@@ -5,7 +5,7 @@ android {
     buildToolsVersion '22.0.1'
 
     defaultConfig {
-        applicationId "com.javatechig.gridviewexample"
+        applicationId "de.k3b.android.fotomap"
         minSdkVersion 11
         targetSdkVersion 21
         versionCode 1
