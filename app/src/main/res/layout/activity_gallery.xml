@@ -8,10 +8,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1" />
+    <!--
     <fragment
         android:id="@+id/galleryArray"
         android:name="de.k3b.android.fotoviewer.gallery.array.GalleryArrayFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1" />
+    -->
 </LinearLayout>

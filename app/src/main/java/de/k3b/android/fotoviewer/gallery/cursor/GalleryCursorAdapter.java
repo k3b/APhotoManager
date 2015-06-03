@@ -35,11 +35,13 @@ public class GalleryCursorAdapter extends CursorAdapter {
     // columns that must be avaulable in the Cursor
     public static final String SQL_COL_PK = MediaStore.Images.Media._ID;
     public static final String SQL_COL_DESCRIPTION = MediaStore.Images.Media.DATA;
+    public static final String SQL_COL_GPS = MediaStore.Images.Media.LONGITUDE;
+    public static final String SQL_COL_COUNT = "count";
 
     // Identifies a particular Loader or a LoaderManager being used in this component
     private static final int MY_LOADER_ID = 0;
     public static final Uri SQL_TABLE_EXTERNAL_CONTENT_URI = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-    public static final String[] SQL_PROJECTION = new String[]{SQL_COL_PK, SQL_COL_DESCRIPTION};
+    public static final String[] SQL_PROJECTION = new String[]{SQL_COL_PK, SQL_COL_DESCRIPTION, "1 AS " + SQL_COL_COUNT, SQL_COL_GPS};
     public static final String SQL_WHERE_STATEMENT = null;      // No selection clause
     public static final String[] SQL_WHERE_PARAMETERS = null;   // No selection arguments
     public static final String SQL_SORT_ORDER = null;           // Default sort order
@@ -113,7 +115,14 @@ public class GalleryCursorAdapter extends CursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
         final GridCellViewHolder holder = (GridCellViewHolder) view.getTag();
         holder.imageID = cursor.getLong(cursor.getColumnIndex(SQL_COL_PK));
-        holder.description.setText(cursor.getString(cursor.getColumnIndex(SQL_COL_DESCRIPTION)));
+        long count = cursor.getLong(cursor.getColumnIndex(SQL_COL_COUNT));
+        boolean gps = !cursor.isNull(cursor.getColumnIndex(SQL_COL_GPS));
+
+        String description = cursor.getString(cursor.getColumnIndex(SQL_COL_DESCRIPTION));
+
+        if (count > 1) description += " (" + count + ")";
+        if (gps) description += "#";
+        holder.description.setText(description);
 
         GridCellImageLoadHandler imgHandler = new GridCellImageLoadHandler(context, holder);
         imgHandler.sendEmptyMessage(0);
@@ -148,13 +157,18 @@ public class GalleryCursorAdapter extends CursorAdapter {
         public void handleMessage(Message msg) {
             Long id = holder.imageID;
             if (null != DEBUG_TAG) Log.i(DEBUG_TAG, "handleMessage getThumbnail for #" + id);
-            Bitmap image = MediaStore.Images.Thumbnails.getThumbnail(
+            Bitmap image = getBitmap(id);
+            holder.image.setImageBitmap(image);
+        }
+
+        public Bitmap getBitmap(Long id) {
+            final Bitmap thumbnail = MediaStore.Images.Thumbnails.getThumbnail(
                     mContext.getContentResolver(),
                     id,
                     MediaStore.Images.Thumbnails.MICRO_KIND,
                     new BitmapFactory.Options());
 
-            holder.image.setImageBitmap(image);
+            return thumbnail;
         }
     }
 }
