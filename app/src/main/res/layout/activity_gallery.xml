@@ -3,8 +3,14 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
     <fragment
-        android:id="@+id/gallery"
-        android:name="de.k3b.android.fotoviewer.GalleryArrayFragment"
+        android:id="@+id/galleryCursor"
+        android:name="de.k3b.android.fotoviewer.gallery.cursor.GalleryCursorFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+    <fragment
+        android:id="@+id/galleryArray"
+        android:name="de.k3b.android.fotoviewer.gallery.array.GalleryArrayFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1" />

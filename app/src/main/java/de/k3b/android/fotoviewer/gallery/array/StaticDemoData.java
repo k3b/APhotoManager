@@ -1,4 +1,4 @@
-package de.k3b.android.fotoviewer;
+package de.k3b.android.fotoviewer.gallery.array;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -6,6 +6,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import java.util.ArrayList;
+
+import de.k3b.android.fotoviewer.ImageItem;
+import de.k3b.android.fotoviewer.R;
 
 /**
  * Created by EVE on 02.06.2015.

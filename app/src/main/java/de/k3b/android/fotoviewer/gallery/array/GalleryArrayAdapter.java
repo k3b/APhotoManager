@@ -1,4 +1,4 @@
-package de.k3b.android.fotoviewer;
+package de.k3b.android.fotoviewer.gallery.array;
 
 import java.util.ArrayList;
 
@@ -10,6 +10,9 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import de.k3b.android.fotoviewer.ImageItem;
+import de.k3b.android.fotoviewer.R;
 
 public class GalleryArrayAdapter extends ArrayAdapter<ImageItem> {
 

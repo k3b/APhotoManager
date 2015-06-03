@@ -1,24 +1,34 @@
-package de.k3b.android.fotoviewer;
+package de.k3b.android.fotoviewer.gallery.cursor;
 
 import android.app.Activity;
+import android.app.FragmentManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.CursorAdapter;
 import android.widget.GridView;
-import android.widget.ListAdapter;
+
+import java.io.IOException;
+
+import de.k3b.android.fotoviewer.ImageItem;
+import de.k3b.android.fotoviewer.R;
 
 /**
- * A simple {@link Fragment} subclass.
+ * A {@link Fragment} to show ImageGallery content based on ContentProvider-Cursor.
  * Activities that contain this fragment must implement the
- * {@link GalleryArrayFragment.OnGalleryInteractionListener} interface
+ * {@link GalleryCursorFragment.OnGalleryInteractionListener} interface
  * to handle interaction events.
- * Use the {@link GalleryArrayFragment#newInstance} factory method to
+ * Use the {@link GalleryCursorFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class GalleryArrayFragment extends Fragment {
+public class GalleryCursorFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -29,7 +39,7 @@ public class GalleryArrayFragment extends Fragment {
     private String mParam2;
 
     private GridView galleryView;
-    private ListAdapter galleryAdapter;
+    private CursorAdapter galleryAdapter;
 
     private OnGalleryInteractionListener mListener;
 
@@ -39,11 +49,11 @@ public class GalleryArrayFragment extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment GalleryArrayFragment.
+     * @return A new instance of fragment GalleryCursorFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static GalleryArrayFragment newInstance(String param1, String param2) {
-        GalleryArrayFragment fragment = new GalleryArrayFragment();
+    public static GalleryCursorFragment newInstance(String param1, String param2) {
+        GalleryCursorFragment fragment = new GalleryCursorFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -51,7 +61,7 @@ public class GalleryArrayFragment extends Fragment {
         return fragment;
     }
 
-    public GalleryArrayFragment() {
+    public GalleryCursorFragment() {
         // Required empty public constructor
     }
 
@@ -70,20 +80,40 @@ public class GalleryArrayFragment extends Fragment {
         // Inflate the layout for this fragment
         View result = inflater.inflate(R.layout.fragment_gallery, container, false);
         galleryView = (GridView) result.findViewById(R.id.gridView);
-        galleryAdapter = new GalleryArrayAdapter(this.getActivity(), R.layout.gallery_grid_item, StaticDemoData.getData(this.getActivity()));
+
+        galleryAdapter = new GalleryCursorAdapter(this.getActivity());
 
         galleryView.setAdapter(galleryAdapter);
 
         galleryView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                ImageItem item = (ImageItem) parent.getItemAtPosition(position);
+                final GalleryCursorAdapter.GridCellViewHolder holder = (GalleryCursorAdapter.GridCellViewHolder) v.getTag();
 
                 if (mListener != null) {
-                    mListener.onGalleryClick(item);
+                    mListener.onGalleryClick(getBitmap(holder.imageID), holder.description.getText().toString());
                 }
             }
         });
+
+
         return result;
+    }
+
+    private Bitmap getBitmap(long imageID) {
+        final Uri uri = getUri(imageID);
+        try {
+            return MediaStore.Images.Media.getBitmap(
+                    this.getActivity().getContentResolver(), uri);
+        } catch (IOException e) {
+            Log.e("GalleryCursor", "cannot load bitmap for uri '" + uri + "':" + e.getMessage(), e);
+        }
+
+        return null;
+    }
+
+    private Uri getUri(long imageID) {
+        return Uri.parse(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI.toString() + "/" + imageID);
     }
 
     @Override
@@ -115,7 +145,7 @@ public class GalleryArrayFragment extends Fragment {
      */
     public interface OnGalleryInteractionListener {
         // TODO: Update argument type and name
-        public void onGalleryClick(ImageItem imageItem);
+        public void onGalleryClick(Bitmap image, String description);
     }
 
 }
