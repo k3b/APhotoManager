@@ -19,6 +19,8 @@
         android:layout_gravity="bottom"
         android:background="#00000c"
         android:padding="10dp"
+        android:ellipsize="start"
+        android:singleLine="true"
         android:textColor="#fff"
         android:textSize="20dp" />
 </FrameLayout>

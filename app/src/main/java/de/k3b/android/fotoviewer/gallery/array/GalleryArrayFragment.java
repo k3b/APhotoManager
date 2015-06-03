@@ -83,7 +83,7 @@ public class GalleryArrayFragment extends Fragment {
                 ImageItem item = (ImageItem) parent.getItemAtPosition(position);
 
                 if (mListener != null) {
-                    mListener.onGalleryClick(item.getTitle(), item.getImage(), null);
+                    mListener.onGalleryClick(0, item.getImage(), null, item.getTitle(), null, null);
                 }
             }
         });

@@ -18,6 +18,10 @@ import android.net.Uri;
  * >Communicating with Other Fragments</a> for more information.
  */
 public interface OnGalleryInteractionListener {
-    public void onGalleryClick(String description, Bitmap image, Uri imageUri);
+    public final int CMD_SHOW_IMAGE = 0;     // one image
+    public final int CMD_SHOW_IMAGE_GALLERY = 1; // list of images as gallery
+    public final int CMD_SHOW_DIR_GALLERY = 2; // list of directories as gallery
+
+    public void onGalleryClick(int activityType, Bitmap image, Uri imageUri, String description, String sqlWhere, String[] sqlWhereParameter);
 }
 

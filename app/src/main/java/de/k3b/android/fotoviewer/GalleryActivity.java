@@ -7,8 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 public class GalleryActivity extends Activity implements
-        OnGalleryInteractionListener
-    {
+        OnGalleryInteractionListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -16,7 +15,7 @@ public class GalleryActivity extends Activity implements
     }
 
     @Override
-    public void onGalleryClick(String description, Bitmap image, Uri imageUri) {
+    public void onGalleryClick(int activityType, Bitmap image, Uri imageUri, String description, String sqlWhere, String[] sqlWhereParameter) {
         //Create intent
         Intent intent = new Intent(this, ImageViewActivity.class);
         intent.putExtra("title", description);

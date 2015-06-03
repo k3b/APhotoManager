@@ -32,19 +32,37 @@ public class GalleryCursorAdapter extends CursorAdapter {
     // for Logging-messages. Set to null to disable debug
     public static final String DEBUG_TAG = "GalleryCAdapter";
 
+    // Identifies a particular Loader or a LoaderManager being used in this component
+    private static final int MY_LOADER_ID = 0;
+
+    public static final Uri SQL_TABLE_EXTERNAL_CONTENT_URI = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+
     // columns that must be avaulable in the Cursor
     public static final String SQL_COL_PK = MediaStore.Images.Media._ID;
     public static final String SQL_COL_DESCRIPTION = MediaStore.Images.Media.DATA;
     public static final String SQL_COL_GPS = MediaStore.Images.Media.LONGITUDE;
     public static final String SQL_COL_COUNT = "count";
 
-    // Identifies a particular Loader or a LoaderManager being used in this component
-    private static final int MY_LOADER_ID = 0;
-    public static final Uri SQL_TABLE_EXTERNAL_CONTENT_URI = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-    public static final String[] SQL_PROJECTION = new String[]{SQL_COL_PK, SQL_COL_DESCRIPTION, "1 AS " + SQL_COL_COUNT, SQL_COL_GPS};
-    public static final String SQL_WHERE_STATEMENT = null;      // No selection clause
-    public static final String[] SQL_WHERE_PARAMETERS = null;   // No selection arguments
-    public static final String SQL_SORT_ORDER = null;           // Default sort order
+    public static final String SQL_EXPR_FOLDER = "substr(" + SQL_COL_DESCRIPTION + ",1,length(" + SQL_COL_DESCRIPTION + ") - length(" + MediaStore.Images.Media.DISPLAY_NAME + "))";
+
+    public static final String[] DETAIL_PROJECTION = new String[]{
+            SQL_COL_PK,
+            SQL_COL_DESCRIPTION,
+            "0 AS " + SQL_COL_COUNT,
+            SQL_COL_GPS};
+    public static final String DETAIL_WHERE_STATEMENT = null;      // No selection clause
+    public static final String[] DETAIL_WHERE_PARAMETERS = null;   // No selection arguments
+    public static final String DETAIL_SORT_ORDER = null;           // Default sort order
+
+    public static final String[] DIR_PROJECTION = new String[]{
+            "min(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
+            SQL_EXPR_FOLDER + " AS " + SQL_COL_DESCRIPTION,
+            "count(*) AS " + SQL_COL_COUNT,
+            "max(" + SQL_COL_GPS + ") AS " + SQL_COL_GPS};
+
+    public static final String DIR_WHERE_STATEMENT = "1=1) GROUP BY (" + SQL_EXPR_FOLDER;      // No selection clause
+    public static final String[] DIR_WHERE_PARAMETERS = null;   // No selection arguments
+    public static final String DIR_SORT_ORDER = null;           // Default sort order
 
     // for debugging: counts how many cell elements were created
     private int itemCreateCount = 0;
@@ -52,7 +70,8 @@ public class GalleryCursorAdapter extends CursorAdapter {
     public GalleryCursorAdapter(final Activity context) {
         super(context, null, false); // no cursor yet; no auto-requery
 
-        requery(context, SQL_PROJECTION, SQL_WHERE_STATEMENT, SQL_SORT_ORDER, SQL_WHERE_PARAMETERS);
+//      requery(context, DETAIL_PROJECTION, DETAIL_WHERE_STATEMENT, DETAIL_SORT_ORDER, DETAIL_WHERE_PARAMETERS);
+        requery(context, DIR_PROJECTION, DIR_WHERE_STATEMENT, DIR_SORT_ORDER, DIR_WHERE_PARAMETERS);
     }
 
     /**

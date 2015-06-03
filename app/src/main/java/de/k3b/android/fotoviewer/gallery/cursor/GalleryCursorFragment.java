@@ -1,20 +1,16 @@
 package de.k3b.android.fotoviewer.gallery.cursor;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.GridView;
-
-import java.io.IOException;
 
 import de.k3b.android.fotoviewer.R;
 import de.k3b.android.fotoviewer.OnGalleryInteractionListener;
@@ -89,7 +85,7 @@ public class GalleryCursorFragment extends Fragment {
                 final GalleryCursorAdapter.GridCellViewHolder holder = (GalleryCursorAdapter.GridCellViewHolder) v.getTag();
 
                 if (mListener != null) {
-                    mListener.onGalleryClick(holder.description.getText().toString(), null, getUri(holder.imageID));
+                    mListener.onGalleryClick(0, null, getUri(holder.imageID), holder.description.getText().toString(), null, null);
                 }
             }
         });
