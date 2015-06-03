@@ -1,7 +1,6 @@
 package de.k3b.android.fotoviewer.gallery.cursor;
 
 import android.app.Activity;
-import android.app.FragmentManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,13 +16,13 @@ import android.widget.GridView;
 
 import java.io.IOException;
 
-import de.k3b.android.fotoviewer.ImageItem;
 import de.k3b.android.fotoviewer.R;
+import de.k3b.android.fotoviewer.OnGalleryInteractionListener;
 
 /**
  * A {@link Fragment} to show ImageGallery content based on ContentProvider-Cursor.
  * Activities that contain this fragment must implement the
- * {@link GalleryCursorFragment.OnGalleryInteractionListener} interface
+ * {@link OnGalleryInteractionListener} interface
  * to handle interaction events.
  * Use the {@link GalleryCursorFragment#newInstance} factory method to
  * create an instance of this fragment.
@@ -90,25 +89,13 @@ public class GalleryCursorFragment extends Fragment {
                 final GalleryCursorAdapter.GridCellViewHolder holder = (GalleryCursorAdapter.GridCellViewHolder) v.getTag();
 
                 if (mListener != null) {
-                    mListener.onGalleryClick(getBitmap(holder.imageID), holder.description.getText().toString());
+                    mListener.onGalleryClick(holder.description.getText().toString(), null, getUri(holder.imageID));
                 }
             }
         });
 
 
         return result;
-    }
-
-    private Bitmap getBitmap(long imageID) {
-        final Uri uri = getUri(imageID);
-        try {
-            return MediaStore.Images.Media.getBitmap(
-                    this.getActivity().getContentResolver(), uri);
-        } catch (IOException e) {
-            Log.e("GalleryCursor", "cannot load bitmap for uri '" + uri + "':" + e.getMessage(), e);
-        }
-
-        return null;
     }
 
     private Uri getUri(long imageID) {
@@ -132,20 +119,4 @@ public class GalleryCursorFragment extends Fragment {
         super.onDetach();
         mListener = null;
     }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnGalleryInteractionListener {
-        // TODO: Update argument type and name
-        public void onGalleryClick(Bitmap image, String description);
-    }
-
 }

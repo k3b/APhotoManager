@@ -3,14 +3,11 @@ package de.k3b.android.fotoviewer;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 
-import de.k3b.android.fotoviewer.gallery.array.GalleryArrayFragment;
-import de.k3b.android.fotoviewer.gallery.cursor.GalleryCursorFragment;
-
 public class GalleryActivity extends Activity implements
-        GalleryArrayFragment.OnGalleryInteractionListener,
-        GalleryCursorFragment.OnGalleryInteractionListener
+        OnGalleryInteractionListener
     {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,11 +16,13 @@ public class GalleryActivity extends Activity implements
     }
 
     @Override
-    public void onGalleryClick(Bitmap image, String description) {
+    public void onGalleryClick(String description, Bitmap image, Uri imageUri) {
         //Create intent
         Intent intent = new Intent(this, ImageViewActivity.class);
         intent.putExtra("title", description);
-        intent.putExtra("image", image);
+
+        if (image != null) intent.putExtra("image", image); // does not work for images > 1mb. there we need to use uri-s instead
+        if (imageUri != null) intent.setData(imageUri);
 
         //Start details activity
         startActivity(intent);

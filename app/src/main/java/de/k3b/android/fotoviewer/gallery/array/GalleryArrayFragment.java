@@ -1,7 +1,6 @@
 package de.k3b.android.fotoviewer.gallery.array;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.view.LayoutInflater;
@@ -13,11 +12,12 @@ import android.widget.ListAdapter;
 
 import de.k3b.android.fotoviewer.ImageItem;
 import de.k3b.android.fotoviewer.R;
+import de.k3b.android.fotoviewer.OnGalleryInteractionListener;
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link GalleryArrayFragment.OnGalleryInteractionListener} interface
+ * {@link OnGalleryInteractionListener} interface
  * to handle interaction events.
  * Use the {@link GalleryArrayFragment#newInstance} factory method to
  * create an instance of this fragment.
@@ -83,7 +83,7 @@ public class GalleryArrayFragment extends Fragment {
                 ImageItem item = (ImageItem) parent.getItemAtPosition(position);
 
                 if (mListener != null) {
-                    mListener.onGalleryClick(item.getImage(), item.getTitle());
+                    mListener.onGalleryClick(item.getTitle(), item.getImage(), null);
                 }
             }
         });
@@ -106,20 +106,4 @@ public class GalleryArrayFragment extends Fragment {
         super.onDetach();
         mListener = null;
     }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnGalleryInteractionListener {
-        // TODO: Update argument type and name
-        public void onGalleryClick(Bitmap image, String description);
-    }
-
 }
