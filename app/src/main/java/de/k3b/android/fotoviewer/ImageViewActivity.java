@@ -1,6 +1,7 @@
 package de.k3b.android.fotoviewer;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,12 +14,14 @@ import java.io.IOException;
 
 public class ImageViewActivity extends Activity {
 
+    public static final String EXTRA_IMAGE = "image";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.image_view_activity);
 
-        String title = getIntent().getStringExtra("title");
+        String title = getIntent().getStringExtra(Intent.EXTRA_TITLE);
         Uri uri = getIntent().getData();
 
         Bitmap bitmap;

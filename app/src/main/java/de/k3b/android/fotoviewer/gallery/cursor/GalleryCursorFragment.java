@@ -12,6 +12,7 @@ import android.widget.AdapterView;
 import android.widget.CursorAdapter;
 import android.widget.GridView;
 
+import de.k3b.android.database.QueryParameterParcelable;
 import de.k3b.android.fotoviewer.R;
 import de.k3b.android.fotoviewer.OnGalleryInteractionListener;
 
@@ -23,7 +24,7 @@ import de.k3b.android.fotoviewer.OnGalleryInteractionListener;
  * Use the {@link GalleryCursorFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class GalleryCursorFragment extends Fragment {
+public class GalleryCursorFragment extends Fragment  implements de.k3b.android.fotoviewer.Queryable {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -34,9 +35,10 @@ public class GalleryCursorFragment extends Fragment {
     private String mParam2;
 
     private GridView galleryView;
-    private CursorAdapter galleryAdapter;
+    private GalleryCursorAdapter galleryAdapter = null;
 
     private OnGalleryInteractionListener mListener;
+    private QueryParameterParcelable mParameters;
 
     /**
      * Use this factory method to create a new instance of
@@ -76,22 +78,28 @@ public class GalleryCursorFragment extends Fragment {
         View result = inflater.inflate(R.layout.fragment_gallery, container, false);
         galleryView = (GridView) result.findViewById(R.id.gridView);
 
-        galleryAdapter = new GalleryCursorAdapter(this.getActivity());
+        galleryAdapter = new GalleryCursorAdapter(this.getActivity(), this.mParameters);
 
         galleryView.setAdapter(galleryAdapter);
 
         galleryView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                final GalleryCursorAdapter.GridCellViewHolder holder = (GalleryCursorAdapter.GridCellViewHolder) v.getTag();
-
-                if (mListener != null) {
-                    mListener.onGalleryClick(0, null, getUri(holder.imageID), holder.description.getText().toString(), null, null);
-                }
+                onGalleryItemClick((GalleryCursorAdapter.GridCellViewHolder) v.getTag());
             }
         });
 
-
         return result;
+    }
+
+    public void onGalleryItemClick(final GalleryCursorAdapter.GridCellViewHolder holder) {
+        if (mListener != null) {
+            QueryParameterParcelable result = new QueryParameterParcelable(this.mParameters);
+
+            if (holder.filter != null) {
+                FotoSql.addWhereFilter(result, holder.filter);
+            }
+            mListener.onGalleryClick(null, getUri(holder.imageID), holder.description.getText().toString(), result);
+        }
     }
 
     private Uri getUri(long imageID) {
@@ -114,5 +122,21 @@ public class GalleryCursorFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    /**
+     * Initiates a database requery in the background
+     *
+     * @param context
+     * @param parameters
+     */
+    @Override
+    public void requery(Activity context, QueryParameterParcelable parameters) {
+        this.mParameters = parameters;
+
+        // is already initialized
+        if (this.galleryAdapter != null) {
+            this.galleryAdapter.requery(getActivity(), parameters);
+        }
     }
 }

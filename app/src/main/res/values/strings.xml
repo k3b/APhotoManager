@@ -24,6 +24,8 @@
         <item>@drawable/image_9</item>
     </string-array>
 
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="foto_detail">Foto Detail</string>
+    <string name="foto_gallery">Gallery of Fotos</string>
+    <string name="directory_gallery">Gallery of Directories</string>
 
 </resources>

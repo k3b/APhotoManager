@@ -7,6 +7,8 @@ package de.k3b.android.fotoviewer;
 import android.graphics.Bitmap;
 import android.net.Uri;
 
+import de.k3b.android.database.QueryParameterParcelable;
+
 /**
  * This interface must be implemented by activities that contain this
  * fragment to allow an interaction in this fragment to be communicated
@@ -18,10 +20,6 @@ import android.net.Uri;
  * >Communicating with Other Fragments</a> for more information.
  */
 public interface OnGalleryInteractionListener {
-    public final int CMD_SHOW_IMAGE = 0;     // one image
-    public final int CMD_SHOW_IMAGE_GALLERY = 1; // list of images as gallery
-    public final int CMD_SHOW_DIR_GALLERY = 2; // list of directories as gallery
-
-    public void onGalleryClick(int activityType, Bitmap image, Uri imageUri, String description, String sqlWhere, String[] sqlWhereParameter);
+    public void onGalleryClick(Bitmap image, Uri imageUri, String description, QueryParameterParcelable parentQuery);
 }
 
