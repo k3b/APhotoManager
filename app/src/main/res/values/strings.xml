@@ -26,6 +26,6 @@
 
     <string name="foto_detail">Foto Detail</string>
     <string name="foto_gallery">Gallery of Fotos</string>
-    <string name="directory_gallery">Gallery of Directories</string>
+    <string name="directory_gallery">Gallery of Folder</string>
 
 </resources>

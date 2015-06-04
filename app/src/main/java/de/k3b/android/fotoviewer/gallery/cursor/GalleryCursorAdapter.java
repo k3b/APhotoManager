@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import de.k3b.android.database.QueryParameterParcelable;
+import de.k3b.android.fotoviewer.OnGalleryInteractionListener;
 import de.k3b.android.fotoviewer.R;
 
 /**
@@ -35,6 +36,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements de.k3b.androi
 
     // Identifies a particular Loader or a LoaderManager being used in this component
     private static final int MY_LOADER_ID = 0;
+    private OnGalleryInteractionListener callback = null;
 
     // for debugging: counts how many cell elements were created
     private int itemCreateCount = 0;
@@ -42,6 +44,10 @@ public class GalleryCursorAdapter extends CursorAdapter implements de.k3b.androi
 
     public GalleryCursorAdapter(final Activity context, QueryParameterParcelable parameters) {
         super(context, null, false); // no cursor yet; no auto-requery
+
+        if (context instanceof OnGalleryInteractionListener) {
+            this.callback = (OnGalleryInteractionListener) context;
+        }
 
         if (parameters != null) {
             requery(context, parameters);
@@ -92,11 +98,19 @@ public class GalleryCursorAdapter extends CursorAdapter implements de.k3b.androi
             @Override
             public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
                 if (null != DEBUG_TAG) Log.i(DEBUG_TAG, "requery rows found: " + cursor.getCount());
+
+                if (callback != null) {
+                    callback.setResultCount(cursor.getCount());
+                }
                 GalleryCursorAdapter.this.changeCursor(cursor);
             }
 
             @Override
             public void onLoaderReset(Loader<Cursor> loader) {
+
+                if (callback != null) {
+                    callback.setResultCount(0);
+                }
                 GalleryCursorAdapter.this.changeCursor(null);
             }
         });

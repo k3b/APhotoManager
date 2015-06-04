@@ -32,6 +32,7 @@ public class GalleryActivity extends Activity implements
         }
     }
 
+    /** GalleryFragment tells the Owning Activity that an Item in the FotoGallery was clicked */
     @Override
     public void onGalleryClick(Bitmap image, Uri imageUri, String description, QueryParameterParcelable parentQuery) {
         Intent intent;
@@ -56,6 +57,17 @@ public class GalleryActivity extends Activity implements
         intent.putExtra(Intent.EXTRA_TITLE, description);
         //Start details activity
         startActivity(intent);
+    }
+
+    /** GalleryFragment tells the Owning Activity that querying data has finisched */
+    @Override
+    public void setResultCount(int count) {
+        String title = this.getTitle().toString();
+        if (count > 0) {
+            if (!title.contains(" - ") || !title.contains("(") || !title.contains(")")) {
+                setTitle(this.parameters.getID(), "(" + count  + ")");
+            }
+        }
     }
 
     private void setTitle(int id, String description) {

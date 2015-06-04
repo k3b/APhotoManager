@@ -20,6 +20,10 @@ import de.k3b.android.database.QueryParameterParcelable;
  * >Communicating with Other Fragments</a> for more information.
  */
 public interface OnGalleryInteractionListener {
+    /** GalleryFragment tells the Owning Activity that an Item in the FotoGallery was clicked */
     public void onGalleryClick(Bitmap image, Uri imageUri, String description, QueryParameterParcelable parentQuery);
+
+    /** GalleryFragment tells the Owning Activity that querying data has finisched */
+    void setResultCount(int count);
 }
 
