@@ -27,5 +27,6 @@
     <string name="foto_detail">Foto Detail</string>
     <string name="foto_gallery">Gallery of Fotos</string>
     <string name="directory_gallery">Gallery of Folder</string>
+    <string name="action_settings">Settings</string>
 
 </resources>

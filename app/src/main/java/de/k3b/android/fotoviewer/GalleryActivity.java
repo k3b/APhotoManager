@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import de.k3b.android.database.QueryParameterParcelable;
 import de.k3b.android.fotoviewer.gallery.cursor.FotoSql;
@@ -30,6 +33,31 @@ public class GalleryActivity extends Activity implements
         if (query != null) {
             query.requery(this,parameters);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu items for use in the action bar
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_gallery, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                openSettings();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void openSettings() {
+        Intent intent = new Intent(this, SettingsActivity.class);;
+        startActivity(intent);
     }
 
     /** GalleryFragment tells the Owning Activity that an Item in the FotoGallery was clicked */
@@ -62,11 +90,10 @@ public class GalleryActivity extends Activity implements
     /** GalleryFragment tells the Owning Activity that querying data has finisched */
     @Override
     public void setResultCount(int count) {
+        String countText = "(" + count + ")";
         String title = this.getTitle().toString();
-        if (count > 0) {
-            if (!title.contains(" - ") || !title.contains("(") || !title.contains(")")) {
-                setTitle(this.parameters.getID(), "(" + count  + ")");
-            }
+        if (!title.contains(countText)) {
+            setTitle(title + " - " + countText);
         }
     }
 

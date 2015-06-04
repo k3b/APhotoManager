@@ -7,6 +7,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -38,6 +41,31 @@ public class ImageViewActivity extends Activity {
         imageView.setImageBitmap(bitmap);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu items for use in the action bar
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_gallery, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                openSettings();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void openSettings() {
+        Intent intent = new Intent(this, SettingsActivity.class);;
+        startActivity(intent);
+    }
+
     private Bitmap getBitmap(final Uri uri) {
         try {
             return MediaStore.Images.Media.getBitmap(
@@ -48,6 +76,4 @@ public class ImageViewActivity extends Activity {
 
         return null;
     }
-
-
 }
