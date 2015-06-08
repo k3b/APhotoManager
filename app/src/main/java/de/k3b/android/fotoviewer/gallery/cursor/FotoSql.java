@@ -28,6 +28,7 @@ public class FotoSql {
                     "max(" + SQL_COL_GPS + ") AS " + SQL_COL_GPS)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
             .addGroupBy(SQL_EXPR_FOLDER)
+            .addOrderBy(SQL_EXPR_FOLDER)
             ;
     public static final QueryParameterParcelable queryDetail = (QueryParameterParcelable) new QueryParameterParcelable()
             .setID(R.string.foto_gallery)
@@ -37,6 +38,7 @@ public class FotoSql {
                     "0 AS " + SQL_COL_COUNT,
                     SQL_COL_GPS)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
+            .addOrderBy(SQL_COL_DESCRIPTION)
             ;
 
     public static String getFilter(Cursor cursor, QueryParameterParcelable parameters, String description) {

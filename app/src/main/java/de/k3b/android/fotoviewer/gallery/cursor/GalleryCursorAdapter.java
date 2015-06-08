@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import de.k3b.android.database.QueryParameterParcelable;
+import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.OnGalleryInteractionListener;
 import de.k3b.android.fotoviewer.R;
 
@@ -31,9 +32,6 @@ import de.k3b.android.fotoviewer.R;
  * Created by k3b on 02.06.2015.
  */
 public class GalleryCursorAdapter extends CursorAdapter implements de.k3b.android.fotoviewer.Queryable {
-    // for Logging-messages. Set to null to disable debug
-    public static final String DEBUG_TAG = "GalleryCAdapter";
-
     // Identifies a particular Loader or a LoaderManager being used in this component
     private static final int MY_LOADER_ID = 0;
     private OnGalleryInteractionListener callback = null;
@@ -60,7 +58,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements de.k3b.androi
     @Override
     public void requery(final Activity context, QueryParameterParcelable parameters) {
         this.parameters = parameters;
-        if (null != DEBUG_TAG) Log.i(DEBUG_TAG, "requery " + parameters.toSqlString());
+        if (Global.debugEnabled) Log.i(Global.LOG_CONTEXT, "requery " + parameters.toSqlString());
         requery(context, parameters.toColumns(), parameters.toFrom(), parameters.toAndroidWhere(), parameters.toOrderBy(), parameters.toAndroidParameters());
     }
 
@@ -68,7 +66,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements de.k3b.androi
      * Initiates a database requery in the background
      */
     private void requery(final Activity context, final String[] sqlProjection, final String from, final String sqlWhereStatement, final String sqlSortOrder, final String... sqlWhereParameters) {
-        // if (null != DEBUG_TAG) Log.i(DEBUG_TAG, "requery");
+        // if (Global.debugEnabled) Log.i(DEBUG_TAG, "requery");
 
         /*
          * Initializes the CursorLoader. The MY_LOADER_ID value is eventually passed
@@ -97,7 +95,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements de.k3b.androi
 
             @Override
             public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-                if (null != DEBUG_TAG) Log.i(DEBUG_TAG, "requery rows found: " + cursor.getCount());
+                if (Global.debugEnabled) Log.i(Global.LOG_CONTEXT, "requery rows found: " + cursor.getCount());
 
                 if (callback != null) {
                     callback.setResultCount(cursor.getCount());
@@ -124,7 +122,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements de.k3b.androi
 
         // iView.setLayoutParams(new GridView.LayoutParams(200, 200));
         itemCreateCount++;
-        if (null != DEBUG_TAG) Log.i(DEBUG_TAG, "newView #" + itemCreateCount);
+        if (Global.debugEnabled) Log.i(Global.LOG_CONTEXT, "newView #" + itemCreateCount);
         return iView;
     }
 
@@ -147,7 +145,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements de.k3b.androi
         GridCellImageLoadHandler imgHandler = new GridCellImageLoadHandler(context, holder);
         imgHandler.sendEmptyMessage(0);
 
-        if (null != DEBUG_TAG) Log.i(DEBUG_TAG, "bindView for #" + holder.imageID);
+        if (Global.debugEnabled) Log.i(Global.LOG_CONTEXT, "bindView for #" + holder.imageID);
     }
 
     /** data belonging to gridview element */
@@ -177,7 +175,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements de.k3b.androi
         @Override
         public void handleMessage(Message msg) {
             Long id = holder.imageID;
-            if (null != DEBUG_TAG) Log.i(DEBUG_TAG, "handleMessage getThumbnail for #" + id);
+            if (Global.debugEnabled) Log.i(Global.LOG_CONTEXT, "handleMessage getThumbnail for #" + id);
             Bitmap image = getBitmap(id);
             holder.image.setImageBitmap(image);
         }

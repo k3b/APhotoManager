@@ -48,6 +48,18 @@ public class SettingsActivity extends PreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActionBar();
+        Settings.init(this);
+    }
+
+    @Override
+    protected void onPause () {
+        Settings.init(this);
+        super.onPause();
+    }
+
+    protected void onResume () {
+        super.onResume();
+        Settings.init(this);
     }
 
     /**

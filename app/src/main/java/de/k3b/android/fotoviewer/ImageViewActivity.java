@@ -71,7 +71,7 @@ public class ImageViewActivity extends Activity {
             return MediaStore.Images.Media.getBitmap(
                     this.getContentResolver(), uri);
         } catch (IOException e) {
-            Log.e("ImageViewer", "cannot load bitmap for uri '" + uri + "':" + e.getMessage(), e);
+            Log.e(Global.LOG_CONTEXT, "ImageViewer: cannot load bitmap for uri '" + uri + "':" + e.getMessage(), e);
         }
 
         return null;
