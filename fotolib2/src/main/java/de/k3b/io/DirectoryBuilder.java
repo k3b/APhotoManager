@@ -3,6 +3,9 @@ package de.k3b.io;
 import java.util.List;
 
 /**
+ * Class to collect Directories and results in a normalized
+ * Directory-Structure, where paths can be combined.
+ *
  * Created by k3b on 04.06.2015.
  */
 public class DirectoryBuilder {
@@ -16,25 +19,39 @@ public class DirectoryBuilder {
         if (root != null) {
             List<Directory> children = root.getChildren();
             compress(children);
-            /*
-            if (children != null) {
-                for (Directory child: children) {
-                    if (!child.getRelPath().startsWith(Directory.PATH_DELIMITER)) {
-                        child.setRelPath(Directory.PATH_DELIMITER + child.getRelPath());
-                    }
-                }
-            }
-            */
+            createStatistics(children);
         }
         return root;
     }
 
-    private void compress(Directory root) {
-        Directory item = root;
-        while ((item != null) && (item.getNonDirItemCount() <= 0)) {
-            item = mergeDirWithChildIfPossible(root);
+    private void createStatistics(List<Directory> children) {
+        if (children != null) {
+            for (Directory child: children) {
+                child.setNonDirSubItemCount(child.getNonDirItemCount()).setDirCount(0).setSubDirCount(0);
+                createStatistics(child.getChildren());
+                Directory parent = child.getParent();
+                if (parent != null) {
+                    parent.addChildStatistics(child.getSubDirCount(), child.getNonDirSubItemCount());
+                }
+            }
         }
-        List<Directory> children = (root != null) ? root.getChildren() : null;
+    }
+
+    private void compress(Directory firstChild) {
+        int mergeCound = 0;
+        Directory item = firstChild;
+        while ((item != null) && (item.getNonDirItemCount() <= 0)) {
+            item = mergeDirWithChildIfPossible(firstChild);
+            mergeCound++;
+        }
+        List<Directory> children = (firstChild != null) ? firstChild.getChildren() : null;
+
+        if ((mergeCound > 0) && (children != null)) {
+            for (Directory child: children) {
+                child.setParent(firstChild);
+            }
+
+        }
         compress(children);
     }
 
@@ -46,20 +63,20 @@ public class DirectoryBuilder {
         }
     }
 
-    private Directory mergeDirWithChildIfPossible(Directory parent) {
-        List<Directory> children = (parent != null) ? parent.getChildren() : null;
+    private Directory mergeDirWithChildIfPossible(Directory firstChild) {
+        List<Directory> children = (firstChild != null) ? firstChild.getChildren() : null;
 
         if ((children != null) && children.size() == 1) {
             Directory child = children.get(0);
-            child.setParent(parent);
-            parent.setRelPath(parent.getRelPath() + Directory.PATH_DELIMITER + child.getRelPath());
-            parent.setNonDirItemCount(parent.getNonDirItemCount() + child.getNonDirItemCount());
+            firstChild.setRelPath(firstChild.getRelPath() + Directory.PATH_DELIMITER + child.getRelPath());
+            firstChild.setNonDirItemCount(firstChild.getNonDirItemCount() + child.getNonDirItemCount());
 
             children = child.getChildren();
-            parent.setChildren(children);
+            firstChild.setChildren(children);
 
+            child.setParent(null);
             child.setChildren(null);
-            return child;
+            return firstChild;
         }
         return null;
     }
