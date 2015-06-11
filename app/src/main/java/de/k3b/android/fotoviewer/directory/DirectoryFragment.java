@@ -12,7 +12,6 @@ import android.widget.TextView;
 
 import de.k3b.android.fotoviewer.R;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
@@ -26,7 +25,7 @@ public class DirectoryFragment extends Fragment {
 
     private DirectoryListAdapter adapter;
     private ExpandableListView categoriesList;
-    private ArrayList<Directory> categories;
+    private DirectoryDemoRoot categories;
 
     protected Activity mContext;
 
@@ -45,7 +44,8 @@ public class DirectoryFragment extends Fragment {
 
         mContext = this.getActivity();
         categoriesList = (ExpandableListView)view.findViewById(R.id.categories);
-        categories = Directory.getCategories();
+        categories = DirectoryDemoData.getCategories();
+
         adapter = new DirectoryListAdapter(mContext,
                 categories, categoriesList);
         categoriesList.setAdapter(adapter);
@@ -60,14 +60,14 @@ public class DirectoryFragment extends Fragment {
                 CheckedTextView checkbox = (CheckedTextView)v.findViewById(R.id.list_item_text_child);
                 checkbox.toggle();
 
-
                 // find parent view by tag
-                View parentView = categoriesList.findViewWithTag(categories.get(groupPosition).name);
+                DirectoryDemoData group = categories.getGroup(groupPosition);
+                View parentView = categoriesList.findViewWithTag(group);
                 if(parentView != null) {
                     TextView sub = (TextView)parentView.findViewById(R.id.list_item_text_subscriptions);
 
                     if(sub != null) {
-                        Directory directory = categories.get(groupPosition);
+                        DirectoryDemoData directory = group;
                         if(checkbox.isChecked()) {
                             // add child category to parent's selection list
                             directory.selection.add(checkbox.getText().toString());

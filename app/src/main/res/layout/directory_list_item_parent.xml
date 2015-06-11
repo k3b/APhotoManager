@@ -12,14 +12,14 @@ android:id="@+id/list_item">
 	android:layout_gravity="center_vertical"
     > 
 	<TextView
-	android:layout_width="fill_parent"
-	android:layout_height="wrap_content"
-	android:id="@+id/list_item_text_view"
-	style="?android:attr/preferenceStyle"
-	android:textSize="15sp"	
-	android:paddingBottom="3dp"
-	android:paddingTop="15dp"
-	android:layout_marginLeft="45dp" />
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:id="@+id/list_item_text_view"
+		style="?android:attr/preferenceStyle"
+		android:textSize="15sp"
+		android:paddingBottom="3dp"
+		android:paddingTop="15dp"
+		android:layout_marginLeft="45dp" />
 	
 	<TextView
 	    android:id="@+id/list_item_text_subscriptions"
