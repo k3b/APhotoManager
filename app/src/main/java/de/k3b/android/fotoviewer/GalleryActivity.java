@@ -10,10 +10,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import de.k3b.android.database.QueryParameterParcelable;
+import de.k3b.android.fotoviewer.directory.DirectoryFragment;
 import de.k3b.android.fotoviewer.gallery.cursor.FotoSql;
 
 public class GalleryActivity extends Activity implements
-        OnGalleryInteractionListener {
+        OnGalleryInteractionListener, DirectoryFragment.OnDirectoryInteractionListener {
 
     public static final String EXTRA_QUERY = "query";
     private QueryParameterParcelable parameters = null;

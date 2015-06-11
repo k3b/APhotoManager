@@ -1,7 +1,6 @@
 package de.k3b.android.fotoviewer;
 
 import android.annotation.TargetApi;
-import android.app.ActionBar;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.media.Ringtone;
@@ -18,7 +17,6 @@ import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
 import android.view.MenuItem;
-import android.support.v4.app.NavUtils;
 
 import de.k3b.android.fotoviewer.R;
 
@@ -86,7 +84,7 @@ public class SettingsActivity extends PreferenceActivity {
             //
             // TODO: If Settings has multiple levels, Up should navigate up
             // that hierarchy.
-            NavUtils.navigateUpFromSameTask(this);
+            // NavUtils.navigateUpFromSameTask(this);
             return true;
         }
         return super.onOptionsItemSelected(item);
