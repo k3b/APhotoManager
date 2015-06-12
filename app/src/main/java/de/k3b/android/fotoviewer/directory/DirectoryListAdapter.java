@@ -15,16 +15,16 @@ import de.k3b.android.fotoviewer.R;
  * 
  */
 
-public class DirectoryListAdapter extends BaseExpandableListAdapter {
+public class DirectoryListAdapter extends BaseExpandableListAdapter implements IExpandableListViewNavigation<Object, Object> {
  
  
     private LayoutInflater inflater;
-    private DirectoryDemoRoot mParent;
+    private IExpandableListViewNavigation<DirectoryDemoData,DirectoryDemoData> mParent;
     private ExpandableListView accordion;
     public int lastExpandedGroupPosition;    
     
  
-    public DirectoryListAdapter(Context context, DirectoryDemoRoot parent, ExpandableListView accordion) {
+    public DirectoryListAdapter(Context context, IExpandableListViewNavigation<DirectoryDemoData,DirectoryDemoData> parent, ExpandableListView accordion) {
         mParent = parent;        
         inflater = LayoutInflater.from(context);
         this.accordion = accordion;       
@@ -46,24 +46,24 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter {
  
     @Override
     //gets the title of each parent/group
-    public Object getGroup(int groupId) {
-        return mParent.getGroup(groupId);
+    public Object getGroup(int groupIndex) {
+        return mParent.getGroup(groupIndex);
     }
  
     @Override
     //gets the name of each item
-    public Object getChild(int groupId, int childId) {
-        return mParent.getChild(groupId, childId);
+    public Object getChild(int groupIndex, int childIndex) {
+        return mParent.getChild(groupIndex, childIndex);
     }
  
     @Override
-    public long getGroupId(int groupId) {
-        return groupId;
+    public long getGroupId(int groupIndex) {
+        return groupIndex;
     }
  
     @Override
-    public long getChildId(int groupId, int childId) {
-        return childId;
+    public long getChildId(int groupIndex, int childIndex) {
+        return childIndex;
     }
  
     @Override
@@ -73,18 +73,18 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter {
  
     @Override
     //in this method you must set the text to see the parent/group on the list
-    public View getGroupView(int groupId, boolean b, View view, ViewGroup viewGroup) {
+    public View getGroupView(int groupIndex, boolean b, View view, ViewGroup viewGroup) {
     	
         if (view == null) {
             view = inflater.inflate(R.layout.directory_list_item_parent, viewGroup,false);
         }
         // set category name as tag so view can be found view later
-        DirectoryDemoData group = mParent.getGroup(groupId);
+        DirectoryDemoData group = mParent.getGroup(groupIndex);
         view.setTag(group);
         
         TextView textView = (TextView) view.findViewById(R.id.list_item_text_view);
         
-        //"groupId" is the position of the parent/group in the list
+        //"groupIndex" is the position of the parent/group in the list
         textView.setText(group.toString());
         
         TextView sub = (TextView) view.findViewById(R.id.list_item_text_subscriptions);
@@ -103,7 +103,7 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter {
  
     @Override
     //in this method you must set the text to see the children on the list
-    public View getChildView(int groupId, int childId, boolean b, View view, ViewGroup viewGroup) {
+    public View getChildView(int groupIndex, int childIndex, boolean b, View view, ViewGroup viewGroup) {
         if (view == null) {
             view = inflater.inflate(R.layout.directory_list_item_child, viewGroup,false);
         }
@@ -111,13 +111,13 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter {
         
         CheckedTextView textView = (CheckedTextView) view.findViewById(R.id.list_item_text_child);
         
-        //"groupId" is the position of the parent/group in the list and
-        //"childId" is the position of the child
-        DirectoryDemoData child = mParent.getChild(groupId, childId);
+        //"groupIndex" is the position of the parent/group in the list and
+        //"childIndex" is the position of the child
+        DirectoryDemoData child = mParent.getChild(groupIndex, childIndex);
         textView.setText(child.name);
  
         // set checked if parent category selection contains child category
-        DirectoryDemoData group = mParent.getGroup(groupId);
+        DirectoryDemoData group = mParent.getGroup(groupIndex);
         if(group.selection.contains(textView.getText().toString())) {
     		textView.setChecked(true);
         }
@@ -130,7 +130,7 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter {
     }
  
     @Override
-    public boolean isChildSelectable(int groupId, int childId) {
+    public boolean isChildSelectable(int groupIndex, int childIndex) {
         return true;
     }
     

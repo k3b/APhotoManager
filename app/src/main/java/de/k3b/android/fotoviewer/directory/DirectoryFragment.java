@@ -25,7 +25,7 @@ public class DirectoryFragment extends Fragment {
 
     private DirectoryListAdapter adapter;
     private ExpandableListView categoriesList;
-    private DirectoryDemoRoot categories;
+    private IExpandableListViewNavigation<DirectoryDemoData,DirectoryDemoData> categories;
 
     protected Activity mContext;
 
@@ -44,7 +44,7 @@ public class DirectoryFragment extends Fragment {
 
         mContext = this.getActivity();
         categoriesList = (ExpandableListView)view.findViewById(R.id.categories);
-        categories = DirectoryDemoData.getCategories();
+        categories = DirectoryDemoRoot.getCategories();
 
         adapter = new DirectoryListAdapter(mContext,
                 categories, categoriesList);
