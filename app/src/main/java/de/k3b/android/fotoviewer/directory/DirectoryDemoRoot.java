@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import de.k3b.io.Directory;
+import de.k3b.io.IExpandableListViewNavigation;
 
 /**
  * Created by k3b on 11.06.2015.
@@ -39,25 +40,25 @@ public class DirectoryDemoRoot extends Directory implements IExpandableListViewN
 
     /*************** api close to adapter **********************/
 
-    //counts the number of group/parent items so the list knows how many times calls getGroupView() method
+    /** counts the number of group/parent items so the list knows how many times calls getGroupView() method */
     @Override
     public int getGroupCount() {
         return mParent.size();
     }
 
-    //counts the number of children items so the list knows how many times calls getChildView() method
+    /** counts the number of children items so the list knows how many times calls getChildView() method */
     @Override
     public int getChildrenCount(int groupIndex) {
         return getGroup(groupIndex).children.size();
     }
 
-    //gets child at index
+    /** gets child at index */
     @Override
     public DirectoryDemoData getChild(int groupIndex, int childIndex) {
         return getGroup(groupIndex).children.get(childIndex);
     }
 
-    //gets group at index
+    /** gets group at index */
     @Override
     public DirectoryDemoData getGroup(int groupIndex) {
         return mParent.get(groupIndex);

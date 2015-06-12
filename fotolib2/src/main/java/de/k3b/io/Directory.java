@@ -152,4 +152,9 @@ public class Directory {
         setSubDirCount(getSubDirCount() + subDirCount + 1);
         setNonDirSubItemCount(getNonDirSubItemCount() + nonDirSubItemCount);
     }
+
+    public static int getChildCount(Directory item) {
+        if ((item != null) && (item.children != null)) return item.children.size();
+        return 0;
+    }
 }

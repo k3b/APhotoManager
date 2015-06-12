@@ -10,6 +10,7 @@ import android.widget.ExpandableListView;
 import android.widget.TextView;
 
 import de.k3b.android.fotoviewer.R;
+import de.k3b.io.IExpandableListViewNavigation;
 
 /**
  * 
