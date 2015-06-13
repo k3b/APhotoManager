@@ -44,7 +44,7 @@ public class DirectoryFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_directory, container, false);
 
         mContext = this.getActivity();
-        listView = (ExpandableListView)view.findViewById(R.id.categories);
+        listView = (ExpandableListView)view.findViewById(R.id.directory_tree);
         Directory directories = DirectoryLoader.getDirectories();
         DirectoryBuilder.createStatistics(directories.getChildren());
         navigation = new DirectoryNavigator(directories);

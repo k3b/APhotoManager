@@ -100,7 +100,7 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
         Directory.appendCount(result, group);
         return result.toString();
     }
-    
+
     @Override
     //in this method you must set the text to see the children on the list
     public View getChildView(int groupIndex, int childIndex, boolean b, View view, ViewGroup viewGroup) {
