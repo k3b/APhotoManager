@@ -93,7 +93,7 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
     }
 
     /** get tree display text */
-    private String getText(String prefix, Directory group) {
+    static String getText(String prefix, Directory group) {
         StringBuilder result = new StringBuilder();
         if (prefix != null) result.append(prefix);
         result.append(group.getRelPath()).append(" ");
@@ -141,19 +141,5 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
         lastExpandedGroupPosition = groupPosition;
         
     }
-
-    /** data belonging to list element */
-    static class DirectoryViewHolder {
-        final public TextView description;
-
-        DirectoryViewHolder(View parent) {
-            this.description = (TextView) parent.findViewById(R.id.text);
-        };
-
-        public long imageID;
-    }
-
-
-
 }
 

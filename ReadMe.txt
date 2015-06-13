@@ -1,6 +1,13 @@
 todo
 
 - DirList Fragment
+	pathbar
+		text = relpath + childcount
+		on click last => select
+	dirTree
+		layout icons child indent
+
+- DirList Fragment
 	 ExpandableListView http://developer.android.com/reference/android/app/ExpandableListActivity.html
 	 	or https://github.com/Polidea/tree-view-list-android
 	 example http://stackoverflow.com/questions/10046336/android-expandablelistview-implements-filterable

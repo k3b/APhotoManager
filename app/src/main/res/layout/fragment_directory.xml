@@ -14,12 +14,14 @@
             android:scrollbars="horizontal"
             android:scrollbarSize="2dp"
             android:scrollbarStyle="insideInset"
+            android:id="@+id/path_scroller"
+
             >
             <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:orientation="horizontal"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
-                android:id="@+id/path"
+                android:id="@+id/path_owner"
                 >
                 <Button
                     android:layout_width="wrap_content"
