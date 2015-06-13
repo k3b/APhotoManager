@@ -6,14 +6,14 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckedTextView;
 import android.widget.ExpandableListView;
-import android.widget.TextView;
 
 import de.k3b.android.fotoviewer.R;
+import de.k3b.io.Directory;
+import de.k3b.io.DirectoryBuilder;
+import de.k3b.io.DirectoryNavigator;
 import de.k3b.io.IExpandableListViewNavigation;
 
-import java.util.Collections;
 import java.util.Comparator;
 
 /**
@@ -25,8 +25,8 @@ import java.util.Comparator;
 public class DirectoryFragment extends Fragment {
 
     private DirectoryListAdapter adapter;
-    private ExpandableListView categoriesList;
-    private IExpandableListViewNavigation<DirectoryDemoData,DirectoryDemoData> categories;
+    private ExpandableListView listView;
+    private IExpandableListViewNavigation<Directory,Directory> navigation;
 
     protected Activity mContext;
 
@@ -44,50 +44,14 @@ public class DirectoryFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_directory, container, false);
 
         mContext = this.getActivity();
-        categoriesList = (ExpandableListView)view.findViewById(R.id.categories);
-        categories = DirectoryDemoRoot.getCategories();
+        listView = (ExpandableListView)view.findViewById(R.id.categories);
+        Directory directories = DirectoryLoader.getDirectories();
+        DirectoryBuilder.createStatistics(directories.getChildren());
+        navigation = new DirectoryNavigator(directories);
 
         adapter = new DirectoryListAdapter(mContext,
-                categories, categoriesList);
-        categoriesList.setAdapter(adapter);
-
-        categoriesList.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-
-            @Override
-            public boolean onChildClick(ExpandableListView parent, View v,
-                                        int groupPosition, int childPosition, long id) {
-
-
-                CheckedTextView checkbox = (CheckedTextView)v.findViewById(R.id.list_item_text_child);
-                checkbox.toggle();
-
-                // find parent view by tag
-                DirectoryDemoData group = categories.getGroup(groupPosition);
-                View parentView = categoriesList.findViewWithTag(group);
-                if(parentView != null) {
-                    TextView sub = (TextView)parentView.findViewById(R.id.list_item_text_subscriptions);
-
-                    if(sub != null) {
-                        DirectoryDemoData directory = group;
-                        if(checkbox.isChecked()) {
-                            // add child category to parent's selection list
-                            directory.selection.add(checkbox.getText().toString());
-
-                            // sort list in alphabetical order
-                            Collections.sort(directory.selection, new CustomComparator());
-                        }
-                        else {
-                            // remove child category from parent's selection list
-                            directory.selection.remove(checkbox.getText().toString());
-                        }
-
-                        // display selection list
-                        sub.setText(directory.selection.toString());
-                    }
-                }
-                return true;
-            }
-        });
+                navigation, listView);
+        listView.setAdapter(adapter);
 
         return view;
     }

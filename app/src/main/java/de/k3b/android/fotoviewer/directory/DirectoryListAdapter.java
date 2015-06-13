@@ -5,11 +5,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
-import android.widget.CheckedTextView;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
 import de.k3b.android.fotoviewer.R;
+import de.k3b.io.Directory;
 import de.k3b.io.IExpandableListViewNavigation;
 
 /**
@@ -20,12 +20,12 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
  
  
     private LayoutInflater inflater;
-    private IExpandableListViewNavigation<DirectoryDemoData,DirectoryDemoData> mParent;
+    private IExpandableListViewNavigation<Directory,Directory> mParent;
     private ExpandableListView accordion;
     public int lastExpandedGroupPosition;    
     
  
-    public DirectoryListAdapter(Context context, IExpandableListViewNavigation<DirectoryDemoData,DirectoryDemoData> parent, ExpandableListView accordion) {
+    public DirectoryListAdapter(Context context, IExpandableListViewNavigation<Directory,Directory> parent, ExpandableListView accordion) {
         mParent = parent;        
         inflater = LayoutInflater.from(context);
         this.accordion = accordion;       
@@ -80,28 +80,27 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
             view = inflater.inflate(R.layout.directory_list_item_parent, viewGroup,false);
         }
         // set category name as tag so view can be found view later
-        DirectoryDemoData group = mParent.getGroup(groupIndex);
+        Directory group = mParent.getGroup(groupIndex);
         view.setTag(group);
         
         TextView textView = (TextView) view.findViewById(R.id.list_item_text_view);
         
         //"groupIndex" is the position of the parent/group in the list
-        textView.setText(group.toString());
-        
-        TextView sub = (TextView) view.findViewById(R.id.list_item_text_subscriptions);
-
-        if(group.selection.size()>0) {
-            sub.setText(group.selection.toString());
-        }
-        else {
-        	sub.setText("");
-        }
+        textView.setText(getText(null, group));
         
         //return the entire view
         return view;
     }
+
+    /** get tree display text */
+    private String getText(String prefix, Directory group) {
+        StringBuilder result = new StringBuilder();
+        if (prefix != null) result.append(prefix);
+        result.append(group.getRelPath()).append(" ");
+        Directory.appendCount(result, group);
+        return result.toString();
+    }
     
- 
     @Override
     //in this method you must set the text to see the children on the list
     public View getChildView(int groupIndex, int childIndex, boolean b, View view, ViewGroup viewGroup) {
@@ -110,22 +109,13 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
         }
  
         
-        CheckedTextView textView = (CheckedTextView) view.findViewById(R.id.list_item_text_child);
+        TextView textView = (TextView) view.findViewById(R.id.list_item_text_child);
         
         //"groupIndex" is the position of the parent/group in the list and
         //"childIndex" is the position of the child
-        DirectoryDemoData child = mParent.getChild(groupIndex, childIndex);
-        textView.setText(child.name);
+        Directory child = mParent.getChild(groupIndex, childIndex);
+        textView.setText(getText("- ", child));
  
-        // set checked if parent category selection contains child category
-        DirectoryDemoData group = mParent.getGroup(groupIndex);
-        if(group.selection.contains(textView.getText().toString())) {
-    		textView.setChecked(true);
-        }
-        else {
-        	textView.setChecked(false);
-        }
-        
         //return the entire view
         return view;
     }

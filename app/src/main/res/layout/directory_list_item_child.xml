@@ -8,15 +8,14 @@
         android:id="@+id/list_item_child"
         android:gravity="center_vertical">
  
-    <CheckedTextView
+    <TextView
         android:id="@+id/list_item_text_child"
         android:layout_width="0dip"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:drawableLeft="?android:attr/listChoiceIndicatorMultiple"
-        android:checked="false"
         android:gravity="center_vertical"
         android:padding="10dp"
 		android:layout_weight="1"
 		android:layout_marginLeft="35dp" />
+
 </LinearLayout>

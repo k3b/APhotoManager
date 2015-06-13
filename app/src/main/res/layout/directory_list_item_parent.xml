@@ -20,18 +20,6 @@ android:id="@+id/list_item">
 		android:paddingBottom="3dp"
 		android:paddingTop="15dp"
 		android:layout_marginLeft="45dp" />
-	
-	<TextView
-	    android:id="@+id/list_item_text_subscriptions"
-	    style="?android:attr/preferenceStyle"
-	    android:layout_width="wrap_content"
-	    android:layout_height="wrap_content"
-	    android:layout_below="@id/list_item_text_view"
-	    android:layout_marginLeft="45dp"	    
-	    android:textColor="#696969"
-	    android:textSize="12sp"
-	    android:paddingBottom="3dp"
-	     />
 
 </RelativeLayout> 
 </LinearLayout>

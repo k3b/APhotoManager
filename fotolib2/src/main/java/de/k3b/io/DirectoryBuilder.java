@@ -24,7 +24,7 @@ public class DirectoryBuilder {
         return root;
     }
 
-    private void createStatistics(List<Directory> children) {
+    public static void createStatistics(List<Directory> children) {
         if (children != null) {
             for (Directory child: children) {
                 child.setNonDirSubItemCount(child.getNonDirItemCount()).setDirCount(0).setSubDirCount(0);
