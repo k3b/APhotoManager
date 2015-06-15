@@ -6,6 +6,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import de.k3b.android.fotoviewer.R;
+import de.k3b.io.Directory;
 
 public class TestDirActivity extends Activity implements DirectoryFragment.OnDirectoryInteractionListener {
 
@@ -36,5 +37,23 @@ public class TestDirActivity extends Activity implements DirectoryFragment.OnDir
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * called when user selects a new directory
+     *
+     * @param newSelection
+     */
+    @Override
+    public void onDirectorySelected(Directory newSelection) {
+
+    }
+
+    /**
+     * called when user cancels selection of a new directory
+     */
+    @Override
+    public void onDirectorySelectCancel() {
+
     }
 }

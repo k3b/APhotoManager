@@ -14,16 +14,23 @@ public class DirectoryLoader {
     private static Directory generateTestData() {
         Directory root = new Directory("", null, 0);
 
-        generateTestData(root, "p", rand.nextInt(9) + 1, 12);
+        generateTestData(root, "p", getRandomInt(9) + 1, 12);
         return root;
+    }
+
+    private static int getRandomInt(int maxRnd) {
+        // return (maxRnd >= 7) ? 7 : maxRnd - 1;
+        return rand.nextInt(maxRnd);
     }
 
     private static void generateTestData(Directory parent, String namePrefix, int numberOfItems, int maxDepth) {
             for (int i = 0; i < numberOfItems; i++) {
                 String relPath = namePrefix + "_" + i;
-                Directory child = new Directory(relPath, parent, 0);
+                int quantity = getRandomInt(10) - 5;
+                if (quantity < 0) quantity = 0;
+                Directory child = new Directory(relPath, parent, quantity);
                 if (maxDepth > 1) {
-                    generateTestData(child, relPath, rand.nextInt(9) + 1, rand.nextInt(maxDepth - 1));
+                    generateTestData(child, relPath, getRandomInt(9) + 1, getRandomInt(maxDepth - 1));
                 }
             }
     }

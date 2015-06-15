@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import de.k3b.android.database.QueryParameterParcelable;
 import de.k3b.android.fotoviewer.directory.DirectoryFragment;
 import de.k3b.android.fotoviewer.gallery.cursor.FotoSql;
+import de.k3b.io.Directory;
 
 public class GalleryActivity extends Activity implements
         OnGalleryInteractionListener, DirectoryFragment.OnDirectoryInteractionListener {
@@ -103,5 +104,23 @@ public class GalleryActivity extends Activity implements
 
         if (null != description) title += " - " + description;
         this.setTitle(title);
+    }
+
+    /**
+     * called when user selects a new directory
+     *
+     * @param newSelection
+     */
+    @Override
+    public void onDirectorySelected(Directory newSelection) {
+
+    }
+
+    /**
+     * called when user cancels selection of a new directory
+     */
+    @Override
+    public void onDirectorySelectCancel() {
+
     }
 }

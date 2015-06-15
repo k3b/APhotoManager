@@ -2,127 +2,119 @@
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent" tools:context=".DirectoryFragment">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <!--
+    [path_scroller with path_owner containing Button-s with path elements]
+    [directory_tree]
+    [cmd_ok] [cmd_cancel]
+    [status [current path] or 'Select Directory with Images to enable OK']
+    -->
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="vertical"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         >
 
         <HorizontalScrollView
+            android:id="@+id/path_scroller"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:scrollbars="horizontal"
             android:scrollbarSize="2dp"
             android:scrollbarStyle="insideInset"
-            android:id="@+id/path_scroller"
-
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
             >
             <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:id="@+id/path_owner"
                 android:orientation="horizontal"
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:id="@+id/path_owner"
+                android:layout_height="wrap_content"
                 >
+
+                <!-- path bar goes here as dynamically inserted buttons -->
+                <!-- to see it in layout-editor uncomment this
                 <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="button 1"
+                    android:text="path goes here"
+                    android:id="@+id/first_button" />
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="path goes here"
                     />
                 <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="button 2"
+                    android:text="path goes here"
                     />
                 <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="button 3"
+                    android:text="path goes here"
                     />
                 <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="button 1"
+                    android:text="path goes here"
                     />
                 <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="button 2"
+                    android:text="path goes here"
                     />
                 <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="button 3"
+                    android:text="path goes here"
                     />
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="button 1"
-                    />
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="button 2"
-                    />
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="button 3"
-                    />
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="button 1"
-                    />
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="button 2"
-                    />
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="button 3"
-                    />
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="button 1"
-                    />
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="button 2"
-                    />
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="button 3"
-                    />
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="button 1"
-                    />
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="button 2"
-                    />
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="button 3"
-                    />
+                -->
             </LinearLayout>
         </HorizontalScrollView>
+
         <ExpandableListView
             android:id="@+id/directory_tree"
-            android:layout_width="match_parent"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_below="@+id/path_scroller"
+            android:layout_above="@+id/cmd_ok"
+             />
+
+        <Button
+            android:id="@+id/cmd_ok"
+            android:text="@string/ok"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true">
-        </ExpandableListView>
-    </LinearLayout>
+            android:layout_above="@+id/status"
+            android:gravity="center"
+            android:enabled="false"
+            />
+
+        <Button
+            android:id="@+id/cmd_cancel"
+            android:text="@string/cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/status"
+            android:layout_toRightOf="@id/cmd_ok"
+            android:gravity="center"
+            />
+
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:ellipsize="start"
+            android:singleLine="true"
+
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentBottom="true"
+
+            android:text="@string/no_dir_selected"
+            />
+
+    </RelativeLayout>
 
 </FrameLayout>
 
