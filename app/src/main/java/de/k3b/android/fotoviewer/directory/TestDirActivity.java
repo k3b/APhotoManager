@@ -1,14 +1,19 @@
 package de.k3b.android.fotoviewer.directory;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import de.k3b.android.database.QueryParameterParcelable;
+import de.k3b.android.fotoviewer.GalleryActivity;
 import de.k3b.android.fotoviewer.Global;
+import de.k3b.android.fotoviewer.ImageViewActivity;
 import de.k3b.android.fotoviewer.R;
+import de.k3b.android.fotoviewer.gallery.cursor.FotoSql;
 import de.k3b.io.Directory;
 
 public class TestDirActivity extends Activity implements DirectoryFragment.OnDirectoryInteractionListener {
@@ -52,6 +57,18 @@ public class TestDirActivity extends Activity implements DirectoryFragment.OnDir
         Log.d(Global.LOG_CONTEXT, "Activity-Dir:onOk: " + newSelection);
 
         Toast.makeText(this, newSelection.getAbsolute(), Toast.LENGTH_LONG);
+
+        Intent intent = new Intent(this, GalleryActivity.class);
+
+        QueryParameterParcelable newQuery = new QueryParameterParcelable(FotoSql.queryDetail);
+        newQuery
+                .addWhere(FotoSql.SQL_COL_DESCRIPTION + " like ?", newSelection.getAbsolute() + "%")
+                .addOrderBy("length(" + FotoSql.SQL_COL_DESCRIPTION + ")");
+        intent.putExtra(GalleryActivity.EXTRA_QUERY, newQuery);
+        String title = newSelection.getAbsolute() + "/* - " + getString(R.string.foto_gallery);
+        intent.putExtra(Intent.EXTRA_TITLE, title);
+        //Start details activity
+        startActivity(intent);
     }
 
     /**
