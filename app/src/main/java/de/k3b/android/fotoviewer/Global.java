@@ -14,4 +14,11 @@ public class Global {
      */
     public static boolean debugEnabled = true;
 
+    /** true: load static demo data; false load real data */
+    public static boolean demoMode = false;
+
+    /** true: load images from folder and its subfolders. false: do not load images from subfolders */
+    public static boolean includeSubItems = true;
+
+
 }

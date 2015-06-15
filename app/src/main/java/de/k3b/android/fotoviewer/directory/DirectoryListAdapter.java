@@ -86,18 +86,18 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
         TextView textView = (TextView) view.findViewById(R.id.list_item_text_view);
         
         //"groupIndex" is the position of the parent/group in the list
-        textView.setText(getText(null, group));
+        textView.setText(getText(null, group, Directory.OPT_ALL));
         
         //return the entire view
         return view;
     }
 
     /** get tree display text */
-    static String getText(String prefix, Directory group) {
+    static String getText(String prefix, Directory directory, int options) {
         StringBuilder result = new StringBuilder();
         if (prefix != null) result.append(prefix);
-        result.append(group.getRelPath()).append(" ");
-        Directory.appendCount(result, group);
+        result.append(directory.getRelPath()).append(" ");
+        Directory.appendCount(result, directory, options);
         return result.toString();
     }
 
@@ -114,7 +114,7 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
         //"groupIndex" is the position of the parent/group in the list and
         //"childIndex" is the position of the child
         Directory child = mParent.getChild(groupIndex, childIndex);
-        textView.setText(getText("- ", child));
+        textView.setText(getText("- ", child, Directory.OPT_ALL));
  
         //return the entire view
         return view;

@@ -2,9 +2,12 @@ package de.k3b.android.fotoviewer.directory;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
+import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.R;
 import de.k3b.io.Directory;
 
@@ -46,7 +49,9 @@ public class TestDirActivity extends Activity implements DirectoryFragment.OnDir
      */
     @Override
     public void onDirectorySelected(Directory newSelection) {
+        Log.d(Global.LOG_CONTEXT, "Activity-Dir:onOk: " + newSelection);
 
+        Toast.makeText(this, newSelection.getAbsolute(), Toast.LENGTH_LONG);
     }
 
     /**
@@ -54,6 +59,8 @@ public class TestDirActivity extends Activity implements DirectoryFragment.OnDir
      */
     @Override
     public void onDirectorySelectCancel() {
+        Log.d(Global.LOG_CONTEXT, "Activity-Dir:onCancel: ");
 
+        Toast.makeText(this, R.string.cancel, Toast.LENGTH_LONG);
     }
 }

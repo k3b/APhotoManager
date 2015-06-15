@@ -2,7 +2,13 @@ package de.k3b.android.fotoviewer.directory;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.LoaderManager;
+import android.content.CursorLoader;
+import android.content.Loader;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,9 +17,13 @@ import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
+import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.R;
+import de.k3b.android.fotoviewer.gallery.cursor.FotoSql;
+import de.k3b.database.QueryParameter;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryBuilder;
 import de.k3b.io.DirectoryNavigator;
@@ -78,6 +88,7 @@ public class DirectoryFragment extends Fragment {
         this.cmdOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(Global.LOG_CONTEXT, "Frag-Dir:onOk: " + currentSelection);
                 mListener.onDirectorySelected(currentSelection);
             }
         });
@@ -85,13 +96,13 @@ public class DirectoryFragment extends Fragment {
         cmdCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(Global.LOG_CONTEXT, "Frag-Dir:onCancel: " + currentSelection);
                 mListener.onDirectorySelectCancel();
             }
         });
 
         treeView = (ExpandableListView)view.findViewById(R.id.directory_tree);
-        Directory directories = DirectoryLoader.getDirectories();
-        DirectoryBuilder.createStatistics(directories.getChildren());
+        Directory directories = getDirectories();
         navigation = new DirectoryNavigator(directories);
 
         adapter = new DirectoryListAdapter(mContext,
@@ -117,10 +128,35 @@ public class DirectoryFragment extends Fragment {
         return view;
     }
 
-    @Override
+    public Directory getDirectories() {
+        /// TODO get from intent/sql
+        if (Global.demoMode) {
+            Directory directories = DirectoryLoader.getDirectories();
+            DirectoryBuilder.createStatistics(directories.getChildren());
+            return directories;
+        } else {
+            QueryParameter parameters = FotoSql.queryDirs;
+            if (Global.debugEnabled) Log.i(Global.LOG_CONTEXT, this.getClass().getSimpleName() + " query " + parameters.toSqlString());
+            // requery(parameters.toOrderBy(), parameters.toAndroidParameters());
+            Cursor cursor = mContext.getContentResolver().query(Uri.parse(parameters.toFrom()), parameters.toColumns(),
+                    parameters.toAndroidWhere(), parameters.toAndroidParameters(), parameters.toOrderBy());
+            DirectoryBuilder builder = new DirectoryBuilder();
+
+            long startTime = SystemClock.currentThreadTimeMillis();
+            int colText = cursor.getColumnIndex(FotoSql.SQL_COL_DESCRIPTION);
+            int colCount = cursor.getColumnIndex(FotoSql.SQL_COL_COUNT);
+            while (cursor.moveToNext()) {
+                builder.add(cursor.getString(colText), cursor.getInt(colCount));
+            }
+
+            // Don't need the cursor any more.
+            cursor.close();
+            return builder.getRoot();
+        }
+    }
+
     public void onResume() {
         super.onResume();
-
     }
 
     @Override
@@ -174,7 +210,8 @@ public class DirectoryFragment extends Fragment {
     }
 
     private void updateStatus() {
-        boolean canPressOk = (this.currentSelection != null) && (this.currentSelection.getNonDirItemCount() > 0);
+        int itemCount = getItemCount(currentSelection);
+        boolean canPressOk = (itemCount > 0);
 
         cmdOk.setEnabled(canPressOk);
         if (canPressOk) {
@@ -184,12 +221,12 @@ public class DirectoryFragment extends Fragment {
         }
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-//    public void onButtonPressed(Uri uri) {
-//        if (mListener != null) {
-//            mListener.onFragmentInteraction(uri);
-//        }
-//    }
+    private int getItemCount(Directory directory) {
+        if (directory == null) return 0;
+        return (Global.includeSubItems)
+                        ? directory.getNonDirSubItemCount()
+                        : directory.getNonDirItemCount();
+    }
 
     /*********************** local helper *******************************************/
 
@@ -222,7 +259,7 @@ public class DirectoryFragment extends Fragment {
     private Button createPathButton(Directory currentDir) {
         Button result = new Button(getActivity());
         result.setTag(currentDir);
-        result.setText(DirectoryListAdapter.getText(null, currentDir));
+        result.setText(DirectoryListAdapter.getText(null, currentDir, (Global.includeSubItems) ? Directory.OPT_SUB_ITEM : Directory.OPT_ITEM ));
 
         result.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -264,12 +301,4 @@ public class DirectoryFragment extends Fragment {
         /** called when user cancels selection of a new directory */
         void onDirectorySelectCancel();
     }
-
-    public class CustomComparator implements Comparator<String> {
-        @Override
-        public int compare(String o1, String o2) {
-            return o1.compareTo(o2);
-        }
-    }
-
 }

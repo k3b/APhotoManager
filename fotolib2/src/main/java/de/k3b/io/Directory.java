@@ -11,6 +11,14 @@ import java.util.List;
 public class Directory {
     public static final String PATH_DELIMITER = "/";
 
+    // Display options
+    public static final int OPT_DIR = 1;
+    public static final int OPT_SUB_DIR = 2;
+    public static final int OPT_ITEM = 4;
+    public static final int OPT_SUB_ITEM = 8;
+    public static final int OPT_ALL = 0xffff;
+    public static final int OPT_NONE = 0;
+
     private String relPath = null;
     private Directory parent = null;
     private List<Directory> children = null;
@@ -80,24 +88,29 @@ public class Directory {
         return result.toString();
     }
 
-    static StringBuilder toTreeString(StringBuilder result, Directory item, String delimiter) {
+    static StringBuilder toTreeString(StringBuilder result, Directory item, String delimiter, int options) {
         if (item != null) {
             result.append(item.getRelPath());
-            appendCount(result, item);
+            appendCount(result, item, options);
             result.append(delimiter);
 
             if (item.getChildren() != null) {
                 for (Directory child : item.getChildren()) {
-                    toTreeString(result, child, delimiter);
+                    toTreeString(result, child, delimiter, options);
                 }
             }
         }
         return result;
     }
 
-    public static void appendCount(StringBuilder result, Directory item) {
-        appendCount(result, "(", item.getDirCount(), item.getSubDirCount(), ")");
-        appendCount(result, ":(", item.getNonDirItemCount(), item.getNonDirSubItemCount(), ")");
+    public static void appendCount(StringBuilder result, Directory item, int options) {
+        int dirCount = ((options & OPT_DIR) == 0) ? 0 : item.getDirCount();
+        int subDirCount = ((options & OPT_SUB_DIR) == 0) ? 0 : item.getSubDirCount();
+        int nonDirItemCount = ((options & OPT_ITEM) == 0) ? 0 : item.getNonDirItemCount();
+        int nonDirSubItemCount = ((options & OPT_SUB_ITEM) == 0) ? 0 : item.getNonDirSubItemCount();
+
+        appendCount(result, "(", dirCount, subDirCount, ")");
+        appendCount(result, ":(", nonDirItemCount, nonDirSubItemCount, ")");
     }
 
     private static void appendCount(StringBuilder result, String prefix, int count, int subCount, String suffix) {
@@ -107,6 +120,11 @@ public class Directory {
             if (subCount > count) result.append("+").append(subCount - count);
             result.append(suffix);
         }
+    }
+
+    @Override
+    public String toString() {
+        return getAbsolute();
     }
 
     /*------------------- statistics ------------------------*/

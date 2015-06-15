@@ -8,6 +8,8 @@ import de.k3b.android.database.QueryParameterParcelable;
 import de.k3b.android.fotoviewer.R;
 
 /**
+ * SQL to query the android gallery
+ *
  * Created by k3b on 04.06.2015.
  */
 public class FotoSql {
