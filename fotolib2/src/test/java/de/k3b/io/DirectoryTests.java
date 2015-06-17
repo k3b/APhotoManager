@@ -94,7 +94,18 @@ public class DirectoryTests {
         assertTree("a(1+2):(3+4)|", root);
     }
 
+    @Test
+    public void shoudFind() {
+        Directory root = new Directory("", null, 0);
+        Directory leave = root;
+        leave = new Directory("a", leave, 0);
+        leave = new Directory("b/c", leave, 0);
+        Directory expected = new Directory("d", leave, 0);
+
+        Assert.assertEquals(expected, root.find("/a/b/c/d/"));
+    }
+
     protected void assertTree(String expected, Directory root) {
-        Assert.assertEquals(expected, Directory.toTreeString(new StringBuilder(),root, "|").toString());
+        Assert.assertEquals(expected, Directory.toTreeString(new StringBuilder(),root, "|", Directory.OPT_ALL).toString());
     }
 }

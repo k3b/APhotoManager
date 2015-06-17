@@ -5,16 +5,19 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.CursorAdapter;
 import android.widget.GridView;
 
-import de.k3b.android.database.QueryParameterParcelable;
+import de.k3b.android.fotoviewer.Global;
+import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
+import de.k3b.android.fotoviewer.queries.FotoSql;
 import de.k3b.android.fotoviewer.R;
 import de.k3b.android.fotoviewer.OnGalleryInteractionListener;
+import de.k3b.android.fotoviewer.queries.Queryable;
 
 /**
  * A {@link Fragment} to show ImageGallery content based on ContentProvider-Cursor.
@@ -24,7 +27,7 @@ import de.k3b.android.fotoviewer.OnGalleryInteractionListener;
  * Use the {@link GalleryCursorFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class GalleryCursorFragment extends Fragment  implements de.k3b.android.fotoviewer.Queryable {
+public class GalleryCursorFragment extends Fragment  implements Queryable {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -125,13 +128,17 @@ public class GalleryCursorFragment extends Fragment  implements de.k3b.android.f
     }
 
     /**
-     * Initiates a database requery in the background
+     * interface Queryable: Initiates a database requery in the background
      *
      * @param context
      * @param parameters
      */
     @Override
     public void requery(Activity context, QueryParameterParcelable parameters) {
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, "GalleryCursorFragment.requery " + ((parameters != null) ? parameters.toSqlString():null));
+        }
+
         this.mParameters = parameters;
 
         // is already initialized

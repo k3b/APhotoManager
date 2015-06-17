@@ -1,9 +1,22 @@
 todo
 
+	Queriable.addResultFilter
+		GalleryCursorAdapter.requery  SELECT _id, _data, 0 AS count, longitude
+			FROM content://media/external/images/media
+			WHERE (_data like ?)
+			PARAMETERS /2015/06/15%
+			ORDER BY _data, length(_data)
+
+select count(*), strftime('%Y/%m/%d', start_time /1000, 'unixepoch', 'localtime')  
+from time_slice group by strftime('%Y/%m/%d', start_time /1000, 'unixepoch', 'localtime') 
+order by strftime('%Y/%m/%d', start_time /1000, 'unixepoch', 'localtime') desc
+
 - DirList Fragment
 	dirTree
 		layout icons child indent
 
+- options: order by (name, date, gps) asc/desc		
+- options: choose by date/dir/gps
 
 -----------------------------------------
 

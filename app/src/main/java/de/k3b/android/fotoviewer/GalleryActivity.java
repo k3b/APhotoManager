@@ -9,9 +9,11 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import de.k3b.android.database.QueryParameterParcelable;
+import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
 import de.k3b.android.fotoviewer.directory.DirectoryFragment;
-import de.k3b.android.fotoviewer.gallery.cursor.FotoSql;
+import de.k3b.android.fotoviewer.queries.FotoSql;
+import de.k3b.android.fotoviewer.queries.FotoViewerParameter;
+import de.k3b.android.fotoviewer.queries.Queryable;
 import de.k3b.io.Directory;
 
 public class GalleryActivity extends Activity implements
@@ -26,7 +28,7 @@ public class GalleryActivity extends Activity implements
         setContentView(R.layout.activity_gallery); // .gallery_activity);
 
         this.parameters = getIntent().getParcelableExtra(EXTRA_QUERY);
-        if (parameters == null) parameters = FotoSql.queryDirs;
+        if (parameters == null) parameters = FotoViewerParameter.currentDirContentQuery;
 
         setTitle(parameters.getID(), getIntent().getStringExtra(Intent.EXTRA_TITLE));
 
@@ -71,7 +73,7 @@ public class GalleryActivity extends Activity implements
             intent = new Intent(this, this.getClass());
 
             QueryParameterParcelable newQuery = new QueryParameterParcelable(FotoSql.queryDetail);
-            newQuery.setWhere(parentQuery,false).setOrderBy(parentQuery,false);
+            newQuery.getWhereFrom(parentQuery, false).getOrderByFrom(parentQuery, false);
 
             intent.putExtra(EXTRA_QUERY, newQuery);
         } else {

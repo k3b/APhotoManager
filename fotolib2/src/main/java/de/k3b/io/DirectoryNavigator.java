@@ -59,4 +59,8 @@ public class DirectoryNavigator implements IExpandableListViewNavigation<Directo
     public void setCurrentGrandFather(Directory currentGrandFather) {
         this.currentGrandFather = currentGrandFather;
     }
+
+    public Directory getRoot() {
+        return root;
+    }
 }

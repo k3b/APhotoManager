@@ -15,8 +15,8 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".directory.TestDirActivity"
-            android:label="@string/title_activity_test_dir" >
+            android:name=".directory.DirChooseActivity"
+            android:label="@string/title_activity_directory_chooser" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

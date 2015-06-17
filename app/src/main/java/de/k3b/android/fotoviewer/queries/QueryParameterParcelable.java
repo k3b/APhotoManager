@@ -1,4 +1,4 @@
-package de.k3b.android.database;
+package de.k3b.android.fotoviewer.queries;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -38,7 +38,7 @@ public class QueryParameterParcelable extends QueryParameter implements Parcelab
 
     public QueryParameterParcelable(QueryParameterParcelable src)
     {
-        this.set(src);
+        this.getFrom(src);
     }
 
     /** to desirialize from Parcel */
@@ -52,13 +52,14 @@ public class QueryParameterParcelable extends QueryParameter implements Parcelab
         in.readList(mOrderBy, null);
         in.readList(mParameters, null);
         in.readList(mHavingParameters,null);
+        mCurrentSelection = in.readString();
     }
 
     /**
      * Parcelable: Describe the kinds of special objects contained in this Parcelable's
      * marshalled representation.
      *
-     * @return a bitmask indicating the set of special object types marshalled
+     * @return a bitmask indicating the getFrom of special object types marshalled
      * by the Parcelable.
      */
     @Override
@@ -84,6 +85,7 @@ public class QueryParameterParcelable extends QueryParameter implements Parcelab
         dest.writeList(mOrderBy);
         dest.writeList(mParameters);
         dest.writeList(mHavingParameters);
+        dest.writeString(mCurrentSelection);
     }
 
 }

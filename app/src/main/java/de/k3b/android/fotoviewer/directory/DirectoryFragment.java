@@ -2,9 +2,6 @@ package de.k3b.android.fotoviewer.directory;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.app.LoaderManager;
-import android.content.CursorLoader;
-import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,18 +14,19 @@ import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
+import de.k3b.android.fotoviewer.queries.FotoViewerParameter;
 import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.R;
-import de.k3b.android.fotoviewer.gallery.cursor.FotoSql;
+import de.k3b.android.fotoviewer.queries.FotoSql;
+import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
+import de.k3b.android.fotoviewer.queries.Queryable;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryBuilder;
 import de.k3b.io.DirectoryNavigator;
 
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -41,7 +39,7 @@ import java.util.List;
  * {@link OnDirectoryInteractionListener} interface
  * to handle interaction events.
  */
-public class DirectoryFragment extends Fragment {
+public class DirectoryFragment extends Fragment implements Queryable {
 
     private static final String TAG = "DirFragment";
 
@@ -58,8 +56,11 @@ public class DirectoryFragment extends Fragment {
 
     // local data
     protected Activity mContext;
-    private DirectoryListAdapter adapter;
-    private DirectoryNavigator navigation;
+    private DirectoryListAdapter mAdapter;
+    private DirectoryNavigator mNavigation;
+
+    /** the content of this fragment */
+    private QueryParameterParcelable mParameters = null;
 
     // api to fragment owner
     private OnDirectoryInteractionListener mListener;
@@ -102,40 +103,59 @@ public class DirectoryFragment extends Fragment {
         });
 
         treeView = (ExpandableListView)view.findViewById(R.id.directory_tree);
-        Directory directories = getDirectories();
-        navigation = new DirectoryNavigator(directories);
-
-        adapter = new DirectoryListAdapter(mContext,
-                navigation, treeView);
-        treeView.setAdapter(adapter);
-
         treeView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                return DirectoryFragment.this.onChildDirectoryClick(childPosition, navigation.getChild(groupPosition, childPosition));
+                return DirectoryFragment.this.onChildDirectoryClick(childPosition, mNavigation.getChild(groupPosition, childPosition));
             }
         });
         treeView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
-                return DirectoryFragment.this.onParentDirectoryClick(navigation.getGroup(groupPosition));
+                return DirectoryFragment.this.onParentDirectoryClick(mNavigation.getGroup(groupPosition));
             }
         });
 
-        /// TODO get from intent
-        Directory initialSelection = null;
-        updatePathBar(initialSelection);
+        // if requery has not been called before: getFrom to default
+        if (mParameters == null) {
+            mParameters = new QueryParameterParcelable(FotoViewerParameter.currentDirContentQuery);
+            mParameters.getOrderByFrom(FotoViewerParameter.currentDirOrderByQuery, false);
+        }
+        requery(mContext, mParameters);
+
         return view;
     }
 
-    public Directory getDirectories() {
-        /// TODO get from intent/sql
+    /**
+     * interface Queryable: Initiates a database requery
+     */
+    public void requery(Activity context, QueryParameterParcelable parameters) {
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, "DirectoryFragment.requery " + ((parameters != null) ? parameters.toSqlString():null));
+        }
+
+        this.mParameters = parameters;
+        if (this.treeView != null) {
+            // only if onCreateView() has already been called
+            Directory directories = getDirectories(parameters);
+            mNavigation = new DirectoryNavigator(directories);
+
+            mAdapter = new DirectoryListAdapter(context,
+                    mNavigation, treeView);
+            treeView.setAdapter(mAdapter);
+
+            updatePathBar(parameters.getCurrentSelection());
+        }
+    }
+
+    public Directory getDirectories(QueryParameter parameters) {
+        /// TODO getFrom from intent/sql
         if (Global.demoMode) {
             Directory directories = DirectoryLoader.getDirectories();
             DirectoryBuilder.createStatistics(directories.getChildren());
             return directories;
         } else {
-            QueryParameter parameters = FotoSql.queryDirs;
+
             if (Global.debugEnabled) Log.i(Global.LOG_CONTEXT, this.getClass().getSimpleName() + " query " + parameters.toSqlString());
             // requery(parameters.toOrderBy(), parameters.toAndroidParameters());
             Cursor cursor = mContext.getContentResolver().query(Uri.parse(parameters.toFrom()), parameters.toColumns(),
@@ -223,12 +243,17 @@ public class DirectoryFragment extends Fragment {
 
     private int getItemCount(Directory directory) {
         if (directory == null) return 0;
-        return (Global.includeSubItems)
+        return (FotoViewerParameter.includeSubItems)
                         ? directory.getNonDirSubItemCount()
                         : directory.getNonDirItemCount();
     }
 
     /*********************** local helper *******************************************/
+    private void updatePathBar(String currentSelection) {
+        if (this.mNavigation != null) {
+            updatePathBar(this.mNavigation.getRoot().find(currentSelection));
+        }
+    }
 
     private void updatePathBar(Directory selectedChild) {
         pathBar.removeAllViews();
@@ -259,7 +284,7 @@ public class DirectoryFragment extends Fragment {
     private Button createPathButton(Directory currentDir) {
         Button result = new Button(getActivity());
         result.setTag(currentDir);
-        result.setText(DirectoryListAdapter.getText(null, currentDir, (Global.includeSubItems) ? Directory.OPT_SUB_ITEM : Directory.OPT_ITEM ));
+        result.setText(DirectoryListAdapter.getText(null, currentDir, (FotoViewerParameter.includeSubItems) ? Directory.OPT_SUB_ITEM : Directory.OPT_ITEM ));
 
         result.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -275,8 +300,8 @@ public class DirectoryFragment extends Fragment {
         if (newGrandParent != null) {
             Log.d(TAG, "=> setCurrentGrandFather(" +
                     newGrandParent.getAbsolute() + ")");
-            navigation.setCurrentGrandFather(newGrandParent);
-            this.treeView.setAdapter(adapter);
+            mNavigation.setCurrentGrandFather(newGrandParent);
+            this.treeView.setAdapter(mAdapter);
             if (newGroupSelection >= 0) {
                 /// find selectedChild as new selectedGroup and expand it
                 treeView.expandGroup(newGroupSelection, true);

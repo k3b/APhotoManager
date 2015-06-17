@@ -22,14 +22,14 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
     private LayoutInflater inflater;
     private IExpandableListViewNavigation<Directory,Directory> mParent;
     private ExpandableListView accordion;
-    public int lastExpandedGroupPosition;    
-    
- 
+    public int lastExpandedGroupPosition;
+
+
     public DirectoryListAdapter(Context context, IExpandableListViewNavigation<Directory,Directory> parent, ExpandableListView accordion) {
         mParent = parent;        
         inflater = LayoutInflater.from(context);
-        this.accordion = accordion;       
-        
+        this.accordion = accordion;
+
 	}
  
  
@@ -73,13 +73,13 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
     }
  
     @Override
-    //in this method you must set the text to see the parent/group on the list
+    //in this method you must getFrom the text to see the parent/group on the list
     public View getGroupView(int groupIndex, boolean b, View view, ViewGroup viewGroup) {
     	
         if (view == null) {
             view = inflater.inflate(R.layout.directory_list_item_parent, viewGroup,false);
         }
-        // set category name as tag so view can be found view later
+        // getFrom category name as tag so view can be found view later
         Directory group = mParent.getGroup(groupIndex);
         view.setTag(group);
         
@@ -92,7 +92,7 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
         return view;
     }
 
-    /** get tree display text */
+    /** getFrom tree display text */
     static String getText(String prefix, Directory directory, int options) {
         StringBuilder result = new StringBuilder();
         if (prefix != null) result.append(prefix);
@@ -102,7 +102,7 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
     }
 
     @Override
-    //in this method you must set the text to see the children on the list
+    //in this method you must getFrom the text to see the children on the list
     public View getChildView(int groupIndex, int childIndex, boolean b, View view, ViewGroup viewGroup) {
         if (view == null) {
             view = inflater.inflate(R.layout.directory_list_item_child, viewGroup,false);

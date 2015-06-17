@@ -175,4 +175,37 @@ public class Directory {
         if ((item != null) && (item.children != null)) return item.children.size();
         return 0;
     }
+
+    public Directory find(String path) {
+        if (path != null) {
+            return find(this, new StringBuilder(path));
+        }
+        return null;
+    }
+
+    private static Directory find(Directory parent, StringBuilder path) {
+        while (path.indexOf(PATH_DELIMITER) == 0) {
+            path.delete(0, PATH_DELIMITER.length());
+        }
+
+        int pathLen = path.length();
+        if (pathLen == 0) return parent;
+
+        if (parent.children != null) {
+            for(Directory child : parent.children) {
+                if (path.indexOf(child.getRelPath()) == 0) {
+                    int childLen = child.getRelPath().length();
+                    if (childLen == pathLen) return child; // found last path element
+                    int end = path.indexOf(PATH_DELIMITER, childLen);
+
+                    if (end == childLen) {
+                        path.delete(0,childLen);
+                        return find(child, path);
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
 }

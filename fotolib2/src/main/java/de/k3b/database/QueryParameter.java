@@ -14,6 +14,7 @@ import java.util.List;
  * Created by k3b on 04.06.2015.
  */
 public class QueryParameter {
+    // the members are protected to allow serialisation via android specific Parcles
     protected int mID = 0;
     protected final List<String> mColumns = new ArrayList<String>();
     protected final List<String> mFrom = new ArrayList<String>();
@@ -23,21 +24,24 @@ public class QueryParameter {
     protected final List<String> mOrderBy = new ArrayList<String>();
     protected final List<String> mParameters = new ArrayList<String>();
     protected final List<String> mHavingParameters = new ArrayList<String>();
+    protected String mCurrentSelection = null;
 
     public QueryParameter() {
     }
 
     /** replace all local settings from src */
-    public QueryParameter set(QueryParameter src) {
-        setID(src.getID());
-        get(mColumns            , src.mColumns           );
-        get(mFrom               , src.mFrom              );
-        get(mWhere              , src.mWhere             );
-        get(mGroupBy            , src.mGroupBy           );
-        get(mHaving             , src.mHaving            );
-        get(mOrderBy            , src.mOrderBy           );
-        get(mParameters         , src.mParameters        );
-        get(mHavingParameters   , src.mHavingParameters  );
+    public QueryParameter getFrom(QueryParameter src) {
+        if (src != null) {
+            setID(src.getID());
+            copy(mColumns, src.mColumns);
+            copy(mFrom, src.mFrom);
+            copy(mWhere, src.mWhere);
+            copy(mGroupBy, src.mGroupBy);
+            copy(mHaving, src.mHaving);
+            copy(mOrderBy, src.mOrderBy);
+            copy(mParameters, src.mParameters);
+            copy(mHavingParameters, src.mHavingParameters);
+        }
         return this;
     }
 
@@ -64,9 +68,11 @@ public class QueryParameter {
         return result.toString();
     }
 
-    public QueryParameter setWhere(QueryParameter src, boolean append) {
-        get(mWhere              , src.mWhere             ,append);
-        get(mParameters         , src.mParameters        ,append);
+    public QueryParameter getWhereFrom(QueryParameter src, boolean append) {
+        if (src != null) {
+            copy(mWhere, src.mWhere, append);
+            copy(mParameters, src.mParameters, append);
+        }
         return this;
     }
 
@@ -105,8 +111,10 @@ public class QueryParameter {
         return addToList(mHavingParameters, true, parameters);
     }
 
-    public QueryParameter setOrderBy(QueryParameter src, boolean append) {
-        get(mOrderBy            , src.mOrderBy           ,append);
+    public QueryParameter getOrderByFrom(QueryParameter src, boolean append) {
+        if (src != null) {
+            copy(mOrderBy, src.mOrderBy, append);
+        }
         return this;
     }
 
@@ -199,13 +207,13 @@ public class QueryParameter {
         return (list != null) && (list.size() > 0);
     }
 
-    private void get(List<String> dest, List<String> src, boolean append) {
+    private void copy(List<String> dest, List<String> src, boolean append) {
         if (!append) dest.clear();
         dest.addAll(src);
     }
 
-    private void get(List<String> dest, List<String> src) {
-        get(dest, src, false);
+    private void copy(List<String> dest, List<String> src) {
+        copy(dest, src, false);
     }
 
     public int getID() {
@@ -214,6 +222,15 @@ public class QueryParameter {
 
     public QueryParameter setID(int mID) {
         this.mID = mID;
+        return this;
+    }
+
+    public String getCurrentSelection() {
+        return mCurrentSelection;
+    }
+
+    public QueryParameter setCurrentSelection(String value) {
+        this.mCurrentSelection = value;
         return this;
     }
 }

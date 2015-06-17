@@ -23,7 +23,7 @@ import de.k3b.android.fotoviewer.R;
 import java.util.List;
 
 /**
- * A {@link PreferenceActivity} that presents a set of application settings. On
+ * A {@link PreferenceActivity} that presents a getFrom of application settings. On
  * handset devices, settings are presented as a single list. On tablets,
  * settings are split by category, with category headers shown to the left of
  * the list of settings.
@@ -219,7 +219,7 @@ public class SettingsActivity extends PreferenceActivity {
                 }
 
             } else {
-                // For all other preferences, set the summary to the value's
+                // For all other preferences, getFrom the summary to the value's
                 // simple string representation.
                 preference.setSummary(stringValue);
             }

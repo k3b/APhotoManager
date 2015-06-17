@@ -8,20 +8,34 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import de.k3b.android.database.QueryParameterParcelable;
+import de.k3b.android.fotoviewer.queries.FotoViewerParameter;
+import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
 import de.k3b.android.fotoviewer.GalleryActivity;
 import de.k3b.android.fotoviewer.Global;
-import de.k3b.android.fotoviewer.ImageViewActivity;
 import de.k3b.android.fotoviewer.R;
-import de.k3b.android.fotoviewer.gallery.cursor.FotoSql;
+import de.k3b.android.fotoviewer.queries.FotoSql;
+import de.k3b.android.fotoviewer.queries.Queryable;
 import de.k3b.io.Directory;
 
-public class TestDirActivity extends Activity implements DirectoryFragment.OnDirectoryInteractionListener {
+public class DirChooseActivity extends Activity implements DirectoryFragment.OnDirectoryInteractionListener {
+
+    /** which query is used to get the directories */
+    private int dirQueryID = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_test_dir);
+        setContentView(R.layout.activity_dir_choose);
+
+        Queryable query = (Queryable) getFragmentManager().findFragmentById(R.id.galleryCursor);
+
+
+        if (query != null) {
+
+            QueryParameterParcelable currentDirContentQuery = FotoViewerParameter.currentDirContentQuery;
+            query.requery(this, currentDirContentQuery);
+            this.dirQueryID = (currentDirContentQuery != null) ? currentDirContentQuery.getID() : 0;
+        }
     }
 
 
@@ -56,16 +70,15 @@ public class TestDirActivity extends Activity implements DirectoryFragment.OnDir
     public void onDirectorySelected(Directory newSelection) {
         Log.d(Global.LOG_CONTEXT, "Activity-Dir:onOk: " + newSelection);
 
-        Toast.makeText(this, newSelection.getAbsolute(), Toast.LENGTH_LONG);
+        String selectedAbsolutePath = newSelection.getAbsolute();
+        Toast.makeText(this, selectedAbsolutePath, Toast.LENGTH_LONG);
 
         Intent intent = new Intent(this, GalleryActivity.class);
 
         QueryParameterParcelable newQuery = new QueryParameterParcelable(FotoSql.queryDetail);
-        newQuery
-                .addWhere(FotoSql.SQL_COL_DESCRIPTION + " like ?", newSelection.getAbsolute() + "%")
-                .addOrderBy("length(" + FotoSql.SQL_COL_DESCRIPTION + ")");
+        FotoSql.addPathWhere(newQuery, selectedAbsolutePath, dirQueryID);
         intent.putExtra(GalleryActivity.EXTRA_QUERY, newQuery);
-        String title = newSelection.getAbsolute() + "/* - " + getString(R.string.foto_gallery);
+        String title = selectedAbsolutePath + "/* - " + getString(R.string.foto_gallery);
         intent.putExtra(Intent.EXTRA_TITLE, title);
         //Start details activity
         startActivity(intent);

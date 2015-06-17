@@ -1,5 +1,0 @@
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:id="@+id/fragmentForDirectory"
-    android:name="de.k3b.android.fotoviewer.directory.DirectoryFragment"
-    tools:layout="@layout/fragment_directory" android:layout_width="match_parent"
-    android:layout_height="match_parent" />

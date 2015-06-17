@@ -7,7 +7,7 @@ package de.k3b.android.fotoviewer;
 import android.graphics.Bitmap;
 import android.net.Uri;
 
-import de.k3b.android.database.QueryParameterParcelable;
+import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
 
 /**
  * This interface must be implemented by activities that contain this
