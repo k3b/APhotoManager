@@ -2,6 +2,27 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".GalleryActivity">
 
+    <item android:id="@+id/cmd_navigator"
+        android:title="@string/action_navigator_title"
+        android:icon="@drawable/ic_action_holo_dark_folder"
+        android:visible="true"
+        android:orderInCategory="1"
+        android:showAsAction="always" />
+
+    <item android:id="@+id/cmd_filter"
+        android:title="@string/action_filter_title"
+        android:icon="@android:drawable/ic_menu_search"
+        android:visible="true"
+        android:orderInCategory="5"
+        android:showAsAction="ifRoom" />
+
+    <item android:id="@+id/cmd_sort"
+        android:title="@string/action_sort_title"
+        android:icon="@android:drawable/ic_menu_sort_alphabetically"
+        android:visible="true"
+        android:orderInCategory="5"
+        android:showAsAction="ifRoom" />
+
     <item android:id="@+id/action_settings"
         android:title="@string/action_settings"
         android:icon="@android:drawable/ic_menu_preferences"

@@ -24,15 +24,20 @@
         <item>@drawable/image_9</item>
     </string-array>
 
-    <string name="foto_detail">Foto Detail</string>
-    <string name="foto_gallery">Gallery of Fotos</string>
-    <string name="directory_gallery">Gallery of Folder</string>
-    <string name="date_gallery">Gallery of Date</string>
+    <string name="foto_detail">Details</string>
+    <string name="foto_gallery">Fotos</string>
+    <string name="directory_gallery">Album</string>
+    <string name="date_gallery">Date</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_directory_chooser">Choose Directory with Images</string>
-    <string name="hello_world">Hello world!</string>
     <string name="no_dir_selected">Select Directory with Images to enable OK</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
+
+    <string name="action_navigator_title">Navigator</string>
+    <string name="action_filter_title">Filter</string>
+    <string name="action_sort_title">Sort</string>
+    <string name="directory_fragment_dialog_title">Select %1$s</string>
+    <string name="directory_fragment_requery_title">Loading %1$s</string>
 
 </resources>

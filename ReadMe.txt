@@ -1,4 +1,52 @@
+FotoGallery\ReadMe.txt"
+
 todo
+
+	> GalleryActivity: new action "navigator" to open DialogFragment to choose directory
+		dialog handling in gallery activity einbauen
+		
+
+
+gui
+	Action (menu)
+		Navigator-FolderSymbol (Dialogfragment) current path as Album-tree/Date-tree/place-tree/map
+		
+		Filter (DialogFragment)
+			List with current filters (edit/delete)
+			add
+				Album (DialogFragment directory-tree or Edit->where data/path like %value%)
+				Date (DialogFragment date-tree or Edits From...To)
+				Place (DialogFragment gps-tree or Edits From...To)
+				??Place (DialogFragment Map to select area)
+				
+		SortBy (popup or combox/spinner) path/date/location/pathlength
+		
+"C:\Progs.Portable\sdk\Android\Android Design - Icons 20131120\Action Bar Icons\holo_light\04_collections_collection\drawable-xxhdpi\ic_action_collection.png"		
+"C:\Progs.Portable\sdk\Android\Android Design - Icons 20131120\Action Bar Icons\holo_light\01_core_search\drawable-xhdpi\ic_action_search.png"
+asc "C:\Progs.Portable\sdk\Android\Android Design - Icons 20131120\Action Bar Icons\holo_light\02_navigation_collapse\drawable-xxhdpi\ic_action_collapse.png"
+
+desc "C:\Progs.Portable\sdk\Android\Android Design - Icons 20131120\Action Bar Icons\holo_light\02_navigation_expand\drawable-xhdpi\ic_action_expand.png"
+
+sort "C:\Progs.Portable\sdk\Android\Android Design - Icons 20131120\Action Bar Icons\holo_light\05_content_import_export\drawable-xxhdpi\ic_action_import_export.png"
+
+place "C:\Progs.Portable\sdk\Android\Android Design - Icons 20131120\Action Bar Icons\holo_light\07_location_place\drawable-xxhdpi\ic_action_place.png"
+
+"C:\Progs.Portable\sdk\Android\Android Design - Icons 20131120\Action Bar Icons\holo_light\07_location_map\drawable-xhdpi\ic_action_map.png"
+
+"D:\prj\eve\android\prj\NichtAktuell\Telegram-master\Telegram-master\TMessagesProj\src\main\res\drawable-hdpi\ic_storage.png"
+
+calender "D:\prj\eve\android\prj\AndroidCalendar.wrk\del\ical-import-export\iCalImportExport\res\drawable-hdpi\icon.png"
+
+
+
+
+
+
+
+- DirectoryBuilder (+sql) mit max(imageID)
+- loc-DirectoryBuilder im format 000.00,000.00 null replaced with 400
+
+
 
 	Queriable.addResultFilter
 		GalleryCursorAdapter.requery  SELECT _id, _data, 0 AS count, longitude
