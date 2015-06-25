@@ -17,7 +17,7 @@ import de.k3b.android.fotoviewer.queries.FotoSql;
 import de.k3b.android.fotoviewer.queries.Queryable;
 import de.k3b.io.Directory;
 
-public class DirChooseActivity extends Activity implements DirectoryFragment.OnDirectoryInteractionListener {
+public class DirPickerTestActivity extends Activity implements DirectoryPickerFragment.OnDirectoryInteractionListener {
 
     /** which query is used to get the directories */
     private int dirQueryID = 0;
@@ -65,9 +65,10 @@ public class DirChooseActivity extends Activity implements DirectoryFragment.OnD
      * called when user selects a new directory
      *
      * @param newSelection
+     * @param queryTypeId
      */
     @Override
-    public void onDirectorySelected(Directory newSelection) {
+    public void onDirectoryPick(Directory newSelection, int queryTypeId) {
         Log.d(Global.LOG_CONTEXT, "Activity-Dir:onOk: " + newSelection);
 
         String selectedAbsolutePath = newSelection.getAbsolute();
@@ -86,11 +87,23 @@ public class DirChooseActivity extends Activity implements DirectoryFragment.OnD
 
     /**
      * called when user cancels selection of a new directory
+     * @param queryTypeId
      */
     @Override
-    public void onDirectorySelectCancel() {
+    public void onDirectoryCancel(int queryTypeId) {
         Log.d(Global.LOG_CONTEXT, "Activity-Dir:onCancel: ");
 
         Toast.makeText(this, R.string.cancel, Toast.LENGTH_LONG);
+    }
+
+    /**
+     * called after the selection in tree has changed
+     *
+     * @param selectedChild
+     * @param queryTypeId
+     */
+    @Override
+    public void onDirectorySelectionChanged(Directory selectedChild, int queryTypeId) {
+
     }
 }

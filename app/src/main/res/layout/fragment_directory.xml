@@ -88,7 +88,7 @@
             android:layout_above="@+id/status"
             android:gravity="center"
             android:enabled="false"
-            />
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/cmd_cancel"
@@ -98,7 +98,7 @@
             android:layout_above="@+id/status"
             android:layout_toRightOf="@id/cmd_ok"
             android:gravity="center"
-            />
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/status"
@@ -112,7 +112,7 @@
             android:layout_alignParentBottom="true"
 
             android:text="@string/no_dir_selected"
-            />
+            android:visibility="gone" />
 
     </RelativeLayout>
 

@@ -3,7 +3,17 @@ FotoGallery\ReadMe.txt"
 todo
 
 	> GalleryActivity: new action "navigator" to open DialogFragment to choose directory
-		dialog handling in gallery activity einbauen
+		Nagvigator (rename from DirectoryFragment) 
+			status: loading album ... instead of show current path
+			mode
+				embedded: onDirSelectionChanged; hidden: buttons/status
+				dialog: buttons+status+ok=onDirClick
+					onInitDialog()
+						set icon
+		GalleryActivity:
+			dialog handling einbauen
+			mode Navigagor+Gallery
+			mode Gallery+NagvigatorDialog+cmdNavigator(menu)
 		
 
 

@@ -5,7 +5,7 @@
 <!--
     <fragment
         android:id="@+id/directoryFragment"
-        android:name="de.k3b.android.fotoviewer.directory.DirectoryFragment"
+        android:name="de.k3b.android.fotoviewer.directory.DirectoryPickerFragmentagment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1" />

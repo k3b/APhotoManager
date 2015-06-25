@@ -6,23 +6,27 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
-import de.k3b.android.fotoviewer.directory.DirectoryFragment;
+import de.k3b.android.fotoviewer.directory.DirectoryPickerFragment;
 import de.k3b.android.fotoviewer.queries.FotoSql;
 import de.k3b.android.fotoviewer.queries.FotoViewerParameter;
 import de.k3b.android.fotoviewer.queries.Queryable;
 import de.k3b.io.Directory;
 
 public class GalleryActivity extends Activity implements
-        OnGalleryInteractionListener, DirectoryFragment.OnDirectoryInteractionListener {
+        OnGalleryInteractionListener, DirectoryPickerFragment.OnDirectoryInteractionListener {
 
-    public static final String EXTRA_QUERY = "query";
+    public static final String EXTRA_QUERY = "gallery";
     private static final String DLG_NAVIGATOR = "navigator";
     private QueryParameterParcelable parameters = null;
+    private boolean hasEmbeddedDirPicker = false;
+    private Queryable gallery;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,10 +38,10 @@ public class GalleryActivity extends Activity implements
 
         setTitle(parameters.getID(), getIntent().getStringExtra(Intent.EXTRA_TITLE));
 
-        Queryable query = (Queryable) getFragmentManager().findFragmentById(R.id.galleryCursor);
+        gallery = (Queryable) getFragmentManager().findFragmentById(R.id.galleryCursor);
 
-        if (query != null) {
-            query.requery(this,parameters);
+        if (gallery != null) {
+            gallery.requery(this,parameters);
         }
     }
 
@@ -73,7 +77,7 @@ public class GalleryActivity extends Activity implements
 
     private void openNavigator() {
         final FragmentManager manager = getFragmentManager();
-        DirectoryFragment dir = new DirectoryFragment(); // (DirectoryFragment) manager.findFragmentByTag(DLG_NAVIGATOR);
+        DirectoryPickerFragment dir = new DirectoryPickerFragment(); // (DirectoryPickerFragment) manager.findFragmentByTag(DLG_NAVIGATOR);
 
         dir.show(manager, DLG_NAVIGATOR);
 
@@ -131,18 +135,43 @@ public class GalleryActivity extends Activity implements
      * called when user selects a new directory
      *
      * @param newSelection
+     * @param queryTypeId
      */
     @Override
-    public void onDirectorySelected(Directory newSelection) {
-
+    public void onDirectoryPick(Directory newSelection, int queryTypeId) {
+        if (!this.hasEmbeddedDirPicker) {
+            navigateTo(newSelection, queryTypeId);
+        }
     }
 
     /**
      * called when user cancels selection of a new directory
+     * @param queryTypeId
      */
     @Override
-    public void onDirectorySelectCancel() {
+    public void onDirectoryCancel(int queryTypeId) {
+        // do nothing
+    }
 
+    /** called after the selection in tree has changed */
+    public void onDirectorySelectionChanged(Directory selectedChild, int queryTypeId) {
+        if (this.hasEmbeddedDirPicker) {
+            navigateTo(selectedChild, queryTypeId);
+        }
+    }
+
+    private void navigateTo(Directory newSelection, int queryTypeId) {
+        Log.d(Global.LOG_CONTEXT, "GalleryActivity.navigateTo " + newSelection);
+
+        String selectedAbsolutePath = newSelection.getAbsolute();
+        Toast.makeText(this, selectedAbsolutePath, Toast.LENGTH_LONG);
+
+        Intent intent = new Intent(this, GalleryActivity.class);
+
+        QueryParameterParcelable newQuery = new QueryParameterParcelable(this.parameters);
+        FotoSql.addPathWhere(newQuery, selectedAbsolutePath, queryTypeId);
+
+        this.gallery.requery(this, newQuery);
     }
 
     private void setTitle(int id, String description) {

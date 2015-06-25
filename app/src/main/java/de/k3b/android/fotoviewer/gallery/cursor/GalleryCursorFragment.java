@@ -143,7 +143,10 @@ public class GalleryCursorFragment extends Fragment  implements Queryable {
 
         // is already initialized
         if (this.galleryAdapter != null) {
+            // this.galleryView.setAdapter(null);
             this.galleryAdapter.requery(getActivity(), parameters);
+            // this.galleryView.setAdapter(this.galleryAdapter);
+            this.galleryAdapter.notifyDataSetChanged();
         }
     }
 }
