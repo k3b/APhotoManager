@@ -7,7 +7,7 @@ package de.k3b.android.fotoviewer.queries;
  */
 public class FotoViewerParameter {
     /** getFrom data for directory chooser */
-    public static QueryParameterParcelable currentDirContentQuery = FotoSql.queryDirs; //queryDates;
+    public static QueryParameterParcelable currentDirContentQuery = FotoSql.queryGroupByDir; //queryGroupByDate;
 
     /** getFrom orderBy for directory chooser */
     public static QueryParameterParcelable currentDirOrderByQuery = null;

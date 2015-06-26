@@ -10,7 +10,7 @@ import de.k3b.android.fotoviewer.R;
 import de.k3b.io.Directory;
 
 /**
- * SQL to query the android gallery
+ * contains all SQL needed to query the android gallery
  *
  * Created by k3b on 04.06.2015.
  */
@@ -33,7 +33,7 @@ public class FotoSql {
     // same format as dir. i.e. description='/2014/12/24/' or '/mnt/sdcard/pictures/'
     public static final String SQL_EXPR_DAY = "strftime('/%Y/%m/%d/', " + DATE_TAKEN + " /1000, 'unixepoch', 'localtime')";
 	
-    public static final QueryParameterParcelable queryDates = (QueryParameterParcelable) new QueryParameterParcelable()
+    public static final QueryParameterParcelable queryGroupByDate = (QueryParameterParcelable) new QueryParameterParcelable()
             .setID(R.string.date_gallery)
             .addColumn(
                     "min(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
@@ -47,7 +47,7 @@ public class FotoSql {
 
 
     public static final String SQL_EXPR_FOLDER = "substr(" + SQL_COL_PATH + ",1,length(" + SQL_COL_PATH + ") - length(" + MediaStore.Images.Media.DISPLAY_NAME + "))";
-    public static final QueryParameterParcelable queryDirs = (QueryParameterParcelable) new QueryParameterParcelable()
+    public static final QueryParameterParcelable queryGroupByDir = (QueryParameterParcelable) new QueryParameterParcelable()
             .setID(R.string.directory_gallery)
             .addColumn(
                     "min(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
@@ -85,67 +85,76 @@ public class FotoSql {
     public static void addPathWhere(QueryParameterParcelable newQuery, String selectedAbsolutePath, int dirQueryID) {
         if ((selectedAbsolutePath != null) && (selectedAbsolutePath.length() > 0)) {
             if (R.string.date_gallery == dirQueryID) {
-
-                Integer year = null;
-                Integer month = null;
-                Integer day = null;
-
-                String parts[] = selectedAbsolutePath.split(Directory.PATH_DELIMITER);
-
-                for (String part : parts) {
-                    if ((part != null) && ((part.length() > 0))) {
-                        try {
-                            Integer value = Integer.parseInt(part);
-                            if (year == null) year = value;
-                            else if (month == null) month = value;
-                            else if (day == null) day = value;
-                        } catch (NumberFormatException ex) {
-
-                        }
-                    }
-                }
-
-                if (year != null) {
-                    int yearFrom = year.intValue();
-
-                    if (yearFrom == 1970) {
-                        newQuery
-                                .addWhere(DATE_TAKEN + " in (0,-1, null)")
-                                .addOrderBy(DATE_TAKEN + " desc");
-
-                    } else {
-                        int monthFrom = (month != null) ? month.intValue() : 1;
-                        int dayFrom = (day != null) ? day.intValue() : 1;
-
-                        GregorianCalendar from = new GregorianCalendar(yearFrom, monthFrom - 1, dayFrom, 0, 0, 0);
-
-                        int field = GregorianCalendar.YEAR;
-                        if (month != null) field = GregorianCalendar.MONTH;
-                        if (day != null) field = GregorianCalendar.DAY_OF_MONTH;
-
-                        GregorianCalendar to = new GregorianCalendar();
-                        to.setTimeInMillis(from.getTimeInMillis());
-                        to.add(field, 1);
-
-                        newQuery
-                                .addWhere(DATE_TAKEN + " >= ?", "" + from.getTimeInMillis())
-                                .addWhere(DATE_TAKEN + " < ?", "" + to.getTimeInMillis())
-                                .addOrderBy(DATE_TAKEN + " desc");
-                    }
-                }
+                addWhereDatePath(newQuery, selectedAbsolutePath);
             } else {
                 // selectedAbsolutePath is assumed to be a file path i.e. /mnt/sdcard/pictures/
+                addWhereDirectoryPath(newQuery, selectedAbsolutePath);
+            }
+        }
+    }
 
-                if (FotoViewerParameter.includeSubItems) {
-                    newQuery
-                            .addWhere(FotoSql.SQL_COL_PATH + " like ?", selectedAbsolutePath + "%")
-                            // .addWhere(FotoSql.SQL_COL_PATH + " like '" + selectedAbsolutePath + "%'")
-                            .addOrderBy(FotoSql.SQL_COL_PATH);
-                } else {
-                    newQuery
-                            .addWhere(SQL_EXPR_FOLDER + " =  ?", selectedAbsolutePath)
-                            .addOrderBy(FotoSql.SQL_COL_PATH);
+    /** directory path i.e. /mnt/sdcard/pictures/ */
+    private static void addWhereDirectoryPath(QueryParameterParcelable newQuery, String selectedAbsolutePath) {
+        if (FotoViewerParameter.includeSubItems) {
+            newQuery
+                    .addWhere(FotoSql.SQL_COL_PATH + " like ?", selectedAbsolutePath + "%")
+                    // .addWhere(FotoSql.SQL_COL_PATH + " like '" + selectedAbsolutePath + "%'")
+                    .addOrderBy(FotoSql.SQL_COL_PATH);
+        } else {
+            // foldername exact match
+            newQuery
+                    .addWhere(SQL_EXPR_FOLDER + " =  ?", selectedAbsolutePath)
+                    .addOrderBy(FotoSql.SQL_COL_PATH);
+        }
+    }
+
+    /** path has format /year/month/day/ or /year/month/ or /year/ or / */
+    private static void addWhereDatePath(QueryParameterParcelable newQuery, String selectedAbsolutePath) {
+        Integer year = null;
+        Integer month = null;
+        Integer day = null;
+
+        String parts[] = selectedAbsolutePath.split(Directory.PATH_DELIMITER);
+
+        for (String part : parts) {
+            if ((part != null) && ((part.length() > 0))) {
+                try {
+                    Integer value = Integer.parseInt(part);
+                    if (year == null) year = value;
+                    else if (month == null) month = value;
+                    else if (day == null) day = value;
+                } catch (NumberFormatException ex) {
+
                 }
+            }
+        }
+
+        if (year != null) {
+            int yearFrom = year.intValue();
+
+            if (yearFrom == 1970) {
+                newQuery
+                        .addWhere(DATE_TAKEN + " in (0,-1, null)")
+                        .addOrderBy(DATE_TAKEN + " desc");
+
+            } else {
+                int monthFrom = (month != null) ? month.intValue() : 1;
+                int dayFrom = (day != null) ? day.intValue() : 1;
+
+                GregorianCalendar from = new GregorianCalendar(yearFrom, monthFrom - 1, dayFrom, 0, 0, 0);
+
+                int field = GregorianCalendar.YEAR;
+                if (month != null) field = GregorianCalendar.MONTH;
+                if (day != null) field = GregorianCalendar.DAY_OF_MONTH;
+
+                GregorianCalendar to = new GregorianCalendar();
+                to.setTimeInMillis(from.getTimeInMillis());
+                to.add(field, 1);
+
+                newQuery
+                        .addWhere(DATE_TAKEN + " >= ?", "" + from.getTimeInMillis())
+                        .addWhere(DATE_TAKEN + " < ?", "" + to.getTimeInMillis())
+                        .addOrderBy(DATE_TAKEN + " desc");
             }
         }
     }

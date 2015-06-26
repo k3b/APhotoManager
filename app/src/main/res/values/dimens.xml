@@ -4,5 +4,7 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="grid_cell_width">130dp</dimen>
     <dimen name="grid_cell_height">130dp</dimen>
+    <dimen name="grid_cell_icon_width">45dp</dimen>
+    <dimen name="grid_cell_icon_height">45dp</dimen>
     <dimen name="grid_cell_margin">5dp</dimen>
 </resources>

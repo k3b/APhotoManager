@@ -195,6 +195,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
         if (count > 1) description += " (" + count + ")";
         if (gps) description += "#";
         holder.description.setText(description);
+        holder.icon.setVisibility((count > 1) ? View.VISIBLE : View.GONE);
 
         GridCellImageLoadHandler imgHandler = new GridCellImageLoadHandler(context, holder);
         imgHandler.sendEmptyMessage(0);
@@ -210,12 +211,14 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
     /** data belonging to gridview element */
     static class GridCellViewHolder {
         final public ImageView image;
+        final public ImageView icon;
         final public TextView description;
         public String filter;
 
         GridCellViewHolder(View parent) {
             this.description = (TextView) parent.findViewById(R.id.text);
             this.image = (ImageView) parent.findViewById(R.id.image);
+            this.icon = (ImageView) parent.findViewById(R.id.icon);
         };
 
         public long imageID;
