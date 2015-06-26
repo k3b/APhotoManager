@@ -37,6 +37,11 @@ public class GalleryCursorFragment extends Fragment  implements Queryable {
     private String mParam1;
     private String mParam2;
 
+    // for debugging
+    private static int id = 1;
+    private final String debugPrefix;
+
+
     private GridView galleryView;
     private GalleryCursorAdapter galleryAdapter = null;
 
@@ -62,7 +67,12 @@ public class GalleryCursorFragment extends Fragment  implements Queryable {
     }
 
     public GalleryCursorFragment() {
+        debugPrefix = "GalleryCursorFragment#" + (id++)  + " ";
         // Required empty public constructor
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, debugPrefix + "()");
+        }
+
     }
 
     @Override
@@ -81,8 +91,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable {
         View result = inflater.inflate(R.layout.fragment_gallery, container, false);
         galleryView = (GridView) result.findViewById(R.id.gridView);
 
-        galleryAdapter = new GalleryCursorAdapter(this.getActivity(), this.mParameters);
-
+        galleryAdapter = new GalleryCursorAdapter(this.getActivity(), mParameters, debugPrefix);
+        // galleryAdapter.requery(this.getActivity(),mParameters);
         galleryView.setAdapter(galleryAdapter);
 
         galleryView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -136,17 +146,20 @@ public class GalleryCursorFragment extends Fragment  implements Queryable {
     @Override
     public void requery(Activity context, QueryParameterParcelable parameters) {
         if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, "GalleryCursorFragment.requery " + ((parameters != null) ? parameters.toSqlString():null));
+            Log.i(Global.LOG_CONTEXT, debugPrefix + "requery " + ((parameters != null) ? parameters.toSqlString():null));
         }
 
         this.mParameters = parameters;
 
-        // is already initialized
-        if (this.galleryAdapter != null) {
-            // this.galleryView.setAdapter(null);
-            this.galleryAdapter.requery(getActivity(), parameters);
-            // this.galleryView.setAdapter(this.galleryAdapter);
-            this.galleryAdapter.notifyDataSetChanged();
-        }
+        // galleryAdapter.changeCursor(null);
+        // galleryView.setAdapter(null);
+        // galleryAdapter = new GalleryCursorAdapter(this.getActivity(), mParameters, debugPrefix + "-r ");
+        galleryAdapter.requery(this.getActivity(), mParameters);
+        // galleryView.setAdapter(galleryAdapter);
+    }
+
+    @Override
+    public String toString() {
+        return debugPrefix + this.galleryAdapter;
     }
 }

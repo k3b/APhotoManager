@@ -4,7 +4,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
 
-import java.util.Date;
 import java.util.GregorianCalendar;
 
 import de.k3b.android.fotoviewer.R;
@@ -24,7 +23,8 @@ public class FotoSql {
 
     // columns that must be avaulable in the Cursor
     public static final String SQL_COL_PK = MediaStore.Images.Media._ID;
-    public static final String SQL_COL_DESCRIPTION = MediaStore.Images.Media.DATA;
+    public static final String SQL_COL_PATH = MediaStore.Images.Media.DATA;
+    public static final String SQL_COL_DISPLAY_TEXT = "disp_txt";
     public static final String SQL_COL_GPS = MediaStore.Images.Media.LONGITUDE;
     public static final String SQL_COL_COUNT = "count";
 
@@ -37,7 +37,7 @@ public class FotoSql {
             .setID(R.string.date_gallery)
             .addColumn(
                     "min(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
-                    SQL_EXPR_DAY + " AS " + SQL_COL_DESCRIPTION,
+                    SQL_EXPR_DAY + " AS " + SQL_COL_DISPLAY_TEXT,
                     "count(*) AS " + SQL_COL_COUNT,
                     "max(" + SQL_COL_GPS + ") AS " + SQL_COL_GPS)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
@@ -46,12 +46,12 @@ public class FotoSql {
             ;
 
 
-    public static final String SQL_EXPR_FOLDER = "substr(" + SQL_COL_DESCRIPTION + ",1,length(" + SQL_COL_DESCRIPTION + ") - length(" + MediaStore.Images.Media.DISPLAY_NAME + "))";
+    public static final String SQL_EXPR_FOLDER = "substr(" + SQL_COL_PATH + ",1,length(" + SQL_COL_PATH + ") - length(" + MediaStore.Images.Media.DISPLAY_NAME + "))";
     public static final QueryParameterParcelable queryDirs = (QueryParameterParcelable) new QueryParameterParcelable()
             .setID(R.string.directory_gallery)
             .addColumn(
                     "min(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
-                    SQL_EXPR_FOLDER + " AS " + SQL_COL_DESCRIPTION,
+                    SQL_EXPR_FOLDER + " AS " + SQL_COL_DISPLAY_TEXT,
                     "count(*) AS " + SQL_COL_COUNT,
                     "max(" + SQL_COL_GPS + ") AS " + SQL_COL_GPS)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
@@ -62,11 +62,11 @@ public class FotoSql {
             .setID(R.string.foto_gallery)
             .addColumn(
                     SQL_COL_PK,
-                    SQL_COL_DESCRIPTION,
+                    SQL_COL_PATH + " AS " + SQL_COL_DISPLAY_TEXT,
                     "0 AS " + SQL_COL_COUNT,
                     SQL_COL_GPS)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
-            .addOrderBy(SQL_COL_DESCRIPTION)
+            .addOrderBy(SQL_COL_PATH)
             ;
 
     public static String getFilter(Cursor cursor, QueryParameterParcelable parameters, String description) {
@@ -138,12 +138,13 @@ public class FotoSql {
 
                 if (FotoViewerParameter.includeSubItems) {
                     newQuery
-                            .addWhere(FotoSql.SQL_COL_DESCRIPTION + " like ?", selectedAbsolutePath + "%")
-                            .addOrderBy(FotoSql.SQL_COL_DESCRIPTION);
+                            .addWhere(FotoSql.SQL_COL_PATH + " like ?", selectedAbsolutePath + "%")
+                            // .addWhere(FotoSql.SQL_COL_PATH + " like '" + selectedAbsolutePath + "%'")
+                            .addOrderBy(FotoSql.SQL_COL_PATH);
                 } else {
                     newQuery
                             .addWhere(SQL_EXPR_FOLDER + " =  ?", selectedAbsolutePath)
-                            .addOrderBy(FotoSql.SQL_COL_DESCRIPTION);
+                            .addOrderBy(FotoSql.SQL_COL_PATH);
                 }
             }
         }

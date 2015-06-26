@@ -1,6 +1,7 @@
 package de.k3b.android.fotoviewer.directory;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
+import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.R;
 import de.k3b.io.Directory;
 import de.k3b.io.IExpandableListViewNavigation;
@@ -24,9 +26,18 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
     private ExpandableListView accordion;
     public int lastExpandedGroupPosition;
 
+    // for debugging
+    private static int id = 1;
+    private final String debugPrefix;
 
-    public DirectoryListAdapter(Context context, IExpandableListViewNavigation<Directory,Directory> parent, ExpandableListView accordion) {
-        mParent = parent;        
+
+    public DirectoryListAdapter(Context context, IExpandableListViewNavigation<Directory, Directory> parent, ExpandableListView accordion, String name) {
+        debugPrefix = "GalleryCursorAdapter#" + (id++) + "@" + name + " ";
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, debugPrefix + "()");
+        }
+
+        mParent = parent;
         inflater = LayoutInflater.from(context);
         this.accordion = accordion;
 
@@ -142,4 +153,3 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
         
     }
 }
-

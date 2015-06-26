@@ -26,6 +26,7 @@ import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.OnGalleryInteractionListener;
 import de.k3b.android.fotoviewer.R;
 import de.k3b.android.fotoviewer.queries.Queryable;
+import de.k3b.database.QueryParameter;
 
 /**
  * CursorAdapter that queries MediaStore.Images.Media.EXTERNAL_CONTENT_URI
@@ -35,16 +36,25 @@ import de.k3b.android.fotoviewer.queries.Queryable;
  */
 public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
     // Identifies a particular Loader or a LoaderManager being used in this component
-    private static final int MY_LOADER_ID = 0;
+    private static int MY_LOADER_ID = 0;
+    private static final boolean SYNC = false;
     private OnGalleryInteractionListener callback = null;
+
+    // for debugging
+    private static int id = 1;
+    private final String debugPrefix;
 
     // for debugging: counts how many cell elements were created
     private int itemCreateCount = 0;
     private QueryParameterParcelable parameters = null;
 
-    public GalleryCursorAdapter(final Activity context, QueryParameterParcelable parameters) {
+    public GalleryCursorAdapter(final Activity context, QueryParameterParcelable parameters, String name) {
         super(context, null, false); // no cursor yet; no auto-requery
+        debugPrefix = "GalleryCursorAdapter#" + (id++) + "@" + name + " ";
 
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, debugPrefix + "()");
+        }
         if (context instanceof OnGalleryInteractionListener) {
             this.callback = (OnGalleryInteractionListener) context;
         }
@@ -61,8 +71,9 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
     public void requery(final Activity context, QueryParameterParcelable parameters) {
         this.parameters = parameters;
         if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, "GalleryCursorAdapter.requery " + ((parameters != null) ? parameters.toSqlString():null));
+            Log.i(Global.LOG_CONTEXT, debugPrefix + "requery " + ((parameters != null) ? parameters.toSqlString() : null));
         }
+
         requery(context, parameters.toColumns(), parameters.toFrom(), parameters.toAndroidWhere(), parameters.toOrderBy(), parameters.toAndroidParameters());
     }
 
@@ -70,18 +81,37 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
      * Initiates a database requery in the background
      */
     private void requery(final Activity context, final String[] sqlProjection, final String from, final String sqlWhereStatement, final String sqlSortOrder, final String... sqlWhereParameters) {
-        // if (Global.debugEnabled) Log.i(DEBUG_TAG, "requery");
 
         /*
          * Initializes the CursorLoader. The MY_LOADER_ID value is eventually passed
          * to onCreateLoader().
          */
-        context.getLoaderManager().initLoader(MY_LOADER_ID, null, new LoaderManager.LoaderCallbacks<Cursor>() {
 
-            @Override
-            public Loader<Cursor> onCreateLoader(int loaderID, Bundle args) {
-                switch (loaderID) {
-                    case MY_LOADER_ID:
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, debugPrefix + "requery " +
+                    QueryParameter.toString(from, // Table to query
+                            sqlProjection,             // Projection to return
+                            sqlWhereStatement,        // No selection clause
+                            sqlWhereParameters,       // No selection arguments
+                            sqlSortOrder));
+        }
+
+        if (SYNC) {
+            // for debugging
+            Cursor result = context.getContentResolver().query(Uri.parse(from), // Table to query
+                    sqlProjection,             // Projection to return
+                    sqlWhereStatement,        // No selection clause
+                    sqlWhereParameters,       // No selection arguments
+                    sqlSortOrder              // Default sort order
+            );
+            onLoadFinished(result);
+        } else {
+            final int currentLoaderId = ++MY_LOADER_ID;
+            context.getLoaderManager().initLoader(currentLoaderId, null, new LoaderManager.LoaderCallbacks<Cursor>() {
+
+                @Override
+                public Loader<Cursor> onCreateLoader(int loaderID, Bundle args) {
+                    if (loaderID == currentLoaderId) {
                         // Returns a new CursorLoader
                         return new CursorLoader(
                                 context,   // Parent activity context
@@ -91,31 +121,51 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
                                 sqlWhereParameters,       // No selection arguments
                                 sqlSortOrder              // Default sort order
                         );
-                    default:
-                        // An invalid id was passed in
-                        return null;
+                    }
+                    return null;
                 }
-            }
 
-            @Override
-            public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-                if (Global.debugEnabled) Log.i(Global.LOG_CONTEXT, "GalleryCursorAdapter.onLoadFinished() requery rows found: " + cursor.getCount());
-
-                if (callback != null) {
-                    callback.setResultCount(cursor.getCount());
+                @Override
+                public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+                    GalleryCursorAdapter.this.onLoadFinished(cursor);
                 }
-                GalleryCursorAdapter.this.changeCursor(cursor);
-            }
 
-            @Override
-            public void onLoaderReset(Loader<Cursor> loader) {
-
-                if (callback != null) {
-                    callback.setResultCount(0);
+                @Override
+                public void onLoaderReset(Loader<Cursor> loader) {
+                    GalleryCursorAdapter.this.onLoadFinished(null);
                 }
-                GalleryCursorAdapter.this.changeCursor(null);
+            });
+        }
+    }
+
+    private void onLoadFinished(Cursor cursor) {
+        int resultCount = (cursor == null) ? 0 : cursor.getCount();
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, debugPrefix + "onLoadFinished() requery rows found: " + resultCount + " in " + cursor + " " +
+                    debugCursor(cursor, 10, " + ", FotoSql.SQL_COL_DISPLAY_TEXT));
+        }
+
+        if (callback != null) {
+            callback.setResultCount(resultCount);
+        }
+        GalleryCursorAdapter.this.changeCursor(cursor);
+    }
+
+    private String debugCursor(Cursor cursor, int maxRows, String delim, String... colmnNames) {
+        StringBuilder result = new StringBuilder();
+        if ((cursor != null) && (!cursor.isClosed())) {
+            int oldPosition = cursor.getPosition();
+            int last = Math.min(maxRows - 1, cursor.getCount() - 1);
+            for (int position = 0; position <= last; position ++) {
+                result.append("#").append(position);
+                cursor.moveToPosition(position);
+                for (String col : colmnNames) {
+                    result.append(";").append(cursor.getString(cursor.getColumnIndex(col)));
+                }
+                result.append(delim);
             }
-        });
+        }
+        return result.toString();
     }
 
     /** create new empty gridview cell */
@@ -126,7 +176,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
 
         // iView.setLayoutParams(new GridView.LayoutParams(200, 200));
         itemCreateCount++;
-        if (Global.debugEnabled) Log.i(Global.LOG_CONTEXT, "GalleryCursorAdapter.newView #" + itemCreateCount);
+        if (Global.debugEnabled) Log.i(Global.LOG_CONTEXT, debugPrefix + "newView #" + itemCreateCount);
         return iView;
     }
 
@@ -138,7 +188,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
         long count = cursor.getLong(cursor.getColumnIndex(FotoSql.SQL_COL_COUNT));
         boolean gps = !cursor.isNull(cursor.getColumnIndex(FotoSql.SQL_COL_GPS));
 
-        String description = cursor.getString(cursor.getColumnIndex(FotoSql.SQL_COL_DESCRIPTION));
+        String description = cursor.getString(cursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT));
 
         holder.filter = FotoSql.getFilter(cursor, this.parameters, description);
 
@@ -149,7 +199,12 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
         GridCellImageLoadHandler imgHandler = new GridCellImageLoadHandler(context, holder);
         imgHandler.sendEmptyMessage(0);
 
-        if (Global.debugEnabled) Log.i(Global.LOG_CONTEXT, "GalleryCursorAdapter.bindView for #" + holder.imageID);
+        if (Global.debugEnabled) Log.i(Global.LOG_CONTEXT, debugPrefix + "bindView for #" + holder.imageID);
+    }
+
+    @Override
+    public String toString() {
+        return debugPrefix + this.parameters;
     }
 
     /** data belonging to gridview element */
@@ -179,7 +234,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
         @Override
         public void handleMessage(Message msg) {
             Long id = holder.imageID;
-            if (Global.debugEnabled) Log.i(Global.LOG_CONTEXT, "GalleryCursorAdapter.handleMessage getThumbnail for #" + id);
+            if (Global.debugEnabled) Log.i(Global.LOG_CONTEXT, "GridCellImageLoadHandler.handleMessage getThumbnail for #" + id);
             Bitmap image = getBitmap(id);
             holder.image.setImageBitmap(image);
         }
