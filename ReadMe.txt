@@ -1,5 +1,6 @@
 FotoGallery\ReadMe.txt"
 
+
 todo
 
 	> GalleryActivity: new action "navigator" to open DialogFragment to choose directory

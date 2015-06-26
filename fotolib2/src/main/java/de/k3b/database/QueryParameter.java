@@ -52,7 +52,7 @@ public class QueryParameter {
     }
 
     public String[] toColumns() {
-        return toList(mColumns);
+        return Helper.toList(mColumns);
     }
 
     public QueryParameter addFrom(String... froms) {
@@ -61,7 +61,7 @@ public class QueryParameter {
 
     public String toFrom() {
         StringBuilder result = new StringBuilder();
-        if (!append(result, null, mFrom, ", ", "", "")) {
+        if (!Helper.append(result, null, mFrom, ", ", "", "")) {
             return null;
         }
 
@@ -85,21 +85,21 @@ public class QueryParameter {
      * Therefore this sql is added to the WHERE part.
      * [select ... from ... where (] [mWhere) GROUP BY (mGroupBy] [) ORDER BY ] [mOrderBy]*/
     public String toAndroidWhere() {
-        boolean hasWhere = isNotEmpty(mWhere);
-        boolean hasGroup = isNotEmpty(mGroupBy);
+        boolean hasWhere = Helper.isNotEmpty(mWhere);
+        boolean hasGroup = Helper.isNotEmpty(mGroupBy);
         if (!hasWhere && !hasGroup) return null;
 
         StringBuilder result = new StringBuilder();
-        if (!append(result, null, mWhere, " AND ", "(", ")")) {
+        if (!Helper.append(result, null, mWhere, " AND ", "(", ")")) {
             result.append("1=1");
         }
-        append(result, ") GROUP BY (", mGroupBy, ", ", "", "");
+        Helper.append(result, ") GROUP BY (", mGroupBy, ", ", "", "");
 
         return result.toString();
     }
 
     public String[] toAndroidParameters() {
-        return toList(mParameters, mHavingParameters);
+        return Helper.toList(mParameters, mHavingParameters);
     }
 
     public QueryParameter addGroupBy(String... parameters) {
@@ -124,7 +124,7 @@ public class QueryParameter {
 
     public String toOrderBy() {
         StringBuilder result = new StringBuilder();
-        if (!append(result, null, mOrderBy, ", ", "", "")) {
+        if (!Helper.append(result, null, mOrderBy, ", ", "", "")) {
             return null;
         }
 
@@ -134,18 +134,41 @@ public class QueryParameter {
     /************************** end properties *********************/
     public String toSqlString() {
         StringBuilder result = new StringBuilder();
-        append(result, " SELECT ", mColumns, ", ", "", "");
-        append(result, " \nFROM ", mFrom, ", ", "", "");
-        append(result, " \nWHERE ", mWhere, " AND ", "(", ")");
-        append(result, " \n\tPARAMETERS ", mParameters, ", ", "", "");
-        append(result, " \nGROUP BY ", mGroupBy, ", ", "", "");
-        append(result, " \nHAVING ", mHaving, " AND ", "(", ")");
-        append(result, " \n\tPARAMETERS ", mHavingParameters, ", ", "", "");
-        append(result, " \nORDER BY ", mOrderBy, ", ", "", "");
+        Helper.append(result, " SELECT ", mColumns, ", ", "", "");
+        Helper.append(result, " \nFROM ", mFrom, ", ", "", "");
+        Helper.append(result, " \nWHERE ", mWhere, " AND ", "(", ")");
+        Helper.append(result, " \n\tPARAMETERS ", mParameters, ", ", "", "");
+        Helper.append(result, " \nGROUP BY ", mGroupBy, ", ", "", "");
+        Helper.append(result, " \nHAVING ", mHaving, " AND ", "(", ")");
+        Helper.append(result, " \n\tPARAMETERS ", mHavingParameters, ", ", "", "");
+        Helper.append(result, " \nORDER BY ", mOrderBy, ", ", "", "");
 
         if (result.length() == 0) return null;
 
         return result.toString();
+    }
+
+    public String toSqlStringAndroid() {
+        return toString(toFrom(), toColumns(), toAndroidWhere(), toAndroidParameters(), toOrderBy());
+    }
+
+    public static String toString(String from, String[] sqlProjection, String sqlWhereStatement, String[] sqlWhereParameters, String sqlSortOrder) {
+        StringBuilder result = new StringBuilder();
+        Helper.append(result, " SELECT ", sqlProjection, ", ", "", "");
+        Helper.append(result, " \nFROM ", from);
+        Helper.append(result, " \nWHERE (", sqlWhereStatement);
+        Helper.append(result, ") \nORDER BY ", sqlSortOrder);
+
+        Helper.append(result, " \n\tPARAMETERS ", sqlWhereParameters, ", ", "", "");
+
+        if (result.length() == 0) return null;
+
+        return result.toString();
+    }
+
+    @Override
+    public String toString() {
+        return toSqlString().replace("\n", " ");
     }
 
     /************************** local helpers *********************/
@@ -159,52 +182,89 @@ public class QueryParameter {
         return this;
     }
 
-    private String[] toList(List<String>... lists) {
-        int size = 0;
-        for (List<String> list : lists) {
-            if (list != null) size += list.size();
-        }
-        if (size == 0) return null;
+    private static class Helper {
 
-        String[] result = new String[size];
-        int next=0;
-        for (List<String> list : lists) {
-            if (list != null) {
+        private static String[] toList(List<String>... lists) {
+            int size = 0;
+            for (List<String> list : lists) {
+                if (list != null) size += list.size();
+            }
+            if (size == 0) return null;
+
+            String[] result = new String[size];
+            int next = 0;
+            for (List<String> list : lists) {
+                if (list != null) {
+                    int listSize = list.size();
+                    for (int i = 0; i < listSize; i++) {
+                        result[next++] = list.get(i);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private static boolean append(StringBuilder result, String blockPrefix, List<String> list, String delimiter, String before, String after) {
+            if (isNotEmpty(list)) {
+                if (blockPrefix != null) {
+                    result.append(blockPrefix);
+                }
+
+                boolean first = true;
                 int listSize = list.size();
                 for (int i = 0; i < listSize; i++) {
-                    result[next++] = list.get(i);
+                    if (!first) {
+                        result.append(delimiter);
+                    }
+
+                    result.append(before);
+                    result.append(list.get(i));
+                    result.append(after);
+                    first = false;
                 }
+                return true;
             }
+            return false;
         }
 
-        return result;
-    }
-
-    private boolean append(StringBuilder result, String blockPrefix, List<String> list, String delimiter, String before, String after) {
-        if (isNotEmpty(list)) {
-            if (blockPrefix != null) {
-                result.append(blockPrefix);
+        private static boolean append(StringBuilder result, String blockPrefix, String list) {
+            if ((list != null) && (list.length() > 0)) {
+                if (blockPrefix != null) {
+                    result.append(blockPrefix);
+                }
+                result.append(list);
+                return true;
             }
+            return false;
+        }
 
-            boolean first = true;
-            int listSize = list.size();
-            for (int i = 0; i < listSize; i++) {
-                if (!first) {
-                    result.append(delimiter);
+        private static boolean append(StringBuilder result, String blockPrefix, String[] list, String delimiter, String before, String after) {
+            if ((list != null) && (list.length > 0)) {
+                if (blockPrefix != null) {
+                    result.append(blockPrefix);
                 }
 
-                result.append(before);
-                result.append(list.get(i));
-                result.append(after);
-                first = false;
-            }
-            return true;
-        }
-        return false;
-    }
+                boolean first = true;
+                int listSize = list.length;
+                for (int i = 0; i < listSize; i++) {
+                    if (!first) {
+                        result.append(delimiter);
+                    }
 
-    private boolean isNotEmpty(List<String> list) {
-        return (list != null) && (list.size() > 0);
+                    result.append(before);
+                    result.append(list[i]);
+                    result.append(after);
+                    first = false;
+                }
+                return true;
+            }
+            return false;
+        }
+
+        private static boolean isNotEmpty(List<String> list) {
+            return (list != null) && (list.size() > 0);
+        }
     }
 
     private void copy(List<String> dest, List<String> src, boolean append) {
