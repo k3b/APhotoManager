@@ -15,4 +15,5 @@ public class FotoViewerParameter {
     /** true: load images from folder and its subfolders. false: do not load images from subfolders */
     public static boolean includeSubItems = true;
 
+    public static String currentDirContentValue = "/";
 }

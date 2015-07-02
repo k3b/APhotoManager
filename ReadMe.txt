@@ -3,6 +3,15 @@ FotoGallery\ReadMe.txt"
 
 todo
 
+	api
+		ziel nur eine instance von rootDirectory in activit
+		einheitliche schnittstelle DirectoryPicerFragment/GalleryCursorFragment
+			    public void defineDirectoryNavigation(Directory root, int dirTypId, String initialAbsolutePath) {
+
+		DirectoryPicerFragment
+			DirectoryLoader.getDirectories outside fragment/inside activity?
+			requery obsolete?
+
 	> GalleryActivity: new action "navigator" to open DialogFragment to choose directory
 		Nagvigator (rename from DirectoryFragment) 
 			status: loading album ... instead of show current path

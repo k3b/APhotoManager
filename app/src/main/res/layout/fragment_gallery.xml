@@ -1,12 +1,136 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" tools:context="de.k3b.android.fotoviewer.gallery.array.GalleryArrayFragment">
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+    <!--
+    [HorizontalScrollView-parent_scroller[parent_owner[[parentButton] [parentButton] [parentButton] ...]]]
+    [HorizontalScrollView-child_scroller [child_owner [[childButton ] [childButton ] [childButton ] ...]]]
+    [GridView-gridView]
+    -->
+    <HorizontalScrollView
+        android:id="@+id/parent_scroller"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="horizontal"
+        android:scrollbarSize="2dp"
+        android:scrollbarStyle="insideInset"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        >
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/parent_owner"
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            >
+
+            <!-- path bar goes here as dynamically inserted buttons -->
+            <!-- to see it in layout-editor uncomment this
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="path goes here" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="path goes here"
+                />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="path goes here"
+                />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="path goes here"
+                />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="path goes here"
+                />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="path goes here"
+                />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="path goes here"
+                />
+            -->
+
+        </LinearLayout>
+    </HorizontalScrollView>
+    <HorizontalScrollView
+        android:id="@+id/child_scroller"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="horizontal"
+        android:scrollbarSize="2dp"
+        android:scrollbarStyle="insideInset"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        >
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/child_owner"
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            >
+
+            <!-- path bar goes here as dynamically inserted buttons -->
+            <!-- to see it in layout-editor uncomment this
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="path goes here" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="path goes here"
+                />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="path goes here"
+                />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="path goes here"
+                />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="path goes here"
+                />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="path goes here"
+                />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="path goes here"
+                />
+-->
+
+        </LinearLayout>
+    </HorizontalScrollView>
 
     <GridView
             android:orientation="horizontal"
             android:background="#f0f0f0"
             android:id="@+id/gridView"
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/grid_cell_margin"
             android:columnWidth="@dimen/grid_cell_width"
@@ -18,4 +142,5 @@
             android:horizontalSpacing="@dimen/grid_cell_margin"
             android:focusable="true"
             android:clickable="true"/>
-</FrameLayout>
+
+</LinearLayout>

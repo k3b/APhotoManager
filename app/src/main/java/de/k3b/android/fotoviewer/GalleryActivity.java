@@ -17,7 +17,6 @@ import de.k3b.android.fotoviewer.directory.DirectoryPickerFragment;
 import de.k3b.android.fotoviewer.queries.FotoSql;
 import de.k3b.android.fotoviewer.queries.FotoViewerParameter;
 import de.k3b.android.fotoviewer.queries.Queryable;
-import de.k3b.io.Directory;
 
 public class GalleryActivity extends Activity implements
         OnGalleryInteractionListener, DirectoryPickerFragment.OnDirectoryInteractionListener {
@@ -96,7 +95,7 @@ public class GalleryActivity extends Activity implements
 
     /** called by Fragment: a fragment Item was clicked */
     @Override
-    public void onGalleryClick(Bitmap image, Uri imageUri, String description, QueryParameterParcelable parentQuery) {
+    public void onGalleryImageClick(Bitmap image, Uri imageUri, String description, QueryParameterParcelable parentQuery) {
         Intent intent;
         if ((parentQuery != null) && (parentQuery.getID() == R.string.directory_gallery) ) {
             //Create intent
@@ -134,13 +133,13 @@ public class GalleryActivity extends Activity implements
     /**
      * called when user selects a new directory
      *
-     * @param newSelection
+     * @param selectedAbsolutePath
      * @param queryTypeId
      */
     @Override
-    public void onDirectoryPick(Directory newSelection, int queryTypeId) {
+    public void onDirectoryPick(String selectedAbsolutePath, int queryTypeId) {
         if (!this.hasEmbeddedDirPicker) {
-            navigateTo(newSelection, queryTypeId);
+            navigateTo(selectedAbsolutePath, queryTypeId);
         }
     }
 
@@ -154,16 +153,16 @@ public class GalleryActivity extends Activity implements
     }
 
     /** called after the selection in tree has changed */
-    public void onDirectorySelectionChanged(Directory selectedChild, int queryTypeId) {
+    @Override
+    public void onDirectorySelectionChanged(String selectedAbsolutePath, int queryTypeId) {
         if (this.hasEmbeddedDirPicker) {
-            navigateTo(selectedChild, queryTypeId);
+            navigateTo(selectedAbsolutePath, queryTypeId);
         }
     }
 
-    private void navigateTo(Directory newSelection, int queryTypeId) {
-        Log.d(Global.LOG_CONTEXT, "GalleryActivity.navigateTo " + newSelection);
+    private void navigateTo(String selectedAbsolutePath, int queryTypeId) {
+        Log.d(Global.LOG_CONTEXT, "GalleryActivity.navigateTo " + selectedAbsolutePath);
 
-        String selectedAbsolutePath = newSelection.getAbsolute();
         Toast.makeText(this, selectedAbsolutePath, Toast.LENGTH_LONG);
 
         Intent intent = new Intent(this, GalleryActivity.class);

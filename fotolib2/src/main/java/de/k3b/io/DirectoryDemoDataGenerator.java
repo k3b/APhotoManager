@@ -1,6 +1,5 @@
-package de.k3b.android.fotoviewer.directory;
+package de.k3b.io;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 import de.k3b.io.Directory;
@@ -8,10 +7,10 @@ import de.k3b.io.Directory;
 /**
  * Created by k3b on 11.06.2015.
  */
-public class DirectoryLoader {
+public class DirectoryDemoDataGenerator {
     private static Random rand = new Random();
     // generate some random amount of child objects (1..10)
-    private static Directory generateTestData() {
+    public static Directory generateTestData() {
         Directory root = new Directory("", null, 0);
 
         generateTestData(root, "p", getRandomInt(9) + 1, 12);
@@ -34,10 +33,5 @@ public class DirectoryLoader {
                 }
             }
     }
-
-    public static Directory getDirectories() {
-        return generateTestData();
-    }
-
 
 }

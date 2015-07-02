@@ -8,6 +8,7 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,10 +48,13 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
     // for debugging: counts how many cell elements were created
     private int itemCreateCount = 0;
     private QueryParameterParcelable parameters = null;
+    private final Drawable imageNotLoadedYet;
 
     public GalleryCursorAdapter(final Activity context, QueryParameterParcelable parameters, String name) {
         super(context, null, false); // no cursor yet; no auto-requery
         debugPrefix = "GalleryCursorAdapter#" + (id++) + "@" + name + " ";
+
+        imageNotLoadedYet = context.getResources().getDrawable(R.drawable.image_loading);
 
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, debugPrefix + "()");
@@ -168,6 +172,22 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
         return result.toString();
     }
 
+    /**
+     * Get the type of View that will be created by {@link #getView} for the specified item.
+     *
+     * @param position The position of the item within the adapter's data set whose view type we
+     *                 want.
+     * @return An integer representing the type of View. Two views should share the same type if one
+     * can be converted to the other in {@link #getView}. Note: Integers must be in the
+     * range 0 to {@link #getViewTypeCount} - 1. {@link #IGNORE_ITEM_VIEW_TYPE} can
+     * also be returned.
+     * @see #IGNORE_ITEM_VIEW_TYPE
+     */
+    @Override
+    public int getItemViewType(int position) {
+        return R.layout.gallery_grid_item;
+    }
+
     /** create new empty gridview cell */
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
@@ -196,6 +216,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
         if (gps) description += "#";
         holder.description.setText(description);
         holder.icon.setVisibility((count > 1) ? View.VISIBLE : View.GONE);
+        holder.image.setImageDrawable(imageNotLoadedYet);
 
         GridCellImageLoadHandler imgHandler = new GridCellImageLoadHandler(context, holder);
         imgHandler.sendEmptyMessage(0);
@@ -213,15 +234,18 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
         final public ImageView image;
         final public ImageView icon;
         final public TextView description;
+
+        /** onClick add this as sql-where-filter */
         public String filter;
+
+        /** for delay loading */
+        public long imageID;
 
         GridCellViewHolder(View parent) {
             this.description = (TextView) parent.findViewById(R.id.text);
             this.image = (ImageView) parent.findViewById(R.id.image);
             this.icon = (ImageView) parent.findViewById(R.id.icon);
         };
-
-        public long imageID;
     }
 
     /** Handler to load image in Background */

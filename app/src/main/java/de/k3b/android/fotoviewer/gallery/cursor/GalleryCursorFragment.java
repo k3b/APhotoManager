@@ -10,14 +10,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.GridView;
+import android.widget.HorizontalScrollView;
+import android.widget.LinearLayout;
 
 import de.k3b.android.fotoviewer.Global;
+import de.k3b.android.fotoviewer.directory.DirectoryGui;
+import de.k3b.android.fotoviewer.queries.FotoViewerParameter;
 import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
 import de.k3b.android.fotoviewer.queries.FotoSql;
 import de.k3b.android.fotoviewer.R;
 import de.k3b.android.fotoviewer.OnGalleryInteractionListener;
 import de.k3b.android.fotoviewer.queries.Queryable;
+import de.k3b.io.Directory;
 
 /**
  * A {@link Fragment} to show ImageGallery content based on ContentProvider-Cursor.
@@ -27,11 +33,17 @@ import de.k3b.android.fotoviewer.queries.Queryable;
  * Use the {@link GalleryCursorFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class GalleryCursorFragment extends Fragment  implements Queryable {
+public class GalleryCursorFragment extends Fragment  implements Queryable, DirectoryGui {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+
+    private HorizontalScrollView parentPathBarScroller;
+    private LinearLayout parentPathBar;
+
+    private HorizontalScrollView childPathBarScroller;
+    private LinearLayout childPathBar;
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -41,13 +53,13 @@ public class GalleryCursorFragment extends Fragment  implements Queryable {
     private static int id = 1;
     private final String debugPrefix;
 
-
     private GridView galleryView;
     private GalleryCursorAdapter galleryAdapter = null;
 
     private OnGalleryInteractionListener mListener;
     private QueryParameterParcelable mParameters;
 
+    /**************** construction ******************/
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -75,6 +87,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable {
 
     }
 
+    /**************** live-cycle ******************/
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,33 +104,23 @@ public class GalleryCursorFragment extends Fragment  implements Queryable {
         View result = inflater.inflate(R.layout.fragment_gallery, container, false);
         galleryView = (GridView) result.findViewById(R.id.gridView);
 
-        galleryAdapter = new GalleryCursorAdapter(this.getActivity(), mParameters, debugPrefix);
-        // galleryAdapter.requery(this.getActivity(),mParameters);
+        galleryAdapter = new GalleryCursorAdapter(this.getActivity(), calculateEffectiveQueryParameters(), debugPrefix);
+        // galleryAdapter.requery(this.getActivity(),calculateEffectiveQueryParameters());
         galleryView.setAdapter(galleryAdapter);
 
         galleryView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                onGalleryItemClick((GalleryCursorAdapter.GridCellViewHolder) v.getTag());
+                onGalleryImageClick((GalleryCursorAdapter.GridCellViewHolder) v.getTag());
             }
         });
 
+        this.parentPathBar = (LinearLayout) result.findViewById(R.id.parent_owner);
+        this.parentPathBarScroller = (HorizontalScrollView) result.findViewById(R.id.parent_scroller);
+
+        this.childPathBar = (LinearLayout) result.findViewById(R.id.child_owner);
+        this.childPathBarScroller = (HorizontalScrollView) result.findViewById(R.id.child_scroller);
+
         return result;
-    }
-
-    public void onGalleryItemClick(final GalleryCursorAdapter.GridCellViewHolder holder) {
-        if (mListener != null) {
-            QueryParameterParcelable result = new QueryParameterParcelable(this.mParameters);
-
-            if (holder.filter != null) {
-                FotoSql.addWhereFilter(result, holder.filter);
-            }
-            mListener.onGalleryClick(null, getUri(holder.imageID), holder.description.getText().toString(), result);
-        }
-    }
-
-    private Uri getUri(long imageID) {
-        return Uri.parse(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI.toString() + "/" + imageID);
     }
 
     @Override
@@ -146,20 +149,134 @@ public class GalleryCursorFragment extends Fragment  implements Queryable {
     @Override
     public void requery(Activity context, QueryParameterParcelable parameters) {
         if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, debugPrefix + "requery " + ((parameters != null) ? parameters.toSqlString():null));
+            Log.i(Global.LOG_CONTEXT, debugPrefix + "requery " + ((parameters != null) ? parameters.toSqlString() : null));
         }
 
         this.mParameters = parameters;
 
-        // galleryAdapter.changeCursor(null);
-        // galleryView.setAdapter(null);
-        // galleryAdapter = new GalleryCursorAdapter(this.getActivity(), mParameters, debugPrefix + "-r ");
-        galleryAdapter.requery(this.getActivity(), mParameters);
-        // galleryView.setAdapter(galleryAdapter);
+        requeryGallery();
+    }
+
+    private void requeryGallery() {
+        galleryAdapter.requery(this.getActivity(), calculateEffectiveQueryParameters());
     }
 
     @Override
     public String toString() {
         return debugPrefix + this.galleryAdapter;
+    }
+
+    /*********************** local helper *******************************************/
+    /** an Image in the FotoGallery was clicked */
+    private void onGalleryImageClick(final GalleryCursorAdapter.GridCellViewHolder holder) {
+        if (mListener != null) {
+            QueryParameterParcelable result = this.calculateEffectiveQueryParameters();
+
+            if (holder.filter != null) {
+                FotoSql.addWhereFilter(result, holder.filter);
+            }
+            mListener.onGalleryImageClick(null, getUri(holder.imageID), holder.description.getText().toString(), result);
+        }
+    }
+
+    /** converts imageID to content-uri */
+    private Uri getUri(long imageID) {
+        return Uri.parse(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI.toString() + "/" + imageID);
+    }
+
+    /****************** path navigation *************************/
+
+    private Directory mDirectoryRoot = null;
+    private int mDirTypId = 0;
+    private String mCurrentPath = null;
+
+    /** Defines Directory Navigation */
+    @Override
+    public void defineDirectoryNavigation(Directory root, int dirTypId, String initialAbsolutePath) {
+        mDirectoryRoot = root;
+        mDirTypId = dirTypId;
+        navigateTo(initialAbsolutePath);
+    }
+
+    /** Set curent selection to absolutePath */
+    @Override
+    public void navigateTo(String absolutePath) {
+        mCurrentPath = absolutePath;
+        if (mDirectoryRoot != null) {
+            reload(mDirectoryRoot.find(absolutePath));
+        }
+        requeryGallery();
+    }
+
+    private void reload(Directory selectedChild) {
+        parentPathBar.removeAllViews();
+        childPathBar.removeAllViews();
+
+        if (selectedChild != null) {
+
+            Button first = null;
+            Directory current = selectedChild;
+            while (current.getParent() != null) {
+                Button button = createPathButton(current);
+                // add parent left to chlild
+                // gui order root/../child.parent/child
+                parentPathBar.addView(button, 0);
+                if (first == null) first = button;
+                current = current.getParent();
+            }
+
+            // scroll to right where deepest child is
+            parentPathBarScroller.requestChildFocus(parentPathBar, first);
+
+            for (Directory child : selectedChild.getChildren()) {
+                Button button = createPathButton(child);
+                childPathBar.addView(button);
+            }
+        }
+    }
+
+    private Button createPathButton(Directory currentDir) {
+        Button result = new Button(getActivity());
+        result.setTag(currentDir);
+        result.setText(getDirectoryDisplayText(null, currentDir, (FotoViewerParameter.includeSubItems) ? Directory.OPT_SUB_ITEM : Directory.OPT_ITEM));
+
+        result.setOnClickListener(onPathButtonClickListener);
+        return result;
+    }
+
+    /** path/directory was clicked */
+    private View.OnClickListener onPathButtonClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            onPathButtonClick((Directory) v.getTag());
+        }
+    };
+
+    /** path/directory was clicked */
+    private void onPathButtonClick(Directory newSelection) {
+        if ((mListener != null) && (newSelection != null)) {
+            mCurrentPath = newSelection.getAbsolute();
+            mListener.onDirectoryPick(mCurrentPath, this.mDirTypId);
+        }
+    }
+
+    /** getFrom tree display text */
+    private static String getDirectoryDisplayText(String prefix, Directory directory, int options) {
+        StringBuilder result = new StringBuilder();
+        if (prefix != null) result.append(prefix);
+        result.append(directory.getRelPath()).append(" ");
+        Directory.appendCount(result, directory, options);
+        return result.toString();
+    }
+
+    /** combine root-query plus current selected directory */
+    private QueryParameterParcelable calculateEffectiveQueryParameters() {
+        QueryParameterParcelable result = new QueryParameterParcelable(mParameters);
+
+        if ((mDirTypId != 0) && (mCurrentPath != null)) {
+            FotoSql.addPathWhere(result, mCurrentPath, mDirTypId);
+        }
+        return result;
     }
 }

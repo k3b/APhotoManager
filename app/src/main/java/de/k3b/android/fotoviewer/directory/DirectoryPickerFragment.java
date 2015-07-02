@@ -3,10 +3,7 @@ package de.k3b.android.fotoviewer.directory;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,17 +13,11 @@ import android.widget.ExpandableListView;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import de.k3b.android.fotoviewer.queries.FotoViewerParameter;
 import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.R;
-import de.k3b.android.fotoviewer.queries.FotoSql;
-import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
-import de.k3b.android.fotoviewer.queries.Queryable;
-import de.k3b.database.QueryParameter;
 import de.k3b.io.Directory;
-import de.k3b.io.DirectoryBuilder;
 import de.k3b.io.DirectoryNavigator;
 
 import java.util.List;
@@ -34,35 +25,35 @@ import java.util.List;
 /**
  * A fragment with a Listing of Directories.
  *
- * [pathBar]
+ * [parentPathBar]
  * [treeView]
  *
  * Activities that contain this fragment must implement the
  * {@link OnDirectoryInteractionListener} interface
  * to handle interaction events.
  */
-public class DirectoryPickerFragment extends DialogFragment implements Queryable {
+public class DirectoryPickerFragment extends DialogFragment implements DirectoryGui {
 
     private static final String TAG = "DirFragment";
 
     // public state
-    private Directory currentSelection = null;
+    private Directory mCurrentSelection = null;
 
     // Layout
-    private HorizontalScrollView pathBarScroller;
-    private LinearLayout pathBar;
+    private HorizontalScrollView parentPathBarScroller;
+    private LinearLayout parentPathBar;
     private ExpandableListView treeView;
     private TextView status = null;
     private Button cmdOk = null;
     private Button cmdCancel = null;
 
+    private View.OnClickListener pathButtonClickHandler;
+
     // local data
     protected Activity mContext;
     private DirectoryListAdapter mAdapter;
     private DirectoryNavigator mNavigation;
-
-    /** the content of this fragment */
-    private QueryParameterParcelable mParameters = null;
+    private int mDirTypId;
 
     // api to fragment owner
     private OnDirectoryInteractionListener mListener;
@@ -96,14 +87,15 @@ public class DirectoryPickerFragment extends DialogFragment implements Queryable
 
         mContext = this.getActivity();
 
-        // if requery has not been called before: getFrom to default
-        if (mParameters == null) {
-            mParameters = new QueryParameterParcelable(FotoViewerParameter.currentDirContentQuery);
-            mParameters.getOrderByFrom(FotoViewerParameter.currentDirOrderByQuery, false);
-        }
+        pathButtonClickHandler = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onParentPathBarButtonClick((Directory) v.getTag());
+            }
+        };
 
-        this.pathBar = (LinearLayout) view.findViewById(R.id.path_owner);
-        this.pathBarScroller = (HorizontalScrollView) view.findViewById(R.id.path_scroller);
+        this.parentPathBar = (LinearLayout) view.findViewById(R.id.parent_owner);
+        this.parentPathBarScroller = (HorizontalScrollView) view.findViewById(R.id.parent_scroller);
 
         treeView = (ExpandableListView)view.findViewById(R.id.directory_tree);
         treeView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
@@ -124,7 +116,8 @@ public class DirectoryPickerFragment extends DialogFragment implements Queryable
             onCreateViewDialog(view);
         }
 
-        requery(mContext, mParameters);
+        // does nothing if defineDirectoryNavigation() has not been called yet
+        reloadTreeViewIfAvailable();
 
         return view;
     }
@@ -137,9 +130,12 @@ public class DirectoryPickerFragment extends DialogFragment implements Queryable
         this.cmdOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(Global.LOG_CONTEXT, debugPrefix + "onOk: " + currentSelection);
-                mListener.onDirectoryPick(currentSelection, mParameters.getID());
-                dismiss();
+                Log.d(Global.LOG_CONTEXT, debugPrefix + "onOk: " + mCurrentSelection);
+                if (mCurrentSelection != null) {
+                    mListener.onDirectoryPick(mCurrentSelection.getAbsolute()
+                            , mDirTypId);
+                    dismiss();
+                }
             }
         });
         cmdOk.setVisibility(View.VISIBLE);
@@ -147,8 +143,8 @@ public class DirectoryPickerFragment extends DialogFragment implements Queryable
         cmdCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(Global.LOG_CONTEXT, debugPrefix + "onCancel: " + currentSelection);
-                mListener.onDirectoryCancel(mParameters.getID());
+                Log.d(Global.LOG_CONTEXT, debugPrefix + "onCancel: " + mCurrentSelection);
+                mListener.onDirectoryCancel(mDirTypId);
                 dismiss();
             }
         });
@@ -156,7 +152,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Queryable
 
         String title = mContext.getString(
                 R.string.directory_fragment_dialog_title,
-                mContext.getString(mParameters.getID()));
+                mContext.getString(mDirTypId));
         getDialog().setTitle(title);
         // no api for setIcon ????
     }
@@ -168,65 +164,6 @@ public class DirectoryPickerFragment extends DialogFragment implements Queryable
 
         return result;
     };
-
-    /**
-     * interface Queryable: Initiates a database requery
-     */
-    public void requery(Activity context, QueryParameterParcelable parameters) {
-        if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, debugPrefix + "requery " + ((parameters != null) ? parameters.toSqlString():null));
-        }
-
-        this.mParameters = parameters;
-        if (this.treeView != null) {
-            // only if onCreateView() has already been called
-
-            String title = mContext.getString(
-                    R.string.directory_fragment_requery_title,
-                    mContext.getString(mParameters.getID()));
-
-            Toast.makeText(mContext, title, Toast.LENGTH_SHORT);
-            getDialog().setTitle(title);
-
-            Directory directories = getDirectories(parameters);
-            mNavigation = new DirectoryNavigator(directories);
-
-            mAdapter = new DirectoryListAdapter(context,
-                    mNavigation, treeView, debugPrefix);
-            treeView.setAdapter(mAdapter);
-
-            updatePathBar(parameters.getCurrentSelection());
-        }
-    }
-
-    public Directory getDirectories(QueryParameter parameters) {
-        /// TODO getFrom from intent/sql
-        if (Global.demoMode) {
-            Directory directories = DirectoryLoader.getDirectories();
-            DirectoryBuilder.createStatistics(directories.getChildren());
-            return directories;
-        } else {
-
-            // requery(parameters.toOrderBy(), parameters.toAndroidParameters());
-            Cursor cursor = mContext.getContentResolver().query(Uri.parse(parameters.toFrom()), parameters.toColumns(),
-                    parameters.toAndroidWhere(), parameters.toAndroidParameters(), parameters.toOrderBy());
-
-            if (Global.debugEnabled) Log.i(Global.LOG_CONTEXT, debugPrefix + cursor.getCount() + " rows found for query " + parameters.toSqlString());
-
-            DirectoryBuilder builder = new DirectoryBuilder();
-
-            long startTime = SystemClock.currentThreadTimeMillis();
-            int colText = cursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT);
-            int colCount = cursor.getColumnIndex(FotoSql.SQL_COL_COUNT);
-            while (cursor.moveToNext()) {
-                builder.add(cursor.getString(colText), cursor.getInt(colCount));
-            }
-
-            // Don't need the cursor any more.
-            cursor.close();
-            return builder.getRoot();
-        }
-    }
 
     public void onResume() {
         super.onResume();
@@ -251,7 +188,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Queryable
 
     /*********************** gui interaction *******************************************/
     private boolean onParentDirectoryClick(Directory dir) {
-        updatePathBar(dir);
+        updateParentPathBar(dir);
         notifySelectionChanged(dir);
         return false;
     }
@@ -264,13 +201,13 @@ public class DirectoryPickerFragment extends DialogFragment implements Queryable
         Directory newGrandParent = ((selectedChild != null) && (selectedChild.getDirCount() > 0)) ? selectedChild.getParent() : null;
 
         navigateTo(childPosition, newGrandParent);
-        updatePathBar(selectedChild);
+        updateParentPathBar(selectedChild);
         notifySelectionChanged(selectedChild);
         return false;
     }
 
-    private void onPathBarButtonClick(Directory selectedChild) {
-        Log.d(TAG, debugPrefix + "onPathBarButtonClick(" +
+    private void onParentPathBarButtonClick(Directory selectedChild) {
+        Log.d(TAG, debugPrefix + "onParentPathBarButtonClick(" +
                 selectedChild.getAbsolute() + ")");
 
         // naviationchange only if there are children below child
@@ -281,23 +218,23 @@ public class DirectoryPickerFragment extends DialogFragment implements Queryable
             int childPosition = siblings.indexOf(selectedChild);
             navigateTo(childPosition, newGrandParent);
         }
-        updatePathBar(selectedChild);
+        updateParentPathBar(selectedChild);
         notifySelectionChanged(selectedChild);
     }
 
     private void notifySelectionChanged(Directory selectedChild) {
-        if (mListener != null) mListener.onDirectorySelectionChanged(selectedChild, mParameters.getID());
+        if ((mListener != null) && (selectedChild != null)) mListener.onDirectorySelectionChanged(selectedChild.getAbsolute(), mDirTypId);
     }
 
     private void updateStatus() {
-        int itemCount = getItemCount(currentSelection);
+        int itemCount = getItemCount(mCurrentSelection);
         boolean canPressOk = (itemCount > 0);
 
         if (cmdOk != null) cmdOk.setEnabled(canPressOk);
 
         if (status != null) {
             if (canPressOk) {
-                status.setText(this.currentSelection.getAbsolute());
+                status.setText(this.mCurrentSelection.getAbsolute());
             } else {
                 status.setText(R.string.no_dir_selected);
             }
@@ -312,14 +249,14 @@ public class DirectoryPickerFragment extends DialogFragment implements Queryable
     }
 
     /*********************** local helper *******************************************/
-    private void updatePathBar(String currentSelection) {
+    private void updateParentPathBar(String currentSelection) {
         if (this.mNavigation != null) {
-            updatePathBar(this.mNavigation.getRoot().find(currentSelection));
+            updateParentPathBar(this.mNavigation.getRoot().find(currentSelection));
         }
     }
 
-    private void updatePathBar(Directory selectedChild) {
-        pathBar.removeAllViews();
+    private void updateParentPathBar(Directory selectedChild) {
+        parentPathBar.removeAllViews();
 
         if (selectedChild != null) {
 
@@ -329,17 +266,17 @@ public class DirectoryPickerFragment extends DialogFragment implements Queryable
                 Button button = createPathButton(current);
                 // add parent left to chlild
                 // gui order root/../child.parent/child
-                pathBar.addView(button, 0);
+                parentPathBar.addView(button, 0);
                 if (first == null) first = button;
                 current = current.getParent();
             }
 
             // scroll to right where deepest child is
-            pathBarScroller.requestChildFocus(pathBar, first);
+            parentPathBarScroller.requestChildFocus(parentPathBar, first);
         }
 
-        if (selectedChild != this.currentSelection) {
-            this.currentSelection = selectedChild;
+        if (selectedChild != this.mCurrentSelection) {
+            this.mCurrentSelection = selectedChild;
         }
         updateStatus();
     }
@@ -347,14 +284,9 @@ public class DirectoryPickerFragment extends DialogFragment implements Queryable
     private Button createPathButton(Directory currentDir) {
         Button result = new Button(getActivity());
         result.setTag(currentDir);
-        result.setText(DirectoryListAdapter.getText(null, currentDir, (FotoViewerParameter.includeSubItems) ? Directory.OPT_SUB_ITEM : Directory.OPT_ITEM ));
+        result.setText(DirectoryListAdapter.getDirectoryDisplayText(null, currentDir, (FotoViewerParameter.includeSubItems) ? Directory.OPT_SUB_ITEM : Directory.OPT_ITEM));
 
-        result.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onPathBarButtonClick((Directory) v.getTag());
-            }
-        });
+        result.setOnClickListener(pathButtonClickHandler);
         return result;
     }
 
@@ -373,6 +305,50 @@ public class DirectoryPickerFragment extends DialogFragment implements Queryable
     }
 
     /**
+     * DirectoryGui-Public api for embedding activity
+     * (Re)-Defines base parameters for Directory Navigation
+     *
+     * @param root
+     * @param dirTypId
+     * @param initialAbsolutePath
+     */
+    @Override
+    public void defineDirectoryNavigation(Directory root, int dirTypId, String initialAbsolutePath) {
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, debugPrefix + " defineDirectoryNavigation : " + initialAbsolutePath);
+        }
+
+        mDirTypId = dirTypId;
+        mNavigation = new DirectoryNavigator(root);
+        mCurrentSelection = root.find(initialAbsolutePath);
+        mNavigation.setCurrentGrandFather(mCurrentSelection);
+
+        // does nothing if OnCreate() has not been called yet
+        reloadTreeViewIfAvailable();
+    }
+
+    /** Does nothing if either OnCreate() or defineDirectoryNavigation() has NOT been called yet */
+    private boolean reloadTreeViewIfAvailable() {
+        if ((treeView != null) && (mNavigation != null)) {
+            mAdapter = new DirectoryListAdapter(this.mContext,
+                    mNavigation, treeView, debugPrefix);
+            treeView.setAdapter(mAdapter);
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Set curent selection to absolutePath
+     *
+     * @param absolutePath
+     */
+    @Override
+    public void navigateTo(String absolutePath) {
+
+    }
+
+    /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
@@ -384,13 +360,13 @@ public class DirectoryPickerFragment extends DialogFragment implements Queryable
      */
     public interface OnDirectoryInteractionListener {
         /** called when user picks a new directory */
-        void onDirectoryPick(Directory newSelection, int queryTypeId);
+        void onDirectoryPick(String selectedAbsolutePath, int queryTypeId);
 
         /** called when user cancels picking of a new directory
          * @param queryTypeId*/
         void onDirectoryCancel(int queryTypeId);
 
         /** called after the selection in tree has changed */
-        void onDirectorySelectionChanged(Directory selectedChild, int queryTypeId);
+        void onDirectorySelectionChanged(String selectedChild, int queryTypeId);
     }
 }

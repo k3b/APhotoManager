@@ -14,30 +14,39 @@ import de.k3b.android.fotoviewer.GalleryActivity;
 import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.R;
 import de.k3b.android.fotoviewer.queries.FotoSql;
-import de.k3b.android.fotoviewer.queries.Queryable;
 import de.k3b.io.Directory;
 
 public class DirPickerTestActivity extends Activity implements DirectoryPickerFragment.OnDirectoryInteractionListener {
 
+    private static final String DBG_PREFIX = "TestGui-";
+
     /** which query is used to get the directories */
     private int dirQueryID = 0;
+
+    /************ life cycle *********************/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dir_choose);
 
-        Queryable query = (Queryable) getFragmentManager().findFragmentById(R.id.galleryCursor);
+        final DirectoryGui gui = (DirectoryGui) getFragmentManager().findFragmentById(R.id.galleryCursor);
 
+        if (gui != null) {
 
-        if (query != null) {
-
-            QueryParameterParcelable currentDirContentQuery = FotoViewerParameter.currentDirContentQuery;
-            query.requery(this, currentDirContentQuery);
+            final QueryParameterParcelable currentDirContentQuery = FotoViewerParameter.currentDirContentQuery;
             this.dirQueryID = (currentDirContentQuery != null) ? currentDirContentQuery.getID() : 0;
+
+            DirectoryLoaderTask loader = new DirectoryLoaderTask(this, DBG_PREFIX) {
+                protected void onPostExecute(Directory result) {
+                    gui.defineDirectoryNavigation(result, currentDirContentQuery.getID(), FotoViewerParameter.currentDirContentValue);
+                }
+            };
+            loader.execute(currentDirContentQuery);
         }
     }
 
+    /************ menu *********************/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -61,17 +70,19 @@ public class DirPickerTestActivity extends Activity implements DirectoryPickerFr
         return super.onOptionsItemSelected(item);
     }
 
+    /************** DirectoryPickerFragment.OnDirectoryInteractionListener callback *******/
     /**
      * called when user selects a new directory
      *
-     * @param newSelection
+     * @param selectedAbsolutePath
      * @param queryTypeId
      */
     @Override
-    public void onDirectoryPick(Directory newSelection, int queryTypeId) {
-        Log.d(Global.LOG_CONTEXT, "Activity-Dir:onOk: " + newSelection);
+    public void onDirectoryPick(String selectedAbsolutePath, int queryTypeId) {
+        if (Global.debugEnabled) {
+            Log.d(Global.LOG_CONTEXT, DBG_PREFIX + "onDirectoryPick: " + selectedAbsolutePath);
+        }
 
-        String selectedAbsolutePath = newSelection.getAbsolute();
         Toast.makeText(this, selectedAbsolutePath, Toast.LENGTH_LONG);
 
         Intent intent = new Intent(this, GalleryActivity.class);
@@ -91,7 +102,10 @@ public class DirPickerTestActivity extends Activity implements DirectoryPickerFr
      */
     @Override
     public void onDirectoryCancel(int queryTypeId) {
-        Log.d(Global.LOG_CONTEXT, "Activity-Dir:onCancel: ");
+        if (Global.debugEnabled) {
+            Log.d(Global.LOG_CONTEXT, DBG_PREFIX + "onDirectoryCancel: ");
+        }
+
 
         Toast.makeText(this, R.string.cancel, Toast.LENGTH_LONG);
     }
@@ -103,7 +117,9 @@ public class DirPickerTestActivity extends Activity implements DirectoryPickerFr
      * @param queryTypeId
      */
     @Override
-    public void onDirectorySelectionChanged(Directory selectedChild, int queryTypeId) {
-
+    public void onDirectorySelectionChanged(String selectedChild, int queryTypeId) {
+        if (Global.debugEnabled) {
+            Log.d(Global.LOG_CONTEXT, DBG_PREFIX + "onDirectorySelectionChanged: " + selectedChild);
+        }
     }
 }
