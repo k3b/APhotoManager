@@ -320,9 +320,25 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
 
         mDirTypId = dirTypId;
         mNavigation = new DirectoryNavigator(root);
-        mCurrentSelection = root.find(initialAbsolutePath);
-        mNavigation.setCurrentGrandFather(mCurrentSelection);
 
+        navigateTo(initialAbsolutePath);
+    }
+
+    /**
+     * Set curent selection to absolutePath
+     *
+     * @param absolutePath
+     */
+    @Override
+    public void navigateTo(String absolutePath) {
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, debugPrefix + " navigateTo : " + absolutePath);
+        }
+
+        if (mNavigation != null) {
+            mCurrentSelection = mNavigation.getRoot().find(absolutePath);
+            mNavigation.setCurrentGrandFather(mCurrentSelection);
+        }
         // does nothing if OnCreate() has not been called yet
         reloadTreeViewIfAvailable();
     }
@@ -336,16 +352,6 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             return true;
         }
         return false;
-    }
-    
-    /**
-     * Set curent selection to absolutePath
-     *
-     * @param absolutePath
-     */
-    @Override
-    public void navigateTo(String absolutePath) {
-
     }
 
     /**
