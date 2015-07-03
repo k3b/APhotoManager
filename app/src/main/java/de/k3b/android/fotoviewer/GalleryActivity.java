@@ -36,6 +36,7 @@ public class GalleryActivity extends Activity implements
     /** one of the FotoSql.QUERY_TYPE_xxx values */
     private int mDirQueryID = 0;
     private Directory mDirectoryRoot = null;
+    private String mCurrentPath = "/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,7 +113,7 @@ public class GalleryActivity extends Activity implements
     private void openNavigator() {
         final FragmentManager manager = getFragmentManager();
         DirectoryPickerFragment dir = new DirectoryPickerFragment(); // (DirectoryPickerFragment) manager.findFragmentByTag(DLG_NAVIGATOR);
-        dir.defineDirectoryNavigation(mDirectoryRoot, mDirQueryID, "/");
+        dir.defineDirectoryNavigation(mDirectoryRoot, mDirQueryID, mCurrentPath);
 
         dir.show(manager, DLG_NAVIGATOR);
 
@@ -197,16 +198,20 @@ public class GalleryActivity extends Activity implements
     }
 
     private void navigateTo(String selectedAbsolutePath, int queryTypeId) {
-        Log.d(Global.LOG_CONTEXT, "GalleryActivity.navigateTo " + selectedAbsolutePath);
+        if (mCurrentPath.compareTo(selectedAbsolutePath) != 0) {
+            mCurrentPath = selectedAbsolutePath;
+            Log.d(Global.LOG_CONTEXT, "GalleryActivity.navigateTo " + selectedAbsolutePath + " from " + mCurrentPath);
 
-        Toast.makeText(this, selectedAbsolutePath, Toast.LENGTH_LONG);
+            Toast.makeText(this, selectedAbsolutePath, Toast.LENGTH_LONG);
 
-        Intent intent = new Intent(this, GalleryActivity.class);
+            QueryParameterParcelable newQuery = new QueryParameterParcelable(this.mGalleryContentQuery);
+            FotoSql.addPathWhere(newQuery, selectedAbsolutePath, queryTypeId);
 
-        QueryParameterParcelable newQuery = new QueryParameterParcelable(this.mGalleryContentQuery);
-        FotoSql.addPathWhere(newQuery, selectedAbsolutePath, queryTypeId);
-
-        this.mGalleryGui.requery(this, newQuery);
+            this.mGalleryGui.requery(this, newQuery);
+            if (mDirGui != null) {
+                mDirGui.navigateTo(selectedAbsolutePath);
+            }
+        }
     }
 
     private void setTitle(int id, String description) {

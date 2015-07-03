@@ -57,12 +57,40 @@ public class DirectoryNavigatorTests {
     }
 
     @Test
-    public void testNavigation() {
+    public void testNavigationGrandFather() {
         sut.setCurrentGrandFather(sut.getGroup(1));
         Assert.assertEquals("p_1_2_3", sut.getChild(2,3).getRelPath());
     }
 
-    // root[3][4][5]
+    @Test
+    public void testSubChildNotFound() {
+        // valid testdata [0..2][0..3][0..4]
+        Assert.assertEquals(null, sut.getSubChild(-1));
+        Assert.assertEquals(null, sut.getSubChild(3));
+        Assert.assertEquals(null, sut.getSubChild(1, 2, 5));
+        Assert.assertEquals("only 3 levels exist", null, sut.getSubChild(1, 2, 3, 4));
+    }
+
+    @Test
+    public void testSubChildFound() {
+        Assert.assertEquals("minimum", "p_0_0_0", sut.getSubChild(0,0,0).getRelPath());
+        Assert.assertEquals("in between", "p_1_2_3", sut.getSubChild(1, 2, 3).getRelPath());
+        Assert.assertEquals("maximum", "p_2_3_4", sut.getSubChild(2,3,4).getRelPath());
+    }
+
+    @Test
+    public void testNavigateTo() {
+        Directory root = sut.getRoot();
+        Directory subChild1 = sut.getSubChild(1);
+        Directory subChild12 = sut.getSubChild(1,2);
+        Directory subChild123 = sut.getSubChild(1,2,3);
+        Assert.assertEquals("not found", root, sut.getNavigationGrandparent(null));
+        Assert.assertEquals("first level", root, sut.getNavigationGrandparent(subChild1));
+        Assert.assertEquals("sub level with children", subChild1, sut.getNavigationGrandparent(subChild12));
+        Assert.assertEquals("sub level without children", subChild1, sut.getNavigationGrandparent(subChild123));
+    }
+
+    // root[0..2][0..3][0..4]
     private Directory createTestData() {
         Directory root = new Directory("", null, 0);
 

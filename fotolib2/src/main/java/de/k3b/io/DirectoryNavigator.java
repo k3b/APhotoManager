@@ -1,5 +1,7 @@
 package de.k3b.io;
 
+import java.util.List;
+
 /**
  * android independant navigation for andoid-s ExpandableListView(Adapter).
  *
@@ -8,6 +10,7 @@ package de.k3b.io;
 public class DirectoryNavigator implements IExpandableListViewNavigation<Directory, Directory> {
 
     private final Directory root;
+    private Directory currentSelection = null;
 
     /** hierachy: root -> .... -> currentGrandFather -> group -> child -> ... */
     private Directory currentGrandFather;
@@ -15,6 +18,10 @@ public class DirectoryNavigator implements IExpandableListViewNavigation<Directo
     public DirectoryNavigator(Directory root) {
         this.root = root;
         this.setCurrentGrandFather(root);
+    }
+
+    public Directory getRoot() {
+        return root;
     }
 
     /**
@@ -60,7 +67,51 @@ public class DirectoryNavigator implements IExpandableListViewNavigation<Directo
         this.currentGrandFather = currentGrandFather;
     }
 
-    public Directory getRoot() {
-        return root;
+    public void navigateTo(Directory newSelection) {
+        Directory navigationGrandparent = getNavigationGrandparent(newSelection);
+        setCurrentGrandFather(navigationGrandparent);
+        setCurrentSelection(newSelection);
+    }
+
+    /** direct access from room via index. return null if index does not exist. */
+    public Directory getSubChild(int... indexes) {
+        Directory found = this.getRoot();
+        if (indexes != null) {
+            for (int index : indexes) {
+                List<Directory> children = (found != null) ? found.getChildren() : null;
+                int childCount = (children != null) ? children.size() : 0;
+                if ((index < 0) || (index >= childCount)) {
+                    return null;
+                }
+                found = children.get(index);
+            }
+        }
+
+        return found;
+    }
+
+    /** package to allow unit testing: calclulate Grandparent for navigateTo */
+    Directory getNavigationGrandparent(Directory newSelection) {
+        if (newSelection != null) {
+            Directory parent = newSelection.getParent();
+            if (parent != null) {
+                if (Directory.getChildCount(newSelection) > 0) {
+                    return parent;
+                }
+                Directory grandparent = parent.getParent();
+                if (grandparent != null) {
+                    return grandparent;
+                }
+            }
+        }
+        return getRoot();
+    }
+
+    public Directory getCurrentSelection() {
+        return currentSelection;
+    }
+
+    public void setCurrentSelection(Directory currentSelection) {
+        this.currentSelection = currentSelection;
     }
 }

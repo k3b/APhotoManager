@@ -15,6 +15,8 @@ import android.widget.GridView;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 
+import java.util.List;
+
 import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.directory.DirectoryGui;
 import de.k3b.android.fotoviewer.directory.DirectoryPickerFragment;
@@ -241,9 +243,12 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             // scroll to right where deepest child is
             parentPathBarScroller.requestChildFocus(parentPathBar, first);
 
-            for (Directory child : selectedChild.getChildren()) {
-                Button button = createPathButton(child);
-                childPathBar.addView(button);
+            List<Directory> children = selectedChild.getChildren();
+            if (children != null) {
+                for (Directory child : children) {
+                    Button button = createPathButton(child);
+                    childPathBar.addView(button);
+                }
             }
         }
     }

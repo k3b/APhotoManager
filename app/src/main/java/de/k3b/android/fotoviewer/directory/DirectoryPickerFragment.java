@@ -337,7 +337,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
 
         if (mNavigation != null) {
             mCurrentSelection = mNavigation.getRoot().find(absolutePath);
-            mNavigation.setCurrentGrandFather(mCurrentSelection);
+            mNavigation.navigateTo(mCurrentSelection);
         }
         // does nothing if OnCreate() has not been called yet
         reloadTreeViewIfAvailable();

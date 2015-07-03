@@ -2,15 +2,11 @@ FotoGallery\ReadMe.txt"
 
 
 todo
+	bug: DirectoryPickerFragment#navigateTo not working as expected yet
 
-	api
-		ziel nur eine instance von rootDirectory in activit
-		einheitliche schnittstelle DirectoryPicerFragment/GalleryCursorFragment
-			    public void defineDirectoryNavigation(Directory root, int dirTypId, String initialAbsolutePath) {
+	bug: warum mehrfaches reload im GalleryFragment after pressing navigation button
+	
 
-		DirectoryPicerFragment
-			DirectoryLoader.getDirectories outside fragment/inside activity?
-			requery obsolete?
 
 	> GalleryActivity: new action "navigator" to open DialogFragment to choose directory
 		Nagvigator (rename from DirectoryFragment) 
