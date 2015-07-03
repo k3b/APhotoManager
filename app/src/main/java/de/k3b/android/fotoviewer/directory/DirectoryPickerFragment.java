@@ -290,20 +290,6 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         return result;
     }
 
-    /** reload tree to new newGrandParent by preserving selection */
-    private void navigateTo(int newGroupSelection, Directory newGrandParent) {
-        if (newGrandParent != null) {
-            Log.d(TAG, debugPrefix + "navigateTo(" +
-                    newGrandParent.getAbsolute() + ")");
-            mNavigation.setCurrentGrandFather(newGrandParent);
-            this.treeView.setAdapter(mAdapter);
-            if (newGroupSelection >= 0) {
-                /// find selectedChild as new selectedGroup and expand it
-                treeView.expandGroup(newGroupSelection, true);
-            }
-        }
-    }
-
     /**
      * DirectoryGui-Public api for embedding activity
      * (Re)-Defines base parameters for Directory Navigation
@@ -324,6 +310,20 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         navigateTo(initialAbsolutePath);
     }
 
+    /** reload tree to new newGrandParent by preserving selection */
+    private void navigateTo(int newGroupSelection, Directory newGrandParent) {
+        if (newGrandParent != null) {
+            Log.d(TAG, debugPrefix + "navigateTo(" +
+                    newGrandParent.getAbsolute() + ")");
+            mNavigation.setCurrentGrandFather(newGrandParent);
+            this.treeView.setAdapter(mAdapter);
+            if (newGroupSelection >= 0) {
+                /// find selectedChild as new selectedGroup and expand it
+                treeView.expandGroup(newGroupSelection, true);
+            }
+        }
+    }
+
     /**
      * Set curent selection to absolutePath
      *
@@ -335,20 +335,31 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             Log.i(Global.LOG_CONTEXT, debugPrefix + " navigateTo : " + absolutePath);
         }
 
-        if (mNavigation != null) {
+        if ((mNavigation != null) && (absolutePath != null)) {
             mCurrentSelection = mNavigation.getRoot().find(absolutePath);
             mNavigation.navigateTo(mCurrentSelection);
         }
+
         // does nothing if OnCreate() has not been called yet
+
         reloadTreeViewIfAvailable();
     }
 
     /** Does nothing if either OnCreate() or defineDirectoryNavigation() has NOT been called yet */
     private boolean reloadTreeViewIfAvailable() {
         if ((treeView != null) && (mNavigation != null)) {
-            mAdapter = new DirectoryListAdapter(this.mContext,
-                    mNavigation, treeView, debugPrefix);
+            if (mAdapter == null) {
+                mAdapter = new DirectoryListAdapter(this.mContext,
+                        mNavigation, treeView, debugPrefix);
+            }
             treeView.setAdapter(mAdapter);
+
+            int g = mNavigation.getLastNavigateToGroupPosition();
+            if (g != DirectoryNavigator.UNDEFINED) {
+                treeView.expandGroup(g, true);
+                updateParentPathBar(mNavigation.getCurrentSelection());
+            }
+
             return true;
         }
         return false;

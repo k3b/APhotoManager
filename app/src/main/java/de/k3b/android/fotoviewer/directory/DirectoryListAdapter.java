@@ -32,7 +32,7 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
 
 
     public DirectoryListAdapter(Context context, IExpandableListViewNavigation<Directory, Directory> parent, ExpandableListView accordion, String name) {
-        debugPrefix = "GalleryCursorAdapter#" + (id++) + "@" + name + " ";
+        debugPrefix = "DirectoryListAdapter#" + (id++) + "@" + name + " ";
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, debugPrefix + "()");
         }

@@ -91,15 +91,6 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
          * to onCreateLoader().
          */
 
-        if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, debugPrefix + "requery " +
-                    QueryParameter.toString(from, // Table to query
-                            sqlProjection,             // Projection to return
-                            sqlWhereStatement,        // No selection clause
-                            sqlWhereParameters,       // No selection arguments
-                            sqlSortOrder));
-        }
-
         if (SYNC) {
             // for debugging
             Cursor result = context.getContentResolver().query(Uri.parse(from), // Table to query

@@ -9,8 +9,12 @@ import java.util.List;
  */
 public class DirectoryNavigator implements IExpandableListViewNavigation<Directory, Directory> {
 
+    public static final int UNDEFINED = -1;
+
     private final Directory root;
     private Directory currentSelection = null;
+    private int mLastNavigateToGroupPosition = UNDEFINED;
+    private int mLastNavigateToChildPosition = UNDEFINED;
 
     /** hierachy: root -> .... -> currentGrandFather -> group -> child -> ... */
     private Directory currentGrandFather;
@@ -73,6 +77,30 @@ public class DirectoryNavigator implements IExpandableListViewNavigation<Directo
         setCurrentSelection(newSelection);
     }
 
+    /** package to allow unit testing: calclulate Grandparent for navigateTo */
+    Directory getNavigationGrandparent(Directory newSelection) {
+        if (newSelection != null) {
+            Directory parent = newSelection.getParent();
+            if (parent != null) {
+                if (Directory.getChildCount(newSelection) > 0) {
+                    this.mLastNavigateToGroupPosition = parent.getChildren().indexOf(newSelection);
+                    this.mLastNavigateToChildPosition = UNDEFINED;
+                    return parent;
+                }
+                Directory grandparent = parent.getParent();
+                if (grandparent != null) {
+                    this.mLastNavigateToGroupPosition = grandparent.getChildren().indexOf(parent);
+                    this.mLastNavigateToChildPosition = parent.getChildren().indexOf(newSelection);
+                    return grandparent;
+                }
+            }
+        }
+        mLastNavigateToGroupPosition = UNDEFINED;
+        mLastNavigateToChildPosition = UNDEFINED;
+
+        return getRoot();
+    }
+
     /** direct access from room via index. return null if index does not exist. */
     public Directory getSubChild(int... indexes) {
         Directory found = this.getRoot();
@@ -90,28 +118,21 @@ public class DirectoryNavigator implements IExpandableListViewNavigation<Directo
         return found;
     }
 
-    /** package to allow unit testing: calclulate Grandparent for navigateTo */
-    Directory getNavigationGrandparent(Directory newSelection) {
-        if (newSelection != null) {
-            Directory parent = newSelection.getParent();
-            if (parent != null) {
-                if (Directory.getChildCount(newSelection) > 0) {
-                    return parent;
-                }
-                Directory grandparent = parent.getParent();
-                if (grandparent != null) {
-                    return grandparent;
-                }
-            }
-        }
-        return getRoot();
-    }
-
     public Directory getCurrentSelection() {
         return currentSelection;
     }
 
     public void setCurrentSelection(Directory currentSelection) {
         this.currentSelection = currentSelection;
+    }
+
+    /** last navigateTo() treeview position */
+    public int getLastNavigateToGroupPosition() {
+        return mLastNavigateToGroupPosition;
+    }
+
+    /** last navigateTo() treeview position */
+    public int getLastNavigateToChildPosition() {
+        return mLastNavigateToChildPosition;
     }
 }

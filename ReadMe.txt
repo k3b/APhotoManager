@@ -21,7 +21,8 @@ todo
 			mode Navigagor+Gallery
 			mode Gallery+NagvigatorDialog+cmdNavigator(menu)
 		
-
+Architektur:
+	die Activity ist zuständig für das filtern des gallery cursors (und nicht mehr das fragment)
 
 gui
 	Action (menu)

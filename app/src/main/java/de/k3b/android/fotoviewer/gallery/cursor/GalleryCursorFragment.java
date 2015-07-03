@@ -60,10 +60,10 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private GridView galleryView;
     private GalleryCursorAdapter galleryAdapter = null;
 
-    private DirectoryPickerFragment.OnDirectoryInteractionListener mDirectoryListener;
-
     private OnGalleryInteractionListener mGalleryListener;
-    private QueryParameterParcelable mParameters;
+    private QueryParameterParcelable mGalleryContentQuery;
+
+    private DirectoryPickerFragment.OnDirectoryInteractionListener mDirectoryListener;
 
     /**************** construction ******************/
     /**
@@ -110,8 +110,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         View result = inflater.inflate(R.layout.fragment_gallery, container, false);
         galleryView = (GridView) result.findViewById(R.id.gridView);
 
-        galleryAdapter = new GalleryCursorAdapter(this.getActivity(), calculateEffectiveQueryParameters(), debugPrefix);
-        // galleryAdapter.requery(this.getActivity(),calculateEffectiveQueryParameters());
+        galleryAdapter = new GalleryCursorAdapter(this.getActivity(), mGalleryContentQuery, debugPrefix);
         galleryView.setAdapter(galleryAdapter);
 
         galleryView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -166,13 +165,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             Log.i(Global.LOG_CONTEXT, debugPrefix + "requery " + ((parameters != null) ? parameters.toSqlString() : null));
         }
 
-        this.mParameters = parameters;
+        this.mGalleryContentQuery = parameters;
 
-        requeryGallery();
-    }
-
-    private void requeryGallery() {
-        galleryAdapter.requery(this.getActivity(), calculateEffectiveQueryParameters());
+        galleryAdapter.requery(this.getActivity(), mGalleryContentQuery);
     }
 
     @Override
@@ -183,13 +178,13 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     /*********************** local helper *******************************************/
     /** an Image in the FotoGallery was clicked */
     private void onGalleryImageClick(final GalleryCursorAdapter.GridCellViewHolder holder) {
-        if (mGalleryListener != null) {
-            QueryParameterParcelable result = this.calculateEffectiveQueryParameters();
+        if ((mGalleryListener != null) && (mGalleryContentQuery != null)) {
+            QueryParameterParcelable imageQuery = new QueryParameterParcelable(mGalleryContentQuery);
 
             if (holder.filter != null) {
-                FotoSql.addWhereFilter(result, holder.filter);
+                FotoSql.addWhereFilter(imageQuery, holder.filter);
             }
-            mGalleryListener.onGalleryImageClick(null, getUri(holder.imageID), holder.description.getText().toString(), result);
+            mGalleryListener.onGalleryImageClick(null, getUri(holder.imageID), holder.description.getText().toString(), imageQuery);
         }
     }
 
@@ -202,14 +197,14 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     /****************** path navigation *************************/
 
     private Directory mDirectoryRoot = null;
-    private int mDirTypId = 0;
+    private int mDirQueryID = 0;
     private String mCurrentPath = null;
 
     /** Defines Directory Navigation */
     @Override
     public void defineDirectoryNavigation(Directory root, int dirTypId, String initialAbsolutePath) {
         mDirectoryRoot = root;
-        mDirTypId = dirTypId;
+        mDirQueryID = dirTypId;
         navigateTo(initialAbsolutePath);
     }
 
@@ -220,7 +215,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         if (mDirectoryRoot != null) {
             reload(mDirectoryRoot.find(absolutePath));
         }
-        requeryGallery();
+        // requeryGallery(); done by owning activity
     }
 
     private void reload(Directory selectedChild) {
@@ -274,7 +269,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private void onPathButtonClick(Directory newSelection) {
         if ((mDirectoryListener != null) && (newSelection != null)) {
             mCurrentPath = newSelection.getAbsolute();
-            mDirectoryListener.onDirectoryPick(mCurrentPath, this.mDirTypId);
+            mDirectoryListener.onDirectoryPick(mCurrentPath, this.mDirQueryID);
         }
     }
 
@@ -285,16 +280,5 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         result.append(directory.getRelPath()).append(" ");
         Directory.appendCount(result, directory, options);
         return result.toString();
-    }
-
-    /** combine root-query plus current selected directory */
-    private QueryParameterParcelable calculateEffectiveQueryParameters() {
-        if (mParameters == null) return null;
-        QueryParameterParcelable result = new QueryParameterParcelable(mParameters);
-
-        if ((mDirTypId != 0) && (mCurrentPath != null)) {
-            FotoSql.addPathWhere(result, mCurrentPath, mDirTypId);
-        }
-        return result;
     }
 }

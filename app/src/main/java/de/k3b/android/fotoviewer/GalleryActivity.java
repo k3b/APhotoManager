@@ -29,14 +29,15 @@ public class GalleryActivity extends Activity implements
     private static final String DLG_NAVIGATOR = "navigator";
 
     private QueryParameterParcelable mGalleryContentQuery = null;
-    private boolean mHasEmbeddedDirPicker = false;
     private Queryable mGalleryGui;
-    private DirectoryGui mDirGui;
 
+    private boolean mHasEmbeddedDirPicker = false;
+    private DirectoryGui mDirGui;
     /** one of the FotoSql.QUERY_TYPE_xxx values */
     private int mDirQueryID = 0;
-    private Directory mDirectoryRoot = null;
     private String mCurrentPath = "/";
+
+    private Directory mDirectoryRoot = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,10 +50,6 @@ public class GalleryActivity extends Activity implements
         setTitle(mGalleryContentQuery.getID(), getIntent().getStringExtra(Intent.EXTRA_TITLE));
 
         mGalleryGui = (Queryable) getFragmentManager().findFragmentById(R.id.galleryCursor);
-
-        if (mGalleryGui != null) {
-            mGalleryGui.requery(this, mGalleryContentQuery);
-        }
 
         // on tablet seperate dir navigator fragment
         mDirGui = (DirectoryGui) getFragmentManager().findFragmentById(R.id.directoryFragment);
@@ -71,13 +68,7 @@ public class GalleryActivity extends Activity implements
             }
         };
         loader.execute(currentDirContentQuery);
-    }
-
-    private void onDirectoryDataLoadComplete(Directory directoryRoot) {
-        mDirectoryRoot = directoryRoot;
-        if (mDirGui != null) {
-            mDirGui.defineDirectoryNavigation(directoryRoot, mDirQueryID, FotoViewerParameter.currentDirContentValue);
-        }
+        reloadGui();
     }
 
     @Override
@@ -199,19 +190,42 @@ public class GalleryActivity extends Activity implements
 
     private void navigateTo(String selectedAbsolutePath, int queryTypeId) {
         if (mCurrentPath.compareTo(selectedAbsolutePath) != 0) {
-            mCurrentPath = selectedAbsolutePath;
             Log.d(Global.LOG_CONTEXT, "GalleryActivity.navigateTo " + selectedAbsolutePath + " from " + mCurrentPath);
+            mCurrentPath = selectedAbsolutePath;
+            mDirQueryID = queryTypeId;
 
             Toast.makeText(this, selectedAbsolutePath, Toast.LENGTH_LONG);
 
-            QueryParameterParcelable newQuery = new QueryParameterParcelable(this.mGalleryContentQuery);
-            FotoSql.addPathWhere(newQuery, selectedAbsolutePath, queryTypeId);
-
-            this.mGalleryGui.requery(this, newQuery);
-            if (mDirGui != null) {
-                mDirGui.navigateTo(selectedAbsolutePath);
-            }
+            reloadGui();
         }
+    }
+
+    private void reloadGui() {
+        if ((mGalleryGui != null) && (mGalleryContentQuery != null)) {
+            this.mGalleryGui.requery(this, calculateEffectiveGalleryContentQuery());
+        }
+        if ((mDirGui != null) && (mCurrentPath != null)) {
+            mDirGui.navigateTo(mCurrentPath);
+        }
+    }
+
+    private void onDirectoryDataLoadComplete(Directory directoryRoot) {
+        mDirectoryRoot = directoryRoot;
+        if ((mDirGui != null) && (mCurrentPath != null)) {
+            mDirGui.defineDirectoryNavigation(directoryRoot, mDirQueryID, mCurrentPath);
+        }
+    }
+
+
+    /** combine root-query plus current selected directory */
+    private QueryParameterParcelable calculateEffectiveGalleryContentQuery() {
+        if (mGalleryContentQuery == null) return null;
+        QueryParameterParcelable result = new QueryParameterParcelable(mGalleryContentQuery);
+
+        if ((mDirQueryID != 0) && (mCurrentPath != null)) {
+            FotoSql.addPathWhere(result, mCurrentPath, mDirQueryID);
+        }
+        return result;
     }
 
     private void setTitle(int id, String description) {
