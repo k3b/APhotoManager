@@ -60,7 +60,7 @@ public class FotoSql {
                     "max(" + SQL_COL_GPS + ") AS " + SQL_COL_GPS)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
             .addGroupBy(SQL_EXPR_FOLDER)
-            .addOrderBy(SQL_EXPR_FOLDER)
+            .addOrderBy("length(" + SQL_EXPR_FOLDER + ")")
             ;
     public static final QueryParameterParcelable queryDetail = (QueryParameterParcelable) new QueryParameterParcelable()
             .setID(QUERY_TYPE_GALLERY)

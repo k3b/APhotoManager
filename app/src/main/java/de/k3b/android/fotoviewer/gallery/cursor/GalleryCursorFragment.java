@@ -125,6 +125,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         this.childPathBar = (LinearLayout) result.findViewById(R.id.child_owner);
         this.childPathBarScroller = (HorizontalScrollView) result.findViewById(R.id.child_scroller);
 
+        reloadDirGuiIfAvailable();
+
         return result;
     }
 
@@ -211,18 +213,23 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     /** Set curent selection to absolutePath */
     @Override
     public void navigateTo(String absolutePath) {
-        mCurrentPath = absolutePath;
-        if (mDirectoryRoot != null) {
-            reload(mDirectoryRoot.find(absolutePath));
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, debugPrefix + " navigateTo : " + absolutePath);
         }
+
+        mCurrentPath = absolutePath;
+        reloadDirGuiIfAvailable();
         // requeryGallery(); done by owning activity
     }
 
-    private void reload(Directory selectedChild) {
-        parentPathBar.removeAllViews();
-        childPathBar.removeAllViews();
+    private void reloadDirGuiIfAvailable() {
+        if ((mDirectoryRoot != null) && (mCurrentPath != null) && (parentPathBar != null)) {
 
-        if (selectedChild != null) {
+            parentPathBar.removeAllViews();
+            childPathBar.removeAllViews();
+
+            Directory selectedChild = mDirectoryRoot.find(mCurrentPath);
+            if (selectedChild == null) selectedChild = mDirectoryRoot;
 
             Button first = null;
             Directory current = selectedChild;
@@ -236,7 +243,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             }
 
             // scroll to right where deepest child is
-            parentPathBarScroller.requestChildFocus(parentPathBar, first);
+            if (first != null) parentPathBarScroller.requestChildFocus(parentPathBar, first);
 
             List<Directory> children = selectedChild.getChildren();
             if (children != null) {
