@@ -56,7 +56,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     private int mDirTypId;
 
     // api to fragment owner
-    private OnDirectoryInteractionListener mListener;
+    private OnDirectoryInteractionListener mDirectoryListener;
 
     // false embedded fragment; true dialog
     private boolean asDialog = false;
@@ -132,7 +132,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             public void onClick(View v) {
                 Log.d(Global.LOG_CONTEXT, debugPrefix + "onOk: " + mCurrentSelection);
                 if (mCurrentSelection != null) {
-                    mListener.onDirectoryPick(mCurrentSelection.getAbsolute()
+                    mDirectoryListener.onDirectoryPick(mCurrentSelection.getAbsolute()
                             , mDirTypId);
                     dismiss();
                 }
@@ -144,7 +144,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             @Override
             public void onClick(View v) {
                 Log.d(Global.LOG_CONTEXT, debugPrefix + "onCancel: " + mCurrentSelection);
-                mListener.onDirectoryCancel(mDirTypId);
+                mDirectoryListener.onDirectoryCancel(mDirTypId);
                 dismiss();
             }
         });
@@ -173,7 +173,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            mListener = (OnDirectoryInteractionListener) activity;
+            mDirectoryListener = (OnDirectoryInteractionListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement OnDirectoryInteractionListener");
@@ -183,7 +183,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+        mDirectoryListener = null;
     }
 
     /*********************** gui interaction *******************************************/
@@ -223,7 +223,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     }
 
     private void notifySelectionChanged(Directory selectedChild) {
-        if ((mListener != null) && (selectedChild != null)) mListener.onDirectorySelectionChanged(selectedChild.getAbsolute(), mDirTypId);
+        if ((mDirectoryListener != null) && (selectedChild != null)) mDirectoryListener.onDirectorySelectionChanged(selectedChild.getAbsolute(), mDirTypId);
     }
 
     private void updateStatus() {

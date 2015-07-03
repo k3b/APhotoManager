@@ -16,4 +16,7 @@ public class FotoViewerParameter {
     public static boolean includeSubItems = true;
 
     public static String currentDirContentValue = "/";
+
+    /** getFrom data for gallery */
+    public static QueryParameterParcelable currentGalleryContentQuery = FotoSql.queryDetail;
 }

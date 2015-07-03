@@ -12,35 +12,70 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import de.k3b.android.fotoviewer.directory.DirectoryGui;
+import de.k3b.android.fotoviewer.directory.DirectoryLoaderTask;
 import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
 import de.k3b.android.fotoviewer.directory.DirectoryPickerFragment;
 import de.k3b.android.fotoviewer.queries.FotoSql;
 import de.k3b.android.fotoviewer.queries.FotoViewerParameter;
 import de.k3b.android.fotoviewer.queries.Queryable;
+import de.k3b.io.Directory;
 
 public class GalleryActivity extends Activity implements
         OnGalleryInteractionListener, DirectoryPickerFragment.OnDirectoryInteractionListener {
+    private static final String DBG_PREFIX = "Gal-";
 
     public static final String EXTRA_QUERY = "gallery";
     private static final String DLG_NAVIGATOR = "navigator";
-    private QueryParameterParcelable parameters = null;
-    private boolean hasEmbeddedDirPicker = false;
-    private Queryable gallery;
+
+    private QueryParameterParcelable mGalleryContentQuery = null;
+    private boolean mHasEmbeddedDirPicker = false;
+    private Queryable mGalleryGui;
+    private DirectoryGui mDirGui;
+
+    /** one of the FotoSql.QUERY_TYPE_xxx values */
+    private int mDirQueryID = 0;
+    private Directory mDirectoryRoot = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gallery); // .gallery_activity);
 
-        this.parameters = getIntent().getParcelableExtra(EXTRA_QUERY);
-        if (parameters == null) parameters = FotoViewerParameter.currentDirContentQuery;
+        this.mGalleryContentQuery = getIntent().getParcelableExtra(EXTRA_QUERY);
+        if (mGalleryContentQuery == null) mGalleryContentQuery = FotoViewerParameter.currentGalleryContentQuery;
 
-        setTitle(parameters.getID(), getIntent().getStringExtra(Intent.EXTRA_TITLE));
+        setTitle(mGalleryContentQuery.getID(), getIntent().getStringExtra(Intent.EXTRA_TITLE));
 
-        gallery = (Queryable) getFragmentManager().findFragmentById(R.id.galleryCursor);
+        mGalleryGui = (Queryable) getFragmentManager().findFragmentById(R.id.galleryCursor);
 
-        if (gallery != null) {
-            gallery.requery(this,parameters);
+        if (mGalleryGui != null) {
+            mGalleryGui.requery(this, mGalleryContentQuery);
+        }
+
+        // on tablet seperate dir navigator fragment
+        mDirGui = (DirectoryGui) getFragmentManager().findFragmentById(R.id.directoryFragment);
+
+        if (mDirGui == null) {
+            // on small screen/cellphone DirectoryGui is part of gallery
+            mDirGui = (DirectoryGui) getFragmentManager().findFragmentById(R.id.galleryCursor);
+        }
+
+        // load directoryRoot in background
+        final QueryParameterParcelable currentDirContentQuery = FotoViewerParameter.currentDirContentQuery;
+        this.mDirQueryID = (currentDirContentQuery != null) ? currentDirContentQuery.getID() : 0;
+        DirectoryLoaderTask loader = new DirectoryLoaderTask(this, DBG_PREFIX) {
+            protected void onPostExecute(Directory directoryRoot) {
+                onDirectoryDataLoadComplete(directoryRoot);
+            }
+        };
+        loader.execute(currentDirContentQuery);
+    }
+
+    private void onDirectoryDataLoadComplete(Directory directoryRoot) {
+        mDirectoryRoot = directoryRoot;
+        if (mDirGui != null) {
+            mDirGui.defineDirectoryNavigation(directoryRoot, mDirQueryID, FotoViewerParameter.currentDirContentValue);
         }
     }
 
@@ -77,6 +112,7 @@ public class GalleryActivity extends Activity implements
     private void openNavigator() {
         final FragmentManager manager = getFragmentManager();
         DirectoryPickerFragment dir = new DirectoryPickerFragment(); // (DirectoryPickerFragment) manager.findFragmentByTag(DLG_NAVIGATOR);
+        dir.defineDirectoryNavigation(mDirectoryRoot, mDirQueryID, "/");
 
         dir.show(manager, DLG_NAVIGATOR);
 
@@ -97,7 +133,7 @@ public class GalleryActivity extends Activity implements
     @Override
     public void onGalleryImageClick(Bitmap image, Uri imageUri, String description, QueryParameterParcelable parentQuery) {
         Intent intent;
-        if ((parentQuery != null) && (parentQuery.getID() == R.string.directory_gallery) ) {
+        if ((parentQuery != null) && (parentQuery.getID() == FotoSql.QUERY_TYPE_GROUP_ALBUM) ) {
             //Create intent
             intent = new Intent(this, this.getClass());
 
@@ -138,7 +174,7 @@ public class GalleryActivity extends Activity implements
      */
     @Override
     public void onDirectoryPick(String selectedAbsolutePath, int queryTypeId) {
-        if (!this.hasEmbeddedDirPicker) {
+        if (!this.mHasEmbeddedDirPicker) {
             navigateTo(selectedAbsolutePath, queryTypeId);
         }
     }
@@ -155,7 +191,7 @@ public class GalleryActivity extends Activity implements
     /** called after the selection in tree has changed */
     @Override
     public void onDirectorySelectionChanged(String selectedAbsolutePath, int queryTypeId) {
-        if (this.hasEmbeddedDirPicker) {
+        if (this.mHasEmbeddedDirPicker) {
             navigateTo(selectedAbsolutePath, queryTypeId);
         }
     }
@@ -167,10 +203,10 @@ public class GalleryActivity extends Activity implements
 
         Intent intent = new Intent(this, GalleryActivity.class);
 
-        QueryParameterParcelable newQuery = new QueryParameterParcelable(this.parameters);
+        QueryParameterParcelable newQuery = new QueryParameterParcelable(this.mGalleryContentQuery);
         FotoSql.addPathWhere(newQuery, selectedAbsolutePath, queryTypeId);
 
-        this.gallery.requery(this, newQuery);
+        this.mGalleryGui.requery(this, newQuery);
     }
 
     private void setTitle(int id, String description) {

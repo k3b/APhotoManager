@@ -19,6 +19,10 @@ public class FotoSql {
 //    public static final String SQL_EXPR_DAY = "(ROUND("
 //            + MediaStore.Images.Media.DATE_TAKEN + "/" + PER_DAY + ") * " + PER_DAY + ")";
 
+    public static final int QUERY_TYPE_GALLERY = R.string.foto_gallery;
+    public static final int QUERY_TYPE_GROUP_DATE = R.string.date_gallery;
+    public static final int QUERY_TYPE_GROUP_ALBUM = R.string.directory_gallery;
+
     public static final Uri SQL_TABLE_EXTERNAL_CONTENT_URI = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
     // columns that must be avaulable in the Cursor
@@ -32,9 +36,9 @@ public class FotoSql {
 
     // same format as dir. i.e. description='/2014/12/24/' or '/mnt/sdcard/pictures/'
     public static final String SQL_EXPR_DAY = "strftime('/%Y/%m/%d/', " + DATE_TAKEN + " /1000, 'unixepoch', 'localtime')";
-	
+
     public static final QueryParameterParcelable queryGroupByDate = (QueryParameterParcelable) new QueryParameterParcelable()
-            .setID(R.string.date_gallery)
+            .setID(QUERY_TYPE_GROUP_DATE)
             .addColumn(
                     "min(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
                     SQL_EXPR_DAY + " AS " + SQL_COL_DISPLAY_TEXT,
@@ -48,7 +52,7 @@ public class FotoSql {
 
     public static final String SQL_EXPR_FOLDER = "substr(" + SQL_COL_PATH + ",1,length(" + SQL_COL_PATH + ") - length(" + MediaStore.Images.Media.DISPLAY_NAME + "))";
     public static final QueryParameterParcelable queryGroupByDir = (QueryParameterParcelable) new QueryParameterParcelable()
-            .setID(R.string.directory_gallery)
+            .setID(QUERY_TYPE_GROUP_ALBUM)
             .addColumn(
                     "min(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
                     SQL_EXPR_FOLDER + " AS " + SQL_COL_DISPLAY_TEXT,
@@ -59,7 +63,7 @@ public class FotoSql {
             .addOrderBy(SQL_EXPR_FOLDER)
             ;
     public static final QueryParameterParcelable queryDetail = (QueryParameterParcelable) new QueryParameterParcelable()
-            .setID(R.string.foto_gallery)
+            .setID(QUERY_TYPE_GALLERY)
             .addColumn(
                     SQL_COL_PK,
                     SQL_COL_PATH + " AS " + SQL_COL_DISPLAY_TEXT,
@@ -70,21 +74,21 @@ public class FotoSql {
             ;
 
     public static String getFilter(Cursor cursor, QueryParameterParcelable parameters, String description) {
-        if ((parameters != null) && (parameters.getID() == R.string.directory_gallery)) {
+        if ((parameters != null) && (parameters.getID() == QUERY_TYPE_GROUP_ALBUM)) {
             return description;
         }
         return null;
     }
 
     public static void addWhereFilter(QueryParameterParcelable parameters, String filterParameter) {
-        if ((parameters != null) && (parameters.getID() == R.string.directory_gallery) && (filterParameter != null)) {
+        if ((parameters != null) && (parameters.getID() == QUERY_TYPE_GROUP_ALBUM) && (filterParameter != null)) {
             parameters.addWhere(SQL_EXPR_FOLDER + " = ?", filterParameter);
         }
     }
 
     public static void addPathWhere(QueryParameterParcelable newQuery, String selectedAbsolutePath, int dirQueryID) {
         if ((selectedAbsolutePath != null) && (selectedAbsolutePath.length() > 0)) {
-            if (R.string.date_gallery == dirQueryID) {
+            if (QUERY_TYPE_GROUP_DATE == dirQueryID) {
                 addWhereDatePath(newQuery, selectedAbsolutePath);
             } else {
                 // selectedAbsolutePath is assumed to be a file path i.e. /mnt/sdcard/pictures/

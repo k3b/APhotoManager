@@ -20,8 +20,10 @@ public class DirPickerTestActivity extends Activity implements DirectoryPickerFr
 
     private static final String DBG_PREFIX = "TestGui-";
 
-    /** which query is used to get the directories */
+    /** which query is used to get the directories: one of the FotoSql.QUERY_TYPE_xxx values */
+
     private int dirQueryID = 0;
+    private DirectoryGui dirGui;
 
     /************ life cycle *********************/
 
@@ -30,20 +32,24 @@ public class DirPickerTestActivity extends Activity implements DirectoryPickerFr
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dir_choose);
 
-        final DirectoryGui gui = (DirectoryGui) getFragmentManager().findFragmentById(R.id.galleryCursor);
+        dirGui = (DirectoryGui) getFragmentManager().findFragmentById(R.id.galleryCursor);
 
-        if (gui != null) {
+        if (dirGui != null) {
 
             final QueryParameterParcelable currentDirContentQuery = FotoViewerParameter.currentDirContentQuery;
             this.dirQueryID = (currentDirContentQuery != null) ? currentDirContentQuery.getID() : 0;
 
             DirectoryLoaderTask loader = new DirectoryLoaderTask(this, DBG_PREFIX) {
-                protected void onPostExecute(Directory result) {
-                    gui.defineDirectoryNavigation(result, currentDirContentQuery.getID(), FotoViewerParameter.currentDirContentValue);
+                protected void onPostExecute(Directory directoryRoot) {
+                    onDirectoryDataLoadComplete(directoryRoot);
                 }
             };
             loader.execute(currentDirContentQuery);
         }
+    }
+
+    private void onDirectoryDataLoadComplete(Directory directoryRoot) {
+        dirGui.defineDirectoryNavigation(directoryRoot, dirQueryID, FotoViewerParameter.currentDirContentValue);
     }
 
     /************ menu *********************/

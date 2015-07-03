@@ -17,6 +17,7 @@ import android.widget.LinearLayout;
 
 import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.directory.DirectoryGui;
+import de.k3b.android.fotoviewer.directory.DirectoryPickerFragment;
 import de.k3b.android.fotoviewer.queries.FotoViewerParameter;
 import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
 import de.k3b.android.fotoviewer.queries.FotoSql;
@@ -39,6 +40,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
+
     private HorizontalScrollView parentPathBarScroller;
     private LinearLayout parentPathBar;
 
@@ -56,7 +58,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private GridView galleryView;
     private GalleryCursorAdapter galleryAdapter = null;
 
-    private OnGalleryInteractionListener mListener;
+    private DirectoryPickerFragment.OnDirectoryInteractionListener mDirectoryListener;
+
+    private OnGalleryInteractionListener mGalleryListener;
     private QueryParameterParcelable mParameters;
 
     /**************** construction ******************/
@@ -127,17 +131,25 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            mListener = (OnGalleryInteractionListener) activity;
+            mGalleryListener = (OnGalleryInteractionListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement OnGalleryInteractionListener");
+        }
+
+        try {
+            mDirectoryListener = (DirectoryPickerFragment.OnDirectoryInteractionListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement DirectoryPickerFragment.OnDirectoryInteractionListener");
         }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+        mGalleryListener = null;
+        mDirectoryListener = null;
     }
 
     /**
@@ -169,13 +181,13 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     /*********************** local helper *******************************************/
     /** an Image in the FotoGallery was clicked */
     private void onGalleryImageClick(final GalleryCursorAdapter.GridCellViewHolder holder) {
-        if (mListener != null) {
+        if (mGalleryListener != null) {
             QueryParameterParcelable result = this.calculateEffectiveQueryParameters();
 
             if (holder.filter != null) {
                 FotoSql.addWhereFilter(result, holder.filter);
             }
-            mListener.onGalleryImageClick(null, getUri(holder.imageID), holder.description.getText().toString(), result);
+            mGalleryListener.onGalleryImageClick(null, getUri(holder.imageID), holder.description.getText().toString(), result);
         }
     }
 
@@ -255,9 +267,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     /** path/directory was clicked */
     private void onPathButtonClick(Directory newSelection) {
-        if ((mListener != null) && (newSelection != null)) {
+        if ((mDirectoryListener != null) && (newSelection != null)) {
             mCurrentPath = newSelection.getAbsolute();
-            mListener.onDirectoryPick(mCurrentPath, this.mDirTypId);
+            mDirectoryListener.onDirectoryPick(mCurrentPath, this.mDirTypId);
         }
     }
 
@@ -272,6 +284,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     /** combine root-query plus current selected directory */
     private QueryParameterParcelable calculateEffectiveQueryParameters() {
+        if (mParameters == null) return null;
         QueryParameterParcelable result = new QueryParameterParcelable(mParameters);
 
         if ((mDirTypId != 0) && (mCurrentPath != null)) {
