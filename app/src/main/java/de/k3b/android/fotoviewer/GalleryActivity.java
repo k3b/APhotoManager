@@ -1,6 +1,7 @@
 package de.k3b.android.fotoviewer;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -10,7 +11,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import de.k3b.android.fotoviewer.directory.DirectoryGui;
 import de.k3b.android.fotoviewer.directory.DirectoryLoaderTask;
@@ -36,6 +36,7 @@ public class GalleryActivity extends Activity implements
     /** one of the FotoSql.QUERY_TYPE_xxx values */
     private int mDirQueryID = 0;
     private String mCurrentPath = "/";
+    private String mTitleResultCount = "";
 
     private Directory mDirectoryRoot = null;
 
@@ -47,16 +48,24 @@ public class GalleryActivity extends Activity implements
         this.mGalleryContentQuery = getIntent().getParcelableExtra(EXTRA_QUERY);
         if (mGalleryContentQuery == null) mGalleryContentQuery = FotoViewerParameter.currentGalleryContentQuery;
 
-        setTitle(mGalleryContentQuery.getID(), getIntent().getStringExtra(Intent.EXTRA_TITLE));
-
-        mGalleryGui = (Queryable) getFragmentManager().findFragmentById(R.id.galleryCursor);
+        FragmentManager fragmentManager = getFragmentManager();
+        mGalleryGui = (Queryable) fragmentManager.findFragmentById(R.id.galleryCursor);
 
         // on tablet seperate dir navigator fragment
-        mDirGui = (DirectoryGui) getFragmentManager().findFragmentById(R.id.directoryFragment);
+        mDirGui = (DirectoryGui) fragmentManager.findFragmentById(R.id.directoryFragment);
 
-        if (mDirGui == null) {
-            // on small screen/cellphone DirectoryGui is part of gallery
-            mDirGui = (DirectoryGui) getFragmentManager().findFragmentById(R.id.galleryCursor);
+        if (FotoViewerParameter.galleryHasEmbeddedDirPicker) {
+            if (mDirGui == null) {
+                // on small screen/cellphone DirectoryGui is part of gallery
+                mDirGui = (DirectoryGui) fragmentManager.findFragmentById(R.id.galleryCursor);
+            } else {
+                mHasEmbeddedDirPicker = true;
+            }
+        } else {
+            if (mDirGui != null) {
+                fragmentManager.beginTransaction().remove((Fragment) mDirGui).commit();
+                mDirGui = null;
+            }
         }
 
         // load directoryRoot in background
@@ -68,6 +77,8 @@ public class GalleryActivity extends Activity implements
             }
         };
         loader.execute(currentDirContentQuery);
+
+        setTitle();
         reloadGui();
     }
 
@@ -151,11 +162,8 @@ public class GalleryActivity extends Activity implements
     /** GalleryFragment tells the Owning Activity that querying data has finisched */
     @Override
     public void setResultCount(int count) {
-        String countText = "(" + count + ")";
-        String title = this.getTitle().toString();
-        if (!title.contains(countText)) {
-            setTitle(title + " - " + countText);
-        }
+        this.mTitleResultCount = (count > 0) ? ("(" + count + ")") : "";
+        setTitle();
     }
 
     /**
@@ -193,8 +201,7 @@ public class GalleryActivity extends Activity implements
             Log.d(Global.LOG_CONTEXT, "GalleryActivity.navigateTo " + selectedAbsolutePath + " from " + mCurrentPath);
             mCurrentPath = selectedAbsolutePath;
             mDirQueryID = queryTypeId;
-
-            Toast.makeText(this, selectedAbsolutePath, Toast.LENGTH_LONG);
+            setTitle();
 
             reloadGui();
         }
@@ -228,11 +235,14 @@ public class GalleryActivity extends Activity implements
         return result;
     }
 
-    private void setTitle(int id, String description) {
-        String title = getString(id);
+    private void setTitle() {
+        String title = getIntent().getStringExtra(Intent.EXTRA_TITLE);
+        if ((title == null) && (mDirQueryID != 0) && (mCurrentPath != null)) {
+            title = getString(mDirQueryID) + " - " + mCurrentPath;
+        }
 
-        if (null != description) title += " - " + description;
-        this.setTitle(title);
+        if (title != null) {
+            this.setTitle(title + mTitleResultCount);
+        }
     }
-
 }

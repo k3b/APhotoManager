@@ -19,4 +19,7 @@ public class FotoViewerParameter {
 
     /** getFrom data for gallery */
     public static QueryParameterParcelable currentGalleryContentQuery = FotoSql.queryDetail;
+
+    /** true: gallery contains inline dir-picker */
+    public static boolean galleryHasEmbeddedDirPicker = false;
 }
