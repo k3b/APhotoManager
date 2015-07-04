@@ -32,7 +32,7 @@ public class DirPickerTestActivity extends Activity implements DirectoryPickerFr
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dir_choose);
 
-        dirGui = (DirectoryGui) getFragmentManager().findFragmentById(R.id.galleryCursor);
+        dirGui = (DirectoryGui) getFragmentManager().findFragmentById(R.id.directoryFragment);
 
         if (dirGui != null) {
 
