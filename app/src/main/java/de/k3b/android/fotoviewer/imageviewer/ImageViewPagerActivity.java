@@ -22,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import de.k3b.android.fotoviewer.R;
+import de.k3b.android.fotoviewer.queries.FotoSql;
 import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
 
 /**
@@ -35,14 +36,20 @@ import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
 public class ImageViewPagerActivity extends Activity {
     public static final String EXTRA_QUERY = "gallery";
 
-    private static final String ISLOCKED_ARG = "isLocked";
+    // private static final String ISLOCKED_ARG = "isLocked";
 	
 	private ViewPager mViewPager;
 
     private QueryParameterParcelable mGalleryContentQuery = null;
 
+    // for debugging
+    private static int id = 1;
+    private String debugPrefix;
+
     @Override
 	public void onCreate(Bundle savedInstanceState) {
+        debugPrefix = "GalleryCursorFragment#" + (id++)  + " ";
+
 		super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_view_pager);
         mViewPager = (HackyViewPager) findViewById(R.id.view_pager);
@@ -50,12 +57,15 @@ public class ImageViewPagerActivity extends Activity {
 
         // extra parameter
         this.mGalleryContentQuery = getIntent().getParcelableExtra(EXTRA_QUERY);
+        if (mGalleryContentQuery == null) {
+            mGalleryContentQuery = FotoSql.getQuery(FotoSql.QUERY_TYPE_DEFAULT);
+        }
 
-        mViewPager.setAdapter(new ImagePagerAdapterFromCursor());
+        mViewPager.setAdapter(new ImagePagerAdapterFromCursor(this,mGalleryContentQuery, debugPrefix));
 		
 		if (savedInstanceState != null) {
-			boolean isLocked = savedInstanceState.getBoolean(ISLOCKED_ARG, false);
-			((HackyViewPager) mViewPager).setLocked(isLocked);
+			// boolean isLocked = savedInstanceState.getBoolean(ISLOCKED_ARG, false);
+			// ((HackyViewPager) mViewPager).setLocked(isLocked);
 		}
 	}
 
@@ -79,13 +89,13 @@ public class ImageViewPagerActivity extends Activity {
     private boolean isViewPagerActive() {
     	return (mViewPager != null && mViewPager instanceof HackyViewPager);
     }
-    
+
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		if (isViewPagerActive()) {
-			outState.putBoolean(ISLOCKED_ARG, ((HackyViewPager) mViewPager).isLocked());
+			// outState.putBoolean(ISLOCKED_ARG, ((HackyViewPager) mViewPager).isLocked());
     	}
 		super.onSaveInstanceState(outState);
 	}
-    
+
 }
