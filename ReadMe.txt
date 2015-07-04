@@ -2,6 +2,8 @@ FotoGallery\ReadMe.txt"
 
 
 todo
+	app
+		better icon
 
 	DirectoryPicker
 		dialog: ?? set icon
