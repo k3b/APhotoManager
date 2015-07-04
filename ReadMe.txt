@@ -2,25 +2,10 @@ FotoGallery\ReadMe.txt"
 
 
 todo
-	bug: DirectoryPickerFragment#navigateTo not working as expected yet
 
-	bug: warum mehrfaches reload im GalleryFragment after pressing navigation button
-	
+	DirectoryPicker
+		dialog: ?? set icon
 
-
-	> GalleryActivity: new action "navigator" to open DialogFragment to choose directory
-		Nagvigator (rename from DirectoryFragment) 
-			status: loading album ... instead of show current path
-			mode
-				embedded: onDirSelectionChanged; hidden: buttons/status
-				dialog: buttons+status+ok=onDirClick
-					onInitDialog()
-						set icon
-		GalleryActivity:
-			dialog handling einbauen
-			mode Navigagor+Gallery
-			mode Gallery+NagvigatorDialog+cmdNavigator(menu)
-		
 Architektur:
 	die Activity ist zuständig für das filtern des gallery cursors (und nicht mehr das fragment)
 

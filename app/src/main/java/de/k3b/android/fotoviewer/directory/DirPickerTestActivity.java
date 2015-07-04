@@ -36,7 +36,7 @@ public class DirPickerTestActivity extends Activity implements DirectoryPickerFr
 
         if (dirGui != null) {
 
-            final QueryParameterParcelable currentDirContentQuery = FotoViewerParameter.currentDirContentQuery;
+            final QueryParameterParcelable currentDirContentQuery = FotoSql.getQuery(FotoSql.QUERY_TYPE_GROUP_DEFAULT);
             this.dirQueryID = (currentDirContentQuery != null) ? currentDirContentQuery.getID() : 0;
 
             DirectoryLoaderTask loader = new DirectoryLoaderTask(this, DBG_PREFIX) {
@@ -49,7 +49,7 @@ public class DirPickerTestActivity extends Activity implements DirectoryPickerFr
     }
 
     private void onDirectoryDataLoadComplete(Directory directoryRoot) {
-        dirGui.defineDirectoryNavigation(directoryRoot, dirQueryID, FotoViewerParameter.currentDirContentValue);
+        dirGui.defineDirectoryNavigation(directoryRoot, dirQueryID, "/");
     }
 
     /************ menu *********************/

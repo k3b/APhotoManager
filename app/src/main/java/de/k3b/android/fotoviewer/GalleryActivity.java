@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,8 +27,14 @@ public class GalleryActivity extends Activity implements
         OnGalleryInteractionListener, DirectoryPickerFragment.OnDirectoryInteractionListener {
     private static final String DBG_PREFIX = "Gal-";
 
+    /** intent parameters supported by GalleryActivity: EXTRA_... */
     public static final String EXTRA_QUERY = "gallery";
-    private static final String DLG_NAVIGATOR = "navigator";
+    public static final String EXTRA_TITLE = Intent.EXTRA_TITLE;
+
+    private static final String STATE_CurrentPath = "CurrentPath";
+    private static final String STATE_DirQueryID = "DirQueryID";
+
+    private static final String DLG_NAVIGATOR_TAG = "navigator";
 
     private QueryParameterParcelable mGalleryContentQuery = null;
     private Queryable mGalleryGui;
@@ -34,19 +42,58 @@ public class GalleryActivity extends Activity implements
     private boolean mHasEmbeddedDirPicker = false;
     private DirectoryGui mDirGui;
     /** one of the FotoSql.QUERY_TYPE_xxx values */
-    private int mDirQueryID = 0;
+    private int mDirQueryID = FotoSql.QUERY_TYPE_GROUP_DEFAULT;
+
     private String mCurrentPath = "/";
+
     private String mTitleResultCount = "";
 
     private Directory mDirectoryRoot = null;
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        saveSettings();
+
+
+        // save InstanceState
+        savedInstanceState.putInt(STATE_DirQueryID, mDirQueryID);
+        savedInstanceState.putString(STATE_CurrentPath, mCurrentPath);
+
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+    private void saveSettings() {
+        // save settings
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor edit = sharedPref.edit();
+        edit.putInt(STATE_DirQueryID, mDirQueryID);
+        edit.putString(STATE_CurrentPath, mCurrentPath);
+        edit.commit();
+    }
+
+    // load from settings/instanceState
+    private void loadSettingsAndInstanceState(Bundle savedInstanceState) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        mCurrentPath = sharedPref.getString(STATE_CurrentPath, mCurrentPath);
+        mDirQueryID = sharedPref.getInt(STATE_DirQueryID, mDirQueryID);
+
+        // instance state overrides settings
+        if (savedInstanceState != null) {
+            mCurrentPath = savedInstanceState.getString(STATE_CurrentPath, mCurrentPath);
+            mDirQueryID = savedInstanceState.getInt(STATE_DirQueryID,mDirQueryID);
+        }
+
+        // extra parameter
+        this.mGalleryContentQuery = getIntent().getParcelableExtra(EXTRA_QUERY);
+        if (mGalleryContentQuery == null) mGalleryContentQuery = FotoSql.getQuery(FotoSql.QUERY_TYPE_DEFAULT);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gallery); // .gallery_activity);
 
-        this.mGalleryContentQuery = getIntent().getParcelableExtra(EXTRA_QUERY);
-        if (mGalleryContentQuery == null) mGalleryContentQuery = FotoViewerParameter.currentGalleryContentQuery;
+        loadSettingsAndInstanceState(savedInstanceState);
 
         FragmentManager fragmentManager = getFragmentManager();
         mGalleryGui = (Queryable) fragmentManager.findFragmentById(R.id.galleryCursor);
@@ -69,17 +116,26 @@ public class GalleryActivity extends Activity implements
         }
 
         // load directoryRoot in background
-        final QueryParameterParcelable currentDirContentQuery = FotoViewerParameter.currentDirContentQuery;
-        this.mDirQueryID = (currentDirContentQuery != null) ? currentDirContentQuery.getID() : 0;
-        DirectoryLoaderTask loader = new DirectoryLoaderTask(this, DBG_PREFIX) {
-            protected void onPostExecute(Directory directoryRoot) {
-                onDirectoryDataLoadComplete(directoryRoot);
-            }
-        };
-        loader.execute(currentDirContentQuery);
+        final QueryParameterParcelable currentDirContentQuery = FotoSql.getQuery(this.mDirQueryID);
+        this.mDirQueryID = (currentDirContentQuery != null) ? currentDirContentQuery.getID() : FotoSql.QUERY_TYPE_UNDEFINED;
+
+        if (currentDirContentQuery != null) {
+            DirectoryLoaderTask loader = new DirectoryLoaderTask(this, DBG_PREFIX) {
+                protected void onPostExecute(Directory directoryRoot) {
+                    onDirectoryDataLoadComplete(directoryRoot);
+                }
+            };
+            loader.execute(currentDirContentQuery);
+        }
 
         setTitle();
         reloadGui();
+    }
+
+    @Override
+    protected void onPause () {
+        saveSettings();
+        super.onPause();
     }
 
     @Override
@@ -114,10 +170,10 @@ public class GalleryActivity extends Activity implements
 
     private void openNavigator() {
         final FragmentManager manager = getFragmentManager();
-        DirectoryPickerFragment dir = new DirectoryPickerFragment(); // (DirectoryPickerFragment) manager.findFragmentByTag(DLG_NAVIGATOR);
+        DirectoryPickerFragment dir = new DirectoryPickerFragment(); // (DirectoryPickerFragment) manager.findFragmentByTag(DLG_NAVIGATOR_TAG);
         dir.defineDirectoryNavigation(mDirectoryRoot, mDirQueryID, mCurrentPath);
 
-        dir.show(manager, DLG_NAVIGATOR);
+        dir.show(manager, DLG_NAVIGATOR_TAG);
 
     }
 
@@ -236,7 +292,7 @@ public class GalleryActivity extends Activity implements
     }
 
     private void setTitle() {
-        String title = getIntent().getStringExtra(Intent.EXTRA_TITLE);
+        String title = getIntent().getStringExtra(EXTRA_TITLE);
         if ((title == null) && (mDirQueryID != 0) && (mCurrentPath != null)) {
             title = getString(mDirQueryID) + " - " + mCurrentPath;
         }

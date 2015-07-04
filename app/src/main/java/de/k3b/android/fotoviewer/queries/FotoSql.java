@@ -3,9 +3,11 @@ package de.k3b.android.fotoviewer.queries;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import java.util.GregorianCalendar;
 
+import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.R;
 import de.k3b.io.Directory;
 
@@ -19,9 +21,13 @@ public class FotoSql {
 //    public static final String SQL_EXPR_DAY = "(ROUND("
 //            + MediaStore.Images.Media.DATE_TAKEN + "/" + PER_DAY + ") * " + PER_DAY + ")";
 
+    public static final int QUERY_TYPE_UNDEFINED = 0;
     public static final int QUERY_TYPE_GALLERY = R.string.foto_gallery;
     public static final int QUERY_TYPE_GROUP_DATE = R.string.date_gallery;
     public static final int QUERY_TYPE_GROUP_ALBUM = R.string.directory_gallery;
+
+    public static final int QUERY_TYPE_GROUP_DEFAULT = QUERY_TYPE_GROUP_ALBUM;
+    public static final int QUERY_TYPE_DEFAULT = QUERY_TYPE_GALLERY;
 
     public static final Uri SQL_TABLE_EXTERNAL_CONTENT_URI = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
@@ -60,7 +66,7 @@ public class FotoSql {
                     "max(" + SQL_COL_GPS + ") AS " + SQL_COL_GPS)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
             .addGroupBy(SQL_EXPR_FOLDER)
-            .addOrderBy("length(" + SQL_EXPR_FOLDER + ")")
+            .addOrderBy(SQL_EXPR_FOLDER)
             ;
     public static final QueryParameterParcelable queryDetail = (QueryParameterParcelable) new QueryParameterParcelable()
             .setID(QUERY_TYPE_GALLERY)
@@ -163,5 +169,20 @@ public class FotoSql {
         }
     }
 
+    public static QueryParameterParcelable getQuery(int queryID) {
+        switch (queryID) {
+            case QUERY_TYPE_UNDEFINED:
+                return null;
+            case QUERY_TYPE_GALLERY:
+                return queryDetail;
+            case QUERY_TYPE_GROUP_DATE:
+                return queryGroupByDate;
+            case QUERY_TYPE_GROUP_ALBUM:
+                return queryGroupByDir;
+            default:
+                Log.e(Global.LOG_CONTEXT,"FotoSql.getQuery(" +queryID+"): unknown ID");
+                return null;
+        }
+    }
 
 }
