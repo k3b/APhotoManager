@@ -23,6 +23,12 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(':fotolib2')
 
+    // zoomable image view
+    compile 'com.github.chrisbanes.photoview:library:1.2.3'
+
+    // for view-pager from https://github.com/chrisbanes/PhotoView
+    compile 'com.android.support:support-v4:21.0.2'
+
     // compile 'com.android.support:support-v4:21.0.2'
     // compile 'com.android.support:appcompat-v7:21.0.2'
 }

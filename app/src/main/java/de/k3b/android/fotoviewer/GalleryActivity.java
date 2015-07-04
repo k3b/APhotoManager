@@ -16,6 +16,8 @@ import android.view.MenuItem;
 
 import de.k3b.android.fotoviewer.directory.DirectoryGui;
 import de.k3b.android.fotoviewer.directory.DirectoryLoaderTask;
+import de.k3b.android.fotoviewer.imageviewer.ImageViewActivity;
+import de.k3b.android.fotoviewer.imageviewer.ImageViewPagerActivity;
 import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
 import de.k3b.android.fotoviewer.directory.DirectoryPickerFragment;
 import de.k3b.android.fotoviewer.queries.FotoSql;
@@ -203,10 +205,12 @@ public class GalleryActivity extends Activity implements
         } else {
 
             //Create intent
-            intent = new Intent(this, ImageViewActivity.class);
+            intent = new Intent(this, ImageViewPagerActivity.class);
 
+            /*
             if (image != null)
-                intent.putExtra(ImageViewActivity.EXTRA_IMAGE, image); // does not work for images > 1mb. there we need to use uri-s instead
+                intent.putExtra(ImageViewPagerActivity.EXTRA_IMAGE, image); // does not work for images > 1mb. there we need to use uri-s instead
+               */
             if (imageUri != null) intent.setData(imageUri);
 
         }

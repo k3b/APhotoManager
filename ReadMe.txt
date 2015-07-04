@@ -3,7 +3,6 @@ FotoGallery\ReadMe.txt"
 
 todo
 	app
-		better icon
 
 	DirectoryPicker
 		dialog: ?? set icon
@@ -24,6 +23,9 @@ gui
 				??Place (DialogFragment Map to select area)
 				
 		SortBy (popup or combox/spinner) path/date/location/pathlength
+
+https://github.com/chrisbanes/PhotoView
+
 		
 "C:\Progs.Portable\sdk\Android\Android Design - Icons 20131120\Action Bar Icons\holo_light\04_collections_collection\drawable-xxhdpi\ic_action_collection.png"		
 "C:\Progs.Portable\sdk\Android\Android Design - Icons 20131120\Action Bar Icons\holo_light\01_core_search\drawable-xhdpi\ic_action_search.png"

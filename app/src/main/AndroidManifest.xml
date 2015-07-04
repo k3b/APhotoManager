@@ -34,7 +34,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ImageViewActivity" />
+        <activity android:name=".imageviewer.ImageViewActivity" />
+        <activity android:name=".imageviewer.ImageViewPagerActivity" />
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings" >

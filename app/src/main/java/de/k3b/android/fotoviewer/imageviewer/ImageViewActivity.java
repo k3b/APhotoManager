@@ -1,4 +1,4 @@
-package de.k3b.android.fotoviewer;
+package de.k3b.android.fotoviewer.imageviewer;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -14,6 +14,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.IOException;
+
+import de.k3b.android.fotoviewer.Global;
+import de.k3b.android.fotoviewer.R;
+import de.k3b.android.fotoviewer.SettingsActivity;
 
 public class ImageViewActivity extends Activity {
 
