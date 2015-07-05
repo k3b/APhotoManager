@@ -11,7 +11,6 @@ pkg
 
 gradle-app.setting
 .gradle
-settings.gradle
 build
 .idea
 .metadata

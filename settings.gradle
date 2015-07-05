@@ -1,0 +1,3 @@
+startParameter.offline=true
+
+include ':app', 'fotolib2', 'fotoview.library'

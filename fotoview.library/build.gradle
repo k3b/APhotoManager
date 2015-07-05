@@ -1,0 +1,17 @@
+apply plugin: 'com.android.library'
+
+dependencies {
+    compile 'com.android.support:support-v4:21.0.2'
+}
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion '22.0.1'
+
+    defaultConfig {
+        minSdkVersion 4
+        targetSdkVersion 21
+    }
+}
+
+// apply from: '../maven_push.gradle'
