@@ -53,7 +53,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     protected Activity mContext;
     private DirectoryListAdapter mAdapter;
     private DirectoryNavigator mNavigation;
-    private int mDirTypId;
+    private int mDirTypId = 0;
 
     // api to fragment owner
     private OnDirectoryInteractionListener mDirectoryListener;
@@ -140,11 +140,13 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         });
         cmdCancel.setVisibility(View.VISIBLE);
 
-        String title = mContext.getString(
-                R.string.directory_fragment_dialog_title,
-                mContext.getString(mDirTypId));
-        getDialog().setTitle(title);
-        // no api for setIcon ????
+        if (mDirTypId != 0) {
+            String title = mContext.getString(
+                    R.string.directory_fragment_dialog_title,
+                    mContext.getString(mDirTypId));
+            getDialog().setTitle(title);
+            // no api for setIcon ????
+        }
     }
 
     private void onDirectoryCancel() {
@@ -171,6 +173,11 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
 
     public void onResume() {
         super.onResume();
+
+        // after rotation dlg has no more data: close it
+        if (this.getShowsDialog() && (this.mNavigation == null)) {
+            dismiss();
+        }
     }
 
     @Override
