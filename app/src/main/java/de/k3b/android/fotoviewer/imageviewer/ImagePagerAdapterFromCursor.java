@@ -15,6 +15,7 @@ import android.support.v4.view.PagerAdapter;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import java.io.IOException;
 
@@ -197,7 +198,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
 
             PhotoView photoView = new PhotoView(container.getContext());
 
-            photoView.setImageURI(uri);
+            setImage(position, imageID, uri, photoView);
 
             // Now just add PhotoView to ViewPager and return it
             container.addView(photoView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
@@ -216,6 +217,30 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
         */
         }
         return null;
+    }
+
+    private boolean mHasLowMemory = false;
+    private void setImage(int position, long imageID, Uri uri, PhotoView photoView) {
+        if (!mHasLowMemory) {
+            try {
+                photoView.setImageURI(uri);
+                return;
+            } catch (OutOfMemoryError e) {
+                String message = photoView.getContext().getString(R.string.err_low_memory);
+                Log.e(Global.LOG_CONTEXT, debugPrefix + "instantiateItem(#" + position + ") => " + message);
+                        Toast.makeText(photoView.getContext(), message, Toast.LENGTH_LONG).show();
+                mHasLowMemory = true;
+                // show only once
+            }
+        }
+
+        // mHasLowMemory
+        Bitmap thumbnail = MediaStore.Images.Thumbnails.getThumbnail(
+                photoView.getContext().getContentResolver(),
+                imageID,
+                MediaStore.Images.Thumbnails.MINI_KIND, // FULL_SCREEN_KIND,
+                new BitmapFactory.Options());
+        photoView.setImageBitmap(thumbnail);
     }
 
     /** converts imageID to content-uri */
