@@ -16,11 +16,13 @@
 package de.k3b.android.fotoviewer.imageviewer;
 
 import android.app.Activity;
+import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Menu;
-import android.view.MenuItem;
 
+import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.R;
 import de.k3b.android.fotoviewer.queries.FotoSql;
 import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
@@ -34,21 +36,25 @@ import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
  */
 
 public class ImageViewPagerActivity extends Activity {
-    public static final String EXTRA_QUERY = "gallery";
+    public static final String EXTRA_QUERY = "de.k3b.extras.sql";
+    public static final String EXTRA_POSITION = "de.k3b.extras.position";
 
     // private static final String ISLOCKED_ARG = "isLocked";
 	
 	private ViewPager mViewPager;
+    private ImagePagerAdapterFromCursor mAdapter;
 
     private QueryParameterParcelable mGalleryContentQuery = null;
 
     // for debugging
     private static int id = 1;
     private String debugPrefix;
+    private DataSetObserver loadCompleteHandler;
 
     @Override
 	public void onCreate(Bundle savedInstanceState) {
-        debugPrefix = "GalleryCursorFragment#" + (id++)  + " ";
+        debugPrefix = "ImageViewPagerActivity#" + (id++)  + " ";
+        Global.debugMemory(debugPrefix, "onCreate");
 
 		super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_view_pager);
@@ -58,10 +64,23 @@ public class ImageViewPagerActivity extends Activity {
         // extra parameter
         this.mGalleryContentQuery = getIntent().getParcelableExtra(EXTRA_QUERY);
         if (mGalleryContentQuery == null) {
+            Log.e(Global.LOG_CONTEXT, debugPrefix + " onCreate() : intent.extras[" + EXTRA_QUERY +
+                        "] not found. Using default.");
             mGalleryContentQuery = FotoSql.getQuery(FotoSql.QUERY_TYPE_DEFAULT);
+        } else if (Global.debugEnabled) {
+            Log.e(Global.LOG_CONTEXT, debugPrefix + " onCreate() : query = " + mGalleryContentQuery);
         }
 
-        mViewPager.setAdapter(new ImagePagerAdapterFromCursor(this,mGalleryContentQuery, debugPrefix));
+        mAdapter = new ImagePagerAdapterFromCursor(this, mGalleryContentQuery, debugPrefix);
+        loadCompleteHandler = new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                super.onChanged();
+                onLoadCompleted();
+            }
+        };
+        mAdapter.registerDataSetObserver(loadCompleteHandler);
+        mViewPager.setAdapter(mAdapter);
 		
 		if (savedInstanceState != null) {
 			// boolean isLocked = savedInstanceState.getBoolean(ISLOCKED_ARG, false);
@@ -70,11 +89,37 @@ public class ImageViewPagerActivity extends Activity {
 	}
 
     @Override
+    protected void onPause () {
+        Global.debugMemory(debugPrefix, "onPause");
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume () {
+        Global.debugMemory(debugPrefix, "onResume");
+        super.onResume();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Global.debugMemory(debugPrefix, "onDestroy");
+        mAdapter.unregisterDataSetObserver(loadCompleteHandler);
+        loadCompleteHandler = null;
+        mViewPager.setAdapter(null);
+        super.onDestroy();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.viewpager_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
-    
+
+    private void onLoadCompleted() {
+        int mInitialPosition = getIntent().getIntExtra(EXTRA_POSITION, 0);
+        mViewPager.setCurrentItem(mInitialPosition);
+    }
+
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         return super.onPrepareOptionsMenu(menu);

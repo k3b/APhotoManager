@@ -1,5 +1,7 @@
 package de.k3b.android.fotoviewer;
 
+import android.util.Log;
+
 /**
  * Global Settings
  *
@@ -13,7 +15,17 @@ public class Global {
      * debugEnabled is updated by the SettingsActivity
      */
     public static boolean debugEnabled = true;
+    public static boolean debugEnabledGalleryImage = false;
 
-    /** true: load static demo data; false load real data */
-    public static boolean demoMode = false;
+    public static void debugMemory(String modul, String message) {
+        if (Global.debugEnabled) {
+            Runtime r = Runtime.getRuntime();
+            String formattedMessage = String.format("memory : (total/free/avail) = (%3$dK/%4$dK/%5$dK)\t- %1$s.%2$s",
+                    modul, message, r.totalMemory()/1024, r.freeMemory()/1024, r.maxMemory()/1024);
+
+            Log.d(Global.LOG_CONTEXT, formattedMessage);
+        }
+    }
+
+
 }

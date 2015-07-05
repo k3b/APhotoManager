@@ -41,6 +41,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
 
     public ImagePagerAdapterFromCursor(final Activity context, QueryParameterParcelable parameters, String name) {
         debugPrefix = "ImagePagerAdapterFromCursor#" + (id++) + "@" + name + " ";
+        Global.debugMemory(debugPrefix, "ctor");
 
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, debugPrefix + "()");
@@ -50,7 +51,6 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
             requery(context, parameters);
         }
     }
-
 
     /**
      * Interface Queryable: Initiates a database requery in the background
@@ -126,6 +126,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
 
         changeCursor(cursor);
         notifyDataSetChanged();
+
     }
 
     /**
@@ -202,6 +203,17 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
             container.addView(photoView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
             return photoView;
+
+            /*
+            LinearLayout llImage = (LinearLayout) getLayoutInflater().inflate(R.layout.view_pager_item, null);
+
+            SubsamplingScaleImageView draweeView = (SubsamplingScaleImageView) llImage.getChildAt(0);
+            draweeView.setImage(ImageSource.uri(images.get(position)));
+
+            container.addView(llImage, 0);
+
+            return llImage;
+        */
         }
         return null;
     }
@@ -214,7 +226,9 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
+        if (Global.debugEnabled) Log.i(Global.LOG_CONTEXT, debugPrefix + "destroyItem(#" + position +")");
         container.removeView((View) object);
+        // super.destroyItem(container, position, object); // else exception method was not overwritten
     }
 
     @Override

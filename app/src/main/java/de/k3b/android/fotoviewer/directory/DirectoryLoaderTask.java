@@ -43,6 +43,7 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, Dire
     public DirectoryLoaderTask(Activity context, String debugPrefix) {
         this.context = context;
         this.debugPrefix = debugPrefix;
+        Global.debugMemory(debugPrefix, "ctor");
     }
 
     protected Directory doInBackground(QueryParameter... queryParameter) {

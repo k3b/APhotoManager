@@ -5,7 +5,6 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -13,10 +12,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ImageView;
 
 import de.k3b.android.fotoviewer.directory.DirectoryGui;
 import de.k3b.android.fotoviewer.directory.DirectoryLoaderTask;
-import de.k3b.android.fotoviewer.imageviewer.ImageViewActivity;
 import de.k3b.android.fotoviewer.imageviewer.ImageViewPagerActivity;
 import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
 import de.k3b.android.fotoviewer.directory.DirectoryPickerFragment;
@@ -27,7 +29,7 @@ import de.k3b.io.Directory;
 
 public class GalleryActivity extends Activity implements
         OnGalleryInteractionListener, DirectoryPickerFragment.OnDirectoryInteractionListener {
-    private static final String DBG_PREFIX = "Gal-";
+    private static final String debugPrefix = "GalA-";
 
     /** intent parameters supported by GalleryActivity: EXTRA_... */
     public static final String EXTRA_QUERY = "gallery";
@@ -92,6 +94,7 @@ public class GalleryActivity extends Activity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Global.debugMemory(debugPrefix, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gallery); // .gallery_activity);
 
@@ -122,7 +125,7 @@ public class GalleryActivity extends Activity implements
         this.mDirQueryID = (currentDirContentQuery != null) ? currentDirContentQuery.getID() : FotoSql.QUERY_TYPE_UNDEFINED;
 
         if (currentDirContentQuery != null) {
-            DirectoryLoaderTask loader = new DirectoryLoaderTask(this, DBG_PREFIX) {
+            DirectoryLoaderTask loader = new DirectoryLoaderTask(this, debugPrefix) {
                 protected void onPostExecute(Directory directoryRoot) {
                     onDirectoryDataLoadComplete(directoryRoot);
                 }
@@ -136,8 +139,34 @@ public class GalleryActivity extends Activity implements
 
     @Override
     protected void onPause () {
+        Global.debugMemory(debugPrefix, "onPause");
         saveSettings();
         super.onPause();
+    }
+
+    @Override
+    protected void onResume () {
+        Global.debugMemory(debugPrefix, "onResume");
+        super.onResume();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Global.debugMemory(debugPrefix, "onDestroy start");
+        super.onDestroy();
+        unbindDrawables(findViewById(R.id.root_view));
+
+        mGalleryContentQuery = null;
+        mGalleryGui = null;
+        mDirGui = null;
+
+        if (mDirectoryRoot != null)
+        {
+            mDirectoryRoot.destroy();
+            mDirectoryRoot = null;
+        }
+        System.gc();
+        Global.debugMemory(debugPrefix, "onDestroy end");
     }
 
     @Override
@@ -172,10 +201,10 @@ public class GalleryActivity extends Activity implements
 
     private void openNavigator() {
         final FragmentManager manager = getFragmentManager();
-        DirectoryPickerFragment dir = new DirectoryPickerFragment(); // (DirectoryPickerFragment) manager.findFragmentByTag(DLG_NAVIGATOR_TAG);
-        dir.defineDirectoryNavigation(mDirectoryRoot, mDirQueryID, mCurrentPath);
+        DirectoryPickerFragment dirDialog = new DirectoryPickerFragment(); // (DirectoryPickerFragment) manager.findFragmentByTag(DLG_NAVIGATOR_TAG);
+        dirDialog.defineDirectoryNavigation(mDirectoryRoot, mDirQueryID, mCurrentPath);
 
-        dir.show(manager, DLG_NAVIGATOR_TAG);
+        dirDialog.show(manager, DLG_NAVIGATOR_TAG);
 
     }
 
@@ -192,30 +221,16 @@ public class GalleryActivity extends Activity implements
 
     /** called by Fragment: a fragment Item was clicked */
     @Override
-    public void onGalleryImageClick(Bitmap image, Uri imageUri, String description, QueryParameterParcelable parentQuery) {
+    public void onGalleryImageClick(long imageId, Uri imageUri, int position) {
+        Global.debugMemory(debugPrefix, "onGalleryImageClick");
         Intent intent;
-        if ((parentQuery != null) && (parentQuery.getID() == FotoSql.QUERY_TYPE_GROUP_ALBUM) ) {
-            //Create intent
-            intent = new Intent(this, this.getClass());
+        //Create intent
+        intent = new Intent(this, ImageViewPagerActivity.class);
 
-            QueryParameterParcelable newQuery = new QueryParameterParcelable(FotoSql.queryDetail);
-            newQuery.getWhereFrom(parentQuery, false).getOrderByFrom(parentQuery, false);
+        intent.putExtra(ImageViewPagerActivity.EXTRA_QUERY, calculateEffectiveGalleryContentQuery() );
+        intent.putExtra(ImageViewPagerActivity.EXTRA_POSITION, position);
+        intent.setData(imageUri);
 
-            intent.putExtra(EXTRA_QUERY, newQuery);
-        } else {
-
-            //Create intent
-            intent = new Intent(this, ImageViewPagerActivity.class);
-
-            /*
-            if (image != null)
-                intent.putExtra(ImageViewPagerActivity.EXTRA_IMAGE, image); // does not work for images > 1mb. there we need to use uri-s instead
-               */
-            if (imageUri != null) intent.setData(imageUri);
-
-        }
-        intent.putExtra(Intent.EXTRA_TITLE, description);
-        //Start details activity
         startActivity(intent);
     }
 
@@ -245,7 +260,6 @@ public class GalleryActivity extends Activity implements
      */
     @Override
     public void onDirectoryCancel(int queryTypeId) {
-        // do nothing
     }
 
     /** called after the selection in tree has changed */
@@ -281,6 +295,7 @@ public class GalleryActivity extends Activity implements
         if ((mDirGui != null) && (mCurrentPath != null)) {
             mDirGui.defineDirectoryNavigation(directoryRoot, mDirQueryID, mCurrentPath);
         }
+        Global.debugMemory(debugPrefix, "onDirectoryDataLoadComplete");
     }
 
 
@@ -303,6 +318,27 @@ public class GalleryActivity extends Activity implements
 
         if (title != null) {
             this.setTitle(title + mTitleResultCount);
+        }
+    }
+
+    /** free resources */
+    // http://stackoverflow.com/questions/1147172/what-android-tools-and-methods-work-best-to-find-memory-resource-leaks
+    private void unbindDrawables(View view) {
+        if (view != null) {
+            if (view.getBackground() != null)
+                view.getBackground().setCallback(null);
+
+            if (view instanceof ImageView) {
+                ImageView imageView = (ImageView) view;
+                imageView.setImageBitmap(null);
+            } else if (view instanceof ViewGroup) {
+                ViewGroup viewGroup = (ViewGroup) view;
+                for (int i = 0; i < viewGroup.getChildCount(); i++)
+                    unbindDrawables(viewGroup.getChildAt(i));
+
+                if (!(view instanceof AdapterView))
+                    viewGroup.removeAllViews();
+            }
         }
     }
 }

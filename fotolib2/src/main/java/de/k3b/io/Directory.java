@@ -38,6 +38,16 @@ public class Directory {
         setNonDirItemCount(nonDirItemCount);
     }
 
+    public void destroy() {
+        if (children != null) {
+            for (Directory child : children) {
+                child.destroy();
+            }
+            children = null;
+        }
+        parent = null;
+    }
+
     void addChild(Directory child) {
         if (this.children == null)
             this.children = new ArrayList<>();

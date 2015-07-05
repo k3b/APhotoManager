@@ -1,7 +1,11 @@
 FotoGallery\ReadMe.txt"
 
 
+
+
 todo
+
+	speicherverbrauch loggen
 	app
 
 	DirectoryPicker

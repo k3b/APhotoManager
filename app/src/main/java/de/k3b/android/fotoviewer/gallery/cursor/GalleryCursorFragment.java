@@ -86,6 +86,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     public GalleryCursorFragment() {
         debugPrefix = "GalleryCursorFragment#" + (id++)  + " ";
+        Global.debugMemory(debugPrefix, "ctor");
+
         // Required empty public constructor
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, debugPrefix + "()");
@@ -96,6 +98,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     /**************** live-cycle ******************/
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Global.debugMemory(debugPrefix, "onCreate");
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
@@ -106,6 +109,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Global.debugMemory(debugPrefix, "onCreateView");
         // Inflate the layout for this fragment
         View result = inflater.inflate(R.layout.fragment_gallery, container, false);
         galleryView = (GridView) result.findViewById(R.id.gridView);
@@ -115,7 +119,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
         galleryView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                onGalleryImageClick((GalleryCursorAdapter.GridCellViewHolder) v.getTag());
+                onGalleryImageClick((GalleryCursorAdapter.GridCellViewHolder) v.getTag(), position);
             }
         });
 
@@ -132,6 +136,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     @Override
     public void onAttach(Activity activity) {
+        Global.debugMemory(debugPrefix, "onAttach");
         super.onAttach(activity);
         try {
             mGalleryListener = (OnGalleryInteractionListener) activity;
@@ -150,17 +155,28 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     @Override
     public void onDetach() {
+        Global.debugMemory(debugPrefix, "onDetach");
         super.onDetach();
         mGalleryListener = null;
         mDirectoryListener = null;
     }
 
-    /**
-     * interface Queryable: Initiates a database requery in the background
-     *
-     * @param context
-     * @param parameters
-     */
+    @Override
+    public void onDestroy() {
+        Global.debugMemory(debugPrefix, "onDestroy before");
+        mGalleryContentQuery = null;
+        galleryAdapter.changeCursor(null);
+        galleryAdapter = null;
+        super.onDestroy();
+        System.gc();
+        Global.debugMemory(debugPrefix, "onDestroy after");
+    }
+        /**
+         * interface Queryable: Initiates a database requery in the background
+         *
+         * @param context
+         * @param parameters
+         */
     @Override
     public void requery(Activity context, QueryParameterParcelable parameters) {
         if (Global.debugEnabled) {
@@ -179,14 +195,14 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     /*********************** local helper *******************************************/
     /** an Image in the FotoGallery was clicked */
-    private void onGalleryImageClick(final GalleryCursorAdapter.GridCellViewHolder holder) {
+    private void onGalleryImageClick(final GalleryCursorAdapter.GridCellViewHolder holder, int position) {
         if ((mGalleryListener != null) && (mGalleryContentQuery != null)) {
             QueryParameterParcelable imageQuery = new QueryParameterParcelable(mGalleryContentQuery);
 
             if (holder.filter != null) {
                 FotoSql.addWhereFilter(imageQuery, holder.filter);
             }
-            mGalleryListener.onGalleryImageClick(null, getUri(holder.imageID), holder.description.getText().toString(), imageQuery);
+            mGalleryListener.onGalleryImageClick(holder.imageID, getUri(holder.imageID), position);
         }
     }
 

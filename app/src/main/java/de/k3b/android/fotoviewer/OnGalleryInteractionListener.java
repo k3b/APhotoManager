@@ -21,7 +21,7 @@ import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
  */
 public interface OnGalleryInteractionListener {
     /** GalleryFragment tells the Owning Activity that an Image in the FotoGallery was clicked */
-    void onGalleryImageClick(Bitmap image, Uri imageUri, String description, QueryParameterParcelable parentQuery);
+    void onGalleryImageClick(long imageId, Uri imageUri, int position);
 
     /** GalleryFragment tells the Owning Activity that querying data has finisched */
     void setResultCount(int count);

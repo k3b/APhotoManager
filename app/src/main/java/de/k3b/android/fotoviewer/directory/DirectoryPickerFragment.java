@@ -58,10 +58,6 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     // api to fragment owner
     private OnDirectoryInteractionListener mDirectoryListener;
 
-    // false embedded fragment; true dialog
-    private boolean asDialog = false;
-
-
     // for debugging
     private static int id = 1;
     private final String debugPrefix;
@@ -72,6 +68,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     public DirectoryPickerFragment() {
         // Required empty public constructor
         debugPrefix = "DirectoryPickerFragment#" + (id++)  + " ";
+        Global.debugMemory(debugPrefix, "ctor");
         // Required empty public constructor
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, debugPrefix + "()");
@@ -112,7 +109,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         });
 
 
-        if (asDialog) {
+        if (getShowsDialog()) {
             onCreateViewDialog(view);
         }
 
@@ -130,12 +127,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         this.cmdOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(Global.LOG_CONTEXT, debugPrefix + "onOk: " + mCurrentSelection);
-                if (mCurrentSelection != null) {
-                    mDirectoryListener.onDirectoryPick(mCurrentSelection.getAbsolute()
-                            , mDirTypId);
-                    dismiss();
-                }
+                onDirectoryPick();
             }
         });
         cmdOk.setVisibility(View.VISIBLE);
@@ -143,9 +135,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         cmdCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(Global.LOG_CONTEXT, debugPrefix + "onCancel: " + mCurrentSelection);
-                mDirectoryListener.onDirectoryCancel(mDirTypId);
-                dismiss();
+                onDirectoryCancel();
             }
         });
         cmdCancel.setVisibility(View.VISIBLE);
@@ -157,10 +147,24 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         // no api for setIcon ????
     }
 
+    private void onDirectoryCancel() {
+        Log.d(Global.LOG_CONTEXT, debugPrefix + "onCancel: " + mCurrentSelection);
+        mDirectoryListener.onDirectoryCancel(mDirTypId);
+        dismiss();
+    }
+
+    private void onDirectoryPick() {
+        Log.d(Global.LOG_CONTEXT, debugPrefix + "onOk: " + mCurrentSelection);
+        if (mCurrentSelection != null) {
+            mDirectoryListener.onDirectoryPick(mCurrentSelection.getAbsolute()
+                    , mDirTypId);
+            dismiss();
+        }
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Dialog result = super.onCreateDialog(savedInstanceState);
-        this.asDialog = true;
 
         return result;
     };

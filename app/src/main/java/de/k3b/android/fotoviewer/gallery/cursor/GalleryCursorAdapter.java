@@ -52,7 +52,9 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
 
     public GalleryCursorAdapter(final Activity context, QueryParameterParcelable parameters, String name) {
         super(context, null, false); // no cursor yet; no auto-requery
+
         debugPrefix = "GalleryCursorAdapter#" + (id++) + "@" + name + " ";
+        Global.debugMemory(debugPrefix, "ctor");
 
         imageNotLoadedYet = context.getResources().getDrawable(R.drawable.image_loading);
 
@@ -73,6 +75,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
      */
     @Override
     public void requery(final Activity context, QueryParameterParcelable parameters) {
+        Global.debugMemory(debugPrefix, "requery starting");
         this.parameters = parameters;
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, debugPrefix + "requery " + ((parameters != null) ? parameters.toSqlString() : null));
@@ -144,6 +147,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
             callback.setResultCount(resultCount);
         }
         GalleryCursorAdapter.this.changeCursor(cursor);
+        Global.debugMemory(debugPrefix, "onLoadFinished finished");
     }
 
     private String debugCursor(Cursor cursor, int maxRows, String delim, String... colmnNames) {
@@ -187,7 +191,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
 
         // iView.setLayoutParams(new GridView.LayoutParams(200, 200));
         itemCreateCount++;
-        if (Global.debugEnabled) Log.i(Global.LOG_CONTEXT, debugPrefix + "newView #" + itemCreateCount);
+        if (Global.debugEnabledGalleryImage) Log.i(Global.LOG_CONTEXT, debugPrefix + "newView #" + itemCreateCount);
         return iView;
     }
 
@@ -212,7 +216,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
         GridCellImageLoadHandler imgHandler = new GridCellImageLoadHandler(context, holder);
         imgHandler.sendEmptyMessage(0);
 
-        if (Global.debugEnabled) Log.i(Global.LOG_CONTEXT, debugPrefix + "bindView for #" + holder.imageID);
+        if (Global.debugEnabledGalleryImage) Log.i(Global.LOG_CONTEXT, debugPrefix + "bindView for #" + holder.imageID);
     }
 
     @Override
@@ -252,7 +256,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
         @Override
         public void handleMessage(Message msg) {
             Long id = holder.imageID;
-            if (Global.debugEnabled) Log.i(Global.LOG_CONTEXT, "GridCellImageLoadHandler.handleMessage getThumbnail for #" + id);
+            if (Global.debugEnabledGalleryImage) Log.i(Global.LOG_CONTEXT, "GridCellImageLoadHandler.handleMessage getThumbnail for #" + id);
             Bitmap image = getBitmap(id);
             holder.image.setImageBitmap(image);
         }
