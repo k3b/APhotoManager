@@ -24,6 +24,7 @@ import de.k3b.android.fotoviewer.R;
 import de.k3b.android.fotoviewer.queries.FotoSql;
 import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
 import de.k3b.android.fotoviewer.queries.Queryable;
+import de.k3b.android.util.GarbageCollector;
 import uk.co.senab.photoview.PhotoView;
 
 /**
@@ -194,9 +195,9 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
 
             Uri uri = getUri(imageID);
 
-            if (Global.debugEnabled) Log.i(Global.LOG_CONTEXT, debugPrefix + "instantiateItem(#" + position +") => " + uri);
-
             PhotoView photoView = new PhotoView(container.getContext());
+
+            if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, debugPrefix + "instantiateItem(#" + position +") => " + uri + " => " + photoView);
 
             setImage(position, imageID, uri, photoView);
 
@@ -251,9 +252,9 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
-        if (Global.debugEnabled) Log.i(Global.LOG_CONTEXT, debugPrefix + "destroyItem(#" + position +")");
+        if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, debugPrefix + "destroyItem(#" + position +") " + object);
         container.removeView((View) object);
-        // super.destroyItem(container, position, object); // else exception method was not overwritten
+        GarbageCollector.freeMemory((View) object); // to reduce memory leaks
     }
 
     @Override

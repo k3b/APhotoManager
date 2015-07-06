@@ -29,7 +29,9 @@ dependencies {
     compile project(':fotoview.library')
 
     // for view-pager
-    compile 'com.android.support:support-v4:21.0.2'
+    // 21.0.2 seems to have problems with ViewPager
+    // compile 'com.android.support:support-v4:21.0.2'
+    compile 'com.android.support:support-v4:22.2.0'
 
     // compile 'com.android.support:support-v4:21.0.2'
     // compile 'com.android.support:appcompat-v7:21.0.2'

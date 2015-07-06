@@ -31,6 +31,10 @@ import uk.co.senab.photoview.PhotoViewAttacher.OnViewTapListener;
 
 public class PhotoView extends ImageView implements IPhotoView {
 
+    // for debug purposes
+    private static int lastDebugId = 1;
+    private final String mDebugId;
+
     private PhotoViewAttacher mAttacher;
 
     private ScaleType mPendingScaleType;
@@ -45,8 +49,17 @@ public class PhotoView extends ImageView implements IPhotoView {
 
     public PhotoView(Context context, AttributeSet attr, int defStyle) {
         super(context, attr, defStyle);
+        // for debug purposes
+        this.mDebugId = "PhotoView#" + (++lastDebugId);
+
         super.setScaleType(ScaleType.MATRIX);
         init();
+    }
+
+    // for debug purposes
+    @Override
+    public String toString() {
+        return mDebugId;
     }
 
     protected void init() {

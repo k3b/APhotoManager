@@ -12,10 +12,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ImageView;
 
 import de.k3b.android.fotoviewer.directory.DirectoryGui;
 import de.k3b.android.fotoviewer.directory.DirectoryLoaderTask;
@@ -25,6 +21,7 @@ import de.k3b.android.fotoviewer.directory.DirectoryPickerFragment;
 import de.k3b.android.fotoviewer.queries.FotoSql;
 import de.k3b.android.fotoviewer.queries.FotoViewerParameter;
 import de.k3b.android.fotoviewer.queries.Queryable;
+import de.k3b.android.util.GarbageCollector;
 import de.k3b.io.Directory;
 
 public class GalleryActivity extends Activity implements
@@ -154,7 +151,9 @@ public class GalleryActivity extends Activity implements
     protected void onDestroy() {
         Global.debugMemory(debugPrefix, "onDestroy start");
         super.onDestroy();
-        unbindDrawables(findViewById(R.id.root_view));
+
+        // to avoid memory leaks
+        GarbageCollector.freeMemory(findViewById(R.id.root_view));
 
         mGalleryContentQuery = null;
         mGalleryGui = null;
@@ -318,27 +317,6 @@ public class GalleryActivity extends Activity implements
 
         if (title != null) {
             this.setTitle(title + mTitleResultCount);
-        }
-    }
-
-    /** free resources */
-    // http://stackoverflow.com/questions/1147172/what-android-tools-and-methods-work-best-to-find-memory-resource-leaks
-    private void unbindDrawables(View view) {
-        if (view != null) {
-            if (view.getBackground() != null)
-                view.getBackground().setCallback(null);
-
-            if (view instanceof ImageView) {
-                ImageView imageView = (ImageView) view;
-                imageView.setImageBitmap(null);
-            } else if (view instanceof ViewGroup) {
-                ViewGroup viewGroup = (ViewGroup) view;
-                for (int i = 0; i < viewGroup.getChildCount(); i++)
-                    unbindDrawables(viewGroup.getChildAt(i));
-
-                if (!(view instanceof AdapterView))
-                    viewGroup.removeAllViews();
-            }
         }
     }
 }

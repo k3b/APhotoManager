@@ -15,10 +15,10 @@ public class Global {
      * debugEnabled is updated by the SettingsActivity
      */
     public static boolean debugEnabled = true;
-    public static boolean debugEnabledGalleryImage = false;
+    public static boolean debugEnabledViewItem = false;
 
     public static void debugMemory(String modul, String message) {
-        if (Global.debugEnabled) {
+        if (false && Global.debugEnabled) {
             Runtime r = Runtime.getRuntime();
             String formattedMessage = String.format("memory : (total/free/avail) = (%3$dK/%4$dK/%5$dK)\t- %1$s.%2$s",
                     modul, message, r.totalMemory()/1024, r.freeMemory()/1024, r.maxMemory()/1024);

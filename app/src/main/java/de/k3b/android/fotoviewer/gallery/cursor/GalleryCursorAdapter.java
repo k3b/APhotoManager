@@ -27,7 +27,6 @@ import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.OnGalleryInteractionListener;
 import de.k3b.android.fotoviewer.R;
 import de.k3b.android.fotoviewer.queries.Queryable;
-import de.k3b.database.QueryParameter;
 
 /**
  * CursorAdapter that queries MediaStore.Images.Media.EXTERNAL_CONTENT_URI
@@ -191,7 +190,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
 
         // iView.setLayoutParams(new GridView.LayoutParams(200, 200));
         itemCreateCount++;
-        if (Global.debugEnabledGalleryImage) Log.i(Global.LOG_CONTEXT, debugPrefix + "newView #" + itemCreateCount);
+        if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, debugPrefix + "newView #" + itemCreateCount);
         return iView;
     }
 
@@ -216,7 +215,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
         GridCellImageLoadHandler imgHandler = new GridCellImageLoadHandler(context, holder);
         imgHandler.sendEmptyMessage(0);
 
-        if (Global.debugEnabledGalleryImage) Log.i(Global.LOG_CONTEXT, debugPrefix + "bindView for #" + holder.imageID);
+        if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, debugPrefix + "bindView for #" + holder.imageID);
     }
 
     @Override
@@ -256,7 +255,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
         @Override
         public void handleMessage(Message msg) {
             Long id = holder.imageID;
-            if (Global.debugEnabledGalleryImage) Log.i(Global.LOG_CONTEXT, "GridCellImageLoadHandler.handleMessage getThumbnail for #" + id);
+            if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, "GridCellImageLoadHandler.handleMessage getThumbnail for #" + id);
             Bitmap image = getBitmap(id);
             holder.image.setImageBitmap(image);
         }

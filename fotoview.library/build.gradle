@@ -1,7 +1,9 @@
 apply plugin: 'com.android.library'
 
 dependencies {
-    compile 'com.android.support:support-v4:21.0.2'
+    // 21.0.2 seems to have problems with ViewPager
+    // compile 'com.android.support:support-v4:21.0.2'
+    compile 'com.android.support:support-v4:22.2.0'
 }
 
 android {
