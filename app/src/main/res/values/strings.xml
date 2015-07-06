@@ -40,5 +40,7 @@
     <string name="directory_fragment_dialog_title">Select %1$s</string>
     <string name="directory_fragment_requery_title">Loading %1$s</string>
     <string name="err_low_memory">Not enough memory available. Showing reduced preview instead.</string>
+    <string name="loading_image_at_position">"loading(%1$d) ..."</string>
+    <string name="err_load_dir_failed">Loading directory %1$s failed</string>
 
 </resources>

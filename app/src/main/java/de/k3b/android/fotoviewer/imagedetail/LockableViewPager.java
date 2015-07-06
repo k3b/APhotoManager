@@ -1,4 +1,4 @@
-package de.k3b.android.fotoviewer.imageviewer;
+package de.k3b.android.fotoviewer.imagedetail;
 
 import android.content.Context;
 import android.support.v4.view.ViewPager;
@@ -25,16 +25,16 @@ import android.view.MotionEvent;
  *
  * @author Chris Banes
  */
-public class HackyViewPager extends ViewPager {
+public class LockableViewPager extends ViewPager {
 
 	private boolean isLocked;
 	
-    public HackyViewPager(Context context) {
+    public LockableViewPager(Context context) {
         super(context);
         isLocked = false;
     }
 
-    public HackyViewPager(Context context, AttributeSet attrs) {
+    public LockableViewPager(Context context, AttributeSet attrs) {
         super(context, attrs);
         isLocked = false;
     }

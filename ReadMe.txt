@@ -1,18 +1,9 @@
 FotoGallery\ReadMe.txt"
 
-
-
-
 todo
-
-	speicherverbrauch loggen
-	app
 
 	DirectoryPicker
 		dialog: ?? set icon
-
-Architektur:
-	die Activity ist zuständig für das filtern des gallery cursors (und nicht mehr das fragment)
 
 gui
 	Action (menu)
@@ -28,7 +19,8 @@ gui
 				
 		SortBy (popup or combox/spinner) path/date/location/pathlength
 
-https://github.com/chrisbanes/PhotoView
+Used libs
+	https://github.com/chrisbanes/PhotoView
 
 		
 "C:\Progs.Portable\sdk\Android\Android Design - Icons 20131120\Action Bar Icons\holo_light\04_collections_collection\drawable-xxhdpi\ic_action_collection.png"		
@@ -69,11 +61,7 @@ select count(*), strftime('%Y/%m/%d', start_time /1000, 'unixepoch', 'localtime'
 from time_slice group by strftime('%Y/%m/%d', start_time /1000, 'unixepoch', 'localtime') 
 order by strftime('%Y/%m/%d', start_time /1000, 'unixepoch', 'localtime') desc
 
-- DirList Fragment
-	dirTree
-		layout icons child indent
-
-- options: order by (name, date, gps) asc/desc		
+- options: order by (name, date, gps) asc/desc
 - options: choose by date/dir/gps
 
 -----------------------------------------
@@ -92,13 +80,3 @@ order by strftime('%Y/%m/%d', start_time /1000, 'unixepoch', 'localtime') desc
 		- with sub-folder-files (path like xxx%) sort by path length
 		- einstellbar item-layout klein (3), mittel(2), gross(1)
 		
-	- DirList-Textuelle Folder-Sicht
-		todo lib unittest
-		directories als testdaten ausgeben
-			/mnt/.../media
-			/mnt/.../media/photos/0206Greve/Blockland
-			/mnt/.../media/photos/0206Greve/Aumund
-	- foto-gallery
-	- foto-detail
-	
-	

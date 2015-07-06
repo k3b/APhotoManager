@@ -8,9 +8,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import de.k3b.android.fotoviewer.queries.FotoViewerParameter;
+import de.k3b.android.fotoviewer.FotoGalleryActivity;
 import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
-import de.k3b.android.fotoviewer.GalleryActivity;
 import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.R;
 import de.k3b.android.fotoviewer.queries.FotoSql;
@@ -91,11 +90,11 @@ public class DirPickerTestActivity extends Activity implements DirectoryPickerFr
 
         Toast.makeText(this, selectedAbsolutePath, Toast.LENGTH_LONG);
 
-        Intent intent = new Intent(this, GalleryActivity.class);
+        Intent intent = new Intent(this, FotoGalleryActivity.class);
 
         QueryParameterParcelable newQuery = new QueryParameterParcelable(FotoSql.queryDetail);
         FotoSql.addPathWhere(newQuery, selectedAbsolutePath, dirQueryID);
-        intent.putExtra(GalleryActivity.EXTRA_QUERY, newQuery);
+        intent.putExtra(FotoGalleryActivity.EXTRA_QUERY, newQuery);
         String title = selectedAbsolutePath + "/* - " + getString(R.string.foto_gallery);
         intent.putExtra(Intent.EXTRA_TITLE, title);
         //Start details activity

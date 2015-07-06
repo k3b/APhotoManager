@@ -33,12 +33,12 @@ public class FotoSql {
 
     // columns that must be avaulable in the Cursor
     public static final String SQL_COL_PK = MediaStore.Images.Media._ID;
-    public static final String SQL_COL_PATH = MediaStore.Images.Media.DATA;
     public static final String SQL_COL_DISPLAY_TEXT = "disp_txt";
     public static final String SQL_COL_GPS = MediaStore.Images.Media.LONGITUDE;
     public static final String SQL_COL_COUNT = "count";
 
     public static final String DATE_TAKEN = MediaStore.Images.Media.DATE_TAKEN;
+    public static final String SQL_COL_PATH = MediaStore.Images.Media.DATA;
 
     // same format as dir. i.e. description='/2014/12/24/' or '/mnt/sdcard/pictures/'
     public static final String SQL_EXPR_DAY = "strftime('/%Y/%m/%d/', " + DATE_TAKEN + " /1000, 'unixepoch', 'localtime')";

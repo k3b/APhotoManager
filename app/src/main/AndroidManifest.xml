@@ -4,18 +4,15 @@
 
     <!-- to read fotos from gallery in android-4.4 -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
-    <!-- To access Google+ APIs: -->
-    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/foto_gallery"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-        <activity
-            android:name=".directory.DirPickerTestActivity"
+
+        <!-- for internal test only -->
+        <activity android:name=".directory.DirPickerTestActivity"
             android:label="@string/title_activity_directory_chooser" >
             <!--
             <intent-filter>
@@ -25,8 +22,7 @@
             </intent-filter>
             -->
         </activity>
-        <activity
-            android:name=".GalleryActivity"
+        <activity android:name=".FotoGalleryActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -34,8 +30,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".imageviewer.ImageViewActivity" />
-        <activity android:name=".imageviewer.ImageViewPagerActivity" />
+        <activity android:name=".imagedetail.ImageDetailActivityViewPager" android:ellipsize="middle" />
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings" >

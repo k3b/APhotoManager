@@ -13,14 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-package de.k3b.android.fotoviewer.imageviewer;
+package de.k3b.android.fotoviewer.imagedetail;
 
 import android.app.Activity;
 import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.R;
@@ -35,7 +40,7 @@ import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
  * Julia Zudikova
  */
 
-public class ImageViewPagerActivity extends Activity {
+public class ImageDetailActivityViewPager extends Activity {
     public static final String EXTRA_QUERY = "de.k3b.extras.sql";
     public static final String EXTRA_POSITION = "de.k3b.extras.position";
 
@@ -53,12 +58,13 @@ public class ImageViewPagerActivity extends Activity {
 
     @Override
 	public void onCreate(Bundle savedInstanceState) {
-        debugPrefix = "ImageViewPagerActivity#" + (id++)  + " ";
+        debugPrefix = "ImageDetailActivityViewPager#" + (id++)  + " ";
         Global.debugMemory(debugPrefix, "onCreate");
 
-		super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_view_pager);
-        mViewPager = (HackyViewPager) findViewById(R.id.view_pager);
+
+        mViewPager = (LockableViewPager) findViewById(R.id.view_pager);
 		setContentView(mViewPager);
 
         // extra parameter
@@ -87,6 +93,21 @@ public class ImageViewPagerActivity extends Activity {
 			// ((HackyViewPager) mViewPager).setLocked(isLocked);
 		}
 	}
+
+/* these doe not work yet (tested with for android 4.0)
+    manifest         <activity ... android:ellipsize="middle" />
+
+    @Override
+    public void setTitle(CharSequence title) {
+        super.setTitle(title);
+        // http://stackoverflow.com/questions/10779037/set-activity-title-ellipse-to-middle
+        final int actionBarTitle = android.R.id.title; //  Resources.getSystem().getIdentifier("action_bar_title", "id", "android");
+        final TextView titleView = (TextView)  this.getWindow().findViewById(actionBarTitle);
+        if ( titleView != null ) {
+            titleView.setEllipsize(TextUtils.TruncateAt.MIDDLE);
+        }
+    }
+*/
 
     @Override
     protected void onPause () {
@@ -127,12 +148,12 @@ public class ImageViewPagerActivity extends Activity {
     
     private void toggleViewPagerScrolling() {
     	if (isViewPagerActive()) {
-    		((HackyViewPager) mViewPager).toggleLock();
+    		((LockableViewPager) mViewPager).toggleLock();
     	}
     }
     
     private boolean isViewPagerActive() {
-    	return (mViewPager != null && mViewPager instanceof HackyViewPager);
+    	return (mViewPager != null && mViewPager instanceof LockableViewPager);
     }
 
 	@Override

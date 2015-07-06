@@ -316,7 +316,8 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         }
 
         mDirTypId = dirTypId;
-        mNavigation = new DirectoryNavigator(root);
+        if (root != null)
+            mNavigation = new DirectoryNavigator(root);
 
         navigateTo(initialAbsolutePath);
     }

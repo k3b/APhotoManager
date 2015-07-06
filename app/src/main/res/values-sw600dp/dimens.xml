@@ -3,4 +3,7 @@
     <dimen name="grid_cell_height">200dp</dimen>
     <dimen name="grid_cell_icon_width">60dp</dimen>
     <dimen name="grid_cell_icon_height">60dp</dimen>
+
+    <!-- used to manually calculate setEllipsize(TextUtils.TruncateAt.MIDDLE) for title -->
+    <integer name="title_length_in_chars">40</integer>
 </resources>

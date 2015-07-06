@@ -12,10 +12,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import de.k3b.android.fotoviewer.directory.DirectoryGui;
 import de.k3b.android.fotoviewer.directory.DirectoryLoaderTask;
-import de.k3b.android.fotoviewer.imageviewer.ImageViewPagerActivity;
+import de.k3b.android.fotoviewer.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
 import de.k3b.android.fotoviewer.directory.DirectoryPickerFragment;
 import de.k3b.android.fotoviewer.queries.FotoSql;
@@ -24,11 +25,11 @@ import de.k3b.android.fotoviewer.queries.Queryable;
 import de.k3b.android.util.GarbageCollector;
 import de.k3b.io.Directory;
 
-public class GalleryActivity extends Activity implements
+public class FotoGalleryActivity extends Activity implements
         OnGalleryInteractionListener, DirectoryPickerFragment.OnDirectoryInteractionListener {
     private static final String debugPrefix = "GalA-";
 
-    /** intent parameters supported by GalleryActivity: EXTRA_... */
+    /** intent parameters supported by FotoGalleryActivity: EXTRA_... */
     public static final String EXTRA_QUERY = "gallery";
     public static final String EXTRA_TITLE = Intent.EXTRA_TITLE;
 
@@ -51,13 +52,15 @@ public class GalleryActivity extends Activity implements
 
     private Directory mDirectoryRoot = null;
 
+    /** true if activity should show navigator dialog after loading mDirectoryRoot is complete */
+    private boolean mMustShowNavigator = false;
+
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         saveSettings();
 
-
         // save InstanceState
-        savedInstanceState.putInt(STATE_DirQueryID, mDirQueryID);
+        savedInstanceState.putInt(STATE_DirQueryID, getDirQueryID());
         savedInstanceState.putString(STATE_CurrentPath, mCurrentPath);
 
         super.onSaveInstanceState(savedInstanceState);
@@ -67,7 +70,8 @@ public class GalleryActivity extends Activity implements
         // save settings
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor edit = sharedPref.edit();
-        edit.putInt(STATE_DirQueryID, mDirQueryID);
+
+        edit.putInt(STATE_DirQueryID, getDirQueryID());
         edit.putString(STATE_CurrentPath, mCurrentPath);
         edit.commit();
     }
@@ -76,12 +80,12 @@ public class GalleryActivity extends Activity implements
     private void loadSettingsAndInstanceState(Bundle savedInstanceState) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         mCurrentPath = sharedPref.getString(STATE_CurrentPath, mCurrentPath);
-        mDirQueryID = sharedPref.getInt(STATE_DirQueryID, mDirQueryID);
+        mDirQueryID = sharedPref.getInt(STATE_DirQueryID, getDirQueryID());
 
         // instance state overrides settings
         if (savedInstanceState != null) {
             mCurrentPath = savedInstanceState.getString(STATE_CurrentPath, mCurrentPath);
-            mDirQueryID = savedInstanceState.getInt(STATE_DirQueryID,mDirQueryID);
+            mDirQueryID = savedInstanceState.getInt(STATE_DirQueryID, getDirQueryID());
         }
 
         // extra parameter
@@ -115,19 +119,6 @@ public class GalleryActivity extends Activity implements
                 fragmentManager.beginTransaction().remove((Fragment) mDirGui).commit();
                 mDirGui = null;
             }
-        }
-
-        // load directoryRoot in background
-        final QueryParameterParcelable currentDirContentQuery = FotoSql.getQuery(this.mDirQueryID);
-        this.mDirQueryID = (currentDirContentQuery != null) ? currentDirContentQuery.getID() : FotoSql.QUERY_TYPE_UNDEFINED;
-
-        if (currentDirContentQuery != null) {
-            DirectoryLoaderTask loader = new DirectoryLoaderTask(this, debugPrefix) {
-                protected void onPostExecute(Directory directoryRoot) {
-                    onDirectoryDataLoadComplete(directoryRoot);
-                }
-            };
-            loader.execute(currentDirContentQuery);
         }
 
         setTitle();
@@ -199,12 +190,30 @@ public class GalleryActivity extends Activity implements
     }
 
     private void openNavigator() {
-        final FragmentManager manager = getFragmentManager();
-        DirectoryPickerFragment dirDialog = new DirectoryPickerFragment(); // (DirectoryPickerFragment) manager.findFragmentByTag(DLG_NAVIGATOR_TAG);
-        dirDialog.defineDirectoryNavigation(mDirectoryRoot, mDirQueryID, mCurrentPath);
+        if (mDirectoryRoot == null) {
+            // not loaded yet. load directoryRoot in background
+            final QueryParameterParcelable currentDirContentQuery = FotoSql.getQuery(this.getDirQueryID());
+            this.mDirQueryID = (currentDirContentQuery != null) ? currentDirContentQuery.getID() : FotoSql.QUERY_TYPE_UNDEFINED;
 
-        dirDialog.show(manager, DLG_NAVIGATOR_TAG);
+            if (currentDirContentQuery != null) {
+                this.mMustShowNavigator = true;
+                DirectoryLoaderTask loader = new DirectoryLoaderTask(this, debugPrefix) {
+                    protected void onPostExecute(Directory directoryRoot) {
+                        onDirectoryDataLoadComplete(directoryRoot);
+                    }
+                };
+                loader.execute(currentDirContentQuery);
+            } else {
+                Log.e(Global.LOG_CONTEXT, debugPrefix + " this.mDirQueryID undefined " + this.mDirQueryID);
+            }
+        } else {
+            this.mMustShowNavigator = false;
+            final FragmentManager manager = getFragmentManager();
+            DirectoryPickerFragment dirDialog = new DirectoryPickerFragment(); // (DirectoryPickerFragment) manager.findFragmentByTag(DLG_NAVIGATOR_TAG);
+            dirDialog.defineDirectoryNavigation(mDirectoryRoot, getDirQueryID(), mCurrentPath);
 
+            dirDialog.show(manager, DLG_NAVIGATOR_TAG);
+        }
     }
 
     private void openFilter() {
@@ -224,10 +233,10 @@ public class GalleryActivity extends Activity implements
         Global.debugMemory(debugPrefix, "onGalleryImageClick");
         Intent intent;
         //Create intent
-        intent = new Intent(this, ImageViewPagerActivity.class);
+        intent = new Intent(this, ImageDetailActivityViewPager.class);
 
-        intent.putExtra(ImageViewPagerActivity.EXTRA_QUERY, calculateEffectiveGalleryContentQuery() );
-        intent.putExtra(ImageViewPagerActivity.EXTRA_POSITION, position);
+        intent.putExtra(ImageDetailActivityViewPager.EXTRA_QUERY, calculateEffectiveGalleryContentQuery() );
+        intent.putExtra(ImageDetailActivityViewPager.EXTRA_POSITION, position);
         intent.setData(imageUri);
 
         startActivity(intent);
@@ -271,7 +280,7 @@ public class GalleryActivity extends Activity implements
 
     private void navigateTo(String selectedAbsolutePath, int queryTypeId) {
         if (mCurrentPath.compareTo(selectedAbsolutePath) != 0) {
-            Log.d(Global.LOG_CONTEXT, "GalleryActivity.navigateTo " + selectedAbsolutePath + " from " + mCurrentPath);
+            Log.d(Global.LOG_CONTEXT, "FotoGalleryActivity.navigateTo " + selectedAbsolutePath + " from " + mCurrentPath);
             mCurrentPath = selectedAbsolutePath;
             mDirQueryID = queryTypeId;
             setTitle();
@@ -290,11 +299,20 @@ public class GalleryActivity extends Activity implements
     }
 
     private void onDirectoryDataLoadComplete(Directory directoryRoot) {
-        mDirectoryRoot = directoryRoot;
-        if ((mDirGui != null) && (mCurrentPath != null)) {
-            mDirGui.defineDirectoryNavigation(directoryRoot, mDirQueryID, mCurrentPath);
+        if (directoryRoot == null) {
+            final String message = getString(R.string.err_load_dir_failed, getString(this.getDirQueryID()));
+            Toast.makeText(this, message,Toast.LENGTH_LONG).show();
+        } else {
+            mDirectoryRoot = directoryRoot;
+            if ((mDirGui != null) && (mCurrentPath != null)) {
+                mDirGui.defineDirectoryNavigation(directoryRoot, getDirQueryID(), mCurrentPath);
+            }
+            Global.debugMemory(debugPrefix, "onDirectoryDataLoadComplete");
+
+            if ((mDirectoryRoot != null) && (this.mMustShowNavigator)) {
+                openNavigator();
+            }
         }
-        Global.debugMemory(debugPrefix, "onDirectoryDataLoadComplete");
     }
 
 
@@ -303,20 +321,28 @@ public class GalleryActivity extends Activity implements
         if (mGalleryContentQuery == null) return null;
         QueryParameterParcelable result = new QueryParameterParcelable(mGalleryContentQuery);
 
-        if ((mDirQueryID != 0) && (mCurrentPath != null)) {
-            FotoSql.addPathWhere(result, mCurrentPath, mDirQueryID);
+        if (mCurrentPath != null) {
+            FotoSql.addPathWhere(result, mCurrentPath, getDirQueryID());
         }
         return result;
     }
 
     private void setTitle() {
         String title = getIntent().getStringExtra(EXTRA_TITLE);
-        if ((title == null) && (mDirQueryID != 0) && (mCurrentPath != null)) {
-            title = getString(mDirQueryID) + " - " + mCurrentPath;
+        if ((title == null) && (mCurrentPath != null)) {
+            title = getString(getDirQueryID()) + " - " + mCurrentPath;
         }
 
         if (title != null) {
             this.setTitle(title + mTitleResultCount);
         }
+    }
+
+    /** one of the FotoSql.QUERY_TYPE_xxx values. if undefined use default */
+    private int getDirQueryID() {
+        if (mDirQueryID == FotoSql.QUERY_TYPE_UNDEFINED)
+            return FotoSql.QUERY_TYPE_GROUP_DEFAULT;
+
+        return mDirQueryID;
     }
 }

@@ -1,8 +1,7 @@
-package de.k3b.android.fotoviewer.imageviewer;
+package de.k3b.android.fotoviewer.imagedetail;
 
 import android.app.Activity;
 import android.app.LoaderManager;
-import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
@@ -17,8 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import java.io.IOException;
-
 import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.R;
 import de.k3b.android.fotoviewer.queries.FotoSql;
@@ -28,22 +25,34 @@ import de.k3b.android.util.GarbageCollector;
 import uk.co.senab.photoview.PhotoView;
 
 /**
+ * Adapter for android.support.v4.view.ViewPager that allows swiping next/previous image.<br>
+ *
+ * Translates between position in ViewPager and content page content with image
  * Created by k3b on 04.07.2015.
  */
 public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Queryable {
+
     // Identifies a particular Loader or a LoaderManager being used in this component
     private static int MY_LOADER_ID = 0;
-    private static final boolean SYNC = false;
 
+    // debug support
     private static int id = 0;
     private final String debugPrefix;
-    private QueryParameterParcelable parameters;
-    private Cursor mCursor = null;
+    private static final boolean SYNC = false; // true: sync loading is much easier to debug.
+
+    private final Activity mActivity;
+    // workaround because setEllipsize(TextUtils.TruncateAt.MIDDLE) is not possible for title
+    private final int mMaxTitleLength;
+
+    private QueryParameterParcelable parameters; // defining sql to get data
+    private Cursor mCursor = null; // the content of the page
     private boolean mDataValid = true;
 
     public ImagePagerAdapterFromCursor(final Activity context, QueryParameterParcelable parameters, String name) {
+        mActivity = context;
         debugPrefix = "ImagePagerAdapterFromCursor#" + (id++) + "@" + name + " ";
         Global.debugMemory(debugPrefix, "ctor");
+        mMaxTitleLength = context.getResources().getInteger(R.integer.title_length_in_chars);
 
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, debugPrefix + "()");
@@ -55,7 +64,8 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
     }
 
     /**
-     * Interface Queryable: Initiates a database requery in the background
+     * Interface Queryable:
+     * Initiates a database requery in a background thread. onLoadFinished() is called when done.
      */
     @Override
     public void requery(final Activity context, QueryParameterParcelable parameters) {
@@ -68,7 +78,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
     }
 
     /**
-     * Initiates a database requery in the background
+     * Initiates a database requery in a background thread. onLoadFinished() is called when done.
      */
     private void requery(final Activity context, final String[] sqlProjection, final String from, final String sqlWhereStatement, final String sqlSortOrder, final String... sqlWhereParameters) {
 
@@ -119,6 +129,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
         }
     }
 
+    /** is called in gui thread when backgroud-threat loading has finished */
     private void onLoadFinished(Cursor cursor) {
         int resultCount = (cursor == null) ? 0 : cursor.getCount();
         if (Global.debugEnabled) {
@@ -163,6 +174,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
         return oldCursor;
     }
 
+    /** debug support for logging current cursor content */
     private String debugCursor(Cursor cursor, int maxRows, String delim, String... colmnNames) {
         StringBuilder result = new StringBuilder();
         if ((cursor != null) && (!cursor.isClosed())) {
@@ -180,18 +192,67 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
         return result.toString();
     }
 
-
+    /**
+     * Implementation for PagerAdapter:
+     * Return the number of views available.
+     */
     @Override
     public int getCount() {
-        return (mDataValid && (mCursor != null)) ? mCursor.getCount() : 0;
+        return (this.mDataValid && (this.mCursor != null)) ? this.mCursor.getCount() : 0;
     }
 
+    /**
+     * Implementation for PagerAdapter:
+     * This method may be called by the ViewPager to obtain a title string
+     * to describe the specified page. This method may return null
+     * indicating no title for this page. The default implementation returns
+     * null.
+     *
+     * @param position The position of the title requested
+     * @return A title for the requested page
+     */
+    public CharSequence getPageTitle(int position) {
+        Cursor cursor = getCursorAt(position);
+        if (cursor != null) {
+            String name = cursor.getString(cursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT));
+            if (name != null) {
+                StringBuilder result = new StringBuilder();
+
+                if (Global.debugEnabled) {
+                    long imageID = cursor.getLong(cursor.getColumnIndex(FotoSql.SQL_COL_PK));
+                    result.append("#").append(imageID).append(":");
+                }
+
+                // workaround because setEllipsize(TextUtils.TruncateAt.MIDDLE) is not possible for title
+                if (name.length() > mMaxTitleLength) {
+                    result.append("..").append(name.substring(name.length() - (mMaxTitleLength - 2)));
+                } else {
+                    result.append(name);
+                }
+
+                return result.toString();
+            }
+        }
+        return mActivity.getString(R.string.loading_image_at_position, position);
+    }
+
+    /**
+     * Implementation for PagerAdapter:
+     * Create the page for the given position.  The adapter is responsible
+     * for adding the view to the container given here, although it only
+     * must ensure this is done by the time it returns from
+     * {@link #finishUpdate(ViewGroup)}.
+     *
+     * @param container The containing View in which the page will be shown.
+     * @param position The page position to be instantiated.
+     * @return Returns an Object representing the new page.  This does not
+     * need to be a View, but can be some other container of the page.
+     */
     @Override
     public View instantiateItem(ViewGroup container, int position) {
-        if (mDataValid && (mCursor != null)) {
-            mCursor.moveToPosition(position);
-
-            long imageID = mCursor.getLong(mCursor.getColumnIndex(FotoSql.SQL_COL_PK));
+        Cursor cursor = getCursorAt(position);
+        if (cursor != null) {
+            long imageID = cursor.getLong(cursor.getColumnIndex(FotoSql.SQL_COL_PK));
 
             Uri uri = getUri(imageID);
 
@@ -216,6 +277,15 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
 
             return llImage;
         */
+        }
+        return null;
+    }
+
+    /** internal helper. return null if position is not available */
+    private Cursor getCursorAt(int position) {
+        if (this.mDataValid && (this.mCursor != null)) {
+            this.mCursor.moveToPosition(position);
+            return this.mCursor;
         }
         return null;
     }
@@ -250,6 +320,17 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI.toString() + "/" + imageID);
     }
 
+    /**
+     * Implementation for PagerAdapter:
+     * Remove a page for the given position.  The adapter is responsible
+     * for removing the view from its container, although it only must ensure
+     * this is done by the time it returns from {@link #finishUpdate(ViewGroup)}.
+     *
+     * @param container The containing View from which the page will be removed.
+     * @param position The page position to be removed.
+     * @param object The same object that was returned by
+     * {@link #instantiateItem(View, int)}.
+     */
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
         if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, debugPrefix + "destroyItem(#" + position +") " + object);
@@ -257,9 +338,34 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
         GarbageCollector.freeMemory((View) object); // to reduce memory leaks
     }
 
+    /**
+     * Implementation for PagerAdapter:
+     * Determines whether a page View is associated with a specific key object
+     * as returned by {@link #instantiateItem(ViewGroup, int)}. This method is
+     * required for a PagerAdapter to function properly.
+     *
+     * @param view Page View to check for association with <code>object</code>
+     * @param object Object to check for association with <code>view</code>
+     * @return true if <code>view</code> is associated with the key object <code>object</code>
+     */
     @Override
     public boolean isViewFromObject(View view, Object object) {
         return view == object;
+    }
+
+    /**
+     * Implementation for PagerAdapter:
+     * Called to inform the adapter of which item is currently considered to
+     * be the "primary", that is the one show to the user as the current page.
+     *
+     * @param container The containing View from which the page will be removed.
+     * @param position The page position that is now the primary.
+     * @param object The same object that was returned by
+     * {@link #instantiateItem(View, int)}.
+     */
+    public void setPrimaryItem(ViewGroup container, int position, Object object) {
+        super.setPrimaryItem(container, position, object);
+        this.mActivity.setTitle(this.getPageTitle(position));
     }
 
 }
