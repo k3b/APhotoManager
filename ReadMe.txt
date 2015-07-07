@@ -1,5 +1,56 @@
 FotoGallery\ReadMe.txt"
 
+add sorter
+
+	file:///C:/Program%20Files%20%28x86%29/sdk/Android/sdk/docs/guide/topics/ui/actionbar.html#ActionView
+>>	file:///C:/Program%20Files%20%28x86%29/sdk/Android/sdk/docs/guide/topics/ui/actionbar.html#Dropdown
+
+		List<Column> columns = columnList.getColumns();
+		SpinnerAdapter columnsAdapter = new ArrayAdapter<Column>(getActivity(), R.layout.simple_spinner_item, columns);
+		SpinnerAdapter columnsSortByAdapter = new ArrayAdapter<Column>(getActivity(), R.layout.simple_spinner_item, columns);
+		spinnerColumns.setAdapter(columnsAdapter);
+		spinnerSortByColumns.setAdapter(columnsSortByAdapter);
+
+-----------------
+
+The basic procedure to enable drop-down navigation is:
+
+    1 Create a SpinnerAdapter that provides the list of selectable items for the drop-down and the layout to use when drawing each item in the list.
+
+		SpinnerAdapter mSpinnerAdapter = ArrayAdapter.createFromResource(this,
+				R.array.sort_items, android.R.layout.simple_spinner_dropdown_item);
+
+    2 Implement ActionBar.OnNavigationListener to define the behavior that occurs when the user selects an item from the list.
+    3 During your activity's onCreate() method, enable the action bar's drop-down list by calling setNavigationMode(NAVIGATION_MODE_LIST).
+    4 Set the callback for the drop-down list with setListNavigationCallbacks(). For example:
+
+    actionBar.setListNavigationCallbacks(mSpinnerAdapter, mNavigationCallback);
+
+		see "D:\prj\eve\android\prj\fotos-android.wrk\FotoGallery\downloads\sorter-settings\GalleryActionBar.java"
+
+		mOnNavigationListener = new OnNavigationListener() {
+		  // Get the same strings provided for the drop-down's ArrayAdapter
+		  String[] strings = getResources().getStringArray(R.array.sort_items);
+
+		  @Override
+		  public boolean onNavigationItemSelected(int position, long itemId) {
+			// Create new fragment from our own Fragment class
+			ListContentFragment newFragment = new ListContentFragment();
+			FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+
+			// Replace whatever is in the fragment container with this fragment
+			// and give the fragment a tag name equal to the string at the position
+			// selected
+			ft.replace(R.id.fragment_container, newFragment, strings[position]);
+
+			// Apply changes
+			ft.commit();
+			return true;
+		  }
+		};
+
+
+
 todo
 
 	DirectoryPicker

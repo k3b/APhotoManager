@@ -24,10 +24,12 @@
         <item>@drawable/image_9</item>
     </string-array>
 
-    <string name="foto_detail">Details</string>
-    <string name="foto_gallery">Fotos</string>
-    <string name="directory_gallery">Album</string>
-    <string name="date_gallery">Date</string>
+    <string name="gallery_foto">Fotos</string>
+    <string name="gallery_directory">Album</string>
+    <string name="gallery_date">Date</string>
+    <string name="gallery_location">Place</string>
+    <string name="sort_by_name_len">Lenght</string>
+
     <string name="action_settings">Settings</string>
     <string name="title_activity_directory_chooser">Choose Directory with Images</string>
     <string name="no_dir_selected">Select Directory with Images to enable OK</string>
@@ -42,5 +44,16 @@
     <string name="err_low_memory">Not enough memory available. Showing reduced preview instead.</string>
     <string name="loading_image_at_position">"loading(%1$d) ..."</string>
     <string name="err_load_dir_failed">Loading directory %1$s failed</string>
+
+    <string-array name="sort_items">
+        <item>Name Ascending</item>
+        <item>Name Descending</item>
+        <item>Date Ascending</item>
+        <item>Date Descending</item>
+        <item>Location Ascending</item>
+        <item>Location Descending</item>
+        <item>Name-length Ascending</item>
+        <item>Name-length Descending</item>
+    </string-array>
 
 </resources>

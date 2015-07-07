@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -45,7 +46,6 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
     private final String debugPrefix;
 
     // for debugging: counts how many cell elements were created
-    private int itemCreateCount = 0;
     private QueryParameterParcelable parameters = null;
     private final Drawable imageNotLoadedYet;
 
@@ -186,11 +186,11 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         View iView = View.inflate(context, R.layout.gallery_grid_item, null);
-        iView.setTag(new GridCellViewHolder(iView));
+        GridCellViewHolder holder = new GridCellViewHolder(iView);
+        iView.setTag(holder);
 
         // iView.setLayoutParams(new GridView.LayoutParams(200, 200));
-        itemCreateCount++;
-        if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, debugPrefix + "newView #" + itemCreateCount);
+        if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, debugPrefix + "newView " + holder);
         return iView;
     }
 
@@ -198,7 +198,6 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         final GridCellViewHolder holder = (GridCellViewHolder) view.getTag();
-        holder.imageID = cursor.getLong(cursor.getColumnIndex(FotoSql.SQL_COL_PK));
         long count = cursor.getLong(cursor.getColumnIndex(FotoSql.SQL_COL_COUNT));
         boolean gps = !cursor.isNull(cursor.getColumnIndex(FotoSql.SQL_COL_GPS));
 
@@ -210,12 +209,9 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
         if (gps) description += "#";
         holder.description.setText(description);
         holder.icon.setVisibility((count > 1) ? View.VISIBLE : View.GONE);
-        holder.image.setImageDrawable(imageNotLoadedYet);
 
-        GridCellImageLoadHandler imgHandler = new GridCellImageLoadHandler(context, holder);
-        imgHandler.sendEmptyMessage(0);
-
-        if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, debugPrefix + "bindView for #" + holder.imageID);
+        holder.loadImageInBackground(cursor.getLong(cursor.getColumnIndex(FotoSql.SQL_COL_PK)),imageNotLoadedYet );
+        if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, debugPrefix + "bindView for " + holder);
     }
 
     @Override
@@ -225,49 +221,88 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
 
     /** data belonging to gridview element */
     static class GridCellViewHolder {
+        private static int lastInstanceNo = 0;
+        private final String debugPrefix;
+
         final public ImageView image;
         final public ImageView icon;
         final public TextView description;
+        private DownloadImageTask downloader = null;
 
         /** onClick add this as sql-where-filter */
         public String filter;
 
         /** for delay loading */
-        public long imageID;
+        public long imageID = 0;
 
         GridCellViewHolder(View parent) {
+            lastInstanceNo++;
+            debugPrefix = "Holder@" + lastInstanceNo + "#";
+
             this.description = (TextView) parent.findViewById(R.id.text);
             this.image = (ImageView) parent.findViewById(R.id.image);
             this.icon = (ImageView) parent.findViewById(R.id.icon);
         };
-    }
-
-    /** Handler to load image in Background */
-    static class GridCellImageLoadHandler extends Handler {
-        private GridCellViewHolder holder;
-        private Context mContext;
-
-        public GridCellImageLoadHandler(Context c, GridCellViewHolder v) {
-            holder = v;
-            mContext = c;
-        }
 
         @Override
-        public void handleMessage(Message msg) {
-            Long id = holder.imageID;
-            if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, "GridCellImageLoadHandler.handleMessage getThumbnail for #" + id);
-            Bitmap image = getBitmap(id);
-            holder.image.setImageBitmap(image);
+        public String toString() {
+            return debugPrefix + this.imageID;
         }
 
-        public Bitmap getBitmap(Long id) {
+        public void loadImageInBackground(long imageID, Drawable imageNotLoadedYet) {
+            if (imageID != this.imageID) {
+                // to avoid reload the same again
+                if (downloader != null) {
+                    downloader.cancel(true);
+                    downloader = null;
+                    if (Global.debugEnabledViewItem)
+                        Log.i(Global.LOG_CONTEXT, "loadImageInBackground.cancel " + this);
+                }
+
+                this.imageID = imageID;
+                image.setImageDrawable(imageNotLoadedYet);
+                this.downloader = new DownloadImageTask();
+                if (Global.debugEnabledViewItem)
+                    Log.i(Global.LOG_CONTEXT, "loadImageInBackground.execute " + this);
+                downloader.execute(this);
+            }
+        }
+    }
+
+	// new DownloadImageTask(mContext).execute(holder);
+	// from https://developer.android.com/guide/components/processes-and-threads.html#WorkerThreads
+	private static class DownloadImageTask extends AsyncTask<GridCellViewHolder, Void, Bitmap> {
+        private GridCellViewHolder holder;
+
+		/** The system calls this to perform work in a worker thread and
+		  * delivers it the parameters given to AsyncTask.execute() */
+		protected Bitmap doInBackground(GridCellViewHolder... holders) {
+            this.holder = holders[0];
+            if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, "GridCellImageLoadHandler.handleMessage getThumbnail for " + holder);
+            Bitmap image = getBitmap(holder.imageID);
+			return image;
+        }
+
+        private Bitmap getBitmap(Long id) {
             final Bitmap thumbnail = MediaStore.Images.Thumbnails.getThumbnail(
-                    mContext.getContentResolver(),
+                    holder.image.getContext().getContentResolver(),
                     id,
                     MediaStore.Images.Thumbnails.MICRO_KIND,
                     new BitmapFactory.Options());
 
             return thumbnail;
         }
-    }
+
+		/** The system calls this to perform work in the UI thread and delivers
+		  * the result from doInBackground() */
+		protected void onPostExecute(Bitmap image) {
+            holder.downloader = null;
+            if (!isCancelled()) {
+                if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, "loadImageInBackground.done " + holder);
+                this.holder.image.setImageBitmap(image);
+            }
+            this.holder = null;
+		}
+	}
+	
 }

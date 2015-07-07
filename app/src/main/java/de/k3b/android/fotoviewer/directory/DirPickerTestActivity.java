@@ -95,7 +95,7 @@ public class DirPickerTestActivity extends Activity implements DirectoryPickerFr
         QueryParameterParcelable newQuery = new QueryParameterParcelable(FotoSql.queryDetail);
         FotoSql.addPathWhere(newQuery, selectedAbsolutePath, dirQueryID);
         intent.putExtra(FotoGalleryActivity.EXTRA_QUERY, newQuery);
-        String title = selectedAbsolutePath + "/* - " + getString(R.string.foto_gallery);
+        String title = selectedAbsolutePath + "/* - " + getString(R.string.gallery_foto);
         intent.putExtra(Intent.EXTRA_TITLE, title);
         //Start details activity
         startActivity(intent);
