@@ -41,6 +41,7 @@ import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
  */
 
 public class ImageDetailActivityViewPager extends Activity {
+    private static final String INSTANCE_STATE_LAST_SCROLL_POSITION = "lastScrollPosition";
     public static final String EXTRA_QUERY = "de.k3b.extras.sql";
     public static final String EXTRA_POSITION = "de.k3b.extras.position";
 
@@ -55,6 +56,7 @@ public class ImageDetailActivityViewPager extends Activity {
     private static int id = 1;
     private String debugPrefix;
     private DataSetObserver loadCompleteHandler;
+    private int mInitialPosition;
 
     @Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -87,10 +89,10 @@ public class ImageDetailActivityViewPager extends Activity {
         };
         mAdapter.registerDataSetObserver(loadCompleteHandler);
         mViewPager.setAdapter(mAdapter);
-		
-		if (savedInstanceState != null) {
-			// boolean isLocked = savedInstanceState.getBoolean(ISLOCKED_ARG, false);
-			// ((HackyViewPager) mViewPager).setLocked(isLocked);
+
+        this.mInitialPosition = getIntent().getIntExtra(EXTRA_POSITION, this.mInitialPosition);
+        if (savedInstanceState != null) {
+            mInitialPosition = savedInstanceState.getInt(INSTANCE_STATE_LAST_SCROLL_POSITION, this.mInitialPosition);
 		}
 	}
 
@@ -137,7 +139,6 @@ public class ImageDetailActivityViewPager extends Activity {
     }
 
     private void onLoadCompleted() {
-        int mInitialPosition = getIntent().getIntExtra(EXTRA_POSITION, 0);
         mViewPager.setCurrentItem(mInitialPosition);
     }
 
@@ -159,7 +160,7 @@ public class ImageDetailActivityViewPager extends Activity {
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		if (isViewPagerActive()) {
-			// outState.putBoolean(ISLOCKED_ARG, ((HackyViewPager) mViewPager).isLocked());
+            outState.putInt(INSTANCE_STATE_LAST_SCROLL_POSITION, mViewPager.getCurrentItem());
     	}
 		super.onSaveInstanceState(outState);
 	}

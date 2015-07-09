@@ -1,6 +1,7 @@
 package de.k3b.android.fotoviewer.gallery.cursor;
 
 import android.app.Activity;
+import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -37,21 +38,13 @@ import de.k3b.io.Directory;
  * create an instance of this fragment.
  */
 public class GalleryCursorFragment extends Fragment  implements Queryable, DirectoryGui {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
+    private static final String INSTANCE_STATE_LAST_VISIBLE_POSITION = "lastVisiblePosition";
 
     private HorizontalScrollView parentPathBarScroller;
     private LinearLayout parentPathBar;
 
     private HorizontalScrollView childPathBarScroller;
     private LinearLayout childPathBar;
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     // for debugging
     private static int id = 1;
@@ -64,22 +57,20 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private QueryParameterParcelable mGalleryContentQuery;
 
     private DirectoryPickerFragment.OnDirectoryInteractionListener mDirectoryListener;
+    private int mLastVisiblePosition = -1;
+    private int mInitialPositionY = 0;
 
     /**************** construction ******************/
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
      * @return A new instance of fragment GalleryCursorFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static GalleryCursorFragment newInstance(String param1, String param2) {
+    public static GalleryCursorFragment newInstance() {
         GalleryCursorFragment fragment = new GalleryCursorFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -100,21 +91,38 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     public void onCreate(Bundle savedInstanceState) {
         Global.debugMemory(debugPrefix, "onCreate");
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mLastVisiblePosition = galleryView.getLastVisiblePosition();
+        outState.putInt(INSTANCE_STATE_LAST_VISIBLE_POSITION, mLastVisiblePosition);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Global.debugMemory(debugPrefix, "onCreateView");
+        if (savedInstanceState != null) {
+            this.mLastVisiblePosition = savedInstanceState.getInt(INSTANCE_STATE_LAST_VISIBLE_POSITION, this.mLastVisiblePosition);
+        }
+
         // Inflate the layout for this fragment
         View result = inflater.inflate(R.layout.fragment_gallery, container, false);
         galleryView = (GridView) result.findViewById(R.id.gridView);
 
         galleryAdapter = new GalleryCursorAdapter(this.getActivity(), mGalleryContentQuery, debugPrefix);
+        galleryAdapter.registerDataSetObserver(new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                super.onChanged();
+                if (mLastVisiblePosition > 0) {
+                    galleryView.smoothScrollToPosition(mLastVisiblePosition);
+                    mLastVisiblePosition = -1;
+                }
+            }
+        });
         galleryView.setAdapter(galleryAdapter);
 
         galleryView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -171,12 +179,13 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         System.gc();
         Global.debugMemory(debugPrefix, "onDestroy after");
     }
-        /**
-         * interface Queryable: Initiates a database requery in the background
-         *
-         * @param context
-         * @param parameters
-         */
+
+    /**
+     * interface Queryable: Initiates a database requery in the background
+     *
+     * @param context
+     * @param parameters
+     */
     @Override
     public void requery(Activity context, QueryParameterParcelable parameters) {
         if (Global.debugEnabled) {

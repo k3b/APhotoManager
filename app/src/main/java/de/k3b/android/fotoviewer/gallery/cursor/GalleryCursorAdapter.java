@@ -253,7 +253,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
             if (imageID != this.imageID) {
                 // to avoid reload the same again
                 if (downloader != null) {
-                    downloader.cancel(true);
+                    downloader.cancel(false);
                     downloader = null;
                     if (Global.debugEnabledViewItem)
                         Log.i(Global.LOG_CONTEXT, "loadImageInBackground.cancel " + this);
