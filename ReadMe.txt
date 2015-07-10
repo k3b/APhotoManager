@@ -1,24 +1,5 @@
 FotoGallery\ReadMe.txt"
 
-v bug imageview rotate selected image lost back to initial where it was started with
-? bug gallery rotate selected image lost back to first
-	how to get/set first visible grid item-pos?	
-			 setSelection(int position)
-			Sets the currently selected ite
-
-			void 	setSelectionFromTop(int position, int y)
-			Sets the selected item and positions the selection y pixels from the top edge of the ListView. 
-
-			public void smoothScrollToPosition (int position)
-
-			public void smoothScrollToPositionFromTop (int position, int offset, int duration)
-
-			int 	pointToPosition(int x, int y)
-
-			setSelectionFromTop(int position, int y)
-	
-	
-	
 add sorter
 
 	file:///C:/Program%20Files%20%28x86%29/sdk/Android/sdk/docs/guide/topics/ui/actionbar.html#ActionView

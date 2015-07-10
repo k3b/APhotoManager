@@ -14,6 +14,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import de.k3b.android.fotoviewer.queries.FotoSql;
 import de.k3b.android.fotoviewer.queries.FotoViewerParameter;
 import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.R;
@@ -143,7 +144,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         if (mDirTypId != 0) {
             String title = mContext.getString(
                     R.string.directory_fragment_dialog_title,
-                    mContext.getString(mDirTypId));
+                    FotoSql.getName(mContext,mDirTypId));
             getDialog().setTitle(title);
             // no api for setIcon ????
         }

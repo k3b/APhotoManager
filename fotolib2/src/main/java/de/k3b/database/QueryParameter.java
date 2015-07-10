@@ -118,6 +118,10 @@ public class QueryParameter {
         return this;
     }
 
+    public QueryParameter replaceOrderBy(String... orders) {
+        mOrderBy.clear();
+        return addOrderBy(orders);
+    }
     public QueryParameter addOrderBy(String... orders) {
         return addToList(mOrderBy, false, orders);
     }

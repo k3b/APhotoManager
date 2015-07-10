@@ -25,7 +25,8 @@
     </string-array>
 
     <string name="gallery_foto">Fotos</string>
-    <string name="gallery_directory">Album</string>
+    <string name="gallery_album">Album</string>
+    <string name="gallery_file_name">Name</string>
     <string name="gallery_date">Date</string>
     <string name="gallery_location">Place</string>
     <string name="sort_by_name_len">Lenght</string>
