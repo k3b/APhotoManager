@@ -100,6 +100,15 @@
             android:gravity="center"
             android:visibility="gone" />
 
+        <ImageView
+            android:id="@+id/image"
+            android:layout_width="@dimen/grid_cell_width"
+            android:layout_height="@dimen/grid_cell_height"
+            android:layout_above="@+id/status"
+            android:layout_alignParentRight="true"
+            android:visibility="gone"
+            />
+
         <TextView
             android:id="@+id/status"
             android:layout_width="fill_parent"

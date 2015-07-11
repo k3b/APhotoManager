@@ -31,7 +31,7 @@ public class DirectoryBuilder {
                 createStatistics(child.getChildren());
                 Directory parent = child.getParent();
                 if (parent != null) {
-                    parent.addChildStatistics(child.getSubDirCount(), child.getNonDirSubItemCount());
+                    parent.addChildStatistics(child.getSubDirCount(), child.getNonDirSubItemCount(), child.getIconID());
                 }
             }
         }
@@ -81,11 +81,12 @@ public class DirectoryBuilder {
         return null;
     }
 
-    public DirectoryBuilder add(String absolutePath, int nonDirItemCount) {
+    public DirectoryBuilder add(String absolutePath, int nonDirItemCount, int iconID) {
         if (root == null) {
             root = new Directory("", null, 0);
         }
-        addPath(absolutePath.split(Directory.PATH_DELIMITER), 0, root, nonDirItemCount);
+        Directory result = addPath(absolutePath.split(Directory.PATH_DELIMITER), 0, root, nonDirItemCount);
+        if (iconID != 0) result.setIconID(iconID);
         return this;
     }
 

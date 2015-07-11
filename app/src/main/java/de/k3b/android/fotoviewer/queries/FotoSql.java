@@ -54,7 +54,7 @@ public class FotoSql {
     public static final QueryParameterParcelable queryGroupByDate = (QueryParameterParcelable) new QueryParameterParcelable()
             .setID(QUERY_TYPE_GROUP_DATE)
             .addColumn(
-                    "min(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
+                    "max(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
                     SQL_EXPR_DAY + " AS " + SQL_COL_DISPLAY_TEXT,
                     "count(*) AS " + SQL_COL_COUNT,
                     "max(" + SQL_COL_GPS + ") AS " + SQL_COL_GPS)
@@ -67,7 +67,7 @@ public class FotoSql {
     public static final QueryParameterParcelable queryGroupByDir = (QueryParameterParcelable) new QueryParameterParcelable()
             .setID(QUERY_TYPE_GROUP_ALBUM)
             .addColumn(
-                    "min(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
+                    "max(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
                     SQL_EXPR_FOLDER + " AS " + SQL_COL_DISPLAY_TEXT,
                     "count(*) AS " + SQL_COL_COUNT,
                     "max(" + SQL_COL_GPS + ") AS " + SQL_COL_GPS)

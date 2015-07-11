@@ -28,6 +28,8 @@ public class Directory {
     private int dirCount = 0;
     private int subDirCount = 0;
 
+    private int iconID = 0;
+
     public Directory(String relPath, Directory parent, int nonDirItemCount) {
         this.setRelPath(relPath);
         this.setParent(parent);
@@ -175,10 +177,11 @@ public class Directory {
         return this;
     }
 
-    public void addChildStatistics(int subDirCount, int nonDirSubItemCount) {
+    public void addChildStatistics(int subDirCount, int nonDirSubItemCount, int iconID) {
         setDirCount(getDirCount() + 1);
         setSubDirCount(getSubDirCount() + subDirCount + 1);
         setNonDirSubItemCount(getNonDirSubItemCount() + nonDirSubItemCount);
+        if (iconID > this.iconID) this.iconID = iconID;
     }
 
     public static int getChildCount(Directory item) {
@@ -217,5 +220,14 @@ public class Directory {
         }
 
         return null;
+    }
+
+    public int getIconID() {
+        return iconID;
+    }
+
+    public Directory setIconID(int iconID) {
+        this.iconID = iconID;
+        return this;
     }
 }

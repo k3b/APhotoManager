@@ -68,9 +68,10 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, Dire
             long startTime = SystemClock.currentThreadTimeMillis();
             int colText = cursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT);
             int colCount = cursor.getColumnIndex(FotoSql.SQL_COL_COUNT);
+            int colIconID = cursor.getColumnIndex(FotoSql.SQL_COL_PK);
             int increment = PROGRESS_INCREMENT;
             while (cursor.moveToNext()) {
-                builder.add(cursor.getString(colText), cursor.getInt(colCount));
+                builder.add(cursor.getString(colText), cursor.getInt(colCount), cursor.getInt(colIconID));
                 itemCount++;
                 if ((--increment) <= 0) {
                     publishProgress(itemCount, expectedCount);

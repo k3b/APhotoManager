@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import de.k3b.android.fotoviewer.Global;
@@ -99,7 +100,7 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
         
         //"groupIndex" is the position of the parent/group in the list
         textView.setText(getDirectoryDisplayText(null, group, Directory.OPT_ALL));
-        
+
         //return the entire view
         return view;
     }
