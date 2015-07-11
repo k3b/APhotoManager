@@ -56,5 +56,8 @@
         <item>Name-length Ascending</item>
         <item>Name-length Descending</item>
     </string-array>
+    <string name="title_activity_gallery_filter">Filter</string>
+
+    <string name="hello_world">Hello world!</string>
 
 </resources>

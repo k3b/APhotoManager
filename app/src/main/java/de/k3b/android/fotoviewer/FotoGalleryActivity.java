@@ -18,6 +18,7 @@ import android.widget.Toast;
 import de.k3b.android.fotoviewer.directory.DirectoryGui;
 import de.k3b.android.fotoviewer.directory.DirectoryLoaderTask;
 import de.k3b.android.fotoviewer.imagedetail.ImageDetailActivityViewPager;
+import de.k3b.android.fotoviewer.queries.GalleryFilterParcelable;
 import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
 import de.k3b.android.fotoviewer.directory.DirectoryPickerFragment;
 import de.k3b.android.fotoviewer.queries.FotoSql;
@@ -41,6 +42,7 @@ public class FotoGalleryActivity extends Activity implements
         private static final String STATE_DirQueryID = "DirQueryID";
         private static final String STATE_SortID = "SortID";
         private static final String STATE_SortAscending = "SortAscending";
+        private static final String STATE_Filter = "mFilter";
 
         /** one of the FotoSql.QUERY_TYPE_xxx values */
         int mDirQueryID = FotoSql.QUERY_TYPE_GROUP_DEFAULT;
@@ -51,6 +53,8 @@ public class FotoGalleryActivity extends Activity implements
         private String mCurrentPath = "/";
 
         QueryParameterParcelable mGalleryContentQuery = null;
+
+        GalleryFilterParcelable mFilter;
 
         /** one of the FotoSql.QUERY_TYPE_xxx values. if undefined use default */
         private int getDirQueryID() {
@@ -94,6 +98,7 @@ public class FotoGalleryActivity extends Activity implements
             savedInstanceState.putString(STATE_CurrentPath, this.mCurrentPath);
             savedInstanceState.putInt(STATE_SortID, this.mSortID);
             savedInstanceState.putBoolean(STATE_SortAscending, this.mSortAscending);
+            savedInstanceState.putParcelable(STATE_Filter, this.mFilter);
         }
 
         private void saveSettings(Context context) {
@@ -105,6 +110,8 @@ public class FotoGalleryActivity extends Activity implements
             edit.putString(STATE_CurrentPath, this.mCurrentPath);
             edit.putInt(STATE_SortID, this.mSortID);
             edit.putBoolean(STATE_SortAscending, this.mSortAscending);
+
+            // edit.putParcelable(STATE_Filter, this.mFilter);
             edit.commit();
         }
 
@@ -122,8 +129,10 @@ public class FotoGalleryActivity extends Activity implements
                 this.mDirQueryID = savedInstanceState.getInt(STATE_DirQueryID, this.getDirQueryID());
                 this.mSortID = savedInstanceState.getInt(STATE_SortID, this.mSortID);
                 this.mSortAscending = savedInstanceState.getBoolean(STATE_SortAscending, this.mSortAscending);
+                this.mFilter = savedInstanceState.getParcelable(STATE_Filter);
             }
 
+            if (this.mFilter == null) this.mFilter = new GalleryFilterParcelable();
             // extra parameter
             this.mGalleryContentQuery = context.getIntent().getParcelableExtra(EXTRA_QUERY);
             if (this.mGalleryContentQuery == null) this.mGalleryContentQuery = FotoSql.getQuery(FotoSql.QUERY_TYPE_DEFAULT);
@@ -309,6 +318,7 @@ public class FotoGalleryActivity extends Activity implements
     }
 
     private void openFilter() {
+        GalleryFilterActivity.showActivity(this, this.galleryQueryParameter.mFilter);
     }
 
     private void openSort() {
