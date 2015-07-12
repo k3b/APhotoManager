@@ -33,6 +33,7 @@ public class FotoSql {
     public static final int QUERY_TYPE_GALLERY = 11;
     public static final int QUERY_TYPE_GROUP_DATE = 12;
     public static final int QUERY_TYPE_GROUP_ALBUM = 13;
+    public static final int QUERY_TYPE_GROUP_place = 14;
 
     public static final int QUERY_TYPE_GROUP_DEFAULT = QUERY_TYPE_GROUP_ALBUM;
     public static final int QUERY_TYPE_DEFAULT = QUERY_TYPE_GALLERY;
@@ -76,6 +77,33 @@ public class FotoSql {
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
             .addGroupBy(SQL_EXPR_FOLDER)
             .addOrderBy(SQL_EXPR_FOLDER);
+
+    public static final QueryParameterParcelable queryGroupByPlace = getQueryGroupByPlace(1000);
+
+    public static QueryParameterParcelable getQueryGroupByPlace(int factor) {
+        String SQL_EXPR_LAT = "(round(" + SQL_COL_LAT + " * " + factor + ") /" + factor + ")";
+        String SQL_EXPR_LON = "(round(" + SQL_COL_LON + " * " + factor + ") /" + factor + ")";
+
+        QueryParameterParcelable result = new QueryParameterParcelable();
+
+        result.setID(QUERY_TYPE_GROUP_place)
+                .addColumn(
+                        "max(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
+                        SQL_EXPR_LAT + " AS " + SQL_COL_LAT,
+                        SQL_EXPR_LON + " AS " + SQL_COL_LON,
+                        "count(*) AS " + SQL_COL_COUNT)
+                .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
+                .addGroupBy(SQL_EXPR_LAT, SQL_EXPR_LON)
+                .addOrderBy(SQL_EXPR_LAT, SQL_EXPR_LON);
+
+        return result;
+    }
+
+
+
+
+
+
     public static final QueryParameterParcelable queryDetail = (QueryParameterParcelable) new QueryParameterParcelable()
             .setID(QUERY_TYPE_GALLERY)
             .addColumn(
@@ -158,6 +186,8 @@ public class FotoSql {
                 return queryGroupByDate;
             case QUERY_TYPE_GROUP_ALBUM:
                 return queryGroupByDir;
+            case QUERY_TYPE_GROUP_place:
+                return queryGroupByPlace;
             default:
                 Log.e(Global.LOG_CONTEXT, "FotoSql.getQuery(" + queryID + "): unknown ID");
                 return null;
@@ -181,6 +211,8 @@ public class FotoSql {
                 return context.getString(R.string.gallery_date);
             case QUERY_TYPE_GROUP_ALBUM:
                 return context.getString(R.string.gallery_album);
+            case QUERY_TYPE_GROUP_place:
+                return context.getString(R.string.gallery_location);
             default:
                 return "???";
         }

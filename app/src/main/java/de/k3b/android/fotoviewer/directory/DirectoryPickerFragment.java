@@ -304,6 +304,9 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     }
 
     private void updateBitmap(int iconID) {
+        if (Global.debugEnabledViewItem) {
+            Log.d(Global.LOG_CONTEXT, debugPrefix + "updateBitmap#" + iconID);
+        }
         if (mLastIconID != iconID) {
             mLastIconID = iconID;
             if (mLastIconID == 0) {

@@ -93,7 +93,7 @@ public class QueryParameter {
         if (!Helper.append(result, null, mWhere, " AND ", "(", ")")) {
             result.append("1=1");
         }
-        Helper.append(result, ") GROUP BY (", mGroupBy, ", ", "", "");
+        Helper.append(result, ") GROUP BY (", mGroupBy, "), (", "", "");
 
         return result.toString();
     }

@@ -96,7 +96,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         cmd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showDirectoryPicker(FotoSql.queryGroupByDate);
+                showDirectoryPicker(FotoSql.queryGroupByPlace);
             }
         });
     }

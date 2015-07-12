@@ -79,7 +79,7 @@ public class DirectoryFormatter {
     }
 
     // package to allow unit testing
-    static String getLastPath(String path) {
+    public static String getLastPath(String path) {
         if (path != null) {
             String[] elements = path.split("/");
             for (int i = elements.length - 1; i >= 0; i--) {

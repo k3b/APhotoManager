@@ -7,6 +7,8 @@ import android.os.AsyncTask;
 import android.os.SystemClock;
 import android.util.Log;
 
+import java.util.List;
+
 import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.R;
 import de.k3b.android.fotoviewer.queries.FotoSql;
@@ -89,10 +91,27 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, Dire
                 }
             }
 
-            return builder.getRoot();
+            Directory result = builder.getRoot();
+            if (colText < 0) {
+                compressLatLon(result);
+            }
+            return result;
         } finally {
             if (cursor != null) {
                 cursor.close();
+            }
+        }
+    }
+
+    private void compressLatLon(Directory result) {
+        List<Directory> children = (result != null) ? result.getChildren() : null;
+
+        if (children != null) {
+            for (Directory child : children) {
+                if (child.getRelPath().indexOf("/") > 0) {
+                    child.setRelPath(DirectoryFormatter.getLastPath(child.getRelPath()));
+                }
+                compressLatLon(child);
             }
         }
     }

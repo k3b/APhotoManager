@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import de.k3b.io.DirectoryFormatter;
+import de.k3b.io.GeoRectangle;
 
 /**
  * Created by k3b on 11.07.2015.
@@ -92,7 +93,13 @@ public class GalleryFilterParcelable extends GalleryFilter  implements Parcelabl
                 setDateMin(from.getTime());
                 setDateMax(to.getTime());
                 return true;
-
+            case FotoSql.QUERY_TYPE_GROUP_place:
+                GeoRectangle geo = DirectoryFormatter.getLatLon(selectedAbsolutePath);
+                setLatitudeMin(geo.getLatitudeMin());
+                setLatitudeMax(geo.getLatitudeMax());
+                setLogituedMin(geo.getLogituedMin());
+                setLogituedMax(geo.getLogituedMax());
+                return true;
         }
         return false;
     }
