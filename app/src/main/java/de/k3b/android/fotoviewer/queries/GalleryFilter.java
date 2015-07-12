@@ -1,19 +1,17 @@
 package de.k3b.android.fotoviewer.queries;
 
+import de.k3b.io.GeoRectangle;
+
 /**
  * Created by k3b on 11.07.2015.
  */
-public class GalleryFilter {
+public class GalleryFilter extends GeoRectangle {
     private String path = null;
 
-    private double latitudeMin = 0;
-    private double latitudeMax = 0;
-    private double logituedMin = 0;
-    private double logituedMax = 0;
     private boolean includeNoLatLong = false;
 
-    private int dateMin = 0;
-    private int dateMax = 0;
+    private long dateMin = 0;
+    private long dateMax = 0;
 
     /******************** properties **************************/
     public String getPath() {
@@ -24,38 +22,6 @@ public class GalleryFilter {
         this.path = path;
     }
 
-    public double getLatitudeMin() {
-        return latitudeMin;
-    }
-
-    public void setLatitudeMin(double latitudeMin) {
-        this.latitudeMin = latitudeMin;
-    }
-
-    public double getLatitudeMax() {
-        return latitudeMax;
-    }
-
-    public void setLatitudeMax(double latitudeMax) {
-        this.latitudeMax = latitudeMax;
-    }
-
-    public double getLogituedMin() {
-        return logituedMin;
-    }
-
-    public void setLogituedMin(double logituedMin) {
-        this.logituedMin = logituedMin;
-    }
-
-    public double getLogituedMax() {
-        return logituedMax;
-    }
-
-    public void setLogituedMax(double logituedMax) {
-        this.logituedMax = logituedMax;
-    }
-
     public boolean isIncludeNoLatLong() {
         return includeNoLatLong;
     }
@@ -64,19 +30,19 @@ public class GalleryFilter {
         this.includeNoLatLong = includeNoLatLong;
     }
 
-    public int getDateMin() {
+    public long getDateMin() {
         return dateMin;
     }
 
-    public void setDateMin(int dateMin) {
+    public void setDateMin(long dateMin) {
         this.dateMin = dateMin;
     }
 
-    public int getDateMax() {
+    public long getDateMax() {
         return dateMax;
     }
 
-    public void setDateMax(int dateMax) {
+    public void setDateMax(long dateMax) {
         this.dateMax = dateMax;
     }
 

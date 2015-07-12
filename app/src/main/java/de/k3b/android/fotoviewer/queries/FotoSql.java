@@ -6,12 +6,12 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
 
-import java.util.GregorianCalendar;
+import java.util.Date;
 
 import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.R;
 import de.k3b.database.QueryParameter;
-import de.k3b.io.Directory;
+import de.k3b.io.DirectoryFormatter;
 
 /**
  * contains all SQL needed to query the android gallery
@@ -42,6 +42,8 @@ public class FotoSql {
     // columns that must be avaulable in the Cursor
     public static final String SQL_COL_PK = MediaStore.Images.Media._ID;
     public static final String SQL_COL_DISPLAY_TEXT = "disp_txt";
+    public static final String SQL_COL_LAT = MediaStore.Images.Media.LATITUDE;
+    public static final String SQL_COL_LON = MediaStore.Images.Media.LONGITUDE;
     public static final String SQL_COL_GPS = MediaStore.Images.Media.LONGITUDE;
     public static final String SQL_COL_COUNT = "count";
 
@@ -129,52 +131,20 @@ public class FotoSql {
      * path has format /year/month/day/ or /year/month/ or /year/ or /
      */
     private static void addWhereDatePath(QueryParameterParcelable newQuery, String selectedAbsolutePath) {
-        Integer year = null;
-        Integer month = null;
-        Integer day = null;
+        Date from = new Date();
+        Date to = new Date();
 
-        String parts[] = selectedAbsolutePath.split(Directory.PATH_DELIMITER);
+        DirectoryFormatter.getDates(selectedAbsolutePath, from, to);
 
-        for (String part : parts) {
-            if ((part != null) && ((part.length() > 0))) {
-                try {
-                    Integer value = Integer.parseInt(part);
-                    if (year == null) year = value;
-                    else if (month == null) month = value;
-                    else if (day == null) day = value;
-                } catch (NumberFormatException ex) {
-
-                }
-            }
-        }
-
-        if (year != null) {
-            int yearFrom = year.intValue();
-
-            if (yearFrom == 1970) {
-                newQuery
-                        .addWhere(SQL_COL_DATE_TAKEN + " in (0,-1, null)")
-                        .addOrderBy(SQL_COL_DATE_TAKEN + " desc");
-
-            } else {
-                int monthFrom = (month != null) ? month.intValue() : 1;
-                int dayFrom = (day != null) ? day.intValue() : 1;
-
-                GregorianCalendar from = new GregorianCalendar(yearFrom, monthFrom - 1, dayFrom, 0, 0, 0);
-
-                int field = GregorianCalendar.YEAR;
-                if (month != null) field = GregorianCalendar.MONTH;
-                if (day != null) field = GregorianCalendar.DAY_OF_MONTH;
-
-                GregorianCalendar to = new GregorianCalendar();
-                to.setTimeInMillis(from.getTimeInMillis());
-                to.add(field, 1);
-
-                newQuery
-                        .addWhere(SQL_COL_DATE_TAKEN + " >= ?", "" + from.getTimeInMillis())
-                        .addWhere(SQL_COL_DATE_TAKEN + " < ?", "" + to.getTimeInMillis())
-                        .addOrderBy(SQL_COL_DATE_TAKEN + " desc");
-            }
+        if (to.getTime() == 0) {
+            newQuery
+                    .addWhere(SQL_COL_DATE_TAKEN + " in (0,-1, null)")
+                    .addOrderBy(SQL_COL_DATE_TAKEN + " desc");
+        } else {
+            newQuery
+                    .addWhere(SQL_COL_DATE_TAKEN + " >= ?", "" + from.getTime())
+                    .addWhere(SQL_COL_DATE_TAKEN + " < ?", "" + to.getTime())
+                    .addOrderBy(SQL_COL_DATE_TAKEN + " desc");
         }
     }
 

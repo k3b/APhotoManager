@@ -77,7 +77,7 @@ public class FotoGalleryActivity extends Activity implements
             return  FotoSql.getName(context, this.mSortID) + ((mSortAscending) ? " ^" : " V");
         }
 
-        /** combine root-query plus current selected directory */
+        /** combine root-query plus current selected directoryRoot */
         private QueryParameterParcelable calculateEffectiveGalleryContentQuery() {
             if (this.mGalleryContentQuery == null) return null;
             QueryParameterParcelable result = new QueryParameterParcelable(this.mGalleryContentQuery);
@@ -352,7 +352,7 @@ public class FotoGalleryActivity extends Activity implements
     }
 
     /**
-     * called when user selects a new directory
+     * called when user selects a new directoryRoot
      *
      * @param selectedAbsolutePath
      * @param queryTypeId
@@ -365,7 +365,7 @@ public class FotoGalleryActivity extends Activity implements
     }
 
     /**
-     * called when user cancels selection of a new directory
+     * called when user cancels selection of a new directoryRoot
      * @param queryTypeId
      */
     @Override

@@ -8,10 +8,12 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import de.k3b.android.fotoviewer.Global;
+import de.k3b.android.fotoviewer.R;
 import de.k3b.android.fotoviewer.queries.FotoSql;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryBuilder;
+import de.k3b.io.DirectoryFormatter;
 
 /**
  * Load Directory in a Background Task.<br>
@@ -69,9 +71,14 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, Dire
             int colText = cursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT);
             int colCount = cursor.getColumnIndex(FotoSql.SQL_COL_COUNT);
             int colIconID = cursor.getColumnIndex(FotoSql.SQL_COL_PK);
+
+            int colLat = cursor.getColumnIndex(FotoSql.SQL_COL_LAT);
+            int colLon = cursor.getColumnIndex(FotoSql.SQL_COL_LON);
+
             int increment = PROGRESS_INCREMENT;
             while (cursor.moveToNext()) {
-                builder.add(cursor.getString(colText), cursor.getInt(colCount), cursor.getInt(colIconID));
+                String path = (colText >= 0) ? cursor.getString(colText) : getLatLonPath(cursor.getDouble(colLat), cursor.getDouble(colLon));
+                builder.add(path, cursor.getInt(colCount), cursor.getInt(colIconID));
                 itemCount++;
                 if ((--increment) <= 0) {
                     publishProgress(itemCount, expectedCount);
@@ -88,6 +95,12 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, Dire
                 cursor.close();
             }
         }
+    }
+
+    private String getLatLonPath(double latitude, double longitude) {
+        String result = DirectoryFormatter.getLatLonPath(latitude, longitude);
+        if (result == null) return this.context.getString(R.string.unknown);
+        return result;
     }
 
     /*

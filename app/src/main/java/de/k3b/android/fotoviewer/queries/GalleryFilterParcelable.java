@@ -3,6 +3,11 @@ package de.k3b.android.fotoviewer.queries;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Date;
+import java.util.GregorianCalendar;
+
+import de.k3b.io.DirectoryFormatter;
+
 /**
  * Created by k3b on 11.07.2015.
  */
@@ -37,8 +42,8 @@ public class GalleryFilterParcelable extends GalleryFilter  implements Parcelabl
         setLogituedMin(in.readDouble());
         setLogituedMax(in.readDouble());
         setIncludeNoLatLong(in.readInt() != 0);
-        setDateMin(in.readInt());
-        setDateMax(in.readInt());
+        setDateMin(in.readLong());
+        setDateMax(in.readLong());
     }
 
     /**
@@ -57,8 +62,8 @@ public class GalleryFilterParcelable extends GalleryFilter  implements Parcelabl
         dest.writeDouble(getLogituedMin());
         dest.writeDouble(getLogituedMax());
         dest.writeInt((isIncludeNoLatLong()) ? 1 : 0);
-        dest.writeInt(getDateMin());
-        dest.writeInt(getDateMax());
+        dest.writeLong(getDateMin());
+        dest.writeLong(getDateMax());
 
     }
 
@@ -72,5 +77,23 @@ public class GalleryFilterParcelable extends GalleryFilter  implements Parcelabl
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    public boolean set(String selectedAbsolutePath, int queryTypeId) {
+        switch (queryTypeId) {
+            case FotoSql.QUERY_TYPE_GROUP_ALBUM:
+                setPath(selectedAbsolutePath);
+                return true;
+            case FotoSql.QUERY_TYPE_GROUP_DATE:
+                Date from = new Date();
+                Date to = new Date();
+
+                DirectoryFormatter.getDates(selectedAbsolutePath, from, to);
+                setDateMin(from.getTime());
+                setDateMax(to.getTime());
+                return true;
+
+        }
+        return false;
     }
 }
