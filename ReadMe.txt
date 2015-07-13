@@ -2,8 +2,13 @@ FotoGallery\ReadMe.txt"
 
 todo
 
+	Filter
+		onDestroy clearMemory
+		filter für query anwenden
+		button clear filter
+		on rotate close dialog
 	DirectoryPicker
-		preview icon for selected folder
+		warum fehlen manchmal die preview bilder
 		dialog: ?? set icon
 
 gui

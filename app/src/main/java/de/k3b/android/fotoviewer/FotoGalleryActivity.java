@@ -111,6 +111,8 @@ public class FotoGalleryActivity extends Activity implements
             edit.putInt(STATE_SortID, this.mSortID);
             edit.putBoolean(STATE_SortAscending, this.mSortAscending);
 
+            mFilter.saveSettings(edit);
+
             // edit.putParcelable(STATE_Filter, this.mFilter);
             edit.commit();
         }
@@ -132,7 +134,10 @@ public class FotoGalleryActivity extends Activity implements
                 this.mFilter = savedInstanceState.getParcelable(STATE_Filter);
             }
 
-            if (this.mFilter == null) this.mFilter = new GalleryFilterParcelable();
+            if (this.mFilter == null) {
+                this.mFilter = new GalleryFilterParcelable();
+                mFilter.loadSettings(sharedPref);
+            }
             // extra parameter
             this.mGalleryContentQuery = context.getIntent().getParcelableExtra(EXTRA_QUERY);
             if (this.mGalleryContentQuery == null) this.mGalleryContentQuery = FotoSql.getQuery(FotoSql.QUERY_TYPE_DEFAULT);
@@ -288,6 +293,34 @@ public class FotoGalleryActivity extends Activity implements
                 return super.onOptionsItemSelected(item);
         }
 
+    }
+
+    /**
+     * Call back from sub-activities.<br/>
+     * Process Change StartTime (longpress start), Select StopTime before stop
+     * (longpress stop) or filter change for detailReport
+     */
+    @Override
+    protected void onActivityResult(final int requestCode,
+                                    final int resultCode, final Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+
+        switch (requestCode) {
+            case GalleryFilterActivity.resultID :
+                onFilterChanged(GalleryFilterActivity.getFilter(intent));
+                break;
+        }
+    }
+
+    private void onFilterChanged(GalleryFilterParcelable filter) {
+        if (filter != null) {
+            this.galleryQueryParameter.mFilter = filter;
+
+            if (mDirectoryRoot != null) mDirectoryRoot.destroy();
+            mDirectoryRoot = null; // must reload next time
+
+            reloadGui();
+        }
     }
 
     private void openNavigator() {

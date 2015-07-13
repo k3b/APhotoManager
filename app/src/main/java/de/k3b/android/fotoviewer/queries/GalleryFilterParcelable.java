@@ -1,18 +1,19 @@
 package de.k3b.android.fotoviewer.queries;
 
+import android.content.SharedPreferences;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.Date;
-import java.util.GregorianCalendar;
 
 import de.k3b.io.DirectoryFormatter;
-import de.k3b.io.GeoRectangle;
+import de.k3b.io.GalleryFilter;
+import de.k3b.io.IGeoRectangle;
 
 /**
  * Created by k3b on 11.07.2015.
  */
-public class GalleryFilterParcelable extends GalleryFilter  implements Parcelable {
+public class GalleryFilterParcelable extends GalleryFilter implements Parcelable {
     /**
      * Classes implementing the Parcelable
      * interface must also have a static field called <code>CREATOR</code>, which
@@ -42,7 +43,6 @@ public class GalleryFilterParcelable extends GalleryFilter  implements Parcelabl
         setLatitudeMax(in.readDouble());
         setLogituedMin(in.readDouble());
         setLogituedMax(in.readDouble());
-        setIncludeNoLatLong(in.readInt() != 0);
         setDateMin(in.readLong());
         setDateMax(in.readLong());
     }
@@ -62,7 +62,6 @@ public class GalleryFilterParcelable extends GalleryFilter  implements Parcelabl
         dest.writeDouble(getLatitudeMax());
         dest.writeDouble(getLogituedMin());
         dest.writeDouble(getLogituedMax());
-        dest.writeInt((isIncludeNoLatLong()) ? 1 : 0);
         dest.writeLong(getDateMin());
         dest.writeLong(getDateMax());
 
@@ -94,13 +93,45 @@ public class GalleryFilterParcelable extends GalleryFilter  implements Parcelabl
                 setDateMax(to.getTime());
                 return true;
             case FotoSql.QUERY_TYPE_GROUP_place:
-                GeoRectangle geo = DirectoryFormatter.getLatLon(selectedAbsolutePath);
-                setLatitudeMin(geo.getLatitudeMin());
-                setLatitudeMax(geo.getLatitudeMax());
-                setLogituedMin(geo.getLogituedMin());
-                setLogituedMax(geo.getLogituedMax());
+                IGeoRectangle geo = DirectoryFormatter.getLatLon(selectedAbsolutePath);
+                this.get(geo);
                 return true;
         }
         return false;
+    }
+
+     private static final String SHARED_KEY_LogituedMin  = "filter_LogituedMin";
+     private static final String SHARED_KEY_LatitudeMin  = "filter_LatitudeMin";
+     private static final String SHARED_KEY_LatitudeMax  = "filter_LatitudeMax";
+     private static final String SHARED_KEY_LogituedMax  = "filter_LogituedMax";
+     private static final String SHARED_KEY_DateMax      = "filter_DateMax";
+     private static final String SHARED_KEY_DateMin      = "filter_DateMin";
+     private static final String SHARED_KEY_Path         = "filter_Path";
+
+    /** workaroud because SharedPreferences cannot handle Parcable */
+    public void saveSettings(SharedPreferences.Editor edit) {
+
+        if (edit != null) {
+            edit.putFloat(SHARED_KEY_LogituedMin, (float) this.getLogituedMin());
+            edit.putFloat(SHARED_KEY_LatitudeMin, (float) this.getLatitudeMin());
+            edit.putFloat(SHARED_KEY_LatitudeMax, (float) this.getLatitudeMax());
+            edit.putFloat(SHARED_KEY_LogituedMax, (float) this.getLogituedMax());
+            edit.putLong(SHARED_KEY_DateMax, this.getDateMax());
+            edit.putLong(SHARED_KEY_DateMin, this.getDateMin());
+            edit.putString(SHARED_KEY_Path, this.getPath());
+        }
+    }
+
+    /** workaroud because SharedPreferences cannot handle Parcable */
+    public void loadSettings(SharedPreferences sharedPref) {
+        if (sharedPref != null) {
+            this.setLogituedMin(sharedPref.getFloat(SHARED_KEY_LogituedMin, (float) this.getLogituedMin()));
+            this.setLatitudeMin(sharedPref.getFloat(SHARED_KEY_LatitudeMin, (float) this.getLatitudeMin()));
+            this.setLatitudeMax(sharedPref.getFloat(SHARED_KEY_LatitudeMax, (float) this.getLatitudeMax()));
+            this.setLogituedMax(sharedPref.getFloat(SHARED_KEY_LogituedMax, (float) this.getLogituedMax()));
+            this.setDateMax(sharedPref.getLong(SHARED_KEY_DateMax, this.getDateMax()));
+            this.setDateMin(sharedPref.getLong(SHARED_KEY_DateMin, this.getDateMin()));
+            this.setPath(sharedPref.getString(SHARED_KEY_Path, this.getPath()));
+        }
     }
 }

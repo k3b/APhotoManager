@@ -10,8 +10,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -20,10 +20,11 @@ import java.util.Locale;
 import de.k3b.android.fotoviewer.directory.DirectoryLoaderTask;
 import de.k3b.android.fotoviewer.directory.DirectoryPickerFragment;
 import de.k3b.android.fotoviewer.queries.FotoSql;
-import de.k3b.android.fotoviewer.queries.GalleryFilter;
 import de.k3b.android.fotoviewer.queries.GalleryFilterParcelable;
 import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
 import de.k3b.io.Directory;
+import de.k3b.io.IGalleryFilter;
+import de.k3b.io.IGeoRectangle;
 
 public class GalleryFilterActivity extends Activity implements DirectoryPickerFragment.OnDirectoryInteractionListener {
     private static final String debugPrefix = "GalF-";
@@ -33,15 +34,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
     private static final String DLG_NAVIGATOR_TAG = "GalleryFilterActivity";
 
     GalleryFilterParcelable mFilter = null;
-    private EditText mPath;
-
-    private EditText mDateFrom;
-    private EditText mDateTo;
-    private EditText mLongitudeFrom;
-    private EditText mLongitudeTo;
-    private EditText mLatitudeTo;
-
-    private EditText mLatitudeFrom;
+    private AsFilter mAsFilter = null;
 
     public static void showActivity(Activity context, GalleryFilterParcelable filter) {
         if (Global.debugEnabled) {
@@ -57,24 +50,24 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         context.startActivityForResult(intent, resultID);
     }
 
+    public static GalleryFilterParcelable getFilter(Intent intent) {
+        if (intent == null) return null;
+        return intent.getParcelableExtra(EXTRA_FILTER);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gallery_filter);
+        this.mAsFilter = new AsFilter();
         onCreateButtos();
 
-        this.mPath = (EditText) findViewById(R.id.edit_path);
-        this.mDateFrom = (EditText) findViewById(R.id.edit_date_from);
-        this.mDateTo = (EditText) findViewById(R.id.edit_date_to);
-        this.mLatitudeFrom = (EditText) findViewById(R.id.edit_latitude_from);
-        this.mLatitudeTo = (EditText) findViewById(R.id.edit_latitude_to);
-        this.mLongitudeFrom = (EditText) findViewById(R.id.edit_longitude_from);
-        this.mLongitudeTo = (EditText) findViewById(R.id.edit_longitude_to);
+        GalleryFilterParcelable filter = getFilter(this.getIntent());
 
-        Intent intent = getIntent();
-        mFilter = intent.getParcelableExtra(EXTRA_FILTER);
-
-        toGui(mFilter);
+        if (filter != null) {
+            mFilter = filter;
+            toGui(mFilter);
+        }
     }
 
     private void onCreateButtos() {
@@ -97,6 +90,21 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
             @Override
             public void onClick(View v) {
                 showDirectoryPicker(FotoSql.queryGroupByPlace);
+            }
+        });
+
+        cmd = (Button) findViewById(R.id.cmd_ok);
+        cmd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onOk();
+            }
+        });
+        cmd = (Button) findViewById(R.id.cmd_cancel);
+        cmd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
             }
         });
     }
@@ -123,28 +131,138 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         return super.onOptionsItemSelected(item);
     }
 
-    private void toGui(GalleryFilter gf) {
-        mPath           .setText(gf.getPath());
-        mDateFrom       .setText(d(gf.getDateMin()));
-        mDateTo         .setText(d(gf.getDateMax()));
-        mLongitudeFrom  .setText(l(gf.getLogituedMin()));
-        mLongitudeTo    .setText(l(gf.getLogituedMax()));
-        mLatitudeFrom   .setText(l(gf.getLatitudeMin()));
-        mLatitudeTo     .setText(l(gf.getLatitudeMax()));
+    /** gui content seen as IGalleryFilter */
+    private class AsFilter implements IGalleryFilter {
+        final private java.text.DateFormat isoDateformatter = new SimpleDateFormat(
+                "yyyy-MM-dd", Locale.US);
+
+        private EditText mPath;
+
+        private EditText mDateFrom;
+        private EditText mDateTo;
+        private EditText mLongitudeFrom;
+        private EditText mLongitudeTo;
+        private EditText mLatitudeTo;
+
+        private EditText mLatitudeFrom;
+
+        AsFilter() {
+            this.mPath = (EditText) findViewById(R.id.edit_path);
+            this.mDateFrom = (EditText) findViewById(R.id.edit_date_from);
+            this.mDateTo = (EditText) findViewById(R.id.edit_date_to);
+            this.mLatitudeFrom = (EditText) findViewById(R.id.edit_latitude_from);
+            this.mLatitudeTo = (EditText) findViewById(R.id.edit_latitude_to);
+            this.mLongitudeFrom = (EditText) findViewById(R.id.edit_longitude_from);
+            this.mLongitudeTo = (EditText) findViewById(R.id.edit_longitude_to);
+        }
+        @Override
+        public double getLatitudeMin() {
+            return convertLL(mLatitudeFrom.getText().toString());
+        }
+
+        @Override
+        public double getLatitudeMax() {
+            return convertLL(mLatitudeTo.getText().toString());
+        }
+
+        @Override
+        public double getLogituedMin() {
+            return convertLL(mLongitudeFrom.getText().toString());
+        }
+
+        @Override
+        public double getLogituedMax() {
+            return convertLL(mLongitudeTo.getText().toString());
+        }
+
+        @Override
+        public String getPath() {
+            return mPath.getText().toString();
+        }
+
+        @Override
+        public long getDateMin() {
+            return convertDate(mDateFrom.getText().toString());
+        }
+
+        @Override
+        public long getDateMax() {
+            return convertDate(mDateTo.getText().toString());
+        }
+
+        @Override
+        public IGalleryFilter get(IGalleryFilter src) {
+            get((IGeoRectangle) src);
+            mPath           .setText(src.getPath());
+            mDateFrom       .setText(convertDate(src.getDateMin()));
+            mDateTo         .setText(convertDate(src.getDateMax()));
+            return this;
+        }
+
+        @Override
+        public IGalleryFilter get(IGeoRectangle src) {
+            mLongitudeFrom  .setText(convertLL(src.getLogituedMin()));
+            mLongitudeTo    .setText(convertLL(src.getLogituedMax()));
+            mLatitudeFrom   .setText(convertLL(src.getLatitudeMin()));
+            mLatitudeTo     .setText(convertLL(src.getLatitudeMax()));
+            return this;
+        }
+        /************* local helper *****************/
+        private String convertLL(double latLon) {
+            if (latLon == 0) return "";
+            return Double.toString(latLon);
+        }
+
+        private String convertDate(long dateMin) {
+            if (dateMin == 0) return "";
+            return isoDateformatter.format(new Date(dateMin));
+        }
+
+        private double convertLL(String string) throws RuntimeException {
+            if ((string == null) || (string.length() == 0)) {
+                return 0;
+            }
+
+            try {
+                return Double.parseDouble(string);
+            } catch (Exception ex) {
+                throw new RuntimeException(getString(R.string.invalid_location, string), ex);
+            }
+        }
+
+        private long convertDate(String string) throws RuntimeException {
+            if ((string == null) || (string.length() == 0)) {
+                return 0;
+            }
+            try {
+                return this.isoDateformatter.parse(string).getTime();
+            } catch (Exception ex) {
+                throw new RuntimeException(getString(R.string.invalid_date, string), ex);
+            }
+        }
+    };
+
+    private void toGui(IGalleryFilter gf) {
+        mAsFilter.get(gf);
     }
 
-    private String l(double latLon) {
-        if (latLon == 0) return "";
-        return Double.toString(latLon);
+    private boolean fromGui(IGalleryFilter src) {
+        try {
+            src.get(mAsFilter);
+            return true;
+        } catch (RuntimeException ex) {
+            Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
+            return false;
+        }
     }
 
-    final private static java.text.DateFormat isoDateformatter = new SimpleDateFormat(
-            "yyyy-MM-dd", Locale.GERMANY);
-
-
-    private String d(long dateMin) {
-        if (dateMin == 0) return "";
-        return isoDateformatter.format(new Date(dateMin));
+    private void onOk() {
+        if (fromGui(mFilter)) {
+            final Intent intent = new Intent();
+            intent.putExtra(EXTRA_FILTER, this.mFilter);
+            this.setResult(resultID, intent);
+            finish();
+        }
     }
 
     /**************** DirectoryPicker *****************/
@@ -166,16 +284,18 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
     }
 
     private void showDirectoryPicker(final QueryParameterParcelable currentDirContentQuery) {
-        Directory directoryRoot = getOrCreateDirInfo(currentDirContentQuery.getID()).directoryRoot;
-        if (directoryRoot == null) {
-            DirectoryLoaderTask loader = new DirectoryLoaderTask(this, debugPrefix) {
-                protected void onPostExecute(Directory directoryRoot) {
-                    onDirectoryDataLoadComplete(directoryRoot, currentDirContentQuery.getID());
-                }
-            };
-            loader.execute(currentDirContentQuery);
-        } else {
-            onDirectoryDataLoadComplete(directoryRoot, currentDirContentQuery.getID());
+        if (fromGui(mFilter)) {
+            Directory directoryRoot = getOrCreateDirInfo(currentDirContentQuery.getID()).directoryRoot;
+            if (directoryRoot == null) {
+                DirectoryLoaderTask loader = new DirectoryLoaderTask(this, debugPrefix) {
+                    protected void onPostExecute(Directory directoryRoot) {
+                        onDirectoryDataLoadComplete(directoryRoot, currentDirContentQuery.getID());
+                    }
+                };
+                loader.execute(currentDirContentQuery);
+            } else {
+                onDirectoryDataLoadComplete(directoryRoot, currentDirContentQuery.getID());
+            }
         }
     }
 
@@ -210,7 +330,5 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
     /** interface DirectoryPickerFragment.OnDirectoryInteractionListener not used */
     @Override
     public void onDirectorySelectionChanged(String selectedChild, int queryTypeId) {}
-
-
 
 }

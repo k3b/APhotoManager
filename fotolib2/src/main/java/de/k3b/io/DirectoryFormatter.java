@@ -1,6 +1,5 @@
 package de.k3b.io;
 
-import java.awt.Rectangle;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Date;
@@ -90,7 +89,7 @@ public class DirectoryFormatter {
         return null;
     }
 
-    public static GeoRectangle getLatLon(String path) {
+    public static IGeoRectangle getLatLon(String path) {
         String[] elements = getLastPath(path).split(",");
         String lat = elements[0];
         String lon = elements[1];
