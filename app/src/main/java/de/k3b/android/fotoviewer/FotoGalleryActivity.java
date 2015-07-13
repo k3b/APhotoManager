@@ -82,6 +82,8 @@ public class FotoGalleryActivity extends Activity implements
             if (this.mGalleryContentQuery == null) return null;
             QueryParameterParcelable result = new QueryParameterParcelable(this.mGalleryContentQuery);
 
+            FotoSql.setWhereFilter(result, this.mFilter);
+
             if (this.mCurrentPath != null) {
                 FotoSql.addPathWhere(result, this.mCurrentPath, this.getDirQueryID());
             }
@@ -326,7 +328,9 @@ public class FotoGalleryActivity extends Activity implements
     private void openNavigator() {
         if (mDirectoryRoot == null) {
             // not loaded yet. load directoryRoot in background
-            final QueryParameterParcelable currentDirContentQuery = FotoSql.getQuery(this.galleryQueryParameter.getDirQueryID());
+            final QueryParameterParcelable currentDirContentQuery = new QueryParameterParcelable(FotoSql.getQuery(this.galleryQueryParameter.getDirQueryID()));
+            FotoSql.setWhereFilter(currentDirContentQuery, this.galleryQueryParameter.mFilter);
+
             this.galleryQueryParameter.mDirQueryID = (currentDirContentQuery != null) ? currentDirContentQuery.getID() : FotoSql.QUERY_TYPE_UNDEFINED;
 
             if (currentDirContentQuery != null) {

@@ -169,8 +169,7 @@
         android:text="OK"
         android:id="@+id/cmd_ok"
         android:layout_below="@+id/edit_longitude_to"
-        android:layout_alignLeft="@+id/edit_longitude_to"
-        android:layout_alignStart="@+id/edit_longitude_to" />
+        android:layout_alignParentLeft="true" />
 
     <Button
         android:layout_width="wrap_content"
@@ -178,9 +177,17 @@
         android:text="Cancel"
         android:id="@+id/cmd_cancel"
         android:layout_below="@+id/edit_longitude_to"
-        android:layout_alignTop="@+id/cmd_ok"
-        android:layout_alignRight="@+id/edit_longitude_to"
-        android:layout_alignEnd="@+id/edit_longitude_to" />
+        android:layout_toRightOf="@+id/cmd_ok"
+        android:layout_toEndOf="@+id/cmd_ok" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Clear Filter"
+        android:id="@+id/cmd_clear"
+        android:layout_below="@+id/edit_longitude_to"
+        android:layout_toRightOf="@+id/cmd_cancel"
+        android:layout_toEndOf="@+id/cmd_cancel" />
 
 
 </RelativeLayout>

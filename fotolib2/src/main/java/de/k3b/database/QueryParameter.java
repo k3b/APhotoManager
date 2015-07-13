@@ -76,6 +76,12 @@ public class QueryParameter {
         return this;
     }
 
+    public QueryParameter clearWhere() {
+        mWhere.clear();
+        mParameters.clear();
+        return this;
+    }
+
     public QueryParameter addWhere(String where, String... parameters) {
         mWhere.add(where);
         return addToList(mParameters, true, parameters);

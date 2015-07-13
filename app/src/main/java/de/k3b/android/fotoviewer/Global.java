@@ -15,7 +15,7 @@ public class Global {
      * debugEnabled is updated by the SettingsActivity
      */
     public static boolean debugEnabled = true;
-    public static boolean debugEnabledViewItem = false;
+    public static boolean debugEnabledViewItem = true;
 
     public static void debugMemory(String modul, String message) {
         if (false && Global.debugEnabled) {

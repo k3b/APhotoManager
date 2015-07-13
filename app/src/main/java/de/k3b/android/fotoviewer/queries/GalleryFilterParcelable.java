@@ -82,7 +82,7 @@ public class GalleryFilterParcelable extends GalleryFilter implements Parcelable
     public boolean set(String selectedAbsolutePath, int queryTypeId) {
         switch (queryTypeId) {
             case FotoSql.QUERY_TYPE_GROUP_ALBUM:
-                setPath(selectedAbsolutePath);
+                setPath(selectedAbsolutePath + "%");
                 return true;
             case FotoSql.QUERY_TYPE_GROUP_DATE:
                 Date from = new Date();

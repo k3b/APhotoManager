@@ -3,12 +3,12 @@ FotoGallery\ReadMe.txt"
 todo
 
 	Filter
-		onDestroy clearMemory
-		filter für query anwenden
-		button clear filter
+v		onDestroy clearMemory
+v		filter für query anwenden
+v		button clear filter
 		on rotate close dialog
 	DirectoryPicker
-		warum fehlen manchmal die preview bilder
+-		warum fehlen manchmal die preview bilder
 		dialog: ?? set icon
 
 gui

@@ -85,13 +85,12 @@ public class DirectoryBuilder {
         if (root == null) {
             root = new Directory("", null, 0);
         }
-        Directory result = addPath(absolutePath.split(Directory.PATH_DELIMITER), 0, root, nonDirItemCount);
-        if (iconID != 0) result.setIconID(iconID);
+        addPath(absolutePath.split(Directory.PATH_DELIMITER), 0, root, nonDirItemCount, iconID);
         return this;
     }
 
-    private Directory addPath(String[] elements, int level, Directory root, int nonDirItemCount) {
-        Directory result = addPath(elements, level, root);
+    private Directory addPath(String[] elements, int level, Directory root, int nonDirItemCount, int iconID) {
+        Directory result = addPath(elements, level, root, iconID);
 
         if (result != null) {
             result.setNonDirItemCount(result.getNonDirItemCount() + nonDirItemCount);
@@ -99,7 +98,7 @@ public class DirectoryBuilder {
         return result;
     }
 
-    private Directory addPath(String[] elements, int level, Directory root) {
+    private Directory addPath(String[] elements, int level, Directory root, int iconID) {
 
         if ((elements == null) || (level >= elements.length))
             return root; // end of recursion
@@ -107,18 +106,19 @@ public class DirectoryBuilder {
         String serach = elements[level];
 
         if ((serach == null) || (serach.length() == 0))
-            return addPath(elements, level + 1, root);
+            return addPath(elements, level + 1, root, iconID);
 
         List<Directory> children = root.getChildren();
         if (children != null) {
             for (Directory child : children) {
                 if (serach.compareToIgnoreCase(child.getRelPath()) == 0) {
-                    return addPath(elements, level+1, child);
+                    return addPath(elements, level+1, child, iconID);
                 }
             }
         }
 
         Directory result = new Directory(serach, root, 0);
-        return addPath(elements, level+1, result);
+        result.setIconID(iconID);
+        return addPath(elements, level+1, result, iconID);
     }
 }

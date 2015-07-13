@@ -22,6 +22,7 @@ import de.k3b.android.fotoviewer.directory.DirectoryPickerFragment;
 import de.k3b.android.fotoviewer.queries.FotoSql;
 import de.k3b.android.fotoviewer.queries.GalleryFilterParcelable;
 import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
+import de.k3b.android.util.GarbageCollector;
 import de.k3b.io.Directory;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
@@ -107,6 +108,13 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
                 finish();
             }
         });
+        cmd = (Button) findViewById(R.id.cmd_clear);
+        cmd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clearFilter();
+            }
+        });
     }
 
     @Override
@@ -129,6 +137,25 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        Global.debugMemory(debugPrefix, "onDestroy start");
+        super.onDestroy();
+
+        if (dirInfos != null)
+        {
+            for(Integer id : dirInfos.keySet()) {
+                DirInfo dir = dirInfos.get(id);
+                dir.directoryRoot.destroy();
+            }
+            dirInfos = null;
+        }
+
+        System.gc();
+        Global.debugMemory(debugPrefix, "onDestroy end");
     }
 
     /** gui content seen as IGalleryFilter */
@@ -254,6 +281,11 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
             Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
             return false;
         }
+    }
+
+    private void clearFilter() {
+        mFilter = new GalleryFilterParcelable();
+        toGui(mFilter);
     }
 
     private void onOk() {

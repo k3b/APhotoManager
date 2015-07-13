@@ -12,6 +12,7 @@ import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.R;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.DirectoryFormatter;
+import de.k3b.io.IGalleryFilter;
 
 /**
  * contains all SQL needed to query the android gallery
@@ -113,6 +114,23 @@ public class FotoSql {
                     SQL_COL_GPS)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
             .addOrderBy(SQL_COL_PATH);
+
+    public static void setWhereFilter(QueryParameterParcelable parameters, IGalleryFilter filter) {
+        if ((parameters != null) && (filter != null)) {
+            parameters.clearWhere();
+
+            if (filter.getLatitudeMin() != 0) parameters.addWhere(SQL_COL_LAT + " >= ?", Double.toString(filter.getLatitudeMin()));
+            if (filter.getLatitudeMax() != 0) parameters.addWhere(SQL_COL_LAT + " < ?", Double.toString(filter.getLatitudeMax()));
+            if (filter.getLogituedMin() != 0) parameters.addWhere(SQL_COL_LON + " >= ?", Double.toString(filter.getLogituedMin()));
+            if (filter.getLogituedMax() != 0) parameters.addWhere(SQL_COL_LON + " < ?", Double.toString(filter.getLogituedMax()));
+
+            if (filter.getDateMin() != 0) parameters.addWhere(SQL_COL_DATE_TAKEN + " >= ?", Double.toString(filter.getDateMin()));
+            if (filter.getDateMax() != 0) parameters.addWhere(SQL_COL_DATE_TAKEN + " < ?", Double.toString(filter.getDateMax()));
+
+            String path = filter.getPath();
+            if ((path != null) && (path.length() > 0)) parameters.addWhere(SQL_COL_PATH + " like ?", path);
+        }
+    }
 
     public static String getFilter(Cursor cursor, QueryParameterParcelable parameters, String description) {
         if ((parameters != null) && (parameters.getID() == QUERY_TYPE_GROUP_ALBUM)) {
