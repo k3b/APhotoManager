@@ -58,6 +58,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Global.debugMemory(debugPrefix, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gallery_filter);
         this.mAsFilter = new AsFilter();
@@ -139,6 +140,17 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onPause () {
+        Global.debugMemory(debugPrefix, "onPause");
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume () {
+        Global.debugMemory(debugPrefix, "onResume");
+        super.onResume();
+    }
 
     @Override
     protected void onDestroy() {
@@ -333,6 +345,8 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
 
     private void onDirectoryDataLoadComplete(Directory directoryRoot, int queryId) {
         if (directoryRoot != null) {
+            Global.debugMemory(debugPrefix, "onDirectoryDataLoadComplete");
+
             DirInfo dirInfo = getOrCreateDirInfo(queryId);
             dirInfo.directoryRoot = directoryRoot;
             final FragmentManager manager = getFragmentManager();

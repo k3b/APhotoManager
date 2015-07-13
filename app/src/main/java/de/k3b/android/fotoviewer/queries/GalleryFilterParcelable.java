@@ -94,7 +94,9 @@ public class GalleryFilterParcelable extends GalleryFilter implements Parcelable
                 return true;
             case FotoSql.QUERY_TYPE_GROUP_place:
                 IGeoRectangle geo = DirectoryFormatter.getLatLon(selectedAbsolutePath);
-                this.get(geo);
+                if (geo != null) {
+                    this.get(geo);
+                }
                 return true;
         }
         return false;

@@ -91,30 +91,33 @@ public class DirectoryFormatter {
 
     public static IGeoRectangle getLatLon(String path) {
         String[] elements = getLastPath(path).split(",");
-        String lat = elements[0];
-        String lon = elements[1];
+        if ((elements != null) && (elements.length == 2)) {
+            String lat = elements[0];
+            String lon = elements[1];
 
-        GeoRectangle result = new GeoRectangle();
-        result.setLatitudeMin(Double.parseDouble(lat));
-        result.setLogituedMin(Double.parseDouble(lon));
+            GeoRectangle result = new GeoRectangle();
+            result.setLatitudeMin(Double.parseDouble(lat));
+            result.setLogituedMin(Double.parseDouble(lon));
 
-        double delta = 1;
-        if (lat.startsWith(" ")) {
-            delta = 10.0;
-        } else {
-            int posDecimal = lat.indexOf(".");
-            if (posDecimal >= 0) {
-                int numberDecimals = lat.length() - posDecimal -1;
-                while (numberDecimals > 0) {
-                    delta = delta / 10.0;
-                    numberDecimals--;
+            double delta = 1;
+            if (lat.startsWith(" ")) {
+                delta = 10.0;
+            } else {
+                int posDecimal = lat.indexOf(".");
+                if (posDecimal >= 0) {
+                    int numberDecimals = lat.length() - posDecimal - 1;
+                    while (numberDecimals > 0) {
+                        delta = delta / 10.0;
+                        numberDecimals--;
+                    }
                 }
             }
+
+            result.setLatitudeMax(result.getLatitudeMin() + delta);
+            result.setLogituedMax(result.getLogituedMin() + delta);
+
+            return result;
         }
-
-        result.setLatitudeMax(result.getLatitudeMin() + delta);
-        result.setLogituedMax(result.getLogituedMin() + delta);
-
-        return result;
+        return null;
     }
 }
