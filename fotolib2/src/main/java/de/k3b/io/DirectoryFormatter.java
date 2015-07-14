@@ -55,7 +55,8 @@ public class DirectoryFormatter {
         }
     }
 
-    private static DecimalFormat latLonFormatter = new DecimalFormat("#.0000", new DecimalFormatSymbols(Locale.US));
+    private static DecimalFormat latLonFormatter4 = new DecimalFormat("#.0000", new DecimalFormatSymbols(Locale.US));
+    private static DecimalFormat latLonFormatter2 = new DecimalFormat("#.00", new DecimalFormatSymbols(Locale.US));
 
     public static String getLatLonPath(double latitude, double longitude) {
         if ((latitude == 0) && (longitude == 0)) return null;
@@ -63,14 +64,18 @@ public class DirectoryFormatter {
         result.append("/ ").append(getInt(latitude, 10)).append(",").append(getInt(longitude,10)).append("/");
         result.append((int) latitude).append(",").append((int)longitude).append("/");
 
-        String lat = latLonFormatter.format(latitude); int latPos = lat.indexOf(".") + 1;
-        String lon = latLonFormatter.format(longitude); int lonPos = lon.indexOf(".")+ 1;
+        String lat = latLonFormatter4.format(latitude); int latPos = lat.indexOf(".") + 1;
+        String lon = latLonFormatter4.format(longitude); int lonPos = lon.indexOf(".")+ 1;
 
-        for (int i=1;i <=3;i++) {
+        for (int i=1;i <=2;i++) {
             result.append(lat.substring(0,latPos + i)).append(",").append(lon.substring(0,lonPos + i)).append("/");
         }
 
         return result.toString();
+    }
+
+    public static String getLatLon(double latOrLon) {
+        return latLonFormatter2.format(latOrLon);
     }
 
     private static int getInt(double ll, int factor) {

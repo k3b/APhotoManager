@@ -80,14 +80,16 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, Dire
             int increment = PROGRESS_INCREMENT;
             while (cursor.moveToNext()) {
                 String path = (colText >= 0) ? cursor.getString(colText) : getLatLonPath(cursor.getDouble(colLat), cursor.getDouble(colLon));
-                builder.add(path, cursor.getInt(colCount), cursor.getInt(colIconID));
-                itemCount++;
-                if ((--increment) <= 0) {
-                    publishProgress(itemCount, expectedCount);
-                    increment = PROGRESS_INCREMENT;
+                if (path != null) {
+                    builder.add(path, cursor.getInt(colCount), cursor.getInt(colIconID));
+                    itemCount++;
+                    if ((--increment) <= 0) {
+                        publishProgress(itemCount, expectedCount);
+                        increment = PROGRESS_INCREMENT;
 
-                    // Escape early if cancel() is called
-                    if (isCancelled()) break;
+                        // Escape early if cancel() is called
+                        if (isCancelled()) break;
+                    }
                 }
             }
 
@@ -118,7 +120,7 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, Dire
 
     private String getLatLonPath(double latitude, double longitude) {
         String result = DirectoryFormatter.getLatLonPath(latitude, longitude);
-        if (result == null) return this.context.getString(R.string.unknown);
+        // if (result == null) return this.context.getString(R.string.unknown);
         return result;
     }
 

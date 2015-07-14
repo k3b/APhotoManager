@@ -34,7 +34,7 @@ public class FotoSql {
     public static final int QUERY_TYPE_GALLERY = 11;
     public static final int QUERY_TYPE_GROUP_DATE = 12;
     public static final int QUERY_TYPE_GROUP_ALBUM = 13;
-    public static final int QUERY_TYPE_GROUP_place = 14;
+    public static final int QUERY_TYPE_GROUP_PLACE = 14;
 
     public static final int QUERY_TYPE_GROUP_DEFAULT = QUERY_TYPE_GROUP_ALBUM;
     public static final int QUERY_TYPE_DEFAULT = QUERY_TYPE_GALLERY;
@@ -79,15 +79,18 @@ public class FotoSql {
             .addGroupBy(SQL_EXPR_FOLDER)
             .addOrderBy(SQL_EXPR_FOLDER);
 
-    public static final QueryParameterParcelable queryGroupByPlace = getQueryGroupByPlace(1000);
+//    public static final int DEFAULT_NUMBER_OF_DECIMAL_DIGITS = 2;
+    public static final QueryParameterParcelable queryGroupByPlace = getQueryGroupByPlace(100);
 
     public static QueryParameterParcelable getQueryGroupByPlace(int factor) {
+//        String SQL_EXPR_LAT = "(round(" + SQL_COL_LAT + ", "+ numberOfDecimalDigits + "))";
+//        String SQL_EXPR_LON = "(round(" + SQL_COL_LON + ", "+ numberOfDecimalDigits + "))";
         String SQL_EXPR_LAT = "(round(" + SQL_COL_LAT + " * " + factor + ") /" + factor + ")";
         String SQL_EXPR_LON = "(round(" + SQL_COL_LON + " * " + factor + ") /" + factor + ")";
 
         QueryParameterParcelable result = new QueryParameterParcelable();
 
-        result.setID(QUERY_TYPE_GROUP_place)
+        result.setID(QUERY_TYPE_GROUP_PLACE)
                 .addColumn(
                         "max(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
                         SQL_EXPR_LAT + " AS " + SQL_COL_LAT,
@@ -119,10 +122,10 @@ public class FotoSql {
         if ((parameters != null) && (filter != null)) {
             parameters.clearWhere();
 
-            if (filter.getLatitudeMin() != 0) parameters.addWhere(SQL_COL_LAT + " >= ?", Double.toString(filter.getLatitudeMin()));
-            if (filter.getLatitudeMax() != 0) parameters.addWhere(SQL_COL_LAT + " < ?", Double.toString(filter.getLatitudeMax()));
-            if (filter.getLogituedMin() != 0) parameters.addWhere(SQL_COL_LON + " >= ?", Double.toString(filter.getLogituedMin()));
-            if (filter.getLogituedMax() != 0) parameters.addWhere(SQL_COL_LON + " < ?", Double.toString(filter.getLogituedMax()));
+            if (filter.getLatitudeMin() != 0) parameters.addWhere(SQL_COL_LAT + " >= ?", DirectoryFormatter.getLatLon(filter.getLatitudeMin()));
+            if (filter.getLatitudeMax() != 0) parameters.addWhere(SQL_COL_LAT + " < ?", DirectoryFormatter.getLatLon(filter.getLatitudeMax()));
+            if (filter.getLogituedMin() != 0) parameters.addWhere(SQL_COL_LON + " >= ?", DirectoryFormatter.getLatLon((filter.getLogituedMin())));
+            if (filter.getLogituedMax() != 0) parameters.addWhere(SQL_COL_LON + " < ?", DirectoryFormatter.getLatLon((filter.getLogituedMax())));
 
             if (filter.getDateMin() != 0) parameters.addWhere(SQL_COL_DATE_TAKEN + " >= ?", Double.toString(filter.getDateMin()));
             if (filter.getDateMax() != 0) parameters.addWhere(SQL_COL_DATE_TAKEN + " < ?", Double.toString(filter.getDateMax()));
@@ -204,7 +207,7 @@ public class FotoSql {
                 return queryGroupByDate;
             case QUERY_TYPE_GROUP_ALBUM:
                 return queryGroupByDir;
-            case QUERY_TYPE_GROUP_place:
+            case QUERY_TYPE_GROUP_PLACE:
                 return queryGroupByPlace;
             default:
                 Log.e(Global.LOG_CONTEXT, "FotoSql.getQuery(" + queryID + "): unknown ID");
@@ -229,7 +232,7 @@ public class FotoSql {
                 return context.getString(R.string.gallery_date);
             case QUERY_TYPE_GROUP_ALBUM:
                 return context.getString(R.string.gallery_album);
-            case QUERY_TYPE_GROUP_place:
+            case QUERY_TYPE_GROUP_PLACE:
                 return context.getString(R.string.gallery_location);
             default:
                 return "???";

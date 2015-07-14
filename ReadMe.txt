@@ -6,9 +6,10 @@ todo
 v		onDestroy clearMemory
 v		filter für query anwenden
 v		button clear filter
-		on rotate close dialog
+v		on rotate close dialog
+		save/restore last picker position
 	DirectoryPicker
--		warum fehlen manchmal die preview bilder
+v		warum fehlen manchmal die preview bilder
 		dialog: ?? set icon
 
 gui

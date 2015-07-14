@@ -92,7 +92,7 @@ public class GalleryFilterParcelable extends GalleryFilter implements Parcelable
                 setDateMin(from.getTime());
                 setDateMax(to.getTime());
                 return true;
-            case FotoSql.QUERY_TYPE_GROUP_place:
+            case FotoSql.QUERY_TYPE_GROUP_PLACE:
                 IGeoRectangle geo = DirectoryFormatter.getLatLon(selectedAbsolutePath);
                 if (geo != null) {
                     this.get(geo);

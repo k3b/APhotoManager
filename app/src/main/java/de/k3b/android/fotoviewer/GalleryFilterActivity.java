@@ -3,7 +3,9 @@ package de.k3b.android.fotoviewer;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,8 +24,8 @@ import de.k3b.android.fotoviewer.directory.DirectoryPickerFragment;
 import de.k3b.android.fotoviewer.queries.FotoSql;
 import de.k3b.android.fotoviewer.queries.GalleryFilterParcelable;
 import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
-import de.k3b.android.util.GarbageCollector;
 import de.k3b.io.Directory;
+import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
 
@@ -33,6 +35,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
     private static final String EXTRA_FILTER = "Filter";
     public static final int resultID = 522;
     private static final String DLG_NAVIGATOR_TAG = "GalleryFilterActivity";
+    private static final String SETTINGS_KEY = "GalleryFilterActivity-";
 
     GalleryFilterParcelable mFilter = null;
     private AsFilter mAsFilter = null;
@@ -143,13 +146,43 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
     @Override
     protected void onPause () {
         Global.debugMemory(debugPrefix, "onPause");
+        saveLastFilter();
         super.onPause();
     }
 
     @Override
     protected void onResume () {
         Global.debugMemory(debugPrefix, "onResume");
+        loadLastFilter();
         super.onResume();
+    }
+
+    private void loadLastFilter() {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+
+        loadLastFilter(sharedPref, FotoSql.QUERY_TYPE_GROUP_ALBUM);
+        loadLastFilter(sharedPref, FotoSql.QUERY_TYPE_GROUP_DATE);
+        loadLastFilter(sharedPref, FotoSql.QUERY_TYPE_GROUP_PLACE);
+    }
+
+    private void loadLastFilter(SharedPreferences sharedPref, int queryTypeID) {
+        getOrCreateDirInfo(queryTypeID).currentPath = sharedPref.getString(SETTINGS_KEY + queryTypeID, null);
+    }
+
+    private void saveLastFilter() {
+        if (dirInfos != null)
+        {
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+            SharedPreferences.Editor edit = sharedPref.edit();
+            
+            for(Integer id : dirInfos.keySet()) {
+                DirInfo dir = dirInfos.get(id);
+                if ((dir != null) && (dir.currentPath != null) && (dir.currentPath.length() > 0)) {
+                    edit.putString(SETTINGS_KEY + id, dir.currentPath);
+                }
+            }
+            edit.commit();
+        }
     }
 
     @Override
@@ -161,7 +194,9 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         {
             for(Integer id : dirInfos.keySet()) {
                 DirInfo dir = dirInfos.get(id);
-                dir.directoryRoot.destroy();
+                if (dir.directoryRoot != null) {
+                    dir.directoryRoot.destroy();
+                }
             }
             dirInfos = null;
         }
@@ -249,7 +284,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         /************* local helper *****************/
         private String convertLL(double latLon) {
             if (latLon == 0) return "";
-            return Double.toString(latLon);
+            return DirectoryFormatter.getLatLon(latLon);
         }
 
         private String convertDate(long dateMin) {
