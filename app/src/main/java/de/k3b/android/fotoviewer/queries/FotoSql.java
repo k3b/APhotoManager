@@ -79,14 +79,13 @@ public class FotoSql {
             .addGroupBy(SQL_EXPR_FOLDER)
             .addOrderBy(SQL_EXPR_FOLDER);
 
-//    public static final int DEFAULT_NUMBER_OF_DECIMAL_DIGITS = 2;
-    public static final QueryParameterParcelable queryGroupByPlace = getQueryGroupByPlace(100);
+    public static final QueryParameterParcelable queryGroupByPlace = getQueryGroupByPlace();
 
-    public static QueryParameterParcelable getQueryGroupByPlace(int factor) {
-//        String SQL_EXPR_LAT = "(round(" + SQL_COL_LAT + ", "+ numberOfDecimalDigits + "))";
-//        String SQL_EXPR_LON = "(round(" + SQL_COL_LON + ", "+ numberOfDecimalDigits + "))";
-        String SQL_EXPR_LAT = "(round(" + SQL_COL_LAT + " * " + factor + ") /" + factor + ")";
-        String SQL_EXPR_LON = "(round(" + SQL_COL_LON + " * " + factor + ") /" + factor + ")";
+    public static QueryParameterParcelable getQueryGroupByPlace() {
+        String SQL_EXPR_LAT = "(round(" + SQL_COL_LAT + " - 0.00499, 2))";
+        String SQL_EXPR_LON = "(round(" + SQL_COL_LON + " - 0.00499, 2))";
+//        String SQL_EXPR_LAT = "(round(" + SQL_COL_LAT + " * " + factor + ") /" + factor + ")";
+//        String SQL_EXPR_LON = "(round(" + SQL_COL_LON + " * " + factor + ") /" + factor + ")";
 
         QueryParameterParcelable result = new QueryParameterParcelable();
 

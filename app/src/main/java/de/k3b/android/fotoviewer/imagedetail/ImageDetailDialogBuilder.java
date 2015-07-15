@@ -51,6 +51,8 @@ public class ImageDetailDialogBuilder {
         StringBuilder builder = new StringBuilder();
 
         try {
+            getExifInfo_android(builder, filepath);
+
             File jpegFile = new File(filepath);
             addExif(builder, jpegFile);
 
@@ -68,13 +70,15 @@ public class ImageDetailDialogBuilder {
         return builder.toString();
     }
 
+    private static String line = "------------------";
     private static void addExif(StringBuilder builder, File file) throws ImageProcessingException, IOException {
         if (file.exists()) {
-            builder.append(NL).append(file).append(NL);
+            builder.append(NL).append(line).append(NL);
+            builder.append(NL).append(file).append(NL).append(NL);
 
             Metadata metadata = ImageMetadataReader.readMetadata(file);
             for (Directory directory : metadata.getDirectories()) {
-                builder.append(NL).append(directory).append(NL);
+                builder.append(NL).append(directory).append(NL).append(NL);
 
                 for (Tag tag : directory.getTags()) {
                     String description = tag.getDescription();
@@ -99,35 +103,31 @@ public class ImageDetailDialogBuilder {
         }
     }
 
-    private static String getExifInfo_android(String filepath) {
-        StringBuilder builder = new StringBuilder();
-        try {
-            ExifInterface exif = new ExifInterface(filepath);
+    private static void getExifInfo_android(StringBuilder builder, String filepath) throws IOException {
+        ExifInterface exif = new ExifInterface(filepath);
 
-            builder.append("Date & Time: " + getExifTag(exif,ExifInterface.TAG_DATETIME) + "\n\n");
-            builder.append("Flash: " + getExifTag(exif,ExifInterface.TAG_FLASH) + "\n");
-            builder.append("Focal Length: " + getExifTag(exif, ExifInterface.TAG_FOCAL_LENGTH) + "\n\n");
+        builder.append(NL).append(line).append(NL);
+        builder.append(NL).append(filepath).append(NL).append(NL);
 
-            float[] latLong=new float[2];
-            if (exif.getLatLong(latLong)) {
-                builder.append("GPS Date & Time: " + getExifTag(exif, ExifInterface.TAG_GPS_DATESTAMP) + " "
-                        + getExifTag(exif, ExifInterface.TAG_GPS_TIMESTAMP) + "\n\n");
-                builder.append("GPS Latitude: " + latLong[0] + "\n");
-                builder.append("GPS Longitude: " + latLong[1] + "\n");
-                builder.append("GPS Altitude: " + exif.getAltitude(0) + "\n");
-                builder.append("GPS Processing Method: " + getExifTag(exif, ExifInterface.TAG_GPS_PROCESSING_METHOD) + "\n");
-            }
-            builder.append("Image Length: " + getExifTag(exif,ExifInterface.TAG_IMAGE_LENGTH) + "\n");
-            builder.append("Image Width: " + getExifTag(exif,ExifInterface.TAG_IMAGE_WIDTH) + "\n\n");
-            builder.append("Camera Make: " + getExifTag(exif,ExifInterface.TAG_MAKE) + "\n");
-            builder.append("Camera Model: " + getExifTag(exif,ExifInterface.TAG_MODEL) + "\n");
-            builder.append("Camera Orientation: " + getExifTag(exif,ExifInterface.TAG_ORIENTATION) + "\n");
-            builder.append("Camera White Balance: " + getExifTag(exif, ExifInterface.TAG_WHITE_BALANCE) + "\n");
+        builder.append("Date & Time: " + getExifTag(exif,ExifInterface.TAG_DATETIME) + "\n\n");
+        builder.append("Flash: " + getExifTag(exif,ExifInterface.TAG_FLASH) + "\n");
+        builder.append("Focal Length: " + getExifTag(exif, ExifInterface.TAG_FOCAL_LENGTH) + "\n\n");
 
-        } catch (IOException e) {
-            e.printStackTrace();
+        float[] latLong=new float[2];
+        if (exif.getLatLong(latLong)) {
+            builder.append("GPS Date & Time: " + getExifTag(exif, ExifInterface.TAG_GPS_DATESTAMP) + " "
+                    + getExifTag(exif, ExifInterface.TAG_GPS_TIMESTAMP) + "\n\n");
+            builder.append("GPS Latitude: " + latLong[0] + "\n");
+            builder.append("GPS Longitude: " + latLong[1] + "\n");
+            builder.append("GPS Altitude: " + exif.getAltitude(0) + "\n");
+            builder.append("GPS Processing Method: " + getExifTag(exif, ExifInterface.TAG_GPS_PROCESSING_METHOD) + "\n");
         }
-        return builder.toString();
+        builder.append("Image Length: " + getExifTag(exif,ExifInterface.TAG_IMAGE_LENGTH) + "\n");
+        builder.append("Image Width: " + getExifTag(exif,ExifInterface.TAG_IMAGE_WIDTH) + "\n\n");
+        builder.append("Camera Make: " + getExifTag(exif,ExifInterface.TAG_MAKE) + "\n");
+        builder.append("Camera Model: " + getExifTag(exif,ExifInterface.TAG_MODEL) + "\n");
+        builder.append("Camera Orientation: " + getExifTag(exif,ExifInterface.TAG_ORIENTATION) + "\n");
+        builder.append("Camera White Balance: " + getExifTag(exif, ExifInterface.TAG_WHITE_BALANCE) + "\n");
     }
 
     private static String getExifTag(ExifInterface exif,String tag){
