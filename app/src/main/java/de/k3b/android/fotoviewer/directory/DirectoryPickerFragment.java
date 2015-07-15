@@ -18,6 +18,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+// import com.squareup.leakcanary.RefWatcher;
+
+import de.k3b.android.fotoviewer.FotoGalleryApp;
 import de.k3b.android.fotoviewer.queries.FotoSql;
 import de.k3b.android.fotoviewer.queries.FotoViewerParameter;
 import de.k3b.android.fotoviewer.Global;
@@ -186,6 +189,12 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         if (this.getShowsDialog() && (this.mNavigation == null)) {
             dismiss();
         }
+    }
+
+    @Override public void onDestroy() {
+        super.onDestroy();
+        // RefWatcher refWatcher = FotoGalleryApp.getRefWatcher(getActivity());
+        // refWatcher.watch(this);
     }
 
     @Override

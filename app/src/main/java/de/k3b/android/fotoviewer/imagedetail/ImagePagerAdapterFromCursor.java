@@ -236,6 +236,14 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
         return mActivity.getString(R.string.loading_image_at_position, position);
     }
 
+    public String getFullFilePath(int position) {
+        Cursor cursor = getCursorAt(position);
+        if (cursor != null) {
+            return cursor.getString(cursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT));
+        }
+        return null;
+    }
+
     /**
      * Implementation for PagerAdapter:
      * Create the page for the given position.  The adapter is responsible

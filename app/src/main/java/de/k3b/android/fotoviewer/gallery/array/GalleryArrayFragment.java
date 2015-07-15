@@ -10,6 +10,9 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ListAdapter;
 
+// import com.squareup.leakcanary.RefWatcher;
+
+import de.k3b.android.fotoviewer.FotoGalleryApp;
 import de.k3b.android.fotoviewer.ImageItem;
 import de.k3b.android.fotoviewer.R;
 import de.k3b.android.fotoviewer.OnGalleryInteractionListener;
@@ -88,6 +91,12 @@ public class GalleryArrayFragment extends Fragment {
             }
         });
         return result;
+    }
+
+    @Override public void onDestroy() {
+        super.onDestroy();
+        // RefWatcher refWatcher = FotoGalleryApp.getRefWatcher(getActivity());
+        // refWatcher.watch(this);
     }
 
     @Override

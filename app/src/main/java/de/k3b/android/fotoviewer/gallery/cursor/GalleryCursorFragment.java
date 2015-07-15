@@ -16,8 +16,11 @@ import android.widget.GridView;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 
+// import com.squareup.leakcanary.RefWatcher;
+
 import java.util.List;
 
+import de.k3b.android.fotoviewer.FotoGalleryApp;
 import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.directory.DirectoryGui;
 import de.k3b.android.fotoviewer.directory.DirectoryPickerFragment;
@@ -178,14 +181,17 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         super.onDestroy();
         System.gc();
         Global.debugMemory(debugPrefix, "onDestroy after");
+        // RefWatcher refWatcher = FotoGalleryApp.getRefWatcher(getActivity());
+        // refWatcher.watch(this);
     }
 
-    /**
-     * interface Queryable: Initiates a database requery in the background
-     *
-     * @param context
-     * @param parameters
-     */
+
+        /**
+         * interface Queryable: Initiates a database requery in the background
+         *
+         * @param context
+         * @param parameters
+         */
     @Override
     public void requery(Activity context, QueryParameterParcelable parameters) {
         if (Global.debugEnabled) {

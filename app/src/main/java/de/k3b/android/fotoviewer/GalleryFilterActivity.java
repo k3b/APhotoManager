@@ -14,6 +14,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+// import com.squareup.leakcanary.RefWatcher;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -203,6 +205,8 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
 
         System.gc();
         Global.debugMemory(debugPrefix, "onDestroy end");
+        // RefWatcher refWatcher = FotoGalleryApp.getRefWatcher(this);
+        // refWatcher.watch(this);
     }
 
     /** gui content seen as IGalleryFilter */

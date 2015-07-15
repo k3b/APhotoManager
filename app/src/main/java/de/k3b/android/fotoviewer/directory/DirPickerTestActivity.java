@@ -8,7 +8,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+// import com.squareup.leakcanary.RefWatcher;
+
 import de.k3b.android.fotoviewer.FotoGalleryActivity;
+import de.k3b.android.fotoviewer.FotoGalleryApp;
 import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
 import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.R;
@@ -49,6 +52,12 @@ public class DirPickerTestActivity extends Activity implements DirectoryPickerFr
 
     private void onDirectoryDataLoadComplete(Directory directoryRoot) {
         dirGui.defineDirectoryNavigation(directoryRoot, dirQueryID, "/");
+    }
+
+    @Override public void onDestroy() {
+        super.onDestroy();
+        // RefWatcher refWatcher = FotoGalleryApp.getRefWatcher(this);
+        // refWatcher.watch(this);
     }
 
     /************ menu *********************/

@@ -19,14 +19,13 @@ import android.app.Activity;
 import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.view.MenuItem;
 
+// import com.squareup.leakcanary.RefWatcher;
+
+import de.k3b.android.fotoviewer.FotoGalleryApp;
 import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.R;
 import de.k3b.android.fotoviewer.queries.FotoSql;
@@ -130,11 +129,13 @@ public class ImageDetailActivityViewPager extends Activity {
         loadCompleteHandler = null;
         mViewPager.setAdapter(null);
         super.onDestroy();
+        // RefWatcher refWatcher = FotoGalleryApp.getRefWatcher(this);
+        // refWatcher.watch(this);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.viewpager_menu, menu);
+        getMenuInflater().inflate(R.menu.menu_image_detail, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -146,7 +147,26 @@ public class ImageDetailActivityViewPager extends Activity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         return super.onPrepareOptionsMenu(menu);
     }
-    
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case R.id.action_details:
+                showDetails();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+    }
+
+    private void showDetails() {
+        int itemPosition = mViewPager.getCurrentItem();
+        String fullFilePath = this.mAdapter.getFullFilePath(itemPosition);
+        ImageDetailDialogBuilder.createImageDetailDialog(this, fullFilePath).show();
+    }
+
     private void toggleViewPagerScrolling() {
     	if (isViewPagerActive()) {
     		((LockableViewPager) mViewPager).toggleLock();

@@ -15,6 +15,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+// import com.squareup.leakcanary.RefWatcher;
+
 import de.k3b.android.fotoviewer.directory.DirectoryGui;
 import de.k3b.android.fotoviewer.directory.DirectoryLoaderTask;
 import de.k3b.android.fotoviewer.imagedetail.ImageDetailActivityViewPager;
@@ -170,6 +172,7 @@ public class FotoGalleryActivity extends Activity implements
     protected void onCreate(Bundle savedInstanceState) {
         Global.debugMemory(debugPrefix, "onCreate");
         super.onCreate(savedInstanceState);
+		
         setContentView(R.layout.activity_gallery); // .gallery_activity);
 
         this.galleryQueryParameter.loadSettingsAndInstanceState(this, savedInstanceState);
@@ -230,6 +233,8 @@ public class FotoGalleryActivity extends Activity implements
         }
         System.gc();
         Global.debugMemory(debugPrefix, "onDestroy end");
+        // RefWatcher refWatcher = FotoGalleryApp.getRefWatcher(this);
+        // refWatcher.watch(this);
     }
 
     @Override
