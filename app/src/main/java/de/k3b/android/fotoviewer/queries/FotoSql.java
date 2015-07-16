@@ -82,10 +82,13 @@ public class FotoSql {
     public static final QueryParameterParcelable queryGroupByPlace = getQueryGroupByPlace();
 
     public static QueryParameterParcelable getQueryGroupByPlace() {
-        String SQL_EXPR_LAT = "(round(" + SQL_COL_LAT + " - 0.00499, 2))";
-        String SQL_EXPR_LON = "(round(" + SQL_COL_LON + " - 0.00499, 2))";
-//        String SQL_EXPR_LAT = "(round(" + SQL_COL_LAT + " * " + factor + ") /" + factor + ")";
-//        String SQL_EXPR_LON = "(round(" + SQL_COL_LON + " * " + factor + ") /" + factor + ")";
+        //String SQL_EXPR_LAT = "(round(" + SQL_COL_LAT + " - 0.00499, 2))";
+        //String SQL_EXPR_LON = "(round(" + SQL_COL_LON + " - 0.00499, 2))";
+        int factor = 100;
+
+        // "- 0.5" else rounding "10.6" becomes 11.0
+        String SQL_EXPR_LAT = "(round((" + SQL_COL_LAT + " * " + factor + ") - 0.5) /" + factor + ")";
+        String SQL_EXPR_LON = "(round((" + SQL_COL_LON + " * " + factor + ") - 0.5) /" + factor + ")";
 
         QueryParameterParcelable result = new QueryParameterParcelable();
 

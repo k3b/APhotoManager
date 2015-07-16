@@ -73,7 +73,6 @@ public class ImageDetailDialogBuilder {
     private static String line = "------------------";
     private static void addExif(StringBuilder builder, File file) throws ImageProcessingException, IOException {
         if (file.exists()) {
-            builder.append(NL).append(line).append(NL);
             builder.append(NL).append(file).append(NL).append(NL);
 
             Metadata metadata = ImageMetadataReader.readMetadata(file);
@@ -97,6 +96,7 @@ public class ImageDetailDialogBuilder {
                 }
             }
             */
+                builder.append(NL).append(line).append(NL);
             }
         } else {
             builder.append(NL).append(file).append(" not found.").append(NL);
@@ -128,6 +128,7 @@ public class ImageDetailDialogBuilder {
         builder.append("Camera Model: " + getExifTag(exif,ExifInterface.TAG_MODEL) + "\n");
         builder.append("Camera Orientation: " + getExifTag(exif,ExifInterface.TAG_ORIENTATION) + "\n");
         builder.append("Camera White Balance: " + getExifTag(exif, ExifInterface.TAG_WHITE_BALANCE) + "\n");
+        builder.append(NL).append(line).append(NL);
     }
 
     private static String getExifTag(ExifInterface exif,String tag){
