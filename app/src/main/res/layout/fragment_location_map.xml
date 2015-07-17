@@ -1,0 +1,57 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="de.k3b.android.fotoviewer.locationmap.LocationMapFragment">
+    <!-- the gui -->
+    <RelativeLayout
+        android:id="@+id/parent_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <!-- own block necessary for Navigation Drawer overlay
+         [map mapview]
+
+         {[btn OK]}
+         [bar zoomBar]
+         [txt cright_osm]
+         -->
+        <TextView
+            android:id="@+id/cright_osm"
+            android:text="@string/title_cright_osm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:linksClickable="true"
+            android:background="@android:color/white"
+            />
+
+        <SeekBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/zoomBar"
+            android:layout_above="@id/cright_osm"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentLeft="true"
+            />
+
+        <org.osmdroid.views.MapView
+            android:id="@+id/mapview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/zoomBar"
+            />
+
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:text="@string/ok"
+            android:id="@+id/ok"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_above="@id/zoomBar"
+            />
+    </RelativeLayout>
+
+</FrameLayout>
