@@ -123,10 +123,8 @@ public class FotoSql {
         if ((parameters != null) && (filter != null)) {
             parameters.clearWhere();
 
-            if (filter.getLatitudeMin() != 0) parameters.addWhere(SQL_COL_LAT + " >= ?", DirectoryFormatter.getLatLon(filter.getLatitudeMin()));
-            if (filter.getLatitudeMax() != 0) parameters.addWhere(SQL_COL_LAT + " < ?", DirectoryFormatter.getLatLon(filter.getLatitudeMax()));
-            if (filter.getLogituedMin() != 0) parameters.addWhere(SQL_COL_LON + " >= ?", DirectoryFormatter.getLatLon((filter.getLogituedMin())));
-            if (filter.getLogituedMax() != 0) parameters.addWhere(SQL_COL_LON + " < ?", DirectoryFormatter.getLatLon((filter.getLogituedMax())));
+            addWhereFilteLatLon(parameters, filter.getLatitudeMin(),
+                    filter.getLatitudeMax(), filter.getLogituedMin(), filter.getLogituedMax());
 
             if (filter.getDateMin() != 0) parameters.addWhere(SQL_COL_DATE_TAKEN + " >= ?", Double.toString(filter.getDateMin()));
             if (filter.getDateMax() != 0) parameters.addWhere(SQL_COL_DATE_TAKEN + " < ?", Double.toString(filter.getDateMax()));
@@ -134,6 +132,13 @@ public class FotoSql {
             String path = filter.getPath();
             if ((path != null) && (path.length() > 0)) parameters.addWhere(SQL_COL_PATH + " like ?", path);
         }
+    }
+
+    public static void addWhereFilteLatLon(QueryParameterParcelable parameters, double latitudeMin, double latitudeMax, double logituedMin, double logituedMax) {
+        if (!Double.isNaN(latitudeMin)) parameters.addWhere(SQL_COL_LAT + " >= ?", DirectoryFormatter.getLatLon(latitudeMin));
+        if (!Double.isNaN(latitudeMax)) parameters.addWhere(SQL_COL_LAT + " < ?", DirectoryFormatter.getLatLon(latitudeMax));
+        if (!Double.isNaN(logituedMin)) parameters.addWhere(SQL_COL_LON + " >= ?", DirectoryFormatter.getLatLon(logituedMin));
+        if (!Double.isNaN(logituedMax)) parameters.addWhere(SQL_COL_LON + " < ?", DirectoryFormatter.getLatLon(logituedMax));
     }
 
     public static String getFilter(Cursor cursor, QueryParameterParcelable parameters, String description) {

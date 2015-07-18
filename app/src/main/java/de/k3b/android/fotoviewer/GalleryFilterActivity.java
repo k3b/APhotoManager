@@ -31,6 +31,9 @@ import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
 
+/**
+ * Defines a gui for global foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.
+ */
 public class GalleryFilterActivity extends Activity implements DirectoryPickerFragment.OnDirectoryInteractionListener {
     private static final String debugPrefix = "GalF-";
 
@@ -287,7 +290,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         }
         /************* local helper *****************/
         private String convertLL(double latLon) {
-            if (latLon == 0) return "";
+            if (Double.isNaN(latLon)) return "";
             return DirectoryFormatter.getLatLon(latLon);
         }
 
@@ -298,7 +301,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
 
         private double convertLL(String string) throws RuntimeException {
             if ((string == null) || (string.length() == 0)) {
-                return 0;
+                return Double.NaN;
             }
 
             try {

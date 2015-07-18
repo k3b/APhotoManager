@@ -1,13 +1,14 @@
 package de.k3b.io;
 
 /**
+ * parameter for foto filter by location: only fotos from certain lat/lon will be visible.
  * Created by k3b on 12.07.2015.
  */
 public class GeoRectangle implements IGeoRectangle {
-    private double latitudeMin = 0;
-    private double latitudeMax = 0;
-    private double logituedMin = 0;
-    private double logituedMax = 0;
+    private double latitudeMin = Double.NaN;
+    private double latitudeMax = Double.NaN;
+    private double logituedMin = Double.NaN;
+    private double logituedMax = Double.NaN;
 
     public GeoRectangle get(IGeoRectangle src) {
         this.setLogituedMin(src.getLogituedMin());
