@@ -14,6 +14,7 @@ import android.widget.Button;
 import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.util.BoundingBoxE6;
+import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayManager;
@@ -25,14 +26,17 @@ import java.util.Stack;
 import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.R;
 import de.k3b.android.fotoviewer.queries.FotoSql;
+import de.k3b.android.fotoviewer.queries.GalleryFilterParameterParcelable;
 import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
 import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
 import de.k3b.android.osmdroid.FolderOverlay;
 import de.k3b.android.osmdroid.IconFactory;
 import de.k3b.android.osmdroid.MarkerBase;
-import de.k3b.database.QueryParameter;
+import de.k3b.io.GeoRectangle;
 
 /**
+ * A fragment to display Foto locations in a geofrafic map.
+ * A location-area can be picked for filtering.
  * A simple {@link Fragment} subclass.
  */
 public class LocationMapFragment extends DialogFragment {
@@ -85,6 +89,7 @@ public class LocationMapFragment extends DialogFragment {
             cmdOk.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    // TODO
                     /*
                     if (currentSelectedPosition != null) {
 
@@ -109,6 +114,10 @@ public class LocationMapFragment extends DialogFragment {
         return result;
     }
 
+    public void defineNavigation(GeoRectangle filter, int queryTypeGroupPlaceMap) {
+        // TODO
+    }
+
     /** all marker clicks will be delegated to LocationMapFragment#onMarkerClicked() */
     private class FotoMarker extends MarkerBase<Object> {
 
@@ -130,24 +139,33 @@ public class LocationMapFragment extends DialogFragment {
     private Stack<FotoMarker> mRecycler = new Stack<FotoMarker>();
 
     private void reload() {
-        /*
+        List<Overlay> oldItems = mFolderOverlay.getItems();
+
         int zoomlevel = this.mMapView.getZoomLevel();
+        int groupingFactor = getGroupingFactor(zoomlevel);
         BoundingBoxE6 world = this.mMapView.getBoundingBox();
 
-        !!!
-        QueryParameterParcelable query = FotoSql.getQueryGroupByPlace(getGroupingFactor(zoomlevel))
-                .clearWhere().addWhere("(" + FotoSql.SQL_COL_LAT + " >= ? " +
-                                "AND " + FotoSql.SQL_COL_LAT + " < ?", world.getLatSouthE6() )
+        reload(world, groupingFactor, oldItems);
+    }
 
-        HashMap<Integer, FotoMarker> oldItems = new HashMap<Integer, FotoMarker>();
-        for (Overlay o : mFolderOverlay.getItems()) {
+    private void reload(BoundingBoxE6 latLonArea, int groupingFactor, List<Overlay> oldItems) {
+        QueryParameterParcelable query = FotoSql.getQueryGroupByPlace(groupingFactor);
+        query.clearWhere();
+
+        FotoSql.addWhereFilteLatLon(query
+                , latLonArea.getLatSouthE6() * 1E-6
+                , latLonArea.getLatNorthE6() * 1E-6
+                , latLonArea.getLonEastE6() * 1E-6
+                , latLonArea.getLonWestE6() * 1E-6);
+
+        HashMap<Integer, FotoMarker> oldItemsHash = new HashMap<Integer, FotoMarker>();
+        for (Overlay o : oldItems) {
             FotoMarker marker = (FotoMarker) o;
-            oldItems.put(marker.getID(), marker);
+            oldItemsHash.put(marker.getID(), marker);
         }
 
-        FotoMarkerLoaderTask loader = new FotoMarkerLoaderTask(oldItems);
+        FotoMarkerLoaderTask loader = new FotoMarkerLoaderTask(oldItemsHash);
         loader.execute(query);
-        */
     }
 
     /** translates map-zoomlevel to groupfactor

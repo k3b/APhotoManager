@@ -92,8 +92,9 @@ public class GalleryFilterParameterParcelable extends GalleryFilterParameter imp
                 setDateMin(from.getTime());
                 setDateMax(to.getTime());
                 return true;
+            case FotoSql.QUERY_TYPE_GROUP_PLACE_MAP:
             case FotoSql.QUERY_TYPE_GROUP_PLACE:
-                IGeoRectangle geo = DirectoryFormatter.getLatLon(selectedAbsolutePath);
+                IGeoRectangle geo = DirectoryFormatter.parseLatLon(selectedAbsolutePath);
                 if (geo != null) {
                     this.get(geo);
                 }

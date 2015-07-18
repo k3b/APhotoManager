@@ -35,6 +35,7 @@ public class FotoSql {
     public static final int QUERY_TYPE_GROUP_DATE = 12;
     public static final int QUERY_TYPE_GROUP_ALBUM = 13;
     public static final int QUERY_TYPE_GROUP_PLACE = 14;
+    public static final int QUERY_TYPE_GROUP_PLACE_MAP = 141;
 
     public static final int QUERY_TYPE_GROUP_DEFAULT = QUERY_TYPE_GROUP_ALBUM;
     public static final int QUERY_TYPE_DEFAULT = QUERY_TYPE_GALLERY;
@@ -135,10 +136,10 @@ public class FotoSql {
     }
 
     public static void addWhereFilteLatLon(QueryParameterParcelable parameters, double latitudeMin, double latitudeMax, double logituedMin, double logituedMax) {
-        if (!Double.isNaN(latitudeMin)) parameters.addWhere(SQL_COL_LAT + " >= ?", DirectoryFormatter.getLatLon(latitudeMin));
-        if (!Double.isNaN(latitudeMax)) parameters.addWhere(SQL_COL_LAT + " < ?", DirectoryFormatter.getLatLon(latitudeMax));
-        if (!Double.isNaN(logituedMin)) parameters.addWhere(SQL_COL_LON + " >= ?", DirectoryFormatter.getLatLon(logituedMin));
-        if (!Double.isNaN(logituedMax)) parameters.addWhere(SQL_COL_LON + " < ?", DirectoryFormatter.getLatLon(logituedMax));
+        if (!Double.isNaN(latitudeMin)) parameters.addWhere(SQL_COL_LAT + " >= ?", DirectoryFormatter.parseLatLon(latitudeMin));
+        if (!Double.isNaN(latitudeMax)) parameters.addWhere(SQL_COL_LAT + " < ?", DirectoryFormatter.parseLatLon(latitudeMax));
+        if (!Double.isNaN(logituedMin)) parameters.addWhere(SQL_COL_LON + " >= ?", DirectoryFormatter.parseLatLon(logituedMin));
+        if (!Double.isNaN(logituedMax)) parameters.addWhere(SQL_COL_LON + " < ?", DirectoryFormatter.parseLatLon(logituedMax));
     }
 
     public static String getFilter(Cursor cursor, QueryParameterParcelable parameters, String description) {
@@ -214,6 +215,7 @@ public class FotoSql {
             case QUERY_TYPE_GROUP_ALBUM:
                 return queryGroupByDir;
             case QUERY_TYPE_GROUP_PLACE:
+            case QUERY_TYPE_GROUP_PLACE_MAP:
                 return queryGroupByPlace;
             default:
                 Log.e(Global.LOG_CONTEXT, "FotoSql.getQuery(" + queryID + "): unknown ID");
@@ -239,6 +241,7 @@ public class FotoSql {
             case QUERY_TYPE_GROUP_ALBUM:
                 return context.getString(R.string.gallery_album);
             case QUERY_TYPE_GROUP_PLACE:
+            case QUERY_TYPE_GROUP_PLACE_MAP:
                 return context.getString(R.string.gallery_location);
             default:
                 return "???";

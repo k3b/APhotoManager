@@ -23,6 +23,7 @@ import java.util.Locale;
 
 import de.k3b.android.fotoviewer.directory.DirectoryLoaderTask;
 import de.k3b.android.fotoviewer.directory.DirectoryPickerFragment;
+import de.k3b.android.fotoviewer.locationmap.LocationMapFragment;
 import de.k3b.android.fotoviewer.queries.FotoSql;
 import de.k3b.android.fotoviewer.queries.GalleryFilterParameterParcelable;
 import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
@@ -99,7 +100,8 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         cmd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showDirectoryPicker(FotoSql.queryGroupByPlace);
+//              showDirectoryPicker(FotoSql.queryGroupByPlace);
+                showLatLonPicker(FotoSql.queryGroupByPlace);
             }
         });
 
@@ -291,7 +293,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         /************* local helper *****************/
         private String convertLL(double latLon) {
             if (Double.isNaN(latLon)) return "";
-            return DirectoryFormatter.getLatLon(latLon);
+            return DirectoryFormatter.parseLatLon(latLon);
         }
 
         private String convertDate(long dateMin) {
@@ -367,6 +369,16 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
             dirInfos.put(queryId, result);
         }
         return result;
+    }
+
+    private void showLatLonPicker(final QueryParameterParcelable currentDirContentQuery) {
+        if (fromGui(mFilter)) {
+            final FragmentManager manager = getFragmentManager();
+            LocationMapFragment dirDialog = new LocationMapFragment();
+            dirDialog.defineNavigation(mFilter, FotoSql.QUERY_TYPE_GROUP_PLACE_MAP);
+
+            dirDialog.show(manager, DLG_NAVIGATOR_TAG);
+        }
     }
 
     private void showDirectoryPicker(final QueryParameterParcelable currentDirContentQuery) {

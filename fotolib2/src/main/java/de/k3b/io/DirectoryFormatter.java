@@ -61,20 +61,22 @@ public class DirectoryFormatter {
     public static String getLatLonPath(double latitude, double longitude) {
         if ((latitude == 0) && (longitude == 0)) return null;
         StringBuilder result = new StringBuilder();
-        result.append("/ ").append(getInt(latitude, 10)).append(",").append(getInt(longitude,10)).append("/");
-        result.append((int) latitude).append(",").append((int)longitude).append("/");
+        result.append("/ ").append(getInt(latitude, 10)).append(",").append(getInt(longitude, 10)).append("/");
+        result.append((int) latitude).append(",").append((int) longitude).append("/");
 
-        String lat = latLonFormatter4.format(latitude); int latPos = lat.indexOf(".") + 1;
-        String lon = latLonFormatter4.format(longitude); int lonPos = lon.indexOf(".")+ 1;
+        String lat = latLonFormatter4.format(latitude);
+        int latPos = lat.indexOf(".") + 1;
+        String lon = latLonFormatter4.format(longitude);
+        int lonPos = lon.indexOf(".") + 1;
 
-        for (int i=1;i <=2;i++) {
-            result.append(lat.substring(0,latPos + i)).append(",").append(lon.substring(0,lonPos + i)).append("/");
+        for (int i = 1; i <= 2; i++) {
+            result.append(lat.substring(0, latPos + i)).append(",").append(lon.substring(0, lonPos + i)).append("/");
         }
 
         return result.toString();
     }
 
-    public static String getLatLon(double latOrLon) {
+    public static String parseLatLon(double latOrLon) {
         return latLonFormatter2.format(latOrLon);
     }
 
@@ -94,35 +96,62 @@ public class DirectoryFormatter {
         return null;
     }
 
-    public static IGeoRectangle getLatLon(String path) {
-        String[] elements = getLastPath(path).split(",");
+    /**
+     * Format "lat,lon" or "lat,lon-lat,lon"
+     *
+     * @param path
+     * @return
+     */
+    public static IGeoRectangle parseLatLon(String path) {
+        String[] minMax = getLastPath(path).split("-");
+        if (minMax == null) return null;
+
+        String[] elements = minMax[0].split(",");
         if ((elements != null) && (elements.length == 2)) {
             String lat = elements[0];
             String lon = elements[1];
 
             GeoRectangle result = new GeoRectangle();
-            result.setLatitudeMin(Double.parseDouble(lat));
-            result.setLogituedMin(Double.parseDouble(lon));
+            result.setLatitudeMin(getLatLon(lat));
+            result.setLogituedMin(getLatLon(lon));
 
-            double delta = 1;
-            if (lat.startsWith(" ")) {
-                delta = 10.0;
-            } else {
-                int posDecimal = lat.indexOf(".");
-                if (posDecimal >= 0) {
-                    int numberDecimals = lat.length() - posDecimal - 1;
-                    while (numberDecimals > 0) {
-                        delta = delta / 10.0;
-                        numberDecimals--;
+            if (minMax.length == 1) {
+                double delta = 1;
+                if (lat.startsWith(" ")) {
+                    delta = 10.0;
+                } else {
+                    int posDecimal = lat.indexOf(".");
+                    if (posDecimal >= 0) {
+                        int numberDecimals = lat.length() - posDecimal - 1;
+                        while (numberDecimals > 0) {
+                            delta = delta / 10.0;
+                            numberDecimals--;
+                        }
                     }
                 }
-            }
 
-            result.setLatitudeMax(result.getLatitudeMin() + delta);
-            result.setLogituedMax(result.getLogituedMin() + delta);
+                result.setLatitudeMax(result.getLatitudeMin() + delta);
+                result.setLogituedMax(result.getLogituedMin() + delta);
+                return result;
+            } else if (minMax.length == 2) {
+                elements = minMax[1].split(",");
+                if ((elements != null) && (elements.length == 2)) {
+                    lat = elements[0];
+                    lon = elements[1];
 
-            return result;
+                    result.setLatitudeMax(getLatLon(lat));
+                    result.setLogituedMax(getLatLon(lon));
+                    return result;
+                } // if lat+lon
+            } // if 1 or 2 lat,lon elements
         }
+
         return null;
     }
+
+    private static double getLatLon(String latOrLon) {
+        if ((latOrLon == null) || (latOrLon.length() == 0)) return Double.NaN;
+        return Double.parseDouble(latOrLon);
+    }
+
 }
