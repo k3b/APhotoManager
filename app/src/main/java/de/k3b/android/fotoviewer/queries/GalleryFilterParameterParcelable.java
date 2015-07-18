@@ -7,36 +7,36 @@ import android.os.Parcelable;
 import java.util.Date;
 
 import de.k3b.io.DirectoryFormatter;
-import de.k3b.io.GalleryFilter;
+import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IGeoRectangle;
 
 /**
  * Created by k3b on 11.07.2015.
  */
-public class GalleryFilterParcelable extends GalleryFilter implements Parcelable {
+public class GalleryFilterParameterParcelable extends GalleryFilterParameter implements Parcelable {
     /**
      * Classes implementing the Parcelable
      * interface must also have a static field called <code>CREATOR</code>, which
      * is an object implementing the {@link Parcelable.Creator Parcelable.Creator}
      * interface.
      */
-    public static final Parcelable.Creator<GalleryFilterParcelable> CREATOR
-            = new Parcelable.Creator<GalleryFilterParcelable>() {
-        public GalleryFilterParcelable createFromParcel(Parcel in) {
-            return new GalleryFilterParcelable(in);
+    public static final Parcelable.Creator<GalleryFilterParameterParcelable> CREATOR
+            = new Parcelable.Creator<GalleryFilterParameterParcelable>() {
+        public GalleryFilterParameterParcelable createFromParcel(Parcel in) {
+            return new GalleryFilterParameterParcelable(in);
         }
 
-        public GalleryFilterParcelable[] newArray(int size) {
-            return new GalleryFilterParcelable[size];
+        public GalleryFilterParameterParcelable[] newArray(int size) {
+            return new GalleryFilterParameterParcelable[size];
         }
     };
 
-    public GalleryFilterParcelable() {};
+    public GalleryFilterParameterParcelable() {};
 
     /************* parcable support **********************/
 
     /** to desirialize from Parcel */
-    private GalleryFilterParcelable(Parcel in) {
+    private GalleryFilterParameterParcelable(Parcel in) {
         setPath(in.readString());
 
         setLatitudeMin(in.readDouble());

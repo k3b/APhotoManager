@@ -20,7 +20,7 @@ import android.widget.Toast;
 import de.k3b.android.fotoviewer.directory.DirectoryGui;
 import de.k3b.android.fotoviewer.directory.DirectoryLoaderTask;
 import de.k3b.android.fotoviewer.imagedetail.ImageDetailActivityViewPager;
-import de.k3b.android.fotoviewer.queries.GalleryFilterParcelable;
+import de.k3b.android.fotoviewer.queries.GalleryFilterParameterParcelable;
 import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
 import de.k3b.android.fotoviewer.directory.DirectoryPickerFragment;
 import de.k3b.android.fotoviewer.queries.FotoSql;
@@ -56,7 +56,7 @@ public class FotoGalleryActivity extends Activity implements
 
         QueryParameterParcelable mGalleryContentQuery = null;
 
-        GalleryFilterParcelable mFilter;
+        GalleryFilterParameterParcelable mFilter;
 
         /** one of the FotoSql.QUERY_TYPE_xxx values. if undefined use default */
         private int getDirQueryID() {
@@ -139,7 +139,7 @@ public class FotoGalleryActivity extends Activity implements
             }
 
             if (this.mFilter == null) {
-                this.mFilter = new GalleryFilterParcelable();
+                this.mFilter = new GalleryFilterParameterParcelable();
                 mFilter.loadSettings(sharedPref);
             }
             // extra parameter
@@ -319,7 +319,7 @@ public class FotoGalleryActivity extends Activity implements
         }
     }
 
-    private void onFilterChanged(GalleryFilterParcelable filter) {
+    private void onFilterChanged(GalleryFilterParameterParcelable filter) {
         if (filter != null) {
             this.galleryQueryParameter.mFilter = filter;
 

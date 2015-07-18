@@ -1,17 +1,16 @@
 package de.k3b.io;
 
-import de.k3b.io.GeoRectangle;
-
 /**
+ * parameter for foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.
  * Created by k3b on 11.07.2015.
  */
-public class GalleryFilter extends GeoRectangle implements IGalleryFilter {
+public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilter {
     private String path = null;
 
     private long dateMin = 0;
     private long dateMax = 0;
 
-    public GalleryFilter get(IGalleryFilter src) {
+    public GalleryFilterParameter get(IGalleryFilter src) {
         super.get(src);
         this.setDateMax(src.getDateMax());
         this.setDateMin(src.getDateMin());

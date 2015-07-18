@@ -22,7 +22,7 @@ import de.k3b.android.osmdroid.MarkerBase;
 import de.k3b.database.QueryParameter;
 
 /**
- * Load Icon Overlays in a Background Task.<br>
+ * Load Marker Overlays in a Background Task.<br>
  * Example usage
  * <pre>
  MarkerLoaderTask loader = new MarkerLoaderTask(getActivity(), "MyLoader") {

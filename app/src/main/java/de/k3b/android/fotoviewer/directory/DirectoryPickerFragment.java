@@ -31,7 +31,7 @@ import de.k3b.io.DirectoryNavigator;
 import java.util.List;
 
 /**
- * A fragment with a Listing of Directories.
+ * A fragment with a Listing of Directories to be picked.
  *
  * [parentPathBar]
  * [treeView]

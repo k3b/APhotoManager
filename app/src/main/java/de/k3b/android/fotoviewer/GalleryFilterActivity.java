@@ -24,7 +24,7 @@ import java.util.Locale;
 import de.k3b.android.fotoviewer.directory.DirectoryLoaderTask;
 import de.k3b.android.fotoviewer.directory.DirectoryPickerFragment;
 import de.k3b.android.fotoviewer.queries.FotoSql;
-import de.k3b.android.fotoviewer.queries.GalleryFilterParcelable;
+import de.k3b.android.fotoviewer.queries.GalleryFilterParameterParcelable;
 import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryFormatter;
@@ -42,10 +42,10 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
     private static final String DLG_NAVIGATOR_TAG = "GalleryFilterActivity";
     private static final String SETTINGS_KEY = "GalleryFilterActivity-";
 
-    GalleryFilterParcelable mFilter = null;
+    GalleryFilterParameterParcelable mFilter = null;
     private AsFilter mAsFilter = null;
 
-    public static void showActivity(Activity context, GalleryFilterParcelable filter) {
+    public static void showActivity(Activity context, GalleryFilterParameterParcelable filter) {
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, context.getClass().getSimpleName()
                     + " > GalleryFilterActivity.showActivity");
@@ -59,7 +59,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         context.startActivityForResult(intent, resultID);
     }
 
-    public static GalleryFilterParcelable getFilter(Intent intent) {
+    public static GalleryFilterParameterParcelable getFilter(Intent intent) {
         if (intent == null) return null;
         return intent.getParcelableExtra(EXTRA_FILTER);
     }
@@ -72,7 +72,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         this.mAsFilter = new AsFilter();
         onCreateButtos();
 
-        GalleryFilterParcelable filter = getFilter(this.getIntent());
+        GalleryFilterParameterParcelable filter = getFilter(this.getIntent());
 
         if (filter != null) {
             mFilter = filter;
@@ -338,7 +338,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
     }
 
     private void clearFilter() {
-        mFilter = new GalleryFilterParcelable();
+        mFilter = new GalleryFilterParameterParcelable();
         toGui(mFilter);
     }
 
