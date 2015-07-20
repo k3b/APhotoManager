@@ -50,8 +50,14 @@ public abstract class MarkerLoaderTask<MARKER extends MarkerBase> extends AsyncT
     private final IconFactory mIconFactory;
     private final DefaultResourceProxyImplEx mResourceProxy;
     protected HashMap<Integer, MARKER> mOldItems;
+    protected StringBuffer mStatus = null;
+    private int mStatisticsRecycled = 0;
 
     public MarkerLoaderTask(Activity context, String debugPrefix, HashMap<Integer, MARKER> oldItems) {
+        if (Global.debugEnabled) {
+            mStatus = new StringBuffer();
+        }
+
         Global.debugMemory(debugPrefix, "ctor");
         this.context = context;
         this.debugPrefix = debugPrefix;
@@ -77,9 +83,9 @@ public abstract class MarkerLoaderTask<MARKER extends MarkerBase> extends AsyncT
             final int expectedCount = itemCount + itemCount;
 
             publishProgress(itemCount, expectedCount);
-            if (Global.debugEnabled)
-                Log.i(Global.LOG_CONTEXT, debugPrefix + itemCount + " rows found for query " + queryParameters.toSqlString());
-
+            if (this.mStatus != null) {
+                this.mStatus.append("'").append(itemCount).append("' rows found for query \n\t").append(queryParameters.toSqlString());
+            }
             OverlayManager result = new OverlayManager(null);
 
             long startTime = SystemClock.currentThreadTimeMillis();
@@ -96,6 +102,7 @@ public abstract class MarkerLoaderTask<MARKER extends MarkerBase> extends AsyncT
                 if (marker != null) {
                     // recycle existing
                     mOldItems.remove(id);
+                    mStatisticsRecycled ++;
                 } else {
                     marker = createMarker();
                     GeoPoint point = new GeoPoint(cursor.getDouble(colLat),cursor.getDouble(colLon));
@@ -114,6 +121,11 @@ public abstract class MarkerLoaderTask<MARKER extends MarkerBase> extends AsyncT
                     if (isCancelled()) break;
                 }
             }
+            if (this.mStatus != null) {
+                this.mStatus.append("\n\tRecycled : ").append(mStatisticsRecycled);
+                // Log.i(Global.LOG_CONTEXT, debugPrefix + itemCount + this.mStatus);
+            }
+
             return result;
         } finally {
             if (cursor != null) {

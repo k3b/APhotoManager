@@ -5,6 +5,9 @@ package de.k3b.io;
  * Created by k3b on 12.07.2015.
  */
 public class GeoRectangle implements IGeoRectangle {
+    public static final String DELIM_LAT_LON = ",";
+    public static final String DELIM_LL_S = ";";
+
     private double latitudeMin = Double.NaN;
     private double latitudeMax = Double.NaN;
     private double logituedMin = Double.NaN;
@@ -56,7 +59,7 @@ public class GeoRectangle implements IGeoRectangle {
 
     @Override
     public String toString() {
-        return "" + getLatitudeMin() + "," + getLogituedMin() + "-"  + getLatitudeMax() + "," + getLogituedMax();
+        return "" + getLatitudeMin() + DELIM_LAT_LON + getLogituedMin() + DELIM_LL_S + getLatitudeMax() + DELIM_LAT_LON + getLogituedMax();
     }
 
     public void setLatitude(double min, double max) {

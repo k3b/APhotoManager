@@ -64,8 +64,6 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, Dire
             final int expectedCount = itemCount + itemCount;
 
             publishProgress(itemCount, expectedCount);
-            if (Global.debugEnabled)
-                Log.i(Global.LOG_CONTEXT, debugPrefix + itemCount + " rows found for query " + queryParameters.toSqlString());
 
             DirectoryBuilder builder = new DirectoryBuilder();
 

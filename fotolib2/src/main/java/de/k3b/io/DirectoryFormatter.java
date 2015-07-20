@@ -103,10 +103,10 @@ public class DirectoryFormatter {
      * @return
      */
     public static IGeoRectangle parseLatLon(String path) {
-        String[] minMax = getLastPath(path).split("-");
+        String[] minMax = getLastPath(path).split(GeoRectangle.DELIM_LL_S);
         if (minMax == null) return null;
 
-        String[] elements = minMax[0].split(",");
+        String[] elements = minMax[0].split(GeoRectangle.DELIM_LAT_LON);
         if ((elements != null) && (elements.length == 2)) {
             String lat = elements[0];
             String lon = elements[1];
@@ -134,7 +134,7 @@ public class DirectoryFormatter {
                 result.setLogituedMax(result.getLogituedMin() + delta);
                 return result;
             } else if (minMax.length == 2) {
-                elements = minMax[1].split(",");
+                elements = minMax[1].split(GeoRectangle.DELIM_LAT_LON);
                 if ((elements != null) && (elements.length == 2)) {
                     lat = elements[0];
                     lon = elements[1];

@@ -36,6 +36,7 @@ import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
 import de.k3b.android.osmdroid.FolderOverlay;
 import de.k3b.android.osmdroid.IconFactory;
 import de.k3b.android.osmdroid.MarkerBase;
+import de.k3b.database.QueryParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGeoRectangle;
 
@@ -75,7 +76,7 @@ public class LocationMapFragment extends DialogFragment {
         Global.debugMemory(debugPrefix, "ctor");
         // Required empty public constructor
         if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, debugPrefix + "()");
+            Log.d(Global.LOG_CONTEXT, debugPrefix + "()");
         }
     }
 
@@ -161,6 +162,10 @@ public class LocationMapFragment extends DialogFragment {
     private void onOk() {
         if (mDirectoryListener != null) {
             IGeoRectangle result = getGeoRectangle(mMapView.getBoundingBox());
+            if (Global.debugEnabled) {
+                Log.i(Global.LOG_CONTEXT, debugPrefix + "onOk: " + result);
+            }
+
             mDirectoryListener.onDirectoryPick(result.toString(), FotoSql.QUERY_TYPE_GROUP_PLACE_MAP);
             dismiss();
         }
@@ -200,6 +205,10 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     public void defineNavigation(GeoRectangle filter, int queryType) {
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, debugPrefix + "defineNavigation: " + filter);
+        }
+
         BoundingBoxE6 boundingBox = new BoundingBoxE6(
                 filter.getLatitudeMax(),
                 filter.getLogituedMin(),
@@ -293,17 +302,38 @@ public class LocationMapFragment extends DialogFragment {
     private FotoMarkerLoaderTask mCurrentLoader = null;
     private class FotoMarkerLoaderTask extends MarkerLoaderTask<FotoMarker> {
 
+        private final int mRecyclerBefore;
+        private int mRecyclerAfter;
+
         public FotoMarkerLoaderTask(HashMap<Integer, FotoMarker> oldItems) {
-            super(getActivity(), debugPrefix + "-MarkerLoader#" + sInstanceCountFotoLoader++, oldItems);
+            super(getActivity(), debugPrefix + "-MarkerLoader#" + (sInstanceCountFotoLoader++) + "-", oldItems);
+            mRecyclerBefore = mRecycler.size();
         }
 
         @Override
         protected FotoMarker createMarker() {
-            FotoMarker marker = (mRecycler.isEmpty()) ? new FotoMarker(mResourceProxy) : mRecycler.pop();
+            if (Global.debugEnabledViewItem) {
+                Log.i(Global.LOG_CONTEXT, debugPrefix + "createMarker() " + mRecycler.size());
+            }
+
+            if (mRecycler.isEmpty()) {
+                return new FotoMarker(mResourceProxy);
+            }
+
+            FotoMarker marker = mRecycler.pop();
+            if (Global.debugEnabledViewItem) {
+                Log.i(Global.LOG_CONTEXT, debugPrefix + "recycled viewitem");
+            }
             return marker;
         }
 
-        // This is called when doInBackground() is finished
+        @Override
+        protected OverlayManager doInBackground(QueryParameter... queryParameter) {
+            OverlayManager result = super.doInBackground(queryParameter);
+            mRecyclerAfter = mRecycler.size();
+            return result;
+        }
+            // This is called when doInBackground() is finished
         protected void onPostExecute(OverlayManager result) {
             boolean zoomLevelChanged = mMapView.getZoomLevel() != mLastZoom;
 
@@ -316,6 +346,11 @@ public class LocationMapFragment extends DialogFragment {
             }
             mOldItems.clear();
             mOldItems = null;
+            int recycler = mRecycler.size();
+            if (mStatus != null) {
+                mStatus.append("\n\tRecycler: ").append(mRecyclerBefore).append(",").append(mRecyclerAfter).append(",").append(recycler);
+                Log.i(Global.LOG_CONTEXT, debugPrefix + mStatus);
+            }
 
             // in the meantime the mapview has moved: must recalculate again.
             mCurrentLoader = null;
@@ -326,9 +361,11 @@ public class LocationMapFragment extends DialogFragment {
         }
 
         private void recyleItems(boolean zoomLevelChanged, HashMap<Integer, FotoMarker> unusedItems) {
-            if (zoomLevelChanged) {
+            if (!zoomLevelChanged) {
+                if (Global.debugEnabledViewItem) {
+                    Log.d(Global.LOG_CONTEXT, debugPrefix + "recyleItems() : " + unusedItems.size());
+                }
 
-            } else {
                 // unused old items go into recycler
                 for (Integer id : unusedItems.keySet()) {
                     FotoMarker marker = unusedItems.get(id);
@@ -345,15 +382,24 @@ public class LocationMapFragment extends DialogFragment {
      * @param zoomLevelChanged
      */
     private void onLoadFinished(OverlayManager result, boolean zoomLevelChanged) {
-        if (Global.debugEnabled) {
+        StringBuilder dbg = (Global.debugEnabled) ? new StringBuilder() : null;
+        if (dbg != null) {
             int found = (result != null) ? result.size() : 0;
-            Log.i(Global.LOG_CONTEXT, debugPrefix + "onLoadFinished() markers created: " + found);
+            dbg.append(debugPrefix).append("onLoadFinished() markers created: ").append(found);
         }
 
         if (result != null) {
             OverlayManager old = mFolderOverlay.setOverlayManager(result);
             if (old != null) {
+                if (dbg != null) {
+                    dbg.append(debugPrefix).append(" previous : : ").append(old.size());
+                }
                 if (zoomLevelChanged) {
+                    if (dbg != null) dbg
+                            .append(" zoomLevelChanged - recycling : ")
+                            .append(old.size())
+                            .append(" items");
+
                     for (Overlay item : old) {
                         mRecycler.add((FotoMarker) item);
                     }
@@ -362,6 +408,9 @@ public class LocationMapFragment extends DialogFragment {
                 old.clear();
             }
             this.mMapView.invalidate();
+        }
+        if (dbg != null) {
+            Log.d(Global.LOG_CONTEXT, dbg.toString());
         }
     }
 
