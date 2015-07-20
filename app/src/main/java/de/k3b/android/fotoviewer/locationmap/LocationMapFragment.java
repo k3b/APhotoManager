@@ -1,6 +1,7 @@
 package de.k3b.android.fotoviewer.locationmap;
 
 
+import android.app.Activity;
 import android.app.DialogFragment;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -36,6 +37,7 @@ import de.k3b.android.osmdroid.FolderOverlay;
 import de.k3b.android.osmdroid.IconFactory;
 import de.k3b.android.osmdroid.MarkerBase;
 import de.k3b.io.GeoRectangle;
+import de.k3b.io.IGeoRectangle;
 
 /**
  * A fragment to display Foto locations in a geofrafic map.
@@ -52,6 +54,11 @@ public class LocationMapFragment extends DialogFragment {
     private FolderOverlay mFolderOverlay;
     IconFactory mIconFactory = null;
     private DefaultResourceProxyImplEx mResourceProxy;
+
+    // api to fragment owner
+    private OnDirectoryInteractionListener mDirectoryListener;
+
+
 
     /**
      * setCenterZoom does not work in onCreate() because getHeight() and getWidth() are not calculated yet and return 0;
@@ -73,10 +80,30 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     @Override public void onDestroy() {
+        if (mCurrentLoader != null) mCurrentLoader.cancel(false);
+        mCurrentLoader = null;
+
         if (mRecycler != null) mRecycler.empty();
         super.onDestroy();
         // RefWatcher refWatcher = FotoGalleryApp.getRefWatcher(getActivity());
         // refWatcher.watch(this);
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mDirectoryListener = (OnDirectoryInteractionListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement OnDirectoryInteractionListener");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mDirectoryListener = null;
     }
 
     @Override
@@ -118,17 +145,7 @@ public class LocationMapFragment extends DialogFragment {
             cmdOk.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    // TODO
-                    /*
-                    if (currentSelectedPosition != null) {
-
-                        GeoPointDto geoPoint = new GeoPointDto().setLatitude(currentSelectedPosition.getPosition().getLatitude()).setLongitude(currentSelectedPosition.getPosition().getLongitude());
-                        String uri = new GeoUri(GeoUri.OPT_DEFAULT).toUriString(geoPoint);
-                        setResult(0, new Intent(Intent.ACTION_PICK, Uri.parse(uri)));
-                    }
-
-                    finish();
-                */
+                    onOk();
                 }
             });
         }
@@ -139,6 +156,14 @@ public class LocationMapFragment extends DialogFragment {
         }
 
         return view;
+    }
+
+    private void onOk() {
+        if (mDirectoryListener != null) {
+            IGeoRectangle result = getGeoRectangle(mMapView.getBoundingBox());
+            mDirectoryListener.onDirectoryPick(result.toString(), FotoSql.QUERY_TYPE_GROUP_PLACE_MAP);
+            dismiss();
+        }
     }
 
     private void createZoomBar(View view) {
@@ -227,11 +252,12 @@ public class LocationMapFragment extends DialogFragment {
         QueryParameterParcelable query = FotoSql.getQueryGroupByPlace(groupingFactor);
         query.clearWhere();
 
+        IGeoRectangle rect = getGeoRectangle(latLonArea);
         FotoSql.addWhereFilteLatLon(query
-                , latLonArea.getLatSouthE6() * 1E-6
-                , latLonArea.getLatNorthE6() * 1E-6
-                , latLonArea.getLonEastE6() * 1E-6
-                , latLonArea.getLonWestE6() * 1E-6);
+                , rect.getLatitudeMin()
+                , rect.getLatitudeMax()
+                , rect.getLogituedMin()
+                , rect.getLogituedMax());
 
         HashMap<Integer, FotoMarker> oldItemsHash = new HashMap<Integer, FotoMarker>();
         for (Overlay o : oldItems) {
@@ -241,6 +267,14 @@ public class LocationMapFragment extends DialogFragment {
 
         mCurrentLoader = new FotoMarkerLoaderTask(oldItemsHash);
         mCurrentLoader.execute(query);
+    }
+
+    private IGeoRectangle getGeoRectangle(BoundingBoxE6 boundingBox) {
+        GeoRectangle result = new GeoRectangle();
+        result.setLatitude(boundingBox.getLatSouthE6() * 1E-6, boundingBox.getLatNorthE6() * 1E-6);
+        result.setLogitude(boundingBox.getLonWestE6() * 1E-6, boundingBox.getLonEastE6() * 1E-6);
+
+        return result;
     }
 
     /** translates map-zoomlevel to groupfactor
@@ -337,4 +371,27 @@ public class LocationMapFragment extends DialogFragment {
     private boolean onMarkerClicked(int markerId, IGeoPointE6 makerPosition, Object markerData) {
         return false; // TODO
     }
+
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p/>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
+    public interface OnDirectoryInteractionListener {
+        /** called when user picks a new directory */
+        void onDirectoryPick(String selectedAbsolutePath, int queryTypeId);
+
+        /** called when user cancels picking of a new directory
+         * @param queryTypeId*/
+        void onDirectoryCancel(int queryTypeId);
+
+        /** called after the selection in tree has changed */
+        void onDirectorySelectionChanged(String selectedChild, int queryTypeId);
+    }
+
 }

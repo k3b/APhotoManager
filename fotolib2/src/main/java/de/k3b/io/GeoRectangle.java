@@ -59,4 +59,25 @@ public class GeoRectangle implements IGeoRectangle {
         return "" + getLatitudeMin() + "," + getLogituedMin() + "-"  + getLatitudeMax() + "," + getLogituedMax();
     }
 
+    public void setLatitude(double min, double max) {
+        if (min > max) {
+            // swap
+            double temp = min;
+            min = max;
+            max = temp;
+        }
+        setLatitudeMin(min);
+        setLatitudeMax(max);
+    }
+
+    public void setLogitude(double min, double max) {
+        if (min > max) {
+            // swap
+            double temp = min;
+            min = max;
+            max = temp;
+        }
+        setLogituedMin(min);
+        setLogituedMax(max);
+    }
 }

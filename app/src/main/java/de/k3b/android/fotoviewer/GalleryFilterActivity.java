@@ -35,7 +35,7 @@ import de.k3b.io.IGeoRectangle;
 /**
  * Defines a gui for global foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.
  */
-public class GalleryFilterActivity extends Activity implements DirectoryPickerFragment.OnDirectoryInteractionListener {
+public class GalleryFilterActivity extends Activity implements DirectoryPickerFragment.OnDirectoryInteractionListener, LocationMapFragment.OnDirectoryInteractionListener {
     private static final String debugPrefix = "GalF-";
 
     private static final String EXTRA_FILTER = "Filter";

@@ -136,17 +136,6 @@ public class FotoSql {
     }
 
     public static void addWhereFilteLatLon(QueryParameterParcelable parameters, double latitudeMin, double latitudeMax, double logituedMin, double logituedMax) {
-        // workaround: sometimes osmdroid BoundingBoxE6 has wrong parameter order
-        if (latitudeMin > latitudeMax) {
-            double temp = latitudeMin;
-            latitudeMin = latitudeMax;
-            latitudeMax = temp;
-        }
-        if (logituedMin > logituedMax) {
-            double temp = logituedMin;
-            logituedMin = logituedMax;
-            logituedMax = temp;
-        }
         if (!Double.isNaN(latitudeMin)) parameters.addWhere(SQL_COL_LAT + " >= ?", DirectoryFormatter.parseLatLon(latitudeMin));
         if (!Double.isNaN(latitudeMax)) parameters.addWhere(SQL_COL_LAT + " < ?", DirectoryFormatter.parseLatLon(latitudeMax));
         if (!Double.isNaN(logituedMin)) parameters.addWhere(SQL_COL_LON + " >= ?", DirectoryFormatter.parseLatLon(logituedMin));
