@@ -5,6 +5,31 @@
     <!-- to read fotos from gallery in android-4.4 -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
+    <!--
+     permission INTERNET and WRITE_EXTERNAL_STORAGE required by MapTileDownloader
+    to load maps from internet and cache them in a cache on sdcard which is shared
+    by all osmdroid apps to minimize internet downloads.
+
+    Note: if these permissions are missing osmdroid will work but will not display
+    any map.
+
+    Note: if you donot want to allow you app to access internet and file store
+    you can use the MapTileAssetsProvider to put the card material into the apk-s
+    asset folder.
+-->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!--
+         permission ACCESS_NETWORK_STATE and ACCESS_WIFI_STATE
+        osmdroid can find out if internet is available and if it is wlan or cellphone-network to decide
+        when to download or refresh downloaded tiles.
+
+        Note: if these permissions are missing osmdroid will work but will not download
+        any map from internet.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
     <application
         android:name=".FotoGalleryApp"
         android:allowBackup="true"

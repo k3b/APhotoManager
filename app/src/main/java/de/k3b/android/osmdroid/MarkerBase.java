@@ -6,6 +6,7 @@ import android.view.MotionEvent;
 
 import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.IGeoPoint;
+import org.osmdroid.api.IGeoPointE6;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.Projection;
 
@@ -30,10 +31,10 @@ public abstract class MarkerBase<DataType> extends IconOverlay {
     /**
      * @return true if click was handeled.
      */
-    abstract protected boolean onMarkerClicked(MapView mapView, int markerId, IGeoPoint makerPosition, DataType markerData);
+    abstract protected boolean onMarkerClicked(MapView mapView, int markerId, IGeoPointE6 makerPosition, DataType markerData);
 
     /** used to recycle this */
-    public MarkerBase set(int id, IGeoPoint position, Drawable icon, DataType data) {
+    public MarkerBase set(int id, IGeoPointE6 position, Drawable icon, DataType data) {
         set(position, icon);
         mId = id;
         mData = data;

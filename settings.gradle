@@ -1,3 +1,3 @@
-startParameter.offline=true
+// startParameter.offline=true
 
-include ':app', 'fotolib2', 'fotoview.library' , ':OSMBonusPack'
+include ':app', 'fotolib2', 'fotoview.library', ':osmdroid-android'

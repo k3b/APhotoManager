@@ -9,12 +9,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.SeekBar;
 
 
 import org.osmdroid.ResourceProxy;
-import org.osmdroid.api.IGeoPoint;
+import org.osmdroid.api.IGeoPointE6;
+import org.osmdroid.events.DelayedMapListener;
+import org.osmdroid.events.MapListener;
+import org.osmdroid.events.ScrollEvent;
+import org.osmdroid.events.ZoomEvent;
 import org.osmdroid.util.BoundingBoxE6;
-import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayManager;
@@ -26,7 +30,6 @@ import java.util.Stack;
 import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.R;
 import de.k3b.android.fotoviewer.queries.FotoSql;
-import de.k3b.android.fotoviewer.queries.GalleryFilterParameterParcelable;
 import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
 import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
 import de.k3b.android.osmdroid.FolderOverlay;
@@ -50,9 +53,18 @@ public class LocationMapFragment extends DialogFragment {
     IconFactory mIconFactory = null;
     private DefaultResourceProxyImplEx mResourceProxy;
 
+    /**
+     * setCenterZoom does not work in onCreate() because getHeight() and getWidth() are not calculated yet and return 0;
+     * setCenterZoom must be set later when getHeight() and getWith() are known (i.e. in onWindowFocusChanged()).
+     * <p/>
+     * see http://stackoverflow.com/questions/10411975/how-to-get-the-width-and-height-of-an-image-view-in-android/10412209#10412209
+     */
+    private BoundingBoxE6 mDelayedZoomToBoundingBox = null;
+    private SeekBar mZoomBar;
+
     public LocationMapFragment() {
         // Required empty public constructor
-        debugPrefix = "DirectoryPickerFragment#" + (id++)  + " ";
+        debugPrefix = "LocationMapFragment#" + (id++)  + " ";
         Global.debugMemory(debugPrefix, "ctor");
         // Required empty public constructor
         if (Global.debugEnabled) {
@@ -74,6 +86,23 @@ public class LocationMapFragment extends DialogFragment {
         View view = inflater.inflate(R.layout.fragment_location_map, container, false);
 
         mMapView = (MapView) view.findViewById(R.id.mapview);
+        createZoomBar(view);
+        mMapView.setMapListener(new MapListener() {
+            @Override
+            public boolean onScroll(ScrollEvent event) {
+                reload();
+                return false;
+            }
+
+            @Override
+            public boolean onZoom(ZoomEvent event) {
+                mZoomBar.setProgress(mMapView.getZoomLevel());
+
+                reload();
+                return false;
+            }
+        });
+
         mResourceProxy = new DefaultResourceProxyImplEx(getActivity().getApplicationContext());
 
         mIconFactory = new IconFactory(mResourceProxy, getResources().getDrawable(R.drawable.marker_green));
@@ -104,8 +133,39 @@ public class LocationMapFragment extends DialogFragment {
             });
         }
 
+        if (this.mDelayedZoomToBoundingBox != null) {
+            mMapView.zoomToBoundingBox(this.mDelayedZoomToBoundingBox);
+            this.mDelayedZoomToBoundingBox = null;
+        }
+
         return view;
     }
+
+    private void createZoomBar(View view) {
+        mMapView.setBuiltInZoomControls(true);
+
+        mZoomBar = (SeekBar) view.findViewById(R.id.zoomBar);
+
+        mZoomBar.setMax(mMapView.getMaxZoomLevel() - mMapView.getMinZoomLevel());
+        mZoomBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser)
+                    mMapView.getController().setZoom(progress - mMapView.getMinZoomLevel());
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+    }
+
 
     private FolderOverlay createFolderOverlay(List<Overlay> overlays) {
         FolderOverlay result = new FolderOverlay(this.getActivity());
@@ -114,8 +174,18 @@ public class LocationMapFragment extends DialogFragment {
         return result;
     }
 
-    public void defineNavigation(GeoRectangle filter, int queryTypeGroupPlaceMap) {
-        // TODO
+    public void defineNavigation(GeoRectangle filter, int queryType) {
+        BoundingBoxE6 boundingBox = new BoundingBoxE6(
+                filter.getLatitudeMax(),
+                filter.getLogituedMin(),
+                filter.getLatitudeMin(),
+                filter.getLogituedMax());
+
+        if (this.mMapView != null) {
+            this.mMapView.zoomToBoundingBox(boundingBox);
+        } else {
+            this.mDelayedZoomToBoundingBox = boundingBox;
+        }
     }
 
     /** all marker clicks will be delegated to LocationMapFragment#onMarkerClicked() */
@@ -129,7 +199,7 @@ public class LocationMapFragment extends DialogFragment {
          * @return true if click was handeled.
          */
         @Override
-        protected boolean onMarkerClicked(MapView mapView, int markerId, IGeoPoint makerPosition, Object markerData) {
+        protected boolean onMarkerClicked(MapView mapView, int markerId, IGeoPointE6 makerPosition, Object markerData) {
             return LocationMapFragment.this.onMarkerClicked(markerId, makerPosition, markerData);
         }
     }
@@ -139,13 +209,18 @@ public class LocationMapFragment extends DialogFragment {
     private Stack<FotoMarker> mRecycler = new Stack<FotoMarker>();
 
     private void reload() {
-        List<Overlay> oldItems = mFolderOverlay.getItems();
+        if (mCurrentLoader == null) {
+            // not active yet
+            List<Overlay> oldItems = mFolderOverlay.getItems();
 
-        int zoomlevel = this.mMapView.getZoomLevel();
-        int groupingFactor = getGroupingFactor(zoomlevel);
-        BoundingBoxE6 world = this.mMapView.getBoundingBox();
+            mLastZoom = this.mMapView.getZoomLevel();
+            int groupingFactor = getGroupingFactor(mLastZoom);
+            BoundingBoxE6 world = this.mMapView.getBoundingBox();
 
-        reload(world, groupingFactor, oldItems);
+            reload(world, groupingFactor, oldItems);
+        } else {
+            mPendingLoads++;
+        }
     }
 
     private void reload(BoundingBoxE6 latLonArea, int groupingFactor, List<Overlay> oldItems) {
@@ -164,8 +239,8 @@ public class LocationMapFragment extends DialogFragment {
             oldItemsHash.put(marker.getID(), marker);
         }
 
-        FotoMarkerLoaderTask loader = new FotoMarkerLoaderTask(oldItemsHash);
-        loader.execute(query);
+        mCurrentLoader = new FotoMarkerLoaderTask(oldItemsHash);
+        mCurrentLoader.execute(query);
     }
 
     /** translates map-zoomlevel to groupfactor
@@ -178,6 +253,10 @@ public class LocationMapFragment extends DialogFragment {
 
     // for debugginc
     private static int sInstanceCountFotoLoader = 1;
+
+    private int mLastZoom = -1;
+    private int mPendingLoads = 0;
+    private FotoMarkerLoaderTask mCurrentLoader = null;
     private class FotoMarkerLoaderTask extends MarkerLoaderTask<FotoMarker> {
 
         public FotoMarkerLoaderTask(HashMap<Integer, FotoMarker> oldItems) {
@@ -192,29 +271,46 @@ public class LocationMapFragment extends DialogFragment {
 
         // This is called when doInBackground() is finished
         protected void onPostExecute(OverlayManager result) {
-            if (isCancelled()) {
-                onLoadFinished(null);
-            } else {
-                onLoadFinished(result);
+            boolean zoomLevelChanged = mMapView.getZoomLevel() != mLastZoom;
 
-                // unused old items go into recycler
-                for (Integer id : mOldItems.keySet()) {
-                    FotoMarker marker = mOldItems.get(id);
-                    marker.set(0,null,null,null);
-                    mRecycler.add(marker);
-                }
+            if (isCancelled()) {
+                onLoadFinished(null, zoomLevelChanged);
+            } else {
+                onLoadFinished(result, zoomLevelChanged);
+
+                recyleItems(zoomLevelChanged, mOldItems);
             }
             mOldItems.clear();
             mOldItems = null;
+
+            // in the meantime the mapview has moved: must recalculate again.
+            mCurrentLoader = null;
+            if (mPendingLoads > 0) {
+                mPendingLoads = 0;
+                reload();
+            }
         }
 
+        private void recyleItems(boolean zoomLevelChanged, HashMap<Integer, FotoMarker> unusedItems) {
+            if (zoomLevelChanged) {
+
+            } else {
+                // unused old items go into recycler
+                for (Integer id : unusedItems.keySet()) {
+                    FotoMarker marker = unusedItems.get(id);
+                    marker.set(0, null, null, null);
+                    mRecycler.add(marker);
+                }
+            }
+        }
     }
 
     /** gets called when FotoMarkerLoaderTask has finished.
      *
      * @param result null if there was an error
+     * @param zoomLevelChanged
      */
-    private void onLoadFinished(OverlayManager result) {
+    private void onLoadFinished(OverlayManager result, boolean zoomLevelChanged) {
         if (Global.debugEnabled) {
             int found = (result != null) ? result.size() : 0;
             Log.i(Global.LOG_CONTEXT, debugPrefix + "onLoadFinished() markers created: " + found);
@@ -223,6 +319,11 @@ public class LocationMapFragment extends DialogFragment {
         if (result != null) {
             OverlayManager old = mFolderOverlay.setOverlayManager(result);
             if (old != null) {
+                if (zoomLevelChanged) {
+                    for (Overlay item : old) {
+                        mRecycler.add((FotoMarker) item);
+                    }
+                }
                 old.onDetach(this.mMapView);
                 old.clear();
             }
@@ -233,7 +334,7 @@ public class LocationMapFragment extends DialogFragment {
     /**
      * @return true if click was handeled.
      */
-    private boolean onMarkerClicked(int markerId, IGeoPoint makerPosition, Object markerData) {
+    private boolean onMarkerClicked(int markerId, IGeoPointE6 makerPosition, Object markerData) {
         return false; // TODO
     }
 }

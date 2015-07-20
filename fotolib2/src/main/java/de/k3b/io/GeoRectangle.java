@@ -58,4 +58,5 @@ public class GeoRectangle implements IGeoRectangle {
     public String toString() {
         return "" + getLatitudeMin() + "," + getLogituedMin() + "-"  + getLatitudeMax() + "," + getLogituedMax();
     }
+
 }

@@ -62,6 +62,6 @@
     <string name="invalid_location">\'%1$s\' is not a valid coordinate.</string>
     <string name="invalid_date">\'%1$s\' is not a valid date.</string>
     <string name="action_details" >Details</string>
-    <string name="title_cright_osm"><![CDATA[Map Tiles (c) <a href=\'http://www.openstreetmap.org/copyright\'>OpenStreetMap</a> Contributors]]></string>
+    <string name="title_cright_osm">Map Tiles (c) <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> Contributors</string>
 
 </resources>

@@ -1,5 +1,19 @@
 FotoGallery\ReadMe.txt"
 
+mappicker
+	load initial data
+	on ok => call parent
+
+	async load if zoomlevel changed empty hash and different recycle
+
+	nur ein asyc load gleichzeitig. ggf in on loadFinished nächsten anstossen
+
+	statt zoomutil
+			mapview.zoomToBoundingBox(final BoundingBoxE6 boundingBox) {
+
+// symlink
+mklink /D /J osmdroid-android d:\prj\eve\android\prj\fotos-android.wrk\osmdroid\osmdroid-android
+
 ImageDetail - 
 	Menu: Properties
 		path
