@@ -283,12 +283,15 @@ public class LocationMapFragment extends DialogFragment {
         QueryParameterParcelable query = FotoSql.getQueryGroupByPlace(groupingFactor);
         query.clearWhere();
 
+        // delta: make the grouping area a little bit bigger than the viewport
+        // so that counts at the borders are correct.
+        double delta = (groupingFactor > 0) ? (2.0 / groupingFactor) : 0.0;
         IGeoRectangle rect = getGeoRectangle(latLonArea);
         FotoSql.addWhereFilteLatLon(query
-                , rect.getLatitudeMin()
-                , rect.getLatitudeMax()
-                , rect.getLogituedMin()
-                , rect.getLogituedMax());
+                , rect.getLatitudeMin() - delta
+                , rect.getLatitudeMax() + delta
+                , rect.getLogituedMin() - delta
+                , rect.getLogituedMax() + delta);
 
         HashMap<Integer, FotoMarker> oldItemsHash = new HashMap<Integer, FotoMarker>();
         for (Overlay o : oldItems) {
@@ -375,7 +378,11 @@ public class LocationMapFragment extends DialogFragment {
                         .append("\n\t").append(mMapView.getBoundingBox())
                         .append(", z= ").append(mMapView.getZoomLevel())
                         .append("\n\tPendingLoads").append(mPendingLoads);
-                Log.i(Global.LOG_CONTEXT, debugPrefix + mStatus);
+                if (Global.debugEnabledSql) {
+                    Log.w(Global.LOG_CONTEXT, debugPrefix + mStatus);
+                } else {
+                    Log.i(Global.LOG_CONTEXT, debugPrefix + mStatus);
+                }
             }
 
             // in the meantime the mapview has moved: must recalculate again.
@@ -408,7 +415,7 @@ public class LocationMapFragment extends DialogFragment {
      * @param zoomLevelChanged
      */
     private void onLoadFinished(OverlayManager result, boolean zoomLevelChanged) {
-        StringBuilder dbg = (Global.debugEnabled) ? new StringBuilder() : null;
+        StringBuilder dbg = (Global.debugEnabledSql || Global.debugEnabled) ? new StringBuilder() : null;
         if (dbg != null) {
             int found = (result != null) ? result.size() : 0;
             dbg.append(debugPrefix).append("onLoadFinished() markers created: ").append(found);

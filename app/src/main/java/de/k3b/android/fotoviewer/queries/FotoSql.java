@@ -99,7 +99,7 @@ public class FotoSql {
 
     public static final QueryParameterParcelable queryGroupByPlace = getQueryGroupByPlace(100);
 
-    public static QueryParameterParcelable getQueryGroupByPlace(double groupingFactor) {
+    public static QueryParameterParcelable getQueryGroupByPlace(int groupingFactor) {
         //String SQL_EXPR_LAT = "(round(" + SQL_COL_LAT + " - 0.00499, 2))";
         //String SQL_EXPR_LON = "(round(" + SQL_COL_LON + " - 0.00499, 2))";
 

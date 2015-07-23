@@ -14,8 +14,9 @@ public class Global {
      * true: addToCompressQue several Log.d(...) to show what is going on.
      * debugEnabled is updated by the SettingsActivity
      */
-    public static boolean debugEnabled = true;
+    public static boolean debugEnabled = false;
     public static boolean debugEnabledViewItem = false;
+    public static boolean debugEnabledSql = true;
 
     public static void debugMemory(String modul, String message) {
         if (false && Global.debugEnabled) {

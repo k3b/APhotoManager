@@ -26,7 +26,8 @@ public class FolderOverlay extends Overlay {
     }
 
     @SuppressLint("WrongCall")
-    @Override protected void draw(Canvas canvas, MapView osm, boolean shadow) {
+    @Override
+    protected void draw(Canvas canvas, MapView osm, boolean shadow) {
         if (shadow)
             return;
         mOverlayManager.onDraw(canvas, osm);

@@ -54,7 +54,7 @@ public abstract class MarkerLoaderTask<MARKER extends MarkerBase> extends AsyncT
     private int mStatisticsRecycled = 0;
 
     public MarkerLoaderTask(Activity context, String debugPrefix, HashMap<Integer, MARKER> oldItems) {
-        if (Global.debugEnabled) {
+        if (Global.debugEnabledSql || Global.debugEnabled) {
             mStatus = new StringBuffer();
         }
 
