@@ -1,8 +1,29 @@
 FotoGallery\ReadMe.txt"
 
+osmdroid
+	branch with structure change
+
+12 200
+11 400
+10 800
+9 1600
+8 3200
+7 6400
+6 12800
+5 256
+4 512
+3 1024
+2 2048
+1 4096
+0 8192	
+zoom=13 => gf=100
+14 50
+15 25
+
+
 mappicker
-    async loader statistics
-	calculate zoom level
+	calculate zoom level Bug in zoomToBoundingBox ? ggf old zoomUtils
+	calculate sql zoom level
 	onMarkerClick
 	doubleClick => zoom center
 	onDoubleDrag

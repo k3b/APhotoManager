@@ -42,9 +42,9 @@ dependencies {
 
     // this is osmdroid
     // compile project(':osmdroid-android') // local copy
-    // compile 'org.osmdroid:osmdroid-android:4.3'
+    compile 'org.osmdroid:osmdroid-android:4.3'
     // non local copy from repositories
-    compile project(':osmdroid-android')
+    // compile project(':osmdroid-android')
 
 //    compile project(':OSMBonusPack')
 

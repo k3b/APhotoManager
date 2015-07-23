@@ -8,8 +8,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 
 import org.osmdroid.ResourceProxy;
-import org.osmdroid.api.IGeoPoint;
-import org.osmdroid.api.IGeoPointE6;
+import org.osmdroid.api.*;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.Projection;
 import org.osmdroid.views.overlay.Overlay;
@@ -28,7 +27,7 @@ public class IconOverlay extends Overlay {
 
     /*attributes for standard features:*/
     protected Drawable mIcon        = null;
-    protected IGeoPointE6 mPosition   = null;
+    protected IGeoPoint mPosition   = null;
 
     protected float mBearing = 0.0f;
     protected float mAnchorU = ANCHOR_CENTER , mAnchorV=ANCHOR_CENTER;
@@ -43,12 +42,12 @@ public class IconOverlay extends Overlay {
         super(pResourceProxy);
     }
         /** save to be called in non-gui-thread */
-    public IconOverlay(final ResourceProxy pResourceProxy, IGeoPointE6 position, Drawable icon) {
+    public IconOverlay(final ResourceProxy pResourceProxy, IGeoPoint position, Drawable icon) {
         super(pResourceProxy);
         set(position, icon);
     }
 
-    public IconOverlay set(IGeoPointE6 position, Drawable icon) {
+    public IconOverlay set(IGeoPoint position, Drawable icon) {
         this.mPosition = position;
         this.mIcon = icon;
         return this;
@@ -79,7 +78,7 @@ public class IconOverlay extends Overlay {
         drawAt(canvas, mIcon, mPositionPixels.x, mPositionPixels.y, false, rotationOnScreen);
     }
 
-    public IGeoPointE6 getPosition() {
+    public IGeoPoint getPosition() {
         return mPosition;
     }
 }

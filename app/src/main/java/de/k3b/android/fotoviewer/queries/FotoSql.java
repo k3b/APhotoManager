@@ -80,9 +80,26 @@ public class FotoSql {
             .addGroupBy(SQL_EXPR_FOLDER)
             .addOrderBy(SQL_EXPR_FOLDER);
 
+    private static final int GROUPFACTOR_FOR_Z6 = 1;
+    public static final int getGroupFactor(final int _zoomLevel) {
+        int zoomLevel = _zoomLevel;
+        int result = GROUPFACTOR_FOR_Z6;
+        while (zoomLevel > 6) {
+            // result <<= 2; //
+            result = result * 2;
+            zoomLevel--;
+        }
+
+        if (Global.debugEnabled) {
+            Log.e(Global.LOG_CONTEXT, "FotoSql.getGroupFactor(" + _zoomLevel + ") => " + result);
+        }
+
+        return result;
+    }
+
     public static final QueryParameterParcelable queryGroupByPlace = getQueryGroupByPlace(100);
 
-    public static QueryParameterParcelable getQueryGroupByPlace(int groupingFactor) {
+    public static QueryParameterParcelable getQueryGroupByPlace(double groupingFactor) {
         //String SQL_EXPR_LAT = "(round(" + SQL_COL_LAT + " - 0.00499, 2))";
         //String SQL_EXPR_LON = "(round(" + SQL_COL_LON + " - 0.00499, 2))";
 

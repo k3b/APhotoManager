@@ -105,7 +105,7 @@
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="numberDecimal"
+        android:inputType="numberDecimal|numberSigned"
         android:ems="10"
         android:id="@+id/edit_latitude_from"
         android:layout_alignBottom="@+id/cmd_lat_lon"
@@ -117,7 +117,7 @@
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="numberDecimal"
+        android:inputType="numberDecimal|numberSigned"
         android:ems="10"
         android:id="@+id/edit_latitude_to"
         android:layout_below="@+id/cmd_lat_lon"
@@ -140,7 +140,7 @@
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="numberDecimal"
+        android:inputType="numberDecimal|numberSigned"
         android:ems="10"
         android:id="@+id/edit_longitude_from"
         android:layout_below="@+id/edit_latitude_to"
@@ -153,7 +153,7 @@
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="numberDecimal"
+        android:inputType="numberDecimal|numberSigned"
         android:ems="10"
         android:id="@+id/edit_longitude_to"
         android:layout_below="@+id/edit_longitude_from"

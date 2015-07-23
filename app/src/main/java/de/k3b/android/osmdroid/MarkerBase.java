@@ -5,8 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 
 import org.osmdroid.ResourceProxy;
-import org.osmdroid.api.IGeoPoint;
-import org.osmdroid.api.IGeoPointE6;
+import org.osmdroid.api.*;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.Projection;
 
@@ -31,10 +30,10 @@ public abstract class MarkerBase<DataType> extends IconOverlay {
     /**
      * @return true if click was handeled.
      */
-    abstract protected boolean onMarkerClicked(MapView mapView, int markerId, IGeoPointE6 makerPosition, DataType markerData);
+    abstract protected boolean onMarkerClicked(MapView mapView, int markerId, IGeoPoint makerPosition, DataType markerData);
 
     /** used to recycle this */
-    public MarkerBase set(int id, IGeoPointE6 position, Drawable icon, DataType data) {
+    public MarkerBase set(int id, IGeoPoint position, Drawable icon, DataType data) {
         set(position, icon);
         mId = id;
         mData = data;
@@ -47,6 +46,10 @@ public abstract class MarkerBase<DataType> extends IconOverlay {
      */
     protected boolean hitTest(final MotionEvent event, final MapView mapView){
         final Projection pj = mapView.getProjection();
+
+        // sometime at higher zoomlevels pj is null
+        if ((mPosition == null) || (mPositionPixels == null) || (pj == null)) return false;
+
         pj.toPixels(mPosition, mPositionPixels);
         final Rect screenRect = pj.getIntrinsicScreenRect();
         int x = -mPositionPixels.x + screenRect.left + (int) event.getX();

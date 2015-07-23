@@ -14,12 +14,12 @@ import android.widget.SeekBar;
 
 
 import org.osmdroid.ResourceProxy;
-import org.osmdroid.api.IGeoPointE6;
-import org.osmdroid.events.DelayedMapListener;
+import org.osmdroid.api.*;
 import org.osmdroid.events.MapListener;
 import org.osmdroid.events.ScrollEvent;
 import org.osmdroid.events.ZoomEvent;
 import org.osmdroid.util.BoundingBoxE6;
+import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayManager;
@@ -36,6 +36,7 @@ import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
 import de.k3b.android.osmdroid.FolderOverlay;
 import de.k3b.android.osmdroid.IconFactory;
 import de.k3b.android.osmdroid.MarkerBase;
+import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGeoRectangle;
@@ -152,8 +153,13 @@ public class LocationMapFragment extends DialogFragment {
         }
 
         if (this.mDelayedZoomToBoundingBox != null) {
-            mMapView.zoomToBoundingBox(this.mDelayedZoomToBoundingBox);
-            this.mDelayedZoomToBoundingBox = null;
+            mMapView.addOnFirstLayoutListener(new MapView.OnFirstLayoutListener() {
+                @Override
+                public void onFirstLayout(View v, int left, int top, int right, int bottom) {
+                    zoomToBoundingBox(mDelayedZoomToBoundingBox);
+                    mDelayedZoomToBoundingBox = null;
+                }
+            });
         }
 
         return view;
@@ -215,11 +221,24 @@ public class LocationMapFragment extends DialogFragment {
                 filter.getLatitudeMin(),
                 filter.getLogituedMax());
 
+        zoomToBoundingBox(boundingBox);
+    }
+
+    private void zoomToBoundingBox(BoundingBoxE6 boundingBox) {
         if (this.mMapView != null) {
-            this.mMapView.zoomToBoundingBox(boundingBox);
+            GeoPoint min = new GeoPoint(boundingBox.getLatSouthE6(), boundingBox.getLonWestE6());
+            GeoPoint max = new GeoPoint(boundingBox.getLatNorthE6(), boundingBox.getLonEastE6());
+            ZoomUtil.zoomTo(this.mMapView, ZoomUtil.NO_ZOOM, min, max);
+            // this.mMapView.zoomToBoundingBox(boundingBox); this is to inexact
+
+            if (Global.debugEnabled) {
+                Log.i(Global.LOG_CONTEXT, debugPrefix + "zoomToBoundingBox(" + boundingBox
+                        + ") => " + mMapView.getBoundingBox() + "; z=" + mMapView.getZoomLevel());
+            }
         } else {
             this.mDelayedZoomToBoundingBox = boundingBox;
         }
+
     }
 
     /** all marker clicks will be delegated to LocationMapFragment#onMarkerClicked() */
@@ -233,7 +252,7 @@ public class LocationMapFragment extends DialogFragment {
          * @return true if click was handeled.
          */
         @Override
-        protected boolean onMarkerClicked(MapView mapView, int markerId, IGeoPointE6 makerPosition, Object markerData) {
+        protected boolean onMarkerClicked(MapView mapView, int markerId, IGeoPoint makerPosition, Object markerData) {
             return LocationMapFragment.this.onMarkerClicked(markerId, makerPosition, markerData);
         }
     }
@@ -243,17 +262,20 @@ public class LocationMapFragment extends DialogFragment {
     private Stack<FotoMarker> mRecycler = new Stack<FotoMarker>();
 
     private void reload() {
-        if (mCurrentLoader == null) {
-            // not active yet
-            List<Overlay> oldItems = mFolderOverlay.getItems();
+        if (mMapView.getHeight() > 0) {
+            // initialized
+            if (mCurrentLoader == null) {
+                // not active yet
+                List<Overlay> oldItems = mFolderOverlay.getItems();
 
-            mLastZoom = this.mMapView.getZoomLevel();
-            int groupingFactor = getGroupingFactor(mLastZoom);
-            BoundingBoxE6 world = this.mMapView.getBoundingBox();
+                mLastZoom = this.mMapView.getZoomLevel();
+                int groupingFactor = getGroupingFactor(mLastZoom);
+                BoundingBoxE6 world = this.mMapView.getBoundingBox();
 
-            reload(world, groupingFactor, oldItems);
-        } else {
-            mPendingLoads++;
+                reload(world, groupingFactor, oldItems);
+            } else {
+                mPendingLoads++;
+            }
         }
     }
 
@@ -291,7 +313,7 @@ public class LocationMapFragment extends DialogFragment {
      */
     private int getGroupingFactor(int zoomlevel) {
         // todo
-        return 100;
+        return FotoSql.getGroupFactor(zoomlevel);
     }
 
     // for debugginc
@@ -348,7 +370,11 @@ public class LocationMapFragment extends DialogFragment {
             mOldItems = null;
             int recycler = mRecycler.size();
             if (mStatus != null) {
-                mStatus.append("\n\tRecycler: ").append(mRecyclerBefore).append(",").append(mRecyclerAfter).append(",").append(recycler);
+                mStatus.append("\n\tRecycler: ").append(mRecyclerBefore).append(",")
+                        .append(mRecyclerAfter).append(",").append(recycler)
+                        .append("\n\t").append(mMapView.getBoundingBox())
+                        .append(", z= ").append(mMapView.getZoomLevel())
+                        .append("\n\tPendingLoads").append(mPendingLoads);
                 Log.i(Global.LOG_CONTEXT, debugPrefix + mStatus);
             }
 
@@ -417,7 +443,7 @@ public class LocationMapFragment extends DialogFragment {
     /**
      * @return true if click was handeled.
      */
-    private boolean onMarkerClicked(int markerId, IGeoPointE6 makerPosition, Object markerData) {
+    private boolean onMarkerClicked(int markerId, IGeoPoint makerPosition, Object markerData) {
         return false; // TODO
     }
 
