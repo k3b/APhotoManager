@@ -281,7 +281,7 @@ public class LocationMapFragment extends DialogFragment {
                 List<Overlay> oldItems = mFolderOverlay.getItems();
 
                 mLastZoom = this.mMapView.getZoomLevel();
-                int groupingFactor = getGroupingFactor(mLastZoom);
+                double groupingFactor = getGroupingFactor(mLastZoom);
                 BoundingBoxE6 world = this.mMapView.getBoundingBox();
 
                 reload(world, groupingFactor, oldItems);
@@ -291,7 +291,7 @@ public class LocationMapFragment extends DialogFragment {
         }
     }
 
-    private void reload(BoundingBoxE6 latLonArea, int groupingFactor, List<Overlay> oldItems) {
+    private void reload(BoundingBoxE6 latLonArea, double groupingFactor, List<Overlay> oldItems) {
         QueryParameterParcelable query = FotoSql.getQueryGroupByPlace(groupingFactor);
         query.clearWhere();
 
@@ -326,7 +326,7 @@ public class LocationMapFragment extends DialogFragment {
     /** translates map-zoomlevel to groupfactor
      * that tells sql how geo-points are grouped together.
      */
-    private int getGroupingFactor(int zoomlevel) {
+    private double getGroupingFactor(int zoomlevel) {
         // todo
         return FotoSql.getGroupFactor(zoomlevel);
     }

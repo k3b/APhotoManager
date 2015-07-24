@@ -26,3 +26,5 @@ build
 /gradlew
 /gradlew.bat
 *.properties
+/OSMBonusPack
+/osmdroid-android

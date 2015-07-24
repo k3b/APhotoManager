@@ -80,11 +80,12 @@ public class FotoSql {
             .addGroupBy(SQL_EXPR_FOLDER)
             .addOrderBy(SQL_EXPR_FOLDER);
 
-    private static final int GROUPFACTOR_FOR_Z6 = 1;
-    public static final int getGroupFactor(final int _zoomLevel) {
+    // the bigger the smaller the area
+    private static final double GROUPFACTOR_FOR_Z0 = 0.025;
+    public static final double getGroupFactor(final int _zoomLevel) {
         int zoomLevel = _zoomLevel;
-        int result = GROUPFACTOR_FOR_Z6;
-        while (zoomLevel > 6) {
+        double result = GROUPFACTOR_FOR_Z0;
+        while (zoomLevel > 0) {
             // result <<= 2; //
             result = result * 2;
             zoomLevel--;
@@ -99,13 +100,16 @@ public class FotoSql {
 
     public static final QueryParameterParcelable queryGroupByPlace = getQueryGroupByPlace(100);
 
-    public static QueryParameterParcelable getQueryGroupByPlace(int groupingFactor) {
+    public static QueryParameterParcelable getQueryGroupByPlace(double groupingFactor) {
         //String SQL_EXPR_LAT = "(round(" + SQL_COL_LAT + " - 0.00499, 2))";
         //String SQL_EXPR_LON = "(round(" + SQL_COL_LON + " - 0.00499, 2))";
 
         // "- 0.5" else rounding "10.6" becomes 11.0
-        String SQL_EXPR_LAT = "(round((" + SQL_COL_LAT + " * " + groupingFactor + ") - 0.5) /" + groupingFactor + ")";
-        String SQL_EXPR_LON = "(round((" + SQL_COL_LON + " * " + groupingFactor + ") - 0.5) /" + groupingFactor + ")";
+        // + (1/groupingFactor/2) in the middle of grouping area
+        String SQL_EXPR_LAT = "((round((" + SQL_COL_LAT + " * " + groupingFactor + ") - 0.5) /"
+                + groupingFactor + ") + " + (1/groupingFactor/2) + ")";
+        String SQL_EXPR_LON = "((round((" + SQL_COL_LON + " * " + groupingFactor + ") - 0.5) /"
+                + groupingFactor + ") + " + (1/groupingFactor/2) + ")";
 
         QueryParameterParcelable result = new QueryParameterParcelable();
 
