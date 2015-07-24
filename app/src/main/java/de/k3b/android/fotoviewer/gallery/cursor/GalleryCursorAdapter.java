@@ -12,8 +12,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -46,6 +44,8 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
     private final String debugPrefix;
 
     // for debugging: counts how many cell elements were created
+    protected StringBuffer mStatus = null;
+
     private QueryParameterParcelable parameters = null;
     private final Drawable imageNotLoadedYet;
 
@@ -74,10 +74,20 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
      */
     @Override
     public void requery(final Activity context, QueryParameterParcelable parameters) {
+        if (Global.debugEnabledSql || Global.debugEnabled) {
+            mStatus = new StringBuffer();
+            mStatus.append(this.debugPrefix);
+        } else {
+            mStatus = null;
+        }
+
         Global.debugMemory(debugPrefix, "requery starting");
         this.parameters = parameters;
-        if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, debugPrefix + "requery " + ((parameters != null) ? parameters.toSqlString() : null));
+        if (mStatus != null) {
+            mStatus.append("requery\n\t");
+            if (parameters != null) {
+                mStatus.append(parameters.toSqlString());
+            }
         }
 
         requery(context, parameters.toColumns(), parameters.toFrom(), parameters.toAndroidWhere(), parameters.toOrderBy(), parameters.toAndroidParameters());
@@ -101,7 +111,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
                     sqlWhereParameters,       // No selection arguments
                     sqlSortOrder              // Default sort order
             );
-            onLoadFinished(result);
+            onLoadFinished(result, mStatus);
         } else {
             final int currentLoaderId = ++MY_LOADER_ID;
             context.getLoaderManager().initLoader(currentLoaderId, null, new LoaderManager.LoaderCallbacks<Cursor>() {
@@ -110,7 +120,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
                 public Loader<Cursor> onCreateLoader(int loaderID, Bundle args) {
                     if (loaderID == currentLoaderId) {
                         // Returns a new CursorLoader
-                        return new CursorLoader(
+                        CursorLoader result = new CursorLoader(
                                 context,   // Parent activity context
                                 Uri.parse(from), // Table to query
                                 sqlProjection,             // Projection to return
@@ -118,28 +128,37 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
                                 sqlWhereParameters,       // No selection arguments
                                 sqlSortOrder              // Default sort order
                         );
+                        return result;
                     }
                     return null;
                 }
 
                 @Override
                 public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-                    GalleryCursorAdapter.this.onLoadFinished(cursor);
+                    GalleryCursorAdapter.this.onLoadFinished(cursor, mStatus);
                 }
 
                 @Override
                 public void onLoaderReset(Loader<Cursor> loader) {
-                    GalleryCursorAdapter.this.onLoadFinished(null);
+                    GalleryCursorAdapter.this.onLoadFinished(null, mStatus);
                 }
             });
         }
     }
 
-    private void onLoadFinished(Cursor cursor) {
+    private void onLoadFinished(Cursor cursor, StringBuffer debugMessage) {
         int resultCount = (cursor == null) ? 0 : cursor.getCount();
-        if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, debugPrefix + "onLoadFinished() requery rows found: " + resultCount + " in " + cursor + " " +
-                    debugCursor(cursor, 10, " + ", FotoSql.SQL_COL_DISPLAY_TEXT));
+
+        if (debugMessage != null) {
+            debugMessage.append("\n").append(debugPrefix).append("onLoadFinished() requery rows found: ").append(resultCount)
+                    .append(" in\n\t").append(cursor).append(" ")
+                    .append(debugCursor(cursor, 10, " + ", FotoSql.SQL_COL_DISPLAY_TEXT));
+        }
+
+        if (Global.debugEnabledSql) {
+            Log.w(Global.LOG_CONTEXT, debugMessage.toString());
+        } else if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, debugMessage.toString());
         }
 
         if (callback != null) {

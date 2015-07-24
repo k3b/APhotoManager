@@ -3,13 +3,17 @@ package de.k3b.android.fotoviewer.locationmap;
 
 import android.app.Activity;
 import android.app.DialogFragment;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 
 
@@ -70,6 +74,7 @@ public class LocationMapFragment extends DialogFragment {
      */
     private BoundingBoxE6 mDelayedZoomToBoundingBox = null;
     private SeekBar mZoomBar;
+    private ImageView mImage;
 
     public LocationMapFragment() {
         // Required empty public constructor
@@ -115,6 +120,13 @@ public class LocationMapFragment extends DialogFragment {
         View view = inflater.inflate(R.layout.fragment_location_map, container, false);
 
         mMapView = (MapView) view.findViewById(R.id.mapview);
+        this.mImage = (ImageView) view.findViewById(R.id.image);
+        this.mImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mImage.setVisibility(View.GONE);
+            }
+        });
         createZoomBar(view);
         mMapView.setMapListener(new MapListener() {
             @Override
@@ -451,8 +463,21 @@ public class LocationMapFragment extends DialogFragment {
      * @return true if click was handeled.
      */
     private boolean onMarkerClicked(int markerId, IGeoPoint makerPosition, Object markerData) {
-        return false; // TODO
+        this.mImage.setImageBitmap(getBitmap(markerId));
+        this.mImage.setVisibility(View.VISIBLE);
+        return true; // TODO
     }
+
+    private Bitmap getBitmap(int id) {
+        final Bitmap thumbnail = MediaStore.Images.Thumbnails.getThumbnail(
+                getActivity().getContentResolver(),
+                id,
+                MediaStore.Images.Thumbnails.MICRO_KIND,
+                new BitmapFactory.Options());
+
+        return thumbnail;
+    }
+
 
     /**
      * This interface must be implemented by activities that contain this

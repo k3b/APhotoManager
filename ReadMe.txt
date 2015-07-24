@@ -1,11 +1,13 @@
 FotoGallery\ReadMe.txt"
 
-todo: why are not all markers visible ?
+todo:
+	why are not all markers visible ?
+v	map mit image via onMarkerClick
+	markerOnLongClick => optionsmenu
+
+	marker in der mitte der group anzeigen
 
 mappicker
-	calculate zoom level Bug in zoomToBoundingBox ? ggf old zoomUtils
-	calculate sql zoom level
-	onMarkerClick
 	doubleClick => zoom center
 	onDoubleDrag
 
