@@ -5,11 +5,11 @@ todo:
 v	map mit image via onMarkerClick
 	markerOnLongClick => optionsmenu
 
-	marker in der mitte der group anzeigen
+v	marker in der mitte der group anzeigen
 
 mappicker
-	doubleClick => zoom center
-	onDoubleDrag
+v	doubleClick => zoom center
+v	onDoubleDrag
 
 // symlink
 mklink /D /J osmdroid-android d:\prj\eve\android\prj\fotos-android.wrk\osmdroid\osmdroid-android

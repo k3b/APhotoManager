@@ -38,6 +38,7 @@ import de.k3b.android.fotoviewer.queries.FotoSql;
 import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
 import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
 import de.k3b.android.osmdroid.FolderOverlay;
+import de.k3b.android.osmdroid.GuestureOverlay;
 import de.k3b.android.osmdroid.IconFactory;
 import de.k3b.android.osmdroid.MarkerBase;
 import de.k3b.android.osmdroid.ZoomUtil;
@@ -150,6 +151,11 @@ public class LocationMapFragment extends DialogFragment {
         final List<Overlay> overlays = this.mMapView.getOverlays();
 
         mFolderOverlay = createFolderOverlay(overlays);
+
+        overlays.add(new GuestureOverlay(getActivity()));
+
+        mMapView.setMultiTouchControls(true);
+
 
         // mFolderOverlay.add(createMarker(mMapView, ...));
 
