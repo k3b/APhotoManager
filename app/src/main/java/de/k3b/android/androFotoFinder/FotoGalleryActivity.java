@@ -433,8 +433,8 @@ public class FotoGalleryActivity extends Activity implements
     }
 
     private void openSettings() {
-        Intent intent = new Intent(this, SettingsActivity.class);;
-        startActivity(intent);
+//        Intent intent = new Intent(this, SettingsActivity.class);;
+//        startActivity(intent);
     }
 
     /** called by Fragment: a fragment Item was clicked */

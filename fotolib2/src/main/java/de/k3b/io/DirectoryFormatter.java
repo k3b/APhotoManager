@@ -121,49 +121,50 @@ public class DirectoryFormatter {
      * @return
      */
     public static IGeoRectangle parseLatLon(String path) {
-        String[] minMax = getLastPath(path).split(GeoRectangle.DELIM_LL_S);
-        if (minMax == null) return null;
+        if (path != null) {
+            String[] minMax = getLastPath(path).split(GeoRectangle.DELIM_LL_S);
+            if (minMax == null) return null;
 
-        String[] elements = minMax[0].split(GeoRectangle.DELIM_LAT_LON);
-        if ((elements != null) && (elements.length == 2)) {
-            String lat = elements[0];
-            String lon = elements[1];
+            String[] elements = minMax[0].split(GeoRectangle.DELIM_LAT_LON);
+            if ((elements != null) && (elements.length == 2)) {
+                String lat = elements[0];
+                String lon = elements[1];
 
-            GeoRectangle result = new GeoRectangle();
-            result.setLatitudeMin(getLatLon(lat));
-            result.setLogituedMin(getLatLon(lon));
+                GeoRectangle result = new GeoRectangle();
+                result.setLatitudeMin(getLatLon(lat));
+                result.setLogituedMin(getLatLon(lon));
 
-            if (minMax.length == 1) {
-                double delta = 1;
-                if (lat.startsWith(" ")) {
-                    delta = 10.0;
-                } else {
-                    int posDecimal = lat.indexOf(".");
-                    if (posDecimal >= 0) {
-                        int numberDecimals = lat.length() - posDecimal - 1;
-                        while (numberDecimals > 0) {
-                            delta = delta / 10.0;
-                            numberDecimals--;
+                if (minMax.length == 1) {
+                    double delta = 1;
+                    if (lat.startsWith(" ")) {
+                        delta = 10.0;
+                    } else {
+                        int posDecimal = lat.indexOf(".");
+                        if (posDecimal >= 0) {
+                            int numberDecimals = lat.length() - posDecimal - 1;
+                            while (numberDecimals > 0) {
+                                delta = delta / 10.0;
+                                numberDecimals--;
+                            }
                         }
                     }
-                }
 
-                result.setLatitudeMax(result.getLatitudeMin() + delta);
-                result.setLogituedMax(result.getLogituedMin() + delta);
-                return result;
-            } else if (minMax.length == 2) {
-                elements = minMax[1].split(GeoRectangle.DELIM_LAT_LON);
-                if ((elements != null) && (elements.length == 2)) {
-                    lat = elements[0];
-                    lon = elements[1];
-
-                    result.setLatitudeMax(getLatLon(lat));
-                    result.setLogituedMax(getLatLon(lon));
+                    result.setLatitudeMax(result.getLatitudeMin() + delta);
+                    result.setLogituedMax(result.getLogituedMin() + delta);
                     return result;
-                } // if lat+lon
-            } // if 1 or 2 lat,lon elements
-        }
+                } else if (minMax.length == 2) {
+                    elements = minMax[1].split(GeoRectangle.DELIM_LAT_LON);
+                    if ((elements != null) && (elements.length == 2)) {
+                        lat = elements[0];
+                        lon = elements[1];
 
+                        result.setLatitudeMax(getLatLon(lat));
+                        result.setLogituedMax(getLatLon(lon));
+                        return result;
+                    } // if lat+lon
+                } // if 1 or 2 lat,lon elements
+            }
+        }
         return null;
     }
 

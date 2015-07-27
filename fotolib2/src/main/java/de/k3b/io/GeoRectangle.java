@@ -33,10 +33,12 @@ public class GeoRectangle implements IGeoRectangle {
     private double logituedMax = Double.NaN;
 
     public GeoRectangle get(IGeoRectangle src) {
-        this.setLogituedMin(src.getLogituedMin());
-        this.setLatitudeMin(src.getLatitudeMin());
-        this.setLatitudeMax(src.getLatitudeMax());
-        this.setLogituedMax(src.getLogituedMax());
+        if (src != null) {
+            this.setLogituedMin(src.getLogituedMin());
+            this.setLatitudeMin(src.getLatitudeMin());
+            this.setLatitudeMax(src.getLatitudeMax());
+            this.setLogituedMax(src.getLogituedMax());
+        }
         return this;
     }
 

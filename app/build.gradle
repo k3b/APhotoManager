@@ -3,9 +3,8 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 21
     buildToolsVersion '22.0.1'
-
     defaultConfig {
-        applicationId "de.k3b.android.fotomap"
+        applicationId 'de.k3b.android.androFotoFinder'
         minSdkVersion 14
         targetSdkVersion 21
         versionCode 2
@@ -17,43 +16,36 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    productFlavors {
+    }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(':fotolib2')
-
     // zoomable image view
     // from https://github.com/chrisbanes/PhotoView
     // compile 'com.github.chrisbanes.photoview:library:1.2.3'
     compile project(':fotoview.library')
-
     // for view-pager
     // 21.0.2 seems to have problems with ViewPager
     // compile 'com.android.support:support-v4:21.0.2'
     compile 'com.android.support:support-v4:22.2.0'
-
     // compile 'com.android.support:support-v4:21.0.2'
     // compile 'com.android.support:appcompat-v7:21.0.2'
-
     // exif support
     // https://github.com/drewnoakes/metadata-extractor/wiki/GettingStarted licence: http://www.apache.org/licenses/LICENSE-2.0
     compile 'com.drewnoakes:metadata-extractor:2.8.1'
-
     // this is osmdroid
     // compile project(':osmdroid-android') // local copy
     compile 'org.osmdroid:osmdroid-android:4.3'
     // non local copy from repositories
     // compile project(':osmdroid-android')
-
-//    compile project(':OSMBonusPack')
-
+    //    compile project(':OSMBonusPack')
     compile 'org.slf4j:slf4j-api:1.7.7@jar'
     compile 'eu.lp0.slf4j:slf4j-android:1.7.7-1@jar'
-
     // find memory leaks. see https://github.com/square/leakcanary
-//	debugCompile 'com.squareup.leakcanary:leakcanary-android:1.3.1'
-//  releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.3.1'
-
+    //	debugCompile 'com.squareup.leakcanary:leakcanary-android:1.3.1'
+    //  releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.3.1'
     // debugcompile optional GhostLog-Integration for non rooted android devices
 }
