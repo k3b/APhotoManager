@@ -51,6 +51,7 @@ public class FotoGalleryActivity extends Activity implements
         private static final String STATE_SortAscending = "SortAscending";
         private static final String STATE_Filter = "mFilter";
         private static final String STATE_LAT_LON = "currentLatLon";
+        private static final String STATE_LAT_LON_ACTIVE = "currentLatLonActive";
 
         /** true use latLonPicker; false use directoryPicker */
         private boolean mUseLatLon = false;
@@ -117,6 +118,7 @@ public class FotoGalleryActivity extends Activity implements
             savedInstanceState.putBoolean(STATE_SortAscending, this.mSortAscending);
             savedInstanceState.putParcelable(STATE_Filter, this.mFilter);
             savedInstanceState.putString(STATE_LAT_LON, this.mCurrentLatLon.toString());
+            savedInstanceState.putBoolean(STATE_LAT_LON_ACTIVE, this.mUseLatLon);
 
         }
 
@@ -145,6 +147,7 @@ public class FotoGalleryActivity extends Activity implements
             this.mDirQueryID = sharedPref.getInt(STATE_DirQueryID, this.getDirQueryID());
             this.mSortID = sharedPref.getInt(STATE_SortID, this.mSortID);
             this.mSortAscending = sharedPref.getBoolean(STATE_SortAscending, this.mSortAscending);
+            this.mCurrentLatLon.get(DirectoryFormatter.parseLatLon(sharedPref.getString(STATE_LAT_LON, null)));
 
             // instance state overrides settings
             if (savedInstanceState != null) {
@@ -154,6 +157,8 @@ public class FotoGalleryActivity extends Activity implements
                 this.mSortAscending = savedInstanceState.getBoolean(STATE_SortAscending, this.mSortAscending);
                 this.mFilter = savedInstanceState.getParcelable(STATE_Filter);
                 this.mCurrentLatLon.get(DirectoryFormatter.parseLatLon(savedInstanceState.getString(STATE_LAT_LON)));
+
+                this.mUseLatLon = savedInstanceState.getBoolean(STATE_LAT_LON_ACTIVE, this.mUseLatLon);
             }
 
             if (this.mFilter == null) {

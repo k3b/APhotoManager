@@ -142,7 +142,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             }
         });
         cmdOk.setVisibility(View.VISIBLE);
-        final Button cmdCancel = (Button) view.findViewById(R.id.cmd_cancel);
+        cmdCancel = (Button) view.findViewById(R.id.cmd_cancel);
         cmdCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

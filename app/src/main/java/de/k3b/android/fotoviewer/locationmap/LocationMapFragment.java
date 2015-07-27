@@ -54,6 +54,7 @@ import de.k3b.io.IGeoRectangle;
  */
 public class LocationMapFragment extends DialogFragment {
 
+    private static final String STATE_LAST_VIEWPORT = "LAST_VIEWPORT";
     // for debugging
     private static int id = 1;
     private final String debugPrefix;
@@ -116,9 +117,21 @@ public class LocationMapFragment extends DialogFragment {
         mDirectoryListener = null;
     }
 
+    /** on ratation save current selelected view port */
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putParcelable(STATE_LAST_VIEWPORT, this.mMapView.getBoundingBox());
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        /** after ratation restore selelected view port */
+        if (savedInstanceState != null) {
+            this.mDelayedZoomToBoundingBox = savedInstanceState.getParcelable(STATE_LAST_VIEWPORT);
+        }
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_location_map, container, false);
 
