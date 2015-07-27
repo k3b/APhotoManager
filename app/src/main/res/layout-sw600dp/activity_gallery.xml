@@ -4,13 +4,13 @@
     android:layout_height="match_parent" android:id="@+id/root_view">
     <!--<fragment
         android:id="@+id/directoryFragment"
-        android:name="de.k3b.android.fotoviewer.directory.DirectoryPickerFragment"
+        android:name="androFotoFinderinder.directory.DirectoryPickerFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1" />-->
     <fragment
         android:id="@+id/galleryCursor"
-        android:name="de.k3b.android.fotoviewer.gallery.cursor.GalleryCursorFragment"
+        android:name="de.k3b.android.androFotoFinder.gallery.cursor.GalleryCursorFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="4" />

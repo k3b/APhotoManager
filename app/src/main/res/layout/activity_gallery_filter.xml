@@ -4,7 +4,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="de.k3b.android.fotoviewer.GalleryFilterActivity">
+    tools:context="de.k3b.android.androFotoFinder.GalleryFilterActivity">
 
     <TextView android:text="Path" android:layout_width="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"

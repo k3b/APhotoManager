@@ -31,7 +31,7 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.Projection;
 import org.osmdroid.views.overlay.Overlay;
 
-import de.k3b.android.fotoviewer.R;
+import de.k3b.android.androFotoFinder.R;
 
 /**
  * Additional Guestures for {@see org.osmdroid.views.MapView}:<br/>

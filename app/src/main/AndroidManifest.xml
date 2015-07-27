@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="de.k3b.android.fotoviewer" >
+    package="de.k3b.android.androFotoFinder" >
 
     <!-- to read fotos from gallery in android-4.4 -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -31,7 +31,7 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <application
-        android:name=".FotoGalleryApp"
+        android:name=".AndroFotoFinderApp"
         android:allowBackup="true"
         android:icon="@drawable/foto_gallery"
         android:label="@string/app_name"
@@ -39,7 +39,7 @@
 
         <!-- for internal test only -->
         <activity
-            android:name=".directory.DirPickerTestActivity"
+            android:name="de.k3b.android.androFotoFinder.directory.DirPickerTestActivity"
             android:label="@string/title_activity_directory_chooser" >
 
             <!--
@@ -51,7 +51,7 @@
             -->
         </activity>
         <activity
-            android:name=".FotoGalleryActivity"
+            android:name="de.k3b.android.androFotoFinder.FotoGalleryActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -60,14 +60,14 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".imagedetail.ImageDetailActivityViewPager"
+            android:name="de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager"
             android:ellipsize="middle" />
         <activity
-            android:name=".SettingsActivity"
+            android:name="de.k3b.android.androFotoFinder.SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>
         <activity
-            android:name=".GalleryFilterActivity"
+            android:name="de.k3b.android.androFotoFinder.GalleryFilterActivity"
             android:label="@string/title_activity_gallery_filter" >
         </activity>
     </application>

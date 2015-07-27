@@ -5,7 +5,7 @@
     android:id="@+id/root_view">
     <fragment
         android:id="@+id/directoryFragment"
-        android:name="de.k3b.android.fotoviewer.directory.DirectoryPickerFragment"
+        android:name="de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1" />

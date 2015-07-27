@@ -4,7 +4,7 @@
     android:layout_height="match_parent" android:id="@+id/root_view">
     <fragment
         android:id="@+id/galleryCursor"
-        android:name="de.k3b.android.fotoviewer.gallery.cursor.GalleryCursorFragment"
+        android:name="de.k3b.android.androFotoFinder.gallery.cursor.GalleryCursorFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1" />

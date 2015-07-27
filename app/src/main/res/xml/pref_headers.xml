@@ -2,14 +2,14 @@
 
     <!-- These settings headers are only used on tablets. -->
 
-    <header android:fragment="de.k3b.android.fotoviewer.SettingsActivity$GeneralPreferenceFragment"
+    <header android:fragment="de.k3b.android.androFotoFinder.SettingsActivity$GeneralPreferenceFragment"
         android:title="@string/pref_header_general" />
 
     <header
-        android:fragment="de.k3b.android.fotoviewer.SettingsActivity$NotificationPreferenceFragment"
+        android:fragment="de.k3b.android.androFotoFinder.SettingsActivity$NotificationPreferenceFragment"
         android:title="@string/pref_header_notifications" />
 
-    <header android:fragment="de.k3b.android.fotoviewer.SettingsActivity$DataSyncPreferenceFragment"
+    <header android:fragment="de.k3b.android.androFotoFinder.SettingsActivity$DataSyncPreferenceFragment"
         android:title="@string/pref_header_data_sync" />
 
 </preference-headers>
