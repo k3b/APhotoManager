@@ -13,6 +13,7 @@ import de.k3b.android.fotoviewer.R;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.IGalleryFilter;
+import de.k3b.io.IGeoRectangle;
 
 /**
  * contains all SQL needed to query the android gallery
@@ -145,14 +146,20 @@ public class FotoSql {
         if ((parameters != null) && (filter != null)) {
             parameters.clearWhere();
 
-            addWhereFilteLatLon(parameters, filter.getLatitudeMin(),
-                    filter.getLatitudeMax(), filter.getLogituedMin(), filter.getLogituedMax());
+            addWhereFilteLatLon(parameters, filter);
 
             if (filter.getDateMin() != 0) parameters.addWhere(SQL_COL_DATE_TAKEN + " >= ?", Double.toString(filter.getDateMin()));
             if (filter.getDateMax() != 0) parameters.addWhere(SQL_COL_DATE_TAKEN + " < ?", Double.toString(filter.getDateMax()));
 
             String path = filter.getPath();
             if ((path != null) && (path.length() > 0)) parameters.addWhere(SQL_COL_PATH + " like ?", path);
+        }
+    }
+
+    public static void addWhereFilteLatLon(QueryParameterParcelable parameters, IGeoRectangle filter) {
+        if ((parameters != null) && (filter != null)) {
+            addWhereFilteLatLon(parameters, filter.getLatitudeMin(),
+                    filter.getLatitudeMax(), filter.getLogituedMin(), filter.getLogituedMax());
         }
     }
 

@@ -9,6 +9,13 @@
         android:orderInCategory="1"
         android:showAsAction="always" />
 
+    <item android:id="@+id/cmd_lat_lon"
+        android:title="@string/gallery_location"
+        android:icon="@android:drawable/ic_dialog_map"
+        android:visible="true"
+        android:orderInCategory="1"
+        android:showAsAction="ifRoom" />
+
     <item android:id="@+id/cmd_filter"
         android:title="@string/action_filter_title"
         android:icon="@android:drawable/ic_menu_search"

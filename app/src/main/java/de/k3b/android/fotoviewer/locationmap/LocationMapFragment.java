@@ -35,6 +35,7 @@ import java.util.Stack;
 import de.k3b.android.fotoviewer.Global;
 import de.k3b.android.fotoviewer.R;
 import de.k3b.android.fotoviewer.queries.FotoSql;
+import de.k3b.android.fotoviewer.queries.GalleryFilterParameterParcelable;
 import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
 import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
 import de.k3b.android.osmdroid.FolderOverlay;
@@ -76,6 +77,7 @@ public class LocationMapFragment extends DialogFragment {
     private BoundingBoxE6 mDelayedZoomToBoundingBox = null;
     private SeekBar mZoomBar;
     private ImageView mImage;
+    private GalleryFilterParameterParcelable mRootFilter;
 
     public LocationMapFragment() {
         // Required empty public constructor
@@ -160,6 +162,15 @@ public class LocationMapFragment extends DialogFragment {
         // mFolderOverlay.add(createMarker(mMapView, ...));
 
         if (getShowsDialog()) {
+            Button cmdCancel = (Button) view.findViewById(R.id.cmd_cancel);
+            cmdCancel.setVisibility(View.VISIBLE);
+            cmdCancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    dismiss();
+                }
+            });
+
             Button cmdOk = (Button) view.findViewById(R.id.ok);
             cmdOk.setVisibility(View.VISIBLE);
             cmdOk.setOnClickListener(new View.OnClickListener() {
@@ -168,6 +179,12 @@ public class LocationMapFragment extends DialogFragment {
                     onOk();
                 }
             });
+
+            String title = getActivity().getString(
+                    R.string.directory_fragment_dialog_title,
+                    getActivity().getString(R.string.gallery_location));
+            getDialog().setTitle(title);
+
         }
 
         if (this.mDelayedZoomToBoundingBox != null) {
@@ -228,16 +245,17 @@ public class LocationMapFragment extends DialogFragment {
         return result;
     }
 
-    public void defineNavigation(GeoRectangle filter, int queryType) {
+    public void defineNavigation(GalleryFilterParameterParcelable rootFilter, GeoRectangle rectangle, int queryType) {
         if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, debugPrefix + "defineNavigation: " + filter);
+            Log.i(Global.LOG_CONTEXT, debugPrefix + "defineNavigation: " + rectangle);
         }
 
+        this.mRootFilter = rootFilter;
         BoundingBoxE6 boundingBox = new BoundingBoxE6(
-                filter.getLatitudeMax(),
-                filter.getLogituedMin(),
-                filter.getLatitudeMin(),
-                filter.getLogituedMax());
+                rectangle.getLatitudeMax(),
+                rectangle.getLogituedMin(),
+                rectangle.getLatitudeMin(),
+                rectangle.getLogituedMax());
 
         zoomToBoundingBox(boundingBox);
     }
@@ -300,6 +318,10 @@ public class LocationMapFragment extends DialogFragment {
     private void reload(BoundingBoxE6 latLonArea, double groupingFactor, List<Overlay> oldItems) {
         QueryParameterParcelable query = FotoSql.getQueryGroupByPlace(groupingFactor);
         query.clearWhere();
+
+        if (this.mRootFilter != null) {
+            FotoSql.setWhereFilter(query, this.mRootFilter);
+        }
 
         // delta: make the grouping area a little bit bigger than the viewport
         // so that counts at the borders are correct.

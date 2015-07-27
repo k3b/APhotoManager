@@ -52,6 +52,17 @@
             android:layout_alignParentStart="true"
             android:layout_above="@id/zoomBar"
             />
+
+        <Button
+            android:id="@+id/cmd_cancel"
+            android:text="@string/cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/zoomBar"
+            android:layout_toRightOf="@id/ok"
+            android:gravity="center"
+            android:visibility="gone" />
+
         <ImageView
             android:visibility="gone"
 

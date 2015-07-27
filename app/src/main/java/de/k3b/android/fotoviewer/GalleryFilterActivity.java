@@ -375,7 +375,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         if (fromGui(mFilter)) {
             final FragmentManager manager = getFragmentManager();
             LocationMapFragment dirDialog = new LocationMapFragment();
-            dirDialog.defineNavigation(mFilter, FotoSql.QUERY_TYPE_GROUP_PLACE_MAP);
+            dirDialog.defineNavigation(null, mFilter, FotoSql.QUERY_TYPE_GROUP_PLACE_MAP);
 
             dirDialog.show(manager, DLG_NAVIGATOR_TAG);
         }

@@ -20,6 +20,7 @@ import android.widget.Toast;
 import de.k3b.android.fotoviewer.directory.DirectoryGui;
 import de.k3b.android.fotoviewer.directory.DirectoryLoaderTask;
 import de.k3b.android.fotoviewer.imagedetail.ImageDetailActivityViewPager;
+import de.k3b.android.fotoviewer.locationmap.LocationMapFragment;
 import de.k3b.android.fotoviewer.queries.GalleryFilterParameterParcelable;
 import de.k3b.android.fotoviewer.queries.QueryParameterParcelable;
 import de.k3b.android.fotoviewer.directory.DirectoryPickerFragment;
@@ -28,9 +29,13 @@ import de.k3b.android.fotoviewer.queries.FotoViewerParameter;
 import de.k3b.android.fotoviewer.queries.Queryable;
 import de.k3b.android.util.GarbageCollector;
 import de.k3b.io.Directory;
+import de.k3b.io.DirectoryFormatter;
+import de.k3b.io.GeoRectangle;
 
 public class FotoGalleryActivity extends Activity implements
-        OnGalleryInteractionListener, DirectoryPickerFragment.OnDirectoryInteractionListener {
+        OnGalleryInteractionListener, DirectoryPickerFragment.OnDirectoryInteractionListener,
+        LocationMapFragment.OnDirectoryInteractionListener
+{
     private static final String debugPrefix = "GalA-";
 
     /** intent parameters supported by FotoGalleryActivity: EXTRA_... */
@@ -45,6 +50,11 @@ public class FotoGalleryActivity extends Activity implements
         private static final String STATE_SortID = "SortID";
         private static final String STATE_SortAscending = "SortAscending";
         private static final String STATE_Filter = "mFilter";
+        private static final String STATE_LAT_LON = "currentLatLon";
+
+        /** true use latLonPicker; false use directoryPicker */
+        private boolean mUseLatLon = false;
+        private GeoRectangle mCurrentLatLon = new GeoRectangle();
 
         /** one of the FotoSql.QUERY_TYPE_xxx values */
         int mDirQueryID = FotoSql.QUERY_TYPE_GROUP_DEFAULT;
@@ -85,8 +95,11 @@ public class FotoGalleryActivity extends Activity implements
             QueryParameterParcelable result = new QueryParameterParcelable(this.mGalleryContentQuery);
 
             FotoSql.setWhereFilter(result, this.mFilter);
+            if (result == null) return null;
 
-            if (this.mCurrentPath != null) {
+            if (mUseLatLon) {
+                FotoSql.addWhereFilteLatLon(result, mCurrentLatLon);
+            } else if (this.mCurrentPath != null) {
                 FotoSql.addPathWhere(result, this.mCurrentPath, this.getDirQueryID());
             }
 
@@ -103,6 +116,8 @@ public class FotoGalleryActivity extends Activity implements
             savedInstanceState.putInt(STATE_SortID, this.mSortID);
             savedInstanceState.putBoolean(STATE_SortAscending, this.mSortAscending);
             savedInstanceState.putParcelable(STATE_Filter, this.mFilter);
+            savedInstanceState.putString(STATE_LAT_LON, this.mCurrentLatLon.toString());
+
         }
 
         private void saveSettings(Context context) {
@@ -114,6 +129,8 @@ public class FotoGalleryActivity extends Activity implements
             edit.putString(STATE_CurrentPath, this.mCurrentPath);
             edit.putInt(STATE_SortID, this.mSortID);
             edit.putBoolean(STATE_SortAscending, this.mSortAscending);
+            edit.putString(STATE_LAT_LON, this.mCurrentLatLon.toString());
+
 
             mFilter.saveSettings(edit);
 
@@ -136,6 +153,7 @@ public class FotoGalleryActivity extends Activity implements
                 this.mSortID = savedInstanceState.getInt(STATE_SortID, this.mSortID);
                 this.mSortAscending = savedInstanceState.getBoolean(STATE_SortAscending, this.mSortAscending);
                 this.mFilter = savedInstanceState.getParcelable(STATE_Filter);
+                this.mCurrentLatLon.get(DirectoryFormatter.parseLatLon(savedInstanceState.getString(STATE_LAT_LON)));
             }
 
             if (this.mFilter == null) {
@@ -271,6 +289,10 @@ public class FotoGalleryActivity extends Activity implements
             case R.id.cmd_navigator:
                 openNavigator();
                 return true;
+
+            case R.id.cmd_lat_lon:
+                openLatLonPicker();
+                return true;
             case R.id.cmd_filter:
                 openFilter();
                 return true;
@@ -330,10 +352,30 @@ public class FotoGalleryActivity extends Activity implements
         }
     }
 
+    private void openLatLonPicker() {
+        galleryQueryParameter.mUseLatLon = true;
+
+        final FragmentManager manager = getFragmentManager();
+        LocationMapFragment dirDialog = new LocationMapFragment();
+        dirDialog.defineNavigation(this.galleryQueryParameter.mFilter, this.galleryQueryParameter.mCurrentLatLon, FotoSql.QUERY_TYPE_GROUP_PLACE_MAP);
+
+        dirDialog.show(manager, DLG_NAVIGATOR_TAG);
+    }
+
+
     private void openNavigator() {
+        galleryQueryParameter.mUseLatLon = false;
+
+        int dirQueryID = this.galleryQueryParameter.getDirQueryID();
+
+        /** if wrong datatype was saved: gallery is not allowed for dirPicker */
+        if (FotoSql.QUERY_TYPE_GALLERY == dirQueryID) {
+            dirQueryID = FotoSql.QUERY_TYPE_GROUP_ALBUM;
+        }
+
         if (mDirectoryRoot == null) {
             // not loaded yet. load directoryRoot in background
-            final QueryParameterParcelable currentDirContentQuery = new QueryParameterParcelable(FotoSql.getQuery(this.galleryQueryParameter.getDirQueryID()));
+            final QueryParameterParcelable currentDirContentQuery = new QueryParameterParcelable(FotoSql.getQuery(dirQueryID));
             FotoSql.setWhereFilter(currentDirContentQuery, this.galleryQueryParameter.mFilter);
 
             this.galleryQueryParameter.mDirQueryID = (currentDirContentQuery != null) ? currentDirContentQuery.getID() : FotoSql.QUERY_TYPE_UNDEFINED;
@@ -353,7 +395,7 @@ public class FotoGalleryActivity extends Activity implements
             this.mMustShowNavigator = false;
             final FragmentManager manager = getFragmentManager();
             DirectoryPickerFragment dirDialog = new DirectoryPickerFragment(); // (DirectoryPickerFragment) manager.findFragmentByTag(DLG_NAVIGATOR_TAG);
-            dirDialog.defineDirectoryNavigation(mDirectoryRoot, this.galleryQueryParameter.getDirQueryID(), this.galleryQueryParameter.mCurrentPath);
+            dirDialog.defineDirectoryNavigation(mDirectoryRoot, dirQueryID, this.galleryQueryParameter.mCurrentPath);
 
             dirDialog.show(manager, DLG_NAVIGATOR_TAG);
         }
@@ -423,13 +465,21 @@ public class FotoGalleryActivity extends Activity implements
     }
 
     private void navigateTo(String selectedAbsolutePath, int queryTypeId) {
-        if (this.galleryQueryParameter.mCurrentPath.compareTo(selectedAbsolutePath) != 0) {
-            Log.d(Global.LOG_CONTEXT, "FotoGalleryActivity.navigateTo " + selectedAbsolutePath + " from " + this.galleryQueryParameter.mCurrentPath);
-            this.galleryQueryParameter.mCurrentPath = selectedAbsolutePath;
-            this.galleryQueryParameter.mDirQueryID = queryTypeId;
-            setTitle();
 
-            reloadGui();
+        if (selectedAbsolutePath != null) {
+            if (galleryQueryParameter.mUseLatLon) {
+                Log.d(Global.LOG_CONTEXT, "FotoGalleryActivity.navigateTo " + selectedAbsolutePath + " from " + galleryQueryParameter.mCurrentLatLon);
+                this.galleryQueryParameter.mCurrentLatLon.get(DirectoryFormatter.parseLatLon(selectedAbsolutePath));
+
+                reloadGui();
+            } else { //  if (this.galleryQueryParameter.mCurrentPath.compareTo(selectedAbsolutePath) != 0) {
+                Log.d(Global.LOG_CONTEXT, "FotoGalleryActivity.navigateTo " + selectedAbsolutePath + " from " + this.galleryQueryParameter.mCurrentPath);
+                this.galleryQueryParameter.mCurrentPath = selectedAbsolutePath;
+                this.galleryQueryParameter.mDirQueryID = queryTypeId;
+                setTitle();
+
+                reloadGui();
+            }
         }
     }
 
@@ -440,6 +490,7 @@ public class FotoGalleryActivity extends Activity implements
                 this.mGalleryGui.requery(this, query);
             }
         }
+
         if (mDirGui != null) {
             String currentPath = this.galleryQueryParameter.mCurrentPath;
             if (currentPath != null) {
@@ -467,10 +518,14 @@ public class FotoGalleryActivity extends Activity implements
 
     private void setTitle() {
         String title = getIntent().getStringExtra(EXTRA_TITLE);
-        if ((title == null) && (this.galleryQueryParameter.mCurrentPath != null)) {
-            title = FotoSql.getName(this, this.galleryQueryParameter.getDirQueryID()) + " - " + this.galleryQueryParameter.mCurrentPath;
-        }
 
+        if (title == null) {
+            if (galleryQueryParameter.mUseLatLon) {
+                title = getString(R.string.gallery_foto);
+            } else if (this.galleryQueryParameter.mCurrentPath != null) {
+                title = FotoSql.getName(this, this.galleryQueryParameter.getDirQueryID()) + " - " + this.galleryQueryParameter.mCurrentPath;
+            }
+        }
         if (title != null) {
             this.setTitle(title + mTitleResultCount);
         }
