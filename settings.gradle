@@ -1,4 +1,4 @@
-startParameter.offline=true
+// startParameter.offline=true
 
 // include ':app', 'fotolib2', 'fotoview.library', ':osmdroid-android'
 include ':app', 'fotolib2', 'fotoview.library'
