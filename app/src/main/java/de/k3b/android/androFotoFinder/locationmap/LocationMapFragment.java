@@ -217,8 +217,7 @@ public class LocationMapFragment extends DialogFragment {
             });
 
             String title = getActivity().getString(
-                    R.string.directory_fragment_dialog_title,
-                    getActivity().getString(R.string.area));
+                    R.string.action_area_title);
             getDialog().setTitle(title);
 
         }

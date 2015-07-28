@@ -58,7 +58,7 @@
                 android:visible="true"
                 android:orderInCategory="5"/>
             <item android:id="@+id/cmd_sort_location"
-                android:title="@string/area"
+                android:title="@string/place"
                 android:visible="true"
                 android:orderInCategory="5" />
             <item android:id="@+id/cmd_sort_len"

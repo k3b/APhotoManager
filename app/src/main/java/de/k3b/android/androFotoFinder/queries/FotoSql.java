@@ -277,7 +277,7 @@ public class FotoSql {
             case SORT_BY_NAME:
                 return context.getString(R.string.file_name);
             case SORT_BY_LOCATION:
-                return context.getString(R.string.area);
+                return context.getString(R.string.place);
             case SORT_BY_NAME_LEN:
                 return context.getString(R.string.sort_by_name_len);
 
@@ -289,7 +289,7 @@ public class FotoSql {
                 return context.getString(R.string.folder);
             case QUERY_TYPE_GROUP_PLACE:
             case QUERY_TYPE_GROUP_PLACE_MAP:
-                return context.getString(R.string.area);
+                return context.getString(R.string.place);
             default:
                 return "???";
         }
