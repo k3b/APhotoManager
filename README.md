@@ -1,4 +1,4 @@
-# AndroFotoFinder ![](https://github.com/k3b/FotoGallery/blob/master/FotoGallery/src/main/res/drawable-hdpi/foto_gallery.png)
+# AndroFotoFinder ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/app/src/main/res/drawable-hdpi/foto_gallery.png)
 
 Fast find local Fotos by (Sub-)Folder, Date and/or geographic Map
 
@@ -20,11 +20,11 @@ features
 
 ### Screenshots
 
-![](https://github.com/k3b/FotoGallery/blob/master/wiki/png/Gallery.png)
+![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/Gallery.png)
 
-![](https://github.com/k3b/FotoGallery/blob/master/wiki/png/SelectArea.png)
+![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/SelectArea.png)
 
-![](https://github.com/k3b/FotoGallery/blob/master/wiki/png/FolderPicker.png)
+![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/FolderPicker.png)
 
-![](https://github.com/k3b/FotoGallery/blob/master/wiki/png/Filter.png) 
-
+![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/Filter.png) 
+ 
