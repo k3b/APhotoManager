@@ -35,7 +35,7 @@ public class Global {
      */
     public static boolean debugEnabled = false;
     public static boolean debugEnabledViewItem = false;
-    public static boolean debugEnabledSql = true;
+    public static boolean debugEnabledSql = false;
 
     public static void debugMemory(String modul, String message) {
         if (false && Global.debugEnabled) {
