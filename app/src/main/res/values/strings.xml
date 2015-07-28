@@ -21,8 +21,6 @@
  -->
 <resources>
 
-    <string name="app_name">a Foto Finder</string>
-
     <string name="gallery_foto">Fotos</string>
 
     <!-- sort criteria -->
@@ -64,5 +62,43 @@
     <string name="invalid_date">\'%1$s\' is not a valid date.</string>
     <string name="action_details" >Details</string>
     <string name="title_cright_osm">Map Tiles (c) <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> Contributors</string>
+    <string name="about_summary">About Andro Foto Finder</string>
+
+    <string name="about_content_about">"
+<![CDATA[
+<h1> AndroFotoFinder </h1>
+</p>
+Features:
+<ul>
+  <li>can handle big image collections (the author has 15000
+ images in 780 folders on his tablet)</li>
+  <li>uses android-system-buildin image content-provider. No
+ initial image
+ scan neccessary.</li>
+  <li>find images via</li>
+  <ul>
+    <li>folder (with hirachical picker)&nbsp;</li>
+    <li>wildcards that match folder and/or filename&nbsp;</li>
+    <li>date&nbsp;</li>
+    <li>area in geographic map (if image has gps-exif info)
+    </li>
+  </ul>
+  <li>show find result in a scrollable gallery view</li>
+  <li>foto-detail-view with</li>
+  <ul>
+    <li>image zoom</li>
+  </ul>
+  <ul>
+    <li>swipe to go to next/previous image</li>
+  </ul>
+  <ul>
+    <li>show extended image info (Exif, IPTC, XMP, ICC)</li>
+  </ul>
+  <li>The geografic map shows markers at places where fotos were
+ taken</li>
+</ul>
+<br />
+]]>
+"</string>
 
 </resources>

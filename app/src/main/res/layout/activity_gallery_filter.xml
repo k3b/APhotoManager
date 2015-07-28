@@ -112,13 +112,13 @@
         android:layout_below="@+id/edit_date_to"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_alignBottom="@+id/cmd_lat_lon" />
+        android:layout_alignBottom="@+id/cmd_select_lat_lon" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="..."
-        android:id="@+id/cmd_lat_lon"
+        android:id="@+id/cmd_select_lat_lon"
         android:layout_below="@+id/edit_date_to"
         android:layout_alignRight="@+id/cmd_date"
         android:layout_alignEnd="@+id/cmd_date" />
@@ -129,8 +129,8 @@
         android:inputType="numberDecimal|numberSigned"
         android:ems="10"
         android:id="@+id/edit_latitude_from"
-        android:layout_alignBottom="@+id/cmd_lat_lon"
-        android:layout_toLeftOf="@+id/cmd_lat_lon"
+        android:layout_alignBottom="@+id/cmd_select_lat_lon"
+        android:layout_toLeftOf="@+id/cmd_select_lat_lon"
         android:layout_alignLeft="@+id/edit_date_to"
         android:layout_alignStart="@+id/edit_date_to" />
 
@@ -141,11 +141,11 @@
         android:inputType="numberDecimal|numberSigned"
         android:ems="10"
         android:id="@+id/edit_latitude_to"
-        android:layout_below="@+id/cmd_lat_lon"
+        android:layout_below="@+id/cmd_select_lat_lon"
         android:layout_alignLeft="@+id/edit_latitude_from"
         android:layout_alignStart="@+id/edit_latitude_from"
-        android:layout_toLeftOf="@+id/cmd_lat_lon"
-        android:layout_toStartOf="@+id/cmd_lat_lon" />
+        android:layout_toLeftOf="@+id/cmd_select_lat_lon"
+        android:layout_toStartOf="@+id/cmd_select_lat_lon" />
 
 <!-- -->
     <TextView

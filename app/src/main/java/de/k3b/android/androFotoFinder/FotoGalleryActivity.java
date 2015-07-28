@@ -47,6 +47,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.queries.Queryable;
 import de.k3b.android.util.GarbageCollector;
+import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GeoRectangle;
@@ -310,11 +311,11 @@ public class FotoGalleryActivity extends Activity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle presses on the action bar items
         switch (item.getItemId()) {
-            case R.id.cmd_navigator:
+            case R.id.cmd_select_folder:
                 openNavigator();
                 return true;
 
-            case R.id.cmd_lat_lon:
+            case R.id.cmd_select_lat_lon:
                 openLatLonPicker();
                 return true;
             case R.id.cmd_filter:
@@ -341,6 +342,9 @@ public class FotoGalleryActivity extends Activity implements
                 return true;
             case R.id.action_settings:
                 openSettings();
+                return true;
+            case R.id.cmd_about:
+                AboutDialogPreference.createAboutDialog(this).show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
