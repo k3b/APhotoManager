@@ -273,23 +273,23 @@ public class FotoSql {
     public static String getName(Context context, int id) {
         switch (id) {
             case SORT_BY_DATE:
-                return context.getString(R.string.gallery_date);
+                return context.getString(R.string.date);
             case SORT_BY_NAME:
-                return context.getString(R.string.gallery_file_name);
+                return context.getString(R.string.file_name);
             case SORT_BY_LOCATION:
-                return context.getString(R.string.gallery_location);
+                return context.getString(R.string.area);
             case SORT_BY_NAME_LEN:
                 return context.getString(R.string.sort_by_name_len);
 
             case QUERY_TYPE_GALLERY:
                 return context.getString(R.string.gallery_foto);
             case QUERY_TYPE_GROUP_DATE:
-                return context.getString(R.string.gallery_date);
+                return context.getString(R.string.date);
             case QUERY_TYPE_GROUP_ALBUM:
-                return context.getString(R.string.gallery_album);
+                return context.getString(R.string.folder);
             case QUERY_TYPE_GROUP_PLACE:
             case QUERY_TYPE_GROUP_PLACE_MAP:
-                return context.getString(R.string.gallery_location);
+                return context.getString(R.string.area);
             default:
                 return "???";
         }

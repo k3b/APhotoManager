@@ -4,7 +4,16 @@ AndroFotoFinder
 
 ##################
 
-
+todo
+- About-Box
+- fdroid-Release without debug output
+- map
+v	inital window if no previous value
+v	no cancle button on small screen
+	
+- Wording
+v	- Navigator => Select Folder/Area
+v	- Album => Folder
 
 
 

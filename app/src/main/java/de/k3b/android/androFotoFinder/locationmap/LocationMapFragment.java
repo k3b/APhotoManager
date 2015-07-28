@@ -195,13 +195,17 @@ public class LocationMapFragment extends DialogFragment {
 
         if (getShowsDialog()) {
             Button cmdCancel = (Button) view.findViewById(R.id.cmd_cancel);
-            cmdCancel.setVisibility(View.VISIBLE);
-            cmdCancel.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    dismiss();
-                }
-            });
+            if (cmdCancel != null) {
+                // only available on tablets.
+                // on small screen it would block the zoom out button
+                cmdCancel.setVisibility(View.VISIBLE);
+                cmdCancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        dismiss();
+                    }
+                });
+            }
 
             Button cmdOk = (Button) view.findViewById(R.id.ok);
             cmdOk.setVisibility(View.VISIBLE);
@@ -214,9 +218,14 @@ public class LocationMapFragment extends DialogFragment {
 
             String title = getActivity().getString(
                     R.string.directory_fragment_dialog_title,
-                    getActivity().getString(R.string.gallery_location));
+                    getActivity().getString(R.string.area));
             getDialog().setTitle(title);
 
+        }
+
+        // if not initialized from outside show the world
+        if (this.mDelayedZoomToBoundingBox == null) {
+            this.mDelayedZoomToBoundingBox = new BoundingBoxE6(80000000, 170000000, -80000000, -170000000);
         }
 
         if (this.mDelayedZoomToBoundingBox != null) {
@@ -283,17 +292,21 @@ public class LocationMapFragment extends DialogFragment {
         }
 
         this.mRootFilter = rootFilter;
-        BoundingBoxE6 boundingBox = new BoundingBoxE6(
-                rectangle.getLatitudeMax(),
-                rectangle.getLogituedMin(),
-                rectangle.getLatitudeMin(),
-                rectangle.getLogituedMax());
 
-        zoomToBoundingBox(boundingBox);
+        if (!Double.isNaN(rectangle.getLatitudeMax())) {
+            BoundingBoxE6 boundingBox = new BoundingBoxE6(
+                    rectangle.getLatitudeMax(),
+                    rectangle.getLogituedMin(),
+                    rectangle.getLatitudeMin(),
+                    rectangle.getLogituedMax());
+
+            zoomToBoundingBox(boundingBox);
+        }
     }
 
     private void zoomToBoundingBox(BoundingBoxE6 boundingBox) {
         if (this.mMapView != null) {
+            // if map is already initialized
             GeoPoint min = new GeoPoint(boundingBox.getLatSouthE6(), boundingBox.getLonWestE6());
             GeoPoint max = new GeoPoint(boundingBox.getLatNorthE6(), boundingBox.getLonEastE6());
             ZoomUtil.zoomTo(this.mMapView, ZoomUtil.NO_ZOOM, min, max);
@@ -304,6 +317,7 @@ public class LocationMapFragment extends DialogFragment {
                         + ") => " + mMapView.getBoundingBox() + "; z=" + mMapView.getZoomLevel());
             }
         } else {
+            // map not initialized yet. do it later.
             this.mDelayedZoomToBoundingBox = boundingBox;
         }
 
