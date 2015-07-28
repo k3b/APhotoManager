@@ -115,7 +115,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
                 showDirectoryPicker(FotoSql.queryGroupByDate);
             }
         });
-        cmd = (Button) findViewById(R.id.cmd_lat_lon);
+        cmd = (Button) findViewById(R.id.cmd_select_lat_lon);
         cmd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

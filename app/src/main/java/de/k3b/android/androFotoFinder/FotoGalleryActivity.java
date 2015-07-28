@@ -47,6 +47,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.queries.Queryable;
 import de.k3b.android.util.GarbageCollector;
+import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GeoRectangle;
@@ -310,11 +311,11 @@ public class FotoGalleryActivity extends Activity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle presses on the action bar items
         switch (item.getItemId()) {
-            case R.id.cmd_navigator:
+            case R.id.cmd_select_folder:
                 openNavigator();
                 return true;
 
-            case R.id.cmd_lat_lon:
+            case R.id.cmd_select_lat_lon:
                 openLatLonPicker();
                 return true;
             case R.id.cmd_filter:
@@ -341,6 +342,9 @@ public class FotoGalleryActivity extends Activity implements
                 return true;
             case R.id.action_settings:
                 openSettings();
+                return true;
+            case R.id.cmd_about:
+                AboutDialogPreference.createAboutDialog(this).show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -381,7 +385,8 @@ public class FotoGalleryActivity extends Activity implements
 
         final FragmentManager manager = getFragmentManager();
         LocationMapFragment dirDialog = new LocationMapFragment();
-        dirDialog.defineNavigation(this.galleryQueryParameter.mFilter, this.galleryQueryParameter.mCurrentLatLon, FotoSql.QUERY_TYPE_GROUP_PLACE_MAP);
+        dirDialog.defineNavigation(this.galleryQueryParameter.mFilter,
+                this.galleryQueryParameter.mCurrentLatLon, FotoSql.QUERY_TYPE_GROUP_PLACE_MAP);
 
         dirDialog.show(manager, DLG_NAVIGATOR_TAG);
     }
@@ -525,7 +530,7 @@ public class FotoGalleryActivity extends Activity implements
 
     private void onDirectoryDataLoadComplete(Directory directoryRoot) {
         if (directoryRoot == null) {
-            final String message = getString(R.string.err_load_dir_failed, FotoSql.getName(this, this.galleryQueryParameter.getDirQueryID()));
+            final String message = getString(R.string.err_load_folder_failed, FotoSql.getName(this, this.galleryQueryParameter.getDirQueryID()));
             Toast.makeText(this, message,Toast.LENGTH_LONG).show();
         } else {
             mDirectoryRoot = directoryRoot;

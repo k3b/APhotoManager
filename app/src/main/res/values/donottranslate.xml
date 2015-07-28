@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (C) 2014 k3b
+
+This file is part of de.k3b.android.AndroFotoFinder (https://github.com/k3b/AndroFotoFinder/)
+
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along with
+this program. If not, see <http://www.gnu.org/licenses/>
+
+-->
+<!--
+    resources that shold NOT be localized
+-->
+<resources>
+    <string name="app_name">a Foto Finder</string>
+
+<string name="about_content"><![CDATA["<html><body>
+<a href="http://github.com/k3b/AndroFotoFinder/wiki"><b>AndroFotoFinder</b></a><br/>Version $versionName$
+<br />
+<hr />
+$about$
+<hr />
+<p> Minimal requirements: Android 4.0 (API 14),
+ internet/wifi-connection to download geodata
+ and a SD-Card to cache geodata and to store fotos<br />
+<br />
+Licence: <a href="http://www.gnu.org/licenses/gpl-3.0">GPLv3</a><br /><br />
+
+Requred permissions: </p>
+<ul>
+  <li> INTERNET: to download map data from Open Streetmap Server </li>
+  <li> ACCESS_NETWORK_STATE and ACCESS_WIFI_STATE: to find out if
+ wifi/internet is online to start downloading geodata if neccessary</li>
+  <li> WRITE_EXTERNAL_STORAGE to cache downloaded map data in local file system </li>
+</ul>
+<p> The code uses </p>
+<ul>
+  <li> <a href="https://github.com/osmdroid/osmdroid">osmdroid library</a>
+ to display maps from <a href="http://www.openstreetmap.org">Open
+ Street Map</a> </li>
+  <li><a href="https://github.com/chrisbanes/PhotoView">chris bane's PhotoView</a> that implemnts
+  the zoomable image view </li>
+  <li><a href="https://github.com/drewnoakes/metadata-extractor/wiki/GettingStarted">drew noakes
+  metadata-extractor</a> to display extended exif infos</li>
+</ul>
+<hr/>
+<h2>History</h2>
+Initial Version v0.3.3<br />
+<ul>
+  <li></li>
+</ul>
+<hr />
+<h2>Links</h2>
+<ul>
+  <li>Source code of current version of AndroFotoFinder at git repository@github.com<br />
+    <a href="http://github.com/k3b/AndroFotoFinder/">https://github.com/k3b/AndroFotoFinder/</a></li>
+  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/History">AndroFotoFinder Changelog</a></li>
+
+  <li>Source code of osmdroid library at git repository@github.com<br />
+    <a href="https://github.com/osmdroid/osmdroid">https://github.com/osmdroid/osmdroid</a></li>
+  <li>slf4j logging for java org.slf4j:slf4j-api<br />
+    <a href="http://www.slf4j.org/">http://www.slf4j.org/</a>
+  </li>
+  <li>slf4j logging driver for android eu.lp0.slf4j:slf4j-android<br />
+    <a href="http://github.com/lp0/slf4j-android">https://github.com/lp0/slf4j-android</a>
+  </li>
+  <li>junit Testing support junit:junit<br />
+    <a href="http://junit.org/">http://junit.org/</a>
+  </li>
+
+  <li>Geograpic data come from openstreetmap<br />
+    <a href="http://www.openstreetmap.org">http://www.openstreetmap.org</a></li>
+
+  <li>The GPLv3 license is available at<br />
+    <a href="http://www.gnu.org/licenses/gpl-3.0">http://www.gnu.org/licenses/gpl-3.0</a></li>
+</ul>
+<br />
+<hr />
+<h2>Legal stuff</h2>
+<b>AndroFotoFinder</b>&nbsp;<br />
+&nbsp;<br />
+Copyright (c) 2015 by k3b<br />
+Licensed under GPL, Version 3.0 or later.<br />
+<br />
+Android is a trademark of Google Inc. Use of this trademark is subject 
+ to Google Permissions.
+<br />
+<hr /><br />
+<br />
+<hr /><br />
+<br />
+<hr /><br />
+
+</body></html>
+"]]>
+</string>
+
+</resources>

@@ -57,19 +57,6 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
 
-        <!-- for internal test only -->
-        <activity
-            android:name="de.k3b.android.androFotoFinder.directory.DirPickerTestActivity"
-            android:label="@string/title_activity_directory_chooser" >
-
-            <!--
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            -->
-        </activity>
         <activity
             android:name="de.k3b.android.androFotoFinder.FotoGalleryActivity"
             android:label="@string/app_name" >

@@ -22,15 +22,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".GalleryActivity">
 
-    <item android:id="@+id/cmd_navigator"
-        android:title="@string/action_navigator_title"
+    <item android:id="@+id/cmd_select_folder"
+        android:title="@string/action_folder_title"
         android:icon="@drawable/ic_action_holo_dark_folder"
         android:visible="true"
         android:orderInCategory="1"
         android:showAsAction="always" />
 
-    <item android:id="@+id/cmd_lat_lon"
-        android:title="@string/gallery_location"
+    <item android:id="@+id/cmd_select_lat_lon"
+        android:title="@string/action_area_title"
         android:icon="@android:drawable/ic_dialog_map"
         android:visible="true"
         android:orderInCategory="1"
@@ -50,15 +50,15 @@
         android:showAsAction="never" >
         <menu>
             <item android:id="@+id/cmd_sort_directory"
-                android:title="@string/gallery_file_name"
+                android:title="@string/file_name"
                 android:visible="true"
                 android:orderInCategory="5" />
             <item android:id="@+id/cmd_sort_date"
-                android:title="@string/gallery_date"
+                android:title="@string/date"
                 android:visible="true"
                 android:orderInCategory="5"/>
             <item android:id="@+id/cmd_sort_location"
-                android:title="@string/gallery_location"
+                android:title="@string/place"
                 android:visible="true"
                 android:orderInCategory="5" />
             <item android:id="@+id/cmd_sort_len"
@@ -78,5 +78,11 @@
 
         android:orderInCategory="100"
         android:showAsAction="ifRoom|withText" />
+
+    <item android:id="@+id/cmd_about"
+        android:title="@string/about_summary"
+        android:visible="true"
+        android:orderInCategory="5"
+        android:showAsAction="never" />
 
 </menu>
