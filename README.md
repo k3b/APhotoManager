@@ -14,7 +14,7 @@ Features
     * date
     * area in [geografic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) (if image has gps-exif info)
 * Show results in a scrollable [gallery view](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View)
-* [Detail view](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) features
+* [Image view](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) features
     * image zoom
     * swiping for next/previous image
     * show extended image info (Exif, IPTC, XMP, ICC)

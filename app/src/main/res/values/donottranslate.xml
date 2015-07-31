@@ -52,6 +52,8 @@ Requred permissions: </p>
   the zoomable image view </li>
   <li><a href="https://github.com/drewnoakes/metadata-extractor/wiki/GettingStarted">drew noakes
   metadata-extractor</a> to display extended exif infos</li>
+  <li><a href="http://www.slf4j.org/">slf4j logging for java</a> with the <a href="http://github.com/lp0/slf4j-android">https://github.com/lp0/slf4j-android</a> driver</li>
+  <li><a href="http://junit.org/">junit Testing support</a></li>
 </ul>
 <hr/>
 <h2>History</h2>

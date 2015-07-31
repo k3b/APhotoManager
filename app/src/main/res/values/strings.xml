@@ -72,22 +72,22 @@ Features:
 <ul>
   <li>Can handle big image collections (15000+ images in 1000+ folders)</li>
   <li>Uses Android's image content-provider. No initial image scan neccessary.</li>
-  <li>Find images via</li>
+  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Filter-View">Find images</a> via</li>
   <ul>
-    <li>folder (with hirachical picker)&nbsp;</li>
+    <li>folder (with hirachical <a href="https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker">Folder-Picker</a>)&nbsp;</li>
     <li>wildcards that match folder/filename&nbsp;</li>
     <li>date&nbsp;</li>
-    <li>area in geographic map (if image has gps-exif info)
+    <li>area in <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geographic map</a> (if image has gps-exif info)
     </li>
   </ul>
-  <li>Show result in a scrollable gallery view</li>
-  <li>Photo-detail-view with</li>
+  <li>Show result in a scrollable <a href="https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View">gallery view</a></li>
+  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View">Photo-detail-view</a> with</li>
   <li><ul>
     <li>image zoom</li>
     <li>swipe to go to next/previous image</li>
     <li>show extended image info (Exif, IPTC, XMP, ICC)</li>
   </ul></li>
-  <li>The geografic map shows markers at places where photos were
+  <li>The <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geografic map</a> shows markers at places where photos were
  taken</li>
 </ul>
 <br />
