@@ -1,22 +1,24 @@
 # AndroFotoFinder ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/app/src/main/res/drawable-hdpi/foto_gallery.png)
 
-Fast find local Fotos by (Sub-)Folder, Date and/or geographic Map
+Fast find local Photos by (Sub-)Folder, Date and/or geographic Map
 
-features
+Search through your device's local media store for photos.
 
-* can handle big image collections (the author has 15000 images in 780 folders on his tablet)
-* uses android-system-buildin image content-provider. No initial image scan neccessary.
-* find images via
-    * folder (with hirachical picker)
-    * wildcards that match folder and/or filename
+Features
+
+* Can handle big image collections (15000+ images in 1000+ folders)
+* Uses Android's image content-provider. No initial image scan neccessary.
+* The [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View) can find images via
+    * folder (with hirachical [Folder-Picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker))
+    * wildcards that match folder/filename
     * date
-    * area in geographic map (if image has gps-exif info)
-* show find result in a scrollable gallery view
-* foto-detail-view with
+    * area in [geografic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) (if image has gps-exif info)
+* Show results in a scrollable [gallery view](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View)
+* [Image view](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) features
     * image zoom
-    * swipe to go to next/previous image
+    * swiping for next/previous image
     * show extended image info (Exif, IPTC, XMP, ICC)
-* The geografic map shows markers at places where fotos were taken
+* The [geografic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) shows markers at places where photos were taken.
 
 ### Screenshots
 
