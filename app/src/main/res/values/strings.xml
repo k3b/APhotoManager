@@ -21,7 +21,7 @@
  -->
 <resources>
 
-    <string name="gallery_foto">Fotos</string>
+    <string name="gallery_foto">Photos</string>
 
     <!-- sort criteria -->
     <string name="folder">Folder</string>
@@ -31,7 +31,7 @@
     <string name="sort_by_name_len">Lenght</string>
 
     <string name="action_settings">Settings</string>
-    <string name="no_dir_selected">Select Directory with Images to enable OK</string>
+    <string name="no_dir_selected">Select Folder with Images to enable OK</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
 
@@ -70,31 +70,24 @@
 </p>
 Features:
 <ul>
-  <li>can handle big image collections (the author has 15000
- images in 780 folders on his tablet)</li>
-  <li>uses android-system-buildin image content-provider. No
- initial image
- scan neccessary.</li>
-  <li>find images via</li>
+  <li>Can handle big image collections (15000+ images in 1000+ folders)</li>
+  <li>Uses Android's image content-provider. No initial image scan neccessary.</li>
+  <li>Find images via</li>
   <ul>
     <li>folder (with hirachical picker)&nbsp;</li>
-    <li>wildcards that match folder and/or filename&nbsp;</li>
+    <li>wildcards that match folder/filename&nbsp;</li>
     <li>date&nbsp;</li>
     <li>area in geographic map (if image has gps-exif info)
     </li>
   </ul>
-  <li>show find result in a scrollable gallery view</li>
-  <li>foto-detail-view with</li>
-  <ul>
+  <li>Show result in a scrollable gallery view</li>
+  <li>Photo-detail-view with</li>
+  <li><ul>
     <li>image zoom</li>
-  </ul>
-  <ul>
     <li>swipe to go to next/previous image</li>
-  </ul>
-  <ul>
     <li>show extended image info (Exif, IPTC, XMP, ICC)</li>
-  </ul>
-  <li>The geografic map shows markers at places where fotos were
+  </ul></li>
+  <li>The geografic map shows markers at places where photos were
  taken</li>
 </ul>
 <br />

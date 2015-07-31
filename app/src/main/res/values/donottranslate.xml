@@ -32,7 +32,7 @@ $about$
 <hr />
 <p> Minimal requirements: Android 4.0 (API 14),
  internet/wifi-connection to download geodata
- and a SD-Card to cache geodata and to store fotos<br />
+ and a SD-Card to cache geodata and to store photos<br />
 <br />
 Licence: <a href="http://www.gnu.org/licenses/gpl-3.0">GPLv3</a><br /><br />
 
@@ -55,7 +55,7 @@ Requred permissions: </p>
 </ul>
 <hr/>
 <h2>History</h2>
-Initial Version v0.3.3<br />
+Initial Version v0.3.4.150728<br />
 <ul>
   <li></li>
 </ul>
