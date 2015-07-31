@@ -8,7 +8,7 @@ Features
 
 * Can handle big image collections (15000+ images in 1000+ folders)
 * Uses Android's image content-provider. No initial image scan neccessary.
-* Find images via
+* The [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View) can find images via
     * folder (with hirachical [Folder-Picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker))
     * wildcards that match folder/filename
     * date
