@@ -368,7 +368,6 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     /**
      * DirectoryGui-Public api for embedding activity
      * (Re)-Defines base parameters for Directory Navigation
-     *
      * @param root
      * @param dirTypId
      * @param initialAbsolutePath

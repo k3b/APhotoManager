@@ -63,6 +63,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
     private static final String SETTINGS_KEY = "GalleryFilterActivity-";
 
     GalleryFilterParameterParcelable mFilter = null;
+
     private AsFilter mAsFilter = null;
 
     public static void showActivity(Activity context, GalleryFilterParameterParcelable filter) {

@@ -45,6 +45,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.OnGalleryInteractionListener;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.Queryable;
+import de.k3b.database.SelectedItems;
 
 /**
  * CursorAdapter that queries MediaStore.Images.Media.EXTERNAL_CONTENT_URI
@@ -56,6 +57,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
     // Identifies a particular Loader or a LoaderManager being used in this component
     private static int MY_LOADER_ID = 0;
     private static final boolean SYNC = false;
+    private final SelectedItems mSelectedItems;
     private OnGalleryInteractionListener callback = null;
 
     // for debugging
@@ -68,8 +70,9 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
     private QueryParameterParcelable parameters = null;
     private final Drawable imageNotLoadedYet;
 
-    public GalleryCursorAdapter(final Activity context, QueryParameterParcelable parameters, String name) {
+    public GalleryCursorAdapter(final Activity context, QueryParameterParcelable parameters, SelectedItems selectedItems, String name) {
         super(context, null, false); // no cursor yet; no auto-requery
+        mSelectedItems = selectedItems;
 
         debugPrefix = "GalleryCursorAdapter#" + (id++) + "@" + name + " ";
         Global.debugMemory(debugPrefix, "ctor");
@@ -246,9 +249,10 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
         if (count > 1) description += " (" + count + ")";
         if (gps) description += "#";
         holder.description.setText(description);
-        holder.icon.setVisibility((count > 1) ? View.VISIBLE : View.GONE);
+        long imageID = cursor.getLong(cursor.getColumnIndex(FotoSql.SQL_COL_PK));
+        holder.icon.setVisibility(((mSelectedItems != null) && (mSelectedItems.contains(imageID))) ? View.VISIBLE : View.GONE);
 
-        holder.loadImageInBackground(cursor.getLong(cursor.getColumnIndex(FotoSql.SQL_COL_PK)),imageNotLoadedYet );
+        holder.loadImageInBackground(imageID,imageNotLoadedYet );
         if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, debugPrefix + "bindView for " + holder);
     }
 
