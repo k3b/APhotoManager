@@ -168,7 +168,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
         }
     }
 
-    private void onLoadFinished(Cursor cursor, StringBuffer debugMessage) {
+    protected void onLoadFinished(Cursor cursor, StringBuffer debugMessage) {
         int resultCount = (cursor == null) ? 0 : cursor.getCount();
 
         if (debugMessage != null) {

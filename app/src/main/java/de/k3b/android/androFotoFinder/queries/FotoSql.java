@@ -30,6 +30,7 @@ import java.util.Date;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.database.QueryParameter;
+import de.k3b.database.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
@@ -172,6 +173,12 @@ public class FotoSql {
 
             String path = filter.getPath();
             if ((path != null) && (path.length() > 0)) parameters.addWhere(SQL_COL_PATH + " like ?", path);
+        }
+    }
+
+    public static void addWhereSelection(QueryParameterParcelable parameters, SelectedItems selectedItems) {
+        if ((parameters != null) && (selectedItems != null) && (!selectedItems.isEmpty())) {
+            parameters.clearWhere().addWhere(FotoSql.SQL_COL_PK + " in (" + selectedItems.toString() + ")");
         }
     }
 

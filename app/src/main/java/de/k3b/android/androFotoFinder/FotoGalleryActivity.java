@@ -285,6 +285,8 @@ public class FotoGalleryActivity extends Activity implements
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu items for use in the action bar
         MenuInflater inflater = getMenuInflater();
+
+        inflater.inflate(R.menu.menu_gallery_select_current, menu);
         inflater.inflate(R.menu.menu_gallery, menu);
         /*
         getActionBar().setListNavigationCallbacks();

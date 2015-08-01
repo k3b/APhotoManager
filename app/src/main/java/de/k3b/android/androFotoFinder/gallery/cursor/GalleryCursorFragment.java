@@ -21,6 +21,7 @@ package de.k3b.android.androFotoFinder.gallery.cursor;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
@@ -70,6 +71,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private static final String INSTANCE_STATE_LAST_VISIBLE_POSITION = "lastVisiblePosition";
     private static final String INSTANCE_STATE_SELECTED_ITEM_IDS = "selectedItems";
     private static final String INSTANCE_STATE_OLD_TITLE = "oldTitle";
+    private static final String INSTANCE_STATE_SEL_ONLY = "selectedOnly";
 
     private HorizontalScrollView parentPathBarScroller;
     private LinearLayout parentPathBar;
@@ -82,6 +84,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private final String debugPrefix;
 
     private GridView galleryView;
+
+    private ShareActionProvider mShareActionProvider;
+    private MenuItem mShareOnlyToggle;
     private GalleryCursorAdapter galleryAdapter = null;
 
     private OnGalleryInteractionListener mGalleryListener;
@@ -94,7 +99,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     // multi selection support
     private SelectedItems mSelectedItems = new SelectedItems();
     private String mOldTitle = null;
-    private ShareActionProvider mShareActionProvider;
+    private boolean mShowSelectedOnly = false;
 
     /**************** construction ******************/
     /**
@@ -128,6 +133,18 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         Global.debugMemory(debugPrefix, "onCreate");
         setHasOptionsMenu(true);
         this.mShareActionProvider = new ShareActionProvider(this.getActivity());
+        if (savedInstanceState != null) {
+            this.mLastVisiblePosition = savedInstanceState.getInt(INSTANCE_STATE_LAST_VISIBLE_POSITION, this.mLastVisiblePosition);
+            String old = mSelectedItems.toString();
+            mSelectedItems.clear();
+            mSelectedItems.parse(savedInstanceState.getString(INSTANCE_STATE_SELECTED_ITEM_IDS, old));
+            this.mOldTitle = savedInstanceState.getString(INSTANCE_STATE_OLD_TITLE, this.mOldTitle);
+            this.mShowSelectedOnly = savedInstanceState.getBoolean(INSTANCE_STATE_SEL_ONLY, this.mShowSelectedOnly);
+            if (!mSelectedItems.isEmpty()) {
+                mMustReplaceMenue = true;
+                getActivity().invalidateOptionsMenu();
+            }
+        }
         super.onCreate(savedInstanceState);
     }
 
@@ -138,26 +155,24 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         outState.putInt(INSTANCE_STATE_LAST_VISIBLE_POSITION, mLastVisiblePosition);
         outState.putString(INSTANCE_STATE_SELECTED_ITEM_IDS, this.mSelectedItems.toString());
         outState.putString(INSTANCE_STATE_OLD_TITLE, this.mOldTitle);
-
+        outState.putBoolean(INSTANCE_STATE_SEL_ONLY, this.mShowSelectedOnly);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Global.debugMemory(debugPrefix, "onCreateView");
-        if (savedInstanceState != null) {
-            this.mLastVisiblePosition = savedInstanceState.getInt(INSTANCE_STATE_LAST_VISIBLE_POSITION, this.mLastVisiblePosition);
-            String old = mSelectedItems.toString();
-            mSelectedItems.clear();
-            mSelectedItems.parse(savedInstanceState.getString(INSTANCE_STATE_SELECTED_ITEM_IDS, old));
-            this.mOldTitle = savedInstanceState.getString(INSTANCE_STATE_OLD_TITLE, this.mOldTitle);
-        }
 
         // Inflate the layout for this fragment
         View result = inflater.inflate(R.layout.fragment_gallery, container, false);
         galleryView = (GridView) result.findViewById(R.id.gridView);
 
-        galleryAdapter = new GalleryCursorAdapter(this.getActivity(), mGalleryContentQuery, mSelectedItems, debugPrefix);
+        galleryAdapter = new GalleryCursorAdapter(this.getActivity(), mGalleryContentQuery, mSelectedItems, debugPrefix) {
+            protected void onLoadFinished(Cursor cursor, StringBuffer debugMessage) {
+                super.onLoadFinished(cursor, debugMessage);
+                multiSelectionReplaceTitleIfNecessary();
+            }
+        };
         galleryAdapter.registerDataSetObserver(new DataSetObserver() {
             @Override
             public void onChanged() {
@@ -180,7 +195,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         mShareActionProvider.setOnShareTargetSelectedListener(new ShareActionProvider.OnShareTargetSelectedListener() {
             @Override
             public boolean onShareTargetSelected(ShareActionProvider source, Intent intent) {
-                cancelMultiSelection();
+                multiSelectionCancel();
                 return false;
             }
         });
@@ -257,7 +272,17 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
         this.mGalleryContentQuery = parameters;
 
-        galleryAdapter.requery(this.getActivity(), mGalleryContentQuery);
+        requery();
+    }
+
+    private void requery() {
+        if (mShowSelectedOnly) {
+            QueryParameterParcelable selFilter = new QueryParameterParcelable(mGalleryContentQuery);
+            FotoSql.addWhereSelection(selFilter, mSelectedItems);
+            galleryAdapter.requery(this.getActivity(), selFilter);
+        } else {
+            galleryAdapter.requery(this.getActivity(), mGalleryContentQuery);
+        }
     }
 
     @Override
@@ -268,7 +293,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     /*********************** local helper *******************************************/
     /** an Image in the FotoGallery was clicked */
     private void onGalleryImageClick(final GalleryCursorAdapter.GridCellViewHolder holder, int position) {
-        if ((!handleMultiselectionClick(holder)) && (mGalleryListener != null) && (mGalleryContentQuery != null)) {
+        if ((!multiSelectionHandleClick(holder)) && (mGalleryListener != null) && (mGalleryContentQuery != null)) {
             QueryParameterParcelable imageQuery = new QueryParameterParcelable(mGalleryContentQuery);
 
             if (holder.filter != null) {
@@ -384,44 +409,53 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     /********************** Multi selection support ***********************************************************/
     private boolean mMustReplaceMenue = false;
 
-    /** return true if multiselection is active */
-    private boolean handleMultiselectionClick(GalleryCursorAdapter.GridCellViewHolder holder) {
-        if (!mSelectedItems.isEmpty()) {
-            long imageID = holder.imageID;
-            holder.icon.setVisibility((mSelectedItems.toggle(imageID)) ? View.VISIBLE : View.GONE);
-            updateActionbarMultiSelection();
-            return true;
-        }
-        return false;
-    }
-
+    /** starts mutliselection */
     private boolean onGalleryLongImageClick(final GalleryCursorAdapter.GridCellViewHolder holder, int position) {
         if (mSelectedItems.isEmpty()) {
+            // multi selection not active yet: start multi selection
             mOldTitle = getActivity().getTitle().toString();
             mMustReplaceMenue = true;
-
-            // must replace OptionsMenu
+            mShowSelectedOnly = false;
             getActivity().invalidateOptionsMenu();
         }
         mSelectedItems.add(holder.imageID);
         holder.icon.setVisibility(View.VISIBLE);
-        updateActionbarMultiSelection();
+        multiSelectionUpdateActionbar();
         return true;
+    }
+
+    /** return true if multiselection is active */
+    private boolean multiSelectionHandleClick(GalleryCursorAdapter.GridCellViewHolder holder) {
+        if (!mSelectedItems.isEmpty()) {
+            long imageID = holder.imageID;
+            holder.icon.setVisibility((mSelectedItems.toggle(imageID)) ? View.VISIBLE : View.GONE);
+            multiSelectionUpdateActionbar();
+            return true;
+        }
+        multiSelectionUpdateActionbar();
+        return false;
     }
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
         if (mMustReplaceMenue) {
+            mMustReplaceMenue = false;
             menu.clear();
             MenuInflater inflater = getActivity().getMenuInflater();
             inflater.inflate(R.menu.menu_gallery_multiselect, menu);
-            mMustReplaceMenue = false;
+            mShareOnlyToggle = menu.findItem(R.id.cmd_selected_only);
+            if (mShowSelectedOnly) {
+                mShareOnlyToggle.setIcon(android.R.drawable.checkbox_on_background);
+                mShareOnlyToggle.setChecked(true);
+            } else {
+                inflater.inflate(R.menu.menu_gallery_select_current, menu);
+            }
 
             MenuItem shareItem = menu.findItem(R.id.menu_item_share);
             shareItem.setActionProvider(mShareActionProvider);
 
-            updateShareIntent();
+            multiSelectionUpdateShareIntent();
         }
     }
 
@@ -430,8 +464,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.cmd_cancel:
-                cancelMultiSelection();
-                return true;
+                return multiSelectionCancel();
+            case R.id.cmd_selected_only:
+                return multiSelectionToggle();
 
             default:
                 return super.onOptionsItemSelected(item);
@@ -439,7 +474,16 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     }
 
-    private void cancelMultiSelection() {
+    private boolean multiSelectionToggle() {
+        mShowSelectedOnly = !mShowSelectedOnly;
+        mMustReplaceMenue = true;
+        getActivity().invalidateOptionsMenu();
+
+        requery();
+        return true;
+    }
+
+    private boolean multiSelectionCancel() {
         mSelectedItems.clear();
 
         for (int i = galleryView.getChildCount() - 1; i >= 0; i--)
@@ -449,24 +493,46 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 holder.icon.setVisibility(View.GONE);
             }
         }
-        updateActionbarMultiSelection();
+        multiSelectionUpdateActionbar();
+        return true;
     }
 
-    private void updateActionbarMultiSelection() {
-        String newTitle;
-        if (mSelectedItems.isEmpty() && (mOldTitle != null)) {
-            // last is deselected. Restore title and menu;
-            newTitle = mOldTitle;
-            mOldTitle = null;
-            getActivity().invalidateOptionsMenu();
-        } else {
-            newTitle = getActivity().getString(R.string.title_multiselection, mSelectedItems.size());
-            updateShareIntent();
+    void multiSelectionReplaceTitleIfNecessary() {
+        if (!mSelectedItems.isEmpty()) {
+            mOldTitle = getActivity().getTitle().toString();
+            multiSelectionUpdateActionbar();
         }
-        getActivity().setTitle(newTitle);
     }
 
-    private void updateShareIntent() {
+    private void multiSelectionUpdateActionbar() {
+        String newTitle = null;
+        if (mSelectedItems.isEmpty()) {
+
+            // lost last selection. revert mShowSelectedOnly if neccessary
+            if (mShowSelectedOnly) {
+                mShowSelectedOnly = false;
+                requery();
+            }
+
+            // lost last selection. revert title if neccessary
+            if (mOldTitle != null) {
+                // last is deselected. Restore title and menu;
+                newTitle = mOldTitle;
+                mOldTitle = null;
+                getActivity().invalidateOptionsMenu();
+            }
+        } else {
+            // multi selection is active: update title and data for share menue
+            newTitle = getActivity().getString(R.string.title_multiselection, mSelectedItems.size());
+            multiSelectionUpdateShareIntent();
+        }
+
+        if (newTitle != null) {
+            getActivity().setTitle(newTitle);
+        }
+    }
+
+    private void multiSelectionUpdateShareIntent() {
         int selectionCount = mSelectedItems.size();
         if ((selectionCount > 0) && (mShareActionProvider != null)) {
             Intent sendIntent = new Intent();
@@ -488,6 +554,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             }
             mShareActionProvider.setShareIntent(sendIntent);
         }
+
     }
 
 
