@@ -2,8 +2,11 @@ The [Gallery-View](Gallery-View) show photos in a scrollable view:
 
 * If you swipe up or down you will see more photos.
 * If you tap on a photo it will be opend in the [Image-View](Image-View).
-* The Symbol(s) in the actionbar and the menu item(s) 
+* The Symbol(s) in the actionbar and the menu item(s)
     * define which photos you want to see (see _current set_ below).
+* If you long-tap on a photo the app enters multiselection mode:
+    * taping on any photo toggles selection of that photo.
+    * you can send/share photos via the share symbol.
 
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/Gallery.png)
 

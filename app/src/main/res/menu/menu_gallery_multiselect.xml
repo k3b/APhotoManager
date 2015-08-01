@@ -29,6 +29,12 @@
         android:orderInCategory="1"
         android:showAsAction="always" />
 
+    <item
+        android:id="@+id/menu_item_share"
+        android:showAsAction="always"
+        android:title="@string/cmd_share"
+        android:orderInCategory="2" />
+
     <item android:id="@+id/action_settings"
         android:title="@string/action_settings"
         android:icon="@android:drawable/ic_menu_preferences"

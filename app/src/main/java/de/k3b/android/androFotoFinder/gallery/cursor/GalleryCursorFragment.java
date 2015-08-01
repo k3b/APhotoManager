@@ -20,6 +20,7 @@
 package de.k3b.android.androFotoFinder.gallery.cursor;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
@@ -37,9 +38,12 @@ import android.widget.Button;
 import android.widget.GridView;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
+import android.widget.ShareActionProvider;
 
 // import com.squareup.leakcanary.RefWatcher;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import de.k3b.android.androFotoFinder.Global;
@@ -90,6 +94,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     // multi selection support
     private SelectedItems mSelectedItems = new SelectedItems();
     private String mOldTitle = null;
+    private ShareActionProvider mShareActionProvider;
 
     /**************** construction ******************/
     /**
@@ -122,6 +127,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     public void onCreate(Bundle savedInstanceState) {
         Global.debugMemory(debugPrefix, "onCreate");
         setHasOptionsMenu(true);
+        this.mShareActionProvider = new ShareActionProvider(this.getActivity());
         super.onCreate(savedInstanceState);
     }
 
@@ -144,7 +150,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             String old = mSelectedItems.toString();
             mSelectedItems.clear();
             mSelectedItems.parse(savedInstanceState.getString(INSTANCE_STATE_SELECTED_ITEM_IDS, old));
-            this.mLastVisiblePosition = savedInstanceState.getString(INSTANCE_STATE_OLD_TITLE, this.mOldTitle);
+            this.mOldTitle = savedInstanceState.getString(INSTANCE_STATE_OLD_TITLE, this.mOldTitle);
         }
 
         // Inflate the layout for this fragment
@@ -169,6 +175,13 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View v, int position, long id) {
                 return onGalleryLongImageClick((GalleryCursorAdapter.GridCellViewHolder) v.getTag(), position);
+            }
+        });
+        mShareActionProvider.setOnShareTargetSelectedListener(new ShareActionProvider.OnShareTargetSelectedListener() {
+            @Override
+            public boolean onShareTargetSelected(ShareActionProvider source, Intent intent) {
+                cancelMultiSelection();
+                return false;
             }
         });
 
@@ -404,6 +417,11 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             MenuInflater inflater = getActivity().getMenuInflater();
             inflater.inflate(R.menu.menu_gallery_multiselect, menu);
             mMustReplaceMenue = false;
+
+            MenuItem shareItem = menu.findItem(R.id.menu_item_share);
+            shareItem.setActionProvider(mShareActionProvider);
+
+            updateShareIntent();
         }
     }
 
@@ -414,6 +432,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             case R.id.cmd_cancel:
                 cancelMultiSelection();
                 return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -439,12 +458,36 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             // last is deselected. Restore title and menu;
             newTitle = mOldTitle;
             mOldTitle = null;
-
             getActivity().invalidateOptionsMenu();
         } else {
             newTitle = getActivity().getString(R.string.title_multiselection, mSelectedItems.size());
+            updateShareIntent();
         }
         getActivity().setTitle(newTitle);
+    }
+
+    private void updateShareIntent() {
+        int selectionCount = mSelectedItems.size();
+        if ((selectionCount > 0) && (mShareActionProvider != null)) {
+            Intent sendIntent = new Intent();
+            sendIntent.setType("image/*");
+            if (selectionCount == 1) {
+                Long imageId = mSelectedItems.first();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_STREAM, getUri(imageId));
+            } else {
+                sendIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
+
+                ArrayList<Uri> uris = new ArrayList<Uri>();
+
+                Iterator<Long> iter = mSelectedItems.iterator();
+                while (iter.hasNext()) {
+                    uris.add(getUri(iter.next()));
+                }
+                sendIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+            }
+            mShareActionProvider.setShareIntent(sendIntent);
+        }
     }
 
 
