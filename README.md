@@ -13,7 +13,7 @@ Features
     * wildcards that match folder/filename
     * date
     * area in [geografic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) (if image has gps-exif info)
-* Show results in a scrollable [gallery view](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View)
+* Show results in a scrollable [gallery view](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) with support for multible selection and share photos.
 * [Image view](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) features
     * image zoom
     * swiping for next/previous image
@@ -23,6 +23,8 @@ Features
 ### Screenshots
 
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/Gallery.png)
+
+![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/Gallery-MultiSelection.png)
 
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/SelectArea.png)
 

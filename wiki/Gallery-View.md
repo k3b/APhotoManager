@@ -4,9 +4,6 @@ The [Gallery-View](Gallery-View) show photos in a scrollable view:
 * If you tap on a photo it will be opend in the [Image-View](Image-View).
 * The Symbol(s) in the actionbar and the menu item(s)
     * define which photos you want to see (see _current set_ below).
-* If you long-tap on a photo the app enters multiselection mode:
-    * taping on any photo toggles selection of that photo.
-    * you can send/share photos via the share symbol.
 
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/Gallery.png)
 
@@ -52,3 +49,13 @@ The [Gallery-View](Gallery-View) has these elements:
 * If you [pick the current Folder](Folder-Picker) "Job" the gallery will show only photos from folder "Job" or subfolders of "Job" from 2007.
     * Photos from other years are not visible - they are filtered out.
 
+## Multiselection Mode
+
+* If you long-tap on a photo the app enters **multiselection mode:** with additional symbols in the actionbar.
+* taping on any photo toggles selection of that photo. A Selected photo contains a [X] symbol.
+* Additional symbols in the Actionbar:
+    * taping on the X symbol exits the multiselection mode.
+    * taping on the [ ]/[X] symbol will toggle between seeing current photots or seeing only selected photos.
+    * you can send/share photos via the share symbol.
+
+![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/Gallery-MultiSelection.png)
