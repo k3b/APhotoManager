@@ -170,7 +170,10 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         galleryAdapter = new GalleryCursorAdapter(this.getActivity(), mGalleryContentQuery, mSelectedItems, debugPrefix) {
             protected void onLoadFinished(Cursor cursor, StringBuffer debugMessage) {
                 super.onLoadFinished(cursor, debugMessage);
-                multiSelectionReplaceTitleIfNecessary();
+                if (cursor != null) {
+                    // do not update on destroy
+                    multiSelectionReplaceTitleIfNecessary();
+                }
             }
         };
         galleryAdapter.registerDataSetObserver(new DataSetObserver() {
