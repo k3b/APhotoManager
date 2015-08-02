@@ -5,16 +5,7 @@ AndroFotoFinder
 ##################
 
 todo
-v About-Box
-- fdroid-Release without debug output
-v map
-v	inital window if no previous value
-v	no cancle button on small screen
-	
-- Wording
-v	- Navigator => Select Folder/Area
-v	- Album => Folder
-
+- Global-settings: share via content-uri or filepath-uri
 
 // symlink
 mklink /D /J osmdroid-android d:\prj\eve\android\prj\fotos-android.wrk\osmdroid\osmdroid-android
