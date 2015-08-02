@@ -30,8 +30,7 @@ public class Global {
     public static final String LOG_CONTEXT = "k3bFoto";
 
     /**
-     * true: addToCompressQue several Log.d(...) to show what is going on.
-     * debugEnabled is updated by the SettingsActivity
+     * TODO: create settings view for these
      */
     public static boolean debugEnabled = false;
     public static boolean debugEnabledViewItem = false;

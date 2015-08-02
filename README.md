@@ -1,6 +1,6 @@
 # AndroFotoFinder ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/app/src/main/res/drawable-hdpi/foto_gallery.png)
 
-Fast find local Photos by (Sub-)Folder, Date and/or geographic Map
+Fast find local photos by (sub-)folder, date and/or geographic map
 
 Search through your device's local media store for photos.
 
@@ -19,6 +19,11 @@ Features
     * swiping for next/previous image
     * show extended image info (Exif, IPTC, XMP, ICC)
 * The [geografic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) shows markers at places where photos were taken.
+
+You can install AndroFotoFinder via
+
+* [f-droid.org installer](https://f-droid.org/) or via
+* internet download from [f-droid.org repository](https://f-droid.org/repository/browse/?fdid=de.k3b.android.androFotoFinder)
 
 ### Screenshots
 

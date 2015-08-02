@@ -1,6 +1,8 @@
+# ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_map.png) [Folder-Picker](Folder-Picker)
+
 You can reach the [Folder-Picker](Folder-Picker) via
 
-* the "folder symbol" in the [Gallery-View](Gallery-View)
+* the "folder symbol" ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_map.png) in the [Gallery-View](Gallery-View)
 * the "folder picker" in the [Filter-View](Filter-View)
 
 In the top area is the **"path bar"** : a list of button where each button represent a folder in the current path.

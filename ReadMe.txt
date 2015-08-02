@@ -5,7 +5,9 @@ AndroFotoFinder
 ##################
 
 todo
-- Global-settings: share via content-uri or filepath-uri
+- Global-settings:
+   share via content-uri or filepath-uri
+   clear selecetion after execute or require explicit cancel
 
 // symlink
 mklink /D /J osmdroid-android d:\prj\eve\android\prj\fotos-android.wrk\osmdroid\osmdroid-android
