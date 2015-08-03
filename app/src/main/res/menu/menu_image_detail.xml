@@ -22,7 +22,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".imagedetail.ImageDetailActivityViewPager">
-    <item android:id="@+id/action_details" android:title="@string/action_details"
+    <item android:id="@+id/action_details" android:title="@string/cmd_details"
         android:icon="@android:drawable/ic_menu_preferences"
         android:orderInCategory="100" android:showAsAction="ifRoom" />
 

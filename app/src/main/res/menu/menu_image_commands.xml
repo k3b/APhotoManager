@@ -22,18 +22,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".GalleryActivity">
 
-    <item android:id="@+id/cmd_select_folder"
-        android:title="@string/action_folder_title"
-        android:icon="@drawable/ic_action_holo_dark_folder"
+    <item android:id="@+id/cmd_delete"
+        android:title="@string/cmd_delete"
+        android:icon="@android:drawable/ic_menu_delete"
         android:visible="true"
-        android:orderInCategory="1"
+        android:orderInCategory="40"
         android:showAsAction="ifRoom" />
-
-    <item android:id="@+id/cmd_select_lat_lon"
-        android:title="@string/action_area_title"
-        android:icon="@android:drawable/ic_dialog_map"
-        android:visible="true"
-        android:orderInCategory="1"
-        android:showAsAction="ifRoom" />
-
 </menu>

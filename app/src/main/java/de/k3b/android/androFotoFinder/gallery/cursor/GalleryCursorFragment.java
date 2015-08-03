@@ -56,6 +56,8 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.OnGalleryInteractionListener;
 import de.k3b.android.androFotoFinder.queries.Queryable;
+import de.k3b.android.util.AndroidFileCommands;
+import de.k3b.android.util.SelectedFotos;
 import de.k3b.database.SelectedItems;
 import de.k3b.io.Directory;
 
@@ -97,9 +99,10 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private int mInitialPositionY = 0;
 
     // multi selection support
-    private SelectedItems mSelectedItems = new SelectedItems();
+    private final SelectedFotos mSelectedItems = new SelectedFotos();
     private String mOldTitle = null;
     private boolean mShowSelectedOnly = false;
+    private AndroidFileCommands mFileCommands;
 
     /**************** construction ******************/
     /**
@@ -198,7 +201,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         mShareActionProvider.setOnShareTargetSelectedListener(new ShareActionProvider.OnShareTargetSelectedListener() {
             @Override
             public boolean onShareTargetSelected(ShareActionProvider source, Intent intent) {
-                multiSelectionCancel();
+                if (Global.clearSelectionAfterCommand) {
+                    multiSelectionCancel();
+                }
                 return false;
             }
         });
@@ -224,6 +229,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     public void onAttach(Activity activity) {
         Global.debugMemory(debugPrefix, "onAttach");
         super.onAttach(activity);
+        mSelectedItems.setContext(activity);
         try {
             mGalleryListener = (OnGalleryInteractionListener) activity;
         } catch (ClassCastException e) {
@@ -245,6 +251,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         super.onDetach();
         mGalleryListener = null;
         mDirectoryListener = null;
+        mFileCommands = null;
     }
 
     @Override
@@ -253,6 +260,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         mGalleryContentQuery = null;
         galleryAdapter.changeCursor(null);
         galleryAdapter = null;
+        mFileCommands = null;
         super.onDestroy();
         System.gc();
         Global.debugMemory(debugPrefix, "onDestroy after");
@@ -457,6 +465,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
             MenuItem shareItem = menu.findItem(R.id.menu_item_share);
             shareItem.setActionProvider(mShareActionProvider);
+            inflater.inflate(R.menu.menu_image_commands, menu);
 
             multiSelectionUpdateShareIntent();
         }
@@ -468,6 +477,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         switch (item.getItemId()) {
             case R.id.cmd_cancel:
                 return multiSelectionCancel();
+            case R.id.cmd_delete:
+                return onDelete();
             case R.id.cmd_selected_only:
                 return multiSelectionToggle();
 
@@ -475,6 +486,28 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 return super.onOptionsItemSelected(item);
         }
 
+    }
+
+    private boolean onDelete() {
+        String fileNames[] = mSelectedItems.getFileNames();
+        if (fileNames != null) {
+            getFileCommands().deleteFileWithQuestion(fileNames);
+        }
+        return true;
+    }
+
+    private AndroidFileCommands getFileCommands() {
+        if (mFileCommands == null) {
+            mFileCommands = new AndroidFileCommands(this.getActivity()) {
+                @Override
+                public void deleteFile(String... paths) {
+                    super.deleteFile(paths);
+                    mShowSelectedOnly = true;
+                    multiSelectionCancel();
+                }
+            };
+        }
+        return mFileCommands;
     }
 
     private boolean multiSelectionToggle() {

@@ -106,5 +106,6 @@ Android is a trademark of Google Inc. Use of this trademark is subject
 </body></html>
 "]]>
 </string>
+    <string name="log_file_path">copy/aFotoFinder.log</string>
 
 </resources>

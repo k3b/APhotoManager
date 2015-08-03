@@ -60,11 +60,22 @@
     <string name="unknown">/unknown/</string>
     <string name="invalid_location">\'%1$s\' is not a valid coordinate.</string>
     <string name="invalid_date">\'%1$s\' is not a valid date.</string>
-    <string name="action_details" >Details</string>
+    <string name="cmd_details" >Details</string>
     <string name="title_cright_osm">Map Tiles (c) <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> Contributors</string>
     <string name="about_summary">About Andro Foto Finder</string>
 
     <string name="title_multiselection">%1$d Selected</string>
+
+    <string name="cmd_share">Share</string>
+    <string name="cmd_delete">Delete</string>
+    <string name="btn_yes">Yes</string>
+    <string name="btn_no">No</string>
+
+    <string name="title_confirm_removal" >Delete Photo(s)?</string>
+    <string name="format_confirm_delete">"Are you sure you want to permanently delete these Files?
+%1$s
+
+This operation cannot be reversed."</string>
 
     <string name="about_content_about">"
 <![CDATA[
@@ -95,6 +106,4 @@ Features:
 <br />
 ]]>
 "</string>
-    <string name="cmd_share">Share</string>
-
 </resources>
