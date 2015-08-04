@@ -50,6 +50,7 @@ import java.util.List;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.directory.DirectoryGui;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
+import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
@@ -58,7 +59,6 @@ import de.k3b.android.androFotoFinder.OnGalleryInteractionListener;
 import de.k3b.android.androFotoFinder.queries.Queryable;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.SelectedFotos;
-import de.k3b.database.SelectedItems;
 import de.k3b.io.Directory;
 
 /**
@@ -269,12 +269,13 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
 
-        /**
-         * interface Queryable: Initiates a database requery in the background
-         *
-         * @param context
-         * @param parameters
-         */
+    /**
+     * interface Queryable: Owning activity tells fragment to change its content:
+     * Initiates a database requery in the background
+     *
+     * @param context
+     * @param parameters
+     */
     @Override
     public void requery(Activity context, QueryParameterParcelable parameters) {
         if (Global.debugEnabled) {
@@ -287,13 +288,19 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     private void requery() {
+        QueryParameterParcelable selFilter = getCurrentQuery();
+        galleryAdapter.requery(this.getActivity(), selFilter);
+    }
+
+    private QueryParameterParcelable getCurrentQuery() {
+        QueryParameterParcelable selFilter = null;
         if (mShowSelectedOnly) {
-            QueryParameterParcelable selFilter = new QueryParameterParcelable(mGalleryContentQuery);
+            selFilter = new QueryParameterParcelable(mGalleryContentQuery);
             FotoSql.addWhereSelection(selFilter, mSelectedItems);
-            galleryAdapter.requery(this.getActivity(), selFilter);
         } else {
-            galleryAdapter.requery(this.getActivity(), mGalleryContentQuery);
+            selFilter = mGalleryContentQuery;
         }
+        return selFilter;
     }
 
     @Override
@@ -428,10 +435,13 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             mMustReplaceMenue = true;
             mShowSelectedOnly = false;
             getActivity().invalidateOptionsMenu();
+            mSelectedItems.add(holder.imageID);
+            holder.icon.setVisibility(View.VISIBLE);
+            multiSelectionUpdateActionbar();
+        } else {
+            // in gallery mode long click is view image
+            ImageDetailActivityViewPager.showActivity(this.getActivity(), getUri(holder.imageID) , position, getCurrentQuery());
         }
-        mSelectedItems.add(holder.imageID);
-        holder.icon.setVisibility(View.VISIBLE);
-        multiSelectionUpdateActionbar();
         return true;
     }
 

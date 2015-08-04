@@ -1,6 +1,7 @@
 You can reach the [Image-View](Image-View) via
 
-* tapping a photo in the [Gallery-View](Gallery-View)
+* [Gallery-View](Gallery-View): taping a photo
+* [Gallery-View](Gallery-View) in multi selection mode: long taping a photo
 
 ## Features:
 

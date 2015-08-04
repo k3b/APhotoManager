@@ -16,7 +16,9 @@
 package de.k3b.android.androFotoFinder.imagedetail;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.database.DataSetObserver;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -55,6 +57,19 @@ public class ImageDetailActivityViewPager extends Activity {
     private String debugPrefix;
     private DataSetObserver loadCompleteHandler;
     private int mInitialPosition;
+
+    public static void showActivity(Activity context, Uri imageUri, int position, QueryParameterParcelable imageDetailQuery) {
+        Intent intent;
+        //Create intent
+        intent = new Intent(context, ImageDetailActivityViewPager.class);
+
+        intent.putExtra(ImageDetailActivityViewPager.EXTRA_QUERY, imageDetailQuery);
+        intent.putExtra(ImageDetailActivityViewPager.EXTRA_POSITION, position);
+        intent.setData(imageUri);
+
+        context.startActivity(intent);
+    }
+
 
     @Override
 	public void onCreate(Bundle savedInstanceState) {

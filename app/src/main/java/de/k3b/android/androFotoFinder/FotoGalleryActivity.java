@@ -449,15 +449,8 @@ public class FotoGalleryActivity extends Activity implements
     @Override
     public void onGalleryImageClick(long imageId, Uri imageUri, int position) {
         Global.debugMemory(debugPrefix, "onGalleryImageClick");
-        Intent intent;
-        //Create intent
-        intent = new Intent(this, ImageDetailActivityViewPager.class);
-
-        intent.putExtra(ImageDetailActivityViewPager.EXTRA_QUERY, this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery());
-        intent.putExtra(ImageDetailActivityViewPager.EXTRA_POSITION, position);
-        intent.setData(imageUri);
-
-        startActivity(intent);
+        QueryParameterParcelable imageDetailQuery = this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery();
+        ImageDetailActivityViewPager.showActivity(this, imageUri, position, imageDetailQuery);
     }
 
     /** GalleryFragment tells the Owning Activity that querying data has finisched */
