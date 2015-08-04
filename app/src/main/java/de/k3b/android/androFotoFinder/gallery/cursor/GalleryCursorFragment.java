@@ -60,6 +60,7 @@ import de.k3b.android.androFotoFinder.queries.Queryable;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.io.Directory;
+import de.k3b.io.IDirectory;
 
 /**
  * A {@link Fragment} to show ImageGallery content based on ContentProvider-Cursor.
@@ -330,14 +331,14 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     /****************** path navigation *************************/
 
-    private Directory mDirectoryRoot = null;
+    private IDirectory mDirectoryRoot = null;
     private int mDirQueryID = 0;
 
     private String mCurrentPath = null;
 
     /** Defines Directory Navigation */
     @Override
-    public void defineDirectoryNavigation(Directory root, int dirTypId, String initialAbsolutePath) {
+    public void defineDirectoryNavigation(IDirectory root, int dirTypId, String initialAbsolutePath) {
         mDirectoryRoot = root;
         mDirQueryID = dirTypId;
         navigateTo(initialAbsolutePath);
@@ -362,11 +363,11 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             parentPathBar.removeAllViews();
             childPathBar.removeAllViews();
 
-            Directory selectedChild = mDirectoryRoot.find(mCurrentPath);
+            IDirectory selectedChild = mDirectoryRoot.find(mCurrentPath);
             if (selectedChild == null) selectedChild = mDirectoryRoot;
 
             Button first = null;
-            Directory current = selectedChild;
+            IDirectory current = selectedChild;
             while (current.getParent() != null) {
                 Button button = createPathButton(current);
                 // add parent left to chlild
@@ -379,9 +380,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             // scroll to right where deepest child is
             if (first != null) parentPathBarScroller.requestChildFocus(parentPathBar, first);
 
-            List<Directory> children = selectedChild.getChildren();
+            List<IDirectory> children = selectedChild.getChildren();
             if (children != null) {
-                for (Directory child : children) {
+                for (IDirectory child : children) {
                     Button button = createPathButton(child);
                     childPathBar.addView(button);
                 }
@@ -389,7 +390,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         }
     }
 
-    private Button createPathButton(Directory currentDir) {
+    private Button createPathButton(IDirectory currentDir) {
         Button result = new Button(getActivity());
         result.setTag(currentDir);
         result.setText(getDirectoryDisplayText(null, currentDir, (FotoViewerParameter.includeSubItems) ? Directory.OPT_SUB_ITEM : Directory.OPT_ITEM));
@@ -402,12 +403,12 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private View.OnClickListener onPathButtonClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            onPathButtonClick((Directory) v.getTag());
+            onPathButtonClick((IDirectory) v.getTag());
         }
     };
 
     /** path/directory was clicked */
-    private void onPathButtonClick(Directory newSelection) {
+    private void onPathButtonClick(IDirectory newSelection) {
         if ((mDirectoryListener != null) && (newSelection != null)) {
             mCurrentPath = newSelection.getAbsolute();
             mDirectoryListener.onDirectoryPick(mCurrentPath, this.mDirQueryID);
@@ -415,7 +416,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     /** getFrom tree display text */
-    private static String getDirectoryDisplayText(String prefix, Directory directory, int options) {
+    private static String getDirectoryDisplayText(String prefix, IDirectory directory, int options) {
         StringBuilder result = new StringBuilder();
         if (prefix != null) result.append(prefix);
         result.append(directory.getRelPath()).append(" ");

@@ -51,6 +51,7 @@ import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GeoRectangle;
+import de.k3b.io.IDirectory;
 
 public class FotoGalleryActivity extends Activity implements
         OnGalleryInteractionListener, DirectoryPickerFragment.OnDirectoryInteractionListener,
@@ -201,7 +202,7 @@ public class FotoGalleryActivity extends Activity implements
 
     private String mTitleResultCount = "";
 
-    private Directory mDirectoryRoot = null;
+    private IDirectory mDirectoryRoot = null;
 
     /** true if activity should show navigator dialog after loading mDirectoryRoot is complete */
     private boolean mMustShowNavigator = false;

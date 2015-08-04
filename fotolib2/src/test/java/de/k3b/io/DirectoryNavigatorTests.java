@@ -28,7 +28,7 @@ import org.junit.Test;
  */
 public class DirectoryNavigatorTests {
     // root[0..2][0..3][0..4]
-    private final Directory root = createTestData();
+    private final IDirectory root = createTestData();
     private final DirectoryNavigator sut = new DirectoryNavigator(root);
 
     @Before
@@ -99,10 +99,10 @@ public class DirectoryNavigatorTests {
 
     @Test
     public void testNavigateTo() {
-        Directory root = sut.getRoot();
-        Directory subChild1 = sut.getSubChild(1);
-        Directory subChild12 = sut.getSubChild(1,2);
-        Directory subChild123 = sut.getSubChild(1,2,3);
+        IDirectory root = sut.getRoot();
+        IDirectory subChild1 = sut.getSubChild(1);
+        IDirectory subChild12 = sut.getSubChild(1,2);
+        IDirectory subChild123 = sut.getSubChild(1,2,3);
         Assert.assertEquals("not found", root, sut.getNavigationGrandparent(null));
         Assert.assertEquals("first level", root, sut.getNavigationGrandparent(subChild1));
         Assert.assertEquals("sub level with children", subChild1, sut.getNavigationGrandparent(subChild12));
@@ -110,7 +110,7 @@ public class DirectoryNavigatorTests {
     }
 
     // root[0..2][0..3][0..4]
-    private Directory createTestData() {
+    private IDirectory createTestData() {
         Directory root = new Directory("", null, 0);
 
         for(int i=0; i < 3; i++) {
@@ -118,7 +118,7 @@ public class DirectoryNavigatorTests {
             for (int j = 0; j < 4; j++) {
                 Directory pj = new Directory("p_" + i + "_" + j, pi, 0);
                 for (int k = 0; k < 5; k++) {
-                    Directory pk = new Directory("p_" + i + "_" + j + "_" + k, pj, 0);
+                    IDirectory pk = new Directory("p_" + i + "_" + j + "_" + k, pj, 0);
                 }
             }
         }

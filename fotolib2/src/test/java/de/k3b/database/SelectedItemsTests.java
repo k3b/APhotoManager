@@ -18,10 +18,10 @@ public class SelectedItemsTests {
     @Test
     public void shoudCreateString() {
         SelectedItems sut = new SelectedItems();
-        sut.add(1);
-        sut.add(2);
-        sut.add(3);
-        sut.add(1); // douplicate not included again
+        sut.add(1l);
+        sut.add(2l);
+        sut.add(3l);
+        sut.add(1l); // douplicate not included again
         Assert.assertEquals("1,2,3", sut.toString());
     }
 

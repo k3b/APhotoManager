@@ -2,6 +2,14 @@ FotoGallery\ReadMe.txt"
 
 AndroFotoFinder
 
+	? own copy/move
+		generic DirPicker mit load on demand
+		AndroidFileCommands.java 
+			loging file open/close
+			mit optionMenu handling public boolean onOptionsItemSelected(MenuItem item)
+			
+
+	
 ##################
 
 todo

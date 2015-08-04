@@ -31,6 +31,7 @@ import android.widget.TextView;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.io.Directory;
+import de.k3b.io.IDirectory;
 import de.k3b.io.IExpandableListViewNavigation;
 
 /**
@@ -41,7 +42,7 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
  
  
     private LayoutInflater inflater;
-    private IExpandableListViewNavigation<Directory,Directory> mParent;
+    private IExpandableListViewNavigation<IDirectory,IDirectory> mParent;
     private ExpandableListView accordion;
     public int lastExpandedGroupPosition;
 
@@ -50,7 +51,7 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
     private final String debugPrefix;
 
 
-    public DirectoryListAdapter(Context context, IExpandableListViewNavigation<Directory, Directory> parent, ExpandableListView accordion, String name) {
+    public DirectoryListAdapter(Context context, IExpandableListViewNavigation<IDirectory, IDirectory> parent, ExpandableListView accordion, String name) {
         debugPrefix = "DirectoryListAdapter#" + (id++) + "@" + name + " ";
         Global.debugMemory(debugPrefix, "ctor");
         if (Global.debugEnabled) {
@@ -111,7 +112,7 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
             view = inflater.inflate(R.layout.directory_list_item_parent, viewGroup,false);
         }
         // getFrom category name as tag so view can be found view later
-        Directory group = mParent.getGroup(groupIndex);
+        IDirectory group = mParent.getGroup(groupIndex);
         view.setTag(group);
         
         TextView textView = (TextView) view.findViewById(R.id.list_item_text_view);
@@ -124,7 +125,7 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
     }
 
     /** getFrom tree display text */
-    static String getDirectoryDisplayText(String prefix, Directory directory, int options) {
+    static String getDirectoryDisplayText(String prefix, IDirectory directory, int options) {
         StringBuilder result = new StringBuilder();
         if (prefix != null) result.append(prefix);
         result.append(directory.getRelPath()).append(" ");
@@ -144,7 +145,7 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
         
         //"groupIndex" is the position of the parent/group in the list and
         //"childIndex" is the position of the child
-        Directory child = mParent.getChild(groupIndex, childIndex);
+        IDirectory child = mParent.getChild(groupIndex, childIndex);
         textView.setText(getDirectoryDisplayText("- ", child, Directory.OPT_ALL));
  
         //return the entire view

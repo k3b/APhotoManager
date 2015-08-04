@@ -45,6 +45,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryNavigator;
+import de.k3b.io.IDirectory;
 
 import java.util.List;
 
@@ -63,7 +64,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     private static final String TAG = "DirFragment";
 
     // public state
-    private Directory mCurrentSelection = null;
+    private IDirectory mCurrentSelection = null;
 
     // Layout
     private HorizontalScrollView parentPathBarScroller;
@@ -233,18 +234,18 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     }
 
     /*********************** gui interaction *******************************************/
-    private boolean onParentDirectoryClick(Directory dir) {
+    private boolean onParentDirectoryClick(IDirectory dir) {
         updateParentPathBar(dir);
         notifySelectionChanged(dir);
         return false;
     }
 
-    private boolean onChildDirectoryClick(int childPosition, Directory selectedChild) {
+    private boolean onChildDirectoryClick(int childPosition, IDirectory selectedChild) {
         Log.d(TAG, debugPrefix + "onChildDirectoryClick(" +
                 selectedChild.getAbsolute() + ")");
 
         // naviationchange only if there are children below child
-        Directory newGrandParent = ((selectedChild != null) && (selectedChild.getDirCount() > 0)) ? selectedChild.getParent() : null;
+        IDirectory newGrandParent = ((selectedChild != null) && (Directory.getChildCount(selectedChild) > 0)) ? selectedChild.getParent() : null;
 
         navigateTo(childPosition, newGrandParent);
         updateParentPathBar(selectedChild);
@@ -252,13 +253,13 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         return false;
     }
 
-    private void onParentPathBarButtonClick(Directory selectedChild) {
+    private void onParentPathBarButtonClick(IDirectory selectedChild) {
         Log.d(TAG, debugPrefix + "onParentPathBarButtonClick(" +
                 selectedChild.getAbsolute() + ")");
 
         // naviationchange only if there are children below child
-        Directory newGrandParent = ((selectedChild != null) && (selectedChild.getDirCount() > 0)) ? selectedChild.getParent() : null;
-        List<Directory> siblings = (newGrandParent != null) ? newGrandParent.getChildren() : null;
+        IDirectory newGrandParent = ((selectedChild != null) && (Directory.getChildCount(selectedChild) > 0)) ? selectedChild.getParent() : null;
+        List<IDirectory> siblings = (newGrandParent != null) ? newGrandParent.getChildren() : null;
 
         if (siblings != null) {
             int childPosition = siblings.indexOf(selectedChild);
@@ -268,7 +269,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         notifySelectionChanged(selectedChild);
     }
 
-    private void notifySelectionChanged(Directory selectedChild) {
+    private void notifySelectionChanged(IDirectory selectedChild) {
         if ((mDirectoryListener != null) && (selectedChild != null)) mDirectoryListener.onDirectorySelectionChanged(selectedChild.getAbsolute(), mDirTypId);
     }
 
@@ -287,8 +288,10 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         }
     }
 
-    private int getItemCount(Directory directory) {
-        if (directory == null) return 0;
+    private int getItemCount(IDirectory _directory) {
+        if ((_directory == null) || (_directory instanceof Directory)) return 0;
+
+        Directory directory = (Directory) _directory;
         return (FotoViewerParameter.includeSubItems)
                         ? directory.getNonDirSubItemCount()
                         : directory.getNonDirItemCount();
@@ -301,13 +304,13 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         }
     }
 
-    private void updateParentPathBar(Directory selectedChild) {
+    private void updateParentPathBar(IDirectory selectedChild) {
         parentPathBar.removeAllViews();
 
         if (selectedChild != null) {
 
             Button first = null;
-            Directory current = selectedChild;
+            IDirectory current = selectedChild;
             while (current.getParent() != null) {
                 Button button = createPathButton(current);
                 // add parent left to chlild
@@ -356,7 +359,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     }
 
 
-    private Button createPathButton(Directory currentDir) {
+    private Button createPathButton(IDirectory currentDir) {
         Button result = new Button(getActivity());
         result.setTag(currentDir);
         result.setText(DirectoryListAdapter.getDirectoryDisplayText(null, currentDir, (FotoViewerParameter.includeSubItems) ? Directory.OPT_SUB_ITEM : Directory.OPT_ITEM));
@@ -373,7 +376,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
      * @param initialAbsolutePath
      */
     @Override
-    public void defineDirectoryNavigation(Directory root, int dirTypId, String initialAbsolutePath) {
+    public void defineDirectoryNavigation(IDirectory root, int dirTypId, String initialAbsolutePath) {
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, debugPrefix + " defineDirectoryNavigation : " + initialAbsolutePath);
         }
@@ -386,7 +389,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     }
 
     /** reload tree to new newGrandParent by preserving selection */
-    private void navigateTo(int newGroupSelection, Directory newGrandParent) {
+    private void navigateTo(int newGroupSelection, IDirectory newGrandParent) {
         if (newGrandParent != null) {
             Log.d(TAG, debugPrefix + "navigateTo(" +
                     newGrandParent.getAbsolute() + ")");

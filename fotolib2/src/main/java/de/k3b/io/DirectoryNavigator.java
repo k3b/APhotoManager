@@ -26,24 +26,24 @@ import java.util.List;
  *
  * Created by k3b on 12.06.2015.
  */
-public class DirectoryNavigator implements IExpandableListViewNavigation<Directory, Directory> {
+public class DirectoryNavigator implements IExpandableListViewNavigation<IDirectory,IDirectory> {
 
     public static final int UNDEFINED = -1;
 
-    private final Directory root;
-    private Directory currentSelection = null;
+    private final IDirectory root;
+    private IDirectory currentSelection = null;
     private int mLastNavigateToGroupPosition = UNDEFINED;
     private int mLastNavigateToChildPosition = UNDEFINED;
 
     /** hierachy: root -> .... -> currentGrandFather -> group -> child -> ... */
-    private Directory currentGrandFather;
+    private IDirectory currentGrandFather;
 
-    public DirectoryNavigator(Directory root) {
+    public DirectoryNavigator(IDirectory root) {
         this.root = root;
         this.setCurrentGrandFather(root);
     }
 
-    public Directory getRoot() {
+    public IDirectory getRoot() {
         return root;
     }
 
@@ -57,13 +57,13 @@ public class DirectoryNavigator implements IExpandableListViewNavigation<Directo
 
     @Override
     public int getChildrenCount(int groupIndex) {
-        Directory group = getGroup(groupIndex);
+        IDirectory group = getGroup(groupIndex);
         return Directory.getChildCount(group);
     }
 
     @Override
-    public Directory getChild(int groupIndex, int childIndex) {
-        Directory group = getGroup(groupIndex);
+    public IDirectory getChild(int groupIndex, int childIndex) {
+        IDirectory group = getGroup(groupIndex);
         if ((childIndex < 0) || (childIndex >= Directory.getChildCount(group))) {
             throw new IndexOutOfBoundsException(
                     "getChild(childIndex=" +
@@ -75,7 +75,7 @@ public class DirectoryNavigator implements IExpandableListViewNavigation<Directo
     }
 
     @Override
-    public Directory getGroup(int groupIndex) {
+    public IDirectory getGroup(int groupIndex) {
         if ((groupIndex < 0) || (groupIndex >= getGroupCount())) {
             throw new IndexOutOfBoundsException(
                     "getGroup(" +
@@ -86,27 +86,27 @@ public class DirectoryNavigator implements IExpandableListViewNavigation<Directo
         return currentGrandFather.getChildren().get(groupIndex);
     }
 
-    public void setCurrentGrandFather(Directory currentGrandFather) {
+    public void setCurrentGrandFather(IDirectory currentGrandFather) {
         this.currentGrandFather = currentGrandFather;
     }
 
-    public void navigateTo(Directory newSelection) {
-        Directory navigationGrandparent = getNavigationGrandparent(newSelection);
+    public void navigateTo(IDirectory newSelection) {
+        IDirectory navigationGrandparent = getNavigationGrandparent(newSelection);
         setCurrentGrandFather(navigationGrandparent);
         setCurrentSelection(newSelection);
     }
 
     /** package to allow unit testing: calclulate Grandparent for navigateTo */
-    Directory getNavigationGrandparent(Directory newSelection) {
+    IDirectory getNavigationGrandparent(IDirectory newSelection) {
         if (newSelection != null) {
-            Directory parent = newSelection.getParent();
+            IDirectory parent = newSelection.getParent();
             if (parent != null) {
                 if (Directory.getChildCount(newSelection) > 0) {
                     this.mLastNavigateToGroupPosition = parent.getChildren().indexOf(newSelection);
                     this.mLastNavigateToChildPosition = UNDEFINED;
                     return parent;
                 }
-                Directory grandparent = parent.getParent();
+                IDirectory grandparent = parent.getParent();
                 if (grandparent != null) {
                     this.mLastNavigateToGroupPosition = grandparent.getChildren().indexOf(parent);
                     this.mLastNavigateToChildPosition = parent.getChildren().indexOf(newSelection);
@@ -121,11 +121,11 @@ public class DirectoryNavigator implements IExpandableListViewNavigation<Directo
     }
 
     /** direct access from room via index. return null if index does not exist. */
-    public Directory getSubChild(int... indexes) {
-        Directory found = this.getRoot();
+    public IDirectory getSubChild(int... indexes) {
+        IDirectory found = this.getRoot();
         if (indexes != null) {
             for (int index : indexes) {
-                List<Directory> children = (found != null) ? found.getChildren() : null;
+                List<IDirectory> children = (found != null) ? found.getChildren() : null;
                 int childCount = (children != null) ? children.size() : 0;
                 if ((index < 0) || (index >= childCount)) {
                     return null;
@@ -137,11 +137,11 @@ public class DirectoryNavigator implements IExpandableListViewNavigation<Directo
         return found;
     }
 
-    public Directory getCurrentSelection() {
+    public IDirectory getCurrentSelection() {
         return currentSelection;
     }
 
-    public void setCurrentSelection(Directory currentSelection) {
+    public void setCurrentSelection(IDirectory currentSelection) {
         this.currentSelection = currentSelection;
     }
 
