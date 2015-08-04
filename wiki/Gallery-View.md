@@ -65,8 +65,8 @@ The [Gallery-View](Gallery-View) has these elements:
 	* taping on the **selected only** symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_checked.png) again will show all photots. The symbol changes to ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_unchecked.png).
 	* taping on the **delete** symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_delete.png) or the "Delete" menu will delete the selected photos.
     * you can send/share the selected photos via the share symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_share.png).
-        * if you have installed [gelin's sendtosd](https://f-droid.org/wiki/page/ru.gelin.android.sendtosd) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_send2sd.png) can be used to copy or move photos to a different folder on the sdcard.
-        * if you have installed [k3b's ToGoZip](https://f-droid.org/wiki/page/de.k3b.android.toGoZip) ![]()  can be used to add the photo to a zip file
+        * if you have installed [gelin's sendtosd](https://f-droid.org/wiki/page/ru.gelin.android.sendtosd) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_send2sd.png): Copy or move photos to a different folder on the sdcard.
+        * if you have installed [k3b's ToGoZip](https://f-droid.org/wiki/page/de.k3b.android.toGoZip) ![](https://raw.githubusercontent.com/k3b/ToGoZip/master/app/src/main/res/drawable-mdpi/ic_launcher.png): Add the photo to a zip file
         * other options are: send photo(s) via bluetooth or mail
 
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/Gallery-MultiSelection.png)
