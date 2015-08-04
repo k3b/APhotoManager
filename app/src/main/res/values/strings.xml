@@ -29,6 +29,7 @@
     <string name="date">Date</string>
     <string name="place">Place</string>
     <string name="sort_by_name_len">Lenght</string>
+    <string name="destination">Destination</string>
 
     <string name="action_settings">Settings</string>
     <string name="no_dir_selected">Select Folder with Images to enable OK</string>
@@ -68,6 +69,9 @@
 
     <string name="cmd_share">Share</string>
     <string name="cmd_delete">Delete</string>
+    <string name="cmd_copy">Copy</string>
+    <string name="cmd_move">Move</string>
+
     <string name="btn_yes">Yes</string>
     <string name="btn_no">No</string>
 

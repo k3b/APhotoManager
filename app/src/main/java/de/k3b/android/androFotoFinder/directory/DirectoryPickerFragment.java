@@ -116,7 +116,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         pathButtonClickHandler = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onParentPathBarButtonClick((Directory) v.getTag());
+                onParentPathBarButtonClick((IDirectory) v.getTag());
             }
         };
 
@@ -289,7 +289,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     }
 
     private int getItemCount(IDirectory _directory) {
-        if ((_directory == null) || (_directory instanceof Directory)) return 0;
+        if ((_directory == null) || (!(_directory instanceof Directory))) return 0;
 
         Directory directory = (Directory) _directory;
         return (FotoViewerParameter.includeSubItems)

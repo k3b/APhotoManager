@@ -61,6 +61,7 @@ import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.io.Directory;
 import de.k3b.io.IDirectory;
+import de.k3b.io.OSDirectory;
 
 /**
  * A {@link Fragment} to show ImageGallery content based on ContentProvider-Cursor.
@@ -490,6 +491,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 return multiSelectionCancel();
             case R.id.cmd_delete:
                 return onDelete();
+            case R.id.cmd_copy:
+            case R.id.cmd_move:
+                return onCopy();
             case R.id.cmd_selected_only:
                 return multiSelectionToggle();
 
@@ -499,12 +503,21 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     }
 
+
+
     private boolean onDelete() {
         String fileNames[] = mSelectedItems.getFileNames();
         if (fileNames != null) {
             getFileCommands().deleteFileWithQuestion(fileNames);
         }
         return true;
+    }
+
+    private boolean onCopy() {
+        DirectoryPickerFragment destDir = new DirectoryPickerFragment();
+        destDir.defineDirectoryNavigation(new OSDirectory("/") , FotoSql.QUERY_TYPE_GROUP_COPY, "/");
+        destDir.show(this.getActivity().getFragmentManager(), "osdir");
+        return false;
     }
 
     private AndroidFileCommands getFileCommands() {

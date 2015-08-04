@@ -58,6 +58,9 @@ public class FotoSql {
     public static final int QUERY_TYPE_GROUP_PLACE = 14;
     public static final int QUERY_TYPE_GROUP_PLACE_MAP = 141;
 
+    public static final int QUERY_TYPE_GROUP_COPY = 20;
+    public static final int QUERY_TYPE_GROUP_MOVE = 21;
+
     public static final int QUERY_TYPE_GROUP_DEFAULT = QUERY_TYPE_GROUP_ALBUM;
     public static final int QUERY_TYPE_DEFAULT = QUERY_TYPE_GALLERY;
 
@@ -271,6 +274,9 @@ public class FotoSql {
             case QUERY_TYPE_GROUP_PLACE:
             case QUERY_TYPE_GROUP_PLACE_MAP:
                 return queryGroupByPlace;
+            case QUERY_TYPE_GROUP_COPY:
+            case QUERY_TYPE_GROUP_MOVE:
+                return null;
             default:
                 Log.e(Global.LOG_CONTEXT, "FotoSql.getQuery(" + queryID + "): unknown ID");
                 return null;
@@ -297,6 +303,9 @@ public class FotoSql {
             case QUERY_TYPE_GROUP_PLACE:
             case QUERY_TYPE_GROUP_PLACE_MAP:
                 return context.getString(R.string.place);
+            case QUERY_TYPE_GROUP_COPY:
+            case QUERY_TYPE_GROUP_MOVE:
+                return context.getString(R.string.destination);
             default:
                 return "???";
         }
