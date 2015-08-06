@@ -316,7 +316,7 @@ public class FotoGalleryActivity extends Activity implements
         // Handle presses on the action bar items
         switch (item.getItemId()) {
             case R.id.cmd_select_folder:
-                openNavigator();
+                openFolderPicker();
                 return true;
 
             case R.id.cmd_select_lat_lon:
@@ -396,7 +396,7 @@ public class FotoGalleryActivity extends Activity implements
     }
 
 
-    private void openNavigator() {
+    private void openFolderPicker() {
         mGalleryQueryParameter.mUseLatLon = false;
 
         int dirQueryID = this.mGalleryQueryParameter.getDirQueryID();
@@ -416,7 +416,8 @@ public class FotoGalleryActivity extends Activity implements
             if (currentDirContentQuery != null) {
                 this.mMustShowNavigator = true;
                 DirectoryLoaderTask loader = new DirectoryLoaderTask(this, debugPrefix) {
-                    protected void onPostExecute(Directory directoryRoot) {
+                    @Override
+                    protected void onPostExecute(IDirectory directoryRoot) {
                         onDirectoryDataLoadComplete(directoryRoot);
                     }
                 };
@@ -525,7 +526,7 @@ public class FotoGalleryActivity extends Activity implements
         }
     }
 
-    private void onDirectoryDataLoadComplete(Directory directoryRoot) {
+    private void onDirectoryDataLoadComplete(IDirectory directoryRoot) {
         if (directoryRoot == null) {
             final String message = getString(R.string.err_load_folder_failed, FotoSql.getName(this, this.mGalleryQueryParameter.getDirQueryID()));
             Toast.makeText(this, message,Toast.LENGTH_LONG).show();
@@ -537,7 +538,7 @@ public class FotoGalleryActivity extends Activity implements
             Global.debugMemory(debugPrefix, "onDirectoryDataLoadComplete");
 
             if ((mDirectoryRoot != null) && (this.mMustShowNavigator)) {
-                openNavigator();
+                openFolderPicker();
             }
         }
     }

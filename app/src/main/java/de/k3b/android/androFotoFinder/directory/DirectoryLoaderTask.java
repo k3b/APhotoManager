@@ -41,7 +41,8 @@ import de.k3b.io.IDirectory;
  * <pre>
     DirectoryLoaderTask loader = new DirectoryLoaderTask(getActivity(), "MyLoader") {
         // This is called when doInBackground() is finished
-        protected void onPostExecute(Directory result) {
+        @Override
+        protected void onPostExecute(IDirectory result) {
             updateGui(result);
         }
 

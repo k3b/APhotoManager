@@ -157,7 +157,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         this.cmdOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onDirectoryPick();
+                onDirectoryPick(mCurrentSelection);
             }
         });
         cmdOk.setVisibility(View.VISIBLE);
@@ -185,10 +185,10 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         dismiss();
     }
 
-    private void onDirectoryPick() {
-        Log.d(Global.LOG_CONTEXT, debugPrefix + "onOk: " + mCurrentSelection);
-        if (mCurrentSelection != null) {
-            mDirectoryListener.onDirectoryPick(mCurrentSelection.getAbsolute()
+    protected void onDirectoryPick(IDirectory selection) {
+        Log.d(Global.LOG_CONTEXT, debugPrefix + "onOk: " + selection);
+        if (selection != null) {
+            mDirectoryListener.onDirectoryPick(selection.getAbsolute()
                     , mDirTypId);
             dismiss();
         }
@@ -269,7 +269,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         notifySelectionChanged(selectedChild);
     }
 
-    private void notifySelectionChanged(IDirectory selectedChild) {
+    protected void notifySelectionChanged(IDirectory selectedChild) {
         if ((mDirectoryListener != null) && (selectedChild != null)) mDirectoryListener.onDirectorySelectionChanged(selectedChild.getAbsolute(), mDirTypId);
     }
 
@@ -289,7 +289,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     }
 
     private int getItemCount(IDirectory _directory) {
-        if ((_directory == null) || (!(_directory instanceof Directory))) return 0;
+        if ((_directory == null) || (!(_directory instanceof Directory))) return 1;
 
         Directory directory = (Directory) _directory;
         return (FotoViewerParameter.includeSubItems)

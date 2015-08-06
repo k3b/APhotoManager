@@ -1,9 +1,18 @@
 FotoGallery\ReadMe.txt"
 
-AndroFotoFinder
+[![Download from F-Droid](https://camo.githubusercontent.com/7df0eafa4433fa4919a56f87c3d99cf81b68d01c/68747470733a2f2f662d64726f69642e6f72672f77696b692f696d616765732f632f63342f462d44726f69642d627574746f6e5f617661696c61626c652d6f6e2e706e67 "Download from F-Droid")](https://f-droid.org/repository/browse/?fdid=uk.co.ashtonbrsc.android.intentintercept)
 
+AndroFotoFinder
 	? own copy/move
-		generic DirPicker mit load on demand
+		v generic OSDirPicker mit load on demand
+			exception when selecting unmounted mnt/extusb on tablet
+			todo
+				has images to enable ok
+				status "select folder with images to enable ok"
+				create new subfolder
+				OSDirPicker: garbage collector 
+					after find???
+					after ok/cancel
 		AndroidFileCommands.java 
 			loging file open/close
 			mit optionMenu handling public boolean onOptionsItemSelected(MenuItem item)

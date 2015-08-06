@@ -46,11 +46,14 @@ public class OSDirectory implements IDirectory {
 
     @Override
     public List<IDirectory> getChildren() {
-        if (mChilden == null) {
+        if ((mCurrent != null) && (mChilden == null)) {
             mChilden = new ArrayList<IDirectory>();
-            for (File file : mCurrent.listFiles()) {
-                if (file.isDirectory() && !file.isHidden() && !file.getName().startsWith(".")) {
-                    mChilden.add(new OSDirectory(file));
+            File[] files = mCurrent.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isDirectory() && !file.isHidden() && !file.getName().startsWith(".")) {
+                        mChilden.add(new OSDirectory(file));
+                    }
                 }
             }
         }

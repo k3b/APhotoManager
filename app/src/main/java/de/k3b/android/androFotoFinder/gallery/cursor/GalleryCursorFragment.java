@@ -442,7 +442,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             multiSelectionUpdateActionbar();
         } else {
             // in gallery mode long click is view image
-            ImageDetailActivityViewPager.showActivity(this.getActivity(), getUri(holder.imageID) , position, getCurrentQuery());
+            ImageDetailActivityViewPager.showActivity(this.getActivity(), getUri(holder.imageID), position, getCurrentQuery());
         }
         return true;
     }
@@ -492,8 +492,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             case R.id.cmd_delete:
                 return onDelete();
             case R.id.cmd_copy:
+                return onCopy(false);
             case R.id.cmd_move:
-                return onCopy();
+                return onCopy(true);
             case R.id.cmd_selected_only:
                 return multiSelectionToggle();
 
@@ -513,11 +514,21 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         return true;
     }
 
-    private boolean onCopy() {
-        DirectoryPickerFragment destDir = new DirectoryPickerFragment();
+    private boolean onCopy(final boolean move) {
+        DirectoryPickerFragment destDir = new DirectoryPickerFragment() {
+            @Override
+            protected void onDirectoryPick(IDirectory selection) {
+                // super.onDirectoryPick(selection);
+                dismiss();
+                onDirectoryPickCopy(move, selection);
+            }
+        };
         destDir.defineDirectoryNavigation(new OSDirectory("/") , FotoSql.QUERY_TYPE_GROUP_COPY, "/");
         destDir.show(this.getActivity().getFragmentManager(), "osdir");
         return false;
+    }
+
+    private void onDirectoryPickCopy(final boolean move, IDirectory selection) {
     }
 
     private AndroidFileCommands getFileCommands() {
