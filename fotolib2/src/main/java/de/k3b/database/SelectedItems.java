@@ -33,7 +33,7 @@ public class SelectedItems extends java.util.TreeSet<Long> implements Set<Long> 
     /** converts this into komma seperated list */
     public SelectedItems parse(String itemListAsString) {
 
-        if (itemListAsString != null) {
+        if ((itemListAsString != null) && (itemListAsString.length() > 0)) {
             String itemsAsString[] = itemListAsString.split(DELIMITER);
             for (String itemAsString : itemsAsString) {
                 Long key = Long.valueOf(itemAsString);
