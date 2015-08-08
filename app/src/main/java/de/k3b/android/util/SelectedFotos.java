@@ -23,6 +23,19 @@ public class SelectedFotos extends SelectedItems {
         mContext = context;
     }
 
+    public static File[] getFiles(String[] fileNames) {
+         // getFileNames();
+        if ((fileNames == null) || (fileNames.length == 0)) return null;
+
+        File[] result = new File[fileNames.length];
+        int i = 0;
+        for (String name : fileNames) {
+            result[i++] = new File(name);
+        }
+
+        return result;
+    }
+
     public String[] getFileNames() {
         if (!isEmpty()) {
             ArrayList<String> result = new ArrayList<>();

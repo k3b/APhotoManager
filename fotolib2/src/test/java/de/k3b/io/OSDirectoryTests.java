@@ -6,8 +6,6 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 
-import sun.misc.OSEnvironment;
-
 /**
  * Created by k3b on 04.08.2015.
  */
