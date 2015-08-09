@@ -149,14 +149,15 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
     }
 
     // This is called when doInBackground() is finished
-    protected void onPostExecute(Directory result) {
+    protected void onPostExecute(IDirectory result) {
         showNotification("Downloaded " + result + " bytes");
     }
     */
     private static void usageExample(Activity context, QueryParameter parameters, String debugPrefix) {
         DirectoryLoaderTask loader = new DirectoryLoaderTask(context, debugPrefix) {
             // This is called when doInBackground() is finished
-            protected void onPostExecute(Directory result) {
+            @Override
+            protected void onPostExecute(IDirectory result) {
                 // updateGui(result);
             }
             // This is called each time you call publishProgress()

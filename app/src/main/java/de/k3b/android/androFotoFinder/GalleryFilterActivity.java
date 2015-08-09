@@ -407,7 +407,8 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
             IDirectory directoryRoot = getOrCreateDirInfo(currentDirContentQuery.getID()).directoryRoot;
             if (directoryRoot == null) {
                 DirectoryLoaderTask loader = new DirectoryLoaderTask(this, debugPrefix) {
-                    protected void onPostExecute(Directory directoryRoot) {
+                    @Override
+                    protected void onPostExecute(IDirectory directoryRoot) {
                         onDirectoryDataLoadComplete(directoryRoot, currentDirContentQuery.getID());
                     }
                 };
