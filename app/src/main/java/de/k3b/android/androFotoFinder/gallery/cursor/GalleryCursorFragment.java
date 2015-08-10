@@ -39,6 +39,7 @@ import android.widget.GridView;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ShareActionProvider;
+import android.widget.Toast;
 
 // import com.squareup.leakcanary.RefWatcher;
 
@@ -511,12 +512,26 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 */
 
                 @Override
-                protected void onPostProcess(String[] paths, int modifyCount, int itemCount) {
-                    super.onPostProcess(paths, modifyCount, itemCount);
-                    if (Global.clearSelectionAfterCommand) {
+                protected void onPostProcess(String[] paths, int modifyCount, int itemCount, int opCode) {
+                    super.onPostProcess(paths, modifyCount, itemCount, opCode);
+                    if (Global.clearSelectionAfterCommand || (opCode == OP_DELETE) || (opCode == OP_MOVE)) {
                         mShowSelectedOnly = true;
                         multiSelectionCancel();
                     }
+
+                    int resId = getResourceId(opCode);
+                    String message = getString(resId, Integer.valueOf(modifyCount), Integer.valueOf(itemCount));
+                    Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                    mDirectoryListener.invalidateDirectories();
+                }
+
+                private int getResourceId(int opCode) {
+                    switch (opCode) {
+                        case OP_COPY: return R.string.format_copy_result;
+                        case OP_MOVE: return R.string.format_move_result;
+                        case OP_DELETE: return R.string.format_delete_result;
+                    }
+                    return 0;
                 }
             };
         }

@@ -10,6 +10,7 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.io.File;
 
@@ -52,9 +53,12 @@ public class AndroidFileCommands extends FileCommands {
 
     /** called for each modified/deleted file */
     @Override
-    protected void onPostProcess(String[] paths, int modifyCount, int itemCount) {
-        super.onPostProcess(paths, modifyCount, itemCount);
-        updateMediaDatabase(paths);
+    protected void onPostProcess(String[] paths, int modifyCount, int itemCount, int opCode) {
+        super.onPostProcess(paths, modifyCount, itemCount, opCode);
+
+        if (opCode != OP_DELETE) {
+            updateMediaDatabase(paths);
+        }
     }
 
     public void updateMediaDatabase(String... pathNames) {
@@ -93,12 +97,12 @@ public class AndroidFileCommands extends FileCommands {
                     File destDirFolder = new File(copyToPath);
 
                     String[] selectedFileNames = fotos.getFileNames();
+                    Long[] ids = (move) ? fotos.getIds() : null;
                     moveOrCopyFilesTo(move, destDirFolder, SelectedFotos.getFiles(selectedFileNames));
 
                     if (move) {
                         // remove from media database after successfull move
                         File[] sourceFiles = SelectedFotos.getFiles(selectedFileNames);
-                        Long[] ids = fotos.getIds();
                         for (int i = 0; i < sourceFiles.length; i++) {
                             File sourceFile = sourceFiles[i];
                             if (!sourceFile.exists()) {
@@ -153,7 +157,7 @@ public class AndroidFileCommands extends FileCommands {
                             public void onClick(
                                     final DialogInterface dialog,
                                     final int id) {
-                                deleteFile(fotos);
+                                deleteFiles(fotos);
                             }
                         }
                 )
@@ -173,14 +177,14 @@ public class AndroidFileCommands extends FileCommands {
         return true;
     }
 
-    private void deleteFile(SelectedFotos fotos) {
+    private int deleteFiles(SelectedFotos fotos) {
         int result = 0;
         String[] fileNames = fotos.getFileNames();
         openLogfile();
         File[] toBeDeleted = SelectedFotos.getFiles(fileNames);
         Long[] ids = fotos.getIds();
 
-        for (int i = 0; i < toBeDeleted.length; i++) {
+        for (int i = 0; i < ids.length; i++) {
             File file = toBeDeleted[i];
             if (deleteFile(file)) {
                 onItemDeleted(file.getAbsolutePath(), ids[i]);
@@ -189,7 +193,9 @@ public class AndroidFileCommands extends FileCommands {
         }
 
         closeLogFile();
-        onPostProcess(fileNames, result, ids.length);
+        onPostProcess(fileNames, result, ids.length, OP_DELETE);
+
+        return result;
     }
 
     private void onItemDeleted(String absolutePath, Long id) {

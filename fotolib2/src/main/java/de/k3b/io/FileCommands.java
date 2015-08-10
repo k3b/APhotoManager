@@ -16,6 +16,9 @@ import java.util.List;
  * Created by k3b on 03.08.2015.
  */
 public class FileCommands implements  Cloneable {
+    public static final int OP_COPY = 1;
+    public static final int OP_MOVE = 2;
+    public static final int OP_DELETE = 3;
 
     private final String mLogFilePath;
     // private static final String LOG_FILE_ENCODING = "UTF-8";
@@ -69,7 +72,7 @@ public class FileCommands implements  Cloneable {
         for(String path : paths) {
             if (deleteFile(new File(path))) result++;
         }
-        onPostProcess(paths, result, paths.length);
+        onPostProcess(paths, result, paths.length, OP_DELETE);
         closeLogFile();
         return result;
     }
@@ -95,6 +98,7 @@ public class FileCommands implements  Cloneable {
     }
 
     public int moveOrCopyFilesTo(boolean move, File destDirFolder, File... sourceFiles) {
+        int opCode = (move) ? OP_MOVE : OP_COPY;
         int result = 0;
         if (createDirIfNeccessary(destDirFolder)) {
             mModifiedFiles = new ArrayList<String>();
@@ -108,7 +112,7 @@ public class FileCommands implements  Cloneable {
         }
 
         int modifyCount = mModifiedFiles.size();
-        onPostProcess((modifyCount > 0) ? mModifiedFiles.toArray(new String[modifyCount]) : null, result, sourceFiles.length);
+        onPostProcess((modifyCount > 0) ? mModifiedFiles.toArray(new String[modifyCount]) : null, result, sourceFiles.length, opCode);
         return result;
     }
 
@@ -158,7 +162,7 @@ public class FileCommands implements  Cloneable {
                 }
             } else { // not renamed: use original
                 renamedDestFiles[pos] = destFile;
-                osFileMoveOrCopy(move, renamedDestFiles[pos], sourceFiles[pos]);
+                if (osFileMoveOrCopy(move, renamedDestFiles[pos], sourceFiles[pos])) itemCount++;
                 pos++;
             }
         }
@@ -287,7 +291,7 @@ public class FileCommands implements  Cloneable {
     }
 
     /** called for each modified/deleted file */
-    protected void onPostProcess(String[] paths, int modifyCount, int itemCount) {
+    protected void onPostProcess(String[] paths, int modifyCount, int itemCount, int opCode) {
     }
 
     public void log(String... messages) {

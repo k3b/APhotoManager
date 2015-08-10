@@ -270,12 +270,8 @@ public class FotoGalleryActivity extends Activity implements
         this.mGalleryQueryParameter.mGalleryContentQuery = null;
         mGalleryGui = null;
         mDirGui = null;
+        invalidateDirectories();
 
-        if (mDirectoryRoot != null)
-        {
-            mDirectoryRoot.destroy();
-            mDirectoryRoot = null;
-        }
         System.gc();
         Global.debugMemory(debugPrefix, "onDestroy end");
         // RefWatcher refWatcher = AndroFotoFinderApp.getRefWatcher(this);
@@ -377,8 +373,7 @@ public class FotoGalleryActivity extends Activity implements
         if (filter != null) {
             this.mGalleryQueryParameter.mFilter = filter;
 
-            if (mDirectoryRoot != null) mDirectoryRoot.destroy();
-            mDirectoryRoot = null; // must reload next time
+            invalidateDirectories();
 
             reloadGui();
         }
@@ -473,6 +468,12 @@ public class FotoGalleryActivity extends Activity implements
         if (!this.mHasEmbeddedDirPicker) {
             navigateTo(selectedAbsolutePath, queryTypeId);
         }
+    }
+
+    @Override
+    public void invalidateDirectories() {
+        if (mDirectoryRoot != null) mDirectoryRoot.destroy();
+        mDirectoryRoot = null; // must reload next time
     }
 
     /**

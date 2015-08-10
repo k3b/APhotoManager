@@ -75,6 +75,9 @@
     <string name="btn_yes">Yes</string>
     <string name="btn_no">No</string>
 
+    <string name="format_delete_result">deleted %1$d/%2$d files</string>
+    <string name="format_copy_result">copied %1$d/%2$d files</string>
+    <string name="format_move_result">moved %1$d/%2$d files</string>
     <string name="title_confirm_removal" >Delete Photo(s)?</string>
     <string name="format_confirm_delete">"Are you sure you want to permanently delete these Files?
 %1$s

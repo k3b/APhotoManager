@@ -1,6 +1,6 @@
 FotoGallery\ReadMe.txt"
 
-after delete/move no more multi-sel-mode
+after delete/move no more multi-sel-mode (if global or delete or move)
 	??? funktioniert das auch?
 tooltip x items deleted/moved/copied
 

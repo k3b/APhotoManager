@@ -463,5 +463,8 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
 
         /** called after the selection in tree has changed */
         void onDirectorySelectionChanged(String selectedChild, int queryTypeId);
+
+        /** remove cached directories */
+        void invalidateDirectories();
     }
 }

@@ -445,6 +445,11 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         toGui(mFilter);
     }
 
+    /** interface DirectoryPickerFragment.invalidateDirectories not used */
+    @Override
+    public void invalidateDirectories() {
+    }
+
     /** interface DirectoryPickerFragment.OnDirectoryInteractionListener not used */
     @Override
     public void onDirectoryCancel(int queryTypeId) {}
