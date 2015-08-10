@@ -3,6 +3,7 @@ package de.k3b.android.util;
 import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
+import android.provider.MediaStore;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -85,6 +86,12 @@ public class SelectedFotos extends SelectedItems {
 
     }
 
-
-
+    /** converts imageID to content-uri */
+    public static Uri getUri(long imageID) {
+        return Uri.parse(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI.toString() + "/" + imageID);
     }
+
+
+
+}

@@ -3,13 +3,22 @@ package de.k3b.android.util;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Environment;
+import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.view.MenuItem;
 
 import java.io.File;
 
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
+import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.io.FileCommands;
+import de.k3b.io.IDirectory;
+import de.k3b.io.OSDirectory;
 
 /**
  * Api to manipulate files/photos.
@@ -18,6 +27,7 @@ import de.k3b.io.FileCommands;
  * Created by k3b on 03.08.2015.
  */
 public class AndroidFileCommands extends FileCommands {
+    private static final String SETTINGS_KEY_LAST_COPY_TO_PATH = "last_copy_to_path";
     private final Activity mContext;
 
     public AndroidFileCommands(Activity context) {
@@ -42,19 +52,87 @@ public class AndroidFileCommands extends FileCommands {
 
     /** called for each modified/deleted file */
     @Override
-    protected void onPostProcess(String[] paths) {
-        super.onPostProcess(paths);
+    protected void onPostProcess(String[] paths, int modifyCount, int itemCount) {
+        super.onPostProcess(paths, modifyCount, itemCount);
         updateMediaDatabase(paths);
     }
 
     public void updateMediaDatabase(String... pathNames) {
+        SelectedFotos deletedItems = new SelectedFotos();
         MediaScannerConnection.scanFile(
                 mContext,
                 pathNames, // mPathNames.toArray(new String[mPathNames.size()]),
                 null, null);
     }
 
-    public void deleteFileWithQuestion(final String... pathNames) {
+    public boolean onOptionsItemSelected(final MenuItem item, final SelectedFotos selectedFileNames) {
+        if ((selectedFileNames != null) && (selectedFileNames.size() > 0)) {
+            // Handle item selection
+            switch (item.getItemId()) {
+                case R.id.cmd_delete:
+                    return cmdDeleteFileWithQuestion(selectedFileNames);
+                case R.id.cmd_copy:
+                    return cmdMoveOrCopyWithDestDirPicker(false, selectedFileNames);
+                case R.id.cmd_move:
+                    return cmdMoveOrCopyWithDestDirPicker(true, selectedFileNames);
+            }
+        }
+        return false;
+    }
+
+    private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, final SelectedFotos fotos) {
+        DirectoryPickerFragment destDir = new DirectoryPickerFragment() {
+            @Override
+            protected void onDirectoryPick(IDirectory selection) {
+                // super.onDirectoryPick(selection);
+                dismiss();
+
+                if (selection != null) {
+                    String copyToPath = selection.getAbsolute();
+                    setLastCopyToPath(copyToPath);
+                    File destDirFolder = new File(copyToPath);
+
+                    String[] selectedFileNames = fotos.getFileNames();
+                    moveOrCopyFilesTo(move, destDirFolder, SelectedFotos.getFiles(selectedFileNames));
+
+                    if (move) {
+                        // remove from media database after successfull move
+                        File[] sourceFiles = SelectedFotos.getFiles(selectedFileNames);
+                        Long[] ids = fotos.getIds();
+                        for (int i = 0; i < sourceFiles.length; i++) {
+                            File sourceFile = sourceFiles[i];
+                            if (!sourceFile.exists()) {
+                                onItemDeleted(sourceFile.getAbsolutePath(), ids[i]);
+                            }
+                        }
+                    }
+                }
+            }
+        };
+        String copyToPath = getLastCopyToPath();
+
+        destDir.defineDirectoryNavigation(new OSDirectory(copyToPath), FotoSql.QUERY_TYPE_GROUP_COPY, copyToPath);
+        destDir.show(this.mContext.getFragmentManager(), "osdir");
+        return false;
+    }
+
+    @NonNull
+    private String getLastCopyToPath() {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
+        return sharedPref.getString(SETTINGS_KEY_LAST_COPY_TO_PATH, "/");
+    }
+
+    private void setLastCopyToPath(String copyToPath) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences.Editor edit = sharedPref.edit();
+        edit.putString(SETTINGS_KEY_LAST_COPY_TO_PATH, copyToPath);
+        edit.commit();
+    }
+
+
+
+    public boolean cmdDeleteFileWithQuestion(final SelectedFotos fotos) {
+        String[] pathNames = fotos.getFileNames();
         StringBuffer names = new StringBuffer();
         for (String name : pathNames) {
             names.append(name).append("\n");
@@ -75,7 +153,7 @@ public class AndroidFileCommands extends FileCommands {
                             public void onClick(
                                     final DialogInterface dialog,
                                     final int id) {
-                                deleteFile(pathNames);
+                                deleteFile(fotos);
                             }
                         }
                 )
@@ -92,6 +170,32 @@ public class AndroidFileCommands extends FileCommands {
 
         final AlertDialog alert = builder.create();
         alert.show();
+        return true;
+    }
 
+    private void deleteFile(SelectedFotos fotos) {
+        int result = 0;
+        String[] fileNames = fotos.getFileNames();
+        openLogfile();
+        File[] toBeDeleted = SelectedFotos.getFiles(fileNames);
+        Long[] ids = fotos.getIds();
+
+        for (int i = 0; i < toBeDeleted.length; i++) {
+            File file = toBeDeleted[i];
+            if (deleteFile(file)) {
+                onItemDeleted(file.getAbsolutePath(), ids[i]);
+                result++;
+            }
+        }
+
+        closeLogFile();
+        onPostProcess(fileNames, result, ids.length);
+    }
+
+    private void onItemDeleted(String absolutePath, Long id) {
+        Uri uri = SelectedFotos.getUri(id);
+        mContext.getContentResolver().delete(uri,null, null);
+        log("rem deleted '" + absolutePath +
+                "' as content: " , uri.toString());
     }
 }

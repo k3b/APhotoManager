@@ -37,6 +37,7 @@ public class Global {
     public static boolean debugEnabledSql = true;
 
     public static boolean clearSelectionAfterCommand = true;
+
     public static void debugMemory(String modul, String message) {
         if (false && Global.debugEnabled) {
             Runtime r = Runtime.getRuntime();

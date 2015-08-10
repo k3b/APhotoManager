@@ -63,38 +63,53 @@ public class FileCommands implements  Cloneable {
         }
     }
 
-    public void deleteFile(String... paths) {
+    public int deleteFiles(String... paths) {
+        int result = 0;
         openLogfile();
         for(String path : paths) {
-            File file = new File(path);
-            if (osFileExists(file)) {
-                log("rem file osFileExists");
-                if (!file.delete()) {
-                    log("rem delete failed");
-                }
-            } else {
-                log("rem file does not exist");
-            }
-            log("del \"" + path + "\"", "");
+            if (deleteFile(new File(path))) result++;
         }
-        onPostProcess(paths);
+        onPostProcess(paths, result, paths.length);
         closeLogFile();
+        return result;
     }
 
-    public void copyFilesTo(boolean move, File destDirFolder, File... sourceFiles) {
+    /**
+     * @return true if file was deleted or does not exist (any more)
+     */
+    protected boolean deleteFile(File file) {
+        boolean result = false;
+        if (osFileExists(file)) {
+            if (!file.delete()) {
+                log("rem osFileExists. delete failed : " + file.getAbsolutePath());
+            } else {
+                log("rem osFileExists");
+                result = true; // was deleted
+            }
+        } else {
+            log("rem file " + file.getAbsolutePath() + "does not exist");
+            result = true; // does not exist
+        }
+        log("del \"", file.getAbsolutePath(), "\"");
+        return result;
+    }
+
+    public int moveOrCopyFilesTo(boolean move, File destDirFolder, File... sourceFiles) {
+        int result = 0;
         if (createDirIfNeccessary(destDirFolder)) {
             mModifiedFiles = new ArrayList<String>();
 
             File[] destFiles = createDestFiles(destDirFolder, sourceFiles);
 
-            copy(move, destFiles, sourceFiles);
+            result = moveOrCopyFiles(move, destFiles, sourceFiles);
 
         } else {
             log("rem Target dir '" + destDirFolder.getAbsolutePath() + "' cannot be created");
         }
 
         int modifyCount = mModifiedFiles.size();
-        onPostProcess((modifyCount > 0) ? mModifiedFiles.toArray(new String[modifyCount]) : null);
+        onPostProcess((modifyCount > 0) ? mModifiedFiles.toArray(new String[modifyCount]) : null, result, sourceFiles.length);
+        return result;
     }
 
     boolean createDirIfNeccessary(File destDirFolder) {
@@ -102,7 +117,8 @@ public class FileCommands implements  Cloneable {
     }
 
     /** does the copying. internal to allow unittesting */
-    void copy(boolean move, File[] destFiles, File[] sourceFiles) {
+    int moveOrCopyFiles(boolean move, File[] destFiles, File[] sourceFiles) {
+        int itemCount = 0;
         int pos = 0;
         int fileCount = destFiles.length;
 
@@ -130,14 +146,14 @@ public class FileCommands implements  Cloneable {
                         }
                     } while (xmpExists);
                     renamedDestFiles[pos] = renamed;
-                    osFileMoveOrCopy(move, renamedDestFiles[pos], sourceFiles[pos]);
+                    if (osFileMoveOrCopy(move, renamedDestFiles[pos], sourceFiles[pos])) itemCount++;
                     pos++;
                     renamedDestFiles[pos] = renamedXmp;
-                    osFileMoveOrCopy(move, renamedDestFiles[pos], sourceFiles[pos]);
+                    if (osFileMoveOrCopy(move, renamedDestFiles[pos], sourceFiles[pos])) itemCount++;
                     pos++;
                 } else {// if not xmp sidecar
                     renamedDestFiles[pos] = renamed;
-                    osFileMoveOrCopy(move, renamedDestFiles[pos], sourceFiles[pos]);
+                    if (osFileMoveOrCopy(move, renamedDestFiles[pos], sourceFiles[pos])) itemCount++;
                     pos++;
                 }
             } else { // not renamed: use original
@@ -146,6 +162,7 @@ public class FileCommands implements  Cloneable {
                 pos++;
             }
         }
+        return itemCount;
     }
 
     /** to be replaced by mock/stub in unittests */
@@ -211,37 +228,47 @@ public class FileCommands implements  Cloneable {
         }
     }
 
-    protected void osFileMoveOrCopy(boolean move, File dest, File source) {
+    protected boolean osFileMoveOrCopy(boolean move, File dest, File source) {
+        boolean result = false;
+        long fileTime = source.lastModified();
+
         if (move) {
-            osFileMove(dest, source);
-            mModifiedFiles.add(source.getAbsolutePath());
-            mModifiedFiles.add(dest.getAbsolutePath());
+            result = osFileMove(dest, source);
+            if (result) {
+                mModifiedFiles.add(dest.getAbsolutePath());
+            }
         } else {
-            osFileCopy(dest, source);
-            mModifiedFiles.add(dest.getAbsolutePath());
+            result = osFileCopy(dest, source);
+            if (result) {
+                mModifiedFiles.add(dest.getAbsolutePath());
+            }
         }
+        if (dest.lastModified() != fileTime) {
+            dest.setLastModified(fileTime);
+        }
+        return result;
     }
 
-    private void osFileMove(File dest, File source) {
-        source.renameTo(dest);
+    protected boolean osFileMove(File dest, File source) {
+        return source.renameTo(dest);
     }
 
     /**
      *
      * @param sourceFullPath the path of the file that shall be copied including the file name with ending
-     * @param targetDir the path of the file  that shall be written to without filename
+     * @param targetFullPath the path of the file  that shall be written to without filename
      *
      * Copies a file from the sourceFullPath path to the target path
      */
-    private static void osFileCopy(File targetDir, File sourceFullPath) {
+    private static boolean osFileCopy(File targetFullPath, File sourceFullPath) {
         FileChannel in = null, out = null;
         try {
-            File target = new File(targetDir, sourceFullPath.getName());
             in = new FileInputStream(sourceFullPath).getChannel();
-            out = new FileOutputStream(target).getChannel();
+            out = new FileOutputStream(targetFullPath).getChannel();
             long size = in.size();
             MappedByteBuffer buf = in.map(FileChannel.MapMode.READ_ONLY, 0,	size);
             out.write(buf);
+            return true;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -256,10 +283,11 @@ public class FileCommands implements  Cloneable {
                     e.printStackTrace();
                 }
         }
+        return false;
     }
 
     /** called for each modified/deleted file */
-    protected void onPostProcess(String[] paths) {
+    protected void onPostProcess(String[] paths, int modifyCount, int itemCount) {
     }
 
     public void log(String... messages) {

@@ -1,6 +1,5 @@
 package de.k3b.io;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,13 +16,13 @@ public class FileCommandTests {
     public void setup() {
         sut = spy(new FileCommands(null));
         doReturn(true).when(sut).createDirIfNeccessary(any(File.class));
-        doNothing().when(sut).osFileMoveOrCopy(anyBoolean(), any(File.class), any(File.class));
+        doReturn(true).when(sut).osFileMoveOrCopy(anyBoolean(), any(File.class), any(File.class));
     }
 
     @Test
     public void shouldCopy() {
         registerFakeFilesInDestDir(sut);
-        sut.copyFilesTo(false, X_FAKE_OUTPUT_DIR, createTestFiles("a.jpg"));
+        sut.moveOrCopyFilesTo(false, X_FAKE_OUTPUT_DIR, createTestFiles("a.jpg"));
 
         verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "/a.jpg"), new File("a.jpg"));
 
@@ -32,7 +31,7 @@ public class FileCommandTests {
     @Test
     public void shouldCopyWitRenameExistingMultible() {
         registerFakeFilesInDestDir(sut, "a.jpg", "b.png", "b(1).png");
-        sut.copyFilesTo(false, X_FAKE_OUTPUT_DIR, createTestFiles("a.jpg", "b.png"));
+        sut.moveOrCopyFilesTo(false, X_FAKE_OUTPUT_DIR, createTestFiles("a.jpg", "b.png"));
 
         verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(1).jpg"), new File("a.jpg"));
         verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "b(2).png"), new File("b.png"));
@@ -41,7 +40,7 @@ public class FileCommandTests {
     @Test
     public void shouldCopyRenameExistingWithXmp() {
         registerFakeFilesInDestDir(sut, "a.jpg", "a(1).xmp", "a(2).jpg"); // a(3) is next possible
-        sut.copyFilesTo(false, X_FAKE_OUTPUT_DIR, createTestFiles("a.jpg", "a.xmp"));
+        sut.moveOrCopyFilesTo(false, X_FAKE_OUTPUT_DIR, createTestFiles("a.jpg", "a.xmp"));
 
         verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(3).jpg"), new File("a.jpg"));
         verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(3).xmp"), new File("a.xmp"));

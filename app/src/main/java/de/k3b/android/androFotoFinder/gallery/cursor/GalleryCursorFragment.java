@@ -26,7 +26,6 @@ import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -61,7 +60,6 @@ import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.io.Directory;
 import de.k3b.io.IDirectory;
-import de.k3b.io.OSDirectory;
 
 /**
  * A {@link Fragment} to show ImageGallery content based on ContentProvider-Cursor.
@@ -320,14 +318,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 FotoSql.addWhereFilter(imageQuery, holder.filter);
             }
             long imageID = holder.imageID;
-            mGalleryListener.onGalleryImageClick(imageID, getUri(imageID), position);
+            mGalleryListener.onGalleryImageClick(imageID, SelectedFotos.getUri(imageID), position);
         }
-    }
-
-    /** converts imageID to content-uri */
-    private Uri getUri(long imageID) {
-        return Uri.parse(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI.toString() + "/" + imageID);
     }
 
     /****************** path navigation *************************/
@@ -442,7 +434,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             multiSelectionUpdateActionbar();
         } else {
             // in gallery mode long click is view image
-            ImageDetailActivityViewPager.showActivity(this.getActivity(), getUri(holder.imageID), position, getCurrentQuery());
+            ImageDetailActivityViewPager.showActivity(this.getActivity(), SelectedFotos.getUri(holder.imageID), position, getCurrentQuery());
         }
         return true;
     }
@@ -484,48 +476,21 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
-        switch (item.getItemId()) {
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        // Handle menuItem selection
+        if ((mSelectedItems != null) && (getFileCommands().onOptionsItemSelected(menuItem, mSelectedItems))) {
+            return true;
+        }
+        switch (menuItem.getItemId()) {
             case R.id.cmd_cancel:
                 return multiSelectionCancel();
-            case R.id.cmd_delete:
-                return onDelete();
-            case R.id.cmd_copy:
-                return onCopy(false);
-            case R.id.cmd_move:
-                return onCopy(true);
             case R.id.cmd_selected_only:
                 return multiSelectionToggle();
 
             default:
-                return super.onOptionsItemSelected(item);
+                return super.onOptionsItemSelected(menuItem);
         }
 
-    }
-
-
-
-    private boolean onDelete() {
-        String fileNames[] = mSelectedItems.getFileNames();
-        if (fileNames != null) {
-            getFileCommands().deleteFileWithQuestion(fileNames);
-        }
-        return true;
-    }
-
-    private boolean onCopy(final boolean move) {
-        DirectoryPickerFragment destDir = new DirectoryPickerFragment() {
-            @Override
-            protected void onDirectoryPick(IDirectory selection) {
-                // super.onDirectoryPick(selection);
-                dismiss();
-                onDirectoryPickCopy(move, selection);
-            }
-        };
-        destDir.defineDirectoryNavigation(new OSDirectory("/") , FotoSql.QUERY_TYPE_GROUP_COPY, "/");
-        destDir.show(this.getActivity().getFragmentManager(), "osdir");
-        return false;
     }
 
     private void onDirectoryPickCopy(final boolean move, IDirectory selection) {
@@ -534,11 +499,24 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private AndroidFileCommands getFileCommands() {
         if (mFileCommands == null) {
             mFileCommands = new AndroidFileCommands(this.getActivity()) {
+                /*
                 @Override
-                public void deleteFile(String... paths) {
-                    super.deleteFile(paths);
-                    mShowSelectedOnly = true;
-                    multiSelectionCancel();
+                public void deleteFiles(String... paths) {
+                    super.deleteFiles(paths);
+                    if (Global.clearSelectionAfterCommand) {
+                        mShowSelectedOnly = true;
+                        multiSelectionCancel();
+                    }
+                }
+                */
+
+                @Override
+                protected void onPostProcess(String[] paths, int modifyCount, int itemCount) {
+                    super.onPostProcess(paths, modifyCount, itemCount);
+                    if (Global.clearSelectionAfterCommand) {
+                        mShowSelectedOnly = true;
+                        multiSelectionCancel();
+                    }
                 }
             };
         }
@@ -611,7 +589,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             if (selectionCount == 1) {
                 Long imageId = mSelectedItems.first();
                 sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_STREAM, getUri(imageId));
+                sendIntent.putExtra(Intent.EXTRA_STREAM, SelectedFotos.getUri(imageId));
             } else {
                 sendIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
 
@@ -619,7 +597,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
                 Iterator<Long> iter = mSelectedItems.iterator();
                 while (iter.hasNext()) {
-                    uris.add(getUri(iter.next()));
+                    uris.add(SelectedFotos.getUri(iter.next()));
                 }
                 sendIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
             }

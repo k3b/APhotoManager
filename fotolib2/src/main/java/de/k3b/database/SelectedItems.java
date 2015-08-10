@@ -43,6 +43,10 @@ public class SelectedItems extends java.util.TreeSet<Long> implements Set<Long> 
         return this;
     }
 
+    public Long[]  getIds() {
+        return toArray(new Long[this.size()]);
+    }
+
     /** return true if included; false if excluded */
     public boolean toggle(Long key) {
         if (contains(key)) {
