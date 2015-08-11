@@ -15,43 +15,56 @@ public class FileCommandTests {
     @Before
     public void setup() {
         sut = spy(new FileCommands(null));
-        doReturn(true).when(sut).createDirIfNeccessary(any(File.class));
+        doReturn(true).when(sut).osCreateDirIfNeccessary(any(File.class));
         doReturn(true).when(sut).osFileMoveOrCopy(anyBoolean(), any(File.class), any(File.class));
+        doReturn(true).when(sut).osDeleteFile(any(File.class));
     }
 
     @Test
     public void shouldCopy() {
-        registerFakeFilesInDestDir(sut);
+        registerFakeFiles(sut);
         sut.moveOrCopyFilesTo(false, X_FAKE_OUTPUT_DIR, createTestFiles("a.jpg"));
 
-        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "/a.jpg"), new File("a.jpg"));
+        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "/a.jpg"), createTestFile("a.jpg"));
 
     }
 
     @Test
     public void shouldCopyWitRenameExistingMultible() {
-        registerFakeFilesInDestDir(sut, "a.jpg", "b.png", "b(1).png");
+        registerFakeFiles(sut, "a.jpg", "b.png", "b(1).png");
         sut.moveOrCopyFilesTo(false, X_FAKE_OUTPUT_DIR, createTestFiles("a.jpg", "b.png"));
 
-        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(1).jpg"), new File("a.jpg"));
-        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "b(2).png"), new File("b.png"));
+        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(1).jpg"), createTestFile("a.jpg"));
+        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "b(2).png"), createTestFile("b.png"));
     }
 
     @Test
     public void shouldCopyRenameExistingWithXmp() {
-        registerFakeFilesInDestDir(sut, "a.jpg", "a(1).xmp", "a(2).jpg"); // a(3) is next possible
-        sut.moveOrCopyFilesTo(false, X_FAKE_OUTPUT_DIR, createTestFiles("a.jpg", "a.xmp"));
+        registerFakeFiles(sut, "a.jpg", "a.xmp", "a(1).xmp", "a(2).jpg"); // a(3) is next possible
 
-        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(3).jpg"), new File("a.jpg"));
-        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(3).xmp"), new File("a.xmp"));
+        sut.moveOrCopyFilesTo(false, X_FAKE_OUTPUT_DIR, createTestFiles("a.jpg"));
+
+        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(3).jpg"), createTestFile("a.jpg"));
+        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(3).xmp"), createTestFile("a.xmp"));
     }
 
-    private static void registerFakeFilesInDestDir(FileCommands sut, String... filenames) {
+    @Test
+    public void shouldDeleteExistingWithXmp() {
+        registerFakeFiles(sut, "a.jpg", "a.xmp");
+        sut.deleteFiles(createTestFile("a.jpg").getAbsolutePath());
+
+        verify(sut).osDeleteFile(createTestFile("a.jpg"));
+        verify(sut).osDeleteFile(createTestFile("a.xmp"));
+    }
+
+    /** these files exist in source-dir and in dest-dir */
+    private static void registerFakeFiles(FileCommands sut, String... filenames) {
         if (filenames.length == 0) {
             doReturn(false).when(sut).osFileExists(any(File.class));
         } else {
             for (String filename : filenames) {
                 doReturn(true).when(sut).osFileExists(new File(X_FAKE_OUTPUT_DIR, filename));
+                doReturn(true).when(sut).osFileExists(createTestFile(filename));
             }
         }
     }
@@ -60,8 +73,12 @@ public class FileCommandTests {
         File[] result = new File[files.length];
         int pos = 0;
         for (String file : files) {
-            result[pos++] = new File(file);
+            result[pos++] = createTestFile(file);
         }
         return result;
+    }
+
+    private static File createTestFile(String name) {
+        return new File(name).getAbsoluteFile();
     }
 }

@@ -10,7 +10,6 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import java.io.File;
 
@@ -106,7 +105,7 @@ public class AndroidFileCommands extends FileCommands {
                         for (int i = 0; i < sourceFiles.length; i++) {
                             File sourceFile = sourceFiles[i];
                             if (!sourceFile.exists()) {
-                                onItemDeleted(sourceFile.getAbsolutePath(), ids[i]);
+                                onMediaDeleted(sourceFile.getAbsolutePath(), ids[i]);
                             }
                         }
                     }
@@ -186,8 +185,8 @@ public class AndroidFileCommands extends FileCommands {
 
         for (int i = 0; i < ids.length; i++) {
             File file = toBeDeleted[i];
-            if (deleteFile(file)) {
-                onItemDeleted(file.getAbsolutePath(), ids[i]);
+            if (deleteFileWitSidecar(file)) {
+                onMediaDeleted(file.getAbsolutePath(), ids[i]);
                 result++;
             }
         }
@@ -198,7 +197,7 @@ public class AndroidFileCommands extends FileCommands {
         return result;
     }
 
-    private void onItemDeleted(String absolutePath, Long id) {
+    private void onMediaDeleted(String absolutePath, Long id) {
         Uri uri = SelectedFotos.getUri(id);
         mContext.getContentResolver().delete(uri,null, null);
         log("rem deleted '" + absolutePath +
