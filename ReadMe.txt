@@ -13,14 +13,9 @@ AndroFotoFinder
 			exception when selecting unmounted mnt/extusb on tablet
 			todo
 				has images to enable ok
-				status "select folder with images to enable ok"
 				create new subfolder
-				OSDirPicker: garbage collector 
-					after find???
-					after ok/cancel
 		AndroidFileCommands.java 
-			loging file open/close
-			mit optionMenu handling public boolean onOptionsItemSelected(MenuItem item)
+			loging file auto open/man close
 			
 
 	
@@ -40,15 +35,6 @@ LeakCanary
 		
 MapPicker DialogFragment
 	own lat-lon-group-by-query
-
-	Background task load ClusterMarker from db
-		where lat/lon between visible region
-		group by ????
-
-todo
-
-	DirectoryPicker
-		dialog: ?? set icon
 
 gui
 	Action (menu)
@@ -84,29 +70,9 @@ place "C:\Progs.Portable\sdk\Android\Android Design - Icons 20131120\Action Bar 
 calender "D:\prj\eve\android\prj\AndroidCalendar.wrk\del\ical-import-export\iCalImportExport\res\drawable-hdpi\icon.png"
 
 
-
-
-
-
-
 - DirectoryBuilder (+sql) mit max(imageID)
 - loc-DirectoryBuilder im format 000.00,000.00 null replaced with 400
 
-
-
-	Queriable.addResultFilter
-		GalleryCursorAdapter.requery  SELECT _id, _data, 0 AS count, longitude
-			FROM content://media/external/images/media
-			WHERE (_data like ?)
-			PARAMETERS /2015/06/15%
-			ORDER BY _data, length(_data)
-
-select count(*), strftime('%Y/%m/%d', start_time /1000, 'unixepoch', 'localtime')  
-from time_slice group by strftime('%Y/%m/%d', start_time /1000, 'unixepoch', 'localtime') 
-order by strftime('%Y/%m/%d', start_time /1000, 'unixepoch', 'localtime') desc
-
-- options: order by (name, date, gps) asc/desc
-- options: choose by date/dir/gps
 
 -----------------------------------------
 
@@ -115,12 +81,9 @@ order by strftime('%Y/%m/%d', start_time /1000, 'unixepoch', 'localtime') desc
 	debug
 	
 - gallery-filter
-	- foto-adapter
-		remember column-id by first access after requery. bind nur if col-id>=0
 		laden der thumbnails in thread?
 	- folder-gallery 
 		- settings pannel (einstellbar optionen)
 		- strict (nur direkte kinder where folder=...) sort by path
 		- with sub-folder-files (path like xxx%) sort by path length
 		- einstellbar item-layout klein (3), mittel(2), gross(1)
-		
