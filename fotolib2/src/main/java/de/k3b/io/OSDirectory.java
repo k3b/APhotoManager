@@ -142,6 +142,25 @@ public class OSDirectory implements IDirectory {
         return mCurrent.toString();
     }
 
+    public String toTreeString() {
+        StringBuffer result = new StringBuffer();
+        toTreeString(result, "", this);
+        return result.toString();
+    }
+
+    public static void toTreeString(StringBuffer result, String indent, IDirectory dir) {
+        result.append(indent).append(dir.getRelPath()).append("\n");
+
+        // avoid load on demand
+        List<IDirectory> mChilden = (dir instanceof OSDirectory) ? ((OSDirectory) dir).mChilden : dir.getChildren();
+        if (mChilden != null) {
+            String childIndent = indent + "-";
+            for(IDirectory child : mChilden) {
+                toTreeString(result, childIndent, child);
+            }
+        }
+    }
+
     public static File getCanonicalFile(String path) {
         try {
             return new File(path).getCanonicalFile();

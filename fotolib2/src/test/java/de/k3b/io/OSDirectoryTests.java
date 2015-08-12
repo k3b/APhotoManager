@@ -30,6 +30,27 @@ public class OSDirectoryTests {
     }
 
     @Test
+    public void shoudFindExistingWithRoot() {
+        mRoot = createTestData("/", "a","b","c","d");
+        IDirectory found = OSDirectory.find(mRoot, new File("/a/b/c"));
+
+        System.out.println(mRoot.toTreeString());
+        assertNotNull(found);
+        assertEquals(1, found.getChildren().size());
+        assertEquals("d", found.getChildren().get(0).getRelPath());
+    }
+
+    @Test
+    public void shoudFindNewWithRoot() {
+        mRoot = createTestData("/", "a","b","c","d");
+        IDirectory found = OSDirectory.find(mRoot, new File("/q"));
+
+        System.out.println( mRoot.toTreeString());
+        assertNotNull(found);
+        assertEquals(2, mRoot.getChildren().size());
+    }
+
+    @Test
     public void shoudFindNew() {
         IDirectory found = OSDirectory.find(mRoot, new File("a/b/c/d2")).getParent();
         assertEquals(2, found.getChildren().size());
@@ -69,7 +90,7 @@ public class OSDirectoryTests {
         OSDirectory current = null;
         List<IDirectory> childen = null;
         for (String element : elements) {
-            elementFile = (elementFile == null) ? new File(element) : new File(elementFile, element);
+            elementFile = createFile(elementFile, element);
             current = new OSDirectory(elementFile, parent, new ArrayList<IDirectory>());
             if (parent != null) {
                 parent.getChildren().add(current);
@@ -83,6 +104,12 @@ public class OSDirectoryTests {
         }
 
         return root;
+    }
+
+    private File createFile(File elementFile, String element) {
+        if (element == null) return null;
+        if (elementFile == null) return new File(element);
+        return new File(elementFile, element);
     }
 
 }
