@@ -45,7 +45,7 @@ public class OSDirectoryTests {
         mRoot = createTestData("/", "a","b","c","d");
         IDirectory found = OSDirectory.find(mRoot, new File("/q"));
 
-        System.out.println( mRoot.toTreeString());
+        System.out.println(mRoot.toTreeString());
         assertNotNull(found);
         assertEquals(2, mRoot.getChildren().size());
     }
@@ -84,32 +84,15 @@ public class OSDirectoryTests {
     }
 
     private OSDirectory createTestData(String... elements) {
-        File elementFile = null;
         OSDirectory root = null;
-        OSDirectory parent = null;
-        OSDirectory current = null;
-        List<IDirectory> childen = null;
-        for (String element : elements) {
-            elementFile = createFile(elementFile, element);
-            current = new OSDirectory(elementFile, parent, new ArrayList<IDirectory>());
-            if (parent != null) {
-                parent.getChildren().add(current);
-            }
+        if ((elements != null) && (elements.length > 0)) {
+            root = new OSDirectory(new File(elements[0]), null, new ArrayList<IDirectory>());
 
-            parent = current;
-
-            if (root == null) {
-                root = current;
+            OSDirectory current = root;
+            for (int i = 1; i < elements.length; i++) {
+                current = current.addChildFolder(elements[i], new ArrayList<IDirectory>());
             }
         }
-
         return root;
     }
-
-    private File createFile(File elementFile, String element) {
-        if (element == null) return null;
-        if (elementFile == null) return new File(element);
-        return new File(elementFile, element);
-    }
-
 }

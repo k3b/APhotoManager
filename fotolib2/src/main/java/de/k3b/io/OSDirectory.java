@@ -93,16 +93,23 @@ public class OSDirectory implements IDirectory {
         if (parentDir == null) return null;
 
         String name = file.getName();
-        List<IDirectory> childred = parentDir.getChildren();
-        for (IDirectory cur : childred) {
+        List<IDirectory> children = parentDir.getChildren();
+        OSDirectory result = (OSDirectory) findChildByRelPath(children, name);
+
+        if (result == null) {
+            result = new OSDirectory(file, (OSDirectory) parentDir);
+            children.add(result);
+        }
+        return result;
+    }
+
+    public static IDirectory findChildByRelPath(List<IDirectory> children, String name) {
+        for (IDirectory cur : children) {
             if (name.equals(cur.getRelPath())) {
                 return cur;
             }
         }
-
-        OSDirectory result = new OSDirectory(file, (OSDirectory) parentDir);
-        childred.add(result);
-        return result;
+        return null;
     }
 
     @Override
@@ -168,5 +175,31 @@ public class OSDirectory implements IDirectory {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public OSDirectory addChildFolder(String newCildFolderName) {
+        return addChildFolder(newCildFolderName, null);
+    }
+
+    /** for unittesting without load on demand */
+    OSDirectory addChildFolder(String newCildFolderName, List<IDirectory> grandChilden) {
+        List<IDirectory> children = this.getChildren();
+        OSDirectory result = (OSDirectory) findChildByRelPath(children, newCildFolderName);
+
+        if (result == null) {
+            File newChildFile = new File(mCurrent, newCildFolderName);
+            result = new OSDirectory(newChildFile, this, grandChilden);
+            children.add(result);
+        }
+
+        return result;
+    }
+
+    /**
+     * creates this folder (including parend-folder) in os-filesystem, if it does not exist.
+     * @return false if path cannot be created.
+     **/
+    public boolean osMkDirs() {
+        return mCurrent.mkdirs() || mCurrent.isDirectory();
     }
 }
