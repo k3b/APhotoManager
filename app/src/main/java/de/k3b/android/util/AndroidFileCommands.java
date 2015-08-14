@@ -115,6 +115,7 @@ public class AndroidFileCommands extends FileCommands {
         String copyToPath = getLastCopyToPath();
 
         destDir.defineDirectoryNavigation(new OSDirectory("/", null), FotoSql.QUERY_TYPE_GROUP_COPY, copyToPath);
+        destDir.setContextMenuId(R.menu.menu_context_osdir);
         destDir.show(this.mContext.getFragmentManager(), "osdir");
         return false;
     }

@@ -109,7 +109,7 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
     public View getGroupView(int groupIndex, boolean b, View view, ViewGroup viewGroup) {
     	
         if (view == null) {
-            view = inflater.inflate(R.layout.directory_list_item_parent, viewGroup,false);
+            view = inflater.inflate(R.layout.list_item_directory_parent, viewGroup,false);
         }
         // getFrom category name as tag so view can be found view later
         IDirectory group = mParent.getGroup(groupIndex);
@@ -137,7 +137,7 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
     //in this method you must getFrom the text to see the children on the list
     public View getChildView(int groupIndex, int childIndex, boolean b, View view, ViewGroup viewGroup) {
         if (view == null) {
-            view = inflater.inflate(R.layout.directory_list_item_child, viewGroup,false);
+            view = inflater.inflate(R.layout.list_item_directory_child, viewGroup,false);
         }
  
         

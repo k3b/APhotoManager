@@ -36,7 +36,7 @@
         android:showAsAction="never" >
         <menu>
             <item android:id="@+id/cmd_sort_directory"
-                android:title="@string/file_name"
+                android:title="@string/name"
                 android:visible="true"
                 android:orderInCategory="5" />
             <item android:id="@+id/cmd_sort_date"

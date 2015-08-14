@@ -494,9 +494,6 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     }
 
-    private void onDirectoryPickCopy(final boolean move, IDirectory selection) {
-    }
-
     private AndroidFileCommands getFileCommands() {
         if (mFileCommands == null) {
             mFileCommands = new AndroidFileCommands(this.getActivity()) {

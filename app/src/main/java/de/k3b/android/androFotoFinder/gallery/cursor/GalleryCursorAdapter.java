@@ -220,13 +220,13 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
      */
     @Override
     public int getItemViewType(int position) {
-        return R.layout.gallery_grid_item;
+        return R.layout.grid_item_gallery;
     }
 
     /** create new empty gridview cell */
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        View iView = View.inflate(context, R.layout.gallery_grid_item, null);
+        View iView = View.inflate(context, R.layout.grid_item_gallery, null);
         GridCellViewHolder holder = new GridCellViewHolder(iView);
         iView.setTag(holder);
 

@@ -127,6 +127,7 @@ public class OSDirectory implements IDirectory {
         destroy(mChilden);
         mChilden = null;
         mCurrent = null;
+        mParent = null;
     }
 
     private void destroy(List<IDirectory> childen) {
@@ -136,7 +137,6 @@ public class OSDirectory implements IDirectory {
             }
             childen.clear();
         }
-        this.mParent = null;
     }
 
     @Override

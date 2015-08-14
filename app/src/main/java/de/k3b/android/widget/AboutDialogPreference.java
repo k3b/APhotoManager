@@ -45,7 +45,7 @@ public class AboutDialogPreference extends DialogPreference {
         super(context, attrs);
         setDialogIcon(R.drawable.foto_gallery);
         setDialogTitle(R.string.about_summary);
-        setDialogLayoutResource(R.layout.about_dialog);
+        setDialogLayoutResource(R.layout.dialog_about);
         this.context = context;
 
     }

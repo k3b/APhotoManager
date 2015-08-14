@@ -326,5 +326,4 @@ public class FileCommands implements  Cloneable {
             mLogFile.flush();
         }
     }
-
 }

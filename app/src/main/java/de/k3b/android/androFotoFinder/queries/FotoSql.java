@@ -288,7 +288,7 @@ public class FotoSql {
             case SORT_BY_DATE:
                 return context.getString(R.string.date);
             case SORT_BY_NAME:
-                return context.getString(R.string.file_name);
+                return context.getString(R.string.name);
             case SORT_BY_LOCATION:
                 return context.getString(R.string.place);
             case SORT_BY_NAME_LEN:
