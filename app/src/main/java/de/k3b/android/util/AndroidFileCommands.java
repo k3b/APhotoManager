@@ -2,6 +2,7 @@ package de.k3b.android.util;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.media.MediaScannerConnection;
@@ -14,11 +15,8 @@ import android.view.MenuItem;
 import java.io.File;
 
 import de.k3b.android.androFotoFinder.R;
-import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
-import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.io.FileCommands;
 import de.k3b.io.IDirectory;
-import de.k3b.io.OSDirectory;
 
 /**
  * Api to manipulate files/photos.
@@ -28,25 +26,28 @@ import de.k3b.io.OSDirectory;
  */
 public class AndroidFileCommands extends FileCommands {
     private static final String SETTINGS_KEY_LAST_COPY_TO_PATH = "last_copy_to_path";
-    private final Activity mContext;
+    private Activity mContext;
+    private AlertDialog mActiveAlert = null;
 
-    public AndroidFileCommands(Activity context) {
-        this(context, getDefaultLogFile(context));
+    public AndroidFileCommands() {
+        // setLogFilePath(getDefaultLogFile());
+        setContext(null);
     }
 
-    public AndroidFileCommands(Activity context, String logFilePath) {
-        super(logFilePath);
-        mContext = context;
+    public void close() {
+        if (mActiveAlert != null) {
+            mActiveAlert.dismiss();
+            mActiveAlert = null;
+        }
     }
-
-    private static String getDefaultLogFile(Activity context) {
+    public String getDefaultLogFile() {
         Boolean isSDPresent = true; // Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED);
 
-        // since android 4.4 Environment.getDataDirectory() and .getDownloadCacheDirectory ()
+        // since android 4.4 Evnvironment.getDataDirectory() and .getDownloadCacheDirectory ()
         // is protected by android-os :-(
         // app will not work on devices with no external storage (sdcard)
-        final File rootDir = ((isSDPresent)) ? Environment.getExternalStorageDirectory() : Environment.getRootDirectory();
-        final String zipfile = rootDir.getAbsolutePath() + "/" + context.getString(R.string.log_file_path);
+        final File rootDir = (isSDPresent) ? Environment.getExternalStorageDirectory() : Environment.getRootDirectory();
+        final String zipfile = rootDir.getAbsolutePath() + "/" + mContext.getString(R.string.log_file_path);
         return zipfile;
     }
 
@@ -74,54 +75,36 @@ public class AndroidFileCommands extends FileCommands {
             switch (item.getItemId()) {
                 case R.id.cmd_delete:
                     return cmdDeleteFileWithQuestion(selectedFileNames);
-                case R.id.cmd_copy:
-                    return cmdMoveOrCopyWithDestDirPicker(false, selectedFileNames);
-                case R.id.cmd_move:
-                    return cmdMoveOrCopyWithDestDirPicker(true, selectedFileNames);
             }
         }
         return false;
     }
 
-    private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, final SelectedFotos fotos) {
-        DirectoryPickerFragment destDir = new DirectoryPickerFragment() {
-            @Override
-            protected void onDirectoryPick(IDirectory selection) {
-                // super.onDirectoryPick(selection);
-                dismiss();
+    public void onMoveOrCopyDirectoryPick(boolean move, IDirectory destFolder, SelectedFotos srcFotos) {
+        if (destFolder != null) {
+            String copyToPath = destFolder.getAbsolute();
+            setLastCopyToPath(copyToPath);
+            File destDirFolder = new File(copyToPath);
 
-                if (selection != null) {
-                    String copyToPath = selection.getAbsolute();
-                    setLastCopyToPath(copyToPath);
-                    File destDirFolder = new File(copyToPath);
+            String[] selectedFileNames = srcFotos.getFileNames(mContext);
+            Long[] ids = (move) ? srcFotos.getIds() : null;
+            moveOrCopyFilesTo(move, destDirFolder, SelectedFotos.getFiles(selectedFileNames));
 
-                    String[] selectedFileNames = fotos.getFileNames();
-                    Long[] ids = (move) ? fotos.getIds() : null;
-                    moveOrCopyFilesTo(move, destDirFolder, SelectedFotos.getFiles(selectedFileNames));
-
-                    if (move) {
-                        // remove from media database after successfull move
-                        File[] sourceFiles = SelectedFotos.getFiles(selectedFileNames);
-                        for (int i = 0; i < sourceFiles.length; i++) {
-                            File sourceFile = sourceFiles[i];
-                            if (!sourceFile.exists()) {
-                                onMediaDeleted(sourceFile.getAbsolutePath(), ids[i]);
-                            }
-                        }
+            if (move) {
+                // remove from media database after successfull move
+                File[] sourceFiles = SelectedFotos.getFiles(selectedFileNames);
+                for (int i = 0; i < sourceFiles.length; i++) {
+                    File sourceFile = sourceFiles[i];
+                    if (!sourceFile.exists()) {
+                        onMediaDeleted(sourceFile.getAbsolutePath(), ids[i]);
                     }
                 }
             }
-        };
-        String copyToPath = getLastCopyToPath();
-
-        destDir.defineDirectoryNavigation(new OSDirectory("/", null), FotoSql.QUERY_TYPE_GROUP_COPY, copyToPath);
-        destDir.setContextMenuId(R.menu.menu_context_osdir);
-        destDir.show(this.mContext.getFragmentManager(), "osdir");
-        return false;
+        }
     }
 
     @NonNull
-    private String getLastCopyToPath() {
+    public String getLastCopyToPath() {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
         return sharedPref.getString(SETTINGS_KEY_LAST_COPY_TO_PATH, "/");
     }
@@ -136,7 +119,7 @@ public class AndroidFileCommands extends FileCommands {
 
 
     public boolean cmdDeleteFileWithQuestion(final SelectedFotos fotos) {
-        String[] pathNames = fotos.getFileNames();
+        String[] pathNames = fotos.getFileNames(mContext);
         StringBuffer names = new StringBuffer();
         for (String name : pathNames) {
             names.append(name).append("\n");
@@ -157,7 +140,7 @@ public class AndroidFileCommands extends FileCommands {
                             public void onClick(
                                     final DialogInterface dialog,
                                     final int id) {
-                                deleteFiles(fotos);
+                                mActiveAlert = null; deleteFiles(fotos);
                             }
                         }
                 )
@@ -167,19 +150,20 @@ public class AndroidFileCommands extends FileCommands {
                             public void onClick(
                                     final DialogInterface dialog,
                                     final int id) {
-                                dialog.cancel();
+                                mActiveAlert = null; dialog.cancel();
                             }
                         }
                 );
 
         final AlertDialog alert = builder.create();
+        mActiveAlert = alert;
         alert.show();
         return true;
     }
 
     private int deleteFiles(SelectedFotos fotos) {
         int result = 0;
-        String[] fileNames = fotos.getFileNames();
+        String[] fileNames = fotos.getFileNames(mContext);
         openLogfile();
         File[] toBeDeleted = SelectedFotos.getFiles(fileNames);
         Long[] ids = fotos.getIds();
@@ -203,5 +187,12 @@ public class AndroidFileCommands extends FileCommands {
         mContext.getContentResolver().delete(uri,null, null);
         log("rem deleted '" + absolutePath +
                 "' as content: " , uri.toString());
+    }
+
+    public void setContext(Activity mContext) {
+        this.mContext = mContext;
+        if (mContext != null) {
+            closeLogFile();
+        }
     }
 }

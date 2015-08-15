@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -17,13 +18,7 @@ import de.k3b.database.SelectedItems;
  * SelectedItems with media support
  * Created by k3b on 03.08.2015.
  */
-public class SelectedFotos extends SelectedItems {
-    private Activity mContext;
-
-    public void setContext(Activity context) {
-        mContext = context;
-    }
-
+public class SelectedFotos extends SelectedItems implements Serializable {
     public static File[] getFiles(String[] fileNames) {
          // getFileNames();
         if ((fileNames == null) || (fileNames.length == 0)) return null;
@@ -37,7 +32,7 @@ public class SelectedFotos extends SelectedItems {
         return result;
     }
 
-    public String[] getFileNames() {
+    public String[] getFileNames(Activity context) {
         if (!isEmpty()) {
             ArrayList<String> result = new ArrayList<>();
 
@@ -47,7 +42,7 @@ public class SelectedFotos extends SelectedItems {
             Cursor cursor = null;
 
             try {
-                cursor = requery(mContext, parameters.toColumns(), parameters.toFrom(), parameters.toAndroidWhere(), parameters.toOrderBy(), parameters.toAndroidParameters());
+                cursor = requery(context, parameters.toColumns(), parameters.toFrom(), parameters.toAndroidWhere(), parameters.toOrderBy(), parameters.toAndroidParameters());
 
                 int colPath = cursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT);
                 while (cursor.moveToNext()) {

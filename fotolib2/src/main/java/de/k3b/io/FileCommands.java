@@ -21,16 +21,13 @@ public class FileCommands implements  Cloneable {
     public static final int OP_DELETE = 3;
     private static final String EXT_SIDECAR = ".xmp";
 
-    private final String mLogFilePath;
+    private String mLogFilePath;
     // private static final String LOG_FILE_ENCODING = "UTF-8";
     private PrintWriter mLogFile;
     private ArrayList<String> mModifiedFiles;
 
-    public FileCommands(String logFilePath) {
-        mLogFilePath = logFilePath;
-        mLogFile = null;
-
-        // openLogfile();
+    public FileCommands() {
+        setLogFilePath(null);
     }
 
     public int deleteFiles(String... paths) {
@@ -308,6 +305,11 @@ public class FileCommands implements  Cloneable {
                 }
             }
         }
+    }
+
+    public void setLogFilePath(String logFilePath) {
+        closeLogFile();
+        mLogFilePath = logFilePath;
     }
 
     public void closeLogFile() {

@@ -61,6 +61,7 @@ import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.io.Directory;
 import de.k3b.io.IDirectory;
+import de.k3b.io.OSDirectory;
 
 /**
  * A {@link Fragment} to show ImageGallery content based on ContentProvider-Cursor.
@@ -103,7 +104,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private final SelectedFotos mSelectedItems = new SelectedFotos();
     private String mOldTitle = null;
     private boolean mShowSelectedOnly = false;
-    private AndroidFileCommands mFileCommands;
+    private final AndroidFileCommands mFileCommands = new GalleryFileCommands();
 
     /**************** construction ******************/
     /**
@@ -120,6 +121,42 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         return fragment;
     }
 
+    class GalleryFileCommands extends AndroidFileCommands {
+        /*
+        @Override
+        public void deleteFiles(String... paths) {
+            super.deleteFiles(paths);
+            if (Global.clearSelectionAfterCommand) {
+                mShowSelectedOnly = true;
+                multiSelectionCancel();
+            }
+        }
+        */
+
+        @Override
+        protected void onPostProcess(String[] paths, int modifyCount, int itemCount, int opCode) {
+            super.onPostProcess(paths, modifyCount, itemCount, opCode);
+            if (Global.clearSelectionAfterCommand || (opCode == OP_DELETE) || (opCode == OP_MOVE)) {
+                mShowSelectedOnly = true;
+                multiSelectionCancel();
+            }
+
+            int resId = getResourceId(opCode);
+            String message = getString(resId, Integer.valueOf(modifyCount), Integer.valueOf(itemCount));
+            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+            mDirectoryListener.invalidateDirectories();
+        }
+
+        private int getResourceId(int opCode) {
+            switch (opCode) {
+                case OP_COPY: return R.string.format_copy_result;
+                case OP_MOVE: return R.string.format_move_result;
+                case OP_DELETE: return R.string.format_delete_result;
+            }
+            return 0;
+        }
+    }
+
     public GalleryCursorFragment() {
         debugPrefix = "GalleryCursorFragment#" + (id++)  + " ";
         Global.debugMemory(debugPrefix, "ctor");
@@ -128,7 +165,6 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, debugPrefix + "()");
         }
-
     }
 
     /**************** live-cycle ******************/
@@ -230,7 +266,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     public void onAttach(Activity activity) {
         Global.debugMemory(debugPrefix, "onAttach");
         super.onAttach(activity);
-        mSelectedItems.setContext(activity);
+        mFileCommands.setContext(activity);
+        mFileCommands.setLogFilePath(mFileCommands.getDefaultLogFile());
+        MoveOrCopyDestDirPicker.sFileCommands = mFileCommands;
         try {
             mGalleryListener = (OnGalleryInteractionListener) activity;
         } catch (ClassCastException e) {
@@ -252,16 +290,19 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         super.onDetach();
         mGalleryListener = null;
         mDirectoryListener = null;
-        mFileCommands = null;
+        mFileCommands.setContext(null);
+        MoveOrCopyDestDirPicker.sFileCommands = null;
     }
 
     @Override
     public void onDestroy() {
         Global.debugMemory(debugPrefix, "onDestroy before");
+
+        mFileCommands.closeLogFile();
+        mFileCommands.close();
         mGalleryContentQuery = null;
         galleryAdapter.changeCursor(null);
         galleryAdapter = null;
-        mFileCommands = null;
         super.onDestroy();
         System.gc();
         Global.debugMemory(debugPrefix, "onDestroy after");
@@ -479,7 +520,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem) {
         // Handle menuItem selection
-        if ((mSelectedItems != null) && (getFileCommands().onOptionsItemSelected(menuItem, mSelectedItems))) {
+        AndroidFileCommands fileCommands = mFileCommands;
+        if ((mSelectedItems != null) && (fileCommands.onOptionsItemSelected(menuItem, mSelectedItems))) {
             return true;
         }
         switch (menuItem.getItemId()) {
@@ -487,6 +529,10 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 return multiSelectionCancel();
             case R.id.cmd_selected_only:
                 return multiSelectionToggle();
+            case R.id.cmd_copy:
+                return cmdMoveOrCopyWithDestDirPicker(false, fileCommands.getLastCopyToPath(), mSelectedItems);
+            case R.id.cmd_move:
+                return cmdMoveOrCopyWithDestDirPicker(true, fileCommands.getLastCopyToPath(), mSelectedItems);
 
             default:
                 return super.onOptionsItemSelected(menuItem);
@@ -494,45 +540,44 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     }
 
-    private AndroidFileCommands getFileCommands() {
-        if (mFileCommands == null) {
-            mFileCommands = new AndroidFileCommands(this.getActivity()) {
-                /*
-                @Override
-                public void deleteFiles(String... paths) {
-                    super.deleteFiles(paths);
-                    if (Global.clearSelectionAfterCommand) {
-                        mShowSelectedOnly = true;
-                        multiSelectionCancel();
-                    }
-                }
-                */
+    public static class MoveOrCopyDestDirPicker extends DirectoryPickerFragment {
+        static AndroidFileCommands sFileCommands = null;
 
-                @Override
-                protected void onPostProcess(String[] paths, int modifyCount, int itemCount, int opCode) {
-                    super.onPostProcess(paths, modifyCount, itemCount, opCode);
-                    if (Global.clearSelectionAfterCommand || (opCode == OP_DELETE) || (opCode == OP_MOVE)) {
-                        mShowSelectedOnly = true;
-                        multiSelectionCancel();
-                    }
+        public static MoveOrCopyDestDirPicker newInstance(boolean move, SelectedFotos srcFotos) {
+            MoveOrCopyDestDirPicker f = new MoveOrCopyDestDirPicker();
 
-                    int resId = getResourceId(opCode);
-                    String message = getString(resId, Integer.valueOf(modifyCount), Integer.valueOf(itemCount));
-                    Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-                    mDirectoryListener.invalidateDirectories();
-                }
+            // Supply index input as an argument.
+            Bundle args = new Bundle();
+            args.putBoolean("move", move);
+            args.putSerializable("srcFotos", srcFotos);
+            f.setArguments(args);
 
-                private int getResourceId(int opCode) {
-                    switch (opCode) {
-                        case OP_COPY: return R.string.format_copy_result;
-                        case OP_MOVE: return R.string.format_move_result;
-                        case OP_DELETE: return R.string.format_delete_result;
-                    }
-                    return 0;
-                }
-            };
+            return f;
         }
-        return mFileCommands;
+
+        public boolean getMove() {
+            return getArguments().getBoolean("move", false);
+        }
+
+        public SelectedFotos getSrcFotos() {
+            return (SelectedFotos) getArguments().getSerializable("srcFotos");
+        }
+
+        @Override
+        protected void onDirectoryPick(IDirectory selection) {
+            // super.onDirectoryPick(selection);
+            dismiss();
+            sFileCommands.onMoveOrCopyDirectoryPick(getMove(), selection, getSrcFotos());
+        }
+    };
+
+    private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFotos fotos) {
+        MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
+
+        destDir.defineDirectoryNavigation(new OSDirectory("/", null), FotoSql.QUERY_TYPE_GROUP_COPY, lastCopyToPath);
+        destDir.setContextMenuId(R.menu.menu_context_osdir);
+        destDir.show(getActivity().getFragmentManager(), "osdir");
+        return false;
     }
 
     private boolean multiSelectionToggle() {
