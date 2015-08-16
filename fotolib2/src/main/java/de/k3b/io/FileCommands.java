@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -58,7 +59,6 @@ public class FileCommands implements  Cloneable {
                 if (!osDeleteFile(file)) {
                     log("rem file exists. delete failed : ", file.getAbsolutePath());
                 } else {
-                    log("rem file exists");
                     result = true; // was deleted
                 }
             } else {
@@ -288,11 +288,18 @@ public class FileCommands implements  Cloneable {
                 File logFile = new File(mLogFilePath);
                 if (osFileExists(logFile)) {
                     // open existing in append mode
+                    long ageInHours = (new Date().getTime() - logFile.lastModified()) / (1000 * 60 * 60);
                     stream = new FileOutputStream(logFile, true);
                     mLogFile = new PrintWriter(stream, true);
+
+                    if (ageInHours > 15) {
+                        log();
+                        log("rem ", new Date());
+                    }
                 } else {
                     // create new
                     mLogFile = new PrintWriter(logFile, "UTF-8");
+                    log("rem " , new Date());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -319,7 +326,7 @@ public class FileCommands implements  Cloneable {
         }
     }
 
-    public void log(Object... messages) {
+    public FileCommands log(Object... messages) {
         if (mLogFile != null) {
             for(Object message : messages) {
                 mLogFile.print(message);
@@ -327,5 +334,6 @@ public class FileCommands implements  Cloneable {
             mLogFile.println();
             mLogFile.flush();
         }
+        return this;
     }
 }

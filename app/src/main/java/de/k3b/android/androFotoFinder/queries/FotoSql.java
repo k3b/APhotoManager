@@ -304,8 +304,9 @@ public class FotoSql {
             case QUERY_TYPE_GROUP_PLACE_MAP:
                 return context.getString(R.string.place);
             case QUERY_TYPE_GROUP_COPY:
+                return context.getString(R.string.destination_copy);
             case QUERY_TYPE_GROUP_MOVE:
-                return context.getString(R.string.destination);
+                return context.getString(R.string.destination_move);
             default:
                 return "???";
         }

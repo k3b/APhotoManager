@@ -34,7 +34,8 @@ public class AndroidFileCommands extends FileCommands {
         setContext(null);
     }
 
-    public void close() {
+    public void closeAll() {
+        closeLogFile();
         if (mActiveAlert != null) {
             mActiveAlert.dismiss();
             mActiveAlert = null;
@@ -184,15 +185,24 @@ public class AndroidFileCommands extends FileCommands {
 
     private void onMediaDeleted(String absolutePath, Long id) {
         Uri uri = SelectedFotos.getUri(id);
-        mContext.getContentResolver().delete(uri,null, null);
+        mContext.getContentResolver().delete(uri, null, null);
         log("rem deleted '" + absolutePath +
-                "' as content: " , uri.toString());
+                "' as content: ", uri.toString());
     }
 
-    public void setContext(Activity mContext) {
+    public AndroidFileCommands setContext(Activity mContext) {
         this.mContext = mContext;
         if (mContext != null) {
             closeLogFile();
         }
+        return this;
+    }
+
+    public static AndroidFileCommands log(Activity context, String... params) {
+        AndroidFileCommands cmd = new AndroidFileCommands().setContext(context);
+        cmd.setLogFilePath(cmd.getDefaultLogFile());
+        cmd.openLogfile();
+        cmd.log(params);
+        return cmd;
     }
 }

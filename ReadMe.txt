@@ -1,38 +1,5 @@
 FotoGallery\ReadMe.txt"
 
-
---------------------
-from http://stackoverflow.com/questions/9156276/android-sdcard-file-permission
-yes it it is possible to set file permissions you need to understand basic file systems This Will Be helpfull to you Android uses Linux kernal so use it accordingly
-
-Java, file permissions are very OS specific: *nix , NTFS (windows) and FAT/FAT32, all have different kind of file permissions. Java comes with some generic file permission to deal with it.
-
-Check if the file permission allow :
-
-file.canExecute(); ֠return true, file is executable; false is not.
-file.canWrite(); ֠return true, file is writable; false is not.
-file.canRead(); ֠return true, file is readable; false is not.
-
-Set the file permission :
-
-file.setExecutable(boolean); ֠true, allow execute operations; false to disallow it.
-file.setReadable(boolean); ֠true, allow read operations; false to disallow it.
-file.setWritable(boolean); ֠true, allow write operations; false to disallow it.
-
-In *nix system, you may need to configure more specifies about file permission, e.g set a 777 permission for a file or directory, however, Java IO classes do not have ready method for it, but you can use the following dirty workaround :
-
-Runtime.getRuntime().exec("chmod 777 file");
-
------------------------------------
-
-
-
-
-
-
-
-
-
 [![Download from F-Droid](https://camo.githubusercontent.com/7df0eafa4433fa4919a56f87c3d99cf81b68d01c/68747470733a2f2f662d64726f69642e6f72672f77696b692f696d616765732f632f63342f462d44726f69642d627574746f6e5f617661696c61626c652d6f6e2e706e67 "Download from F-Droid")](https://f-droid.org/repository/browse/?fdid=uk.co.ashtonbrsc.android.intentintercept)
 
 onLoadComplete what to do make call overlay.draw() happen? invalidate does not work

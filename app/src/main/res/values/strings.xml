@@ -29,7 +29,8 @@
     <string name="date">Date</string>
     <string name="place">Place</string>
     <string name="sort_by_name_len">Lenght</string>
-    <string name="destination">Destination</string>
+    <string name="destination_move">Move Destination</string>
+    <string name="destination_copy">Copy Destination</string>
 
     <string name="action_settings">Settings</string>
     <string name="no_dir_selected">Select Folder with Images to enable OK</string>

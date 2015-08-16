@@ -28,7 +28,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -52,6 +51,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryNavigator;
 import de.k3b.io.IDirectory;
@@ -308,6 +308,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
 
         int msgId;
         if (newChild.osMkDirs()) {
+            AndroidFileCommands.log(getActivity(), "mkdirs \"", newPathAbsolute, "\"" ).closeLogFile();
             msgId = R.string.cmd_mk_success;
             reloadTreeViewIfAvailable();
             onParentPathBarButtonClick(newChild);
