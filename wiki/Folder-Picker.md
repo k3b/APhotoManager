@@ -1,8 +1,9 @@
-# ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_map.png) [Folder-Picker](Folder-Picker)
+# ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_folder.png) [Folder-Picker](Folder-Picker)
 
 You can reach the [Folder-Picker](Folder-Picker) via
 
-* the "folder symbol" ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_map.png) in the [Gallery-View](Gallery-View)
+* the "folder symbol" ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_folder.png) or menu "Select Folder" in the [Gallery-View](Gallery-View)
+* the menu "Copy" or "Move" in the [Gallery-View](Gallery-View) in multiselection mode
 * the "folder picker" in the [Filter-View](Filter-View)
 
 In the top area is the **"path bar"** : a list of button where each button represent a folder in the current path.
@@ -22,6 +23,8 @@ In the button area you have buttons **OK**, **Cancel** and a **preview image**
   * the **current folder path** is updated
   * the folder picker navigates to that path 
   * and a photo belonging to the folder is displayed in the lower right corner.
+* If you long tap on a (sub)folder in the **list** or a button in the **path bar** you get a context menu for the folder
+  * **Create Folder** to create a folder when copying/moving files.
 * The "Ok" button takes the current folder-path and updates the caller:
   * [Gallery-View](Gallery-View): to update which photos are visible.
   * [Filter-View](Filter-View): set the path value.
