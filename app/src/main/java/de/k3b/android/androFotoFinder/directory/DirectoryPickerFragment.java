@@ -177,9 +177,12 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         if (mContextMenue != 0) {
             treeView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                 @Override
-                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                    long packedPos = treeView.getExpandableListPosition(position);
-                    onShowPopUp(view, mNavigation.getChild(treeView.getPackedPositionGroup(packedPos), treeView.getPackedPositionGroup(packedPos)));
+                public boolean onItemLongClick(AdapterView<?> parent, View view, int flatPosition, long id) {
+                    long packedPos = treeView.getExpandableListPosition(flatPosition);
+                    int group = treeView.getPackedPositionGroup(packedPos);
+                    int child = treeView.getPackedPositionChild(packedPos);
+                    IDirectory directory = (child != -1) ? mNavigation.getChild(group, child) : mNavigation.getGroup(group);
+                    onShowPopUp(view, directory);
                     return false;
                 }
             });

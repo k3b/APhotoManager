@@ -299,7 +299,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         Global.debugMemory(debugPrefix, "onDestroy before");
 
         mFileCommands.closeLogFile();
-        mFileCommands.close();
+        mFileCommands.closeAll();
         mGalleryContentQuery = null;
         galleryAdapter.changeCursor(null);
         galleryAdapter = null;
