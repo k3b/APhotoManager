@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
  * Copyright (c) 2015 by k3b.
@@ -20,10 +20,20 @@
  */
  -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".imagedetail.ImageDetailActivityViewPager">
-    <item android:id="@+id/action_details" android:title="@string/cmd_details"
-        android:icon="@android:drawable/ic_menu_preferences"
-        android:orderInCategory="100" android:showAsAction="ifRoom" />
+    xmlns:tools="http://schemas.android.com/tools" tools:context=".GalleryActivity">
+
+    <item android:id="@+id/cmd_select_folder"
+        android:title="@string/action_folder_title"
+        android:icon="@drawable/ic_action_holo_dark_folder"
+        android:visible="true"
+        android:orderInCategory="1"
+        android:showAsAction="ifRoom" />
+
+    <item android:id="@+id/cmd_select_lat_lon"
+        android:title="@string/action_area_title"
+        android:icon="@android:drawable/ic_dialog_map"
+        android:visible="true"
+        android:orderInCategory="1"
+        android:showAsAction="ifRoom" />
 
 </menu>

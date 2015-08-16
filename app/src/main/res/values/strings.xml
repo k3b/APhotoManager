@@ -25,15 +25,18 @@
 
     <!-- sort criteria -->
     <string name="folder">Folder</string>
-    <string name="file_name">Name</string>
+    <string name="name">Name</string>
     <string name="date">Date</string>
     <string name="place">Place</string>
     <string name="sort_by_name_len">Lenght</string>
+    <string name="destination_move">Move Destination</string>
+    <string name="destination_copy">Copy Destination</string>
 
     <string name="action_settings">Settings</string>
     <string name="no_dir_selected">Select Folder with Images to enable OK</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
+    <string name="popup">...</string>
 
     <string name="action_folder_title">Select Folder</string>
     <string name="action_area_title">Select Area</string>
@@ -60,9 +63,33 @@
     <string name="unknown">/unknown/</string>
     <string name="invalid_location">\'%1$s\' is not a valid coordinate.</string>
     <string name="invalid_date">\'%1$s\' is not a valid date.</string>
-    <string name="action_details" >Details</string>
+    <string name="cmd_details" >Details</string>
     <string name="title_cright_osm">Map Tiles (c) <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> Contributors</string>
     <string name="about_summary">About Andro Foto Finder</string>
+
+    <string name="title_multiselection">%1$d Selected</string>
+
+    <string name="cmd_share">Share</string>
+    <string name="cmd_delete">Delete</string>
+    <string name="cmd_copy">Copy</string>
+    <string name="cmd_move">Move</string>
+    <string name="cmd_mk_dir">Create Folder</string>
+    <string name="cmd_mk_success">Created %1$s</string>
+    <string name="cmd_mk_failed">Cannot create %1$s</string>
+    <string name="mk_dir_default">new_folder</string>
+
+
+    <string name="btn_yes">Yes</string>
+    <string name="btn_no">No</string>
+
+    <string name="format_delete_result">deleted %1$d/%2$d files</string>
+    <string name="format_copy_result">copied %1$d/%2$d files</string>
+    <string name="format_move_result">moved %1$d/%2$d files</string>
+    <string name="title_confirm_removal" >Delete Photo(s)?</string>
+    <string name="format_confirm_delete">"Are you sure you want to permanently delete these Files?
+%1$s
+
+This operation cannot be reversed."</string>
 
     <string name="about_content_about">"
 <![CDATA[
@@ -93,5 +120,4 @@ Features:
 <br />
 ]]>
 "</string>
-
 </resources>

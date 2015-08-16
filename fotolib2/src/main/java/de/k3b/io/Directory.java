@@ -27,7 +27,7 @@ import java.util.List;
  *
  * Created by k3b on 04.06.2015.
  */
-public class Directory {
+public class Directory implements IDirectory {
     public static final String PATH_DELIMITER = "/";
 
     // Display options
@@ -39,8 +39,8 @@ public class Directory {
     public static final int OPT_NONE = 0;
 
     private String relPath = null;
-    private Directory parent = null;
-    private List<Directory> children = null;
+    private IDirectory parent = null;
+    private List<IDirectory> children = null;
 
     private int nonDirItemCount = 0;
     private int nonDirSubItemCount = 0;
@@ -59,9 +59,10 @@ public class Directory {
         setNonDirItemCount(nonDirItemCount);
     }
 
+    @Override
     public void destroy() {
         if (children != null) {
-            for (Directory child : children) {
+            for (IDirectory child : getChildren()) {
                 child.destroy();
             }
             children = null;
@@ -69,7 +70,7 @@ public class Directory {
         parent = null;
     }
 
-    void addChild(Directory child) {
+    void addChild(IDirectory child) {
         if (this.children == null)
             this.children = new ArrayList<>();
         this.children.add(child);
@@ -78,6 +79,7 @@ public class Directory {
 
     /*------------------- simple properties ------------------------*/
 
+    @Override
     public String getRelPath() {
         return relPath;
     }
@@ -86,7 +88,8 @@ public class Directory {
         this.relPath = relPath;
     }
 
-    public Directory getParent() {
+    @Override
+    public IDirectory getParent() {
         return parent;
     }
 
@@ -94,19 +97,21 @@ public class Directory {
         this.parent = parent;
     }
 
-    public List<Directory> getChildren() {
+    @Override
+    public List<IDirectory> getChildren() {
         return children;
     }
 
-    public void setChildren(List<Directory> children) {
+    public void setChildren(List<IDirectory> children) {
         this.children = children;
     }
 
     /*------------------- formatting ------------------------*/
 
+    @Override
     public String getAbsolute() {
         StringBuilder result = new StringBuilder();
-        Directory current = this;
+        IDirectory current = this;
 
         while (current != null) {
             String pathSegment = current.getRelPath();
@@ -126,22 +131,25 @@ public class Directory {
             result.append(delimiter);
 
             if (item.getChildren() != null) {
-                for (Directory child : item.getChildren()) {
-                    toTreeString(result, child, delimiter, options);
+                for (IDirectory child : item.getChildren()) {
+                    toTreeString(result, (Directory) child, delimiter, options);
                 }
             }
         }
         return result;
     }
 
-    public static void appendCount(StringBuilder result, Directory item, int options) {
-        int dirCount = ((options & OPT_DIR) == 0) ? 0 : item.getDirCount();
-        int subDirCount = ((options & OPT_SUB_DIR) == 0) ? 0 : item.getSubDirCount();
-        int nonDirItemCount = ((options & OPT_ITEM) == 0) ? 0 : item.getNonDirItemCount();
-        int nonDirSubItemCount = ((options & OPT_SUB_ITEM) == 0) ? 0 : item.getNonDirSubItemCount();
+    public static void appendCount(StringBuilder result, IDirectory _item, int options) {
+        if ((_item != null) && (_item instanceof Directory)) {
+            Directory item = (Directory) _item;
+            int dirCount = ((options & OPT_DIR) == 0) ? 0 : item.getDirCount();
+            int subDirCount = ((options & OPT_SUB_DIR) == 0) ? 0 : item.getSubDirCount();
+            int nonDirItemCount = ((options & OPT_ITEM) == 0) ? 0 : item.getNonDirItemCount();
+            int nonDirSubItemCount = ((options & OPT_SUB_ITEM) == 0) ? 0 : item.getNonDirSubItemCount();
 
-        appendCount(result, "(", dirCount, subDirCount, ")");
-        appendCount(result, ":(", nonDirItemCount, nonDirSubItemCount, ")");
+            appendCount(result, "(", dirCount, subDirCount, ")");
+            appendCount(result, ":(", nonDirItemCount, nonDirSubItemCount, ")");
+        }
     }
 
     private static void appendCount(StringBuilder result, String prefix, int count, int subCount, String suffix) {
@@ -160,7 +168,7 @@ public class Directory {
 
     /*------------------- statistics ------------------------*/
 
-    public Directory setNonDirItemCount(int nonDirItemCount) {
+    public IDirectory setNonDirItemCount(int nonDirItemCount) {
         this.nonDirItemCount = nonDirItemCount;
         return this;
     }
@@ -203,19 +211,20 @@ public class Directory {
         if (iconID > this.iconID) this.iconID = iconID;
     }
 
-    public static int getChildCount(Directory item) {
-        if ((item != null) && (item.children != null)) return item.children.size();
+    public static int getChildCount(IDirectory item) {
+        if ((item != null) && (item.getChildren() != null)) return item.getChildren().size();
         return 0;
     }
 
-    public Directory find(String path) {
+    @Override
+    public IDirectory find(String path) {
         if (path != null) {
             return find(this, new StringBuilder(path));
         }
         return null;
     }
 
-    private static Directory find(Directory parent, StringBuilder path) {
+    private static IDirectory find(IDirectory parent, StringBuilder path) {
         while (path.indexOf(PATH_DELIMITER) == 0) {
             path.delete(0, PATH_DELIMITER.length());
         }
@@ -223,8 +232,8 @@ public class Directory {
         int pathLen = path.length();
         if (pathLen == 0) return parent;
 
-        if (parent.children != null) {
-            for(Directory child : parent.children) {
+        if (parent.getChildren() != null) {
+            for(IDirectory child : parent.getChildren()) {
                 if (path.indexOf(child.getRelPath()) == 0) {
                     int childLen = child.getRelPath().length();
                     if (childLen == pathLen) return child; // found last path element
@@ -241,11 +250,12 @@ public class Directory {
         return null;
     }
 
+    @Override
     public int getIconID() {
         return iconID;
     }
 
-    public Directory setIconID(int iconID) {
+    public IDirectory setIconID(int iconID) {
         this.iconID = iconID;
         return this;
     }

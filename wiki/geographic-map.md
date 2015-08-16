@@ -1,3 +1,5 @@
+# ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_map.png) Pick an area from a [Geographic-Map](Geographic-Map)
+
 Note: The geograpic data in the map come from [openstreetmap servers](http://www.openstreetmap.org) and is cached on the android device. You need an internet connection to download the data.
 
 You can reach the [Geographic-Map](Geographic-Map) via

@@ -36,7 +36,7 @@
         android:gravity="top|left"
 
         android:layout_height="@dimen/grid_cell_icon_height"
-        android:background="@drawable/ic_action_holo_dark_folder"
+        android:background="@android:drawable/checkbox_on_background"
         android:layout_gravity="center" />
 
     <TextView

@@ -33,6 +33,7 @@ import de.k3b.database.QueryParameter;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryBuilder;
 import de.k3b.io.DirectoryFormatter;
+import de.k3b.io.IDirectory;
 
 /**
  * Load Directory in a Background Task.<br>
@@ -40,7 +41,8 @@ import de.k3b.io.DirectoryFormatter;
  * <pre>
     DirectoryLoaderTask loader = new DirectoryLoaderTask(getActivity(), "MyLoader") {
         // This is called when doInBackground() is finished
-        protected void onPostExecute(Directory result) {
+        @Override
+        protected void onPostExecute(IDirectory result) {
             updateGui(result);
         }
 
@@ -54,7 +56,7 @@ import de.k3b.io.DirectoryFormatter;
  *
  * Created by k3b on 02.07.2015.
  */
-public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, Directory> {
+public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDirectory> {
     // every 500 items the progress indicator is advanced
     private static final int PROGRESS_INCREMENT = 500;
 
@@ -67,7 +69,7 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, Dire
         Global.debugMemory(debugPrefix, "ctor");
     }
 
-    protected Directory doInBackground(QueryParameter... queryParameter) {
+    protected IDirectory doInBackground(QueryParameter... queryParameter) {
         if (queryParameter.length != 1) throw new IllegalArgumentException();
 
         QueryParameter queryParameters = queryParameter[0];
@@ -108,7 +110,7 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, Dire
                 }
             }
 
-            Directory result = builder.getRoot();
+            IDirectory result = builder.getRoot();
             if (colText < 0) {
                 compressLatLon(result);
             }
@@ -120,11 +122,12 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, Dire
         }
     }
 
-    private void compressLatLon(Directory result) {
-        List<Directory> children = (result != null) ? result.getChildren() : null;
+    private void compressLatLon(IDirectory result) {
+        List<IDirectory> children = (result != null) ? result.getChildren() : null;
 
         if (children != null) {
-            for (Directory child : children) {
+            for (IDirectory _child: children) {
+                Directory child = (Directory) _child;
                 if (child.getRelPath().indexOf("/") > 0) {
                     child.setRelPath(DirectoryFormatter.getLastPath(child.getRelPath()));
                 }
@@ -146,14 +149,15 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, Dire
     }
 
     // This is called when doInBackground() is finished
-    protected void onPostExecute(Directory result) {
+    protected void onPostExecute(IDirectory result) {
         showNotification("Downloaded " + result + " bytes");
     }
     */
     private static void usageExample(Activity context, QueryParameter parameters, String debugPrefix) {
         DirectoryLoaderTask loader = new DirectoryLoaderTask(context, debugPrefix) {
             // This is called when doInBackground() is finished
-            protected void onPostExecute(Directory result) {
+            @Override
+            protected void onPostExecute(IDirectory result) {
                 // updateGui(result);
             }
             // This is called each time you call publishProgress()

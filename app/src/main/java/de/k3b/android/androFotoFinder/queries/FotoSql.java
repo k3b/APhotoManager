@@ -30,6 +30,7 @@ import java.util.Date;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.database.QueryParameter;
+import de.k3b.database.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
@@ -56,6 +57,9 @@ public class FotoSql {
     public static final int QUERY_TYPE_GROUP_ALBUM = 13;
     public static final int QUERY_TYPE_GROUP_PLACE = 14;
     public static final int QUERY_TYPE_GROUP_PLACE_MAP = 141;
+
+    public static final int QUERY_TYPE_GROUP_COPY = 20;
+    public static final int QUERY_TYPE_GROUP_MOVE = 21;
 
     public static final int QUERY_TYPE_GROUP_DEFAULT = QUERY_TYPE_GROUP_ALBUM;
     public static final int QUERY_TYPE_DEFAULT = QUERY_TYPE_GALLERY;
@@ -175,6 +179,12 @@ public class FotoSql {
         }
     }
 
+    public static void addWhereSelection(QueryParameterParcelable parameters, SelectedItems selectedItems) {
+        if ((parameters != null) && (selectedItems != null) && (!selectedItems.isEmpty())) {
+            parameters.clearWhere().addWhere(FotoSql.SQL_COL_PK + " in (" + selectedItems.toString() + ")");
+        }
+    }
+
     public static void addWhereFilteLatLon(QueryParameterParcelable parameters, IGeoRectangle filter) {
         if ((parameters != null) && (filter != null)) {
             addWhereFilteLatLon(parameters, filter.getLatitudeMin(),
@@ -264,6 +274,9 @@ public class FotoSql {
             case QUERY_TYPE_GROUP_PLACE:
             case QUERY_TYPE_GROUP_PLACE_MAP:
                 return queryGroupByPlace;
+            case QUERY_TYPE_GROUP_COPY:
+            case QUERY_TYPE_GROUP_MOVE:
+                return null;
             default:
                 Log.e(Global.LOG_CONTEXT, "FotoSql.getQuery(" + queryID + "): unknown ID");
                 return null;
@@ -275,7 +288,7 @@ public class FotoSql {
             case SORT_BY_DATE:
                 return context.getString(R.string.date);
             case SORT_BY_NAME:
-                return context.getString(R.string.file_name);
+                return context.getString(R.string.name);
             case SORT_BY_LOCATION:
                 return context.getString(R.string.place);
             case SORT_BY_NAME_LEN:
@@ -290,6 +303,10 @@ public class FotoSql {
             case QUERY_TYPE_GROUP_PLACE:
             case QUERY_TYPE_GROUP_PLACE_MAP:
                 return context.getString(R.string.place);
+            case QUERY_TYPE_GROUP_COPY:
+                return context.getString(R.string.destination_copy);
+            case QUERY_TYPE_GROUP_MOVE:
+                return context.getString(R.string.destination_move);
             default:
                 return "???";
         }

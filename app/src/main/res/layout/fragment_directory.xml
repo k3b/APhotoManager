@@ -25,7 +25,7 @@
     <!--
     [path_scroller with path_owner containing Button-s with path elements]
     [directory_tree]
-    [cmd_ok] [cmd_cancel]
+    [cmd_ok] [cmd_cancel] [cmd_popup]
     [status [current path] or 'Select Directory with Images to enable OK']
     -->
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -118,6 +118,17 @@
             android:layout_above="@+id/status"
             android:layout_toRightOf="@id/cmd_ok"
             android:gravity="center"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/cmd_popup"
+            android:text="@string/popup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/status"
+            android:layout_toRightOf="@id/cmd_cancel"
+            android:gravity="center"
+            android:enabled="false"
             android:visibility="gone" />
 
         <ImageView

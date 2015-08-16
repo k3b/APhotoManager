@@ -48,6 +48,7 @@ import de.k3b.android.androFotoFinder.queries.GalleryFilterParameterParcelable;
 import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryFormatter;
+import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
 
@@ -63,6 +64,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
     private static final String SETTINGS_KEY = "GalleryFilterActivity-";
 
     GalleryFilterParameterParcelable mFilter = null;
+
     private AsFilter mAsFilter = null;
 
     public static void showActivity(Activity context, GalleryFilterParameterParcelable filter) {
@@ -375,10 +377,10 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
     /**************** DirectoryPicker *****************/
     private static class DirInfo {
         int queryId = 0;
-        Directory directoryRoot = null;
+        IDirectory directoryRoot = null;
         String currentPath = null;
-
     }
+
     private HashMap<Integer, DirInfo> dirInfos = new HashMap<Integer, DirInfo>();
     DirInfo getOrCreateDirInfo(int queryId) {
         DirInfo result = dirInfos.get(queryId);
@@ -402,10 +404,11 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
 
     private void showDirectoryPicker(final QueryParameterParcelable currentDirContentQuery) {
         if (fromGui(mFilter)) {
-            Directory directoryRoot = getOrCreateDirInfo(currentDirContentQuery.getID()).directoryRoot;
+            IDirectory directoryRoot = getOrCreateDirInfo(currentDirContentQuery.getID()).directoryRoot;
             if (directoryRoot == null) {
                 DirectoryLoaderTask loader = new DirectoryLoaderTask(this, debugPrefix) {
-                    protected void onPostExecute(Directory directoryRoot) {
+                    @Override
+                    protected void onPostExecute(IDirectory directoryRoot) {
                         onDirectoryDataLoadComplete(directoryRoot, currentDirContentQuery.getID());
                     }
                 };
@@ -416,7 +419,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         }
     }
 
-    private void onDirectoryDataLoadComplete(Directory directoryRoot, int queryId) {
+    private void onDirectoryDataLoadComplete(IDirectory directoryRoot, int queryId) {
         if (directoryRoot != null) {
             Global.debugMemory(debugPrefix, "onDirectoryDataLoadComplete");
 
@@ -440,6 +443,11 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
 
         mFilter.set(selectedAbsolutePath, queryTypeId);
         toGui(mFilter);
+    }
+
+    /** interface DirectoryPickerFragment.invalidateDirectories not used */
+    @Override
+    public void invalidateDirectories() {
     }
 
     /** interface DirectoryPickerFragment.OnDirectoryInteractionListener not used */

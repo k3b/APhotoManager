@@ -34,23 +34,24 @@ public class DirectoryBuilder {
         root = null;
     }
 
-    public Directory getRoot() {
+    public IDirectory getRoot() {
         if (root != null) {
-            List<Directory> children = root.getChildren();
+            List<IDirectory> children = root.getChildren();
             compress(children);
             createStatistics(children);
         }
         return root;
     }
 
-    public static void createStatistics(List<Directory> children) {
+    public static void createStatistics(List<IDirectory> children) {
         if (children != null) {
-            for (Directory child: children) {
+            for (IDirectory _child: children) {
+                Directory child = (Directory) _child;
                 child.setNonDirSubItemCount(child.getNonDirItemCount()).setDirCount(0).setSubDirCount(0);
                 createStatistics(child.getChildren());
-                Directory parent = child.getParent();
+                IDirectory parent = child.getParent();
                 if (parent != null) {
-                    parent.addChildStatistics(child.getSubDirCount(), child.getNonDirSubItemCount(), child.getIconID());
+                    ((Directory)parent).addChildStatistics(child.getSubDirCount(), child.getNonDirSubItemCount(), child.getIconID());
                 }
             }
         }
@@ -63,10 +64,11 @@ public class DirectoryBuilder {
             item = mergeDirWithChildIfPossible(firstChild);
             mergeCound++;
         }
-        List<Directory> children = (firstChild != null) ? firstChild.getChildren() : null;
+        List<IDirectory> children = (firstChild != null) ? firstChild.getChildren() : null;
 
         if ((mergeCound > 0) && (children != null)) {
-            for (Directory child: children) {
+            for (IDirectory _child: children) {
+                Directory child = (Directory) _child;
                 child.setParent(firstChild);
             }
 
@@ -74,19 +76,20 @@ public class DirectoryBuilder {
         compress(children);
     }
 
-    private void compress(List<Directory> children) {
+    private void compress(List<IDirectory> children) {
         if (children != null) {
-            for (Directory child: children) {
+            for (IDirectory _child: children) {
+                Directory child = (Directory) _child;
                 compress(child);
             }
         }
     }
 
     private Directory mergeDirWithChildIfPossible(Directory firstChild) {
-        List<Directory> children = (firstChild != null) ? firstChild.getChildren() : null;
+        List<IDirectory> children = (firstChild != null) ? firstChild.getChildren() : null;
 
         if ((children != null) && children.size() == 1) {
-            Directory child = children.get(0);
+            Directory child = (Directory) children.get(0);
             firstChild.setRelPath(firstChild.getRelPath() + Directory.PATH_DELIMITER + child.getRelPath());
             firstChild.setNonDirItemCount(firstChild.getNonDirItemCount() + child.getNonDirItemCount());
 
@@ -108,7 +111,7 @@ public class DirectoryBuilder {
         return this;
     }
 
-    private Directory addPath(String[] elements, int level, Directory root, int nonDirItemCount, int iconID) {
+    private IDirectory addPath(String[] elements, int level, Directory root, int nonDirItemCount, int iconID) {
         Directory result = addPath(elements, level, root, iconID);
 
         if (result != null) {
@@ -127,9 +130,10 @@ public class DirectoryBuilder {
         if ((serach == null) || (serach.length() == 0))
             return addPath(elements, level + 1, root, iconID);
 
-        List<Directory> children = root.getChildren();
+        List<IDirectory> children = root.getChildren();
         if (children != null) {
-            for (Directory child : children) {
+            for (IDirectory _child: children) {
+                Directory child = (Directory) _child;
                 if (serach.compareToIgnoreCase(child.getRelPath()) == 0) {
                     return addPath(elements, level+1, child, iconID);
                 }
