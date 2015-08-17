@@ -11,8 +11,8 @@ public class SelectedItemsTests {
     public void shoudParse() {
         SelectedItems sut = new SelectedItems().parse("1,2,3,1");
         Assert.assertEquals("size",3, sut.size());
-        Assert.assertEquals("has 2",true, sut.contains(2));
-        Assert.assertEquals("has not 5",false, sut.contains(5));
+        Assert.assertEquals("has 2",true, sut.contains(2l));
+        Assert.assertEquals("has not 5",false, sut.contains(5l));
     }
 
     @Test
