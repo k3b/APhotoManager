@@ -25,5 +25,8 @@
     <item android:id="@+id/action_details" android:title="@string/cmd_details"
         android:icon="@android:drawable/ic_menu_preferences"
         android:orderInCategory="100" android:showAsAction="ifRoom" />
+    <item android:id="@+id/action_edit" android:title="@string/cmd_edit"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:orderInCategory="20" android:showAsAction="ifRoom" />
 
 </menu>

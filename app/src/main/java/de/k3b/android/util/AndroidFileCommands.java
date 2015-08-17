@@ -81,6 +81,15 @@ public class AndroidFileCommands extends FileCommands {
         return false;
     }
 
+    public boolean rename(Long fileId, File dest, File src) {
+        int result = moveOrCopyFiles(true, new File[]{dest}, new File[]{src});
+        if ((fileId != null) && (!osFileExists(src))) {
+            onMediaDeleted(src.getAbsolutePath(), fileId);
+        }
+
+        return (result != 0);
+    }
+
     public void onMoveOrCopyDirectoryPick(boolean move, IDirectory destFolder, SelectedFotos srcFotos) {
         if (destFolder != null) {
             String copyToPath = destFolder.getAbsolute();
@@ -96,7 +105,7 @@ public class AndroidFileCommands extends FileCommands {
                 File[] sourceFiles = SelectedFotos.getFiles(selectedFileNames);
                 for (int i = 0; i < sourceFiles.length; i++) {
                     File sourceFile = sourceFiles[i];
-                    if (!sourceFile.exists()) {
+                    if (!osFileExists(sourceFile)) {
                         onMediaDeleted(sourceFile.getAbsolutePath(), ids[i]);
                     }
                 }
@@ -198,7 +207,7 @@ public class AndroidFileCommands extends FileCommands {
         return this;
     }
 
-    public static AndroidFileCommands log(Activity context, String... params) {
+    public static AndroidFileCommands log(Activity context, Object... params) {
         AndroidFileCommands cmd = new AndroidFileCommands().setContext(context);
         cmd.setLogFilePath(cmd.getDefaultLogFile());
         cmd.openLogfile();

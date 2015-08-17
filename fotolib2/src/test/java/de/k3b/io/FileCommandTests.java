@@ -14,7 +14,7 @@ public class FileCommandTests {
     FileCommands sut;
     @Before
     public void setup() {
-        sut = spy(new FileCommands(null));
+        sut = spy(new FileCommands());
         doReturn(true).when(sut).osCreateDirIfNeccessary(any(File.class));
         doReturn(true).when(sut).osFileMoveOrCopy(anyBoolean(), any(File.class), any(File.class));
         doReturn(true).when(sut).osDeleteFile(any(File.class));

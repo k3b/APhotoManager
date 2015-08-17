@@ -71,11 +71,8 @@ public class FileCommands implements  Cloneable {
     }
 
     public int moveOrCopyFilesTo(boolean move, File destDirFolder, File... sourceFiles) {
-        int opCode = (move) ? OP_MOVE : OP_COPY;
         int result = 0;
         if (osCreateDirIfNeccessary(destDirFolder)) {
-            mModifiedFiles = new ArrayList<String>();
-
             File[] destFiles = createDestFiles(destDirFolder, sourceFiles);
 
             result = moveOrCopyFiles(move, destFiles, sourceFiles);
@@ -83,14 +80,13 @@ public class FileCommands implements  Cloneable {
         } else {
             log("rem Target dir '", destDirFolder.getAbsolutePath(), "' cannot be created");
         }
-
-        int modifyCount = mModifiedFiles.size();
-        onPostProcess((modifyCount > 0) ? mModifiedFiles.toArray(new String[modifyCount]) : null, result, sourceFiles.length, opCode);
         return result;
     }
 
-    /** does the copying. internal to allow unittesting */
-    int moveOrCopyFiles(boolean move, File[] destFiles, File[] sourceFiles) {
+    /** does the copying. also used by unittesting */
+    protected int moveOrCopyFiles(boolean move, File[] destFiles, File[] sourceFiles) {
+        mModifiedFiles = new ArrayList<String>();
+
         openLogfile();
         int itemCount = 0;
         int pos = 0;
@@ -113,6 +109,12 @@ public class FileCommands implements  Cloneable {
             pos++;
         }
         closeLogFile();
+        int modifyCount = mModifiedFiles.size();
+
+        int opCode = (move) ? OP_MOVE : OP_COPY;
+
+        onPostProcess((modifyCount > 0) ? mModifiedFiles.toArray(new String[modifyCount]) : null, itemCount, sourceFiles.length, opCode);
+
         return itemCount;
     }
 
@@ -223,7 +225,7 @@ public class FileCommands implements  Cloneable {
         return result;
     }
 
-    /** to be replaced by mock/stub in unittests */
+    /** can be replaced by mock/stub in unittests */
     protected boolean osFileMove(File dest, File source) {
         return source.renameTo(dest);
     }
@@ -271,8 +273,8 @@ public class FileCommands implements  Cloneable {
         return destDirFolder.mkdirs() || destDirFolder.isDirectory();
     }
 
-    /** to be replaced by mock/stub in unittests */
-    protected boolean osFileExists(File file) {
+    /** can be replaced by mock/stub in unittests */
+    public boolean osFileExists(File file) {
         return file.exists();
     }
 

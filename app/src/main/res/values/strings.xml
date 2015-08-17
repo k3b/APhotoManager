@@ -64,12 +64,25 @@
     <string name="invalid_location">\'%1$s\' is not a valid coordinate.</string>
     <string name="invalid_date">\'%1$s\' is not a valid date.</string>
     <string name="cmd_details" >Details</string>
+
+    <string name="cmd_edit" >Edit</string>
+    <string name="title_chooser_edit" >Choose photo editor</string>
+    <string name="error_edit" >No photo editor found</string>
+
     <string name="title_cright_osm">Map Tiles (c) <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> Contributors</string>
     <string name="about_summary">About Andro Foto Finder</string>
 
     <string name="title_multiselection">%1$d Selected</string>
 
+    <string name="cmd_rename">Rename</string>
+    <string name="err_file_exists">The File \'%1$s\' already exists. Please choose a different name.</string>
+    <string name="err_file_rename">Cannot rename File \'%1$s\'.</string>
+    <string name="success_file_rename">Renamed \'%1$s\' to \'%2$s\'.</string>
+
     <string name="cmd_share">Share</string>
+    <string name="title_chooser_share" >Share/Send</string>
+    <string name="error_share" >No send/share provider found</string>
+
     <string name="cmd_delete">Delete</string>
     <string name="cmd_copy">Copy</string>
     <string name="cmd_move">Move</string>

@@ -263,6 +263,14 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
         return null;
     }
 
+    public long getImageId(int position) {
+        Cursor cursor = getCursorAt(position);
+        if (cursor != null) {
+            return cursor.getLong(cursor.getColumnIndex(FotoSql.SQL_COL_PK));
+        }
+        return 0;
+    }
+
     /**
      * Implementation for PagerAdapter:
      * Create the page for the given position.  The adapter is responsible
