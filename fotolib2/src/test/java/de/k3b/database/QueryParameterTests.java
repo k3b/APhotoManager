@@ -45,7 +45,7 @@ public class QueryParameterTests {
                 .addWhere("w1").addWhere("w2")
                 .addOrderBy("o")
                 .addGroupBy("g1").addGroupBy("g2");
-        Assert.assertEquals("select c from f where ((w1) and (w2)) group by (g1, g2) order by o", normalize(sut.toSqlStringAndroid()));
+        Assert.assertEquals("select c from f where ((w1) and (w2)) group by (g1), (g2) order by o", normalize(sut.toSqlStringAndroid()));
     }
 
     private String normalize(String unnormalized) {
