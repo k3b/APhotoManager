@@ -32,9 +32,9 @@ public class Global {
     /**
      * TODO: create settings view for these
      */
-    public static boolean debugEnabled = false;
+    public static boolean debugEnabled = true;
     public static boolean debugEnabledViewItem = false;
-    public static boolean debugEnabledSql = true;
+    public static boolean debugEnabledSql = false;
 
     public static boolean clearSelectionAfterCommand = false;
 

@@ -18,6 +18,7 @@ package de.k3b.android.androFotoFinder.imagedetail;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.DataSetObserver;
@@ -28,6 +29,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -277,14 +279,21 @@ public class ImageDetailActivityViewPager extends Activity {
     }
 
     private void cmdStartIntent(String currentFilePath, String action, int idChooserCaption, int idEditError) {
-        final Uri uri = Uri.fromFile(new File(currentFilePath));
+        File file = new File(currentFilePath);
+        final Uri uri = Uri.fromFile(file);
 
         final Intent outIntent = new Intent()
-                .setAction(Intent.ACTION_SEND)
-                .setData(uri)
-                .putExtra(Intent.EXTRA_STREAM, uri)
+                .setAction(action)
+                .setDataAndType(uri, getMime(currentFilePath))
+                // .putExtra(Intent.EXTRA_STREAM, uri)
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        if (Global.debugEnabled) {
+            Log.d(Global.LOG_CONTEXT, "cmdStartIntent(" +
+                    action +
+                    ":'" + outIntent.getData() + "',  mime:'" + outIntent.getType() + "')");
+        }
 
         try {
             this.startActivity(Intent.createChooser(outIntent, getText(idChooserCaption)));
@@ -370,6 +379,11 @@ public class ImageDetailActivityViewPager extends Activity {
             errorMessage = getString(R.string.err_file_rename, src.getAbsoluteFile());
             Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
         }
+    }
+
+    private String getMime(String path) {
+        MimeTypeMap map = MimeTypeMap.getSingleton();
+        return map.getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(path));
     }
 
     protected SelectedFotos getCurrentFoto() {

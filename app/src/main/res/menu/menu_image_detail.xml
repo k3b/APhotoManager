@@ -22,6 +22,19 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".imagedetail.ImageDetailActivityViewPager">
+    <item
+        android:id="@+id/menu_item_share"
+        android:showAsAction="always"
+        android:icon="@android:drawable/ic_menu_share"
+        android:title="@string/cmd_share"
+        android:orderInCategory="2" />
+
+    <item
+        android:id="@+id/menu_item_rename"
+        android:showAsAction="ifRoom"
+        android:title="@string/cmd_rename"
+        android:orderInCategory="50" />
+
     <item android:id="@+id/action_details" android:title="@string/cmd_details"
         android:icon="@android:drawable/ic_menu_preferences"
         android:orderInCategory="100" android:showAsAction="ifRoom" />
