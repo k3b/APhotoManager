@@ -555,6 +555,10 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             return f;
         }
 
+        /** do not use activity callback */
+        @Override
+        protected void setDirectoryListener(Activity activity) {}
+
         public boolean getMove() {
             return getArguments().getBoolean("move", false);
         }

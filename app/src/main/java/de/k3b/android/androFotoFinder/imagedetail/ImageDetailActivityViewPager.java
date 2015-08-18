@@ -18,7 +18,6 @@ package de.k3b.android.androFotoFinder.imagedetail;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
-import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.DataSetObserver;
@@ -49,11 +48,8 @@ import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
 
 /**
- * Lock/Unlock button is added to the ActionBar.
- * Use it to temporarily disable ViewPager navigation in order to correctly interact with ImageView by gestures.
- * Lock/Unlock state of ViewPager is saved and restored on configuration changes.
- * 
- * Julia Zudikova
+ * Shows a zoomable imagee.<br>
+ * Swipe left/right to show previous/next image.
  */
 
 public class ImageDetailActivityViewPager extends Activity {
@@ -97,6 +93,10 @@ public class ImageDetailActivityViewPager extends Activity {
 
             return f;
         }
+
+        /** do not use activity callback */
+        @Override
+        protected void setDirectoryListener(Activity activity) {}
 
         public boolean getMove() {
             return getArguments().getBoolean("move", false);
@@ -238,7 +238,22 @@ public class ImageDetailActivityViewPager extends Activity {
     }
 
     private void onLoadCompleted() {
-        mViewPager.setCurrentItem(mInitialPosition);
+        if (mAdapter.getCount() == 0) {
+            // close activity if last image of current selection has been deleted
+            Toast.makeText(this, R.string.delete_empty, Toast.LENGTH_LONG).show();
+            this.finish();
+        } else if (mInitialPosition >= 0) {
+            // after initial load select correct image
+            mViewPager.invalidate();
+            mViewPager.setCurrentItem(mInitialPosition);
+            mInitialPosition = -1;
+        } else  {
+            // update mViewPager so that deleted image will not be the current any more
+            mInitialPosition = mViewPager.getCurrentItem();
+            mViewPager.setAdapter(mAdapter); // reload
+            mViewPager.setCurrentItem(mInitialPosition);
+            mInitialPosition = -1;
+        }
     }
 
     @Override
@@ -271,7 +286,7 @@ public class ImageDetailActivityViewPager extends Activity {
             case R.id.cmd_move:
                 return cmdMoveOrCopyWithDestDirPicker(true, mFileCommands.getLastCopyToPath(), getCurrentFoto());
             case R.id.menu_item_rename:
-            // case R.id.cmd_delete:
+                return onRenameDirQueston(getCurrentImageId(), getCurrentFilePath(), null);
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -352,7 +367,7 @@ public class ImageDetailActivityViewPager extends Activity {
         File srcXmp = mFileCommands.getSidecar(src);
         boolean hasSideCar = ((srcXmp != null) && (mFileCommands.osFileExists(srcXmp)));
 
-        File dest = new File(src.getPath(), newFileName);
+        File dest = new File(src.getParentFile(), newFileName);
         File destXmp = mFileCommands.getSidecar(dest);
 
         if (src == dest) return; // new name == old name ==> nothing to do
@@ -387,10 +402,15 @@ public class ImageDetailActivityViewPager extends Activity {
     }
 
     protected SelectedFotos getCurrentFoto() {
-        int itemPosition = mViewPager.getCurrentItem();
+        long imageId = getCurrentImageId();
         SelectedFotos result = new SelectedFotos();
-        result.add(this.mAdapter.getImageId(itemPosition));
+        result.add(imageId);
         return  result;
+    }
+
+    private long getCurrentImageId() {
+        int itemPosition = mViewPager.getCurrentItem();
+        return this.mAdapter.getImageId(itemPosition);
     }
 
     protected String getCurrentFilePath() {
