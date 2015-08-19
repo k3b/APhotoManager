@@ -68,7 +68,21 @@
         </activity>
         <activity
             android:name="de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager"
-            android:ellipsize="middle" />
+            android:ellipsize="middle" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SENDTO" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!-- file must have mimeType to match -->
+                <data android:mimeType="image/*" />
+                <data android:scheme="file" />
+            </intent-filter>
+
+        </activity>
         <activity
             android:name="de.k3b.android.androFotoFinder.GalleryFilterActivity"
             android:label="@string/title_activity_gallery_filter" >

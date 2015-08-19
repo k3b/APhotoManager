@@ -1,18 +1,22 @@
 /*******************************************************************************
  * Copyright 2011, 2012 Chris Banes.
+ * Copyright (c) 2015 by k3b.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This file is part of AndroFotoFinder.
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *******************************************************************************/
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
 package de.k3b.android.androFotoFinder.imagedetail;
 
 import android.app.Activity;
@@ -143,7 +147,8 @@ public class ImageDetailActivityViewPager extends Activity {
     private static int id = 1;
     private String debugPrefix;
     private DataSetObserver loadCompleteHandler;
-    private int mInitialPosition;
+    private int mInitialPosition = -1;
+    private String mInitialFilePath = null;
 
     public static void showActivity(Activity context, Uri imageUri, int position, QueryParameterParcelable imageDetailQuery) {
         Intent intent;
@@ -170,14 +175,8 @@ public class ImageDetailActivityViewPager extends Activity {
 		setContentView(mViewPager);
 
         // extra parameter
-        this.mGalleryContentQuery = getIntent().getParcelableExtra(EXTRA_QUERY);
-        if (mGalleryContentQuery == null) {
-            Log.e(Global.LOG_CONTEXT, debugPrefix + " onCreate() : intent.extras[" + EXTRA_QUERY +
-                        "] not found. Using default.");
-            mGalleryContentQuery = FotoSql.getQuery(FotoSql.QUERY_TYPE_DEFAULT);
-        } else if (Global.debugEnabled) {
-            Log.e(Global.LOG_CONTEXT, debugPrefix + " onCreate() : query = " + mGalleryContentQuery);
-        }
+        Intent intent = getIntent();
+        getParameter(intent);
 
         mAdapter = new ImagePagerAdapterFromCursor(this, mGalleryContentQuery, debugPrefix);
         loadCompleteHandler = new DataSetObserver() {
@@ -190,7 +189,6 @@ public class ImageDetailActivityViewPager extends Activity {
         mAdapter.registerDataSetObserver(loadCompleteHandler);
         mViewPager.setAdapter(mAdapter);
 
-        this.mInitialPosition = getIntent().getIntExtra(EXTRA_POSITION, this.mInitialPosition);
         if (savedInstanceState != null) {
             mInitialPosition = savedInstanceState.getInt(INSTANCE_STATE_LAST_SCROLL_POSITION, this.mInitialPosition);
             mModifyCount = savedInstanceState.getInt(INSTANCE_STATE_MODIFY_COUNT, this.mModifyCount);
@@ -203,6 +201,36 @@ public class ImageDetailActivityViewPager extends Activity {
         mFileCommands.setContext(this);
         mFileCommands.setLogFilePath(mFileCommands.getDefaultLogFile());
         MoveOrCopyDestDirPicker.sFileCommands = mFileCommands;
+    }
+
+    private void getParameter(Intent intent) {
+        this.mInitialPosition = intent.getIntExtra(EXTRA_POSITION, this.mInitialPosition);
+        this.mGalleryContentQuery = intent.getParcelableExtra(EXTRA_QUERY);
+        if (mGalleryContentQuery == null) {
+            Uri uri = intent.getData();
+            if (uri != null) {
+                String scheme = uri.getScheme();
+                if ((scheme == null) || ("file".equals(scheme))) {
+                    mInitialFilePath = uri.getPath();
+                    File selectedPhoto = new File(mInitialFilePath);
+                    this.mInitialPosition = -1;
+
+                    QueryParameterParcelable query = new QueryParameterParcelable(FotoSql.queryDetail);
+                    FotoSql.addPathWhere(query, selectedPhoto.getParent(), FotoSql.QUERY_TYPE_GALLERY);
+                    FotoSql.setSort(query, FotoSql.SORT_BY_NAME_LEN, true);
+                    mGalleryContentQuery = query;
+                }
+
+            }
+        }
+
+        if (mGalleryContentQuery == null) {
+            Log.e(Global.LOG_CONTEXT, debugPrefix + " onCreate() : intent.extras[" + EXTRA_QUERY +
+                    "] not found. Using default.");
+            mGalleryContentQuery = FotoSql.getQuery(FotoSql.QUERY_TYPE_DEFAULT);
+        } else if (Global.debugEnabled) {
+            Log.e(Global.LOG_CONTEXT, debugPrefix + " onCreate() : query = " + mGalleryContentQuery);
+        }
     }
 
 /* these doe not work yet (tested with for android 4.0)
@@ -266,7 +294,13 @@ public class ImageDetailActivityViewPager extends Activity {
             mViewPager.invalidate();
             mViewPager.setCurrentItem(mInitialPosition);
             mInitialPosition = -1;
-        } else  {
+            mInitialFilePath = null;
+        } else if (mInitialFilePath != null) {
+            mViewPager.invalidate();
+            mViewPager.setCurrentItem(mAdapter.getCursorFromPath(mInitialFilePath));
+            mInitialPosition = -1;
+            mInitialFilePath = null;
+        } else {
             // update mViewPager so that deleted image will not be the current any more
             mInitialPosition = mViewPager.getCurrentItem();
             mViewPager.setAdapter(mAdapter); // reload
