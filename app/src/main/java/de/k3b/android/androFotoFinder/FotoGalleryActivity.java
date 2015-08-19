@@ -48,7 +48,6 @@ import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.queries.Queryable;
 import de.k3b.android.util.GarbageCollector;
 import de.k3b.android.widget.AboutDialogPreference;
-import de.k3b.io.Directory;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IDirectory;
@@ -365,6 +364,11 @@ public class FotoGalleryActivity extends Activity implements
         switch (requestCode) {
             case GalleryFilterActivity.resultID :
                 onFilterChanged(GalleryFilterActivity.getFilter(intent));
+                break;
+            case ImageDetailActivityViewPager.ACTIVITY_ID:
+                if (resultCode == ImageDetailActivityViewPager.RESULT_CHANGE) {
+                    invalidateDirectories();
+                }
                 break;
         }
     }

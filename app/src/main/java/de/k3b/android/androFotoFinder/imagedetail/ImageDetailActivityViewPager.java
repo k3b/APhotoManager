@@ -28,6 +28,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -53,16 +54,25 @@ import de.k3b.io.OSDirectory;
  */
 
 public class ImageDetailActivityViewPager extends Activity {
+    private static final String INSTANCE_STATE_MODIFY_COUNT = "mModifyCount";
+    public static final int ACTIVITY_ID = 76621;
+
+    public static final int RESULT_NOCHANGE = RESULT_FIRST_USER + 1;
+    public static final int RESULT_CHANGE = RESULT_FIRST_USER + 2;
+
+    // how many changes have been made. if != 0 parent activity must invalidate cached data
+    private static int mModifyCount = 0;
+
     class ImageDetailFileCommands extends AndroidFileCommands {
         @Override
         protected void onPostProcess(String[] paths, int modifyCount, int itemCount, int opCode) {
             super.onPostProcess(paths, modifyCount, itemCount, opCode);
             // reload after modification
-            Activity context = ImageDetailActivityViewPager.this;
-            mAdapter.requery(context, mGalleryContentQuery);
+            requery();
             if (Global.clearSelectionAfterCommand || (opCode == OP_DELETE) || (opCode == OP_MOVE)) {
             }
 
+            Activity context = ImageDetailActivityViewPager.this;
             int resId = getResourceId(opCode);
             String message = getString(resId, Integer.valueOf(modifyCount), Integer.valueOf(itemCount));
             Toast.makeText(context, message, Toast.LENGTH_LONG).show();
@@ -109,6 +119,9 @@ public class ImageDetailActivityViewPager extends Activity {
         @Override
         protected void onDirectoryPick(IDirectory selection) {
             // super.onDirectoryPick(selection);
+            mModifyCount++; // copy or move initiated
+            getActivity().setResult((mModifyCount == 0) ? RESULT_NOCHANGE : RESULT_CHANGE);
+
             dismiss();
             sFileCommands.onMoveOrCopyDirectoryPick(getMove(), selection, getSrcFotos());
         }
@@ -141,7 +154,7 @@ public class ImageDetailActivityViewPager extends Activity {
         intent.putExtra(ImageDetailActivityViewPager.EXTRA_POSITION, position);
         intent.setData(imageUri);
 
-        context.startActivity(intent);
+        context.startActivityForResult(intent, ACTIVITY_ID);
     }
 
 
@@ -180,7 +193,12 @@ public class ImageDetailActivityViewPager extends Activity {
         this.mInitialPosition = getIntent().getIntExtra(EXTRA_POSITION, this.mInitialPosition);
         if (savedInstanceState != null) {
             mInitialPosition = savedInstanceState.getInt(INSTANCE_STATE_LAST_SCROLL_POSITION, this.mInitialPosition);
-		}
+            mModifyCount = savedInstanceState.getInt(INSTANCE_STATE_MODIFY_COUNT, this.mModifyCount);
+        } else {
+            mModifyCount = 0;
+        }
+
+        setResult((mModifyCount == 0) ? RESULT_NOCHANGE : RESULT_CHANGE);
 
         mFileCommands.setContext(this);
         mFileCommands.setLogFilePath(mFileCommands.getDefaultLogFile());
@@ -205,6 +223,7 @@ public class ImageDetailActivityViewPager extends Activity {
     @Override
     protected void onPause () {
         Global.debugMemory(debugPrefix, "onPause");
+
         super.onPause();
     }
 
@@ -264,6 +283,7 @@ public class ImageDetailActivityViewPager extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (mFileCommands.onOptionsItemSelected(item, getCurrentFoto())) {
+            mModifyCount++;
             return true; // case R.id.cmd_delete:
         }
 
@@ -342,7 +362,11 @@ public class ImageDetailActivityViewPager extends Activity {
             newName = new File(getCurrentFilePath()).getName();
         }
         edit.setText(newName);
-        edit.setSelection(0, newName.length());
+		
+		// select text without extension
+		int selectLen = newName.lastIndexOf(".");
+		if (selectLen == -1) selectLen = newName.length();
+        edit.setSelection(0, selectLen);
 
         builder.setView(content);
         builder.setNegativeButton(R.string.cancel, null);
@@ -359,6 +383,10 @@ public class ImageDetailActivityViewPager extends Activity {
         // DisplayMetrics metrics = getResources().getDisplayMetrics();
         // int width = metrics.widthPixels;
         alertDialog.getWindow().setLayout(width * 2, LinearLayout.LayoutParams.WRAP_CONTENT);
+		edit.requestFocus();
+		
+		// request keyboard. See http://stackoverflow.com/questions/2403632/android-show-soft-keyboard-automatically-when-focus-is-on-an-edittext
+		alertDialog.getWindow().setSoftInputMode (WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         return true;
     }
 
@@ -386,14 +414,19 @@ public class ImageDetailActivityViewPager extends Activity {
             onRenameDirQueston(fotoId, fotoSourcePath, newFileName);
         } else if (mFileCommands.rename(fotoId, dest, src)) {
             // rename success: update media database and gui
-            mAdapter.requery(this, mGalleryContentQuery);
+            requery();
             errorMessage = getString(R.string.success_file_rename, src.getAbsoluteFile(), newFileName);
             Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
+            mModifyCount++;
         } else {
             // rename failed
             errorMessage = getString(R.string.err_file_rename, src.getAbsoluteFile());
             Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void requery() {
+        mAdapter.requery(this, mGalleryContentQuery);
     }
 
     private String getMime(String path) {
@@ -433,6 +466,7 @@ public class ImageDetailActivityViewPager extends Activity {
 		if (isViewPagerActive()) {
             outState.putInt(INSTANCE_STATE_LAST_SCROLL_POSITION, mViewPager.getCurrentItem());
     	}
+        outState.putInt(INSTANCE_STATE_MODIFY_COUNT, mModifyCount);
 		super.onSaveInstanceState(outState);
 	}
 
