@@ -122,15 +122,26 @@ Features:
     <li>area in <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geographic map</a> (if image has gps-exif info)
     </li>
   </ul>
-  <li>Show result in a scrollable <a href="https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View">gallery view</a></li>
+  <li>Show result in a scrollable <a href="https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View">gallery view</a> with</li>
+  <ul>
+    <li>support for multible photo selection (since 0.4.0)</li>
+    <li>file operations copy, move, delete, share (since 0.4.0)</li>
+  </ul>
   <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View">Photo-detail-view</a> with</li>
   <li><ul>
     <li>image zoom</li>
     <li>swipe to go to next/previous image</li>
     <li>show extended image info (Exif, IPTC, XMP, ICC)</li>
+    <li>file operations copy, move, delete, rename, share (since 0.4.1)</li>
   </ul></li>
   <li>The <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geografic map</a> shows markers at places where photos were
  taken</li>
+  <li>File operations</li>
+  <li><ul>
+    <li>will also update Android's image content-provider-database</li>
+    <li>update xmp-sidecar-files</li>
+    <li>preserve file date if local android supports it.</li>
+  </ul></li>
 </ul>
 <br />
 ]]>
