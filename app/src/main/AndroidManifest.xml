@@ -78,9 +78,22 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <!-- file must have mimeType to match -->
+                <data android:mimeType="image/*" android:scheme="file" />
+            </intent-filter>
+            <intent-filter android:label="@string/app_viewer_name">
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SENDTO" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!-- this does not work
+                <data android:host="*" />
+                <data android:scheme="content" />
+                -->
                 <data android:mimeType="image/*" />
-                <data android:scheme="file" />
-                <data android:scheme="content" /> <!-- not working yet -->
+                <!-- example content://media/external/images/media/4711 -->
             </intent-filter>
 
         </activity>

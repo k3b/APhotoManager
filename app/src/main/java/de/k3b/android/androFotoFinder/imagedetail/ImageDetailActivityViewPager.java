@@ -215,16 +215,9 @@ public class ImageDetailActivityViewPager extends Activity {
                 if ((scheme == null) || ("file".equals(scheme))) {
                     getParameterFromPath(uri.getPath());
                 } else if ("content".equals(scheme)) {
-                    ContentResolver resolver = this.getContentResolver();
-                    Cursor c = null;
-                    try {
-                        c = resolver.query(uri, new String[] {FotoSql.SQL_COL_PATH}, null, null, null);
-                        c.moveToFirst();
-                        getParameterFromPath(c.getString(c.getColumnIndex(FotoSql.SQL_COL_PATH)));
-                    } catch (Exception ex) {
-                        Log.e(Global.LOG_CONTEXT, "Cannot get path from " + uri, ex);
-                    } finally {
-                        if (c != null) c.close();
+                    String path = FotoSql.getFotoPath(this, uri);
+                    if (path != null) {
+                        getParameterFromPath(path);
                     }
                 }
             }
