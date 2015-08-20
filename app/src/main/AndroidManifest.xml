@@ -69,7 +69,7 @@
         <activity
             android:name="de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager"
             android:ellipsize="middle" >
-            <intent-filter>
+            <intent-filter android:label="@string/app_viewer_name">
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SENDTO" />
@@ -80,6 +80,7 @@
                 <!-- file must have mimeType to match -->
                 <data android:mimeType="image/*" />
                 <data android:scheme="file" />
+                <data android:scheme="content" /> <!-- not working yet -->
             </intent-filter>
 
         </activity>

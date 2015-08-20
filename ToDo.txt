@@ -1,10 +1,13 @@
 FotoGallery\ReadMe.txt"
 
-?v	fdroid release 0.4
 
-#3 Detail-View from filemanager
+>  #3 Detail-View from filemanager
 		detail-view via intent to show files of currentfolder
+	?? Crash imageview => sendTo imageview => exit
+	content-uri-s
 
+	intent filter name "a Foto Viewer"
+	
 #4 Detail-View show map with edit/set current gps-lat/lon
 	FotoSql: find lat/lon min/max to calculate best rectangle for map
 		green: known images in area

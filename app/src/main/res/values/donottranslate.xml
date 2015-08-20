@@ -23,6 +23,7 @@ this program. If not, see <http://www.gnu.org/licenses/>
 -->
 <resources>
     <string name="app_name">a Foto Finder</string>
+    <string name="app_viewer_name">a Foto Viewer</string>
 
 <string name="about_content"><![CDATA["<html><body>
 <a href="http://github.com/k3b/AndroFotoFinder/wiki"><b>AndroFotoFinder</b></a><br/>Version $versionName$

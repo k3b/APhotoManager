@@ -22,8 +22,10 @@ package de.k3b.android.androFotoFinder.imagedetail;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
@@ -211,26 +213,42 @@ public class ImageDetailActivityViewPager extends Activity {
             if (uri != null) {
                 String scheme = uri.getScheme();
                 if ((scheme == null) || ("file".equals(scheme))) {
-                    mInitialFilePath = uri.getPath();
-                    File selectedPhoto = new File(mInitialFilePath);
-                    this.mInitialPosition = -1;
-
-                    QueryParameterParcelable query = new QueryParameterParcelable(FotoSql.queryDetail);
-                    FotoSql.addPathWhere(query, selectedPhoto.getParent(), FotoSql.QUERY_TYPE_GALLERY);
-                    FotoSql.setSort(query, FotoSql.SORT_BY_NAME_LEN, true);
-                    mGalleryContentQuery = query;
+                    getParameterFromPath(uri.getPath());
+                } else if ("content".equals(scheme)) {
+                    ContentResolver resolver = this.getContentResolver();
+                    Cursor c = null;
+                    try {
+                        c = resolver.query(uri, new String[] {FotoSql.SQL_COL_PATH}, null, null, null);
+                        c.moveToFirst();
+                        getParameterFromPath(c.getString(c.getColumnIndex(FotoSql.SQL_COL_PATH)));
+                    } catch (Exception ex) {
+                        Log.e(Global.LOG_CONTEXT, "Cannot get path from " + uri, ex);
+                    } finally {
+                        if (c != null) c.close();
+                    }
                 }
-
             }
         }
 
         if (mGalleryContentQuery == null) {
             Log.e(Global.LOG_CONTEXT, debugPrefix + " onCreate() : intent.extras[" + EXTRA_QUERY +
-                    "] not found. Using default.");
+                    "] not found. data=" + intent.getData() +
+                    ". Using default.");
             mGalleryContentQuery = FotoSql.getQuery(FotoSql.QUERY_TYPE_DEFAULT);
-        } else if (Global.debugEnabled) {
-            Log.e(Global.LOG_CONTEXT, debugPrefix + " onCreate() : query = " + mGalleryContentQuery);
+        } else if (Global.debugEnabledSql) {
+            Log.i(Global.LOG_CONTEXT, debugPrefix + " onCreate() : query = " + mGalleryContentQuery);
         }
+    }
+
+    private void getParameterFromPath(String path) {
+        mInitialFilePath = path;
+        File selectedPhoto = new File(mInitialFilePath);
+        this.mInitialPosition = -1;
+
+        QueryParameterParcelable query = new QueryParameterParcelable(FotoSql.queryDetail);
+        FotoSql.addPathWhere(query, selectedPhoto.getParent(), FotoSql.QUERY_TYPE_GALLERY);
+        FotoSql.setSort(query, FotoSql.SORT_BY_NAME_LEN, true);
+        mGalleryContentQuery = query;
     }
 
 /* these doe not work yet (tested with for android 4.0)

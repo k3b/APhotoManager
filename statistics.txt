@@ -1,6 +1,6 @@
 Unique visitors https://github.com/k3b/AndroFotoFinder/graphs/traffic
 
-0730	8
+0730	8	v0.3.4 in frdroid
 0731	15
 0801	24
 0802	19
@@ -18,5 +18,7 @@ Unique visitors https://github.com/k3b/AndroFotoFinder/graphs/traffic
 0814	1
 0815	4
 0816	6	v0.4.0
-0817
+0817	9
+0818	16	v0.4.0 in fdroid
+0819	8
 
