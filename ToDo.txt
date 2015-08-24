@@ -1,65 +1,8 @@
 TODO Stackoverflow:
 
-Intent-filter for "content" uris like content://media/external/images/media/4711 only
+?	Intent-filter for "content" uris like content://media/external/images/media/4711 only
 
-I have written an imageviewer for local files that should be started 
-from a filemanager or from gallery.
-
-To start my viewer i need to add intenfilters in the manifest
-
-This filter works for all local files which is half of what i want
-
-        <activity ... >
-            <intent-filter android:label="@string/app_viewer_name">
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.SEND" />
-                <action android:name="android.intent.action.SENDTO" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <!-- file must have mimeType to match -->
-                <data android:mimeType="image/*" android:scheme="file" />
-            </intent-filter>
-
-However this does not work for content uris like content://media/external/images/media/4711
-
-        <activity ... >
-            <intent-filter android:label="@string/app_viewer_name">
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.SEND" />
-                <action android:name="android.intent.action.SENDTO" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <!-- file must have mimeType to match -->
-                <data android:mimeType="image/*" android:scheme="content" />
-            </intent-filter>
-
-If i remove the schema this filter works for all images (including http, https, file, content) 
-Unfortunatley My app cannont handle http(s) content
-			
-        <activity ... >
-            <intent-filter android:label="@string/app_viewer_name">
-                <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.SEND" />
-                <action android:name="android.intent.action.SENDTO" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <!-- file must have mimeType to match -->
-                <data android:mimeType="image/*"  />
-            </intent-filter>
-
-Is there a way to get "content" only uris or "file" + "content" but not "http", "https", .... ?
-
-I have tested this using the "gallery" app-s share on an android 4.4 handset.
-
-FotoGallery\ReadMe.txt"
-
-content://media/external/images/media
+v	#5	map&selectedItems
 
 >  #3 Detail-View from filemanager
 ??	content-uri-s howto intent filter ??? => stackoverflow

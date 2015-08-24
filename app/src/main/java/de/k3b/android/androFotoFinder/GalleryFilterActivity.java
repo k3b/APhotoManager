@@ -46,7 +46,6 @@ import de.k3b.android.androFotoFinder.locationmap.LocationMapFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.GalleryFilterParameterParcelable;
 import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
-import de.k3b.io.Directory;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
@@ -396,7 +395,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         if (fromGui(mFilter)) {
             final FragmentManager manager = getFragmentManager();
             LocationMapFragment dirDialog = new LocationMapFragment();
-            dirDialog.defineNavigation(null, mFilter, FotoSql.QUERY_TYPE_GROUP_PLACE_MAP);
+            dirDialog.defineNavigation(null, mFilter, null);
 
             dirDialog.show(manager, DLG_NAVIGATOR_TAG);
         }

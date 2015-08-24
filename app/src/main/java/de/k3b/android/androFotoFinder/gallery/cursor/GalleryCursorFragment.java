@@ -121,6 +121,10 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         return fragment;
     }
 
+    public SelectedFotos getSelectedItems() {
+        return mSelectedItems;
+    }
+
     class GalleryFileCommands extends AndroidFileCommands {
         /*
         @Override

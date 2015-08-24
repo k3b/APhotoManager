@@ -2,7 +2,7 @@ The [Gallery-View](Gallery-View) show photos in a scrollable view:
 
 * If you swipe up or down you will see more photos.
 * If you tap on a photo it will be opend in the [Image-View](Image-View).
-+ If you long-tap on a photo the app enters multiselection mode (see below) 
+* If you long-tap on a photo the app enters multiselection mode (see below)
 * The Symbol(s) in the actionbar and the menu item(s)
     * ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_unchecked.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_filter.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_folder.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_map.png)
     * define which photos you want to see (see _current set_ below).
@@ -60,6 +60,7 @@ The [Gallery-View](Gallery-View) has these elements:
 	* ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_cancel.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_unchecked.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_checked.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_share.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_delete.png)
 * Taping on any photo toggles selection of that photo. A Selected photo contains a [X] symbol.
 * Long-tap on a photo it will open it in the [Image-View](Image-View).
+* If you open the [Geographic-Map](Geographic-Map) in multiselection mode selected photos will be shown as blue markers.
 * Additional symbols in the Actionbar (or overflow menu):
     * taping on the cancel symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_cancel.png) exits the multiselection mode.
     * taping on the **selected only** symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_unchecked.png) will show only the seleceted photos. The symbol changes to ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_checked.png) 

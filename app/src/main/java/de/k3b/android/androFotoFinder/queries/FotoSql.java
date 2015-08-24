@@ -153,11 +153,6 @@ public class FotoSql {
         return result;
     }
 
-
-
-
-
-
     public static final QueryParameterParcelable queryDetail = (QueryParameterParcelable) new QueryParameterParcelable()
             .setID(QUERY_TYPE_GALLERY)
             .addColumn(
@@ -167,6 +162,15 @@ public class FotoSql {
                     SQL_COL_GPS)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
             .addOrderBy(SQL_COL_PATH);
+
+    public static final QueryParameterParcelable queryGps = (QueryParameterParcelable) new QueryParameterParcelable()
+            .setID(QUERY_TYPE_UNDEFINED)
+            .addColumn(
+                    SQL_COL_PK,
+                    // SQL_COL_PATH + " AS " + SQL_COL_DISPLAY_TEXT,
+                    "0 AS " + SQL_COL_COUNT,
+                    SQL_COL_LAT, SQL_COL_LON)
+            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString());
 
     public static void setWhereFilter(QueryParameterParcelable parameters, IGalleryFilter filter) {
         if ((parameters != null) && (filter != null)) {

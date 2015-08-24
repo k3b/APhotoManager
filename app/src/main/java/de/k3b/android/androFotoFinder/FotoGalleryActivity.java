@@ -38,6 +38,7 @@ import android.widget.Toast;
 
 import de.k3b.android.androFotoFinder.directory.DirectoryGui;
 import de.k3b.android.androFotoFinder.directory.DirectoryLoaderTask;
+import de.k3b.android.androFotoFinder.gallery.cursor.GalleryCursorFragment;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.locationmap.LocationMapFragment;
 import de.k3b.android.androFotoFinder.queries.GalleryFilterParameterParcelable;
@@ -47,7 +48,9 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.queries.Queryable;
 import de.k3b.android.util.GarbageCollector;
+import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.AboutDialogPreference;
+import de.k3b.database.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IDirectory;
@@ -193,6 +196,8 @@ public class FotoGalleryActivity extends Activity implements
     }
 
     private GalleryQueryParameter mGalleryQueryParameter = new GalleryQueryParameter();
+    // multi selection support
+    private SelectedFotos mSelectedItems = null;
 
     private Queryable mGalleryGui;
 
@@ -223,6 +228,10 @@ public class FotoGalleryActivity extends Activity implements
 
         FragmentManager fragmentManager = getFragmentManager();
         mGalleryGui = (Queryable) fragmentManager.findFragmentById(R.id.galleryCursor);
+
+        if (mGalleryGui instanceof GalleryCursorFragment) {
+            this.mSelectedItems = ((GalleryCursorFragment) mGalleryGui).getSelectedItems();
+        }
 
         // on tablet seperate dir navigator fragment
         mDirGui = (DirectoryGui) fragmentManager.findFragmentById(R.id.directoryFragment);
@@ -389,7 +398,7 @@ public class FotoGalleryActivity extends Activity implements
         final FragmentManager manager = getFragmentManager();
         LocationMapFragment dirDialog = new LocationMapFragment();
         dirDialog.defineNavigation(this.mGalleryQueryParameter.mFilter,
-                this.mGalleryQueryParameter.mCurrentLatLon, FotoSql.QUERY_TYPE_GROUP_PLACE_MAP);
+                this.mGalleryQueryParameter.mCurrentLatLon, mSelectedItems);
 
         dirDialog.show(manager, DLG_NAVIGATOR_TAG);
     }

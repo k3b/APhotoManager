@@ -19,5 +19,5 @@
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/Gallery.png)
 
 
-12:15
-
+[Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map)
+[Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View)

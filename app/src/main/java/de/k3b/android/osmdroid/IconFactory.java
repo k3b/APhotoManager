@@ -61,7 +61,7 @@ public class IconFactory {
     }
 
     // inspired by org.osmdroid.bonuspack.clustering.MarkerClusterer.
-    public BitmapDrawable createIcon(int id, String text) {
+    public BitmapDrawable createIcon(String text) {
         Bitmap finalIcon = Bitmap.createBitmap(mBackground.getWidth(), mBackground.getHeight(), mBackground.getConfig());
         Canvas iconCanvas = new Canvas(finalIcon);
         iconCanvas.drawBitmap(mBackground, 0, 0, null);
