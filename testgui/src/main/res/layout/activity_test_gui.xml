@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+        android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".GeoIntentDemoActivity">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Uri:"
+            android:id="@+id/labelUri"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignRight="@+id/editMime"
+            android:layout_alignEnd="@+id/editMime" />
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:id="@+id/editUri"
+            android:layout_below="@id/labelUri"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mime (empty means null) :"
+            android:id="@+id/labelMime"
+            android:layout_below="@id/editUri"
+            android:layout_alignParentLeft="true"
+            android:layout_alignRight="@+id/editUri"
+            android:layout_alignEnd="@+id/editUri" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="image/*"
+            android:id="@+id/editMime"
+            android:layout_below="@id/labelMime"
+            android:layout_alignParentLeft="true"
+            android:layout_alignRight="@+id/labelMime"
+            android:layout_alignEnd="@+id/labelMime" />
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="get as stream (CATEGORY_OPENABLE)"
+            android:id="@+id/chk_CATEGORY_OPENABLE"
+            android:layout_below="@id/editMime"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+
+            />
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="EXTRA_LOCAL_ONLY"
+            android:id="@+id/chk_EXTRA_LOCAL_ONLY"
+            android:layout_below="@id/chk_CATEGORY_OPENABLE"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+
+            />
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="EXTRA_ALLOW_MULTIPLE"
+            android:id="@+id/chk_EXTRA_ALLOW_MULTIPLE"
+            android:layout_below="@id/chk_EXTRA_LOCAL_ONLY"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Title (empty means none) :"
+            android:id="@+id/labelTitle"
+            android:layout_below="@id/chk_EXTRA_ALLOW_MULTIPLE"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignRight="@+id/editUri"
+            android:layout_alignEnd="@+id/editUri" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select a photo?"
+            android:id="@+id/editTitle"
+            android:layout_below="@id/labelTitle"
+            android:layout_alignParentLeft="true"
+            android:layout_alignRight="@+id/labelTitle"
+            android:layout_alignEnd="@+id/labelTitle" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="de.k3b.EXTRA_FILTER (empty means none) :"
+            android:id="@+id/label_filter"
+            android:layout_below="@id/editTitle"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignRight="@+id/editUri"
+            android:layout_alignEnd="@+id/editUri" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:id="@+id/edit_filter"
+            android:layout_below="@id/label_filter"
+            android:layout_alignParentLeft="true"
+            android:layout_alignRight="@+id/label_filter"
+            android:layout_alignEnd="@+id/label_filter"
+            android:scrollbars="horizontal"
+            android:lines="4" />
+
+        <Button android:text="View" android:id="@+id/runView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/edit_filter"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+        <Button android:text="Pick" android:id="@+id/runDemoPick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/runView"
+            android:layout_toRightOf="@id/runView" />
+        <Button android:text="Get Content" android:id="@+id/runDemoGetContent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/runView"
+            android:layout_toRightOf="@id/runDemoPick" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/labelLastResult"
+            android:text="result"
+            android:layout_below="@+id/runView"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignRight="@+id/editTitle"
+            android:layout_alignEnd="@+id/editTitle" />
+
+    </RelativeLayout>
+</ScrollView>
