@@ -19,5 +19,6 @@
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/Gallery.png)
 
 
-[Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map)
-[Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View)
+* [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map)
+* [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View)
+* [Folder-Picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker)

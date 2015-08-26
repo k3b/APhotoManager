@@ -88,9 +88,10 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <!-- this does not work
-                <data android:host="*" />
-                <data android:scheme="content" />
+                <!-- these do not work
+                <data android:scheme="content" android:host="*"  />
+                <data android:scheme="content" android:host="media" android:pathPattern="/external/images/media/.*" />
+                <data android:host="*" android:scheme="content" android:mimeType="image/*" />
                 -->
                 <data android:mimeType="image/*" />
                 <!-- example content://media/external/images/media/4711 -->

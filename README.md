@@ -21,6 +21,7 @@ Features
     * swiping for next/previous image
     * show extended image info (Exif, IPTC, XMP, ICC)
 	* file operations copy, move, delete, rename, share (since 0.4.1)
+	* can be opened from any filemanager (since 0.4.1)
 * The [geografic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) shows markers at places where photos were taken.
 * File operations 
 	* will also update Android's image content-provider-database
