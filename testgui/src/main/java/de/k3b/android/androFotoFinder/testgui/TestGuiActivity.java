@@ -23,6 +23,7 @@ public class TestGuiActivity extends Activity {
     private CheckBox chk_EXTRA_ALLOW_MULTIPLE;
     private CheckBox chk_CATEGORY_OPENABLE;
     private CheckBox chk_EXTRA_LOCAL_ONLY;
+    private HistoryEditText mHistory;
 
     /** Greate the gui to enter the parameters for testing intent-api. */
     @Override
@@ -55,6 +56,13 @@ public class TestGuiActivity extends Activity {
                 startDemo(Intent.ACTION_VIEW);
             }
         });
+        rundDemoGetContent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {startDemo(Intent.ACTION_GET_CONTENT);
+            }
+        });
+
+        mHistory = new HistoryEditText(this, editMime, editFilter, editTitle, editUri);
     }
 
     /** Gui dependant code */
@@ -64,6 +72,8 @@ public class TestGuiActivity extends Activity {
         if ((mimeString != null) && (mimeString.length() == 0)) mimeString = null;
         String title = editTitle.getText().toString(); // Example "where did you take the photo"
         String filter = editFilter.getText().toString().trim();
+
+        mHistory.saveHistory();
 
         startDemo(uriString, mimeString, action, title, filter,
                 chk_CATEGORY_OPENABLE.isChecked(), chk_EXTRA_ALLOW_MULTIPLE.isChecked(), chk_EXTRA_LOCAL_ONLY.isChecked());
