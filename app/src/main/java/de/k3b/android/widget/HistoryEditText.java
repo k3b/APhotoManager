@@ -22,9 +22,7 @@ package de.k3b.android.widget;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.view.ActionMode;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -34,8 +32,6 @@ import android.widget.PopupMenu;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import de.k3b.android.androFotoFinder.testgui.R;
 
 /**
  * Add history-popup to EditText.
@@ -52,7 +48,7 @@ public class HistoryEditText {
     private final EditorHandler[] mEditorHandlers;
 
     /** ContextActionBar for one EditText */
-    protected class EditorHandler implements ActionMode.Callback, View.OnLongClickListener, View.OnClickListener  {
+    protected class EditorHandler implements View.OnLongClickListener, View.OnClickListener  {
         private final EditText mEditor;
         private final ImageButton mCmd;
         private final String mId;
@@ -62,7 +58,6 @@ public class HistoryEditText {
             mEditor = editor;
 
             mCmd = (cmdId != NO_ID) ? (ImageButton) mContext.findViewById(cmdId) : null;
-            mEditor.setCustomSelectionActionModeCallback(this);
 
             if (mCmd == null) {
                 mEditor.setOnLongClickListener(this);
@@ -73,35 +68,6 @@ public class HistoryEditText {
 
         public String toString(SharedPreferences pref) {
             return mId + " : '" + getHistory(pref) + "'";
-        }
-
-        @Override
-        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            MenuInflater inflater = mode.getMenuInflater();
-            inflater.inflate(R.menu.menu_history_edit_text, menu);
-            // menu.removeItem(android.R.id.selectAll);
-            return true;
-        }
-
-        @Override
-        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            return false;
-        }
-
-        @Override
-        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            switch(item.getItemId()) {
-
-                case R.id.action_history:
-                    showHistory();
-                    return true;
-            }
-            return false;
-        }
-
-        @Override
-        public void onDestroyActionMode(ActionMode mode) {
-
         }
 
         protected void showHistory() {
