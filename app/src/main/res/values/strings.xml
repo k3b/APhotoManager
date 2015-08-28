@@ -70,7 +70,6 @@
     <string name="error_edit" >No photo editor found</string>
 
     <string name="title_cright_osm">Map Tiles (c) <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> Contributors</string>
-    <string name="about_summary">About Andro Foto Finder</string>
 
     <string name="title_multiselection">%1$d Selected</string>
 

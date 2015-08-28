@@ -23,6 +23,7 @@ this program. If not, see <http://www.gnu.org/licenses/>
 -->
 <resources>
     <string name="app_name">a Foto Finder (dev)</string>
+    <string name="about_summary">About a Foto Finder (dev)</string>
     <string name="app_viewer_name">a Foto Viewer (dev)</string>
 
 <string name="about_content"><![CDATA["<html><body>
