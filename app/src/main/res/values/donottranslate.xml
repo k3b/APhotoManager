@@ -22,7 +22,9 @@ this program. If not, see <http://www.gnu.org/licenses/>
     resources that shold NOT be localized
 -->
 <resources>
+    <!-- note these are different in branch fdroid without (dev) and in master with (dev) -->
     <string name="app_name">a Foto Finder</string>
+    <string name="about_summary">About a Foto Finder</string>
     <string name="app_viewer_name">a Foto Viewer</string>
 
 <string name="about_content"><![CDATA["<html><body>
