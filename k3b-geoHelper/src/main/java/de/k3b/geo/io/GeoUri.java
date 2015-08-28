@@ -228,6 +228,11 @@ public class GeoUri {
 
     }
 
+
+    public String toUriString(double latitude, double longitude, int zoomLevel) {
+        return toUriString(new GeoPointDto(latitude, longitude, zoomLevel));
+    }
+
     /**
      * Converts a {@link de.k3b.geo.api.IGeoPointInfo} into uri string representatino.<br/>
      * <br/>

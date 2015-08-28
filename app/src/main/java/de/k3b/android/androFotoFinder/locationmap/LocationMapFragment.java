@@ -22,12 +22,14 @@ package de.k3b.android.androFotoFinder.locationmap;
 
 import android.app.Activity;
 import android.app.DialogFragment;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -65,6 +67,8 @@ import de.k3b.android.osmdroid.GuestureOverlay;
 import de.k3b.android.osmdroid.MarkerBase;
 import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.database.SelectedItems;
+import de.k3b.geo.api.IGeoPointInfo;
+import de.k3b.geo.io.GeoUri;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGeoRectangle;
 
@@ -80,6 +84,7 @@ public class LocationMapFragment extends DialogFragment {
     // for debugging
     private static int sId = 1;
     private final String mDebugPrefix;
+    private final GeoUri mGeoUriEngine = new GeoUri(GeoUri.OPT_DEFAULT);
 
     private MapView mMapView;
     private SeekBar mZoomBar;
@@ -118,6 +123,7 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     @Override public void onDestroy() {
+        saveLastViewPort(null);
         if (mCurrentSummaryMarkerLoader != null) mCurrentSummaryMarkerLoader.cancel(false);
         mCurrentSummaryMarkerLoader = null;
 
@@ -148,23 +154,73 @@ public class LocationMapFragment extends DialogFragment {
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putParcelable(STATE_LAST_VIEWPORT, this.mMapView.getBoundingBox());
+        saveLastViewPort(savedInstanceState);
+    }
+
+    private void saveLastViewPort(Bundle savedInstanceState) {
+        BoundingBoxE6 currentViewPort = this.mMapView.getBoundingBox();
+
+        if (savedInstanceState != null) {
+            savedInstanceState.putParcelable(STATE_LAST_VIEWPORT, currentViewPort);
+        }
+
+        GeoPoint currentCenter = currentViewPort.getCenter();
+        int currentZoomLevel = this.mMapView.getZoomLevel();
+        String uriCurrentViewport = mGeoUriEngine.toUriString(currentCenter.getLatitude(), currentCenter.getLongitude(), currentZoomLevel);
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        SharedPreferences.Editor edit = sharedPref.edit();
+
+        edit.putString(STATE_LAST_VIEWPORT, uriCurrentViewport);
+
+        edit.commit();
+
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + "saveLastViewPort: " + uriCurrentViewport);
+        }
+    }
+
+    @NonNull
+    private IGeoPointInfo loadLastViewPort() {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
+        final String defaultValue = "geo:49,10?z=2";
+        String uri = sharedPref.getString(STATE_LAST_VIEWPORT, defaultValue);
+        IGeoPointInfo result = mGeoUriEngine.fromUri(uri);
+
+        if ((result == null) || Double.isNaN(result.getLongitude()) || (NO_ZOOM == result.getZoomMin())) {
+            result = mGeoUriEngine.fromUri(defaultValue);
+        }
+
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + "loadLastViewPort: " + uri);
+        }
+
+        return result;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        int zoomLevel = NO_ZOOM;
         BoundingBoxE6 boundingBoxE6 = null;
         /** after ratation restore selelected view port */
         if (savedInstanceState != null) {
             boundingBoxE6 =  savedInstanceState.getParcelable(STATE_LAST_VIEWPORT);
         }
-        // if not initialized from outside show the world
         if (boundingBoxE6 == null) {
-            boundingBoxE6 = new BoundingBoxE6(80000000, 170000000, -80000000, -170000000);
+            // if not initialized from outside show last used value
+            IGeoPointInfo rectangle = loadLastViewPort();
+            zoomLevel = rectangle.getZoomMin();
+
+            boundingBoxE6 = new BoundingBoxE6(
+                    rectangle.getLatitude(),
+                    rectangle.getLongitude(),
+                    rectangle.getLatitude(),
+                    rectangle.getLongitude());
         }
-        zoomToBoundingBox(boundingBoxE6 , NO_ZOOM);
+        zoomToBoundingBox(boundingBoxE6 , zoomLevel);
 
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_location_map, container, false);
@@ -364,7 +420,7 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     private void reloadSummaryMarker() {
-        if (mMapView.getHeight() > 0) {
+        if (mIsInitialized) {
             // initialized
             if (mCurrentSummaryMarkerLoader == null) {
                 // not active yet
@@ -468,7 +524,7 @@ public class LocationMapFragment extends DialogFragment {
                         .append(mRecyclerSizeAfter).append(",").append(recyclerSize)
                         .append("\n\t").append(mMapView.getBoundingBox())
                         .append(", z= ").append(mMapView.getZoomLevel())
-                        .append("\n\tPendingLoads").append(mSummaryMarkerPendingLoads);
+                        .append("\n\tPendingLoads: ").append(mSummaryMarkerPendingLoads);
                 if (Global.debugEnabledSql) {
                     Log.w(Global.LOG_CONTEXT, mDebugPrefix + mStatus);
                 } else {
@@ -495,7 +551,7 @@ public class LocationMapFragment extends DialogFragment {
         StringBuilder dbg = (Global.debugEnabledSql || Global.debugEnabled) ? new StringBuilder() : null;
         if (dbg != null) {
             int found = (result != null) ? result.size() : 0;
-            dbg.append(mDebugPrefix).append("onLoadFinishedSummaryMarker() markers created: ").append(found);
+            dbg.append(mDebugPrefix).append("onLoadFinishedSummaryMarker() markers created: ").append(found).append(". ");
         }
 
         if (result != null) {
