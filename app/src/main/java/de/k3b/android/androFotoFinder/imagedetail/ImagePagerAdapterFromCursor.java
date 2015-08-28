@@ -89,7 +89,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
     @Override
     public void requery(final Activity context, QueryParameterParcelable parameters) {
         this.parameters = parameters;
-        if (Global.debugEnabled) {
+        if (Global.debugEnabledSql) {
             Log.i(Global.LOG_CONTEXT, debugPrefix + "requery " + ((parameters != null) ? parameters.toSqlString() : null));
         }
 
@@ -263,6 +263,14 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
         return null;
     }
 
+    public long getImageId(int position) {
+        Cursor cursor = getCursorAt(position);
+        if (cursor != null) {
+            return cursor.getLong(cursor.getColumnIndex(FotoSql.SQL_COL_PK));
+        }
+        return 0;
+    }
+
     /**
      * Implementation for PagerAdapter:
      * Create the page for the given position.  The adapter is responsible
@@ -315,6 +323,23 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
             return this.mCursor;
         }
         return null;
+    }
+
+    /** internal helper. return null if position is not available */
+    public int getCursorFromPath(String path) {
+        if (this.mDataValid && (this.mCursor != null) && (path != null)) {
+            int index = mCursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT);
+            if (index >= 0) {
+                if (mCursor.moveToFirst()) {
+                    do {
+                        if (path.equals(mCursor.getString(index))) {
+                            return mCursor.getPosition();
+                        }
+                    } while (mCursor.moveToNext());
+                }
+            }
+        }
+        return -1;
     }
 
     private boolean mHasLowMemory = false;

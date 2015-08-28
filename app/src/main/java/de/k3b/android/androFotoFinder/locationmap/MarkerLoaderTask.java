@@ -63,8 +63,8 @@ public abstract class MarkerLoaderTask<MARKER extends MarkerBase> extends AsyncT
     // every 500 items the progress indicator is advanced
     private static final int PROGRESS_INCREMENT = 500;
 
-    private final Activity context;
-    private final String debugPrefix;
+    private final Activity mContext;
+    protected final String mDebugPrefix;
     private final IconFactory mIconFactory;
     private final DefaultResourceProxyImplEx mResourceProxy;
     protected HashMap<Integer, MARKER> mOldItems;
@@ -77,8 +77,8 @@ public abstract class MarkerLoaderTask<MARKER extends MarkerBase> extends AsyncT
         }
 
         Global.debugMemory(debugPrefix, "ctor");
-        this.context = context;
-        this.debugPrefix = debugPrefix;
+        this.mContext = context;
+        this.mDebugPrefix = debugPrefix;
         mOldItems = oldItems;
         mResourceProxy = new DefaultResourceProxyImplEx(context);
         mIconFactory = new IconFactory(mResourceProxy, context.getResources().getDrawable(R.drawable.marker_green));
@@ -94,7 +94,7 @@ public abstract class MarkerLoaderTask<MARKER extends MarkerBase> extends AsyncT
 
         Cursor cursor = null;
         try {
-            cursor = context.getContentResolver().query(Uri.parse(queryParameters.toFrom()), queryParameters.toColumns(),
+            cursor = mContext.getContentResolver().query(Uri.parse(queryParameters.toFrom()), queryParameters.toColumns(),
                     queryParameters.toAndroidWhere(), queryParameters.toAndroidParameters(), queryParameters.toOrderBy());
 
             int itemCount = cursor.getCount();
@@ -118,13 +118,13 @@ public abstract class MarkerLoaderTask<MARKER extends MarkerBase> extends AsyncT
                 int id = cursor.getInt(colIconID);
                 MARKER marker = mOldItems.get(id);
                 if (marker != null) {
-                    // recycle existing
+                    // recycle existing with same content
                     mOldItems.remove(id);
                     mStatisticsRecycled ++;
                 } else {
                     marker = createMarker();
                     GeoPoint point = new GeoPoint(cursor.getDouble(colLat),cursor.getDouble(colLon));
-                    BitmapDrawable icon = mIconFactory.createIcon(id, cursor.getString(colCount));
+                    BitmapDrawable icon = createIcon(cursor.getString(colCount));
                     marker.set(id, point, icon,null );
                 }
 
@@ -150,6 +150,10 @@ public abstract class MarkerLoaderTask<MARKER extends MarkerBase> extends AsyncT
                 cursor.close();
             }
         }
+    }
+
+    protected BitmapDrawable createIcon(String iconText) {
+        return mIconFactory.createIcon(iconText);
     }
 
 }

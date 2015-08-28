@@ -94,8 +94,8 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     private DirectoryNavigator mNavigation;
     private int mDirTypId = 0;
 
-    // api to fragment owner
-    private OnDirectoryInteractionListener mDirectoryListener;
+    // api to fragment owner or null
+    private OnDirectoryInteractionListener mDirectoryListener = null;
 
     // for debugging
     private static int id = 1;
@@ -332,13 +332,13 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
 
     private void onDirectoryCancel() {
         Log.d(Global.LOG_CONTEXT, debugPrefix + "onCancel: " + mCurrentSelection);
-        mDirectoryListener.onDirectoryCancel(mDirTypId);
+        if (mDirectoryListener != null) mDirectoryListener.onDirectoryCancel(mDirTypId);
         dismiss();
     }
 
     protected void onDirectoryPick(IDirectory selection) {
         Log.d(Global.LOG_CONTEXT, debugPrefix + "onOk: " + selection);
-        if (selection != null) {
+        if ((mDirectoryListener != null) && (selection != null)) {
             mDirectoryListener.onDirectoryPick(selection.getAbsolute()
                     , mDirTypId);
             dismiss();
@@ -372,6 +372,10 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+        setDirectoryListener(activity);
+    }
+
+    protected void setDirectoryListener(Activity activity) {
         try {
             mDirectoryListener = (OnDirectoryInteractionListener) activity;
         } catch (ClassCastException e) {

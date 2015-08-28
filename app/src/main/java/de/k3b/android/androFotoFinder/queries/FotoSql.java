@@ -19,6 +19,8 @@
  
 package de.k3b.android.androFotoFinder.queries;
 
+import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
@@ -32,6 +34,7 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
+import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
 
@@ -150,11 +153,6 @@ public class FotoSql {
         return result;
     }
 
-
-
-
-
-
     public static final QueryParameterParcelable queryDetail = (QueryParameterParcelable) new QueryParameterParcelable()
             .setID(QUERY_TYPE_GALLERY)
             .addColumn(
@@ -164,6 +162,15 @@ public class FotoSql {
                     SQL_COL_GPS)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
             .addOrderBy(SQL_COL_PATH);
+
+    public static final QueryParameterParcelable queryGps = (QueryParameterParcelable) new QueryParameterParcelable()
+            .setID(QUERY_TYPE_UNDEFINED)
+            .addColumn(
+                    SQL_COL_PK,
+                    // SQL_COL_PATH + " AS " + SQL_COL_DISPLAY_TEXT,
+                    "0 AS " + SQL_COL_COUNT,
+                    SQL_COL_LAT, SQL_COL_LON)
+            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString());
 
     public static void setWhereFilter(QueryParameterParcelable parameters, IGalleryFilter filter) {
         if ((parameters != null) && (filter != null)) {
@@ -327,6 +334,74 @@ public class FotoSql {
                 return result.replaceOrderBy("length(" + SQL_COL_PATH + ")"+asc);
             default: return  result;
         }
+    }
+
+    public static String getFotoPath(Context context, Uri uri) {
+        Cursor c = null;
+        try {
+            c = query(context, uri.toString(), null, null, null, FotoSql.SQL_COL_PATH);
+            if (c.moveToFirst()) {
+                return c.getString(c.getColumnIndex(FotoSql.SQL_COL_PATH));
+            }
+        } catch (Exception ex) {
+            Log.e(Global.LOG_CONTEXT, "Cannot get path from " + uri, ex);
+        } finally {
+            if (c != null) c.close();
+        }
+        return null;
+    }
+
+    private static Cursor query(final Context context, QueryParameterParcelable parameters) {
+        return query(context, parameters.toFrom(), parameters.toAndroidWhere(),
+                parameters.toAndroidParameters(), parameters.toOrderBy(),
+                parameters.toColumns()
+        );
+    }
+
+    private static Cursor query(final Context context, final String from, final String sqlWhereStatement,
+                         final String[] sqlWhereParameters, final String sqlSortOrder,
+                         final String... sqlSelectColums) {
+        ContentResolver resolver = context.getContentResolver();
+        return resolver.query(Uri.parse(from), sqlSelectColums, sqlWhereStatement, sqlWhereParameters, sqlSortOrder);
+    }
+
+    public static IGeoRectangle getGeoRectangle(Context context, IGalleryFilter filter, SelectedItems selectedItems) {
+        QueryParameterParcelable query = (QueryParameterParcelable) new QueryParameterParcelable()
+                .setID(QUERY_TYPE_UNDEFINED)
+                .addColumn(
+                        "min(" + SQL_COL_LAT + ") AS LAT_MIN",
+                        "max(" + SQL_COL_LAT + ") AS LAT_MAX",
+                        "min(" + SQL_COL_LON + ") AS LON_MIN",
+                        "max(" + SQL_COL_LON + ") AS LON_MAX"
+                )
+                .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString());
+
+        if (filter != null) {
+            setWhereFilter(query, filter);
+        }
+
+        query.addWhere(SQL_COL_LAT + " IS NOT NULL")
+             .addWhere(SQL_COL_LON + " IS NOT NULL");
+
+        if (selectedItems != null) {
+            addWhereSelection(query, selectedItems);
+        }
+
+        Cursor c = null;
+        try {
+            c = query(context, query);
+            if (c.moveToFirst()) {
+                GeoRectangle result = new GeoRectangle();
+                result.setLatitude(c.getDouble(0), c.getDouble(1));
+                result.setLogitude(c.getDouble(2), c.getDouble(3));
+                return result;
+            }
+        } catch (Exception ex) {
+            Log.e(Global.LOG_CONTEXT, "getGeoRectangle: error executing " + query, ex);
+        } finally {
+            if (c != null) c.close();
+        }
+        return null;
     }
 }
 

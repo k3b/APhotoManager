@@ -10,7 +10,8 @@ You can reach the [Geographic-Map](Geographic-Map) via
 ## Features:
 
 * The geografic map shows markers ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/app/src/main/res/drawable-mdpi/marker_green.png) at places where photos were taken.
-* The numer in the marker indicates how many photos belong to the marker.
+* The numer in the **green marker** indicates how many photos belong to the marker.
+* **Blue markers** represent selected photos if [Gallery-View](Gallery-View) is in multiselection mode.
 * If you tap on a marker a photo belonging to the marker is displayed in the lower right corner
 * Tap on the photo to hide it.
 * If you tap somewhere in the map the "zoomin"- and "zoomout"-buttons become visible to change the map detail level.

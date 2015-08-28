@@ -121,6 +121,10 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         return fragment;
     }
 
+    public SelectedFotos getSelectedItems() {
+        return mSelectedItems;
+    }
+
     class GalleryFileCommands extends AndroidFileCommands {
         /*
         @Override
@@ -554,6 +558,10 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
             return f;
         }
+
+        /** do not use activity callback */
+        @Override
+        protected void setDirectoryListener(Activity activity) {}
 
         public boolean getMove() {
             return getArguments().getBoolean("move", false);

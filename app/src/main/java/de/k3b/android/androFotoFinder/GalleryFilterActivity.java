@@ -46,7 +46,7 @@ import de.k3b.android.androFotoFinder.locationmap.LocationMapFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.GalleryFilterParameterParcelable;
 import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
-import de.k3b.io.Directory;
+import de.k3b.android.widget.HistoryEditText;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
@@ -66,6 +66,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
     GalleryFilterParameterParcelable mFilter = null;
 
     private AsFilter mAsFilter = null;
+    private HistoryEditText mHistory;
 
     public static void showActivity(Activity context, GalleryFilterParameterParcelable filter) {
         if (Global.debugEnabled) {
@@ -247,7 +248,6 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         private EditText mLongitudeFrom;
         private EditText mLongitudeTo;
         private EditText mLatitudeTo;
-
         private EditText mLatitudeFrom;
 
         AsFilter() {
@@ -258,6 +258,12 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
             this.mLatitudeTo = (EditText) findViewById(R.id.edit_latitude_to);
             this.mLongitudeFrom = (EditText) findViewById(R.id.edit_longitude_from);
             this.mLongitudeTo = (EditText) findViewById(R.id.edit_longitude_to);
+
+            mHistory = new HistoryEditText(GalleryFilterActivity.this, new int[] {
+                    R.id.cmd_path_history, R.id.cmd_date_from_history, R.id.cmd_date_to_history,
+                    R.id.cmd_lat_from_history, R.id.cmd_lat_to_history, R.id.cmd_lon_from_history, R.id.cmd_lon_to_history} ,
+                    mPath ,mDateFrom ,mDateTo, mLatitudeFrom, mLatitudeTo, mLongitudeFrom, mLongitudeTo);
+
         }
         @Override
         public double getLatitudeMin() {
@@ -367,6 +373,8 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
 
     private void onOk() {
         if (fromGui(mFilter)) {
+            mHistory.saveHistory();
+
             final Intent intent = new Intent();
             intent.putExtra(EXTRA_FILTER, this.mFilter);
             this.setResult(resultID, intent);
@@ -396,7 +404,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         if (fromGui(mFilter)) {
             final FragmentManager manager = getFragmentManager();
             LocationMapFragment dirDialog = new LocationMapFragment();
-            dirDialog.defineNavigation(null, mFilter, FotoSql.QUERY_TYPE_GROUP_PLACE_MAP);
+            dirDialog.defineNavigation(null, mFilter, null);
 
             dirDialog.show(manager, DLG_NAVIGATOR_TAG);
         }

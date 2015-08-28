@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2015 by k3b.
+ *
+ * This file is part of AndroFotoFinder.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
+
 package de.k3b.io;
 
 import java.io.File;
@@ -71,11 +90,8 @@ public class FileCommands implements  Cloneable {
     }
 
     public int moveOrCopyFilesTo(boolean move, File destDirFolder, File... sourceFiles) {
-        int opCode = (move) ? OP_MOVE : OP_COPY;
         int result = 0;
         if (osCreateDirIfNeccessary(destDirFolder)) {
-            mModifiedFiles = new ArrayList<String>();
-
             File[] destFiles = createDestFiles(destDirFolder, sourceFiles);
 
             result = moveOrCopyFiles(move, destFiles, sourceFiles);
@@ -83,14 +99,13 @@ public class FileCommands implements  Cloneable {
         } else {
             log("rem Target dir '", destDirFolder.getAbsolutePath(), "' cannot be created");
         }
-
-        int modifyCount = mModifiedFiles.size();
-        onPostProcess((modifyCount > 0) ? mModifiedFiles.toArray(new String[modifyCount]) : null, result, sourceFiles.length, opCode);
         return result;
     }
 
-    /** does the copying. internal to allow unittesting */
-    int moveOrCopyFiles(boolean move, File[] destFiles, File[] sourceFiles) {
+    /** does the copying. also used by unittesting */
+    protected int moveOrCopyFiles(boolean move, File[] destFiles, File[] sourceFiles) {
+        mModifiedFiles = new ArrayList<String>();
+
         openLogfile();
         int itemCount = 0;
         int pos = 0;
@@ -113,6 +128,12 @@ public class FileCommands implements  Cloneable {
             pos++;
         }
         closeLogFile();
+        int modifyCount = mModifiedFiles.size();
+
+        int opCode = (move) ? OP_MOVE : OP_COPY;
+
+        onPostProcess((modifyCount > 0) ? mModifiedFiles.toArray(new String[modifyCount]) : null, itemCount, sourceFiles.length, opCode);
+
         return itemCount;
     }
 
@@ -223,7 +244,7 @@ public class FileCommands implements  Cloneable {
         return result;
     }
 
-    /** to be replaced by mock/stub in unittests */
+    /** can be replaced by mock/stub in unittests */
     protected boolean osFileMove(File dest, File source) {
         return source.renameTo(dest);
     }
@@ -271,8 +292,8 @@ public class FileCommands implements  Cloneable {
         return destDirFolder.mkdirs() || destDirFolder.isDirectory();
     }
 
-    /** to be replaced by mock/stub in unittests */
-    protected boolean osFileExists(File file) {
+    /** can be replaced by mock/stub in unittests */
+    public boolean osFileExists(File file) {
         return file.exists();
     }
 

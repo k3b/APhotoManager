@@ -13,12 +13,20 @@ Features
     * wildcards that match folder/filename
     * date
     * area in [geografic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) (if image has gps-exif info)
-* Show results in a scrollable [gallery view](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) with support for multible selection and share photos.
+* Show results in a scrollable [gallery view](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) with 
+	* support for multible photo selection (since 0.4.0)
+	* file operations copy, move, delete, share (since 0.4.0)
 * [Image view](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) features
     * image zoom
     * swiping for next/previous image
     * show extended image info (Exif, IPTC, XMP, ICC)
+	* file operations copy, move, delete, rename, share (since 0.4.1)
+	* can be opened from any filemanager (since 0.4.1)
 * The [geografic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) shows markers at places where photos were taken.
+* File operations 
+	* will also update Android's image content-provider-database
+	* update xmp-sidecar-files
+	* preserve file date if local android supports it.
 
 You can install AndroFotoFinder via
 

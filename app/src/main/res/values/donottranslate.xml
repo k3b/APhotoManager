@@ -22,7 +22,8 @@ this program. If not, see <http://www.gnu.org/licenses/>
     resources that shold NOT be localized
 -->
 <resources>
-    <string name="app_name">a Foto Finder</string>
+    <string name="app_name">a Foto Finder (dev)</string>
+    <string name="app_viewer_name">a Foto Viewer (dev)</string>
 
 <string name="about_content"><![CDATA["<html><body>
 <a href="http://github.com/k3b/AndroFotoFinder/wiki"><b>AndroFotoFinder</b></a><br/>Version $versionName$
@@ -57,6 +58,16 @@ Requred permissions: </p>
 </ul>
 <hr/>
 <h2>History</h2>
+Version v0.4.1<br />
+<ul>
+  <li>Image-Detail-View: implemented Share/Edit/Rename/Delete/Copy/Move</li>
+</ul>
+
+Version v0.4.0.150816<br />
+<ul>
+  <li>Gallery-View: implemented Multi selection mode: Share/Delete/Copy/Move/CreateFolder/Write-Log</li>
+</ul>
+
 Initial Version v0.3.4.150728<br />
 <ul>
   <li></li>

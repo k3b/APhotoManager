@@ -64,13 +64,28 @@
     <string name="invalid_location">\'%1$s\' is not a valid coordinate.</string>
     <string name="invalid_date">\'%1$s\' is not a valid date.</string>
     <string name="cmd_details" >Details</string>
+
+    <string name="cmd_edit" >Edit</string>
+    <string name="title_chooser_edit" >Choose photo editor</string>
+    <string name="error_edit" >No photo editor found</string>
+
     <string name="title_cright_osm">Map Tiles (c) <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> Contributors</string>
     <string name="about_summary">About Andro Foto Finder</string>
 
     <string name="title_multiselection">%1$d Selected</string>
 
+    <string name="cmd_rename">Rename</string>
+    <string name="err_file_exists">The File \'%1$s\' already exists. Please choose a different name.</string>
+    <string name="err_file_rename">Cannot rename File \'%1$s\'.</string>
+    <string name="success_file_rename">Renamed \'%1$s\' to \'%2$s\'.</string>
+
     <string name="cmd_share">Share</string>
+    <string name="title_chooser_share" >Share/Send</string>
+    <string name="error_share" >No send/share provider found</string>
+
     <string name="cmd_delete">Delete</string>
+    <string name="delete_empty">No more Photos.</string>
+
     <string name="cmd_copy">Copy</string>
     <string name="cmd_move">Move</string>
     <string name="cmd_mk_dir">Create Folder</string>
@@ -107,15 +122,26 @@ Features:
     <li>area in <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geographic map</a> (if image has gps-exif info)
     </li>
   </ul>
-  <li>Show result in a scrollable <a href="https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View">gallery view</a></li>
+  <li>Show result in a scrollable <a href="https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View">gallery view</a> with</li>
+  <ul>
+    <li>support for multible photo selection (since 0.4.0)</li>
+    <li>file operations copy, move, delete, share (since 0.4.0)</li>
+  </ul>
   <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View">Photo-detail-view</a> with</li>
   <li><ul>
     <li>image zoom</li>
     <li>swipe to go to next/previous image</li>
     <li>show extended image info (Exif, IPTC, XMP, ICC)</li>
+    <li>file operations copy, move, delete, rename, share (since 0.4.1)</li>
   </ul></li>
   <li>The <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geografic map</a> shows markers at places where photos were
  taken</li>
+  <li>File operations</li>
+  <li><ul>
+    <li>will also update Android's image content-provider-database</li>
+    <li>update xmp-sidecar-files</li>
+    <li>preserve file date if local android supports it.</li>
+  </ul></li>
 </ul>
 <br />
 ]]>

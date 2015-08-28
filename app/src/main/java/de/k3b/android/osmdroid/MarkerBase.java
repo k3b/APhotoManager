@@ -31,7 +31,7 @@ import org.osmdroid.views.Projection;
 import java.util.List;
 
 /**
- * A marker containing IGeoPoint, unique id and data. In a geografic map it will shows an icon.
+ * A marker containing IGeoPoint, unique id and data. In a geografic map it will be shown as an icon.
  *
  * Created by k3b on 17.07.2015.
  */

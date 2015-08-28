@@ -20,6 +20,7 @@
  */
  -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    android:installLocation="auto"
     package="de.k3b.android.androFotoFinder" >
 
     <!-- to read fotos from gallery in android-4.4 -->
@@ -68,7 +69,36 @@
         </activity>
         <activity
             android:name="de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager"
-            android:ellipsize="middle" />
+            android:ellipsize="middle" >
+            <intent-filter android:label="@string/app_viewer_name">
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SENDTO" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!-- file must have mimeType to match -->
+                <data android:mimeType="image/*" android:scheme="file" />
+            </intent-filter>
+            <intent-filter android:label="@string/app_viewer_name">
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SENDTO" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!-- these do not work
+                <data android:scheme="content" android:host="*"  />
+                <data android:scheme="content" android:host="media" android:pathPattern="/external/images/media/.*" />
+                <data android:host="*" android:scheme="content" android:mimeType="image/*" />
+                -->
+                <data android:mimeType="image/*" />
+                <!-- example content://media/external/images/media/4711 -->
+            </intent-filter>
+
+        </activity>
         <activity
             android:name="de.k3b.android.androFotoFinder.GalleryFilterActivity"
             android:label="@string/title_activity_gallery_filter" >

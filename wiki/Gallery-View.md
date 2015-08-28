@@ -2,6 +2,7 @@ The [Gallery-View](Gallery-View) show photos in a scrollable view:
 
 * If you swipe up or down you will see more photos.
 * If you tap on a photo it will be opend in the [Image-View](Image-View).
+* If you long-tap on a photo the app enters multiselection mode (see below)
 * The Symbol(s) in the actionbar and the menu item(s)
     * ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_unchecked.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_filter.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_folder.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_map.png)
     * define which photos you want to see (see _current set_ below).
@@ -55,17 +56,19 @@ The [Gallery-View](Gallery-View) has these elements:
 
 ## Multiselection Mode (Since Version 0.4)
 
-* If you long-tap on a photo the app enters **multiselection mode:** with additional symbols in the actionbar:
+* If you long-tap on a photo the app enters **multiselection mode:** with different menu items and symbols in the actionbar:
 	* ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_cancel.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_unchecked.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_checked.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_share.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_delete.png)
 * Taping on any photo toggles selection of that photo. A Selected photo contains a [X] symbol.
-* Long-tap on a photo it will be opend in the [Image-View](Image-View).
+* Long-tap on a photo it will open it in the [Image-View](Image-View).
+* If you open the [Geographic-Map](Geographic-Map) in multiselection mode selected photos will be shown as blue markers.
 * Additional symbols in the Actionbar (or overflow menu):
     * taping on the cancel symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_cancel.png) exits the multiselection mode.
     * taping on the **selected only** symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_unchecked.png) will show only the seleceted photos. The symbol changes to ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_checked.png) 
 	* taping on the **selected only** symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_checked.png) again will show all photots. The symbol changes to ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_unchecked.png).
-	* taping on the **delete** symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_delete.png) or the "Delete" menu will delete the selected photos.
+	* taping on the **delete** symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_delete.png) or the "Delete" menu will delete the selected photo(s).
+	* the **move/copy** menu will move/copy the selected photo(s) to a different folder.
+	    * Pressing the "..." button or long pressing a folder in the [foder picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker) allows you to create a new folder.
     * you can send/share the selected photos via the share symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_share.png).
-        * if you have installed [gelin's sendtosd](https://f-droid.org/wiki/page/ru.gelin.android.sendtosd) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_send2sd.png): Copy or move photos to a different folder on the sdcard.
         * if you have installed [k3b's ToGoZip](https://f-droid.org/wiki/page/de.k3b.android.toGoZip) ![](https://raw.githubusercontent.com/k3b/ToGoZip/master/app/src/main/res/drawable-mdpi/ic_launcher.png): Add the photo to a zip file
         * other options are: send photo(s) via bluetooth or mail
 
