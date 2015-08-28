@@ -51,6 +51,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.SelectedFotos;
+import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
 
@@ -352,6 +353,10 @@ public class ImageDetailActivityViewPager extends Activity {
                 return cmdMoveOrCopyWithDestDirPicker(true, mFileCommands.getLastCopyToPath(), getCurrentFoto());
             case R.id.menu_item_rename:
                 return onRenameDirQueston(getCurrentImageId(), getCurrentFilePath(), null);
+            case R.id.cmd_about:
+                AboutDialogPreference.createAboutDialog(this).show();
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }

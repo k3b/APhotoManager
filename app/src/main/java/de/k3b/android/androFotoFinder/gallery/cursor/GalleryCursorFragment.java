@@ -582,7 +582,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFotos fotos) {
         MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
-        destDir.defineDirectoryNavigation(new OSDirectory("/", null), FotoSql.QUERY_TYPE_GROUP_COPY, lastCopyToPath);
+        destDir.defineDirectoryNavigation(new OSDirectory("/", null),
+                (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
+                lastCopyToPath);
         destDir.setContextMenuId(R.menu.menu_context_osdir);
         destDir.show(getActivity().getFragmentManager(), "osdir");
         return false;

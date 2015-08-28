@@ -41,5 +41,9 @@
     <item android:id="@+id/action_edit" android:title="@string/cmd_edit"
         android:icon="@android:drawable/ic_menu_edit"
         android:orderInCategory="20" android:showAsAction="ifRoom" />
-
+    <item android:id="@+id/cmd_about"
+        android:title="@string/about_summary"
+        android:visible="true"
+        android:orderInCategory="1000"
+        android:showAsAction="never" />
 </menu>
