@@ -82,6 +82,8 @@ public class LocationMapFragment extends DialogFragment {
     private final String mDebugPrefix;
 
     private MapView mMapView;
+    private SeekBar mZoomBar;
+    private ImageView mImage;
     private DefaultResourceProxyImplEx mResourceProxy;
 
     /** contain the markers with itmen-count that gets recalculated on every map move/zoom */
@@ -101,8 +103,8 @@ public class LocationMapFragment extends DialogFragment {
      */
     private BoundingBoxE6 mDelayedZoomToBoundingBox = null;
     private int mDelayedZoomLevel = NO_ZOOM;
-    private SeekBar mZoomBar;
-    private ImageView mImage;
+    private boolean mIsInitialized = false;
+
     private GalleryFilterParameterParcelable mRootFilter;
 
     public LocationMapFragment() {
@@ -153,10 +155,17 @@ public class LocationMapFragment extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        BoundingBoxE6 boundingBoxE6 = null;
         /** after ratation restore selelected view port */
         if (savedInstanceState != null) {
-            this.mDelayedZoomToBoundingBox = savedInstanceState.getParcelable(STATE_LAST_VIEWPORT);
+            boundingBoxE6 =  savedInstanceState.getParcelable(STATE_LAST_VIEWPORT);
         }
+        // if not initialized from outside show the world
+        if (boundingBoxE6 == null) {
+            boundingBoxE6 = new BoundingBoxE6(80000000, 170000000, -80000000, -170000000);
+        }
+        zoomToBoundingBox(boundingBoxE6 , NO_ZOOM);
+
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_location_map, container, false);
 
@@ -230,21 +239,16 @@ public class LocationMapFragment extends DialogFragment {
 
         }
 
-        // if not initialized from outside show the world
-        if (this.mDelayedZoomToBoundingBox == null) {
-            this.mDelayedZoomToBoundingBox = new BoundingBoxE6(80000000, 170000000, -80000000, -170000000);
-        }
 
-        if (this.mDelayedZoomToBoundingBox != null) {
-            mMapView.addOnFirstLayoutListener(new MapView.OnFirstLayoutListener() {
-                @Override
-                public void onFirstLayout(View v, int left, int top, int right, int bottom) {
-                    zoomToBoundingBox(mDelayedZoomToBoundingBox, mDelayedZoomLevel);
-                    mDelayedZoomToBoundingBox = null;
-                    mDelayedZoomLevel = NO_ZOOM;
-                }
-            });
-        }
+        mMapView.addOnFirstLayoutListener(new MapView.OnFirstLayoutListener() {
+            @Override
+            public void onFirstLayout(View v, int left, int top, int right, int bottom) {
+                mIsInitialized = true;
+                zoomToBoundingBox(mDelayedZoomToBoundingBox, mDelayedZoomLevel);
+                mDelayedZoomToBoundingBox = null;
+                mDelayedZoomLevel = NO_ZOOM;
+            }
+        });
 
         reloadSelectionMarker();
         return view;
@@ -319,27 +323,28 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     private void zoomToBoundingBox(BoundingBoxE6 boundingBox, int zoomLevel) {
-        if (this.mMapView != null) {
-            // if map is already initialized
-            GeoPoint min = new GeoPoint(boundingBox.getLatSouthE6(), boundingBox.getLonWestE6());
+        if (boundingBox != null) {
+            if (mIsInitialized) {
+                // if map is already initialized
+                GeoPoint min = new GeoPoint(boundingBox.getLatSouthE6(), boundingBox.getLonWestE6());
 
-            if (zoomLevel != NO_ZOOM) {
-                ZoomUtil.zoomTo(this.mMapView, zoomLevel, min, null);
+                if (zoomLevel != NO_ZOOM) {
+                    ZoomUtil.zoomTo(this.mMapView, zoomLevel, min, null);
+                } else {
+                    GeoPoint max = new GeoPoint(boundingBox.getLatNorthE6(), boundingBox.getLonEastE6());
+                    ZoomUtil.zoomTo(this.mMapView, ZoomUtil.NO_ZOOM, min, max);
+                    // this.mMapView.zoomToBoundingBox(boundingBox); this is to inexact
+                }
+                if (Global.debugEnabled) {
+                    Log.i(Global.LOG_CONTEXT, mDebugPrefix + "zoomToBoundingBox(" + boundingBox
+                            + ") => " + mMapView.getBoundingBox() + "; z=" + mMapView.getZoomLevel());
+                }
             } else {
-                GeoPoint max = new GeoPoint(boundingBox.getLatNorthE6(), boundingBox.getLonEastE6());
-                ZoomUtil.zoomTo(this.mMapView, ZoomUtil.NO_ZOOM, min, max);
-                // this.mMapView.zoomToBoundingBox(boundingBox); this is to inexact
+                // map not initialized yet. do it later.
+                this.mDelayedZoomToBoundingBox = boundingBox;
+                this.mDelayedZoomLevel = zoomLevel;
             }
-            if (Global.debugEnabled) {
-                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "zoomToBoundingBox(" + boundingBox
-                        + ") => " + mMapView.getBoundingBox() + "; z=" + mMapView.getZoomLevel());
-            }
-        } else {
-            // map not initialized yet. do it later.
-            this.mDelayedZoomToBoundingBox = boundingBox;
-            this.mDelayedZoomLevel = zoomLevel;
         }
-
     }
 
     /** all marker clicks will be delegated to LocationMapFragment#onMarkerClicked() */

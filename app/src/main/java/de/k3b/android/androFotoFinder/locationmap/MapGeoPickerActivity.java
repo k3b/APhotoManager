@@ -78,11 +78,11 @@ public class MapGeoPickerActivity extends Activity implements LocationMapFragmen
         SelectedItems selectedItems = null;
 
         int zoom = ZoomUtil.NO_ZOOM;
-        if (geoPointFromIntent != null) {
+        if ((savedInstanceState == null) && (geoPointFromIntent != null)) {
             zoom = geoPointFromIntent.getZoomMin();
-            rectangle.setLogituedMin(geoPointFromIntent.getLatitude()).setLatitudeMin(geoPointFromIntent.getLongitude());
-            rectangle.setLogituedMax(geoPointFromIntent.getLatitude()).setLatitudeMax(geoPointFromIntent.getLongitude());
-        }
+            rectangle.setLogituedMin(geoPointFromIntent.getLongitude()).setLatitudeMin(geoPointFromIntent.getLatitude());
+            rectangle.setLogituedMax(geoPointFromIntent.getLongitude()).setLatitudeMax(geoPointFromIntent.getLatitude());
+        } // else (savedInstanceState != null) restore after rotation. fragment takes care of restoring map pos
         mMap.defineNavigation(rootFilter, rectangle, zoom, selectedItems);
     }
 

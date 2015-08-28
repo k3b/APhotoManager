@@ -1,9 +1,8 @@
 TODO Stackoverflow:
 
-HistoryEditText/TestGui 
-	visible history-button "V" instead of long-press
-	add to other aFoto* layouts
-	
+#6 geo-pikcer
+	overlay cross with current location
+
 
 next #6 => #4
 
