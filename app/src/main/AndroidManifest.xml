@@ -20,6 +20,7 @@
  */
  -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    android:installLocation="auto"
     package="de.k3b.android.androFotoFinder" >
 
     <!-- to read fotos from gallery in android-4.4 -->

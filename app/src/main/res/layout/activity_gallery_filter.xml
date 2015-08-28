@@ -19,8 +19,13 @@
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
  -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent" android:layout_height="wrap_content">
+
+<RelativeLayout
+    android:layout_width="match_parent"
     android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
@@ -31,10 +36,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="..."
-        android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        />
+        android:layout_alignParentTop="true" />
     <TextView android:id="@+id/lbl_path"
         android:text="Path"
         android:layout_width="wrap_content"
@@ -140,7 +144,7 @@
         android:layout_height="wrap_content"
         android:background="@android:drawable/ic_menu_more"
 
-        android:layout_alignTop="@+id/edit_latitude_from"
+        android:layout_alignBottom="@+id/cmd_select_lat_lon"
         android:layout_toLeftOf="@+id/cmd_select_lat_lon"
         android:layout_toStartOf="@+id/cmd_select_lat_lon" />
     <EditText android:id="@+id/edit_latitude_from"
@@ -240,3 +244,4 @@
 
 
 </RelativeLayout>
+</ScrollView>
