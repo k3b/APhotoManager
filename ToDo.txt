@@ -50,79 +50,8 @@ next #6 => #4
 		
 		
 		
-#####################################
-
-demo app CAB in editText from http://stackoverflow.com/questions/12995439/custom-cut-copy-action-bar-for-edittext-that-shows-text-selection-handles
 
 
-  edit.setCustomSelectionActionModeCallback(new StyleCallback());
-  
-   class StyleCallback implements ActionMode.Callback {
-
-    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-        Log.d(TAG, "onCreateActionMode");
-        MenuInflater inflater = mode.getMenuInflater();
-        inflater.inflate(R.menu.style, menu);
-        menu.removeItem(android.R.id.selectAll);
-        return true;
-    }
-
-    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-        return false;
-    }
-
-    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-        Log.d(TAG, String.format("onActionItemClicked item=%s/%d", item.toString(), item.getItemId()));
-        CharacterStyle cs;
-        int start = bodyView.getSelectionStart();
-        int end = bodyView.getSelectionEnd();
-        SpannableStringBuilder ssb = new SpannableStringBuilder(bodyView.getText());
-
-        switch(item.getItemId()) {
-
-        case R.id.bold:
-            cs = new StyleSpan(Typeface.BOLD);
-            ssb.setSpan(cs, start, end, 1);
-            bodyView.setText(ssb);
-            return true;
-
-        case R.id.italic:
-            cs = new StyleSpan(Typeface.ITALIC);
-            ssb.setSpan(cs, start, end, 1);
-            bodyView.setText(ssb);
-            return true;
-
-        case R.id.underline:
-            cs = new UnderlineSpan();
-            ssb.setSpan(cs, start, end, 1);
-            bodyView.setText(ssb);
-            return true;
-        }
-        return false;
-    }
-
-    public void onDestroyActionMode(ActionMode mode) {
-    }
-	
---------------	
-	The XML for the menu additions is:
-
-	<?xml version="1.0" encoding="utf-8"?>
-	<menu xmlns:android="http://schemas.android.com/apk/res/android">
-		<item android:id="@+id/italic"
-			  android:showAsAction="always"
-			  android:icon="@drawable/italic"
-			  android:title="Italic"/>
-		<item android:id="@+id/bold"
-			  android:showAsAction="always"
-			  android:icon="@drawable/bold"
-			  android:title="Bold"/>
-		<item android:id="@+id/underline"
-			  android:showAsAction="always"
-			  android:icon="@drawable/underline"
-			  android:title="Underline"/>
-	</menu>
-	
 #####################################		
 		
 		
@@ -151,6 +80,7 @@ todo
 
 // symlink
 mklink /D /J osmdroid-android d:\prj\eve\android\prj\fotos-android.wrk\osmdroid\osmdroid-android
+mklink /D /J k3b-geoHelper D:\prj\eve\android\prj\LocationMapViewer.wrk\LocationMapViewer\k3b-geoHelper
 
 LeakCanary
 

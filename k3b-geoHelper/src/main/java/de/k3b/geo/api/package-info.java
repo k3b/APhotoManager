@@ -1,9 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
 /*
  * Copyright (c) 2015 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of LocationMapViewer.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -18,15 +16,18 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
- -->
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="de.k3b.android.androFotoFinder.GalleryFilterActivity">
-    <item android:id="@+id/action_settings" android:title="@string/action_settings"
-        android:orderInCategory="100" android:showAsAction="never" android:visible="false" />
-    <item android:id="@+id/cmd_about"
-        android:title="@string/about_summary"
-        android:visible="true"
-        android:orderInCategory="500"
-        android:showAsAction="never" />
-</menu>
+
+/**
+ * This Package defines Android independant api as interfaces to handle geo infos.
+ *
+ * <ul>
+ *     <li>{@link de.k3b.geo.api.GeoPointDto}:
+ *          a location or trackpoint that can be represented in a gpx file.</li>
+ *     <li>{@link de.k3b.geo.io.gpx.GpxFormatter}:
+ *          Formats {@link de.k3b.geo.api.GeoPointDto}-s or {@link de.k3b.geo.api.ILocation}-s as geo-xml.</li>
+ *     <li>{@link de.k3b.geo.io.gpx.GpxReader}:
+ *          reads {@link de.k3b.geo.api.GeoPointDto} from file or stream.</li>
+ * </ul>
+ *
+ **/
+package de.k3b.geo.api;

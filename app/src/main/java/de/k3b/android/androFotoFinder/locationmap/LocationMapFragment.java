@@ -76,6 +76,7 @@ import de.k3b.io.IGeoRectangle;
 public class LocationMapFragment extends DialogFragment {
 
     private static final String STATE_LAST_VIEWPORT = "LAST_VIEWPORT";
+    private static final int NO_ZOOM = ZoomUtil.NO_ZOOM;
     // for debugging
     private static int sId = 1;
     private final String mDebugPrefix;
@@ -99,6 +100,7 @@ public class LocationMapFragment extends DialogFragment {
      * see http://stackoverflow.com/questions/10411975/how-to-get-the-width-and-height-of-an-image-view-in-android/10412209#10412209
      */
     private BoundingBoxE6 mDelayedZoomToBoundingBox = null;
+    private int mDelayedZoomLevel = NO_ZOOM;
     private SeekBar mZoomBar;
     private ImageView mImage;
     private GalleryFilterParameterParcelable mRootFilter;
@@ -237,8 +239,9 @@ public class LocationMapFragment extends DialogFragment {
             mMapView.addOnFirstLayoutListener(new MapView.OnFirstLayoutListener() {
                 @Override
                 public void onFirstLayout(View v, int left, int top, int right, int bottom) {
-                    zoomToBoundingBox(mDelayedZoomToBoundingBox);
+                    zoomToBoundingBox(mDelayedZoomToBoundingBox, mDelayedZoomLevel);
                     mDelayedZoomToBoundingBox = null;
+                    mDelayedZoomLevel = NO_ZOOM;
                 }
             });
         }
@@ -292,33 +295,41 @@ public class LocationMapFragment extends DialogFragment {
         return result;
     }
 
-    public void defineNavigation(GalleryFilterParameterParcelable rootFilter, GeoRectangle rectangle, SelectedItems selectedItems) {
+    public void defineNavigation(GalleryFilterParameterParcelable rootFilter, GeoRectangle rectangle, int zoomlevel, SelectedItems selectedItems) {
         if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, mDebugPrefix + "defineNavigation: " + rectangle);
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + "defineNavigation: " + rectangle + ";z=" + zoomlevel);
         }
 
         this.mRootFilter = rootFilter;
         this.mSelectedItems = selectedItems;
 
-        if (!Double.isNaN(rectangle.getLatitudeMax())) {
+        if (!Double.isNaN(rectangle.getLatitudeMin())) {
             BoundingBoxE6 boundingBox = new BoundingBoxE6(
                     rectangle.getLatitudeMax(),
                     rectangle.getLogituedMin(),
                     rectangle.getLatitudeMin(),
                     rectangle.getLogituedMax());
 
-            zoomToBoundingBox(boundingBox);
+            zoomToBoundingBox(boundingBox, zoomlevel);
+        }
+
+        if (rootFilter != null) {
+            reloadSummaryMarker();
         }
     }
 
-    private void zoomToBoundingBox(BoundingBoxE6 boundingBox) {
+    private void zoomToBoundingBox(BoundingBoxE6 boundingBox, int zoomLevel) {
         if (this.mMapView != null) {
             // if map is already initialized
             GeoPoint min = new GeoPoint(boundingBox.getLatSouthE6(), boundingBox.getLonWestE6());
-            GeoPoint max = new GeoPoint(boundingBox.getLatNorthE6(), boundingBox.getLonEastE6());
-            ZoomUtil.zoomTo(this.mMapView, ZoomUtil.NO_ZOOM, min, max);
-            // this.mMapView.zoomToBoundingBox(boundingBox); this is to inexact
 
+            if (zoomLevel != NO_ZOOM) {
+                ZoomUtil.zoomTo(this.mMapView, zoomLevel, min, null);
+            } else {
+                GeoPoint max = new GeoPoint(boundingBox.getLatNorthE6(), boundingBox.getLonEastE6());
+                ZoomUtil.zoomTo(this.mMapView, ZoomUtil.NO_ZOOM, min, max);
+                // this.mMapView.zoomToBoundingBox(boundingBox); this is to inexact
+            }
             if (Global.debugEnabled) {
                 Log.i(Global.LOG_CONTEXT, mDebugPrefix + "zoomToBoundingBox(" + boundingBox
                         + ") => " + mMapView.getBoundingBox() + "; z=" + mMapView.getZoomLevel());
@@ -326,6 +337,7 @@ public class LocationMapFragment extends DialogFragment {
         } else {
             // map not initialized yet. do it later.
             this.mDelayedZoomToBoundingBox = boundingBox;
+            this.mDelayedZoomLevel = zoomLevel;
         }
 
     }
@@ -407,7 +419,7 @@ public class LocationMapFragment extends DialogFragment {
 
     /** caching support: if zoom level changes the cached items become invalid
      * because the marker clustering is different */
-    private int mLastZoom = -1;
+    private int mLastZoom = NO_ZOOM;
 
     /** how much mCurrentSummaryMarkerLoader are tirggerd while task is loading */
     private int mSummaryMarkerPendingLoads = 0;
@@ -538,15 +550,8 @@ public class LocationMapFragment extends DialogFragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnDirectoryInteractionListener {
-        /** called when user picks a new directory */
+        /** called when upresses "OK" button */
         void onDirectoryPick(String selectedAbsolutePath, int queryTypeId);
-
-        /** called when user cancels picking of a new directory
-         * @param queryTypeId*/
-        void onDirectoryCancel(int queryTypeId);
-
-        /** called after the selection in tree has changed */
-        void onDirectorySelectionChanged(String selectedChild, int queryTypeId);
     }
 
     /**************************** Support for non-clustered selected items ********************/

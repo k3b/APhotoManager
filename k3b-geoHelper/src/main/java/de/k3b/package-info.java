@@ -1,9 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
 /*
  * Copyright (c) 2015 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of LocationMapViewer.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -18,15 +16,10 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
- -->
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="de.k3b.android.androFotoFinder.GalleryFilterActivity">
-    <item android:id="@+id/action_settings" android:title="@string/action_settings"
-        android:orderInCategory="100" android:showAsAction="never" android:visible="false" />
-    <item android:id="@+id/cmd_about"
-        android:title="@string/about_summary"
-        android:visible="true"
-        android:orderInCategory="500"
-        android:showAsAction="never" />
-</menu>
+
+/**
+ * This Package defines portable, "Android independant" code consumed by LocationMapViewer.
+ *
+ * Thw code can be tested by non-android-Junit tests.
+ **/
+package de.k3b;

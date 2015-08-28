@@ -47,8 +47,8 @@ public class GeoRectangle implements IGeoRectangle {
         return latitudeMin;
     }
 
-    public void setLatitudeMin(double latitudeMin) {
-        this.latitudeMin = latitudeMin;
+    public GeoRectangle setLatitudeMin(double latitudeMin) {
+        this.latitudeMin = latitudeMin; return this;
     }
 
     @Override
@@ -56,8 +56,8 @@ public class GeoRectangle implements IGeoRectangle {
         return latitudeMax;
     }
 
-    public void setLatitudeMax(double latitudeMax) {
-        this.latitudeMax = latitudeMax;
+    public GeoRectangle setLatitudeMax(double latitudeMax) {
+        this.latitudeMax = latitudeMax; return this;
     }
 
     @Override
@@ -65,8 +65,8 @@ public class GeoRectangle implements IGeoRectangle {
         return logituedMin;
     }
 
-    public void setLogituedMin(double logituedMin) {
-        this.logituedMin = logituedMin;
+    public GeoRectangle setLogituedMin(double logituedMin) {
+        this.logituedMin = logituedMin; return this;
     }
 
     @Override
@@ -74,8 +74,8 @@ public class GeoRectangle implements IGeoRectangle {
         return logituedMax;
     }
 
-    public void setLogituedMax(double logituedMax) {
-        this.logituedMax = logituedMax;
+    public GeoRectangle setLogituedMax(double logituedMax) {
+        this.logituedMax = logituedMax; return this;
     }
 
     @Override
@@ -83,7 +83,7 @@ public class GeoRectangle implements IGeoRectangle {
         return "" + getLatitudeMin() + DELIM_LAT_LON + getLogituedMin() + DELIM_LL_S + getLatitudeMax() + DELIM_LAT_LON + getLogituedMax();
     }
 
-    public void setLatitude(double min, double max) {
+    public GeoRectangle setLatitude(double min, double max) {
         if (min > max) {
             // swap
             double temp = min;
@@ -92,9 +92,10 @@ public class GeoRectangle implements IGeoRectangle {
         }
         setLatitudeMin(min);
         setLatitudeMax(max);
+        return this;
     }
 
-    public void setLogitude(double min, double max) {
+    public GeoRectangle setLogitude(double min, double max) {
         if (min > max) {
             // swap
             double temp = min;
@@ -103,5 +104,6 @@ public class GeoRectangle implements IGeoRectangle {
         }
         setLogituedMin(min);
         setLogituedMax(max);
+        return this;
     }
 }

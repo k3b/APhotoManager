@@ -18,10 +18,15 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
- -->
+-->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    android:installLocation="auto"
-    package="de.k3b.android.androFotoFinder" >
+    package="de.k3b.android.androFotoFinder"
+    android:installLocation="auto" >
+
+    <supports-screens
+        android:anyDensity="true"
+        android:largeScreens="true"
+        android:normalScreens="true" />
 
     <!-- to read fotos from gallery in android-4.4 -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -37,7 +42,7 @@
     Note: if you donot want to allow you app to access internet and file store
     you can use the MapTileAssetsProvider to put the card material into the apk-s
     asset folder.
--->
+    -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <!--
@@ -52,14 +57,13 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <application
-        android:name="de.k3b.android.androFotoFinder.AndroFotoFinderApp"
+        android:name=".AndroFotoFinderApp"
         android:allowBackup="true"
         android:icon="@drawable/foto_gallery"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-
         <activity
-            android:name="de.k3b.android.androFotoFinder.FotoGalleryActivity"
+            android:name=".FotoGalleryActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -68,9 +72,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager"
+            android:name=".imagedetail.ImageDetailActivityViewPager"
             android:ellipsize="middle" >
-            <intent-filter android:label="@string/app_viewer_name">
+            <intent-filter android:label="@string/app_viewer_name" >
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SENDTO" />
@@ -79,9 +83,11 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <!-- file must have mimeType to match -->
-                <data android:mimeType="image/*" android:scheme="file" />
+                <data
+                    android:mimeType="image/*"
+                    android:scheme="file" />
             </intent-filter>
-            <intent-filter android:label="@string/app_viewer_name">
+            <intent-filter android:label="@string/app_viewer_name" >
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SENDTO" />
@@ -89,7 +95,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <!-- these do not work
+                <!--
+                these do not work
                 <data android:scheme="content" android:host="*"  />
                 <data android:scheme="content" android:host="media" android:pathPattern="/external/images/media/.*" />
                 <data android:host="*" android:scheme="content" android:mimeType="image/*" />
@@ -97,11 +104,53 @@
                 <data android:mimeType="image/*" />
                 <!-- example content://media/external/images/media/4711 -->
             </intent-filter>
-
         </activity>
         <activity
-            android:name="de.k3b.android.androFotoFinder.GalleryFilterActivity"
+            android:name=".GalleryFilterActivity"
             android:label="@string/title_activity_gallery_filter" >
+        </activity>
+        <activity
+            android:name=".locationmap.MapGeoPickerActivity"
+            android:icon="@drawable/ic_foto_map"
+            android:label="@string/app_map_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter><!-- android:label="LMV#2"> -->
+
+                <!-- trigger if there is uri=geo:.... with any mime -->
+
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.PICK" />
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SENDTO" />
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:mimeType="*/*" />
+                <data android:scheme="geo" />
+            </intent-filter>
+            <intent-filter><!-- android:label="LMV#3"> -->
+
+                <!-- trigger if there is uri=geo:.... without mime -->
+
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.PICK" />
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SENDTO" />
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <action android:name="android.intent.action.GET_CONTENT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="geo" />
+            </intent-filter>
         </activity>
     </application>
 

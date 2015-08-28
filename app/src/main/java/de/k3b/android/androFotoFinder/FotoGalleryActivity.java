@@ -47,10 +47,10 @@ import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.queries.Queryable;
+import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.android.util.GarbageCollector;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.AboutDialogPreference;
-import de.k3b.database.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IDirectory;
@@ -396,11 +396,11 @@ public class FotoGalleryActivity extends Activity implements
         mGalleryQueryParameter.mUseLatLon = true;
 
         final FragmentManager manager = getFragmentManager();
-        LocationMapFragment dirDialog = new LocationMapFragment();
-        dirDialog.defineNavigation(this.mGalleryQueryParameter.mFilter,
-                this.mGalleryQueryParameter.mCurrentLatLon, mSelectedItems);
+        LocationMapFragment dialog = new LocationMapFragment();
+        dialog.defineNavigation(this.mGalleryQueryParameter.mFilter,
+                this.mGalleryQueryParameter.mCurrentLatLon, ZoomUtil.NO_ZOOM, mSelectedItems);
 
-        dirDialog.show(manager, DLG_NAVIGATOR_TAG);
+        dialog.show(manager, DLG_NAVIGATOR_TAG);
     }
 
 
