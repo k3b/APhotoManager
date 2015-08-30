@@ -113,11 +113,6 @@
             android:name=".locationmap.MapGeoPickerActivity"
             android:icon="@drawable/ic_foto_map"
             android:label="@string/app_map_name" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
             <intent-filter><!-- android:label="LMV#2"> -->
 
                 <!-- trigger if there is uri=geo:.... with any mime -->
@@ -127,7 +122,6 @@
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SENDTO" />
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
-                <action android:name="android.intent.action.GET_CONTENT" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -144,7 +138,6 @@
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SENDTO" />
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
-                <action android:name="android.intent.action.GET_CONTENT" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />

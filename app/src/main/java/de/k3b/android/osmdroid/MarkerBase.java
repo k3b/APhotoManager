@@ -100,4 +100,8 @@ public abstract class MarkerBase<DataType> extends IconOverlay {
     public int getID() {
         return mId;
     }
+
+    public DataType getData() {
+        return mData;
+    }
 }

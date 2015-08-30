@@ -26,7 +26,7 @@
     tools:context="de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity">
     <fragment
         android:id="@+id/fragment_map"
-        android:name="de.k3b.android.androFotoFinder.locationmap.LocationMapFragment"
+        android:name="de.k3b.android.androFotoFinder.locationmap.PickerLocationMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="4" />

@@ -27,12 +27,17 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import org.osmdroid.api.IGeoPoint;
+import org.osmdroid.util.GeoPoint;
+
 import java.util.Date;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
+import de.k3b.geo.api.GeoPointDto;
+import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGalleryFilter;
@@ -403,6 +408,31 @@ public class FotoSql {
         }
         return null;
     }
+
+    public static IGeoPoint getPosition(Context context, int id) {
+        QueryParameterParcelable query = (QueryParameterParcelable) new QueryParameterParcelable()
+        .setID(QUERY_TYPE_UNDEFINED)
+                .addColumn(SQL_COL_LAT, SQL_COL_LON)
+                .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
+                .addWhere(SQL_COL_PK + "= ?", "" + id)
+                .addWhere(SQL_COL_LAT + " IS NOT NULL")
+                .addWhere(SQL_COL_LON + " IS NOT NULL");
+
+        Cursor c = null;
+        try {
+            c = query(context, query);
+            if (c.moveToFirst()) {
+                GeoPoint result = new GeoPoint(c.getDouble(0),c.getDouble(1));
+                return result;
+            }
+        } catch (Exception ex) {
+            Log.e(Global.LOG_CONTEXT, "getGeoRectangle: error executing " + query, ex);
+        } finally {
+            if (c != null) c.close();
+        }
+        return null;
+    }
+
 }
 
 

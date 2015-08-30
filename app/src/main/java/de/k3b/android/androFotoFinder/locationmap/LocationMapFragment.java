@@ -34,6 +34,7 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -64,6 +65,7 @@ import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
 import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
 import de.k3b.android.osmdroid.FolderOverlay;
 import de.k3b.android.osmdroid.GuestureOverlay;
+import de.k3b.android.osmdroid.IconOverlay;
 import de.k3b.android.osmdroid.MarkerBase;
 import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.database.SelectedItems;
@@ -84,9 +86,9 @@ public class LocationMapFragment extends DialogFragment {
     // for debugging
     private static int sId = 1;
     private final String mDebugPrefix;
-    private final GeoUri mGeoUriEngine = new GeoUri(GeoUri.OPT_DEFAULT);
+    protected final GeoUri mGeoUriEngine = new GeoUri(GeoUri.OPT_DEFAULT);
 
-    private MapView mMapView;
+    protected MapView mMapView;
     private SeekBar mZoomBar;
     private ImageView mImage;
     private DefaultResourceProxyImplEx mResourceProxy;
@@ -96,7 +98,7 @@ public class LocationMapFragment extends DialogFragment {
     private FolderOverlay mFolderOverlaySelectionMarker;
 
     // api to fragment owner
-    private OnDirectoryInteractionListener mDirectoryListener;
+    protected OnDirectoryInteractionListener mDirectoryListener;
 
 
 
@@ -137,7 +139,9 @@ public class LocationMapFragment extends DialogFragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            mDirectoryListener = (OnDirectoryInteractionListener) activity;
+            if (mDirectoryListener instanceof  OnDirectoryInteractionListener) {
+                mDirectoryListener = (OnDirectoryInteractionListener) activity;
+            }
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement OnDirectoryInteractionListener");
@@ -230,7 +234,7 @@ public class LocationMapFragment extends DialogFragment {
         this.mImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mImage.setVisibility(View.GONE);
+                hideImage();
             }
         });
         createZoomBar(view);
@@ -252,42 +256,13 @@ public class LocationMapFragment extends DialogFragment {
 
         mResourceProxy = new DefaultResourceProxyImplEx(getActivity().getApplicationContext());
 
-        final List<Overlay> overlays = this.mMapView.getOverlays();
-
-        this.mSelectionMarker = getActivity().getResources().getDrawable(R.drawable.marker_blue);
-        mFolderOverlaySummaryMarker = createFolderOverlay(overlays);
-
-        mFolderOverlaySelectionMarker = createFolderOverlay(overlays);
-
-        overlays.add(new GuestureOverlay(getActivity()));
-
-        mMapView.setMultiTouchControls(true);
+        definteOverlays(mMapView, mResourceProxy);
 
 
         // mFolderOverlay.add(createMarker(mMapView, ...));
 
         if (getShowsDialog()) {
-            Button cmdCancel = (Button) view.findViewById(R.id.cmd_cancel);
-            if (cmdCancel != null) {
-                // only available on tablets.
-                // on small screen it would block the zoom out button
-                cmdCancel.setVisibility(View.VISIBLE);
-                cmdCancel.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        dismiss();
-                    }
-                });
-            }
-
-            Button cmdOk = (Button) view.findViewById(R.id.ok);
-            cmdOk.setVisibility(View.VISIBLE);
-            cmdOk.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    onOk();
-                }
-            });
+            defineButtons(view);
 
             String title = getActivity().getString(
                     R.string.action_area_title);
@@ -310,7 +285,52 @@ public class LocationMapFragment extends DialogFragment {
         return view;
     }
 
-    private void onOk() {
+    protected void hideImage() {
+        mImage.setVisibility(View.GONE);
+    }
+
+    protected void definteOverlays(MapView mapView, DefaultResourceProxyImplEx mResourceProxy) {
+        final List<Overlay> overlays = mapView.getOverlays();
+
+        this.mSelectionMarker = getActivity().getResources().getDrawable(R.drawable.marker_blue);
+        mFolderOverlaySummaryMarker = createFolderOverlay(overlays);
+
+        mFolderOverlaySelectionMarker = createFolderOverlay(overlays);
+
+        overlays.add(new GuestureOverlay(getActivity()));
+
+        mapView.setMultiTouchControls(true);
+    }
+
+    protected void defineButtons(View view) {
+        Button cmdCancel = (Button) view.findViewById(R.id.cmd_cancel);
+        if (cmdCancel != null) {
+            // only available on tablets.
+            // on small screen it would block the zoom out button
+            cmdCancel.setVisibility(View.VISIBLE);
+            cmdCancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onCancel();
+                }
+            });
+        }
+
+        Button cmdOk = (Button) view.findViewById(R.id.ok);
+        cmdOk.setVisibility(View.VISIBLE);
+        cmdOk.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onOk();
+            }
+        });
+    }
+
+    protected void onCancel() {
+        dismiss();
+    }
+
+    protected void onOk() {
         if (mDirectoryListener != null) {
             IGeoRectangle result = getGeoRectangle(mMapView.getBoundingBox());
             if (Global.debugEnabled) {
@@ -415,7 +435,7 @@ public class LocationMapFragment extends DialogFragment {
          */
         @Override
         protected boolean onMarkerClicked(MapView mapView, int markerId, IGeoPoint makerPosition, Object markerData) {
-            return LocationMapFragment.this.onMarkerClicked(markerId, makerPosition, markerData);
+            return LocationMapFragment.this.onMarkerClicked(this, markerId, makerPosition, markerData);
         }
     }
 
@@ -583,7 +603,7 @@ public class LocationMapFragment extends DialogFragment {
     /**
      * @return true if click was handeled.
      */
-    private boolean onMarkerClicked(int markerId, IGeoPoint makerPosition, Object markerData) {
+    protected boolean onMarkerClicked(IconOverlay marker, int markerId, IGeoPoint makerPosition, Object markerData) {
         this.mImage.setImageBitmap(getBitmap(markerId));
         this.mImage.setVisibility(View.VISIBLE);
         return true; // TODO

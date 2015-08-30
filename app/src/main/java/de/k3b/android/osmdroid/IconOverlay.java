@@ -19,12 +19,11 @@
  
 package de.k3b.android.osmdroid;
 
-import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.view.MotionEvent;
 
 import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.*;
@@ -33,7 +32,7 @@ import org.osmdroid.views.Projection;
 import org.osmdroid.views.overlay.Overlay;
 
 /**
- * An icon placed at a particular point on the map's surface.
+ * An icon placed at a particular IGeoPoint on the map's surface.
  * Thanks to ResourceProxy the constructor can be called in a non-gui thread i.e. in AsyncTask.
  *
  * Inspired by org.osmdroid.bonuspack.overlays.Marker.
@@ -66,12 +65,6 @@ public class IconOverlay extends Overlay {
         set(position, icon);
     }
 
-    public IconOverlay set(IGeoPoint position, Drawable icon) {
-        this.mPosition = position;
-        this.mIcon = icon;
-        return this;
-    }
-
     /**
      * Draw the icon.
      */
@@ -80,6 +73,8 @@ public class IconOverlay extends Overlay {
         if (shadow)
             return;
         if (mIcon == null)
+            return;
+        if (mPosition == null)
             return;
 
         final Projection pj = mapView.getProjection();
@@ -91,7 +86,7 @@ public class IconOverlay extends Overlay {
         rect.offset(-(int)(mAnchorU*width), -(int)(mAnchorV*height));
         mIcon.setBounds(rect);
 
-        mIcon.setAlpha((int)(mAlpha*255));
+        mIcon.setAlpha((int) (mAlpha * 255));
 
         float rotationOnScreen = (mFlat ? -mBearing : mapView.getMapOrientation()-mBearing);
         drawAt(canvas, mIcon, mPositionPixels.x, mPositionPixels.y, false, rotationOnScreen);
@@ -99,5 +94,23 @@ public class IconOverlay extends Overlay {
 
     public IGeoPoint getPosition() {
         return mPosition;
+    }
+
+    public IconOverlay set(IGeoPoint position, Drawable icon) {
+        this.mPosition = position;
+        this.mIcon = icon;
+        return this;
+    }
+
+    public IconOverlay moveTo(final MotionEvent event, final MapView mapView){
+        final Projection pj = mapView.getProjection();
+        moveTo(pj.fromPixels((int) event.getX(), (int) event.getY()), mapView);
+        return this;
+    }
+
+    public IconOverlay moveTo(final IGeoPoint position, final MapView mapView){
+        mPosition = position;
+        mapView.invalidate();
+        return this;
     }
 }

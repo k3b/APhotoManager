@@ -1,6 +1,6 @@
 TODO Stackoverflow:
 
-#6 geo-pikcer
+#6 geo-picker
 	overlay cross with current location
 
 

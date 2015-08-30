@@ -38,10 +38,9 @@ import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.io.GeoUri;
 import de.k3b.io.GeoRectangle;
 
-public class MapGeoPickerActivity extends Activity implements LocationMapFragment.OnDirectoryInteractionListener {
+public class MapGeoPickerActivity extends Activity  {
 
     private LocationMapFragment mMap;
-    private boolean mUsePicker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,8 +49,6 @@ public class MapGeoPickerActivity extends Activity implements LocationMapFragmen
         Intent intent = this.getIntent();
 
         GeoPointDto geoPointFromIntent = getGeoPointDtoFromIntent(intent);
-
-        mUsePicker = ((Intent.ACTION_PICK.equals(intent.getAction())) || (Intent.ACTION_GET_CONTENT.equals(intent.getAction())));
 
         String extraTitle = intent.getStringExtra(Intent.EXTRA_TITLE);
         if (extraTitle == null && (geoPointFromIntent == null)) {
@@ -103,12 +100,6 @@ public class MapGeoPickerActivity extends Activity implements LocationMapFragmen
             default:
                 return super.onOptionsItemSelected(item);
         }
-
-    }
-
-    /** called when upresses "OK" button */
-    @Override
-    public void onDirectoryPick(String selectedAbsolutePath, int queryTypeId) {
 
     }
 
