@@ -22,7 +22,10 @@ Features
     * show extended image info (Exif, IPTC, XMP, ICC)
 	* file operations copy, move, delete, rename, share (since 0.4.1)
 	* can be opened from any filemanager (since 0.4.1)
-* The [geografic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) shows markers at places where photos were taken.
+* The [geografic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) 
+    * shows markers at places where photos were taken.
+	* can be opened as a map-viewer from any app that support "geo:"-uri-s (since 0.4.1)
+	* can be opened as a "geo:" picker to select a location from a map or photo (since 0.4.1)
 * File operations 
 	* will also update Android's image content-provider-database
 	* update xmp-sidecar-files

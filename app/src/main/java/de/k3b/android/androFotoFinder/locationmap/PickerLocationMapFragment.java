@@ -15,6 +15,7 @@ import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.OverlayManager;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
@@ -32,8 +33,6 @@ import de.k3b.io.GeoRectangle;
  */
 public class PickerLocationMapFragment extends LocationMapFragment {
     private final String mDebugPrefix;
-    private IconOverlay mCurrrentSelectionMarker = null;
-    private int mMarkerId = -1;
     private boolean mUsePicker;
 
     public PickerLocationMapFragment() {
@@ -53,9 +52,9 @@ public class PickerLocationMapFragment extends LocationMapFragment {
         @Override
         public boolean onSingleTapConfirmed(final MotionEvent e, final MapView mapView) {
             if (isEnabled()) {
-                mMarkerId = -1;
+                mMarkerId = NO_MARKER_ID;
                 moveTo(e, mapView);
-                updateMarker(null);
+                updateMarker(null, NO_MARKER_ID, getPosition(), null);
                 hideImage();
             }
             return super.onSingleTapConfirmed(e, mapView);
@@ -76,48 +75,39 @@ public class PickerLocationMapFragment extends LocationMapFragment {
         return result;
     }
 
+    protected IconOverlay createSelectedItemOverlay(DefaultResourceProxyImplEx resourceProxy) {
+        if (mUsePicker) {
+            Drawable currrentSelectionIcon = getActivity().getResources().getDrawable(R.drawable.marker_red);
+            return new CurrentSelectionMarker(resourceProxy, null, currrentSelectionIcon);
+        } else {
+            Drawable currrentSelectionIcon = getActivity().getResources().getDrawable(R.drawable.marker_red);
+            // fixed positon, not updated on pick
+            return new IconOverlay(resourceProxy, null, currrentSelectionIcon);
+        }
+
+    }
     @Override
     protected void definteOverlays(MapView mapView, DefaultResourceProxyImplEx resourceProxy) {
         super.definteOverlays(mapView, resourceProxy);
 
-        if (true) {
-            Drawable currrentSelectionIcon = getActivity().getResources().getDrawable(R.drawable.marker_red);
-            if (mUsePicker) {
-                // updateed position on tap
-                this.mCurrrentSelectionMarker = new CurrentSelectionMarker(resourceProxy, null, currrentSelectionIcon);
-            } else {
-                // fixed positon, not updated on pick
-                this.mCurrrentSelectionMarker = new IconOverlay(resourceProxy, null, currrentSelectionIcon);
-            }
-            mapView.getOverlays().add(mCurrrentSelectionMarker);
-        }
-    }
+        /// TODO
+        /*
+        OverlayManager items = new OverlayManager(null);
+        // form  intent and Intent.EXTRA_STREAM as array[uri]
 
-    @Override
-    protected boolean onMarkerClicked(IconOverlay marker, int markerId, IGeoPoint makerPosition, Object markerData) {
-        boolean result = super.onMarkerClicked(marker, markerId, makerPosition, markerData);
 
-        if (mUsePicker) {
-            mCurrrentSelectionMarker.moveTo(makerPosition, mMapView);
-            mMarkerId = markerId;
-            updateMarker(marker);
-        }
+        !!!!!!
 
-        return result;
-    }
 
-    private void updateMarker(IconOverlay marker) {
-        if ((mUsePicker) && (mCurrrentSelectionMarker != null)) {
-            mMapView.getOverlays().remove(mCurrrentSelectionMarker);
-            mMapView.getOverlays().add(mCurrrentSelectionMarker);
-        }
+        onLoadFinishedSelection(items);
+        */
     }
 
     @Override
     public void defineNavigation(GalleryFilterParameterParcelable rootFilter, GeoRectangle rectangle, int zoomlevel, SelectedItems selectedItems) {
         super.defineNavigation(rootFilter, rectangle, zoomlevel, selectedItems);
-        if ((rectangle != null) && (mCurrrentSelectionMarker != null) && (mMapView != null)) {
-            mCurrrentSelectionMarker.moveTo(new GeoPoint(rectangle.getLatitudeMin(), rectangle.getLogituedMin()), mMapView);
+        if (rectangle != null) {
+            updateMarker(null, NO_MARKER_ID, new GeoPoint(rectangle.getLatitudeMin(), rectangle.getLogituedMin()), null);
         }
     }
 
@@ -126,7 +116,7 @@ public class PickerLocationMapFragment extends LocationMapFragment {
         IGeoPoint result = null;
 
         Activity activity = getActivity();
-        if (mMarkerId != -1) {
+        if (mMarkerId != NO_MARKER_ID) {
             result = FotoSql.getPosition(activity, mMarkerId);
         }
 

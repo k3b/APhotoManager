@@ -80,6 +80,7 @@ import de.k3b.io.IGeoRectangle;
  * A simple {@link Fragment} subclass.
  */
 public class LocationMapFragment extends DialogFragment {
+    protected static final int NO_MARKER_ID = -1;
 
     private static final String STATE_LAST_VIEWPORT = "LAST_VIEWPORT";
     private static final int NO_ZOOM = ZoomUtil.NO_ZOOM;
@@ -96,6 +97,10 @@ public class LocationMapFragment extends DialogFragment {
     /** contain the markers with itmen-count that gets recalculated on every map move/zoom */
     private FolderOverlay mFolderOverlaySummaryMarker;
     private FolderOverlay mFolderOverlaySelectionMarker;
+
+    // handling current selection
+    protected IconOverlay mCurrrentSelectionMarker = null;
+    protected int mMarkerId = -1;
 
     // api to fragment owner
     protected OnDirectoryInteractionListener mDirectoryListener;
@@ -289,8 +294,10 @@ public class LocationMapFragment extends DialogFragment {
         mImage.setVisibility(View.GONE);
     }
 
-    protected void definteOverlays(MapView mapView, DefaultResourceProxyImplEx mResourceProxy) {
+    protected void definteOverlays(MapView mapView, DefaultResourceProxyImplEx resourceProxy) {
         final List<Overlay> overlays = mapView.getOverlays();
+
+        this.mCurrrentSelectionMarker = createSelectedItemOverlay(resourceProxy);
 
         this.mSelectionMarker = getActivity().getResources().getDrawable(R.drawable.marker_blue);
         mFolderOverlaySummaryMarker = createFolderOverlay(overlays);
@@ -300,6 +307,12 @@ public class LocationMapFragment extends DialogFragment {
         overlays.add(new GuestureOverlay(getActivity()));
 
         mapView.setMultiTouchControls(true);
+    }
+
+    protected IconOverlay createSelectedItemOverlay(DefaultResourceProxyImplEx resourceProxy) {
+        Drawable currrentSelectionIcon = getActivity().getResources().getDrawable(R.drawable.marker_red);
+        // fixed positon, not updated on pick
+        return new IconOverlay(resourceProxy, null, currrentSelectionIcon);
     }
 
     protected void defineButtons(View view) {
@@ -606,8 +619,21 @@ public class LocationMapFragment extends DialogFragment {
     protected boolean onMarkerClicked(IconOverlay marker, int markerId, IGeoPoint makerPosition, Object markerData) {
         this.mImage.setImageBitmap(getBitmap(markerId));
         this.mImage.setVisibility(View.VISIBLE);
+
+        updateMarker(marker, markerId, makerPosition, markerData);
+
         return true; // TODO
     }
+
+    protected void updateMarker(IconOverlay marker, int markerId, IGeoPoint makerPosition, Object markerData) {
+        mMarkerId = markerId;
+        if (mCurrrentSelectionMarker != null) {
+            mMapView.getOverlays().remove(mCurrrentSelectionMarker);
+            mCurrrentSelectionMarker.moveTo(makerPosition, mMapView);
+            mMapView.getOverlays().add(mCurrrentSelectionMarker);
+        }
+    }
+
 
     private Bitmap getBitmap(int id) {
         final Bitmap thumbnail = MediaStore.Images.Thumbnails.getThumbnail(

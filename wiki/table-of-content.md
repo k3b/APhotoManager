@@ -6,6 +6,7 @@
 	<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View">Gallery-View</a></li>
 	<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker">Folder-Picker</a></li>
 	<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View">Image-View</a></li>
+	<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/intentapi">Intent API</a></li>
 </ul>
 
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_unchecked.png)
@@ -22,3 +23,4 @@
 * [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map)
 * [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View)
 * [Folder-Picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker)
+* [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi)

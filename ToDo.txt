@@ -1,8 +1,15 @@
-TODO Stackoverflow:
+TODO
 
+image-view 
+	current selected item = red
+	context menü: open gallery with items of bubble
+
+Disppatch activity file exist and isFile => imageDetail else gallery
+wiki api
+
+? fixed manifest-intent-filter content: geht noch ?
 #6 geo-picker
-	overlay cross with current location
-
+	extera_stream-uri(s) => blue: selected items via geo:, content: or file:
 
 next #6 => #4
 
