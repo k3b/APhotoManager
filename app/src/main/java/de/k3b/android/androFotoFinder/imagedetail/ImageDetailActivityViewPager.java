@@ -211,6 +211,12 @@ public class ImageDetailActivityViewPager extends Activity {
         this.mGalleryContentQuery = intent.getParcelableExtra(EXTRA_QUERY);
         if (mGalleryContentQuery == null) {
             Uri uri = intent.getData();
+            if (uri == null) {
+                Object stream = intent.getExtras().get(Intent.EXTRA_STREAM);
+                if (stream != null) {
+                    uri = Uri.parse(stream.toString());
+                }
+            }
             if (uri != null) {
                 String scheme = uri.getScheme();
                 if ((scheme == null) || ("file".equals(scheme))) {

@@ -56,14 +56,12 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
-    <application
-        android:name=".AndroFotoFinderApp"
+    <application android:name=".AndroFotoFinderApp"
         android:allowBackup="true"
         android:icon="@drawable/foto_gallery"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-        <activity
-            android:name=".FotoGalleryActivity"
+        <activity android:name=".FotoGalleryActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -71,10 +69,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".imagedetail.ImageDetailActivityViewPager"
-            android:ellipsize="middle" >
-            <intent-filter android:label="@string/app_viewer_name" >
+        <activity android:name=".imagedetail.ImageDetailActivityViewPager"
+            android:ellipsize="middle"  android:label="@string/app_viewer_name">
+            <intent-filter > <!-- file with mime -->
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SENDTO" />
@@ -87,13 +84,13 @@
                     android:mimeType="image/*"
                     android:scheme="file" />
             </intent-filter>
-            <intent-filter android:label="@string/app_viewer_name" >
-                <action android:name="android.intent.action.VIEW" />
+            <intent-filter > <!-- mime only SEND(_TO) -->
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SENDTO" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.CATEGORY_OPENABLE" />
 
                 <!--
                 these do not work
@@ -105,18 +102,15 @@
                 <!-- example content://media/external/images/media/4711 -->
             </intent-filter>
         </activity>
-        <activity
-            android:name=".GalleryFilterActivity"
+        <activity android:name=".GalleryFilterActivity"
             android:label="@string/title_activity_gallery_filter" >
         </activity>
-        <activity
-            android:name=".locationmap.MapGeoPickerActivity"
+        <activity android:name=".locationmap.MapGeoPickerActivity"
             android:icon="@drawable/ic_foto_map"
             android:label="@string/app_map_name" >
             <intent-filter><!-- android:label="LMV#2"> -->
 
                 <!-- trigger if there is uri=geo:.... with any mime -->
-
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.PICK" />
                 <action android:name="android.intent.action.SEND" />

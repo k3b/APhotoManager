@@ -139,7 +139,7 @@ public class LocationMapFragment extends DialogFragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            if (mDirectoryListener instanceof  OnDirectoryInteractionListener) {
+            if (activity instanceof  OnDirectoryInteractionListener) {
                 mDirectoryListener = (OnDirectoryInteractionListener) activity;
             }
         } catch (ClassCastException e) {
@@ -717,7 +717,7 @@ public class LocationMapFragment extends DialogFragment {
      *
      * @param result null if there was an error
      */
-    private void onLoadFinishedSelection(OverlayManager result) {
+    protected void onLoadFinishedSelection(OverlayManager result) {
         mCurrentSelectionMarkerLoader = null;
         StringBuilder dbg = (Global.debugEnabledSql || Global.debugEnabled) ? new StringBuilder() : null;
         if (dbg != null) {
