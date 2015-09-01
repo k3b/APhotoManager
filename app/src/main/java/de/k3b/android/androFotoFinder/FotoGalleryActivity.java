@@ -41,7 +41,6 @@ import de.k3b.android.androFotoFinder.directory.DirectoryLoaderTask;
 import de.k3b.android.androFotoFinder.gallery.cursor.GalleryCursorFragment;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.locationmap.LocationMapFragment;
-import de.k3b.android.androFotoFinder.queries.GalleryFilterParameterParcelable;
 import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
@@ -52,6 +51,7 @@ import de.k3b.android.util.GarbageCollector;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.io.DirectoryFormatter;
+import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IDirectory;
 
@@ -73,7 +73,7 @@ public class FotoGalleryActivity extends Activity implements
         private static final String STATE_DirQueryID = "DirQueryID";
         private static final String STATE_SortID = "SortID";
         private static final String STATE_SortAscending = "SortAscending";
-        private static final String STATE_Filter = "mFilter";
+        private static final String STATE_Filter = "filter";
         private static final String STATE_LAT_LON = "currentLatLon";
         private static final String STATE_LAT_LON_ACTIVE = "currentLatLonActive";
 
@@ -91,7 +91,7 @@ public class FotoGalleryActivity extends Activity implements
 
         QueryParameterParcelable mGalleryContentQuery = null;
 
-        GalleryFilterParameterParcelable mFilter;
+        GalleryFilterParameter mFilter;
 
         /** one of the FotoSql.QUERY_TYPE_xxx values. if undefined use default */
         private int getDirQueryID() {
@@ -140,7 +140,7 @@ public class FotoGalleryActivity extends Activity implements
             savedInstanceState.putString(STATE_CurrentPath, this.mCurrentPath);
             savedInstanceState.putInt(STATE_SortID, this.mSortID);
             savedInstanceState.putBoolean(STATE_SortAscending, this.mSortAscending);
-            savedInstanceState.putParcelable(STATE_Filter, this.mFilter);
+            savedInstanceState.putString(STATE_Filter, this.mFilter.toString());
             savedInstanceState.putString(STATE_LAT_LON, this.mCurrentLatLon.toString());
             savedInstanceState.putBoolean(STATE_LAT_LON_ACTIVE, this.mUseLatLon);
 
@@ -157,10 +157,8 @@ public class FotoGalleryActivity extends Activity implements
             edit.putBoolean(STATE_SortAscending, this.mSortAscending);
             edit.putString(STATE_LAT_LON, this.mCurrentLatLon.toString());
 
+            edit.putString(STATE_Filter, mFilter.toString());
 
-            mFilter.saveSettings(edit);
-
-            // edit.putParcelable(STATE_Filter, this.mFilter);
             edit.commit();
         }
 
@@ -186,8 +184,11 @@ public class FotoGalleryActivity extends Activity implements
             }
 
             if (this.mFilter == null) {
-                this.mFilter = new GalleryFilterParameterParcelable();
-                mFilter.loadSettings(sharedPref);
+                String filter = sharedPref.getString(STATE_Filter, null);
+
+                if (filter != null) {
+                    this.mFilter = GalleryFilterParameter.parse(filter, new GalleryFilterParameter());
+                }
             }
             // extra parameter
             this.mGalleryContentQuery = context.getIntent().getParcelableExtra(EXTRA_QUERY);
@@ -382,7 +383,7 @@ public class FotoGalleryActivity extends Activity implements
         }
     }
 
-    private void onFilterChanged(GalleryFilterParameterParcelable filter) {
+    private void onFilterChanged(GalleryFilterParameter filter) {
         if (filter != null) {
             this.mGalleryQueryParameter.mFilter = filter;
 

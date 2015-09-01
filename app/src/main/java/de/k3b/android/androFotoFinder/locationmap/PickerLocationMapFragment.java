@@ -15,15 +15,14 @@ import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.OverlayManager;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.queries.GalleryFilterParameterParcelable;
 import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
 import de.k3b.android.osmdroid.IconOverlay;
 import de.k3b.database.SelectedItems;
+import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 
 /**
@@ -104,7 +103,7 @@ public class PickerLocationMapFragment extends LocationMapFragment {
     }
 
     @Override
-    public void defineNavigation(GalleryFilterParameterParcelable rootFilter, GeoRectangle rectangle, int zoomlevel, SelectedItems selectedItems) {
+    public void defineNavigation(GalleryFilterParameter rootFilter, GeoRectangle rectangle, int zoomlevel, SelectedItems selectedItems) {
         super.defineNavigation(rootFilter, rectangle, zoomlevel, selectedItems);
         if (rectangle != null) {
             updateMarker(null, NO_MARKER_ID, new GeoPoint(rectangle.getLatitudeMin(), rectangle.getLogituedMin()), null);
@@ -143,5 +142,5 @@ public class PickerLocationMapFragment extends LocationMapFragment {
         this.getActivity().finish();
     }
 
-    // warum ist roter marker nicht sichtbar wenn auf grünen marker gecklickt wurde ???
+    // warum ist roter marker nicht sichtbar wenn auf gruenen marker gecklickt wurde ???
 }

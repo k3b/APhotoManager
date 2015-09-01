@@ -30,12 +30,12 @@ import android.view.Window;
 import android.widget.Toast;
 
 import de.k3b.android.androFotoFinder.R;
-import de.k3b.android.androFotoFinder.queries.GalleryFilterParameterParcelable;
 import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.database.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.io.GeoUri;
+import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 
 public class MapGeoPickerActivity extends Activity  {
@@ -70,7 +70,7 @@ public class MapGeoPickerActivity extends Activity  {
 
         mMap = (LocationMapFragment) getFragmentManager().findFragmentById(R.id.fragment_map);
 
-        GalleryFilterParameterParcelable rootFilter = new GalleryFilterParameterParcelable();
+        GalleryFilterParameter rootFilter = new GalleryFilterParameter();
         GeoRectangle rectangle = new GeoRectangle();
         SelectedItems selectedItems = null;
 

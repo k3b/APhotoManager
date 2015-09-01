@@ -44,12 +44,12 @@ import de.k3b.android.androFotoFinder.directory.DirectoryLoaderTask;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.locationmap.LocationMapFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.queries.GalleryFilterParameterParcelable;
 import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
 import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.io.DirectoryFormatter;
+import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
@@ -60,17 +60,17 @@ import de.k3b.io.IGeoRectangle;
 public class GalleryFilterActivity extends Activity implements DirectoryPickerFragment.OnDirectoryInteractionListener, LocationMapFragment.OnDirectoryInteractionListener {
     private static final String debugPrefix = "GalF-";
 
-    private static final String EXTRA_FILTER = "Filter";
+    private static final String EXTRA_FILTER = "de.k2b.Filter";
     public static final int resultID = 522;
     private static final String DLG_NAVIGATOR_TAG = "GalleryFilterActivity";
     private static final String SETTINGS_KEY = "GalleryFilterActivity-";
 
-    GalleryFilterParameterParcelable mFilter = null;
+    GalleryFilterParameter mFilter = null;
 
     private AsFilter mAsFilter = null;
     private HistoryEditText mHistory;
 
-    public static void showActivity(Activity context, GalleryFilterParameterParcelable filter) {
+    public static void showActivity(Activity context, GalleryFilterParameter filter) {
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, context.getClass().getSimpleName()
                     + " > GalleryFilterActivity.showActivity");
@@ -79,14 +79,16 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         final Intent intent = new Intent().setClass(context,
                 GalleryFilterActivity.class);
 
-        intent.putExtra(EXTRA_FILTER, filter);
+        intent.putExtra(EXTRA_FILTER, filter.toString());
 
         context.startActivityForResult(intent, resultID);
     }
 
-    public static GalleryFilterParameterParcelable getFilter(Intent intent) {
+    public static GalleryFilterParameter getFilter(Intent intent) {
         if (intent == null) return null;
-        return intent.getParcelableExtra(EXTRA_FILTER);
+        String filter = intent.getStringExtra(EXTRA_FILTER);
+        if (filter == null) return null;
+        return GalleryFilterParameter.parse(filter, new GalleryFilterParameter());
     }
 
     @Override
@@ -97,7 +99,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         this.mAsFilter = new AsFilter();
         onCreateButtos();
 
-        GalleryFilterParameterParcelable filter = getFilter(this.getIntent());
+        GalleryFilterParameter filter = getFilter(this.getIntent());
 
         if (filter != null) {
             mFilter = filter;
@@ -370,7 +372,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
     }
 
     private void clearFilter() {
-        mFilter = new GalleryFilterParameterParcelable();
+        mFilter = new GalleryFilterParameter();
         toGui(mFilter);
     }
 
@@ -379,7 +381,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
             mHistory.saveHistory();
 
             final Intent intent = new Intent();
-            intent.putExtra(EXTRA_FILTER, this.mFilter);
+            intent.putExtra(EXTRA_FILTER, this.mFilter.toString());
             this.setResult(resultID, intent);
             finish();
         }
@@ -452,7 +454,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         DirInfo dirInfo = getOrCreateDirInfo(queryTypeId);
         dirInfo.currentPath=selectedAbsolutePath;
 
-        mFilter.set(selectedAbsolutePath, queryTypeId);
+        FotoSql.set(mFilter,selectedAbsolutePath, queryTypeId);
         toGui(mFilter);
     }
 

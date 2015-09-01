@@ -19,7 +19,6 @@
  
 package de.k3b.android.androFotoFinder.queries;
 
-import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
@@ -36,9 +35,8 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
-import de.k3b.geo.api.GeoPointDto;
-import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.io.DirectoryFormatter;
+import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
@@ -340,6 +338,31 @@ public class FotoSql {
             default: return  result;
         }
     }
+
+    public static boolean set(GalleryFilterParameter dest, String selectedAbsolutePath, int queryTypeId) {
+        switch (queryTypeId) {
+            case FotoSql.QUERY_TYPE_GROUP_ALBUM:
+                dest.setPath(selectedAbsolutePath + "%");
+                return true;
+            case FotoSql.QUERY_TYPE_GROUP_DATE:
+                Date from = new Date();
+                Date to = new Date();
+
+                DirectoryFormatter.getDates(selectedAbsolutePath, from, to);
+                dest.setDateMin(from.getTime());
+                dest.setDateMax(to.getTime());
+                return true;
+            case FotoSql.QUERY_TYPE_GROUP_PLACE_MAP:
+            case FotoSql.QUERY_TYPE_GROUP_PLACE:
+                IGeoRectangle geo = DirectoryFormatter.parseLatLon(selectedAbsolutePath);
+                if (geo != null) {
+                    dest.get(geo);
+                }
+                return true;
+        }
+        return false;
+    }
+
 
     public static String getFotoPath(Context context, Uri uri) {
         Cursor c = null;

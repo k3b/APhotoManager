@@ -34,11 +34,13 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.SeekBar;
 
 
@@ -60,7 +62,6 @@ import java.util.Stack;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.queries.GalleryFilterParameterParcelable;
 import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
 import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
 import de.k3b.android.osmdroid.FolderOverlay;
@@ -71,6 +72,7 @@ import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.database.SelectedItems;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
+import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGeoRectangle;
 
@@ -117,7 +119,7 @@ public class LocationMapFragment extends DialogFragment {
     private int mDelayedZoomLevel = NO_ZOOM;
     private boolean mIsInitialized = false;
 
-    private GalleryFilterParameterParcelable mRootFilter;
+    private GalleryFilterParameter mRootFilter;
 
     public LocationMapFragment() {
         // Required empty public constructor
@@ -388,7 +390,7 @@ public class LocationMapFragment extends DialogFragment {
         return result;
     }
 
-    public void defineNavigation(GalleryFilterParameterParcelable rootFilter, GeoRectangle rectangle, int zoomlevel, SelectedItems selectedItems) {
+    public void defineNavigation(GalleryFilterParameter rootFilter, GeoRectangle rectangle, int zoomlevel, SelectedItems selectedItems) {
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + "defineNavigation: " + rectangle + ";z=" + zoomlevel);
         }
@@ -450,6 +452,15 @@ public class LocationMapFragment extends DialogFragment {
         protected boolean onMarkerClicked(MapView mapView, int markerId, IGeoPoint makerPosition, Object markerData) {
             return LocationMapFragment.this.onMarkerClicked(this, markerId, makerPosition, markerData);
         }
+
+        /**
+         * @return true if click was handeled.
+         */
+        @Override
+        protected boolean onMarkerLongPress(MapView mapView, int markerId, IGeoPoint geoPosition, Object data) {
+            return LocationMapFragment.this.onMarkerLongPress(this, markerId, geoPosition, data);
+        }
+
     }
 
     private void reloadSummaryMarker() {
@@ -616,13 +627,18 @@ public class LocationMapFragment extends DialogFragment {
     /**
      * @return true if click was handeled.
      */
-    protected boolean onMarkerClicked(IconOverlay marker, int markerId, IGeoPoint makerPosition, Object markerData) {
+    protected boolean onMarkerClicked(IconOverlay marker, int markerId, IGeoPoint geoPosition, Object markerData) {
         this.mImage.setImageBitmap(getBitmap(markerId));
         this.mImage.setVisibility(View.VISIBLE);
 
-        updateMarker(marker, markerId, makerPosition, markerData);
+        updateMarker(marker, markerId, geoPosition, markerData);
 
         return true; // TODO
+    }
+
+    protected boolean onMarkerLongPress(IconOverlay marker, int markerId, IGeoPoint geoPosition, Object markerData) {
+        onMarkerClicked(marker, markerId, geoPosition, markerData);
+        return showContextMenu(this.mMapView, markerId, geoPosition, markerData);
     }
 
     protected void updateMarker(IconOverlay marker, int markerId, IGeoPoint makerPosition, Object markerData) {
@@ -765,6 +781,45 @@ public class LocationMapFragment extends DialogFragment {
         if (dbg != null) {
             Log.d(Global.LOG_CONTEXT, dbg.toString());
         }
+    }
+
+    protected   boolean showContextMenu(final View parent, final int markerId,
+                                        final IGeoPoint geoPosition, final Object markerData) {
+        MenuInflater inflater = getActivity().getMenuInflater();
+        PopupMenu menu = new PopupMenu(getActivity(), parent);
+
+        inflater.inflate(R.menu.menu_map_context, menu.getMenu());
+
+        menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.cmd_gallery:
+                        return showGallery(geoPosition);
+                    case R.id.cmd_zoom:
+                        return zoomToFit(geoPosition);
+                    default:
+                        return false;
+                }
+            }
+        });
+        return true;
+    }
+
+    private boolean showGallery(IGeoPoint geoPosition) {
+//        QueryParameterParcelable subQuery = new QueryParameterParcelable(this.mRootFilter);
+        return true;
+    }
+
+    private boolean zoomToFit(IGeoPoint geoPosition) {
+        // todo get current resolutoion
+//        QueryParameterParcelable subQuery = new QueryParameterParcelable(this.mRootFilter);
+        /*
+        mLastZoom = this.mMapView.getZoomLevel();
+        double groupingFactor = getGroupingFactor(mLastZoom);
+        QueryParameterParcelable query = FotoSql.getQueryGroupByPlace(groupingFactor);
+*/
+        return true;
     }
 
 }

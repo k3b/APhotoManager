@@ -2,6 +2,10 @@ TODO
 
 map-view context menü
 	open gallery with items of bubble
+		v string <=> GalleryFilterValue 
+			replace ParcableGalleryFilterValue with string value
+	zomm to marker content
+		siehe fotosql zoomfactor
 	add to current-selection
 	
 
