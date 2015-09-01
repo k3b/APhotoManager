@@ -29,6 +29,11 @@ import java.util.Locale;
  * Created by k3b on 12.07.2015.
  */
 public class DirectoryFormatter {
+    /**
+     * "/2001/01/16" => 2001-01-16 - 2001-01-17
+     * "/2001/01/" => 2001-01-01 - 2001-02-01
+     * "/2001/" => 2001-01-01 - 2002-01-01
+     */
     public static void getDates(String selectedAbsolutePath, Date from, Date to) {
         Integer year = null;
         Integer month = null;
@@ -122,10 +127,10 @@ public class DirectoryFormatter {
      */
     public static IGeoRectangle parseLatLon(String path) {
         if (path != null) {
-            String[] minMax = getLastPath(path).split(GeoRectangle.DELIM_LL_S);
+            String[] minMax = getLastPath(path).split(GeoRectangle.DELIM_FIELD);
             if (minMax == null) return null;
 
-            String[] elements = minMax[0].split(GeoRectangle.DELIM_LAT_LON);
+            String[] elements = minMax[0].split(GeoRectangle.DELIM_SUB_FIELD);
             if ((elements != null) && (elements.length == 2)) {
                 String lat = elements[0];
                 String lon = elements[1];
@@ -153,7 +158,7 @@ public class DirectoryFormatter {
                     result.setLogituedMax(result.getLogituedMin() + delta);
                     return result;
                 } else if (minMax.length == 2) {
-                    elements = minMax[1].split(GeoRectangle.DELIM_LAT_LON);
+                    elements = minMax[1].split(GeoRectangle.DELIM_SUB_FIELD);
                     if ((elements != null) && (elements.length == 2)) {
                         lat = elements[0];
                         lon = elements[1];

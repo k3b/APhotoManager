@@ -1,8 +1,9 @@
 TODO
 
-image-view 
-	current selected item = red
-	context menü: open gallery with items of bubble
+map-view context menü
+	open gallery with items of bubble
+	add to current-selection
+	
 
 Disppatch activity file exist and isFile => imageDetail else gallery
 wiki api

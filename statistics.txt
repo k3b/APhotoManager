@@ -27,4 +27,9 @@ Unique visitors https://github.com/k3b/AndroFotoFinder/graphs/traffic
 0823	4
 0824	3
 0825	11
+0826	6
+0827	10
+0828	9
+0829	5
+0830	4
 
