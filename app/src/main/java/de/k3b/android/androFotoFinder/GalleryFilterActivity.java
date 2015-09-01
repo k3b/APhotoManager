@@ -57,10 +57,9 @@ import de.k3b.io.IGeoRectangle;
 /**
  * Defines a gui for global foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.
  */
-public class GalleryFilterActivity extends Activity implements DirectoryPickerFragment.OnDirectoryInteractionListener, LocationMapFragment.OnDirectoryInteractionListener {
+public class GalleryFilterActivity extends Activity implements Common, DirectoryPickerFragment.OnDirectoryInteractionListener, LocationMapFragment.OnDirectoryInteractionListener {
     private static final String debugPrefix = "GalF-";
 
-    private static final String EXTRA_FILTER = "de.k2b.Filter";
     public static final int resultID = 522;
     private static final String DLG_NAVIGATOR_TAG = "GalleryFilterActivity";
     private static final String SETTINGS_KEY = "GalleryFilterActivity-";
@@ -79,7 +78,9 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         final Intent intent = new Intent().setClass(context,
                 GalleryFilterActivity.class);
 
-        intent.putExtra(EXTRA_FILTER, filter.toString());
+        if (filter != null) {
+            intent.putExtra(EXTRA_FILTER, filter.toString());
+        }
 
         context.startActivityForResult(intent, resultID);
     }
@@ -381,7 +382,9 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
             mHistory.saveHistory();
 
             final Intent intent = new Intent();
-            intent.putExtra(EXTRA_FILTER, this.mFilter.toString());
+            if (this.mFilter != null) {
+                intent.putExtra(EXTRA_FILTER, this.mFilter.toString());
+            }
             this.setResult(resultID, intent);
             finish();
         }

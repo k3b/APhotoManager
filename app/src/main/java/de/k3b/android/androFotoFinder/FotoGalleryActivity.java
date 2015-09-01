@@ -55,7 +55,7 @@ import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IDirectory;
 
-public class FotoGalleryActivity extends Activity implements
+public class FotoGalleryActivity extends Activity implements Common,
         OnGalleryInteractionListener, DirectoryPickerFragment.OnDirectoryInteractionListener,
         LocationMapFragment.OnDirectoryInteractionListener
 {
@@ -140,7 +140,9 @@ public class FotoGalleryActivity extends Activity implements
             savedInstanceState.putString(STATE_CurrentPath, this.mCurrentPath);
             savedInstanceState.putInt(STATE_SortID, this.mSortID);
             savedInstanceState.putBoolean(STATE_SortAscending, this.mSortAscending);
-            savedInstanceState.putString(STATE_Filter, this.mFilter.toString());
+            if (this.mFilter != null) {
+                savedInstanceState.putString(STATE_Filter, this.mFilter.toString());
+            }
             savedInstanceState.putString(STATE_LAT_LON, this.mCurrentLatLon.toString());
             savedInstanceState.putBoolean(STATE_LAT_LON_ACTIVE, this.mUseLatLon);
 
@@ -157,7 +159,9 @@ public class FotoGalleryActivity extends Activity implements
             edit.putBoolean(STATE_SortAscending, this.mSortAscending);
             edit.putString(STATE_LAT_LON, this.mCurrentLatLon.toString());
 
-            edit.putString(STATE_Filter, mFilter.toString());
+            if (mFilter != null) {
+                edit.putString(STATE_Filter, mFilter.toString());
+            }
 
             edit.commit();
         }
@@ -171,24 +175,27 @@ public class FotoGalleryActivity extends Activity implements
             this.mSortAscending = sharedPref.getBoolean(STATE_SortAscending, this.mSortAscending);
             this.mCurrentLatLon.get(DirectoryFormatter.parseLatLon(sharedPref.getString(STATE_LAT_LON, null)));
 
+            Intent intent = context.getIntent();
+            String filter = (intent != null) ? intent.getStringExtra(EXTRA_FILTER) : null;
             // instance state overrides settings
             if (savedInstanceState != null) {
                 this.mCurrentPath = savedInstanceState.getString(STATE_CurrentPath, this.mCurrentPath);
                 this.mDirQueryID = savedInstanceState.getInt(STATE_DirQueryID, this.getDirQueryID());
                 this.mSortID = savedInstanceState.getInt(STATE_SortID, this.mSortID);
                 this.mSortAscending = savedInstanceState.getBoolean(STATE_SortAscending, this.mSortAscending);
-                this.mFilter = savedInstanceState.getParcelable(STATE_Filter);
+                filter = savedInstanceState.getString(STATE_Filter);
+
                 this.mCurrentLatLon.get(DirectoryFormatter.parseLatLon(savedInstanceState.getString(STATE_LAT_LON)));
 
                 this.mUseLatLon = savedInstanceState.getBoolean(STATE_LAT_LON_ACTIVE, this.mUseLatLon);
             }
 
-            if (this.mFilter == null) {
-                String filter = sharedPref.getString(STATE_Filter, null);
+            if ((filter == null) && (this.mFilter == null)) {
+                filter = sharedPref.getString(STATE_Filter, null);
+            }
 
-                if (filter != null) {
-                    this.mFilter = GalleryFilterParameter.parse(filter, new GalleryFilterParameter());
-                }
+            if (filter != null) {
+                this.mFilter = GalleryFilterParameter.parse(filter, new GalleryFilterParameter());
             }
             // extra parameter
             this.mGalleryContentQuery = context.getIntent().getParcelableExtra(EXTRA_QUERY);
@@ -212,6 +219,16 @@ public class FotoGalleryActivity extends Activity implements
     /** true if activity should show navigator dialog after loading mDirectoryRoot is complete */
     private boolean mMustShowNavigator = false;
 
+    public static void showActivity(Activity context, GalleryFilterParameter filter, int requestCode) {
+        Intent intent = new Intent(context, FotoGalleryActivity.class);
+
+        if (filter != null) {
+            intent.putExtra(EXTRA_FILTER, filter.toString());
+        }
+        context.startActivityForResult(intent, requestCode);
+    }
+
+
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         this.mGalleryQueryParameter.saveInstanceState(this, savedInstanceState);
@@ -223,7 +240,7 @@ public class FotoGalleryActivity extends Activity implements
         Global.debugMemory(debugPrefix, "onCreate");
         super.onCreate(savedInstanceState);
 
-            setContentView(R.layout.activity_gallery); // .gallery_activity);
+        setContentView(R.layout.activity_gallery); // .gallery_activity);
 
         this.mGalleryQueryParameter.loadSettingsAndInstanceState(this, savedInstanceState);
 

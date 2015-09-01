@@ -35,9 +35,11 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
 
     public GalleryFilterParameter get(IGalleryFilter src) {
         super.get(src);
-        this.setDateMax(src.getDateMax());
-        this.setDateMin(src.getDateMin());
-        this.setPath(src.getPath());
+        if (src != null) {
+            this.setDateMax(src.getDateMax());
+            this.setDateMin(src.getDateMin());
+            this.setPath(src.getPath());
+        }
         return this;
     }
 

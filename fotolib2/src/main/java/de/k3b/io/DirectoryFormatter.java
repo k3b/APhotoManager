@@ -128,7 +128,7 @@ public class DirectoryFormatter {
     public static IGeoRectangle parseLatLon(String path) {
         if (path != null) {
             String[] minMax = getLastPath(path).split(GeoRectangle.DELIM_FIELD);
-            if (minMax == null) return null;
+            if ((minMax == null) || (minMax.length == 0)) return null;
 
             String[] elements = minMax[0].split(GeoRectangle.DELIM_SUB_FIELD);
             if ((elements != null) && (elements.length == 2)) {

@@ -22,6 +22,7 @@ package de.k3b.android.androFotoFinder.locationmap;
 
 import android.app.Activity;
 import android.app.DialogFragment;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -59,6 +60,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
+import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
@@ -786,7 +788,7 @@ public class LocationMapFragment extends DialogFragment {
     protected   boolean showContextMenu(final View parent, final int markerId,
                                         final IGeoPoint geoPosition, final Object markerData) {
         MenuInflater inflater = getActivity().getMenuInflater();
-        PopupMenu menu = new PopupMenu(getActivity(), parent);
+        PopupMenu menu = new PopupMenu(getActivity(), this.mImage);
 
         inflater.inflate(R.menu.menu_map_context, menu.getMenu());
 
@@ -795,31 +797,66 @@ public class LocationMapFragment extends DialogFragment {
             public boolean onMenuItemClick(MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.cmd_gallery:
-                        return showGallery(geoPosition);
+                        return showGallery(getiGeoPointById(markerId, geoPosition));
                     case R.id.cmd_zoom:
-                        return zoomToFit(geoPosition);
+                        return zoomToFit(getiGeoPointById(markerId, geoPosition));
                     default:
                         return false;
                 }
             }
         });
+        menu.show();
         return true;
     }
 
     private boolean showGallery(IGeoPoint geoPosition) {
-//        QueryParameterParcelable subQuery = new QueryParameterParcelable(this.mRootFilter);
+        GalleryFilterParameter filter = getMarkerFilter(geoPosition);
+        FotoGalleryActivity.showActivity(this.getActivity(), filter, 4711);
         return true;
     }
 
     private boolean zoomToFit(IGeoPoint geoPosition) {
-        // todo get current resolutoion
-//        QueryParameterParcelable subQuery = new QueryParameterParcelable(this.mRootFilter);
-        /*
-        mLastZoom = this.mMapView.getZoomLevel();
-        double groupingFactor = getGroupingFactor(mLastZoom);
-        QueryParameterParcelable query = FotoSql.getQueryGroupByPlace(groupingFactor);
-*/
+        BoundingBoxE6 boundingBoxE6 = getMarkerBoundingBox(geoPosition);
+
+        zoomToBoundingBox(boundingBoxE6, NO_ZOOM);
         return true;
+    }
+
+    private GalleryFilterParameter getMarkerFilter(IGeoPoint geoPosition) {
+        double delta = getMarkerDelta();
+
+        GalleryFilterParameter result = new GalleryFilterParameter().get(mRootFilter);
+        result.setLatitude(geoPosition.getLatitude() - delta, geoPosition.getLatitude() + delta);
+        result.setLogitude(geoPosition.getLongitude() - delta, geoPosition.getLongitude() + delta);
+
+        return result;
+    }
+
+    @NonNull
+    private BoundingBoxE6 getMarkerBoundingBox(IGeoPoint geoPosition) {
+        double delta = getMarkerDelta();
+
+        return new BoundingBoxE6(
+                geoPosition.getLatitude()+delta,
+                geoPosition.getLongitude()+delta,
+                geoPosition.getLatitude()-delta,
+                geoPosition.getLongitude()-delta);
+    }
+
+    private double getMarkerDelta() {
+        int zoomLevel = this.mMapView.getZoomLevel();
+        double groupingFactor = getGroupingFactor(zoomLevel);
+        return 1/groupingFactor/2;
+    }
+
+    private IGeoPoint getiGeoPointById(int markerId, IGeoPoint notFoundValue) {
+        if (markerId != NO_MARKER_ID) {
+            IGeoPoint pos = FotoSql.getPosition(this.getActivity(), markerId);
+            if (pos != null) {
+                notFoundValue = pos;
+            }
+        }
+        return notFoundValue;
     }
 
 }

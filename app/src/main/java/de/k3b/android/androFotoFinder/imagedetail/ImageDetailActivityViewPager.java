@@ -165,7 +165,6 @@ public class ImageDetailActivityViewPager extends Activity {
         context.startActivityForResult(intent, ACTIVITY_ID);
     }
 
-
     @Override
 	public void onCreate(Bundle savedInstanceState) {
         debugPrefix = "ImageDetailActivityViewPager#" + (id++)  + " ";
