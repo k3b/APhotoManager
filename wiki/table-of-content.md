@@ -24,3 +24,4 @@
 * [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View)
 * [Folder-Picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker)
 * [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi)
+* [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)

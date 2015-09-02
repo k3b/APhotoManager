@@ -179,7 +179,11 @@ public class FotoSql {
         if ((parameters != null) && (filter != null)) {
             parameters.clearWhere();
 
-            addWhereFilteLatLon(parameters, filter);
+            if (filter.isNonGeoOnly()) {
+                parameters.addWhere(SQL_COL_LAT + " is null AND " + SQL_COL_LAT + " is null");
+            } else {
+                addWhereFilteLatLon(parameters, filter);
+            }
 
             if (filter.getDateMin() != 0) parameters.addWhere(SQL_COL_DATE_TAKEN + " >= ?", Double.toString(filter.getDateMin()));
             if (filter.getDateMax() != 0) parameters.addWhere(SQL_COL_DATE_TAKEN + " < ?", Double.toString(filter.getDateMax()));

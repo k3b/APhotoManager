@@ -30,6 +30,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -255,6 +256,7 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
         private EditText mLongitudeTo;
         private EditText mLatitudeTo;
         private EditText mLatitudeFrom;
+        private CheckBox mWithNoGeoInfo;
 
         AsFilter() {
             this.mPath = (EditText) findViewById(R.id.edit_path);
@@ -264,6 +266,15 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
             this.mLatitudeTo = (EditText) findViewById(R.id.edit_latitude_to);
             this.mLongitudeFrom = (EditText) findViewById(R.id.edit_longitude_from);
             this.mLongitudeTo = (EditText) findViewById(R.id.edit_longitude_to);
+            this.mWithNoGeoInfo = (CheckBox) findViewById(R.id.chk_with_no_geo);
+
+            mWithNoGeoInfo.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showLatLon();
+                }
+
+            });
 
             mHistory = new HistoryEditText(GalleryFilterActivity.this, new int[] {
                     R.id.cmd_path_history, R.id.cmd_date_from_history, R.id.cmd_date_to_history,
@@ -271,6 +282,18 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
                     mPath ,mDateFrom ,mDateTo, mLatitudeFrom, mLatitudeTo, mLongitudeFrom, mLongitudeTo);
 
         }
+
+        private void showLatLon() {
+            show(mWithNoGeoInfo.isChecked(), R.id.cmd_select_lat_lon, R.id.lbl_latitude, R.id.cmd_lat_from_history, R.id.edit_latitude_from,
+                    R.id.cmd_lat_to_history, R.id.edit_latitude_to, R.id.lbl_longitude, R.id.cmd_lon_from_history,
+                    R.id.edit_longitude_from,R.id.cmd_lon_to_history, R.id.edit_longitude_to);
+        }
+
+        private void show(boolean checked, int... ids) {
+            for(int id:ids)
+                findViewById(id).setVisibility((!checked) ? View.VISIBLE : View.INVISIBLE );
+        }
+
         @Override
         public double getLatitudeMin() {
             return convertLL(mLatitudeFrom.getText().toString());
@@ -307,11 +330,18 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
         }
 
         @Override
+        public boolean isNonGeoOnly() {
+            return mWithNoGeoInfo.isChecked();
+        }
+
+        @Override
         public IGalleryFilter get(IGalleryFilter src) {
             get((IGeoRectangle) src);
             mPath           .setText(src.getPath());
             mDateFrom       .setText(convertDate(src.getDateMin()));
             mDateTo         .setText(convertDate(src.getDateMax()));
+            mWithNoGeoInfo.setChecked(src.isNonGeoOnly());
+            showLatLon();
             return this;
         }
 

@@ -15,6 +15,9 @@ You can reach the [Geographic-Map](Geographic-Map) via
 * **Blue markers** represent selected photos if [Gallery-View](Gallery-View) is in multiselection mode or if SEND_MULTIPLE.
 * If you tap on a marker the marker becomes **red** to indicate current selection and a photo belonging to the marker is displayed in the lower right corner.
 * Tap on the photo to hide it.
+* if you **long-tap on a marker** you get a context menu to
+	* to open a new gallery instance filtering the area of the current marker.
+	* to zoom to fit the area of the current marker.
 * If you tap somewhere in the map the "zoomin"- and "zoomout"-buttons become visible to change the map detail level.
 * If you double tap somewhere in the map the map zooms in one level.
 * If you swipe left/right/up/down you can change the current map area

@@ -1,13 +1,13 @@
 TODO
 
 map-view context menü
-	open gallery with items of bubble
-		v string <=> GalleryFilterValue 
-			replace ParcableGalleryFilterValue with string value
-	zomm to marker content
-		siehe fotosql zoomfactor
-	add to current-selection
-	
+	save/load filter settings with differenet string-keys
+	menu (multi-)Selection add/remove
+		filterparam "nogeodata"
+		query parcable ersetzen durch filter??
+		
+	history (md/notranslate)
+	map.md add contextmenu
 
 Disppatch activity file exist and isFile => imageDetail else gallery
 wiki api

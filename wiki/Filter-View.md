@@ -19,6 +19,9 @@ You can reach the [Filter-View](Filter-View) via
 		* searching for date "2007-01-01" and "" will show photos taken since 2007.
 		* searching for date "" and "2008-01-01" will show photos taken before jan 1st 2008.
 		* searching for date "2007-01-01" and "2008-01-01" will show photos taken in 2007.
+* [ ] With no geo info: When checked 
+	* only photos without geo-infos are visible
+	* input fields for latitude/longitude are hidden.
 * **Geo Area** where the photo was taken as Lat(itude north) and Lon(gitude east).  The first field is **from** the second field is **to** .
 	* you can pick a geo area through the [Geographic-Map](Geographic-Map) with the "..." button. 
 	* you can enter a start and/or a end valus in decimal degrees format.
@@ -27,3 +30,5 @@ You can reach the [Filter-View](Filter-View) via
   * [Gallery-View](Gallery-View): to update which photos are visible.
 * The "Cancel" button or the back button closes the picker without affecting [Gallery-View](Gallery-View).
 * The "Clear Filter" sets all filter fields to empty which means "no filter".
+
+Each field in the [Filter-View](Filter-View) corresponds to a field of de.k2b.extra.FILTER of the [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi).

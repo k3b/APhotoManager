@@ -23,14 +23,14 @@
     xmlns:tools="http://schemas.android.com/tools" tools:context=".GalleryActivity">
 
     <item android:id="@+id/cmd_select_folder"
-        android:title="@string/action_folder_title"
+        android:title="@string/action_folder_title_menu"
         android:icon="@drawable/ic_action_holo_dark_folder"
         android:visible="true"
         android:orderInCategory="1"
         android:showAsAction="ifRoom" />
 
     <item android:id="@+id/cmd_select_lat_lon"
-        android:title="@string/action_area_title"
+        android:title="@string/action_area_title_menu"
         android:icon="@android:drawable/ic_dialog_map"
         android:visible="true"
         android:orderInCategory="1"

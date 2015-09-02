@@ -1,3 +1,8 @@
+You can reach the [Gallery-View](Gallery-View) via
+
+* opening from android-s app manager
+* the [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map)'s contextmenu by long tapping a marker.
+
 The [Gallery-View](Gallery-View) show photos in a scrollable view:
 
 * If you swipe up or down you will see more photos.
@@ -35,8 +40,8 @@ in the [Image-View](Image-View).
 The [Gallery-View](Gallery-View) has these elements:
 
 * via the **SearchFiter** symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_filter.png) (or menu item "Filter") you can open the [Filter-View](Filter-View) to define the SearchFiter. 
-* via the **CurrentFolder** symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_folder.png) (or menu item "Select Folder") you can open a [Folder-Picker](Folder-Picker) to pick the CurrentFolder.
-* via the **CurrentGeoArea** symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_map.png) (or menu item "Select Area") you can open a [Geographic-Map](Geographic-Map) to pick the CurrentGeoArea.
+* via the **CurrentFolder** symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_folder.png) (or menu item "Folder Filter") you can open a [Folder-Picker](Folder-Picker) to pick the CurrentFolder.
+* via the **CurrentGeoArea** symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_map.png) (or menu item "Map Area Filter") you can open a [Geographic-Map](Geographic-Map) to pick the CurrentGeoArea.
 * via the menu item "Sort xxx" you see the current sort order. 
     * Example "Sort: Name ^" means "sort by name ascending". "^" means ascending; "v" means descending.
     * If you click on the "Sort xxx" menuitem you get a submenu with the different sort criteria.

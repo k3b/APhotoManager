@@ -49,7 +49,15 @@ public class GalleryFilterParameterTest {
 
     @Test
     public void shouldParseFull() {
-        GalleryFilterParameter sut = GalleryFilterParameter.parse("1.23,2.34;3.45,4.56;2001-02-03,2005-12-31;/some/path/;", new GalleryFilterParameter());
+        GalleryFilterParameter sutParsed = GalleryFilterParameter.parse("1.23,2.34;3.45,4.56;2001-02-03,2005-12-31;/some/path/;", new GalleryFilterParameter());
+        GalleryFilterParameter sut = new GalleryFilterParameter().get(sutParsed);
         assertEquals("1.23,2.34;3.45,4.56;2001-02-03,2005-12-31;/some/path/;", sut.toString());
+    }
+
+    @Test
+    public void shouldParseFullNoGeo() {
+        GalleryFilterParameter sutParsed = GalleryFilterParameter.parse("n;;2001-02-03,2005-12-31;/some/path/;", new GalleryFilterParameter());
+        GalleryFilterParameter sut = new GalleryFilterParameter().get(sutParsed);
+        assertEquals("noGeoInfo;;2001-02-03,2005-12-31;/some/path/;", sut.toString());
     }
 }

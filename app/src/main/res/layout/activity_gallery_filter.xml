@@ -80,7 +80,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Date"
+        android:text="@string/lbl_date"
         android:layout_below="@+id/cmd_path"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
@@ -120,13 +120,23 @@
         android:layout_toRightOf="@+id/lbl_date"
         android:layout_toLeftOf="@+id/cmd_date_from_history"
         android:layout_toStartOf="@+id/cmd_date_from_history" />
-<!-- -->
+    <!-- -->
+
+    <CheckBox android:id="@+id/chk_with_no_geo"
+        android:text="@string/lbl_with_no_geo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/edit_date_to"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        />
+    <!-- -->
 
     <Button android:id="@+id/cmd_select_lat_lon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="..."
-        android:layout_below="@+id/edit_date_to"
+        android:layout_below="@+id/chk_with_no_geo"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         />

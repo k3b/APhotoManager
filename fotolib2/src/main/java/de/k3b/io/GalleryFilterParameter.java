@@ -28,10 +28,14 @@ import java.text.SimpleDateFormat;
  */
 public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilter {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private static final String NON_GEO_ONLY      = "noGeoInfo";
+    private static final String NON_GEO_ONLY_FIND = NON_GEO_ONLY.substring(0, 1);
     private String path = null;
 
     private long dateMin = 0;
     private long dateMax = 0;
+
+    private boolean nonGeoOnly = false;
 
     public GalleryFilterParameter get(IGalleryFilter src) {
         super.get(src);
@@ -39,6 +43,7 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
             this.setDateMax(src.getDateMax());
             this.setDateMin(src.getDateMin());
             this.setPath(src.getPath());
+            this.setNonGeoOnly(src.isNonGeoOnly());
         }
         return this;
     }
@@ -71,10 +76,27 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
         this.dateMax = dateMax; return this;
     }
 
+    @Override
+    public boolean isNonGeoOnly() {
+        return nonGeoOnly;
+    }
+
+    public GalleryFilterParameter setNonGeoOnly(boolean nonGeoOnly) {
+        this.nonGeoOnly = nonGeoOnly;
+        return this;
+    }
+
     /********************* string conversion support ***************/
     @Override
     public StringBuilder toStringBuilder() {
-        StringBuilder result = super.toStringBuilder();
+        StringBuilder result = null;
+        if (isNonGeoOnly()) {
+            result = new StringBuilder();
+            appendSubFields(result, NON_GEO_ONLY);
+            appendSubFields(result, "");
+        } else {
+            result = super.toStringBuilder();
+        }
         appendSubFields(result, format(getDateMin()), format(getDateMax()));
         appendSubFields(result, format(getPath()));
         return result;
@@ -110,10 +132,15 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
     private void assign(int field, int subfield, String value) {
         switch (field) {
             case 0 :
-                if (subfield == 0)
-                    setLatitudeMin(parseLatLon(value));
-                else
-                    setLogituedMin(parseLatLon(value));
+                if (isNonGeoOnly(value)) {
+                    setNonGeoOnly(true);
+                } else {
+                    setNonGeoOnly(false);
+                    if (subfield == 0)
+                        setLatitudeMin(parseLatLon(value));
+                    else
+                        setLogituedMin(parseLatLon(value));
+                }
                 break;
             case 1 :
                 if (subfield == 0)
@@ -131,6 +158,10 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
                 setPath(value);
                 break;
         }
+    }
+
+    private boolean isNonGeoOnly(String value) {
+        return (value != null) && (value.toLowerCase().startsWith(NON_GEO_ONLY_FIND));
     }
 
     private long parseDate(String value) {

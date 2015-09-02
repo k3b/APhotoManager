@@ -39,7 +39,9 @@
     <string name="popup">...</string>
 
     <string name="action_folder_title">Select Folder</string>
+    <string name="action_folder_title_menu">Folder Filter</string>
     <string name="action_area_title">Select Area</string>
+    <string name="action_area_title_menu">Map Area Filter</string>
     <string name="action_filter_title">Filter</string>
     <string name="action_sort_title">Sort</string>
     <string name="directory_fragment_dialog_title">Select %1$s</string>
@@ -145,6 +147,8 @@ Features:
 <br />
 ]]>
 "</string>
-    <string name="title_show_in_gallery">show</string>
+    <string name="title_show_in_gallery">Show in new Gallery</string>
     <string name="title_zoom_to_fit">Zoom to fit</string>
+    <string name="lbl_date">Date</string>
+    <string name="lbl_with_no_geo">With no geo info</string>
 </resources>
