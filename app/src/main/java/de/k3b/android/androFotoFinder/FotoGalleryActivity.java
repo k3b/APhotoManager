@@ -118,6 +118,14 @@ public class FotoGalleryActivity extends Activity implements Common,
             return  FotoSql.getName(context, this.mSortID) + ((mSortAscending) ? " ^" : " V");
         }
 
+        public boolean clearPathIfActive() {
+            if ((!mUseLatLon) && (mCurrentPath != null)) {
+                mCurrentPath = null;
+                return true;
+            }
+            return false;
+        }
+
         /** combine root-query plus current selected directoryRoot */
         private QueryParameterParcelable calculateEffectiveGalleryContentQuery() {
             if (this.mGalleryContentQuery == null) return null;
@@ -493,6 +501,12 @@ public class FotoGalleryActivity extends Activity implements Common,
     public void setResultCount(int count) {
         this.mTitleResultCount = (count > 0) ? ("(" + count + ")") : "";
         setTitle();
+
+        // current path does not contain photo => reload witout current path
+        if ((count == 0) &&(mGalleryQueryParameter.clearPathIfActive())) {
+            setTitle();
+            reloadGui();
+        }
     }
 
     /**
@@ -589,7 +603,10 @@ public class FotoGalleryActivity extends Activity implements Common,
             if (mGalleryQueryParameter.mUseLatLon) {
                 title = getString(R.string.gallery_foto);
             } else if (this.mGalleryQueryParameter.mCurrentPath != null) {
-                title = FotoSql.getName(this, this.mGalleryQueryParameter.getDirQueryID()) + " - " + this.mGalleryQueryParameter.mCurrentPath;
+                title = FotoSql.getName(this, this.mGalleryQueryParameter.getDirQueryID())
+                        + " - " + this.mGalleryQueryParameter.mCurrentPath;
+            } else {
+                title = FotoSql.getName(this, this.mGalleryQueryParameter.getDirQueryID());
             }
         }
         if (title != null) {
