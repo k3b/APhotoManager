@@ -1,13 +1,9 @@
 TODO
 
-map-view context menü
-	save/load filter settings with differenet string-keys
-	menu (multi-)Selection add/remove
-		filterparam "nogeodata"
-		query parcable ersetzen durch filter??
-		
+	map->show in gallery without root-dir
+
 	history (md/notranslate)
-	map.md add contextmenu
+
 
 Disppatch activity file exist and isFile => imageDetail else gallery
 wiki api

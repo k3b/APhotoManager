@@ -2,6 +2,8 @@
 
 ## v0.4.1.* (not released yet)
 
+* [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) :
+	* [Selection](Gallery-View#Multiselection): add/remove [all visible](Gallery-View#CurrentSet)
 * [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) : 
 	* [#2 Share/Edit](https://github.com/k3b/AndroFotoFinder/issues/2)/Rename/Delete/Copy/Move
 	* Open [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) when [#3 clicking a photo file in a filemanager](https://github.com/k3b/AndroFotoFinder/issues/3) or in android-s "gallery-send menu"

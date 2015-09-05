@@ -69,6 +69,7 @@ public class MapGeoPickerActivity extends Activity  {
         }
 
         mMap = (LocationMapFragment) getFragmentManager().findFragmentById(R.id.fragment_map);
+        mMap.STATE_LAST_VIEWPORT = "ignore"; // do not use last viewport in settings
 
         GalleryFilterParameter rootFilter = new GalleryFilterParameter();
         GeoRectangle rectangle = new GeoRectangle();

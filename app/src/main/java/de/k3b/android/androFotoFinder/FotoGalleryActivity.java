@@ -46,10 +46,13 @@ import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.queries.Queryable;
+import de.k3b.android.androFotoFinder.queries.SqlUpdateTask;
 import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.android.util.GarbageCollector;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.AboutDialogPreference;
+import de.k3b.database.QueryParameter;
+import de.k3b.database.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
@@ -92,6 +95,7 @@ public class FotoGalleryActivity extends Activity implements Common,
         QueryParameterParcelable mGalleryContentQuery = null;
 
         GalleryFilterParameter mFilter;
+        private boolean mSaveToSharedPrefs = true;
 
         /** one of the FotoSql.QUERY_TYPE_xxx values. if undefined use default */
         private int getDirQueryID() {
@@ -149,21 +153,23 @@ public class FotoGalleryActivity extends Activity implements Common,
         }
 
         private void saveSettings(Context context) {
-            // save settings
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-            SharedPreferences.Editor edit = sharedPref.edit();
+            if (mSaveToSharedPrefs) {
+                // save settings
+                SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+                SharedPreferences.Editor edit = sharedPref.edit();
 
-            edit.putInt(STATE_DirQueryID, this.getDirQueryID());
-            edit.putString(STATE_CurrentPath, this.mCurrentPath);
-            edit.putInt(STATE_SortID, this.mSortID);
-            edit.putBoolean(STATE_SortAscending, this.mSortAscending);
-            edit.putString(STATE_LAT_LON, this.mCurrentLatLon.toString());
+                edit.putInt(STATE_DirQueryID, this.getDirQueryID());
+                edit.putString(STATE_CurrentPath, this.mCurrentPath);
+                edit.putInt(STATE_SortID, this.mSortID);
+                edit.putBoolean(STATE_SortAscending, this.mSortAscending);
+                edit.putString(STATE_LAT_LON, this.mCurrentLatLon.toString());
 
-            if (mFilter != null) {
-                edit.putString(STATE_Filter, mFilter.toString());
+                if (mFilter != null) {
+                    edit.putString(STATE_Filter, mFilter.toString());
+                }
+
+                edit.commit();
             }
-
-            edit.commit();
         }
 
         // load from settings/instanceState
@@ -177,6 +183,8 @@ public class FotoGalleryActivity extends Activity implements Common,
 
             Intent intent = context.getIntent();
             String filter = (intent != null) ? intent.getStringExtra(EXTRA_FILTER) : null;
+
+            this.mSaveToSharedPrefs = (filter == null); // false if controlled via intent
             // instance state overrides settings
             if (savedInstanceState != null) {
                 this.mCurrentPath = savedInstanceState.getString(STATE_CurrentPath, this.mCurrentPath);
@@ -309,8 +317,8 @@ public class FotoGalleryActivity extends Activity implements Common,
         // Inflate the menu items for use in the action bar
         MenuInflater inflater = getMenuInflater();
 
-        inflater.inflate(R.menu.menu_gallery_select_current, menu);
-        inflater.inflate(R.menu.menu_gallery, menu);
+        inflater.inflate(R.menu.menu_gallery_non_selected_only, menu);
+        inflater.inflate(R.menu.menu_gallery_non_multiselect, menu);
         /*
         getActionBar().setListNavigationCallbacks();
         MenuItem sorter = menu.getItem(R.id.cmd_sort);
@@ -377,7 +385,6 @@ public class FotoGalleryActivity extends Activity implements Common,
         }
 
     }
-
     /**
      * Call back from sub-activities.<br/>
      * Process Change StartTime (longpress start), Select StopTime before stop

@@ -22,7 +22,6 @@ package de.k3b.android.androFotoFinder.locationmap;
 
 import android.app.Activity;
 import android.app.DialogFragment;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -86,7 +85,7 @@ import de.k3b.io.IGeoRectangle;
 public class LocationMapFragment extends DialogFragment {
     protected static final int NO_MARKER_ID = -1;
 
-    private static final String STATE_LAST_VIEWPORT = "LAST_VIEWPORT";
+    public String STATE_LAST_VIEWPORT = "LAST_VIEWPORT";
     private static final int NO_ZOOM = ZoomUtil.NO_ZOOM;
     // for debugging
     private static int sId = 1;
@@ -541,7 +540,8 @@ public class LocationMapFragment extends DialogFragment {
     /** to load summary marker with numbers in the icons */
     private class SummaryMarkerLoaderTask extends MarkerLoaderTaskWithRecycling<FotoMarker> {
         public SummaryMarkerLoaderTask(HashMap<Integer, FotoMarker> oldItems) {
-            super(getActivity(), LocationMapFragment.this.mDebugPrefix + "-SummaryMarkerLoaderTask#" + (sInstanceCountFotoLoader++) + "-", mMarkerRecycler, oldItems);
+            super(getActivity(), LocationMapFragment.this.mDebugPrefix + "-SummaryMarkerLoaderTask#" + (sInstanceCountFotoLoader++) + "-",
+                    mMarkerRecycler, oldItems, NO_MARKER_COUNT_LIMIT);
         }
 
         @NonNull
@@ -691,7 +691,8 @@ public class LocationMapFragment extends DialogFragment {
     /** to load markers for current selected items */
     private class SelectionMarkerLoaderTask extends MarkerLoaderTaskWithRecycling<FotoMarker> {
         public SelectionMarkerLoaderTask(HashMap<Integer, FotoMarker> oldItems) {
-            super(getActivity(), LocationMapFragment.this.mDebugPrefix + "-SelectionMarkerLoaderTask#" + (sInstanceCountFotoLoader++) + "-", mMarkerRecycler, oldItems);
+            super(getActivity(), LocationMapFragment.this.mDebugPrefix + "-SelectionMarkerLoaderTask#" + (sInstanceCountFotoLoader++) + "-", mMarkerRecycler,
+                    oldItems, Global.maxSelectionMarkersInMap);
         }
 
         @NonNull
@@ -740,7 +741,7 @@ public class LocationMapFragment extends DialogFragment {
             List<Overlay> oldItems = mFolderOverlaySelectionMarker.getItems();
 
             QueryParameterParcelable query = new QueryParameterParcelable(FotoSql.queryGps);
-            FotoSql.addWhereSelection(query, mSelectedItems);
+            FotoSql.setWhereSelection(query, mSelectedItems);
 
             mCurrentSelectionMarkerLoader = new SelectionMarkerLoaderTask(createHashMap(oldItems));
             mCurrentSelectionMarkerLoader.execute(query);

@@ -7,24 +7,25 @@ The [Gallery-View](Gallery-View) show photos in a scrollable view:
 
 * If you swipe up or down you will see more photos.
 * If you tap on a photo it will be opend in the [Image-View](Image-View).
-* If you long-tap on a photo the app enters multiselection mode (see below)
+* If you long-tap on a photo the app enters [multi selection mode](Gallery-View#Multiselection)
 * The Symbol(s) in the actionbar and the menu item(s)
     * ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_unchecked.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_filter.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_folder.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_map.png)
-    * define which photos you want to see (see _current set_ below).
+    * define which photos you want to see (see [Current Visible Photos](Gallery-View#CurrentSet) below).
 
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/Gallery.png)
 
-##Current Set
 
-The [Gallery-View](Gallery-View) show the photos of the device`s _current set_.
+## <a name='CurrentSet'>Current Visible Photos</a>
 
-The **current set** is either the result of
+The [Gallery-View](Gallery-View) show the photos of the device which are _current visible_.
+
+This visibility is either the result of
 
 * SearchFiter ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_filter.png) + CurrentFolder ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_folder.png) + Sorter or
 * SearchFiter ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_filter.png) + CurrentGeoArea ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_map.png) + Sorter
 * or shows the selected items ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_checked.png) (See Multi Selection below)
 
-The **SearchFiter**
+The **[Search Fiter](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)**
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_filter.png)
 is used to find a set of photos by search criteria.
 
@@ -35,7 +36,7 @@ The **Sorter** determines the order in which the
 result photos are presented in the [Gallery-View](Gallery-View) and 
 in the [Image-View](Image-View).
 
-###Navigation
+### <a name='Navigation'>Navigation</a>
 
 The [Gallery-View](Gallery-View) has these elements:
 
@@ -59,17 +60,19 @@ The [Gallery-View](Gallery-View) has these elements:
 * If you [pick the current Folder](Folder-Picker) "Job" the gallery will show only photos from folder "Job" or subfolders of "Job" from 2007.
     * Photos from other years are not visible - they are filtered out.
 
-## Multiselection Mode (Since Version 0.4)
+## <a name='Multiselection'>Multiselection Mode</a>
 
-* If you long-tap on a photo the app enters **multiselection mode:** with different menu items and symbols in the actionbar:
+* If you long-tap on a photo the app enters **[multi selection mode](Gallery-View#Multiselection):** with different menu items and symbols in the actionbar:
 	* ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_cancel.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_unchecked.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_checked.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_share.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_delete.png)
 * Taping on any photo toggles selection of that photo. A Selected photo contains a [X] symbol.
 * Long-tap on a photo it will open it in the [Image-View](Image-View).
-* If you open the [Geographic-Map](Geographic-Map) in multiselection mode selected photos will be shown as blue markers.
+* If you open the [Geographic-Map](Geographic-Map) in [multi selection mode](Gallery-View#Multiselection) selected photos will be shown as blue markers.
 * Additional symbols in the Actionbar (or overflow menu):
-    * taping on the cancel symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_cancel.png) exits the multiselection mode.
+    * taping on the cancel symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_cancel.png) exits the [multi selection mode](Gallery-View#Multiselection).
     * taping on the **selected only** symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_unchecked.png) will show only the seleceted photos. The symbol changes to ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_checked.png) 
 	* taping on the **selected only** symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_checked.png) again will show all photots. The symbol changes to ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_unchecked.png).
+    * taping on the **Selection: add all visible** will select all [Current Visible Photos](Gallery-View#CurrentSet). (Since Version 0.4.1)
+    * taping on the **Selection: remove all visible** will unselect all [Current Visible Photos](Gallery-View#CurrentSet). (Since Version 0.4.1)
 	* taping on the **delete** symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_delete.png) or the "Delete" menu will delete the selected photo(s).
 	* the **move/copy** menu will move/copy the selected photo(s) to a different folder.
 	    * Pressing the "..." button or long pressing a folder in the [foder picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker) allows you to create a new folder.

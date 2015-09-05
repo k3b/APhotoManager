@@ -175,7 +175,7 @@ public class FotoSql {
                     SQL_COL_LAT, SQL_COL_LON)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString());
 
-    public static void setWhereFilter(QueryParameterParcelable parameters, IGalleryFilter filter) {
+    public static void setWhereFilter(QueryParameter parameters, IGalleryFilter filter) {
         if ((parameters != null) && (filter != null)) {
             parameters.clearWhere();
 
@@ -193,40 +193,43 @@ public class FotoSql {
         }
     }
 
-    public static void addWhereSelection(QueryParameterParcelable parameters, SelectedItems selectedItems) {
+    public static void setWhereSelection(QueryParameter parameters, SelectedItems selectedItems) {
         if ((parameters != null) && (selectedItems != null) && (!selectedItems.isEmpty())) {
-            parameters.clearWhere().addWhere(FotoSql.SQL_COL_PK + " in (" + selectedItems.toString() + ")");
+            parameters.clearWhere()
+                    .addWhere(FotoSql.SQL_COL_PK + " in (" + selectedItems.toString() + ")")
+                    .addWhere(FotoSql.SQL_COL_LAT + " is not null and " + FotoSql.SQL_COL_LON + " is not null")
+            ;
         }
     }
 
-    public static void addWhereFilteLatLon(QueryParameterParcelable parameters, IGeoRectangle filter) {
+    public static void addWhereFilteLatLon(QueryParameter parameters, IGeoRectangle filter) {
         if ((parameters != null) && (filter != null)) {
             addWhereFilteLatLon(parameters, filter.getLatitudeMin(),
                     filter.getLatitudeMax(), filter.getLogituedMin(), filter.getLogituedMax());
         }
     }
 
-    public static void addWhereFilteLatLon(QueryParameterParcelable parameters, double latitudeMin, double latitudeMax, double logituedMin, double logituedMax) {
+    public static void addWhereFilteLatLon(QueryParameter parameters, double latitudeMin, double latitudeMax, double logituedMin, double logituedMax) {
         if (!Double.isNaN(latitudeMin)) parameters.addWhere(SQL_COL_LAT + " >= ?", DirectoryFormatter.parseLatLon(latitudeMin));
         if (!Double.isNaN(latitudeMax)) parameters.addWhere(SQL_COL_LAT + " < ?", DirectoryFormatter.parseLatLon(latitudeMax));
         if (!Double.isNaN(logituedMin)) parameters.addWhere(SQL_COL_LON + " >= ?", DirectoryFormatter.parseLatLon(logituedMin));
         if (!Double.isNaN(logituedMax)) parameters.addWhere(SQL_COL_LON + " < ?", DirectoryFormatter.parseLatLon(logituedMax));
     }
 
-    public static String getFilter(Cursor cursor, QueryParameterParcelable parameters, String description) {
+    public static String getFilter(Cursor cursor, QueryParameter parameters, String description) {
         if ((parameters != null) && (parameters.getID() == QUERY_TYPE_GROUP_ALBUM)) {
             return description;
         }
         return null;
     }
 
-    public static void addWhereFilter(QueryParameterParcelable parameters, String filterParameter) {
+    public static void addWhereFilter(QueryParameter parameters, String filterParameter) {
         if ((parameters != null) && (parameters.getID() == QUERY_TYPE_GROUP_ALBUM) && (filterParameter != null)) {
             parameters.addWhere(SQL_EXPR_FOLDER + " = ?", filterParameter);
         }
     }
 
-    public static void addPathWhere(QueryParameterParcelable newQuery, String selectedAbsolutePath, int dirQueryID) {
+    public static void addPathWhere(QueryParameter newQuery, String selectedAbsolutePath, int dirQueryID) {
         if ((selectedAbsolutePath != null) && (selectedAbsolutePath.length() > 0)) {
             if (QUERY_TYPE_GROUP_DATE == dirQueryID) {
                 addWhereDatePath(newQuery, selectedAbsolutePath);
@@ -240,7 +243,7 @@ public class FotoSql {
     /**
      * directory path i.e. /mnt/sdcard/pictures/
      */
-    private static void addWhereDirectoryPath(QueryParameterParcelable newQuery, String selectedAbsolutePath) {
+    private static void addWhereDirectoryPath(QueryParameter newQuery, String selectedAbsolutePath) {
         if (FotoViewerParameter.includeSubItems) {
             newQuery
                     .addWhere(FotoSql.SQL_COL_PATH + " like ?", selectedAbsolutePath + "%")
@@ -257,7 +260,7 @@ public class FotoSql {
     /**
      * path has format /year/month/day/ or /year/month/ or /year/ or /
      */
-    private static void addWhereDatePath(QueryParameterParcelable newQuery, String selectedAbsolutePath) {
+    private static void addWhereDatePath(QueryParameter newQuery, String selectedAbsolutePath) {
         Date from = new Date();
         Date to = new Date();
 
@@ -383,7 +386,7 @@ public class FotoSql {
         return null;
     }
 
-    private static Cursor query(final Context context, QueryParameterParcelable parameters) {
+    private static Cursor query(final Context context, QueryParameter parameters) {
         return query(context, parameters.toFrom(), parameters.toAndroidWhere(),
                 parameters.toAndroidParameters(), parameters.toOrderBy(),
                 parameters.toColumns()
@@ -416,7 +419,7 @@ public class FotoSql {
              .addWhere(SQL_COL_LON + " IS NOT NULL");
 
         if (selectedItems != null) {
-            addWhereSelection(query, selectedItems);
+            setWhereSelection(query, selectedItems);
         }
 
         Cursor c = null;

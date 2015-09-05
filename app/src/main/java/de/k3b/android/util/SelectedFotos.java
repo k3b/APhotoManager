@@ -27,7 +27,6 @@ import android.provider.MediaStore;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
@@ -56,7 +55,7 @@ public class SelectedFotos extends SelectedItems implements Serializable {
             ArrayList<String> result = new ArrayList<>();
 
             QueryParameterParcelable parameters = new QueryParameterParcelable(FotoSql.queryDetail);
-            FotoSql.addWhereSelection(parameters, this);
+            FotoSql.setWhereSelection(parameters, this);
 
             Cursor cursor = null;
 

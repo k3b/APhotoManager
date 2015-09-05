@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
- 
-package de.k3b.android.androFotoFinder.locationmap;
+
+package de.k3b.android.androFotoFinder.queries;
 
 import android.app.Activity;
 import android.database.Cursor;
@@ -29,68 +29,37 @@ import android.os.SystemClock;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.overlay.OverlayManager;
 
-import java.util.HashMap;
-
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
-import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
 import de.k3b.android.osmdroid.IconFactory;
-import de.k3b.android.osmdroid.MarkerBase;
 import de.k3b.database.QueryParameter;
+import de.k3b.database.SelectedItems;
 
-/**
- * Load Marker Overlays in a Background Task.<br>
- * Example usage
- * <pre>
- MarkerLoaderTask loader = new MarkerLoaderTask(getActivity(), "MyLoader") {
- // This is called when doInBackground() is finished
- protected void onPostExecute(OverlayManager result) {
- updateGui(result);
- }
-
- // This is called each time you call publishProgress()
- protected void onProgressUpdate(Integer... progress) {
- setStatus("Loaded " + progress[0] + "/" + progress[1]);
- }
- };
- loader.execute(parameters);
- </pre>
- *
- * Created by k3b on 16.07.2015.
- */
-public abstract class MarkerLoaderTask<MARKER extends MarkerBase> extends AsyncTask<QueryParameter, Integer, OverlayManager> {
-    public static final int NO_MARKER_COUNT_LIMIT = 0;
+public abstract class SqlUpdateTask  extends AsyncTask<QueryParameter, Integer, SelectedItems> {
     // every 500 items the progress indicator is advanced
     private static final int PROGRESS_INCREMENT = 500;
 
     private final Activity mContext;
     protected final String mDebugPrefix;
-    private final IconFactory mIconFactory;
-    private final DefaultResourceProxyImplEx mResourceProxy;
-    private final int mMarkerCountLimit;
-    protected HashMap<Integer, MARKER> mOldItems;
+    protected SelectedItems mSelectedItems;
     protected StringBuffer mStatus = null;
     private int mStatisticsRecycled = 0;
 
-    public MarkerLoaderTask(Activity context, String debugPrefix, HashMap<Integer, MARKER> oldItems, int markerCountLimit) {
-        mMarkerCountLimit = markerCountLimit;
+    public SqlUpdateTask(Activity context, String debugPrefix, SelectedItems selectedItems) {
         if (Global.debugEnabledSql || Global.debugEnabled) {
-            mStatus = new StringBuffer();
+            mStatus = new StringBuffer().append(debugPrefix);
         }
 
         Global.debugMemory(debugPrefix, "ctor");
         this.mContext = context;
         this.mDebugPrefix = debugPrefix;
-        mOldItems = oldItems;
-        mResourceProxy = new DefaultResourceProxyImplEx(context);
-        mIconFactory = new IconFactory(mResourceProxy, context.getResources().getDrawable(R.drawable.marker_green));
+        this.mSelectedItems = new SelectedItems();
+        this.mSelectedItems.addAll(selectedItems);
     }
 
-    protected abstract MARKER createMarker();
-
     @Override
-    protected OverlayManager doInBackground(QueryParameter... queryParameter) {
+    protected SelectedItems doInBackground(QueryParameter... queryParameter) {
         if (queryParameter.length != 1) throw new IllegalArgumentException();
 
         QueryParameter queryParameters = queryParameter[0];
@@ -107,31 +76,15 @@ public abstract class MarkerLoaderTask<MARKER extends MarkerBase> extends AsyncT
             if (this.mStatus != null) {
                 this.mStatus.append("'").append(itemCount).append("' rows found for query \n\t").append(queryParameters.toSqlString());
             }
-            OverlayManager result = new OverlayManager(null);
 
-            long startTime = SystemClock.currentThreadTimeMillis();
-            int colCount = cursor.getColumnIndex(FotoSql.SQL_COL_COUNT);
+            // long startTime = SystemClock.currentThreadTimeMillis();
             int colIconID = cursor.getColumnIndex(FotoSql.SQL_COL_PK);
-
-            int colLat = cursor.getColumnIndex(FotoSql.SQL_COL_LAT);
-            int colLon = cursor.getColumnIndex(FotoSql.SQL_COL_LON);
 
             int increment = PROGRESS_INCREMENT;
             while (cursor.moveToNext()) {
-                int id = cursor.getInt(colIconID);
-                MARKER marker = mOldItems.get(id);
-                if (marker != null) {
-                    // recycle existing with same content
-                    mOldItems.remove(id);
-                    mStatisticsRecycled ++;
-                } else {
-                    marker = createMarker();
-                    GeoPoint point = new GeoPoint(cursor.getDouble(colLat),cursor.getDouble(colLon));
-                    BitmapDrawable icon = createIcon(cursor.getString(colCount));
-                    marker.set(id, point, icon,null );
-                }
+                Long id = cursor.getLong(colIconID);
 
-                result.add(marker);
+                doInBackground(id);
 
                 itemCount++;
                 if ((--increment) <= 0) {
@@ -141,18 +94,13 @@ public abstract class MarkerLoaderTask<MARKER extends MarkerBase> extends AsyncT
                     // Escape early if cancel() is called
                     if (isCancelled()) break;
                 }
-                
-                if ((mMarkerCountLimit != NO_MARKER_COUNT_LIMIT) && (itemCount >=mMarkerCountLimit))
-                {
-                    break;
-                }
             }
             if (this.mStatus != null) {
                 this.mStatus.append("\n\tRecycled : ").append(mStatisticsRecycled);
                 // Log.i(Global.LOG_CONTEXT, debugPrefix + itemCount + this.mStatus);
             }
 
-            return result;
+            return this.mSelectedItems;
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -160,8 +108,5 @@ public abstract class MarkerLoaderTask<MARKER extends MarkerBase> extends AsyncT
         }
     }
 
-    protected BitmapDrawable createIcon(String iconText) {
-        return mIconFactory.createIcon(iconText);
-    }
-
+    abstract protected void doInBackground(Long id);
 }

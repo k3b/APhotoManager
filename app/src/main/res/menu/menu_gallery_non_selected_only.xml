@@ -19,6 +19,7 @@
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
  -->
+<!-- menue of gallery activity/fragment common for non multiselection mode and for multiselection mode with disabled selected-only -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".GalleryActivity">
 
@@ -35,5 +36,16 @@
         android:visible="true"
         android:orderInCategory="1"
         android:showAsAction="ifRoom" />
+
+    <item android:id="@+id/cmd_selection_add_all"
+        android:title="@string/selection_add_all_menu_title"
+        android:visible="true"
+        android:orderInCategory="70"
+        android:showAsAction="never" />
+    <item android:id="@+id/cmd_selection_remove_all"
+        android:title="@string/selection_add_remove_menu_title"
+        android:visible="true"
+        android:orderInCategory="70"
+        android:showAsAction="never" />
 
 </menu>

@@ -21,6 +21,10 @@
 
 
 * [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map)
+* [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View)
+	* [multi selection mode](Gallery-View#Multiselection)
+	* [Gallery Navigation](Gallery-View#Navigation)
+	* [Current Visible Photos](Gallery-View#CurrentSet)
 * [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View)
 * [Folder-Picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker)
 * [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi)
