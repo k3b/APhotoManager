@@ -69,7 +69,7 @@
     <item android:id="@+id/cmd_about"
         android:title="@string/about_summary"
         android:visible="true"
-        android:orderInCategory="50"
+        android:orderInCategory="1000"
         android:showAsAction="never" />
 
 </menu>

@@ -1,5 +1,4 @@
 TODO
-	GeoEdit first start: geoUri-Default
 	history (md/notranslate)
 
 
