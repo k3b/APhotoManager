@@ -42,6 +42,7 @@ import android.widget.Toast;
 
 import java.io.File;
 
+import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
@@ -59,12 +60,9 @@ import de.k3b.io.OSDirectory;
  * Swipe left/right to show previous/next image.
  */
 
-public class ImageDetailActivityViewPager extends Activity {
+public class ImageDetailActivityViewPager extends Activity implements Common {
     private static final String INSTANCE_STATE_MODIFY_COUNT = "mModifyCount";
     public static final int ACTIVITY_ID = 76621;
-
-    public static final int RESULT_NOCHANGE = RESULT_FIRST_USER + 1;
-    public static final int RESULT_CHANGE = RESULT_FIRST_USER + 2;
 
     // how many changes have been made. if != 0 parent activity must invalidate cached data
     private static int mModifyCount = 0;

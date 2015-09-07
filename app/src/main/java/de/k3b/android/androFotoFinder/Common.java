@@ -34,4 +34,7 @@ public interface Common {
      * See https://github.com/k3b/AndroFotoFinder/wiki/intentapi#SelectedItems
      */
     static final String EXTRA_SELECTED_ITEMS = "de.k3b.extra.SELECTED_ITEMS";
+
+    public static final int RESULT_NOCHANGE = 1775 + 1;
+    public static final int RESULT_CHANGE = 1775 + 2;
 }

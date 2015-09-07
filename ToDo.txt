@@ -1,4 +1,9 @@
 TODO
+	geoEdit in backgroud task with gui update
+		progressbar
+		title with itemcount
+		after done: invalidate dir-cache
+	
 	history (md/notranslate)
 
 

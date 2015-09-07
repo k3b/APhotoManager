@@ -40,6 +40,7 @@ import de.k3b.android.androFotoFinder.directory.DirectoryGui;
 import de.k3b.android.androFotoFinder.directory.DirectoryLoaderTask;
 import de.k3b.android.androFotoFinder.gallery.cursor.GalleryCursorFragment;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
+import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
 import de.k3b.android.androFotoFinder.locationmap.LocationMapFragment;
 import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
@@ -408,6 +409,11 @@ public class FotoGalleryActivity extends Activity implements Common,
                 onFilterChanged(GalleryFilterActivity.getFilter(intent));
                 break;
             case ImageDetailActivityViewPager.ACTIVITY_ID:
+                if (resultCode == ImageDetailActivityViewPager.RESULT_CHANGE) {
+                    invalidateDirectories();
+                }
+                break;
+            case GeoEditActivity.RESULT_ID:
                 if (resultCode == ImageDetailActivityViewPager.RESULT_CHANGE) {
                     invalidateDirectories();
                 }

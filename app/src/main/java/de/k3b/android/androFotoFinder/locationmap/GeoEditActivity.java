@@ -24,6 +24,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
@@ -31,10 +32,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import de.k3b.android.androFotoFinder.Common;
-import de.k3b.android.androFotoFinder.GalleryFilterActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.AndroidFileCommands;
@@ -61,6 +62,8 @@ public class GeoEditActivity extends Activity implements Common {
     private SelectedFotos mSelectedItems;
 
     private GeoPointDto mCurrentPoint = new GeoPointDto();
+    private Button cmdOk;
+    private Button cmdCancel;
 
     public static void showActivity(Activity context, SelectedItems selectedItems) {
         if (Global.debugEnabled) {
@@ -88,6 +91,9 @@ public class GeoEditActivity extends Activity implements Common {
         SelectedFotos selectedItems = getItems(this.getIntent());
         if (selectedItems != null) {
             mSelectedItems = selectedItems;
+
+            String title = getString(R.string.title_geo_edit) + " (" + selectedItems.size() + ")";
+            setTitle(title);
         }
 
         GeoPointDto currentPoint = getLastGeo();
@@ -112,17 +118,18 @@ public class GeoEditActivity extends Activity implements Common {
             }
         });
 
-        cmd = (Button) findViewById(R.id.cmd_ok);
-        cmd.setOnClickListener(new View.OnClickListener() {
+        this.cmdOk = (Button) findViewById(R.id.cmd_ok);
+        cmdOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onOk();
             }
         });
-        cmd = (Button) findViewById(R.id.cmd_cancel);
-        cmd.setOnClickListener(new View.OnClickListener() {
+        this.cmdCancel = (Button) findViewById(R.id.cmd_cancel);
+        cmdCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                setResult(RESULT_NOCHANGE);
                 finish();
             }
         });
@@ -289,16 +296,54 @@ public class GeoEditActivity extends Activity implements Common {
         mHistory.saveHistory();
         if (!Double.isNaN(latitude) && !Double.isNaN(longitude)) {
             setGeo(latitude, longitude, mSelectedItems);
-            finish();
         }
     }
 
-    private void setGeo(double latitude, double longitude, SelectedFotos selectedItems) {
-        AndroidFileCommands engine = new AndroidFileCommands().setContext(this);
-        engine.setLogFilePath(engine.getDefaultLogFile());
-        int itemcount = engine.setGeo(latitude, longitude, selectedItems);
-        engine.setLogFilePath(null);
-        String message = getString(R.string.success_update, itemcount);
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    private void setGeo(final double latitude, final double longitude, final SelectedFotos selectedItems) {
+        final ProgressBar bar = (ProgressBar) findViewById(R.id.progressBar);
+        cmdOk.setVisibility(View.INVISIBLE);
+        cmdCancel.setVisibility(View.INVISIBLE);
+        bar.setVisibility(View.VISIBLE);
+        bar.setMax(selectedItems.size() + 1);
+
+        /** encapsulate geo-job into async background task */
+        AsyncTask<Object, Integer, Integer> task = new AsyncTask<Object, Integer, Integer>() {
+            private AndroidFileCommands engine;
+            @Override protected void onPreExecute() {
+                engine = new AndroidFileCommands() {
+                    /** map AndroidFileCommands-progress to AsyncTask-progress */
+                    @Override protected void onProgress(int itemcount, int size) {
+                        publishProgress(itemcount, size);
+                    }
+                };
+                engine.setContext(GeoEditActivity.this);
+            }
+
+            @Override protected Integer doInBackground(Object... params) {
+                engine.setLogFilePath(engine.getDefaultLogFile());
+                int itemcount = engine.setGeo(latitude, longitude, selectedItems, 10);
+                engine.setLogFilePath(null);
+                return itemcount;
+            }
+
+            @Override protected void onProgressUpdate(Integer... values) {
+                bar.setProgress(values[0]);
+                super.onProgressUpdate(values);
+            }
+
+            @Override protected void onPostExecute(Integer result) {
+                if ((result != null) && (result.intValue() > 0)) {
+                    String message = getString(R.string.success_update, result.intValue());
+                    Toast.makeText(GeoEditActivity.this, message, Toast.LENGTH_LONG).show();
+                    setResult(RESULT_CHANGE);
+                    finish();
+                }
+                cmdOk.setVisibility(View.VISIBLE);
+                cmdCancel.setVisibility(View.VISIBLE);
+                bar.setVisibility(View.INVISIBLE);
+            }
+        };
+
+        task.execute();
     }
 }

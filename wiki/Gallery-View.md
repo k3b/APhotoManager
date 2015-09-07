@@ -23,14 +23,14 @@ This visibility is either the result of
 
 * SearchFiter ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_filter.png) + CurrentFolder ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_folder.png) + Sorter or
 * SearchFiter ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_filter.png) + CurrentGeoArea ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_map.png) + Sorter
-* or shows the selected items ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_checked.png) (See Multi Selection below)
+* or shows the selected items ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_checked.png) (See [Multi Selection](Gallery-View#Multiselection) below)
 
 The **[Search Fiter](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)**
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_filter.png)
 is used to find a set of photos by search criteria.
 
-The **CurrentFolder** ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_folder.png) or **CurrentGeoArea** ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_map.png) is used to navigate
-in the SearchFiter`s resultset.
+The **CurrentFolder** ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_folder.png) or **CurrentGeoArea** ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_map.png) 
+is used to navigate in the SearchFiter`s resultset.
 
 The **Sorter** determines the order in which the 
 result photos are presented in the [Gallery-View](Gallery-View) and 
@@ -76,8 +76,13 @@ The [Gallery-View](Gallery-View) has these elements:
 	* taping on the **delete** symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_delete.png) or the "Delete" menu will delete the selected photo(s).
 	* the **move/copy** menu will move/copy the selected photo(s) to a different folder.
 	    * Pressing the "..." button or long pressing a folder in the [foder picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker) allows you to create a new folder.
+	* the **Edit geo** menu allow you to change the photos geo location (latitude/longitude).  (Since Version 0.4.1)
     * you can send/share the selected photos via the share symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_share.png).
         * if you have installed [k3b's ToGoZip](https://f-droid.org/wiki/page/de.k3b.android.toGoZip) ![](https://raw.githubusercontent.com/k3b/ToGoZip/master/app/src/main/res/drawable-mdpi/ic_launcher.png): Add the photo to a zip file
         * other options are: send photo(s) via bluetooth or mail
 
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/Gallery-MultiSelection.png)
+
+The [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi) for [Gallery-View](Gallery-View)  support
+
+* [de.k3b.extra.FILTER string](intentapi#filter) (optional)

@@ -216,28 +216,42 @@ public class AndroidFileCommands extends FileCommands {
 
     /**
      * Write geo data (lat/lon) to photo, media database and log.<br/>
-     *
-     * @param latitude
+     *  @param latitude
      * @param longitude
      * @param selectedItems
+     * @param itemsPerProgress
      */
-    public int setGeo(double latitude, double longitude, SelectedFotos selectedItems) {
+    public int setGeo(double latitude, double longitude, SelectedFotos selectedItems, int itemsPerProgress) {
         if (!Double.isNaN(latitude) && !Double.isNaN(longitude) && (selectedItems != null) && (selectedItems.size() > 0)) {
+            int itemcount = 0;
+            int countdown = 0;
             String[] fileNames = selectedItems.getFileNames(this.mContext);
             if (fileNames != null) {
                 File[] files = SelectedFotos.getFiles(fileNames);
+                int maxCount = files.length+1;
                 openLogfile();
                 for (File file : files) {
+                    countdown--;
+                    if (countdown <= 0) {
+                        countdown = itemsPerProgress;
+                        onProgress(itemcount, maxCount);
+                    }
                     ExifGps.saveLatLon(file, latitude, longitude);
                     log("setgeo  '" + file.getAbsolutePath() +
                             "' ", DirectoryFormatter.parseLatLon(latitude), " ", DirectoryFormatter.parseLatLon(longitude));
+                    itemcount++;
                 }
+                onProgress(itemcount, maxCount);
                 int result = FotoSql.execUpdateGeo(this.mContext, latitude, longitude, selectedItems);
                 closeLogFile();
+                onProgress(++itemcount, maxCount);
                 return result;
             }
         }
         return 0;
+    }
+
+    protected void onProgress(int itemcount, int size) {
     }
 
     private void onMediaDeleted(String absolutePath, Long id) {
