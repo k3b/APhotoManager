@@ -170,7 +170,7 @@ public class GeoEditActivity extends Activity implements Common {
     private GeoPointDto getLastGeo() {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         if (sharedPref != null) {
-            String uriAsString = sharedPref.getString(SETTINGS_KEY_LAST_URI, null);
+            String uriAsString = sharedPref.getString(SETTINGS_KEY_LAST_URI, "geo:51,9?z=4");
             return parseGeo(uriAsString);
         }
         return null;

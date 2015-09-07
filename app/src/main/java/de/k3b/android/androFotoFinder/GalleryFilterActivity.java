@@ -65,7 +65,7 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
     private static final String DLG_NAVIGATOR_TAG = "GalleryFilterActivity";
     private static final String SETTINGS_KEY = "GalleryFilterActivity-";
 
-    GalleryFilterParameter mFilter = null;
+    GalleryFilterParameter mFilter = new GalleryFilterParameter();
 
     private AsFilter mAsFilter = null;
     private HistoryEditText mHistory;
