@@ -22,10 +22,8 @@ package de.k3b.android.androFotoFinder.imagedetail;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
-import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
@@ -222,7 +220,7 @@ public class ImageDetailActivityViewPager extends Activity {
                 if ((scheme == null) || ("file".equals(scheme))) {
                     getParameterFromPath(uri.getPath());
                 } else if ("content".equals(scheme)) {
-                    String path = FotoSql.getFotoPath(this, uri);
+                    String path = FotoSql.execGetFotoPath(this, uri);
                     if (path != null) {
                         getParameterFromPath(path);
                     }

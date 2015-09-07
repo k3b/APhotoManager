@@ -1,9 +1,5 @@
 TODO
-	geo edit
-		v?	layout align
-		-	blue markers
-		-	double picker
-
+	GeoEdit first start: geoUri-Default
 	history (md/notranslate)
 
 

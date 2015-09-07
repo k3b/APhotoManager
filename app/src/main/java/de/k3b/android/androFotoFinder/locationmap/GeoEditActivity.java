@@ -37,6 +37,7 @@ import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.GalleryFilterActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.database.SelectedItems;
@@ -293,7 +294,11 @@ public class GeoEditActivity extends Activity implements Common {
     }
 
     private void setGeo(double latitude, double longitude, SelectedFotos selectedItems) {
-        Toast.makeText(this, "not implemented yet", Toast.LENGTH_LONG).show();
-        // !!!!
+        AndroidFileCommands engine = new AndroidFileCommands().setContext(this);
+        engine.setLogFilePath(engine.getDefaultLogFile());
+        int itemcount = engine.setGeo(latitude, longitude, selectedItems);
+        engine.setLogFilePath(null);
+        String message = getString(R.string.success_update, itemcount);
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 }

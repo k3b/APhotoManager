@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 
 /**
+ * Write geo data (lat/lon) to photo
  * Based on http://stackoverflow.com/questions/5280479/how-to-save-gps-coordinates-in-exif-data-on-android
  *
  * Created by k3b on 25.08.2015.

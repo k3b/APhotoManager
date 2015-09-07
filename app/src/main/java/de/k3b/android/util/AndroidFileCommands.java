@@ -34,6 +34,8 @@ import android.view.MenuItem;
 import java.io.File;
 
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
 import de.k3b.io.IDirectory;
 
@@ -179,7 +181,8 @@ public class AndroidFileCommands extends FileCommands {
                             public void onClick(
                                     final DialogInterface dialog,
                                     final int id) {
-                                mActiveAlert = null; dialog.cancel();
+                                mActiveAlert = null;
+                                dialog.cancel();
                             }
                         }
                 );
@@ -209,6 +212,32 @@ public class AndroidFileCommands extends FileCommands {
         onPostProcess(fileNames, result, ids.length, OP_DELETE);
 
         return result;
+    }
+
+    /**
+     * Write geo data (lat/lon) to photo, media database and log.<br/>
+     *
+     * @param latitude
+     * @param longitude
+     * @param selectedItems
+     */
+    public int setGeo(double latitude, double longitude, SelectedFotos selectedItems) {
+        if (!Double.isNaN(latitude) && !Double.isNaN(longitude) && (selectedItems != null) && (selectedItems.size() > 0)) {
+            String[] fileNames = selectedItems.getFileNames(this.mContext);
+            if (fileNames != null) {
+                File[] files = SelectedFotos.getFiles(fileNames);
+                openLogfile();
+                for (File file : files) {
+                    ExifGps.saveLatLon(file, latitude, longitude);
+                    log("setgeo  '" + file.getAbsolutePath() +
+                            "' ", DirectoryFormatter.parseLatLon(latitude), " ", DirectoryFormatter.parseLatLon(longitude));
+                }
+                int result = FotoSql.execUpdateGeo(this.mContext, latitude, longitude, selectedItems);
+                closeLogFile();
+                return result;
+            }
+        }
+        return 0;
     }
 
     private void onMediaDeleted(String absolutePath, Long id) {

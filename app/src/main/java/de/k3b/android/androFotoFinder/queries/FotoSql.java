@@ -20,6 +20,7 @@
 package de.k3b.android.androFotoFinder.queries;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
@@ -197,9 +198,14 @@ public class FotoSql {
         if ((parameters != null) && (selectedItems != null) && (!selectedItems.isEmpty())) {
             parameters.clearWhere()
                     .addWhere(FotoSql.SQL_COL_PK + " in (" + selectedItems.toString() + ")")
-                    .addWhere(FotoSql.SQL_COL_LAT + " is not null and " + FotoSql.SQL_COL_LON + " is not null")
             ;
         }
+    }
+
+
+    public static void addWhereLatLonNotNull(QueryParameterParcelable parameters) {
+        parameters.addWhere(FotoSql.SQL_COL_LAT + " is not null and " + FotoSql.SQL_COL_LON + " is not null")
+        ;
     }
 
     public static void addWhereFilteLatLon(QueryParameter parameters, IGeoRectangle filter) {
@@ -371,7 +377,7 @@ public class FotoSql {
     }
 
 
-    public static String getFotoPath(Context context, Uri uri) {
+    public static String execGetFotoPath(Context context, Uri uri) {
         Cursor c = null;
         try {
             c = query(context, uri.toString(), null, null, null, FotoSql.SQL_COL_PATH);
@@ -384,6 +390,20 @@ public class FotoSql {
             if (c != null) c.close();
         }
         return null;
+    }
+
+    /**
+     * Write geo data (lat/lon) media database.<br/>
+     */
+    public static int execUpdateGeo(final Context context, double latitude, double longitude, SelectedItems selectedItems) {
+        QueryParameter where = new QueryParameter();
+        setWhereSelection(where, selectedItems);
+
+        ContentValues values = new ContentValues(2);
+        values.put(SQL_COL_LAT, DirectoryFormatter.parseLatLon(latitude));
+        values.put(SQL_COL_LON, DirectoryFormatter.parseLatLon(longitude));
+        ContentResolver resolver = context.getContentResolver();
+        return resolver.update(SQL_TABLE_EXTERNAL_CONTENT_URI, values, where.toAndroidWhere(), where.toAndroidParameters());
     }
 
     private static Cursor query(final Context context, QueryParameter parameters) {
@@ -400,7 +420,7 @@ public class FotoSql {
         return resolver.query(Uri.parse(from), sqlSelectColums, sqlWhereStatement, sqlWhereParameters, sqlSortOrder);
     }
 
-    public static IGeoRectangle getGeoRectangle(Context context, IGalleryFilter filter, SelectedItems selectedItems) {
+    public static IGeoRectangle execGetGeoRectangle(Context context, IGalleryFilter filter, SelectedItems selectedItems) {
         QueryParameterParcelable query = (QueryParameterParcelable) new QueryParameterParcelable()
                 .setID(QUERY_TYPE_UNDEFINED)
                 .addColumn(
@@ -415,12 +435,10 @@ public class FotoSql {
             setWhereFilter(query, filter);
         }
 
-        query.addWhere(SQL_COL_LAT + " IS NOT NULL")
-             .addWhere(SQL_COL_LON + " IS NOT NULL");
-
         if (selectedItems != null) {
             setWhereSelection(query, selectedItems);
         }
+        FotoSql.addWhereLatLonNotNull(query);
 
         Cursor c = null;
         try {
@@ -432,14 +450,14 @@ public class FotoSql {
                 return result;
             }
         } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, "getGeoRectangle: error executing " + query, ex);
+            Log.e(Global.LOG_CONTEXT, "execGetGeoRectangle: error executing " + query, ex);
         } finally {
             if (c != null) c.close();
         }
         return null;
     }
 
-    public static IGeoPoint getPosition(Context context, int id) {
+    public static IGeoPoint execGetPosition(Context context, int id) {
         QueryParameterParcelable query = (QueryParameterParcelable) new QueryParameterParcelable()
         .setID(QUERY_TYPE_UNDEFINED)
                 .addColumn(SQL_COL_LAT, SQL_COL_LON)
@@ -456,13 +474,12 @@ public class FotoSql {
                 return result;
             }
         } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, "getGeoRectangle: error executing " + query, ex);
+            Log.e(Global.LOG_CONTEXT, "execGetGeoRectangle: error executing " + query, ex);
         } finally {
             if (c != null) c.close();
         }
         return null;
     }
-
 }
 
 

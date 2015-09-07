@@ -735,7 +735,8 @@ public class LocationMapFragment extends DialogFragment {
     } // class SelectionMarkerLoaderTask
 
     private void reloadSelectionMarker() {
-        if ((mSelectedItems != null) && (!mSelectedItems.isEmpty())) {
+        if ((mFolderOverlaySelectionMarker != null) &&
+                (mSelectedItems != null) && (!mSelectedItems.isEmpty())) {
             if (mCurrentSelectionMarkerLoader != null) {
                 mCurrentSelectionMarkerLoader.cancel(false);
                 mCurrentSelectionMarkerLoader = null;
@@ -745,6 +746,7 @@ public class LocationMapFragment extends DialogFragment {
 
             QueryParameterParcelable query = new QueryParameterParcelable(FotoSql.queryGps);
             FotoSql.setWhereSelection(query, mSelectedItems);
+            FotoSql.addWhereLatLonNotNull(query);
 
             mCurrentSelectionMarkerLoader = new SelectionMarkerLoaderTask(createHashMap(oldItems));
             mCurrentSelectionMarkerLoader.execute(query);
@@ -855,7 +857,7 @@ public class LocationMapFragment extends DialogFragment {
 
     private IGeoPoint getiGeoPointById(int markerId, IGeoPoint notFoundValue) {
         if (markerId != NO_MARKER_ID) {
-            IGeoPoint pos = FotoSql.getPosition(this.getActivity(), markerId);
+            IGeoPoint pos = FotoSql.execGetPosition(this.getActivity(), markerId);
             if (pos != null) {
                 notFoundValue = pos;
             }
