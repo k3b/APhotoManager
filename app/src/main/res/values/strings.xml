@@ -69,7 +69,11 @@
 
     <string name="cmd_edit" >Edit</string>
     <string name="title_chooser_edit" >Choose photo editor</string>
+<!--    <string name="title_chooser_geo_picker" >Choose geo picker</string> -->
+    <string name="cmd_edit_geo" >Edit geo</string>
+    <string name="title_geo_picker" >Select geo for photo</string>
     <string name="error_edit" >No photo editor found</string>
+    <string name="error_geo_picker" >No geo picker found</string>
 
     <string name="title_cright_osm">Map Tiles (c) <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> Contributors</string>
 
@@ -154,4 +158,5 @@ Features:
     <string name="selection_add_all_menu_title"   >Selection: Add all visible</string>
     <string name="selection_add_remove_menu_title">Selection: Remove all visible</string>
     <string name="err_cannot_share">sendmultible: item count exceeded</string>
+    <string name="title_geo_edit">a Foto Geo Edit</string>
 </resources>

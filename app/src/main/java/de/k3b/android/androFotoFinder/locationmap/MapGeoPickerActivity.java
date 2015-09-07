@@ -29,6 +29,7 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.widget.Toast;
 
+import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.android.widget.AboutDialogPreference;
@@ -38,7 +39,7 @@ import de.k3b.geo.io.GeoUri;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 
-public class MapGeoPickerActivity extends Activity  {
+public class MapGeoPickerActivity extends Activity implements Common {
 
     private LocationMapFragment mMap;
 
@@ -54,9 +55,8 @@ public class MapGeoPickerActivity extends Activity  {
         if (extraTitle == null && (geoPointFromIntent == null)) {
             extraTitle = getString(R.string.app_map_name);
         }
+
         if (extraTitle == null) {
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
-            // must be called before this.setContentView(...) else crash
             this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         }
 
@@ -73,14 +73,16 @@ public class MapGeoPickerActivity extends Activity  {
 
         GalleryFilterParameter rootFilter = new GalleryFilterParameter();
         GeoRectangle rectangle = new GeoRectangle();
-        SelectedItems selectedItems = null;
-
         int zoom = ZoomUtil.NO_ZOOM;
         if ((savedInstanceState == null) && (geoPointFromIntent != null)) {
             zoom = geoPointFromIntent.getZoomMin();
             rectangle.setLogituedMin(geoPointFromIntent.getLongitude()).setLatitudeMin(geoPointFromIntent.getLatitude());
             rectangle.setLogituedMax(geoPointFromIntent.getLongitude()).setLatitudeMax(geoPointFromIntent.getLatitude());
         } // else (savedInstanceState != null) restore after rotation. fragment takes care of restoring map pos
+
+        String selectedItemsString = intent.getStringExtra(EXTRA_SELECTED_ITEMS);
+        SelectedItems selectedItems = (selectedItemsString != null) ? new SelectedItems().parse(selectedItemsString) : null;
+
         mMap.defineNavigation(rootFilter, rectangle, zoom, selectedItems);
     }
 

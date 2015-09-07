@@ -105,6 +105,12 @@
         <activity android:name=".GalleryFilterActivity"
             android:label="@string/title_activity_gallery_filter" >
         </activity>
+
+        <activity android:name=".locationmap.GeoEditActivity"
+            android:label="@string/title_geo_edit"
+            android:icon="@drawable/ic_geo_edit">
+        </activity>
+
         <activity android:name=".locationmap.MapGeoPickerActivity"
             android:icon="@drawable/ic_foto_map"
             android:label="@string/app_map_name" >

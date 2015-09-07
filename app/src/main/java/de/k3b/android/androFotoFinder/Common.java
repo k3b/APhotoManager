@@ -23,5 +23,15 @@ package de.k3b.android.androFotoFinder;
  * Created by k3b on 01.09.2015.
  */
 public interface Common {
-    static final String EXTRA_FILTER = "de.k2b.extra.FILTER";
+    /**
+     * Format:GalleryFilterParameter.toString/parse.
+     * See https://github.com/k3b/AndroFotoFinder/wiki/intentapi#filter
+     */
+    static final String EXTRA_FILTER = "de.k3b.extra.FILTER";
+
+    /**
+     * Format:SelectedItems.toString/parse.
+     * See https://github.com/k3b/AndroFotoFinder/wiki/intentapi#SelectedItems
+     */
+    static final String EXTRA_SELECTED_ITEMS = "de.k3b.extra.SELECTED_ITEMS";
 }

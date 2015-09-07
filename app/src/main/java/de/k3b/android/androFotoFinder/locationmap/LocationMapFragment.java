@@ -397,7 +397,10 @@ public class LocationMapFragment extends DialogFragment {
         }
 
         this.mRootFilter = rootFilter;
-        this.mSelectedItems = selectedItems;
+        if ((selectedItems != null) && (this.mSelectedItems != selectedItems)) {
+            this.mSelectedItems = selectedItems;
+            reloadSelectionMarker();
+        }
 
         if (!Double.isNaN(rectangle.getLatitudeMin())) {
             BoundingBoxE6 boundingBox = new BoundingBoxE6(

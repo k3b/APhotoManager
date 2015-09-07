@@ -8,6 +8,8 @@ You can reach the [Geographic-Map](Geographic-Map) via
 * the "location picker" in the [Filter-View](Filter-View)
 * from any app that support [intents with "geo:"- uris](https://github.com/k3b/AndroFotoFinder/wiki/intentapi) (VIEW/SEND/SENDTO/SEND_MULTIPLE/PICK)
 
+![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/SelectArea.png)
+
 ## Features:
 
 * The geografic map shows markers ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/app/src/main/res/drawable-mdpi/marker_green.png) at places where photos were taken.
@@ -29,9 +31,15 @@ You can reach the [Geographic-Map](Geographic-Map) via
   * return the current position (**red marker**) if called from [external app via "Pick geo:"](https://github.com/k3b/AndroFotoFinder/wiki/intentapi)
 * The "Cancel" button or the back button closes the map without affecting the calling activitry.
 
-If you use the [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) as a ["geo:" picker](https://github.com/k3b/AndroFotoFinder/wiki/intentapi) you can
+## <a name='picker'>"geo:" picker</a>
+
+If you use the Geografic-Map as a ["geo:" picker](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map#picker) you can
 
 * tap on a green/blue marker to select the geo-location belonging to that marker (the marker becomes **red**)
 * tap somewhere in the map where no green/blue marker exists to select a place with no photo.
 
-![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/SelectArea.png)
+The [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi) for ["geo:" picker](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map#picker) support
+
+* [geo: uri format](intentapi#uri-geo) (required)
+* [de.k3b.extra.SELECTED_ITEMS string](intentapi#SelectedItems) (optional)
+* [android.intent.extra.TITLE string](intentapi#EXTRA_TITLE) (optional)

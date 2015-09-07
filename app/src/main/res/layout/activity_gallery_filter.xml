@@ -62,6 +62,7 @@
         android:layout_toLeftOf="@+id/cmd_path_history"
         android:layout_toRightOf="@+id/lbl_path"
         android:layout_toEndOf="@+id/lbl_path"
+        android:layout_alignBaseline="@+id/lbl_path"
         android:ellipsize="end"
         android:nestedScrollingEnabled="false"
         android:singleLine="true"
@@ -99,6 +100,7 @@
         android:ems="10"
         android:layout_alignBottom="@+id/cmd_date"
         android:layout_toRightOf="@+id/lbl_date"
+        android:layout_alignBaseline="@+id/lbl_date"
         android:layout_toLeftOf="@+id/cmd_date_from_history"
         android:layout_toStartOf="@+id/cmd_date_from_history"
         android:layout_below="@+id/edit_path" />
@@ -163,6 +165,7 @@
         android:inputType="numberDecimal|numberSigned"
         android:ems="10"
         android:layout_alignBottom="@+id/cmd_select_lat_lon"
+        android:layout_alignBaseline="@+id/lbl_latitude"
         android:layout_toLeftOf="@+id/cmd_lat_from_history"
         android:layout_alignLeft="@+id/edit_date_to"
         android:layout_alignStart="@+id/edit_date_to" />
@@ -208,6 +211,7 @@
         android:inputType="numberDecimal|numberSigned"
         android:ems="10"
         android:layout_below="@+id/edit_latitude_to"
+        android:layout_alignBaseline="@+id/lbl_longitude"
         android:layout_toLeftOf="@+id/cmd_lon_from_history"
         android:layout_alignLeft="@+id/edit_latitude_to"
         android:layout_alignStart="@+id/edit_latitude_to" />

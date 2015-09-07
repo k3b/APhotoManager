@@ -21,6 +21,7 @@
 
 
 * [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map)
+	* ["geo:" picker](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map#picker)
 * [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View)
 	* [multi selection mode](Gallery-View#Multiselection)
 	* [Gallery Navigation](Gallery-View#Navigation)
@@ -28,4 +29,10 @@
 * [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View)
 * [Folder-Picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker)
 * [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi)
+	* [Uri formats](intentapi#uri)
+		* [geo: uri format](intentapi#uri-geo)
+	* [Intent-Extra parameter](intentapi#extra)
+	* [de.k3b.extra.FILTER string](intentapi#filter)
+	* [de.k3b.extra.SELECTED_ITEMS string](intentapi#SelectedItems)
+	* [android.intent.extra.TITLE string](intentapi#EXTRA_TITLE)
 * [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)

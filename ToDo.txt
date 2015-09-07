@@ -1,6 +1,8 @@
 TODO
-
-	map->show in gallery without root-dir
+	geo edit
+		v?	layout align
+		-	blue markers
+		-	double picker
 
 	history (md/notranslate)
 

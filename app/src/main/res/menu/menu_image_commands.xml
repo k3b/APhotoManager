@@ -19,6 +19,7 @@
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
  -->
+<!-- commands that can be applied to one or more images -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".GalleryActivity">
 
@@ -42,4 +43,12 @@
         android:visible="true"
         android:orderInCategory="40"
         android:showAsAction="ifRoom" />
+
+    <item android:id="@+id/cmd_edit_geo"
+        android:title="@string/cmd_edit_geo"
+        android:icon="@android:drawable/ic_dialog_map"
+        android:visible="true"
+        android:orderInCategory="200"
+        android:showAsAction="never" />
+
 </menu>
