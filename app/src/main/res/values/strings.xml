@@ -70,8 +70,8 @@
     <string name="cmd_edit" >Edit</string>
     <string name="title_chooser_edit" >Choose photo editor</string>
 <!--    <string name="title_chooser_geo_picker" >Choose geo picker</string> -->
-    <string name="cmd_edit_geo" >Change geo</string>
-    <string name="title_geo_picker" >Select geo for photo</string>
+    <string name="cmd_set_geo" >Set geo</string>
+    <string name="title_geo_picker" >Select new geo for photo</string>
     <string name="error_edit" >No photo editor found</string>
     <string name="error_geo_picker" >No geo picker found</string>
 
@@ -159,6 +159,10 @@ Features:
     <string name="selection_add_all_menu_title"   >Selection: Add all visible</string>
     <string name="selection_add_remove_menu_title">Selection: Remove all visible</string>
     <string name="err_cannot_share">sendmultible: item count exceeded</string>
-    <string name="title_geo_edit">a Foto Geo Edit</string>
-    <string name="geo_update_in_progress">Updating geo info in selected photos</string>
+    <string name="title_geo_edit">a Foto Change Geo</string>
+    <string name="geo_update_in_progress">Changing geo info in selected photos</string>
+    <string name="cmd_clear_filter">Clear Filter</string>
+    <string name="lbl_longitude_short">Lon</string>
+    <string name="lbl_latitude_short">Lat</string>
+    <string name="lbl_path">Path</string>
 </resources>

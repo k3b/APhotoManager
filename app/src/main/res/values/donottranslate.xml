@@ -44,7 +44,7 @@ Requred permissions: </p>
   <li> INTERNET: to download map data from Open Streetmap Server </li>
   <li> ACCESS_NETWORK_STATE and ACCESS_WIFI_STATE: to find out if
  wifi/internet is online to start downloading geodata if neccessary</li>
-  <li> WRITE_EXTERNAL_STORAGE to cache downloaded map data in local file system </li>
+  <li> WRITE_EXTERNAL_STORAGE to cache downloaded map data in local file system and to do file operations.</li>
 </ul>
 <p> The code uses </p>
 <ul>
@@ -62,7 +62,12 @@ Requred permissions: </p>
 <h2>History</h2>
 Version v0.4.1<br />
 <ul>
-  <li>Image-Detail-View: implemented Share/Edit/Rename/Delete/Copy/Move</li>
+  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View">Image-Detail-View</a>:
+      implemented Share/Edit/Rename/Delete/Copy/Move/change geo infos</li>
+  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View#Multiselection">Gallery-View in Multi selection mode</a>:
+      change geo infos</li>
+  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">Geografic-Map</a>:
+      selected items as blue marker; current selection as red marker; "geo:" picker; long tap context menu</li>
 </ul>
 
 Version v0.4.0.150816<br />

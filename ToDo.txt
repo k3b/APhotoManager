@@ -1,9 +1,5 @@
 TODO
 	geoEdit in backgroud task with gui update
-		progressbar null => cancel
-		statusmessage
-		ok => change geo
-	
 	history (md/notranslate)
 
 
