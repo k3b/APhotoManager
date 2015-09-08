@@ -98,19 +98,28 @@
         android:layout_alignLeft="@+id/edit_latitude_from"
         android:layout_alignStart="@+id/edit_latitude_from" />
 
+    <TextView android:id="@+id/lbl_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_below="@+id/edit_longitude_from"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        />
+
 <!-- -->
     <Button android:id="@+id/cmd_ok"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="OK"
-        android:layout_below="@+id/edit_longitude_from"
+        android:text="@string/cmd_edit_geo"
+        android:layout_below="@+id/lbl_status"
         android:layout_alignParentLeft="true"
         />
     <Button android:id="@+id/cmd_cancel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Cancel"
-        android:layout_below="@+id/edit_longitude_from"
+        android:text="@string/cancel"
+        android:layout_below="@+id/lbl_status"
         android:layout_toRightOf="@+id/cmd_ok"
         android:layout_toEndOf="@+id/cmd_ok" />
 
@@ -119,7 +128,7 @@
         android:visibility="invisible"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/edit_longitude_from"
+        android:layout_below="@+id/lbl_status"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_alignBottom="@+id/cmd_cancel"

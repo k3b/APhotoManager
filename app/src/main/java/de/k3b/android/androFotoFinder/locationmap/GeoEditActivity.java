@@ -33,6 +33,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import de.k3b.android.androFotoFinder.Common;
@@ -64,6 +65,10 @@ public class GeoEditActivity extends Activity implements Common {
     private GeoPointDto mCurrentPoint = new GeoPointDto();
     private Button cmdOk;
     private Button cmdCancel;
+
+    /** != -null will setGeo-asynctask is running. null if activity is destroyed so async-task does not update gui any more */
+    private ProgressBar mProgressBar = null;
+    private TextView mLblStatusMessage;
 
     public static void showActivity(Activity context, SelectedItems selectedItems) {
         if (Global.debugEnabled) {
@@ -140,6 +145,9 @@ public class GeoEditActivity extends Activity implements Common {
         String geoUri = fromGui();
         saveLastGeo(geoUri);
         mHistory.saveHistory();
+        /** indicate that activity is destroyed so async-task does not update gui any more */
+        mProgressBar = null;
+
         super.onDestroy();
     }
 
@@ -300,11 +308,14 @@ public class GeoEditActivity extends Activity implements Common {
     }
 
     private void setGeo(final double latitude, final double longitude, final SelectedFotos selectedItems) {
-        final ProgressBar bar = (ProgressBar) findViewById(R.id.progressBar);
+        mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         cmdOk.setVisibility(View.INVISIBLE);
         cmdCancel.setVisibility(View.INVISIBLE);
-        bar.setVisibility(View.VISIBLE);
-        bar.setMax(selectedItems.size() + 1);
+        mProgressBar.setVisibility(View.VISIBLE);
+        mProgressBar.setMax(selectedItems.size() + 1);
+
+        mLblStatusMessage = ((TextView) findViewById(R.id.lbl_status));
+        mLblStatusMessage.setText(R.string.geo_update_in_progress);
 
         /** encapsulate geo-job into async background task */
         AsyncTask<Object, Integer, Integer> task = new AsyncTask<Object, Integer, Integer>() {
@@ -327,20 +338,24 @@ public class GeoEditActivity extends Activity implements Common {
             }
 
             @Override protected void onProgressUpdate(Integer... values) {
-                bar.setProgress(values[0]);
+                if (mProgressBar != null) mProgressBar.setProgress(values[0]);
                 super.onProgressUpdate(values);
             }
 
             @Override protected void onPostExecute(Integer result) {
-                if ((result != null) && (result.intValue() > 0)) {
-                    String message = getString(R.string.success_update, result.intValue());
-                    Toast.makeText(GeoEditActivity.this, message, Toast.LENGTH_LONG).show();
-                    setResult(RESULT_CHANGE);
-                    finish();
+                if (mProgressBar != null) {
+                    // gui is not destoyed yet
+                    if ((result != null) && (result.intValue() > 0)) {
+                        String message = getString(R.string.success_update, result.intValue());
+                        Toast.makeText(GeoEditActivity.this, message, Toast.LENGTH_LONG).show();
+                        setResult(RESULT_CHANGE);
+                        finish();
+                    }
+                    cmdOk.setVisibility(View.VISIBLE);
+                    cmdCancel.setVisibility(View.VISIBLE);
+                    mProgressBar.setVisibility(View.INVISIBLE);
+                    mLblStatusMessage.setText("");
                 }
-                cmdOk.setVisibility(View.VISIBLE);
-                cmdCancel.setVisibility(View.VISIBLE);
-                bar.setVisibility(View.INVISIBLE);
             }
         };
 

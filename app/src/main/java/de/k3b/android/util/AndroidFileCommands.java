@@ -22,6 +22,7 @@ package de.k3b.android.util;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.media.MediaScannerConnection;
@@ -223,6 +224,8 @@ public class AndroidFileCommands extends FileCommands {
      */
     public int setGeo(double latitude, double longitude, SelectedFotos selectedItems, int itemsPerProgress) {
         if (!Double.isNaN(latitude) && !Double.isNaN(longitude) && (selectedItems != null) && (selectedItems.size() > 0)) {
+            // in case that current activity is destroyed while running async, applicationContext will allow to finish database operation
+            Context applicationContext = this.mContext.getApplicationContext();
             int itemcount = 0;
             int countdown = 0;
             String[] fileNames = selectedItems.getFileNames(this.mContext);
@@ -242,7 +245,7 @@ public class AndroidFileCommands extends FileCommands {
                     itemcount++;
                 }
                 onProgress(itemcount, maxCount);
-                int result = FotoSql.execUpdateGeo(this.mContext, latitude, longitude, selectedItems);
+                int result = FotoSql.execUpdateGeo(applicationContext, latitude, longitude, selectedItems);
                 closeLogFile();
                 onProgress(++itemcount, maxCount);
                 return result;
@@ -251,6 +254,7 @@ public class AndroidFileCommands extends FileCommands {
         return 0;
     }
 
+    /** called every time when command makes some little progress. Can be mapped to async progress-bar */
     protected void onProgress(int itemcount, int size) {
     }
 
