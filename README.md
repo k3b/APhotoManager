@@ -15,12 +15,12 @@ Features
     * area in [geografic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) (if image has gps-exif info)
 * Show results in a scrollable [gallery view](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) with 
 	* support for multible photo selection
-	* file operations copy, move, delete, share, edit geo info (since 0.4.1)
+	* file operations copy, move, delete, share, change geo info (since 0.4.1)
 * [Image view](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) features
     * image zoom
     * swiping for next/previous image
     * show extended image info (Exif, IPTC, XMP, ICC)
-	* file operations copy, move, delete, rename, share, edit geo info (since 0.4.1)
+	* file operations copy, move, delete, rename, share, change geo info (since 0.4.1)
 	* can be opened from any filemanager or android-s gallery (since 0.4.1)
 * The [geografic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) 
     * shows markers at places where photos were taken.

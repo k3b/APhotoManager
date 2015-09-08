@@ -76,7 +76,7 @@ The [Gallery-View](Gallery-View) has these elements:
 	* taping on the **delete** symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_delete.png) or the "Delete" menu will delete the selected photo(s).
 	* the **move/copy** menu will move/copy the selected photo(s) to a different folder.
 	    * Pressing the "..." button or long pressing a folder in the [foder picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker) allows you to create a new folder.
-	* the **Edit geo** menu allow you to change the photos geo location (latitude/longitude).  (Since Version 0.4.1)
+	* the **change geo** menu allow you to change the photos geo location (latitude/longitude).  (Since Version 0.4.1)
     * you can send/share the selected photos via the share symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_share.png).
         * if you have installed [k3b's ToGoZip](https://f-droid.org/wiki/page/de.k3b.android.toGoZip) ![](https://raw.githubusercontent.com/k3b/ToGoZip/master/app/src/main/res/drawable-mdpi/ic_launcher.png): Add the photo to a zip file
         * other options are: send photo(s) via bluetooth or mail

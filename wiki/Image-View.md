@@ -9,5 +9,6 @@ You can reach the [Image-View](Image-View) via
 * image zoom
 * swiping for next/previous image
 * show extended image info (Exif, IPTC, XMP, ICC)
-* file operations copy/move/rename/delete
+* file operations copy/move/rename/delete/change geo info (Since Version 0.4.1)
+
 
