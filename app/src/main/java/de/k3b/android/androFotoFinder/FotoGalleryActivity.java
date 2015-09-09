@@ -36,6 +36,8 @@ import android.widget.Toast;
 
 // import com.squareup.leakcanary.RefWatcher;
 
+import java.io.File;
+
 import de.k3b.android.androFotoFinder.directory.DirectoryGui;
 import de.k3b.android.androFotoFinder.directory.DirectoryLoaderTask;
 import de.k3b.android.androFotoFinder.gallery.cursor.GalleryCursorFragment;
@@ -50,6 +52,7 @@ import de.k3b.android.androFotoFinder.queries.Queryable;
 import de.k3b.android.androFotoFinder.queries.SqlUpdateTask;
 import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.android.util.GarbageCollector;
+import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.database.QueryParameter;
@@ -189,8 +192,21 @@ public class FotoGalleryActivity extends Activity implements Common,
             this.mCurrentLatLon.get(DirectoryFormatter.parseLatLon(sharedPref.getString(STATE_LAT_LON, null)));
 
             Intent intent = context.getIntent();
-            String filter = (intent != null) ? intent.getStringExtra(EXTRA_FILTER) : null;
+            String filter = null;
+            String pathFilter = null;
 
+            if (intent != null) {
+                filter = intent.getStringExtra(EXTRA_FILTER);
+
+                if (filter == null) {
+                    Uri uri = IntentUtil.getUri(intent);
+                    File file = IntentUtil.getFile(uri);
+
+                    if (file != null) {
+                        pathFilter = uri.getPath().replace('*', '%');
+                    }
+                }
+            }
             this.mSaveToSharedPrefs = (filter == null); // false if controlled via intent
             // instance state overrides settings
             if (savedInstanceState != null) {
@@ -205,12 +221,15 @@ public class FotoGalleryActivity extends Activity implements Common,
                 this.mUseLatLon = savedInstanceState.getBoolean(STATE_LAT_LON_ACTIVE, this.mUseLatLon);
             }
 
-            if ((filter == null) && (this.mFilter == null)) {
+            if ((pathFilter == null) && (filter == null) && (this.mFilter == null)) {
                 filter = sharedPref.getString(STATE_Filter, null);
             }
 
             if (filter != null) {
                 this.mFilter = GalleryFilterParameter.parse(filter, new GalleryFilterParameter());
+            } else if (pathFilter != null) {
+                if (!pathFilter.endsWith("%")) pathFilter += "%";
+                this.mFilter = new GalleryFilterParameter().setPath(pathFilter);
             }
             // extra parameter
             this.mGalleryContentQuery = context.getIntent().getParcelableExtra(EXTRA_QUERY);
