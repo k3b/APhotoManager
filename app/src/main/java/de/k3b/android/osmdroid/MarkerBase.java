@@ -90,6 +90,24 @@ public abstract class MarkerBase<DataType> extends IconOverlay {
         }
     }
 
+    /**
+     * By default does nothing ({@code return false}). If you handled the Event, return {@code true}
+     * , otherwise return {@code false}. If you returned {@code true} none of the following Overlays
+     * or the underlying {@link MapView} has the chance to handle this event.
+     */
+    public boolean onLongPress(final MotionEvent event, final MapView mapView) {
+        boolean touched = hitTest(event, mapView);
+        if (touched) {
+            return onMarkerLongPress(mapView, mId, mPosition, mData);
+        } else {
+            return super.onLongPress(event, mapView);
+        }
+    }
+
+    protected boolean onMarkerLongPress(MapView mapView, int markerId, IGeoPoint geoPosition, Object data) {
+        return false;
+    }
+
     public static MarkerBase find(List<MarkerBase> list, int id) {
         for (MarkerBase item : list) {
             if ((item != null) && (item.mId == id)) return item;
@@ -99,5 +117,9 @@ public abstract class MarkerBase<DataType> extends IconOverlay {
 
     public int getID() {
         return mId;
+    }
+
+    public DataType getData() {
+        return mData;
     }
 }

@@ -22,6 +22,7 @@ package de.k3b.android.util;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.media.MediaScannerConnection;
@@ -34,6 +35,8 @@ import android.view.MenuItem;
 import java.io.File;
 
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
 import de.k3b.io.IDirectory;
 
@@ -179,7 +182,8 @@ public class AndroidFileCommands extends FileCommands {
                             public void onClick(
                                     final DialogInterface dialog,
                                     final int id) {
-                                mActiveAlert = null; dialog.cancel();
+                                mActiveAlert = null;
+                                dialog.cancel();
                             }
                         }
                 );
@@ -209,6 +213,49 @@ public class AndroidFileCommands extends FileCommands {
         onPostProcess(fileNames, result, ids.length, OP_DELETE);
 
         return result;
+    }
+
+    /**
+     * Write geo data (lat/lon) to photo, media database and log.<br/>
+     *  @param latitude
+     * @param longitude
+     * @param selectedItems
+     * @param itemsPerProgress
+     */
+    public int setGeo(double latitude, double longitude, SelectedFotos selectedItems, int itemsPerProgress) {
+        if (!Double.isNaN(latitude) && !Double.isNaN(longitude) && (selectedItems != null) && (selectedItems.size() > 0)) {
+            // in case that current activity is destroyed while running async, applicationContext will allow to finish database operation
+            Context applicationContext = this.mContext.getApplicationContext();
+            int itemcount = 0;
+            int countdown = 0;
+            String[] fileNames = selectedItems.getFileNames(this.mContext);
+            if (fileNames != null) {
+                File[] files = SelectedFotos.getFiles(fileNames);
+                int maxCount = files.length+1;
+                openLogfile();
+                for (File file : files) {
+                    countdown--;
+                    if (countdown <= 0) {
+                        countdown = itemsPerProgress;
+                        onProgress(itemcount, maxCount);
+                    }
+                    ExifGps.saveLatLon(file, latitude, longitude);
+                    log("setgeo  '" + file.getAbsolutePath() +
+                            "' ", DirectoryFormatter.parseLatLon(latitude), " ", DirectoryFormatter.parseLatLon(longitude));
+                    itemcount++;
+                }
+                onProgress(itemcount, maxCount);
+                int result = FotoSql.execUpdateGeo(applicationContext, latitude, longitude, selectedItems);
+                closeLogFile();
+                onProgress(++itemcount, maxCount);
+                return result;
+            }
+        }
+        return 0;
+    }
+
+    /** called every time when command makes some little progress. Can be mapped to async progress-bar */
+    protected void onProgress(int itemcount, int size) {
     }
 
     private void onMediaDeleted(String absolutePath, Long id) {

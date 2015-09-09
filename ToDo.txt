@@ -1,141 +1,28 @@
-TODO Stackoverflow:
+TODO
 
-HistoryEditText/TestGui 
-	visible history-button "V" instead of long-press
-	add to other aFoto* layouts
-	
+v	imageDetail Disppatch to gallery
+	- intent parameters to infer filter from path
+		wildcards "*" => "%"
+		isDirectory
 
-next #6 => #4
+-	[Folder-Picker]long-tap=>context-menu
+	- open new gallery
+
+wiki api
+
+#6 geo-picker
+	extera_stream-uri(s) => blue: selected items via geo:, content: or file:
 
 ?	Intent-filter for "content" uris like content://media/external/images/media/4711 only
 
 ??	content-uri-s howto intent filter ??? => stackoverflow
 
-#6 Implement geo-lat-lon-picker via map with ACTION_GET_CONTENT / ACTION_PICK 
-	> demo app
-		- save last text field-content values in settings. long press to select one
-		- file:///C:/Program%20Files%20(x86)/sdk/Android/sdk/docs/reference/android/widget/TextView.html#getCustomSelectionActionModeCallback()
-				- CAB https://dzone.com/articles/contextual-action-bar-cab siehe auch 
-				- file:///C:/Program%20Files%20%28x86%29/sdk/Android/sdk/docs/reference/android/view/ActionMode.Callback.html
-				
-	- aFotoMap(Action) with new icon
-	- map center is selected geo
-	- when clicking on photo-marker the geo of the photo becomes selected geo
-	- onMapMove/Zoom selected photo is hidden
-	- overlay with a cross that shows current selected geo
-	- import LocationMapViewer geo-uri stuff
-	- filter toString/parse as de.k3b.EXTRA_FILTER
-	
-	- wiki page with intent-api description
-	
 #7 Implement picker via gallery with ACTION_GET_CONTENT / ACTION_PICK 
 	- pick photo (mime=image/*) Selecting one or more photos from the gallery and return them.
 	- pick geo: Selecting a photo that has geo-info from the gallery and return the geo-info of the selected photo.
 
-	
-#4 Detail-View show map with edit/set current gps-lat/lon (also as ACTION_EDIT for mime image/* ??)
-	Activity with lat/lon edits and a "..." button to select geo
-	FotoSql: find lat/lon min/max to calculate best rectangle for map
-		green: known images in area
-		blue: selected images that should get new lat/lon
-		red: new lat/long of images that should get new lat/lon
-		?? copy/paste lat/lon
-
-		
-		
-		
-		
-		
-		
-		
-		
-		
-#####################################
-
-demo app CAB in editText from http://stackoverflow.com/questions/12995439/custom-cut-copy-action-bar-for-edittext-that-shows-text-selection-handles
-
-
-  edit.setCustomSelectionActionModeCallback(new StyleCallback());
-  
-   class StyleCallback implements ActionMode.Callback {
-
-    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-        Log.d(TAG, "onCreateActionMode");
-        MenuInflater inflater = mode.getMenuInflater();
-        inflater.inflate(R.menu.style, menu);
-        menu.removeItem(android.R.id.selectAll);
-        return true;
-    }
-
-    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-        return false;
-    }
-
-    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-        Log.d(TAG, String.format("onActionItemClicked item=%s/%d", item.toString(), item.getItemId()));
-        CharacterStyle cs;
-        int start = bodyView.getSelectionStart();
-        int end = bodyView.getSelectionEnd();
-        SpannableStringBuilder ssb = new SpannableStringBuilder(bodyView.getText());
-
-        switch(item.getItemId()) {
-
-        case R.id.bold:
-            cs = new StyleSpan(Typeface.BOLD);
-            ssb.setSpan(cs, start, end, 1);
-            bodyView.setText(ssb);
-            return true;
-
-        case R.id.italic:
-            cs = new StyleSpan(Typeface.ITALIC);
-            ssb.setSpan(cs, start, end, 1);
-            bodyView.setText(ssb);
-            return true;
-
-        case R.id.underline:
-            cs = new UnderlineSpan();
-            ssb.setSpan(cs, start, end, 1);
-            bodyView.setText(ssb);
-            return true;
-        }
-        return false;
-    }
-
-    public void onDestroyActionMode(ActionMode mode) {
-    }
-	
---------------	
-	The XML for the menu additions is:
-
-	<?xml version="1.0" encoding="utf-8"?>
-	<menu xmlns:android="http://schemas.android.com/apk/res/android">
-		<item android:id="@+id/italic"
-			  android:showAsAction="always"
-			  android:icon="@drawable/italic"
-			  android:title="Italic"/>
-		<item android:id="@+id/bold"
-			  android:showAsAction="always"
-			  android:icon="@drawable/bold"
-			  android:title="Bold"/>
-		<item android:id="@+id/underline"
-			  android:showAsAction="always"
-			  android:icon="@drawable/underline"
-			  android:title="Underline"/>
-	</menu>
-	
 #####################################		
 		
-		
-		
--	[Folder-Picker]long-tap=>context-menu
-	- selected-Items add-to/remove-from with/without-subfolders
--	[Geografic-Map] long-tap=>context-menu
-	- selected-Items add-to/remove-from
-	- copy lat/lon
-	- paste lat/lon
--	[Image-View]-Menu
-	- copy lat/lon
-	- paste lat/lon
 
 [![Download from F-Droid](https://camo.githubusercontent.com/7df0eafa4433fa4919a56f87c3d99cf81b68d01c/68747470733a2f2f662d64726f69642e6f72672f77696b692f696d616765732f632f63342f462d44726f69642d627574746f6e5f617661696c61626c652d6f6e2e706e67 "Download from F-Droid")](https://f-droid.org/repository/browse/?fdid=uk.co.ashtonbrsc.android.intentintercept)
 
@@ -151,6 +38,7 @@ todo
 
 // symlink
 mklink /D /J osmdroid-android d:\prj\eve\android\prj\fotos-android.wrk\osmdroid\osmdroid-android
+mklink /D /J k3b-geoHelper D:\prj\eve\android\prj\LocationMapViewer.wrk\LocationMapViewer\k3b-geoHelper
 
 LeakCanary
 

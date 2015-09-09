@@ -24,4 +24,9 @@
     tools:context="de.k3b.android.androFotoFinder.GalleryFilterActivity">
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:orderInCategory="100" android:showAsAction="never" android:visible="false" />
+    <item android:id="@+id/cmd_about"
+        android:title="@string/about_summary"
+        android:visible="true"
+        android:orderInCategory="1000"
+        android:showAsAction="never" />
 </menu>

@@ -30,6 +30,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -44,10 +45,12 @@ import de.k3b.android.androFotoFinder.directory.DirectoryLoaderTask;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.locationmap.LocationMapFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.queries.GalleryFilterParameterParcelable;
 import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
+import de.k3b.android.osmdroid.ZoomUtil;
+import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.io.DirectoryFormatter;
+import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
@@ -55,20 +58,19 @@ import de.k3b.io.IGeoRectangle;
 /**
  * Defines a gui for global foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.
  */
-public class GalleryFilterActivity extends Activity implements DirectoryPickerFragment.OnDirectoryInteractionListener, LocationMapFragment.OnDirectoryInteractionListener {
+public class GalleryFilterActivity extends Activity implements Common, DirectoryPickerFragment.OnDirectoryInteractionListener, LocationMapFragment.OnDirectoryInteractionListener {
     private static final String debugPrefix = "GalF-";
 
-    private static final String EXTRA_FILTER = "Filter";
     public static final int resultID = 522;
     private static final String DLG_NAVIGATOR_TAG = "GalleryFilterActivity";
     private static final String SETTINGS_KEY = "GalleryFilterActivity-";
 
-    GalleryFilterParameterParcelable mFilter = null;
+    GalleryFilterParameter mFilter = new GalleryFilterParameter();
 
     private AsFilter mAsFilter = null;
     private HistoryEditText mHistory;
 
-    public static void showActivity(Activity context, GalleryFilterParameterParcelable filter) {
+    public static void showActivity(Activity context, GalleryFilterParameter filter) {
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, context.getClass().getSimpleName()
                     + " > GalleryFilterActivity.showActivity");
@@ -77,14 +79,18 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         final Intent intent = new Intent().setClass(context,
                 GalleryFilterActivity.class);
 
-        intent.putExtra(EXTRA_FILTER, filter);
+        if (filter != null) {
+            intent.putExtra(EXTRA_FILTER, filter.toString());
+        }
 
         context.startActivityForResult(intent, resultID);
     }
 
-    public static GalleryFilterParameterParcelable getFilter(Intent intent) {
+    public static GalleryFilterParameter getFilter(Intent intent) {
         if (intent == null) return null;
-        return intent.getParcelableExtra(EXTRA_FILTER);
+        String filter = intent.getStringExtra(EXTRA_FILTER);
+        if (filter == null) return null;
+        return GalleryFilterParameter.parse(filter, new GalleryFilterParameter());
     }
 
     @Override
@@ -95,7 +101,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         this.mAsFilter = new AsFilter();
         onCreateButtos();
 
-        GalleryFilterParameterParcelable filter = getFilter(this.getIntent());
+        GalleryFilterParameter filter = getFilter(this.getIntent());
 
         if (filter != null) {
             mFilter = filter;
@@ -164,12 +170,13 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (item.getItemId()) {
+            case R.id.cmd_about:
+                AboutDialogPreference.createAboutDialog(this).show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -249,6 +256,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         private EditText mLongitudeTo;
         private EditText mLatitudeTo;
         private EditText mLatitudeFrom;
+        private CheckBox mWithNoGeoInfo;
 
         AsFilter() {
             this.mPath = (EditText) findViewById(R.id.edit_path);
@@ -258,6 +266,15 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
             this.mLatitudeTo = (EditText) findViewById(R.id.edit_latitude_to);
             this.mLongitudeFrom = (EditText) findViewById(R.id.edit_longitude_from);
             this.mLongitudeTo = (EditText) findViewById(R.id.edit_longitude_to);
+            this.mWithNoGeoInfo = (CheckBox) findViewById(R.id.chk_with_no_geo);
+
+            mWithNoGeoInfo.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showLatLon();
+                }
+
+            });
 
             mHistory = new HistoryEditText(GalleryFilterActivity.this, new int[] {
                     R.id.cmd_path_history, R.id.cmd_date_from_history, R.id.cmd_date_to_history,
@@ -265,6 +282,18 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
                     mPath ,mDateFrom ,mDateTo, mLatitudeFrom, mLatitudeTo, mLongitudeFrom, mLongitudeTo);
 
         }
+
+        private void showLatLon() {
+            show(mWithNoGeoInfo.isChecked(), R.id.cmd_select_lat_lon, R.id.lbl_latitude, R.id.cmd_lat_from_history, R.id.edit_latitude_from,
+                    R.id.cmd_lat_to_history, R.id.edit_latitude_to, R.id.lbl_longitude, R.id.cmd_lon_from_history,
+                    R.id.edit_longitude_from,R.id.cmd_lon_to_history, R.id.edit_longitude_to);
+        }
+
+        private void show(boolean checked, int... ids) {
+            for(int id:ids)
+                findViewById(id).setVisibility((!checked) ? View.VISIBLE : View.INVISIBLE );
+        }
+
         @Override
         public double getLatitudeMin() {
             return convertLL(mLatitudeFrom.getText().toString());
@@ -301,11 +330,18 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         }
 
         @Override
+        public boolean isNonGeoOnly() {
+            return mWithNoGeoInfo.isChecked();
+        }
+
+        @Override
         public IGalleryFilter get(IGalleryFilter src) {
             get((IGeoRectangle) src);
             mPath           .setText(src.getPath());
             mDateFrom       .setText(convertDate(src.getDateMin()));
             mDateTo         .setText(convertDate(src.getDateMax()));
+            mWithNoGeoInfo.setChecked(src.isNonGeoOnly());
+            showLatLon();
             return this;
         }
 
@@ -367,7 +403,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
     }
 
     private void clearFilter() {
-        mFilter = new GalleryFilterParameterParcelable();
+        mFilter = new GalleryFilterParameter();
         toGui(mFilter);
     }
 
@@ -376,7 +412,9 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
             mHistory.saveHistory();
 
             final Intent intent = new Intent();
-            intent.putExtra(EXTRA_FILTER, this.mFilter);
+            if (this.mFilter != null) {
+                intent.putExtra(EXTRA_FILTER, this.mFilter.toString());
+            }
             this.setResult(resultID, intent);
             finish();
         }
@@ -404,7 +442,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         if (fromGui(mFilter)) {
             final FragmentManager manager = getFragmentManager();
             LocationMapFragment dirDialog = new LocationMapFragment();
-            dirDialog.defineNavigation(null, mFilter, null);
+            dirDialog.defineNavigation(null, mFilter, ZoomUtil.NO_ZOOM, null);
 
             dirDialog.show(manager, DLG_NAVIGATOR_TAG);
         }
@@ -449,7 +487,7 @@ public class GalleryFilterActivity extends Activity implements DirectoryPickerFr
         DirInfo dirInfo = getOrCreateDirInfo(queryTypeId);
         dirInfo.currentPath=selectedAbsolutePath;
 
-        mFilter.set(selectedAbsolutePath, queryTypeId);
+        FotoSql.set(mFilter,selectedAbsolutePath, queryTypeId);
         toGui(mFilter);
     }
 

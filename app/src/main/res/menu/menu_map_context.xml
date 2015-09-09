@@ -20,20 +20,10 @@
  */
  -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" tools:context=".GalleryActivity">
-
-    <item android:id="@+id/cmd_select_folder"
-        android:title="@string/action_folder_title"
-        android:icon="@drawable/ic_action_holo_dark_folder"
-        android:visible="true"
-        android:orderInCategory="1"
-        android:showAsAction="ifRoom" />
-
-    <item android:id="@+id/cmd_select_lat_lon"
-        android:title="@string/action_area_title"
-        android:icon="@android:drawable/ic_dialog_map"
-        android:visible="true"
-        android:orderInCategory="1"
-        android:showAsAction="ifRoom" />
-
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity">
+    <item android:id="@+id/cmd_gallery" android:title="@string/title_show_in_gallery"
+        android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
+    <item android:id="@+id/cmd_zoom" android:title="@string/title_zoom_to_fit"
+        android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
 </menu>

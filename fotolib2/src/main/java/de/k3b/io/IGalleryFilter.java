@@ -30,7 +30,7 @@ public interface IGalleryFilter extends IGeoRectangle {
 
     long getDateMax();
 
+    boolean isNonGeoOnly();
+
     IGalleryFilter get(IGalleryFilter src);
-
-
 }

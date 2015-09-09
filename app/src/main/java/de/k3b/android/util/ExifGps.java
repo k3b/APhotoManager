@@ -25,18 +25,26 @@ import java.io.File;
 import java.io.IOException;
 
 /**
+ * Write geo data (lat/lon) to photo
  * Based on http://stackoverflow.com/questions/5280479/how-to-save-gps-coordinates-in-exif-data-on-android
+ *
  * Created by k3b on 25.08.2015.
  */
 public class ExifGps {
     public static void saveLatLon(File filePath, double latitude, double longitude) {
         try {
+            long lastModified = filePath.lastModified();
             ExifInterface exif = new ExifInterface(filePath.getAbsolutePath());
             exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE, convert(latitude));
             exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, latitudeRef(latitude));
             exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, convert(longitude));
             exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, longitudeRef(longitude));
+            // exif.setAttribute(ExifInterface.TAG_GPS_ALTITUDE, convert(0));
+            // exif.setAttribute(ExifInterface.TAG_GPS_ALTITUDE_REF, longitudeRef(0));
             exif.saveAttributes();
+
+            // preseve file modification date
+            filePath.setLastModified(lastModified);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -22,10 +22,8 @@ package de.k3b.android.androFotoFinder.imagedetail;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
-import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
@@ -44,13 +42,18 @@ import android.widget.Toast;
 
 import java.io.File;
 
+import de.k3b.android.androFotoFinder.Common;
+import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
+import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
 import de.k3b.android.util.AndroidFileCommands;
+import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.SelectedFotos;
+import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
 
@@ -59,12 +62,12 @@ import de.k3b.io.OSDirectory;
  * Swipe left/right to show previous/next image.
  */
 
-public class ImageDetailActivityViewPager extends Activity {
+public class ImageDetailActivityViewPager extends Activity implements Common {
     private static final String INSTANCE_STATE_MODIFY_COUNT = "mModifyCount";
     public static final int ACTIVITY_ID = 76621;
 
-    public static final int RESULT_NOCHANGE = RESULT_FIRST_USER + 1;
-    public static final int RESULT_CHANGE = RESULT_FIRST_USER + 2;
+    /** activityRequestCode: in dispacht mode: intent is forwarded to gallery */
+    private static final int ID_DISPATCH = 471102;
 
     // how many changes have been made. if != 0 parent activity must invalidate cached data
     private static int mModifyCount = 0;
@@ -134,8 +137,6 @@ public class ImageDetailActivityViewPager extends Activity {
     };
 
     private static final String INSTANCE_STATE_LAST_SCROLL_POSITION = "lastScrollPosition";
-    public static final String EXTRA_QUERY = "de.k3b.extras.sql";
-    public static final String EXTRA_POSITION = "de.k3b.extras.position";
 
     // private static final String ISLOCKED_ARG = "isLocked";
 	
@@ -164,58 +165,87 @@ public class ImageDetailActivityViewPager extends Activity {
         context.startActivityForResult(intent, ACTIVITY_ID);
     }
 
-
     @Override
 	public void onCreate(Bundle savedInstanceState) {
         debugPrefix = "ImageDetailActivityViewPager#" + (id++)  + " ";
         Global.debugMemory(debugPrefix, "onCreate");
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_image_view_pager);
-
-        mViewPager = (LockableViewPager) findViewById(R.id.view_pager);
-		setContentView(mViewPager);
-
-        // extra parameter
         Intent intent = getIntent();
-        getParameter(intent);
 
-        mAdapter = new ImagePagerAdapterFromCursor(this, mGalleryContentQuery, debugPrefix);
-        loadCompleteHandler = new DataSetObserver() {
-            @Override
-            public void onChanged() {
-                super.onChanged();
-                onLoadCompleted();
+        if (mustDispatch(intent)) {
+            // cannot handle myself. Forward to FotoGalleryActivity
+            Intent childIntent = new Intent(intent);
+            childIntent.setClass(this, FotoGalleryActivity.class);
+            startActivityForResult(childIntent, ID_DISPATCH);
+        } else { // not in dispatch mode
+            setContentView(R.layout.activity_image_view_pager);
+
+            mViewPager = (LockableViewPager) findViewById(R.id.view_pager);
+            setContentView(mViewPager);
+
+            // extra parameter
+            getParameter(intent);
+
+            mAdapter = new ImagePagerAdapterFromCursor(this, mGalleryContentQuery, debugPrefix);
+            loadCompleteHandler = new DataSetObserver() {
+                @Override
+                public void onChanged() {
+                    super.onChanged();
+                    onLoadCompleted();
+                }
+            };
+            mAdapter.registerDataSetObserver(loadCompleteHandler);
+            mViewPager.setAdapter(mAdapter);
+
+            if (savedInstanceState != null) {
+                mInitialPosition = savedInstanceState.getInt(INSTANCE_STATE_LAST_SCROLL_POSITION, this.mInitialPosition);
+                mModifyCount = savedInstanceState.getInt(INSTANCE_STATE_MODIFY_COUNT, this.mModifyCount);
+            } else {
+                mModifyCount = 0;
             }
-        };
-        mAdapter.registerDataSetObserver(loadCompleteHandler);
-        mViewPager.setAdapter(mAdapter);
 
-        if (savedInstanceState != null) {
-            mInitialPosition = savedInstanceState.getInt(INSTANCE_STATE_LAST_SCROLL_POSITION, this.mInitialPosition);
-            mModifyCount = savedInstanceState.getInt(INSTANCE_STATE_MODIFY_COUNT, this.mModifyCount);
-        } else {
-            mModifyCount = 0;
+            setResult((mModifyCount == 0) ? RESULT_NOCHANGE : RESULT_CHANGE);
+
+            mFileCommands.setContext(this);
+            mFileCommands.setLogFilePath(mFileCommands.getDefaultLogFile());
+            MoveOrCopyDestDirPicker.sFileCommands = mFileCommands;
         }
+    }
 
-        setResult((mModifyCount == 0) ? RESULT_NOCHANGE : RESULT_CHANGE);
+    @Override
+    protected void onActivityResult(final int requestCode,
+                                    final int resultCode, final Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
 
-        mFileCommands.setContext(this);
-        mFileCommands.setLogFilePath(mFileCommands.getDefaultLogFile());
-        MoveOrCopyDestDirPicker.sFileCommands = mFileCommands;
+        if (requestCode == ID_DISPATCH) {
+            // forward result from child-activity to parent-activity
+            setResult(resultCode, intent);
+            finish();
+        }
+    }
+
+    private static boolean mustDispatch(Intent intent) {
+        File file = IntentUtil.getFile(IntentUtil.getUri(intent));
+
+        // probably content: url
+        if (file == null) return false;
+
+        // file with wildcard, directory or no read permissions
+        return (!file.exists() || !file.isFile() || !file.canRead());
     }
 
     private void getParameter(Intent intent) {
         this.mInitialPosition = intent.getIntExtra(EXTRA_POSITION, this.mInitialPosition);
         this.mGalleryContentQuery = intent.getParcelableExtra(EXTRA_QUERY);
         if (mGalleryContentQuery == null) {
-            Uri uri = intent.getData();
+            Uri uri = IntentUtil.getUri(intent);
             if (uri != null) {
                 String scheme = uri.getScheme();
                 if ((scheme == null) || ("file".equals(scheme))) {
                     getParameterFromPath(uri.getPath());
                 } else if ("content".equals(scheme)) {
-                    String path = FotoSql.getFotoPath(this, uri);
+                    String path = FotoSql.execGetFotoPath(this, uri);
                     if (path != null) {
                         getParameterFromPath(path);
                     }
@@ -352,6 +382,14 @@ public class ImageDetailActivityViewPager extends Activity {
                 return cmdMoveOrCopyWithDestDirPicker(true, mFileCommands.getLastCopyToPath(), getCurrentFoto());
             case R.id.menu_item_rename:
                 return onRenameDirQueston(getCurrentImageId(), getCurrentFilePath(), null);
+            case R.id.cmd_edit_geo:
+                GeoEditActivity.showActivity(this, getCurrentFoto());
+                return true;
+
+            case R.id.cmd_about:
+                AboutDialogPreference.createAboutDialog(this).show();
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }

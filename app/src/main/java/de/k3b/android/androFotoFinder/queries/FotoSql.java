@@ -19,13 +19,16 @@
  
 package de.k3b.android.androFotoFinder.queries;
 
-import android.app.Activity;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
+
+import org.osmdroid.api.IGeoPoint;
+import org.osmdroid.util.GeoPoint;
 
 import java.util.Date;
 
@@ -34,6 +37,7 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
+import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
@@ -172,11 +176,15 @@ public class FotoSql {
                     SQL_COL_LAT, SQL_COL_LON)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString());
 
-    public static void setWhereFilter(QueryParameterParcelable parameters, IGalleryFilter filter) {
+    public static void setWhereFilter(QueryParameter parameters, IGalleryFilter filter) {
         if ((parameters != null) && (filter != null)) {
             parameters.clearWhere();
 
-            addWhereFilteLatLon(parameters, filter);
+            if (filter.isNonGeoOnly()) {
+                parameters.addWhere(SQL_COL_LAT + " is null AND " + SQL_COL_LAT + " is null");
+            } else {
+                addWhereFilteLatLon(parameters, filter);
+            }
 
             if (filter.getDateMin() != 0) parameters.addWhere(SQL_COL_DATE_TAKEN + " >= ?", Double.toString(filter.getDateMin()));
             if (filter.getDateMax() != 0) parameters.addWhere(SQL_COL_DATE_TAKEN + " < ?", Double.toString(filter.getDateMax()));
@@ -186,40 +194,48 @@ public class FotoSql {
         }
     }
 
-    public static void addWhereSelection(QueryParameterParcelable parameters, SelectedItems selectedItems) {
+    public static void setWhereSelection(QueryParameter parameters, SelectedItems selectedItems) {
         if ((parameters != null) && (selectedItems != null) && (!selectedItems.isEmpty())) {
-            parameters.clearWhere().addWhere(FotoSql.SQL_COL_PK + " in (" + selectedItems.toString() + ")");
+            parameters.clearWhere()
+                    .addWhere(FotoSql.SQL_COL_PK + " in (" + selectedItems.toString() + ")")
+            ;
         }
     }
 
-    public static void addWhereFilteLatLon(QueryParameterParcelable parameters, IGeoRectangle filter) {
+
+    public static void addWhereLatLonNotNull(QueryParameterParcelable parameters) {
+        parameters.addWhere(FotoSql.SQL_COL_LAT + " is not null and " + FotoSql.SQL_COL_LON + " is not null")
+        ;
+    }
+
+    public static void addWhereFilteLatLon(QueryParameter parameters, IGeoRectangle filter) {
         if ((parameters != null) && (filter != null)) {
             addWhereFilteLatLon(parameters, filter.getLatitudeMin(),
                     filter.getLatitudeMax(), filter.getLogituedMin(), filter.getLogituedMax());
         }
     }
 
-    public static void addWhereFilteLatLon(QueryParameterParcelable parameters, double latitudeMin, double latitudeMax, double logituedMin, double logituedMax) {
+    public static void addWhereFilteLatLon(QueryParameter parameters, double latitudeMin, double latitudeMax, double logituedMin, double logituedMax) {
         if (!Double.isNaN(latitudeMin)) parameters.addWhere(SQL_COL_LAT + " >= ?", DirectoryFormatter.parseLatLon(latitudeMin));
         if (!Double.isNaN(latitudeMax)) parameters.addWhere(SQL_COL_LAT + " < ?", DirectoryFormatter.parseLatLon(latitudeMax));
         if (!Double.isNaN(logituedMin)) parameters.addWhere(SQL_COL_LON + " >= ?", DirectoryFormatter.parseLatLon(logituedMin));
         if (!Double.isNaN(logituedMax)) parameters.addWhere(SQL_COL_LON + " < ?", DirectoryFormatter.parseLatLon(logituedMax));
     }
 
-    public static String getFilter(Cursor cursor, QueryParameterParcelable parameters, String description) {
+    public static String getFilter(Cursor cursor, QueryParameter parameters, String description) {
         if ((parameters != null) && (parameters.getID() == QUERY_TYPE_GROUP_ALBUM)) {
             return description;
         }
         return null;
     }
 
-    public static void addWhereFilter(QueryParameterParcelable parameters, String filterParameter) {
+    public static void addWhereFilter(QueryParameter parameters, String filterParameter) {
         if ((parameters != null) && (parameters.getID() == QUERY_TYPE_GROUP_ALBUM) && (filterParameter != null)) {
             parameters.addWhere(SQL_EXPR_FOLDER + " = ?", filterParameter);
         }
     }
 
-    public static void addPathWhere(QueryParameterParcelable newQuery, String selectedAbsolutePath, int dirQueryID) {
+    public static void addPathWhere(QueryParameter newQuery, String selectedAbsolutePath, int dirQueryID) {
         if ((selectedAbsolutePath != null) && (selectedAbsolutePath.length() > 0)) {
             if (QUERY_TYPE_GROUP_DATE == dirQueryID) {
                 addWhereDatePath(newQuery, selectedAbsolutePath);
@@ -233,7 +249,7 @@ public class FotoSql {
     /**
      * directory path i.e. /mnt/sdcard/pictures/
      */
-    private static void addWhereDirectoryPath(QueryParameterParcelable newQuery, String selectedAbsolutePath) {
+    private static void addWhereDirectoryPath(QueryParameter newQuery, String selectedAbsolutePath) {
         if (FotoViewerParameter.includeSubItems) {
             newQuery
                     .addWhere(FotoSql.SQL_COL_PATH + " like ?", selectedAbsolutePath + "%")
@@ -250,7 +266,7 @@ public class FotoSql {
     /**
      * path has format /year/month/day/ or /year/month/ or /year/ or /
      */
-    private static void addWhereDatePath(QueryParameterParcelable newQuery, String selectedAbsolutePath) {
+    private static void addWhereDatePath(QueryParameter newQuery, String selectedAbsolutePath) {
         Date from = new Date();
         Date to = new Date();
 
@@ -336,7 +352,32 @@ public class FotoSql {
         }
     }
 
-    public static String getFotoPath(Context context, Uri uri) {
+    public static boolean set(GalleryFilterParameter dest, String selectedAbsolutePath, int queryTypeId) {
+        switch (queryTypeId) {
+            case FotoSql.QUERY_TYPE_GROUP_ALBUM:
+                dest.setPath(selectedAbsolutePath + "%");
+                return true;
+            case FotoSql.QUERY_TYPE_GROUP_DATE:
+                Date from = new Date();
+                Date to = new Date();
+
+                DirectoryFormatter.getDates(selectedAbsolutePath, from, to);
+                dest.setDateMin(from.getTime());
+                dest.setDateMax(to.getTime());
+                return true;
+            case FotoSql.QUERY_TYPE_GROUP_PLACE_MAP:
+            case FotoSql.QUERY_TYPE_GROUP_PLACE:
+                IGeoRectangle geo = DirectoryFormatter.parseLatLon(selectedAbsolutePath);
+                if (geo != null) {
+                    dest.get(geo);
+                }
+                return true;
+        }
+        return false;
+    }
+
+
+    public static String execGetFotoPath(Context context, Uri uri) {
         Cursor c = null;
         try {
             c = query(context, uri.toString(), null, null, null, FotoSql.SQL_COL_PATH);
@@ -351,7 +392,21 @@ public class FotoSql {
         return null;
     }
 
-    private static Cursor query(final Context context, QueryParameterParcelable parameters) {
+    /**
+     * Write geo data (lat/lon) media database.<br/>
+     */
+    public static int execUpdateGeo(final Context context, double latitude, double longitude, SelectedItems selectedItems) {
+        QueryParameter where = new QueryParameter();
+        setWhereSelection(where, selectedItems);
+
+        ContentValues values = new ContentValues(2);
+        values.put(SQL_COL_LAT, DirectoryFormatter.parseLatLon(latitude));
+        values.put(SQL_COL_LON, DirectoryFormatter.parseLatLon(longitude));
+        ContentResolver resolver = context.getContentResolver();
+        return resolver.update(SQL_TABLE_EXTERNAL_CONTENT_URI, values, where.toAndroidWhere(), where.toAndroidParameters());
+    }
+
+    private static Cursor query(final Context context, QueryParameter parameters) {
         return query(context, parameters.toFrom(), parameters.toAndroidWhere(),
                 parameters.toAndroidParameters(), parameters.toOrderBy(),
                 parameters.toColumns()
@@ -365,7 +420,7 @@ public class FotoSql {
         return resolver.query(Uri.parse(from), sqlSelectColums, sqlWhereStatement, sqlWhereParameters, sqlSortOrder);
     }
 
-    public static IGeoRectangle getGeoRectangle(Context context, IGalleryFilter filter, SelectedItems selectedItems) {
+    public static IGeoRectangle execGetGeoRectangle(Context context, IGalleryFilter filter, SelectedItems selectedItems) {
         QueryParameterParcelable query = (QueryParameterParcelable) new QueryParameterParcelable()
                 .setID(QUERY_TYPE_UNDEFINED)
                 .addColumn(
@@ -380,12 +435,10 @@ public class FotoSql {
             setWhereFilter(query, filter);
         }
 
-        query.addWhere(SQL_COL_LAT + " IS NOT NULL")
-             .addWhere(SQL_COL_LON + " IS NOT NULL");
-
         if (selectedItems != null) {
-            addWhereSelection(query, selectedItems);
+            setWhereSelection(query, selectedItems);
         }
+        FotoSql.addWhereLatLonNotNull(query);
 
         Cursor c = null;
         try {
@@ -397,7 +450,31 @@ public class FotoSql {
                 return result;
             }
         } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, "getGeoRectangle: error executing " + query, ex);
+            Log.e(Global.LOG_CONTEXT, "execGetGeoRectangle: error executing " + query, ex);
+        } finally {
+            if (c != null) c.close();
+        }
+        return null;
+    }
+
+    public static IGeoPoint execGetPosition(Context context, int id) {
+        QueryParameterParcelable query = (QueryParameterParcelable) new QueryParameterParcelable()
+        .setID(QUERY_TYPE_UNDEFINED)
+                .addColumn(SQL_COL_LAT, SQL_COL_LON)
+                .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
+                .addWhere(SQL_COL_PK + "= ?", "" + id)
+                .addWhere(SQL_COL_LAT + " IS NOT NULL")
+                .addWhere(SQL_COL_LON + " IS NOT NULL");
+
+        Cursor c = null;
+        try {
+            c = query(context, query);
+            if (c.moveToFirst()) {
+                GeoPoint result = new GeoPoint(c.getDouble(0),c.getDouble(1));
+                return result;
+            }
+        } catch (Exception ex) {
+            Log.e(Global.LOG_CONTEXT, "execGetGeoRectangle: error executing " + query, ex);
         } finally {
             if (c != null) c.close();
         }

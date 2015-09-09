@@ -24,8 +24,8 @@ package de.k3b.io;
  * Created by k3b on 12.07.2015.
  */
 public class GeoRectangle implements IGeoRectangle {
-    public static final String DELIM_LAT_LON = ",";
-    public static final String DELIM_LL_S = ";";
+    public static final String DELIM_SUB_FIELD = ",";
+    public static final String DELIM_FIELD = ";";
 
     private double latitudeMin = Double.NaN;
     private double latitudeMax = Double.NaN;
@@ -47,8 +47,8 @@ public class GeoRectangle implements IGeoRectangle {
         return latitudeMin;
     }
 
-    public void setLatitudeMin(double latitudeMin) {
-        this.latitudeMin = latitudeMin;
+    public GeoRectangle setLatitudeMin(double latitudeMin) {
+        this.latitudeMin = latitudeMin; return this;
     }
 
     @Override
@@ -56,8 +56,8 @@ public class GeoRectangle implements IGeoRectangle {
         return latitudeMax;
     }
 
-    public void setLatitudeMax(double latitudeMax) {
-        this.latitudeMax = latitudeMax;
+    public GeoRectangle setLatitudeMax(double latitudeMax) {
+        this.latitudeMax = latitudeMax; return this;
     }
 
     @Override
@@ -65,8 +65,8 @@ public class GeoRectangle implements IGeoRectangle {
         return logituedMin;
     }
 
-    public void setLogituedMin(double logituedMin) {
-        this.logituedMin = logituedMin;
+    public GeoRectangle setLogituedMin(double logituedMin) {
+        this.logituedMin = logituedMin; return this;
     }
 
     @Override
@@ -74,16 +74,11 @@ public class GeoRectangle implements IGeoRectangle {
         return logituedMax;
     }
 
-    public void setLogituedMax(double logituedMax) {
-        this.logituedMax = logituedMax;
+    public GeoRectangle setLogituedMax(double logituedMax) {
+        this.logituedMax = logituedMax; return this;
     }
 
-    @Override
-    public String toString() {
-        return "" + getLatitudeMin() + DELIM_LAT_LON + getLogituedMin() + DELIM_LL_S + getLatitudeMax() + DELIM_LAT_LON + getLogituedMax();
-    }
-
-    public void setLatitude(double min, double max) {
+    public GeoRectangle setLatitude(double min, double max) {
         if (min > max) {
             // swap
             double temp = min;
@@ -92,9 +87,10 @@ public class GeoRectangle implements IGeoRectangle {
         }
         setLatitudeMin(min);
         setLatitudeMax(max);
+        return this;
     }
 
-    public void setLogitude(double min, double max) {
+    public GeoRectangle setLogitude(double min, double max) {
         if (min > max) {
             // swap
             double temp = min;
@@ -103,5 +99,47 @@ public class GeoRectangle implements IGeoRectangle {
         }
         setLogituedMin(min);
         setLogituedMax(max);
+        return this;
     }
+
+    /********************* string conversion support ***************/
+    @Override
+    public String toString() {
+
+        return toStringBuilder().toString();
+    }
+
+    protected StringBuilder toStringBuilder() {
+        StringBuilder result = new StringBuilder();
+        appendLatLon(result, getLatitudeMin(), getLogituedMin());
+        appendLatLon(result, getLatitudeMax(), getLogituedMax());
+        return result;
+    }
+
+    protected static StringBuilder appendLatLon(StringBuilder result, double lat, double lon) {
+        return appendSubFields(result, format(lat), format(lon));
+    }
+
+    protected static StringBuilder appendSubFields(StringBuilder result, String... items) {
+        if (items != null) {
+            int last = items.length - 1;
+            while ((last >= 0) && (items[last].isEmpty())) {
+                last--;
+            }
+
+            if (last >= 0) {
+                result.append(items[0]);
+                for (int i=1; i <= last; i++) {
+                    result.append(DELIM_SUB_FIELD).append(items[i]);
+                }
+            }
+        }
+        return result.append(DELIM_FIELD);
+    }
+
+    private static String format(double d) {
+        if (Double.isNaN(d)) return "";
+        return Double.toString(d);
+    }
+
 }

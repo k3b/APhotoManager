@@ -19,6 +19,7 @@
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
  -->
+<!-- menue of gallery activity/fragment if gallery is NOT in multiselection mode -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".GalleryActivity">
 
@@ -68,7 +69,7 @@
     <item android:id="@+id/cmd_about"
         android:title="@string/about_summary"
         android:visible="true"
-        android:orderInCategory="50"
+        android:orderInCategory="1000"
         android:showAsAction="never" />
 
 </menu>

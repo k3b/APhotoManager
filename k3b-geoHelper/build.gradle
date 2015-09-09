@@ -1,0 +1,47 @@
+apply plugin: 'java'
+apply plugin: 'jacoco'
+
+dependencies {
+    // compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.11'
+    testCompile 'org.slf4j:slf4j-simple:1.7.7@jar'
+    // testCompile fileTree(dir: 'resources', include: ['*.*'])
+    compile 'org.slf4j:slf4j-api:1.7.7@jar'
+    //  compile 'org.slf4j:slf4j-api:1.7.6@jar'
+    // compile 'com.darwinsys:hirondelle-date4j:1.5.1'
+    // compile 'joda-time:joda-time:2.7'
+}
+
+task javadocZip(type: Zip, dependsOn: javadoc) {
+    group = 'Distribution'
+    classifier = 'docs'
+    description = "Builds -${classifier} archive containing api and reference ."
+
+    from('src/dist') {
+        // include 'changelog.txt'
+    }
+
+    from ('build/docs/javadoc' ) {
+        into 'api'
+    }
+}
+
+task testZip(type: Zip, dependsOn: [test, jacocoTestReport]) {
+    group = 'Distribution'
+    classifier = 'tests'
+    description = "Builds -${classifier} archive containing testresults and codecoverage ."
+
+    from('src/dist') {
+        // include 'changelog.txt'
+    }
+
+    from ('build/reports/tests' ) {
+        into 'tests'
+    }
+
+    from ('build/reports/jacoco/test/html' ) {
+        into 'codecoverage'
+    }
+}
+
+task reports (dependsOn: [test, jacocoTestReport, javadoc])

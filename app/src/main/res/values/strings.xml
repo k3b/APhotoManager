@@ -39,7 +39,9 @@
     <string name="popup">...</string>
 
     <string name="action_folder_title">Select Folder</string>
+    <string name="action_folder_title_menu">Folder Filter</string>
     <string name="action_area_title">Select Area</string>
+    <string name="action_area_title_menu">Map Area Filter</string>
     <string name="action_filter_title">Filter</string>
     <string name="action_sort_title">Sort</string>
     <string name="directory_fragment_dialog_title">Select %1$s</string>
@@ -67,7 +69,11 @@
 
     <string name="cmd_edit" >Edit</string>
     <string name="title_chooser_edit" >Choose photo editor</string>
+<!--    <string name="title_chooser_geo_picker" >Choose geo picker</string> -->
+    <string name="cmd_set_geo" >Set geo</string>
+    <string name="title_geo_picker" >Select new geo for photo</string>
     <string name="error_edit" >No photo editor found</string>
+    <string name="error_geo_picker" >No geo picker found</string>
 
     <string name="title_cright_osm">Map Tiles (c) <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> Contributors</string>
 
@@ -77,6 +83,7 @@
     <string name="err_file_exists">The File \'%1$s\' already exists. Please choose a different name.</string>
     <string name="err_file_rename">Cannot rename File \'%1$s\'.</string>
     <string name="success_file_rename">Renamed \'%1$s\' to \'%2$s\'.</string>
+    <string name="success_update">Updated %1$d photos.</string>
 
     <string name="cmd_share">Share</string>
     <string name="title_chooser_share" >Share/Send</string>
@@ -145,4 +152,17 @@ Features:
 <br />
 ]]>
 "</string>
+    <string name="title_show_in_gallery">Show in new Gallery</string>
+    <string name="title_zoom_to_fit">Zoom to fit</string>
+    <string name="lbl_date">Date</string>
+    <string name="lbl_with_no_geo">With no geo info</string>
+    <string name="selection_add_all_menu_title"   >Selection: Add all visible</string>
+    <string name="selection_add_remove_menu_title">Selection: Remove all visible</string>
+    <string name="err_cannot_share">sendmultible: item count exceeded</string>
+    <string name="title_geo_edit">a Foto Change Geo</string>
+    <string name="geo_update_in_progress">Changing geo info in selected photos</string>
+    <string name="cmd_clear_filter">Clear Filter</string>
+    <string name="lbl_longitude_short">Lon</string>
+    <string name="lbl_latitude_short">Lat</string>
+    <string name="lbl_path">Path</string>
 </resources>

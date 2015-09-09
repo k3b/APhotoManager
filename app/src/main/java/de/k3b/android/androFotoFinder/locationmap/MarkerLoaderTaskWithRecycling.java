@@ -43,8 +43,8 @@ public abstract class MarkerLoaderTaskWithRecycling<MARKER extends MarkerBase> e
     protected int mRecyclerSizeAfter;
 
 
-    public MarkerLoaderTaskWithRecycling(Activity context, String debugPrefix, Stack<MARKER> recycler, HashMap<Integer, MARKER> oldItems) {
-        super(context, debugPrefix, oldItems);
+    public MarkerLoaderTaskWithRecycling(Activity context, String debugPrefix, Stack<MARKER> recycler, HashMap<Integer, MARKER> oldItems, int markerCountLimit) {
+        super(context, debugPrefix, oldItems, markerCountLimit);
         mRecycler = recycler;
         mRecyclerSizeBefore = mRecycler.size();
     }

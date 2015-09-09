@@ -2,7 +2,7 @@
 
 You can reach the [Folder-Picker](Folder-Picker) via
 
-* the "folder symbol" ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_folder.png) or menu "Select Folder" in the [Gallery-View](Gallery-View)
+* the "folder symbol" ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_folder.png) or menu "Folder Filter" in the [Gallery-View](Gallery-View)
 * the menu "Copy" or "Move" in the [Gallery-View](Gallery-View) in multiselection mode
 * the "folder picker" in the [Filter-View](Filter-View)
 

@@ -51,7 +51,7 @@
         <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text=""
+            android:text="geo:53.2,8.8?&amp;z=11"
             android:id="@+id/edit_Uri"
             android:layout_toLeftOf="@+id/cmd_uri"
             android:layout_below="@id/label_uri"

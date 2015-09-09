@@ -120,7 +120,7 @@ public class TestGuiActivity extends Activity {
         }
 
         if ((filter != null) && (filter.length() > 0)) {
-            intent.putExtra("de.k3b.EXTRA_FILTER", filter);
+            intent.putExtra("de.k3b.extra.FILTER", filter);
         }
 
         if (openable) intent.addCategory(Intent.CATEGORY_OPENABLE);

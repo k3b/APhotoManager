@@ -60,6 +60,7 @@ import de.k3b.database.QueryParameter;
  * Created by k3b on 16.07.2015.
  */
 public abstract class MarkerLoaderTask<MARKER extends MarkerBase> extends AsyncTask<QueryParameter, Integer, OverlayManager> {
+    public static final int NO_MARKER_COUNT_LIMIT = 0;
     // every 500 items the progress indicator is advanced
     private static final int PROGRESS_INCREMENT = 500;
 
@@ -67,11 +68,13 @@ public abstract class MarkerLoaderTask<MARKER extends MarkerBase> extends AsyncT
     protected final String mDebugPrefix;
     private final IconFactory mIconFactory;
     private final DefaultResourceProxyImplEx mResourceProxy;
+    private final int mMarkerCountLimit;
     protected HashMap<Integer, MARKER> mOldItems;
     protected StringBuffer mStatus = null;
     private int mStatisticsRecycled = 0;
 
-    public MarkerLoaderTask(Activity context, String debugPrefix, HashMap<Integer, MARKER> oldItems) {
+    public MarkerLoaderTask(Activity context, String debugPrefix, HashMap<Integer, MARKER> oldItems, int markerCountLimit) {
+        mMarkerCountLimit = markerCountLimit;
         if (Global.debugEnabledSql || Global.debugEnabled) {
             mStatus = new StringBuffer();
         }
@@ -137,6 +140,11 @@ public abstract class MarkerLoaderTask<MARKER extends MarkerBase> extends AsyncT
 
                     // Escape early if cancel() is called
                     if (isCancelled()) break;
+                }
+                
+                if ((mMarkerCountLimit != NO_MARKER_COUNT_LIMIT) && (itemCount >=mMarkerCountLimit))
+                {
+                    break;
                 }
             }
             if (this.mStatus != null) {
