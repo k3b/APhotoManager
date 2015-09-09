@@ -22,7 +22,7 @@ build
 
 .project
 *.iml
-*.properties
+#*.properties
 /OSMBonusPack
 /osmdroid-android
 /wiki/png/temp.png
