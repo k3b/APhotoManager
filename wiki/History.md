@@ -1,6 +1,8 @@
 ## next version not released yet
 
-## v0.4.1.* (not released yet)
+## v0.4.2.* (not released yet)
+
+## [v0.4.1.150909](https://github.com/k3b/AndroFotoFinder/releases/tag/v0.4.1.150909)
 
 * [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) :
 	* [Selection](Gallery-View#Multiselection): add/remove [all visible](Gallery-View#CurrentSet)

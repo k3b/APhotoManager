@@ -1,6 +1,6 @@
 TODO
 
-v	imageDetail Disppatch to gallery
+v	imageDetail Dispatch to gallery
 	- intent parameters to infer filter from path
 		wildcards "*" => "%"
 		isDirectory
