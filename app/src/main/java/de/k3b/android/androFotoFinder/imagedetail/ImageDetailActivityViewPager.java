@@ -54,6 +54,7 @@ import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.AboutDialogPreference;
+import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
 
@@ -68,6 +69,8 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     /** activityRequestCode: in dispacht mode: intent is forwarded to gallery */
     private static final int ID_DISPATCH = 471102;
+    private static final int DEFAULT_SORT = FotoSql.SORT_BY_NAME_LEN;
+    private static final QueryParameterParcelable DEFAULT_QUERY = FotoSql.queryDetail;
 
     // how many changes have been made. if != 0 parent activity must invalidate cached data
     private static int mModifyCount = 0;
@@ -143,14 +146,20 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 	private ViewPager mViewPager;
     private ImagePagerAdapterFromCursor mAdapter;
 
-    private QueryParameterParcelable mGalleryContentQuery = null;
     private final AndroidFileCommands mFileCommands = new ImageDetailFileCommands();
 
     // for debugging
     private static int id = 1;
     private String debugPrefix;
     private DataSetObserver loadCompleteHandler;
-    private int mInitialPosition = -1;
+
+    /** where data comes from */
+    private QueryParameterParcelable mGalleryContentQuery = null;
+
+    /** if >= 0 after load cursor scroll to this offset */
+    private int mScrollPosition = -1;
+
+    /** if != after load cursor scroll to this path */
     private String mInitialFilePath = null;
 
     public static void showActivity(Activity context, Uri imageUri, int position, QueryParameterParcelable imageDetailQuery) {
@@ -199,7 +208,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             mViewPager.setAdapter(mAdapter);
 
             if (savedInstanceState != null) {
-                mInitialPosition = savedInstanceState.getInt(INSTANCE_STATE_LAST_SCROLL_POSITION, this.mInitialPosition);
+                mScrollPosition = savedInstanceState.getInt(INSTANCE_STATE_LAST_SCROLL_POSITION, this.mScrollPosition);
                 mModifyCount = savedInstanceState.getInt(INSTANCE_STATE_MODIFY_COUNT, this.mModifyCount);
             } else {
                 mModifyCount = 0;
@@ -235,9 +244,19 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         return (!file.exists() || !file.isFile() || !file.canRead());
     }
 
+    /** query from EXTRA_QUERY, EXTRA_FILTER, fileParentDir , defaultQuery */
     private void getParameter(Intent intent) {
-        this.mInitialPosition = intent.getIntExtra(EXTRA_POSITION, this.mInitialPosition);
+        this.mScrollPosition = intent.getIntExtra(EXTRA_POSITION, this.mScrollPosition);
         this.mGalleryContentQuery = intent.getParcelableExtra(EXTRA_QUERY);
+        if (mGalleryContentQuery == null) {
+            String filterValue = intent.getStringExtra(EXTRA_FILTER);
+            if (filterValue != null) {
+                GalleryFilterParameter filter = GalleryFilterParameter.parse(filterValue, new GalleryFilterParameter());
+                QueryParameterParcelable query = new QueryParameterParcelable(DEFAULT_QUERY);
+                FotoSql.setSort(query, DEFAULT_SORT, true);
+                FotoSql.setWhereFilter(query, filter);
+            }
+        }
         if (mGalleryContentQuery == null) {
             Uri uri = IntentUtil.getUri(intent);
             if (uri != null) {
@@ -257,7 +276,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             Log.e(Global.LOG_CONTEXT, debugPrefix + " onCreate() : intent.extras[" + EXTRA_QUERY +
                     "] not found. data=" + intent.getData() +
                     ". Using default.");
-            mGalleryContentQuery = FotoSql.getQuery(FotoSql.QUERY_TYPE_DEFAULT);
+            mGalleryContentQuery = new QueryParameterParcelable(DEFAULT_QUERY);
         } else if (Global.debugEnabledSql) {
             Log.i(Global.LOG_CONTEXT, debugPrefix + " onCreate() : query = " + mGalleryContentQuery);
         }
@@ -266,11 +285,11 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     private void getParameterFromPath(String path) {
         mInitialFilePath = path;
         File selectedPhoto = new File(mInitialFilePath);
-        this.mInitialPosition = -1;
+        this.mScrollPosition = -1;
 
-        QueryParameterParcelable query = new QueryParameterParcelable(FotoSql.queryDetail);
+        QueryParameterParcelable query = new QueryParameterParcelable(DEFAULT_QUERY);
         FotoSql.addPathWhere(query, selectedPhoto.getParent(), FotoSql.QUERY_TYPE_GALLERY);
-        FotoSql.setSort(query, FotoSql.SORT_BY_NAME_LEN, true);
+        FotoSql.setSort(query, DEFAULT_SORT, true);
         mGalleryContentQuery = query;
     }
 
@@ -330,23 +349,23 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             // close activity if last image of current selection has been deleted
             Toast.makeText(this, R.string.delete_empty, Toast.LENGTH_LONG).show();
             this.finish();
-        } else if (mInitialPosition >= 0) {
+        } else if (mScrollPosition >= 0) {
             // after initial load select correct image
             mViewPager.invalidate();
-            mViewPager.setCurrentItem(mInitialPosition);
-            mInitialPosition = -1;
+            mViewPager.setCurrentItem(mScrollPosition);
+            mScrollPosition = -1;
             mInitialFilePath = null;
         } else if (mInitialFilePath != null) {
             mViewPager.invalidate();
             mViewPager.setCurrentItem(mAdapter.getCursorFromPath(mInitialFilePath));
-            mInitialPosition = -1;
+            mScrollPosition = -1;
             mInitialFilePath = null;
         } else {
             // update mViewPager so that deleted image will not be the current any more
-            mInitialPosition = mViewPager.getCurrentItem();
+            mScrollPosition = mViewPager.getCurrentItem();
             mViewPager.setAdapter(mAdapter); // reload
-            mViewPager.setCurrentItem(mInitialPosition);
-            mInitialPosition = -1;
+            mViewPager.setCurrentItem(mScrollPosition);
+            mScrollPosition = -1;
         }
     }
 
