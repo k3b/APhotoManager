@@ -10,8 +10,8 @@ android {
 		
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 5
-        versionName "0.4.0.150828"
+        versionCode 6
+        versionName "0.4.1.150909"
     }
     buildTypes {
         release {
@@ -26,6 +26,7 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(':fotolib2')
+    compile project(':k3b-geohelper')
     // zoomable image view
     // from https://github.com/chrisbanes/PhotoView
     // compile 'com.github.chrisbanes.photoview:library:1.2.3'
