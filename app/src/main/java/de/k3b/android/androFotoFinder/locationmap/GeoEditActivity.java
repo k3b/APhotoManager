@@ -262,7 +262,7 @@ public class GeoEditActivity extends Activity implements Common {
         final Intent intent = new Intent();
         intent.setAction(Intent.ACTION_PICK);
         intent.setData(Uri.parse(geoUri));
-        intent.putExtra(Intent.EXTRA_TITLE, getString(R.string.title_geo_picker));
+        intent.putExtra(EXTRA_TITLE, getString(R.string.title_geo_picker));
         if (mSelectedItems != null) {
             intent.putExtra(EXTRA_SELECTED_ITEMS, mSelectedItems.toString());
         }

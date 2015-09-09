@@ -19,22 +19,42 @@
 
 package de.k3b.android.androFotoFinder;
 
+import android.app.Activity;
+import android.content.Intent;
+
 /**
  * Created by k3b on 01.09.2015.
  */
 public interface Common {
     /**
+     * gallery,filter:
      * Format:GalleryFilterParameter.toString/parse.
      * See https://github.com/k3b/AndroFotoFinder/wiki/intentapi#filter
      */
     static final String EXTRA_FILTER = "de.k3b.extra.FILTER";
 
     /**
-     * Format:SelectedItems.toString/parse.
+     * geoEdit,picker
+     * Format:SelectedItems.toString/parse: id,id,id,....
      * See https://github.com/k3b/AndroFotoFinder/wiki/intentapi#SelectedItems
      */
     static final String EXTRA_SELECTED_ITEMS = "de.k3b.extra.SELECTED_ITEMS";
 
-    public static final int RESULT_NOCHANGE = 1775 + 1;
-    public static final int RESULT_CHANGE = 1775 + 2;
+    /** detail,gallery:  sql where ... order by ... group by ... */
+    public static final String EXTRA_QUERY = "de.k3b.extra.SQL";
+
+    /** detail: offset in in the resultset to be shown */
+    public static final String EXTRA_POSITION = "de.k3b.extra.OFFSET";
+
+    /** gallery,geoEdit,picker: app title for picker */
+    public static final String EXTRA_TITLE = Intent.EXTRA_TITLE;
+
+    /**  detail:  getData/EXTRA_STREAM - file/content  */
+    public static final String EXTRA_STREAM = Intent.EXTRA_STREAM;
+
+    /** detail:  Activity.onActivityResult() - resultCode: no photo-files were modified */
+    public static final int RESULT_NOCHANGE = Activity.RESULT_CANCELED;
+
+    /** detail,geoEdit:  Activity.onActivityResult() - resultCode:  one or more photo-files were modified. caller must invalidate cached files/directories. */
+    public static final int RESULT_CHANGE = Activity.RESULT_OK;
 }

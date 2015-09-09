@@ -66,8 +66,6 @@ public class FotoGalleryActivity extends Activity implements Common,
     private static final String debugPrefix = "GalA-";
 
     /** intent parameters supported by FotoGalleryActivity: EXTRA_... */
-    public static final String EXTRA_QUERY = "gallery";
-    public static final String EXTRA_TITLE = Intent.EXTRA_TITLE;
 
     private static final String DLG_NAVIGATOR_TAG = "navigator";
     private static final String STATE_CurrentSelections = "CurrentSelections";

@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.directory.DirectoryGui;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
@@ -75,7 +76,7 @@ import de.k3b.io.OSDirectory;
  * Use the {@link GalleryCursorFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class GalleryCursorFragment extends Fragment  implements Queryable, DirectoryGui {
+public class GalleryCursorFragment extends Fragment  implements Queryable, DirectoryGui,Common {
     private static final String INSTANCE_STATE_LAST_VISIBLE_POSITION = "lastVisiblePosition";
     private static final String INSTANCE_STATE_SELECTED_ITEM_IDS = "selectedItems";
     private static final String INSTANCE_STATE_OLD_TITLE = "oldTitle";
@@ -693,7 +694,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             if (selectionCount == 1) {
                 Long imageId = mSelectedItems.first();
                 sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_STREAM, SelectedFotos.getUri(imageId));
+                sendIntent.putExtra(EXTRA_STREAM, SelectedFotos.getUri(imageId));
             } else {
                 sendIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
 
@@ -703,7 +704,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 while (iter.hasNext()) {
                     uris.add(SelectedFotos.getUri(iter.next()));
                 }
-                sendIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+                sendIntent.putParcelableArrayListExtra(EXTRA_STREAM, uris);
             }
 
             try {

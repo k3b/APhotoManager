@@ -51,7 +51,7 @@ public class MapGeoPickerActivity extends Activity implements Common {
 
         GeoPointDto geoPointFromIntent = getGeoPointDtoFromIntent(intent);
 
-        String extraTitle = intent.getStringExtra(Intent.EXTRA_TITLE);
+        String extraTitle = intent.getStringExtra(EXTRA_TITLE);
         if (extraTitle == null && (geoPointFromIntent == null)) {
             extraTitle = getString(R.string.app_map_name);
         }
