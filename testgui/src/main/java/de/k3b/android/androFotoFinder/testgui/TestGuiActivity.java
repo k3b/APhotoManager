@@ -32,6 +32,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import de.k3b.android.GuiUtil;
 import de.k3b.android.widget.HistoryEditText;
 
 public class TestGuiActivity extends Activity {
@@ -52,6 +53,7 @@ public class TestGuiActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test_gui);
         appName = getString(R.string.app_name) + ":";
+        setTitle(appName + GuiUtil.getAppVersionName(this));
 
         Button rundDemoView = (Button) findViewById(R.id.run_view);
         Button rundDemoPick = (Button) findViewById(R.id.run_demo_pick);

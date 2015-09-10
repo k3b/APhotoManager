@@ -8,9 +8,10 @@ android {
         applicationId "de.k3b.android.androFotoFinder.testgui"
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 1
-        versionName "1.0"
+        versionCode 6
+        versionName "0.4.1.150911"
     }
+
     buildTypes {
         release {
             minifyEnabled false
