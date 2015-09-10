@@ -192,18 +192,24 @@ public class FotoGalleryActivity extends Activity implements Common,
             this.mCurrentLatLon.get(DirectoryFormatter.parseLatLon(sharedPref.getString(STATE_LAT_LON, null)));
 
             Intent intent = context.getIntent();
+
+            // for debugging: where does the filter come from
+            String dbgFilter = null;
             String filter = null;
             String pathFilter = null;
 
             if (intent != null) {
                 filter = intent.getStringExtra(EXTRA_FILTER);
 
+                if (filter != null) dbgFilter = "filter from " + EXTRA_FILTER +"=" + filter;
+
                 if (filter == null) {
                     Uri uri = IntentUtil.getUri(intent);
-                    File file = IntentUtil.getFile(uri);
 
-                    if (file != null) {
-                        pathFilter = uri.getPath().replace('*', '%');
+                    if (IntentUtil.isFileUri(uri)) {
+                        pathFilter = uri.getSchemeSpecificPart();
+                        if (pathFilter != null) pathFilter = pathFilter.replace('*', '%');
+                        dbgFilter = "path from uri=" + pathFilter;
                     }
                 }
             }
@@ -215,6 +221,7 @@ public class FotoGalleryActivity extends Activity implements Common,
                 this.mSortID = savedInstanceState.getInt(STATE_SortID, this.mSortID);
                 this.mSortAscending = savedInstanceState.getBoolean(STATE_SortAscending, this.mSortAscending);
                 filter = savedInstanceState.getString(STATE_Filter);
+                if (filter != null) dbgFilter = "filter from savedInstanceState=" + filter;
 
                 this.mCurrentLatLon.get(DirectoryFormatter.parseLatLon(savedInstanceState.getString(STATE_LAT_LON)));
 
@@ -223,6 +230,7 @@ public class FotoGalleryActivity extends Activity implements Common,
 
             if ((pathFilter == null) && (filter == null) && (this.mFilter == null)) {
                 filter = sharedPref.getString(STATE_Filter, null);
+                if (filter != null) dbgFilter = "filter from sharedPref=" + filter;
             }
 
             if (filter != null) {
@@ -230,6 +238,10 @@ public class FotoGalleryActivity extends Activity implements Common,
             } else if (pathFilter != null) {
                 if (!pathFilter.endsWith("%")) pathFilter += "%";
                 this.mFilter = new GalleryFilterParameter().setPath(pathFilter);
+            }
+
+            if (Global.debugEnabled) {
+                Log.i(Global.LOG_CONTEXT, debugPrefix + dbgFilter + " => " + this.mFilter);
             }
             // extra parameter
             this.mGalleryContentQuery = context.getIntent().getParcelableExtra(EXTRA_QUERY);

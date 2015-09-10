@@ -2,7 +2,11 @@
 
 ## v0.4.2.* (not released yet)
 
-## [v0.4.1.150909](https://github.com/k3b/AndroFotoFinder/releases/tag/v0.4.1.150909)
+* [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi): intent VIEW mime="image/*" + data=file:xxx or android.intent.extra.STREAM=file:xxx
+	* [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) if xxx is an existing image file. 
+	* else [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) where xxx is used as a path filter
+	
+## [v0.4.1.150910](https://github.com/k3b/AndroFotoFinder/releases/tag/v0.4.1.150910)
 
 * [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) :
 	* [Selection](Gallery-View#Multiselection): add/remove [all visible](Gallery-View#CurrentSet)

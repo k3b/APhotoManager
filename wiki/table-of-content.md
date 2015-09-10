@@ -27,6 +27,7 @@
 	* [Gallery Navigation](Gallery-View#Navigation)
 	* [Current Visible Photos](Gallery-View#CurrentSet)
 * [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View)
+	* [Image-View Intent-API](Image-View#api)
 * [Folder-Picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker)
 * [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi)
 	* [Uri formats](intentapi#uri)

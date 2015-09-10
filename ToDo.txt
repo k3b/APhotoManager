@@ -1,21 +1,13 @@
 TODO
 
-v	imageDetail Dispatch to gallery
-	- intent parameters to infer filter from path
-		wildcards "*" => "%"
-		isDirectory
-
--	[Folder-Picker]long-tap=>context-menu
+- [Folder-Picker]long-tap=>context-menu
 	- open new gallery
+- map-view-menu set filter
 
 wiki api
 
 #6 geo-picker
 	extera_stream-uri(s) => blue: selected items via geo:, content: or file:
-
-?	Intent-filter for "content" uris like content://media/external/images/media/4711 only
-
-??	content-uri-s howto intent filter ??? => stackoverflow
 
 #7 Implement picker via gallery with ACTION_GET_CONTENT / ACTION_PICK 
 	- pick photo (mime=image/*) Selecting one or more photos from the gallery and return them.

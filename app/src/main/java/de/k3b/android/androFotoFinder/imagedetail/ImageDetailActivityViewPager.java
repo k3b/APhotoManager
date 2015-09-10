@@ -67,8 +67,8 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     private static final String INSTANCE_STATE_MODIFY_COUNT = "mModifyCount";
     public static final int ACTIVITY_ID = 76621;
 
-    /** activityRequestCode: in dispacht mode: intent is forwarded to gallery */
-    private static final int ID_DISPATCH = 471102;
+    /** activityRequestCode: in forward mode: intent is forwarded to gallery */
+    private static final int ID_FORWARD = 471102;
     private static final int DEFAULT_SORT = FotoSql.SORT_BY_NAME_LEN;
     private static final QueryParameterParcelable DEFAULT_QUERY = FotoSql.queryDetail;
 
@@ -143,8 +143,8 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     // private static final String ISLOCKED_ARG = "isLocked";
 	
-	private ViewPager mViewPager;
-    private ImagePagerAdapterFromCursor mAdapter;
+	private ViewPager mViewPager = null;
+    private ImagePagerAdapterFromCursor mAdapter = null;
 
     private final AndroidFileCommands mFileCommands = new ImageDetailFileCommands();
 
@@ -182,12 +182,16 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
 
-        if (mustDispatch(intent)) {
+        if (mustForward(intent)) {
             // cannot handle myself. Forward to FotoGalleryActivity
-            Intent childIntent = new Intent(intent);
+            Intent childIntent = new Intent();
             childIntent.setClass(this, FotoGalleryActivity.class);
-            startActivityForResult(childIntent, ID_DISPATCH);
-        } else { // not in dispatch mode
+            childIntent.setAction(intent.getAction());
+            childIntent.setDataAndType(intent.getData(), intent.getType());
+            copyExtras(childIntent, intent.getExtras(),
+                    EXTRA_FILTER, EXTRA_POSITION, EXTRA_QUERY, EXTRA_SELECTED_ITEMS, EXTRA_STREAM, EXTRA_TITLE);
+            startActivityForResult(childIntent, ID_FORWARD);
+        } else { // not in forward mode
             setContentView(R.layout.activity_image_view_pager);
 
             mViewPager = (LockableViewPager) findViewById(R.id.view_pager);
@@ -222,23 +226,35 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         }
     }
 
+    private void copyExtras(Intent dest, Bundle source, String... keys) {
+        if ((dest != null) && (source != null) && (keys != null)) {
+            for (String key : keys) {
+                Object item = source.get(key);
+                if (item != null) {
+                    dest.putExtra(key, item.toString());
+                }
+            }
+        }
+    }
+
     @Override
     protected void onActivityResult(final int requestCode,
                                     final int resultCode, final Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
-        if (requestCode == ID_DISPATCH) {
+        if (requestCode == ID_FORWARD) {
             // forward result from child-activity to parent-activity
             setResult(resultCode, intent);
             finish();
         }
     }
 
-    private static boolean mustDispatch(Intent intent) {
-        File file = IntentUtil.getFile(IntentUtil.getUri(intent));
+    private static boolean mustForward(Intent intent) {
+        Uri uri = IntentUtil.getUri(intent);
+        File file = IntentUtil.getFile(uri);
 
         // probably content: url
-        if (file == null) return false;
+        if (file == null) return IntentUtil.isFileUri(uri); // true if file:// with wildcards "%" or "*" goto gallery;
 
         // file with wildcard, directory or no read permissions
         return (!file.exists() || !file.isFile() || !file.canRead());
@@ -324,13 +340,17 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     @Override
     protected void onDestroy() {
         Global.debugMemory(debugPrefix, "onDestroy");
-        mAdapter.unregisterDataSetObserver(loadCompleteHandler);
-        loadCompleteHandler = null;
-        mViewPager.setAdapter(null);
-        mFileCommands.closeLogFile();
-        mFileCommands.closeAll();
-        mFileCommands.setContext(null);
-        MoveOrCopyDestDirPicker.sFileCommands = null;
+
+        if (mAdapter != null) {
+            // not in forward-mode
+            mAdapter.unregisterDataSetObserver(loadCompleteHandler);
+            loadCompleteHandler = null;
+            mViewPager.setAdapter(null);
+            mFileCommands.closeLogFile();
+            mFileCommands.closeAll();
+            mFileCommands.setContext(null);
+            MoveOrCopyDestDirPicker.sFileCommands = null;
+        }
 
         super.onDestroy();
         // RefWatcher refWatcher = AndroFotoFinderApp.getRefWatcher(this);

@@ -2,6 +2,7 @@ package de.k3b.android.util;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 
 import java.io.File;
@@ -17,23 +18,29 @@ public class IntentUtil implements Common {
     @Nullable
     public static Uri getUri(Intent intent) {
         Uri uri = intent.getData();
-        if (uri == null) {
-            Object stream = intent.getExtras().get(EXTRA_STREAM);
-            if (stream != null) {
-                uri = Uri.parse(stream.toString());
-            }
+        Bundle extras = (uri != null) ? null : intent.getExtras();
+        Object stream = (extras == null) ? null : extras.get(EXTRA_STREAM);
+        if (stream != null) {
+            uri = Uri.parse(stream.toString());
         }
         return uri;
     }
 
-    /** return null if uri is not file scheam */
+    /** return null if uri is not a valid file scheam */
     @Nullable
     public static File getFile(Uri uri) {
-        if ((uri != null) && ("file".equals(uri.getScheme()))) {
-            final String canonicalPath;
-            return new File(uri.getPath());
+        if (isFileUri(uri)) {
+            try {
+                return new File(uri.getPath());
+            } catch (Exception ex) {
+                ; // i.e. contain illegal chars
+            }
         }
         return null;
+    }
+
+    public static boolean isFileUri(Uri uri) {
+        return (uri != null) && ("file".equals(uri.getScheme()));
     }
 
 }

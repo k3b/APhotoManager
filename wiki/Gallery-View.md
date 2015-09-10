@@ -83,6 +83,13 @@ The [Gallery-View](Gallery-View) has these elements:
 
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/Gallery-MultiSelection.png)
 
-The [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi) for [Gallery-View](Gallery-View)  support
+## <a name='api'>Intent-API</a> (since 0.4.2)
 
-* [de.k3b.extra.FILTER string](intentapi#filter) (optional)
+* action=VIEW/SEND/SENDTO
+* mime="image/*"
+* [extra[android.intent.extra.TITLE string]](intentapi#EXTRA_TITLE)
+* [extra[de.k3b.extra.FILTER]](intentapi#filter)
+* data=file:{xxx} or extra[android.intent.extra.STREAM]=file:{xxx}
+  * opens [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) with pathfilter={xxx} if {xxx} is not an image file
+  * examle file:*kreta*
+	* opens [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) showing all files that contain "kreta" in its full path

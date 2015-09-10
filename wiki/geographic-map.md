@@ -38,8 +38,13 @@ If you use the Geografic-Map as a ["geo:" picker](https://github.com/k3b/AndroFo
 * tap on a green/blue marker to select the geo-location belonging to that marker (the marker becomes **red**)
 * tap somewhere in the map where no green/blue marker exists to select a place with no photo.
 
-The [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi) for ["geo:" picker](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map#picker) support
+## <a name='api'>Intent-API</a> (since 0.4.2)
 
+The [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi) support
+
+* action=VIEW/SEND/SENDTO to show map
+* action=PICK to open a ["geo:" picker](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map#picker) 
+* mime="*/*" or mime=null
 * [geo: uri format](intentapi#uri-geo) (required)
-* [de.k3b.extra.SELECTED_ITEMS string](intentapi#SelectedItems) (optional)
+* [de.k3b.extra.SELECTED_ITEMS string](intentapi#SelectedItems) define the blue markers (optional)
 * [android.intent.extra.TITLE string](intentapi#EXTRA_TITLE) (optional)
