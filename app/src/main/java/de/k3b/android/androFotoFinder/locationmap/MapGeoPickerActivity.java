@@ -21,27 +21,42 @@ package de.k3b.android.androFotoFinder.locationmap;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
 import android.widget.Toast;
 
 import de.k3b.android.androFotoFinder.Common;
+import de.k3b.android.androFotoFinder.GalleryFilterActivity;
+import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.osmdroid.ZoomUtil;
+import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.database.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.io.GeoUri;
+import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 
 public class MapGeoPickerActivity extends Activity implements Common {
+    private static final String debugPrefix = "GalM-";
+    private static final String STATE_Filter = "filterMap";
 
     private LocationMapFragment mMap;
+
+    /** true: if activity started without special intent-parameters, the last mFilter is saved/loaded for next use */
+    private boolean mSaveToSharedPrefs = true;
+    private GalleryFilterParameter mFilter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +86,6 @@ public class MapGeoPickerActivity extends Activity implements Common {
         mMap = (LocationMapFragment) getFragmentManager().findFragmentById(R.id.fragment_map);
         mMap.STATE_LAST_VIEWPORT = "ignore"; // do not use last viewport in settings
 
-        GalleryFilterParameter rootFilter = new GalleryFilterParameter();
         GeoRectangle rectangle = new GeoRectangle();
         int zoom = ZoomUtil.NO_ZOOM;
         if ((savedInstanceState == null) && (geoPointFromIntent != null)) {
@@ -83,7 +97,35 @@ public class MapGeoPickerActivity extends Activity implements Common {
         String selectedItemsString = intent.getStringExtra(EXTRA_SELECTED_ITEMS);
         SelectedItems selectedItems = (selectedItemsString != null) ? new SelectedItems().parse(selectedItemsString) : null;
 
-        mMap.defineNavigation(rootFilter, rectangle, zoom, selectedItems);
+        String filter = null;
+        // for debugging: where does the filter come from
+        String dbgFilter = null;
+        if (intent != null) {
+            filter = intent.getStringExtra(EXTRA_FILTER);
+        }
+        this.mSaveToSharedPrefs = (filter == null); // false if controlled via intent
+        if (savedInstanceState != null) {
+            filter = savedInstanceState.getString(STATE_Filter);
+            if (filter != null) dbgFilter = "filter from savedInstanceState=" + filter;
+        }
+
+        if (this.mSaveToSharedPrefs) {
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+            filter = sharedPref.getString(STATE_Filter, null);
+            if (filter != null) dbgFilter = "filter from sharedPref=" + filter;
+        }
+
+        this.mFilter = new GalleryFilterParameter();
+
+        if (filter != null) {
+            GalleryFilterParameter.parse(filter, this.mFilter);
+        }
+
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, debugPrefix + dbgFilter + " => " + this.mFilter);
+        }
+
+        mMap.defineNavigation(this.mFilter, rectangle, zoom, selectedItems);
     }
 
     @Override
@@ -94,9 +136,37 @@ public class MapGeoPickerActivity extends Activity implements Common {
     }
 
     @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        saveSettings(this);
+
+        if (this.mFilter != null) {
+            savedInstanceState.putString(STATE_Filter, this.mFilter.toString());
+        }
+    }
+
+    private void saveSettings(Context context) {
+        if (mSaveToSharedPrefs) {
+            // save settings
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences.Editor edit = sharedPref.edit();
+
+            if (mFilter != null) {
+                edit.putString(STATE_Filter, mFilter.toString());
+            }
+
+            edit.commit();
+        }
+    }
+
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle presses on the action bar items
         switch (item.getItemId()) {
+            case R.id.cmd_filter:
+                openFilter();
+                return true;
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
                 return true;
@@ -104,6 +174,34 @@ public class MapGeoPickerActivity extends Activity implements Common {
                 return super.onOptionsItemSelected(item);
         }
 
+    }
+
+    /**
+     * Call back from sub-activities.<br/>
+     * Process Change StartTime (longpress start), Select StopTime before stop
+     * (longpress stop) or filter change for detailReport
+     */
+    @Override
+    protected void onActivityResult(final int requestCode,
+                                    final int resultCode, final Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+
+        switch (requestCode) {
+            case GalleryFilterActivity.resultID :
+                onFilterChanged(GalleryFilterActivity.getFilter(intent));
+                break;
+        }
+    }
+
+    private void onFilterChanged(GalleryFilterParameter filter) {
+        if (filter != null) {
+            this.mFilter = filter;
+            mMap.defineNavigation(this.mFilter, null, ZoomUtil.NO_ZOOM, null);
+        }
+    }
+
+    private void openFilter() {
+        GalleryFilterActivity.showActivity(this, this.mFilter);
     }
 
     private GeoPointDto getGeoPointDtoFromIntent(Intent intent) {

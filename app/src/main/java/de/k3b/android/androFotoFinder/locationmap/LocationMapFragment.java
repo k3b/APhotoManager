@@ -396,20 +396,25 @@ public class LocationMapFragment extends DialogFragment {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + "defineNavigation: " + rectangle + ";z=" + zoomlevel);
         }
 
-        this.mRootFilter = rootFilter;
+        if (rootFilter != null) {
+            this.mRootFilter = rootFilter;
+        }
+
         if ((selectedItems != null) && (this.mSelectedItems != selectedItems)) {
             this.mSelectedItems = selectedItems;
             reloadSelectionMarker();
         }
 
-        if (!Double.isNaN(rectangle.getLatitudeMin())) {
-            BoundingBoxE6 boundingBox = new BoundingBoxE6(
-                    rectangle.getLatitudeMax(),
-                    rectangle.getLogituedMin(),
-                    rectangle.getLatitudeMin(),
-                    rectangle.getLogituedMax());
+        if (rectangle != null) {
+            if (!Double.isNaN(rectangle.getLatitudeMin())) {
+                BoundingBoxE6 boundingBox = new BoundingBoxE6(
+                        rectangle.getLatitudeMax(),
+                        rectangle.getLogituedMin(),
+                        rectangle.getLatitudeMin(),
+                        rectangle.getLogituedMax());
 
-            zoomToBoundingBox(boundingBox, zoomlevel);
+                zoomToBoundingBox(boundingBox, zoomlevel);
+            }
         }
 
         if (rootFilter != null) {

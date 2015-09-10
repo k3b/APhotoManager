@@ -97,6 +97,7 @@ public class FotoGalleryActivity extends Activity implements Common,
         QueryParameterParcelable mGalleryContentQuery = null;
 
         GalleryFilterParameter mFilter;
+        /** true: if activity started without special intent-parameters, the last mFilter is saved/loaded for next use */
         private boolean mSaveToSharedPrefs = true;
 
         /** one of the FotoSql.QUERY_TYPE_xxx values. if undefined use default */

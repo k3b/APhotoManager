@@ -7,6 +7,7 @@ You can reach the [Geographic-Map](Geographic-Map) via
 * the "map symbol" in the [Gallery-View](Gallery-View)
 * the "location picker" in the [Filter-View](Filter-View)
 * from any app that support [intents with "geo:"- uris](https://github.com/k3b/AndroFotoFinder/wiki/intentapi) (VIEW/SEND/SENDTO/SEND_MULTIPLE/PICK)
+* opening from android-s app manager
 
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/SelectArea.png)
 
@@ -30,6 +31,9 @@ You can reach the [Geographic-Map](Geographic-Map) via
   * lat/lon values in the [Filter-View](Filter-View) if called from there
   * return the current position (**red marker**) if called from [external app via "Pick geo:"](https://github.com/k3b/AndroFotoFinder/wiki/intentapi)
 * The "Cancel" button or the back button closes the map without affecting the calling activitry.
+* The menu *Filter" openes the [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)
+		* purpose: Filter the photos that are visible in the map.
+		* if [Geografic-Map](geographic-map) is started without [intent-extra-de.k3b.extra.FILTER parameter](intentapi#filter) the map uses the last used filter.
 
 ## <a name='picker'>"geo:" picker</a>
 
@@ -48,3 +52,5 @@ The [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi) support
 * [geo: uri format](intentapi#uri-geo) (required)
 * [de.k3b.extra.SELECTED_ITEMS string](intentapi#SelectedItems) define the blue markers (optional)
 * [android.intent.extra.TITLE string](intentapi#EXTRA_TITLE) (optional)
+* [extra[de.k3b.extra.FILTER]](intentapi#filter) (Since Version 0.4.2)
+	* purpose: Filter the photos that are visible in the map.

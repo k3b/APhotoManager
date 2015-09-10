@@ -3,6 +3,8 @@ You can reach the [Gallery-View](Gallery-View) via
 * opening from android-s app manager
 * the [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map)'s contextmenu by long tapping a marker.
 
+Note: [Gallery-View](Gallery-View) is started with the [last used filter-settings](Gallery-View#CurrentSet) if it was started without [intent-extra-de.k3b.extra.FILTER parameter](intentapi#filter) .
+
 The [Gallery-View](Gallery-View) show photos in a scrollable view:
 
 * If you swipe up or down you will see more photos.

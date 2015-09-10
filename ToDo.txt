@@ -1,10 +1,8 @@
 TODO
 
+- map: no read marker if (0,0) or if no photo
 - [Folder-Picker]long-tap=>context-menu
 	- open new gallery
-- map-view-menu set filter
-
-wiki api
 
 #6 geo-picker
 	extera_stream-uri(s) => blue: selected items via geo:, content: or file:
