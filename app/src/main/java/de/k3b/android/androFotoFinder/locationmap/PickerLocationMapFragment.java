@@ -22,6 +22,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
 import de.k3b.android.osmdroid.IconOverlay;
 import de.k3b.database.SelectedItems;
+import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 
@@ -102,11 +103,10 @@ public class PickerLocationMapFragment extends LocationMapFragment {
         */
     }
 
-    @Override
-    public void defineNavigation(GalleryFilterParameter rootFilter, GeoRectangle rectangle, int zoomlevel, SelectedItems selectedItems) {
+    public void defineNavigation(GalleryFilterParameter rootFilter, IGeoPointInfo currentSelection, GeoRectangle rectangle, int zoomlevel, SelectedItems selectedItems) {
         super.defineNavigation(rootFilter, rectangle, zoomlevel, selectedItems);
-        if (rectangle != null) {
-            updateMarker(null, NO_MARKER_ID, new GeoPoint(rectangle.getLatitudeMin(), rectangle.getLogituedMin()), null);
+        if (currentSelection != null) {
+            updateMarker(null, NO_MARKER_ID, new GeoPoint(currentSelection.getLatitude(), currentSelection.getLongitude()), null);
         }
     }
 

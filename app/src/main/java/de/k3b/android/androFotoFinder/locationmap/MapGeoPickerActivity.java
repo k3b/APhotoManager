@@ -52,7 +52,7 @@ public class MapGeoPickerActivity extends Activity implements Common {
     private static final String debugPrefix = "GalM-";
     private static final String STATE_Filter = "filterMap";
 
-    private LocationMapFragment mMap;
+    private PickerLocationMapFragment mMap;
 
     /** true: if activity started without special intent-parameters, the last mFilter is saved/loaded for next use */
     private boolean mSaveToSharedPrefs = true;
@@ -83,7 +83,7 @@ public class MapGeoPickerActivity extends Activity implements Common {
             setNoTitle();
         }
 
-        mMap = (LocationMapFragment) getFragmentManager().findFragmentById(R.id.fragment_map);
+        mMap = (PickerLocationMapFragment) getFragmentManager().findFragmentById(R.id.fragment_map);
         mMap.STATE_LAST_VIEWPORT = "ignore"; // do not use last viewport in settings
 
         GeoRectangle rectangle = new GeoRectangle();
@@ -125,7 +125,7 @@ public class MapGeoPickerActivity extends Activity implements Common {
             Log.i(Global.LOG_CONTEXT, debugPrefix + dbgFilter + " => " + this.mFilter);
         }
 
-        mMap.defineNavigation(this.mFilter, rectangle, zoom, selectedItems);
+        mMap.defineNavigation(this.mFilter, geoPointFromIntent, rectangle, zoom, selectedItems);
     }
 
     @Override
@@ -136,11 +136,17 @@ public class MapGeoPickerActivity extends Activity implements Common {
     }
 
     @Override
+    protected void onDestroy() {
+        saveSettings(this);
+        super.onDestroy();
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         saveSettings(this);
 
-        if (this.mFilter != null) {
+        if ((savedInstanceState != null) && (this.mFilter != null)) {
             savedInstanceState.putString(STATE_Filter, this.mFilter.toString());
         }
     }
@@ -158,7 +164,6 @@ public class MapGeoPickerActivity extends Activity implements Common {
             edit.commit();
         }
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -212,6 +217,7 @@ public class MapGeoPickerActivity extends Activity implements Common {
             Toast.makeText(this, getString(R.string.app_name) + ": received  " + uriAsString, Toast.LENGTH_LONG).show();
             GeoUri parser = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
             pointFromIntent = (GeoPointDto) parser.fromUri(uriAsString, new GeoPointDto());
+            if (GeoPointDto.isEmpty(pointFromIntent)) pointFromIntent = null;
         }
         return pointFromIntent;
     }

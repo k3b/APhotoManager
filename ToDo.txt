@@ -1,6 +1,9 @@
 TODO
 
-- map: no read marker if (0,0) or if no photo
+- mapview
+	- remeber last view/zoom if startet without geo-uri
+	- bug geo:-uri without zoom => zoom-max
+
 - [Folder-Picker]long-tap=>context-menu
 	- open new gallery
 
