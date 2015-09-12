@@ -41,9 +41,9 @@ Unique visitors https://github.com/k3b/AndroFotoFinder/graphs/traffic
 0906	5
 0907	5
 0908	4
-0909		v0.4.1.150909 in github
-0910	
-0911	
+0909	3	v0.4.1.150909 in github
+0910	5	v0.4.1.150910 in github
+0911	12	v0.4.1.150911 in github
 0912	
 0913	
 0914	

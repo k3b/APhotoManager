@@ -1,5 +1,8 @@
 TODO
 
+#10 Fast swiping through images does not work
+	load preview images.on zoom start load original image
+
 #6 geo-picker
 	extera_stream-uri(s) => blue: selected items via geo:, content: or file:
 

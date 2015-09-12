@@ -1,6 +1,6 @@
 ## next version not released yet
 
-## v0.4.2.* (not released yet)
+## [v0.4.2.*](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.2) (not released yet)
 
 * [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) :
 	* menu to open [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)
@@ -8,13 +8,14 @@
 		* if [Geografic-Map](geographic-map) is opened without [intent-extra-de.k3b.extra.FILTER parameter](intentapi#filter) the map is opend with the last used filter.
 	* improved menu "zoom to fit"
 	* [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi): support for [de.k3b.extra.FILTER string](intentapi#filter)
-* [Folder- or Date-Picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker)'s long-tapping-folder-contextmenu:  
-	* menu "Show in new Gallery" opens a new prefiltered [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View)
+* [Folder- or Date-Picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker):  
+	* long-tapping-folder-contextmenu "Show in new Gallery" opens a new prefiltered [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View)
+	* [#11](https://github.com/k3b/AndroFotoFinder/issues/11) Folder name in bold and counts in non-bold.
 * [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi): intent VIEW mime="image/*" + data=file:xxx or android.intent.extra.STREAM=file:xxx
 	* [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) if xxx is an existing image file. 
 	* else [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) where xxx is used as a path filter
 	
-## [v0.4.1.150911](https://github.com/k3b/AndroFotoFinder/releases/tag/v0.4.1.150911)
+## [v0.4.1.150911](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.1)
 
 * [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) :
 	* [Selection](Gallery-View#Multiselection): add/remove [all visible](Gallery-View#CurrentSet)

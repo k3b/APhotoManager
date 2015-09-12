@@ -20,6 +20,8 @@
 package de.k3b.android.androFotoFinder.directory;
 
 import android.content.Context;
+import android.text.Html;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -125,12 +127,15 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
     }
 
     /** getFrom tree display text */
-    static String getDirectoryDisplayText(String prefix, IDirectory directory, int options) {
+    static Spanned getDirectoryDisplayText(String prefix, IDirectory directory, int options) {
         StringBuilder result = new StringBuilder();
+        boolean asHtml = (options & Directory.OPT_AS_HTML) != 0;
+        if (asHtml) result.append("<b>");
         if (prefix != null) result.append(prefix);
         result.append(directory.getRelPath()).append(" ");
+        if (asHtml) result.append("</b>");
         Directory.appendCount(result, directory, options);
-        return result.toString();
+        return Html.fromHtml(result.toString());
     }
 
     @Override
