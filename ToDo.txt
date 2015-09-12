@@ -1,7 +1,5 @@
 TODO
 
-- mapview
-	zoo2fit query rectangle
 - [Folder-Picker]long-tap=>context-menu
 	- open new gallery
 

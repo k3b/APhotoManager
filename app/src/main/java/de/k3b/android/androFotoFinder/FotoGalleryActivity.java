@@ -36,8 +36,6 @@ import android.widget.Toast;
 
 // import com.squareup.leakcanary.RefWatcher;
 
-import java.io.File;
-
 import de.k3b.android.androFotoFinder.directory.DirectoryGui;
 import de.k3b.android.androFotoFinder.directory.DirectoryLoaderTask;
 import de.k3b.android.androFotoFinder.gallery.cursor.GalleryCursorFragment;
@@ -49,14 +47,11 @@ import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.queries.Queryable;
-import de.k3b.android.androFotoFinder.queries.SqlUpdateTask;
 import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.android.util.GarbageCollector;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.AboutDialogPreference;
-import de.k3b.database.QueryParameter;
-import de.k3b.database.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
@@ -138,7 +133,7 @@ public class FotoGalleryActivity extends Activity implements Common,
             if (result == null) return null;
 
             if (mUseLatLon) {
-                FotoSql.addWhereFilteLatLon(result, mCurrentLatLon);
+                FotoSql.addWhereFilterLatLon(result, mCurrentLatLon);
             } else if (this.mCurrentPath != null) {
                 FotoSql.addPathWhere(result, this.mCurrentPath, this.getDirQueryID());
             }

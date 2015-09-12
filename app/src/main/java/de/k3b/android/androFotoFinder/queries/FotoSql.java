@@ -183,7 +183,7 @@ public class FotoSql {
             if (filter.isNonGeoOnly()) {
                 parameters.addWhere(SQL_COL_LAT + " is null AND " + SQL_COL_LAT + " is null");
             } else {
-                addWhereFilteLatLon(parameters, filter);
+                addWhereFilterLatLon(parameters, filter);
             }
 
             if (filter.getDateMin() != 0) parameters.addWhere(SQL_COL_DATE_TAKEN + " >= ?", Double.toString(filter.getDateMin()));
@@ -208,14 +208,14 @@ public class FotoSql {
         ;
     }
 
-    public static void addWhereFilteLatLon(QueryParameter parameters, IGeoRectangle filter) {
+    public static void addWhereFilterLatLon(QueryParameter parameters, IGeoRectangle filter) {
         if ((parameters != null) && (filter != null)) {
-            addWhereFilteLatLon(parameters, filter.getLatitudeMin(),
+            addWhereFilterLatLon(parameters, filter.getLatitudeMin(),
                     filter.getLatitudeMax(), filter.getLogituedMin(), filter.getLogituedMax());
         }
     }
 
-    public static void addWhereFilteLatLon(QueryParameter parameters, double latitudeMin, double latitudeMax, double logituedMin, double logituedMax) {
+    public static void addWhereFilterLatLon(QueryParameter parameters, double latitudeMin, double latitudeMax, double logituedMin, double logituedMax) {
         if (!Double.isNaN(latitudeMin)) parameters.addWhere(SQL_COL_LAT + " >= ?", DirectoryFormatter.parseLatLon(latitudeMin));
         if (!Double.isNaN(latitudeMax)) parameters.addWhere(SQL_COL_LAT + " < ?", DirectoryFormatter.parseLatLon(latitudeMax));
         if (!Double.isNaN(logituedMin)) parameters.addWhere(SQL_COL_LON + " >= ?", DirectoryFormatter.parseLatLon(logituedMin));
@@ -427,7 +427,8 @@ public class FotoSql {
                         "min(" + SQL_COL_LAT + ") AS LAT_MIN",
                         "max(" + SQL_COL_LAT + ") AS LAT_MAX",
                         "min(" + SQL_COL_LON + ") AS LON_MIN",
-                        "max(" + SQL_COL_LON + ") AS LON_MAX"
+                        "max(" + SQL_COL_LON + ") AS LON_MAX",
+                        "count(*)"
                 )
                 .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString());
 
@@ -447,6 +448,11 @@ public class FotoSql {
                 GeoRectangle result = new GeoRectangle();
                 result.setLatitude(c.getDouble(0), c.getDouble(1));
                 result.setLogitude(c.getDouble(2), c.getDouble(3));
+
+                if (Global.debugEnabledSql) {
+                    Log.i(Global.LOG_CONTEXT, "FotoSql.execGetGeoRectangle() => " + result + " from " + c.getLong(4) + " via\n\t" + query);
+                }
+
                 return result;
             }
         } catch (Exception ex) {

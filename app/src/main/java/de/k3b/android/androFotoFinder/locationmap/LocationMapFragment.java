@@ -509,7 +509,7 @@ public class LocationMapFragment extends DialogFragment {
         // so that counts at the borders are correct.
         double delta = (groupingFactor > 0) ? (2.0 / groupingFactor) : 0.0;
         IGeoRectangle rect = getGeoRectangle(latLonArea);
-        FotoSql.addWhereFilteLatLon(query
+        FotoSql.addWhereFilterLatLon(query
                 , rect.getLatitudeMin() - delta
                 , rect.getLatitudeMax() + delta
                 , rect.getLogituedMin() - delta
@@ -834,10 +834,35 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     private boolean zoomToFit(IGeoPoint geoPosition) {
-        BoundingBoxE6 boundingBoxE6 = getMarkerBoundingBox(geoPosition);
+        BoundingBoxE6 boundingBoxE6 = null;
 
+        IGeoRectangle fittingRectangle = FotoSql.execGetGeoRectangle(this.getActivity(), getMarkerFilter(geoPosition), null);
+        double delta = getDelta(fittingRectangle);
+        if (delta < 1e-6) {
+            boundingBoxE6 = getMarkerBoundingBox(geoPosition);
+
+        } else {
+            double enlarge = delta * 0.2;
+            boundingBoxE6 = new BoundingBoxE6(
+                    fittingRectangle.getLatitudeMax()+enlarge,
+                    fittingRectangle.getLogituedMax()+enlarge,
+                    fittingRectangle.getLatitudeMin()-enlarge,
+                    fittingRectangle.getLogituedMin()-enlarge);
+        }
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, "zoomToFit(): " + fittingRectangle +
+                    " delta " + delta +
+                    " => box " + boundingBoxE6);
+        }
         zoomToBoundingBox(boundingBoxE6, NO_ZOOM);
         return true;
+    }
+
+    private double getDelta(IGeoRectangle fittingRectangle) {
+        if (fittingRectangle == null) return 0;
+
+        return Math.max(Math.abs(fittingRectangle.getLogituedMax() - fittingRectangle.getLogituedMin())
+                , Math.abs(fittingRectangle.getLatitudeMax() - fittingRectangle.getLatitudeMin()));
     }
 
     private GalleryFilterParameter getMarkerFilter(IGeoPoint geoPosition) {
