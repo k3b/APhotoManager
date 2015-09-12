@@ -169,6 +169,15 @@ public class LocationMapFragment extends DialogFragment {
         saveLastViewPort(savedInstanceState);
     }
 
+    public String getCurrentGeoUri() {
+        BoundingBoxE6 currentViewPort = this.mMapView.getBoundingBox();
+
+        GeoPoint currentCenter = currentViewPort.getCenter();
+        int currentZoomLevel = this.mMapView.getZoomLevel();
+        String uriCurrentViewport = mGeoUriEngine.toUriString(currentCenter.getLatitude(), currentCenter.getLongitude(), currentZoomLevel);
+        return uriCurrentViewport;
+    }
+
     private void saveLastViewPort(Bundle savedInstanceState) {
         BoundingBoxE6 currentViewPort = this.mMapView.getBoundingBox();
 
@@ -176,9 +185,7 @@ public class LocationMapFragment extends DialogFragment {
             savedInstanceState.putParcelable(STATE_LAST_VIEWPORT, currentViewPort);
         }
 
-        GeoPoint currentCenter = currentViewPort.getCenter();
-        int currentZoomLevel = this.mMapView.getZoomLevel();
-        String uriCurrentViewport = mGeoUriEngine.toUriString(currentCenter.getLatitude(), currentCenter.getLongitude(), currentZoomLevel);
+        String uriCurrentViewport = getCurrentGeoUri();
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         SharedPreferences.Editor edit = sharedPref.edit();

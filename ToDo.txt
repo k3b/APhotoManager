@@ -1,9 +1,7 @@
 TODO
 
 - mapview
-	- remeber last view/zoom if startet without geo-uri
-	- bug geo:-uri without zoom => zoom-max
-
+	zoo2fit query rectangle
 - [Folder-Picker]long-tap=>context-menu
 	- open new gallery
 

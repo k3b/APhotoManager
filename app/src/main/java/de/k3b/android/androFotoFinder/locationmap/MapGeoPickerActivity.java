@@ -37,34 +37,50 @@ import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.GalleryFilterActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
-import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.osmdroid.ZoomUtil;
-import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.database.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
+import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
-import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 
 public class MapGeoPickerActivity extends Activity implements Common {
     private static final String debugPrefix = "GalM-";
     private static final String STATE_Filter = "filterMap";
+    private static final String STATE_LAST_GEO = "geoLastView";
 
     private PickerLocationMapFragment mMap;
 
     /** true: if activity started without special intent-parameters, the last mFilter is saved/loaded for next use */
-    private boolean mSaveToSharedPrefs = true;
+    private boolean mSaveLastUsedFilterToSharedPrefs = true;
+    private boolean mSaveLastUsedGeoToSharedPrefs = true;
+
     private GalleryFilterParameter mFilter;
+    private GeoUri mGeoUriParser = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         Intent intent = this.getIntent();
 
         GeoPointDto geoPointFromIntent = getGeoPointDtoFromIntent(intent);
+        // no geo: from intent: use last used value
+        mSaveLastUsedGeoToSharedPrefs = (geoPointFromIntent == null);
+
+        String lastGeoUri = sharedPref.getString(STATE_LAST_GEO, "geo:53,8?z=6");
+        IGeoPointInfo lastGeo = mGeoUriParser.fromUri(lastGeoUri);
+        if ((geoPointFromIntent != null) && (lastGeo != null)) {
+            // apply default values if part is missing
+            if (Double.isNaN(geoPointFromIntent.getLongitude())) geoPointFromIntent.setLongitude(lastGeo.getLongitude());
+            if (Double.isNaN(geoPointFromIntent.getLatitude())) geoPointFromIntent.setLatitude(lastGeo.getLatitude());
+            if (geoPointFromIntent.getZoomMin() == IGeoPointInfo.NO_ZOOM) geoPointFromIntent.setZoomMin(lastGeo.getZoomMin());
+        }
+
+        IGeoPointInfo initalZoom = (mSaveLastUsedGeoToSharedPrefs) ? lastGeo : geoPointFromIntent;
 
         String extraTitle = intent.getStringExtra(EXTRA_TITLE);
         if (extraTitle == null && (geoPointFromIntent == null)) {
@@ -86,12 +102,13 @@ public class MapGeoPickerActivity extends Activity implements Common {
         mMap = (PickerLocationMapFragment) getFragmentManager().findFragmentById(R.id.fragment_map);
         mMap.STATE_LAST_VIEWPORT = "ignore"; // do not use last viewport in settings
 
-        GeoRectangle rectangle = new GeoRectangle();
+        GeoRectangle rectangle = null;
         int zoom = ZoomUtil.NO_ZOOM;
-        if ((savedInstanceState == null) && (geoPointFromIntent != null)) {
-            zoom = geoPointFromIntent.getZoomMin();
-            rectangle.setLogituedMin(geoPointFromIntent.getLongitude()).setLatitudeMin(geoPointFromIntent.getLatitude());
-            rectangle.setLogituedMax(geoPointFromIntent.getLongitude()).setLatitudeMax(geoPointFromIntent.getLatitude());
+        if ((savedInstanceState == null) && (initalZoom != null)) {
+            rectangle = new GeoRectangle();
+            zoom = initalZoom.getZoomMin();
+            rectangle.setLogituedMin(initalZoom.getLongitude()).setLatitudeMin(initalZoom.getLatitude());
+            rectangle.setLogituedMax(initalZoom.getLongitude()).setLatitudeMax(initalZoom.getLatitude());
         } // else (savedInstanceState != null) restore after rotation. fragment takes care of restoring map pos
 
         String selectedItemsString = intent.getStringExtra(EXTRA_SELECTED_ITEMS);
@@ -103,14 +120,13 @@ public class MapGeoPickerActivity extends Activity implements Common {
         if (intent != null) {
             filter = intent.getStringExtra(EXTRA_FILTER);
         }
-        this.mSaveToSharedPrefs = (filter == null); // false if controlled via intent
+        this.mSaveLastUsedFilterToSharedPrefs = (filter == null); // false if controlled via intent
         if (savedInstanceState != null) {
             filter = savedInstanceState.getString(STATE_Filter);
             if (filter != null) dbgFilter = "filter from savedInstanceState=" + filter;
         }
 
-        if (this.mSaveToSharedPrefs) {
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        if (this.mSaveLastUsedFilterToSharedPrefs) {
             filter = sharedPref.getString(STATE_Filter, null);
             if (filter != null) dbgFilter = "filter from sharedPref=" + filter;
         }
@@ -152,13 +168,18 @@ public class MapGeoPickerActivity extends Activity implements Common {
     }
 
     private void saveSettings(Context context) {
-        if (mSaveToSharedPrefs) {
+        if (mSaveLastUsedFilterToSharedPrefs || mSaveLastUsedGeoToSharedPrefs) {
             // save settings
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
             SharedPreferences.Editor edit = sharedPref.edit();
 
-            if (mFilter != null) {
+            if (mSaveLastUsedFilterToSharedPrefs && (mFilter != null)) {
                 edit.putString(STATE_Filter, mFilter.toString());
+            }
+
+            if (mSaveLastUsedGeoToSharedPrefs) {
+                String currentGeoUri = mMap.getCurrentGeoUri();
+                edit.putString(STATE_LAST_GEO, currentGeoUri);
             }
 
             edit.commit();
@@ -215,8 +236,8 @@ public class MapGeoPickerActivity extends Activity implements Common {
         GeoPointDto pointFromIntent = null;
         if (uriAsString != null) {
             Toast.makeText(this, getString(R.string.app_name) + ": received  " + uriAsString, Toast.LENGTH_LONG).show();
-            GeoUri parser = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
-            pointFromIntent = (GeoPointDto) parser.fromUri(uriAsString, new GeoPointDto());
+
+            pointFromIntent = (GeoPointDto) mGeoUriParser.fromUri(uriAsString, new GeoPointDto());
             if (GeoPointDto.isEmpty(pointFromIntent)) pointFromIntent = null;
         }
         return pointFromIntent;
