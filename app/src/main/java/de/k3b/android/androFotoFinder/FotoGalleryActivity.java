@@ -267,7 +267,12 @@ public class FotoGalleryActivity extends Activity implements Common,
         if (filter != null) {
             intent.putExtra(EXTRA_FILTER, filter.toString());
         }
-        context.startActivityForResult(intent, requestCode);
+
+        if (requestCode != 0) {
+            context.startActivityForResult(intent, requestCode);
+        } else {
+            context.startActivity(intent);
+        }
     }
 
 
@@ -501,6 +506,8 @@ public class FotoGalleryActivity extends Activity implements Common,
             this.mMustShowNavigator = false;
             final FragmentManager manager = getFragmentManager();
             DirectoryPickerFragment dirDialog = new DirectoryPickerFragment(); // (DirectoryPickerFragment) manager.findFragmentByTag(DLG_NAVIGATOR_TAG);
+            dirDialog.setContextMenuId(R.menu.menu_context_dirpicker);
+
             dirDialog.defineDirectoryNavigation(mDirectoryRoot, dirQueryID, this.mGalleryQueryParameter.mCurrentPath);
 
             dirDialog.show(manager, DLG_NAVIGATOR_TAG);

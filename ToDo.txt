@@ -1,8 +1,5 @@
 TODO
 
-- [Folder-Picker]long-tap=>context-menu
-	- open new gallery
-
 #6 geo-picker
 	extera_stream-uri(s) => blue: selected items via geo:, content: or file:
 

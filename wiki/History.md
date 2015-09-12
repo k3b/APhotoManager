@@ -8,6 +8,8 @@
 		* if [Geografic-Map](geographic-map) is opened without [intent-extra-de.k3b.extra.FILTER parameter](intentapi#filter) the map is opend with the last used filter.
 	* improved menu "zoom to fit"
 	* [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi): support for [de.k3b.extra.FILTER string](intentapi#filter)
+* [Folder- or Date-Picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker)'s long-tapping-folder-contextmenu:  
+	* menu "Show in new Gallery" opens a new prefiltered [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View)
 * [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi): intent VIEW mime="image/*" + data=file:xxx or android.intent.extra.STREAM=file:xxx
 	* [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) if xxx is an existing image file. 
 	* else [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) where xxx is used as a path filter

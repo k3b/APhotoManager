@@ -829,7 +829,7 @@ public class LocationMapFragment extends DialogFragment {
 
     private boolean showGallery(IGeoPoint geoPosition) {
         GalleryFilterParameter filter = getMarkerFilter(geoPosition);
-        FotoGalleryActivity.showActivity(this.getActivity(), filter, 4711);
+        FotoGalleryActivity.showActivity(this.getActivity(), filter, 0);
         return true;
     }
 

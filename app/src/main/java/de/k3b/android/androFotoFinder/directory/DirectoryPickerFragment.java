@@ -47,6 +47,7 @@ import android.widget.Toast;
 
 // import com.squareup.leakcanary.RefWatcher;
 
+import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.Global;
@@ -54,6 +55,7 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryNavigator;
+import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
 
@@ -78,16 +80,16 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     private IDirectory mCurrentSelection = null;
 
     // Layout
-    private HorizontalScrollView parentPathBarScroller;
-    private LinearLayout parentPathBar;
-    private ExpandableListView treeView;
-    private TextView status = null;
-    private Button cmdOk = null;
-    private Button cmdCancel = null;
-    private Button cmdPopup = null;
+    private HorizontalScrollView mParentPathBarScroller;
+    private LinearLayout mParentPathBar;
+    private ExpandableListView mTreeView;
+    private TextView mStatus = null;
+    private Button mCmdOk = null;
+    private Button mCmdCancel = null;
+    private Button mCmdPopup = null;
 
-    private View.OnClickListener pathButtonClickHandler;
-    private View.OnLongClickListener pathButtonLongClickHandler = null;
+    private View.OnClickListener mPathButtonClickHandler;
+    private View.OnLongClickListener mPathButtonLongClickHandler = null;
     // local data
     protected Activity mContext;
     private DirectoryListAdapter mAdapter;
@@ -139,7 +141,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
 
         mContext = this.getActivity();
 
-        pathButtonClickHandler = new View.OnClickListener() {
+        mPathButtonClickHandler = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onParentPathBarButtonClick((IDirectory) v.getTag());
@@ -147,7 +149,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         };
 
         if (this.mContextMenue != 0) {
-            pathButtonLongClickHandler = new View.OnLongClickListener() {
+            mPathButtonLongClickHandler = new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
                     onShowPopUp(v, (IDirectory) v.getTag());
@@ -156,18 +158,18 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             };
         }
 
-        this.parentPathBar = (LinearLayout) view.findViewById(R.id.parent_owner);
-        this.parentPathBarScroller = (HorizontalScrollView) view.findViewById(R.id.parent_scroller);
+        this.mParentPathBar = (LinearLayout) view.findViewById(R.id.parent_owner);
+        this.mParentPathBarScroller = (HorizontalScrollView) view.findViewById(R.id.parent_scroller);
 
-        treeView = (ExpandableListView)view.findViewById(R.id.directory_tree);
-        treeView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+        mTreeView = (ExpandableListView)view.findViewById(R.id.directory_tree);
+        mTreeView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                 return DirectoryPickerFragment.this.onChildDirectoryClick(childPosition, mNavigation.getChild(groupPosition, childPosition));
             }
         });
 
-        treeView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
+        mTreeView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
                 return DirectoryPickerFragment.this.onParentDirectoryClick(mNavigation.getGroup(groupPosition));
@@ -175,12 +177,12 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         });
 
         if (mContextMenue != 0) {
-            treeView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            mTreeView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                 @Override
                 public boolean onItemLongClick(AdapterView<?> parent, View view, int flatPosition, long id) {
-                    long packedPos = treeView.getExpandableListPosition(flatPosition);
-                    int group = treeView.getPackedPositionGroup(packedPos);
-                    int child = treeView.getPackedPositionChild(packedPos);
+                    long packedPos = mTreeView.getExpandableListPosition(flatPosition);
+                    int group = mTreeView.getPackedPositionGroup(packedPos);
+                    int child = mTreeView.getPackedPositionChild(packedPos);
                     IDirectory directory = (child != -1) ? mNavigation.getChild(group, child) : mNavigation.getGroup(group);
                     onShowPopUp(view, directory);
                     return false;
@@ -202,37 +204,37 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
 
     /** handle init for dialog-only controlls: cmdOk, cmdCancel, status */
     private void onCreateViewDialog(View view) {
-        this.status = (TextView) view.findViewById(R.id.status);
-        this.status.setVisibility(View.VISIBLE);
+        this.mStatus = (TextView) view.findViewById(R.id.status);
+        this.mStatus.setVisibility(View.VISIBLE);
         
-        this.cmdOk = (Button) view.findViewById(R.id.cmd_ok);
-        this.cmdOk.setOnClickListener(new View.OnClickListener() {
+        this.mCmdOk = (Button) view.findViewById(R.id.cmd_ok);
+        this.mCmdOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onDirectoryPick(mCurrentSelection);
             }
         });
-        cmdOk.setVisibility(View.VISIBLE);
+        mCmdOk.setVisibility(View.VISIBLE);
         
-        cmdCancel = (Button) view.findViewById(R.id.cmd_cancel);
-        cmdCancel.setOnClickListener(new View.OnClickListener() {
+        mCmdCancel = (Button) view.findViewById(R.id.cmd_cancel);
+        mCmdCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onDirectoryCancel();
             }
         });
-        cmdCancel.setVisibility(View.VISIBLE);
+        mCmdCancel.setVisibility(View.VISIBLE);
 
-        cmdPopup = null;
+        mCmdPopup = null;
         if (mContextMenue != 0) {
-            cmdPopup = (Button) view.findViewById(R.id.cmd_popup);
-            cmdPopup.setOnClickListener(new View.OnClickListener() {
+            mCmdPopup = (Button) view.findViewById(R.id.cmd_popup);
+            mCmdPopup.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    onShowPopUp(cmdPopup, mCurrentSelection);
+                    onShowPopUp(mCmdPopup, mCurrentSelection);
                 }
             });
-            cmdPopup.setVisibility(View.VISIBLE);
+            mCmdPopup.setVisibility(View.VISIBLE);
         }
 
         if (mDirTypId != 0) {
@@ -266,6 +268,9 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         switch (menuItem.getItemId()) {
             case R.id.cmd_mk_dir:
                 return onCreateSubDirQueston(mPopUpSelection);
+            case R.id.cmd_gallery:
+                return showGallery(mPopUpSelection);
+
         }
         return false;
     }
@@ -322,6 +327,17 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         }
         Toast.makeText(getActivity(), getActivity().getString(msgId, newPathAbsolute),
                 Toast.LENGTH_LONG).show();
+    }
+
+    private boolean showGallery(IDirectory selectedDir) {
+        String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
+        if (pathFilter != null) {
+            GalleryFilterParameter filter = new GalleryFilterParameter();
+            FotoSql.set(filter, pathFilter, mDirTypId);
+            FotoGalleryActivity.showActivity(this.getActivity(), filter, 0);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -434,14 +450,14 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         int itemCount = getItemCount(mCurrentSelection);
         boolean canPressOk = (itemCount > 0);
 
-        if (cmdOk != null) cmdOk.setEnabled(canPressOk);
-        if (cmdPopup != null) cmdPopup.setEnabled(canPressOk);
+        if (mCmdOk != null) mCmdOk.setEnabled(canPressOk);
+        if (mCmdPopup != null) mCmdPopup.setEnabled(canPressOk);
         
-        if (status != null) {
+        if (mStatus != null) {
             if (canPressOk) {
-                status.setText(this.mCurrentSelection.getAbsolute());
+                mStatus.setText(this.mCurrentSelection.getAbsolute());
             } else {
-                status.setText(R.string.no_dir_selected);
+                mStatus.setText(R.string.no_dir_selected);
             }
         }
     }
@@ -463,7 +479,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     }
 
     private void updateParentPathBar(IDirectory selectedChild) {
-        parentPathBar.removeAllViews();
+        mParentPathBar.removeAllViews();
 
         if (selectedChild != null) {
 
@@ -473,13 +489,13 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                 Button button = createPathButton(current);
                 // add parent left to chlild
                 // gui order root/../child.parent/child
-                parentPathBar.addView(button, 0);
+                mParentPathBar.addView(button, 0);
                 if (first == null) first = button;
                 current = current.getParent();
             }
 
             // scroll to right where deepest child is
-            parentPathBarScroller.requestChildFocus(parentPathBar, first);
+            mParentPathBarScroller.requestChildFocus(mParentPathBar, first);
         }
 
         if (mImage != null) {
@@ -522,9 +538,9 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         result.setTag(currentDir);
         result.setText(DirectoryListAdapter.getDirectoryDisplayText(null, currentDir, (FotoViewerParameter.includeSubItems) ? Directory.OPT_SUB_ITEM : Directory.OPT_ITEM));
 
-        result.setOnClickListener(pathButtonClickHandler);
-        if (pathButtonLongClickHandler != null) {
-            result.setOnLongClickListener(pathButtonLongClickHandler);
+        result.setOnClickListener(mPathButtonClickHandler);
+        if (mPathButtonLongClickHandler != null) {
+            result.setOnLongClickListener(mPathButtonLongClickHandler);
         }
         return result;
     }
@@ -555,10 +571,10 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             Log.d(TAG, debugPrefix + "navigateTo(" +
                     newGrandParent.getAbsolute() + ")");
             mNavigation.setCurrentGrandFather(newGrandParent);
-            this.treeView.setAdapter(mAdapter);
+            this.mTreeView.setAdapter(mAdapter);
             if (newGroupSelection >= 0) {
                 /// find selectedChild as new selectedGroup and expand it
-                treeView.expandGroup(newGroupSelection, true);
+                mTreeView.expandGroup(newGroupSelection, true);
             }
         }
     }
@@ -586,16 +602,16 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
 
     /** Does nothing if either OnCreate() or defineDirectoryNavigation() has NOT been called yet */
     private boolean reloadTreeViewIfAvailable() {
-        if ((treeView != null) && (mNavigation != null)) {
+        if ((mTreeView != null) && (mNavigation != null)) {
             if (mAdapter == null) {
                 mAdapter = new DirectoryListAdapter(this.mContext,
-                        mNavigation, treeView, debugPrefix);
+                        mNavigation, mTreeView, debugPrefix);
             }
-            treeView.setAdapter(mAdapter);
+            mTreeView.setAdapter(mAdapter);
 
             int g = mNavigation.getLastNavigateToGroupPosition();
             if (g != DirectoryNavigator.UNDEFINED) {
-                treeView.expandGroup(g, true);
+                mTreeView.expandGroup(g, true);
                 updateParentPathBar(mNavigation.getCurrentSelection());
             }
 
