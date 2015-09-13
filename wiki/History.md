@@ -3,8 +3,9 @@
 ## [v0.4.2.*](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.2) (not released yet)
 
 * [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) : 
-	* [#10 Faster image detail swiping](https://github.com/k3b/AndroFotoFinder/issues/10)
+	* [#10 Faster swiping through high resolution images](https://github.com/k3b/AndroFotoFinder/issues/10)
 		* initially the view is loaded with low res image. on first zoom it is reloaded with maximum resolution.
+	* if image exists but is not in media database restart media scanner for containing folder
 * [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) :
 	* menu to open [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)
 		* purpose: Filter the photos that are visible in the map.

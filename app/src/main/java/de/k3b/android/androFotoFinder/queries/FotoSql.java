@@ -30,7 +30,9 @@ import android.util.Log;
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.util.GeoPoint;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
@@ -376,7 +378,6 @@ public class FotoSql {
         return false;
     }
 
-
     public static String execGetFotoPath(Context context, Uri uri) {
         Cursor c = null;
         try {
@@ -390,6 +391,24 @@ public class FotoSql {
             if (c != null) c.close();
         }
         return null;
+    }
+
+    public static List<String> execGetFotoPaths(Context context, String pathFilter) {
+        ArrayList<String> result = new ArrayList<String>();
+        ContentResolver resolver = context.getContentResolver();
+
+        Cursor c = null;
+        try {
+            c = resolver.query(SQL_TABLE_EXTERNAL_CONTENT_URI, new String[] {FotoSql.SQL_COL_PATH}, FotoSql.SQL_COL_PATH + " like ?", new String[] {pathFilter}, FotoSql.SQL_COL_PATH);
+            while (c.moveToNext()) {
+                result.add(c.getString(0));
+            }
+        } catch (Exception ex) {
+            Log.e(Global.LOG_CONTEXT, "Cannot get path from: " + FotoSql.SQL_COL_PATH + " like '" + pathFilter +"'", ex);
+        } finally {
+            if (c != null) c.close();
+        }
+        return result;
     }
 
     /**

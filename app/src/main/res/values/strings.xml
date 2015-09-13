@@ -90,7 +90,8 @@
     <string name="error_share" >No send/share provider found</string>
 
     <string name="cmd_delete">Delete</string>
-    <string name="delete_empty">No more Photos.</string>
+    <string name="err_no_fotos_found">No Photos found for %1$s.</string>
+    <string name="err_fotos_not_in_db">Photo not found in media database %1$s yet. Scanning %2$d new files</string>
 
     <string name="cmd_copy">Copy</string>
     <string name="cmd_move">Move</string>

@@ -25,6 +25,7 @@ import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.DataSetObserver;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
@@ -41,6 +42,8 @@ import android.widget.Toast;
 // import com.squareup.leakcanary.RefWatcher;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
@@ -150,8 +153,8 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     // for debugging
     private static int id = 1;
-    private String debugPrefix;
-    private DataSetObserver loadCompleteHandler;
+    private String mDebugPrefix;
+    private DataSetObserver mLoadCompleteHandler;
 
     /** where data comes from */
     private QueryParameterParcelable mGalleryContentQuery = null;
@@ -176,8 +179,8 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     @Override
 	public void onCreate(Bundle savedInstanceState) {
-        debugPrefix = "ImageDetailActivityViewPager#" + (id++)  + " ";
-        Global.debugMemory(debugPrefix, "onCreate");
+        mDebugPrefix = "ImageDetailActivityViewPager#" + (id++)  + " ";
+        Global.debugMemory(mDebugPrefix, "onCreate");
 
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
@@ -200,15 +203,15 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             // extra parameter
             getParameter(intent);
 
-            mAdapter = new ImagePagerAdapterFromCursor(this, mGalleryContentQuery, debugPrefix);
-            loadCompleteHandler = new DataSetObserver() {
+            mAdapter = new ImagePagerAdapterFromCursor(this, mGalleryContentQuery, mDebugPrefix);
+            mLoadCompleteHandler = new DataSetObserver() {
                 @Override
                 public void onChanged() {
                     super.onChanged();
                     onLoadCompleted();
                 }
             };
-            mAdapter.registerDataSetObserver(loadCompleteHandler);
+            mAdapter.registerDataSetObserver(mLoadCompleteHandler);
             mViewPager.setAdapter(mAdapter);
 
             if (savedInstanceState != null) {
@@ -278,27 +281,27 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             if (uri != null) {
                 String scheme = uri.getScheme();
                 if ((scheme == null) || ("file".equals(scheme))) {
-                    getParameterFromPath(uri.getPath());
+                    getParameterFromPath(uri.getPath(), true);
                 } else if ("content".equals(scheme)) {
                     String path = FotoSql.execGetFotoPath(this, uri);
                     if (path != null) {
-                        getParameterFromPath(path);
+                        getParameterFromPath(path, false);
                     }
                 }
             }
         }
 
         if (mGalleryContentQuery == null) {
-            Log.e(Global.LOG_CONTEXT, debugPrefix + " onCreate() : intent.extras[" + EXTRA_QUERY +
+            Log.e(Global.LOG_CONTEXT, mDebugPrefix + " onCreate() : intent.extras[" + EXTRA_QUERY +
                     "] not found. data=" + intent.getData() +
                     ". Using default.");
             mGalleryContentQuery = new QueryParameterParcelable(DEFAULT_QUERY);
         } else if (Global.debugEnabledSql) {
-            Log.i(Global.LOG_CONTEXT, debugPrefix + " onCreate() : query = " + mGalleryContentQuery);
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onCreate() : query = " + mGalleryContentQuery);
         }
     }
 
-    private void getParameterFromPath(String path) {
+    private void getParameterFromPath(String path, boolean isFileUri) {
         mInitialFilePath = path;
         File selectedPhoto = new File(mInitialFilePath);
         this.mScrollPosition = -1;
@@ -326,25 +329,25 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     @Override
     protected void onPause () {
-        Global.debugMemory(debugPrefix, "onPause");
+        Global.debugMemory(mDebugPrefix, "onPause");
 
         super.onPause();
     }
 
     @Override
     protected void onResume () {
-        Global.debugMemory(debugPrefix, "onResume");
+        Global.debugMemory(mDebugPrefix, "onResume");
         super.onResume();
     }
 
     @Override
     protected void onDestroy() {
-        Global.debugMemory(debugPrefix, "onDestroy");
+        Global.debugMemory(mDebugPrefix, "onDestroy");
 
         if (mAdapter != null) {
             // not in forward-mode
-            mAdapter.unregisterDataSetObserver(loadCompleteHandler);
-            loadCompleteHandler = null;
+            mAdapter.unregisterDataSetObserver(mLoadCompleteHandler);
+            mLoadCompleteHandler = null;
             mViewPager.setAdapter(null);
             mFileCommands.closeLogFile();
             mFileCommands.closeAll();
@@ -366,9 +369,23 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     private void onLoadCompleted() {
         if (mAdapter.getCount() == 0) {
-            // close activity if last image of current selection has been deleted
-            Toast.makeText(this, R.string.delete_empty, Toast.LENGTH_LONG).show();
-            this.finish();
+            // image not found in media database
+
+            File fileToLoad = (mInitialFilePath != null) ? new File(mInitialFilePath) : null;
+            if ((fileToLoad != null) && (fileToLoad.exists()) && (fileToLoad.canRead())) {
+                // file exists => must update media database
+                int numberOfNewItems = updateIncompleteMediaDatabase(fileToLoad);
+
+                // close activity if last image of current selection has been deleted
+                String message = getString(R.string.err_fotos_not_in_db, mInitialFilePath, numberOfNewItems);
+                Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+                this.finish();
+            } else {
+                // close activity if last image of current selection has been deleted
+                String message = getString(R.string.err_no_fotos_found, mInitialFilePath);
+                Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+                this.finish();
+            }
         } else if (mScrollPosition >= 0) {
             // after initial load select correct image
             mViewPager.invalidate();
@@ -387,6 +404,51 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             mViewPager.setCurrentItem(mScrollPosition);
             mScrollPosition = -1;
         }
+    }
+
+    private int updateIncompleteMediaDatabase(File fileToLoad) {
+        String fullPath = fileToLoad.toString();
+        int extPos = fullPath.lastIndexOf(".");
+        String ext = (extPos >= 0) ? fullPath.substring(extPos) : null;
+        String dbPathSearch = null;
+        ArrayList<String> missing = new ArrayList<String>();
+        if (ext != null) {
+            File parentDir = fileToLoad.getParentFile();
+            dbPathSearch = parentDir.getPath() + "%" + ext;
+            List<String> known = FotoSql.execGetFotoPaths(this, dbPathSearch);
+            File[] existing = parentDir.listFiles();
+
+            if (existing != null) {
+                for (File file : existing) {
+                    String found = file.getAbsolutePath();
+                    if (found.endsWith(ext) && !known.contains(found)) {
+                        missing.add(found);
+                    }
+                }
+            }
+        }
+
+        if (missing.size() == 0) {
+            missing.add(fullPath);
+        }
+
+        if (Global.debugEnabled) {
+            StringBuilder message = new StringBuilder();
+            message.append(mDebugPrefix).append("updateIncompleteMediaDatabase('")
+                    .append(fullPath).append("', '").append(ext).append("', '").append(dbPathSearch).append("') : \n\t");
+
+            for(String s : missing) {
+                message.append(s).append("; ");
+            }
+            Log.d(Global.LOG_CONTEXT, message.toString());
+        }
+        MediaScannerConnection.scanFile(
+                // http://stackoverflow.com/questions/5739140/mediascannerconnection-produces-android-app-serviceconnectionleaked
+                this.getApplicationContext(),
+                missing.toArray(new String[missing.size()]),
+                null, null);
+
+        return missing.size();
     }
 
     @Override

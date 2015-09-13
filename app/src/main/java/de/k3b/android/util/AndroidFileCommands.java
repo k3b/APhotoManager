@@ -87,7 +87,8 @@ public class AndroidFileCommands extends FileCommands {
     public void updateMediaDatabase(String... pathNames) {
         SelectedFotos deletedItems = new SelectedFotos();
         MediaScannerConnection.scanFile(
-                mContext,
+                // http://stackoverflow.com/questions/5739140/mediascannerconnection-produces-android-app-serviceconnectionleaked
+                mContext.getApplicationContext(),
                 pathNames, // mPathNames.toArray(new String[mPathNames.size()]),
                 null, null);
     }
