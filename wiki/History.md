@@ -2,6 +2,9 @@
 
 ## [v0.4.2.*](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.2) (not released yet)
 
+* [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) : 
+	* [#10 Faster image detail swiping](https://github.com/k3b/AndroFotoFinder/issues/10)
+		* initially the view is loaded with low res image. on first zoom it is reloaded with maximum resolution.
 * [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) :
 	* menu to open [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)
 		* purpose: Filter the photos that are visible in the map.
@@ -15,7 +18,7 @@
 	* [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) if xxx is an existing image file. 
 	* else [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) where xxx is used as a path filter
 	
-## [v0.4.1.150911](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.1)
+## [v0.4.1.150911](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.1) available in [F-Droid app store](https://f-droid.org) since 2015-09-12
 
 * [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) :
 	* [Selection](Gallery-View#Multiselection): add/remove [all visible](Gallery-View#CurrentSet)
@@ -35,11 +38,11 @@
 	* New filter option : only photos with no geo infos.
 * App can be installed on SD-Card
 
-## [v0.4.0.150816](https://github.com/k3b/AndroFotoFinder/releases/tag/v0.4.0.150816)
+## [v0.4.0.150816](https://github.com/k3b/AndroFotoFinder/releases/tag/v0.4.0.150816)  available in [F-Droid app store](https://f-droid.org) since 2015-08-18
 
 * [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) : Implemented [#1 Multi selection and share/send image](https://github.com/k3b/AndroFotoFinder/issues/1)
 * [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) in multi selection mode : Implemented Delete/Copy/Move/CreateFolder/Write-Log
 
-## [v0.3.4.150728](https://github.com/k3b/AndroFotoFinder/releases/tag/v0.3.4.150728)
+## [v0.3.4.150728](https://github.com/k3b/AndroFotoFinder/releases/tag/v0.3.4.150728)  available in [F-Droid app store](https://f-droid.org) since 2015-08-01
 
 * Initial public release on FDroid

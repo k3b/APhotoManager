@@ -63,7 +63,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
     // workaround because setEllipsize(TextUtils.TruncateAt.MIDDLE) is not possible for title
     private final int mMaxTitleLength;
 
-    private QueryParameterParcelable parameters; // defining sql to get data
+    private QueryParameterParcelable mParameters; // defining sql to get data
     private Cursor mCursor = null; // the content of the page
     private boolean mDataValid = true;
 
@@ -88,7 +88,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
      */
     @Override
     public void requery(final Activity context, QueryParameterParcelable parameters) {
-        this.parameters = parameters;
+        this.mParameters = parameters;
         if (Global.debugEnabledSql) {
             Log.i(Global.LOG_CONTEXT, debugPrefix + "requery " + ((parameters != null) ? parameters.toSqlString() : null));
         }
@@ -342,22 +342,9 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
         return -1;
     }
 
-    private boolean mHasLowMemory = false;
     private void setImage(int position, long imageID, Uri uri, PhotoView photoView) {
-        if (!mHasLowMemory) {
-            try {
-                photoView.setImageURI(uri);
-                return;
-            } catch (OutOfMemoryError e) {
-                String message = photoView.getContext().getString(R.string.err_low_memory);
-                Log.e(Global.LOG_CONTEXT, debugPrefix + "instantiateItem(#" + position + ") => " + message);
-                        Toast.makeText(photoView.getContext(), message, Toast.LENGTH_LONG).show();
-                mHasLowMemory = true;
-                // show only once
-            }
-        }
-
-        // mHasLowMemory
+        /** k3b 20150913 #10: Faster initial loading: initially the view is loaded with low res image. on first zoom it is reloaded with this uri */
+        photoView.setImageReloadURI(uri);
         Bitmap thumbnail = MediaStore.Images.Thumbnails.getThumbnail(
                 photoView.getContext().getContentResolver(),
                 imageID,

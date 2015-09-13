@@ -318,4 +318,9 @@ public class PhotoView extends ImageView implements IPhotoView {
         init();
         super.onAttachedToWindow();
     }
+
+    /** k3b 20150913 #10: Faster initial loading: initially the view is loaded with low res image. on first zoom it is reloaded with this uri */
+    public void setImageReloadURI(Uri uri) {
+        mAttacher.setImageReloadURI(uri);
+    }
 }
