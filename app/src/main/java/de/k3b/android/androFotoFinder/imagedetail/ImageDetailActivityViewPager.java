@@ -371,14 +371,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         if (mAdapter.getCount() == 0) {
             // image not found in media database
 
-            File fileToLoad = (mInitialFilePath != null) ? new File(mInitialFilePath) : null;
-            if ((fileToLoad != null) && (fileToLoad.exists()) && (fileToLoad.canRead())) {
-                // file exists => must update media database
-                int numberOfNewItems = updateIncompleteMediaDatabase(fileToLoad);
-
-                // close activity if last image of current selection has been deleted
-                String message = getString(R.string.err_fotos_not_in_db, mInitialFilePath, numberOfNewItems);
-                Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+            if (checkForIncompleteMediaDatabase(mInitialFilePath)) {
                 this.finish();
             } else {
                 // close activity if last image of current selection has been deleted
@@ -394,9 +387,13 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             mInitialFilePath = null;
         } else if (mInitialFilePath != null) {
             mViewPager.invalidate();
-            mViewPager.setCurrentItem(mAdapter.getCursorFromPath(mInitialFilePath));
+            int positionFound = mAdapter.getCursorFromPath(mInitialFilePath);
+            if (positionFound < 0) {
+                checkForIncompleteMediaDatabase(mInitialFilePath);
+            }
+            mViewPager.setCurrentItem(positionFound);
             mScrollPosition = -1;
-            mInitialFilePath = null;
+            // mInitialFilePath = null; keep path so next requery/rotatate the selected image will be displayed
         } else {
             // update mViewPager so that deleted image will not be the current any more
             mScrollPosition = mViewPager.getCurrentItem();
@@ -404,6 +401,19 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             mViewPager.setCurrentItem(mScrollPosition);
             mScrollPosition = -1;
         }
+    }
+
+    private boolean checkForIncompleteMediaDatabase(String filePath) {
+        File fileToLoad = (filePath != null) ? new File(filePath) : null;
+        if ((fileToLoad != null) && (fileToLoad.exists()) && (fileToLoad.canRead())) {
+            // file exists => must update media database
+            int numberOfNewItems = updateIncompleteMediaDatabase(fileToLoad);
+
+            String message = getString(R.string.err_fotos_not_in_db, filePath, numberOfNewItems);
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+            return true;
+        }
+        return false;
     }
 
     private int updateIncompleteMediaDatabase(File fileToLoad) {

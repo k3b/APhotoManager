@@ -34,6 +34,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
+import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
 
@@ -473,6 +474,9 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
                 try {
                     imageView.setImageURI(mImageReloadURI);
                 } catch (OutOfMemoryError e) {
+                    String errorMessage = imageView.getContext().getString(R.string.err_low_memory, mImageReloadURI);
+                    Toast.makeText(imageView.getContext(), errorMessage, Toast.LENGTH_LONG).show();
+
                     LogManager.getLogger().e(
                             LOG_TAG,
                             "onScale: Not enought memory to reloading image from " + mImageReloadURI + " failed: " + e.getMessage());

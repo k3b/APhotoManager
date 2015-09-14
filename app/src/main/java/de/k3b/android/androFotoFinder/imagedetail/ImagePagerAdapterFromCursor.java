@@ -325,7 +325,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
         return null;
     }
 
-    /** internal helper. return null if position is not available */
+    /** internal helper. return -1 if position is not available */
     public int getCursorFromPath(String path) {
         if (this.mDataValid && (this.mCursor != null) && (path != null)) {
             int index = mCursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT);
