@@ -33,7 +33,8 @@ import android.support.v4.view.PagerAdapter;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
+
+import java.io.File;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
@@ -344,13 +345,14 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
 
     private void setImage(int position, long imageID, Uri uri, PhotoView photoView) {
         /** k3b 20150913 #10: Faster initial loading: initially the view is loaded with low res image. on first zoom it is reloaded with this uri */
-        photoView.setImageReloadURI(uri);
+        photoView.setImageReloadFile(new File(getFullFilePath(position)));
         Bitmap thumbnail = MediaStore.Images.Thumbnails.getThumbnail(
                 photoView.getContext().getContentResolver(),
                 imageID,
                 MediaStore.Images.Thumbnails.MINI_KIND, // FULL_SCREEN_KIND,
                 new BitmapFactory.Options());
         photoView.setImageBitmap(thumbnail);
+        photoView.setMaximumScale(20);
     }
 
     /** converts imageID to content-uri */

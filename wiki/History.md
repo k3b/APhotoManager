@@ -5,6 +5,7 @@
 * [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) : 
 	* [#10 Faster swiping through high resolution images](https://github.com/k3b/AndroFotoFinder/issues/10)
 		* initially the view is loaded with low res image. on first zoom it is reloaded with maximum resolution.
+	* Improved scaling of big images
 	* if image exists but is not in media database restart media scanner for containing folder
 * [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) :
 	* menu to open [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)

@@ -25,6 +25,8 @@ import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.widget.ImageView;
 
+import java.io.File;
+
 import uk.co.senab.photoview.PhotoViewAttacher.OnMatrixChangedListener;
 import uk.co.senab.photoview.PhotoViewAttacher.OnPhotoTapListener;
 import uk.co.senab.photoview.PhotoViewAttacher.OnViewTapListener;
@@ -320,7 +322,7 @@ public class PhotoView extends ImageView implements IPhotoView {
     }
 
     /** k3b 20150913 #10: Faster initial loading: initially the view is loaded with low res image. on first zoom it is reloaded with this uri */
-    public void setImageReloadURI(Uri uri) {
-        mAttacher.setImageReloadURI(uri);
+    public void setImageReloadFile(File file) {
+        mAttacher.setImageReloadFile(file);
     }
 }
