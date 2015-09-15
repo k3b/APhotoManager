@@ -125,6 +125,6 @@ public class DirectoryTests {
     }
 
     protected void assertTree(String expected, IDirectory root) {
-        Assert.assertEquals(expected, Directory.toTreeString(new StringBuilder(),(Directory) root, "|", Directory.OPT_ALL).toString());
+        Assert.assertEquals(expected, Directory.toTreeString(new StringBuilder(),(Directory) root, "|", Directory.OPT_ALL - Directory.OPT_AS_HTML).toString());
     }
 }
