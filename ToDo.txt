@@ -1,11 +1,5 @@
 TODO
 
-v if image exists but is not in media database restart media scanner for containing folder
-	? does it work on android 4.2?
-
-	 file:///C:/Program%20Files%20%28x86%29/sdk/Android/sdk/docs/training/displaying-bitmaps/load-bitmap.html
-                                 	http://developer.android.com/training/displaying-bitmaps/index.html
-
 #6 geo-picker
 	extera_stream-uri(s) => blue: selected items via geo:, content: or file:
 

@@ -19,6 +19,7 @@
 * [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi): intent VIEW mime="image/*" + data=file:xxx or android.intent.extra.STREAM=file:xxx
 	* [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) if xxx is an existing image file. 
 	* else [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) where xxx is used as a path filter
+* [#16 Media scanner for android below 4.4](https://github.com/k3b/AndroFotoFinder/issues/16)
 	
 ## [v0.4.1.150911](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.1) available in [F-Droid app store](https://f-droid.org) since 2015-09-12
 
