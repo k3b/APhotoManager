@@ -35,6 +35,7 @@ public class Directory implements IDirectory {
     public static final int OPT_SUB_DIR = 2;
     public static final int OPT_ITEM = 4;
     public static final int OPT_SUB_ITEM = 8;
+    public static final int OPT_AS_HTML = 0x100;
     public static final int OPT_ALL = 0xffff;
     public static final int OPT_NONE = 0;
 
@@ -147,17 +148,20 @@ public class Directory implements IDirectory {
             int nonDirItemCount = ((options & OPT_ITEM) == 0) ? 0 : item.getNonDirItemCount();
             int nonDirSubItemCount = ((options & OPT_SUB_ITEM) == 0) ? 0 : item.getNonDirSubItemCount();
 
-            appendCount(result, "(", dirCount, subDirCount, ")");
-            appendCount(result, ":(", nonDirItemCount, nonDirSubItemCount, ")");
+            boolean asHtml = (options & OPT_AS_HTML) != 0;
+            appendCount(result, "(", dirCount, subDirCount, ")", asHtml);
+            appendCount(result, ":(", nonDirItemCount, nonDirSubItemCount, ")", asHtml);
         }
     }
 
-    private static void appendCount(StringBuilder result, String prefix, int count, int subCount, String suffix) {
+    private static void appendCount(StringBuilder result, String prefix, int count, int subCount, String suffix, boolean asHtml) {
         if ((count > 0) || (subCount > count)) {
+            if (asHtml) result.append("<font color='gray'><small>");
             result.append(prefix);
             if (count > 0) result.append(count);
             if (subCount > count) result.append("+").append(subCount - count);
             result.append(suffix);
+            if (asHtml) result.append("</small></font>");
         }
     }
 

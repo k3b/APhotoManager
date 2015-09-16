@@ -7,6 +7,7 @@ You can reach the [Geographic-Map](Geographic-Map) via
 * the "map symbol" in the [Gallery-View](Gallery-View)
 * the "location picker" in the [Filter-View](Filter-View)
 * from any app that support [intents with "geo:"- uris](https://github.com/k3b/AndroFotoFinder/wiki/intentapi) (VIEW/SEND/SENDTO/SEND_MULTIPLE/PICK)
+* opening from android-s app manager
 
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/SelectArea.png)
 
@@ -19,8 +20,8 @@ You can reach the [Geographic-Map](Geographic-Map) via
 * If you tap on a marker the marker becomes **red** to indicate current selection and a photo belonging to the marker is displayed in the lower right corner.
 * Tap on the photo to hide it.
 * if you **long-tap on a marker** you get a context menu to
-	* to open a new gallery instance filtering the area of the current marker.
-	* to zoom to fit the area of the current marker.
+	* **"Show in new Gallery"** opens a new [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) instance filtered by lat/lon of selected marker
+	* to **zoom to fit** the area of the current marker.
 * If you tap somewhere in the map the "zoomin"- and "zoomout"-buttons become visible to change the map detail level.
 * If you double tap somewhere in the map the map zooms in one level.
 * If you swipe left/right/up/down you can change the current map area
@@ -30,6 +31,9 @@ You can reach the [Geographic-Map](Geographic-Map) via
   * lat/lon values in the [Filter-View](Filter-View) if called from there
   * return the current position (**red marker**) if called from [external app via "Pick geo:"](https://github.com/k3b/AndroFotoFinder/wiki/intentapi)
 * The "Cancel" button or the back button closes the map without affecting the calling activitry.
+* The menu *Filter" openes the [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)
+		* purpose: Filter the photos that are visible in the map.
+		* if [Geografic-Map](geographic-map) is started without [intent-extra-de.k3b.extra.FILTER parameter](intentapi#filter) the map uses the last used filter.
 
 ## <a name='picker'>"geo:" picker</a>
 
@@ -38,8 +42,15 @@ If you use the Geografic-Map as a ["geo:" picker](https://github.com/k3b/AndroFo
 * tap on a green/blue marker to select the geo-location belonging to that marker (the marker becomes **red**)
 * tap somewhere in the map where no green/blue marker exists to select a place with no photo.
 
-The [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi) for ["geo:" picker](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map#picker) support
+## <a name='api'>Intent-API</a> (since 0.4.2)
 
+The [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi) support
+
+* action=VIEW/SEND/SENDTO to show map
+* action=PICK to open a ["geo:" picker](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map#picker) 
+* mime="*/*" or mime=null
 * [geo: uri format](intentapi#uri-geo) (required)
-* [de.k3b.extra.SELECTED_ITEMS string](intentapi#SelectedItems) (optional)
+* [de.k3b.extra.SELECTED_ITEMS string](intentapi#SelectedItems) define the blue markers (optional)
 * [android.intent.extra.TITLE string](intentapi#EXTRA_TITLE) (optional)
+* [extra[de.k3b.extra.FILTER]](intentapi#filter) (Since Version 0.4.2)
+	* purpose: Filter the photos that are visible in the map.

@@ -47,13 +47,11 @@ import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.queries.Queryable;
-import de.k3b.android.androFotoFinder.queries.SqlUpdateTask;
 import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.android.util.GarbageCollector;
+import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.AboutDialogPreference;
-import de.k3b.database.QueryParameter;
-import de.k3b.database.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
@@ -94,6 +92,7 @@ public class FotoGalleryActivity extends Activity implements Common,
         QueryParameterParcelable mGalleryContentQuery = null;
 
         GalleryFilterParameter mFilter;
+        /** true: if activity started without special intent-parameters, the last mFilter is saved/loaded for next use */
         private boolean mSaveToSharedPrefs = true;
 
         /** one of the FotoSql.QUERY_TYPE_xxx values. if undefined use default */
@@ -134,7 +133,7 @@ public class FotoGalleryActivity extends Activity implements Common,
             if (result == null) return null;
 
             if (mUseLatLon) {
-                FotoSql.addWhereFilteLatLon(result, mCurrentLatLon);
+                FotoSql.addWhereFilterLatLon(result, mCurrentLatLon);
             } else if (this.mCurrentPath != null) {
                 FotoSql.addPathWhere(result, this.mCurrentPath, this.getDirQueryID());
             }
@@ -189,8 +188,27 @@ public class FotoGalleryActivity extends Activity implements Common,
             this.mCurrentLatLon.get(DirectoryFormatter.parseLatLon(sharedPref.getString(STATE_LAT_LON, null)));
 
             Intent intent = context.getIntent();
-            String filter = (intent != null) ? intent.getStringExtra(EXTRA_FILTER) : null;
 
+            // for debugging: where does the filter come from
+            String dbgFilter = null;
+            String filter = null;
+            String pathFilter = null;
+
+            if (intent != null) {
+                filter = intent.getStringExtra(EXTRA_FILTER);
+
+                if (filter != null) dbgFilter = "filter from " + EXTRA_FILTER +"=" + filter;
+
+                if (filter == null) {
+                    Uri uri = IntentUtil.getUri(intent);
+
+                    if (IntentUtil.isFileUri(uri)) {
+                        pathFilter = uri.getSchemeSpecificPart();
+                        if (pathFilter != null) pathFilter = pathFilter.replace('*', '%');
+                        dbgFilter = "path from uri=" + pathFilter;
+                    }
+                }
+            }
             this.mSaveToSharedPrefs = (filter == null); // false if controlled via intent
             // instance state overrides settings
             if (savedInstanceState != null) {
@@ -199,18 +217,27 @@ public class FotoGalleryActivity extends Activity implements Common,
                 this.mSortID = savedInstanceState.getInt(STATE_SortID, this.mSortID);
                 this.mSortAscending = savedInstanceState.getBoolean(STATE_SortAscending, this.mSortAscending);
                 filter = savedInstanceState.getString(STATE_Filter);
+                if (filter != null) dbgFilter = "filter from savedInstanceState=" + filter;
 
                 this.mCurrentLatLon.get(DirectoryFormatter.parseLatLon(savedInstanceState.getString(STATE_LAT_LON)));
 
                 this.mUseLatLon = savedInstanceState.getBoolean(STATE_LAT_LON_ACTIVE, this.mUseLatLon);
             }
 
-            if ((filter == null) && (this.mFilter == null)) {
+            if ((pathFilter == null) && (filter == null) && (this.mFilter == null)) {
                 filter = sharedPref.getString(STATE_Filter, null);
+                if (filter != null) dbgFilter = "filter from sharedPref=" + filter;
             }
 
             if (filter != null) {
                 this.mFilter = GalleryFilterParameter.parse(filter, new GalleryFilterParameter());
+            } else if (pathFilter != null) {
+                if (!pathFilter.endsWith("%")) pathFilter += "%";
+                this.mFilter = new GalleryFilterParameter().setPath(pathFilter);
+            }
+
+            if (Global.debugEnabled) {
+                Log.i(Global.LOG_CONTEXT, debugPrefix + dbgFilter + " => " + this.mFilter);
             }
             // extra parameter
             this.mGalleryContentQuery = context.getIntent().getParcelableExtra(EXTRA_QUERY);
@@ -240,7 +267,12 @@ public class FotoGalleryActivity extends Activity implements Common,
         if (filter != null) {
             intent.putExtra(EXTRA_FILTER, filter.toString());
         }
-        context.startActivityForResult(intent, requestCode);
+
+        if (requestCode != 0) {
+            context.startActivityForResult(intent, requestCode);
+        } else {
+            context.startActivity(intent);
+        }
     }
 
 
@@ -474,6 +506,8 @@ public class FotoGalleryActivity extends Activity implements Common,
             this.mMustShowNavigator = false;
             final FragmentManager manager = getFragmentManager();
             DirectoryPickerFragment dirDialog = new DirectoryPickerFragment(); // (DirectoryPickerFragment) manager.findFragmentByTag(DLG_NAVIGATOR_TAG);
+            dirDialog.setContextMenuId(R.menu.menu_context_dirpicker);
+
             dirDialog.defineDirectoryNavigation(mDirectoryRoot, dirQueryID, this.mGalleryQueryParameter.mCurrentPath);
 
             dirDialog.show(manager, DLG_NAVIGATOR_TAG);

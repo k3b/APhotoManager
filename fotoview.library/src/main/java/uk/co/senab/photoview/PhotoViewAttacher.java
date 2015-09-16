@@ -22,7 +22,7 @@ import android.graphics.Matrix;
 import android.graphics.Matrix.ScaleToFit;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
+import android.os.Build;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -33,7 +33,9 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
+import android.widget.Toast;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 
 import uk.co.senab.photoview.gestures.OnGestureListener;
@@ -53,9 +55,13 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
 
     // let debug flag be dynamic, but still Proguard can be used to remove from
     // release builds
-    private static final boolean DEBUG = Log.isLoggable(LOG_TAG, Log.DEBUG);
+    private static final boolean DEBUG = true; //!!! Log.isLoggable(LOG_TAG, Log.DEBUG);
 
     static final Interpolator sInterpolator = new AccelerateDecelerateInterpolator();
+
+    /** my android 4.4 cannot process images bigger than 4096*4096. -1 means must be calculated from openGL  */
+    private static int MAX_IMAGE_DIMENSION = -1; // will be set to 4096
+
     int ZOOM_DURATION = DEFAULT_ZOOM_DURATION;
 
     static final int EDGE_NONE = -1;
@@ -69,6 +75,9 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
 
     private boolean mAllowParentInterceptOnEdge = true;
     private boolean mBlockParentIntercept = false;
+
+    /** k3b 20150913 #10: Faster initial loading: initially the view is loaded with low res image. on first zoom it is reloaded with this uri */
+    private File mImageReloadFile = null;
 
     private static void checkZoomLevels(float minZoom, float midZoom,
                                         float maxZoom) {
@@ -446,13 +455,43 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
         }
     }
 
+    /** invoked by the guesture detector */
     @Override
     public void onScale(float scaleFactor, float focusX, float focusY) {
+        // //!!!
         if (DEBUG) {
             LogManager.getLogger().d(
                     LOG_TAG,
                     String.format("onScale: scale: %.2f. fX: %.2f. fY: %.2f",
                             scaleFactor, focusX, focusY));
+        }
+
+        /** k3b 20150913 #10: Faster initial loading: initially the view is loaded with low res image. on first zoom it is reloaded with this uri */
+        if (mImageReloadFile != null) {
+            ImageView imageView = getImageView();
+            if (imageView != null) {
+                if (DEBUG) {
+                    // !!!
+                    LogManager.getLogger().d(
+                            LOG_TAG,
+                            "onScale: Reloading image from " + mImageReloadFile);
+                }
+                try {
+                    if (MAX_IMAGE_DIMENSION < 0) {
+                        MAX_IMAGE_DIMENSION = (Build.VERSION.SDK_INT < Build.VERSION_CODES.FROYO) ? 4096 : HugeImageLoader.getMaxTextureSize();
+                    }
+                    imageView.setImageBitmap(HugeImageLoader.loadImage(mImageReloadFile.getAbsoluteFile(), MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION));
+                } catch (OutOfMemoryError e) {
+                    String errorMessage = imageView.getContext().getString(R.string.err_low_memory, mImageReloadFile);
+                    Toast.makeText(imageView.getContext(), errorMessage, Toast.LENGTH_LONG).show();
+
+                    LogManager.getLogger().e(
+                            LOG_TAG,
+                            "onScale: Not enought memory to reloading image from " + mImageReloadFile + " failed: " + e.getMessage());
+                }
+
+                mImageReloadFile = null; // either success or error: do not try it again
+            }
         }
 
         if (getScale() < mMaxScale || scaleFactor < 1f) {
@@ -935,6 +974,12 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
         if (null == imageView)
             return 0;
         return imageView.getHeight() - imageView.getPaddingTop() - imageView.getPaddingBottom();
+    }
+
+    /** k3b 20150913 #10: Faster initial loading: initially the view is loaded with low res image. on first zoom it is reloaded with this uri
+     * @param imageReloadURI*/
+    public void setImageReloadFile(File imageReloadURI) {
+        this.mImageReloadFile = imageReloadURI;
     }
 
     /**

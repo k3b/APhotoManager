@@ -46,7 +46,6 @@
     <string name="action_sort_title">Sort</string>
     <string name="directory_fragment_dialog_title">Select %1$s</string>
     <string name="directory_fragment_requery_title">Loading %1$s</string>
-    <string name="err_low_memory">Not enough memory available. Showing reduced preview instead.</string>
     <string name="loading_image_at_position">"loading(%1$d) ..."</string>
     <string name="err_load_folder_failed">Loading Folder %1$s failed</string>
 
@@ -90,7 +89,8 @@
     <string name="error_share" >No send/share provider found</string>
 
     <string name="cmd_delete">Delete</string>
-    <string name="delete_empty">No more Photos.</string>
+    <string name="err_no_fotos_found">No Photos found for %1$s.</string>
+    <string name="err_fotos_not_in_db">Photo not found in media database %1$s yet. Scanning %2$d new files. The missing photo will be available soon.</string>
 
     <string name="cmd_copy">Copy</string>
     <string name="cmd_move">Move</string>
@@ -165,4 +165,6 @@ Features:
     <string name="lbl_longitude_short">Lon</string>
     <string name="lbl_latitude_short">Lat</string>
     <string name="lbl_path">Path</string>
+
+    <string name="media_update_result">Updated %1$d Media Database Items</string>
 </resources>

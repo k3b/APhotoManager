@@ -1,7 +1,10 @@
 You can reach the [Gallery-View](Gallery-View) via
 
 * opening from android-s app manager
-* the [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map)'s contextmenu by long tapping a marker.
+* the [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map)'s contextmenu by long tapping a marker and selecting menu "Show in new Gallery".
+* the [Folder- or Date-Picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker)'s contextmenu by long tapping a folder and selecting menu "Show in new Gallery".
+
+Note: [Gallery-View](Gallery-View) is started with the [last used filter-settings](Gallery-View#CurrentSet) if it was started without [intent-extra-de.k3b.extra.FILTER parameter](intentapi#filter) .
 
 The [Gallery-View](Gallery-View) show photos in a scrollable view:
 
@@ -28,6 +31,9 @@ This visibility is either the result of
 The **[Search Fiter](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)**
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_filter.png)
 is used to find a set of photos by search criteria.
+
+Note: If opened from a parent activity via the menu "Show in new Gallery" the 
+[Search Fiter](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View) of the [Gallery-View](Gallery-View) is is prepopulated with values from the parent´s context.
 
 The **CurrentFolder** ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_folder.png) or **CurrentGeoArea** ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_map.png) 
 is used to navigate in the SearchFiter`s resultset.
@@ -83,6 +89,13 @@ The [Gallery-View](Gallery-View) has these elements:
 
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/Gallery-MultiSelection.png)
 
-The [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi) for [Gallery-View](Gallery-View)  support
+## <a name='api'>Intent-API</a> (since 0.4.2)
 
-* [de.k3b.extra.FILTER string](intentapi#filter) (optional)
+* action=VIEW/SEND/SENDTO
+* mime="image/*"
+* [extra[android.intent.extra.TITLE string]](intentapi#EXTRA_TITLE)
+* [extra[de.k3b.extra.FILTER]](intentapi#filter)
+* data=file:{xxx} or extra[android.intent.extra.STREAM]=file:{xxx}
+  * opens [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) with pathfilter={xxx} if {xxx} is not an image file
+  * examle file:*kreta*
+	* opens [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) showing all files that contain "kreta" in its full path

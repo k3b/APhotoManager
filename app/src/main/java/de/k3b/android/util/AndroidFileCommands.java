@@ -28,11 +28,14 @@ import android.content.SharedPreferences;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.io.File;
+import java.util.Map;
 
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
@@ -85,11 +88,7 @@ public class AndroidFileCommands extends FileCommands {
     }
 
     public void updateMediaDatabase(String... pathNames) {
-        SelectedFotos deletedItems = new SelectedFotos();
-        MediaScannerConnection.scanFile(
-                mContext,
-                pathNames, // mPathNames.toArray(new String[mPathNames.size()]),
-                null, null);
+        MediaScanner.updateMediaDBInBackground(mContext, pathNames);
     }
 
     public boolean onOptionsItemSelected(final MenuItem item, final SelectedFotos selectedFileNames) {

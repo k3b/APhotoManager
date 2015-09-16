@@ -30,7 +30,11 @@ import android.util.Log;
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.util.GeoPoint;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
@@ -183,7 +187,7 @@ public class FotoSql {
             if (filter.isNonGeoOnly()) {
                 parameters.addWhere(SQL_COL_LAT + " is null AND " + SQL_COL_LAT + " is null");
             } else {
-                addWhereFilteLatLon(parameters, filter);
+                addWhereFilterLatLon(parameters, filter);
             }
 
             if (filter.getDateMin() != 0) parameters.addWhere(SQL_COL_DATE_TAKEN + " >= ?", Double.toString(filter.getDateMin()));
@@ -208,14 +212,14 @@ public class FotoSql {
         ;
     }
 
-    public static void addWhereFilteLatLon(QueryParameter parameters, IGeoRectangle filter) {
+    public static void addWhereFilterLatLon(QueryParameter parameters, IGeoRectangle filter) {
         if ((parameters != null) && (filter != null)) {
-            addWhereFilteLatLon(parameters, filter.getLatitudeMin(),
+            addWhereFilterLatLon(parameters, filter.getLatitudeMin(),
                     filter.getLatitudeMax(), filter.getLogituedMin(), filter.getLogituedMax());
         }
     }
 
-    public static void addWhereFilteLatLon(QueryParameter parameters, double latitudeMin, double latitudeMax, double logituedMin, double logituedMax) {
+    public static void addWhereFilterLatLon(QueryParameter parameters, double latitudeMin, double latitudeMax, double logituedMin, double logituedMax) {
         if (!Double.isNaN(latitudeMin)) parameters.addWhere(SQL_COL_LAT + " >= ?", DirectoryFormatter.parseLatLon(latitudeMin));
         if (!Double.isNaN(latitudeMax)) parameters.addWhere(SQL_COL_LAT + " < ?", DirectoryFormatter.parseLatLon(latitudeMax));
         if (!Double.isNaN(logituedMin)) parameters.addWhere(SQL_COL_LON + " >= ?", DirectoryFormatter.parseLatLon(logituedMin));
@@ -376,7 +380,6 @@ public class FotoSql {
         return false;
     }
 
-
     public static String execGetFotoPath(Context context, Uri uri) {
         Cursor c = null;
         try {
@@ -385,11 +388,33 @@ public class FotoSql {
                 return c.getString(c.getColumnIndex(FotoSql.SQL_COL_PATH));
             }
         } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, "Cannot get path from " + uri, ex);
+            Log.e(Global.LOG_CONTEXT, "FotoSql.execGetFotoPath() Cannot get path from " + uri, ex);
         } finally {
             if (c != null) c.close();
         }
         return null;
+    }
+
+    public static List<String> execGetFotoPaths(Context context, String pathFilter) {
+        ArrayList<String> result = new ArrayList<String>();
+        ContentResolver resolver = context.getContentResolver();
+
+        Cursor c = null;
+        try {
+            c = resolver.query(SQL_TABLE_EXTERNAL_CONTENT_URI, new String[]{FotoSql.SQL_COL_PATH}, FotoSql.SQL_COL_PATH + " like ?", new String[]{pathFilter}, FotoSql.SQL_COL_PATH);
+            while (c.moveToNext()) {
+                result.add(c.getString(0));
+            }
+        } catch (Exception ex) {
+            Log.e(Global.LOG_CONTEXT, "FotoSql.execGetFotoPaths() Cannot get path from: " + FotoSql.SQL_COL_PATH + " like '" + pathFilter +"'", ex);
+        } finally {
+            if (c != null) c.close();
+        }
+
+        if (Global.debugEnabled) {
+            Log.d(Global.LOG_CONTEXT, "FotoSql.execGetFotoPaths() result count=" + result.size());
+        }
+        return result;
     }
 
     /**
@@ -427,7 +452,8 @@ public class FotoSql {
                         "min(" + SQL_COL_LAT + ") AS LAT_MIN",
                         "max(" + SQL_COL_LAT + ") AS LAT_MAX",
                         "min(" + SQL_COL_LON + ") AS LON_MIN",
-                        "max(" + SQL_COL_LON + ") AS LON_MAX"
+                        "max(" + SQL_COL_LON + ") AS LON_MAX",
+                        "count(*)"
                 )
                 .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString());
 
@@ -447,15 +473,21 @@ public class FotoSql {
                 GeoRectangle result = new GeoRectangle();
                 result.setLatitude(c.getDouble(0), c.getDouble(1));
                 result.setLogitude(c.getDouble(2), c.getDouble(3));
+
+                if (Global.debugEnabledSql) {
+                    Log.i(Global.LOG_CONTEXT, "FotoSql.execGetGeoRectangle() => " + result + " from " + c.getLong(4) + " via\n\t" + query);
+                }
+
                 return result;
             }
         } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, "execGetGeoRectangle: error executing " + query, ex);
+            Log.e(Global.LOG_CONTEXT, "FotoSql.execGetGeoRectangle(): error executing " + query, ex);
         } finally {
             if (c != null) c.close();
         }
         return null;
     }
+
 
     public static IGeoPoint execGetPosition(Context context, int id) {
         QueryParameterParcelable query = (QueryParameterParcelable) new QueryParameterParcelable()
@@ -474,11 +506,59 @@ public class FotoSql {
                 return result;
             }
         } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, "execGetGeoRectangle: error executing " + query, ex);
+            Log.e(Global.LOG_CONTEXT, "FotoSql.execGetPosition: error executing " + query, ex);
         } finally {
             if (c != null) c.close();
         }
         return null;
+    }
+
+    public static Map<String, Integer> execGetPathIdMap(Context context, String... fileNames) {
+        Map<String, Integer> result = new HashMap<String, Integer>();
+
+        if (fileNames != null) {
+            StringBuilder filter = new StringBuilder();
+            filter.append(SQL_COL_PATH).append(" in (");
+
+            int count = 0;
+            for (String fileName : fileNames) {
+                if (fileName != null) {
+                    if (count > 0) filter.append(", ");
+                    filter.append("'").append(fileName).append("'");
+                    count++;
+                }
+            }
+
+            if (count == 0) return result;
+            filter.append(")");
+
+            QueryParameterParcelable query = (QueryParameterParcelable) new QueryParameterParcelable()
+                    .setID(QUERY_TYPE_UNDEFINED)
+                    .addColumn(SQL_COL_PK, SQL_COL_PATH)
+                    .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
+                    .addWhere(filter.toString());
+
+            Cursor c = null;
+            try {
+                c = query(context, query);
+                while (c.moveToNext()) {
+                    result.put(c.getString(1),c.getInt(0));
+                }
+            } catch (Exception ex) {
+                Log.e(Global.LOG_CONTEXT, "FotoSql.execGetPathIdMap: error executing " + query, ex);
+            } finally {
+                if (c != null) c.close();
+            }
+        }
+        return result;
+    }
+
+    public static int execUpdate(Context context, Integer id, ContentValues values) {
+        return context.getContentResolver().update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, values, SQL_COL_PK + " = ?", new String[]{id.toString()});
+    }
+
+    public static Uri execInsert(Context context, ContentValues values) {
+        return context.getContentResolver().insert(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, values);
     }
 }
 

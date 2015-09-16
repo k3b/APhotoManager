@@ -308,4 +308,20 @@ public class GeoPointDto implements ILocation, IGeoPointInfo, Cloneable   {
         if (this.id != null) return "#" + this.id;
         return super.toString();
     }
+
+    public static boolean isEmpty(ILocation point) {
+        if (point != null) {
+            return (isEmpty(point.getLatitude(), point.getLongitude()));
+        }
+        return true;
+    }
+
+    /**
+     * @return true if either lat or lon is not set (NaN) or if both are 0
+     */
+    public static boolean isEmpty(double latitude, double longitude) {
+        if (Double.isNaN(latitude) || Double.isNaN(longitude)) return true;
+        if ((latitude == NO_LAT_LON) || (longitude == NO_LAT_LON)) return true;
+        return ((latitude == 0.0f) && (longitude == 0.0f));
+    }
 }

@@ -169,6 +169,15 @@ public class LocationMapFragment extends DialogFragment {
         saveLastViewPort(savedInstanceState);
     }
 
+    public String getCurrentGeoUri() {
+        BoundingBoxE6 currentViewPort = this.mMapView.getBoundingBox();
+
+        GeoPoint currentCenter = currentViewPort.getCenter();
+        int currentZoomLevel = this.mMapView.getZoomLevel();
+        String uriCurrentViewport = mGeoUriEngine.toUriString(currentCenter.getLatitude(), currentCenter.getLongitude(), currentZoomLevel);
+        return uriCurrentViewport;
+    }
+
     private void saveLastViewPort(Bundle savedInstanceState) {
         BoundingBoxE6 currentViewPort = this.mMapView.getBoundingBox();
 
@@ -176,9 +185,7 @@ public class LocationMapFragment extends DialogFragment {
             savedInstanceState.putParcelable(STATE_LAST_VIEWPORT, currentViewPort);
         }
 
-        GeoPoint currentCenter = currentViewPort.getCenter();
-        int currentZoomLevel = this.mMapView.getZoomLevel();
-        String uriCurrentViewport = mGeoUriEngine.toUriString(currentCenter.getLatitude(), currentCenter.getLongitude(), currentZoomLevel);
+        String uriCurrentViewport = getCurrentGeoUri();
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         SharedPreferences.Editor edit = sharedPref.edit();
@@ -396,20 +403,25 @@ public class LocationMapFragment extends DialogFragment {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + "defineNavigation: " + rectangle + ";z=" + zoomlevel);
         }
 
-        this.mRootFilter = rootFilter;
+        if (rootFilter != null) {
+            this.mRootFilter = rootFilter;
+        }
+
         if ((selectedItems != null) && (this.mSelectedItems != selectedItems)) {
             this.mSelectedItems = selectedItems;
             reloadSelectionMarker();
         }
 
-        if (!Double.isNaN(rectangle.getLatitudeMin())) {
-            BoundingBoxE6 boundingBox = new BoundingBoxE6(
-                    rectangle.getLatitudeMax(),
-                    rectangle.getLogituedMin(),
-                    rectangle.getLatitudeMin(),
-                    rectangle.getLogituedMax());
+        if (rectangle != null) {
+            if (!Double.isNaN(rectangle.getLatitudeMin())) {
+                BoundingBoxE6 boundingBox = new BoundingBoxE6(
+                        rectangle.getLatitudeMax(),
+                        rectangle.getLogituedMin(),
+                        rectangle.getLatitudeMin(),
+                        rectangle.getLogituedMax());
 
-            zoomToBoundingBox(boundingBox, zoomlevel);
+                zoomToBoundingBox(boundingBox, zoomlevel);
+            }
         }
 
         if (rootFilter != null) {
@@ -497,7 +509,7 @@ public class LocationMapFragment extends DialogFragment {
         // so that counts at the borders are correct.
         double delta = (groupingFactor > 0) ? (2.0 / groupingFactor) : 0.0;
         IGeoRectangle rect = getGeoRectangle(latLonArea);
-        FotoSql.addWhereFilteLatLon(query
+        FotoSql.addWhereFilterLatLon(query
                 , rect.getLatitudeMin() - delta
                 , rect.getLatitudeMax() + delta
                 , rect.getLogituedMin() - delta
@@ -817,15 +829,40 @@ public class LocationMapFragment extends DialogFragment {
 
     private boolean showGallery(IGeoPoint geoPosition) {
         GalleryFilterParameter filter = getMarkerFilter(geoPosition);
-        FotoGalleryActivity.showActivity(this.getActivity(), filter, 4711);
+        FotoGalleryActivity.showActivity(this.getActivity(), filter, 0);
         return true;
     }
 
     private boolean zoomToFit(IGeoPoint geoPosition) {
-        BoundingBoxE6 boundingBoxE6 = getMarkerBoundingBox(geoPosition);
+        BoundingBoxE6 boundingBoxE6 = null;
 
+        IGeoRectangle fittingRectangle = FotoSql.execGetGeoRectangle(this.getActivity(), getMarkerFilter(geoPosition), null);
+        double delta = getDelta(fittingRectangle);
+        if (delta < 1e-6) {
+            boundingBoxE6 = getMarkerBoundingBox(geoPosition);
+
+        } else {
+            double enlarge = delta * 0.2;
+            boundingBoxE6 = new BoundingBoxE6(
+                    fittingRectangle.getLatitudeMax()+enlarge,
+                    fittingRectangle.getLogituedMax()+enlarge,
+                    fittingRectangle.getLatitudeMin()-enlarge,
+                    fittingRectangle.getLogituedMin()-enlarge);
+        }
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, "zoomToFit(): " + fittingRectangle +
+                    " delta " + delta +
+                    " => box " + boundingBoxE6);
+        }
         zoomToBoundingBox(boundingBoxE6, NO_ZOOM);
         return true;
+    }
+
+    private double getDelta(IGeoRectangle fittingRectangle) {
+        if (fittingRectangle == null) return 0;
+
+        return Math.max(Math.abs(fittingRectangle.getLogituedMax() - fittingRectangle.getLogituedMin())
+                , Math.abs(fittingRectangle.getLatitudeMax() - fittingRectangle.getLatitudeMin()));
     }
 
     private GalleryFilterParameter getMarkerFilter(IGeoPoint geoPosition) {

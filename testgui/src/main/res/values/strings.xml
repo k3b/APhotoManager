@@ -20,6 +20,6 @@
  */
  -->
 <resources>
-    <string name="app_name">A Foto Finder Test GUI</string>
+    <string name="app_name">aFF Test GUI</string>
     <string name="action_settings">Settings</string>
 </resources>

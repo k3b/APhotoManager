@@ -1,8 +1,8 @@
 # AndroFotoFinder ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/app/src/main/res/drawable-hdpi/foto_gallery.png)
 
-Fast find local photos by (sub-)folder, date and/or geographic map
+Manage photos in local media store: find, sort, view, copy, delete, set gps exif data, send, ... .
 
-Search through your device's local media store for photos.
+Fast find local photos by (sub-)folder, date and/or geographic map.
 
 Features
 

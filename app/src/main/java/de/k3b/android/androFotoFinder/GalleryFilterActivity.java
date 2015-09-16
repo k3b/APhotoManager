@@ -473,6 +473,8 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
             dirInfo.directoryRoot = directoryRoot;
             final FragmentManager manager = getFragmentManager();
             DirectoryPickerFragment dirDialog = new DirectoryPickerFragment();
+            dirDialog.setContextMenuId(R.menu.menu_context_dirpicker);
+
             dirDialog.defineDirectoryNavigation(dirInfo.directoryRoot, dirInfo.queryId, dirInfo.currentPath);
 
             dirDialog.show(manager, DLG_NAVIGATOR_TAG);
