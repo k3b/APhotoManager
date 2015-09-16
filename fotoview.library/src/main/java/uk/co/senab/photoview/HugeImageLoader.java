@@ -31,8 +31,11 @@ public class HugeImageLoader {
     public static int getMaxTextureSize() {
         try {
             int[] max = new int[1];
-            new GLES20().glGetIntegerv(GL10.GL_MAX_TEXTURE_SIZE, max, 0);
-            return max[0];
+            new GLES20().glGetIntegerv(GLES20.GL_MAX_TEXTURE_SIZE, max, 0);
+
+            if (max[0] > 0) {
+                return max[0];
+            }
         } catch (Exception ex) {
 
         }
