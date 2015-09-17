@@ -239,8 +239,8 @@ public class AndroidFileCommands extends FileCommands {
                         onProgress(itemcount, maxCount);
                     }
                     ExifGps.saveLatLon(file, latitude, longitude);
-                    log("setgeo  '" + file.getAbsolutePath() +
-                            "' ", DirectoryFormatter.parseLatLon(latitude), " ", DirectoryFormatter.parseLatLon(longitude));
+                    log("CALL setgps  ", getFilenameForLog(file),
+                            " ", DirectoryFormatter.parseLatLon(latitude), " ", DirectoryFormatter.parseLatLon(longitude));
                     itemcount++;
                 }
                 onProgress(itemcount, maxCount);
@@ -260,8 +260,8 @@ public class AndroidFileCommands extends FileCommands {
     private void onMediaDeleted(String absolutePath, Long id) {
         Uri uri = SelectedFotos.getUri(id);
         mContext.getContentResolver().delete(uri, null, null);
-        log("rem deleted '" + absolutePath +
-                "' as content: ", uri.toString());
+        log("rem deleted ", getFilenameForLog(absolutePath),
+                " as content: ", uri.toString());
     }
 
     public AndroidFileCommands setContext(Activity mContext) {

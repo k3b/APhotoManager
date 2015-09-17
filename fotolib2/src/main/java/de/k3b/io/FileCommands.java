@@ -71,22 +71,32 @@ public class FileCommands implements  Cloneable {
             File sidecar = getSidecar(file);
             if (osFileExists(sidecar)) {
                 osDeleteFile(sidecar); // dont care if delete was successfull
-                log("del \"", sidecar.getAbsolutePath(), "\"");
+                log("del " , getFilenameForLog(sidecar));
             }
 
             if (osFileExists(file)) {
                 if (!osDeleteFile(file)) {
-                    log("rem file exists. delete failed : ", file.getAbsolutePath());
+                    log("rem file exists. delete failed : ", getFilenameForLog(file));
                 } else {
                     result = true; // was deleted
                 }
             } else {
-                log("rem file ", file.getAbsolutePath(), "does not exist");
+                log("rem file ", getFilenameForLog(file), " does not exist");
                 result = true; // it is gone
             }
         }
-        log("del \"", file.getAbsolutePath(), "\"");
+        log("del ", getFilenameForLog(file));
         return result;
+    }
+
+    public static String getFilenameForLog(File file) {
+        if (file == null) return "";
+        return getFilenameForLog(file.getAbsolutePath());
+    }
+
+    public static String getFilenameForLog(String absolutePath) {
+        if (absolutePath == null) return "";
+        return "\"" + absolutePath.replace("/", "\\") + "\"";
     }
 
     public int moveOrCopyFilesTo(boolean move, File destDirFolder, File... sourceFiles) {
@@ -97,7 +107,7 @@ public class FileCommands implements  Cloneable {
             result = moveOrCopyFiles(move, destFiles, sourceFiles);
 
         } else {
-            log("rem Target dir '", destDirFolder.getAbsolutePath(), "' cannot be created");
+            log("rem Target dir ", getFilenameForLog(destDirFolder), " cannot be created");
         }
         return result;
     }
@@ -117,13 +127,13 @@ public class FileCommands implements  Cloneable {
 
             File destRenamed = renameDuplicate(destFile);
             if (osFileMoveOrCopy(move, destRenamed, sourceFile)) itemCount++;
-            log(((move) ? "move \"" : "copy \""), sourceFile.getAbsolutePath(), "\" \"" , destRenamed.getAbsolutePath(), "\"");
+            log(((move) ? "MOVE /y \"" : "COPY /y "), getFilenameForLog(sourceFile), " " , getFilenameForLog(destRenamed));
 
             File sourceSidecar = getSidecar(sourceFile);
             if (osFileExists(sourceSidecar)) {
                 File destSidecar = getSidecar(destRenamed);
                 if (osFileMoveOrCopy(move, destSidecar, sourceSidecar)) itemCount++;
-                log(((move) ? "move \"" : "copy \""), sourceSidecar.getAbsolutePath(), "\" \"" , destSidecar.getAbsolutePath(), "\"");
+                log(((move) ? "MOVE /y " : "COPY /y "), getFilenameForLog(sourceSidecar), " " , getFilenameForLog(destSidecar));
             }
             pos++;
         }
@@ -216,7 +226,7 @@ public class FileCommands implements  Cloneable {
             String candidatePath = filename + id + extension;
             File candidate = new File(candidatePath);
             if (!fileOrSidecarExists(candidate)) {
-                log("rem renamed from '", file.toString(), "' to '", candidatePath, "'");
+                log("rem renamed from ", getFilenameForLog(file), " to ", getFilenameForLog(candidatePath));
                 return candidate;
             }
 
