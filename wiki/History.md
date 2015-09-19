@@ -7,6 +7,7 @@
 		* initially the view is loaded with low res image. on first zoom it is reloaded with maximum resolution.
 	* Improved scaling of big images
 	* if image exists but is not in media database restart media scanner for containing folder
+		* automatic removal of duplicate images from media db
 * [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) :
 	* menu to open [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)
 		* purpose: Filter the photos that are visible in the map.

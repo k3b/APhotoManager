@@ -115,6 +115,20 @@ public class FotoSql {
             .addGroupBy(SQL_EXPR_FOLDER)
             .addOrderBy(SQL_EXPR_FOLDER);
 
+    /* image entries may become duplicated if media scanner finds new images that have not been inserted into media database yet
+     * and aFotoSql tries to show the new image and triggers a filescan. */
+    public static final QueryParameterParcelable queryGetDuplicates = (QueryParameterParcelable) new QueryParameterParcelable()
+            .setID(QUERY_TYPE_UNDEFINED)
+            .addColumn(
+                    "min(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
+                    SQL_COL_PATH + " AS " + SQL_COL_DISPLAY_TEXT,
+                    "count(*) AS " + SQL_COL_COUNT)
+            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
+            .addGroupBy(SQL_COL_PATH)
+            .addHaving("count(*) > 1")
+            .addOrderBy(SQL_COL_PATH);
+
+
     // the bigger the smaller the area
     private static final double GROUPFACTOR_FOR_Z0 = 0.025;
     public static final double getGroupFactor(final int _zoomLevel) {

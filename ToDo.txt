@@ -1,9 +1,4 @@
 TODO
-	rem setgps.cmd ["/path/to/image.jpg" [53.2 8.3]]
-
-	"D:\prj\eve\android\prj\fotos-android.wrk\FotoGallery\doc\aFotoFinder.bat"	
-	"C:\Users\eve\Pictures\bin\setGps\test\exif.txt"
-			
 #6 geo-picker
 	extera_stream-uri(s) => blue: selected items via geo:, content: or file:
 

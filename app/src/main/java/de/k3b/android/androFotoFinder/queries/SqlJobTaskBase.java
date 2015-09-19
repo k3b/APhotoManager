@@ -36,17 +36,21 @@ import de.k3b.android.osmdroid.IconFactory;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
 
-public abstract class SqlUpdateTask  extends AsyncTask<QueryParameter, Integer, SelectedItems> {
+/**
+ * process item-ids from sql-query in background task
+ */
+public abstract class SqlJobTaskBase extends AsyncTask<QueryParameter, Integer, SelectedItems> {
     // every 500 items the progress indicator is advanced
     private static final int PROGRESS_INCREMENT = 500;
 
     private final Activity mContext;
     protected final String mDebugPrefix;
     protected SelectedItems mSelectedItems;
-    protected StringBuffer mStatus = null;
-    private int mStatisticsRecycled = 0;
 
-    public SqlUpdateTask(Activity context, String debugPrefix, SelectedItems selectedItems) {
+    /** collects debug infos */
+    protected StringBuffer mStatus = null;
+
+    public SqlJobTaskBase(Activity context, String debugPrefix, SelectedItems selectedItems) {
         if (Global.debugEnabledSql || Global.debugEnabled) {
             mStatus = new StringBuffer().append(debugPrefix);
         }
@@ -55,26 +59,28 @@ public abstract class SqlUpdateTask  extends AsyncTask<QueryParameter, Integer, 
         this.mContext = context;
         this.mDebugPrefix = debugPrefix;
         this.mSelectedItems = new SelectedItems();
-        this.mSelectedItems.addAll(selectedItems);
+        if (selectedItems != null) {
+            this.mSelectedItems.addAll(selectedItems);
+        }
     }
 
     @Override
-    protected SelectedItems doInBackground(QueryParameter... queryParameter) {
-        if (queryParameter.length != 1) throw new IllegalArgumentException();
+    protected SelectedItems doInBackground(QueryParameter... querys) {
+        if (querys.length != 1) throw new IllegalArgumentException();
 
-        QueryParameter queryParameters = queryParameter[0];
+        QueryParameter query = querys[0];
 
         Cursor cursor = null;
         try {
-            cursor = mContext.getContentResolver().query(Uri.parse(queryParameters.toFrom()), queryParameters.toColumns(),
-                    queryParameters.toAndroidWhere(), queryParameters.toAndroidParameters(), queryParameters.toOrderBy());
+            cursor = mContext.getContentResolver().query(Uri.parse(query.toFrom()), query.toColumns(),
+                    query.toAndroidWhere(), query.toAndroidParameters(), query.toOrderBy());
 
             int itemCount = cursor.getCount();
             final int expectedCount = itemCount + itemCount;
 
             publishProgress(itemCount, expectedCount);
             if (this.mStatus != null) {
-                this.mStatus.append("'").append(itemCount).append("' rows found for query \n\t").append(queryParameters.toSqlString());
+                this.mStatus.append("'").append(itemCount).append("' rows found for query \n\t").append(query.toSqlString());
             }
 
             // long startTime = SystemClock.currentThreadTimeMillis();
@@ -94,10 +100,6 @@ public abstract class SqlUpdateTask  extends AsyncTask<QueryParameter, Integer, 
                     // Escape early if cancel() is called
                     if (isCancelled()) break;
                 }
-            }
-            if (this.mStatus != null) {
-                this.mStatus.append("\n\tRecycled : ").append(mStatisticsRecycled);
-                // Log.i(Global.LOG_CONTEXT, debugPrefix + itemCount + this.mStatus);
             }
 
             return this.mSelectedItems;
