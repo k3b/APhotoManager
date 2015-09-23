@@ -209,6 +209,11 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
                 @Override
                 public void onChanged() {
                     super.onChanged();
+                    // #13 Swiping: Sometimes the app jumps back
+                    int currentViewItem = mViewPager.getCurrentItem();
+                    if (currentViewItem > 0) {
+                        mScrollPosition = currentViewItem;
+                    }
                     onLoadCompleted();
                 }
             };

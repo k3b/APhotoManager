@@ -1,8 +1,4 @@
 TODO
-	- detailview
-		- #13 Swiping: Sometimes the app jumps back
-			jump back to initial (??adapter change??)
-
 	? suche nach tag
 		? eigene tag-db + where _id in (id,id,...)
 			tab tags (id, name, parentID, androidFileID)
