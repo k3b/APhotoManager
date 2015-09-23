@@ -75,7 +75,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="lbl_longitude_short"
+        android:text="@string/lbl_longitude_short"
         android:layout_below="@+id/edit_latitude_from"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />

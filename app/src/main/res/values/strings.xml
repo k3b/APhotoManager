@@ -167,4 +167,5 @@ Features:
     <string name="lbl_path">Path</string>
 
     <string name="media_update_result">Updated %1$d Media Database Items</string>
+    <string name="cmd_slideshow">Slideshow</string>
 </resources>

@@ -127,7 +127,7 @@ public class FileCommands implements  Cloneable {
 
             File destRenamed = renameDuplicate(destFile);
             if (osFileMoveOrCopy(move, destRenamed, sourceFile)) itemCount++;
-            log(((move) ? "MOVE /y \"" : "COPY /y "), getFilenameForLog(sourceFile), " " , getFilenameForLog(destRenamed));
+            log(((move) ? "MOVE /y " : "COPY /y "), getFilenameForLog(sourceFile), " " , getFilenameForLog(destRenamed));
 
             File sourceSidecar = getSidecar(sourceFile);
             if (osFileExists(sourceSidecar)) {

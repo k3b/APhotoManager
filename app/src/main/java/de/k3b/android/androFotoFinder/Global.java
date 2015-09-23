@@ -38,6 +38,8 @@ public class Global {
 
     public static int maxSelectionMarkersInMap = 255;
 
+    public static int slideshowIntervallInMilliSecs = 1500;
+
     public static boolean clearSelectionAfterCommand = false;
 
     public static void debugMemory(String modul, String message) {

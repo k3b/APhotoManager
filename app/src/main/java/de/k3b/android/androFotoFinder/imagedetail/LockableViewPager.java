@@ -23,6 +23,7 @@ import android.content.Context;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.View;
 
 /**
  * Found at http://stackoverflow.com/questions/7814017/is-it-possible-to-disable-scrolling-on-a-viewpager.
@@ -58,8 +59,14 @@ public class LockableViewPager extends ViewPager {
         isLocked = false;
     }
 
+	private View.OnClickListener onInterceptTouchListener = null;
+	public void setOnInterceptTouchEvent(View.OnClickListener onInterceptTouchListener) {
+		this.onInterceptTouchListener = onInterceptTouchListener;
+	}
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+		if (onInterceptTouchListener != null) onInterceptTouchListener.onClick(this);
     	if (!isLocked) {
 	        try {
 	            return super.onInterceptTouchEvent(ev);

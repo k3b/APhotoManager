@@ -3,6 +3,7 @@
 ## [v0.4.2.*](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.2) (not released yet)
 
 * [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) : 
+	* new menu command slideshow: showing next image every 1.5 seconds.
 	* [#10 Faster swiping through high resolution images](https://github.com/k3b/AndroFotoFinder/issues/10)
 		* initially the view is loaded with low res image. on first zoom it is reloaded with maximum resolution.
 	* Improved scaling of big images

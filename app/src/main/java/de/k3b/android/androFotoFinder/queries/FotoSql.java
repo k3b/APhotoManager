@@ -397,7 +397,7 @@ public class FotoSql {
     public static String execGetFotoPath(Context context, Uri uri) {
         Cursor c = null;
         try {
-            c = query(context, uri.toString(), null, null, null, FotoSql.SQL_COL_PATH);
+            c = createCursorForQuery(context, uri.toString(), null, null, null, FotoSql.SQL_COL_PATH);
             if (c.moveToFirst()) {
                 return c.getString(c.getColumnIndex(FotoSql.SQL_COL_PATH));
             }
@@ -445,16 +445,16 @@ public class FotoSql {
         return resolver.update(SQL_TABLE_EXTERNAL_CONTENT_URI, values, where.toAndroidWhere(), where.toAndroidParameters());
     }
 
-    private static Cursor query(final Context context, QueryParameter parameters) {
-        return query(context, parameters.toFrom(), parameters.toAndroidWhere(),
+    public static Cursor createCursorForQuery(final Context context, QueryParameter parameters) {
+        return createCursorForQuery(context, parameters.toFrom(), parameters.toAndroidWhere(),
                 parameters.toAndroidParameters(), parameters.toOrderBy(),
                 parameters.toColumns()
         );
     }
 
-    private static Cursor query(final Context context, final String from, final String sqlWhereStatement,
-                         final String[] sqlWhereParameters, final String sqlSortOrder,
-                         final String... sqlSelectColums) {
+    private static Cursor createCursorForQuery(final Context context, final String from, final String sqlWhereStatement,
+                                               final String[] sqlWhereParameters, final String sqlSortOrder,
+                                               final String... sqlSelectColums) {
         ContentResolver resolver = context.getContentResolver();
         return resolver.query(Uri.parse(from), sqlSelectColums, sqlWhereStatement, sqlWhereParameters, sqlSortOrder);
     }
@@ -482,7 +482,7 @@ public class FotoSql {
 
         Cursor c = null;
         try {
-            c = query(context, query);
+            c = createCursorForQuery(context, query);
             if (c.moveToFirst()) {
                 GeoRectangle result = new GeoRectangle();
                 result.setLatitude(c.getDouble(0), c.getDouble(1));
@@ -514,7 +514,7 @@ public class FotoSql {
 
         Cursor c = null;
         try {
-            c = query(context, query);
+            c = createCursorForQuery(context, query);
             if (c.moveToFirst()) {
                 GeoPoint result = new GeoPoint(c.getDouble(0),c.getDouble(1));
                 return result;
@@ -554,7 +554,7 @@ public class FotoSql {
 
             Cursor c = null;
             try {
-                c = query(context, query);
+                c = createCursorForQuery(context, query);
                 while (c.moveToNext()) {
                     result.put(c.getString(1),c.getInt(0));
                 }

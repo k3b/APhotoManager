@@ -25,10 +25,10 @@ import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.DataSetObserver;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -78,6 +78,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     // how many changes have been made. if != 0 parent activity must invalidate cached data
     private static int mModifyCount = 0;
+    private MenuItem mMenuSlideshow = null;
 
     class ImageDetailFileCommands extends AndroidFileCommands {
         @Override
@@ -147,7 +148,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     // private static final String ISLOCKED_ARG = "isLocked";
 	
-	private ViewPager mViewPager = null;
+	private LockableViewPager mViewPager = null;
     private ImagePagerAdapterFromCursor mAdapter = null;
 
     private final AndroidFileCommands mFileCommands = new ImageDetailFileCommands();
@@ -215,6 +216,12 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             mAdapter = new ImagePagerAdapterFromCursor(this, mGalleryContentQuery, mDebugPrefix);
             mAdapter.registerDataSetObserver(mLoadCompleteHandler);
             mViewPager.setAdapter(mAdapter);
+            mViewPager.setOnInterceptTouchEvent(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mSlideShowStarted) startStopSlideShow(false);
+                }
+            });
 
             if (savedInstanceState != null) {
                 mScrollPosition = savedInstanceState.getInt(INSTANCE_STATE_LAST_SCROLL_POSITION, this.mScrollPosition);
@@ -332,7 +339,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     @Override
     protected void onPause () {
         Global.debugMemory(mDebugPrefix, "onPause");
-
+        startStopSlideShow(false);
         super.onPause();
     }
 
@@ -366,6 +373,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_image_detail, menu);
         getMenuInflater().inflate(R.menu.menu_image_commands, menu);
+        mMenuSlideshow = menu.findItem(R.id.action_slideshow);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -483,6 +491,12 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        boolean slideShowStarted = mSlideShowStarted;
+
+        // every command will stop the slideshow
+        if (slideShowStarted) {
+            startStopSlideShow(false);
+        }
         if (mFileCommands.onOptionsItemSelected(item, getCurrentFoto())) {
             mModifyCount++;
             return true; // case R.id.cmd_delete:
@@ -492,6 +506,11 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         switch (item.getItemId()) {
             case R.id.action_details:
                 cmdShowDetails(getCurrentFilePath());
+                return true;
+
+            case R.id.action_slideshow:
+                // only if not started
+                if (!slideShowStarted) startStopSlideShow(true);
                 return true;
 
             case R.id.action_edit:
@@ -520,6 +539,37 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
                 return super.onOptionsItemSelected(item);
         }
 
+    }
+
+    private static final int SLIDESHOW_WHAT = 2;
+    private boolean mSlideShowStarted = false;
+    private Handler mSlideShowTimer = new Handler() {
+        public void handleMessage(Message m) {
+            if (mSlideShowStarted) {
+                onSlideShowNext();
+                sendMessageDelayed(Message.obtain(this, SLIDESHOW_WHAT), Global.slideshowIntervallInMilliSecs);
+            }
+        }
+    };
+
+    private void startStopSlideShow(boolean start) {
+        mViewPager.setLocked(start);
+        if (start != mSlideShowStarted) {
+            if (start) {
+                onSlideShowNext();
+                mSlideShowTimer.sendMessageDelayed(Message.obtain(mSlideShowTimer, SLIDESHOW_WHAT), Global.slideshowIntervallInMilliSecs);
+            } else {
+                mSlideShowTimer.removeMessages(SLIDESHOW_WHAT);
+            }
+            mSlideShowStarted = start;
+            if (mMenuSlideshow != null) mMenuSlideshow.setChecked(start);
+        }
+    }
+
+    private void onSlideShowNext() {
+        int pos = mViewPager.getCurrentItem() + 1;
+        if (pos >= mAdapter.getCount()) pos = 0;
+        mViewPager.setCurrentItem(pos);
     }
 
     private void cmdStartIntent(String currentFilePath, String action, int idChooserCaption, int idEditError) {
