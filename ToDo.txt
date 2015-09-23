@@ -1,20 +1,7 @@
 TODO
 	- detailview
-		> slideshow (every 1.5 sec next)
-			- 1.5 sec => Global....
-			
-			
 		- #13 Swiping: Sometimes the app jumps back
 			jump back to initial (??adapter change??)
-
-?? bug: nach rename sind bilder verschwunden !!!
-	- if (isMediaScannerScanning(..))
-		error: cannot rename/move file while android media scanner is running.
-	- security-logger
-	- file commands batch
-		
-	v exifRenew: exif:all>csv del exif:all exif:all<csv
-	- C:\Users\eve\Desktop\eve-wrk\foto\todo\doneMini-all-fixedExifRenew > android/jphototagger
 
 	? suche nach tag
 		? eigene tag-db + where _id in (id,id,...)
@@ -134,23 +121,4 @@ http://stackoverflow.com/questions/24615420/how-to-join-literaly-two-more-conten
 	}
 
 #############################
-
-http://stackoverflow.com/questions/12136681/detect-if-media-scanner-running-on-android
-
-if (isMediaScannerScanning(..))
-	error: cannot rename/move file while android media scanner is running.
-
-public static boolean isMediaScannerScanning(ContentResolver cr) {
-        boolean result = false;
-        Cursor cursor = query(cr, MediaStore.getMediaScannerUri(),
-               new String [] {MediaStore.MEDIA_SCANNER_VOLUME},
-                null, null, null);
-        if (cursor != null) {
-            if (cursor.getCount() == 1) {
-                cursor.moveToFirst();
-                result = "external".equals(cursor.getString(0));
-            }
-            cursor.close();
-        }    
-        return result;
-    }
+	

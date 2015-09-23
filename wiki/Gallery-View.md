@@ -81,6 +81,7 @@ The [Gallery-View](Gallery-View) has these elements:
     * taping on the **Selection: remove all visible** will unselect all [Current Visible Photos](Gallery-View#CurrentSet). (Since Version 0.4.1)
 	* taping on the **delete** symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_delete.png) or the "Delete" menu will delete the selected photo(s).
 	* the **move/copy** menu will move/copy the selected photo(s) to a different folder.
+		* Move is blocked while Media Scanner is active to avoid conflicts/inconsistent data.
 	    * Pressing the "..." button or long pressing a folder in the [foder picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker) allows you to create a new folder.
 	* the **change geo** menu allow you to change the photos geo location (latitude/longitude).  (Since Version 0.4.1)
     * you can send/share the selected photos via the share symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_share.png).

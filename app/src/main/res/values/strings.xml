@@ -168,4 +168,5 @@ Features:
 
     <string name="media_update_result">Updated %1$d Media Database Items</string>
     <string name="cmd_slideshow">Slideshow</string>
+    <string name="cannot_change_if_scanner_active">Cannot move or rename while Android Media Scanner is busy. Try again later.</string>
 </resources>

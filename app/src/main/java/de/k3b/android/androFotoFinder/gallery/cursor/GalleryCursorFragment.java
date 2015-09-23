@@ -61,6 +61,7 @@ import de.k3b.android.androFotoFinder.OnGalleryInteractionListener;
 import de.k3b.android.androFotoFinder.queries.Queryable;
 import de.k3b.android.androFotoFinder.queries.SqlJobTaskBase;
 import de.k3b.android.util.AndroidFileCommands;
+import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
@@ -618,13 +619,17 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     };
 
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFotos fotos) {
-        MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
+        if (move && MediaScanner.isScannerActive(this.getActivity().getContentResolver())) {
+            Toast.makeText(this.getActivity(), R.string.cannot_change_if_scanner_active, Toast.LENGTH_LONG).show();
+        } else {
+            MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
-        destDir.defineDirectoryNavigation(new OSDirectory("/", null),
-                (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
-                lastCopyToPath);
-        destDir.setContextMenuId(R.menu.menu_context_osdir);
-        destDir.show(getActivity().getFragmentManager(), "osdir");
+            destDir.defineDirectoryNavigation(new OSDirectory("/", null),
+                    (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
+                    lastCopyToPath);
+            destDir.setContextMenuId(R.menu.menu_context_osdir);
+            destDir.show(getActivity().getFragmentManager(), "osdir");
+        }
         return false;
     }
 

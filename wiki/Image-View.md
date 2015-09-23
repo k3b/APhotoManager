@@ -10,6 +10,7 @@ You can reach the [Image-View](Image-View) via
 * swiping for next/previous image
 * show extended image info (Exif, IPTC, XMP, ICC)
 * file operations copy/move/rename/delete/change geo info (Since Version 0.4.1)
+	* Move and Rename is blocked while Media Scanner is active to avoid conflicts/inconsistent data.
 * menu command slideshow: automatic showing next image every 1.5 seconds. Tuching the image stops the slideshow
 
 ## <a name='api'>Intent-API</a> 

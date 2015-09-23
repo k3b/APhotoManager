@@ -602,50 +602,60 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     }
 
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFotos fotos) {
-        MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
+        if (move && MediaScanner.isScannerActive(this.getContentResolver())) {
+            Toast.makeText(this, R.string.cannot_change_if_scanner_active, Toast.LENGTH_LONG).show();
+        } else {
+            MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
-        destDir.defineDirectoryNavigation(new OSDirectory("/", null), FotoSql.QUERY_TYPE_GROUP_COPY, lastCopyToPath);
-        destDir.setContextMenuId(R.menu.menu_context_osdir);
-        destDir.show(this.getFragmentManager(), "osdirimage");
+            destDir.defineDirectoryNavigation(new OSDirectory("/", null),
+                    (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
+                    lastCopyToPath);
+            destDir.setContextMenuId(R.menu.menu_context_osdir);
+            destDir.show(this.getFragmentManager(), "osdirimage");
+        }
         return false;
     }
 
     private boolean onRenameDirQueston(final long fotoId, final String fotoPath, String newName) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.cmd_rename);
-        View content = this.getLayoutInflater().inflate(R.layout.dialog_edit_name, null);
+        if (MediaScanner.isScannerActive(this.getContentResolver())) {
+            Toast.makeText(this, R.string.cannot_change_if_scanner_active, Toast.LENGTH_LONG).show();
+        } else {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.cmd_rename);
+            View content = this.getLayoutInflater().inflate(R.layout.dialog_edit_name, null);
 
-        final EditText edit = (EditText) content.findViewById(R.id.edName);
+            final EditText edit = (EditText) content.findViewById(R.id.edName);
 
-        if (newName == null) {
-            newName = new File(getCurrentFilePath()).getName();
-        }
-        edit.setText(newName);
-		
-		// select text without extension
-		int selectLen = newName.lastIndexOf(".");
-		if (selectLen == -1) selectLen = newName.length();
-        edit.setSelection(0, selectLen);
-
-        builder.setView(content);
-        builder.setNegativeButton(R.string.cancel, null);
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            //@Override
-            public void onClick(DialogInterface dialog, int which) {
-                onRenameSubDirAnswer(fotoId, fotoPath, edit.getText().toString());
+            if (newName == null) {
+                newName = new File(getCurrentFilePath()).getName();
             }
-        });
-        AlertDialog alertDialog = builder.create();
-        alertDialog.show();
+            edit.setText(newName);
 
-        int width = (int ) (8 * edit.getTextSize());
-        // DisplayMetrics metrics = getResources().getDisplayMetrics();
-        // int width = metrics.widthPixels;
-        alertDialog.getWindow().setLayout(width * 2, LinearLayout.LayoutParams.WRAP_CONTENT);
-		edit.requestFocus();
-		
-		// request keyboard. See http://stackoverflow.com/questions/2403632/android-show-soft-keyboard-automatically-when-focus-is-on-an-edittext
-		alertDialog.getWindow().setSoftInputMode (WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+            // select text without extension
+            int selectLen = newName.lastIndexOf(".");
+            if (selectLen == -1) selectLen = newName.length();
+            edit.setSelection(0, selectLen);
+
+            builder.setView(content);
+            builder.setNegativeButton(R.string.cancel, null);
+            builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                //@Override
+                public void onClick(DialogInterface dialog, int which) {
+                    onRenameSubDirAnswer(fotoId, fotoPath, edit.getText().toString());
+                }
+            });
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+
+            int width = (int) (8 * edit.getTextSize());
+            // DisplayMetrics metrics = getResources().getDisplayMetrics();
+            // int width = metrics.widthPixels;
+            alertDialog.getWindow().setLayout(width * 2, LinearLayout.LayoutParams.WRAP_CONTENT);
+            edit.requestFocus();
+
+            // request keyboard. See http://stackoverflow.com/questions/2403632/android-show-soft-keyboard-automatically-when-focus-is-on-an-edittext
+            alertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+        }
         return true;
     }
 

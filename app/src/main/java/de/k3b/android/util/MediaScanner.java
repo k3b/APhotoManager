@@ -1,5 +1,6 @@
 package de.k3b.android.util;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -243,4 +244,24 @@ public class MediaScanner extends AsyncTask<String,Object,Integer> {
         }
     }
 
+    // http://stackoverflow.com/questions/12136681/detect-if-media-scanner-running-on-android
+    public static boolean isScannerActive(ContentResolver cr) {
+        boolean result = false;
+        Cursor cursor = null;
+
+        try {
+            cursor = cr.query(MediaStore.getMediaScannerUri(),
+                    new String[]{MediaStore.MEDIA_SCANNER_VOLUME},
+                    null, null, null);
+            if (cursor != null) {
+                if (cursor.getCount() == 1) {
+                    cursor.moveToFirst();
+                    result = "external".equals(cursor.getString(0));
+                }
+            }
+            return result;
+        } finally {
+            if (cursor != null) cursor.close();
+        }
+    }
 }
