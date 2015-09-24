@@ -59,8 +59,9 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.OnGalleryInteractionListener;
 import de.k3b.android.androFotoFinder.queries.Queryable;
-import de.k3b.android.androFotoFinder.queries.SqlUpdateTask;
+import de.k3b.android.androFotoFinder.queries.SqlJobTaskBase;
 import de.k3b.android.util.AndroidFileCommands;
+import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
@@ -165,6 +166,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 case OP_COPY: return R.string.format_copy_result;
                 case OP_MOVE: return R.string.format_move_result;
                 case OP_DELETE: return R.string.format_delete_result;
+                case OP_RENAME: return R.string.format_rename_result;
+                case OP_UPDATE: return R.string.format_update_result;
             }
             return 0;
         }
@@ -272,6 +275,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
         reloadDirGuiIfAvailable();
 
+        findDuplicates();
         return result;
     }
 
@@ -617,13 +621,15 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     };
 
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFotos fotos) {
-        MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
+        if (AndroidFileCommands.canProcessFile(this.getActivity())) {
+            MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
-        destDir.defineDirectoryNavigation(new OSDirectory("/", null),
-                (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
-                lastCopyToPath);
-        destDir.setContextMenuId(R.menu.menu_context_osdir);
-        destDir.show(getActivity().getFragmentManager(), "osdir");
+            destDir.defineDirectoryNavigation(new OSDirectory("/", null),
+                    (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
+                    lastCopyToPath);
+            destDir.setContextMenuId(R.menu.menu_context_osdir);
+            destDir.show(getActivity().getFragmentManager(), "osdir");
+        }
         return false;
     }
 
@@ -720,9 +726,50 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     }
 
+    private void findDuplicates() {
+        SqlJobTaskBase task = new SqlJobTaskBase(this.getActivity(), "Removed duplcates from media dB:\n", null) {
+            @Override
+            protected void doInBackground(Long id) {
+                this.mSelectedItems.add(id);
+            }
+
+            @Override
+            protected void onPostExecute(SelectedItems selectedItems) {
+                if (!isCancelled()) {
+                    if ((selectedItems != null) && (selectedItems.size() > 0)) {
+                        onDuplicatesFound(selectedItems, mStatus);
+                    } else {
+                        onDuplicatesFound(null, mStatus);
+                    }
+                }
+            }
+        };
+        QueryParameterParcelable query = FotoSql.queryGetDuplicates;
+        task.execute(query);
+    }
+
+    /** is called when findDuplicates() found duplicates */
+    private void onDuplicatesFound(SelectedItems selectedItems, StringBuffer debugMessage) {
+        if (debugMessage != null) {
+            Log.w(Global.LOG_CONTEXT, debugPrefix + debugMessage);
+        }
+
+        if (selectedItems != null) {
+            QueryParameterParcelable query = new QueryParameterParcelable();
+            FotoSql.setWhereSelection(query, selectedItems);
+
+            int delCount = getActivity().getContentResolver().delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, query.toAndroidWhere(), null);
+            if (debugMessage != null) {
+                Log.w(Global.LOG_CONTEXT, debugPrefix + " deleted " + delCount +
+                        " duplicates\n\tDELETE ... WHERE " + query.toAndroidWhere());
+            }
+
+            requery();
+        }
+    }
 
     private void removeAllFromSelection() {
-        SqlUpdateTask task = new SqlUpdateTask(this.getActivity(), "removeAllFromSelection", this.mSelectedItems) {
+        SqlJobTaskBase task = new SqlJobTaskBase(this.getActivity(), "removeAllFromSelection", this.mSelectedItems) {
             @Override
             protected void doInBackground(Long id) {
                 this.mSelectedItems.remove(id);
@@ -738,7 +785,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     private void addAllToSelection() {
-        SqlUpdateTask task = new SqlUpdateTask(this.getActivity(), "addAllToSelection", this.mSelectedItems) {
+        SqlJobTaskBase task = new SqlJobTaskBase(this.getActivity(), "addAllToSelection", this.mSelectedItems) {
             @Override
             protected void doInBackground(Long id) {
                 this.mSelectedItems.add(id);

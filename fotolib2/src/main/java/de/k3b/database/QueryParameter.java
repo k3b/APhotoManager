@@ -108,17 +108,21 @@ public class QueryParameter {
 
     /** android content-queries do not support GROUP BY.
      * Therefore this sql is added to the WHERE part.
-     * [select ... from ... where (] [mWhere) GROUP BY (mGroupBy] [) ORDER BY ] [mOrderBy]*/
+     * [select ... from ... where (] [[mWhere][) GROUP BY (mGroupBy][) HAVING (mHaving]] [) ORDER BY ] [mOrderBy]*/
     public String toAndroidWhere() {
         boolean hasWhere = Helper.isNotEmpty(mWhere);
         boolean hasGroup = Helper.isNotEmpty(mGroupBy);
-        if (!hasWhere && !hasGroup) return null;
+        boolean hasHaving = Helper.isNotEmpty(mHaving);
+        if (!hasWhere && !hasGroup && !hasHaving) return null;
 
         StringBuilder result = new StringBuilder();
         if (!Helper.append(result, null, mWhere, " AND ", "(", ")")) {
             result.append("1=1");
         }
         Helper.append(result, ") GROUP BY (", mGroupBy, "), (", "", "");
+        if (hasHaving) {
+            Helper.append(result, ") HAVING (", mHaving, "), (", "", "");
+        }
 
         return result.toString();
     }

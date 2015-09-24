@@ -25,10 +25,10 @@ import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.DataSetObserver;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -78,6 +78,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     // how many changes have been made. if != 0 parent activity must invalidate cached data
     private static int mModifyCount = 0;
+    private MenuItem mMenuSlideshow = null;
 
     class ImageDetailFileCommands extends AndroidFileCommands {
         @Override
@@ -100,10 +101,12 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
                 case OP_COPY: return R.string.format_copy_result;
                 case OP_MOVE: return R.string.format_move_result;
                 case OP_DELETE: return R.string.format_delete_result;
+                case OP_RENAME: return R.string.format_rename_result;
+                case OP_UPDATE: return R.string.format_update_result;
             }
             return 0;
         }
-/*        */
+
     }
     public static class MoveOrCopyDestDirPicker extends DirectoryPickerFragment {
         static AndroidFileCommands sFileCommands = null;
@@ -147,7 +150,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     // private static final String ISLOCKED_ARG = "isLocked";
 	
-	private ViewPager mViewPager = null;
+	private LockableViewPager mViewPager = null;
     private ImagePagerAdapterFromCursor mAdapter = null;
 
     private final AndroidFileCommands mFileCommands = new ImageDetailFileCommands();
@@ -208,6 +211,11 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
                 @Override
                 public void onChanged() {
                     super.onChanged();
+                    // #13 Swiping: Sometimes the app jumps back
+                    int currentViewItem = mViewPager.getCurrentItem();
+                    if (currentViewItem > 0) {
+                        mScrollPosition = currentViewItem;
+                    }
                     onLoadCompleted();
                 }
             };
@@ -215,6 +223,12 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             mAdapter = new ImagePagerAdapterFromCursor(this, mGalleryContentQuery, mDebugPrefix);
             mAdapter.registerDataSetObserver(mLoadCompleteHandler);
             mViewPager.setAdapter(mAdapter);
+            mViewPager.setOnInterceptTouchEvent(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mSlideShowStarted) startStopSlideShow(false);
+                }
+            });
 
             if (savedInstanceState != null) {
                 mScrollPosition = savedInstanceState.getInt(INSTANCE_STATE_LAST_SCROLL_POSITION, this.mScrollPosition);
@@ -332,7 +346,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     @Override
     protected void onPause () {
         Global.debugMemory(mDebugPrefix, "onPause");
-
+        startStopSlideShow(false);
         super.onPause();
     }
 
@@ -366,6 +380,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_image_detail, menu);
         getMenuInflater().inflate(R.menu.menu_image_commands, menu);
+        mMenuSlideshow = menu.findItem(R.id.action_slideshow);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -483,6 +498,12 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        boolean slideShowStarted = mSlideShowStarted;
+
+        // every command will stop the slideshow
+        if (slideShowStarted) {
+            startStopSlideShow(false);
+        }
         if (mFileCommands.onOptionsItemSelected(item, getCurrentFoto())) {
             mModifyCount++;
             return true; // case R.id.cmd_delete:
@@ -492,6 +513,11 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         switch (item.getItemId()) {
             case R.id.action_details:
                 cmdShowDetails(getCurrentFilePath());
+                return true;
+
+            case R.id.action_slideshow:
+                // only if not started
+                if (!slideShowStarted) startStopSlideShow(true);
                 return true;
 
             case R.id.action_edit:
@@ -520,6 +546,37 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
                 return super.onOptionsItemSelected(item);
         }
 
+    }
+
+    private static final int SLIDESHOW_WHAT = 2;
+    private boolean mSlideShowStarted = false;
+    private Handler mSlideShowTimer = new Handler() {
+        public void handleMessage(Message m) {
+            if (mSlideShowStarted) {
+                onSlideShowNext();
+                sendMessageDelayed(Message.obtain(this, SLIDESHOW_WHAT), Global.slideshowIntervallInMilliSecs);
+            }
+        }
+    };
+
+    private void startStopSlideShow(boolean start) {
+        mViewPager.setLocked(start);
+        if (start != mSlideShowStarted) {
+            if (start) {
+                onSlideShowNext();
+                mSlideShowTimer.sendMessageDelayed(Message.obtain(mSlideShowTimer, SLIDESHOW_WHAT), Global.slideshowIntervallInMilliSecs);
+            } else {
+                mSlideShowTimer.removeMessages(SLIDESHOW_WHAT);
+            }
+            mSlideShowStarted = start;
+            if (mMenuSlideshow != null) mMenuSlideshow.setChecked(start);
+        }
+    }
+
+    private void onSlideShowNext() {
+        int pos = mViewPager.getCurrentItem() + 1;
+        if (pos >= mAdapter.getCount()) pos = 0;
+        mViewPager.setCurrentItem(pos);
     }
 
     private void cmdStartIntent(String currentFilePath, String action, int idChooserCaption, int idEditError) {
@@ -552,50 +609,56 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     }
 
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFotos fotos) {
-        MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
+        if (AndroidFileCommands.canProcessFile(this)) {
+            MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
-        destDir.defineDirectoryNavigation(new OSDirectory("/", null), FotoSql.QUERY_TYPE_GROUP_COPY, lastCopyToPath);
-        destDir.setContextMenuId(R.menu.menu_context_osdir);
-        destDir.show(this.getFragmentManager(), "osdirimage");
+            destDir.defineDirectoryNavigation(new OSDirectory("/", null),
+                    (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
+                    lastCopyToPath);
+            destDir.setContextMenuId(R.menu.menu_context_osdir);
+            destDir.show(this.getFragmentManager(), "osdirimage");
+        }
         return false;
     }
 
     private boolean onRenameDirQueston(final long fotoId, final String fotoPath, String newName) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.cmd_rename);
-        View content = this.getLayoutInflater().inflate(R.layout.dialog_edit_name, null);
+        if (AndroidFileCommands.canProcessFile(this)) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.cmd_rename);
+            View content = this.getLayoutInflater().inflate(R.layout.dialog_edit_name, null);
 
-        final EditText edit = (EditText) content.findViewById(R.id.edName);
+            final EditText edit = (EditText) content.findViewById(R.id.edName);
 
-        if (newName == null) {
-            newName = new File(getCurrentFilePath()).getName();
-        }
-        edit.setText(newName);
-		
-		// select text without extension
-		int selectLen = newName.lastIndexOf(".");
-		if (selectLen == -1) selectLen = newName.length();
-        edit.setSelection(0, selectLen);
-
-        builder.setView(content);
-        builder.setNegativeButton(R.string.cancel, null);
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            //@Override
-            public void onClick(DialogInterface dialog, int which) {
-                onRenameSubDirAnswer(fotoId, fotoPath, edit.getText().toString());
+            if (newName == null) {
+                newName = new File(getCurrentFilePath()).getName();
             }
-        });
-        AlertDialog alertDialog = builder.create();
-        alertDialog.show();
+            edit.setText(newName);
 
-        int width = (int ) (8 * edit.getTextSize());
-        // DisplayMetrics metrics = getResources().getDisplayMetrics();
-        // int width = metrics.widthPixels;
-        alertDialog.getWindow().setLayout(width * 2, LinearLayout.LayoutParams.WRAP_CONTENT);
-		edit.requestFocus();
-		
-		// request keyboard. See http://stackoverflow.com/questions/2403632/android-show-soft-keyboard-automatically-when-focus-is-on-an-edittext
-		alertDialog.getWindow().setSoftInputMode (WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+            // select text without extension
+            int selectLen = newName.lastIndexOf(".");
+            if (selectLen == -1) selectLen = newName.length();
+            edit.setSelection(0, selectLen);
+
+            builder.setView(content);
+            builder.setNegativeButton(R.string.cancel, null);
+            builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                //@Override
+                public void onClick(DialogInterface dialog, int which) {
+                    onRenameSubDirAnswer(fotoId, fotoPath, edit.getText().toString());
+                }
+            });
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+
+            int width = (int) (8 * edit.getTextSize());
+            // DisplayMetrics metrics = getResources().getDisplayMetrics();
+            // int width = metrics.widthPixels;
+            alertDialog.getWindow().setLayout(width * 2, LinearLayout.LayoutParams.WRAP_CONTENT);
+            edit.requestFocus();
+
+            // request keyboard. See http://stackoverflow.com/questions/2403632/android-show-soft-keyboard-automatically-when-focus-is-on-an-edittext
+            alertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+        }
         return true;
     }
 
