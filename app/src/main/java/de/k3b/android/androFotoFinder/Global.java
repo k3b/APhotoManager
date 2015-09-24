@@ -42,6 +42,9 @@ public class Global {
 
     public static boolean clearSelectionAfterCommand = false;
 
+    /** true update only if media scanner is not running. false=risky=always allow.  */
+    public static boolean mustCheckMediaScannerRunning = true;
+
     public static void debugMemory(String modul, String message) {
         if (false && Global.debugEnabled) {
             Runtime r = Runtime.getRuntime();

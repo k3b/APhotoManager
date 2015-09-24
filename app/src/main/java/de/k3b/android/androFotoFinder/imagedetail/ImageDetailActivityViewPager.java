@@ -101,10 +101,12 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
                 case OP_COPY: return R.string.format_copy_result;
                 case OP_MOVE: return R.string.format_move_result;
                 case OP_DELETE: return R.string.format_delete_result;
+                case OP_RENAME: return R.string.format_rename_result;
+                case OP_UPDATE: return R.string.format_update_result;
             }
             return 0;
         }
-/*        */
+
     }
     public static class MoveOrCopyDestDirPicker extends DirectoryPickerFragment {
         static AndroidFileCommands sFileCommands = null;
@@ -607,9 +609,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     }
 
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFotos fotos) {
-        if (move && MediaScanner.isScannerActive(this.getContentResolver())) {
-            Toast.makeText(this, R.string.cannot_change_if_scanner_active, Toast.LENGTH_LONG).show();
-        } else {
+        if (AndroidFileCommands.canProcessFile(this)) {
             MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
             destDir.defineDirectoryNavigation(new OSDirectory("/", null),
@@ -622,9 +622,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     }
 
     private boolean onRenameDirQueston(final long fotoId, final String fotoPath, String newName) {
-        if (MediaScanner.isScannerActive(this.getContentResolver())) {
-            Toast.makeText(this, R.string.cannot_change_if_scanner_active, Toast.LENGTH_LONG).show();
-        } else {
+        if (AndroidFileCommands.canProcessFile(this)) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle(R.string.cmd_rename);
             View content = this.getLayoutInflater().inflate(R.layout.dialog_edit_name, null);

@@ -39,6 +39,8 @@ public class FileCommands implements  Cloneable {
     public static final int OP_COPY = 1;
     public static final int OP_MOVE = 2;
     public static final int OP_DELETE = 3;
+    public static final int OP_RENAME = 4;
+    public static final int OP_UPDATE = 5;
     private static final String EXT_SIDECAR = ".xmp";
 
     private String mLogFilePath;
@@ -52,13 +54,19 @@ public class FileCommands implements  Cloneable {
 
     public int deleteFiles(String... paths) {
         int result = 0;
-        openLogfile();
-        for(String path : paths) {
-            if (deleteFileWitSidecar(new File(path))) result++;
+        if (canProcessFile(OP_DELETE)) {
+            openLogfile();
+            for (String path : paths) {
+                if (deleteFileWitSidecar(new File(path))) result++;
+            }
+            onPostProcess(paths, result, paths.length, OP_DELETE);
+            closeLogFile();
         }
-        onPostProcess(paths, result, paths.length, OP_DELETE);
-        closeLogFile();
         return result;
+    }
+
+    protected boolean canProcessFile(int opCode) {
+        return true;
     }
 
     /**
@@ -101,13 +109,15 @@ public class FileCommands implements  Cloneable {
 
     public int moveOrCopyFilesTo(boolean move, File destDirFolder, File... sourceFiles) {
         int result = 0;
-        if (osCreateDirIfNeccessary(destDirFolder)) {
-            File[] destFiles = createDestFiles(destDirFolder, sourceFiles);
+        if (canProcessFile(move ? OP_MOVE : OP_COPY)) {
+            if (osCreateDirIfNeccessary(destDirFolder)) {
+                File[] destFiles = createDestFiles(destDirFolder, sourceFiles);
 
-            result = moveOrCopyFiles(move, destFiles, sourceFiles);
+                result = moveOrCopyFiles(move, destFiles, sourceFiles);
 
-        } else {
-            log("rem Target dir ", getFilenameForLog(destDirFolder), " cannot be created");
+            } else {
+                log("rem Target dir ", getFilenameForLog(destDirFolder), " cannot be created");
+            }
         }
         return result;
     }
@@ -212,6 +222,7 @@ public class FileCommands implements  Cloneable {
             // rename is not neccessary
             return file;
         }
+
 
         String filename = file.getAbsolutePath();
         String extension = ")";

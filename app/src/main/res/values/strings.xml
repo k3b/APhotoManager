@@ -106,6 +106,9 @@
     <string name="format_delete_result">deleted %1$d/%2$d files</string>
     <string name="format_copy_result">copied %1$d/%2$d files</string>
     <string name="format_move_result">moved %1$d/%2$d files</string>
+    <string name="format_update_result" >updated %1$d/%2$d files</string>
+    <string name="format_rename_result" >renamed %1$d/%2$d files</string>
+
     <string name="title_confirm_removal" >Delete Photo(s)?</string>
     <string name="format_confirm_delete">"Are you sure you want to permanently delete these Files?
 %1$s
@@ -168,5 +171,5 @@ Features:
 
     <string name="media_update_result">Updated %1$d Media Database Items</string>
     <string name="cmd_slideshow">Slideshow</string>
-    <string name="cannot_change_if_scanner_active">Cannot move or rename while Android Media Scanner is busy. Try again later.</string>
+    <string name="cannot_change_if_scanner_active">Cannot change image files while Android Media Scanner is busy. Try again later.</string>
 </resources>

@@ -21,14 +21,11 @@ package de.k3b.android.util;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
-import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.view.MenuItem;
@@ -37,6 +34,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.util.Map;
 
+import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.io.DirectoryFormatter;
@@ -83,11 +81,11 @@ public class AndroidFileCommands extends FileCommands {
         super.onPostProcess(paths, modifyCount, itemCount, opCode);
 
         if (opCode != OP_DELETE) {
-            updateMediaDatabase(paths);
+            updateMediaDatabase(opCode, paths);
         }
     }
 
-    public void updateMediaDatabase(String... pathNames) {
+    public void updateMediaDatabase(int opCode, String... pathNames) {
         MediaScanner.updateMediaDBInBackground(mContext, pathNames);
     }
 
@@ -146,8 +144,6 @@ public class AndroidFileCommands extends FileCommands {
         edit.putString(SETTINGS_KEY_LAST_COPY_TO_PATH, copyToPath);
         edit.commit();
     }
-
-
 
     public boolean cmdDeleteFileWithQuestion(final SelectedFotos fotos) {
         String[] pathNames = fotos.getFileNames(mContext);
@@ -279,4 +275,23 @@ public class AndroidFileCommands extends FileCommands {
         cmd.log(params);
         return cmd;
     }
+
+    @Override
+    protected boolean canProcessFile(int opCode) {
+        if (opCode != OP_UPDATE) {
+            return AndroidFileCommands.canProcessFile(this.mContext);
+        }
+        return true;
+    }
+
+    public static boolean canProcessFile(Context context) {
+        if (!Global.mustCheckMediaScannerRunning) return true; // always allowed
+
+        if (MediaScanner.isScannerActive(context.getContentResolver())) {
+            Toast.makeText(context, R.string.cannot_change_if_scanner_active, Toast.LENGTH_LONG).show();
+            return false;
+        }
+        return true;
+    }
+
 }
