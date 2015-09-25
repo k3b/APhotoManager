@@ -128,6 +128,16 @@ public class FotoSql {
             .addHaving("count(*) > 1")
             .addOrderBy(SQL_COL_PATH);
 
+    /* image entries may not have DISPLAY_NAME which is essential for calculating the item-s folder. */
+    public static final QueryParameterParcelable queryGetMissingDisplayNames = (QueryParameterParcelable) new QueryParameterParcelable()
+            .setID(QUERY_TYPE_UNDEFINED)
+            .addColumn(
+                    SQL_COL_PK,
+                    SQL_COL_PATH,
+                    MediaStore.MediaColumns.DISPLAY_NAME,
+                    MediaStore.MediaColumns.TITLE)
+            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
+            .addWhere(MediaStore.MediaColumns.DISPLAY_NAME + " is null");
 
     // the bigger the smaller the area
     private static final double GROUPFACTOR_FOR_Z0 = 0.025;
@@ -567,8 +577,8 @@ public class FotoSql {
         return result;
     }
 
-    public static int execUpdate(Context context, Integer id, ContentValues values) {
-        return context.getContentResolver().update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, values, SQL_COL_PK + " = ?", new String[]{id.toString()});
+    public static int execUpdate(Context context, int id, ContentValues values) {
+        return context.getContentResolver().update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, values, SQL_COL_PK + " = ?", new String[]{Integer.toString(id)});
     }
 
     public static Uri execInsert(Context context, ContentValues values) {

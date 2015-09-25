@@ -79,7 +79,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
         }
 
         if (parameters != null) {
-            requery(context, parameters);
+            requery(context, parameters, "new ImagePagerAdapterFromCursor()");
         }
     }
 
@@ -88,10 +88,10 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
      * Initiates a database requery in a background thread. onLoadFinished() is called when done.
      */
     @Override
-    public void requery(final Activity context, QueryParameterParcelable parameters) {
+    public void requery(final Activity context, QueryParameterParcelable parameters, String why) {
         this.mParameters = parameters;
         if (Global.debugEnabledSql) {
-            Log.i(Global.LOG_CONTEXT, debugPrefix + "requery " + ((parameters != null) ? parameters.toSqlString() : null));
+            Log.i(Global.LOG_CONTEXT, debugPrefix + why + " requery " + ((parameters != null) ? parameters.toSqlString() : null));
         }
 
         requery(context, parameters.toColumns(), parameters.toFrom(), parameters.toAndroidWhere(), parameters.toOrderBy(), parameters.toAndroidParameters());

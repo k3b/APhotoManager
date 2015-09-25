@@ -1,4 +1,6 @@
 TODO
+	bug: add missing displayName requeried to find folderName via sql
+	
 
 	? suche nach tag
 		? eigene tag-db + where _id in (id,id,...)

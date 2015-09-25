@@ -85,7 +85,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         protected void onPostProcess(String[] paths, int modifyCount, int itemCount, int opCode) {
             super.onPostProcess(paths, modifyCount, itemCount, opCode);
             // reload after modification
-            requery();
+            requery("ImageDetailFileCommands.onPostProcess()");
             if (Global.clearSelectionAfterCommand || (opCode == OP_DELETE) || (opCode == OP_MOVE)) {
             }
 
@@ -478,7 +478,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             protected void onPostExecute(Integer resultCount) {
                 super.onPostExecute(resultCount);
                 if (resultCount > 0) {
-                    requery();
+                    requery("updateIncompleteMediaDatabase-MediaScanner.onPostExecute()");
                 } else {
                     finish();
                 }
@@ -686,7 +686,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             onRenameDirQueston(fotoId, fotoSourcePath, newFileName);
         } else if (mFileCommands.rename(fotoId, dest, src)) {
             // rename success: update media database and gui
-            requery();
+            requery("onRename");
             errorMessage = getString(R.string.success_file_rename, src.getAbsoluteFile(), newFileName);
             Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
             mModifyCount++;
@@ -697,8 +697,8 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         }
     }
 
-    private void requery() {
-        mAdapter.requery(this, mGalleryContentQuery);
+    private void requery(String why) {
+        mAdapter.requery(this, mGalleryContentQuery, mDebugPrefix + why);
     }
 
     private String getMime(String path) {

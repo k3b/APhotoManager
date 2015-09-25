@@ -87,7 +87,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
         }
 
         if (parameters != null) {
-            requery(context, parameters);
+            requery(context, parameters, "new GalleryCursorAdapter()");
         }
     }
 
@@ -95,10 +95,10 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
      * Interface Queryable: Initiates a database requery in the background
      */
     @Override
-    public void requery(final Activity context, QueryParameterParcelable parameters) {
+    public void requery(final Activity context, QueryParameterParcelable parameters, String why) {
         if (Global.debugEnabledSql || Global.debugEnabled) {
             mStatus = new StringBuffer();
-            mStatus.append(this.debugPrefix);
+            mStatus.append(this.debugPrefix).append("-").append(why).append(" ");
         } else {
             mStatus = null;
         }
@@ -112,13 +112,17 @@ public class GalleryCursorAdapter extends CursorAdapter implements Queryable {
             }
         }
 
-        requery(context, parameters.toColumns(), parameters.toFrom(), parameters.toAndroidWhere(), parameters.toOrderBy(), parameters.toAndroidParameters());
+        requery(context, why, parameters.toColumns(), parameters.toFrom(),
+                parameters.toAndroidWhere(), parameters.toOrderBy(),
+                parameters.toAndroidParameters());
     }
 
     /**
      * Initiates a database requery in the background
      */
-    private void requery(final Activity context, final String[] sqlProjection, final String from, final String sqlWhereStatement, final String sqlSortOrder, final String... sqlWhereParameters) {
+    private void requery(final Activity context, String why, final String[] sqlProjection,
+                         final String from, final String sqlWhereStatement,
+                         final String sqlSortOrder, final String... sqlWhereParameters) {
 
         /*
          * Initializes the CursorLoader. The MY_LOADER_ID value is eventually passed

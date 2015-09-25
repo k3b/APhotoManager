@@ -49,6 +49,7 @@ public abstract class SqlJobTaskBase extends AsyncTask<QueryParameter, Integer, 
 
     /** collects debug infos */
     protected StringBuffer mStatus = null;
+    protected int mColumnIndexPK = -1;
 
     public SqlJobTaskBase(Activity context, String debugPrefix, SelectedItems selectedItems) {
         if (Global.debugEnabledSql || Global.debugEnabled) {
@@ -84,13 +85,13 @@ public abstract class SqlJobTaskBase extends AsyncTask<QueryParameter, Integer, 
             }
 
             // long startTime = SystemClock.currentThreadTimeMillis();
-            int colIconID = cursor.getColumnIndex(FotoSql.SQL_COL_PK);
+            mColumnIndexPK = cursor.getColumnIndex(FotoSql.SQL_COL_PK);
 
             int increment = PROGRESS_INCREMENT;
             while (cursor.moveToNext()) {
-                Long id = cursor.getLong(colIconID);
+                Long id = cursor.getLong(mColumnIndexPK);
 
-                doInBackground(id);
+                doInBackground(id, cursor);
 
                 itemCount++;
                 if ((--increment) <= 0) {
@@ -110,5 +111,5 @@ public abstract class SqlJobTaskBase extends AsyncTask<QueryParameter, Integer, 
         }
     }
 
-    abstract protected void doInBackground(Long id);
+    abstract protected void doInBackground(Long id, Cursor cursor);
 }

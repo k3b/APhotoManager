@@ -30,5 +30,5 @@ public interface Queryable {
     /**
      * interface Queryable: Initiates a database requery in the background
      */
-    void requery(Activity context, QueryParameterParcelable parameters);
+    void requery(Activity context, QueryParameterParcelable parameters, String why);
 }

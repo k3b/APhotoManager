@@ -316,7 +316,7 @@ public class FotoGalleryActivity extends Activity implements Common,
         }
 
         setTitle();
-        reloadGui();
+        reloadGui("onCreate");
     }
 
     @Override
@@ -399,19 +399,19 @@ public class FotoGalleryActivity extends Activity implements Common,
                 return true;
             case R.id.cmd_sort_date:
                 this.mGalleryQueryParameter.setSortID(FotoSql.SORT_BY_DATE);
-                reloadGui();
+                reloadGui("sort date");
                 return true;
             case R.id.cmd_sort_directory:
                 this.mGalleryQueryParameter.setSortID(FotoSql.SORT_BY_NAME);
-                reloadGui();
+                reloadGui("sort dir");
                 return true;
             case R.id.cmd_sort_len:
                 this.mGalleryQueryParameter.setSortID(FotoSql.SORT_BY_NAME_LEN);
-                reloadGui();
+                reloadGui("sort len");
                 return true;
             case R.id.cmd_sort_location:
                 this.mGalleryQueryParameter.setSortID(FotoSql.SORT_BY_LOCATION);
-                reloadGui();
+                reloadGui("sort geo");
                 return true;
             case R.id.action_settings:
                 openSettings();
@@ -457,7 +457,7 @@ public class FotoGalleryActivity extends Activity implements Common,
 
             invalidateDirectories();
 
-            reloadGui();
+            reloadGui("filter changed");
         }
     }
 
@@ -543,7 +543,7 @@ public class FotoGalleryActivity extends Activity implements Common,
         // current path does not contain photo => reload witout current path
         if ((count == 0) &&(mGalleryQueryParameter.clearPathIfActive())) {
             setTitle();
-            reloadGui();
+            reloadGui("query changed");
         }
     }
 
@@ -589,23 +589,23 @@ public class FotoGalleryActivity extends Activity implements Common,
                 Log.d(Global.LOG_CONTEXT, "FotoGalleryActivity.navigateTo " + selectedAbsolutePath + " from " + mGalleryQueryParameter.mCurrentLatLon);
                 this.mGalleryQueryParameter.mCurrentLatLon.get(DirectoryFormatter.parseLatLon(selectedAbsolutePath));
 
-                reloadGui();
+                reloadGui("navigate to geo");
             } else { //  if (this.mGalleryQueryParameter.mCurrentPath.compareTo(selectedAbsolutePath) != 0) {
                 Log.d(Global.LOG_CONTEXT, "FotoGalleryActivity.navigateTo " + selectedAbsolutePath + " from " + this.mGalleryQueryParameter.mCurrentPath);
                 this.mGalleryQueryParameter.mCurrentPath = selectedAbsolutePath;
                 this.mGalleryQueryParameter.mDirQueryID = queryTypeId;
                 setTitle();
 
-                reloadGui();
+                reloadGui("navigate to dir");
             }
         }
     }
 
-    private void reloadGui() {
+    private void reloadGui(String why) {
         if (mGalleryGui != null) {
             QueryParameterParcelable query = this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery();
             if (query != null) {
-                this.mGalleryGui.requery(this, query);
+                this.mGalleryGui.requery(this, query, debugPrefix + why);
             }
         }
 

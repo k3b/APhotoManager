@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
@@ -11,6 +12,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Looper;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
@@ -117,13 +119,8 @@ public class MediaScanner extends AsyncTask<String,Object,Integer> {
     /** updates values with current values of file */
     private static void getExifFromFile(ContentValues values, File file) {
         String absolutePath = file.getAbsolutePath();
-        String title = values.getAsString(MediaStore.MediaColumns.TITLE);
-        if (title == null || TextUtils.isEmpty(title.trim())) {
-            title = generateTitleFromFilePath(absolutePath);
-        }
+        setPathRelatedFieldsIfNeccessary(values, absolutePath, null);
 
-        values.put(MediaStore.MediaColumns.DATA, absolutePath);
-        values.put(MediaStore.MediaColumns.TITLE, title);
         values.put(MediaStore.MediaColumns.DATE_MODIFIED, file.lastModified() / 1000);
         values.put(MediaStore.MediaColumns.SIZE, file.length());
 
@@ -182,7 +179,37 @@ public class MediaScanner extends AsyncTask<String,Object,Integer> {
         }
     }
 
-    private static void update_Android42(Context context, Integer id, File file) {
+    public static void updatePathRelatedFields(Context context, Cursor cursor, String newAbsolutePath) {
+        int columnIndexPk = cursor.getColumnIndex(FotoSql.SQL_COL_PK);
+        int columnIndexPath = cursor.getColumnIndex(FotoSql.SQL_COL_PATH);
+        updatePathRelatedFields(context, cursor, newAbsolutePath, columnIndexPk, columnIndexPath);
+    }
+
+    public static void updatePathRelatedFields(Context context, Cursor cursor, String newAbsolutePath, int columnIndexPk, int columnIndexPath) {
+        ContentValues values = new ContentValues();
+        DatabaseUtils.cursorRowToContentValues(cursor, values);
+        String oldAbsolutePath = cursor.getString(columnIndexPath);
+        int id = cursor.getInt(columnIndexPk);
+        setPathRelatedFieldsIfNeccessary(values, newAbsolutePath, oldAbsolutePath);
+        FotoSql.execUpdate(context, id, values);
+    }
+
+    /** sets the path related fields */
+    public static void setPathRelatedFieldsIfNeccessary(ContentValues values, String newAbsolutePath, String oldAbsolutePath) {
+        setFieldIfNeccessary(values, MediaStore.MediaColumns.TITLE, generateTitleFromFilePath(newAbsolutePath), generateTitleFromFilePath(oldAbsolutePath));
+        setFieldIfNeccessary(values, MediaStore.MediaColumns.DISPLAY_NAME, generateDisplayNameFromFilePath(newAbsolutePath), generateDisplayNameFromFilePath(oldAbsolutePath));
+        values.put(MediaStore.MediaColumns.DATA, newAbsolutePath);
+    }
+
+    /** values[fieldName]=newCalculatedValue if current not set or equals oldCalculatedValue */
+    private static void setFieldIfNeccessary(ContentValues values, String fieldName, String newCalculatedValue, String oldCalculatedValue) {
+        String currentValue = values.getAsString(fieldName);
+        if ((currentValue == null) || (TextUtils.isEmpty(currentValue.trim())) || (currentValue.equals(oldCalculatedValue))) {
+            values.put(fieldName, newCalculatedValue);
+        }
+    }
+
+    private static void update_Android42(Context context, int id, File file) {
         if ((file != null) && file.exists() && file.canRead()) {
             ContentValues values = new ContentValues();
             getExifFromFile(values, file);
@@ -201,20 +228,33 @@ public class MediaScanner extends AsyncTask<String,Object,Integer> {
         }
     }
 
+    @NonNull
     // generates a title based on file name
     public static String generateTitleFromFilePath(String filePath) {
-        // extract file name after last slash
-        int lastSlash = filePath.lastIndexOf('/');
-        if (lastSlash >= 0) {
-            lastSlash++;
-            if (lastSlash < filePath.length()) {
-                filePath = filePath.substring(lastSlash);
+        filePath = generateDisplayNameFromFilePath(filePath);
+
+        if (filePath != null) {
+            // truncate the file extension (if any)
+            int lastDot = filePath.lastIndexOf('.');
+            if (lastDot > 0) {
+                filePath = filePath.substring(0, lastDot);
             }
         }
-        // truncate the file extension (if any)
-        int lastDot = filePath.lastIndexOf('.');
-        if (lastDot > 0) {
-            filePath = filePath.substring(0, lastDot);
+        return filePath;
+    }
+
+    @NonNull
+    // generates a title based on file name
+    public static String generateDisplayNameFromFilePath(String filePath) {
+        if (filePath != null) {
+            // extract file name after last slash
+            int lastSlash = filePath.lastIndexOf('/');
+            if (lastSlash >= 0) {
+                lastSlash++;
+                if (lastSlash < filePath.length()) {
+                    filePath = filePath.substring(lastSlash);
+                }
+            }
         }
         return filePath;
     }
