@@ -22,12 +22,14 @@ import java.io.IOException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
 
 /**
  * Since android.media.MediaScannerConnection does not work on my android-4.2
@@ -35,7 +37,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
  *
  * Created by k3b on 14.09.2015.
  */
-public class MediaScanner extends AsyncTask<String,Object,Integer> {
+public class MediaScanner extends AsyncTask<String[],Object,Integer> {
     private static final String CONTEXT = "MediaScanner";
     private static SimpleDateFormat sFormatter;
 
@@ -51,8 +53,9 @@ public class MediaScanner extends AsyncTask<String,Object,Integer> {
     }
 
     @Override
-    protected Integer doInBackground(String... pathNames) {
-        return updateMediaDatabase_Android42(mContext, pathNames);
+    protected Integer doInBackground(String[]... pathNames) {
+        if (pathNames.length != 2) throw new IllegalArgumentException("MediaScanner.execute(oldFileNames, newFileNames)");
+        return updateMediaDatabase_Android42(mContext, pathNames[0], pathNames[1]);
     }
 
     @Override
@@ -66,17 +69,18 @@ public class MediaScanner extends AsyncTask<String,Object,Integer> {
     }
 
     /** do not wait for result. Use buildIn scanner if a4.4 else own scanner. */
-    public static void updateMediaDBInBackground(Context context, String[] pathNames) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+    public static void updateMediaDBInBackground(Context context, String[] oldPathNames, String[] newPathNames) {
+        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+                && (newPathNames != null) && (newPathNames.length > 0)) {
             // for android-4.4 and up use internal scanner
-            MediaScanner.updateMediaDB_Androd44(context, pathNames);
+            MediaScanner.updateMediaDB_Androd44(context, newPathNames);
         } else if (isGuiThread()) {
             // update_Android42 scanner in seperate background task for android-4.3 and below
             MediaScanner scanTask = new MediaScanner(context.getApplicationContext());
-            scanTask.execute(pathNames);
+            scanTask.execute(oldPathNames, newPathNames);
         } else {
             // Continute in background task  for android-4.3 and below
-            MediaScanner.updateMediaDatabase_Android42(context.getApplicationContext(), pathNames);
+            MediaScanner.updateMediaDatabase_Android42(context.getApplicationContext(), oldPathNames, newPathNames);
         }
     }
 
@@ -85,22 +89,25 @@ public class MediaScanner extends AsyncTask<String,Object,Integer> {
     }
 
 
-    public static int updateMediaDatabase_Android42(Context context, String... pathNames) {
+    public static int updateMediaDatabase_Android42(Context context, String[] oldPathNames, String... newPathNames) {
+        if ((newPathNames != null) && (newPathNames.length > 0) && (oldPathNames != null) && (oldPathNames.length > 0)) {
+            return renameInMediaDatabase(context, oldPathNames, newPathNames);
+        }
         if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, CONTEXT + "A42 scanner starting with " + pathNames.length + " files " + pathNames[0] + "...");
+            Log.i(Global.LOG_CONTEXT, CONTEXT + "A42 scanner starting with " + newPathNames.length + " files " + newPathNames[0] + "...");
         }
 
         // ignore non-jpeg
-        for(int i = 0; i < pathNames.length; i++) {
-            if (!MediaScanner.isJpeg(pathNames[i])) {
-                pathNames[i] = null;
+        for(int i = 0; i < newPathNames.length; i++) {
+            if (!isJpeg(newPathNames[i])) {
+                newPathNames[i] = null;
             }
         }
 
-        Map<String, Integer> inMediaDb = FotoSql.execGetPathIdMap(context.getApplicationContext(), pathNames);
+        Map<String, Integer> inMediaDb = FotoSql.execGetPathIdMap(context.getApplicationContext(), newPathNames);
 
         int count = 0;
-        for (String fileName : pathNames) {
+        for (String fileName : newPathNames) {
             if (fileName != null) {
                 Integer id = inMediaDb.get(fileName);
                 if (id != null) {
@@ -114,6 +121,40 @@ public class MediaScanner extends AsyncTask<String,Object,Integer> {
         }
 
         return count;
+    }
+
+    /** change path and path dependant fields in media database */
+    private static int renameInMediaDatabase(Context context, String[] oldPathNames, String... newPathNames) {
+        Map<String,String> old2NewFileNames = new HashMap<>(oldPathNames.length);
+        for (int i = 0; i < oldPathNames.length; i++) {
+            old2NewFileNames.put(oldPathNames[i], newPathNames[i]);
+        }
+
+        QueryParameterParcelable query = new QueryParameterParcelable(FotoSql.queryChangePath);
+        FotoSql.setWhereFileNames(query, oldPathNames);
+        int resultCount = 0;
+
+        Cursor c = null;
+        try {
+            c = FotoSql.createCursorForQuery(context, query);
+            int pkColNo  = c.getColumnIndex(FotoSql.SQL_COL_PK);
+            int pathColNo  = c.getColumnIndex(FotoSql.SQL_COL_PATH);
+            while (c.moveToNext()) {
+                String oldPath = c.getString(pathColNo);
+                MediaScanner.updatePathRelatedFields(context, c, old2NewFileNames.get(oldPath), pkColNo, pathColNo);
+
+                resultCount++;
+            }
+        } catch (Exception ex) {
+            Log.e(Global.LOG_CONTEXT, "FotoSql.execChangePaths() error :", ex);
+        } finally {
+            if (c != null) c.close();
+        }
+
+        if (Global.debugEnabled) {
+            Log.d(Global.LOG_CONTEXT, "FotoSql.execChangePaths() result count=" + resultCount);
+        }
+        return resultCount;
     }
 
     /** updates values with current values of file */
@@ -259,11 +300,6 @@ public class MediaScanner extends AsyncTask<String,Object,Integer> {
         return filePath;
     }
 
-    public static boolean isJpeg(String path) {
-        String lcPath = path.toLowerCase();
-        return lcPath.endsWith(".jpg") || lcPath.endsWith(".jpeg");
-    }
-
     /**
      * Returns number of milliseconds since Jan. 1, 1970, midnight.
      * Returns -1 if the date time information if not available.
@@ -320,5 +356,11 @@ public class MediaScanner extends AsyncTask<String,Object,Integer> {
         } finally {
             if (cursor != null) cursor.close();
         }
+    }
+
+    public static boolean isJpeg(String path) {
+        if (path == null) return false;
+        String lcPath = path.toLowerCase();
+        return lcPath.endsWith(".jpg") || lcPath.endsWith(".jpeg");
     }
 }

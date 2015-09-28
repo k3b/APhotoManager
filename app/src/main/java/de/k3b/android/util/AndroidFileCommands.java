@@ -32,7 +32,6 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import java.io.File;
-import java.util.Map;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
@@ -77,16 +76,16 @@ public class AndroidFileCommands extends FileCommands {
 
     /** called for each modified/deleted file */
     @Override
-    protected void onPostProcess(String[] paths, int modifyCount, int itemCount, int opCode) {
-        super.onPostProcess(paths, modifyCount, itemCount, opCode);
+    protected void onPostProcess(String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
+        super.onPostProcess(oldPathNames, newPathNames, modifyCount, itemCount, opCode);
 
         if (opCode != OP_DELETE) {
-            updateMediaDatabase(opCode, paths);
+            updateMediaDatabase(opCode, oldPathNames, newPathNames);
         }
     }
 
-    public void updateMediaDatabase(int opCode, String... pathNames) {
-        MediaScanner.updateMediaDBInBackground(mContext, pathNames);
+    public void updateMediaDatabase(int opCode, String[] oldPathNames, String... newPathNames) {
+        MediaScanner.updateMediaDBInBackground(mContext, oldPathNames, newPathNames);
     }
 
     public boolean onOptionsItemSelected(final MenuItem item, final SelectedFotos selectedFileNames) {
@@ -205,7 +204,7 @@ public class AndroidFileCommands extends FileCommands {
         }
 
         closeLogFile();
-        onPostProcess(fileNames, result, ids.length, OP_DELETE);
+        onPostProcess(fileNames, null, result, ids.length, OP_DELETE);
 
         return result;
     }

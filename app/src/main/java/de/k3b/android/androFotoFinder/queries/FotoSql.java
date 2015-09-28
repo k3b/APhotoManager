@@ -31,16 +31,21 @@ import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.util.GeoPoint;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.util.MediaScanner;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
+import de.k3b.io.FileCommands;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGalleryFilter;
@@ -129,14 +134,17 @@ public class FotoSql {
             .addOrderBy(SQL_COL_PATH);
 
     /* image entries may not have DISPLAY_NAME which is essential for calculating the item-s folder. */
-    public static final QueryParameterParcelable queryGetMissingDisplayNames = (QueryParameterParcelable) new QueryParameterParcelable()
+    public static final QueryParameterParcelable queryChangePath = (QueryParameterParcelable) new QueryParameterParcelable()
             .setID(QUERY_TYPE_UNDEFINED)
             .addColumn(
                     SQL_COL_PK,
                     SQL_COL_PATH,
                     MediaStore.MediaColumns.DISPLAY_NAME,
                     MediaStore.MediaColumns.TITLE)
-            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
+            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString());
+
+    /* image entries may not have DISPLAY_NAME which is essential for calculating the item-s folder. */
+    public static final QueryParameterParcelable queryGetMissingDisplayNames = (QueryParameterParcelable) queryChangePath
             .addWhere(MediaStore.MediaColumns.DISPLAY_NAME + " is null");
 
     // the bigger the smaller the area
@@ -230,6 +238,13 @@ public class FotoSql {
         }
     }
 
+    public static void setWhereFileNames(QueryParameter parameters, String... fileNames) {
+        if ((parameters != null) && (fileNames != null) && (fileNames.length > 0)) {
+            parameters.clearWhere()
+                    .addWhere(getWhereInFileNames(fileNames))
+            ;
+        }
+    }
 
     public static void addWhereLatLonNotNull(QueryParameterParcelable parameters) {
         parameters.addWhere(FotoSql.SQL_COL_LAT + " is not null and " + FotoSql.SQL_COL_LON + " is not null")
@@ -540,27 +555,13 @@ public class FotoSql {
     public static Map<String, Integer> execGetPathIdMap(Context context, String... fileNames) {
         Map<String, Integer> result = new HashMap<String, Integer>();
 
-        if (fileNames != null) {
-            StringBuilder filter = new StringBuilder();
-            filter.append(SQL_COL_PATH).append(" in (");
-
-            int count = 0;
-            for (String fileName : fileNames) {
-                if (fileName != null) {
-                    if (count > 0) filter.append(", ");
-                    filter.append("'").append(fileName).append("'");
-                    count++;
-                }
-            }
-
-            if (count == 0) return result;
-            filter.append(")");
-
+        String whereFileNames = getWhereInFileNames(fileNames);
+        if (whereFileNames != null) {
             QueryParameterParcelable query = (QueryParameterParcelable) new QueryParameterParcelable()
                     .setID(QUERY_TYPE_UNDEFINED)
                     .addColumn(SQL_COL_PK, SQL_COL_PATH)
                     .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
-                    .addWhere(filter.toString());
+                    .addWhere(whereFileNames);
 
             Cursor c = null;
             try {
@@ -575,6 +576,27 @@ public class FotoSql {
             }
         }
         return result;
+    }
+
+    private static String getWhereInFileNames(String... fileNames) {
+        if (fileNames != null) {
+            StringBuilder filter = new StringBuilder();
+            filter.append(SQL_COL_PATH).append(" in (");
+
+            int count = 0;
+            for (String fileName : fileNames) {
+                if (!FileCommands.isSidecar(fileName)) {
+                    if (count > 0) filter.append(", ");
+                    filter.append("'").append(fileName).append("'");
+                    count++;
+                }
+            }
+
+            filter.append(")");
+
+            if (count > 0) return filter.toString();
+        }
+        return null;
     }
 
     public static int execUpdate(Context context, int id, ContentValues values) {

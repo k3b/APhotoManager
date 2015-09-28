@@ -58,6 +58,7 @@ import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.AboutDialogPreference;
+import de.k3b.io.FileCommands;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
@@ -82,8 +83,8 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     class ImageDetailFileCommands extends AndroidFileCommands {
         @Override
-        protected void onPostProcess(String[] paths, int modifyCount, int itemCount, int opCode) {
-            super.onPostProcess(paths, modifyCount, itemCount, opCode);
+        protected void onPostProcess(String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
+            super.onPostProcess(oldPathNames, newPathNames, modifyCount, itemCount, opCode);
             // reload after modification
             requery("ImageDetailFileCommands.onPostProcess()");
             if (Global.clearSelectionAfterCommand || (opCode == OP_DELETE) || (opCode == OP_MOVE)) {
@@ -487,7 +488,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
                 }
             }
         };
-        scanner.execute(missing.toArray(new String[missing.size()]));
+        scanner.execute(null, missing.toArray(new String[missing.size()]));
         return missing.size();
     }
 

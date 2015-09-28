@@ -1,6 +1,5 @@
 TODO
-	bug: add missing displayName requeried to find folderName via sql
-	
+	move/rename => updateMediaDB-item instead of rescan
 
 	? suche nach tag
 		? eigene tag-db + where _id in (id,id,...)

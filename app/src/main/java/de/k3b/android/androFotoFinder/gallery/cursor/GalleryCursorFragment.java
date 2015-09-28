@@ -148,8 +148,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         */
 
         @Override
-        protected void onPostProcess(String[] paths, int modifyCount, int itemCount, int opCode) {
-            super.onPostProcess(paths, modifyCount, itemCount, opCode);
+        protected void onPostProcess(String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
+            super.onPostProcess(oldPathNames, newPathNames, modifyCount, itemCount, opCode);
             if (Global.clearSelectionAfterCommand || (opCode == OP_DELETE) || (opCode == OP_MOVE)) {
                 mShowSelectedOnly = true;
                 multiSelectionCancel();
