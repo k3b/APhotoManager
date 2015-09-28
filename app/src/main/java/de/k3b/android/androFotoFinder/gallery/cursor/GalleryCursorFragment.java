@@ -20,6 +20,7 @@
 package de.k3b.android.androFotoFinder.gallery.cursor;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.DataSetObserver;
@@ -148,11 +149,15 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         */
 
         @Override
-        protected void onPostProcess(String[] paths, int modifyCount, int itemCount, int opCode) {
-            super.onPostProcess(paths, modifyCount, itemCount, opCode);
+        protected void onPostProcess(String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
+            Context context = getActivity().getApplicationContext();
             if (Global.clearSelectionAfterCommand || (opCode == OP_DELETE) || (opCode == OP_MOVE)) {
+                MediaScanner.updateMediaDatabase_Android42(context, oldPathNames, newPathNames);
                 mShowSelectedOnly = true;
-                multiSelectionCancel();
+                multiSelectionCancel(); // reload gui
+            } else if (opCode == OP_COPY) {
+                // start scanner in background without gui reload
+                super.onPostProcess(oldPathNames, newPathNames, modifyCount, itemCount, opCode);
             }
 
             int resId = getResourceId(opCode);
@@ -273,7 +278,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         this.mChildPathBar = (LinearLayout) result.findViewById(R.id.child_owner);
         this.mChildPathBarScroller = (HorizontalScrollView) result.findViewById(R.id.child_scroller);
 
-        reloadDirGuiIfAvailable();
+        reloadDirGuiIfAvailable("onCreateView");
 
         fixMediaDatabase();
         return result;
@@ -408,12 +413,15 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         }
 
         mCurrentPath = absolutePath;
-        reloadDirGuiIfAvailable();
+        reloadDirGuiIfAvailable("navigateTo");
         // requeryGallery(); done by owning activity
     }
 
-    private void reloadDirGuiIfAvailable() {
+    private void reloadDirGuiIfAvailable(String why) {
         if ((mDirectoryRoot != null) && (mCurrentPath != null) && (mParentPathBar != null)) {
+            if (Global.debugEnabled) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + " reloadDirGuiIfAvailable : " + why);
+            }
 
             mParentPathBar.removeAllViews();
             mChildPathBar.removeAllViews();

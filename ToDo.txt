@@ -1,6 +1,8 @@
 TODO
-	bug: add missing displayName requeried to find folderName via sql
-	
+	> move/rename => updateMediaDB-item instead of rescan
+		todo alle testen: ren/move/copy/del in imagedetail and gallery
+	- imagedetails-info : show mediaDb-Content
+	? bug imagedetail:send via bluetooth does not work
 
 	? suche nach tag
 		? eigene tag-db + where _id in (id,id,...)

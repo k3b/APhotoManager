@@ -22,6 +22,7 @@ package de.k3b.android.androFotoFinder.imagedetail;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.DataSetObserver;
@@ -58,6 +59,7 @@ import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.AboutDialogPreference;
+import de.k3b.io.FileCommands;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
@@ -82,18 +84,33 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     class ImageDetailFileCommands extends AndroidFileCommands {
         @Override
-        protected void onPostProcess(String[] paths, int modifyCount, int itemCount, int opCode) {
-            super.onPostProcess(paths, modifyCount, itemCount, opCode);
-            // reload after modification
-            requery("ImageDetailFileCommands.onPostProcess()");
-            if (Global.clearSelectionAfterCommand || (opCode == OP_DELETE) || (opCode == OP_MOVE)) {
+        protected void onPostProcess(String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
+            Context context = ImageDetailActivityViewPager.this.getApplicationContext();
+
+            switch (opCode) {
+                case OP_UPDATE:
+                case OP_COPY:
+                    // restart scanner in background if necessary
+                    super.onPostProcess(oldPathNames, newPathNames, modifyCount, itemCount, opCode);
+                    break;
+                case OP_MOVE:
+                case OP_RENAME:
+                    if ((newPathNames!= null) && (newPathNames.length > 0)) {
+                        mInitialFilePath = newPathNames[0];
+                    }
+                    MediaScanner.updateMediaDatabase_Android42(context, oldPathNames, newPathNames);
+                    break;
+                case OP_DELETE:
+                    // media db is already updated
+                    break;
             }
 
-            Activity context = ImageDetailActivityViewPager.this;
             int resId = getResourceId(opCode);
             String message = getString(resId, Integer.valueOf(modifyCount), Integer.valueOf(itemCount));
             Toast.makeText(context, message, Toast.LENGTH_LONG).show();
             // mDirectoryListener.invalidateDirectories();
+            // reload after modification
+            requery("ImageDetailFileCommands.onPostProcess()" + message);
         }
 
         private int getResourceId(int opCode) {
@@ -466,13 +483,6 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             Log.d(Global.LOG_CONTEXT, message.toString());
         }
 
-        /*
-        MediaScannerConnection.scanFile(
-                // http://stackoverflow.com/questions/5739140/mediascannerconnection-produces-android-app-serviceconnectionleaked
-                this.getApplicationContext(),
-                missing.toArray(new String[missing.size()]),
-                null, null);
-        */
         MediaScanner scanner = new MediaScanner(this) {
             @Override
             protected void onPostExecute(Integer resultCount) {
@@ -487,7 +497,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
                 }
             }
         };
-        scanner.execute(missing.toArray(new String[missing.size()]));
+        scanner.execute(null, missing.toArray(new String[missing.size()]));
         return missing.size();
     }
 
@@ -685,10 +695,6 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
             onRenameDirQueston(fotoId, fotoSourcePath, newFileName);
         } else if (mFileCommands.rename(fotoId, dest, src)) {
-            // rename success: update media database and gui
-            requery("onRename");
-            errorMessage = getString(R.string.success_file_rename, src.getAbsoluteFile(), newFileName);
-            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
             mModifyCount++;
         } else {
             // rename failed
