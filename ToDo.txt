@@ -1,5 +1,12 @@
 TODO
-	? bug imagedetail:send via bluetooth does not work
+	bug:delete ohne refresh
+		getContext().getContentResolver().notifyChange(uri, null);		
+		do you call getContext().getContentResolver().notifyChange(Uri,..); in your update/insert ContentProvider methods implementation ? 
+			do you call cursor.setNotificationUri(getContext().getContentResolver(), uri); before return it from query method in your ContentProvide	
+			http://stackoverflow.com/questions/32741634/how-to-make-notifychange-work-between-two-activities
+			http://stackoverflow.com/questions/26609078/android-listfragment-data-not-updating-via-simplecursoradapter-loadermanager
+			http://stackoverflow.com/questions/19064802/android-contentprovider-notifychange
+			see foto download
 
 	? suche nach tag
 		? eigene tag-db + where _id in (id,id,...)
@@ -12,6 +19,8 @@ TODO
 				fullpath relative to csv-file-path
 			insert into tagDB via merge-sort
 		exiftool > csv => import für tags, title,
+		tree-file with tag hirachy
+			?? duplicate tags in 2 hirachies
 	extra log für gps-update via csv
 		
 #6 geo-picker
