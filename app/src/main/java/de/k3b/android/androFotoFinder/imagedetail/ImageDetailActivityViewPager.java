@@ -522,7 +522,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         // Handle presses on the action bar items
         switch (item.getItemId()) {
             case R.id.action_details:
-                cmdShowDetails(getCurrentFilePath());
+                cmdShowDetails(getCurrentFilePath(), getCurrentImageId());
                 return true;
 
             case R.id.action_slideshow:
@@ -613,9 +613,9 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         }
     }
 
-    private void cmdShowDetails(String fullFilePath) {
+    private void cmdShowDetails(String fullFilePath, long currentImageId) {
 
-        ImageDetailDialogBuilder.createImageDetailDialog(this, fullFilePath).show();
+        ImageDetailDialogBuilder.createImageDetailDialog(this, fullFilePath, currentImageId).show();
     }
 
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFotos fotos) {

@@ -22,6 +22,7 @@ package de.k3b.android.androFotoFinder.imagedetail;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ContentValues;
 import android.media.ExifInterface;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -34,8 +35,10 @@ import com.drew.metadata.Tag;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.queries.FotoSql;
 
 /**
  * Created by k3b on 15.07.2015.
@@ -43,7 +46,7 @@ import de.k3b.android.androFotoFinder.R;
 public class ImageDetailDialogBuilder {
     private static final String NL = "\n";
 
-    public static Dialog createImageDetailDialog(Activity context, String filePath) {
+    public static Dialog createImageDetailDialog(Activity context, String filePath, long currentImageId) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(filePath);
 
@@ -51,7 +54,7 @@ public class ImageDetailDialogBuilder {
         sv.setVerticalScrollBarEnabled(true);
         TextView view = new TextView(context);
 
-        view.setText(getExifInfo(filePath));
+        view.setText(getExifInfo(context, filePath, currentImageId));
 
         sv.addView(view);
         builder.setView(sv);
@@ -65,7 +68,7 @@ public class ImageDetailDialogBuilder {
         return builder.create();
     }
 
-    private static String getExifInfo(String filepath) {
+    private static String getExifInfo(Activity context, String filepath, long currentImageId) {
         StringBuilder builder = new StringBuilder();
 
         try {
@@ -80,6 +83,14 @@ public class ImageDetailDialogBuilder {
             File xmpFile = new File(xmpFilePath);
             addExif(builder, xmpFile);
 
+            ContentValues dbContent = FotoSql.getDbContent(context, currentImageId);
+            if (dbContent != null) {
+                builder.append(NL).append(line).append(NL);
+                builder.append(NL).append(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI).append(NL).append(NL);
+                for (Map.Entry<String, Object> item : dbContent.valueSet()) {
+                    builder.append(item.getKey()).append("=").append(item.getValue()).append(NL);
+                }
+            }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ImageProcessingException e) {

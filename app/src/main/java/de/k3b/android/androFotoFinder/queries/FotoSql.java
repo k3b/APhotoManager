@@ -23,6 +23,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -31,17 +32,13 @@ import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.util.GeoPoint;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
-import de.k3b.android.util.MediaScanner;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
@@ -595,6 +592,25 @@ public class FotoSql {
             filter.append(")");
 
             if (count > 0) return filter.toString();
+        }
+        return null;
+    }
+
+    public static ContentValues getDbContent(Context context, final long id) {
+        ContentResolver resolver = context.getContentResolver();
+
+        Cursor c = null;
+        try {
+            c = resolver.query(SQL_TABLE_EXTERNAL_CONTENT_URI, new String[]{"*"}, FotoSql.SQL_COL_PK + " = ?", new String[]{"" + id}, null);
+            if (c.moveToNext()) {
+                ContentValues values = new ContentValues();
+                DatabaseUtils.cursorRowToContentValues(c, values);
+                return values;
+            }
+        } catch (Exception ex) {
+            Log.e(Global.LOG_CONTEXT, "FotoSql.getDbContent(id=" + id + ") failed", ex);
+        } finally {
+            if (c != null) c.close();
         }
         return null;
     }
