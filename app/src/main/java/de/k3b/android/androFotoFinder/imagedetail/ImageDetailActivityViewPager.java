@@ -531,11 +531,11 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
                 return true;
 
             case R.id.action_edit:
-                cmdStartIntent(getCurrentFilePath(), Intent.ACTION_EDIT, R.string.title_chooser_edit, R.string.error_edit);
+                cmdStartIntent(getCurrentFilePath(), null, Intent.ACTION_EDIT, R.string.title_chooser_edit, R.string.error_edit);
                 return true;
 
             case R.id.menu_item_share:
-                cmdStartIntent(getCurrentFilePath(), Intent.ACTION_SEND, R.string.title_chooser_share, R.string.error_share);
+                cmdStartIntent(null, getCurrentFilePath(), Intent.ACTION_SEND, R.string.title_chooser_share, R.string.error_share);
                 return true;
 
             case R.id.cmd_copy:
@@ -589,17 +589,26 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         mViewPager.setCurrentItem(pos);
     }
 
-    private void cmdStartIntent(String currentFilePath, String action, int idChooserCaption, int idEditError) {
-        File file = new File(currentFilePath);
-        final Uri uri = Uri.fromFile(file);
+    private void cmdStartIntent(String currentFilePath, String extraPath, String action, int idChooserCaption, int idEditError) {
 
         final Intent outIntent = new Intent()
                 .setAction(action)
-                .setDataAndType(uri, getMime(currentFilePath))
                 // .putExtra(Intent.EXTRA_STREAM, uri)
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
+        if (currentFilePath != null) {
+            File file = new File(currentFilePath);
+            final Uri uri = Uri.fromFile(file);
+            outIntent.setDataAndType(uri, getMime(currentFilePath));
+        }
+
+        if (extraPath != null) {
+            File file = new File(extraPath);
+            final Uri uri = Uri.fromFile(file);
+            outIntent.setType(getMime(extraPath));
+            outIntent.putExtra(EXTRA_STREAM, uri);
+        }
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, "cmdStartIntent(" +
                     action +

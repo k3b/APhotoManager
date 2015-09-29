@@ -10,6 +10,8 @@
 	* if image exists but is not in media database restart media scanner for containing folder
 		* automatic removal of duplicate images from media db
 	* Bugfix [#13 Swiping](https://github.com/k3b/AndroFotoFinder/issues/13) : Sometimes the app jumps back
+	* details: added mediaDb-field-values in addition to the exif-infos
+	* Fixed Send via bluetooth 
 * [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) :
 	* menu to open [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)
 		* purpose: Filter the photos that are visible in the map.

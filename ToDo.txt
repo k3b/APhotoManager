@@ -1,7 +1,4 @@
 TODO
-	> move/rename => updateMediaDB-item instead of rescan
-		todo alle testen: ren/move/copy/del in imagedetail and gallery
-	- imagedetails-info : show mediaDb-Content
 	? bug imagedetail:send via bluetooth does not work
 
 	? suche nach tag
