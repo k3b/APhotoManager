@@ -149,7 +149,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         */
 
         @Override
-        protected void onPostProcess(String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
+        protected void onPostProcess(String what, String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
             Context context = getActivity().getApplicationContext();
             if (Global.clearSelectionAfterCommand || (opCode == OP_DELETE) || (opCode == OP_MOVE)) {
                 MediaScanner.updateMediaDatabase_Android42(context, oldPathNames, newPathNames);
@@ -157,7 +157,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 multiSelectionCancel(); // reload gui
             } else if (opCode == OP_COPY) {
                 // start scanner in background without gui reload
-                super.onPostProcess(oldPathNames, newPathNames, modifyCount, itemCount, opCode);
+                super.onPostProcess(what, oldPathNames, newPathNames, modifyCount, itemCount, opCode);
             }
 
             int resId = getResourceId(opCode);

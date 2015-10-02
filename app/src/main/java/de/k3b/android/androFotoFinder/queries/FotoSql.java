@@ -22,10 +22,12 @@ package de.k3b.android.androFotoFinder.queries;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import org.osmdroid.api.IGeoPoint;
@@ -575,7 +577,7 @@ public class FotoSql {
         return result;
     }
 
-    private static String getWhereInFileNames(String... fileNames) {
+    public static String getWhereInFileNames(String... fileNames) {
         if (fileNames != null) {
             StringBuilder filter = new StringBuilder();
             filter.append(SQL_COL_PATH).append(" in (");
@@ -621,6 +623,18 @@ public class FotoSql {
 
     public static Uri execInsert(Context context, ContentValues values) {
         return context.getContentResolver().insert(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, values);
+    }
+
+    @NonNull
+    public static CursorLoader createCursorLoader(Context context, QueryParameter query) {
+        return new CursorLoader(
+                context,   // Parent activity context
+                Uri.parse(query.toFrom()),        // Table to query
+                query.toColumns(),     // Projection to return
+                query.toAndroidWhere(),            // No selection clause
+                query.toAndroidParameters(),            // No selection arguments
+                query.toOrderBy()             // Default sort order
+        );
     }
 }
 

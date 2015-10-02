@@ -24,10 +24,10 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -48,6 +48,7 @@ import de.k3b.io.IDirectory;
  */
 public class AndroidFileCommands extends FileCommands {
     private static final String SETTINGS_KEY_LAST_COPY_TO_PATH = "last_copy_to_path";
+    private static final String mDebugPrefix = "AndroidFileCommands.";
     private Activity mContext;
     private AlertDialog mActiveAlert = null;
 
@@ -74,18 +75,43 @@ public class AndroidFileCommands extends FileCommands {
         return zipfile;
     }
 
-    /** called for each modified/deleted file */
+    /** called before copy/move/rename/delete */
     @Override
-    protected void onPostProcess(String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
-        super.onPostProcess(oldPathNames, newPathNames, modifyCount, itemCount, opCode);
-
-        updateMediaDatabase(opCode, oldPathNames, newPathNames);
+    protected void onPreProcess(String what, String[] oldPathNames, String[] newPathNames, int opCode) {
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onPreProcess('" + what + "')");
+        }
+        super.onPreProcess(what, oldPathNames, newPathNames, opCode);
     }
 
-    public void updateMediaDatabase(int opCode, String[] oldPathNames, String... newPathNames) {
-        if (opCode != OP_DELETE) {
-            MediaScanner.updateMediaDBInBackground(mContext, oldPathNames, newPathNames);
+    /** called for each modified/deleted file */
+    @Override
+    protected void onPostProcess(String what, String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix
+                    + " onPostProcess('" + what + "') => " + modifyCount + "/" + itemCount);
         }
+        super.onPostProcess(what, oldPathNames, newPathNames, modifyCount, itemCount, opCode);
+
+        int resId = getResourceId(opCode);
+        String message = mContext.getString(resId, Integer.valueOf(modifyCount), Integer.valueOf(itemCount));
+        if (itemCount > 0) {
+            MediaScanner.updateMediaDBInBackground(mContext, message, oldPathNames, newPathNames);
+        }
+
+        Toast.makeText(mContext, message, Toast.LENGTH_LONG).show();
+    }
+
+    private int getResourceId(int opCode) {
+        switch (opCode) {
+            case OP_COPY: return R.string.format_copy_result;
+            case OP_MOVE: return R.string.format_move_result;
+            case OP_DELETE: return R.string.format_delete_result;
+            case OP_RENAME: return R.string.format_rename_result;
+            case OP_UPDATE: return R.string.format_update_result;
+        }
+        return 0;
+
     }
 
     public boolean onOptionsItemSelected(final MenuItem item, final SelectedFotos selectedFileNames) {
@@ -100,7 +126,7 @@ public class AndroidFileCommands extends FileCommands {
     }
 
     public boolean rename(Long fileId, File dest, File src) {
-        int result = moveOrCopyFiles(true, new File[]{dest}, new File[]{src});
+        int result = moveOrCopyFiles(true, "rename", new File[]{dest}, new File[]{src});
         return (result != 0);
     }
 
@@ -111,19 +137,7 @@ public class AndroidFileCommands extends FileCommands {
             File destDirFolder = new File(copyToPath);
 
             String[] selectedFileNames = srcFotos.getFileNames(mContext);
-            Long[] ids = (move) ? srcFotos.getIds() : null;
             moveOrCopyFilesTo(move, destDirFolder, SelectedFotos.getFiles(selectedFileNames));
-
-            if (move) {
-                // remove from media database after successfull move
-                File[] sourceFiles = SelectedFotos.getFiles(selectedFileNames);
-                for (int i = 0; i < sourceFiles.length; i++) {
-                    File sourceFile = sourceFiles[i];
-                    if (!osFileExists(sourceFile)) {
-                        onMediaDeleted(sourceFile.getAbsolutePath(), ids[i]);
-                    }
-                }
-            }
         }
     }
 
@@ -185,24 +199,8 @@ public class AndroidFileCommands extends FileCommands {
     }
 
     private int deleteFiles(SelectedFotos fotos) {
-        int result = 0;
         String[] fileNames = fotos.getFileNames(mContext);
-        openLogfile();
-        File[] toBeDeleted = SelectedFotos.getFiles(fileNames);
-        Long[] ids = fotos.getIds();
-
-        for (int i = 0; i < ids.length; i++) {
-            File file = toBeDeleted[i];
-            if (deleteFileWitSidecar(file)) {
-                onMediaDeleted(file.getAbsolutePath(), ids[i]);
-                result++;
-            }
-        }
-
-        closeLogFile();
-        onPostProcess(fileNames, null, result, ids.length, OP_DELETE);
-
-        return result;
+        return super.deleteFiles(fileNames);
     }
 
     /**
@@ -246,13 +244,6 @@ public class AndroidFileCommands extends FileCommands {
 
     /** called every time when command makes some little progress. Can be mapped to async progress-bar */
     protected void onProgress(int itemcount, int size) {
-    }
-
-    private void onMediaDeleted(String absolutePath, Long id) {
-        Uri uri = SelectedFotos.getUri(id);
-        mContext.getContentResolver().delete(uri, null, null);
-        log("rem deleted ", getFilenameForLog(absolutePath),
-                " as content: ", uri.toString());
     }
 
     public AndroidFileCommands setContext(Activity mContext) {

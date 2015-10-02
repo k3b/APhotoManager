@@ -9,7 +9,6 @@ import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -38,7 +37,7 @@ import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
  * Created by k3b on 14.09.2015.
  */
 public class MediaScanner extends AsyncTask<String[],Object,Integer> {
-    private static final String CONTEXT = "MediaScanner";
+    private static final String CONTEXT = "MediaScanner.";
     private static SimpleDateFormat sFormatter;
 
     static {
@@ -47,40 +46,53 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
     }
 
     protected final Context mContext;
+    private final String mWhy;
 
-    public MediaScanner(Context context) {
+    public MediaScanner(Context context, String why) {
+        mWhy = why;
         mContext = context.getApplicationContext();
     }
 
     @Override
     protected Integer doInBackground(String[]... pathNames) {
-        if (pathNames.length != 2) throw new IllegalArgumentException("MediaScanner.execute(oldFileNames, newFileNames)");
+        if (pathNames.length != 2) throw new IllegalArgumentException(CONTEXT + ".execute(oldFileNames, newFileNames)");
         return updateMediaDatabase_Android42(mContext, pathNames[0], pathNames[1]);
     }
 
     @Override
-    protected void onPostExecute(Integer resultCount) {
-        super.onPostExecute(resultCount);
-        String message = this.mContext.getString(R.string.media_update_result, resultCount);
+    protected void onPostExecute(Integer modifyCount) {
+        super.onPostExecute(modifyCount);
+        String message = this.mContext.getString(R.string.media_update_result, modifyCount);
         Toast.makeText(this.mContext, message, Toast.LENGTH_LONG).show();
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, CONTEXT + "A42 scanner finished: " + message);
         }
+
+        if (modifyCount > 0) {
+            notifyChanges(mContext, mWhy);
+        }
     }
 
-    /** do not wait for result. Use buildIn scanner if a4.4 else own scanner. */
-    public static void updateMediaDBInBackground(Context context, String[] oldPathNames, String[] newPathNames) {
-        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
-                && (newPathNames != null) && (newPathNames.length > 0)) {
-            // for android-4.4 and up use internal scanner
-            MediaScanner.updateMediaDB_Androd44(context, newPathNames);
-        } else if (isGuiThread()) {
-            // update_Android42 scanner in seperate background task for android-4.3 and below
-            MediaScanner scanTask = new MediaScanner(context.getApplicationContext());
+    public static void notifyChanges(Context context, String why) {
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, CONTEXT + "notifyChanges(" + why + ") "
+                    + FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI);
+        }
+        context.getContentResolver().notifyChange(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, null);
+    }
+
+    /** do not wait for result. */
+    public static void updateMediaDBInBackground(Context context, String why, String[] oldPathNames, String[] newPathNames) {
+        if (isGuiThread()) {
+            // update_Android42 scanner in seperate background task
+            MediaScanner scanTask = new MediaScanner(context.getApplicationContext(), why + " from completed new AsycTask");
             scanTask.execute(oldPathNames, newPathNames);
         } else {
-            // Continute in background task  for android-4.3 and below
-            MediaScanner.updateMediaDatabase_Android42(context.getApplicationContext(), oldPathNames, newPathNames);
+            // Continute in background task
+            int modifyCount = MediaScanner.updateMediaDatabase_Android42(context.getApplicationContext(), oldPathNames, newPathNames);
+            if (modifyCount > 0) {
+                MediaScanner.notifyChanges(context, why + " within current non-gui-task");
+            }
         }
     }
 
@@ -88,17 +100,16 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
         return (Looper.myLooper() == Looper.getMainLooper());
     }
 
-
     public static int updateMediaDatabase_Android42(Context context, String[] oldPathNames, String... newPathNames) {
-        int count = 0;
+        int modifyCount = 0;
 
         final boolean hasNew = (newPathNames != null) && (newPathNames.length > 0);
         final boolean hasOld = (oldPathNames != null) && (oldPathNames.length > 0);
         if (hasNew && hasOld) {
             return renameInMediaDatabase(context, oldPathNames, newPathNames);
-        }
-
-        if (hasNew) {
+        } else if (hasOld) {
+            return deleteInMediaDatabase(context, oldPathNames);
+        } if (hasNew) {
             if (Global.debugEnabled) {
                 Log.i(Global.LOG_CONTEXT, CONTEXT + "A42 scanner starting with " + newPathNames.length + " files " + newPathNames[0] + "...");
             }
@@ -121,11 +132,27 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
                     } else {
                         insert_Android42(context, new File(fileName));
                     }
-                    count++;
+                    modifyCount++;
                 }
             }
         }
-        return count;
+        return modifyCount;
+    }
+
+    /** delete oldPathNames from media database */
+    private static int deleteInMediaDatabase(Context context, String[] oldPathNames) {
+        String sqlWhere = FotoSql.getWhereInFileNames(oldPathNames);
+        int modifyCount = 0;
+        try {
+            modifyCount = context.getContentResolver().delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, sqlWhere, null);
+            if (Global.debugEnabled) {
+                Log.d(Global.LOG_CONTEXT, CONTEXT + "deleteInMediaDatabase(len=" + oldPathNames.length + ", files='" + oldPathNames[0] + "'...) result count=" + modifyCount);
+            }
+        } catch (Exception ex) {
+            Log.e(Global.LOG_CONTEXT, CONTEXT + "deleteInMediaDatabase(" + sqlWhere + ") error :", ex);
+        }
+
+        return modifyCount;
     }
 
     /** change path and path dependant fields in media database */
@@ -140,7 +167,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
 
         QueryParameterParcelable query = new QueryParameterParcelable(FotoSql.queryChangePath);
         FotoSql.setWhereFileNames(query, oldPathNames);
-        int resultCount = 0;
+        int modifyCount = 0;
 
         Cursor c = null;
         try {
@@ -151,18 +178,18 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
                 String oldPath = c.getString(pathColNo);
                 MediaScanner.updatePathRelatedFields(context, c, old2NewFileNames.get(oldPath), pkColNo, pathColNo);
 
-                resultCount++;
+                modifyCount++;
             }
         } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, "FotoSql.execChangePaths() error :", ex);
+            Log.e(Global.LOG_CONTEXT, CONTEXT + "execChangePaths() error :", ex);
         } finally {
             if (c != null) c.close();
         }
 
         if (Global.debugEnabled) {
-            Log.d(Global.LOG_CONTEXT, "FotoSql.execChangePaths() result count=" + resultCount);
+            Log.d(Global.LOG_CONTEXT, CONTEXT + "execChangePaths() result count=" + modifyCount);
         }
-        return resultCount;
+        return modifyCount;
     }
 
     /** updates values with current values of file */
@@ -334,7 +361,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
      */
     public static void updateMediaDB_Androd44(Context context, String[] pathNames) {
         if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, CONTEXT + "A44 scanner starting with " + pathNames.length + " files " + pathNames[0] + "...");
+            Log.i(Global.LOG_CONTEXT, CONTEXT + "updateMediaDB_Androd44(" + pathNames.length + " files " + pathNames[0] + "...");
         }
 
         // this only works in android-4.4 and up but not below

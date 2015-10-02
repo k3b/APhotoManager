@@ -1,12 +1,16 @@
 TODO
-	bug:delete ohne refresh
-		getContext().getContentResolver().notifyChange(uri, null);		
-		do you call getContext().getContentResolver().notifyChange(Uri,..); in your update/insert ContentProvider methods implementation ? 
-			do you call cursor.setNotificationUri(getContext().getContentResolver(), uri); before return it from query method in your ContentProvide	
-			http://stackoverflow.com/questions/32741634/how-to-make-notifychange-work-between-two-activities
-			http://stackoverflow.com/questions/26609078/android-listfragment-data-not-updating-via-simplecursoradapter-loadermanager
-			http://stackoverflow.com/questions/19064802/android-contentprovider-notifychange
-			see foto download
+	Architecture propagate changes in mediaDB to gui via Loader(Manager)
+		v imageDetailView/adapter/pager/loader
+		- galleryView/fragment/activity/adapter/loader
+		? mapView
+		> howto
+			getContext().getContentResolver().notifyChange(uri, null);
+			do you call getContext().getContentResolver().notifyChange(Uri,..); in your update/insert ContentProvider methods implementation ?
+				do you call cursor.setNotificationUri(getContext().getContentResolver(), uri); before return it from query method in your ContentProvide
+				http://stackoverflow.com/questions/32741634/how-to-make-notifychange-work-between-two-activities
+				http://stackoverflow.com/questions/26609078/android-listfragment-data-not-updating-via-simplecursoradapter-loadermanager
+				http://stackoverflow.com/questions/19064802/android-contentprovider-notifychange
+				see foto download
 
 	? suche nach tag
 		? eigene tag-db + where _id in (id,id,...)

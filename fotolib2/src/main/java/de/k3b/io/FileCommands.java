@@ -57,10 +57,11 @@ public class FileCommands implements  Cloneable {
         int result = 0;
         if (canProcessFile(OP_DELETE)) {
             openLogfile();
+            onPreProcess("delete", paths, null, OP_DELETE);
             for (String path : paths) {
                 if (deleteFileWitSidecar(new File(path))) result++;
             }
-            onPostProcess(paths, null, result, paths.length, OP_DELETE);
+            onPostProcess("delete", paths, null, result, paths.length, OP_DELETE);
             closeLogFile();
         }
         return result;
@@ -114,7 +115,7 @@ public class FileCommands implements  Cloneable {
             if (osCreateDirIfNeccessary(destDirFolder)) {
                 File[] destFiles = createDestFiles(destDirFolder, sourceFiles);
 
-                result = moveOrCopyFiles(move, destFiles, sourceFiles);
+                result = moveOrCopyFiles(move, (move ? "mov" : "copy"), destFiles, sourceFiles);
 
             } else {
                 log("rem Target dir ", getFilenameForLog(destDirFolder), " cannot be created");
@@ -124,11 +125,15 @@ public class FileCommands implements  Cloneable {
     }
 
     /** does the copying. also used by unittesting */
-    protected int moveOrCopyFiles(boolean move, File[] destFiles, File[] sourceFiles) {
+    protected int moveOrCopyFiles(boolean move, String what, File[] destFiles, File[] sourceFiles) {
+        int opCode = (move) ? OP_MOVE : OP_COPY;
+
         mModifiedSrcFiles = (move) ? new ArrayList<String>() : null;
         mModifiedDestFiles = new ArrayList<String>();
 
         openLogfile();
+        // onPreProcess(what, sourceFiles, destFiles, opCode);
+        onPreProcess(what, null, null, opCode);
         int itemCount = 0;
         int pos = 0;
         int fileCount = destFiles.length;
@@ -149,15 +154,13 @@ public class FileCommands implements  Cloneable {
             }
             pos++;
         }
-        closeLogFile();
         int modifyCount = mModifiedDestFiles.size();
-
-        int opCode = (move) ? OP_MOVE : OP_COPY;
 
         String[] modifiedSourceFiles =  ((mModifiedSrcFiles != null) && (mModifiedSrcFiles.size() > 0)) ? mModifiedSrcFiles.toArray(new String[modifyCount]) : null;
 
-        onPostProcess(modifiedSourceFiles, (modifyCount > 0) ? mModifiedDestFiles.toArray(new String[modifyCount]) : null, itemCount, sourceFiles.length, opCode);
+        onPostProcess(what, modifiedSourceFiles, (modifyCount > 0) ? mModifiedDestFiles.toArray(new String[modifyCount]) : null, itemCount, sourceFiles.length, opCode);
 
+        closeLogFile();
         return itemCount;
     }
 
@@ -323,8 +326,12 @@ public class FileCommands implements  Cloneable {
         return file.exists();
     }
 
+    /** called before copy/move/rename/delete */
+    protected void onPreProcess(String what, String[] oldPathNames, String[] newPathNames, int opCode) {
+    }
+
     /** called for each modified/deleted file */
-    protected void onPostProcess(String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
+    protected void onPostProcess(String what, String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
     }
 
     public void openLogfile() {
