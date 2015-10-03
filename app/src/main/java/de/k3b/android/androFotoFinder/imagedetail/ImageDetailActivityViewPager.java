@@ -32,6 +32,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -95,10 +96,9 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
                 case ACTIVITY_ID:
                     mRequeryInstanceCount++;
                     if (Global.debugEnabledSql) {
-                        Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onCreateLoader(#" + mRequeryInstanceCount
-                                + ", mScrollPosition=" + mInitialScrollPosition +
-                                ",  Path='" + mInitialFilePath
-                                +") : query = " + mGalleryContentQuery);
+                        Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onCreateLoader" +
+                                getDebugContext() +
+                                " : query = " + mGalleryContentQuery);
                     }
                     return FotoSql.createCursorLoader(getApplicationContext(), mGalleryContentQuery);
                 default:
@@ -120,9 +120,9 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             if (mInitialScrollPosition >= mAdapter.getCount()) mInitialScrollPosition = -1;
 
             if (Global.debugEnabledSql) {
-                Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onLoadFinished(#" + mRequeryInstanceCount
-                        + ", mScrollPosition=" + mInitialScrollPosition +
-                        ",  Path='" + mInitialFilePath +") fount " + ((data == null) ? 0 : data.getCount()) + " rows");
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onLoadFinished" +
+                        getDebugContext() +
+                        " found " + ((data == null) ? 0 : data.getCount()) + " rows");
             }
 
             // do change the data
@@ -140,17 +140,23 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             mInitialScrollPosition = mViewPager.getCurrentItem();
             mAdapter.swapCursor(null);
             if (Global.debugEnabledSql) {
-                Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onLoaderReset(#" + mRequeryInstanceCount
-                        + ", mScrollPosition=" + mInitialScrollPosition +
-                        ",  Path='" + mInitialFilePath +
-                        "')");
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onLoaderReset" +
+                        getDebugContext());
             }
             mAdapter.notifyDataSetChanged();
         }
-    }
 
+        @NonNull
+        private String getDebugContext() {
+            return "(#" + mRequeryInstanceCount
+                    + ", mScrollPosition=" + mInitialScrollPosition +
+                    ",  Path='" + mInitialFilePath +
+                    "')";
+        }
+    }
     LocalCursorLoader mCurorLoader;
-    class ImageDetailFileCommands extends AndroidFileCommands {
+
+    class LocalFileCommands extends AndroidFileCommands {
         @Override
         protected void onPostProcess(String what, String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
             mInitialFilePath = null;
@@ -219,7 +225,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 	private LockableViewPager mViewPager = null;
     private ImagePagerAdapterFromCursor mAdapter = null;
 
-    private final AndroidFileCommands mFileCommands = new ImageDetailFileCommands();
+    private final AndroidFileCommands mFileCommands = new LocalFileCommands();
 
     // for debugging
     private static int id = 1;

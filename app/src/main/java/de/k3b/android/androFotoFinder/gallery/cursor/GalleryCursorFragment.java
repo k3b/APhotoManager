@@ -20,13 +20,15 @@
 package de.k3b.android.androFotoFinder.gallery.cursor;
 
 import android.app.Activity;
+import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
-import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -79,6 +81,7 @@ import de.k3b.io.OSDirectory;
  * create an instance of this fragment.
  */
 public class GalleryCursorFragment extends Fragment  implements Queryable, DirectoryGui,Common {
+    public static final int ACTIVITY_ID = 76831;
     private static final String INSTANCE_STATE_LAST_VISIBLE_POSITION = "lastVisiblePosition";
     private static final String INSTANCE_STATE_SELECTED_ITEM_IDS = "selectedItems";
     private static final String INSTANCE_STATE_OLD_TITLE = "oldTitle";
@@ -98,20 +101,19 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     private ShareActionProvider mShareActionProvider;
     private MenuItem mShareOnlyToggle;
-    private GalleryCursorAdapter galleryAdapter = null;
+    private GalleryCursorAdapter mAdapter = null;
 
     private OnGalleryInteractionListener mGalleryListener;
     private QueryParameterParcelable mGalleryContentQuery;
 
     private DirectoryPickerFragment.OnDirectoryInteractionListener mDirectoryListener;
     private int mLastVisiblePosition = -1;
-    private int mInitialPositionY = 0;
 
     // multi selection support
     private final SelectedFotos mSelectedItems = new SelectedFotos();
     private String mOldTitle = null;
     private boolean mShowSelectedOnly = false;
-    private final AndroidFileCommands mFileCommands = new GalleryFileCommands();
+    private final AndroidFileCommands mFileCommands = new LocalFileCommands();
     private MenuItem mMenuRemoveAllSelected = null;
 
     /* false: prevent showing error message again */
@@ -136,45 +138,102 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         return mSelectedItems;
     }
 
-    class GalleryFileCommands extends AndroidFileCommands {
-        /*
+    class LocalCursorLoader implements LoaderManager.LoaderCallbacks<Cursor> {
+        /** incremented every time a new curster/query is generated */
+        private int mRequeryInstanceCount = 0;
+
+        /** called by LoaderManager.getLoader(ACTIVITY_ID) to (re)create loader
+         * that attaches to last query/cursor if it still exist i.e. after rotation */
         @Override
-        public void deleteFiles(String... paths) {
-            super.deleteFiles(paths);
-            if (Global.clearSelectionAfterCommand) {
-                mShowSelectedOnly = true;
-                multiSelectionCancel();
+        public Loader<Cursor> onCreateLoader(int loaderID, Bundle bundle) {
+            switch (loaderID) {
+                case ACTIVITY_ID:
+                    QueryParameterParcelable query = getCurrentQuery();
+                    mRequeryInstanceCount++;
+                    if (Global.debugEnabledSql) {
+                        Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onCreateLoader"
+                                + getDebugContext() +
+                                " : query = " + query);
+                    }
+                    return FotoSql.createCursorLoader(getActivity().getApplicationContext(), query);
+                default:
+                    // An invalid id was passed in
+                    return null;
             }
         }
-        */
+
+        /** called after media db content has changed */
+        @Override
+        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            mLastVisiblePosition = mGalleryView.getLastVisiblePosition();
+
+            // do change the data
+            mAdapter.swapCursor(data);
+
+            if (mLastVisiblePosition > 0) {
+                mGalleryView.smoothScrollToPosition(mLastVisiblePosition);
+                mLastVisiblePosition = -1;
+            }
+
+            final int resultCount = (data == null) ? 0 : data.getCount();
+            if (Global.debugEnabledSql) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onLoadFinished"
+                        + getDebugContext() +
+                        " fount " + resultCount + " rows");
+            }
+
+            // do change the data
+            mAdapter.notifyDataSetChanged();
+
+            if (mLastVisiblePosition > 0) {
+                mGalleryView.smoothScrollToPosition(mLastVisiblePosition);
+                mLastVisiblePosition = -1;
+            }
+
+            Activity context = getActivity();
+            // show the changes
+
+            if (context instanceof OnGalleryInteractionListener) {
+                ((OnGalleryInteractionListener) context).setResultCount(resultCount);;
+            }
+            multiSelectionReplaceTitleIfNecessary();
+        }
+
+        /** called by LoaderManager. after search criteria were changed or if activity is destroyed. */
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+            // rember position where we have to scroll to after reload is finished.
+            mLastVisiblePosition = mGalleryView.getLastVisiblePosition();
+
+            mAdapter.swapCursor(null);
+            if (Global.debugEnabledSql) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onLoaderReset" + getDebugContext());
+            }
+            mAdapter.notifyDataSetChanged();
+        }
+
+        @NonNull
+        private String getDebugContext() {
+            return "(#" + mRequeryInstanceCount +
+                    ", LastVisiblePosition=" + mLastVisiblePosition +
+//                    ",  Path='" + mInitialFilePath +
+                    "')";
+        }
+    }
+
+    LocalCursorLoader mCurorLoader = null;
+
+    class LocalFileCommands extends AndroidFileCommands {
 
         @Override
         protected void onPostProcess(String what, String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
             Context context = getActivity().getApplicationContext();
             if (Global.clearSelectionAfterCommand || (opCode == OP_DELETE) || (opCode == OP_MOVE)) {
-                MediaScanner.updateMediaDatabase_Android42(context, oldPathNames, newPathNames);
                 mShowSelectedOnly = true;
-                multiSelectionCancel(); // reload gui
-            } else if (opCode == OP_COPY) {
-                // start scanner in background without gui reload
-                super.onPostProcess(what, oldPathNames, newPathNames, modifyCount, itemCount, opCode);
+                multiSelectionCancel();
             }
 
-            int resId = getResourceId(opCode);
-            String message = getString(resId, Integer.valueOf(modifyCount), Integer.valueOf(itemCount));
-            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-            mDirectoryListener.invalidateDirectories();
-        }
-
-        private int getResourceId(int opCode) {
-            switch (opCode) {
-                case OP_COPY: return R.string.format_copy_result;
-                case OP_MOVE: return R.string.format_move_result;
-                case OP_DELETE: return R.string.format_delete_result;
-                case OP_RENAME: return R.string.format_rename_result;
-                case OP_UPDATE: return R.string.format_update_result;
-            }
-            return 0;
+            super.onPostProcess(what, oldPathNames, newPathNames, modifyCount, itemCount, opCode);
         }
     }
 
@@ -228,26 +287,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         View result = inflater.inflate(R.layout.fragment_gallery, container, false);
         mGalleryView = (GridView) result.findViewById(R.id.gridView);
 
-        galleryAdapter = new GalleryCursorAdapter(this.getActivity(), getCurrentQuery(), mSelectedItems, mDebugPrefix) {
-            protected void onLoadFinished(Cursor cursor, StringBuffer debugMessage) {
-                super.onLoadFinished(cursor, debugMessage);
-                if (cursor != null) {
-                    // do not update on destroy
-                    multiSelectionReplaceTitleIfNecessary();
-                }
-            }
-        };
-        galleryAdapter.registerDataSetObserver(new DataSetObserver() {
-            @Override
-            public void onChanged() {
-                super.onChanged();
-                if (mLastVisiblePosition > 0) {
-                    mGalleryView.smoothScrollToPosition(mLastVisiblePosition);
-                    mLastVisiblePosition = -1;
-                }
-            }
-        });
-        mGalleryView.setAdapter(galleryAdapter);
+        mAdapter = new GalleryCursorAdapter(this.getActivity(), mSelectedItems, mDebugPrefix);
+        mGalleryView.setAdapter(mAdapter);
 
         mGalleryView.setLongClickable(true);
         mGalleryView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -281,6 +322,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         reloadDirGuiIfAvailable("onCreateView");
 
         fixMediaDatabase();
+
+        requery("onCreateView");
         return result;
     }
 
@@ -320,11 +363,12 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     public void onDestroy() {
         Global.debugMemory(mDebugPrefix, "onDestroy before");
 
+        getLoaderManager().destroyLoader(ACTIVITY_ID);
+
         mFileCommands.closeLogFile();
         mFileCommands.closeAll();
         mGalleryContentQuery = null;
-        galleryAdapter.changeCursor(null);
-        galleryAdapter = null;
+        mAdapter = null;
         super.onDestroy();
         System.gc();
         Global.debugMemory(mDebugPrefix, "onDestroy after");
@@ -342,18 +386,25 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
      */
     @Override
     public void requery(Activity context, QueryParameterParcelable parameters, String why) {
-        if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, mDebugPrefix + why + " requery " + ((parameters != null) ? parameters.toSqlString() : null));
-        }
-
         this.mGalleryContentQuery = parameters;
 
         requery(why);
     }
 
     private void requery(String why) {
-        QueryParameterParcelable selFilter = getCurrentQuery();
-        galleryAdapter.requery(this.getActivity(), selFilter, mDebugPrefix + why);
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + why + " requery " + ((mGalleryContentQuery != null) ? mGalleryContentQuery.toSqlString() : null));
+        }
+
+        if (mGalleryContentQuery != null) {
+            // query has been initialized
+            if (mCurorLoader == null) {
+                mCurorLoader = new LocalCursorLoader();
+                getLoaderManager().initLoader(ACTIVITY_ID, null, mCurorLoader);
+            } else {
+                getLoaderManager().restartLoader(ACTIVITY_ID, null, this.mCurorLoader);
+            }
+        }
     }
 
     private QueryParameterParcelable getCurrentQuery() {
@@ -369,7 +420,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     @Override
     public String toString() {
-        return mDebugPrefix + this.galleryAdapter;
+        return mDebugPrefix + this.mAdapter;
     }
 
     /*********************** local helper *******************************************/
@@ -380,7 +431,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             if (currentQuery != null) {
                 QueryParameterParcelable imageQuery = new QueryParameterParcelable(currentQuery);
 
-                if (holder.filter != null) {
+                String filter = FotoSql.getFilter(this.mGalleryContentQuery, holder.filter);
+                if (filter != null) {
                     FotoSql.addWhereFilter(imageQuery, holder.filter);
                 }
                 long imageID = holder.imageID;
@@ -413,7 +465,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         }
 
         mCurrentPath = absolutePath;
-        reloadDirGuiIfAvailable("navigateTo");
+        reloadDirGuiIfAvailable("navigateTo " + absolutePath);
         // requeryGallery(); done by owning activity
     }
 

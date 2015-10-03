@@ -1,4 +1,5 @@
 TODO
+	copy in asyncTask
 	Architecture propagate changes in mediaDB to gui via Loader(Manager)
 		v imageDetailView/adapter/pager/loader
 		- galleryView/fragment/activity/adapter/loader

@@ -25,6 +25,7 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -52,6 +53,7 @@ import de.k3b.android.util.GarbageCollector;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.AboutDialogPreference;
+import de.k3b.io.Directory;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
@@ -61,12 +63,20 @@ public class FotoGalleryActivity extends Activity implements Common,
         OnGalleryInteractionListener, DirectoryPickerFragment.OnDirectoryInteractionListener,
         LocationMapFragment.OnDirectoryInteractionListener
 {
-    private static final String debugPrefix = "GalA-";
+    private static final String mDebugPrefix = "GalA-";
 
     /** intent parameters supported by FotoGalleryActivity: EXTRA_... */
 
     private static final String DLG_NAVIGATOR_TAG = "navigator";
     private static final String STATE_CurrentSelections = "CurrentSelections";
+
+    /** after media db change cached Directories must be recalculated */
+    private final ContentObserver mMediaObserverDirectory = new ContentObserver(null) {
+        @Override
+        public void onChange(boolean selfChange) {
+            invalidateDirectories();
+        }
+    };
 
     private static class GalleryQueryParameter {
         private static final String STATE_CurrentPath = "CurrentPath";
@@ -237,7 +247,7 @@ public class FotoGalleryActivity extends Activity implements Common,
             }
 
             if (Global.debugEnabled) {
-                Log.i(Global.LOG_CONTEXT, debugPrefix + dbgFilter + " => " + this.mFilter);
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + dbgFilter + " => " + this.mFilter);
             }
             // extra parameter
             this.mGalleryContentQuery = context.getIntent().getParcelableExtra(EXTRA_QUERY);
@@ -284,9 +294,10 @@ public class FotoGalleryActivity extends Activity implements Common,
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
-        Global.debugMemory(debugPrefix, "onCreate");
+        Global.debugMemory(mDebugPrefix, "onCreate");
         super.onCreate(savedInstanceState);
 
+        this.getContentResolver().registerContentObserver(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, true, mMediaObserverDirectory);
         setContentView(R.layout.activity_gallery); // .gallery_activity);
 
         this.mGalleryQueryParameter.loadSettingsAndInstanceState(this, savedInstanceState);
@@ -321,21 +332,22 @@ public class FotoGalleryActivity extends Activity implements Common,
 
     @Override
     protected void onPause () {
-        Global.debugMemory(debugPrefix, "onPause");
+        Global.debugMemory(mDebugPrefix, "onPause");
         this.mGalleryQueryParameter.saveSettings(this);
         super.onPause();
     }
 
     @Override
     protected void onResume () {
-        Global.debugMemory(debugPrefix, "onResume");
+        Global.debugMemory(mDebugPrefix, "onResume");
         super.onResume();
     }
 
     @Override
     protected void onDestroy() {
-        Global.debugMemory(debugPrefix, "onDestroy start");
+        Global.debugMemory(mDebugPrefix, "onDestroy start");
         super.onDestroy();
+        this.getContentResolver().unregisterContentObserver(mMediaObserverDirectory);
 
         // to avoid memory leaks
         GarbageCollector.freeMemory(findViewById(R.id.root_view));
@@ -346,7 +358,7 @@ public class FotoGalleryActivity extends Activity implements Common,
         invalidateDirectories();
 
         System.gc();
-        Global.debugMemory(debugPrefix, "onDestroy end");
+        Global.debugMemory(mDebugPrefix, "onDestroy end");
         // RefWatcher refWatcher = AndroFotoFinderApp.getRefWatcher(this);
         // refWatcher.watch(this);
     }
@@ -492,7 +504,7 @@ public class FotoGalleryActivity extends Activity implements Common,
 
             if (currentDirContentQuery != null) {
                 this.mMustShowNavigator = true;
-                DirectoryLoaderTask loader = new DirectoryLoaderTask(this, debugPrefix) {
+                DirectoryLoaderTask loader = new DirectoryLoaderTask(this, mDebugPrefix) {
                     @Override
                     protected void onPostExecute(IDirectory directoryRoot) {
                         onDirectoryDataLoadComplete(directoryRoot);
@@ -500,7 +512,7 @@ public class FotoGalleryActivity extends Activity implements Common,
                 };
                 loader.execute(currentDirContentQuery);
             } else {
-                Log.e(Global.LOG_CONTEXT, debugPrefix + " this.mDirQueryID undefined " + this.mGalleryQueryParameter.mDirQueryID);
+                Log.e(Global.LOG_CONTEXT, mDebugPrefix + " this.mDirQueryID undefined " + this.mGalleryQueryParameter.mDirQueryID);
             }
         } else {
             this.mMustShowNavigator = false;
@@ -529,7 +541,7 @@ public class FotoGalleryActivity extends Activity implements Common,
     /** called by Fragment: a fragment Item was clicked */
     @Override
     public void onGalleryImageClick(long imageId, Uri imageUri, int position) {
-        Global.debugMemory(debugPrefix, "onGalleryImageClick");
+        Global.debugMemory(mDebugPrefix, "onGalleryImageClick");
         QueryParameterParcelable imageDetailQuery = this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery();
         ImageDetailActivityViewPager.showActivity(this, imageUri, position, imageDetailQuery);
     }
@@ -562,7 +574,14 @@ public class FotoGalleryActivity extends Activity implements Common,
 
     @Override
     public void invalidateDirectories() {
-        if (mDirectoryRoot != null) mDirectoryRoot.destroy();
+        if (mDirectoryRoot != null) {
+            if (Global.debugEnabled) {
+                StringBuilder name = new StringBuilder(mDirectoryRoot.getAbsolute());
+                Directory.appendCount(name, mDirectoryRoot, Directory.OPT_DIR | Directory.OPT_SUB_DIR);
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "invalidateDirectories(" + name + ")");
+            }
+            mDirectoryRoot.destroy();
+        }
         mDirectoryRoot = null; // must reload next time
     }
 
@@ -605,7 +624,7 @@ public class FotoGalleryActivity extends Activity implements Common,
         if (mGalleryGui != null) {
             QueryParameterParcelable query = this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery();
             if (query != null) {
-                this.mGalleryGui.requery(this, query, debugPrefix + why);
+                this.mGalleryGui.requery(this, query, mDebugPrefix + why);
             }
         }
 
@@ -623,12 +642,24 @@ public class FotoGalleryActivity extends Activity implements Common,
             Toast.makeText(this, message,Toast.LENGTH_LONG).show();
         } else {
             mDirectoryRoot = directoryRoot;
-            if ((mDirGui != null) && (this.mGalleryQueryParameter.mCurrentPath != null)) {
+            final boolean mustDefineNavigation = (mDirGui != null) && (this.mGalleryQueryParameter.mCurrentPath != null);
+            final boolean mustShowFolderPicker = (mDirectoryRoot != null) && (this.mMustShowNavigator);
+
+            if (Global.debugEnabled) {
+                StringBuilder name = new StringBuilder(mDirectoryRoot.getAbsolute());
+                Directory.appendCount(name, mDirectoryRoot, Directory.OPT_DIR | Directory.OPT_SUB_DIR);
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "onDirectoryDataLoadComplete(" +
+                        "mustDefineNavigation=" + mustDefineNavigation +
+                        ", mustShowFolderPicker=" + mustShowFolderPicker +
+                        ", content=" + name + ")");
+            }
+
+            if (mustDefineNavigation) {
                 mDirGui.defineDirectoryNavigation(directoryRoot, this.mGalleryQueryParameter.getDirQueryID(), this.mGalleryQueryParameter.mCurrentPath);
             }
-            Global.debugMemory(debugPrefix, "onDirectoryDataLoadComplete");
+            Global.debugMemory(mDebugPrefix, "onDirectoryDataLoadComplete");
 
-            if ((mDirectoryRoot != null) && (this.mMustShowNavigator)) {
+            if (mustShowFolderPicker) {
                 openFolderPicker();
             }
         }

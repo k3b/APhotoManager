@@ -264,7 +264,7 @@ public class FotoSql {
         if (!Double.isNaN(logituedMax)) parameters.addWhere(SQL_COL_LON + " < ?", DirectoryFormatter.parseLatLon(logituedMax));
     }
 
-    public static String getFilter(Cursor cursor, QueryParameter parameters, String description) {
+    public static String getFilter(QueryParameter parameters, String description) {
         if ((parameters != null) && (parameters.getID() == QUERY_TYPE_GROUP_ALBUM)) {
             return description;
         }
