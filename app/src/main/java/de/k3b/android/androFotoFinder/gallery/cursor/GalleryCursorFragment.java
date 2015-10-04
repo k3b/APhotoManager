@@ -57,7 +57,6 @@ import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
-import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.OnGalleryInteractionListener;
@@ -104,7 +103,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private GalleryCursorAdapter mAdapter = null;
 
     private OnGalleryInteractionListener mGalleryListener;
-    private QueryParameterParcelable mGalleryContentQuery;
+    private QueryParameter mGalleryContentQuery;
 
     private DirectoryPickerFragment.OnDirectoryInteractionListener mDirectoryListener;
     private int mLastVisiblePosition = -1;
@@ -148,7 +147,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         public Loader<Cursor> onCreateLoader(int loaderID, Bundle bundle) {
             switch (loaderID) {
                 case ACTIVITY_ID:
-                    QueryParameterParcelable query = getCurrentQuery();
+                    QueryParameter query = getCurrentQuery();
                     mRequeryInstanceCount++;
                     if (Global.debugEnabledSql) {
                         Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onCreateLoader"
@@ -385,7 +384,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
      * @param why
      */
     @Override
-    public void requery(Activity context, QueryParameterParcelable parameters, String why) {
+    public void requery(Activity context, QueryParameter parameters, String why) {
         this.mGalleryContentQuery = parameters;
 
         requery(why);
@@ -407,10 +406,10 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         }
     }
 
-    private QueryParameterParcelable getCurrentQuery() {
-        QueryParameterParcelable selFilter = null;
+    private QueryParameter getCurrentQuery() {
+        QueryParameter selFilter = null;
         if (mShowSelectedOnly) {
-            selFilter = new QueryParameterParcelable(mGalleryContentQuery);
+            selFilter = new QueryParameter(mGalleryContentQuery);
             FotoSql.setWhereSelection(selFilter, mSelectedItems);
         } else {
             selFilter = mGalleryContentQuery;
@@ -427,9 +426,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     /** an Image in the FotoGallery was clicked */
     private void onGalleryImageClick(final GalleryCursorAdapter.GridCellViewHolder holder, int position) {
         if ((!multiSelectionHandleClick(holder)) && (mGalleryListener != null)) {
-            QueryParameterParcelable currentQuery = getCurrentQuery();
+            QueryParameter currentQuery = getCurrentQuery();
             if (currentQuery != null) {
-                QueryParameterParcelable imageQuery = new QueryParameterParcelable(currentQuery);
+                QueryParameter imageQuery = new QueryParameter(currentQuery);
 
                 String filter = FotoSql.getFilter(this.mGalleryContentQuery, holder.filter);
                 if (filter != null) {
@@ -797,7 +796,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 replaceSelectedItems(selectedItems, mStatus, mDebugPrefix);
             }
         };
-        QueryParameterParcelable query = getCurrentQuery();
+        QueryParameter query = getCurrentQuery();
         task.execute(query);
     }
 
@@ -867,7 +866,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 }
             }
         };
-        QueryParameterParcelable query = FotoSql.queryGetMissingDisplayNames;
+        QueryParameter query = FotoSql.queryGetMissingDisplayNames;
         task.execute(query);
     }
 
@@ -899,7 +898,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 }
             }
         };
-        QueryParameterParcelable query = FotoSql.queryGetDuplicates;
+        QueryParameter query = FotoSql.queryGetDuplicates;
         task.execute(query);
     }
 
@@ -910,7 +909,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         }
 
         if (selectedItems != null) {
-            QueryParameterParcelable query = new QueryParameterParcelable();
+            QueryParameter query = new QueryParameter();
             FotoSql.setWhereSelection(query, selectedItems);
 
             int delCount = getActivity().getContentResolver().delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, query.toAndroidWhere(), null);

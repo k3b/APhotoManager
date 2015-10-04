@@ -56,12 +56,12 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.AboutDialogPreference;
+import de.k3b.database.QueryParameter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
@@ -78,7 +78,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     /** activityRequestCode: in forward mode: intent is forwarded to gallery */
     private static final int ID_FORWARD = 471102;
     private static final int DEFAULT_SORT = FotoSql.SORT_BY_NAME_LEN;
-    private static final QueryParameterParcelable DEFAULT_QUERY = FotoSql.queryDetail;
+    private static final QueryParameter DEFAULT_QUERY = FotoSql.queryDetail;
 
     // how many changes have been made. if != 0 parent activity must invalidate cached data
     private static int mModifyCount = 0;
@@ -232,7 +232,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     private String mDebugPrefix;
 
     /** where data comes from */
-    private QueryParameterParcelable mGalleryContentQuery = null;
+    private QueryParameter mGalleryContentQuery = null;
 
     /** if >= 0 after load cursor scroll to this offset */
     private int mInitialScrollPosition = -1;
@@ -240,12 +240,14 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     /** if != after load cursor scroll to this path */
     private String mInitialFilePath = null;
 
-    public static void showActivity(Activity context, Uri imageUri, int position, QueryParameterParcelable imageDetailQuery) {
+    public static void showActivity(Activity context, Uri imageUri, int position, QueryParameter imageDetailQuery) {
         Intent intent;
         //Create intent
         intent = new Intent(context, ImageDetailActivityViewPager.class);
 
-        intent.putExtra(ImageDetailActivityViewPager.EXTRA_QUERY, imageDetailQuery);
+        if (imageDetailQuery != null) {
+            intent.putExtra(ImageDetailActivityViewPager.EXTRA_QUERY, imageDetailQuery.toDeseralizableString());
+        }
         intent.putExtra(ImageDetailActivityViewPager.EXTRA_POSITION, position);
         intent.setData(imageUri);
 
@@ -342,12 +344,13 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     /** query from EXTRA_QUERY, EXTRA_FILTER, fileParentDir , defaultQuery */
     private void getParameter(Intent intent) {
         this.mInitialScrollPosition = intent.getIntExtra(EXTRA_POSITION, this.mInitialScrollPosition);
-        this.mGalleryContentQuery = intent.getParcelableExtra(EXTRA_QUERY);
+        this.mGalleryContentQuery = QueryParameter.parse(intent.getStringExtra(EXTRA_QUERY));
+
         if (mGalleryContentQuery == null) {
             String filterValue = intent.getStringExtra(EXTRA_FILTER);
             if (filterValue != null) {
                 GalleryFilterParameter filter = GalleryFilterParameter.parse(filterValue, new GalleryFilterParameter());
-                QueryParameterParcelable query = new QueryParameterParcelable(DEFAULT_QUERY);
+                QueryParameter query = new QueryParameter(DEFAULT_QUERY);
                 FotoSql.setSort(query, DEFAULT_SORT, true);
                 FotoSql.setWhereFilter(query, filter);
             }
@@ -371,7 +374,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             Log.e(Global.LOG_CONTEXT, mDebugPrefix + " onCreate() : intent.extras[" + EXTRA_QUERY +
                     "] not found. data=" + intent.getData() +
                     ". Using default.");
-            mGalleryContentQuery = new QueryParameterParcelable(DEFAULT_QUERY);
+            mGalleryContentQuery = new QueryParameter(DEFAULT_QUERY);
         } else if (Global.debugEnabledSql) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onCreate() : query = " + mGalleryContentQuery);
         }
@@ -382,7 +385,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         File selectedPhoto = new File(mInitialFilePath);
         this.mInitialScrollPosition = -1;
 
-        QueryParameterParcelable query = new QueryParameterParcelable(DEFAULT_QUERY);
+        QueryParameter query = new QueryParameter(DEFAULT_QUERY);
         FotoSql.addPathWhere(query, selectedPhoto.getParent(), FotoSql.QUERY_TYPE_GALLERY);
         FotoSql.setSort(query, DEFAULT_SORT, true);
         mGalleryContentQuery = query;

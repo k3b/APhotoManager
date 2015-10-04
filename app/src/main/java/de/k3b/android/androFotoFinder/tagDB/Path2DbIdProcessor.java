@@ -28,7 +28,7 @@ import java.util.NoSuchElementException;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
+import de.k3b.database.QueryParameter;
 
 /**
  * This Processor translates Path to id from photo-media db.
@@ -38,7 +38,7 @@ import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
 abstract class Path2DbIdProcessor extends Path2IdProcessor {
     /** process all items in csvSorted by getting the id that corresponds to path  */
     protected void process(final Context context, Iterator<IPathID> csvSorted) {
-        QueryParameterParcelable query = FotoSql.queryDetail;
+        QueryParameter query = FotoSql.queryDetail;
         Cursor c = null;
         try {
             c = FotoSql.createCursorForQuery(context, query);

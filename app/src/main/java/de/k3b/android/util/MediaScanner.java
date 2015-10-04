@@ -28,7 +28,7 @@ import java.util.TimeZone;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
+import de.k3b.database.QueryParameter;
 
 /**
  * Since android.media.MediaScannerConnection does not work on my android-4.2
@@ -165,7 +165,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
             old2NewFileNames.put(oldPathNames[i], newPathNames[i]);
         }
 
-        QueryParameterParcelable query = new QueryParameterParcelable(FotoSql.queryChangePath);
+        QueryParameter query = new QueryParameter(FotoSql.queryChangePath);
         FotoSql.setWhereFileNames(query, oldPathNames);
         int modifyCount = 0;
 

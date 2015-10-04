@@ -43,9 +43,13 @@ public class QueryParameter {
     protected final List<String> mOrderBy = new ArrayList<String>();
     protected final List<String> mParameters = new ArrayList<String>();
     protected final List<String> mHavingParameters = new ArrayList<String>();
-    protected String mCurrentSelection = null;
+    // protected String mCurrentSelection = null;
 
     public QueryParameter() {
+    }
+
+    public QueryParameter(QueryParameter src) {
+        getFrom(src);
     }
 
     /** replace all local settings from src */
@@ -165,6 +169,84 @@ public class QueryParameter {
     }
 
     /************************** end properties *********************/
+    public String toDeseralizableString() {
+        StringBuilder result = new StringBuilder();
+        Helper.append(result, "\nFROM ", mFrom, "", "\n\t", "");
+        if (mID != 0) result.append("\n\tQUERY-TYPE-ID\n\t\t").append(mID);
+        Helper.append(result, "\nSELECT ", mColumns, "", "\n\t", "");
+        Helper.append(result, "\nWHERE ", mWhere, "", "\n\t", "");
+        Helper.append(result, "\n\tWHERE-PARAMETERS ", mParameters, "", "\n\t\t", "");
+        Helper.append(result, "\nGROUP-BY ", mGroupBy, "", "\n\t", "");
+        Helper.append(result, "\nHAVING ", mHaving, "", "\n\t", "");
+        Helper.append(result, "\n\tHAVING-PARAMETERS ", mHavingParameters, "", "\n\t\t", "");
+        Helper.append(result, "\nORDER-BY ", mOrderBy, "", "\n\t", "");
+
+        // protected String mCurrentSelection = null;
+
+        if (result.length() == 0) return null;
+
+        return result.toString();
+    }
+
+    private static final String PARSER_KEYWORDS = ";FROM;QUERY-TYPE-ID;SELECT;WHERE;WHERE-PARAMETERS;GROUP-BY;HAVING;HAVING-PARAMETERS;ORDER-BY;";
+
+    public static QueryParameter parse(String stringToBeParsed) {
+        List<QueryParameter> result = (stringToBeParsed != null) ? parseMultible(stringToBeParsed) : null;
+        if (result == null) return null;
+        return result.get(0);
+    }
+
+    public static List<QueryParameter> parseMultible(String stringToBeParsed) {
+        List<QueryParameter> result = new ArrayList<QueryParameter>();
+        QueryParameter current = new QueryParameter();
+        List<String> params = null;
+
+        String[] lines = stringToBeParsed.split("\n");
+        int i = 0;
+        String line = null;
+        while(i < lines.length) {
+            line = lines[i++].trim();
+            if (isKeyword(line)) {
+                switch (line.toUpperCase())
+                {
+                    case "FROM":
+                        current = new QueryParameter();
+                        result.add(current);
+                        params = current.mFrom;
+                        break;
+
+                    case "QUERY-TYPE-ID":
+                        line = (i < lines.length) ? lines[i].trim() : "0";
+                        if (!isKeyword(line)) {
+                            i++;
+                            current.setID(Integer.parseInt(line));
+                        }
+                        continue;
+
+                    case "SELECT": params = current.mColumns; break;
+                    case "WHERE": params = current.mWhere; break;
+                    case "WHERE-PARAMETERS": params = current.mParameters; break;
+                    case "GROUP-BY": params = current.mGroupBy; break;
+                    case "HAVING": params = current.mHaving; break;
+                    case "HAVING-PARAMETERS": params = current.mHavingParameters; break;
+                    case "ORDER-BY": params = current.mOrderBy; break;
+                }
+            } else if (params != null) {
+                params.add(line);
+            }
+        }
+
+        if (result.size() > 0) {
+            return result;
+        }
+        return null;
+    }
+
+    private static boolean isKeyword(String line) {
+        line = (line != null) ? (";" + line.trim().toUpperCase() + ";") : null;
+        return ((line != null) && (PARSER_KEYWORDS.indexOf(line) >= 0));
+    }
+
     public String toSqlString() {
         StringBuilder result = new StringBuilder();
         Helper.append(result, " SELECT ", mColumns, ", ", "", "");
@@ -318,6 +400,7 @@ public class QueryParameter {
         return this;
     }
 
+    /*
     public String getCurrentSelection() {
         return mCurrentSelection;
     }
@@ -326,6 +409,7 @@ public class QueryParameter {
         this.mCurrentSelection = value;
         return this;
     }
+    */
 }
 
 

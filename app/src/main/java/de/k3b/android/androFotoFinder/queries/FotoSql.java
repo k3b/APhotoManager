@@ -95,7 +95,7 @@ public class FotoSql {
     // same format as dir. i.e. description='/2014/12/24/' or '/mnt/sdcard/pictures/'
     public static final String SQL_EXPR_DAY = "strftime('/%Y/%m/%d/', " + SQL_COL_DATE_TAKEN + " /1000, 'unixepoch', 'localtime')";
 
-    public static final QueryParameterParcelable queryGroupByDate = (QueryParameterParcelable) new QueryParameterParcelable()
+    public static final QueryParameter queryGroupByDate = new QueryParameter()
             .setID(QUERY_TYPE_GROUP_DATE)
             .addColumn(
                     "max(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
@@ -108,7 +108,7 @@ public class FotoSql {
 
 
     public static final String SQL_EXPR_FOLDER = "substr(" + SQL_COL_PATH + ",1,length(" + SQL_COL_PATH + ") - length(" + MediaStore.Images.Media.DISPLAY_NAME + "))";
-    public static final QueryParameterParcelable queryGroupByDir = (QueryParameterParcelable) new QueryParameterParcelable()
+    public static final QueryParameter queryGroupByDir = new QueryParameter()
             .setID(QUERY_TYPE_GROUP_ALBUM)
             .addColumn(
                     "max(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
@@ -121,7 +121,7 @@ public class FotoSql {
 
     /* image entries may become duplicated if media scanner finds new images that have not been inserted into media database yet
      * and aFotoSql tries to show the new image and triggers a filescan. */
-    public static final QueryParameterParcelable queryGetDuplicates = (QueryParameterParcelable) new QueryParameterParcelable()
+    public static final QueryParameter queryGetDuplicates = new QueryParameter()
             .setID(QUERY_TYPE_UNDEFINED)
             .addColumn(
                     "min(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
@@ -133,7 +133,7 @@ public class FotoSql {
             .addOrderBy(SQL_COL_PATH);
 
     /* image entries may not have DISPLAY_NAME which is essential for calculating the item-s folder. */
-    public static final QueryParameterParcelable queryChangePath = (QueryParameterParcelable) new QueryParameterParcelable()
+    public static final QueryParameter queryChangePath = new QueryParameter()
             .setID(QUERY_TYPE_UNDEFINED)
             .addColumn(
                     SQL_COL_PK,
@@ -143,7 +143,7 @@ public class FotoSql {
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString());
 
     /* image entries may not have DISPLAY_NAME which is essential for calculating the item-s folder. */
-    public static final QueryParameterParcelable queryGetMissingDisplayNames = (QueryParameterParcelable) queryChangePath
+    public static final QueryParameter queryGetMissingDisplayNames = queryChangePath
             .addWhere(MediaStore.MediaColumns.DISPLAY_NAME + " is null");
 
     // the bigger the smaller the area
@@ -164,9 +164,9 @@ public class FotoSql {
         return result;
     }
 
-    public static final QueryParameterParcelable queryGroupByPlace = getQueryGroupByPlace(100);
+    public static final QueryParameter queryGroupByPlace = getQueryGroupByPlace(100);
 
-    public static QueryParameterParcelable getQueryGroupByPlace(double groupingFactor) {
+    public static QueryParameter getQueryGroupByPlace(double groupingFactor) {
         //String SQL_EXPR_LAT = "(round(" + SQL_COL_LAT + " - 0.00499, 2))";
         //String SQL_EXPR_LON = "(round(" + SQL_COL_LON + " - 0.00499, 2))";
 
@@ -177,7 +177,7 @@ public class FotoSql {
         String SQL_EXPR_LON = "((round((" + SQL_COL_LON + " * " + groupingFactor + ") - 0.5) /"
                 + groupingFactor + ") + " + (1/groupingFactor/2) + ")";
 
-        QueryParameterParcelable result = new QueryParameterParcelable();
+        QueryParameter result = new QueryParameter();
 
         result.setID(QUERY_TYPE_GROUP_PLACE)
                 .addColumn(
@@ -192,7 +192,7 @@ public class FotoSql {
         return result;
     }
 
-    public static final QueryParameterParcelable queryDetail = (QueryParameterParcelable) new QueryParameterParcelable()
+    public static final QueryParameter queryDetail = new QueryParameter()
             .setID(QUERY_TYPE_GALLERY)
             .addColumn(
                     SQL_COL_PK,
@@ -202,7 +202,7 @@ public class FotoSql {
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
             .addOrderBy(SQL_COL_PATH);
 
-    public static final QueryParameterParcelable queryGps = (QueryParameterParcelable) new QueryParameterParcelable()
+    public static final QueryParameter queryGps = new QueryParameter()
             .setID(QUERY_TYPE_UNDEFINED)
             .addColumn(
                     SQL_COL_PK,
@@ -245,7 +245,7 @@ public class FotoSql {
         }
     }
 
-    public static void addWhereLatLonNotNull(QueryParameterParcelable parameters) {
+    public static void addWhereLatLonNotNull(QueryParameter parameters) {
         parameters.addWhere(FotoSql.SQL_COL_LAT + " is not null and " + FotoSql.SQL_COL_LON + " is not null")
         ;
     }
@@ -326,7 +326,7 @@ public class FotoSql {
         }
     }
 
-    public static QueryParameterParcelable getQuery(int queryID) {
+    public static QueryParameter getQuery(int queryID) {
         switch (queryID) {
             case QUERY_TYPE_UNDEFINED:
                 return null;
@@ -484,7 +484,7 @@ public class FotoSql {
     }
 
     public static IGeoRectangle execGetGeoRectangle(Context context, IGalleryFilter filter, SelectedItems selectedItems) {
-        QueryParameterParcelable query = (QueryParameterParcelable) new QueryParameterParcelable()
+        QueryParameter query = new QueryParameter()
                 .setID(QUERY_TYPE_UNDEFINED)
                 .addColumn(
                         "min(" + SQL_COL_LAT + ") AS LAT_MIN",
@@ -528,7 +528,7 @@ public class FotoSql {
 
 
     public static IGeoPoint execGetPosition(Context context, int id) {
-        QueryParameterParcelable query = (QueryParameterParcelable) new QueryParameterParcelable()
+        QueryParameter query = new QueryParameter()
         .setID(QUERY_TYPE_UNDEFINED)
                 .addColumn(SQL_COL_LAT, SQL_COL_LON)
                 .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
@@ -556,7 +556,7 @@ public class FotoSql {
 
         String whereFileNames = getWhereInFileNames(fileNames);
         if (whereFileNames != null) {
-            QueryParameterParcelable query = (QueryParameterParcelable) new QueryParameterParcelable()
+            QueryParameter query = new QueryParameter()
                     .setID(QUERY_TYPE_UNDEFINED)
                     .addColumn(SQL_COL_PK, SQL_COL_PATH)
                     .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())

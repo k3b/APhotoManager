@@ -22,6 +22,8 @@ package de.k3b.database;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.List;
+
 /**
  * Created by k3b on 25.06.2015.
  */
@@ -48,8 +50,44 @@ public class QueryParameterTests {
         Assert.assertEquals("select c from f where ((w1) and (w2)) group by (g1), (g2) order by o", normalize(sut.toSqlStringAndroid()));
     }
 
+    @Test
+    public void shoudCreateSerializable() {
+        QueryParameter sut = new QueryParameter()
+                .addFrom("f")
+                .setID(4711)
+                .addColumn("c1", "c2")
+                .addWhere("w1=?", "w1Value")
+                .addWhere("w2=?","w2Value")
+                .addOrderBy("o")
+                .addGroupBy("g")
+                .addHaving("h1", "h1Value")
+                .addHaving("h2", "h2Value");
+        Assert.assertEquals("from f query-type-id 4711 select c1 c2 where w1=? w2=? where-parameters w1value w2value group-by g having h1 h2 having-parameters h1value h2value order-by o",
+                normalize(sut.toDeseralizableString()));
+    }
+
+    @Test
+    public void shoudParseSerializable() {
+        QueryParameter original = new QueryParameter()
+                .addFrom("f")
+                .setID(4711)
+                .addColumn("c1", "c2")
+                .addWhere("w1=?", "w1Value")
+                .addWhere("w2=?","w2Value")
+                .addOrderBy("o")
+                .addGroupBy("g")
+                .addHaving("h1", "h1Value")
+                .addHaving("h2", "h2Value");
+
+        final String stringToBeParsed = original.toDeseralizableString();
+        List<QueryParameter> sut = QueryParameter.parseMultible(stringToBeParsed);
+        Assert.assertEquals("size", 1, sut.size());
+        Assert.assertEquals("from f query-type-id 4711 select c1 c2 where w1=? w2=? where-parameters w1value w2value group-by g having h1 h2 having-parameters h1value h2value order-by o",
+                normalize(sut.get(0).toDeseralizableString()));
+    }
+
     private String normalize(String unnormalized) {
         return unnormalized
-                .replace("\n", "").replace("  ", " ").toLowerCase().trim();
+                .replace("\t", " ").replace("\n", " ").replace("  ", " ").replace("  ", " ").toLowerCase().trim();
     }
 }

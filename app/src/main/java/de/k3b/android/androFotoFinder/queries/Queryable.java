@@ -21,6 +21,8 @@ package de.k3b.android.androFotoFinder.queries;
 
 import android.app.Activity;
 
+import de.k3b.database.QueryParameter;
+
 /**
  * An Api that clients to getFrom the content of of it-s fragment(s) and/or adapter(s).
  *
@@ -30,5 +32,5 @@ public interface Queryable {
     /**
      * interface Queryable: Initiates a database requery in the background
      */
-    void requery(Activity context, QueryParameterParcelable parameters, String why);
+    void requery(Activity context, QueryParameter parameters, String why);
 }

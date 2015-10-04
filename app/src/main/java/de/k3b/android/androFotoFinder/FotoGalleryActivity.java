@@ -43,7 +43,6 @@ import de.k3b.android.androFotoFinder.gallery.cursor.GalleryCursorFragment;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
 import de.k3b.android.androFotoFinder.locationmap.LocationMapFragment;
-import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
@@ -53,6 +52,7 @@ import de.k3b.android.util.GarbageCollector;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.AboutDialogPreference;
+import de.k3b.database.QueryParameter;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GalleryFilterParameter;
@@ -99,7 +99,7 @@ public class FotoGalleryActivity extends Activity implements Common,
 
         private String mCurrentPath = "/";
 
-        QueryParameterParcelable mGalleryContentQuery = null;
+        QueryParameter mGalleryContentQuery = null;
 
         GalleryFilterParameter mFilter;
         /** true: if activity started without special intent-parameters, the last mFilter is saved/loaded for next use */
@@ -135,9 +135,9 @@ public class FotoGalleryActivity extends Activity implements Common,
         }
 
         /** combine root-query plus current selected directoryRoot */
-        private QueryParameterParcelable calculateEffectiveGalleryContentQuery() {
+        private QueryParameter calculateEffectiveGalleryContentQuery() {
             if (this.mGalleryContentQuery == null) return null;
-            QueryParameterParcelable result = new QueryParameterParcelable(this.mGalleryContentQuery);
+            QueryParameter result = new QueryParameter(this.mGalleryContentQuery);
 
             FotoSql.setWhereFilter(result, this.mFilter);
             if (result == null) return null;
@@ -250,7 +250,7 @@ public class FotoGalleryActivity extends Activity implements Common,
                 Log.i(Global.LOG_CONTEXT, mDebugPrefix + dbgFilter + " => " + this.mFilter);
             }
             // extra parameter
-            this.mGalleryContentQuery = context.getIntent().getParcelableExtra(EXTRA_QUERY);
+            this.mGalleryContentQuery = QueryParameter.parse(context.getIntent().getStringExtra(EXTRA_QUERY));
             if (this.mGalleryContentQuery == null) this.mGalleryContentQuery = FotoSql.getQuery(FotoSql.QUERY_TYPE_DEFAULT);
         }
     }
@@ -497,7 +497,7 @@ public class FotoGalleryActivity extends Activity implements Common,
 
         if (mDirectoryRoot == null) {
             // not loaded yet. load directoryRoot in background
-            final QueryParameterParcelable currentDirContentQuery = new QueryParameterParcelable(FotoSql.getQuery(dirQueryID));
+            final QueryParameter currentDirContentQuery = new QueryParameter(FotoSql.getQuery(dirQueryID));
             FotoSql.setWhereFilter(currentDirContentQuery, this.mGalleryQueryParameter.mFilter);
 
             this.mGalleryQueryParameter.mDirQueryID = (currentDirContentQuery != null) ? currentDirContentQuery.getID() : FotoSql.QUERY_TYPE_UNDEFINED;
@@ -542,7 +542,7 @@ public class FotoGalleryActivity extends Activity implements Common,
     @Override
     public void onGalleryImageClick(long imageId, Uri imageUri, int position) {
         Global.debugMemory(mDebugPrefix, "onGalleryImageClick");
-        QueryParameterParcelable imageDetailQuery = this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery();
+        QueryParameter imageDetailQuery = this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery();
         ImageDetailActivityViewPager.showActivity(this, imageUri, position, imageDetailQuery);
     }
 
@@ -622,7 +622,7 @@ public class FotoGalleryActivity extends Activity implements Common,
 
     private void reloadGui(String why) {
         if (mGalleryGui != null) {
-            QueryParameterParcelable query = this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery();
+            QueryParameter query = this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery();
             if (query != null) {
                 this.mGalleryGui.requery(this, query, mDebugPrefix + why);
             }

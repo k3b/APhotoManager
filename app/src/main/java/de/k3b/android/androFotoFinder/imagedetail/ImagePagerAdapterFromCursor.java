@@ -35,9 +35,8 @@ import java.io.File;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
-import de.k3b.android.androFotoFinder.queries.Queryable;
 import de.k3b.android.util.GarbageCollector;
+import de.k3b.database.QueryParameter;
 import uk.co.senab.photoview.PhotoView;
 
 /**
@@ -56,7 +55,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  {
     // workaround because setEllipsize(TextUtils.TruncateAt.MIDDLE) is not possible for title
     private final int mMaxTitleLength;
 
-    private QueryParameterParcelable mParameters; // defining sql to get data
+    private QueryParameter mParameters; // defining sql to get data
     private Cursor mCursor = null; // the content of the page
     private boolean mDataValid = true;
 

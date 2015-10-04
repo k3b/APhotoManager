@@ -21,18 +21,10 @@ package de.k3b.android.androFotoFinder.queries;
 
 import android.app.Activity;
 import android.database.Cursor;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.SystemClock;
-
-import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.overlay.OverlayManager;
 
 import de.k3b.android.androFotoFinder.Global;
-import de.k3b.android.androFotoFinder.R;
-import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
-import de.k3b.android.osmdroid.IconFactory;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
 

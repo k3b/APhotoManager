@@ -63,13 +63,13 @@ import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
 import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
 import de.k3b.android.osmdroid.FolderOverlay;
 import de.k3b.android.osmdroid.GuestureOverlay;
 import de.k3b.android.osmdroid.IconOverlay;
 import de.k3b.android.osmdroid.MarkerBase;
 import de.k3b.android.osmdroid.ZoomUtil;
+import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
@@ -498,7 +498,7 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     private void reloadSummaryMarker(BoundingBoxE6 latLonArea, double groupingFactor, List<Overlay> oldItems) {
-        QueryParameterParcelable query = FotoSql.getQueryGroupByPlace(groupingFactor);
+        QueryParameter query = FotoSql.getQueryGroupByPlace(groupingFactor);
         query.clearWhere();
 
         if (this.mRootFilter != null) {
@@ -756,7 +756,7 @@ public class LocationMapFragment extends DialogFragment {
 
             List<Overlay> oldItems = mFolderOverlaySelectionMarker.getItems();
 
-            QueryParameterParcelable query = new QueryParameterParcelable(FotoSql.queryGps);
+            QueryParameter query = new QueryParameter(FotoSql.queryGps);
             FotoSql.setWhereSelection(query, mSelectedItems);
             FotoSql.addWhereLatLonNotNull(query);
 

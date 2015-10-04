@@ -45,10 +45,10 @@ import de.k3b.android.androFotoFinder.directory.DirectoryLoaderTask;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.locationmap.LocationMapFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
 import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.HistoryEditText;
+import de.k3b.database.QueryParameter;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
@@ -438,7 +438,7 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
         return result;
     }
 
-    private void showLatLonPicker(final QueryParameterParcelable currentDirContentQuery) {
+    private void showLatLonPicker(final QueryParameter currentDirContentQuery) {
         if (fromGui(mFilter)) {
             final FragmentManager manager = getFragmentManager();
             LocationMapFragment dirDialog = new LocationMapFragment();
@@ -448,7 +448,7 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
         }
     }
 
-    private void showDirectoryPicker(final QueryParameterParcelable currentDirContentQuery) {
+    private void showDirectoryPicker(final QueryParameter currentDirContentQuery) {
         if (fromGui(mFilter)) {
             IDirectory directoryRoot = getOrCreateDirInfo(currentDirContentQuery.getID()).directoryRoot;
             if (directoryRoot == null) {
