@@ -79,7 +79,9 @@
     <string name="title_multiselection">%1$d Selected</string>
 
     <string name="cmd_rename">Rename</string>
-    <string name="err_file_exists">The File \'%1$s\' already exists. Please choose a different name.</string>
+    <string name="question_overwrite">Overwrite?</string>
+
+    <string name="err_file_exists">The File \'%1$s\' already exists.\n Do you really want to overwrite it?</string>
     <string name="err_file_rename">Cannot rename File \'%1$s\'.</string>
     <string name="success_file_rename">Renamed \'%1$s\' to \'%2$s\'.</string>
     <string name="success_update">Updated %1$d photos.</string>
@@ -89,7 +91,11 @@
     <string name="error_share" >No send/share provider found</string>
 
     <string name="cmd_delete">Delete</string>
+    <string name="delete_question">Delete this bookmark?</string>
+    <string name="delete_answer">Deleted bookmark %1$s.</string>
+    <string name="delete_error">Cannot deleted bookmark %1$s.</string>
     <string name="err_no_fotos_found">No Photos found for %1$s.</string>
+    <string name="err_no_query_found">No queries found in %1$s.</string>
     <string name="err_fotos_not_in_db">Photo not found in media database %1$s yet. Scanning %2$d new files. The missing photo will be available soon.</string>
 
     <string name="cmd_copy">Copy</string>
@@ -172,4 +178,7 @@ Features:
     <string name="media_update_result">Updated %1$d Media Database Items</string>
     <string name="cmd_slideshow">Slideshow</string>
     <string name="cannot_change_if_scanner_active">Cannot change image files while Android Media Scanner is busy. Try again later.</string>
+    <string name="query_param_comment">Generated on %3$s with \'%1$s\' Version %2$s. See https://github.com/k3b/AndroFotoFinder/wiki/intentap#sql for details</string>
+    <string name="cmd_save_bookmark_as">Save Bookmark as ...</string>
+    <string name="cmd_load_bookmark_from">Load Bookmark from ...</string>
 </resources>

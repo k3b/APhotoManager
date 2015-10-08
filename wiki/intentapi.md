@@ -56,9 +56,30 @@ Other Android apps can use parts of "a Foto Finder" throught the "Intent api".
 
 * purpose define the title of the gui
 
+### <a name='EXTRA_SQL'>de.k3b.extra.SQL string</a>
+
+* purpose current sql from [Gallery-View](Gallery-View) to [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View)
+	* so that the image view show the same images and in the same order as the Gallery-View
+* format: the same as [bookmark files *.query](intentapi#sql)
+	
 ### Internal extras, not for public use
 
-* de.k3b.extra.SQL current sql from [Gallery-View](Gallery-View) to [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View)
-	* so that the image view show the same images and in the same order as the Gallery-View
 * de.k3b.extra.OFFSET offset in sql that should be initally visible in image view.
 	* Example: opening the 5th image in the gallery view will open the 5th image in the sql-query
+	
+## <a name='sql'>internal sql file format *.query (since version 0.4.2)</a>
+
+* purpose defintion of Bookmarks in folder /storage/sdcard0/databases/sql/*.query
+* created in [Filter-View](Filter-View) via menu "Save Bookmark as ..."
+* loaded into [Filter-View](Filter-View) via menu "Load Bookmark from ..."
+
+Note: The same format is also used in the [intent api for extra parameter de.k3b.extra.SQL](intentapi#EXTRA_SQL)
+
+Format: 
+
+* Lines, seperated by newline character. Each line is either 
+	* a comment starting with '#', '//' or '--'
+	* a keyword: one of FROM, QUERY-TYPE-ID, SELECT, WHERE, WHERE-PARAMETERS, GROUP-BY, HAVING, HAVING-PARAMETERS, ORDER-BY
+		* the keyword is similar to sql 
+			* select [SELECT] from [FROM] where [WHERE+WHERE-PARAMETERS] group by [GROUP-BY] having [HAVING+HAVING-PARAMETERS] order by [ORDER-BY]
+	* a value, that belongs to the keyword.

@@ -33,6 +33,8 @@ import java.util.List;
  * Created by k3b on 04.06.2015.
  */
 public class QueryParameter {
+    /** added to every serialized item if != null */
+    public static String sParserComment = null;
     // the members are protected to allow serialisation via android specific Parcles
     protected int mID = 0;
     protected final List<String> mColumns = new ArrayList<String>();
@@ -110,6 +112,42 @@ public class QueryParameter {
         return addToList(mParameters, true, parameters);
     }
 
+    public String[] getWhereParameter(String sqlExprWithParameters) {
+        return getExpresionParameter(sqlExprWithParameters, mWhere, mParameters);
+    }
+
+    static String[] getExpresionParameter(String sqlExprWithParameters, List<String> expressions, List<String> parameters) {
+        if ((sqlExprWithParameters != null) && (expressions != null) && (parameters != null)) {
+            int paramNo = 0;
+            for (String p : expressions) {
+                int paramCount = getParamCount(p, parameters);
+                if (sqlExprWithParameters.equalsIgnoreCase(p)) {
+                    String[] result = new String[paramCount];
+
+                    int sourceIndex = paramNo;
+                    for (int i=0; i < paramCount; i++) {
+                        result[i] = (sourceIndex < parameters.size()) ? parameters.get(sourceIndex) : null;
+                        sourceIndex++;
+                    }
+                    return result;
+                }
+                paramNo += paramCount;
+            }
+        }
+        return null;
+    }
+
+    /** counts how many "?" are inside sqlWhereWithParameters */
+    private static int getParamCount(String sqlWhereWithParameters, List<String> parameters) {
+        int result = 0;
+        int last = sqlWhereWithParameters.indexOf("?");
+        while (last >= 0) {
+            result++;
+            last = sqlWhereWithParameters.indexOf("?", last + 1);
+        }
+        return result;
+    }
+
     /** android content-queries do not support GROUP BY.
      * Therefore this sql is added to the WHERE part.
      * [select ... from ... where (] [[mWhere][) GROUP BY (mGroupBy][) HAVING (mHaving]] [) ORDER BY ] [mOrderBy]*/
@@ -169,8 +207,9 @@ public class QueryParameter {
     }
 
     /************************** end properties *********************/
-    public String toDeseralizableString() {
+    public String toReParseableString() {
         StringBuilder result = new StringBuilder();
+        if (sParserComment != null) result.append("# ").append(sParserComment).append("\n");
         Helper.append(result, "\nFROM ", mFrom, "", "\n\t", "");
         if (mID != 0) result.append("\n\tQUERY-TYPE-ID\n\t\t").append(mID);
         Helper.append(result, "\nSELECT ", mColumns, "", "\n\t", "");
@@ -231,7 +270,7 @@ public class QueryParameter {
                     case "HAVING-PARAMETERS": params = current.mHavingParameters; break;
                     case "ORDER-BY": params = current.mOrderBy; break;
                 }
-            } else if (params != null) {
+            } else if ((params != null) && (isNoComment(line))) {
                 params.add(line);
             }
         }
@@ -240,6 +279,10 @@ public class QueryParameter {
             return result;
         }
         return null;
+    }
+
+    private static boolean isNoComment(String line) {
+        return ((line != null) && !line.startsWith("#") && !line.startsWith("//") && !line.startsWith("--") );
     }
 
     private static boolean isKeyword(String line) {

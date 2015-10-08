@@ -26,6 +26,9 @@
 	* else [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) where xxx is used as a path filter
 * [#16 Media scanner for android below 4.4](https://github.com/k3b/AndroFotoFinder/issues/16)
 	* Move and Rename is blocked while Media Scanner is active to avoid conflicts/inconsistent data.
+* [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View) :
+	* "Save Bookmark as" and "Load Bookmark from" menu of qurrent filter as query file in /storage/sdcard0/databases/sql/*.query
+	* Long-pressing in "Load Bookmark from" opens a contextmenu to edit, rename, delete a bookmarkfile.
 	
 ## [v0.4.1.150911](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.1) available in [F-Droid app store](https://f-droid.org) since 2015-09-12
 

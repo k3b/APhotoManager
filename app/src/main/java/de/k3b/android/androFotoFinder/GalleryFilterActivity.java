@@ -36,6 +36,10 @@ import android.widget.Toast;
 
 // import com.squareup.leakcanary.RefWatcher;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -47,9 +51,11 @@ import de.k3b.android.androFotoFinder.locationmap.LocationMapFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.android.widget.AboutDialogPreference;
+import de.k3b.android.widget.Dialogs;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.DirectoryFormatter;
+import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
@@ -64,13 +70,16 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
     public static final int resultID = 522;
     private static final String DLG_NAVIGATOR_TAG = "GalleryFilterActivity";
     private static final String SETTINGS_KEY = "GalleryFilterActivity-";
+    private static QueryParameter mRootQuery;
 
     GalleryFilterParameter mFilter = new GalleryFilterParameter();
 
     private AsFilter mAsFilter = null;
     private HistoryEditText mHistory;
+    private BookmarkController bookmarkController = null;
 
-    public static void showActivity(Activity context, GalleryFilterParameter filter) {
+    public static void showActivity(Activity context, GalleryFilterParameter filter, QueryParameter rootQuery) {
+        mRootQuery = rootQuery;
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, context.getClass().getSimpleName()
                     + " > GalleryFilterActivity.showActivity");
@@ -107,6 +116,8 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
             mFilter = filter;
             toGui(mFilter);
         }
+
+        bookmarkController = new BookmarkController(this);
     }
 
     private void onCreateButtos() {
@@ -174,9 +185,29 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
                 return true;
+            case R.id.action_save_as:
+                bookmarkController.onSaveAsQuestion("", getAsQuery());
+                return true;
+            case R.id.action_load_from:
+                bookmarkController.onLoadFromQuestion(new BookmarkController.IQueryConsumer() {
+                    @Override
+                    public void setQuery(QueryParameter newQuery) {
+                        IGalleryFilter filter = FotoSql.getWhereFilter(newQuery);
+                        toGui(filter);
+                    }
+                }, getAsQuery());
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private QueryParameter getAsQuery() {
+        IGalleryFilter filter = new GalleryFilterParameter();
+        fromGui(filter);
+        QueryParameter query = new QueryParameter(mRootQuery);
+        FotoSql.setWhereFilter(query, filter);
+        return query;
     }
 
     @Override
@@ -392,9 +423,9 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
         mAsFilter.get(gf);
     }
 
-    private boolean fromGui(IGalleryFilter src) {
+    private boolean fromGui(IGalleryFilter dest) {
         try {
-            src.get(mAsFilter);
+            dest.get(mAsFilter);
             return true;
         } catch (RuntimeException ex) {
             Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();

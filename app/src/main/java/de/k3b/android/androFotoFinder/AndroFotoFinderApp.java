@@ -21,6 +21,11 @@ package de.k3b.android.androFotoFinder;
 
 import android.app.Application;
 
+import java.util.Date;
+
+import de.k3b.android.GuiUtil;
+import de.k3b.database.QueryParameter;
+
 // import com.squareup.leakcanary.LeakCanary;
 // import com.squareup.leakcanary.RefWatcher;
 
@@ -41,4 +46,11 @@ public class AndroFotoFinderApp extends Application {
         LeakCanary.install(this);
     }
     */
+    @Override public void onCreate() {
+        super.onCreate();
+        QueryParameter.sParserComment = getString(R.string.query_param_comment,
+                getString(R.string.app_name),
+                GuiUtil.getAppVersionName(this),
+                new Date().toString());
+    }
 }

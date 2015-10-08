@@ -20,11 +20,9 @@
 package de.k3b.android.androFotoFinder.imagedetail;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.LoaderManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
@@ -37,10 +35,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 // import com.squareup.leakcanary.RefWatcher;
@@ -61,6 +56,7 @@ import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.AboutDialogPreference;
+import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
@@ -246,7 +242,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         intent = new Intent(context, ImageDetailActivityViewPager.class);
 
         if (imageDetailQuery != null) {
-            intent.putExtra(ImageDetailActivityViewPager.EXTRA_QUERY, imageDetailQuery.toDeseralizableString());
+            intent.putExtra(ImageDetailActivityViewPager.EXTRA_QUERY, imageDetailQuery.toReParseableString());
         }
         intent.putExtra(ImageDetailActivityViewPager.EXTRA_POSITION, position);
         intent.setData(imageUri);
@@ -423,7 +419,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     protected void onDestroy() {
         Global.debugMemory(mDebugPrefix, "onDestroy");
 
-        getLoaderManager().destroyLoader(ACTIVITY_ID);
+        // getLoaderManager().destroyLoader(ACTIVITY_ID);
         if (mAdapter != null) {
             mViewPager.setAdapter(null);
             mFileCommands.closeLogFile();
@@ -673,41 +669,19 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     private boolean onRenameDirQueston(final long fotoId, final String fotoPath, String newName) {
         if (AndroidFileCommands.canProcessFile(this)) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(R.string.cmd_rename);
-            View content = this.getLayoutInflater().inflate(R.layout.dialog_edit_name, null);
-
-            final EditText edit = (EditText) content.findViewById(R.id.edName);
-
             if (newName == null) {
                 newName = new File(getCurrentFilePath()).getName();
             }
-            edit.setText(newName);
 
-            // select text without extension
-            int selectLen = newName.lastIndexOf(".");
-            if (selectLen == -1) selectLen = newName.length();
-            edit.setSelection(0, selectLen);
-
-            builder.setView(content);
-            builder.setNegativeButton(R.string.cancel, null);
-            builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                //@Override
-                public void onClick(DialogInterface dialog, int which) {
-                    onRenameSubDirAnswer(fotoId, fotoPath, edit.getText().toString());
+            Dialogs dialog = new Dialogs() {
+                @Override
+                protected void onDialogResult(String newFileName, Object... parameters) {
+                    if (newFileName != null) {
+                        onRenameSubDirAnswer((Long) parameters[0], (String) parameters[1], newFileName);
+                    }
                 }
-            });
-            AlertDialog alertDialog = builder.create();
-            alertDialog.show();
-
-            int width = (int) (8 * edit.getTextSize());
-            // DisplayMetrics metrics = getResources().getDisplayMetrics();
-            // int width = metrics.widthPixels;
-            alertDialog.getWindow().setLayout(width * 2, LinearLayout.LayoutParams.WRAP_CONTENT);
-            edit.requestFocus();
-
-            // request keyboard. See http://stackoverflow.com/questions/2403632/android-show-soft-keyboard-automatically-when-focus-is-on-an-edittext
-            alertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+            };
+            dialog.editFileName(this, getString(R.string.cmd_rename), newName, fotoId, fotoPath);
         }
         return true;
     }

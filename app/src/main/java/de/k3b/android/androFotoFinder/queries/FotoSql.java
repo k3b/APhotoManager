@@ -85,12 +85,20 @@ public class FotoSql {
     public static final String SQL_COL_PK = MediaStore.Images.Media._ID;
     public static final String SQL_COL_DISPLAY_TEXT = "disp_txt";
     public static final String SQL_COL_LAT = MediaStore.Images.Media.LATITUDE;
+    private static final String FILTER_EXPR_LAT_MAX = SQL_COL_LAT + " < ?";
+    private static final String FILTER_EXPR_LAT_MIN = SQL_COL_LAT + " >= ?";
+    private static final String FILTER_EXPR_NO_GPS = SQL_COL_LAT + " is null AND " + SQL_COL_LAT + " is null";
     public static final String SQL_COL_LON = MediaStore.Images.Media.LONGITUDE;
+    private static final String FILTER_EXPR_LON_MAX = SQL_COL_LON + " < ?";
+    private static final String FILTER_EXPR_LON_MIN = SQL_COL_LON + " >= ?";
     public static final String SQL_COL_GPS = MediaStore.Images.Media.LONGITUDE;
     public static final String SQL_COL_COUNT = "count";
 
     public static final String SQL_COL_DATE_TAKEN = MediaStore.Images.Media.DATE_TAKEN;
+    private static final String FILTER_EXPR_DATE_MAX = SQL_COL_DATE_TAKEN + " < ?";
+    private static final String FILTER_EXPR_DATE_MIN = SQL_COL_DATE_TAKEN + " >= ?";
     public static final String SQL_COL_PATH = MediaStore.Images.Media.DATA;
+    private static final String FILTER_EXPR_PATH_LIKE = SQL_COL_PATH + " like ?";
 
     // same format as dir. i.e. description='/2014/12/24/' or '/mnt/sdcard/pictures/'
     public static final String SQL_EXPR_DAY = "strftime('/%Y/%m/%d/', " + SQL_COL_DATE_TAKEN + " /1000, 'unixepoch', 'localtime')";
@@ -216,37 +224,59 @@ public class FotoSql {
             parameters.clearWhere();
 
             if (filter.isNonGeoOnly()) {
-                parameters.addWhere(SQL_COL_LAT + " is null AND " + SQL_COL_LAT + " is null");
+                parameters.addWhere(FILTER_EXPR_NO_GPS);
             } else {
                 addWhereFilterLatLon(parameters, filter);
             }
 
-            if (filter.getDateMin() != 0) parameters.addWhere(SQL_COL_DATE_TAKEN + " >= ?", Double.toString(filter.getDateMin()));
-            if (filter.getDateMax() != 0) parameters.addWhere(SQL_COL_DATE_TAKEN + " < ?", Double.toString(filter.getDateMax()));
+            if (filter.getDateMin() != 0) parameters.addWhere(FILTER_EXPR_DATE_MIN, Long.toString(filter.getDateMin()));
+            if (filter.getDateMax() != 0) parameters.addWhere(FILTER_EXPR_DATE_MAX, Long.toString(filter.getDateMax()));
 
             String path = filter.getPath();
-            if ((path != null) && (path.length() > 0)) parameters.addWhere(SQL_COL_PATH + " like ?", path);
+            if ((path != null) && (path.length() > 0)) parameters.addWhere(FILTER_EXPR_PATH_LIKE, path);
         }
     }
 
-    public static void setWhereSelection(QueryParameter parameters, SelectedItems selectedItems) {
-        if ((parameters != null) && (selectedItems != null) && (!selectedItems.isEmpty())) {
-            parameters.clearWhere()
+    public static IGalleryFilter getWhereFilter(QueryParameter parameters) {
+        if (parameters != null) {
+            GalleryFilterParameter filter = new GalleryFilterParameter();
+            if (null != parameters.getWhereParameter(FILTER_EXPR_NO_GPS)) {
+                filter.setNonGeoOnly(true);
+            } else {
+                filter.setLogitude(getParam(parameters, FILTER_EXPR_LON_MIN), getParam(parameters, FILTER_EXPR_LON_MAX));
+                filter.setLatitude(getParam(parameters, FILTER_EXPR_LAT_MIN), getParam(parameters, FILTER_EXPR_LAT_MAX));
+            }
+
+	        filter.setDate(getParam(parameters, FILTER_EXPR_DATE_MIN), getParam(parameters, FILTER_EXPR_DATE_MAX));
+            filter.setPath(getParam(parameters, FILTER_EXPR_PATH_LIKE));
+            return filter;
+        }
+        return null;
+    }
+
+    private static String getParam(QueryParameter query, String expresion) {
+        final String[] result = query.getWhereParameter(expresion);
+        return ((result != null) && (result.length > 0)) ? result[0] : null;
+    }
+
+    public static void setWhereSelection(QueryParameter query, SelectedItems selectedItems) {
+        if ((query != null) && (selectedItems != null) && (!selectedItems.isEmpty())) {
+            query.clearWhere()
                     .addWhere(FotoSql.SQL_COL_PK + " in (" + selectedItems.toString() + ")")
             ;
         }
     }
 
-    public static void setWhereFileNames(QueryParameter parameters, String... fileNames) {
-        if ((parameters != null) && (fileNames != null) && (fileNames.length > 0)) {
-            parameters.clearWhere()
+    public static void setWhereFileNames(QueryParameter query, String... fileNames) {
+        if ((query != null) && (fileNames != null) && (fileNames.length > 0)) {
+            query.clearWhere()
                     .addWhere(getWhereInFileNames(fileNames))
             ;
         }
     }
 
-    public static void addWhereLatLonNotNull(QueryParameter parameters) {
-        parameters.addWhere(FotoSql.SQL_COL_LAT + " is not null and " + FotoSql.SQL_COL_LON + " is not null")
+    public static void addWhereLatLonNotNull(QueryParameter query) {
+        query.addWhere(FotoSql.SQL_COL_LAT + " is not null and " + FotoSql.SQL_COL_LON + " is not null")
         ;
     }
 
@@ -257,23 +287,23 @@ public class FotoSql {
         }
     }
 
-    public static void addWhereFilterLatLon(QueryParameter parameters, double latitudeMin, double latitudeMax, double logituedMin, double logituedMax) {
-        if (!Double.isNaN(latitudeMin)) parameters.addWhere(SQL_COL_LAT + " >= ?", DirectoryFormatter.parseLatLon(latitudeMin));
-        if (!Double.isNaN(latitudeMax)) parameters.addWhere(SQL_COL_LAT + " < ?", DirectoryFormatter.parseLatLon(latitudeMax));
-        if (!Double.isNaN(logituedMin)) parameters.addWhere(SQL_COL_LON + " >= ?", DirectoryFormatter.parseLatLon(logituedMin));
-        if (!Double.isNaN(logituedMax)) parameters.addWhere(SQL_COL_LON + " < ?", DirectoryFormatter.parseLatLon(logituedMax));
+    public static void addWhereFilterLatLon(QueryParameter query, double latitudeMin, double latitudeMax, double logituedMin, double logituedMax) {
+        if (!Double.isNaN(latitudeMin)) query.addWhere(FILTER_EXPR_LAT_MIN, DirectoryFormatter.parseLatLon(latitudeMin));
+        if (!Double.isNaN(latitudeMax)) query.addWhere(FILTER_EXPR_LAT_MAX, DirectoryFormatter.parseLatLon(latitudeMax));
+        if (!Double.isNaN(logituedMin)) query.addWhere(FILTER_EXPR_LON_MIN, DirectoryFormatter.parseLatLon(logituedMin));
+        if (!Double.isNaN(logituedMax)) query.addWhere(FILTER_EXPR_LON_MAX, DirectoryFormatter.parseLatLon(logituedMax));
     }
 
-    public static String getFilter(QueryParameter parameters, String description) {
-        if ((parameters != null) && (parameters.getID() == QUERY_TYPE_GROUP_ALBUM)) {
+    public static String getFilter(QueryParameter query, String description) {
+        if ((query != null) && (query.getID() == QUERY_TYPE_GROUP_ALBUM)) {
             return description;
         }
         return null;
     }
 
-    public static void addWhereFilter(QueryParameter parameters, String filterParameter) {
-        if ((parameters != null) && (parameters.getID() == QUERY_TYPE_GROUP_ALBUM) && (filterParameter != null)) {
-            parameters.addWhere(SQL_EXPR_FOLDER + " = ?", filterParameter);
+    public static void addWhereFilter(QueryParameter query, String filterParameter) {
+        if ((query != null) && (query.getID() == QUERY_TYPE_GROUP_ALBUM) && (filterParameter != null)) {
+            query.addWhere(SQL_EXPR_FOLDER + " = ?", filterParameter);
         }
     }
 
@@ -320,8 +350,8 @@ public class FotoSql {
                     .addOrderBy(SQL_COL_DATE_TAKEN + " desc");
         } else {
             newQuery
-                    .addWhere(SQL_COL_DATE_TAKEN + " >= ?", "" + from.getTime())
-                    .addWhere(SQL_COL_DATE_TAKEN + " < ?", "" + to.getTime())
+                    .addWhere(FILTER_EXPR_DATE_MIN, "" + from.getTime())
+                    .addWhere(FILTER_EXPR_DATE_MAX, "" + to.getTime())
                     .addOrderBy(SQL_COL_DATE_TAKEN + " desc");
         }
     }

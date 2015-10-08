@@ -28,7 +28,7 @@ this program. If not, see <http://www.gnu.org/licenses/>
     <string name="app_map_name">a Foto Map (dev)</string>
 
 <string name="about_content"><![CDATA["<html><body>
-<a href="http://github.com/k3b/AndroFotoFinder/wiki"><b>AndroFotoFinder</b></a><br/>Version $versionName$
+<a href="https://github.com/k3b/AndroFotoFinder/wiki"><b>AndroFotoFinder</b></a><br/>Version $versionName$
 <br />
 <hr />
 $about$

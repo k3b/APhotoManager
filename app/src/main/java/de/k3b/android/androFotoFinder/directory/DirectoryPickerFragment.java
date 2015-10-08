@@ -353,7 +353,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     }
 
     protected void onDirectoryPick(IDirectory selection) {
-        Log.d(Global.LOG_CONTEXT, debugPrefix + "onOk: " + selection);
+        Log.d(Global.LOG_CONTEXT, debugPrefix + "onDirectoryPick: " + selection);
         if ((mDirectoryListener != null) && (selection != null)) {
             mDirectoryListener.onDirectoryPick(selection.getAbsolute()
                     , mDirTypId);

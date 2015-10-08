@@ -63,7 +63,7 @@ public class QueryParameterTests {
                 .addHaving("h1", "h1Value")
                 .addHaving("h2", "h2Value");
         Assert.assertEquals("from f query-type-id 4711 select c1 c2 where w1=? w2=? where-parameters w1value w2value group-by g having h1 h2 having-parameters h1value h2value order-by o",
-                normalize(sut.toDeseralizableString()));
+                normalize(sut.toReParseableString()));
     }
 
     @Test
@@ -79,12 +79,27 @@ public class QueryParameterTests {
                 .addHaving("h1", "h1Value")
                 .addHaving("h2", "h2Value");
 
-        final String stringToBeParsed = original.toDeseralizableString();
+        final String stringToBeParsed = original.toReParseableString();
         List<QueryParameter> sut = QueryParameter.parseMultible(stringToBeParsed);
         Assert.assertEquals("size", 1, sut.size());
         Assert.assertEquals("from f query-type-id 4711 select c1 c2 where w1=? w2=? where-parameters w1value w2value group-by g having h1 h2 having-parameters h1value h2value order-by o",
-                normalize(sut.get(0).toDeseralizableString()));
+                normalize(sut.get(0).toReParseableString()));
     }
+
+    @Test
+    public void shoudParseExprParameter() {
+        QueryParameter sut = new QueryParameter()
+                .addWhere("w0")
+                .addWhere("w1=?", "w1Value")
+                .addWhere("w2 between ? and ?", "w21Value", "w22Value");
+
+        Assert.assertNull(sut.getWhereParameter("doesNotExist"));
+        Assert.assertEquals(new String[0], sut.getWhereParameter("w0"));
+        Assert.assertEquals("w1Value", sut.getWhereParameter("w1=?")[0]);
+        Assert.assertEquals("w22Value", sut.getWhereParameter("w2 between ? and ?")[1]);
+
+    }
+
 
     private String normalize(String unnormalized) {
         return unnormalized

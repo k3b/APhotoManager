@@ -527,7 +527,7 @@ public class FotoGalleryActivity extends Activity implements Common,
     }
 
     private void openFilter() {
-        GalleryFilterActivity.showActivity(this, this.mGalleryQueryParameter.mFilter);
+        GalleryFilterActivity.showActivity(this, this.mGalleryQueryParameter.mFilter, this.mGalleryQueryParameter.mGalleryContentQuery);
     }
 
     private void openSort() {
