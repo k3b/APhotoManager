@@ -1,10 +1,8 @@
 TODO
 	bug
-		gallery->ImageViewer offset not working any more
 		mapView->popup-position (see download)
 		ImageViewer 
 			first dbl-tab -> zoom to fille h/v
-			sendTo does not work
 		
 	- copy in asyncTask
 	- reports

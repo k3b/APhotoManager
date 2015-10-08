@@ -75,6 +75,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     private static final int ID_FORWARD = 471102;
     private static final int DEFAULT_SORT = FotoSql.SORT_BY_NAME_LEN;
     private static final QueryParameter DEFAULT_QUERY = FotoSql.queryDetail;
+    private static final int NO_INITIAL_SCROLL_POSITION = -1;
 
     // how many changes have been made. if != 0 parent activity must invalidate cached data
     private static int mModifyCount = 0;
@@ -107,13 +108,14 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
             // to be restored after reload if there is no mInitialFilePath
-            mInitialScrollPosition = mViewPager.getCurrentItem();
-
+            if (mInitialScrollPosition == NO_INITIAL_SCROLL_POSITION) {
+                mInitialScrollPosition = mViewPager.getCurrentItem();
+            }
             // do change the data
             mAdapter.swapCursor(data);
 
             // restore position is invalid
-            if (mInitialScrollPosition >= mAdapter.getCount()) mInitialScrollPosition = -1;
+            if (mInitialScrollPosition >= mAdapter.getCount()) mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
 
             if (Global.debugEnabledSql) {
                 Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onLoadFinished" +
@@ -231,7 +233,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     private QueryParameter mGalleryContentQuery = null;
 
     /** if >= 0 after load cursor scroll to this offset */
-    private int mInitialScrollPosition = -1;
+    private int mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
 
     /** if != after load cursor scroll to this path */
     private String mInitialFilePath = null;
@@ -379,7 +381,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     private void getParameterFromPath(String path, boolean isFileUri) {
         mInitialFilePath = path;
         File selectedPhoto = new File(mInitialFilePath);
-        this.mInitialScrollPosition = -1;
+        this.mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
 
         QueryParameter query = new QueryParameter(DEFAULT_QUERY);
         FotoSql.addPathWhere(query, selectedPhoto.getParent(), FotoSql.QUERY_TYPE_GALLERY);
@@ -468,12 +470,12 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
                 mViewPager.setCurrentItem(positionFound);
                 mInitialFilePath = null;
             }
-            mInitialScrollPosition = -1;
+            mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
         } else if (mInitialScrollPosition >= 0) {
             // after initial load select correct image
             mViewPager.invalidate();
             mViewPager.setCurrentItem(mInitialScrollPosition);
-            mInitialScrollPosition = -1;
+            mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
             mInitialFilePath = null;
         }
     }
@@ -637,9 +639,8 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             outIntent.putExtra(EXTRA_STREAM, uri);
         }
         if (Global.debugEnabled) {
-            Log.d(Global.LOG_CONTEXT, "cmdStartIntent(" +
-                    action +
-                    ":'" + outIntent.getData() + "',  mime:'" + outIntent.getType() + "')");
+            Log.d(Global.LOG_CONTEXT,
+                    "cmdStartIntent(" + outIntent.toUri(Intent.URI_INTENT_SCHEME) + "')");
         }
 
         try {
@@ -718,8 +719,11 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     }
 
     private String getMime(String path) {
+        return "image/*";
+        /*
         MimeTypeMap map = MimeTypeMap.getSingleton();
         return map.getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(path));
+        */
     }
 
     protected SelectedFotos getCurrentFoto() {
