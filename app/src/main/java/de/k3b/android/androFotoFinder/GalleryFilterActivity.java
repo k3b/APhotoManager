@@ -36,10 +36,6 @@ import android.widget.Toast;
 
 // import com.squareup.leakcanary.RefWatcher;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -51,11 +47,9 @@ import de.k3b.android.androFotoFinder.locationmap.LocationMapFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.android.widget.AboutDialogPreference;
-import de.k3b.android.widget.Dialogs;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.DirectoryFormatter;
-import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
@@ -78,7 +72,7 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
     private HistoryEditText mHistory;
     private BookmarkController bookmarkController = null;
 
-    public static void showActivity(Activity context, GalleryFilterParameter filter, QueryParameter rootQuery) {
+    public static void showActivity(Activity context, IGalleryFilter filter, QueryParameter rootQuery) {
         mRootQuery = rootQuery;
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, context.getClass().getSimpleName()
@@ -206,7 +200,7 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
         IGalleryFilter filter = new GalleryFilterParameter();
         fromGui(filter);
         QueryParameter query = new QueryParameter(mRootQuery);
-        FotoSql.setWhereFilter(query, filter);
+        FotoSql.setWhereFilter(query, filter, true);
         return query;
     }
 

@@ -236,6 +236,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  {
                 new BitmapFactory.Options());
         photoView.setImageBitmap(thumbnail);
         photoView.setMaximumScale(20);
+        photoView.setMediumScale(5);
     }
 
     /** converts imageID to content-uri */

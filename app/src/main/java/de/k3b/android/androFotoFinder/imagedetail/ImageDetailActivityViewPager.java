@@ -35,7 +35,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 // import com.squareup.leakcanary.RefWatcher;
@@ -350,7 +349,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
                 GalleryFilterParameter filter = GalleryFilterParameter.parse(filterValue, new GalleryFilterParameter());
                 QueryParameter query = new QueryParameter(DEFAULT_QUERY);
                 FotoSql.setSort(query, DEFAULT_SORT, true);
-                FotoSql.setWhereFilter(query, filter);
+                FotoSql.setWhereFilter(query, filter, true);
             }
         }
         if (mGalleryContentQuery == null) {
@@ -652,7 +651,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     private void cmdShowDetails(String fullFilePath, long currentImageId) {
 
-        ImageDetailDialogBuilder.createImageDetailDialog(this, fullFilePath, currentImageId).show();
+        ImageDetailDialogBuilder.createImageDetailDialog(this, fullFilePath, currentImageId, mGalleryContentQuery, mViewPager.getCurrentItem()).show();
     }
 
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFotos fotos) {

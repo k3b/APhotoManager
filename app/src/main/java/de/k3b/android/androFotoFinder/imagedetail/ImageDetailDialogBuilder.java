@@ -39,6 +39,7 @@ import java.util.Map;
 
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.database.QueryParameter;
 
 /**
  * Created by k3b on 15.07.2015.
@@ -46,7 +47,9 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 public class ImageDetailDialogBuilder {
     private static final String NL = "\n";
 
-    public static Dialog createImageDetailDialog(Activity context, String filePath, long currentImageId) {
+    public static Dialog createImageDetailDialog(Activity context, String filePath, long imageId,
+                                                 QueryParameter query,
+                                                 long offset) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(filePath);
 
@@ -54,7 +57,7 @@ public class ImageDetailDialogBuilder {
         sv.setVerticalScrollBarEnabled(true);
         TextView view = new TextView(context);
 
-        view.setText(getExifInfo(context, filePath, currentImageId));
+        view.setText(getExifInfo(context, filePath, imageId, query, offset));
 
         sv.addView(view);
         builder.setView(sv);
@@ -68,7 +71,7 @@ public class ImageDetailDialogBuilder {
         return builder.create();
     }
 
-    private static String getExifInfo(Activity context, String filepath, long currentImageId) {
+    private static String getExifInfo(Activity context, String filepath, long currentImageId, QueryParameter query, long offset) {
         StringBuilder builder = new StringBuilder();
 
         try {
@@ -90,6 +93,11 @@ public class ImageDetailDialogBuilder {
                 for (Map.Entry<String, Object> item : dbContent.valueSet()) {
                     builder.append(item.getKey()).append("=").append(item.getValue()).append(NL);
                 }
+            }
+
+            if (query != null) {
+                builder.append(NL).append(line).append(NL);
+                builder.append(NL).append("#").append(offset).append(": ").append(query.toSqlString()).append(NL).append(NL);
             }
         } catch (IOException e) {
             e.printStackTrace();

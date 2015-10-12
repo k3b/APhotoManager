@@ -24,11 +24,13 @@
     <string name="gallery_foto">Photos</string>
 
     <!-- sort criteria -->
-    <string name="folder">Folder</string>
-    <string name="name">Name</string>
-    <string name="date">Date</string>
-    <string name="place">Place</string>
+    <string name="sort_by_none">Unsorted</string>
+    <string name="sort_by_folder">Folder</string>
+    <string name="sort_by_name">Name</string>
+    <string name="sort_by_date">Date</string>
+    <string name="sort_by_place">Place</string>
     <string name="sort_by_name_len">Lenght</string>
+
     <string name="destination_move">Move Destination</string>
     <string name="destination_copy">Copy Destination</string>
 
@@ -168,7 +170,7 @@ Features:
     <string name="selection_add_all_menu_title"   >Selection: Add all visible</string>
     <string name="selection_add_remove_menu_title">Selection: Remove all visible</string>
     <string name="err_cannot_share">sendmultible: item count exceeded</string>
-    <string name="title_geo_edit">a Foto Change Geo</string>
+    <string name="title_geo_edit">a Photo Change Geo</string>
     <string name="geo_update_in_progress">Changing geo info in selected photos</string>
     <string name="cmd_clear_filter">Clear Filter</string>
     <string name="lbl_longitude_short">Lon</string>

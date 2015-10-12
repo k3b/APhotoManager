@@ -58,6 +58,7 @@ import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IDirectory;
+import de.k3b.io.IGalleryFilter;
 
 public class FotoGalleryActivity extends Activity implements Common,
         OnGalleryInteractionListener, DirectoryPickerFragment.OnDirectoryInteractionListener,
@@ -101,7 +102,8 @@ public class FotoGalleryActivity extends Activity implements Common,
 
         QueryParameter mGalleryContentQuery = null;
 
-        GalleryFilterParameter mFilter;
+        // GalleryFilterParameter mFilter;
+        IGalleryFilter mFilter;
         /** true: if activity started without special intent-parameters, the last mFilter is saved/loaded for next use */
         private boolean mSaveToSharedPrefs = true;
 
@@ -113,6 +115,9 @@ public class FotoGalleryActivity extends Activity implements Common,
             return this.mDirQueryID;
         }
 
+        public int getSortID() {
+            return mSortID;
+        }
         public void setSortID(int sortID) {
             if (sortID == mSortID) {
                 mSortAscending = !mSortAscending;
@@ -139,7 +144,7 @@ public class FotoGalleryActivity extends Activity implements Common,
             if (this.mGalleryContentQuery == null) return null;
             QueryParameter result = new QueryParameter(this.mGalleryContentQuery);
 
-            FotoSql.setWhereFilter(result, this.mFilter);
+            FotoSql.setWhereFilter(result, this.mFilter, getSortID() != FotoSql.SORT_BY_NONE);
             if (result == null) return null;
 
             if (mUseLatLon) {
@@ -148,7 +153,9 @@ public class FotoGalleryActivity extends Activity implements Common,
                 FotoSql.addPathWhere(result, this.mCurrentPath, this.getDirQueryID());
             }
 
-            FotoSql.setSort(result, mSortID, mSortAscending);
+            if (mSortID != FotoSql.SORT_BY_NONE) {
+                FotoSql.setSort(result, mSortID, mSortAscending);
+            }
             return result;
         }
 
@@ -297,6 +304,8 @@ public class FotoGalleryActivity extends Activity implements Common,
         Global.debugMemory(mDebugPrefix, "onCreate");
         super.onCreate(savedInstanceState);
 
+        bookmarkController = new BookmarkController(this);
+
         this.getContentResolver().registerContentObserver(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, true, mMediaObserverDirectory);
         setContentView(R.layout.activity_gallery); // .gallery_activity);
 
@@ -406,6 +415,9 @@ public class FotoGalleryActivity extends Activity implements Common,
             case R.id.cmd_filter:
                 openFilter();
                 return true;
+            case R.id.cmd_load_bookmark:
+                loadBookmark();
+                return true;
             case R.id.cmd_sort:
                 openSort();
                 return true;
@@ -436,6 +448,21 @@ public class FotoGalleryActivity extends Activity implements Common,
         }
 
     }
+
+    private BookmarkController bookmarkController = null;
+
+    private void loadBookmark() {
+        bookmarkController.onLoadFromQuestion(new BookmarkController.IQueryConsumer() {
+            @Override
+            public void setQuery(QueryParameter newQuery) {
+                mGalleryQueryParameter.mGalleryContentQuery = newQuery;
+                mGalleryQueryParameter.setSortID(FotoSql.SORT_BY_NONE);
+                onFilterChanged(FotoSql.getWhereFilter(newQuery));
+                reloadGui("loaded bookmark");
+            }
+        }, this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery());
+    }
+
     /**
      * Call back from sub-activities.<br/>
      * Process Change StartTime (longpress start), Select StopTime before stop
@@ -463,7 +490,7 @@ public class FotoGalleryActivity extends Activity implements Common,
         }
     }
 
-    private void onFilterChanged(GalleryFilterParameter filter) {
+    private void onFilterChanged(IGalleryFilter filter) {
         if (filter != null) {
             this.mGalleryQueryParameter.mFilter = filter;
 
@@ -498,7 +525,7 @@ public class FotoGalleryActivity extends Activity implements Common,
         if (mDirectoryRoot == null) {
             // not loaded yet. load directoryRoot in background
             final QueryParameter currentDirContentQuery = new QueryParameter(FotoSql.getQuery(dirQueryID));
-            FotoSql.setWhereFilter(currentDirContentQuery, this.mGalleryQueryParameter.mFilter);
+            FotoSql.setWhereFilter(currentDirContentQuery, this.mGalleryQueryParameter.mFilter, this.mGalleryQueryParameter.getSortID() != FotoSql.SORT_BY_NONE);
 
             this.mGalleryQueryParameter.mDirQueryID = (currentDirContentQuery != null) ? currentDirContentQuery.getID() : FotoSql.QUERY_TYPE_UNDEFINED;
 

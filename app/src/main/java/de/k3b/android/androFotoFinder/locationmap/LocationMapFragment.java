@@ -73,6 +73,7 @@ import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
+import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
 
 /**
@@ -121,7 +122,7 @@ public class LocationMapFragment extends DialogFragment {
     private int mDelayedZoomLevel = NO_ZOOM;
     private boolean mIsInitialized = false;
 
-    private GalleryFilterParameter mRootFilter;
+    private IGalleryFilter mRootFilter;
 
     public LocationMapFragment() {
         // Required empty public constructor
@@ -399,7 +400,7 @@ public class LocationMapFragment extends DialogFragment {
         return result;
     }
 
-    public void defineNavigation(GalleryFilterParameter rootFilter, GeoRectangle rectangle, int zoomlevel, SelectedItems selectedItems) {
+    public void defineNavigation(IGalleryFilter rootFilter, GeoRectangle rectangle, int zoomlevel, SelectedItems selectedItems) {
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + "defineNavigation: " + rectangle + ";z=" + zoomlevel);
         }
@@ -503,7 +504,7 @@ public class LocationMapFragment extends DialogFragment {
         query.clearWhere();
 
         if (this.mRootFilter != null) {
-            FotoSql.setWhereFilter(query, this.mRootFilter);
+            FotoSql.setWhereFilter(query, this.mRootFilter, true);
         }
 
         // delta: make the grouping area a little bit bigger than the viewport

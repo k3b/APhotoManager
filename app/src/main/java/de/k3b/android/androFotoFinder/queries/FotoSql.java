@@ -33,6 +33,7 @@ import android.util.Log;
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.util.GeoPoint;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -60,6 +61,7 @@ public class FotoSql {
 //    public static final String SQL_EXPR_DAY = "(ROUND("
 //            + MediaStore.Images.Media.SQL_COL_DATE_TAKEN + "/" + PER_DAY + ") * " + PER_DAY + ")";
 
+    public static final int SORT_BY_NONE = 0;
     public static final int SORT_BY_DATE = 1;
     public static final int SORT_BY_NAME = 2;
     public static final int SORT_BY_LOCATION = 3;
@@ -219,9 +221,11 @@ public class FotoSql {
                     SQL_COL_LAT, SQL_COL_LON)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString());
 
-    public static void setWhereFilter(QueryParameter parameters, IGalleryFilter filter) {
+    public static void setWhereFilter(QueryParameter parameters, IGalleryFilter filter, boolean clearWhereBefore) {
         if ((parameters != null) && (filter != null)) {
-            parameters.clearWhere();
+            if (clearWhereBefore) {
+                parameters.clearWhere();
+            }
 
             if (filter.isNonGeoOnly()) {
                 parameters.addWhere(FILTER_EXPR_NO_GPS);
@@ -380,24 +384,26 @@ public class FotoSql {
 
     public static String getName(Context context, int id) {
         switch (id) {
+            case SORT_BY_NONE:
+                return context.getString(R.string.sort_by_none);
             case SORT_BY_DATE:
-                return context.getString(R.string.date);
+                return context.getString(R.string.sort_by_date);
             case SORT_BY_NAME:
-                return context.getString(R.string.name);
+                return context.getString(R.string.sort_by_name);
             case SORT_BY_LOCATION:
-                return context.getString(R.string.place);
+                return context.getString(R.string.sort_by_place);
             case SORT_BY_NAME_LEN:
                 return context.getString(R.string.sort_by_name_len);
 
             case QUERY_TYPE_GALLERY:
                 return context.getString(R.string.gallery_foto);
             case QUERY_TYPE_GROUP_DATE:
-                return context.getString(R.string.date);
+                return context.getString(R.string.sort_by_date);
             case QUERY_TYPE_GROUP_ALBUM:
-                return context.getString(R.string.folder);
+                return context.getString(R.string.sort_by_folder);
             case QUERY_TYPE_GROUP_PLACE:
             case QUERY_TYPE_GROUP_PLACE_MAP:
-                return context.getString(R.string.place);
+                return context.getString(R.string.sort_by_place);
             case QUERY_TYPE_GROUP_COPY:
                 return context.getString(R.string.destination_copy);
             case QUERY_TYPE_GROUP_MOVE:
@@ -526,7 +532,7 @@ public class FotoSql {
                 .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString());
 
         if (filter != null) {
-            setWhereFilter(query, filter);
+            setWhereFilter(query, filter, true);
         }
 
         if (selectedItems != null) {
@@ -656,15 +662,29 @@ public class FotoSql {
     }
 
     @NonNull
-    public static CursorLoader createCursorLoader(Context context, QueryParameter query) {
-        return new CursorLoader(
+    public static CursorLoader createCursorLoader(Context context, final QueryParameter query) {
+        final CursorLoader loader = new CursorLoader(
                 context,   // Parent activity context
                 Uri.parse(query.toFrom()),        // Table to query
-                query.toColumns(),     // Projection to return
-                query.toAndroidWhere(),            // No selection clause
-                query.toAndroidParameters(),            // No selection arguments
-                query.toOrderBy()             // Default sort order
-        );
+                query.toColumns(),                // the colums to be queried
+                query.toAndroidWhere(),           // the sql-where statement
+                query.toAndroidParameters(),      // the "?"-Parameter values belonging to sqlWhere
+                query.toOrderBy()                 // Default sort order
+        ){
+            @Override
+            public Cursor loadInBackground() {
+                try {
+                    Cursor result = super.loadInBackground();
+                    return result;
+                } catch (Exception ex) {
+                    final String msg = "FotoSql.createCursorLoader()#loadInBackground failed:\n\t" + query.toSqlString();
+                    Log.e(Global.LOG_CONTEXT, msg, ex);
+                    // throw new RuntimeException(msg, ex);
+                    throw ex;
+                }
+            }
+        };
+        return loader;
     }
 }
 

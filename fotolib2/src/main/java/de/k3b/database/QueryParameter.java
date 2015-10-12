@@ -270,7 +270,7 @@ public class QueryParameter {
                     case "HAVING-PARAMETERS": params = current.mHavingParameters; break;
                     case "ORDER-BY": params = current.mOrderBy; break;
                 }
-            } else if ((params != null) && (isNoComment(line))) {
+            } else if ((params != null) && (isNoComment(line)) && (line.trim().length() > 0)) {
                 params.add(line);
             }
         }
