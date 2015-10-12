@@ -19,7 +19,6 @@
  
 package de.k3b.android.androFotoFinder.locationmap;
 
-
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.SharedPreferences;
@@ -42,7 +41,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.SeekBar;
-
 
 import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.*;
@@ -96,6 +94,9 @@ public class LocationMapFragment extends DialogFragment {
     private SeekBar mZoomBar;
     private ImageView mImage;
     private DefaultResourceProxyImplEx mResourceProxy;
+
+    /** temporary 1x1 pix view where popup-menu is attached to */
+    private View tempPopupMenuParentView = null;
 
     /** contain the markers with itmen-count that gets recalculated on every map move/zoom */
     private FolderOverlay mFolderOverlaySummaryMarker;
@@ -806,13 +807,17 @@ public class LocationMapFragment extends DialogFragment {
     protected   boolean showContextMenu(final View parent, final int markerId,
                                         final IGeoPoint geoPosition, final Object markerData) {
         MenuInflater inflater = getActivity().getMenuInflater();
-        PopupMenu menu = new PopupMenu(getActivity(), this.mImage);
+        mMapView.removeView(tempPopupMenuParentView);
+
+        PopupMenu menu = new PopupMenu(getActivity(), createTempPopupParentMenuView(new GeoPoint(geoPosition.getLatitudeE6(), geoPosition.getLongitudeE6())));
 
         inflater.inflate(R.menu.menu_map_context, menu.getMenu());
 
         menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
+                mMapView.removeView(tempPopupMenuParentView);
+
                 switch (item.getItemId()) {
                     case R.id.cmd_gallery:
                         return showGallery(getiGeoPointById(markerId, geoPosition));
@@ -825,6 +830,20 @@ public class LocationMapFragment extends DialogFragment {
         });
         menu.show();
         return true;
+    }
+
+    // inspired by org.osmdroid.bonuspack.overlays.InfoWindow
+    private View createTempPopupParentMenuView(GeoPoint position) {
+        if (tempPopupMenuParentView != null) mMapView.removeView(tempPopupMenuParentView);
+        tempPopupMenuParentView = new View(getActivity());
+        MapView.LayoutParams lp = new MapView.LayoutParams(
+                1,
+                1,
+                position, MapView.LayoutParams.CENTER,
+                0, 0);
+        tempPopupMenuParentView.setVisibility(View.VISIBLE);
+        mMapView.addView(tempPopupMenuParentView, lp);
+        return tempPopupMenuParentView;
     }
 
     private boolean showGallery(IGeoPoint geoPosition) {
