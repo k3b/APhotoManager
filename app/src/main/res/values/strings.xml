@@ -183,4 +183,9 @@ Features:
     <string name="query_param_comment">Generated on %3$s with \'%1$s\' Version %2$s. See https://github.com/k3b/AndroFotoFinder/wiki/intentap#sql for details</string>
     <string name="cmd_save_bookmark_as">Save Bookmark as ...</string>
     <string name="cmd_load_bookmark_from">Load Bookmark from ...</string>
+
+    <string name="err_sql_title_reload">Invalid SQL. Reloading default</string>
+    <string name="err_system">Systemfehler. Exiting</string>
+    <string name="err_sql_message">Sql error \'%1$s\'\n\n%2$s</string>
+
 </resources>

@@ -33,7 +33,6 @@ import android.util.Log;
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.util.GeoPoint;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -663,28 +662,40 @@ public class FotoSql {
 
     @NonNull
     public static CursorLoader createCursorLoader(Context context, final QueryParameter query) {
-        final CursorLoader loader = new CursorLoader(
-                context,   // Parent activity context
-                Uri.parse(query.toFrom()),        // Table to query
-                query.toColumns(),                // the colums to be queried
-                query.toAndroidWhere(),           // the sql-where statement
-                query.toAndroidParameters(),      // the "?"-Parameter values belonging to sqlWhere
-                query.toOrderBy()                 // Default sort order
-        ){
-            @Override
-            public Cursor loadInBackground() {
-                try {
-                    Cursor result = super.loadInBackground();
-                    return result;
-                } catch (Exception ex) {
-                    final String msg = "FotoSql.createCursorLoader()#loadInBackground failed:\n\t" + query.toSqlString();
-                    Log.e(Global.LOG_CONTEXT, msg, ex);
-                    // throw new RuntimeException(msg, ex);
-                    throw ex;
-                }
-            }
-        };
+        final CursorLoader loader = new CursorLoaderWithException(context, query);
         return loader;
+    }
+
+    public static class CursorLoaderWithException extends CursorLoader {
+        private final QueryParameter query;
+        private Exception mException;
+
+        public CursorLoaderWithException(Context context, QueryParameter query) {
+            super(context, Uri.parse(query.toFrom()), query.toColumns(), query.toAndroidWhere(), query.toAndroidParameters(), query.toOrderBy());
+            this.query = query;
+        }
+
+        @Override
+        public Cursor loadInBackground() {
+            mException = null;
+            try {
+                Cursor result = super.loadInBackground();
+                return result;
+            } catch (Exception ex) {
+                final String msg = "FotoSql.createCursorLoader()#loadInBackground failed:\n\t" + query.toSqlString();
+                Log.e(Global.LOG_CONTEXT, msg, ex);
+                mException = ex;
+                return null;
+            }
+        }
+
+        public QueryParameter getQuery() {
+            return query;
+        }
+
+        public Exception getException() {
+            return mException;
+        }
     }
 }
 

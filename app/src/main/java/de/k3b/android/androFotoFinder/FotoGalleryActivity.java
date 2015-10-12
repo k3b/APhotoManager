@@ -141,8 +141,13 @@ public class FotoGalleryActivity extends Activity implements Common,
 
         /** combine root-query plus current selected directoryRoot */
         private QueryParameter calculateEffectiveGalleryContentQuery() {
-            if (this.mGalleryContentQuery == null) return null;
-            QueryParameter result = new QueryParameter(this.mGalleryContentQuery);
+            return calculateEffectiveGalleryContentQuery(mGalleryContentQuery);
+        }
+
+        /** combine root-query plus current selected directoryRoot */
+        private QueryParameter calculateEffectiveGalleryContentQuery(QueryParameter rootQuery) {
+            if (rootQuery == null) return null;
+            QueryParameter result = new QueryParameter(rootQuery);
 
             FotoSql.setWhereFilter(result, this.mFilter, getSortID() != FotoSql.SORT_BY_NONE);
             if (result == null) return null;

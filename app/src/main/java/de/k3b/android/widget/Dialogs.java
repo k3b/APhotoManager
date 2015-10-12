@@ -88,19 +88,19 @@ public abstract class Dialogs {
 
 		builder.setView(content);
 		builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                onDialogResult(null);
-                dialog.dismiss();
-            }
-        });
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				onDialogResult(null);
+				dialog.dismiss();
+			}
+		});
 		builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                onDialogResult(edit.getText().toString(), parameters);
-                dialog.dismiss();
-            }
-        });
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				onDialogResult(edit.getText().toString(), parameters);
+				dialog.dismiss();
+			}
+		});
 		AlertDialog alertDialog = builder.create();
 		alertDialog.show();
 
@@ -115,7 +115,7 @@ public abstract class Dialogs {
 		alertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
 	}
 
-	private void fixLayout(Dialog alertDialog, TextView edit) {
+	private static void fixLayout(Dialog alertDialog, TextView edit) {
 		int width = (int) (8 * edit.getTextSize());
 		// DisplayMetrics metrics = getResources().getDisplayMetrics();
 		// int width = metrics.widthPixels;
@@ -155,4 +155,19 @@ public abstract class Dialogs {
 
         fixLayout(alertDialog, textView);
     }
+	public static void messagebox(Activity parent, final String title, String question, final Object... parameters) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(parent);
+		builder.setTitle(title);
+		final TextView textView = new TextView(parent);
+		textView.setText(question);
+		builder.setView(textView);
+		builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		});
+		AlertDialog alertDialog = builder.create();
+		alertDialog.show();
+	}
 }

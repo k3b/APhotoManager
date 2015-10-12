@@ -65,6 +65,7 @@ import de.k3b.android.androFotoFinder.queries.SqlJobTaskBase;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.SelectedFotos;
+import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
 import de.k3b.io.Directory;
@@ -163,8 +164,28 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
         /** called after media db content has changed */
         @Override
-        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        public void onLoadFinished(Loader<Cursor> _loader, Cursor data) {
             mLastVisiblePosition = mGalleryView.getLastVisiblePosition();
+
+            final Activity context = getActivity();
+            if (data == null) {
+                FotoSql.CursorLoaderWithException loader = (FotoSql.CursorLoaderWithException) _loader;
+                String title;
+                String message = context.getString(R.string.err_sql_message, loader.getException().getMessage(), loader.getQuery().toSqlString());
+                if (loader.getException() != null) {
+                    if (0 != loader.getQuery().toSqlString().compareTo(getCurrentQuery(FotoSql.queryDetail).toSqlString())) {
+                        // query is not default query. revert to default query
+                        mGalleryContentQuery = FotoSql.queryDetail;
+                        requery("requery after query-errror");
+                        title = context.getString(R.string.err_sql_title_reload);
+                    } else {
+                        title = context.getString(R.string.err_system);
+                        context.finish();
+                    }
+                    Dialogs.messagebox(context, title, message);
+                    return;
+                }
+            }
 
             // do change the data
             mAdapter.swapCursor(data);
@@ -189,7 +210,6 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 mLastVisiblePosition = -1;
             }
 
-            Activity context = getActivity();
             // show the changes
 
             if (context instanceof OnGalleryInteractionListener) {
@@ -407,12 +427,16 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     private QueryParameter getCurrentQuery() {
+        return getCurrentQuery(mGalleryContentQuery);
+    }
+
+    private QueryParameter getCurrentQuery(QueryParameter rootQuery) {
         QueryParameter selFilter = null;
         if (mShowSelectedOnly) {
-            selFilter = new QueryParameter(mGalleryContentQuery);
+            selFilter = new QueryParameter(rootQuery);
             FotoSql.setWhereSelection(selFilter, mSelectedItems);
         } else {
-            selFilter = mGalleryContentQuery;
+            selFilter = rootQuery;
         }
         return selFilter;
     }
