@@ -212,14 +212,14 @@ public class FotoGalleryActivity extends Activity implements Common,
             Intent intent = context.getIntent();
 
             // for debugging: where does the filter come from
-            String dbgFilter = null;
+            StringBuilder dbgFilter = (Global.debugEnabled) ? new StringBuilder() : null;
             String filter = null;
             String pathFilter = null;
 
             if (intent != null) {
                 filter = intent.getStringExtra(EXTRA_FILTER);
 
-                if (filter != null) dbgFilter = "filter from " + EXTRA_FILTER +"=" + filter;
+                if ((filter != null) && (dbgFilter != null)) dbgFilter.append("filter from ").append(EXTRA_FILTER).append("=").append(filter).append("\n");
 
                 if (filter == null) {
                     Uri uri = IntentUtil.getUri(intent);
@@ -227,7 +227,7 @@ public class FotoGalleryActivity extends Activity implements Common,
                     if (IntentUtil.isFileUri(uri)) {
                         pathFilter = uri.getSchemeSpecificPart();
                         if (pathFilter != null) pathFilter = pathFilter.replace('*', '%');
-                        dbgFilter = "path from uri=" + pathFilter;
+                        if (dbgFilter != null) dbgFilter.append("path from uri=").append(pathFilter).append("\n");
                     }
                 }
             }
@@ -239,7 +239,7 @@ public class FotoGalleryActivity extends Activity implements Common,
                 this.mSortID = savedInstanceState.getInt(STATE_SortID, this.mSortID);
                 this.mSortAscending = savedInstanceState.getBoolean(STATE_SortAscending, this.mSortAscending);
                 filter = savedInstanceState.getString(STATE_Filter);
-                if (filter != null) dbgFilter = "filter from savedInstanceState=" + filter;
+                if ((filter != null) && (dbgFilter != null)) dbgFilter.append("filter from savedInstanceState=").append(filter).append("\n");
 
                 this.mCurrentLatLon.get(DirectoryFormatter.parseLatLon(savedInstanceState.getString(STATE_LAT_LON)));
 
@@ -248,7 +248,7 @@ public class FotoGalleryActivity extends Activity implements Common,
 
             if ((pathFilter == null) && (filter == null) && (this.mFilter == null)) {
                 filter = sharedPref.getString(STATE_Filter, null);
-                if (filter != null) dbgFilter = "filter from sharedPref=" + filter;
+                if ((filter != null) && (dbgFilter != null)) dbgFilter.append("filter from sharedPref=").append(filter).append("\n");
             }
 
             if (filter != null) {
@@ -258,12 +258,19 @@ public class FotoGalleryActivity extends Activity implements Common,
                 this.mFilter = new GalleryFilterParameter().setPath(pathFilter);
             }
 
-            if (Global.debugEnabled) {
-                Log.i(Global.LOG_CONTEXT, mDebugPrefix + dbgFilter + " => " + this.mFilter);
-            }
             // extra parameter
-            this.mGalleryContentQuery = QueryParameter.parse(context.getIntent().getStringExtra(EXTRA_QUERY));
+            final String sqlString = intent.getStringExtra(EXTRA_QUERY);
+            if (sqlString != null) {
+                if (dbgFilter != null) dbgFilter.append("query from ").append(EXTRA_QUERY).append("\n\t").append(sqlString).append("\n");
+                this.mGalleryContentQuery = QueryParameter.parse(sqlString);
+                setSortID(FotoSql.SORT_BY_NONE);
+            }
+
             if (this.mGalleryContentQuery == null) this.mGalleryContentQuery = FotoSql.getQuery(FotoSql.QUERY_TYPE_DEFAULT);
+
+            if (dbgFilter != null)  {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + dbgFilter.toString());
+            }
         }
     }
 
@@ -283,11 +290,15 @@ public class FotoGalleryActivity extends Activity implements Common,
     /** true if activity should show navigator dialog after loading mDirectoryRoot is complete */
     private boolean mMustShowNavigator = false;
 
-    public static void showActivity(Activity context, GalleryFilterParameter filter, int requestCode) {
+    public static void showActivity(Activity context, GalleryFilterParameter filter, QueryParameter query, int requestCode) {
         Intent intent = new Intent(context, FotoGalleryActivity.class);
 
         if (filter != null) {
             intent.putExtra(EXTRA_FILTER, filter.toString());
+        }
+
+        if (query != null) {
+            intent.putExtra(EXTRA_QUERY, query.toReParseableString());
         }
 
         if (requestCode != 0) {
@@ -355,6 +366,11 @@ public class FotoGalleryActivity extends Activity implements Common,
     protected void onResume () {
         Global.debugMemory(mDebugPrefix, "onResume");
         super.onResume();
+    }
+
+    @Override public void onLowMemory() {
+        super.onLowMemory();
+        invalidateDirectories();
     }
 
     @Override
@@ -463,6 +479,7 @@ public class FotoGalleryActivity extends Activity implements Common,
                 mGalleryQueryParameter.mGalleryContentQuery = newQuery;
                 mGalleryQueryParameter.setSortID(FotoSql.SORT_BY_NONE);
                 onFilterChanged(FotoSql.getWhereFilter(newQuery));
+                invalidateDirectories();
                 reloadGui("loaded bookmark");
             }
         }, this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery());

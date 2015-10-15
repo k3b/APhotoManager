@@ -1,16 +1,8 @@
 TODO
+	-??? osmdroid reduce thread logging
+
 	https://github.com/k3b/AndroFotoFinder/issues/12 #12 
 		appname "a Foto Finder" => "a Photo Manager" versus "Andro Foto Finder" in the about-box
-		
-	bug
-		Activity { 
-			@Override public void onBackPressed()			
-				to release Loader-instance when activity-instance is not needed any more
-				
-		?? multible GalleryInstances each having it-s own loader-ID??
-			
-		ImageViewer 
-			first dbl-tab -> zoom to fille h/v
 		
 	- copy in asyncTask
 	- reports

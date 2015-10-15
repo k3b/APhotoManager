@@ -434,14 +434,6 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         // refWatcher.watch(this);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_image_detail, menu);
-        getMenuInflater().inflate(R.menu.menu_image_commands, menu);
-        mMenuSlideshow = menu.findItem(R.id.action_slideshow);
-        return super.onCreateOptionsMenu(menu);
-    }
-
     private void onLoadCompleted() {
         if (mAdapter.getCount() == 0) {
             // image not found in media database
@@ -527,6 +519,14 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         MediaScanner scanner = new MediaScanner(context, why);
         scanner.execute(null, missing.toArray(new String[missing.size()]));
         return missing.size();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_image_detail, menu);
+        getMenuInflater().inflate(R.menu.menu_image_commands, menu);
+        mMenuSlideshow = menu.findItem(R.id.action_slideshow);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override

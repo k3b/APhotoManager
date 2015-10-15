@@ -48,7 +48,6 @@ import de.k3b.database.SelectedItems;
  */
 public class GalleryCursorAdapter extends CursorAdapter {
     // Identifies a particular Loader or a LoaderManager being used in this component
-    private static int MY_LOADER_ID = 0;
     private static final boolean SYNC = false;
     private final SelectedItems mSelectedItems;
     private OnGalleryInteractionListener callback = null;
@@ -131,10 +130,10 @@ public class GalleryCursorAdapter extends CursorAdapter {
         long count = cursor.getLong(cursor.getColumnIndex(FotoSql.SQL_COL_COUNT));
         boolean gps = !cursor.isNull(cursor.getColumnIndex(FotoSql.SQL_COL_GPS));
 
+        final int columnIndexWhereParam = cursor.getColumnIndex(FotoSql.SQL_COL_WHERE_PARAM);
+        holder.filter =  (columnIndexWhereParam >= 0) ? cursor.getString(columnIndexWhereParam) : null;
+
         String description = cursor.getString(cursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT));
-
-        holder.filter = description;
-
         if (count > 1) description += " (" + count + ")";
         if (gps) description += "#";
         holder.description.setText(description);

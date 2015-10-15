@@ -86,14 +86,15 @@ public class FotoSql {
     public static final String SQL_COL_PK = MediaStore.Images.Media._ID;
     public static final String SQL_COL_DISPLAY_TEXT = "disp_txt";
     public static final String SQL_COL_LAT = MediaStore.Images.Media.LATITUDE;
+    public static final String SQL_COL_LON = MediaStore.Images.Media.LONGITUDE;
     private static final String FILTER_EXPR_LAT_MAX = SQL_COL_LAT + " < ?";
     private static final String FILTER_EXPR_LAT_MIN = SQL_COL_LAT + " >= ?";
-    private static final String FILTER_EXPR_NO_GPS = SQL_COL_LAT + " is null AND " + SQL_COL_LAT + " is null";
-    public static final String SQL_COL_LON = MediaStore.Images.Media.LONGITUDE;
+    private static final String FILTER_EXPR_NO_GPS = SQL_COL_LAT + " is null AND " + SQL_COL_LON + " is null";
     private static final String FILTER_EXPR_LON_MAX = SQL_COL_LON + " < ?";
     private static final String FILTER_EXPR_LON_MIN = SQL_COL_LON + " >= ?";
     public static final String SQL_COL_GPS = MediaStore.Images.Media.LONGITUDE;
     public static final String SQL_COL_COUNT = "count";
+    public static final String SQL_COL_WHERE_PARAM = "where_param";
 
     public static final String SQL_COL_DATE_TAKEN = MediaStore.Images.Media.DATE_TAKEN;
     private static final String FILTER_EXPR_DATE_MAX = SQL_COL_DATE_TAKEN + " < ?";
@@ -123,6 +124,8 @@ public class FotoSql {
                     "max(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
                     SQL_EXPR_FOLDER + " AS " + SQL_COL_DISPLAY_TEXT,
                     "count(*) AS " + SQL_COL_COUNT,
+                    // (Substr(_data,1, length(_data) -  length(_display_Name)) = '/storage/sdcard0/DCIM/onw7b/2013/')
+                    // "'(" + SQL_EXPR_FOLDER + " = ''' || " + SQL_EXPR_FOLDER + " || ''')'"
                     "max(" + SQL_COL_GPS + ") AS " + SQL_COL_GPS)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
             .addGroupBy(SQL_EXPR_FOLDER)
@@ -295,19 +298,6 @@ public class FotoSql {
         if (!Double.isNaN(latitudeMax)) query.addWhere(FILTER_EXPR_LAT_MAX, DirectoryFormatter.parseLatLon(latitudeMax));
         if (!Double.isNaN(logituedMin)) query.addWhere(FILTER_EXPR_LON_MIN, DirectoryFormatter.parseLatLon(logituedMin));
         if (!Double.isNaN(logituedMax)) query.addWhere(FILTER_EXPR_LON_MAX, DirectoryFormatter.parseLatLon(logituedMax));
-    }
-
-    public static String getFilter(QueryParameter query, String description) {
-        if ((query != null) && (query.getID() == QUERY_TYPE_GROUP_ALBUM)) {
-            return description;
-        }
-        return null;
-    }
-
-    public static void addWhereFilter(QueryParameter query, String filterParameter) {
-        if ((query != null) && (query.getID() == QUERY_TYPE_GROUP_ALBUM) && (filterParameter != null)) {
-            query.addWhere(SQL_EXPR_FOLDER + " = ?", filterParameter);
-        }
     }
 
     public static void addPathWhere(QueryParameter newQuery, String selectedAbsolutePath, int dirQueryID) {

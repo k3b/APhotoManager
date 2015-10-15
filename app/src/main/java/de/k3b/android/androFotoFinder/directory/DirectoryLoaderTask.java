@@ -67,6 +67,8 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
     // will receive debug output
     private StringBuffer mStatus = null;
 
+    protected Exception mException = null;
+
     public DirectoryLoaderTask(Activity context, String debugPrefix) {
         this.context = context;
         this.debugPrefix = debugPrefix;
@@ -82,6 +84,7 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
     }
 
     protected IDirectory doInBackground(QueryParameter... queryParameter) {
+        mException = null;
         if (queryParameter.length != 1) throw new IllegalArgumentException();
 
         QueryParameter queryParameters = queryParameter[0];
@@ -136,6 +139,12 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
                 compressLatLon(result);
             }
             return result;
+        } catch (Exception ex) {
+            mException = ex;
+            if (mStatus != null) {
+                mStatus.append("\n\t").append(ex.getMessage());
+            }
+            return null;
         } finally {
             if (cursor != null) {
                 cursor.close();
