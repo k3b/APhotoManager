@@ -2,6 +2,12 @@
 
 ## [v0.4.2.*](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.2) (not released yet)
 
+* renamed from "a Foto Finder" to "a Photo Manager" to avoid naming collision with other names.
+* added [Bookmark](Filter-View#Bookmarks) support in [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) and [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View).
+* [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) :
+	* added menu
+		* Load [Bookmark](Filter-View#Bookmarks) from ...
+		* Details to show current sql 
 * [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) : 
 	* new menu command slideshow: showing next image every 1.5 seconds.
 	* [#10 Faster swiping through high resolution images](https://github.com/k3b/AndroFotoFinder/issues/10)
@@ -9,9 +15,8 @@
 	* Improved scaling of big images
 	* if image exists but is not in media database restart media scanner for containing folder
 		* automatic removal of duplicate images from media db
-	* details: added mediaDb-field-values in addition to the exif-infos
+	* details: added mediaDb-field-values and current sql in addition to the exif-infos
 	* Bugfix [#13 Swiping](https://github.com/k3b/AndroFotoFinder/issues/13) : Sometimes the app jumps back
-	* Bugfix: Map-Contextmenu popup-position at marker.
 	* Fixed Send via bluetooth 
 * [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) :
 	* menu to open [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)
@@ -19,17 +24,22 @@
 		* if [Geografic-Map](geographic-map) is opened without [intent-extra-de.k3b.extra.FILTER parameter](intentapi#filter) the map is opend with the last used filter.
 	* improved menu "zoom to fit"
 	* [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi): support for [de.k3b.extra.FILTER string](intentapi#filter)
+	* Bugfix: Map-Contextmenu popup-position at marker.
+* [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View) :
+	* "Save [Bookmark](Filter-View#Bookmarks) as" and "Load [Bookmark](Filter-View#Bookmarks) from" menu of current filter as query file in /storage/sdcard0/databases/sql/*.query
+	* Long-pressing in "Load [Bookmark](Filter-View#Bookmarks) from" opens a contextmenu to edit, rename, delete a bookmarkfile.
 * [Folder- or Date-Picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker):  
 	* long-tapping-folder-contextmenu "Show in new Gallery" opens a new prefiltered [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View)
 	* [#11](https://github.com/k3b/AndroFotoFinder/issues/11) Folder name in bold and counts in non-bold.
 * [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi): intent VIEW mime="image/*" + data=file:xxx or android.intent.extra.STREAM=file:xxx
+    * de.k3b.extra.SQL is now in human readable string format (Same format as [Bookmark](Filter-View#Bookmarks) or .query file.
 	* [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) if xxx is an existing image file. 
 	* else [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) where xxx is used as a path filter
 * [#16 Media scanner for android below 4.4](https://github.com/k3b/AndroFotoFinder/issues/16)
 	* Move and Rename is blocked while Media Scanner is active to avoid conflicts/inconsistent data.
-* [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View) :
-	* "Save Bookmark as" and "Load Bookmark from" menu of qurrent filter as query file in /storage/sdcard0/databases/sql/*.query
-	* Long-pressing in "Load Bookmark from" opens a contextmenu to edit, rename, delete a bookmarkfile.
+* Technical changes
+	* Reimplemented database queries with Cursorloader(Manager)
+	* improved own media scanner so images can be rescanned after fileoperations in android 4.3 and before
 	
 ## [v0.4.1.150911](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.1) available in [F-Droid app store](https://f-droid.org) since 2015-09-12
 

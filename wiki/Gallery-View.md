@@ -14,6 +14,7 @@ The [Gallery-View](Gallery-View) show photos in a scrollable view:
 * The Symbol(s) in the actionbar and the menu item(s)
     * ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_unchecked.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_filter.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_folder.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_map.png)
     * define which photos you want to see (see [Current Visible Photos](Gallery-View#CurrentSet) below).
+	* Allows you to load (or manage) a [Bookmark](Filter-View#Bookmarks) file.
 
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/Gallery.png)
 
@@ -30,7 +31,7 @@ This visibility is either the result of
 
 The **[Search Fiter](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)**
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_filter.png)
-is used to find a set of photos by search criteria.
+is used to find a set of photos by search criteria and can be saved to and loaded from a [Bookmark](Filter-View#Bookmarks) file.
 
 Note: If opened from a parent activity via the menu "Show in new Gallery" the 
 [Search Fiter](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View) of the [Gallery-View](Gallery-View) is is prepopulated with values from the parent´s context.
@@ -54,7 +55,9 @@ The [Gallery-View](Gallery-View) has these elements:
     * If you click on the "Sort xxx" menuitem you get a submenu with the different sort criteria.
     * If you select the same sort criteria again you toggle between ascending and descending.
         * Example: if current sort is "Sort: Name ^" and you select "Name" again the sort will become "Sort: Name v".
-
+* [Load Bookmark from](Filter-View#Bookmarks) opens a file chooser to load a previously saved filter or bookmark file.
+* "Selection: Add all visible" add items to [selection](Gallery-View#Multiselection)
+		
 ###Example Usecase
 
 * The device contains 15000 photos.
@@ -93,10 +96,12 @@ The [Gallery-View](Gallery-View) has these elements:
 ## <a name='api'>Intent-API</a> (since 0.4.2)
 
 * action=VIEW/SEND/SENDTO
-* mime="image/*"
-* [extra[android.intent.extra.TITLE string]](intentapi#EXTRA_TITLE)
-* [extra[de.k3b.extra.FILTER]](intentapi#filter)
-* data=file:{xxx} or extra[android.intent.extra.STREAM]=file:{xxx}
-  * opens [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) with pathfilter={xxx} if {xxx} is not an image file
-  * examle file:*kreta*
-	* opens [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) showing all files that contain "kreta" in its full path
+	* mime="image/*"
+	* data=file:{xxx} or extra [android.intent.extra.STREAM]=file:{xxx}
+	  * opens [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) with pathfilter={xxx} if {xxx} is not an image file
+	  * examle file:*kreta*
+		* opens [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) showing all files that contain "kreta" in its full path
+	* optional extra [android.intent.extra.TITLE string](intentapi#EXTRA_TITLE) to define the title 
+	* optional extra [de.k3b.extra.FILTER](intentapi#filter) to define which data is visible
+	* optional extra [de.k3b.extra.SQL string string](intentapi#EXTRA_SQL) to define which data is visible
+	* optional extra [de.k3b.extra.SELECTED_ITEMS string](intentapi#SelectedItems) to define the [selected items](Gallery-View#Multiselection)

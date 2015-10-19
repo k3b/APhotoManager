@@ -3,7 +3,7 @@
 /*
  * Copyright (c) 2015 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of "a Photo Manager (A(ndro)FotoFinder).
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
     <string name="sort_by_name">Name</string>
     <string name="sort_by_date">Date</string>
     <string name="sort_by_place">Place</string>
-    <string name="sort_by_name_len">Lenght</string>
+    <string name="sort_by_name_len">Length</string>
 
     <string name="destination_move">Move Destination</string>
     <string name="destination_copy">Copy Destination</string>
@@ -125,7 +125,7 @@ This operation cannot be reversed."</string>
 
     <string name="about_content_about">"
 <![CDATA[
-<h1> AndroFotoFinder </h1>
+<h1> A Photo Manager (A(ndro)FotoFinder) </h1>
 </p>
 Features:
 <ul>

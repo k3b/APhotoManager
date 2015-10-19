@@ -1,22 +1,9 @@
 TODO
-	-??? osmdroid reduce thread logging
-
-	https://github.com/k3b/AndroFotoFinder/issues/12 #12 
-		appname "a Foto Finder" => "a Photo Manager" versus "Andro Foto Finder" in the about-box
+	docs
+		? bookmark
 		
 	- copy in asyncTask
-	- reports
-		type
-			gallery-view (if id, dispText(,count,lat))
-			textview (grid)
-		text
-		filter save/load
 	
-	Architecture propagate changes in mediaDB to gui via Loader(Manager)
-		v imageDetailView/adapter/pager/loader
-		v? galleryView/fragment/activity/adapter/loader
-		? mapView
-
 	? suche nach tag
 		? eigene tag-db + where _id in (id,id,...)
 			tab tags (id, name, parentID, androidFileID)
