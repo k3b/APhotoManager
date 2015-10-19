@@ -95,6 +95,7 @@ public class FotoGalleryActivity extends Activity implements Common,
         /** one of the FotoSql.QUERY_TYPE_xxx values */
         int mDirQueryID = FotoSql.QUERY_TYPE_GROUP_DEFAULT;
 
+        private boolean mHasUserDefinedQuery = false;
         private int mSortID = FotoSql.SORT_BY_DEFAULT;
         private boolean mSortAscending = true;
 
@@ -149,7 +150,7 @@ public class FotoGalleryActivity extends Activity implements Common,
             if (rootQuery == null) return null;
             QueryParameter result = new QueryParameter(rootQuery);
 
-            FotoSql.setWhereFilter(result, this.mFilter, getSortID() != FotoSql.SORT_BY_NONE);
+            FotoSql.setWhereFilter(result, this.mFilter, !hasUserDefinedQuery());
             if (result == null) return null;
 
             if (mUseLatLon) {
@@ -263,7 +264,7 @@ public class FotoGalleryActivity extends Activity implements Common,
             if (sqlString != null) {
                 if (dbgFilter != null) dbgFilter.append("query from ").append(EXTRA_QUERY).append("\n\t").append(sqlString).append("\n");
                 this.mGalleryContentQuery = QueryParameter.parse(sqlString);
-                setSortID(FotoSql.SORT_BY_NONE);
+                setHasUserDefinedQuery(true);
             }
 
             if (this.mGalleryContentQuery == null) this.mGalleryContentQuery = FotoSql.getQuery(FotoSql.QUERY_TYPE_DEFAULT);
@@ -271,6 +272,14 @@ public class FotoGalleryActivity extends Activity implements Common,
             if (dbgFilter != null)  {
                 Log.i(Global.LOG_CONTEXT, mDebugPrefix + dbgFilter.toString());
             }
+        }
+
+        public boolean hasUserDefinedQuery() {
+            return mHasUserDefinedQuery;
+        }
+
+        public void setHasUserDefinedQuery(boolean mHasUserDefinedQuery) {
+            this.mHasUserDefinedQuery = mHasUserDefinedQuery;
         }
     }
 
@@ -480,6 +489,7 @@ public class FotoGalleryActivity extends Activity implements Common,
                 mGalleryQueryParameter.setSortID(FotoSql.SORT_BY_NONE);
                 onFilterChanged(FotoSql.getWhereFilter(newQuery));
                 invalidateDirectories();
+                mGalleryQueryParameter.setHasUserDefinedQuery(true);
                 reloadGui("loaded bookmark");
             }
         }, this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery());

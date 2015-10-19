@@ -204,15 +204,16 @@ public class FotoSql {
         return result;
     }
 
+    public static final String[] DEFAULT_GALLERY_COLUMNS = new String[]{SQL_COL_PK,
+            SQL_COL_PATH + " AS " + SQL_COL_DISPLAY_TEXT,
+            "0 AS " + SQL_COL_COUNT,
+            SQL_COL_GPS};
+
     public static final QueryParameter queryDetail = new QueryParameter()
             .setID(QUERY_TYPE_GALLERY)
             .addColumn(
-                    SQL_COL_PK,
-                    SQL_COL_PATH + " AS " + SQL_COL_DISPLAY_TEXT,
-                    "0 AS " + SQL_COL_COUNT,
-                    SQL_COL_GPS)
-            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
-            .addOrderBy(SQL_COL_PATH);
+                    DEFAULT_GALLERY_COLUMNS)
+            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString());
 
     public static final QueryParameter queryGps = new QueryParameter()
             .setID(QUERY_TYPE_UNDEFINED)

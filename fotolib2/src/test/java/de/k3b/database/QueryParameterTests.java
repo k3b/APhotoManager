@@ -22,6 +22,7 @@ package de.k3b.database;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -84,6 +85,43 @@ public class QueryParameterTests {
         Assert.assertEquals("size", 1, sut.size());
         Assert.assertEquals("from f query-type-id 4711 select c1 c2 where w1=? w2=? where-parameters w1value w2value group-by g having h1 h2 having-parameters h1value h2value order-by o",
                 normalize(sut.get(0).toReParseableString()));
+    }
+
+    @Test
+    public void shoudParseNoDefaults() {
+        QueryParameter original = new QueryParameter()
+                .addWhere("w1=?", "w1Value");
+
+        final String stringToBeParsed = original.toReParseableString();
+        List<QueryParameter> sut = QueryParameter.parseMultible(stringToBeParsed);
+        Assert.assertEquals("size", 1, sut.size());
+        Assert.assertEquals("where w1=? where-parameters w1value",
+                normalize(sut.get(0).toReParseableString()));
+    }
+
+    @Test
+    public void shoudParseWithDefaults() {
+        try {
+            QueryParameter.sParserDefaultFrom = "f";
+            QueryParameter.sParserDefaultQueryTypeId = 4711;
+            QueryParameter.sParserDefaultSelect = new ArrayList<String>();
+            QueryParameter.sParserDefaultSelect.add("c1");
+            QueryParameter.sParserDefaultSelect.add("c2");
+
+
+            QueryParameter original = new QueryParameter()
+                    .addWhere("w1=?", "w1Value");
+
+            final String stringToBeParsed = original.toReParseableString();
+            List<QueryParameter> sut = QueryParameter.parseMultible(stringToBeParsed);
+            Assert.assertEquals("size", 1, sut.size());
+            Assert.assertEquals("from f query-type-id 4711 select c1 c2 where w1=? where-parameters w1value",
+                    normalize(sut.get(0).toReParseableString()));
+        } finally {
+            QueryParameter.sParserDefaultFrom = null;
+            QueryParameter.sParserDefaultQueryTypeId = 0;
+            QueryParameter.sParserDefaultSelect = null;
+        }
     }
 
     @Test

@@ -33,8 +33,18 @@ import java.util.List;
  * Created by k3b on 04.06.2015.
  */
 public class QueryParameter {
-    /** added to every serialized item if != null */
+    /** added to every serialized item if != null. Example "Generated on 2015-10-19 with myApp Version 0815." */
     public static String sParserComment = null;
+
+    /** added to parsed Query if it does not contain table-uris belonging to the "FROM"  keyword */
+    public static String sParserDefaultFrom = null;
+
+    /** added to parsed Query if it does not contain the "QUERY-TYPE-ID"  keyword */
+    public static int sParserDefaultQueryTypeId = 0;
+
+    /** added to parsed Query if it does not contain fields belonging to the "SELECT"  keyword */
+    public static List<String> sParserDefaultSelect = null;
+
     // the members are protected to allow serialisation via android specific Parcles
     protected int mID = 0;
     protected final List<String> mColumns = new ArrayList<String>();
@@ -237,7 +247,8 @@ public class QueryParameter {
 
     public static List<QueryParameter> parseMultible(String stringToBeParsed) {
         List<QueryParameter> result = new ArrayList<QueryParameter>();
-        QueryParameter current = new QueryParameter();
+        QueryParameter currentParseItem = null;
+
         List<String> params = null;
 
         String[] lines = stringToBeParsed.split("\n");
@@ -246,29 +257,37 @@ public class QueryParameter {
         while(i < lines.length) {
             line = lines[i++].trim();
             if (isKeyword(line)) {
-                switch (line.toUpperCase())
-                {
-                    case "FROM":
-                        current = new QueryParameter();
-                        result.add(current);
-                        params = current.mFrom;
-                        break;
+                final String keyword = line.toUpperCase();
 
+                if (keyword.compareTo("FROM") == 0) {
+                    // next "FROM" occured. finish previos query if available
+                    fixQuery(currentParseItem);
+                    currentParseItem = null;
+                }
+
+                // a keyword has occured: now there is a current-query
+                if (currentParseItem == null) {
+                    currentParseItem = new QueryParameter();
+                    result.add(currentParseItem);
+                }
+                switch (keyword)
+                {
                     case "QUERY-TYPE-ID":
                         line = (i < lines.length) ? lines[i].trim() : "0";
                         if (!isKeyword(line)) {
                             i++;
-                            current.setID(Integer.parseInt(line));
+                            currentParseItem.setID(Integer.parseInt(line));
                         }
                         continue;
 
-                    case "SELECT": params = current.mColumns; break;
-                    case "WHERE": params = current.mWhere; break;
-                    case "WHERE-PARAMETERS": params = current.mParameters; break;
-                    case "GROUP-BY": params = current.mGroupBy; break;
-                    case "HAVING": params = current.mHaving; break;
-                    case "HAVING-PARAMETERS": params = current.mHavingParameters; break;
-                    case "ORDER-BY": params = current.mOrderBy; break;
+                    case "FROM": params = currentParseItem.mFrom; break;
+                    case "SELECT": params = currentParseItem.mColumns; break;
+                    case "WHERE": params = currentParseItem.mWhere; break;
+                    case "WHERE-PARAMETERS": params = currentParseItem.mParameters; break;
+                    case "GROUP-BY": params = currentParseItem.mGroupBy; break;
+                    case "HAVING": params = currentParseItem.mHaving; break;
+                    case "HAVING-PARAMETERS": params = currentParseItem.mHavingParameters; break;
+                    case "ORDER-BY": params = currentParseItem.mOrderBy; break;
                 }
             } else if ((params != null) && (isNoComment(line)) && (line.trim().length() > 0)) {
                 params.add(line);
@@ -276,9 +295,23 @@ public class QueryParameter {
         }
 
         if (result.size() > 0) {
+            // make shure that last query has been fixed.
+            fixQuery(currentParseItem);
+
             return result;
         }
+
+        // indicate nothing found
         return null;
+    }
+
+    private static void fixQuery(QueryParameter current) {
+        if (current != null) {
+            // default values if not found in sql-string
+            if ((current.getID() == 0)) current.setID(QueryParameter.sParserDefaultQueryTypeId);
+            if ((current.mFrom.size() == 0) && (QueryParameter.sParserDefaultFrom != null)) current.mFrom.add(QueryParameter.sParserDefaultFrom);
+            if ((current.mColumns.size() == 0) && (QueryParameter.sParserDefaultSelect != null)) current.mColumns.addAll(QueryParameter.sParserDefaultSelect);
+        }
     }
 
     private static boolean isNoComment(String line) {
