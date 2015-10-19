@@ -186,7 +186,7 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
                 bookmarkController.onLoadFromQuestion(new BookmarkController.IQueryConsumer() {
                     @Override
                     public void setQuery(QueryParameter newQuery) {
-                        IGalleryFilter filter = FotoSql.getWhereFilter(newQuery);
+                        IGalleryFilter filter = FotoSql.getWhereFilter(newQuery, false);
                         toGui(filter);
                     }
                 }, getAsQuery());

@@ -131,11 +131,14 @@ public class QueryParameterTests {
                 .addWhere("w1=?", "w1Value")
                 .addWhere("w2 between ? and ?", "w21Value", "w22Value");
 
-        Assert.assertNull(sut.getWhereParameter("doesNotExist"));
-        Assert.assertEquals(new String[0], sut.getWhereParameter("w0"));
-        Assert.assertEquals("w1Value", sut.getWhereParameter("w1=?")[0]);
-        Assert.assertEquals("w22Value", sut.getWhereParameter("w2 between ? and ?")[1]);
+        Assert.assertNull(sut.getWhereParameter("doesNotExist", false));
+        Assert.assertEquals(new String[0], sut.getWhereParameter("w0", false));
+        Assert.assertEquals("w1Value", sut.getWhereParameter("w1=?", false)[0]);
+        Assert.assertEquals("w22Value", sut.getWhereParameter("w2 between ? and ?", false)[1]);
 
+        // remove so it cannot be found any more
+        sut.getWhereParameter("w1=?", true);
+        Assert.assertNull("w1Value", sut.getWhereParameter("w1=?", false));
     }
 
 

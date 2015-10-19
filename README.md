@@ -1,4 +1,4 @@
-# A Photo Manager (aka A(ndro)FotoFinder) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/app/src/main/res/drawable-hdpi/foto_gallery.png)
+# A Photo Manager ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/app/src/main/res/drawable-hdpi/foto_gallery.png), A Photo Map, AndroFotoFinder
 
 Manage photos in local media store: find, sort, view, copy, delete, set gps exif data, send, ... .
 

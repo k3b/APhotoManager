@@ -122,11 +122,11 @@ public class QueryParameter {
         return addToList(mParameters, true, parameters);
     }
 
-    public String[] getWhereParameter(String sqlExprWithParameters) {
-        return getExpresionParameter(sqlExprWithParameters, mWhere, mParameters);
+    public String[] getWhereParameter(String sqlExprWithParameters, boolean remove) {
+        return getExpresionParameter(sqlExprWithParameters, mWhere, mParameters, remove);
     }
 
-    static String[] getExpresionParameter(String sqlExprWithParameters, List<String> expressions, List<String> parameters) {
+    static String[] getExpresionParameter(String sqlExprWithParameters, List<String> expressions, List<String> parameters, boolean remove) {
         if ((sqlExprWithParameters != null) && (expressions != null) && (parameters != null)) {
             int paramNo = 0;
             for (String p : expressions) {
@@ -139,8 +139,18 @@ public class QueryParameter {
                         result[i] = (sourceIndex < parameters.size()) ? parameters.get(sourceIndex) : null;
                         sourceIndex++;
                     }
+
+                    if (remove) {
+                        for (int i=0; i < paramCount; i++) {
+                            if (parameters.size() > paramNo) {
+                                parameters.remove(paramNo);
+                            }
+                        }
+                        expressions.remove(p);
+                    }
                     return result;
                 }
+
                 paramNo += paramCount;
             }
         }

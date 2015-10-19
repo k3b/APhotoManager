@@ -485,9 +485,10 @@ public class FotoGalleryActivity extends Activity implements Common,
         bookmarkController.onLoadFromQuestion(new BookmarkController.IQueryConsumer() {
             @Override
             public void setQuery(QueryParameter newQuery) {
+                final IGalleryFilter whereFilter = FotoSql.getWhereFilter(newQuery, true);
                 mGalleryQueryParameter.mGalleryContentQuery = newQuery;
                 mGalleryQueryParameter.setSortID(FotoSql.SORT_BY_NONE);
-                onFilterChanged(FotoSql.getWhereFilter(newQuery));
+                onFilterChanged(whereFilter);
                 invalidateDirectories();
                 mGalleryQueryParameter.setHasUserDefinedQuery(true);
                 reloadGui("loaded bookmark");

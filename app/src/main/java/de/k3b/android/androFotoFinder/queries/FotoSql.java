@@ -244,25 +244,25 @@ public class FotoSql {
         }
     }
 
-    public static IGalleryFilter getWhereFilter(QueryParameter parameters) {
+    public static IGalleryFilter getWhereFilter(QueryParameter parameters, boolean remove) {
         if (parameters != null) {
             GalleryFilterParameter filter = new GalleryFilterParameter();
-            if (null != parameters.getWhereParameter(FILTER_EXPR_NO_GPS)) {
+            if (null != parameters.getWhereParameter(FILTER_EXPR_NO_GPS, remove)) {
                 filter.setNonGeoOnly(true);
             } else {
-                filter.setLogitude(getParam(parameters, FILTER_EXPR_LON_MIN), getParam(parameters, FILTER_EXPR_LON_MAX));
-                filter.setLatitude(getParam(parameters, FILTER_EXPR_LAT_MIN), getParam(parameters, FILTER_EXPR_LAT_MAX));
+                filter.setLogitude(getParam(parameters, FILTER_EXPR_LON_MIN, remove), getParam(parameters, FILTER_EXPR_LON_MAX, remove));
+                filter.setLatitude(getParam(parameters, FILTER_EXPR_LAT_MIN, remove), getParam(parameters, FILTER_EXPR_LAT_MAX, remove));
             }
 
-	        filter.setDate(getParam(parameters, FILTER_EXPR_DATE_MIN), getParam(parameters, FILTER_EXPR_DATE_MAX));
-            filter.setPath(getParam(parameters, FILTER_EXPR_PATH_LIKE));
+	        filter.setDate(getParam(parameters, FILTER_EXPR_DATE_MIN, remove), getParam(parameters, FILTER_EXPR_DATE_MAX, remove));
+            filter.setPath(getParam(parameters, FILTER_EXPR_PATH_LIKE, remove));
             return filter;
         }
         return null;
     }
 
-    private static String getParam(QueryParameter query, String expresion) {
-        final String[] result = query.getWhereParameter(expresion);
+    private static String getParam(QueryParameter query, String expresion, boolean remove) {
+        final String[] result = query.getWhereParameter(expresion, remove);
         return ((result != null) && (result.length > 0)) ? result[0] : null;
     }
 

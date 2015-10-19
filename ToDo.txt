@@ -2,6 +2,8 @@ TODO
 	docs
 		? bookmark
 		
+	? test incomplete .query file with "dateTaken" in yyyy-mm-dd format
+		
 	- copy in asyncTask
 	
 	? suche nach tag
