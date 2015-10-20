@@ -135,10 +135,19 @@ public class QueryParameterTests {
         Assert.assertEquals(new String[0], sut.getWhereParameter("w0", false));
         Assert.assertEquals("w1Value", sut.getWhereParameter("w1=?", false)[0]);
         Assert.assertEquals("w22Value", sut.getWhereParameter("w2 between ? and ?", false)[1]);
+    }
 
-        // remove so it cannot be found any more
+    @Test
+    public void shoudRemoveParameter() {
+        QueryParameter sut = new QueryParameter()
+                .addWhere("w0")
+                .addWhere("w1=?", "w1Value")
+                .addWhere("w2 between ? and ?", "w21Value", "w22Value");
+
+        // remove param
         sut.getWhereParameter("w1=?", true);
-        Assert.assertNull("w1Value", sut.getWhereParameter("w1=?", false));
+        Assert.assertEquals("where (w0) and (w2 between ? and ?) parameters w21value, w22value",
+                normalize(sut.toSqlString()));
     }
 
 
