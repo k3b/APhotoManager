@@ -50,6 +50,7 @@ public class RecursiveMediaScanner extends MediaScanner {
 
     @Override
     protected Integer doInBackground(String[]... pathNames) {
+        // do not call super.doInBackground here because logic is different
         int resultCount = 0;
         for (String[] pathArray : pathNames) {
             if (pathArray != null) {
@@ -124,19 +125,35 @@ public class RecursiveMediaScanner extends MediaScanner {
     @Override protected void onPostExecute(Integer modifyCount) {
         super.onPostExecute(modifyCount);
         if (isCancelled()) {
-            onStatusDialogEnd(mPaused, false);
-
-            if ((mPaused != null) && (this == RecursiveMediaScanner.sScanner)) {
-                RecursiveMediaScanner newScanner = new RecursiveMediaScanner(mContext,"resumed " + mWhy);
-                newScanner.mPaused = this.mPaused;
-            }
+            handleScannerCancel();
         } else {
             onStatusDialogEnd(null, false);
+            if (sScanner == this) {
+                sScanner = null;
+            }
         }
+
+    }
+
+    private void handleScannerCancel() {
+        final boolean mustCreateResumeScanner = (mPaused != null) && ((this == RecursiveMediaScanner.sScanner) || (null == RecursiveMediaScanner.sScanner));
+        onStatusDialogEnd(mPaused, false);
 
         if (sScanner == this) {
             sScanner = null;
         }
+
+        if (mustCreateResumeScanner) {
+            RecursiveMediaScanner newScanner = new RecursiveMediaScanner(mContext,"resumed " + mWhy);
+            newScanner.mPaused = this.mPaused;
+            RecursiveMediaScanner.sScanner = newScanner;
+        }
+    }
+
+    @Override
+    protected void onCancelled(Integer result) {
+        // super.onCancelled();
+        handleScannerCancel();
     }
 
     /** returns null if scanner is not busy-active */
@@ -211,6 +228,10 @@ public class RecursiveMediaScanner extends MediaScanner {
         if (cancelScanner) {
             mPaused = pauseState;
             cancel(false);
+
+            if (RecursiveMediaScanner.sScanner == this) {
+                RecursiveMediaScanner.sScanner = null;
+            }
         }
     }
 }
