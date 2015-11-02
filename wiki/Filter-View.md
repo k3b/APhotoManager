@@ -33,3 +33,12 @@ You can reach the [Filter-View](Filter-View) via
 * The "Clear Filter" sets all filter fields to empty which means "no filter".
 
 Each field in the [Filter-View](Filter-View) corresponds to a field of [EXTRA de.k3b.extra.FILTER](intentapi#filter) of the [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi).
+
+Menu commands
+
+* If you press the "Save Bookmark as ..." menu you will be asked for the name of a [Bookmark](Bookmarks) file where the [Current criteria](Gallery-View#CurrentSet) will be saved to.
+* If you press the "Load Bookmark from ..." menu  you can choose which [Bookmark](Bookmarks) file should be loaded into the filter fields.
+	* If you long-press on a [Bookmark](Bookmarks)-file you get a contextmenu
+		* Edit to load the selected [Bookmark](Bookmarks)-file into a text editor
+		* Rename to change the name of the selected [Bookmark](Bookmarks)-file
+		* Delete to delete the selected [Bookmark](Bookmarks)-file

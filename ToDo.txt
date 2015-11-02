@@ -22,7 +22,6 @@ TODO
 
 	mediaScanner
 		delete orfan thumbnails
-	? funktioniert reloaded 15teneriffa jetzt auf tablet?
 		
 	- copy in asyncTask
 	

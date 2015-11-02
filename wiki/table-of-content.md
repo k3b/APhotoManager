@@ -41,4 +41,4 @@
 	* [Internal sql format of .query files](intentapi#sql)
 	
 * [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)
-	* [Bookmarks](Filter-View#Bookmarks)
+* [Bookmarks](Bookmarks)

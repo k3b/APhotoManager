@@ -57,7 +57,7 @@ Other Android apps can use parts of "a Photo Manager" throught the "Intent api".
 	* used when opening a sub-[gallery view](Gallery-View)
 	* used when opening a [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) 
 	* used when navigating to [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) so that the image view show the same images and in the same order as the originating Gallery-View
-* format: the same as [Internal sql format of .query files](intentapi#sql) generated in the [bookmark menues](Filter-View#Bookmarks) of [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View).
+* format: the same as [Internal sql format of .query files](intentapi#sql) generated in the [bookmark menues](Bookmarks) of [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View).
 * technically this defines a complete sql including sql-where, ordering and colums formulas. 
 	
 ### <a name='OFFSET'>OFFSET</a>
@@ -73,12 +73,12 @@ Other Android apps can use parts of "a Photo Manager" throught the "Intent api".
 
 ## <a name='sql'>internal sql format of .query files (since version 0.4.2)</a>
 
-* purpose defintion of Bookmark files in folder /storage/sdcard0/databases/sql/*.query
-* created in [Filter-View](Filter-View) via menu "Save Bookmark as ..."
-* loaded into [Filter-View](Filter-View) via menu "Load Bookmark from ..."
-* loaded into [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) via menu "Load Bookmark from ..."
+* purpose defintion of [bookmark](Bookmarks) files in folder /storage/sdcard0/databases/sql/*.query
+* created in [Filter-View](Filter-View) via menu "Save [bookmark](Bookmarks) as ..."
+* loaded into [Filter-View](Filter-View) via menu "Load [bookmark](Bookmarks) from ..."
+* loaded into [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) via menu "Load [bookmark](Bookmarks) from ..."
 
-".query files" can be used to create summery queries with cont, group by, having....
+".query files" can be used to create summery queries with count, group by, having....
 
 Note: The same format is also used in the [intent api for extra parameter de.k3b.extra.SQL](intentapi#EXTRA_SQL)
 

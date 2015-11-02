@@ -14,7 +14,7 @@ The [Gallery-View](Gallery-View) show photos in a scrollable view:
 * The Symbol(s) in the actionbar and the menu item(s)
     * ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_unchecked.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_filter.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_folder.png) ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_map.png)
     * define which photos you want to see (see [Current Visible Photos](Gallery-View#CurrentSet) below).
-	* Allows you to load (or manage) a [Bookmark](Filter-View#Bookmarks) file.
+	* Allows you to load (or manage) a [Bookmark](Bookmarks) file.
 
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/Gallery.png)
 
@@ -31,7 +31,7 @@ This visibility is either the result of
 
 The **[Search Fiter](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)**
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_filter.png)
-is used to find a set of photos by search criteria and can be saved to and loaded from a [Bookmark](Filter-View#Bookmarks) file.
+is used to find a set of photos by search criteria and can be saved to and loaded from a [Bookmark](Bookmarks) file.
 
 Note: If opened from a parent activity via the menu "Show in new Gallery" the 
 [Search Fiter](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View) of the [Gallery-View](Gallery-View) is is prepopulated with values from the parent´s context.
@@ -55,7 +55,7 @@ The [Gallery-View](Gallery-View) has these elements:
     * If you click on the "Sort xxx" menuitem you get a submenu with the different sort criteria.
     * If you select the same sort criteria again you toggle between ascending and descending.
         * Example: if current sort is "Sort: Name ^" and you select "Name" again the sort will become "Sort: Name v".
-* [Load Bookmark from](Filter-View#Bookmarks) opens a file chooser to load a previously saved filter or bookmark file.
+* [Load Bookmark from](Bookmarks) opens a file chooser to load a previously saved filter or bookmark file.
 * "Selection: Add all visible" add items to [selection](Gallery-View#Multiselection)
 		
 ###Example Usecase
@@ -90,6 +90,7 @@ The [Gallery-View](Gallery-View) has these elements:
     * you can send/share the selected photos via the share symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_share.png).
         * if you have installed [k3b's ToGoZip](https://f-droid.org/wiki/page/de.k3b.android.toGoZip) ![](https://raw.githubusercontent.com/k3b/ToGoZip/master/app/src/main/res/drawable-mdpi/ic_launcher.png): Add the photo to a zip file
         * other options are: send photo(s) via bluetooth or mail
+	* the **Start Media Scanner** asks for folder where the media scanner should (re-)scan *.jpg and *.jpeg files
 
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/Gallery-MultiSelection.png)
 
