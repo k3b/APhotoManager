@@ -177,6 +177,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         }
 
     }
+
     public static class MoveOrCopyDestDirPicker extends DirectoryPickerFragment {
         static AndroidFileCommands sFileCommands = null;
 

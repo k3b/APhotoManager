@@ -38,6 +38,8 @@
     <string name="no_dir_selected">Select Folder with Images to enable OK</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
+    <string name="pause">Pause</string>
+    <string name="background">Background</string>
     <string name="popup">...</string>
 
     <string name="action_folder_title">Select Folder</string>
@@ -125,7 +127,8 @@ This operation cannot be reversed."</string>
 
     <string name="about_content_about">"
 <![CDATA[
-<h1> A Photo Manager (A(ndro)FotoFinder) </h1>
+<h1> A Photo Manager </h1>
+with 'A Photo Map' in 'AndroFotoFinder'<br/>
 </p>
 Features:
 <ul>
@@ -164,6 +167,11 @@ Features:
 ]]>
 "</string>
     <string name="title_show_in_gallery">Show in new Gallery</string>
+    <string name="title_start_scanner">Start Media Scanner</string>
+    <string name="title_scanner_dir">Where to start scanning?</string>
+    <string name="cannot_change_if_scanner_active">Cannot process photo files while Android Media Scanner is busy. Try again later.</string>
+    <string name="title_scanner">Media Sacanner</string>
+
     <string name="title_zoom_to_fit">Zoom to fit</string>
     <string name="lbl_date">Date</string>
     <string name="lbl_with_no_geo">With no geo info</string>
@@ -179,7 +187,6 @@ Features:
 
     <string name="media_update_result">Updated %1$d Media Database Items</string>
     <string name="cmd_slideshow">Slideshow</string>
-    <string name="cannot_change_if_scanner_active">Cannot change image files while Android Media Scanner is busy. Try again later.</string>
     <string name="query_param_comment">Generated on %3$s with \'%1$s\' Version %2$s. See https://github.com/k3b/AndroFotoFinder/wiki/intentap#sql for details</string>
     <string name="cmd_save_bookmark_as">Save Bookmark as ...</string>
     <string name="cmd_load_bookmark_from">Load Bookmark from ...</string>

@@ -35,10 +35,12 @@ import java.io.File;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
 import de.k3b.io.IDirectory;
+import de.k3b.io.OSDirectory;
 
 /**
  * Api to manipulate files/photos.
@@ -203,6 +205,65 @@ public class AndroidFileCommands extends FileCommands {
         return super.deleteFiles(fileNames);
     }
 
+    public boolean cmdMediaScannerWithQuestion() {
+        final RecursiveMediaScanner scanner = RecursiveMediaScanner.sScanner;
+
+        if (scanner != null) {
+            // connect gui to already running scanner if possible
+            scanner.resumeIfNeccessary(); // if paused resume it.
+            showMediaScannerStatus(scanner);
+            return true;
+        } else if (AndroidFileCommands.canProcessFile(mContext)) {
+            // show dialog to get start parameter
+            DirectoryPickerFragment destDir = new DirectoryPickerFragment() {
+                /** do not use activity callback */
+                @Override protected void setDirectoryListener(Activity activity) {}
+
+                @Override
+                protected void onDirectoryPick(IDirectory selection) {
+                    dismiss();
+                    if (selection != null) {
+                        onMediaScannerAnswer(selection.getAbsolute());
+                    }
+                }
+            };
+
+            destDir.setTitleId(R.string.title_scanner_dir);
+            destDir.defineDirectoryNavigation(new OSDirectory("/", null),
+                    FotoSql.QUERY_TYPE_UNDEFINED,
+                    getLastCopyToPath());
+            destDir.setContextMenuId(R.menu.menu_context_osdir);
+            destDir.show(mContext.getFragmentManager(), "scannerPick");
+
+            return true;
+        }
+        return false;
+    }
+
+    /** answer from "which directory to start scanner from"? */
+    private void onMediaScannerAnswer(String scanRootDir) {
+        if  ((AndroidFileCommands.canProcessFile(mContext)) || (RecursiveMediaScanner.sScanner == null)){
+            final String message = mContext.getString(R.string.title_start_scanner);
+            final RecursiveMediaScanner scanner = (RecursiveMediaScanner.sScanner != null)
+                    ? RecursiveMediaScanner.sScanner :
+                    new RecursiveMediaScanner(mContext, message);
+            synchronized (scanner) {
+                if (RecursiveMediaScanner.sScanner == null) {
+                    RecursiveMediaScanner.sScanner = scanner;
+                    scanner.execute(new String[]{scanRootDir});
+                } // else scanner is already running
+            }
+
+            showMediaScannerStatus(RecursiveMediaScanner.sScanner);
+        }
+    }
+
+    private void showMediaScannerStatus(RecursiveMediaScanner mediaScanner) {
+        if (mediaScanner != null) {
+            mediaScanner.showStatusDialog(mContext);
+        }
+    }
+
     /**
      * Write geo data (lat/lon) to photo, media database and log.<br/>
      *  @param latitude
@@ -271,10 +332,14 @@ public class AndroidFileCommands extends FileCommands {
     }
 
     public static boolean canProcessFile(Context context) {
-        if (!Global.mustCheckMediaScannerRunning) return true; // always allowed
+        if (!Global.mustCheckMediaScannerRunning) return true; // always allowed. DANGEROUS !!!
 
         if (MediaScanner.isScannerActive(context.getContentResolver())) {
             Toast.makeText(context, R.string.cannot_change_if_scanner_active, Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+        if (RecursiveMediaScanner.getBusyScanner() != null) {
             return false;
         }
         return true;

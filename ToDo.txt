@@ -1,8 +1,28 @@
 TODO
+	#17 Image View fullscreen
+		auto-hide actionbar http://stackoverflow.com/questions/19831090/loop-for-time-delay-when-hiding-actionbar
+		
+			Handler h = new Handler();
+			h.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					// DO DELAYED STUFF
+					getActionBar().hide();
+					getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
+				}
+			}, 3000); // e.g. 3000 milliseconds
+		
+	replace (see https://en.wikipedia.org/wiki/Constant_interface)
+		implements Common 
+		with 
+		import static de.k3b.android.androFotoFinder.Common.*;
+
 	docs
 		? bookmark
-		
-	? test incomplete .query file with "dateTaken" in yyyy-mm-dd format
+
+	mediaScanner
+		delete orfan thumbnails
+	? funktioniert reloaded 15teneriffa jetzt auf tablet?
 		
 	- copy in asyncTask
 	

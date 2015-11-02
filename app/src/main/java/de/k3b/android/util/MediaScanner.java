@@ -46,7 +46,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
     }
 
     protected final Context mContext;
-    private final String mWhy;
+    protected final String mWhy;
 
     public MediaScanner(Context context, String why) {
         mWhy = why;

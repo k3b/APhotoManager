@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -53,6 +54,7 @@ import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.AndroidFileCommands;
+import de.k3b.android.widget.Dialogs;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryNavigator;
 import de.k3b.io.GalleryFilterParameter;
@@ -95,6 +97,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     private DirectoryListAdapter mAdapter;
     private DirectoryNavigator mNavigation;
     private int mDirTypId = 0;
+    protected int mTitleId = 0;
 
     // api to fragment owner or null
     private OnDirectoryInteractionListener mDirectoryListener = null;
@@ -120,6 +123,11 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, debugPrefix + "()");
         }
+    }
+
+    public DirectoryPickerFragment setTitleId(int titleId) {
+        mTitleId = titleId;
+        return this;
     }
 
     public DirectoryPickerFragment setContextMenuId(int contextMenuId) {
@@ -243,6 +251,8 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                     FotoSql.getName(mContext,mDirTypId));
             getDialog().setTitle(title);
             // no api for setIcon ????
+        } else if (mTitleId != 0) {
+            getDialog().setTitle(mTitleId);
         }
     }
 
@@ -267,15 +277,15 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     private boolean onPopUpClick(MenuItem menuItem) {
         switch (menuItem.getItemId()) {
             case R.id.cmd_mk_dir:
-                return onCreateSubDirQueston(mPopUpSelection);
+                return onCreateSubDirQuestion(mPopUpSelection);
             case R.id.cmd_gallery:
                 return showGallery(mPopUpSelection);
-
         }
         return false;
     }
 
-    private boolean onCreateSubDirQueston(final IDirectory parentDir) {
+
+    private boolean onCreateSubDirQuestion(final IDirectory parentDir) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.cmd_mk_dir);
         View content = getActivity().getLayoutInflater().inflate(R.layout.dialog_edit_name, null);

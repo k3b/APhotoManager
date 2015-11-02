@@ -13,7 +13,7 @@ Features
     * wildcards that match folder/filename
     * date
     * area in [geografic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) (if image has gps-exif info)
-	* Searchcriteria can be saved to and later be retrieved from [Bookmarks](Filter-View#Bookmarks) (since 0.4.2).
+	* Searchcriteria can be saved to and later be retrieved from [Bookmarks](Bookmarks) (since 0.4.2).
 * Show results in a scrollable [gallery view](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) with 
 	* support for multible photo selection
 	* file operations copy, move, delete, share, change geo info (since 0.4.1)

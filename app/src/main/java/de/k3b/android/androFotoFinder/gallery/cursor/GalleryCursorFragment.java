@@ -700,6 +700,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             case R.id.action_details:
                 cmdShowDetails();
                 return true;
+            case R.id.cmd_scan:
+                return fileCommands.cmdMediaScannerWithQuestion();
 
             default:
                 return super.onOptionsItemSelected(menuItem);
