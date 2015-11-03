@@ -64,6 +64,7 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
     public static final int resultID = 522;
     private static final String DLG_NAVIGATOR_TAG = "GalleryFilterActivity";
     private static final String SETTINGS_KEY = "GalleryFilterActivity-";
+    private static final String FILTER_VALUE = "CURRENT_FILTER";
     private static QueryParameter mRootQuery;
 
     GalleryFilterParameter mFilter = new GalleryFilterParameter();
@@ -97,6 +98,13 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
     }
 
     @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        fromGui(mFilter);
+        savedInstanceState.putString(FILTER_VALUE, mFilter.toString());
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         Global.debugMemory(debugPrefix, "onCreate");
         super.onCreate(savedInstanceState);
@@ -104,11 +112,14 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
         this.mAsFilter = new AsFilter();
         onCreateButtos();
 
-        GalleryFilterParameter filter = getFilter(this.getIntent());
+        GalleryFilterParameter filter = (savedInstanceState == null)
+                ? getFilter(this.getIntent())
+                : GalleryFilterParameter.parse(savedInstanceState.getString(FILTER_VALUE, ""),  new GalleryFilterParameter()) ;
 
         if (filter != null) {
             mFilter = filter;
             toGui(mFilter);
+            mAsFilter.showLatLon(filter.isNonGeoOnly());
         }
 
         bookmarkController = new BookmarkController(this);
@@ -296,7 +307,7 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
             mWithNoGeoInfo.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    showLatLon();
+                    showLatLon(mWithNoGeoInfo.isChecked());
                 }
 
             });
@@ -308,8 +319,8 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
 
         }
 
-        private void showLatLon() {
-            show(mWithNoGeoInfo.isChecked(), R.id.cmd_select_lat_lon, R.id.lbl_latitude, R.id.cmd_lat_from_history, R.id.edit_latitude_from,
+        void showLatLon(boolean noGeoInfo) {
+            show(noGeoInfo, R.id.cmd_select_lat_lon, R.id.lbl_latitude, R.id.cmd_lat_from_history, R.id.edit_latitude_from,
                     R.id.cmd_lat_to_history, R.id.edit_latitude_to, R.id.lbl_longitude, R.id.cmd_lon_from_history,
                     R.id.edit_longitude_from,R.id.cmd_lon_to_history, R.id.edit_longitude_to);
         }
@@ -366,7 +377,7 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
             mDateFrom       .setText(convertDate(src.getDateMin()));
             mDateTo         .setText(convertDate(src.getDateMax()));
             mWithNoGeoInfo.setChecked(src.isNonGeoOnly());
-            showLatLon();
+            showLatLon(src.isNonGeoOnly());
             return this;
         }
 

@@ -152,13 +152,13 @@ Purpose: show only images that
 
 <pre>
 WHERE 
-	# NOTE: there are no "and2-S between the colum-definitions.
+	# NOTE: there are no "AND-a between the colum-definitions.
 	latitude >= ?
-	latitude < ?
+	latitude &lt; ?
 	longitude >= ?
-	longitude < ?
+	longitude &lt; ?
 	datetaken >= ?
-	datetaken < ?
+	datetaken &lt; ?
 	_data like ?
 	WHERE-PARAMETERS 
 		34.691944
@@ -189,7 +189,7 @@ Purpose: show only panorama pictures
 
 <pre>
 Where 
-  ((1.0*width/height<0.3) or (1.0*width/height>3))
+  ((1.0*width/height &lt; 0.3) or (1.0*width/height &gt; 3))
 </pre>
  
 This cannot be done in the [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)

@@ -205,6 +205,19 @@ public class AndroidFileCommands extends FileCommands {
         return super.deleteFiles(fileNames);
     }
 
+    class MediaScannerDirectoryPickerFragment extends DirectoryPickerFragment {
+        /** do not use activity callback */
+        @Override protected void setDirectoryListener(Activity activity) {}
+
+        @Override
+        protected void onDirectoryPick(IDirectory selection) {
+            dismiss();
+            if (selection != null) {
+                onMediaScannerAnswer(selection.getAbsolute());
+            }
+        }
+    }
+
     public boolean cmdMediaScannerWithQuestion() {
         final RecursiveMediaScanner scanner = RecursiveMediaScanner.sScanner;
 
@@ -215,7 +228,7 @@ public class AndroidFileCommands extends FileCommands {
             return true;
         } else if (AndroidFileCommands.canProcessFile(mContext)) {
             // show dialog to get start parameter
-            DirectoryPickerFragment destDir = new DirectoryPickerFragment() {
+            DirectoryPickerFragment destDir = new MediaScannerDirectoryPickerFragment() {
                 /** do not use activity callback */
                 @Override protected void setDirectoryListener(Activity activity) {}
 
@@ -225,6 +238,17 @@ public class AndroidFileCommands extends FileCommands {
                     if (selection != null) {
                         onMediaScannerAnswer(selection.getAbsolute());
                     }
+                }
+
+                @Override
+                public void onPause() {
+                    super.onPause();
+
+                    // else the java.lang.InstantiationException: can't instantiate
+                    // class de.k3b.android.util.AndroidFileCommands$MediaScannerDirectoryPickerFragment;
+                    // no empty constructor
+                    // on orientation change
+                    dismiss();
                 }
             };
 

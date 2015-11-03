@@ -48,7 +48,7 @@ The [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi) support
 
 * action=VIEW/SEND/SENDTO to show map
 * action=PICK to open a ["geo:" picker](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map#picker) 
-* mime="*/*" or mime=null
+* mime=" * / * " or mime=null
 * [geo: uri format](intentapi#uri-geo) (required)
 * [de.k3b.extra.SELECTED_ITEMS string](intentapi#SelectedItems) define the blue markers (optional)
 * [android.intent.extra.TITLE string](intentapi#EXTRA_TITLE) (optional)

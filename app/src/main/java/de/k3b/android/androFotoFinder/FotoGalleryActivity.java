@@ -317,7 +317,6 @@ public class FotoGalleryActivity extends Activity implements Common,
         }
     }
 
-
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         this.mGalleryQueryParameter.saveInstanceState(this, savedInstanceState);
