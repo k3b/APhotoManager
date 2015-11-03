@@ -529,9 +529,10 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
         toGui(mFilter);
     }
 
-    /** interface DirectoryPickerFragment.invalidateDirectories not used */
+    /** interface DirectoryPickerFragment.invalidateDirectories not used
+     * @param why*/
     @Override
-    public void invalidateDirectories() {
+    public void invalidateDirectories(String why) {
     }
 
     /** interface DirectoryPickerFragment.OnDirectoryInteractionListener not used */

@@ -20,6 +20,7 @@
 package de.k3b.android.androFotoFinder;
 
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
@@ -75,9 +76,12 @@ public class FotoGalleryActivity extends Activity implements Common,
     private final ContentObserver mMediaObserverDirectory = new ContentObserver(null) {
         @Override
         public void onChange(boolean selfChange) {
-            invalidateDirectories();
+            invalidateDirectories(mDebugPrefix + "#onChange from mMediaObserverDirectory");
         }
     };
+
+    /** set while dir picker is active */
+    private DialogFragment mDirPicker = null;
 
     private static class GalleryQueryParameter {
         private static final String STATE_CurrentPath = "CurrentPath";
@@ -378,7 +382,7 @@ public class FotoGalleryActivity extends Activity implements Common,
 
     @Override public void onLowMemory() {
         super.onLowMemory();
-        invalidateDirectories();
+        invalidateDirectories(mDebugPrefix + "#onLowMemory");
     }
 
     @Override
@@ -393,7 +397,7 @@ public class FotoGalleryActivity extends Activity implements Common,
         this.mGalleryQueryParameter.mGalleryContentQuery = null;
         mGalleryGui = null;
         mDirGui = null;
-        invalidateDirectories();
+        invalidateDirectories(mDebugPrefix + "#onDestroy");
 
         System.gc();
         Global.debugMemory(mDebugPrefix, "onDestroy end");
@@ -487,8 +491,8 @@ public class FotoGalleryActivity extends Activity implements Common,
                 final IGalleryFilter whereFilter = FotoSql.getWhereFilter(newQuery, true);
                 mGalleryQueryParameter.mGalleryContentQuery = newQuery;
                 mGalleryQueryParameter.setSortID(FotoSql.SORT_BY_NONE);
-                onFilterChanged(whereFilter);
-                invalidateDirectories();
+                onFilterChanged(whereFilter, "loadBookmark");
+                invalidateDirectories(mDebugPrefix + "#loaded bookmark");
                 mGalleryQueryParameter.setHasUserDefinedQuery(true);
                 reloadGui("loaded bookmark");
             }
@@ -507,26 +511,26 @@ public class FotoGalleryActivity extends Activity implements Common,
 
         switch (requestCode) {
             case GalleryFilterActivity.resultID :
-                onFilterChanged(GalleryFilterActivity.getFilter(intent));
+                onFilterChanged(GalleryFilterActivity.getFilter(intent), mDebugPrefix + "#onActivityResult from GalleryFilterActivity");
                 break;
             case ImageDetailActivityViewPager.ACTIVITY_ID:
                 if (resultCode == ImageDetailActivityViewPager.RESULT_CHANGE) {
-                    invalidateDirectories();
+                    invalidateDirectories(mDebugPrefix + "#onActivityResult from ImageDetailActivityViewPager");
                 }
                 break;
             case GeoEditActivity.RESULT_ID:
                 if (resultCode == ImageDetailActivityViewPager.RESULT_CHANGE) {
-                    invalidateDirectories();
+                    invalidateDirectories(mDebugPrefix + "#onActivityResult from GeoEditActivity");
                 }
                 break;
         }
     }
 
-    private void onFilterChanged(IGalleryFilter filter) {
+    private void onFilterChanged(IGalleryFilter filter, String why) {
         if (filter != null) {
             this.mGalleryQueryParameter.mFilter = filter;
 
-            invalidateDirectories();
+            invalidateDirectories(mDebugPrefix + "#filter changed " + why);
 
             reloadGui("filter changed");
         }
@@ -581,6 +585,7 @@ public class FotoGalleryActivity extends Activity implements Common,
 
             dirDialog.defineDirectoryNavigation(mDirectoryRoot, dirQueryID, this.mGalleryQueryParameter.mCurrentPath);
 
+            mDirPicker = dirDialog;
             dirDialog.show(manager, DLG_NAVIGATOR_TAG);
         }
     }
@@ -629,19 +634,23 @@ public class FotoGalleryActivity extends Activity implements Common,
         if (!this.mHasEmbeddedDirPicker) {
             navigateTo(selectedAbsolutePath, queryTypeId);
         }
+        mDirPicker = null;
     }
 
     @Override
-    public void invalidateDirectories() {
+    public void invalidateDirectories(String why) {
+
         if (mDirectoryRoot != null) {
             if (Global.debugEnabled) {
                 StringBuilder name = new StringBuilder(mDirectoryRoot.getAbsolute());
                 Directory.appendCount(name, mDirectoryRoot, Directory.OPT_DIR | Directory.OPT_SUB_DIR);
-                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "invalidateDirectories(" + name + ")");
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "invalidateDirectories(" + name + ") because of " + why);
             }
-            mDirectoryRoot.destroy();
+            if (mDirPicker == null) {
+                mDirectoryRoot.destroy();
+                mDirectoryRoot = null; // must reload next time
+            }
         }
-        mDirectoryRoot = null; // must reload next time
     }
 
     /**
@@ -650,6 +659,7 @@ public class FotoGalleryActivity extends Activity implements Common,
      */
     @Override
     public void onDirectoryCancel(int queryTypeId) {
+        mDirPicker = null;
     }
 
     /** called after the selection in tree has changed */
