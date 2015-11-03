@@ -982,14 +982,19 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             QueryParameter query = new QueryParameter();
             FotoSql.setWhereSelection(query, selectedItems);
 
-            int delCount = getActivity().getContentResolver().delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, query.toAndroidWhere(), null);
-            if (debugMessage != null) {
-                Log.w(Global.LOG_CONTEXT, mDebugPrefix + " deleted " + delCount +
-                        " duplicates\n\tDELETE ... WHERE " + query.toAndroidWhere());
-            }
+            final Activity activity = getActivity();
 
-            if (delCount > 0) {
-                requery("after delete duplicates"); // content has changed: must reload
+            // might be null in in orientation change
+            if (activity != null) {
+                int delCount = activity.getContentResolver().delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, query.toAndroidWhere(), null);
+                if (debugMessage != null) {
+                    Log.w(Global.LOG_CONTEXT, mDebugPrefix + " deleted " + delCount +
+                            " duplicates\n\tDELETE ... WHERE " + query.toAndroidWhere());
+                }
+
+                if (delCount > 0) {
+                    requery("after delete duplicates"); // content has changed: must reload
+                }
             }
         }
     }
