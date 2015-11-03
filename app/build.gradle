@@ -4,9 +4,9 @@ android {
     compileSdkVersion 21
     buildToolsVersion '22.0.1'
     defaultConfig {
-        // fdroid-release 'de.k3b.android.androFotoFinder'
-        // main-develop-branch 'de.k3b.android.androFotoFinderDev'
-        applicationId 'de.k3b.android.androFotoFinder.dev'
+        // fdroid-release      'de.k3b.android.androFotoFinder'
+        // main-develop-branch 'de.k3b.android.androFotoFinder.dev'
+        applicationId 'de.k3b.android.androFotoFinder'
 		
         minSdkVersion 14
         targetSdkVersion 21
