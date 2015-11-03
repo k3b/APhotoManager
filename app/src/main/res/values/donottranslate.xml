@@ -22,10 +22,10 @@ this program. If not, see <http://www.gnu.org/licenses/>
     resources that shold NOT be localized
 -->
 <resources>
-    <string name="app_name">a Photo Manager (dev)</string>
-    <string name="about_summary">About a Photo Manager (dev)</string>
-    <string name="app_viewer_name">a Photo Viewer (dev)</string>
-    <string name="app_map_name">a Photo Map (dev)</string>
+    <string name="app_name">a Photo Manager</string>
+    <string name="about_summary">About a Photo Manager</string>
+    <string name="app_viewer_name">a Photo Viewer</string>
+    <string name="app_map_name">a Photo Map</string>
 
 <string name="about_content"><![CDATA["<html><body>
 <a href="https://github.com/k3b/AndroFotoFinder/wiki"><b>A Photo Manager</b></a><br/>Version AndroFotoFinder $versionName$
