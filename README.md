@@ -1,4 +1,4 @@
-# AndroFotoFinder ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/app/src/main/res/drawable-hdpi/foto_gallery.png)
+# A Photo Manager ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/app/src/main/res/drawable-hdpi/foto_gallery.png), A Photo Map, AndroFotoFinder
 
 Manage photos in local media store: find, sort, view, copy, delete, set gps exif data, send, ... .
 
@@ -13,6 +13,7 @@ Features
     * wildcards that match folder/filename
     * date
     * area in [geografic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) (if image has gps-exif info)
+	* Searchcriteria can be saved to and later be retrieved from [Bookmarks](Bookmarks) (since 0.4.2).
 * Show results in a scrollable [gallery view](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) with 
 	* support for multible photo selection
 	* file operations copy, move, delete, share, change geo info (since 0.4.1)
@@ -31,7 +32,7 @@ Features
 	* update xmp-sidecar-files
 	* preserve file date if local android supports it.
 
-You can install AndroFotoFinder via
+You can install A Photo Manager via
 
 * [f-droid.org installer](https://f-droid.org/) or via
 * internet download from [f-droid.org repository](https://f-droid.org/repository/browse/?fdid=de.k3b.android.androFotoFinder)

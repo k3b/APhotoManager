@@ -24,6 +24,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.SystemClock;
+import android.util.Log;
 
 import java.util.List;
 
@@ -63,17 +64,37 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
     private final Activity context;
     private final String debugPrefix;
 
+    // will receive debug output
+    private StringBuffer mStatus = null;
+
+    protected Exception mException = null;
+
     public DirectoryLoaderTask(Activity context, String debugPrefix) {
         this.context = context;
         this.debugPrefix = debugPrefix;
         Global.debugMemory(debugPrefix, "ctor");
+
+        if (Global.debugEnabledSql || Global.debugEnabled) {
+            mStatus = new StringBuffer();
+            mStatus.append(this.debugPrefix);
+        } else {
+            mStatus = null;
+        }
+
     }
 
     protected IDirectory doInBackground(QueryParameter... queryParameter) {
+        mException = null;
         if (queryParameter.length != 1) throw new IllegalArgumentException();
 
         QueryParameter queryParameters = queryParameter[0];
 
+        if (mStatus != null) {
+            mStatus.append("\n\t");
+            if (queryParameters != null) {
+                mStatus.append(queryParameters.toSqlString());
+            }
+        }
         Cursor cursor = null;
         try {
             cursor = context.getContentResolver().query(Uri.parse(queryParameters.toFrom()), queryParameters.toColumns(),
@@ -109,16 +130,33 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
                     }
                 }
             }
+            if (mStatus != null) {
+                mStatus.append("\n\tfound " + cursor.getCount() + " db rows");
+            }
 
             IDirectory result = builder.getRoot();
             if (colText < 0) {
                 compressLatLon(result);
             }
             return result;
+        } catch (Exception ex) {
+            mException = ex;
+            if (mStatus != null) {
+                mStatus.append("\n\t").append(ex.getMessage());
+            }
+            return null;
         } finally {
             if (cursor != null) {
                 cursor.close();
             }
+            if (mStatus != null) {
+                if (Global.debugEnabledSql) {
+                    Log.w(Global.LOG_CONTEXT, mStatus.toString());
+                } else if (Global.debugEnabled) {
+                    Log.i(Global.LOG_CONTEXT, mStatus.toString());
+                }
+            }
+
         }
     }
 

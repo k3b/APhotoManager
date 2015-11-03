@@ -45,10 +45,10 @@ import de.k3b.android.androFotoFinder.directory.DirectoryLoaderTask;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.locationmap.LocationMapFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
 import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.HistoryEditText;
+import de.k3b.database.QueryParameter;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
@@ -64,13 +64,16 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
     public static final int resultID = 522;
     private static final String DLG_NAVIGATOR_TAG = "GalleryFilterActivity";
     private static final String SETTINGS_KEY = "GalleryFilterActivity-";
+    private static QueryParameter mRootQuery;
 
     GalleryFilterParameter mFilter = new GalleryFilterParameter();
 
     private AsFilter mAsFilter = null;
     private HistoryEditText mHistory;
+    private BookmarkController bookmarkController = null;
 
-    public static void showActivity(Activity context, GalleryFilterParameter filter) {
+    public static void showActivity(Activity context, IGalleryFilter filter, QueryParameter rootQuery) {
+        mRootQuery = rootQuery;
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, context.getClass().getSimpleName()
                     + " > GalleryFilterActivity.showActivity");
@@ -107,6 +110,8 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
             mFilter = filter;
             toGui(mFilter);
         }
+
+        bookmarkController = new BookmarkController(this);
     }
 
     private void onCreateButtos() {
@@ -174,9 +179,29 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
                 return true;
+            case R.id.action_save_as:
+                bookmarkController.onSaveAsQuestion("", getAsQuery());
+                return true;
+            case R.id.action_load_from:
+                bookmarkController.onLoadFromQuestion(new BookmarkController.IQueryConsumer() {
+                    @Override
+                    public void setQuery(QueryParameter newQuery) {
+                        IGalleryFilter filter = FotoSql.getWhereFilter(newQuery, false);
+                        toGui(filter);
+                    }
+                }, getAsQuery());
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private QueryParameter getAsQuery() {
+        IGalleryFilter filter = new GalleryFilterParameter();
+        fromGui(filter);
+        QueryParameter query = new QueryParameter(mRootQuery);
+        FotoSql.setWhereFilter(query, filter, true);
+        return query;
     }
 
     @Override
@@ -392,9 +417,9 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
         mAsFilter.get(gf);
     }
 
-    private boolean fromGui(IGalleryFilter src) {
+    private boolean fromGui(IGalleryFilter dest) {
         try {
-            src.get(mAsFilter);
+            dest.get(mAsFilter);
             return true;
         } catch (RuntimeException ex) {
             Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
@@ -438,7 +463,7 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
         return result;
     }
 
-    private void showLatLonPicker(final QueryParameterParcelable currentDirContentQuery) {
+    private void showLatLonPicker(final QueryParameter currentDirContentQuery) {
         if (fromGui(mFilter)) {
             final FragmentManager manager = getFragmentManager();
             LocationMapFragment dirDialog = new LocationMapFragment();
@@ -448,7 +473,7 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
         }
     }
 
-    private void showDirectoryPicker(final QueryParameterParcelable currentDirContentQuery) {
+    private void showDirectoryPicker(final QueryParameter currentDirContentQuery) {
         if (fromGui(mFilter)) {
             IDirectory directoryRoot = getOrCreateDirInfo(currentDirContentQuery.getID()).directoryRoot;
             if (directoryRoot == null) {

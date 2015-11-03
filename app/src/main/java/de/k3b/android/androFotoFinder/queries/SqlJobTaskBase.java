@@ -21,18 +21,10 @@ package de.k3b.android.androFotoFinder.queries;
 
 import android.app.Activity;
 import android.database.Cursor;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.SystemClock;
-
-import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.overlay.OverlayManager;
 
 import de.k3b.android.androFotoFinder.Global;
-import de.k3b.android.androFotoFinder.R;
-import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
-import de.k3b.android.osmdroid.IconFactory;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
 
@@ -49,6 +41,7 @@ public abstract class SqlJobTaskBase extends AsyncTask<QueryParameter, Integer, 
 
     /** collects debug infos */
     protected StringBuffer mStatus = null;
+    protected int mColumnIndexPK = -1;
 
     public SqlJobTaskBase(Activity context, String debugPrefix, SelectedItems selectedItems) {
         if (Global.debugEnabledSql || Global.debugEnabled) {
@@ -84,13 +77,13 @@ public abstract class SqlJobTaskBase extends AsyncTask<QueryParameter, Integer, 
             }
 
             // long startTime = SystemClock.currentThreadTimeMillis();
-            int colIconID = cursor.getColumnIndex(FotoSql.SQL_COL_PK);
+            mColumnIndexPK = cursor.getColumnIndex(FotoSql.SQL_COL_PK);
 
             int increment = PROGRESS_INCREMENT;
             while (cursor.moveToNext()) {
-                Long id = cursor.getLong(colIconID);
+                Long id = cursor.getLong(mColumnIndexPK);
 
-                doInBackground(id);
+                doInBackground(id, cursor);
 
                 itemCount++;
                 if ((--increment) <= 0) {
@@ -110,5 +103,5 @@ public abstract class SqlJobTaskBase extends AsyncTask<QueryParameter, Integer, 
         }
     }
 
-    abstract protected void doInBackground(Long id);
+    abstract protected void doInBackground(Long id, Cursor cursor);
 }

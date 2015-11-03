@@ -227,7 +227,7 @@ public class MapGeoPickerActivity extends Activity implements Common {
     }
 
     private void openFilter() {
-        GalleryFilterActivity.showActivity(this, this.mFilter);
+        GalleryFilterActivity.showActivity(this, this.mFilter, null);
     }
 
     private GeoPointDto getGeoPointDtoFromIntent(Intent intent) {

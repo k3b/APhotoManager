@@ -28,14 +28,14 @@ import android.content.Intent;
 public interface Common {
     /**
      * gallery,filter:
-     * Format:GalleryFilterParameter.toString/parse.
+     * Format:GalleryFilterParameter.toString/parseMultible.
      * See https://github.com/k3b/AndroFotoFinder/wiki/intentapi#filter
      */
     static final String EXTRA_FILTER = "de.k3b.extra.FILTER";
 
     /**
      * geoEdit,picker
-     * Format:SelectedItems.toString/parse: id,id,id,....
+     * Format:SelectedItems.toString/parseMultible: id,id,id,....
      * See https://github.com/k3b/AndroFotoFinder/wiki/intentapi#SelectedItems
      */
     static final String EXTRA_SELECTED_ITEMS = "de.k3b.extra.SELECTED_ITEMS";

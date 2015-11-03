@@ -19,6 +19,8 @@
  
 package de.k3b.android.androFotoFinder.queries;
 
+import de.k3b.database.QueryParameter;
+
 /**
  * Data to be shared between activities and fragments
  *
@@ -26,13 +28,13 @@ package de.k3b.android.androFotoFinder.queries;
  */
 public class FotoViewerParameter {
     /** getFrom orderBy for directory chooser */
-    public static QueryParameterParcelable currentDirOrderByQuery = null;
+    public static QueryParameter currentDirOrderByQuery = null;
 
     /** true: load images from folder and its subfolders. false: do not load images from subfolders */
     public static boolean includeSubItems = true;
 
     /** getFrom data for gallery */
-    public static QueryParameterParcelable currentGalleryContentQuery = FotoSql.queryDetail;
+    public static QueryParameter currentGalleryContentQuery = FotoSql.queryDetail;
 
     /** true: gallery contains inline dir-picker */
     public static boolean galleryHasEmbeddedDirPicker = false;

@@ -21,6 +21,13 @@ package de.k3b.android.androFotoFinder;
 
 import android.app.Application;
 
+import java.util.ArrayList;
+import java.util.Date;
+
+import de.k3b.android.GuiUtil;
+import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.database.QueryParameter;
+
 // import com.squareup.leakcanary.LeakCanary;
 // import com.squareup.leakcanary.RefWatcher;
 
@@ -41,4 +48,20 @@ public class AndroFotoFinderApp extends Application {
         LeakCanary.install(this);
     }
     */
+    @Override public void onCreate() {
+        super.onCreate();
+
+        // create sensible defaults for domain-independant QueryParameter parsing
+        QueryParameter.sParserComment = getString(R.string.query_param_comment,
+                getString(R.string.app_name),
+                GuiUtil.getAppVersionName(this),
+                new Date().toString());
+
+        QueryParameter.sParserDefaultFrom = FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI.toString();
+        QueryParameter.sParserDefaultQueryTypeId = FotoSql.QUERY_TYPE_DEFAULT;
+        QueryParameter.sParserDefaultSelect = new ArrayList<String>();
+        for (String columnName : FotoSql.DEFAULT_GALLERY_COLUMNS) {
+            QueryParameter.sParserDefaultSelect.add(columnName);
+        }
+    }
 }

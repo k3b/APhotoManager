@@ -3,7 +3,7 @@
 /*
  * Copyright (c) 2015 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of "a Photo Manager (A(ndro)FotoFinder).
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -24,11 +24,13 @@
     <string name="gallery_foto">Photos</string>
 
     <!-- sort criteria -->
-    <string name="folder">Folder</string>
-    <string name="name">Name</string>
-    <string name="date">Date</string>
-    <string name="place">Place</string>
-    <string name="sort_by_name_len">Lenght</string>
+    <string name="sort_by_none">Unsorted</string>
+    <string name="sort_by_folder">Folder</string>
+    <string name="sort_by_name">Name</string>
+    <string name="sort_by_date">Date</string>
+    <string name="sort_by_place">Place</string>
+    <string name="sort_by_name_len">Length</string>
+
     <string name="destination_move">Move Destination</string>
     <string name="destination_copy">Copy Destination</string>
 
@@ -36,6 +38,8 @@
     <string name="no_dir_selected">Select Folder with Images to enable OK</string>
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
+    <string name="pause">Pause</string>
+    <string name="background">Background</string>
     <string name="popup">...</string>
 
     <string name="action_folder_title">Select Folder</string>
@@ -79,7 +83,9 @@
     <string name="title_multiselection">%1$d Selected</string>
 
     <string name="cmd_rename">Rename</string>
-    <string name="err_file_exists">The File \'%1$s\' already exists. Please choose a different name.</string>
+    <string name="question_overwrite">Overwrite?</string>
+
+    <string name="err_file_exists">The File \'%1$s\' already exists.\n Do you really want to overwrite it?</string>
     <string name="err_file_rename">Cannot rename File \'%1$s\'.</string>
     <string name="success_file_rename">Renamed \'%1$s\' to \'%2$s\'.</string>
     <string name="success_update">Updated %1$d photos.</string>
@@ -89,7 +95,11 @@
     <string name="error_share" >No send/share provider found</string>
 
     <string name="cmd_delete">Delete</string>
+    <string name="delete_question">Delete this bookmark?</string>
+    <string name="delete_answer">Deleted bookmark %1$s.</string>
+    <string name="delete_error">Cannot deleted bookmark %1$s.</string>
     <string name="err_no_fotos_found">No Photos found for %1$s.</string>
+    <string name="err_no_query_found">No queries found in %1$s.</string>
     <string name="err_fotos_not_in_db">Photo not found in media database %1$s yet. Scanning %2$d new files. The missing photo will be available soon.</string>
 
     <string name="cmd_copy">Copy</string>
@@ -117,7 +127,8 @@ This operation cannot be reversed."</string>
 
     <string name="about_content_about">"
 <![CDATA[
-<h1> AndroFotoFinder </h1>
+<h1> A Photo Manager </h1>
+with 'A Photo Map' in 'AndroFotoFinder'<br/>
 </p>
 Features:
 <ul>
@@ -156,13 +167,18 @@ Features:
 ]]>
 "</string>
     <string name="title_show_in_gallery">Show in new Gallery</string>
+    <string name="title_start_scanner">Start Media Scanner</string>
+    <string name="title_scanner_dir">Where to start scanning?</string>
+    <string name="cannot_change_if_scanner_active">Cannot process photo files while Android Media Scanner is busy. Try again later.</string>
+    <string name="title_scanner">Media Sacanner</string>
+
     <string name="title_zoom_to_fit">Zoom to fit</string>
     <string name="lbl_date">Date</string>
     <string name="lbl_with_no_geo">With no geo info</string>
     <string name="selection_add_all_menu_title"   >Selection: Add all visible</string>
     <string name="selection_add_remove_menu_title">Selection: Remove all visible</string>
     <string name="err_cannot_share">sendmultible: item count exceeded</string>
-    <string name="title_geo_edit">a Foto Change Geo</string>
+    <string name="title_geo_edit">a Photo Change Geo</string>
     <string name="geo_update_in_progress">Changing geo info in selected photos</string>
     <string name="cmd_clear_filter">Clear Filter</string>
     <string name="lbl_longitude_short">Lon</string>
@@ -171,5 +187,12 @@ Features:
 
     <string name="media_update_result">Updated %1$d Media Database Items</string>
     <string name="cmd_slideshow">Slideshow</string>
-    <string name="cannot_change_if_scanner_active">Cannot change image files while Android Media Scanner is busy. Try again later.</string>
+    <string name="query_param_comment">Generated on %3$s with \'%1$s\' Version %2$s. See https://github.com/k3b/AndroFotoFinder/wiki/intentap#sql for details</string>
+    <string name="cmd_save_bookmark_as">Save Bookmark as ...</string>
+    <string name="cmd_load_bookmark_from">Load Bookmark from ...</string>
+
+    <string name="err_sql_title_reload">Invalid SQL. Reloading default</string>
+    <string name="err_system">Systemfehler. Exiting</string>
+    <string name="err_sql_message">Sql error \'%1$s\'\n\n%2$s</string>
+
 </resources>

@@ -22,9 +22,12 @@ package de.k3b.android.androFotoFinder.queries;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import org.osmdroid.api.IGeoPoint;
@@ -41,6 +44,7 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
+import de.k3b.io.FileCommands;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGalleryFilter;
@@ -56,6 +60,7 @@ public class FotoSql {
 //    public static final String SQL_EXPR_DAY = "(ROUND("
 //            + MediaStore.Images.Media.SQL_COL_DATE_TAKEN + "/" + PER_DAY + ") * " + PER_DAY + ")";
 
+    public static final int SORT_BY_NONE = 0;
     public static final int SORT_BY_DATE = 1;
     public static final int SORT_BY_NAME = 2;
     public static final int SORT_BY_LOCATION = 3;
@@ -82,16 +87,25 @@ public class FotoSql {
     public static final String SQL_COL_DISPLAY_TEXT = "disp_txt";
     public static final String SQL_COL_LAT = MediaStore.Images.Media.LATITUDE;
     public static final String SQL_COL_LON = MediaStore.Images.Media.LONGITUDE;
+    private static final String FILTER_EXPR_LAT_MAX = SQL_COL_LAT + " < ?";
+    private static final String FILTER_EXPR_LAT_MIN = SQL_COL_LAT + " >= ?";
+    private static final String FILTER_EXPR_NO_GPS = SQL_COL_LAT + " is null AND " + SQL_COL_LON + " is null";
+    private static final String FILTER_EXPR_LON_MAX = SQL_COL_LON + " < ?";
+    private static final String FILTER_EXPR_LON_MIN = SQL_COL_LON + " >= ?";
     public static final String SQL_COL_GPS = MediaStore.Images.Media.LONGITUDE;
     public static final String SQL_COL_COUNT = "count";
+    public static final String SQL_COL_WHERE_PARAM = "where_param";
 
     public static final String SQL_COL_DATE_TAKEN = MediaStore.Images.Media.DATE_TAKEN;
+    private static final String FILTER_EXPR_DATE_MAX = SQL_COL_DATE_TAKEN + " < ?";
+    private static final String FILTER_EXPR_DATE_MIN = SQL_COL_DATE_TAKEN + " >= ?";
     public static final String SQL_COL_PATH = MediaStore.Images.Media.DATA;
+    private static final String FILTER_EXPR_PATH_LIKE = SQL_COL_PATH + " like ?";
 
     // same format as dir. i.e. description='/2014/12/24/' or '/mnt/sdcard/pictures/'
     public static final String SQL_EXPR_DAY = "strftime('/%Y/%m/%d/', " + SQL_COL_DATE_TAKEN + " /1000, 'unixepoch', 'localtime')";
 
-    public static final QueryParameterParcelable queryGroupByDate = (QueryParameterParcelable) new QueryParameterParcelable()
+    public static final QueryParameter queryGroupByDate = new QueryParameter()
             .setID(QUERY_TYPE_GROUP_DATE)
             .addColumn(
                     "max(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
@@ -104,12 +118,14 @@ public class FotoSql {
 
 
     public static final String SQL_EXPR_FOLDER = "substr(" + SQL_COL_PATH + ",1,length(" + SQL_COL_PATH + ") - length(" + MediaStore.Images.Media.DISPLAY_NAME + "))";
-    public static final QueryParameterParcelable queryGroupByDir = (QueryParameterParcelable) new QueryParameterParcelable()
+    public static final QueryParameter queryGroupByDir = new QueryParameter()
             .setID(QUERY_TYPE_GROUP_ALBUM)
             .addColumn(
                     "max(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
                     SQL_EXPR_FOLDER + " AS " + SQL_COL_DISPLAY_TEXT,
                     "count(*) AS " + SQL_COL_COUNT,
+                    // (Substr(_data,1, length(_data) -  length(_display_Name)) = '/storage/sdcard0/DCIM/onw7b/2013/')
+                    // "'(" + SQL_EXPR_FOLDER + " = ''' || " + SQL_EXPR_FOLDER + " || ''')'"
                     "max(" + SQL_COL_GPS + ") AS " + SQL_COL_GPS)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
             .addGroupBy(SQL_EXPR_FOLDER)
@@ -117,7 +133,7 @@ public class FotoSql {
 
     /* image entries may become duplicated if media scanner finds new images that have not been inserted into media database yet
      * and aFotoSql tries to show the new image and triggers a filescan. */
-    public static final QueryParameterParcelable queryGetDuplicates = (QueryParameterParcelable) new QueryParameterParcelable()
+    public static final QueryParameter queryGetDuplicates = new QueryParameter()
             .setID(QUERY_TYPE_UNDEFINED)
             .addColumn(
                     "min(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
@@ -128,6 +144,19 @@ public class FotoSql {
             .addHaving("count(*) > 1")
             .addOrderBy(SQL_COL_PATH);
 
+    /* image entries may not have DISPLAY_NAME which is essential for calculating the item-s folder. */
+    public static final QueryParameter queryChangePath = new QueryParameter()
+            .setID(QUERY_TYPE_UNDEFINED)
+            .addColumn(
+                    SQL_COL_PK,
+                    SQL_COL_PATH,
+                    MediaStore.MediaColumns.DISPLAY_NAME,
+                    MediaStore.MediaColumns.TITLE)
+            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString());
+
+    /* image entries may not have DISPLAY_NAME which is essential for calculating the item-s folder. */
+    public static final QueryParameter queryGetMissingDisplayNames = queryChangePath
+            .addWhere(MediaStore.MediaColumns.DISPLAY_NAME + " is null");
 
     // the bigger the smaller the area
     private static final double GROUPFACTOR_FOR_Z0 = 0.025;
@@ -147,9 +176,9 @@ public class FotoSql {
         return result;
     }
 
-    public static final QueryParameterParcelable queryGroupByPlace = getQueryGroupByPlace(100);
+    public static final QueryParameter queryGroupByPlace = getQueryGroupByPlace(100);
 
-    public static QueryParameterParcelable getQueryGroupByPlace(double groupingFactor) {
+    public static QueryParameter getQueryGroupByPlace(double groupingFactor) {
         //String SQL_EXPR_LAT = "(round(" + SQL_COL_LAT + " - 0.00499, 2))";
         //String SQL_EXPR_LON = "(round(" + SQL_COL_LON + " - 0.00499, 2))";
 
@@ -160,7 +189,7 @@ public class FotoSql {
         String SQL_EXPR_LON = "((round((" + SQL_COL_LON + " * " + groupingFactor + ") - 0.5) /"
                 + groupingFactor + ") + " + (1/groupingFactor/2) + ")";
 
-        QueryParameterParcelable result = new QueryParameterParcelable();
+        QueryParameter result = new QueryParameter();
 
         result.setID(QUERY_TYPE_GROUP_PLACE)
                 .addColumn(
@@ -175,17 +204,18 @@ public class FotoSql {
         return result;
     }
 
-    public static final QueryParameterParcelable queryDetail = (QueryParameterParcelable) new QueryParameterParcelable()
+    public static final String[] DEFAULT_GALLERY_COLUMNS = new String[]{SQL_COL_PK,
+            SQL_COL_PATH + " AS " + SQL_COL_DISPLAY_TEXT,
+            "0 AS " + SQL_COL_COUNT,
+            SQL_COL_GPS};
+
+    public static final QueryParameter queryDetail = new QueryParameter()
             .setID(QUERY_TYPE_GALLERY)
             .addColumn(
-                    SQL_COL_PK,
-                    SQL_COL_PATH + " AS " + SQL_COL_DISPLAY_TEXT,
-                    "0 AS " + SQL_COL_COUNT,
-                    SQL_COL_GPS)
-            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
-            .addOrderBy(SQL_COL_PATH);
+                    DEFAULT_GALLERY_COLUMNS)
+            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString());
 
-    public static final QueryParameterParcelable queryGps = (QueryParameterParcelable) new QueryParameterParcelable()
+    public static final QueryParameter queryGps = new QueryParameter()
             .setID(QUERY_TYPE_UNDEFINED)
             .addColumn(
                     SQL_COL_PK,
@@ -194,35 +224,66 @@ public class FotoSql {
                     SQL_COL_LAT, SQL_COL_LON)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString());
 
-    public static void setWhereFilter(QueryParameter parameters, IGalleryFilter filter) {
+    public static void setWhereFilter(QueryParameter parameters, IGalleryFilter filter, boolean clearWhereBefore) {
         if ((parameters != null) && (filter != null)) {
-            parameters.clearWhere();
+            if (clearWhereBefore) {
+                parameters.clearWhere();
+            }
 
             if (filter.isNonGeoOnly()) {
-                parameters.addWhere(SQL_COL_LAT + " is null AND " + SQL_COL_LAT + " is null");
+                parameters.addWhere(FILTER_EXPR_NO_GPS);
             } else {
                 addWhereFilterLatLon(parameters, filter);
             }
 
-            if (filter.getDateMin() != 0) parameters.addWhere(SQL_COL_DATE_TAKEN + " >= ?", Double.toString(filter.getDateMin()));
-            if (filter.getDateMax() != 0) parameters.addWhere(SQL_COL_DATE_TAKEN + " < ?", Double.toString(filter.getDateMax()));
+            if (filter.getDateMin() != 0) parameters.addWhere(FILTER_EXPR_DATE_MIN, Long.toString(filter.getDateMin()));
+            if (filter.getDateMax() != 0) parameters.addWhere(FILTER_EXPR_DATE_MAX, Long.toString(filter.getDateMax()));
 
             String path = filter.getPath();
-            if ((path != null) && (path.length() > 0)) parameters.addWhere(SQL_COL_PATH + " like ?", path);
+            if ((path != null) && (path.length() > 0)) parameters.addWhere(FILTER_EXPR_PATH_LIKE, path);
         }
     }
 
-    public static void setWhereSelection(QueryParameter parameters, SelectedItems selectedItems) {
-        if ((parameters != null) && (selectedItems != null) && (!selectedItems.isEmpty())) {
-            parameters.clearWhere()
+    public static IGalleryFilter getWhereFilter(QueryParameter parameters, boolean remove) {
+        if (parameters != null) {
+            GalleryFilterParameter filter = new GalleryFilterParameter();
+            if (null != parameters.getWhereParameter(FILTER_EXPR_NO_GPS, remove)) {
+                filter.setNonGeoOnly(true);
+            } else {
+                filter.setLogitude(getParam(parameters, FILTER_EXPR_LON_MIN, remove), getParam(parameters, FILTER_EXPR_LON_MAX, remove));
+                filter.setLatitude(getParam(parameters, FILTER_EXPR_LAT_MIN, remove), getParam(parameters, FILTER_EXPR_LAT_MAX, remove));
+            }
+
+	        filter.setDate(getParam(parameters, FILTER_EXPR_DATE_MIN, remove), getParam(parameters, FILTER_EXPR_DATE_MAX, remove));
+            filter.setPath(getParam(parameters, FILTER_EXPR_PATH_LIKE, remove));
+            return filter;
+        }
+        return null;
+    }
+
+    private static String getParam(QueryParameter query, String expresion, boolean remove) {
+        final String[] result = query.getWhereParameter(expresion, remove);
+        return ((result != null) && (result.length > 0)) ? result[0] : null;
+    }
+
+    public static void setWhereSelection(QueryParameter query, SelectedItems selectedItems) {
+        if ((query != null) && (selectedItems != null) && (!selectedItems.isEmpty())) {
+            query.clearWhere()
                     .addWhere(FotoSql.SQL_COL_PK + " in (" + selectedItems.toString() + ")")
             ;
         }
     }
 
+    public static void setWhereFileNames(QueryParameter query, String... fileNames) {
+        if ((query != null) && (fileNames != null) && (fileNames.length > 0)) {
+            query.clearWhere()
+                    .addWhere(getWhereInFileNames(fileNames))
+            ;
+        }
+    }
 
-    public static void addWhereLatLonNotNull(QueryParameterParcelable parameters) {
-        parameters.addWhere(FotoSql.SQL_COL_LAT + " is not null and " + FotoSql.SQL_COL_LON + " is not null")
+    public static void addWhereLatLonNotNull(QueryParameter query) {
+        query.addWhere(FotoSql.SQL_COL_LAT + " is not null and " + FotoSql.SQL_COL_LON + " is not null")
         ;
     }
 
@@ -233,24 +294,11 @@ public class FotoSql {
         }
     }
 
-    public static void addWhereFilterLatLon(QueryParameter parameters, double latitudeMin, double latitudeMax, double logituedMin, double logituedMax) {
-        if (!Double.isNaN(latitudeMin)) parameters.addWhere(SQL_COL_LAT + " >= ?", DirectoryFormatter.parseLatLon(latitudeMin));
-        if (!Double.isNaN(latitudeMax)) parameters.addWhere(SQL_COL_LAT + " < ?", DirectoryFormatter.parseLatLon(latitudeMax));
-        if (!Double.isNaN(logituedMin)) parameters.addWhere(SQL_COL_LON + " >= ?", DirectoryFormatter.parseLatLon(logituedMin));
-        if (!Double.isNaN(logituedMax)) parameters.addWhere(SQL_COL_LON + " < ?", DirectoryFormatter.parseLatLon(logituedMax));
-    }
-
-    public static String getFilter(Cursor cursor, QueryParameter parameters, String description) {
-        if ((parameters != null) && (parameters.getID() == QUERY_TYPE_GROUP_ALBUM)) {
-            return description;
-        }
-        return null;
-    }
-
-    public static void addWhereFilter(QueryParameter parameters, String filterParameter) {
-        if ((parameters != null) && (parameters.getID() == QUERY_TYPE_GROUP_ALBUM) && (filterParameter != null)) {
-            parameters.addWhere(SQL_EXPR_FOLDER + " = ?", filterParameter);
-        }
+    public static void addWhereFilterLatLon(QueryParameter query, double latitudeMin, double latitudeMax, double logituedMin, double logituedMax) {
+        if (!Double.isNaN(latitudeMin)) query.addWhere(FILTER_EXPR_LAT_MIN, DirectoryFormatter.parseLatLon(latitudeMin));
+        if (!Double.isNaN(latitudeMax)) query.addWhere(FILTER_EXPR_LAT_MAX, DirectoryFormatter.parseLatLon(latitudeMax));
+        if (!Double.isNaN(logituedMin)) query.addWhere(FILTER_EXPR_LON_MIN, DirectoryFormatter.parseLatLon(logituedMin));
+        if (!Double.isNaN(logituedMax)) query.addWhere(FILTER_EXPR_LON_MAX, DirectoryFormatter.parseLatLon(logituedMax));
     }
 
     public static void addPathWhere(QueryParameter newQuery, String selectedAbsolutePath, int dirQueryID) {
@@ -296,13 +344,13 @@ public class FotoSql {
                     .addOrderBy(SQL_COL_DATE_TAKEN + " desc");
         } else {
             newQuery
-                    .addWhere(SQL_COL_DATE_TAKEN + " >= ?", "" + from.getTime())
-                    .addWhere(SQL_COL_DATE_TAKEN + " < ?", "" + to.getTime())
+                    .addWhere(FILTER_EXPR_DATE_MIN, "" + from.getTime())
+                    .addWhere(FILTER_EXPR_DATE_MAX, "" + to.getTime())
                     .addOrderBy(SQL_COL_DATE_TAKEN + " desc");
         }
     }
 
-    public static QueryParameterParcelable getQuery(int queryID) {
+    public static QueryParameter getQuery(int queryID) {
         switch (queryID) {
             case QUERY_TYPE_UNDEFINED:
                 return null;
@@ -326,24 +374,26 @@ public class FotoSql {
 
     public static String getName(Context context, int id) {
         switch (id) {
+            case SORT_BY_NONE:
+                return context.getString(R.string.sort_by_none);
             case SORT_BY_DATE:
-                return context.getString(R.string.date);
+                return context.getString(R.string.sort_by_date);
             case SORT_BY_NAME:
-                return context.getString(R.string.name);
+                return context.getString(R.string.sort_by_name);
             case SORT_BY_LOCATION:
-                return context.getString(R.string.place);
+                return context.getString(R.string.sort_by_place);
             case SORT_BY_NAME_LEN:
                 return context.getString(R.string.sort_by_name_len);
 
             case QUERY_TYPE_GALLERY:
                 return context.getString(R.string.gallery_foto);
             case QUERY_TYPE_GROUP_DATE:
-                return context.getString(R.string.date);
+                return context.getString(R.string.sort_by_date);
             case QUERY_TYPE_GROUP_ALBUM:
-                return context.getString(R.string.folder);
+                return context.getString(R.string.sort_by_folder);
             case QUERY_TYPE_GROUP_PLACE:
             case QUERY_TYPE_GROUP_PLACE_MAP:
-                return context.getString(R.string.place);
+                return context.getString(R.string.sort_by_place);
             case QUERY_TYPE_GROUP_COPY:
                 return context.getString(R.string.destination_copy);
             case QUERY_TYPE_GROUP_MOVE:
@@ -460,7 +510,7 @@ public class FotoSql {
     }
 
     public static IGeoRectangle execGetGeoRectangle(Context context, IGalleryFilter filter, SelectedItems selectedItems) {
-        QueryParameterParcelable query = (QueryParameterParcelable) new QueryParameterParcelable()
+        QueryParameter query = new QueryParameter()
                 .setID(QUERY_TYPE_UNDEFINED)
                 .addColumn(
                         "min(" + SQL_COL_LAT + ") AS LAT_MIN",
@@ -472,7 +522,7 @@ public class FotoSql {
                 .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString());
 
         if (filter != null) {
-            setWhereFilter(query, filter);
+            setWhereFilter(query, filter, true);
         }
 
         if (selectedItems != null) {
@@ -504,7 +554,7 @@ public class FotoSql {
 
 
     public static IGeoPoint execGetPosition(Context context, int id) {
-        QueryParameterParcelable query = (QueryParameterParcelable) new QueryParameterParcelable()
+        QueryParameter query = new QueryParameter()
         .setID(QUERY_TYPE_UNDEFINED)
                 .addColumn(SQL_COL_LAT, SQL_COL_LON)
                 .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
@@ -530,27 +580,13 @@ public class FotoSql {
     public static Map<String, Integer> execGetPathIdMap(Context context, String... fileNames) {
         Map<String, Integer> result = new HashMap<String, Integer>();
 
-        if (fileNames != null) {
-            StringBuilder filter = new StringBuilder();
-            filter.append(SQL_COL_PATH).append(" in (");
-
-            int count = 0;
-            for (String fileName : fileNames) {
-                if (fileName != null) {
-                    if (count > 0) filter.append(", ");
-                    filter.append("'").append(fileName).append("'");
-                    count++;
-                }
-            }
-
-            if (count == 0) return result;
-            filter.append(")");
-
-            QueryParameterParcelable query = (QueryParameterParcelable) new QueryParameterParcelable()
+        String whereFileNames = getWhereInFileNames(fileNames);
+        if (whereFileNames != null) {
+            QueryParameter query = new QueryParameter()
                     .setID(QUERY_TYPE_UNDEFINED)
                     .addColumn(SQL_COL_PK, SQL_COL_PATH)
                     .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
-                    .addWhere(filter.toString());
+                    .addWhere(whereFileNames);
 
             Cursor c = null;
             try {
@@ -567,12 +603,90 @@ public class FotoSql {
         return result;
     }
 
-    public static int execUpdate(Context context, Integer id, ContentValues values) {
-        return context.getContentResolver().update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, values, SQL_COL_PK + " = ?", new String[]{id.toString()});
+    public static String getWhereInFileNames(String... fileNames) {
+        if (fileNames != null) {
+            StringBuilder filter = new StringBuilder();
+            filter.append(SQL_COL_PATH).append(" in (");
+
+            int count = 0;
+            for (String fileName : fileNames) {
+                if (!FileCommands.isSidecar(fileName)) {
+                    if (count > 0) filter.append(", ");
+                    filter.append("'").append(fileName).append("'");
+                    count++;
+                }
+            }
+
+            filter.append(")");
+
+            if (count > 0) return filter.toString();
+        }
+        return null;
+    }
+
+    public static ContentValues getDbContent(Context context, final long id) {
+        ContentResolver resolver = context.getContentResolver();
+
+        Cursor c = null;
+        try {
+            c = resolver.query(SQL_TABLE_EXTERNAL_CONTENT_URI, new String[]{"*"}, FotoSql.SQL_COL_PK + " = ?", new String[]{"" + id}, null);
+            if (c.moveToNext()) {
+                ContentValues values = new ContentValues();
+                DatabaseUtils.cursorRowToContentValues(c, values);
+                return values;
+            }
+        } catch (Exception ex) {
+            Log.e(Global.LOG_CONTEXT, "FotoSql.getDbContent(id=" + id + ") failed", ex);
+        } finally {
+            if (c != null) c.close();
+        }
+        return null;
+    }
+
+    public static int execUpdate(Context context, int id, ContentValues values) {
+        return context.getContentResolver().update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, values, SQL_COL_PK + " = ?", new String[]{Integer.toString(id)});
     }
 
     public static Uri execInsert(Context context, ContentValues values) {
         return context.getContentResolver().insert(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, values);
+    }
+
+    @NonNull
+    public static CursorLoader createCursorLoader(Context context, final QueryParameter query) {
+        final CursorLoader loader = new CursorLoaderWithException(context, query);
+        return loader;
+    }
+
+    public static class CursorLoaderWithException extends CursorLoader {
+        private final QueryParameter query;
+        private Exception mException;
+
+        public CursorLoaderWithException(Context context, QueryParameter query) {
+            super(context, Uri.parse(query.toFrom()), query.toColumns(), query.toAndroidWhere(), query.toAndroidParameters(), query.toOrderBy());
+            this.query = query;
+        }
+
+        @Override
+        public Cursor loadInBackground() {
+            mException = null;
+            try {
+                Cursor result = super.loadInBackground();
+                return result;
+            } catch (Exception ex) {
+                final String msg = "FotoSql.createCursorLoader()#loadInBackground failed:\n\t" + query.toSqlString();
+                Log.e(Global.LOG_CONTEXT, msg, ex);
+                mException = ex;
+                return null;
+            }
+        }
+
+        public QueryParameter getQuery() {
+            return query;
+        }
+
+        public Exception getException() {
+            return mException;
+        }
     }
 }
 

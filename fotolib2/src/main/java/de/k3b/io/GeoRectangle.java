@@ -32,6 +32,15 @@ public class GeoRectangle implements IGeoRectangle {
     private double logituedMin = Double.NaN;
     private double logituedMax = Double.NaN;
 
+    protected static double parseLatLon(String value) {
+        if ((value == null) || value.isEmpty()) return Double.NaN;
+        try {
+            return Double.parseDouble(value);
+        } catch (Exception e) {
+            return Double.NaN;
+        }
+    }
+
     public GeoRectangle get(IGeoRectangle src) {
         if (src != null) {
             this.setLogituedMin(src.getLogituedMin());
@@ -78,6 +87,11 @@ public class GeoRectangle implements IGeoRectangle {
         this.logituedMax = logituedMax; return this;
     }
 
+    public GeoRectangle setLatitude(String min, String max) {
+        //         return GalleryFilterParameter.parseLatLon(paramValue);
+        return setLatitude(parseLatLon(min), parseLatLon(max));
+    }
+
     public GeoRectangle setLatitude(double min, double max) {
         if (min > max) {
             // swap
@@ -88,6 +102,11 @@ public class GeoRectangle implements IGeoRectangle {
         setLatitudeMin(min);
         setLatitudeMax(max);
         return this;
+    }
+
+    public GeoRectangle setLogitude(String min, String max) {
+        //         return GalleryFilterParameter.parseLatLon(paramValue);
+        return setLogitude(parseLatLon(min), parseLatLon(max));
     }
 
     public GeoRectangle setLogitude(double min, double max) {

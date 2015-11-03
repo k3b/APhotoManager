@@ -20,23 +20,21 @@
 package de.k3b.android.androFotoFinder.imagedetail;
 
 import android.app.Activity;
-import android.app.AlertDialog;
+import android.app.LoaderManager;
 import android.content.ActivityNotFoundException;
-import android.content.DialogInterface;
+import android.content.Context;
 import android.content.Intent;
-import android.database.DataSetObserver;
+import android.content.Loader;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
-import android.webkit.MimeTypeMap;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 // import com.squareup.leakcanary.RefWatcher;
@@ -52,12 +50,13 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.AboutDialogPreference;
+import de.k3b.android.widget.Dialogs;
+import de.k3b.database.QueryParameter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
@@ -74,40 +73,111 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     /** activityRequestCode: in forward mode: intent is forwarded to gallery */
     private static final int ID_FORWARD = 471102;
     private static final int DEFAULT_SORT = FotoSql.SORT_BY_NAME_LEN;
-    private static final QueryParameterParcelable DEFAULT_QUERY = FotoSql.queryDetail;
+    private static final QueryParameter DEFAULT_QUERY = FotoSql.queryDetail;
+    private static final int NO_INITIAL_SCROLL_POSITION = -1;
 
     // how many changes have been made. if != 0 parent activity must invalidate cached data
     private static int mModifyCount = 0;
     private MenuItem mMenuSlideshow = null;
 
-    class ImageDetailFileCommands extends AndroidFileCommands {
-        @Override
-        protected void onPostProcess(String[] paths, int modifyCount, int itemCount, int opCode) {
-            super.onPostProcess(paths, modifyCount, itemCount, opCode);
-            // reload after modification
-            requery();
-            if (Global.clearSelectionAfterCommand || (opCode == OP_DELETE) || (opCode == OP_MOVE)) {
-            }
+    class LocalCursorLoader implements LoaderManager.LoaderCallbacks<Cursor> {
+        /** incremented every time a new curster/query is generated */
+        private int mRequeryInstanceCount = 0;
 
-            Activity context = ImageDetailActivityViewPager.this;
-            int resId = getResourceId(opCode);
-            String message = getString(resId, Integer.valueOf(modifyCount), Integer.valueOf(itemCount));
-            Toast.makeText(context, message, Toast.LENGTH_LONG).show();
-            // mDirectoryListener.invalidateDirectories();
+        /** called by LoaderManager.getLoader(ACTIVITY_ID) to (re)create loader
+         * that attaches to last query/cursor if it still exist i.e. after rotation */
+        @Override
+        public Loader<Cursor> onCreateLoader(int loaderID, Bundle bundle) {
+            switch (loaderID) {
+                case ACTIVITY_ID:
+                    mRequeryInstanceCount++;
+                    if (Global.debugEnabledSql) {
+                        Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onCreateLoader" +
+                                getDebugContext() +
+                                " : query = " + mGalleryContentQuery);
+                    }
+                    return FotoSql.createCursorLoader(getApplicationContext(), mGalleryContentQuery);
+                default:
+                    // An invalid id was passed in
+                    return null;
+            }
         }
 
-        private int getResourceId(int opCode) {
-            switch (opCode) {
-                case OP_COPY: return R.string.format_copy_result;
-                case OP_MOVE: return R.string.format_move_result;
-                case OP_DELETE: return R.string.format_delete_result;
-                case OP_RENAME: return R.string.format_rename_result;
-                case OP_UPDATE: return R.string.format_update_result;
+        /** called after media db content has changed */
+        @Override
+        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            // to be restored after reload if there is no mInitialFilePath
+            if (mInitialScrollPosition == NO_INITIAL_SCROLL_POSITION) {
+                mInitialScrollPosition = mViewPager.getCurrentItem();
             }
-            return 0;
+            // do change the data
+            mAdapter.swapCursor(data);
+
+            // restore position is invalid
+            if (mInitialScrollPosition >= mAdapter.getCount()) mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
+
+            if (Global.debugEnabledSql) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onLoadFinished" +
+                        getDebugContext() +
+                        " found " + ((data == null) ? 0 : data.getCount()) + " rows");
+            }
+
+            // do change the data
+            mAdapter.notifyDataSetChanged();
+            mViewPager.setAdapter(mAdapter);
+
+            // show the changes
+            onLoadCompleted();
+        }
+
+        /** called by LoaderManager. after search criteria were changed or if activity is destroyed. */
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+            // rember position where we have to scroll to after reload is finished.
+            mInitialScrollPosition = mViewPager.getCurrentItem();
+            mAdapter.swapCursor(null);
+            if (Global.debugEnabledSql) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onLoaderReset" +
+                        getDebugContext());
+            }
+            mAdapter.notifyDataSetChanged();
+        }
+
+        @NonNull
+        private String getDebugContext() {
+            return "(#" + mRequeryInstanceCount
+                    + ", mScrollPosition=" + mInitialScrollPosition +
+                    ",  Path='" + mInitialFilePath +
+                    "')";
+        }
+    }
+    LocalCursorLoader mCurorLoader;
+
+    class LocalFileCommands extends AndroidFileCommands {
+        @Override
+        protected void onPostProcess(String what, String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
+            mInitialFilePath = null;
+            switch (opCode) {
+                case OP_MOVE:
+                case OP_RENAME:
+                    if ((newPathNames!= null) && (newPathNames.length > 0)) {
+                        // so selection will be restored to this after load complete
+                        mInitialFilePath = newPathNames[0];
+                    }
+                    break;
+                case OP_COPY:
+                    if ((oldPathNames!= null) && (oldPathNames.length > 0)) {
+                        // so selection will be restored to this after load complete
+                        mInitialFilePath = oldPathNames[0];
+                    }
+                    break;
+            }
+
+            super.onPostProcess(what, oldPathNames, newPathNames, modifyCount, itemCount, opCode);
         }
 
     }
+
     public static class MoveOrCopyDestDirPicker extends DirectoryPickerFragment {
         static AndroidFileCommands sFileCommands = null;
 
@@ -153,28 +223,29 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 	private LockableViewPager mViewPager = null;
     private ImagePagerAdapterFromCursor mAdapter = null;
 
-    private final AndroidFileCommands mFileCommands = new ImageDetailFileCommands();
+    private final AndroidFileCommands mFileCommands = new LocalFileCommands();
 
     // for debugging
     private static int id = 1;
     private String mDebugPrefix;
-    private DataSetObserver mLoadCompleteHandler;
 
     /** where data comes from */
-    private QueryParameterParcelable mGalleryContentQuery = null;
+    private QueryParameter mGalleryContentQuery = null;
 
     /** if >= 0 after load cursor scroll to this offset */
-    private int mScrollPosition = -1;
+    private int mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
 
     /** if != after load cursor scroll to this path */
     private String mInitialFilePath = null;
 
-    public static void showActivity(Activity context, Uri imageUri, int position, QueryParameterParcelable imageDetailQuery) {
+    public static void showActivity(Activity context, Uri imageUri, int position, QueryParameter imageDetailQuery) {
         Intent intent;
         //Create intent
         intent = new Intent(context, ImageDetailActivityViewPager.class);
 
-        intent.putExtra(ImageDetailActivityViewPager.EXTRA_QUERY, imageDetailQuery);
+        if (imageDetailQuery != null) {
+            intent.putExtra(ImageDetailActivityViewPager.EXTRA_QUERY, imageDetailQuery.toReParseableString());
+        }
         intent.putExtra(ImageDetailActivityViewPager.EXTRA_POSITION, position);
         intent.setData(imageUri);
 
@@ -207,21 +278,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             // extra parameter
             getParameter(intent);
 
-            mLoadCompleteHandler = new DataSetObserver() {
-                @Override
-                public void onChanged() {
-                    super.onChanged();
-                    // #13 Swiping: Sometimes the app jumps back
-                    int currentViewItem = mViewPager.getCurrentItem();
-                    if (currentViewItem > 0) {
-                        mScrollPosition = currentViewItem;
-                    }
-                    onLoadCompleted();
-                }
-            };
-
-            mAdapter = new ImagePagerAdapterFromCursor(this, mGalleryContentQuery, mDebugPrefix);
-            mAdapter.registerDataSetObserver(mLoadCompleteHandler);
+            mAdapter = new ImagePagerAdapterFromCursor(this, mDebugPrefix);
             mViewPager.setAdapter(mAdapter);
             mViewPager.setOnInterceptTouchEvent(new View.OnClickListener() {
                 @Override
@@ -231,7 +288,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             });
 
             if (savedInstanceState != null) {
-                mScrollPosition = savedInstanceState.getInt(INSTANCE_STATE_LAST_SCROLL_POSITION, this.mScrollPosition);
+                mInitialScrollPosition = savedInstanceState.getInt(INSTANCE_STATE_LAST_SCROLL_POSITION, this.mInitialScrollPosition);
                 mModifyCount = savedInstanceState.getInt(INSTANCE_STATE_MODIFY_COUNT, this.mModifyCount);
             } else {
                 mModifyCount = 0;
@@ -242,6 +299,9 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             mFileCommands.setContext(this);
             mFileCommands.setLogFilePath(mFileCommands.getDefaultLogFile());
             MoveOrCopyDestDirPicker.sFileCommands = mFileCommands;
+
+            mCurorLoader = new LocalCursorLoader();
+            getLoaderManager().initLoader(ACTIVITY_ID, null, mCurorLoader);
         }
     }
 
@@ -281,15 +341,16 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     /** query from EXTRA_QUERY, EXTRA_FILTER, fileParentDir , defaultQuery */
     private void getParameter(Intent intent) {
-        this.mScrollPosition = intent.getIntExtra(EXTRA_POSITION, this.mScrollPosition);
-        this.mGalleryContentQuery = intent.getParcelableExtra(EXTRA_QUERY);
+        this.mInitialScrollPosition = intent.getIntExtra(EXTRA_POSITION, this.mInitialScrollPosition);
+        this.mGalleryContentQuery = QueryParameter.parse(intent.getStringExtra(EXTRA_QUERY));
+
         if (mGalleryContentQuery == null) {
             String filterValue = intent.getStringExtra(EXTRA_FILTER);
             if (filterValue != null) {
                 GalleryFilterParameter filter = GalleryFilterParameter.parse(filterValue, new GalleryFilterParameter());
-                QueryParameterParcelable query = new QueryParameterParcelable(DEFAULT_QUERY);
+                QueryParameter query = new QueryParameter(DEFAULT_QUERY);
                 FotoSql.setSort(query, DEFAULT_SORT, true);
-                FotoSql.setWhereFilter(query, filter);
+                FotoSql.setWhereFilter(query, filter, true);
             }
         }
         if (mGalleryContentQuery == null) {
@@ -311,7 +372,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             Log.e(Global.LOG_CONTEXT, mDebugPrefix + " onCreate() : intent.extras[" + EXTRA_QUERY +
                     "] not found. data=" + intent.getData() +
                     ". Using default.");
-            mGalleryContentQuery = new QueryParameterParcelable(DEFAULT_QUERY);
+            mGalleryContentQuery = new QueryParameter(DEFAULT_QUERY);
         } else if (Global.debugEnabledSql) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onCreate() : query = " + mGalleryContentQuery);
         }
@@ -320,9 +381,9 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     private void getParameterFromPath(String path, boolean isFileUri) {
         mInitialFilePath = path;
         File selectedPhoto = new File(mInitialFilePath);
-        this.mScrollPosition = -1;
+        this.mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
 
-        QueryParameterParcelable query = new QueryParameterParcelable(DEFAULT_QUERY);
+        QueryParameter query = new QueryParameter(DEFAULT_QUERY);
         FotoSql.addPathWhere(query, selectedPhoto.getParent(), FotoSql.QUERY_TYPE_GALLERY);
         FotoSql.setSort(query, DEFAULT_SORT, true);
         mGalleryContentQuery = query;
@@ -360,10 +421,8 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     protected void onDestroy() {
         Global.debugMemory(mDebugPrefix, "onDestroy");
 
+        // getLoaderManager().destroyLoader(ACTIVITY_ID);
         if (mAdapter != null) {
-            // not in forward-mode
-            mAdapter.unregisterDataSetObserver(mLoadCompleteHandler);
-            mLoadCompleteHandler = null;
             mViewPager.setAdapter(null);
             mFileCommands.closeLogFile();
             mFileCommands.closeAll();
@@ -376,71 +435,67 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         // refWatcher.watch(this);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_image_detail, menu);
-        getMenuInflater().inflate(R.menu.menu_image_commands, menu);
-        mMenuSlideshow = menu.findItem(R.id.action_slideshow);
-        return super.onCreateOptionsMenu(menu);
-    }
-
     private void onLoadCompleted() {
         if (mAdapter.getCount() == 0) {
             // image not found in media database
 
-            if (checkForIncompleteMediaDatabase(mInitialFilePath)) {
+            if (checkForIncompleteMediaDatabase(mInitialFilePath, "onLoadCompleted().count=0")) {
                 // this.finish();
             } else {
+
                 // close activity if last image of current selection has been deleted
                 String message = getString(R.string.err_no_fotos_found, mInitialFilePath);
                 Toast.makeText(this, message, Toast.LENGTH_LONG).show();
                 this.finish();
             }
-        } else if (mScrollPosition >= 0) {
-            // after initial load select correct image
-            mViewPager.invalidate();
-            mViewPager.setCurrentItem(mScrollPosition);
-            mScrollPosition = -1;
-            mInitialFilePath = null;
         } else if (mInitialFilePath != null) {
+            // try to find selection by text
             mViewPager.invalidate();
             int positionFound = mAdapter.getCursorFromPath(mInitialFilePath);
             if (positionFound < 0) {
-                checkForIncompleteMediaDatabase(mInitialFilePath);
+                // not found
+                checkForIncompleteMediaDatabase(mInitialFilePath, "onLoadCompleted(Selection='" +
+                        mInitialFilePath + "' not found)");
+                if (mInitialScrollPosition >= 0) mViewPager.setCurrentItem(mInitialScrollPosition);
+                // mInitialFilePath = null; keep path so next requery/rotatate the selected image will be displayed
+            } else {
+                mViewPager.setCurrentItem(positionFound);
+                mInitialFilePath = null;
             }
-            mViewPager.setCurrentItem(positionFound);
-            mScrollPosition = -1;
-            // mInitialFilePath = null; keep path so next requery/rotatate the selected image will be displayed
-        } else {
-            // update mViewPager so that deleted image will not be the current any more
-            mScrollPosition = mViewPager.getCurrentItem();
-            mViewPager.setAdapter(mAdapter); // reload
-            mViewPager.setCurrentItem(mScrollPosition);
-            mScrollPosition = -1;
+            mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
+        } else if (mInitialScrollPosition >= 0) {
+            // after initial load select correct image
+            mViewPager.invalidate();
+            mViewPager.setCurrentItem(mInitialScrollPosition);
+            mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
+            mInitialFilePath = null;
         }
     }
 
-    private boolean checkForIncompleteMediaDatabase(String filePath) {
-        File fileToLoad = (filePath != null) ? new File(filePath) : null;
+    /** gets called if no file is found by a db-query or if jpgFullFilePath is not found in media db */
+    private boolean checkForIncompleteMediaDatabase(String jpgFullFilePath, String why) {
+        File fileToLoad = (jpgFullFilePath != null) ? new File(jpgFullFilePath) : null;
         if ((fileToLoad != null) && (fileToLoad.exists()) && (fileToLoad.canRead())) {
             // file exists => must update media database
-            int numberOfNewItems = updateIncompleteMediaDatabase(fileToLoad);
+            int numberOfNewItems = updateIncompleteMediaDatabase(mDebugPrefix, this,
+                    mDebugPrefix + "checkForIncompleteMediaDatabase-" + why,
+                    fileToLoad.getParentFile());
 
-            String message = getString(R.string.err_fotos_not_in_db, filePath, numberOfNewItems);
+            String message = getString(R.string.err_fotos_not_in_db, jpgFullFilePath, numberOfNewItems);
             Toast.makeText(this, message, Toast.LENGTH_LONG).show();
             return true;
         }
         return false;
     }
 
-    private int updateIncompleteMediaDatabase(File fileToLoad) {
-        String fullPath = fileToLoad.toString();
+    private static int updateIncompleteMediaDatabase(String debugPrefix, Context context, String why, File dirToScan) {
+        if (dirToScan == null) return 0;
+
         String dbPathSearch = null;
         ArrayList<String> missing = new ArrayList<String>();
-        File parentDir = fileToLoad.getParentFile();
-        dbPathSearch = parentDir.getPath() + "%";
-        List<String> known = FotoSql.execGetFotoPaths(this, dbPathSearch);
-        File[] existing = parentDir.listFiles();
+        dbPathSearch = dirToScan.getPath() + "%";
+        List<String> known = FotoSql.execGetFotoPaths(context, dbPathSearch);
+        File[] existing = dirToScan.listFiles();
 
         if (existing != null) {
             for (File file : existing) {
@@ -451,14 +506,10 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             }
         }
 
-        if (missing.size() == 0) {
-            missing.add(fullPath);
-        }
-
         if (Global.debugEnabled) {
             StringBuilder message = new StringBuilder();
-            message.append(mDebugPrefix).append("updateIncompleteMediaDatabase.updateIncompleteMediaDatabase('")
-                    .append(fullPath).append("', '").append(dbPathSearch).append("') : \n\t");
+            message.append(debugPrefix).append("updateIncompleteMediaDatabase('")
+                    .append(dbPathSearch).append("') : \n\t");
 
             for(String s : missing) {
                 message.append(s).append("; ");
@@ -466,29 +517,17 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             Log.d(Global.LOG_CONTEXT, message.toString());
         }
 
-        /*
-        MediaScannerConnection.scanFile(
-                // http://stackoverflow.com/questions/5739140/mediascannerconnection-produces-android-app-serviceconnectionleaked
-                this.getApplicationContext(),
-                missing.toArray(new String[missing.size()]),
-                null, null);
-        */
-        MediaScanner scanner = new MediaScanner(this) {
-            @Override
-            protected void onPostExecute(Integer resultCount) {
-                super.onPostExecute(resultCount);
-                if (resultCount > 0) {
-                    requery();
-                } else {
-                    finish();
-                }
-                if (Global.debugEnabled) {
-                    Log.d(Global.LOG_CONTEXT, "Items updated by Media scanner : " + resultCount);
-                }
-            }
-        };
-        scanner.execute(missing.toArray(new String[missing.size()]));
+        MediaScanner scanner = new MediaScanner(context, why);
+        scanner.execute(null, missing.toArray(new String[missing.size()]));
         return missing.size();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_image_detail, menu);
+        getMenuInflater().inflate(R.menu.menu_image_commands, menu);
+        mMenuSlideshow = menu.findItem(R.id.action_slideshow);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -512,7 +551,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         // Handle presses on the action bar items
         switch (item.getItemId()) {
             case R.id.action_details:
-                cmdShowDetails(getCurrentFilePath());
+                cmdShowDetails(getCurrentFilePath(), getCurrentImageId());
                 return true;
 
             case R.id.action_slideshow:
@@ -521,11 +560,11 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
                 return true;
 
             case R.id.action_edit:
-                cmdStartIntent(getCurrentFilePath(), Intent.ACTION_EDIT, R.string.title_chooser_edit, R.string.error_edit);
+                cmdStartIntent(getCurrentFilePath(), null, Intent.ACTION_EDIT, R.string.title_chooser_edit, R.string.error_edit);
                 return true;
 
             case R.id.menu_item_share:
-                cmdStartIntent(getCurrentFilePath(), Intent.ACTION_SEND, R.string.title_chooser_share, R.string.error_share);
+                cmdStartIntent(null, getCurrentFilePath(), Intent.ACTION_SEND, R.string.title_chooser_share, R.string.error_share);
                 return true;
 
             case R.id.cmd_copy:
@@ -579,21 +618,29 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         mViewPager.setCurrentItem(pos);
     }
 
-    private void cmdStartIntent(String currentFilePath, String action, int idChooserCaption, int idEditError) {
-        File file = new File(currentFilePath);
-        final Uri uri = Uri.fromFile(file);
+    private void cmdStartIntent(String currentFilePath, String extraPath, String action, int idChooserCaption, int idEditError) {
 
         final Intent outIntent = new Intent()
                 .setAction(action)
-                .setDataAndType(uri, getMime(currentFilePath))
                 // .putExtra(Intent.EXTRA_STREAM, uri)
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
+        if (currentFilePath != null) {
+            File file = new File(currentFilePath);
+            final Uri uri = Uri.fromFile(file);
+            outIntent.setDataAndType(uri, getMime(currentFilePath));
+        }
+
+        if (extraPath != null) {
+            File file = new File(extraPath);
+            final Uri uri = Uri.fromFile(file);
+            outIntent.setType(getMime(extraPath));
+            outIntent.putExtra(EXTRA_STREAM, uri);
+        }
         if (Global.debugEnabled) {
-            Log.d(Global.LOG_CONTEXT, "cmdStartIntent(" +
-                    action +
-                    ":'" + outIntent.getData() + "',  mime:'" + outIntent.getType() + "')");
+            Log.d(Global.LOG_CONTEXT,
+                    "cmdStartIntent(" + outIntent.toUri(Intent.URI_INTENT_SCHEME) + "')");
         }
 
         try {
@@ -603,9 +650,9 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         }
     }
 
-    private void cmdShowDetails(String fullFilePath) {
+    private void cmdShowDetails(String fullFilePath, long currentImageId) {
 
-        ImageDetailDialogBuilder.createImageDetailDialog(this, fullFilePath).show();
+        ImageDetailDialogBuilder.createImageDetailDialog(this, fullFilePath, currentImageId, mGalleryContentQuery, mViewPager.getCurrentItem()).show();
     }
 
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFotos fotos) {
@@ -623,41 +670,19 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     private boolean onRenameDirQueston(final long fotoId, final String fotoPath, String newName) {
         if (AndroidFileCommands.canProcessFile(this)) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(R.string.cmd_rename);
-            View content = this.getLayoutInflater().inflate(R.layout.dialog_edit_name, null);
-
-            final EditText edit = (EditText) content.findViewById(R.id.edName);
-
             if (newName == null) {
                 newName = new File(getCurrentFilePath()).getName();
             }
-            edit.setText(newName);
 
-            // select text without extension
-            int selectLen = newName.lastIndexOf(".");
-            if (selectLen == -1) selectLen = newName.length();
-            edit.setSelection(0, selectLen);
-
-            builder.setView(content);
-            builder.setNegativeButton(R.string.cancel, null);
-            builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                //@Override
-                public void onClick(DialogInterface dialog, int which) {
-                    onRenameSubDirAnswer(fotoId, fotoPath, edit.getText().toString());
+            Dialogs dialog = new Dialogs() {
+                @Override
+                protected void onDialogResult(String newFileName, Object... parameters) {
+                    if (newFileName != null) {
+                        onRenameSubDirAnswer((Long) parameters[0], (String) parameters[1], newFileName);
+                    }
                 }
-            });
-            AlertDialog alertDialog = builder.create();
-            alertDialog.show();
-
-            int width = (int) (8 * edit.getTextSize());
-            // DisplayMetrics metrics = getResources().getDisplayMetrics();
-            // int width = metrics.widthPixels;
-            alertDialog.getWindow().setLayout(width * 2, LinearLayout.LayoutParams.WRAP_CONTENT);
-            edit.requestFocus();
-
-            // request keyboard. See http://stackoverflow.com/questions/2403632/android-show-soft-keyboard-automatically-when-focus-is-on-an-edittext
-            alertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+            };
+            dialog.editFileName(this, getString(R.string.cmd_rename), newName, fotoId, fotoPath);
         }
         return true;
     }
@@ -685,10 +710,6 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
             onRenameDirQueston(fotoId, fotoSourcePath, newFileName);
         } else if (mFileCommands.rename(fotoId, dest, src)) {
-            // rename success: update media database and gui
-            requery();
-            errorMessage = getString(R.string.success_file_rename, src.getAbsoluteFile(), newFileName);
-            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
             mModifyCount++;
         } else {
             // rename failed
@@ -697,13 +718,12 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         }
     }
 
-    private void requery() {
-        mAdapter.requery(this, mGalleryContentQuery);
-    }
-
     private String getMime(String path) {
+        return "image/*";
+        /*
         MimeTypeMap map = MimeTypeMap.getSingleton();
         return map.getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(path));
+        */
     }
 
     protected SelectedFotos getCurrentFoto() {

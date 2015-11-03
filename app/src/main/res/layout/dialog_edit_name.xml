@@ -30,7 +30,7 @@
             android:id="@+id/lblName"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="@string/name"
+            android:text="@string/sort_by_name"
              />
 
         <EditText android:id="@+id/edName"

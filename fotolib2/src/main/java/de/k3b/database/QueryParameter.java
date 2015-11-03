@@ -33,6 +33,18 @@ import java.util.List;
  * Created by k3b on 04.06.2015.
  */
 public class QueryParameter {
+    /** added to every serialized item if != null. Example "Generated on 2015-10-19 with myApp Version 0815." */
+    public static String sParserComment = null;
+
+    /** added to parsed Query if it does not contain table-uris belonging to the "FROM"  keyword */
+    public static String sParserDefaultFrom = null;
+
+    /** added to parsed Query if it does not contain the "QUERY-TYPE-ID"  keyword */
+    public static int sParserDefaultQueryTypeId = 0;
+
+    /** added to parsed Query if it does not contain fields belonging to the "SELECT"  keyword */
+    public static List<String> sParserDefaultSelect = null;
+
     // the members are protected to allow serialisation via android specific Parcles
     protected int mID = 0;
     protected final List<String> mColumns = new ArrayList<String>();
@@ -43,9 +55,13 @@ public class QueryParameter {
     protected final List<String> mOrderBy = new ArrayList<String>();
     protected final List<String> mParameters = new ArrayList<String>();
     protected final List<String> mHavingParameters = new ArrayList<String>();
-    protected String mCurrentSelection = null;
+    // protected String mCurrentSelection = null;
 
     public QueryParameter() {
+    }
+
+    public QueryParameter(QueryParameter src) {
+        getFrom(src);
     }
 
     /** replace all local settings from src */
@@ -104,6 +120,52 @@ public class QueryParameter {
     public QueryParameter addWhere(String where, String... parameters) {
         mWhere.add(where);
         return addToList(mParameters, true, parameters);
+    }
+
+    public String[] getWhereParameter(String sqlExprWithParameters, boolean remove) {
+        return getExpresionParameter(sqlExprWithParameters, mWhere, mParameters, remove);
+    }
+
+    static String[] getExpresionParameter(String sqlExprWithParameters, List<String> expressions, List<String> parameters, boolean remove) {
+        if ((sqlExprWithParameters != null) && (expressions != null) && (parameters != null)) {
+            int paramNo = 0;
+            for (String p : expressions) {
+                int paramCount = getParamCount(p, parameters);
+                if (sqlExprWithParameters.equalsIgnoreCase(p)) {
+                    String[] result = new String[paramCount];
+
+                    int sourceIndex = paramNo;
+                    for (int i=0; i < paramCount; i++) {
+                        result[i] = (sourceIndex < parameters.size()) ? parameters.get(sourceIndex) : null;
+                        sourceIndex++;
+                    }
+
+                    if (remove) {
+                        for (int i=0; i < paramCount; i++) {
+                            if (parameters.size() > paramNo) {
+                                parameters.remove(paramNo);
+                            }
+                        }
+                        expressions.remove(p);
+                    }
+                    return result;
+                }
+
+                paramNo += paramCount;
+            }
+        }
+        return null;
+    }
+
+    /** counts how many "?" are inside sqlWhereWithParameters */
+    private static int getParamCount(String sqlWhereWithParameters, List<String> parameters) {
+        int result = 0;
+        int last = sqlWhereWithParameters.indexOf("?");
+        while (last >= 0) {
+            result++;
+            last = sqlWhereWithParameters.indexOf("?", last + 1);
+        }
+        return result;
     }
 
     /** android content-queries do not support GROUP BY.
@@ -165,6 +227,112 @@ public class QueryParameter {
     }
 
     /************************** end properties *********************/
+    public String toReParseableString() {
+        StringBuilder result = new StringBuilder();
+        if (sParserComment != null) result.append("# ").append(sParserComment).append("\n");
+        Helper.append(result, "\nFROM ", mFrom, "", "\n\t", "");
+        if (mID != 0) result.append("\n\tQUERY-TYPE-ID\n\t\t").append(mID);
+        Helper.append(result, "\nSELECT ", mColumns, "", "\n\t", "");
+        Helper.append(result, "\nWHERE ", mWhere, "", "\n\t", "");
+        Helper.append(result, "\n\tWHERE-PARAMETERS ", mParameters, "", "\n\t\t", "");
+        Helper.append(result, "\nGROUP-BY ", mGroupBy, "", "\n\t", "");
+        Helper.append(result, "\nHAVING ", mHaving, "", "\n\t", "");
+        Helper.append(result, "\n\tHAVING-PARAMETERS ", mHavingParameters, "", "\n\t\t", "");
+        Helper.append(result, "\nORDER-BY ", mOrderBy, "", "\n\t", "");
+
+        // protected String mCurrentSelection = null;
+
+        if (result.length() == 0) return null;
+
+        return result.toString();
+    }
+
+    private static final String PARSER_KEYWORDS = ";FROM;QUERY-TYPE-ID;SELECT;WHERE;WHERE-PARAMETERS;GROUP-BY;HAVING;HAVING-PARAMETERS;ORDER-BY;";
+
+    public static QueryParameter parse(String stringToBeParsed) {
+        List<QueryParameter> result = (stringToBeParsed != null) ? parseMultible(stringToBeParsed) : null;
+        if (result == null) return null;
+        return result.get(0);
+    }
+
+    public static List<QueryParameter> parseMultible(String stringToBeParsed) {
+        List<QueryParameter> result = new ArrayList<QueryParameter>();
+        QueryParameter currentParseItem = null;
+
+        List<String> params = null;
+
+        String[] lines = stringToBeParsed.split("\n");
+        int i = 0;
+        String line = null;
+        while(i < lines.length) {
+            line = lines[i++].trim();
+            if (isKeyword(line)) {
+                final String keyword = line.toUpperCase();
+
+                if (keyword.compareTo("FROM") == 0) {
+                    // next "FROM" occured. finish previos query if available
+                    fixQuery(currentParseItem);
+                    currentParseItem = null;
+                }
+
+                // a keyword has occured: now there is a current-query
+                if (currentParseItem == null) {
+                    currentParseItem = new QueryParameter();
+                    result.add(currentParseItem);
+                }
+                switch (keyword)
+                {
+                    case "QUERY-TYPE-ID":
+                        line = (i < lines.length) ? lines[i].trim() : "0";
+                        if (!isKeyword(line)) {
+                            i++;
+                            currentParseItem.setID(Integer.parseInt(line));
+                        }
+                        continue;
+
+                    case "FROM": params = currentParseItem.mFrom; break;
+                    case "SELECT": params = currentParseItem.mColumns; break;
+                    case "WHERE": params = currentParseItem.mWhere; break;
+                    case "WHERE-PARAMETERS": params = currentParseItem.mParameters; break;
+                    case "GROUP-BY": params = currentParseItem.mGroupBy; break;
+                    case "HAVING": params = currentParseItem.mHaving; break;
+                    case "HAVING-PARAMETERS": params = currentParseItem.mHavingParameters; break;
+                    case "ORDER-BY": params = currentParseItem.mOrderBy; break;
+                }
+            } else if ((params != null) && (isNoComment(line)) && (line.trim().length() > 0)) {
+                params.add(line);
+            }
+        }
+
+        if (result.size() > 0) {
+            // make shure that last query has been fixed.
+            fixQuery(currentParseItem);
+
+            return result;
+        }
+
+        // indicate nothing found
+        return null;
+    }
+
+    private static void fixQuery(QueryParameter current) {
+        if (current != null) {
+            // default values if not found in sql-string
+            if ((current.getID() == 0)) current.setID(QueryParameter.sParserDefaultQueryTypeId);
+            if ((current.mFrom.size() == 0) && (QueryParameter.sParserDefaultFrom != null)) current.mFrom.add(QueryParameter.sParserDefaultFrom);
+            if ((current.mColumns.size() == 0) && (QueryParameter.sParserDefaultSelect != null)) current.mColumns.addAll(QueryParameter.sParserDefaultSelect);
+        }
+    }
+
+    private static boolean isNoComment(String line) {
+        return ((line != null) && !line.startsWith("#") && !line.startsWith("//") && !line.startsWith("--") );
+    }
+
+    private static boolean isKeyword(String line) {
+        line = (line != null) ? (";" + line.trim().toUpperCase() + ";") : null;
+        return ((line != null) && (PARSER_KEYWORDS.indexOf(line) >= 0));
+    }
+
     public String toSqlString() {
         StringBuilder result = new StringBuilder();
         Helper.append(result, " SELECT ", mColumns, ", ", "", "");
@@ -318,6 +486,7 @@ public class QueryParameter {
         return this;
     }
 
+    /*
     public String getCurrentSelection() {
         return mCurrentSelection;
     }
@@ -326,6 +495,7 @@ public class QueryParameter {
         this.mCurrentSelection = value;
         return this;
     }
+    */
 }
 
 

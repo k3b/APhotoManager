@@ -20,14 +20,10 @@
 package de.k3b.android.androFotoFinder.imagedetail;
 
 import android.app.Activity;
-import android.app.LoaderManager;
-import android.content.CursorLoader;
-import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.view.PagerAdapter;
 import android.util.Log;
@@ -39,9 +35,8 @@ import java.io.File;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
-import de.k3b.android.androFotoFinder.queries.Queryable;
 import de.k3b.android.util.GarbageCollector;
+import de.k3b.database.QueryParameter;
 import uk.co.senab.photoview.PhotoView;
 
 /**
@@ -50,11 +45,7 @@ import uk.co.senab.photoview.PhotoView;
  * Translates between position in ViewPager and content page content with image
  * Created by k3b on 04.07.2015.
  */
-public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Queryable {
-
-    // Identifies a particular Loader or a LoaderManager being used in this component
-    private static int MY_LOADER_ID = 0;
-
+public class ImagePagerAdapterFromCursor extends PagerAdapter  {
     // debug support
     private static int id = 0;
     private final String debugPrefix;
@@ -64,11 +55,11 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
     // workaround because setEllipsize(TextUtils.TruncateAt.MIDDLE) is not possible for title
     private final int mMaxTitleLength;
 
-    private QueryParameterParcelable mParameters; // defining sql to get data
+    private QueryParameter mParameters; // defining sql to get data
     private Cursor mCursor = null; // the content of the page
     private boolean mDataValid = true;
 
-    public ImagePagerAdapterFromCursor(final Activity context, QueryParameterParcelable parameters, String name) {
+    public ImagePagerAdapterFromCursor(final Activity context, String name) {
         mActivity = context;
         debugPrefix = "ImagePagerAdapterFromCursor#" + (id++) + "@" + name + " ";
         Global.debugMemory(debugPrefix, "ctor");
@@ -77,107 +68,10 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, debugPrefix + "()");
         }
-
-        if (parameters != null) {
-            requery(context, parameters);
-        }
     }
 
     /**
-     * Interface Queryable:
-     * Initiates a database requery in a background thread. onLoadFinished() is called when done.
-     */
-    @Override
-    public void requery(final Activity context, QueryParameterParcelable parameters) {
-        this.mParameters = parameters;
-        if (Global.debugEnabledSql) {
-            Log.i(Global.LOG_CONTEXT, debugPrefix + "requery " + ((parameters != null) ? parameters.toSqlString() : null));
-        }
-
-        requery(context, parameters.toColumns(), parameters.toFrom(), parameters.toAndroidWhere(), parameters.toOrderBy(), parameters.toAndroidParameters());
-    }
-
-    /**
-     * Initiates a database requery in a background thread. onLoadFinished() is called when done.
-     */
-    private void requery(final Activity context, final String[] sqlProjection, final String from, final String sqlWhereStatement, final String sqlSortOrder, final String... sqlWhereParameters) {
-
-        /*
-         * Initializes the CursorLoader. The MY_LOADER_ID value is eventually passed
-         * to onCreateLoader().
-         */
-
-        if (SYNC) {
-            // for debugging
-            Cursor result = context.getContentResolver().query(Uri.parse(from), // Table to query
-                    sqlProjection,             // Projection to return
-                    sqlWhereStatement,        // No selection clause
-                    sqlWhereParameters,       // No selection arguments
-                    sqlSortOrder              // Default sort order
-            );
-            onLoadFinished(result);
-        } else {
-            final int currentLoaderId = ++MY_LOADER_ID;
-            context.getLoaderManager().initLoader(currentLoaderId, null, new LoaderManager.LoaderCallbacks<Cursor>() {
-
-                @Override
-                public Loader<Cursor> onCreateLoader(int loaderID, Bundle args) {
-                    if (loaderID == currentLoaderId) {
-                        // Returns a new CursorLoader
-                        return new CursorLoader(
-                                context,   // Parent activity context
-                                Uri.parse(from), // Table to query
-                                sqlProjection,             // Projection to return
-                                sqlWhereStatement,        // No selection clause
-                                sqlWhereParameters,       // No selection arguments
-                                sqlSortOrder              // Default sort order
-                        );
-                    }
-                    return null;
-                }
-
-                @Override
-                public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-                    ImagePagerAdapterFromCursor.this.onLoadFinished(cursor);
-                }
-
-                @Override
-                public void onLoaderReset(Loader<Cursor> loader) {
-                    ImagePagerAdapterFromCursor.this.onLoadFinished(null);
-                }
-            });
-        }
-    }
-
-    /** is called in gui thread when backgroud-threat loading has finished */
-    private void onLoadFinished(Cursor cursor) {
-        int resultCount = (cursor == null) ? 0 : cursor.getCount();
-        if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, debugPrefix + "onLoadFinished() requery rows found: " + resultCount + " in " + cursor + " " +
-                    debugCursor(cursor, 10, " + ", FotoSql.SQL_COL_DISPLAY_TEXT));
-        }
-
-        changeCursor(cursor);
-        notifyDataSetChanged();
-
-    }
-
-    /**
-     * Change the underlying cursor to a new cursor. If there is an existing cursor it will be
-     * closed.
-     *
-     * @param cursor The new cursor to be used
-     */
-    private void changeCursor(Cursor cursor) {
-        Cursor old = swapCursor(cursor);
-        if (old != null) {
-            old.close();
-        }
-    }
-
-    /**
-     * Swap in a new Cursor, returning the old Cursor.  Unlike
-     * {@link #changeCursor(Cursor)}, the returned old Cursor is <em>not</em>
+     * Swap in a new Cursor, returning the old Cursor.  Unlike the returned old Cursor is <em>not</em>
      * closed.
      *
      * @param newCursor The new cursor to be used.
@@ -185,7 +79,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
      * If the given new Cursor is the same instance is the previously set
      * Cursor, null is also returned.
      */
-    private Cursor swapCursor(Cursor newCursor) {
+    public Cursor swapCursor(Cursor newCursor) {
         if (newCursor == mCursor) {
             return null;
         }
@@ -302,17 +196,6 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
             container.addView(photoView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
             return photoView;
-
-            /*
-            LinearLayout llImage = (LinearLayout) getLayoutInflater().inflate(R.layout.view_pager_item, null);
-
-            SubsamplingScaleImageView draweeView = (SubsamplingScaleImageView) llImage.getChildAt(0);
-            draweeView.setImage(ImageSource.uri(images.get(position)));
-
-            container.addView(llImage, 0);
-
-            return llImage;
-        */
         }
         return null;
     }
@@ -353,6 +236,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
                 new BitmapFactory.Options());
         photoView.setImageBitmap(thumbnail);
         photoView.setMaximumScale(20);
+        photoView.setMediumScale(5);
     }
 
     /** converts imageID to content-uri */
@@ -408,5 +292,4 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  implements Querya
         super.setPrimaryItem(container, position, object);
         this.mActivity.setTitle(this.getPageTitle(position));
     }
-
 }

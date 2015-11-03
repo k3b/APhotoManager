@@ -57,6 +57,9 @@ public class DirectoryNavigator implements IExpandableListViewNavigation<IDirect
 
     @Override
     public int getChildrenCount(int groupIndex) {
+        if ((groupIndex < 0) || (groupIndex >= getGroupCount())) {
+            return 0;
+        }
         IDirectory group = getGroup(groupIndex);
         return Directory.getChildCount(group);
     }

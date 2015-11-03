@@ -29,7 +29,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
+import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
 
 /**
@@ -54,7 +54,7 @@ public class SelectedFotos extends SelectedItems implements Serializable {
         if (!isEmpty()) {
             ArrayList<String> result = new ArrayList<>();
 
-            QueryParameterParcelable parameters = new QueryParameterParcelable(FotoSql.queryDetail);
+            QueryParameter parameters = new QueryParameter(FotoSql.queryDetail);
             FotoSql.setWhereSelection(parameters, this);
 
             Cursor cursor = null;

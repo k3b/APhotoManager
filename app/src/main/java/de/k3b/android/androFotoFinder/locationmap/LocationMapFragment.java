@@ -19,7 +19,6 @@
  
 package de.k3b.android.androFotoFinder.locationmap;
 
-
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.SharedPreferences;
@@ -43,7 +42,6 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.SeekBar;
 
-
 import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.*;
 import org.osmdroid.events.MapListener;
@@ -63,18 +61,19 @@ import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
 import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
 import de.k3b.android.osmdroid.FolderOverlay;
 import de.k3b.android.osmdroid.GuestureOverlay;
 import de.k3b.android.osmdroid.IconOverlay;
 import de.k3b.android.osmdroid.MarkerBase;
 import de.k3b.android.osmdroid.ZoomUtil;
+import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
+import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
 
 /**
@@ -96,6 +95,9 @@ public class LocationMapFragment extends DialogFragment {
     private SeekBar mZoomBar;
     private ImageView mImage;
     private DefaultResourceProxyImplEx mResourceProxy;
+
+    /** temporary 1x1 pix view where popup-menu is attached to */
+    private View tempPopupMenuParentView = null;
 
     /** contain the markers with itmen-count that gets recalculated on every map move/zoom */
     private FolderOverlay mFolderOverlaySummaryMarker;
@@ -120,7 +122,7 @@ public class LocationMapFragment extends DialogFragment {
     private int mDelayedZoomLevel = NO_ZOOM;
     private boolean mIsInitialized = false;
 
-    private GalleryFilterParameter mRootFilter;
+    private IGalleryFilter mRootFilter;
 
     public LocationMapFragment() {
         // Required empty public constructor
@@ -398,7 +400,7 @@ public class LocationMapFragment extends DialogFragment {
         return result;
     }
 
-    public void defineNavigation(GalleryFilterParameter rootFilter, GeoRectangle rectangle, int zoomlevel, SelectedItems selectedItems) {
+    public void defineNavigation(IGalleryFilter rootFilter, GeoRectangle rectangle, int zoomlevel, SelectedItems selectedItems) {
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + "defineNavigation: " + rectangle + ";z=" + zoomlevel);
         }
@@ -498,11 +500,11 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     private void reloadSummaryMarker(BoundingBoxE6 latLonArea, double groupingFactor, List<Overlay> oldItems) {
-        QueryParameterParcelable query = FotoSql.getQueryGroupByPlace(groupingFactor);
+        QueryParameter query = FotoSql.getQueryGroupByPlace(groupingFactor);
         query.clearWhere();
 
         if (this.mRootFilter != null) {
-            FotoSql.setWhereFilter(query, this.mRootFilter);
+            FotoSql.setWhereFilter(query, this.mRootFilter, true);
         }
 
         // delta: make the grouping area a little bit bigger than the viewport
@@ -756,7 +758,7 @@ public class LocationMapFragment extends DialogFragment {
 
             List<Overlay> oldItems = mFolderOverlaySelectionMarker.getItems();
 
-            QueryParameterParcelable query = new QueryParameterParcelable(FotoSql.queryGps);
+            QueryParameter query = new QueryParameter(FotoSql.queryGps);
             FotoSql.setWhereSelection(query, mSelectedItems);
             FotoSql.addWhereLatLonNotNull(query);
 
@@ -806,13 +808,17 @@ public class LocationMapFragment extends DialogFragment {
     protected   boolean showContextMenu(final View parent, final int markerId,
                                         final IGeoPoint geoPosition, final Object markerData) {
         MenuInflater inflater = getActivity().getMenuInflater();
-        PopupMenu menu = new PopupMenu(getActivity(), this.mImage);
+        mMapView.removeView(tempPopupMenuParentView);
+
+        PopupMenu menu = new PopupMenu(getActivity(), createTempPopupParentMenuView(new GeoPoint(geoPosition.getLatitudeE6(), geoPosition.getLongitudeE6())));
 
         inflater.inflate(R.menu.menu_map_context, menu.getMenu());
 
         menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
+                mMapView.removeView(tempPopupMenuParentView);
+
                 switch (item.getItemId()) {
                     case R.id.cmd_gallery:
                         return showGallery(getiGeoPointById(markerId, geoPosition));
@@ -827,9 +833,23 @@ public class LocationMapFragment extends DialogFragment {
         return true;
     }
 
+    // inspired by org.osmdroid.bonuspack.overlays.InfoWindow
+    private View createTempPopupParentMenuView(GeoPoint position) {
+        if (tempPopupMenuParentView != null) mMapView.removeView(tempPopupMenuParentView);
+        tempPopupMenuParentView = new View(getActivity());
+        MapView.LayoutParams lp = new MapView.LayoutParams(
+                1,
+                1,
+                position, MapView.LayoutParams.CENTER,
+                0, 0);
+        tempPopupMenuParentView.setVisibility(View.VISIBLE);
+        mMapView.addView(tempPopupMenuParentView, lp);
+        return tempPopupMenuParentView;
+    }
+
     private boolean showGallery(IGeoPoint geoPosition) {
         GalleryFilterParameter filter = getMarkerFilter(geoPosition);
-        FotoGalleryActivity.showActivity(this.getActivity(), filter, 0);
+        FotoGalleryActivity.showActivity(this.getActivity(), filter, null, 0);
         return true;
     }
 

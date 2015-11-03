@@ -24,22 +24,23 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import java.io.File;
-import java.util.Map;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
 import de.k3b.io.IDirectory;
+import de.k3b.io.OSDirectory;
 
 /**
  * Api to manipulate files/photos.
@@ -49,6 +50,7 @@ import de.k3b.io.IDirectory;
  */
 public class AndroidFileCommands extends FileCommands {
     private static final String SETTINGS_KEY_LAST_COPY_TO_PATH = "last_copy_to_path";
+    private static final String mDebugPrefix = "AndroidFileCommands.";
     private Activity mContext;
     private AlertDialog mActiveAlert = null;
 
@@ -75,18 +77,43 @@ public class AndroidFileCommands extends FileCommands {
         return zipfile;
     }
 
-    /** called for each modified/deleted file */
+    /** called before copy/move/rename/delete */
     @Override
-    protected void onPostProcess(String[] paths, int modifyCount, int itemCount, int opCode) {
-        super.onPostProcess(paths, modifyCount, itemCount, opCode);
-
-        if (opCode != OP_DELETE) {
-            updateMediaDatabase(opCode, paths);
+    protected void onPreProcess(String what, String[] oldPathNames, String[] newPathNames, int opCode) {
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onPreProcess('" + what + "')");
         }
+        super.onPreProcess(what, oldPathNames, newPathNames, opCode);
     }
 
-    public void updateMediaDatabase(int opCode, String... pathNames) {
-        MediaScanner.updateMediaDBInBackground(mContext, pathNames);
+    /** called for each modified/deleted file */
+    @Override
+    protected void onPostProcess(String what, String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix
+                    + " onPostProcess('" + what + "') => " + modifyCount + "/" + itemCount);
+        }
+        super.onPostProcess(what, oldPathNames, newPathNames, modifyCount, itemCount, opCode);
+
+        int resId = getResourceId(opCode);
+        String message = mContext.getString(resId, Integer.valueOf(modifyCount), Integer.valueOf(itemCount));
+        if (itemCount > 0) {
+            MediaScanner.updateMediaDBInBackground(mContext, message, oldPathNames, newPathNames);
+        }
+
+        Toast.makeText(mContext, message, Toast.LENGTH_LONG).show();
+    }
+
+    private int getResourceId(int opCode) {
+        switch (opCode) {
+            case OP_COPY: return R.string.format_copy_result;
+            case OP_MOVE: return R.string.format_move_result;
+            case OP_DELETE: return R.string.format_delete_result;
+            case OP_RENAME: return R.string.format_rename_result;
+            case OP_UPDATE: return R.string.format_update_result;
+        }
+        return 0;
+
     }
 
     public boolean onOptionsItemSelected(final MenuItem item, final SelectedFotos selectedFileNames) {
@@ -101,11 +128,7 @@ public class AndroidFileCommands extends FileCommands {
     }
 
     public boolean rename(Long fileId, File dest, File src) {
-        int result = moveOrCopyFiles(true, new File[]{dest}, new File[]{src});
-        if ((fileId != null) && (!osFileExists(src))) {
-            onMediaDeleted(src.getAbsolutePath(), fileId);
-        }
-
+        int result = moveOrCopyFiles(true, "rename", new File[]{dest}, new File[]{src});
         return (result != 0);
     }
 
@@ -116,19 +139,7 @@ public class AndroidFileCommands extends FileCommands {
             File destDirFolder = new File(copyToPath);
 
             String[] selectedFileNames = srcFotos.getFileNames(mContext);
-            Long[] ids = (move) ? srcFotos.getIds() : null;
             moveOrCopyFilesTo(move, destDirFolder, SelectedFotos.getFiles(selectedFileNames));
-
-            if (move) {
-                // remove from media database after successfull move
-                File[] sourceFiles = SelectedFotos.getFiles(selectedFileNames);
-                for (int i = 0; i < sourceFiles.length; i++) {
-                    File sourceFile = sourceFiles[i];
-                    if (!osFileExists(sourceFile)) {
-                        onMediaDeleted(sourceFile.getAbsolutePath(), ids[i]);
-                    }
-                }
-            }
         }
     }
 
@@ -190,24 +201,67 @@ public class AndroidFileCommands extends FileCommands {
     }
 
     private int deleteFiles(SelectedFotos fotos) {
-        int result = 0;
         String[] fileNames = fotos.getFileNames(mContext);
-        openLogfile();
-        File[] toBeDeleted = SelectedFotos.getFiles(fileNames);
-        Long[] ids = fotos.getIds();
+        return super.deleteFiles(fileNames);
+    }
 
-        for (int i = 0; i < ids.length; i++) {
-            File file = toBeDeleted[i];
-            if (deleteFileWitSidecar(file)) {
-                onMediaDeleted(file.getAbsolutePath(), ids[i]);
-                result++;
-            }
+    public boolean cmdMediaScannerWithQuestion() {
+        final RecursiveMediaScanner scanner = RecursiveMediaScanner.sScanner;
+
+        if (scanner != null) {
+            // connect gui to already running scanner if possible
+            scanner.resumeIfNeccessary(); // if paused resume it.
+            showMediaScannerStatus(scanner);
+            return true;
+        } else if (AndroidFileCommands.canProcessFile(mContext)) {
+            // show dialog to get start parameter
+            DirectoryPickerFragment destDir = new DirectoryPickerFragment() {
+                /** do not use activity callback */
+                @Override protected void setDirectoryListener(Activity activity) {}
+
+                @Override
+                protected void onDirectoryPick(IDirectory selection) {
+                    dismiss();
+                    if (selection != null) {
+                        onMediaScannerAnswer(selection.getAbsolute());
+                    }
+                }
+            };
+
+            destDir.setTitleId(R.string.title_scanner_dir);
+            destDir.defineDirectoryNavigation(new OSDirectory("/", null),
+                    FotoSql.QUERY_TYPE_UNDEFINED,
+                    getLastCopyToPath());
+            destDir.setContextMenuId(R.menu.menu_context_osdir);
+            destDir.show(mContext.getFragmentManager(), "scannerPick");
+
+            return true;
         }
+        return false;
+    }
 
-        closeLogFile();
-        onPostProcess(fileNames, result, ids.length, OP_DELETE);
+    /** answer from "which directory to start scanner from"? */
+    private void onMediaScannerAnswer(String scanRootDir) {
+        if  ((AndroidFileCommands.canProcessFile(mContext)) || (RecursiveMediaScanner.sScanner == null)){
+            final String message = mContext.getString(R.string.title_start_scanner);
+            final RecursiveMediaScanner scanner = (RecursiveMediaScanner.sScanner != null)
+                    ? RecursiveMediaScanner.sScanner :
+                    new RecursiveMediaScanner(mContext, message);
+            synchronized (scanner) {
+                if (RecursiveMediaScanner.sScanner == null) {
+                    RecursiveMediaScanner.sScanner = scanner;
+                    scanner.execute(new String[]{scanRootDir});
+                } // else scanner is already running
+            }
 
-        return result;
+            showMediaScannerStatus(RecursiveMediaScanner.sScanner);
+        }
+    }
+
+    private void showMediaScannerStatus(RecursiveMediaScanner mediaScanner) {
+        if (mediaScanner != null) {
+            mediaScanner.showStatusDialog(mContext);
+        }
     }
 
     /**
@@ -253,13 +307,6 @@ public class AndroidFileCommands extends FileCommands {
     protected void onProgress(int itemcount, int size) {
     }
 
-    private void onMediaDeleted(String absolutePath, Long id) {
-        Uri uri = SelectedFotos.getUri(id);
-        mContext.getContentResolver().delete(uri, null, null);
-        log("rem deleted ", getFilenameForLog(absolutePath),
-                " as content: ", uri.toString());
-    }
-
     public AndroidFileCommands setContext(Activity mContext) {
         this.mContext = mContext;
         if (mContext != null) {
@@ -285,10 +332,14 @@ public class AndroidFileCommands extends FileCommands {
     }
 
     public static boolean canProcessFile(Context context) {
-        if (!Global.mustCheckMediaScannerRunning) return true; // always allowed
+        if (!Global.mustCheckMediaScannerRunning) return true; // always allowed. DANGEROUS !!!
 
         if (MediaScanner.isScannerActive(context.getContentResolver())) {
             Toast.makeText(context, R.string.cannot_change_if_scanner_active, Toast.LENGTH_LONG).show();
+            return false;
+        }
+
+        if (RecursiveMediaScanner.getBusyScanner() != null) {
             return false;
         }
         return true;

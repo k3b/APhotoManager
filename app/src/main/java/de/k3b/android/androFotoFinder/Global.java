@@ -19,7 +19,10 @@
  
 package de.k3b.android.androFotoFinder;
 
+import android.os.Environment;
 import android.util.Log;
+
+import java.io.File;
 
 /**
  * Global Settings
@@ -45,6 +48,8 @@ public class Global {
 
     /** true update only if media scanner is not running. false=risky=always allow.  */
     public static boolean mustCheckMediaScannerRunning = true;
+    public static File reportDir = new File(Environment.getExternalStorageDirectory(), "databases/sql");
+    public static String reportExt = ".query";
 
     public static void debugMemory(String modul, String message) {
         if (false && Global.debugEnabled) {

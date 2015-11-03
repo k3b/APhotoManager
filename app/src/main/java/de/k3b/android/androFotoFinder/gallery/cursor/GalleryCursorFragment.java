@@ -20,12 +20,15 @@
 package de.k3b.android.androFotoFinder.gallery.cursor;
 
 import android.app.Activity;
+import android.app.LoaderManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
-import android.database.DataSetObserver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -48,13 +51,14 @@ import java.util.Iterator;
 import java.util.List;
 
 import de.k3b.android.androFotoFinder.Common;
+import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.directory.DirectoryGui;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
+import de.k3b.android.androFotoFinder.imagedetail.ImageDetailDialogBuilder;
 import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
-import de.k3b.android.androFotoFinder.queries.QueryParameterParcelable;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.OnGalleryInteractionListener;
@@ -63,6 +67,7 @@ import de.k3b.android.androFotoFinder.queries.SqlJobTaskBase;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.SelectedFotos;
+import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
 import de.k3b.io.Directory;
@@ -82,35 +87,38 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private static final String INSTANCE_STATE_SELECTED_ITEM_IDS = "selectedItems";
     private static final String INSTANCE_STATE_OLD_TITLE = "oldTitle";
     private static final String INSTANCE_STATE_SEL_ONLY = "selectedOnly";
+    private static final String INSTANCE_STATE_LOADER_ID = "loaderID";
 
-    private HorizontalScrollView parentPathBarScroller;
-    private LinearLayout parentPathBar;
+    private static int nextLoaderID = 100;
+    private int loaderID = -1;
 
-    private HorizontalScrollView childPathBarScroller;
-    private LinearLayout childPathBar;
+    private HorizontalScrollView mParentPathBarScroller;
+    private LinearLayout mParentPathBar;
+
+    private HorizontalScrollView mChildPathBarScroller;
+    private LinearLayout mChildPathBar;
 
     // for debugging
     private static int id = 1;
-    private final String debugPrefix;
+    private String mDebugPrefix;
 
-    private GridView galleryView;
+    private GridView mGalleryView;
 
     private ShareActionProvider mShareActionProvider;
     private MenuItem mShareOnlyToggle;
-    private GalleryCursorAdapter galleryAdapter = null;
+    private GalleryCursorAdapter mAdapter = null;
 
     private OnGalleryInteractionListener mGalleryListener;
-    private QueryParameterParcelable mGalleryContentQuery;
+    private QueryParameter mGalleryContentQuery;
 
     private DirectoryPickerFragment.OnDirectoryInteractionListener mDirectoryListener;
     private int mLastVisiblePosition = -1;
-    private int mInitialPositionY = 0;
 
     // multi selection support
     private final SelectedFotos mSelectedItems = new SelectedFotos();
     private String mOldTitle = null;
     private boolean mShowSelectedOnly = false;
-    private final AndroidFileCommands mFileCommands = new GalleryFileCommands();
+    private final AndroidFileCommands mFileCommands = new LocalFileCommands();
     private MenuItem mMenuRemoveAllSelected = null;
 
     /* false: prevent showing error message again */
@@ -135,62 +143,142 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         return mSelectedItems;
     }
 
-    class GalleryFileCommands extends AndroidFileCommands {
-        /*
+    class LocalCursorLoader implements LoaderManager.LoaderCallbacks<Cursor> {
+        /** incremented every time a new curster/query is generated */
+        private int mRequeryInstanceCount = 0;
+
+        /** called by LoaderManager.getLoader(ACTIVITY_ID) to (re)create loader
+         * that attaches to last query/cursor if it still exist i.e. after rotation */
         @Override
-        public void deleteFiles(String... paths) {
-            super.deleteFiles(paths);
-            if (Global.clearSelectionAfterCommand) {
-                mShowSelectedOnly = true;
-                multiSelectionCancel();
+        public Loader<Cursor> onCreateLoader(int aLoaderID, Bundle bundle) {
+            if (loaderID == aLoaderID) {
+                QueryParameter query = getCurrentQuery();
+                mRequeryInstanceCount++;
+                if (Global.debugEnabledSql) {
+                    Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onCreateLoader"
+                            + getDebugContext() +
+                            " : query = " + query);
+                }
+                return FotoSql.createCursorLoader(getActivity().getApplicationContext(), query);
             }
+
+            // An invalid id was passed in
+            return null;
         }
-        */
+
+        /** called after media db content has changed */
+        @Override
+        public void onLoadFinished(Loader<Cursor> _loader, Cursor data) {
+            mLastVisiblePosition = mGalleryView.getLastVisiblePosition();
+
+            final Activity context = getActivity();
+            if (data == null) {
+                FotoSql.CursorLoaderWithException loader = (FotoSql.CursorLoaderWithException) _loader;
+                String title;
+                String message = context.getString(R.string.err_sql_message, loader.getException().getMessage(), loader.getQuery().toSqlString());
+                if (loader.getException() != null) {
+                    if (0 != loader.getQuery().toSqlString().compareTo(getCurrentQuery(FotoSql.queryDetail).toSqlString())) {
+                        // query is not default query. revert to default query
+                        mGalleryContentQuery = FotoSql.queryDetail;
+                        requery("requery after query-errror");
+                        title = context.getString(R.string.err_sql_title_reload);
+                    } else {
+                        title = context.getString(R.string.err_system);
+                        context.finish();
+                    }
+                    Dialogs.messagebox(context, title, message);
+                    return;
+                }
+            }
+
+            // do change the data
+            mAdapter.swapCursor(data);
+
+            if (mLastVisiblePosition > 0) {
+                mGalleryView.smoothScrollToPosition(mLastVisiblePosition);
+                mLastVisiblePosition = -1;
+            }
+
+            final int resultCount = (data == null) ? 0 : data.getCount();
+            if (Global.debugEnabled) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onLoadFinished"
+                        + getDebugContext() +
+                        " fount " + resultCount + " rows");
+            }
+
+            // do change the data
+            mAdapter.notifyDataSetChanged();
+
+            if (mLastVisiblePosition > 0) {
+                mGalleryView.smoothScrollToPosition(mLastVisiblePosition);
+                mLastVisiblePosition = -1;
+            }
+
+            // show the changes
+
+            if (context instanceof OnGalleryInteractionListener) {
+                ((OnGalleryInteractionListener) context).setResultCount(resultCount);;
+            }
+            multiSelectionReplaceTitleIfNecessary();
+        }
+
+        /** called by LoaderManager. after search criteria were changed or if activity is destroyed. */
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+            if (Global.debugEnabled) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onLoaderReset" + getDebugContext());
+            }
+            // rember position where we have to scroll to after reload is finished.
+            mLastVisiblePosition = mGalleryView.getLastVisiblePosition();
+
+            mAdapter.swapCursor(null);
+            mAdapter.notifyDataSetChanged();
+        }
+
+        @NonNull
+        String getDebugContext() {
+            return "(@" + loaderID + ", #" + mRequeryInstanceCount +
+                    ", LastVisiblePosition=" + mLastVisiblePosition +
+//                    ",  Path='" + mInitialFilePath +
+                    "')";
+        }
+    }
+
+    LocalCursorLoader mCurorLoader = null;
+
+    class LocalFileCommands extends AndroidFileCommands {
 
         @Override
-        protected void onPostProcess(String[] paths, int modifyCount, int itemCount, int opCode) {
-            super.onPostProcess(paths, modifyCount, itemCount, opCode);
+        protected void onPostProcess(String what, String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
+            Context context = getActivity().getApplicationContext();
             if (Global.clearSelectionAfterCommand || (opCode == OP_DELETE) || (opCode == OP_MOVE)) {
                 mShowSelectedOnly = true;
                 multiSelectionCancel();
             }
 
-            int resId = getResourceId(opCode);
-            String message = getString(resId, Integer.valueOf(modifyCount), Integer.valueOf(itemCount));
-            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-            mDirectoryListener.invalidateDirectories();
-        }
-
-        private int getResourceId(int opCode) {
-            switch (opCode) {
-                case OP_COPY: return R.string.format_copy_result;
-                case OP_MOVE: return R.string.format_move_result;
-                case OP_DELETE: return R.string.format_delete_result;
-                case OP_RENAME: return R.string.format_rename_result;
-                case OP_UPDATE: return R.string.format_update_result;
-            }
-            return 0;
+            super.onPostProcess(what, oldPathNames, newPathNames, modifyCount, itemCount, opCode);
         }
     }
 
     public GalleryCursorFragment() {
-        debugPrefix = "GalleryCursorFragment#" + (id++)  + " ";
-        Global.debugMemory(debugPrefix, "ctor");
+        mDebugPrefix = "GalleryCursorFragment#" + (id++)  + " ";
+        Global.debugMemory(mDebugPrefix, "ctor");
 
         // Required empty public constructor
         if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, debugPrefix + "()");
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + "()");
         }
     }
 
     /**************** live-cycle ******************/
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Global.debugMemory(debugPrefix, "onCreate");
+        Global.debugMemory(mDebugPrefix, "onCreate");
         setHasOptionsMenu(true);
         this.mShareActionProvider = new ShareActionProvider(this.getActivity());
         if (savedInstanceState != null) {
             this.mLastVisiblePosition = savedInstanceState.getInt(INSTANCE_STATE_LAST_VISIBLE_POSITION, this.mLastVisiblePosition);
+            this.loaderID = savedInstanceState.getInt(INSTANCE_STATE_LOADER_ID, this.loaderID);
             String old = mSelectedItems.toString();
             mSelectedItems.clear();
             mSelectedItems.parse(savedInstanceState.getString(INSTANCE_STATE_SELECTED_ITEM_IDS, old));
@@ -200,6 +288,12 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 mMustReplaceMenue = true;
                 getActivity().invalidateOptionsMenu();
             }
+        } else {
+            // first creation of new instance
+            loaderID = nextLoaderID++;
+        }
+        if (mDebugPrefix.indexOf("@") < 0) {
+            mDebugPrefix += "@" + loaderID + " ";
         }
         super.onCreate(savedInstanceState);
     }
@@ -207,8 +301,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        mLastVisiblePosition = galleryView.getLastVisiblePosition();
+        mLastVisiblePosition = mGalleryView.getLastVisiblePosition();
         outState.putInt(INSTANCE_STATE_LAST_VISIBLE_POSITION, mLastVisiblePosition);
+        outState.putInt(INSTANCE_STATE_LOADER_ID, loaderID);
         outState.putString(INSTANCE_STATE_SELECTED_ITEM_IDS, this.mSelectedItems.toString());
         outState.putString(INSTANCE_STATE_OLD_TITLE, this.mOldTitle);
         outState.putBoolean(INSTANCE_STATE_SEL_ONLY, this.mShowSelectedOnly);
@@ -217,35 +312,17 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Global.debugMemory(debugPrefix, "onCreateView");
+        Global.debugMemory(mDebugPrefix, "onCreateView");
 
         // Inflate the layout for this fragment
         View result = inflater.inflate(R.layout.fragment_gallery, container, false);
-        galleryView = (GridView) result.findViewById(R.id.gridView);
+        mGalleryView = (GridView) result.findViewById(R.id.gridView);
 
-        galleryAdapter = new GalleryCursorAdapter(this.getActivity(), getCurrentQuery(), mSelectedItems, debugPrefix) {
-            protected void onLoadFinished(Cursor cursor, StringBuffer debugMessage) {
-                super.onLoadFinished(cursor, debugMessage);
-                if (cursor != null) {
-                    // do not update on destroy
-                    multiSelectionReplaceTitleIfNecessary();
-                }
-            }
-        };
-        galleryAdapter.registerDataSetObserver(new DataSetObserver() {
-            @Override
-            public void onChanged() {
-                super.onChanged();
-                if (mLastVisiblePosition > 0) {
-                    galleryView.smoothScrollToPosition(mLastVisiblePosition);
-                    mLastVisiblePosition = -1;
-                }
-            }
-        });
-        galleryView.setAdapter(galleryAdapter);
+        mAdapter = new GalleryCursorAdapter(this.getActivity(), mSelectedItems, mDebugPrefix);
+        mGalleryView.setAdapter(mAdapter);
 
-        galleryView.setLongClickable(true);
-        galleryView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        mGalleryView.setLongClickable(true);
+        mGalleryView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View v, int position, long id) {
                 return onGalleryLongImageClick((GalleryCursorAdapter.GridCellViewHolder) v.getTag(), position);
@@ -261,27 +338,29 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             }
         });
 
-        galleryView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mGalleryView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
                 onGalleryImageClick((GalleryCursorAdapter.GridCellViewHolder) v.getTag(), position);
             }
         });
 
-        this.parentPathBar = (LinearLayout) result.findViewById(R.id.parent_owner);
-        this.parentPathBarScroller = (HorizontalScrollView) result.findViewById(R.id.parent_scroller);
+        this.mParentPathBar = (LinearLayout) result.findViewById(R.id.parent_owner);
+        this.mParentPathBarScroller = (HorizontalScrollView) result.findViewById(R.id.parent_scroller);
 
-        this.childPathBar = (LinearLayout) result.findViewById(R.id.child_owner);
-        this.childPathBarScroller = (HorizontalScrollView) result.findViewById(R.id.child_scroller);
+        this.mChildPathBar = (LinearLayout) result.findViewById(R.id.child_owner);
+        this.mChildPathBarScroller = (HorizontalScrollView) result.findViewById(R.id.child_scroller);
 
-        reloadDirGuiIfAvailable();
+        reloadDirGuiIfAvailable("onCreateView");
 
-        findDuplicates();
+        fixMediaDatabase();
+
+        requery("onCreateView");
         return result;
     }
 
     @Override
     public void onAttach(Activity activity) {
-        Global.debugMemory(debugPrefix, "onAttach");
+        Global.debugMemory(mDebugPrefix, "onAttach");
         super.onAttach(activity);
         mFileCommands.setContext(activity);
         mFileCommands.setLogFilePath(mFileCommands.getDefaultLogFile());
@@ -303,7 +382,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     @Override
     public void onDetach() {
-        Global.debugMemory(debugPrefix, "onDetach");
+        Global.debugMemory(mDebugPrefix, "onDetach");
         super.onDetach();
         mGalleryListener = null;
         mDirectoryListener = null;
@@ -312,76 +391,113 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        destroyLoaderIfFinishing("onPause");
+    }
+
+    @Override
     public void onDestroy() {
-        Global.debugMemory(debugPrefix, "onDestroy before");
+        Global.debugMemory(mDebugPrefix, "before onDestroy");
+
+        destroyLoaderIfFinishing("onDestroy");
 
         mFileCommands.closeLogFile();
         mFileCommands.closeAll();
         mGalleryContentQuery = null;
-        galleryAdapter.changeCursor(null);
-        galleryAdapter = null;
+        mAdapter = null;
         super.onDestroy();
         System.gc();
-        Global.debugMemory(debugPrefix, "onDestroy after");
+        Global.debugMemory(mDebugPrefix, "after onDestroy");
         // RefWatcher refWatcher = AndroFotoFinderApp.getRefWatcher(getActivity());
         // refWatcher.watch(this);
+        super.onDestroy();
     }
 
+    private void destroyLoaderIfFinishing(String context) {
+        if ((loaderID != -1) && (getActivity() != null) && (getActivity().isFinishing())) {
+            getLoaderManager().destroyLoader(loaderID);
+            if ((Global.debugEnabled) && (mCurorLoader != null)) {
+                Log.d(Global.LOG_CONTEXT, mDebugPrefix + context + " - releasing mCurorLoader" +
+                        mCurorLoader.getDebugContext());
+            }
+            mCurorLoader = null;
+            if (loaderID == (nextLoaderID - 1)) nextLoaderID--;
+            loaderID = -1;
+        }
+    }
 
     /**
      * interface Queryable: Owning activity tells fragment to change its content:
      * Initiates a database requery in the background
-     *
-     * @param context
+     *  @param context
      * @param parameters
+     * @param why
      */
     @Override
-    public void requery(Activity context, QueryParameterParcelable parameters) {
-        if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, debugPrefix + "requery " + ((parameters != null) ? parameters.toSqlString() : null));
-        }
-
+    public void requery(Activity context, QueryParameter parameters, String why) {
         this.mGalleryContentQuery = parameters;
 
-        requery();
+        requery(why);
     }
 
-    private void requery() {
-        QueryParameterParcelable selFilter = getCurrentQuery();
-        galleryAdapter.requery(this.getActivity(), selFilter);
+    private void requery(String why) {
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + why + " requery " + ((mGalleryContentQuery != null) ? mGalleryContentQuery.toSqlString() : null));
+        }
+
+        if (mGalleryContentQuery != null) {
+            // query has been initialized
+            if (mCurorLoader == null) {
+                mCurorLoader = new LocalCursorLoader();
+                getLoaderManager().initLoader(loaderID, null, mCurorLoader);
+            } else {
+                getLoaderManager().restartLoader(loaderID, null, this.mCurorLoader);
+            }
+        }
     }
 
-    private QueryParameterParcelable getCurrentQuery() {
-        QueryParameterParcelable selFilter = null;
+    private QueryParameter getCurrentQuery() {
+        return getCurrentQuery(mGalleryContentQuery);
+    }
+
+    private QueryParameter getCurrentQuery(QueryParameter rootQuery) {
+        QueryParameter selFilter = null;
         if (mShowSelectedOnly) {
-            selFilter = new QueryParameterParcelable(mGalleryContentQuery);
+            selFilter = new QueryParameter(rootQuery);
             FotoSql.setWhereSelection(selFilter, mSelectedItems);
         } else {
-            selFilter = mGalleryContentQuery;
+            selFilter = rootQuery;
         }
         return selFilter;
     }
 
     @Override
     public String toString() {
-        return debugPrefix + this.galleryAdapter;
+        return mDebugPrefix + this.mAdapter;
     }
 
     /*********************** local helper *******************************************/
     /** an Image in the FotoGallery was clicked */
     private void onGalleryImageClick(final GalleryCursorAdapter.GridCellViewHolder holder, int position) {
         if ((!multiSelectionHandleClick(holder)) && (mGalleryListener != null)) {
-            QueryParameterParcelable currentQuery = getCurrentQuery();
-            if (currentQuery != null) {
-                QueryParameterParcelable imageQuery = new QueryParameterParcelable(currentQuery);
+            if (holder.filter != null) {
+                QueryParameter subGalleryQuery = new QueryParameter(FotoSql.queryDetail);
 
-                if (holder.filter != null) {
-                    FotoSql.addWhereFilter(imageQuery, holder.filter);
-                }
-                long imageID = holder.imageID;
-                mGalleryListener.onGalleryImageClick(imageID, SelectedFotos.getUri(imageID), position);
+                subGalleryQuery.addWhere(holder.filter);
+                onOpenChildGallery(subGalleryQuery);
+                return;
             }
+            long imageID = holder.imageID;
+            mGalleryListener.onGalleryImageClick(imageID, SelectedFotos.getUri(imageID), position);
         }
+    }
+
+    private void onOpenChildGallery(QueryParameter subGalleryQuery) {
+        if (Global.debugEnabledSql) {
+            Log.i(Global.LOG_CONTEXT, "Exec child gallery\n\t" + subGalleryQuery.toSqlString());
+        }
+        FotoGalleryActivity.showActivity(getActivity(), null, subGalleryQuery, 0);
     }
 
     /****************** path navigation *************************/
@@ -404,19 +520,22 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     @Override
     public void navigateTo(String absolutePath) {
         if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, debugPrefix + " navigateTo : " + absolutePath);
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + " navigateTo : " + absolutePath);
         }
 
         mCurrentPath = absolutePath;
-        reloadDirGuiIfAvailable();
+        reloadDirGuiIfAvailable("navigateTo " + absolutePath);
         // requeryGallery(); done by owning activity
     }
 
-    private void reloadDirGuiIfAvailable() {
-        if ((mDirectoryRoot != null) && (mCurrentPath != null) && (parentPathBar != null)) {
+    private void reloadDirGuiIfAvailable(String why) {
+        if ((mDirectoryRoot != null) && (mCurrentPath != null) && (mParentPathBar != null)) {
+            if (Global.debugEnabled) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + " reloadDirGuiIfAvailable : " + why);
+            }
 
-            parentPathBar.removeAllViews();
-            childPathBar.removeAllViews();
+            mParentPathBar.removeAllViews();
+            mChildPathBar.removeAllViews();
 
             IDirectory selectedChild = mDirectoryRoot.find(mCurrentPath);
             if (selectedChild == null) selectedChild = mDirectoryRoot;
@@ -427,19 +546,19 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 Button button = createPathButton(current);
                 // add parent left to chlild
                 // gui order root/../child.parent/child
-                parentPathBar.addView(button, 0);
+                mParentPathBar.addView(button, 0);
                 if (first == null) first = button;
                 current = current.getParent();
             }
 
             // scroll to right where deepest child is
-            if (first != null) parentPathBarScroller.requestChildFocus(parentPathBar, first);
+            if (first != null) mParentPathBarScroller.requestChildFocus(mParentPathBar, first);
 
             List<IDirectory> children = selectedChild.getChildren();
             if (children != null) {
                 for (IDirectory child : children) {
                     Button button = createPathButton(child);
-                    childPathBar.addView(button);
+                    mChildPathBar.addView(button);
                 }
             }
         }
@@ -490,7 +609,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
             mSelectedItems.add(holder.imageID);
             holder.icon.setVisibility(View.VISIBLE);
-            multiSelectionUpdateActionbar();
+            multiSelectionUpdateActionbar("Start multisel");
         } else {
             // in gallery mode long click is view image
             ImageDetailActivityViewPager.showActivity(this.getActivity(), SelectedFotos.getUri(holder.imageID), position, getCurrentQuery());
@@ -511,10 +630,10 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         if (!mSelectedItems.isEmpty()) {
             long imageID = holder.imageID;
             holder.icon.setVisibility((mSelectedItems.toggle(imageID)) ? View.VISIBLE : View.GONE);
-            multiSelectionUpdateActionbar();
+            multiSelectionUpdateActionbar("changed mutli sel");
             return true;
         }
-        multiSelectionUpdateActionbar();
+        multiSelectionUpdateActionbar("lost multi sel");
         return false;
     }
 
@@ -574,15 +693,25 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             case R.id.cmd_selection_add_all:
                 addAllToSelection();
                 return true;
-
             case R.id.cmd_selection_remove_all:
                 removeAllFromSelection();
                 return true;
+
+            case R.id.action_details:
+                cmdShowDetails();
+                return true;
+            case R.id.cmd_scan:
+                return fileCommands.cmdMediaScannerWithQuestion();
 
             default:
                 return super.onOptionsItemSelected(menuItem);
         }
 
+    }
+
+    private void cmdShowDetails() {
+        ImageDetailDialogBuilder.createImageDetailDialog(this.getActivity(), getActivity().getTitle().toString(),
+                this.toString(), mGalleryContentQuery.toSqlString()).show();
     }
 
     public static class MoveOrCopyDestDirPicker extends DirectoryPickerFragment {
@@ -638,39 +767,39 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         mMustReplaceMenue = true;
         getActivity().invalidateOptionsMenu();
 
-        requery();
+        requery("multiSelectionToggle");
         return true;
     }
 
     private boolean multiSelectionCancel() {
         mSelectedItems.clear();
 
-        for (int i = galleryView.getChildCount() - 1; i >= 0; i--)
+        for (int i = mGalleryView.getChildCount() - 1; i >= 0; i--)
         {
-            GalleryCursorAdapter.GridCellViewHolder holder =  (GalleryCursorAdapter.GridCellViewHolder) galleryView.getChildAt(i).getTag();
+            GalleryCursorAdapter.GridCellViewHolder holder =  (GalleryCursorAdapter.GridCellViewHolder) mGalleryView.getChildAt(i).getTag();
             if (holder != null) {
                 holder.icon.setVisibility(View.GONE);
             }
         }
-        multiSelectionUpdateActionbar();
+        multiSelectionUpdateActionbar("multiSelectionCancel");
         return true;
     }
 
     void multiSelectionReplaceTitleIfNecessary() {
         if (!mSelectedItems.isEmpty()) {
             mOldTitle = getActivity().getTitle().toString();
-            multiSelectionUpdateActionbar();
+            multiSelectionUpdateActionbar("selection my have changed");
         }
     }
 
-    private void multiSelectionUpdateActionbar() {
+    private void multiSelectionUpdateActionbar(String why) {
         String newTitle = null;
         if (mSelectedItems.isEmpty()) {
 
             // lost last selection. revert mShowSelectedOnly if neccessary
             if (mShowSelectedOnly) {
                 mShowSelectedOnly = false;
-                requery();
+                requery(why + "-lost multisel");
             }
 
             // lost last selection. revert title if neccessary
@@ -725,11 +854,106 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         }
 
     }
-
-    private void findDuplicates() {
-        SqlJobTaskBase task = new SqlJobTaskBase(this.getActivity(), "Removed duplcates from media dB:\n", null) {
+    private void removeAllFromSelection() {
+        SqlJobTaskBase task = new SqlJobTaskBase(this.getActivity(), "removeAllFromSelection", this.mSelectedItems) {
             @Override
-            protected void doInBackground(Long id) {
+            protected void doInBackground(Long id, Cursor cursor) {
+                this.mSelectedItems.remove(id);
+            }
+
+            @Override
+            protected void onPostExecute(SelectedItems selectedItems) {
+                replaceSelectedItems(selectedItems, mStatus, mDebugPrefix);
+            }
+        };
+        QueryParameter query = getCurrentQuery();
+        task.execute(query);
+    }
+
+    private void addAllToSelection() {
+        SqlJobTaskBase task = new SqlJobTaskBase(this.getActivity(), "addAllToSelection", this.mSelectedItems) {
+            @Override
+            protected void doInBackground(Long id, Cursor cursor) {
+                this.mSelectedItems.add(id);
+            }
+
+            @Override
+            protected void onPostExecute(SelectedItems selectedItems) {
+                replaceSelectedItems(selectedItems, mStatus, mDebugPrefix);
+            }
+        };
+        QueryParameter query = getCurrentQuery();
+        task.execute(query);
+    }
+
+    private void replaceSelectedItems(SelectedItems selectedItems, StringBuffer debugMessage, String why) {
+        int oldSize = mSelectedItems.size();
+        this.mSelectedItems.clear();
+        this.mSelectedItems.addAll(selectedItems);
+        int newSize = mSelectedItems.size();
+
+        if (debugMessage != null) {
+            debugMessage.append("\nSelections ").append(oldSize).append("=>").append(newSize);
+            Log.i(Global.LOG_CONTEXT, debugMessage.toString());
+        }
+        if ((oldSize == 0) && (newSize > 0)) {
+            startMultiSelectionMode();
+        }
+        multiSelectionUpdateActionbar(why);
+        requery(why);
+    }
+
+    //-------------------------------------------------------------
+
+    private void fixMediaDatabase() {
+        if (!MediaScanner.isScannerActive(getActivity().getContentResolver())) {
+            if (Global.debugEnabled) {
+                Log.d(Global.LOG_CONTEXT, "Analysing media database for potential problems");
+            }
+            repairMissingDisplayNames();
+            removeDuplicates();
+        }
+    }
+
+    /** image entries may not have DISPLAY_NAME which is essential for calculating the item-s folder. */
+    private void repairMissingDisplayNames() {
+        SqlJobTaskBase task = new SqlJobTaskBase(this.getActivity(), "Searching media database for missing 'displayname'-s:\n", null) {
+            private int mPathColNo = -2;
+            private int mResultCount = 0;
+
+            @Override
+            protected void doInBackground(Long id, Cursor cursor) {
+                if (mPathColNo == -2) mPathColNo = cursor.getColumnIndex(FotoSql.SQL_COL_PATH);
+                MediaScanner.updatePathRelatedFields(getActivity(), cursor, cursor.getString(mPathColNo), mColumnIndexPK, mPathColNo);
+
+                mResultCount++;
+            }
+
+            @Override
+            protected void onPostExecute(SelectedItems selectedItems) {
+                if (!isCancelled()) {
+                    onMissingDisplayNamesComplete(mResultCount, mStatus);
+                }
+            }
+        };
+        QueryParameter query = FotoSql.queryGetMissingDisplayNames;
+        task.execute(query);
+    }
+
+    /** called after MissingDisplayNamesComplete finished */
+    private void onMissingDisplayNamesComplete(int mResultCount, StringBuffer debugMessage) {
+        if (debugMessage != null) {
+            Log.w(Global.LOG_CONTEXT, mDebugPrefix + debugMessage);
+        }
+
+        if (mResultCount > 0) {
+        }
+    }
+
+    private void removeDuplicates() {
+        SqlJobTaskBase task = new SqlJobTaskBase(this.getActivity(), "Searching for duplcates in media database:\n", null) {
+            @Override
+            protected void doInBackground(Long id, Cursor cursor) {
                 this.mSelectedItems.add(id);
             }
 
@@ -744,76 +968,29 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 }
             }
         };
-        QueryParameterParcelable query = FotoSql.queryGetDuplicates;
+        QueryParameter query = FotoSql.queryGetDuplicates;
         task.execute(query);
     }
 
-    /** is called when findDuplicates() found duplicates */
+    /** is called when removeDuplicates() found duplicates */
     private void onDuplicatesFound(SelectedItems selectedItems, StringBuffer debugMessage) {
         if (debugMessage != null) {
-            Log.w(Global.LOG_CONTEXT, debugPrefix + debugMessage);
+            Log.w(Global.LOG_CONTEXT, mDebugPrefix + debugMessage);
         }
 
         if (selectedItems != null) {
-            QueryParameterParcelable query = new QueryParameterParcelable();
+            QueryParameter query = new QueryParameter();
             FotoSql.setWhereSelection(query, selectedItems);
 
             int delCount = getActivity().getContentResolver().delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, query.toAndroidWhere(), null);
             if (debugMessage != null) {
-                Log.w(Global.LOG_CONTEXT, debugPrefix + " deleted " + delCount +
+                Log.w(Global.LOG_CONTEXT, mDebugPrefix + " deleted " + delCount +
                         " duplicates\n\tDELETE ... WHERE " + query.toAndroidWhere());
             }
 
-            requery();
+            if (delCount > 0) {
+                requery("after delete duplicates"); // content has changed: must reload
+            }
         }
-    }
-
-    private void removeAllFromSelection() {
-        SqlJobTaskBase task = new SqlJobTaskBase(this.getActivity(), "removeAllFromSelection", this.mSelectedItems) {
-            @Override
-            protected void doInBackground(Long id) {
-                this.mSelectedItems.remove(id);
-            }
-
-            @Override
-            protected void onPostExecute(SelectedItems selectedItems) {
-                replaceSelectedItems(selectedItems, mStatus);
-            }
-        };
-        QueryParameterParcelable query = getCurrentQuery();
-        task.execute(query);
-    }
-
-    private void addAllToSelection() {
-        SqlJobTaskBase task = new SqlJobTaskBase(this.getActivity(), "addAllToSelection", this.mSelectedItems) {
-            @Override
-            protected void doInBackground(Long id) {
-                this.mSelectedItems.add(id);
-            }
-
-            @Override
-            protected void onPostExecute(SelectedItems selectedItems) {
-                replaceSelectedItems(selectedItems, mStatus);
-            }
-        };
-        QueryParameter query = getCurrentQuery();
-        task.execute(query);
-    }
-
-    private void replaceSelectedItems(SelectedItems selectedItems, StringBuffer debugMessage) {
-        int oldSize = mSelectedItems.size();
-        this.mSelectedItems.clear();
-        this.mSelectedItems.addAll(selectedItems);
-        int newSize = mSelectedItems.size();
-
-        if (debugMessage != null) {
-            debugMessage.append("\nSelections ").append(oldSize).append("=>").append(newSize);
-            Log.i(Global.LOG_CONTEXT, debugMessage.toString());
-        }
-        if ((oldSize == 0) && (newSize > 0)) {
-            startMultiSelectionMode();
-        }
-        multiSelectionUpdateActionbar();
-        requery();
     }
 }

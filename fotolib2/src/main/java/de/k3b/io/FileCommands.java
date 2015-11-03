@@ -46,7 +46,8 @@ public class FileCommands implements  Cloneable {
     private String mLogFilePath;
     // private static final String LOG_FILE_ENCODING = "UTF-8";
     private PrintWriter mLogFile;
-    private ArrayList<String> mModifiedFiles;
+    private ArrayList<String> mModifiedDestFiles;
+    private ArrayList<String> mModifiedSrcFiles;
 
     public FileCommands() {
         setLogFilePath(null);
@@ -56,10 +57,11 @@ public class FileCommands implements  Cloneable {
         int result = 0;
         if (canProcessFile(OP_DELETE)) {
             openLogfile();
+            onPreProcess("delete", paths, null, OP_DELETE);
             for (String path : paths) {
                 if (deleteFileWitSidecar(new File(path))) result++;
             }
-            onPostProcess(paths, result, paths.length, OP_DELETE);
+            onPostProcess("delete", paths, null, result, paths.length, OP_DELETE);
             closeLogFile();
         }
         return result;
@@ -113,7 +115,7 @@ public class FileCommands implements  Cloneable {
             if (osCreateDirIfNeccessary(destDirFolder)) {
                 File[] destFiles = createDestFiles(destDirFolder, sourceFiles);
 
-                result = moveOrCopyFiles(move, destFiles, sourceFiles);
+                result = moveOrCopyFiles(move, (move ? "mov" : "copy"), destFiles, sourceFiles);
 
             } else {
                 log("rem Target dir ", getFilenameForLog(destDirFolder), " cannot be created");
@@ -123,10 +125,15 @@ public class FileCommands implements  Cloneable {
     }
 
     /** does the copying. also used by unittesting */
-    protected int moveOrCopyFiles(boolean move, File[] destFiles, File[] sourceFiles) {
-        mModifiedFiles = new ArrayList<String>();
+    protected int moveOrCopyFiles(boolean move, String what, File[] destFiles, File[] sourceFiles) {
+        int opCode = (move) ? OP_MOVE : OP_COPY;
+
+        mModifiedSrcFiles = (move) ? new ArrayList<String>() : null;
+        mModifiedDestFiles = new ArrayList<String>();
 
         openLogfile();
+        // onPreProcess(what, sourceFiles, destFiles, opCode);
+        onPreProcess(what, null, null, opCode);
         int itemCount = 0;
         int pos = 0;
         int fileCount = destFiles.length;
@@ -147,13 +154,13 @@ public class FileCommands implements  Cloneable {
             }
             pos++;
         }
+        int modifyCount = mModifiedDestFiles.size();
+
+        String[] modifiedSourceFiles =  ((mModifiedSrcFiles != null) && (mModifiedSrcFiles.size() > 0)) ? mModifiedSrcFiles.toArray(new String[modifyCount]) : null;
+
+        onPostProcess(what, modifiedSourceFiles, (modifyCount > 0) ? mModifiedDestFiles.toArray(new String[modifyCount]) : null, itemCount, sourceFiles.length, opCode);
+
         closeLogFile();
-        int modifyCount = mModifiedFiles.size();
-
-        int opCode = (move) ? OP_MOVE : OP_COPY;
-
-        onPostProcess((modifyCount > 0) ? mModifiedFiles.toArray(new String[modifyCount]) : null, itemCount, sourceFiles.length, opCode);
-
         return itemCount;
     }
 
@@ -174,12 +181,12 @@ public class FileCommands implements  Cloneable {
         return osFileExists(file) || osFileExists(getSidecar(file));
     }
 
-    public boolean isSidecar(File file) {
+    public static boolean isSidecar(File file) {
         if (file == null) return false;
         return isSidecar(file.getAbsolutePath());
     }
 
-    public boolean isSidecar(String name) {
+    public static boolean isSidecar(String name) {
         if (name == null) return false;
         return name.toLowerCase().endsWith(EXT_SIDECAR);
     }
@@ -251,12 +258,13 @@ public class FileCommands implements  Cloneable {
         if (move) {
             result = osFileMove(dest, source);
             if (result) {
-                mModifiedFiles.add(dest.getAbsolutePath());
+                mModifiedDestFiles.add(dest.getAbsolutePath());
+                mModifiedSrcFiles.add(source.getAbsolutePath());
             }
         } else {
             result = osFileCopy(dest, source);
             if (result) {
-                mModifiedFiles.add(dest.getAbsolutePath());
+                mModifiedDestFiles.add(dest.getAbsolutePath());
             }
         }
         if (dest.lastModified() != fileTime) {
@@ -318,8 +326,12 @@ public class FileCommands implements  Cloneable {
         return file.exists();
     }
 
+    /** called before copy/move/rename/delete */
+    protected void onPreProcess(String what, String[] oldPathNames, String[] newPathNames, int opCode) {
+    }
+
     /** called for each modified/deleted file */
-    protected void onPostProcess(String[] paths, int modifyCount, int itemCount, int opCode) {
+    protected void onPostProcess(String what, String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
     }
 
     public void openLogfile() {

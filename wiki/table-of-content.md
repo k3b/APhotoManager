@@ -7,6 +7,7 @@
 	<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker">Folder-Picker</a></li>
 	<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View">Image-View</a></li>
 	<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/intentapi">Intent API</a></li>
+	<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/History">History</a></li>
 </ul>
 
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_unchecked.png)
@@ -32,8 +33,12 @@
 * [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi)
 	* [Uri formats](intentapi#uri)
 		* [geo: uri format](intentapi#uri-geo)
+	* [android.intent.extra.TITLE string](intentapi#EXTRA_TITLE)
 	* [Intent-Extra parameter](intentapi#extra)
 	* [de.k3b.extra.FILTER string](intentapi#filter)
+	* [de.k3b.extra.SQL string string](intentapi#EXTRA_SQL)
 	* [de.k3b.extra.SELECTED_ITEMS string](intentapi#SelectedItems)
-	* [android.intent.extra.TITLE string](intentapi#EXTRA_TITLE)
+	* [Internal sql format of .query files](intentapi#sql)
+	
 * [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)
+* [Bookmarks](Bookmarks)

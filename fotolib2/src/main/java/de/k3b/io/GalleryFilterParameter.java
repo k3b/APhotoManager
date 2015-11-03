@@ -76,6 +76,14 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
         this.dateMax = dateMax; return this;
     }
 
+    public GalleryFilterParameter setDate(String min, String max) {
+        return setDate(parseDate(min), parseDate(max));
+    }
+
+    public GalleryFilterParameter setDate(long min, long max) {
+        return setDateMin(min).setDateMax(max);
+    }
+
     @Override
     public boolean isNonGeoOnly() {
         return nonGeoOnly;
@@ -164,21 +172,16 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
         return (value != null) && (value.toLowerCase().startsWith(NON_GEO_ONLY_FIND));
     }
 
-    private long parseDate(String value) {
+    private static long parseDate(String value) {
         if ((value == null) || value.isEmpty()) return 0;
         try {
             return dateFormat.parse(value).getTime();
-        } catch (Exception e) {
-            return 0;
-        }
-    }
-
-    private double parseLatLon(String value) {
-        if ((value == null) || value.isEmpty()) return Double.NaN;
-        try {
-            return Double.parseDouble(value);
-        } catch (Exception e) {
-            return Double.NaN;
+        } catch (Exception e1) {
+            try {
+                return Long.parseLong(value);
+            } catch (Exception e2) {
+                return 0;
+            }
         }
     }
 }
