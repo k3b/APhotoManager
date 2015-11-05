@@ -2,6 +2,7 @@
 
 ## [v0.4.2.*](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.2) (not released yet)
 
+* after app crash the errorlog (logcat) is written to /mnt/sdcard/copy/log/androFotofinder.logcat*.txt
 * renamed from "a Foto Finder" to "a Photo Manager" to avoid naming collision with other names.
 * added [Bookmark](Bookmarks) support in [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) and [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View).
 * [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) :
