@@ -26,6 +26,7 @@ import java.util.Date;
 
 import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.util.LogCat;
 import de.k3b.database.QueryParameter;
 
 // import com.squareup.leakcanary.LeakCanary;
@@ -35,19 +36,21 @@ import de.k3b.database.QueryParameter;
  * Created by k3b on 14.07.2015.
  */
 public class AndroFotoFinderApp extends Application {
+    private LogCat mCrashSaveToFile = null;
+
     /*
-    private RefWatcher refWatcher;
+        private RefWatcher refWatcher;
 
-    public static RefWatcher getRefWatcher(Context context) {
-        AndroFotoFinderApp application = (AndroFotoFinderApp) context.getApplicationContext();
-        return application.refWatcher;
-    }
+        public static RefWatcher getRefWatcher(Context context) {
+            AndroFotoFinderApp application = (AndroFotoFinderApp) context.getApplicationContext();
+            return application.refWatcher;
+        }
 
-    @Override public void onCreate() {
-        super.onCreate();
-        LeakCanary.install(this);
-    }
-    */
+        @Override public void onCreate() {
+            super.onCreate();
+            LeakCanary.install(this);
+        }
+        */
     @Override public void onCreate() {
         super.onCreate();
 
@@ -63,5 +66,15 @@ public class AndroFotoFinderApp extends Application {
         for (String columnName : FotoSql.DEFAULT_GALLERY_COLUMNS) {
             QueryParameter.sParserDefaultSelect.add(columnName);
         }
+        mCrashSaveToFile = new LogCat(Global.LOG_CONTEXT);
+    }
+
+    @Override
+    public void onTerminate() {
+        if (mCrashSaveToFile != null) {
+            mCrashSaveToFile.close();
+        }
+        mCrashSaveToFile = null;
+        super.onTerminate();
     }
 }
