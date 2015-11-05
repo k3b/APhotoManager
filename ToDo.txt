@@ -1,4 +1,12 @@
 TODO
+	aLogCat als lib einbinden um log anzuzeigen/speichern
+	
+	absturz nach set Geo
+	
+	test mit android6 emulator
+		- file
+		- log
+
 	#17 Image View fullscreen
 		auto-hide actionbar http://stackoverflow.com/questions/19831090/loop-for-time-delay-when-hiding-actionbar
 		

@@ -58,6 +58,9 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
+    <!-- after app crash the logcat is written to /mnt/sdcard/copy/log/androFotofinder.logcat*.txt -->
+    <uses-permission android:name="android.permission.READ_LOGS" />
+
     <application android:name=".AndroFotoFinderApp"
         android:allowBackup="false"
         android:largeHeap="true"

@@ -45,6 +45,7 @@ Requred permissions: </p>
   <li> ACCESS_NETWORK_STATE and ACCESS_WIFI_STATE: to find out if
  wifi/internet is online to start downloading geodata if neccessary</li>
   <li> WRITE_EXTERNAL_STORAGE to cache downloaded map data in local file system and to do file operations.</li>
+  <li> READ_LOGS after app crash the logcat is written to /mnt/sdcard/copy/log/androFotofinder.logcat*.txt .</li>
 </ul>
 <p> The code uses </p>
 <ul>
