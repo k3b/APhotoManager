@@ -102,11 +102,22 @@
              />
 
         <Button
+            android:id="@+id/cmd_cancel"
+            android:text="@string/cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/status"
+            android:gravity="center"
+            android:enabled="false"
+            android:visibility="gone" />
+
+        <Button
             android:id="@+id/cmd_popup"
             android:text="@string/popup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@+id/status"
+            android:layout_toRightOf="@id/cmd_cancel"
             android:gravity="center"
             android:enabled="false"
             android:visibility="gone" />

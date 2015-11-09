@@ -7,8 +7,8 @@
         <item>@string/sort_order_Date_Descending</item>
         <item>@string/sort_order_Place_Ascending</item>
         <item>@string/sort_order_Place_Descending</item>
-        <item>@string/sort_order_Name-length_Ascending</item>
-        <item>@string/sort_order_Name-length_Descending</item>
+        <item>@string/sort_order_Name_length_Ascending</item>
+        <item>@string/sort_order_Name_length_Descending</item>
     </string-array>
 
 </resources>

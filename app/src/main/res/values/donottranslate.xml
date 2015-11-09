@@ -72,7 +72,7 @@ Version v0.4.2<br />
   <li>Added <a href="https://github.com/k3b/AndroFotoFinder/wiki/Bookmarks">Bookmark</a> support to remember search kriteria.</li>
   <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View">Image-Detail-View</a>:
       implemented slideshow, improved sliding/scaling </li>
-  <li>Improved <a href="Media scanner for android below 4.4">Media scanner for android below 4.4</a> to directly update media database after file operations copy, rename, move, delete...  </li>
+  <li>Improved <a href="Media scanner for android below 4.4">Media scanner for android below 4.4</a> to directly update media database after file operations copy, rename, move, delete&#8230;  </li>
 </ul>
 
 Version v0.4.1<br />

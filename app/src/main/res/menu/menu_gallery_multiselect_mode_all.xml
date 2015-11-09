@@ -31,7 +31,7 @@
         android:showAsAction="always" />
 
     <item android:id="@+id/cmd_selected_only"
-        android:title="Selected only"
+        android:title="@string/selected_only_menu_title"
         android:icon="@android:drawable/checkbox_off_background"
         android:visible="true"
         android:orderInCategory="1"

@@ -40,14 +40,14 @@
     <string name="cancel">Cancel</string>
     <string name="pause">Pause</string>
     <string name="background">Background</string>
-    <string name="popup">...</string>
+    <string name="popup">&#8230;</string>
 
     <string name="folder_menu_title">Folder Filter</string>
     <string name="area_menu_title">Select Map Area</string>
     <string name="filter_menu_title">Filter</string>
     <string name="sort_menu_title">Sort</string>
     <string name="folder_dialog_title_format">Select %1$s</string>
-    <string name="image_loading_at_position_format">"loading(%1$d) ..."</string>
+    <string name="image_loading_at_position_format">"loading(%1$d) &#8230;"</string>
     <string name="folder_err_load_failed_format">Loading Folder %1$s failed</string>
 
     <string name="sort_order_Name_Ascending" >Name Ascending</string>
@@ -56,8 +56,8 @@
     <string name="sort_order_Date_Descending" >Date Descending</string>
     <string name="sort_order_Place_Ascending" >Place Ascending</string>
     <string name="sort_order_Place_Descending" >Place Descending</string>
-    <string name="sort_order_Name-length_Ascending" >Name-length Ascending</string>
-    <string name="sort_order_Name-length_Descending" >Name-length Descending</string>
+    <string name="sort_order_Name_length_Ascending" >Name-length Ascending</string>
+    <string name="sort_order_Name_length_Descending" >Name-length Descending</string>
 
     <string name="filter_title">Filter</string>
 
@@ -82,7 +82,6 @@
 
     <string name="image_err_file_exists_format">The File \'%1$s\' already exists.\n Do you really want to overwrite it?</string>
     <string name="image_err_file_rename_format">Cannot rename File \'%1$s\'.</string>
-    <string name="image_success_file_rename_format">Renamed \'%1$s\' to \'%2$s\'.</string>
     <string name="image_success_update_format">Updated %1$d photos.</string>
 
     <string name="share_menu_title">Share</string>
@@ -128,7 +127,7 @@ with 'A Photo Map' in 'AndroFotoFinder'<br/>
 Features:
 <ul>
   <li>Can handle big image collections (15000+ images in 1000+ folders)</li>
-  <li>Uses Android's image content-provider. No initial image scan neccessary.</li>
+  <li>Uses Android's image content-provider. No initial image scan necessary.</li>
   <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Filter-View">Find images</a> via</li>
   <ul>
     <li>folder (with hirachical <a href="https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker">Folder-Picker</a>)&nbsp;</li>
@@ -182,8 +181,8 @@ Features:
     <string name="scanner_update_result_format">Updated %1$d Media Database Items</string>
     <string name="slideshow_menu_title">Slideshow</string>
     <string name="bookmark_file_comment_format">Generated on %3$s with \'%1$s\' Version %2$s. See https://github.com/k3b/AndroFotoFinder/wiki/intentap#sql for details</string>
-    <string name="bookmark_save_as_menu_title">Save Bookmark as ...</string>
-    <string name="bookmark_load_from_menu_title">Load Bookmark from ...</string>
+    <string name="bookmark_save_as_menu_title">Save Bookmark as &#8230;</string>
+    <string name="bookmark_load_from_menu_title">Load Bookmark from &#8230;</string>
 
     <string name="global_err_sql_title_reload">Invalid SQL. Reloading default</string>
     <string name="global_err_system">Systemfehler. Exiting</string>
@@ -192,16 +191,17 @@ Features:
     <string name="settings_map_selmarker_max_title">Max. Sel-Markers in Map</string>
     <string name="settings_image_slideshow_intervall_title">Slide Show Intervall in millisecs</string>
     <string name="settings_bookmark_dir_title">Report Folder</string>
-    <string name="settings_multisel_clear_summary">... after Copy/Move/Rename/... .</string>
-    <string name="settings_debug_sql_summary">... containing executed SQL.</string>
+    <string name="settings_multisel_clear_summary">&#8230; after Copy/Move/Rename/&#8230; .</string>
+    <string name="settings_debug_sql_summary">&#8230; containing executed SQL.</string>
     <string name="settings_debug_sql_title">LogCat SQL</string>
     <string name="settings_debug_view_item_title">LogCat Grid/Listview</string>
-    <string name="settings_debug_view_item_summary">... containing Grid/Listview Items.</string>
-    <string name="settings_debug_memory_summary">... containing Memory Consumption.</string>
+    <string name="settings_debug_view_item_summary">&#8230; containing Grid/Listview Items.</string>
+    <string name="settings_debug_memory_summary">&#8230; containing Memory Consumption.</string>
     <string name="settings_debug_memory_title">LogCat Memory Consumption</string>
     <string name="settings_debug_title">LogCat Misc.</string>
-    <string name="settings_debug_summary">... containing other Log Messages.</string>
+    <string name="settings_debug_summary">&#8230; containing other Log Messages.</string>
     <string name="settings_log_folder_title">Error Log Folder</string>
     <string name="settings_group_debug_title">Diagnostics</string>
+    <string name="selected_only_menu_title">Selected only</string>
 
 </resources>

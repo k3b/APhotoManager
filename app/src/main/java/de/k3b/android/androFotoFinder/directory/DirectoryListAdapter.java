@@ -50,11 +50,11 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
 
     // for debugging
     private static int id = 1;
-    private final String debugPrefix;
+    // private final String debugPrefix;
 
 
     public DirectoryListAdapter(Context context, IExpandableListViewNavigation<IDirectory, IDirectory> parent, ExpandableListView accordion, String name) {
-        debugPrefix = "DirectoryListAdapter#" + (id++) + "@" + name + " ";
+        String debugPrefix = "DirectoryListAdapter#" + (id++) + "@" + name + " ";
         Global.debugMemory(debugPrefix, "ctor");
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, debugPrefix + "()");

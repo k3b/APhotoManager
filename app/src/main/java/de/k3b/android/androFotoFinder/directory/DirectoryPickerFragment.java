@@ -223,13 +223,15 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         mCmdOk.setVisibility(View.VISIBLE);
         
         mCmdCancel = (Button) view.findViewById(R.id.cmd_cancel);
-        mCmdCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onDirectoryCancel();
-            }
-        });
-        mCmdCancel.setVisibility(View.VISIBLE);
+        if (mCmdCancel != null) {
+            mCmdCancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onDirectoryCancel();
+                }
+            });
+            mCmdCancel.setVisibility(View.VISIBLE);
+        }
 
         mCmdPopup = null;
         if (mContextMenue != 0) {

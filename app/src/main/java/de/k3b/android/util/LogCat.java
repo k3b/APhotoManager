@@ -34,7 +34,7 @@ public class LogCat implements Thread.UncaughtExceptionHandler {
                 : "Saving errorlog ('LocCat') is disabled. See Settings 'Diagnostics' for details";
         Log.e(Global.LOG_CONTEXT, message);
         if (context != null) {
-            Toast.makeText(context, message, Toast.LENGTH_LONG);
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show();
         }
 
         if (logDirectory != null) {

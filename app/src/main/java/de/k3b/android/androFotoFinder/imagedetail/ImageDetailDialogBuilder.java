@@ -171,25 +171,25 @@ public class ImageDetailDialogBuilder {
         builder.append(NL).append(line).append(NL);
         builder.append(NL).append(filepath).append(NL).append(NL);
 
-        builder.append("Date & Time: " + getExifTag(exif,ExifInterface.TAG_DATETIME) + "\n\n");
-        builder.append("Flash: " + getExifTag(exif,ExifInterface.TAG_FLASH) + "\n");
-        builder.append("Focal Length: " + getExifTag(exif, ExifInterface.TAG_FOCAL_LENGTH) + "\n\n");
+        builder.append("Date & Time: ").append(getExifTag(exif, ExifInterface.TAG_DATETIME)).append("\n\n");
+        builder.append("Flash: ").append(getExifTag(exif, ExifInterface.TAG_FLASH)).append("\n");
+        builder.append("Focal Length: ").append(getExifTag(exif, ExifInterface.TAG_FOCAL_LENGTH)).append("\n\n");
 
         float[] latLong=new float[2];
         if (exif.getLatLong(latLong)) {
-            builder.append("GPS Date & Time: " + getExifTag(exif, ExifInterface.TAG_GPS_DATESTAMP) + " "
-                    + getExifTag(exif, ExifInterface.TAG_GPS_TIMESTAMP) + "\n\n");
-            builder.append("GPS Latitude: " + latLong[0] + "\n");
-            builder.append("GPS Longitude: " + latLong[1] + "\n");
-            builder.append("GPS Altitude: " + exif.getAltitude(0) + "\n");
-            builder.append("GPS Processing Method: " + getExifTag(exif, ExifInterface.TAG_GPS_PROCESSING_METHOD) + "\n");
+            builder.append("GPS Date & Time: ").append(getExifTag(exif, ExifInterface.TAG_GPS_DATESTAMP)).append(" "
+            ).append(getExifTag(exif, ExifInterface.TAG_GPS_TIMESTAMP)).append("\n\n");
+            builder.append("GPS Latitude: ").append(latLong[0]).append("\n");
+            builder.append("GPS Longitude: ").append(latLong[1]).append("\n");
+            builder.append("GPS Altitude: ").append(exif.getAltitude(0)).append("\n");
+            builder.append("GPS Processing Method: ").append(getExifTag(exif, ExifInterface.TAG_GPS_PROCESSING_METHOD)).append("\n");
         }
-        builder.append("Image Length: " + getExifTag(exif,ExifInterface.TAG_IMAGE_LENGTH) + "\n");
-        builder.append("Image Width: " + getExifTag(exif,ExifInterface.TAG_IMAGE_WIDTH) + "\n\n");
-        builder.append("Camera Make: " + getExifTag(exif,ExifInterface.TAG_MAKE) + "\n");
-        builder.append("Camera Model: " + getExifTag(exif,ExifInterface.TAG_MODEL) + "\n");
-        builder.append("Camera Orientation: " + getExifTag(exif,ExifInterface.TAG_ORIENTATION) + "\n");
-        builder.append("Camera White Balance: " + getExifTag(exif, ExifInterface.TAG_WHITE_BALANCE) + "\n");
+        builder.append("Image Length: ").append(getExifTag(exif,ExifInterface.TAG_IMAGE_LENGTH)).append("\n");
+        builder.append("Image Width: ").append(getExifTag(exif,ExifInterface.TAG_IMAGE_WIDTH)).append("\n\n");
+        builder.append("Camera Make: ").append(getExifTag(exif,ExifInterface.TAG_MAKE)).append("\n");
+        builder.append("Camera Model: ").append(getExifTag(exif,ExifInterface.TAG_MODEL)).append("\n");
+        builder.append("Camera Orientation: ").append(getExifTag(exif,ExifInterface.TAG_ORIENTATION)).append("\n");
+        builder.append("Camera White Balance: ").append(getExifTag(exif, ExifInterface.TAG_WHITE_BALANCE)).append("\n");
         builder.append(NL).append(line).append(NL);
     }
 

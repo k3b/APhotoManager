@@ -271,7 +271,7 @@ public class AndroidFileCommands extends FileCommands {
             final RecursiveMediaScanner scanner = (RecursiveMediaScanner.sScanner != null)
                     ? RecursiveMediaScanner.sScanner :
                     new RecursiveMediaScanner(mContext, message);
-            synchronized (scanner) {
+            synchronized (this) {
                 if (RecursiveMediaScanner.sScanner == null) {
                     RecursiveMediaScanner.sScanner = scanner;
                     scanner.execute(new String[]{scanRootDir});

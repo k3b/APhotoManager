@@ -431,6 +431,10 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             MoveOrCopyDestDirPicker.sFileCommands = null;
         }
 
+        if (mSlideShowTimer != null) {
+            startStopSlideShow(false);
+            mSlideShowTimer = null;
+        }
         super.onDestroy();
         // RefWatcher refWatcher = AndroFotoFinderApp.getRefWatcher(this);
         // refWatcher.watch(this);
