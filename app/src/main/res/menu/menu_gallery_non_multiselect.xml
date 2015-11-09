@@ -24,14 +24,14 @@
     xmlns:tools="http://schemas.android.com/tools" tools:context=".GalleryActivity">
 
     <item android:id="@+id/cmd_filter"
-        android:title="@string/action_filter_title"
+        android:title="@string/filter_menu_title"
         android:icon="@android:drawable/ic_menu_search"
         android:visible="true"
         android:orderInCategory="10"
         android:showAsAction="ifRoom" />
 
     <item android:id="@+id/cmd_sort"
-        android:title="@string/action_sort_title"
+        android:title="@string/sort_menu_title"
         android:visible="true"
         android:orderInCategory="15"
         android:showAsAction="never" >
@@ -56,20 +56,20 @@
     </item>
 
     <item android:id="@+id/cmd_load_bookmark"
-        android:title="@string/cmd_load_bookmark_from"
+        android:title="@string/bookmark_load_from_menu_title"
         android:icon="@android:drawable/ic_menu_myplaces"
         android:visible="true"
         android:orderInCategory="18"
         android:showAsAction="never" />
 
-    <item android:id="@+id/action_settings"
-        android:title="@string/action_settings"
+    <item android:id="@+id/cmd_settings"
+        android:title="@string/settings_title"
         android:icon="@android:drawable/ic_menu_preferences"
         android:visible="true"
         android:orderInCategory="100"
         android:showAsAction="ifRoom|withText" />
 
-    <item android:id="@+id/cmd_scan" android:title="@string/title_start_scanner" android:orderInCategory="110"
+    <item android:id="@+id/cmd_scan" android:title="@string/scanner_menu_title" android:orderInCategory="110"
         android:showAsAction="never" android:visible="true"/>
 
     <item android:id="@+id/cmd_about"

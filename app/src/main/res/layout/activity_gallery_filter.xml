@@ -251,7 +251,7 @@
     <Button android:id="@+id/cmd_clear"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/cmd_clear_filter"
+        android:text="@string/filter_clear_menu_title"
         android:layout_below="@+id/edit_longitude_to"
         android:layout_toRightOf="@+id/cmd_cancel"
         android:layout_toEndOf="@+id/cmd_cancel" />

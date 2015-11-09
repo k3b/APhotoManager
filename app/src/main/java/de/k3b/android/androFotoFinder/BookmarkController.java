@@ -39,7 +39,7 @@ public class BookmarkController {
             }
 
         };
-        dlg.editFileName(mContext, mContext.getString(R.string.cmd_save_bookmark_as), name, 0);
+        dlg.editFileName(mContext, mContext.getString(R.string.bookmark_save_as_menu_title), name, 0);
     }
 
     private void onSaveAsAnswer(final String fileName, boolean askToOverwrite) {
@@ -64,8 +64,8 @@ public class BookmarkController {
                         }
                     }
                 };
-                dialog.yesNoQuestion(mContext, mContext.getString(R.string.question_overwrite) ,
-                        mContext.getString(R.string.err_file_exists, outFile.getAbsoluteFile()));
+                dialog.yesNoQuestion(mContext, mContext.getString(R.string.overwrite_question_title) ,
+                        mContext.getString(R.string.image_err_file_exists_format, outFile.getAbsoluteFile()));
             } else {
                 PrintWriter out = null;
                 try {
@@ -74,7 +74,7 @@ public class BookmarkController {
                     out.close();
                     out = null;
                 } catch (IOException err) {
-                    String errorMessage = mContext.getString(R.string.cmd_mk_failed, outFile.getAbsoluteFile());
+                    String errorMessage = mContext.getString(R.string.mk_err_failed_format, outFile.getAbsoluteFile());
                     Toast.makeText(mContext, errorMessage, Toast.LENGTH_LONG).show();
                     Log.e(Global.LOG_CONTEXT, errorMessage, err);
                 }
@@ -98,10 +98,10 @@ public class BookmarkController {
 
                 @Override protected void onDialogResult(String fileName, Object[] parameters) {onLoadFromAnswer(fileName, consumer);}
             };
-            dlg.pickFromStrings(mContext, mContext.getString(R.string.cmd_load_bookmark_from), R.menu.menu_bookmark_context, fileNames);
+            dlg.pickFromStrings(mContext, mContext.getString(R.string.bookmark_load_from_menu_title), R.menu.menu_bookmark_context, fileNames);
         } else {
             Toast.makeText(mContext,
-                    mContext.getString(R.string.err_no_query_found, Global.reportDir.getAbsoluteFile() + "/*" + Global.reportExt),
+                    mContext.getString(R.string.bookmark_err_not_found_format, Global.reportDir.getAbsoluteFile() + "/*" + Global.reportExt),
                     Toast.LENGTH_LONG).show();
         }
     }
@@ -166,7 +166,7 @@ public class BookmarkController {
                 }
             }
         };
-        dialog.editFileName(mContext, mContext.getString(R.string.cmd_rename), newName);
+        dialog.editFileName(mContext, mContext.getString(R.string.rename_menu_title), newName);
         return true;
     }
 
@@ -190,20 +190,20 @@ public class BookmarkController {
             }
         };
 
-        dlg.yesNoQuestion(mContext, items[itemIndex], mContext.getString(R.string.delete_question));
+        dlg.yesNoQuestion(mContext, items[itemIndex], mContext.getString(R.string.bookmark_delete_question));
         return true;
     }
 
     private void onDeleteAnswer(File file, int itemIndex, String[] items) {
         if (file.exists() && file.delete()) {
-            String message = mContext.getString(R.string.delete_answer, file.getAbsoluteFile() );
+            String message = mContext.getString(R.string.bookmark_delete_answer_format, file.getAbsoluteFile() );
             Toast.makeText(mContext,
                      message,
                     Toast.LENGTH_LONG).show();
             Log.d(Global.LOG_CONTEXT, message);
             items[itemIndex] = null;
         } else {
-            String message = mContext.getString(R.string.delete_error, file.getAbsoluteFile() );
+            String message = mContext.getString(R.string.bookmark_delete_error_format, file.getAbsoluteFile() );
             Toast.makeText(mContext,
                     message,
                     Toast.LENGTH_LONG).show();

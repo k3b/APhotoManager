@@ -190,7 +190,7 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
                 return true;
-            case R.id.action_settings:
+            case R.id.cmd_settings:
                 SettingsActivity.show(this);
                 return true;
 
@@ -412,7 +412,7 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
             try {
                 return Double.parseDouble(string);
             } catch (Exception ex) {
-                throw new RuntimeException(getString(R.string.invalid_location, string), ex);
+                throw new RuntimeException(getString(R.string.filter_err_invalid_location_format, string), ex);
             }
         }
 
@@ -423,7 +423,7 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
             try {
                 return this.isoDateformatter.parse(string).getTime();
             } catch (Exception ex) {
-                throw new RuntimeException(getString(R.string.invalid_date, string), ex);
+                throw new RuntimeException(getString(R.string.filter_err_invalid_date_format, string), ex);
             }
         }
     };

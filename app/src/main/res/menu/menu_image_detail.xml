@@ -26,24 +26,24 @@
         android:id="@+id/menu_item_share"
         android:showAsAction="always"
         android:icon="@android:drawable/ic_menu_share"
-        android:title="@string/cmd_share"
+        android:title="@string/share_menu_title"
         android:orderInCategory="2" />
 
     <item
         android:id="@+id/menu_item_rename"
         android:showAsAction="ifRoom"
-        android:title="@string/cmd_rename"
+        android:title="@string/rename_menu_title"
         android:orderInCategory="50" />
 
-    <item android:id="@+id/action_slideshow" android:title="@string/cmd_slideshow"
+    <item android:id="@+id/action_slideshow" android:title="@string/slideshow_menu_title"
         android:icon="@android:drawable/ic_media_play"
         android:checkable="true"
         android:orderInCategory="900" android:showAsAction="never" />
 
-    <item android:id="@+id/action_details" android:title="@string/cmd_details"
+    <item android:id="@+id/action_details" android:title="@string/details_menu_title"
         android:icon="@android:drawable/ic_menu_preferences"
         android:orderInCategory="900" android:showAsAction="ifRoom" />
-    <item android:id="@+id/action_edit" android:title="@string/cmd_edit"
+    <item android:id="@+id/action_edit" android:title="@string/edit_menu_title"
         android:icon="@android:drawable/ic_menu_edit"
         android:orderInCategory="20" android:showAsAction="ifRoom" />
     <item android:id="@+id/cmd_about"

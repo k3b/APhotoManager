@@ -386,7 +386,7 @@ public class FotoSql {
                 return context.getString(R.string.sort_by_name_len);
 
             case QUERY_TYPE_GALLERY:
-                return context.getString(R.string.gallery_foto);
+                return context.getString(R.string.gallery_title);
             case QUERY_TYPE_GROUP_DATE:
                 return context.getString(R.string.sort_by_date);
             case QUERY_TYPE_GROUP_ALBUM:

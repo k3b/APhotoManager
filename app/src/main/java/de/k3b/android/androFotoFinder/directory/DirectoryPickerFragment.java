@@ -23,7 +23,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -54,7 +53,6 @@ import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.AndroidFileCommands;
-import de.k3b.android.widget.Dialogs;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryNavigator;
 import de.k3b.io.GalleryFilterParameter;
@@ -247,7 +245,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
 
         if (mDirTypId != 0) {
             String title = mContext.getString(
-                    R.string.directory_fragment_dialog_title,
+                    R.string.folder_dialog_title_format,
                     FotoSql.getName(mContext,mDirTypId));
             getDialog().setTitle(title);
             // no api for setIcon ????
@@ -287,7 +285,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
 
     private boolean onCreateSubDirQuestion(final IDirectory parentDir) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(R.string.cmd_mk_dir);
+        builder.setTitle(R.string.mk_dir_menu_title);
         View content = getActivity().getLayoutInflater().inflate(R.layout.dialog_edit_name, null);
 
         final EditText edit = (EditText) content.findViewById(R.id.edName);
@@ -327,11 +325,11 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         int msgId;
         if (newChild.osMkDirs()) {
             AndroidFileCommands.log(getActivity(), "mkdirs \"", newPathAbsolute, "\"" ).closeLogFile();
-            msgId = R.string.cmd_mk_success;
+            msgId = R.string.mk_success_format;
             reloadTreeViewIfAvailable();
             onParentPathBarButtonClick(newChild);
         } else {
-            msgId = R.string.cmd_mk_failed;
+            msgId = R.string.mk_err_failed_format;
             parentDir.getChildren().remove(newChild);
             newChild.destroy();
         }

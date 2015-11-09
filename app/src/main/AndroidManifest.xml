@@ -76,7 +76,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".imagedetail.ImageDetailActivityViewPager"
-            android:ellipsize="middle"  android:label="@string/app_viewer_name">
+            android:ellipsize="middle"  android:label="@string/app_image_viewer_title">
             <intent-filter > <!-- file with mime -->
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.SEND" />
@@ -109,17 +109,17 @@
             </intent-filter>
         </activity>
         <activity android:name=".GalleryFilterActivity"
-            android:label="@string/title_activity_gallery_filter" >
+            android:label="@string/filter_title" >
         </activity>
 
         <activity android:name=".locationmap.GeoEditActivity"
-            android:label="@string/title_geo_edit"
+            android:label="@string/geo_edit_menu_title"
             android:icon="@drawable/ic_geo_edit">
         </activity>
 
         <activity android:name=".locationmap.MapGeoPickerActivity"
             android:icon="@drawable/ic_foto_map"
-            android:label="@string/app_map_name" >
+            android:label="@string/app_map_title" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

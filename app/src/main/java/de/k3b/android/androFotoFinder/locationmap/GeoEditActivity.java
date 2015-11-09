@@ -97,7 +97,7 @@ public class GeoEditActivity extends Activity implements Common {
         if (selectedItems != null) {
             mSelectedItems = selectedItems;
 
-            String title = getString(R.string.title_geo_edit) + " (" + selectedItems.size() + ")";
+            String title = getString(R.string.geo_edit_menu_title) + " (" + selectedItems.size() + ")";
             setTitle(title);
         }
 
@@ -254,7 +254,7 @@ public class GeoEditActivity extends Activity implements Common {
         try {
             return Double.parseDouble(string);
         } catch (Exception ex) {
-            throw new RuntimeException(getString(R.string.invalid_location, string), ex);
+            throw new RuntimeException(getString(R.string.filter_err_invalid_location_format, string), ex);
         }
     }
 
@@ -262,7 +262,7 @@ public class GeoEditActivity extends Activity implements Common {
         final Intent intent = new Intent();
         intent.setAction(Intent.ACTION_PICK);
         intent.setData(Uri.parse(geoUri));
-        intent.putExtra(EXTRA_TITLE, getString(R.string.title_geo_picker));
+        intent.putExtra(EXTRA_TITLE, getString(R.string.geo_picker_title));
         if (mSelectedItems != null) {
             intent.putExtra(EXTRA_SELECTED_ITEMS, mSelectedItems.toString());
         }
@@ -271,7 +271,7 @@ public class GeoEditActivity extends Activity implements Common {
 //          this.startActivityForResult(Intent.createChooser(intent, getText(R.string.title_chooser_geo_picker)), RESULT_ID);
             this.startActivityForResult(intent, RESULT_ID);
         } catch (ActivityNotFoundException ex) {
-            Toast.makeText(this, R.string.error_geo_picker,Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.geo_picker_err_not_found,Toast.LENGTH_LONG).show();
         }
     }
 
@@ -315,7 +315,7 @@ public class GeoEditActivity extends Activity implements Common {
         mProgressBar.setMax(selectedItems.size() + 1);
 
         mLblStatusMessage = ((TextView) findViewById(R.id.lbl_status));
-        mLblStatusMessage.setText(R.string.geo_update_in_progress);
+        mLblStatusMessage.setText(R.string.geo_edit_update_in_progress);
 
         /** encapsulate geo-job into async background task */
         AsyncTask<Object, Integer, Integer> task = new AsyncTask<Object, Integer, Integer>() {
@@ -346,7 +346,7 @@ public class GeoEditActivity extends Activity implements Common {
                 if (mProgressBar != null) {
                     // gui is not destoyed yet
                     if ((result != null) && (result.intValue() > 0)) {
-                        String message = getString(R.string.success_update, result.intValue());
+                        String message = getString(R.string.image_success_update_format, result.intValue());
                         Toast.makeText(GeoEditActivity.this, message, Toast.LENGTH_LONG).show();
                         setResult(RESULT_CHANGE);
                         finish();

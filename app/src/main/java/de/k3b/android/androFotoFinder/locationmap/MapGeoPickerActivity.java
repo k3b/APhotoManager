@@ -85,7 +85,7 @@ public class MapGeoPickerActivity extends Activity implements Common {
 
         String extraTitle = intent.getStringExtra(EXTRA_TITLE);
         if (extraTitle == null && (geoPointFromIntent == null)) {
-            extraTitle = getString(R.string.app_map_name);
+            extraTitle = getString(R.string.app_map_title);
         }
 
         if (extraTitle == null) {
@@ -197,7 +197,7 @@ public class MapGeoPickerActivity extends Activity implements Common {
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
                 return true;
-            case R.id.action_settings:
+            case R.id.cmd_settings:
                 SettingsActivity.show(this);
                 return true;
             default:

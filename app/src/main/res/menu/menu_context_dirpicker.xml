@@ -20,6 +20,6 @@
  */
  -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/cmd_gallery" android:title="@string/title_show_in_gallery"
+    <item android:id="@+id/cmd_gallery" android:title="@string/show_in_gallery_menu_title"
         android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
 </menu>

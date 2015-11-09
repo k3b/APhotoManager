@@ -57,7 +57,7 @@ public class AndroFotoFinderApp extends Application {
         SettingsActivity.prefs2Global(this);
 
         // create sensible defaults for domain-independant QueryParameter parsing
-        QueryParameter.sParserComment = getString(R.string.query_param_comment,
+        QueryParameter.sParserComment = getString(R.string.bookmark_file_comment_format,
                 getString(R.string.app_name),
                 GuiUtil.getAppVersionName(this),
                 new Date().toString());

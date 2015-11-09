@@ -2,7 +2,7 @@
 
 <PreferenceScreen android:key="preferences" xmlns:android="http://schemas.android.com/apk/res/android">
 	<PreferenceCategory 
-		android:title="@string/action_settings"
+		android:title="@string/settings_title"
 		android:key="first_category">
 
         <CheckBoxPreference android:key="clearSelectionAfterCommand"

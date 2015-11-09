@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="sort_order_options" translatable="false">
+        <item>@string/sort_order_Name_Ascending</item>
+        <item>@string/sort_order_Name_Descending</item>
+        <item>@string/sort_order_Date_Ascending</item>
+        <item>@string/sort_order_Date_Descending</item>
+        <item>@string/sort_order_Place_Ascending</item>
+        <item>@string/sort_order_Place_Descending</item>
+        <item>@string/sort_order_Name-length_Ascending</item>
+        <item>@string/sort_order_Name-length_Descending</item>
+    </string-array>
+
+</resources>

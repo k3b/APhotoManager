@@ -22,12 +22,14 @@ this program. If not, see <http://www.gnu.org/licenses/>
     resources that shold NOT be localized
 -->
 <resources>
-    <string name="app_name">a Photo Manager (dev)</string>
-    <string name="about_summary">About a Photo Manager (dev)</string>
-    <string name="app_viewer_name">a Photo Viewer (dev)</string>
-    <string name="app_map_name">a Photo Map (dev)</string>
+    <string name="app_name" translatable="false">a Photo Manager (dev)</string>
+    <string name="about_summary" translatable="false">About a Photo Manager (dev)</string>
+    <string name="app_image_viewer_title" translatable="false">a Photo Viewer (dev)</string>
+    <string name="app_map_title" translatable="false">a Photo Map (dev)</string>
 
-<string name="about_content"><![CDATA["<html><body>
+    <string name="global_log_file_path" translatable="false">copy/aPhotoManager.log</string>
+
+<string name="about_content" translatable="false"><![CDATA["<html><body>
 <a href="https://github.com/k3b/AndroFotoFinder/wiki"><b>A Photo Manager</b></a><br/>Version AndroFotoFinder $versionName$
 <br />
 <hr />
@@ -140,6 +142,5 @@ Android is a trademark of Google Inc. Use of this trademark is subject
 </body></html>
 "]]>
 </string>
-    <string name="log_file_path">copy/aPhotoManager.log</string>
 
 </resources>

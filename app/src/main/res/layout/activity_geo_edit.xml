@@ -111,7 +111,7 @@
     <Button android:id="@+id/cmd_ok"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/cmd_set_geo"
+        android:text="@string/set_geo_menu_title"
         android:layout_below="@+id/lbl_status"
         android:layout_alignParentLeft="true"
         />

@@ -24,28 +24,28 @@
     xmlns:tools="http://schemas.android.com/tools" tools:context=".GalleryActivity">
 
     <item android:id="@+id/cmd_copy"
-        android:title="@string/cmd_copy"
+        android:title="@string/copy_menu_title"
         android:icon="@android:drawable/ic_menu_save"
         android:visible="true"
         android:orderInCategory="40"
         android:showAsAction="ifRoom" />
 
     <item android:id="@+id/cmd_move"
-        android:title="@string/cmd_move"
+        android:title="@string/move_menu_title"
         android:icon="@android:drawable/ic_menu_send"
         android:visible="true"
         android:orderInCategory="40"
         android:showAsAction="ifRoom" />
 
     <item android:id="@+id/cmd_delete"
-        android:title="@string/cmd_delete"
+        android:title="@string/delete_menu_title"
         android:icon="@android:drawable/ic_menu_delete"
         android:visible="true"
         android:orderInCategory="40"
         android:showAsAction="ifRoom" />
 
     <item android:id="@+id/cmd_edit_geo"
-        android:title="@string/cmd_set_geo"
+        android:title="@string/set_geo_menu_title"
         android:icon="@android:drawable/ic_dialog_map"
         android:visible="true"
         android:orderInCategory="200"

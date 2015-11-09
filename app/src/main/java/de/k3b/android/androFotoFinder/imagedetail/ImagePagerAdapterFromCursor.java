@@ -147,7 +147,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  {
                 return result.toString();
             }
         }
-        return mActivity.getString(R.string.loading_image_at_position, position);
+        return mActivity.getString(R.string.image_loading_at_position_format, position);
     }
 
     public String getFullFilePath(int position) {

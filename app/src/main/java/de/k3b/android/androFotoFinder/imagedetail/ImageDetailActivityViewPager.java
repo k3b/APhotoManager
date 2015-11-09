@@ -445,7 +445,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             } else {
 
                 // close activity if last image of current selection has been deleted
-                String message = getString(R.string.err_no_fotos_found, mInitialFilePath);
+                String message = getString(R.string.image_err_not_found_format, mInitialFilePath);
                 Toast.makeText(this, message, Toast.LENGTH_LONG).show();
                 this.finish();
             }
@@ -482,7 +482,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
                     mDebugPrefix + "checkForIncompleteMediaDatabase-" + why,
                     fileToLoad.getParentFile());
 
-            String message = getString(R.string.err_fotos_not_in_db, jpgFullFilePath, numberOfNewItems);
+            String message = getString(R.string.image_err_not_in_db_format, jpgFullFilePath, numberOfNewItems);
             Toast.makeText(this, message, Toast.LENGTH_LONG).show();
             return true;
         }
@@ -561,11 +561,11 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
                 return true;
 
             case R.id.action_edit:
-                cmdStartIntent(getCurrentFilePath(), null, Intent.ACTION_EDIT, R.string.title_chooser_edit, R.string.error_edit);
+                cmdStartIntent(getCurrentFilePath(), null, Intent.ACTION_EDIT, R.string.edit_chooser_title, R.string.edit_err_editor_not_found);
                 return true;
 
             case R.id.menu_item_share:
-                cmdStartIntent(null, getCurrentFilePath(), Intent.ACTION_SEND, R.string.title_chooser_share, R.string.error_share);
+                cmdStartIntent(null, getCurrentFilePath(), Intent.ACTION_SEND, R.string.share_chooser__title, R.string.share_err_not_found);
                 return true;
 
             case R.id.cmd_copy:
@@ -581,7 +581,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
                 return true;
-            case R.id.action_settings:
+            case R.id.cmd_settings:
                 SettingsActivity.show(this);
                 return true;
 
@@ -686,7 +686,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
                     }
                 }
             };
-            dialog.editFileName(this, getString(R.string.cmd_rename), newName, fotoId, fotoPath);
+            dialog.editFileName(this, getString(R.string.rename_menu_title), newName, fotoId, fotoPath);
         }
         return true;
     }
@@ -703,10 +703,10 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
         String errorMessage = null;
         if (hasSideCar && mFileCommands.osFileExists(destXmp)) {
-            errorMessage = getString(R.string.err_file_exists, destXmp.getAbsoluteFile());
+            errorMessage = getString(R.string.image_err_file_exists_format, destXmp.getAbsoluteFile());
         }
         if (mFileCommands.osFileExists(dest)) {
-            errorMessage = getString(R.string.err_file_exists, dest.getAbsoluteFile());
+            errorMessage = getString(R.string.image_err_file_exists_format, dest.getAbsoluteFile());
         }
 
         if (errorMessage != null) {
@@ -717,7 +717,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             mModifyCount++;
         } else {
             // rename failed
-            errorMessage = getString(R.string.err_file_rename, src.getAbsoluteFile());
+            errorMessage = getString(R.string.image_err_file_rename_format, src.getAbsoluteFile());
             Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
         }
     }
