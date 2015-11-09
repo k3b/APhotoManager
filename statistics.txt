@@ -104,8 +104,8 @@ Unique visitors https://github.com/k3b/AndroFotoFinder/graphs/traffic
 1104	3
 1105	4
 1106	7
-1107		available in fdroid v0.4.2.151105
-1108	
+1107	24	available in fdroid v0.4.2.151105
+1108	23
 1109	
 1110	
 1111	

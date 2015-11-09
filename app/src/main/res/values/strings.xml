@@ -91,7 +91,7 @@
     <string name="delete_menu_title">Delete</string>
     <string name="bookmark_delete_question">Delete this bookmark?</string>
     <string name="bookmark_delete_answer_format">Deleted bookmark %1$s.</string>
-    <string name="bookmark_delete_error_format">Cannot deleted bookmark %1$s.</string>
+    <string name="bookmark_delete_error_format">Cannot delete bookmark %1$s.</string>
     <string name="image_err_not_found_format">No Photos found for %1$s.</string>
     <string name="bookmark_err_not_found_format">No queries found in %1$s.</string>
     <string name="image_err_not_in_db_format">Photo not found in media database %1$s yet. Scanning %2$d new files. The missing photo will be available soon.</string>
