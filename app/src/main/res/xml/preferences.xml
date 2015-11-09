@@ -7,45 +7,43 @@
 
         <CheckBoxPreference android:key="clearSelectionAfterCommand"
             android:defaultValue="true"
-            android:title="Clear Multi-Selelection"
-            android:summary="... after Copy/Move/Rename/... ." />
+            android:title="@string/settings_multisel_clear_title"
+            android:summary="@string/settings_multisel_clear_summary" />
         <de.k3b.android.widgets.EditTextPreferenceWithSummary
             android:key="maxSelectionMarkersInMap"
-            android:title="Max. Sel-Markers in Map" />
+            android:title="@string/settings_map_selmarker_max_title" />
         <de.k3b.android.widgets.EditTextPreferenceWithSummary
             android:key="slideshowIntervallInMilliSecs"
-            android:title="Slide Show Intervall in millisecs" />
+            android:title="@string/settings_image_slideshow_intervall_title" />
         <de.k3b.android.widgets.EditTextPreferenceWithSummary
             android:key="reportDir"
-            android:title="Report Folder" />
+            android:title="@string/settings_bookmark_dir_title" />
 		<de.k3b.android.widget.AboutDialogPreference
 			android:key="about"
 			android:title="@string/about_summary" />
-        <!--
-        -->
 	</PreferenceCategory>
 	<PreferenceCategory 
-		android:title="Diagnostics"
+		android:title="@string/settings_group_debug_title"
 		android:key="second_category">
         <de.k3b.android.widgets.EditTextPreferenceWithSummary
             android:key="logCatDir"
-            android:title="Error Log  Folder" />
+            android:title="@string/settings_log_folder_title" />
         <CheckBoxPreference android:key="debugEnabledSql"
             android:defaultValue="false"
-            android:title="LogCat SQL"
-            android:summary="... containing executed SQL." />
+            android:title="@string/settings_debug_sql_title"
+            android:summary="@string/settings_debug_sql_summary" />
         <CheckBoxPreference android:key="debugEnabledViewItem"
             android:defaultValue="false"
-            android:title="LogCat Grid/Listview"
-            android:summary="... containing Grid/Listview Items." />
+            android:title="@string/settings_debug_view_item_title"
+            android:summary="@string/settings_debug_view_item_summary" />
         <CheckBoxPreference android:key="debugEnabledMemory"
             android:defaultValue="false"
-            android:title="LogCat Memory Consumption"
-            android:summary="... containing Memory Consumption." />
+            android:title="@string/settings_debug_memory_title"
+            android:summary="@string/settings_debug_memory_summary" />
         <CheckBoxPreference android:key="debugEnabled"
             android:defaultValue="false"
-            android:title="LogCat Misc."
-            android:summary="... containing other Log Messages." />
+            android:title="@string/settings_debug_title"
+            android:summary="@string/settings_debug_summary" />
 
 	</PreferenceCategory>
 </PreferenceScreen>

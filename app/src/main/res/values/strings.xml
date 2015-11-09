@@ -188,5 +188,20 @@ Features:
     <string name="global_err_sql_title_reload">Invalid SQL. Reloading default</string>
     <string name="global_err_system">Systemfehler. Exiting</string>
     <string name="global_err_sql_message_format">Sql error \'%1$s\'\n\n%2$s</string>
+    <string name="settings_multisel_clear_title">Clear Multi-Selelection</string>
+    <string name="settings_map_selmarker_max_title">Max. Sel-Markers in Map</string>
+    <string name="settings_image_slideshow_intervall_title">Slide Show Intervall in millisecs</string>
+    <string name="settings_bookmark_dir_title">Report Folder</string>
+    <string name="settings_multisel_clear_summary">... after Copy/Move/Rename/... .</string>
+    <string name="settings_debug_sql_summary">... containing executed SQL.</string>
+    <string name="settings_debug_sql_title">LogCat SQL</string>
+    <string name="settings_debug_view_item_title">LogCat Grid/Listview</string>
+    <string name="settings_debug_view_item_summary">... containing Grid/Listview Items.</string>
+    <string name="settings_debug_memory_summary">... containing Memory Consumption.</string>
+    <string name="settings_debug_memory_title">LogCat Memory Consumption</string>
+    <string name="settings_debug_title">LogCat Misc.</string>
+    <string name="settings_debug_summary">... containing other Log Messages.</string>
+    <string name="settings_log_folder_title">Error Log Folder</string>
+    <string name="settings_group_debug_title">Diagnostics</string>
 
 </resources>
