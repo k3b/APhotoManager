@@ -471,7 +471,7 @@ public class FotoGalleryActivity extends Activity implements Common,
                 reloadGui("sort geo");
                 return true;
             case R.id.action_settings:
-                openSettings();
+                SettingsActivity.show(this);
                 return true;
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
@@ -595,11 +595,6 @@ public class FotoGalleryActivity extends Activity implements Common,
     }
 
     private void openSort() {
-    }
-
-    private void openSettings() {
-//        Intent intent = new Intent(this, SettingsActivity.class);;
-//        startActivity(intent);
     }
 
     /** called by Fragment: a fragment Item was clicked */

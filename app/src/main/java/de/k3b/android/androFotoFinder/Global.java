@@ -33,11 +33,12 @@ public class Global {
     public static final String LOG_CONTEXT = "k3bFoto";
 
     /**
-     * TODO: create settings view for these
+     * Global.xxxxx. Non final values may be changed in SettingsActivity
      */
     public static boolean debugEnabled = true;
     public static boolean debugEnabledViewItem = false;
     public static boolean debugEnabledSql = true;
+    public static boolean debugEnabledMemory = false;
 
     public static int maxSelectionMarkersInMap = 255;
 
@@ -46,12 +47,14 @@ public class Global {
     public static boolean clearSelectionAfterCommand = false;
 
     /** true update only if media scanner is not running. false=risky=always allow.  */
-    public static boolean mustCheckMediaScannerRunning = true;
+    public static final boolean mustCheckMediaScannerRunning = true;
     public static File reportDir = new File(Environment.getExternalStorageDirectory(), "databases/sql");
-    public static String reportExt = ".query";
+    public static final String reportExt = ".query";
+
+    public static File logCatDir = new File(Environment.getExternalStorageDirectory(), "copy/log");
 
     public static void debugMemory(String modul, String message) {
-        if (false && Global.debugEnabled) {
+        if (Global.debugEnabledMemory) {
             Runtime r = Runtime.getRuntime();
             String formattedMessage = String.format("memory : (total/free/avail) = (%3$dK/%4$dK/%5$dK)\t- %1$s.%2$s",
                     modul, message, r.totalMemory()/1024, r.freeMemory()/1024, r.maxMemory()/1024);

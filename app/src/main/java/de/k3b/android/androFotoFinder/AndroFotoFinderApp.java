@@ -54,6 +54,8 @@ public class AndroFotoFinderApp extends Application {
     @Override public void onCreate() {
         super.onCreate();
 
+        SettingsActivity.prefs2Global(this);
+
         // create sensible defaults for domain-independant QueryParameter parsing
         QueryParameter.sParserComment = getString(R.string.query_param_comment,
                 getString(R.string.app_name),
@@ -66,7 +68,7 @@ public class AndroFotoFinderApp extends Application {
         for (String columnName : FotoSql.DEFAULT_GALLERY_COLUMNS) {
             QueryParameter.sParserDefaultSelect.add(columnName);
         }
-        mCrashSaveToFile = new LogCat(Global.LOG_CONTEXT);
+        mCrashSaveToFile = new LogCat(this, Global.LOG_CONTEXT);
     }
 
     @Override

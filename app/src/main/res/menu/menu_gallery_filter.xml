@@ -23,7 +23,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="de.k3b.android.androFotoFinder.GalleryFilterActivity">
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
-        android:orderInCategory="100" android:showAsAction="never" android:visible="false" />
+        android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
     <item android:id="@+id/action_save_as" android:title="@string/cmd_save_bookmark_as"
         android:orderInCategory="200" android:showAsAction="never" android:visible="true" />
     <item android:id="@+id/action_load_from" android:title="@string/cmd_load_bookmark_from"

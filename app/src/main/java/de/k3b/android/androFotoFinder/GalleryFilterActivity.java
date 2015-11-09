@@ -190,6 +190,10 @@ public class GalleryFilterActivity extends Activity implements Common, Directory
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
                 return true;
+            case R.id.action_settings:
+                SettingsActivity.show(this);
+                return true;
+
             case R.id.action_save_as:
                 bookmarkController.onSaveAsQuestion("", getAsQuery());
                 return true;

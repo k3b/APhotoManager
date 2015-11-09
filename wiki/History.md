@@ -1,6 +1,14 @@
 ## next version not released yet
 
-## [v0.4.2.*](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.2) (not released yet)
+## todo 
+
+* [#20 Add german translations](https://github.com/k3b/AndroFotoFinder/issues/20)
+* [#19 Add Settings dialog](https://github.com/k3b/AndroFotoFinder/issues/19)
+
+## [v0.4.3.*](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.3) (not released yet)
+
+
+## [v0.4.2.151105](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.2.151105) available in [F-Droid app store](https://f-droid.org)  since 2015-11-07
 
 * after app crash the errorlog (logcat) is written to /mnt/sdcard/copy/log/androFotofinder.logcat*.txt
 * renamed from "a Foto Finder" to "a Photo Manager" to avoid naming collision with other names.

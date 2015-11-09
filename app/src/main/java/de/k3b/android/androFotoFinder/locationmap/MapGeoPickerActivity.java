@@ -37,6 +37,7 @@ import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.GalleryFilterActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.SettingsActivity;
 import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.database.SelectedItems;
@@ -195,6 +196,9 @@ public class MapGeoPickerActivity extends Activity implements Common {
                 return true;
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
+                return true;
+            case R.id.action_settings:
+                SettingsActivity.show(this);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

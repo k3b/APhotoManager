@@ -47,6 +47,7 @@ import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.SettingsActivity;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
@@ -579,6 +580,9 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
+                return true;
+            case R.id.action_settings:
+                SettingsActivity.show(this);
                 return true;
 
             default:

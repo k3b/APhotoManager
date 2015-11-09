@@ -65,7 +65,7 @@
     <item android:id="@+id/action_settings"
         android:title="@string/action_settings"
         android:icon="@android:drawable/ic_menu_preferences"
-        android:visible="false"
+        android:visible="true"
         android:orderInCategory="100"
         android:showAsAction="ifRoom|withText" />
 

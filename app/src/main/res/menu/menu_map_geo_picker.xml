@@ -29,7 +29,7 @@
         android:orderInCategory="10"
         android:showAsAction="never" />
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
-        android:orderInCategory="100" android:showAsAction="never" android:visible="false" />
+        android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
     <item android:id="@+id/cmd_about"
         android:title="@string/about_summary"
         android:visible="true"
