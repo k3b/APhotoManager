@@ -21,79 +21,128 @@
  */
  -->
 <resources>
-  <string name="gallery_title">Fotos</string>
-  <string name="sort_by_none">Unsortiert</string>
-  <string name="sort_by_folder">Ordner</string>
-  <string name="sort_by_name">Name</string>
-  <string name="sort_by_date">Datum</string>
-  <string name="sort_by_place">Ort</string>
-  <string name="sort_by_name_len">Länge</string>
-  <string name="destination_move">Verschieben nach</string>
-  <string name="destination_copy">Kopieren nach</string>
-  <string name="settings_title">Einstellungen</string>
-  <string name="no_dir_selected">Wählen Sie einen Ordner mit Bildern aus, um OK zu aktivieren</string>
-  <string name="ok">Ok</string>
-  <string name="cancel">Abbrechen</string>
-  <string name="pause">Anhalten</string>
-  <string name="background">Hintergrund</string>
-  <string name="popup">&#8230;</string>
-  <string name="folder_menu_title">Ordner-Filter</string>
   <string name="area_menu_title">Kartenausschnitt wählen</string>
-  <string name="filter_menu_title">Filter</string>
-  <string name="sort_menu_title">Sortieren</string>
-  <string name="folder_dialog_title_format">Wählen Sie %1$s</string>
-  <string name="image_loading_at_position_format">"Lade(%1$d)…"</string>
-  <string name="folder_err_load_failed_format">Fehler beim Laden des Ordners %1$s</string>
-  <string name="sort_order_Name_Ascending">Name aufsteigend</string>
-  <string name="sort_order_Name_Descending">Name absteigend</string>
-  <string name="sort_order_Date_Ascending">Datum aufsteigend</string>
-  <string name="sort_order_Date_Descending">Datum absteigend</string>
-  <string name="sort_order_Place_Ascending">Ort aufsteigend</string>
-  <string name="sort_order_Place_Descending">Ort absteigend</string>
-  <string name="sort_order_Name_length_Ascending">Namenslänge aufsteigend</string>
-  <string name="sort_order_Name_length_Descending">Namenslänge absteigend</string>
-  <string name="filter_title">Filter</string>
-  <string name="filter_err_invalid_location_format">\'%1$s\' ist keine gültige Koordinate.</string>
-  <string name="filter_err_invalid_date_format">\'%1$s\' ist kein gültiges Datum.</string>
-  <string name="details_menu_title">Informationen</string>
-  <string name="edit_menu_title">Bearbeiten</string>
-  <string name="edit_chooser_title">Wählen Sie einen Fotoeditor</string>
-  <string name="set_geo_menu_title">Geo Daten definieren</string>
-  <string name="geo_picker_title">Wählen Sie neuen Ort für Foto</string>
-  <string name="edit_err_editor_not_found">Kein Fotoeditor gefunden</string>
-  <string name="geo_picker_err_not_found">Keine Geo Auswahl gefunden</string>
-  <string name="osm_cright_title">Map Tiles (c) <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> Mitwirkende</string>
-  <string name="multiselection_status_format">%1$d Ausgewählt</string>
-  <string name="rename_menu_title">Umbenennen</string>
-  <string name="overwrite_question_title">Überschreiben?</string>
-  <string name="image_err_file_exists_format">Die Datei \'%1$s\' ist bereits vorhanden. \n wollen Sie wirklich überschreiben?</string>
-  <string name="image_err_file_rename_format">Datei \'%1$s\' kann nicht umbenannt werden.</string>
-  <string name="image_success_update_format">%1$d Fotos aktualisiert.</string>
-  <string name="share_menu_title">Teilen/Senden</string>
-  <string name="share_err_not_found">Kein Teilen/Senden Anbieter gefunden</string>
-  <string name="delete_menu_title">Löschen</string>
-  <string name="bookmark_delete_question">Lesezeichen löschen?</string>
+  <string name="background">Hintergrund</string>
   <string name="bookmark_delete_answer_format">Lesezeichen %1$s gelöscht.</string>
   <string name="bookmark_delete_error_format">Kann Lesezeichen %1$s nicht löschen.</string>
-  <string name="image_err_not_found_format">Keine Fotos gefunden für %1$s.</string>
+  <string name="bookmark_delete_question">Lesezeichen löschen?</string>
   <string name="bookmark_err_not_found_format">Keine Lesezeichen in %1$s.</string>
-  <string name="image_err_not_in_db_format">Foto in Medien-Datenbank-%1$s nicht gefunden. Scanne %2$d neue Dateien. Fehlende Fotos werden in Kürze verfügbar sein.</string>
-  <string name="copy_menu_title">Kopieren</string>
-  <string name="move_menu_title">Verschieben</string>
-  <string name="mk_dir_menu_title">Ordner erstellen</string>
-  <string name="mk_success_format">Erstellte %1$s</string>
-  <string name="mk_err_failed_format">%1$s kann nicht erstellt werden</string>
-  <string name="mk_dir_default">neuer_Ordner</string>
-  <string name="btn_yes">Ja</string>
+  <string name="bookmark_file_comment_format">Erstellt am %3$s mit \'%1$s\' Version %2$s. weitere Informationen finden Sie unter https://github.com/k3b/AndroFotoFinder/wiki/intentap#sql</string>
+  <string name="bookmark_load_from_menu_title">Lade Lesezeichen aus&#8230;</string>
+  <string name="bookmark_save_as_menu_title">Lesezeichen speichern unter...</string>
+
   <string name="btn_no">Nein</string>
-  <string name="delete_result_format">%1$d/%2$d Dateien gelöscht</string>
+  <string name="btn_yes">Ja</string>
+  <string name="btn_cancel">Abbrechen</string>
+  <string name="btn_change">Ändern</string>
+  <string name="btn_ok">Ok</string>
+  <string name="btn_pause">Anhalten</string>
+
+  <string name="copy_menu_title">Kopieren</string>
   <string name="copy_result_format">%1$d/%2$d Dateien kopiert</string>
-  <string name="move_result_format">%1$d/%2$d Dateien verschobenen</string>
-  <string name="update_result_format">%1$d/%2$d Dateien aktualisiert</string>
-  <string name="rename_result_format">%1$d/%2$d Dateien umbenannt</string>
+  <string name="delete_menu_title">Löschen</string>
+  <string name="delete_question_message_format">"Sind Sie sicher, dass Sie diese Dateien dauerhaft löschen möchten?
+%1$s,
+
+Dieser Vorgang kann nicht rückgängig gemacht werden."</string>
   <string name="delete_question_title">Foto(s) Löschen?</string>
-  <string name="delete_question_message_format">\"Sind Sie sicher, dass Sie diese Dateien dauerhaft löschen möchten?\n%1$s,\n Diesen Vorgang kann nicht rückgängig gemacht werden.\"</string>
-  <string name="about_content_about"><![CDATA[
+  <string name="delete_result_format">%1$d/%2$d Dateien gelöscht</string>
+  <string name="destination_copy">Kopieren nach</string>
+  <string name="destination_move">Verschieben nach</string>
+  <string name="details_menu_title">Informationen</string>
+  <string name="edit_chooser_title">Wählen Sie einen Fotoeditor</string>
+  <string name="edit_err_editor_not_found">Kein Fotoeditor gefunden</string>
+  <string name="edit_menu_title">Bearbeiten</string>
+  <string name="filter_clear_menu_title">Filter löschen</string>
+  <string name="filter_err_invalid_date_format">\'%1$s\' ist kein gültiges Datum.</string>
+  <string name="filter_err_invalid_location_format">\'%1$s\' ist keine gültige Koordinate.</string>
+  <string name="filter_menu_title">Filter</string>
+  <string name="folder_dialog_title_format">Wählen Sie %1$s</string>
+  <string name="folder_err_load_failed_format">Fehler beim Laden des Ordners %1$s</string>
+  <string name="folder_menu_title">Ordner-Filter</string>
+  <string name="gallery_title">Fotos</string>
+
+  <string name="geo_edit_menu_title">Geo-Info ändern</string>
+  <string name="geo_edit_update_in_progress">Ändere Geo-Infos in ausgewählten Fotos</string>
+
+  <string name="geo_picker_err_not_found">Keine Geo Auswahl installiert</string>
+  <string name="geo_picker_title">Wählen Sie neuen Ort fürs Foto</string>
+
+  <string name="global_err_sql_message_format">Sql-Fehler \'%1$s\' \n\n%2$s</string>
+  <string name="global_err_sql_title_reload">Ungültiges SQL. Verwende statt dessen Default</string>
+  <string name="global_err_system">Systemfehler. Beende App</string>
+  <string name="image_err_file_exists_format">Die Datei \'%1$s\' ist bereits vorhanden. \n wollen Sie wirklich überschreiben?</string>
+  <string name="image_err_file_rename_format">Datei \'%1$s\' kann nicht umbenannt werden.</string>
+  <string name="image_err_not_found_format">Keine Fotos gefunden für %1$s.</string>
+  <string name="image_err_not_in_db_format">Foto in Medien-Datenbank-%1$s nicht gefunden. Scanne %2$d neue Dateien. Fehlende Fotos werden in Kürze verfügbar sein.</string>
+  <string name="image_loading_at_position_format">"Lade(%1$d)…"</string>
+  <string name="image_success_update_format">%1$d Fotos aktualisiert.</string>
+  <string name="lbl_date">Datum</string>
+  <string name="lbl_latitude_short">Breite</string>
+  <string name="lbl_longitude_short">Länge</string>
+  <string name="lbl_path">Datei</string>
+  <string name="lbl_with_no_geo">Ohne Geo-Infos</string>
+  <string name="mk_dir_default">neuer_Ordner</string>
+  <string name="mk_dir_menu_title">Ordner erstellen</string>
+  <string name="mk_err_failed_format">%1$s kann nicht erstellt werden</string>
+  <string name="mk_success_format">Erstellte %1$s</string>
+  <string name="move_menu_title">Verschieben</string>
+  <string name="move_result_format">%1$d/%2$d Dateien verschobenen</string>
+  <string name="osm_cright_title">Map Tiles (c) <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> Mitwirkende</string>
+  <string name="overwrite_question_title">Überschreiben?</string>
+  <string name="rename_menu_title">Umbenennen</string>
+  <string name="rename_result_format">%1$d/%2$d Dateien umbenannt</string>
+  <string name="scanner_dir_question">Ab wo scannen?</string>
+  <string name="scanner_err_busy">Fotodateien können nicht bearbeitet werden, solange der Android Media Scanner aktiv ist. Versuchen Sie es später erneut.</string>
+  <string name="scanner_menu_title">Media-Scanner</string>
+  <string name="scanner_update_result_format">%1$d Media Datenbankelemente Aktualisiert</string>
+
+  <string name="selection_status_format">%1$d Ausgewählt</string>
+  <string name="selection_none_hint">Wählen Sie einen Ordner mit Bildern aus, um OK zu aktivieren</string>
+  <string name="selected_only_menu_title">Nur ausgewählte</string>
+  <string name="selection_add_all_menu_title">Auswahl: alle sichtbaren</string>
+  <string name="selection_remove_menu_title">Auswahl: alle sichtbaren abwählen</string>
+
+  <string name="settings_bookmark_dir_title">Ordner für Lesezeichen</string>
+  <string name="settings_debug_memory_summary">... mit Speicherverbrauch.</string>
+  <string name="settings_debug_memory_title">LogCat Speicherverbrauch</string>
+  <string name="settings_debug_sql_summary">... ausgeführtes SQL.</string>
+  <string name="settings_debug_sql_title">LogCat SQL</string>
+  <string name="settings_debug_summary">... mit anderen Log-Nachrichten.</string>
+  <string name="settings_debug_title">LogCat sonstiges.</string>
+  <string name="settings_debug_view_item_summary">..., Grid/Listview Elemente.</string>
+  <string name="settings_debug_view_item_title">LogCat Grid/Listview</string>
+  <string name="settings_group_debug_title">Diagnose</string>
+  <string name="settings_image_slideshow_intervall_title">Diashow-Intervall in Millisekunden</string>
+  <string name="settings_log_folder_title">Ordner für Log-Meldungen</string>
+  <string name="settings_map_selmarker_max_title">Max. Anzahl Mehrfach-Marker in der Karte</string>
+  <string name="settings_multisel_clear_summary">... nach Kopieren/Verschieben/Umbenennen /...</string>
+  <string name="settings_multisel_clear_title">Mehrfachauswahl deaktivieren</string>
+  <string name="settings_title">Einstellungen</string>
+  <string name="share_err_not_found">Kein Teilen/Senden Anbieter gefunden</string>
+  <string name="share_err_to_many">Mehrfach senden: Maximal Anzahl überschritten</string>
+  <string name="share_menu_title">Teilen/Senden</string>
+  <string name="show_in_gallery_menu_title">In neuer Galerie anzeigen</string>
+  <string name="slideshow_menu_title">Slideshow</string>
+  <string name="sort_by_date">Datum</string>
+  <string name="sort_by_folder">Ordner</string>
+  <string name="sort_by_name">Name</string>
+  <string name="sort_by_name_len">Länge</string>
+  <string name="sort_by_none">Unsortiert</string>
+  <string name="sort_by_place">Ort</string>
+  <string name="sort_menu_title">Sortieren</string>
+  <string name="sort_order_Date_Ascending">Datum aufsteigend</string>
+  <string name="sort_order_Date_Descending">Datum absteigend</string>
+  <string name="sort_order_Name_Ascending">Name aufsteigend</string>
+  <string name="sort_order_Name_Descending">Name absteigend</string>
+  <string name="sort_order_Name_length_Ascending">Namenslänge aufsteigend</string>
+  <string name="sort_order_Name_length_Descending">Namenslänge absteigend</string>
+  <string name="sort_order_Place_Ascending">Ort aufsteigend</string>
+  <string name="sort_order_Place_Descending">Ort absteigend</string>
+  <string name="update_result_format">%1$d/%2$d Dateien aktualisiert</string>
+  <string name="zoom_to_fit_menu_title">Zoom ausfüllen</string>
+
+  <string name="about_content_about"><![CDATA["
   A Photo Manager mit &#39;A Photo Viewer&#39; und &#39;AndroFotoFinder&#39;
   <br />Merkmale:
   <ul>
@@ -142,45 +191,5 @@
     </li>
   </ul>
   <br />
-  ]]></string>
-  <string name="show_in_gallery_menu_title">In neuer Galerie anzeigen</string>
-  <string name="scanner_menu_title">Media-Scanner</string>
-  <string name="scanner_dir_question">Ab wo scannen?</string>
-  <string name="scanner_err_busy">Fotodateien können nicht bearbeitet werden, solange der Android Media Scanner aktiv ist. Versuchen Sie es später erneut.</string>
-  <string name="zoom_to_fit_menu_title">Zoom ausfüllen</string>
-  <string name="lbl_date">Datum</string>
-  <string name="lbl_with_no_geo">Ohne Geo-Infos</string>
-  <string name="selection_add_all_menu_title">Auswahl: alle sichtbaren</string>
-  <string name="selection_remove_menu_title">Auswahl: alle sichtbaren abwählen</string>
-  <string name="share_err_to_many">Mehrfach senden: Maximal Anzahl überschritten</string>
-  <string name="geo_edit_menu_title">Geo-Info ändern</string>
-  <string name="geo_edit_update_in_progress">Ändere Geo-Infos in ausgewählten Fotos</string>
-  <string name="filter_clear_menu_title">Filter löschen</string>
-  <string name="lbl_longitude_short">Länge</string>
-  <string name="lbl_latitude_short">Breite</string>
-  <string name="lbl_path">Datei</string>
-  <string name="scanner_update_result_format">%1$d Media Datenbankelemente Aktualisiert</string>
-  <string name="slideshow_menu_title">Slideshow</string>
-  <string name="bookmark_file_comment_format">Erstellt am %3$s mit \'%1$s\' Version %2$s. weitere Informationen finden Sie unter https://github.com/k3b/AndroFotoFinder/wiki/intentap#sql</string>
-  <string name="bookmark_save_as_menu_title">Lesezeichen speichern unter...</string>
-  <string name="bookmark_load_from_menu_title">Lade Lesezeichen aus&#8230;</string>
-  <string name="global_err_sql_title_reload">Ungültiges SQL. Verwende statt dessen Default</string>
-  <string name="global_err_system">Systemfehler. Beende App</string>
-  <string name="global_err_sql_message_format">Sql-Fehler \'%1$s\' \n\n%2$s</string>
-  <string name="settings_multisel_clear_title">Mehrfachauswahl deaktivieren</string>
-  <string name="settings_map_selmarker_max_title">Max. Anzahl Mehrfach-Marker in der Karte</string>
-  <string name="settings_image_slideshow_intervall_title">Diashow-Intervall in Millisekunden</string>
-  <string name="settings_bookmark_dir_title">Ordner für Lesezeichen</string>
-  <string name="settings_multisel_clear_summary">... nach Kopieren/Verschieben/Umbenennen /...</string>
-  <string name="settings_debug_sql_summary">... ausgeführtes SQL.</string>
-  <string name="settings_debug_sql_title">LogCat SQL</string>
-  <string name="settings_debug_view_item_title">LogCat Grid/Listview</string>
-  <string name="settings_debug_view_item_summary">..., Grid/Listview Elemente.</string>
-  <string name="settings_debug_memory_summary">... mit Speicherverbrauch.</string>
-  <string name="settings_debug_memory_title">LogCat Speicherverbrauch</string>
-  <string name="settings_debug_title">LogCat sonstiges.</string>
-  <string name="settings_debug_summary">... mit anderen Log-Nachrichten.</string>
-  <string name="settings_log_folder_title">Ordner für Log-Meldungen</string>
-  <string name="settings_group_debug_title">Diagnose</string>
-  <string name="selected_only_menu_title">Nur ausgewählte</string>
+"]]></string>
 </resources>

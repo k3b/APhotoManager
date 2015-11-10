@@ -109,7 +109,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".GalleryFilterActivity"
-            android:label="@string/filter_title" >
+            android:label="@string/filter_menu_title" >
         </activity>
 
         <activity android:name=".locationmap.GeoEditActivity"

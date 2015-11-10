@@ -65,7 +65,7 @@
 
         <Button
             android:id="@+id/cmd_cancel"
-            android:text="@string/cancel"
+            android:text="@string/btn_cancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
@@ -75,7 +75,7 @@
             />
 
         <Button
-            android:text="@string/ok"
+            android:text="@string/btn_ok"
             android:id="@+id/ok"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

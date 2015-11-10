@@ -45,7 +45,7 @@
         android:showAsAction="ifRoom" />
 
     <item android:id="@+id/cmd_edit_geo"
-        android:title="@string/set_geo_menu_title"
+        android:title="@string/geo_edit_menu_title"
         android:icon="@android:drawable/ic_dialog_map"
         android:visible="true"
         android:orderInCategory="200"
