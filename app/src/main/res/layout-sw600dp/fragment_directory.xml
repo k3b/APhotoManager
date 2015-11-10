@@ -26,7 +26,7 @@
     <!--
     [path_scroller with path_owner containing Button-s with path elements]
     [directory_tree]
-    [cmd_ok] [cmd_cancel] [cmd_popup]
+    [cmd_cancel] [cmd_popup] [cmd_ok]
     [status [current path] or 'Select Directory with Images to enable OK']
     -->
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"

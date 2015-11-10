@@ -236,13 +236,15 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         mCmdPopup = null;
         if (mContextMenue != 0) {
             mCmdPopup = (Button) view.findViewById(R.id.cmd_popup);
-            mCmdPopup.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onShowPopUp(mCmdPopup, mCurrentSelection);
-                }
-            });
-            mCmdPopup.setVisibility(View.VISIBLE);
+            if (mCmdPopup != null) {
+                mCmdPopup.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        onShowPopUp(mCmdPopup, mCurrentSelection);
+                    }
+                });
+                mCmdPopup.setVisibility(View.VISIBLE);
+            }
         }
 
         if (mDirTypId != 0) {

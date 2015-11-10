@@ -53,7 +53,6 @@ Dieser Vorgang kann nicht rückgängig gemacht werden."</string>
   <string name="edit_chooser_title">Wählen Sie einen Fotoeditor</string>
   <string name="edit_err_editor_not_found">Kein Fotoeditor gefunden</string>
   <string name="edit_menu_title">Bearbeiten</string>
-  <string name="filter_clear_menu_title">Filter löschen</string>
   <string name="filter_err_invalid_date_format">\'%1$s\' ist kein gültiges Datum.</string>
   <string name="filter_err_invalid_location_format">\'%1$s\' ist keine gültige Koordinate.</string>
   <string name="filter_menu_title">Filter</string>
