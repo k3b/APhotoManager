@@ -1,4 +1,6 @@
 todo readme
+	dirPicker ohne "opt" anstelle ohne "cancel"
+
 	doc settings
 
 	### Translations
@@ -10,7 +12,6 @@ todo readme
 
 	## License
 	This program is licensed under GPLv3 and the whole source code is available on github.
-
 
 TODO
 

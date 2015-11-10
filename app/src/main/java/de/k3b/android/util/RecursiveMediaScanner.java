@@ -173,13 +173,13 @@ public class RecursiveMediaScanner extends MediaScanner {
         final TextView count = (TextView) content.findViewById(R.id.count);
 
         builder.setView(content);
-        builder.setNeutralButton(R.string.cancel, new DialogInterface.OnClickListener() {
+        builder.setNeutralButton(R.string.btn_cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 onStatusDialogEnd(null, true);
             }
         });
-        builder.setNegativeButton(R.string.pause, new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.btn_pause, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 onStatusDialogEnd(new ArrayList<String>(), true);

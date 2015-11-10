@@ -811,7 +811,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             }
         } else {
             // multi selection is active: update title and data for share menue
-            newTitle = getActivity().getString(R.string.multiselection_status_format, mSelectedItems.size());
+            newTitle = getActivity().getString(R.string.selection_status_format, mSelectedItems.size());
             multiSelectionUpdateShareIntent();
         }
 

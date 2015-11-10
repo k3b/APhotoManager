@@ -103,7 +103,7 @@
 
         <Button
             android:id="@+id/cmd_cancel"
-            android:text="@string/cancel"
+            android:text="@string/btn_cancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@+id/status"
@@ -113,7 +113,7 @@
 
         <Button
             android:id="@+id/cmd_popup"
-            android:text="@string/popup"
+            android:text="@string/btn_popup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@+id/status"
@@ -123,7 +123,7 @@
             android:visibility="gone" />
         <Button
             android:id="@+id/cmd_ok"
-            android:text="@string/ok"
+            android:text="@string/btn_ok"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@+id/status"
@@ -152,7 +152,7 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentBottom="true"
 
-            android:text="@string/no_dir_selected"
+            android:text="@string/selection_none_hint"
             android:visibility="gone" />
 
     </RelativeLayout>

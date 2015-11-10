@@ -296,13 +296,13 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         edit.setSelection(0, defaultName.length());
 
         builder.setView(content);
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.btn_cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dismiss();mSubDialog=null;
             }
         });
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
             //@Override
             public void onClick(DialogInterface dialog, int which) {
                 onCreateSubDirAnswer(parentDir, edit.getText().toString());
@@ -467,7 +467,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             if (canPressOk) {
                 mStatus.setText(this.mCurrentSelection.getAbsolute());
             } else {
-                mStatus.setText(R.string.no_dir_selected);
+                mStatus.setText(R.string.selection_none_hint);
             }
         }
     }
