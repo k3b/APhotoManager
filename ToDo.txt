@@ -2,20 +2,11 @@ todo readme
 	doc settings
 
 	### Translations
-	I'm always seeking for new translations. If you feel that one of your languages should be added, please contribute to the [Crowdin Project](https://crowdin.com/project/fancyplaces)
+	I'm always seeking for new translations. If you feel that one of your languages should be added, please contribute to the [Crowdin Project](https://crowdin.com/project/androFotoFinder)
 
 	Currently we have:
 	- English
 	- German
-	- French (credits: RobyRemzy, v1.1.0+)
-	- Japanese (credits: naofum, v1.2.0+)
-	- Portuguese, Brazlian (credits: mauriciomoura, v1.2.0+)
-	- Catalan (credits: sancv4, v1.2.0+)
-	- Spanish (credits: sancv4, v1.2.0+)
-	- Dutch (credits: YarrHarr, v1.2.0+)
-	- Portuguese (credits: Marco Magalhães, v1.2.1+)
-	- Malay (credits: bornd, v1.2.1+)
-	- Turkish (credits: Tigerider/hbu, v1.2.1+)
 
 	## License
 	This program is licensed under GPLv3 and the whole source code is available on github.
@@ -23,34 +14,7 @@ todo readme
 
 TODO
 
-
-
-	https://hosted.weblate.org/ via github ( OsmAnd, fdroid)
-	https://crowdin.com/page/android-localization (FancyPlaces)
-	- not https://www.transifex.com/
 ------------------
-
-		<string name="account_setup_imap" translatable="false">IMAP</string>
-	
-		Android string-array structures are not currently supported. To work around this, you can break you string arrays apart:
-
-		<string-array name="several_strings">
-			<item>First string</item>
-			<item>Second string</item>
-		</string-array>
-
-		become:
-
-		<string-array name="several_strings">
-			<item>@string/several_strings_0</item>
-			<item>@string/several_strings_1</item>
-		</string-array>
-		<string name="several_strings_0">First string</string>
-		<string name="several_strings_1">Second string</string>
-
-	
-	
-	
 
 	absturz nach set Geo
 	

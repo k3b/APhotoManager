@@ -70,7 +70,6 @@
   <string name="image_err_file_rename_format">Datei \'%1$s\' kann nicht umbenannt werden.</string>
   <string name="image_success_update_format">%1$d Fotos aktualisiert.</string>
   <string name="share_menu_title">Teilen/Senden</string>
-  <string name="share_chooser__title">Teilen/Senden</string>
   <string name="share_err_not_found">Kein Teilen/Senden Anbieter gefunden</string>
   <string name="delete_menu_title">Löschen</string>
   <string name="bookmark_delete_question">Lesezeichen löschen?</string>
@@ -94,47 +93,56 @@
   <string name="rename_result_format">%1$d/%2$d Dateien umbenannt</string>
   <string name="delete_question_title">Foto(s) Löschen?</string>
   <string name="delete_question_message_format">\"Sind Sie sicher, dass Sie diese Dateien dauerhaft löschen möchten?\n%1$s,\n Diesen Vorgang kann nicht rückgängig gemacht werden.\"</string>
-  <string name="about_content_about">"
-<![CDATA[
-<h1> A Photo Manager </h1>
-with 'A Photo Map' in 'AndroFotoFinder'<br/>
-</p>
-Features:
-<ul>
-  <li>Can handle big image collections (15000+ images in 1000+ folders)</li>
-  <li>Uses Android's image content-provider. No initial image scan necessary.</li>
-  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Filter-View">Find images</a> via</li>
+  <string name="about_content_about"><![CDATA[
+  A Photo Manager mit &#39;A Photo Viewer&#39; und &#39;AndroFotoFinder&#39;
+  <br />Merkmale:
   <ul>
-    <li>folder (with hirachical <a href="https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker">Folder-Picker</a>)&nbsp;</li>
-    <li>wildcards that match folder/filename&nbsp;</li>
-    <li>date&nbsp;</li>
-    <li>area in <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geographic map</a> (if image has gps-exif info)
+    <li>verwaltet große Bildersammlungen (15000+ Bilder in 1000+ Ordnern)</li>
+    <li>verwendet Androids interne Mediendatenbank. Kein initialer Bild Scan notwendig.</li>
+    <li>
+    <a href="https://github.com/k3b/AndroFotoFinder/wiki/Filter-View">Bilder finden</a>, per</li>
+    <li style="list-style: none; display: inline">
+      <ul>
+        <li>Ordner (mit hirachischer
+        <a href="https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker">Ordnerauswahl</a>)</li>
+        <li>Ordner/Dateinamen mit Platzhaltern</li>
+        <li>Datum</li>
+        <li>Gebiet auf einer
+        <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">Landkarte</a> (für Bilder Gps-Exif-Infos)</li>
+      </ul>
+    </li>
+    <li>Ergebnisanzeige in
+    <a href="https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View">Galerie-Ansicht</a></li>
+    <li style="list-style: none; display: inline">
+      <ul>
+        <li>Unterstützung für Mehrfach-Auswahl (seit 0.4.0)</li>
+        <li>Dateiverarbeitung: kopieren, verschieben, löschen, senden (seit 0.4.0)</li>
+      </ul>
+    </li>
+    <li>
+    <a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View">Foto-Ansicht</a> mit</li>
+    <li style="list-style: none; display: inline">
+      <ul>
+        <li>Stufenlose Vergrößerung (Zoom)</li>
+        <li>links/rechts wischen für nächstes/vorheriges Bild</li>
+        <li>Anzeige erweiterte Bildinformationen (Exif, IPTC, XMP, ICC)</li>
+        <li>Bilder kopieren, verschieben, löschen, umbenennen, teilen (seit 0.4.1)</li>
+      </ul>
+    </li>
+    <li>Die
+    <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geografische Karte</a> zeigt Marker an den Orten, an denen Fotos
+    aufgenommen wurden</li>
+    <li>Dateioperationen</li>
+    <li>
+      <ul>
+        <li>aktualisieren auch die Android-Mediandatenbank</li>
+        <li>erhalten das Dateidatum wenn Android dies unterstützt</li>
+        <li>aktualisiert auch Xmp-Filialdateien</li>
+      </ul>
     </li>
   </ul>
-  <li>Show result in a scrollable <a href="https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View">gallery view</a> with</li>
-  <ul>
-    <li>support for multible photo selection (since 0.4.0)</li>
-    <li>file operations copy, move, delete, share (since 0.4.0)</li>
-  </ul>
-  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View">Photo-detail-view</a> with</li>
-  <li><ul>
-    <li>image zoom</li>
-    <li>swipe to go to next/previous image</li>
-    <li>show extended image info (Exif, IPTC, XMP, ICC)</li>
-    <li>file operations copy, move, delete, rename, share (since 0.4.1)</li>
-  </ul></li>
-  <li>The <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geografic map</a> shows markers at places where photos were
- taken</li>
-  <li>File operations</li>
-  <li><ul>
-    <li>will also update Android's image content-provider-database</li>
-    <li>update xmp-sidecar-files</li>
-    <li>preserve file date if local android supports it.</li>
-  </ul></li>
-</ul>
-<br />
-]]>
-"</string>
+  <br />
+  ]]></string>
   <string name="show_in_gallery_menu_title">In neuer Galerie anzeigen</string>
   <string name="scanner_menu_title">Media-Scanner</string>
   <string name="scanner_dir_question">Ab wo scannen?</string>

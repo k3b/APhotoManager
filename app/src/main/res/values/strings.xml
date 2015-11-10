@@ -84,8 +84,7 @@
     <string name="image_err_file_rename_format">Cannot rename File \'%1$s\'.</string>
     <string name="image_success_update_format">Updated %1$d photos.</string>
 
-    <string name="share_menu_title">Share</string>
-    <string name="share_chooser__title" >Share/Send</string>
+    <string name="share_menu_title">Share/Send</string>
     <string name="share_err_not_found" >No send/share provider found</string>
 
     <string name="delete_menu_title">Delete</string>
@@ -119,7 +118,7 @@
 
 This operation cannot be reversed."</string>
 
-    <string name="about_content_about">"
+    <string name="about_content_about">
 <![CDATA[
 <h1> A Photo Manager </h1>
 with 'A Photo Map' in 'AndroFotoFinder'<br/>
@@ -159,7 +158,7 @@ Features:
 </ul>
 <br />
 ]]>
-"</string>
+</string>
     <string name="show_in_gallery_menu_title">Show in new Gallery</string>
     <string name="scanner_menu_title">Media Scanner</string>
     <string name="scanner_dir_question">Where to start scanning?</string>

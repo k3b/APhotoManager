@@ -4,7 +4,7 @@
 * Shows photos in a [geografic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) from [openstreetmap](http://www.openstreetmap.org)
 * Buildin file manager for photos: find, sort, view, copy, delete, set gps exif data, send, ... .
 * Fast find local photos by (sub-)folder, date and/or geographic map.
-* Translations: English 
+* [Translations](https://crowdin.com/project/androFotoFinder): English, German 
 
 [... features more detailed](https://github.com/k3b/AndroFotoFinder/wiki/features)
 
@@ -34,7 +34,7 @@ See [History](https://github.com/k3b/AndroFotoFinder/wiki/History)
 Feedback, translation and contributions are welcomed. 
 
 * [Issue tracker](https://github.com/k3b/AndroFotoFinder/issues)
-* Translations via TODO
+* You can help to translate this app via https://crowdin.com/project/androFotoFinder
 
 # Table of Contents
 

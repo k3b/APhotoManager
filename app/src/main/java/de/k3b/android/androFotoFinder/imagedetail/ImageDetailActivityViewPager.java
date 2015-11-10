@@ -569,7 +569,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
                 return true;
 
             case R.id.menu_item_share:
-                cmdStartIntent(null, getCurrentFilePath(), Intent.ACTION_SEND, R.string.share_chooser__title, R.string.share_err_not_found);
+                cmdStartIntent(null, getCurrentFilePath(), Intent.ACTION_SEND, R.string.share_menu_title, R.string.share_err_not_found);
                 return true;
 
             case R.id.cmd_copy:

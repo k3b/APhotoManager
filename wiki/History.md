@@ -2,10 +2,12 @@
 
 ## todo 
 
-* [#20 Add german translations](https://github.com/k3b/AndroFotoFinder/issues/20)
-* [#19 Add Settings dialog](https://github.com/k3b/AndroFotoFinder/issues/19)
 
 ## [v0.4.3.*](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.3) (not released yet)
+
+* [#20 Add german translations](https://github.com/k3b/AndroFotoFinder/issues/20)
+	* Registered app for online crowd translation service [Crowdin Project](https://crowdin.com/project/androFotoFinder)
+* [#19 Add Settings dialog](https://github.com/k3b/AndroFotoFinder/issues/19)
 
 
 ## [v0.4.2.151105](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.2.151105) available in [F-Droid app store](https://f-droid.org)  since 2015-11-07
