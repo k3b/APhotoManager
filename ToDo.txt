@@ -1,18 +1,5 @@
 todo readme
-	doc settings
-
-	### Translations
-	I'm always seeking for new translations. If you feel that one of your languages should be added, please contribute to the [Crowdin Project](https://crowdin.com/project/androFotoFinder)
-
-	Currently we have:
-	- English
-	- German
-
-	## License
-	This program is licensed under GPLv3 and the whole source code is available on github.
-
-
-TODO
+	dirPicker ohne "opt" anstelle ohne "cancel"
 
 ------------------
 

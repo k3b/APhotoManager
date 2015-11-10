@@ -74,6 +74,7 @@ Other Android apps can use parts of "a Photo Manager" throught the "Intent api".
 ## <a name='sql'>internal sql format of .query files (since version 0.4.2)</a>
 
 * purpose defintion of [bookmark](Bookmarks) files in folder /storage/sdcard0/databases/sql/*.query
+	* Note: You can change this folder through **Report Folder** in the [Settings View](settings).
 * created in [Filter-View](Filter-View) via menu "Save [bookmark](Bookmarks) as ..."
 * loaded into [Filter-View](Filter-View) via menu "Load [bookmark](Bookmarks) from ..."
 * loaded into [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) via menu "Load [bookmark](Bookmarks) from ..."

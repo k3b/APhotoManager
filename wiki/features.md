@@ -2,6 +2,14 @@
 
 ## Features
 
+**Help wanted for further [Translations](https://crowdin.com/project/androFotoFinder)**
+
+* The only enhanced android [Gallery app](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) for local images on [f-droid](https://f-droid.org/)
+* Shows photos in a [geografic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) from [openstreetmap](http://www.openstreetmap.org)
+* Buildin file manager for photos: find, sort, view, copy, delete, set gps exif data, send, ... .
+* Fast find local photos by (sub-)folder, date and/or geographic map.
+* [Translations](https://crowdin.com/project/androFotoFinder): English
+
 * Can handle big image collections (15000+ images in 1000+ folders)
 * Uses Android's image content-provider. No initial image scan neccessary.
 * The [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View) can find images via
@@ -12,17 +20,17 @@
 	* Searchcriteria can be saved to and later be retrieved from [Bookmarks](Bookmarks) (since 0.4.2).
 * Show results in a scrollable [gallery view](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) with 
 	* support for multible photo selection
-	* file operations copy, move, delete, share, change geo info (since 0.4.1)
+	* file operations copy, move, delete, share, change geo info 
 * [Image view](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) features
     * image zoom
     * swiping for next/previous image
     * show extended image info (Exif, IPTC, XMP, ICC)
-	* file operations copy, move, delete, rename, share, change geo info (since 0.4.1)
-	* can be opened from any filemanager or android-s gallery (since 0.4.1)
+	* file operations copy, move, delete, rename, share, change geo info 
+	* can be opened from any filemanager or android-s gallery 
 * The [geografic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) 
     * shows markers at places where photos were taken.
-	* can be opened as a map-viewer from any app that support "geo:"-uri-s (since 0.4.1)
-	* can be opened as a "geo:" picker to select a location from a map or photo (since 0.4.1)
+	* can be opened as a map-viewer from any app that support "geo:"-uri-s 
+	* can be opened as a "geo:" picker to select a location from a map or photo 
 * File operations 
 	* will also update Android's image content-provider-database
 	* update xmp-sidecar-files

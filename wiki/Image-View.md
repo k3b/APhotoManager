@@ -12,6 +12,7 @@ You can reach the [Image-View](Image-View) via
 * file operations copy/move/rename/delete/change geo info (Since Version 0.4.1)
 	* Move and Rename is blocked while Media Scanner is active to avoid conflicts/inconsistent data.
 * menu command slideshow: automatic showing next image every 1.5 seconds. Tuching the image stops the slideshow
+	* Note: You can change the slide time through **Slide Show Intervall in millisecs** in the [Settings View](settings).
 
 ## <a name='api'>Intent-API</a> 
 

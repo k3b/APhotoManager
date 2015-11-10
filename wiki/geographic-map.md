@@ -16,7 +16,8 @@ You can reach the [Geographic-Map](Geographic-Map) via
 * The geografic map shows markers ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/app/src/main/res/drawable-mdpi/marker_green.png) at places where photos were taken.
 * The numer in the **green marker** indicates how many photos belong to the marker.
 * **Blue markers** represent selected photos if [Gallery-View](Gallery-View) is in [multi selection mode](Gallery-View#Multiselection) or if SEND_MULTIPLE.
-	* Note: for performance/memory reason only the first 256 blue markers are shown.
+	* Note: For performance/memory reason only the first 256 blue markers are shown.
+	* Note: you can chance this limit in the [Settings View](settings) under **Max. Sel-Markers in Map** .
 * If you tap on a marker the marker becomes **red** to indicate current selection and a photo belonging to the marker is displayed in the lower right corner.
 * Tap on the photo to hide it.
 * if you **long-tap on a marker** you get a context menu to

@@ -92,6 +92,8 @@ The [Gallery-View](Gallery-View) has these elements:
         * other options are: send photo(s) via bluetooth or mail
 	* the **Start Media Scanner** asks for folder where the media scanner should (re-)scan *.jpg and *.jpeg files
 
+Note: If you have checked **Clear Multi-Selelection** in the [Settings View](settings) the [multi selection mode](Gallery-View#Multiselection) is cancled after a command from Actionbar or Menu.
+		
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/Gallery-MultiSelection.png)
 
 ## <a name='api'>Intent-API</a> (since 0.4.2)
