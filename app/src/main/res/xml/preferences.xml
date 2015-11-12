@@ -40,6 +40,10 @@
             android:defaultValue="false"
             android:title="@string/settings_debug_memory_title"
             android:summary="@string/settings_debug_memory_summary" />
+        <CheckBoxPreference android:key="debugEnableLibs"
+            android:defaultValue="false"
+            android:title="@string/settings_debug_libs_title"
+            android:summary="@string/settings_debug_libs_summary" />
         <CheckBoxPreference android:key="debugEnabled"
             android:defaultValue="false"
             android:title="@string/settings_debug_title"

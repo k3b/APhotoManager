@@ -51,11 +51,11 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
         OnGestureListener,
         ViewTreeObserver.OnGlobalLayoutListener {
 
-    private static final String LOG_TAG = "PhotoViewAttacher";
+    public static final String LOG_TAG = "PhotoViewAttacher";
 
     // let debug flag be dynamic, but still Proguard can be used to remove from
     // release builds
-    private static final boolean DEBUG = true; //!!! Log.isLoggable(LOG_TAG, Log.DEBUG);
+    public static boolean DEBUG = true; //!!! Log.isLoggable(LOG_TAG, Log.DEBUG);
 
     static final Interpolator sInterpolator = new AccelerateDecelerateInterpolator();
 
@@ -78,6 +78,8 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
 
     /** k3b 20150913 #10: Faster initial loading: initially the view is loaded with low res image. on first zoom it is reloaded with this uri */
     private File mImageReloadFile = null;
+    private double mLastFocusX = Double.NaN;
+    private double mLastFocusY = Double.NaN;
 
     private static void checkZoomLevels(float minZoom, float midZoom,
                                         float maxZoom) {
@@ -230,6 +232,10 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
             return; // cleanup already done
         }
 
+        if (DEBUG) {
+            LogManager.getLogger().d(LOG_TAG,"cleanup");
+        }
+
         final ImageView imageView = mImageView.get();
 
         if (null != imageView) {
@@ -278,7 +284,7 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
             return false;
 
         mSuppMatrix.set(finalMatrix);
-        setImageViewMatrix(getDrawMatrix());
+        setImageViewMatrix(getDrawMatrix(), "setDisplayMatrix");
         checkMatrixBounds();
 
         return true;
@@ -290,19 +296,19 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
     @Override
     public void setPhotoViewRotation(float degrees) {
         mSuppMatrix.setRotate(degrees % 360);
-        checkAndDisplayMatrix();
+        checkAndDisplayMatrix("setPhotoViewRotation");
     }
 
     @Override
     public void setRotationTo(float degrees) {
         mSuppMatrix.setRotate(degrees % 360);
-        checkAndDisplayMatrix();
+        checkAndDisplayMatrix("setRotationTo");
     }
 
     @Override
     public void setRotationBy(float degrees) {
         mSuppMatrix.postRotate(degrees % 360);
-        checkAndDisplayMatrix();
+        checkAndDisplayMatrix("setRotationBy");
     }
 
     public ImageView getImageView() {
@@ -315,7 +321,7 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
         // If we don't have an ImageView, call cleanup()
         if (null == imageView) {
             cleanup();
-            LogManager.getLogger().i(LOG_TAG,
+            LogManager.getLogger().w(LOG_TAG,
                     "ImageView no longer exists. You should not use this PhotoViewAttacher any more.");
         }
 
@@ -378,7 +384,7 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
 
         ImageView imageView = getImageView();
         mSuppMatrix.postTranslate(dx, dy);
-        checkAndDisplayMatrix();
+        checkAndDisplayMatrix("onDrag");
 
         /**
          * Here we decide whether to let the ImageView's parent to start taking
@@ -440,17 +446,22 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
                  */
                 if (top != mIvTop || bottom != mIvBottom || left != mIvLeft
                         || right != mIvRight) {
+                    float lastScale = getScale();
                     // Update our base matrix, as the bounds have changed
-                    updateBaseMatrix(imageView.getDrawable());
-
+                    updateBaseMatrix(imageView.getDrawable(), "onGlobalLayout mZoomEnabled=true");
                     // Update values as something has changed
                     mIvTop = top;
                     mIvRight = right;
                     mIvBottom = bottom;
                     mIvLeft = left;
+
+                    if (!Double.isNaN(mLastFocusX)) {
+                        // try to restore current zoom/focus
+                        onScale(lastScale, (float) mLastFocusX, (float) mLastFocusY);
+                    }
                 }
             } else {
-                updateBaseMatrix(imageView.getDrawable());
+                updateBaseMatrix(imageView.getDrawable(), "onGlobalLayout mZoomEnabled=false");
             }
         }
     }
@@ -498,8 +509,10 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
             if (null != mScaleChangeListener) {
                 mScaleChangeListener.onScaleChange(scaleFactor, focusX, focusY);
             }
+            mLastFocusX=focusX;
+            mLastFocusY=focusY;
             mSuppMatrix.postScale(scaleFactor, scaleFactor, focusX, focusY);
-            checkAndDisplayMatrix();
+            checkAndDisplayMatrix("onScale");
         }
     }
 
@@ -679,7 +692,7 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
                         focalX, focalY));
             } else {
                 mSuppMatrix.setScale(scale, scale, focalX, focalY);
-                checkAndDisplayMatrix();
+                checkAndDisplayMatrix("setScale");
             }
         }
     }
@@ -690,17 +703,17 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
             mScaleType = scaleType;
 
             // Finally update
-            update();
+            update("setScaleType");
         }
     }
 
     @Override
     public void setZoomable(boolean zoomable) {
         mZoomEnabled = zoomable;
-        update();
+        update("setZoomable");
     }
 
-    public void update() {
+    public void update(String why) {
         ImageView imageView = getImageView();
 
         if (null != imageView) {
@@ -709,10 +722,10 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
                 setImageViewScaleTypeMatrix(imageView);
 
                 // Update the base matrix using the current drawable
-                updateBaseMatrix(imageView.getDrawable());
+                updateBaseMatrix(imageView.getDrawable(), why);
             } else {
                 // Reset the Matrix...
-                resetMatrix();
+                resetMatrix(why);
             }
         }
     }
@@ -737,10 +750,11 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
 
     /**
      * Helper method that simply checks the Matrix, and then displays the result
+     * @param why
      */
-    private void checkAndDisplayMatrix() {
+    private void checkAndDisplayMatrix(String why) {
         if (checkMatrixBounds()) {
-            setImageViewMatrix(getDrawMatrix());
+            setImageViewMatrix(getDrawMatrix(), why);
         }
     }
 
@@ -873,16 +887,21 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
 
     /**
      * Resets the Matrix back to FIT_CENTER, and then displays it.s
+     * @param why
      */
-    private void resetMatrix() {
+    private void resetMatrix(String why) {
         mSuppMatrix.reset();
-        setImageViewMatrix(getDrawMatrix());
+        setImageViewMatrix(getDrawMatrix(), why);
         checkMatrixBounds();
     }
 
-    private void setImageViewMatrix(Matrix matrix) {
+    private void setImageViewMatrix(Matrix matrix, String why) {
         ImageView imageView = getImageView();
         if (null != imageView) {
+
+            if (DEBUG) {
+                LogManager.getLogger().d(LOG_TAG,"setImageViewMatrix " + why);
+            }
 
             checkImageViewScaleType();
             imageView.setImageMatrix(matrix);
@@ -901,8 +920,9 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
      * Calculate Matrix for FIT_CENTER
      *
      * @param d - Drawable being displayed
+     * @param why
      */
-    private void updateBaseMatrix(Drawable d) {
+    private void updateBaseMatrix(Drawable d, String why) {
         ImageView imageView = getImageView();
         if (null == imageView || null == d) {
             return;
@@ -961,7 +981,7 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
             }
         }
 
-        resetMatrix();
+        resetMatrix(why);
     }
 
     private int getImageViewWidth(ImageView imageView) {
@@ -1175,7 +1195,7 @@ public class PhotoViewAttacher implements IPhotoView, View.OnTouchListener,
                 }
 
                 mSuppMatrix.postTranslate(mCurrentX - newX, mCurrentY - newY);
-                setImageViewMatrix(getDrawMatrix());
+                setImageViewMatrix(getDrawMatrix(), "fling run");
 
                 mCurrentX = newX;
                 mCurrentY = newY;

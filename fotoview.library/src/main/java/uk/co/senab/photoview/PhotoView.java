@@ -204,7 +204,7 @@ public class PhotoView extends ImageView implements IPhotoView {
     public void setImageDrawable(Drawable drawable) {
         super.setImageDrawable(drawable);
         if (null != mAttacher) {
-            mAttacher.update();
+            mAttacher.update("setImageDrawable");
         }
     }
 
@@ -212,7 +212,7 @@ public class PhotoView extends ImageView implements IPhotoView {
     public void setImageResource(int resId) {
         super.setImageResource(resId);
         if (null != mAttacher) {
-            mAttacher.update();
+            mAttacher.update("setImageResource");
         }
     }
 
@@ -220,7 +220,7 @@ public class PhotoView extends ImageView implements IPhotoView {
     public void setImageURI(Uri uri) {
         super.setImageURI(uri);
         if (null != mAttacher) {
-            mAttacher.update();
+            mAttacher.update("setImageURI");
         }
     }
 

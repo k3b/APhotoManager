@@ -21,11 +21,11 @@ import uk.co.senab.photoview.log.LogManager;
  * Created by k3b on 14.09.2015.
  */
 public class HugeImageLoader {
-    private static final String LOG_TAG = "HugeImageLoader";
+    public static final String LOG_TAG = "HugeImageLoader";
 
     // let debug flag be dynamic, but still Proguard can be used to remove from
     // release builds
-    private static final boolean DEBUG = true; //!!! Log.isLoggable(LOG_TAG, Log.DEBUG);
+    public static boolean DEBUG = true; //!!! Log.isLoggable(LOG_TAG, Log.DEBUG);
 
     @TargetApi(Build.VERSION_CODES.FROYO)
     public static int getMaxTextureSize() {

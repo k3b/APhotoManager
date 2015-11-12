@@ -51,4 +51,10 @@
         android:visible="true"
         android:orderInCategory="1000"
         android:showAsAction="never" />
+    <item android:id="@+id/cmd_settings"
+        android:title="@string/settings_title"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:visible="true"
+        android:orderInCategory="1000"
+        android:showAsAction="never" />
 </menu>

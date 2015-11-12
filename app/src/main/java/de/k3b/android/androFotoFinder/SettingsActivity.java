@@ -10,6 +10,10 @@ import android.preference.PreferenceManager;
 
 import java.io.File;
 
+import uk.co.senab.photoview.HugeImageLoader;
+import uk.co.senab.photoview.PhotoViewAttacher;
+import uk.co.senab.photoview.log.LogManager;
+
 public class SettingsActivity extends PreferenceActivity {
 
     @Override
@@ -34,6 +38,9 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putBoolean("debugEnabledViewItem", Global.debugEnabledViewItem);
         prefs.putBoolean("debugEnabledSql", Global.debugEnabledSql);
         prefs.putBoolean("debugEnabledMemory", Global.debugEnabledMemory);
+
+        prefs.putBoolean("debugEnableLibs", PhotoViewAttacher.DEBUG);
+
         prefs.putBoolean("clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
 
         prefs.putString("maxSelectionMarkersInMap", "" + Global.maxSelectionMarkersInMap);
@@ -51,7 +58,13 @@ public class SettingsActivity extends PreferenceActivity {
         Global.debugEnabled                     = getPref(prefs, "debugEnabled", Global.debugEnabled);
         Global.debugEnabledViewItem             = getPref(prefs, "debugEnabledViewItem", Global.debugEnabledViewItem);
         Global.debugEnabledSql                  = getPref(prefs, "debugEnabledSql", Global.debugEnabledSql);
-        Global.debugEnabledMemory       = getPref(prefs, "debugEnabledMemory", Global.debugEnabledMemory);
+        Global.debugEnabledMemory               = getPref(prefs, "debugEnabledMemory", Global.debugEnabledMemory);
+
+        // one setting for several 3d party debug-flags
+        PhotoViewAttacher.DEBUG                 = getPref(prefs, "debugEnableLibs", PhotoViewAttacher.DEBUG);
+        HugeImageLoader.DEBUG                   = PhotoViewAttacher.DEBUG;
+        LogManager.enableDebug(PhotoViewAttacher.DEBUG);
+
         Global.clearSelectionAfterCommand       = getPref(prefs, "clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
 
         Global.maxSelectionMarkersInMap         = getPref(prefs, "maxSelectionMarkersInMap", Global.maxSelectionMarkersInMap);

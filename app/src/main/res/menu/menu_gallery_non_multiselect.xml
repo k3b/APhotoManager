@@ -66,7 +66,7 @@
         android:title="@string/settings_title"
         android:icon="@android:drawable/ic_menu_preferences"
         android:visible="true"
-        android:orderInCategory="100"
+        android:orderInCategory="1000"
         android:showAsAction="ifRoom|withText" />
 
     <item android:id="@+id/cmd_scan" android:title="@string/scanner_menu_title" android:orderInCategory="110"

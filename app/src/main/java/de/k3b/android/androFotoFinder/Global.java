@@ -40,17 +40,26 @@ public class Global {
     public static boolean debugEnabledSql = true;
     public static boolean debugEnabledMemory = false;
 
+    /** The maximum number of **Blue selection markers** in the [Geografic-Map](geographic-map). */
     public static int maxSelectionMarkersInMap = 255;
 
+    /** defines the [Image-View's](Image-View) timing of menu command **slideshow** */
     public static int slideshowIntervallInMilliSecs = 1500;
 
+    /** defines the timespan after which the [Image-View's](Image-View) ActionBar is hidden */
+    public static int actionBarHideTimeInMilliSecs = 2000;
+
+    /** If checked [multi selection mode](Gallery-View#Multiselection) in [Gallery-View](Gallery-View) is canceled after a command from Actionbar or Menu */
     public static boolean clearSelectionAfterCommand = false;
 
     /** true update only if media scanner is not running. false=risky=always allow.  */
     public static final boolean mustCheckMediaScannerRunning = true;
+
+    /** defines the filesystem's directory where [Bookmark files](Bookmarks) are stored and loaded from. */
     public static File reportDir = new File(Environment.getExternalStorageDirectory(), "databases/sql");
     public static final String reportExt = ".query";
 
+    /** defines the filesystem's directory where crash reports are written to. */
     public static File logCatDir = new File(Environment.getExternalStorageDirectory(), "copy/log");
 
     public static void debugMemory(String modul, String message) {

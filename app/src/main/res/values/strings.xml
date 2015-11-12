@@ -114,15 +114,20 @@ This operation cannot be reversed."</string>
     <string name="selection_remove_menu_title">Selection: Remove all visible</string>
 
     <string name="settings_bookmark_dir_title">Report Folder</string>
+
+    <string name="settings_debug_libs_summary" translatable="false">&#8230; of 3d party libraries.</string>
+    <string name="settings_debug_libs_title" translatable="false">LogCat libs</string>
+
     <string name="settings_debug_memory_summary">&#8230; containing Memory Consumption.</string>
     <string name="settings_debug_memory_title">LogCat Memory Consumption</string>
     <string name="settings_debug_sql_summary">&#8230; containing executed SQL.</string>
-    <string name="settings_debug_sql_title">LogCat SQL</string>
+    <string name="settings_debug_sql_title" translatable="false">LogCat SQL</string>
     <string name="settings_debug_summary">&#8230; containing other Log Messages.</string>
     <string name="settings_debug_title">LogCat Misc.</string>
     <string name="settings_debug_view_item_summary">&#8230; containing Grid/Listview Items.</string>
-    <string name="settings_debug_view_item_title">LogCat Grid/Listview</string>
+    <string name="settings_debug_view_item_title" translatable="false">LogCat Grid/Listview</string>
     <string name="settings_group_debug_title">Diagnostics</string>
+
     <string name="settings_image_slideshow_intervall_title">Slide Show Intervall in millisecs</string>
     <string name="settings_log_folder_title">Error Log Folder</string>
     <string name="settings_map_selmarker_max_title">Max. Sel-Markers in Map</string>

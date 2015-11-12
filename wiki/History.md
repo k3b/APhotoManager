@@ -3,8 +3,11 @@
 ## todo 
 
 
+* [#21 additional languages](https://github.com/k3b/AndroFotoFinder/issues/21)
+
 ## [v0.4.3.*](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.3) (not released yet)
 
+* [#17: Image View auto-hide Actionbar](https://github.com/k3b/AndroFotoFinder/issues/17). Added More debug support for 3rd party libs
 * [#20 Add german translations](https://github.com/k3b/AndroFotoFinder/issues/20)
 	* Registered app for online crowd translation service [Crowdin Project](https://crowdin.com/project/androFotoFinder)
 * [#19 Add Settings dialog](https://github.com/k3b/AndroFotoFinder/issues/19)

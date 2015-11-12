@@ -28,6 +28,9 @@ import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.LogCat;
 import de.k3b.database.QueryParameter;
+import uk.co.senab.photoview.HugeImageLoader;
+import uk.co.senab.photoview.PhotoViewAttacher;
+import uk.co.senab.photoview.gestures.CupcakeGestureDetector;
 
 // import com.squareup.leakcanary.LeakCanary;
 // import com.squareup.leakcanary.RefWatcher;
@@ -68,7 +71,7 @@ public class AndroFotoFinderApp extends Application {
         for (String columnName : FotoSql.DEFAULT_GALLERY_COLUMNS) {
             QueryParameter.sParserDefaultSelect.add(columnName);
         }
-        mCrashSaveToFile = new LogCat(this, Global.LOG_CONTEXT);
+        mCrashSaveToFile = new LogCat(this, Global.LOG_CONTEXT, HugeImageLoader.LOG_TAG, PhotoViewAttacher.LOG_TAG, CupcakeGestureDetector.LOG_TAG);
     }
 
     @Override

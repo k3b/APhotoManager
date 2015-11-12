@@ -107,8 +107,8 @@ Unique visitors https://github.com/k3b/AndroFotoFinder/graphs/traffic
 1107	24	available in fdroid v0.4.2.151105
 1108	23
 1109	18
-1110	
-1111	
+1110	24	crowdin.com web translation platform
+1111	11
 1112	
 1113	
 1114	

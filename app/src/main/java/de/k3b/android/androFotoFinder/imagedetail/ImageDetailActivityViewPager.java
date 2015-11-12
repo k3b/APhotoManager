@@ -19,6 +19,7 @@
  */
 package de.k3b.android.androFotoFinder.imagedetail;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.ActivityNotFoundException;
@@ -76,6 +77,9 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     private static final int DEFAULT_SORT = FotoSql.SORT_BY_NAME_LEN;
     private static final QueryParameter DEFAULT_QUERY = FotoSql.queryDetail;
     private static final int NO_INITIAL_SCROLL_POSITION = -1;
+
+    /** if smaller that these millisecs then the actionbar autohide is disabled */
+    private static final int DISABLE_HIDE_ACTIONBAR = 700;
 
     // how many changes have been made. if != 0 parent activity must invalidate cached data
     private static int mModifyCount = 0;
@@ -284,7 +288,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             mViewPager.setOnInterceptTouchEvent(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mSlideShowStarted) startStopSlideShow(false);
+                    onGuiTouched();
                 }
             });
 
@@ -303,6 +307,55 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
             mCurorLoader = new LocalCursorLoader();
             getLoaderManager().initLoader(ACTIVITY_ID, null, mCurorLoader);
+        }
+        unhideActionBar(Global.actionBarHideTimeInMilliSecs, "onCreate");
+    }
+
+    private void onGuiTouched() {
+        // stop slideshow if active
+        if (mSlideShowStarted) startStopSlideShow(false);
+        unhideActionBar(Global.actionBarHideTimeInMilliSecs, "onGuiTouched");
+    }
+
+    /** after 2 secs of user inactive the actionbar is hidden until the screen is touched */
+    private Handler mActionBarHideTimer = null;
+    private void unhideActionBar(int milliSecsUntilHide, String why) {
+        final int ACTIONBAR_HIDE_HANDLER_ID = 3;
+        boolean timer = milliSecsUntilHide >= DISABLE_HIDE_ACTIONBAR;
+
+        ActionBar bar = getActionBar();
+
+        if ((bar != null) && (!bar.isShowing())) {
+            if (Global.debugEnabled) {
+                Log.d(Global.LOG_CONTEXT, mDebugPrefix + "unhiding ActionBar(timer=" + timer +
+                        ") " + why);
+            }
+            bar.show();
+        }
+
+        if (timer) {
+            if (mActionBarHideTimer == null) {
+                mActionBarHideTimer = new Handler() {
+                    public void handleMessage(Message m) {
+                        ActionBar bar = getActionBar();
+
+                        if ((bar != null) && (bar.isShowing())) {
+                            if (Global.debugEnabled) {
+                                Log.d(Global.LOG_CONTEXT, mDebugPrefix + "hiding ActionBar");
+                            }
+                            bar.hide();
+                        }
+                    }
+                };
+
+            }
+            mActionBarHideTimer.removeMessages(ACTIONBAR_HIDE_HANDLER_ID);
+            mActionBarHideTimer.sendMessageDelayed(Message.obtain(mActionBarHideTimer, ACTIONBAR_HIDE_HANDLER_ID), milliSecsUntilHide);
+        } else {
+            if (mActionBarHideTimer != null) {
+                mActionBarHideTimer.removeMessages(ACTIONBAR_HIDE_HANDLER_ID);
+                mActionBarHideTimer = null;
+            }
         }
     }
 
@@ -397,8 +450,8 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     public void setTitle(CharSequence title) {
         super.setTitle(title);
         // http://stackoverflow.com/questions/10779037/set-activity-title-ellipse-to-middle
-        final int actionBarTitle = android.R.id.title; //  Resources.getSystem().getIdentifier("action_bar_title", "id", "android");
-        final TextView titleView = (TextView)  this.getWindow().findViewById(actionBarTitle);
+        final int ActionBarTitle = android.R.id.title; //  Resources.getSystem().getIdentifier("action_bar_title", "id", "android");
+        final TextView titleView = (TextView)  this.getWindow().findViewById(ActionBarTitle);
         if ( titleView != null ) {
             titleView.setEllipsize(TextUtils.TruncateAt.MIDDLE);
         }
@@ -407,6 +460,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     @Override
     protected void onPause () {
+        unhideActionBar(DISABLE_HIDE_ACTIONBAR, "onPause");
         Global.debugMemory(mDebugPrefix, "onPause");
         startStopSlideShow(false);
         super.onPause();
@@ -414,6 +468,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     @Override
     protected void onResume () {
+        unhideActionBar(Global.actionBarHideTimeInMilliSecs, "onResume");
         Global.debugMemory(mDebugPrefix, "onResume");
         super.onResume();
     }
@@ -421,6 +476,8 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     @Override
     protected void onDestroy() {
         Global.debugMemory(mDebugPrefix, "onDestroy");
+
+        unhideActionBar(DISABLE_HIDE_ACTIONBAR, "onDestroy");
 
         // getLoaderManager().destroyLoader(ACTIVITY_ID);
         if (mAdapter != null) {
@@ -537,6 +594,8 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        // have more time to find and press the menu
+        unhideActionBar(Global.actionBarHideTimeInMilliSecs * 3, "onPrepareOptionsMenu");
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -544,10 +603,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     public boolean onOptionsItemSelected(MenuItem item) {
         boolean slideShowStarted = mSlideShowStarted;
 
-        // every command will stop the slideshow
-        if (slideShowStarted) {
-            startStopSlideShow(false);
-        }
+        onGuiTouched();
         if (mFileCommands.onOptionsItemSelected(item, getCurrentFoto())) {
             mModifyCount++;
             return true; // case R.id.cmd_delete:
@@ -595,13 +651,13 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     }
 
-    private static final int SLIDESHOW_WHAT = 2;
+    private static final int SLIDESHOW_HANDLER_ID = 2;
     private boolean mSlideShowStarted = false;
     private Handler mSlideShowTimer = new Handler() {
         public void handleMessage(Message m) {
             if (mSlideShowStarted) {
                 onSlideShowNext();
-                sendMessageDelayed(Message.obtain(this, SLIDESHOW_WHAT), Global.slideshowIntervallInMilliSecs);
+                sendMessageDelayed(Message.obtain(this, SLIDESHOW_HANDLER_ID), Global.slideshowIntervallInMilliSecs);
             }
         }
     };
@@ -611,9 +667,9 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         if (start != mSlideShowStarted) {
             if (start) {
                 onSlideShowNext();
-                mSlideShowTimer.sendMessageDelayed(Message.obtain(mSlideShowTimer, SLIDESHOW_WHAT), Global.slideshowIntervallInMilliSecs);
+                mSlideShowTimer.sendMessageDelayed(Message.obtain(mSlideShowTimer, SLIDESHOW_HANDLER_ID), Global.slideshowIntervallInMilliSecs);
             } else {
-                mSlideShowTimer.removeMessages(SLIDESHOW_WHAT);
+                mSlideShowTimer.removeMessages(SLIDESHOW_HANDLER_ID);
             }
             mSlideShowStarted = start;
             if (mMenuSlideshow != null) mMenuSlideshow.setChecked(start);

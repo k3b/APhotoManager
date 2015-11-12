@@ -48,7 +48,7 @@ import uk.co.senab.photoview.PhotoView;
 public class ImagePagerAdapterFromCursor extends PagerAdapter  {
     // debug support
     private static int id = 0;
-    private final String debugPrefix;
+    private final String mDebugPrefix;
     private static final boolean SYNC = false; // true: sync loading is much easier to debug.
 
     private final Activity mActivity;
@@ -61,12 +61,12 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  {
 
     public ImagePagerAdapterFromCursor(final Activity context, String name) {
         mActivity = context;
-        debugPrefix = "ImagePagerAdapterFromCursor#" + (id++) + "@" + name + " ";
-        Global.debugMemory(debugPrefix, "ctor");
+        mDebugPrefix = "ImagePagerAdapterFromCursor#" + (id++) + "@" + name + " ";
+        Global.debugMemory(mDebugPrefix, "ctor");
         mMaxTitleLength = context.getResources().getInteger(R.integer.title_length_in_chars);
 
         if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, debugPrefix + "()");
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + "()");
         }
     }
 
@@ -188,7 +188,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  {
 
             PhotoView photoView = new PhotoView(container.getContext());
 
-            if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, debugPrefix + "instantiateItem(#" + position +") => " + uri + " => " + photoView);
+            if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, mDebugPrefix + "instantiateItem(#" + position +") => " + uri + " => " + photoView);
 
             setImage(position, imageID, uri, photoView);
 
@@ -258,7 +258,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  {
      */
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
-        if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, debugPrefix + "destroyItem(#" + position +") " + object);
+        if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, mDebugPrefix + "destroyItem(#" + position +") " + object);
         container.removeView((View) object);
         GarbageCollector.freeMemory((View) object); // to reduce memory leaks
     }
