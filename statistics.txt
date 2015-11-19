@@ -109,13 +109,13 @@ Unique visitors https://github.com/k3b/AndroFotoFinder/graphs/traffic
 1109	18
 1110	24	crowdin.com web translation platform
 1111	11
-1112	
-1113	
-1114	
-1115	
-1116	
-1117	
-1118	
+1112	16
+1113	14
+1114	8
+1115	7
+1116	11
+1117	14
+1118	13
 1119	
 1120	
 1121	

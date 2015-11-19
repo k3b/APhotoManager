@@ -27,6 +27,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,6 +38,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.Toast;
 
 // import com.squareup.leakcanary.RefWatcher;
@@ -262,6 +265,10 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         mDebugPrefix = "ImageDetailActivityViewPager#" + (id++)  + " ";
         Global.debugMemory(mDebugPrefix, "onCreate");
 
+        // #17: let actionbar overlap image so there is no need to resize main view item
+        // http://stackoverflow.com/questions/6749261/custom-translucent-android-actionbar
+        getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
 
@@ -307,6 +314,10 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
             mCurorLoader = new LocalCursorLoader();
             getLoaderManager().initLoader(ACTIVITY_ID, null, mCurorLoader);
+
+            // #17: make actionbar background nearly transparent
+            // http://stackoverflow.com/questions/6749261/custom-translucent-android-actionbar
+            getActionBar().setBackgroundDrawable(new ColorDrawable(Color.argb(128, 0, 0, 0)));
         }
         unhideActionBar(Global.actionBarHideTimeInMilliSecs, "onCreate");
     }
@@ -819,7 +830,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		if (isViewPagerActive()) {
+        if (isViewPagerActive()) {
             outState.putInt(INSTANCE_STATE_LAST_SCROLL_POSITION, mViewPager.getCurrentItem());
     	}
         outState.putInt(INSTANCE_STATE_MODIFY_COUNT, mModifyCount);
