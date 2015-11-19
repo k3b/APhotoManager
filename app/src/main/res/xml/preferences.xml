@@ -16,6 +16,10 @@
             android:key="slideshowIntervallInMilliSecs"
             android:title="@string/settings_image_slideshow_intervall_title" />
         <de.k3b.android.widgets.EditTextPreferenceWithSummary
+            android:key="actionBarHideTimeInMilliSecs"
+            android:title="@string/settings_image_hide_time_title" />
+
+        <de.k3b.android.widgets.EditTextPreferenceWithSummary
             android:key="reportDir"
             android:title="@string/settings_bookmark_dir_title" />
 		<de.k3b.android.widget.AboutDialogPreference

@@ -129,6 +129,8 @@ This operation cannot be reversed."</string>
     <string name="settings_group_debug_title">Diagnostics</string>
 
     <string name="settings_image_slideshow_intervall_title">Slide Show Intervall in millisecs</string>
+    <string name="settings_image_hide_time_title">Auto Hide Actionbar after millisecs</string>
+
     <string name="settings_log_folder_title">Error Log Folder</string>
     <string name="settings_map_selmarker_max_title">Max. Sel-Markers in Map</string>
     <string name="settings_multisel_clear_summary">&#8230; after Copy/Move/Rename/&#8230; .</string>

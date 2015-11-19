@@ -14,6 +14,7 @@ You can reach the [Settings View](settings) via the **settings** menu of
 * **Max. Sel-Markers in Map**: The maximum number of **Blue selection markers** in the [Geografic-Map](geographic-map).
 	* Note: This value is limited for performance/memory reason.
 * **Slide Show Intervall in millisecs**: defines the [Image-View's](Image-View) timing of menu command **slideshow**
+* **Auto Hide Actionbar after millisecs**: After this time the actionbar of the [Image-View](Image-View) is automaticaly hidden. "0" means do not hide.
 * **Report Folder** defines the filesystem's directory where [Bookmark files](Bookmarks) are stored and loaded from.
 
 ##Diagnostics

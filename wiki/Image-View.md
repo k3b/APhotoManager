@@ -13,6 +13,8 @@ You can reach the [Image-View](Image-View) via
 	* Move and Rename is blocked while Media Scanner is active to avoid conflicts/inconsistent data.
 * menu command slideshow: automatic showing next image every 1.5 seconds. Tuching the image stops the slideshow
 	* Note: You can change the slide time through **Slide Show Intervall in millisecs** in the [Settings View](settings).
+* the actionbar is automatically hidden after a short time if the screen is not touched.
+	* Note: You can change this time through **Auto Hide Actionbar after millisecs** in the [Settings View](settings). "0" means do not hide.
 
 ## <a name='api'>Intent-API</a> 
 
