@@ -80,13 +80,15 @@ The [Gallery-View](Gallery-View) has these elements:
     * taping on the cancel symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_cancel.png) exits the [multi selection mode](Gallery-View#Multiselection).
     * taping on the **selected only** symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_unchecked.png) will show only the seleceted photos. The symbol changes to ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_checked.png) 
 	* taping on the **selected only** symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_checked.png) again will show all photots. The symbol changes to ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_unchecked.png).
-    * taping on the **Selection: add all visible** will select all [Current Visible Photos](Gallery-View#CurrentSet). (Since Version 0.4.1)
-    * taping on the **Selection: remove all visible** will unselect all [Current Visible Photos](Gallery-View#CurrentSet). (Since Version 0.4.1)
+    * taping on the **Selection: add all visible** will select all [Current Visible Photos](Gallery-View#CurrentSet).
+    * taping on the **Selection: remove all visible** will unselect all [Current Visible Photos](Gallery-View#CurrentSet).
 	* taping on the **delete** symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_delete.png) or the "Delete" menu will delete the selected photo(s).
 	* the **move/copy** menu will move/copy the selected photo(s) to a different folder.
 		* Move is blocked while Media Scanner is active to avoid conflicts/inconsistent data.
 	    * Pressing the "..." button or long pressing a folder in the [foder picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker) allows you to create a new folder.
-	* the **change geo** menu allow you to change the photos geo location (latitude/longitude).  (Since Version 0.4.1)
+	* the **set geo** menu allows you to change the photos geo location (latitude/longitude).
+	    * The previous geo-picks for "Set Geo" are shown as blue markers if you select the geo from a map.
+	    * Note: You can change size and filename of the history through **Set Geo History XXX** in the [Settings View](settings).
     * you can send/share the selected photos via the share symbol ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_share.png).
         * if you have installed [k3b's ToGoZip](https://f-droid.org/wiki/page/de.k3b.android.toGoZip) ![](https://raw.githubusercontent.com/k3b/ToGoZip/master/app/src/main/res/drawable-mdpi/ic_launcher.png): Add the photo to a zip file
         * other options are: send photo(s) via bluetooth or mail

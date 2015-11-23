@@ -122,12 +122,14 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             mAdapter.swapCursor(data);
 
             // restore position is invalid
-            if (mInitialScrollPosition >= mAdapter.getCount()) mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
+            final int newItemCount = mAdapter.getCount();
+
+            if (((newItemCount == 0)) || (mInitialScrollPosition >= newItemCount)) mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
 
             if (Global.debugEnabledSql) {
                 Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onLoadFinished" +
                         getDebugContext() +
-                        " found " + ((data == null) ? 0 : data.getCount()) + " rows");
+                        " found " + ((data == null) ? 0 : newItemCount) + " rows");
             }
 
             // do change the data

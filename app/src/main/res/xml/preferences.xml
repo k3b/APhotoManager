@@ -12,6 +12,14 @@
         <de.k3b.android.widgets.EditTextPreferenceWithSummary
             android:key="maxSelectionMarkersInMap"
             android:title="@string/settings_map_selmarker_max_title" />
+
+        <de.k3b.android.widgets.EditTextPreferenceWithSummary
+            android:key="pickHistoryMax"
+            android:title="@string/settings_geo_history_max_title" />
+        <de.k3b.android.widgets.EditTextPreferenceWithSummary
+            android:key="pickHistoryFile"
+            android:title="@string/settings_geo_history_file_title" />
+
         <de.k3b.android.widgets.EditTextPreferenceWithSummary
             android:key="slideshowIntervallInMilliSecs"
             android:title="@string/settings_image_slideshow_intervall_title" />

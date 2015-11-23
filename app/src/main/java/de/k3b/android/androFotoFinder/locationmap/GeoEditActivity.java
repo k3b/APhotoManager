@@ -44,6 +44,7 @@ import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.database.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
+import de.k3b.geo.io.GeoPickHistory;
 import de.k3b.geo.io.GeoUri;
 import de.k3b.io.DirectoryFormatter;
 
@@ -51,7 +52,7 @@ import de.k3b.io.DirectoryFormatter;
  * Defines a gui for global foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.
  */
 public class GeoEditActivity extends Activity implements Common {
-    private static final String debugPrefix = "GalF-";
+    private static final String debugPrefix = "GeoEdit-";
 
     public static final int RESULT_ID = 524;
     private static final String DLG_NAVIGATOR_TAG = "GeoEditActivity";
@@ -258,13 +259,27 @@ public class GeoEditActivity extends Activity implements Common {
         }
     }
 
+    /** opens lat/lon picker */
     private void showLatLonPicker(String geoUri) {
         final Intent intent = new Intent();
         intent.setAction(Intent.ACTION_PICK);
-        intent.setData(Uri.parse(geoUri));
+        final Uri parseUri = Uri.parse(geoUri);
+        intent.setData(parseUri);
         intent.putExtra(EXTRA_TITLE, getString(R.string.geo_picker_title));
+
+        SelectedFotos calculatedSelectedFotos = new SelectedFotos();
+
+        GeoPickHistory history = getHistory();
+        if (history != null) {
+            history.addKeysTo(calculatedSelectedFotos);
+        }
+
         if (mSelectedItems != null) {
-            intent.putExtra(EXTRA_SELECTED_ITEMS, mSelectedItems.toString());
+            calculatedSelectedFotos.addAll(mSelectedItems);
+        }
+
+        if (calculatedSelectedFotos.size() > 0) {
+            intent.putExtra(EXTRA_SELECTED_ITEMS, calculatedSelectedFotos.toString());
         }
 
         try {
@@ -273,6 +288,16 @@ public class GeoEditActivity extends Activity implements Common {
         } catch (ActivityNotFoundException ex) {
             Toast.makeText(this, R.string.geo_picker_err_not_found,Toast.LENGTH_LONG).show();
         }
+    }
+
+    private static GeoPickHistory getHistory() {
+        if (Global.pickHistoryFile != null) {
+            GeoPickHistory history = new GeoPickHistory(Global.pickHistoryFile, Global.pickHistoryMax);
+            history.load();
+            return history;
+        }
+        // null if disabled
+        return null;
     }
 
     /**
@@ -302,7 +327,7 @@ public class GeoEditActivity extends Activity implements Common {
         double latitude = getLatitude();
         double longitude = getLogitued();
         mHistory.saveHistory();
-        if (!Double.isNaN(latitude) && !Double.isNaN(longitude)) {
+        if (!Double.isNaN(latitude) && !Double.isNaN(longitude) && (mSelectedItems.size() > 0)) {
             setGeo(latitude, longitude, mSelectedItems);
         }
     }
@@ -316,6 +341,12 @@ public class GeoEditActivity extends Activity implements Common {
 
         mLblStatusMessage = ((TextView) findViewById(R.id.lbl_status));
         mLblStatusMessage.setText(R.string.geo_edit_update_in_progress);
+
+        GeoPickHistory history = getHistory();
+        if (history != null) {
+            history.add(selectedItems.getIds()[0], latitude, longitude);
+            history.save();
+        }
 
         /** encapsulate geo-job into async background task */
         AsyncTask<Object, Integer, Integer> task = new AsyncTask<Object, Integer, Integer>() {

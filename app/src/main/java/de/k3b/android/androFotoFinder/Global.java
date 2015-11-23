@@ -62,6 +62,10 @@ public class Global {
     /** defines the filesystem's directory where crash reports are written to. */
     public static File logCatDir = new File(Environment.getExternalStorageDirectory(), "copy/log");
 
+    /** remember last picked geo-s */
+    public static File pickHistoryFile = null; // initialized in app.onCreate with local database file
+    public static int pickHistoryMax = 25;
+
     public static void debugMemory(String modul, String message) {
         if (Global.debugEnabledMemory) {
             Runtime r = Runtime.getRuntime();

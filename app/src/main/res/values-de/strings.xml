@@ -121,6 +121,10 @@ Dieser Vorgang kann nicht rückgängig gemacht werden."</string>
 
   <string name="settings_log_folder_title">Ordner für Log-Meldungen</string>
   <string name="settings_map_selmarker_max_title">Max. Anzahl Mehrfach-Marker in der Karte</string>
+
+  <string name="settings_geo_history_max_title">Geo History Größe</string>
+  <string name="settings_geo_history_file_title">Geo History Datei</string>
+
   <string name="settings_multisel_clear_summary">... nach Kopieren/Verschieben/Umbenennen /...</string>
   <string name="settings_multisel_clear_title">Mehrfachauswahl deaktivieren</string>
   <string name="settings_title">Einstellungen</string>

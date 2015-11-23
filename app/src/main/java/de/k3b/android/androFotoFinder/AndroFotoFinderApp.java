@@ -57,6 +57,7 @@ public class AndroFotoFinderApp extends Application {
     @Override public void onCreate() {
         super.onCreate();
 
+        Global.pickHistoryFile = getDatabasePath("pickHistory.geouri.txt");
         SettingsActivity.prefs2Global(this);
 
         // create sensible defaults for domain-independant QueryParameter parsing

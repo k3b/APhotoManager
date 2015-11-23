@@ -108,7 +108,7 @@
             android:layout_height="wrap_content"
             android:layout_above="@+id/status"
             android:gravity="center"
-            android:enabled="false"
+            android:enabled="true"
             android:visibility="gone" />
 
         <Button

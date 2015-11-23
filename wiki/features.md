@@ -8,24 +8,25 @@
 * Shows photos in a [geografic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) from [openstreetmap](http://www.openstreetmap.org)
 * Buildin file manager for photos: find, sort, view, copy, delete, set gps exif data, send, ... .
 * Fast find local photos by (sub-)folder, date and/or geographic map.
-* [Translations](https://crowdin.com/project/androFotoFinder): English
+* [Translations](https://crowdin.com/project/androFotoFinder): English, German(since 0.4.3)
 
 * Can handle big image collections (15000+ images in 1000+ folders)
 * Uses Android's image content-provider. No initial image scan neccessary.
 * The [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View) can find images via
-    * folder (with hirachical [Folder-Picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker))
+    * folder (with hirachical [Folder-Picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker)). 
+		* Non-relevant folders are hidden from folder picker (i.e. they have no images inside) .
     * wildcards that match folder/filename
     * date
     * area in [geografic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) (if image has gps-exif info)
 	* Searchcriteria can be saved to and later be retrieved from [Bookmarks](Bookmarks) (since 0.4.2).
 * Show results in a scrollable [gallery view](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) with 
 	* support for multible photo selection
-	* file operations copy, move, delete, share, change geo info 
+	* file operations copy, move, delete, share, set geo 
 * [Image view](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) features
     * image zoom
     * swiping for next/previous image
     * show extended image info (Exif, IPTC, XMP, ICC)
-	* file operations copy, move, delete, rename, share, change geo info 
+	* file operations copy, move, delete, rename, share, set geo 
 	* can be opened from any filemanager or android-s gallery 
 * The [geografic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) 
     * shows markers at places where photos were taken.

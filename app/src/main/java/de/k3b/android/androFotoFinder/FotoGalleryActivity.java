@@ -65,7 +65,7 @@ public class FotoGalleryActivity extends Activity implements Common,
         OnGalleryInteractionListener, DirectoryPickerFragment.OnDirectoryInteractionListener,
         LocationMapFragment.OnDirectoryInteractionListener
 {
-    private static final String mDebugPrefix = "GalA-";
+    private static final String mDebugPrefix = "GalleryA-";
 
     /** intent parameters supported by FotoGalleryActivity: EXTRA_... */
 

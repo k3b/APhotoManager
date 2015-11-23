@@ -50,16 +50,16 @@ public class GeoFileRepository<T extends IGeoPointInfo> implements IGeoRepositor
     public static final java.lang.String COMMENT = "#";
 
     /** where data is loaded from/saved to */
-    private final File file;
-    private final GeoPointDto factory;
+    private final File mFile;
+    private final GeoPointDto mFactory;
 
     /** the content of the repository */
-    private List<T> data = null;
+    protected List<T> mData = null;
 
     /** connect repository to file */
     public GeoFileRepository(File file, GeoPointDto factory) {
-        this.file = file;
-        this.factory = factory;
+        this.mFile = file;
+        this.mFactory = factory;
     }
 
     /** load from repository
@@ -67,22 +67,22 @@ public class GeoFileRepository<T extends IGeoPointInfo> implements IGeoRepositor
      * @return data loaded
      */
     public List<T> load() {
-        if (data == null) {
-            data = new ArrayList<>();
-            if (this.file.exists()) {
+        if (mData == null) {
+            mData = new ArrayList<>();
+            if (this.mFile.exists()) {
                 try {
-                    load(data, new FileReader(this.file));
+                    load(mData, new FileReader(this.mFile));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("load(): " + data.size() + " items from " + this.file);
+                logger.debug("load(): " + mData.size() + " items from " + this.mFile);
             }
         } else if (logger.isDebugEnabled()) {
-            logger.debug("load() cached value : " + data.size() + " items from " + this.file);
+            logger.debug("load() cached value : " + mData.size() + " items from " + this.mFile);
         }
-        return data;
+        return mData;
     }
 
     /**
@@ -92,7 +92,7 @@ public class GeoFileRepository<T extends IGeoPointInfo> implements IGeoRepositor
      */
     @Override
     public List<T> reload() {
-        this.data = null;
+        this.mData = null;
         return load();
     }
 
@@ -123,21 +123,21 @@ public class GeoFileRepository<T extends IGeoPointInfo> implements IGeoRepositor
      */
     public boolean save() {
         try {
-            if ((data != null) && (data.size() > 0)) {
-                if (!this.file.exists()) {
-                    this.file.getParentFile().mkdirs();
+            if ((mData != null) && (mData.size() > 0)) {
+                if (!this.mFile.exists()) {
+                    this.mFile.getParentFile().mkdirs();
                 }
                 if (logger.isDebugEnabled()) {
-                    logger.debug("save(): " + data.size() + " items to " + this.file);
+                    logger.debug("save(): " + mData.size() + " items to " + this.mFile);
                 }
-                save(data, new FileWriter(this.file, false));
+                save(mData, new FileWriter(this.mFile, false));
             }
             return true;
         } catch (IOException e) {
             e.printStackTrace();
         }
         if (logger.isDebugEnabled()) {
-            logger.debug("save(): no items for " + this.file);
+            logger.debug("save(): no items for " + this.mFile);
         }
         return false;
     }
@@ -167,7 +167,7 @@ public class GeoFileRepository<T extends IGeoPointInfo> implements IGeoRepositor
     }
 
     protected GeoPointDto create() {
-        return (GeoPointDto) factory.clone().clear();
+        return (GeoPointDto) mFactory.clone().clear();
     }
 
     /** save points to writer */

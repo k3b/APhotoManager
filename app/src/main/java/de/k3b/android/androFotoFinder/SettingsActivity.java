@@ -46,9 +46,12 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putString("maxSelectionMarkersInMap", "" + Global.maxSelectionMarkersInMap);
         prefs.putString("slideshowIntervallInMilliSecs", "" + Global.slideshowIntervallInMilliSecs);
         prefs.putString("actionBarHideTimeInMilliSecs", "" + Global.actionBarHideTimeInMilliSecs);
+        prefs.putString("pickHistoryMax", "" + Global.pickHistoryMax);
 
         prefs.putString("reportDir", (Global.reportDir != null) ? Global.reportDir.getAbsolutePath() : null);
         prefs.putString("logCatDir", (Global.logCatDir != null) ? Global.logCatDir.getAbsolutePath() : null);
+        prefs.putString("pickHistoryFile", (Global.pickHistoryFile != null) ? Global.pickHistoryFile.getAbsolutePath() : null);
+
         prefs.commit();
 
     }
@@ -68,12 +71,15 @@ public class SettingsActivity extends PreferenceActivity {
 
         Global.clearSelectionAfterCommand       = getPref(prefs, "clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
 
-        Global.maxSelectionMarkersInMap         = getPref(prefs, "maxSelectionMarkersInMap", Global.maxSelectionMarkersInMap);
+        Global.maxSelectionMarkersInMap         = getPref(prefs, "maxSelectionMarkersInMap"     , Global.maxSelectionMarkersInMap);
         Global.slideshowIntervallInMilliSecs    = getPref(prefs, "slideshowIntervallInMilliSecs", Global.slideshowIntervallInMilliSecs);
-        Global.actionBarHideTimeInMilliSecs     = getPref(prefs, "actionBarHideTimeInMilliSecs", Global.actionBarHideTimeInMilliSecs);
+        Global.actionBarHideTimeInMilliSecs     = getPref(prefs, "actionBarHideTimeInMilliSecs" , Global.actionBarHideTimeInMilliSecs);
+        Global.pickHistoryMax = getPref(prefs, "pickHistoryMax"               , Global.pickHistoryMax);
 
         Global.reportDir                        = getPref(prefs, "reportDir", Global.reportDir);
         Global.logCatDir                        = getPref(prefs, "logCatDir", Global.logCatDir);
+
+        Global.pickHistoryFile                  = getPref(prefs, "pickHistoryFile", Global.pickHistoryFile);
 
         /*
         // bool
