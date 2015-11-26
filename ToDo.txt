@@ -1,11 +1,3 @@
-	absturz nach set Geo aus image-view nach änderung ist menge leer
-		Index out of bound goto(0) with size = 0
-	
-	#23 Set Geo with picker history
-		setGeo default: current imgGeo (if available)
-			picker selected = pickHistory+current/selectedItems
-		History: last 25 (imgID,lat,lon;
-	
 	[#22 Add "Show on Map" action to the Image View](https://github.com/k3b/AndroFotoFinder/issues/22)
 	
 	#21 additional languages

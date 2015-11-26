@@ -37,6 +37,8 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.GarbageCollector;
 import de.k3b.database.QueryParameter;
+import de.k3b.geo.api.GeoPointDto;
+import de.k3b.geo.api.IGeoPointInfo;
 import uk.co.senab.photoview.PhotoView;
 
 /**
@@ -164,6 +166,17 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  {
             return cursor.getLong(cursor.getColumnIndex(FotoSql.SQL_COL_PK));
         }
         return 0;
+    }
+
+    public IGeoPointInfo getGeoPoint(int position) {
+        Cursor cursor = getCursorAt(position);
+        if (cursor != null) {
+            int colLat = cursor.getColumnIndex(FotoSql.SQL_COL_LAT);
+            int colLon = cursor.getColumnIndex(FotoSql.SQL_COL_LON);
+
+            return new GeoPointDto(cursor.getDouble(colLat), cursor.getDouble(colLon), IGeoPointInfo.NO_ZOOM);
+        }
+        return null;
     }
 
     /**

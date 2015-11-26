@@ -552,7 +552,6 @@ public class FotoSql {
         return null;
     }
 
-
     public static IGeoPoint execGetPosition(Context context, int id) {
         QueryParameter query = new QueryParameter()
         .setID(QUERY_TYPE_UNDEFINED)

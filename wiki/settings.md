@@ -1,4 +1,4 @@
-The [Settings View](settings) is used to configure the behaviour of "a Photo Manager". 
+The [Settings View](settings) (since v0.4.3) is used to configure the behaviour of "a Photo Manager".
 
 You can reach the [Settings View](settings) via the **settings** menu of 
 

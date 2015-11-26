@@ -36,14 +36,18 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.osmdroid.api.IGeoPoint;
+
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.database.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
+import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoPickHistory;
 import de.k3b.geo.io.GeoUri;
 import de.k3b.io.DirectoryFormatter;
@@ -57,6 +61,7 @@ public class GeoEditActivity extends Activity implements Common {
     public static final int RESULT_ID = 524;
     private static final String DLG_NAVIGATOR_TAG = "GeoEditActivity";
     private static final String SETTINGS_KEY_LAST_URI = "GeoEditActivity-";
+    private static final GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
 
     private EditText mLatitudeFrom;
     private EditText mLongitudeFrom;
@@ -72,16 +77,23 @@ public class GeoEditActivity extends Activity implements Common {
     private TextView mLblStatusMessage;
 
     public static void showActivity(Activity context, SelectedItems selectedItems) {
-        if (Global.debugEnabled) {
-            Log.d(Global.LOG_CONTEXT, context.getClass().getSimpleName()
-                    + " > GeoEditActivity.showActivity");
-        }
-
+        Uri initalUri = null;
         final Intent intent = new Intent().setClass(context,
                 GeoEditActivity.class);
 
-        if (selectedItems != null) {
+        if ((selectedItems != null) && (selectedItems.size() > 0)) {
             intent.putExtra(EXTRA_SELECTED_ITEMS, selectedItems.toString());
+
+            IGeoPoint initialPoint = FotoSql.execGetPosition(context, selectedItems.first().intValue());
+            if (initialPoint != null) {
+                initalUri = Uri.parse(PARSER.toUriString(initialPoint.getLatitude(),initialPoint.getLongitude(), IGeoPointInfo.NO_ZOOM));
+                intent.setData(initalUri);
+            }
+        }
+
+        if (Global.debugEnabled) {
+            Log.d(Global.LOG_CONTEXT, context.getClass().getSimpleName()
+                    + " > GeoEditActivity.showActivity@" + initalUri);
         }
 
         context.startActivityForResult(intent, RESULT_ID);
@@ -105,6 +117,10 @@ public class GeoEditActivity extends Activity implements Common {
         GeoPointDto currentPoint = getLastGeo();
         if (currentPoint != null) {
             toGui(currentPoint);
+        }
+
+        if (Global.geoNoEdit) {
+            showLatLonPicker(fromGui());
         }
     }
 
@@ -165,8 +181,7 @@ public class GeoEditActivity extends Activity implements Common {
         try {
             mCurrentPoint.setLatitude(getLatitude());
             mCurrentPoint.setLongitude(getLogitued());
-            GeoUri parser = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
-            return parser.toUriString(mCurrentPoint);
+            return PARSER.toUriString(mCurrentPoint);
         } catch (RuntimeException ex) {
             Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
             return null;
@@ -184,6 +199,11 @@ public class GeoEditActivity extends Activity implements Common {
 
     @Nullable
     private GeoPointDto getLastGeo() {
+        Uri initalUri = getIntent().getData();
+        if (initalUri != null) {
+            return parseGeo(initalUri.toString());
+        }
+
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         if (sharedPref != null) {
             String uriAsString = sharedPref.getString(SETTINGS_KEY_LAST_URI, "geo:51,9?z=4");
@@ -312,7 +332,7 @@ public class GeoEditActivity extends Activity implements Common {
 
         switch (requestCode) {
             case RESULT_ID:
-                if (intent != null) onGeoChanged(intent.getData());
+                onGeoChanged((intent != null) ? intent.getData() : null);
                 break;
         }
     }
@@ -320,6 +340,13 @@ public class GeoEditActivity extends Activity implements Common {
     private void onGeoChanged(Uri data) {
         if (data != null) {
             toGui(parseGeo(data.toString()));
+        }
+        if (Global.geoNoEdit) {
+            if (data != null) {
+                onOk();
+            } else {
+                finish();
+            }
         }
     }
 
