@@ -3,7 +3,7 @@
 
 ## next version not released yet
 
-## [v0.4.3.*](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.3) (not released yet)
+## [v0.4.3.151201](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.3.151201)
 
 * [#22 Added "Show in map" action](https://github.com/k3b/AndroFotoFinder/issues/22) to [Gallery-View](Gallery-View) and [Image-View](Image-View) to show the current or selected images in the [Geografic-Map](geographic-map)
 * [#23 Set Geo with picker history](https://github.com/k3b/AndroFotoFinder/issues/23)
