@@ -39,10 +39,14 @@ public class Global {
     public static boolean debugEnabled = false;
     public static boolean debugEnabledViewItem = false;
     public static boolean debugEnabledSql = false;
+    public static boolean debugEnabledMemory = false;
 
     public static int maxSelectionMarkersInMap = 255;
 
     public static int slideshowIntervallInMilliSecs = 1500;
+
+    /** defines the timespan after which the [Image-View's](Image-View) ActionBar is hidden */
+    public static int actionBarHideTimeInMilliSecs = 2000;
 
     public static boolean clearSelectionAfterCommand = false;
 
@@ -50,6 +54,16 @@ public class Global {
     public static boolean mustCheckMediaScannerRunning = true;
     public static File reportDir = new File(Environment.getExternalStorageDirectory(), "databases/sql");
     public static String reportExt = ".query";
+
+    /** defines the filesystem's directory where crash reports are written to. */
+    public static File logCatDir = new File(Environment.getExternalStorageDirectory(), "copy/log");
+
+    /** remember last picked geo-s */
+    public static File pickHistoryFile = null; // initialized in app.onCreate with local database file
+    public static int pickHistoryMax = 25;
+
+    /** false: cmd setGeo => form(GeoEditActivity) => mapPicker */
+    public static boolean geoNoEdit = true;
 
     public static void debugMemory(String modul, String message) {
         if (false && Global.debugEnabled) {

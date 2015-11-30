@@ -24,8 +24,10 @@ this program. If not, see <http://www.gnu.org/licenses/>
 <resources>
     <string name="app_name">a Photo Manager</string>
     <string name="about_summary">About a Photo Manager</string>
-    <string name="app_viewer_name">a Photo Viewer</string>
-    <string name="app_map_name">a Photo Map</string>
+    <string name="app_image_viewer_title">a Photo Viewer</string>
+    <string name="app_map_title">a Photo Map</string>
+    <string name="btn_popup" translatable="false">&#8230;</string>
+    <string name="global_log_file_path" translatable="false">copy/aPhotoManager.log</string>
 
 <string name="about_content"><![CDATA["<html><body>
 <a href="https://github.com/k3b/AndroFotoFinder/wiki"><b>A Photo Manager</b></a><br/>Version AndroFotoFinder $versionName$
