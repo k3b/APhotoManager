@@ -4,14 +4,14 @@
 * Shows photos in a [geografic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) from [openstreetmap](http://www.openstreetmap.org)
 * Buildin file manager for photos: find, sort, view, copy, delete, set gps exif data, send, ... .
 * Fast find local photos by (sub-)folder, date and/or geographic map.
-* [Translations](https://crowdin.com/project/androFotoFinder): English
+* [Translations](https://crowdin.com/project/androFotoFinder): English, German
 
 [... features more detailed](https://github.com/k3b/AndroFotoFinder/wiki/features)
 
 **Help wanted for further [Translations](https://crowdin.com/project/androFotoFinder)**
 
 ## Current Project Status
-Latest stable release: v0.4.2 (branch FDroid)
+Latest stable release: v0.4.3 (branch FDroid)
 
 * available via [f-droid.org installer](https://f-droid.org/) or [apk internet download](https://f-droid.org/repository/browse/?fdid=de.k3b.android.androFotoFinder) or [sourcecode at github](https://github.com/k3b/AndroFotoFinder/tree/FDroid)
 * Recent changes see [History](https://github.com/k3b/AndroFotoFinder/wiki/History)
