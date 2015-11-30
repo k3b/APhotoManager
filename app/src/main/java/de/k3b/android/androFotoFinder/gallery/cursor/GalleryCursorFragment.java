@@ -58,6 +58,7 @@ import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailDialogBuilder;
 import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
+import de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.R;
@@ -687,6 +688,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 return cmdMoveOrCopyWithDestDirPicker(false, fileCommands.getLastCopyToPath(), mSelectedItems);
             case R.id.cmd_move:
                 return cmdMoveOrCopyWithDestDirPicker(true, fileCommands.getLastCopyToPath(), mSelectedItems);
+            case R.id.cmd_show_geo:
+                MapGeoPickerActivity.showActivity(this.getActivity(), mSelectedItems);
+                return true;
             case R.id.cmd_edit_geo:
                 GeoEditActivity.showActivity(this.getActivity(), mSelectedItems);
                 return true;

@@ -4,7 +4,8 @@ Note: The geograpic data in the map come from [openstreetmap servers](http://www
 
 You can reach the [Geographic-Map](Geographic-Map) via
 
-* the "map symbol" in the [Gallery-View](Gallery-View)
+* the "map filter symbol" (or menu "Select Map Area") in the [Gallery-View](Gallery-View)
+* menu "Show in map" in the [Gallery-View](Gallery-View) or  [Image-View](Image-View)
 * the "location picker" in the [Filter-View](Filter-View)
 * from any app that support [intents with "geo:"- uris](https://github.com/k3b/AndroFotoFinder/wiki/intentapi) (VIEW/SEND/SENDTO/SEND_MULTIPLE/PICK)
 * opening from android-s app manager

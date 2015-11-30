@@ -66,6 +66,7 @@ This operation cannot be reversed."</string>
 
     <string name="gallery_title">Photos</string>
 
+    <string name="geo_show_menu_title">Show in map</string>
     <string name="geo_edit_menu_title">Set geo</string>
     <string name="geo_edit_update_in_progress">Changing geo info in selected photos</string>
     <string name="geo_picker_err_not_found" >No geo picker found</string>

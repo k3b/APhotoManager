@@ -61,6 +61,7 @@ Dieser Vorgang kann nicht rückgängig gemacht werden."</string>
   <string name="folder_menu_title">Ordner-Filter</string>
   <string name="gallery_title">Fotos</string>
 
+  <string name="geo_show_menu_title">In Karte anzeigen</string>
   <string name="geo_edit_menu_title">Geo-Info ändern</string>
   <string name="geo_edit_update_in_progress">Ändere Geo-Infos in ausgewählten Fotos</string>
 

@@ -1,11 +1,11 @@
 ## todo
-* [#22 Add "Show on Map" action to the Image View](https://github.com/k3b/AndroFotoFinder/issues/22)
 * [#21 additional languages](https://github.com/k3b/AndroFotoFinder/issues/21)
 
 ## next version not released yet
 
 ## [v0.4.3.*](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.3) (not released yet)
 
+* [#22 Added "Show in map" action](https://github.com/k3b/AndroFotoFinder/issues/22) to [Gallery-View](Gallery-View) and [Image-View](Image-View) to show the current or selected images in the [Geografic-Map](geographic-map)
 * [#23 Set Geo with picker history](https://github.com/k3b/AndroFotoFinder/issues/23)
 	* The previous geo-picks for "Set Geo" are shown as blue markers if you select the geo from a map.
 * [#17: Image View auto-hide Actionbar](https://github.com/k3b/AndroFotoFinder/issues/17).

@@ -86,6 +86,8 @@ The [Gallery-View](Gallery-View) has these elements:
 	* the **move/copy** menu will move/copy the selected photo(s) to a different folder.
 		* Move is blocked while Media Scanner is active to avoid conflicts/inconsistent data.
 	    * Pressing the "..." button or long pressing a folder in the [foder picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker) allows you to create a new folder.
+    * the **Show in map** menu show the selected images in the [Geografic-Map](geographic-map) with a blue markers
+        * Note: Green Markers are hidden in this mode.
 	* the **set geo** menu allows you to change the photos geo location (latitude/longitude).
 	    * The previous geo-picks for "Set Geo" are shown as blue markers if you select the geo from a map.
 	    * Note: You can change size and filename of the history through **Set Geo History XXX** in the [Settings View](settings).

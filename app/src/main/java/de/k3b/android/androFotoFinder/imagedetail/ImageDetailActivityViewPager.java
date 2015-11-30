@@ -54,6 +54,7 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.SettingsActivity;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
+import de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.IntentUtil;
@@ -647,6 +648,10 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
                 return cmdMoveOrCopyWithDestDirPicker(true, mFileCommands.getLastCopyToPath(), getCurrentFoto());
             case R.id.menu_item_rename:
                 return onRenameDirQueston(getCurrentImageId(), getCurrentFilePath(), null);
+
+            case R.id.cmd_show_geo:
+                MapGeoPickerActivity.showActivity(this, getCurrentFoto());
+                return true;
             case R.id.cmd_edit_geo:
                 GeoEditActivity.showActivity(this, getCurrentFoto());
                 return true;

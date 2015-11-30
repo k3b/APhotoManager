@@ -44,6 +44,13 @@
         android:orderInCategory="40"
         android:showAsAction="ifRoom" />
 
+    <item android:id="@+id/cmd_show_geo"
+        android:title="@string/geo_show_menu_title"
+        android:icon="@android:drawable/ic_dialog_map"
+        android:visible="true"
+        android:orderInCategory="200"
+        android:showAsAction="never" />
+
     <item android:id="@+id/cmd_edit_geo"
         android:title="@string/geo_edit_menu_title"
         android:icon="@android:drawable/ic_dialog_map"
