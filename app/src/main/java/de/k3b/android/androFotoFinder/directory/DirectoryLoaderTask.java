@@ -131,7 +131,7 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
                 }
             }
             if (mStatus != null) {
-                mStatus.append("\n\tfound " + cursor.getCount() + " db rows");
+                mStatus.append("\n\tfound ").append(cursor.getCount()).append(" db rows");
             }
 
             IDirectory result = builder.getRoot();

@@ -35,7 +35,7 @@
     <Button android:id="@+id/cmd_path"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="..."
+        android:text="@string/btn_popup"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true" />
@@ -72,7 +72,7 @@
     <Button android:id="@+id/cmd_date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="..."
+        android:text="@string/btn_popup"
         android:layout_below="@+id/edit_path"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
@@ -137,7 +137,7 @@
     <Button android:id="@+id/cmd_select_lat_lon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="..."
+        android:text="@string/btn_popup"
         android:layout_below="@+id/chk_with_no_geo"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
@@ -235,26 +235,26 @@
         android:layout_alignStart="@+id/edit_longitude_from" />
 <!-- -->
 
-    <Button android:id="@+id/cmd_ok"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/ok"
-        android:layout_below="@+id/edit_longitude_to"
-        android:layout_alignParentLeft="true" />
     <Button android:id="@+id/cmd_cancel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/cancel"
+        android:text="@string/btn_cancel"
         android:layout_below="@+id/edit_longitude_to"
-        android:layout_toRightOf="@+id/cmd_ok"
-        android:layout_toEndOf="@+id/cmd_ok" />
+        android:layout_alignParentLeft="true" />
     <Button android:id="@+id/cmd_clear"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/cmd_clear_filter"
+        android:text="@string/delete_menu_title"
         android:layout_below="@+id/edit_longitude_to"
         android:layout_toRightOf="@+id/cmd_cancel"
         android:layout_toEndOf="@+id/cmd_cancel" />
+    <Button android:id="@+id/cmd_ok"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_ok"
+        android:layout_below="@+id/edit_longitude_to"
+        android:layout_toRightOf="@+id/cmd_clear"
+        android:layout_toEndOf="@+id/cmd_clear" />
 
 
 </RelativeLayout>

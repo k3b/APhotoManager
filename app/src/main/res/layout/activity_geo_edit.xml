@@ -35,7 +35,7 @@
     <Button android:id="@+id/cmd_select_lat_lon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="..."
+        android:text="@string/btn_popup"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
@@ -108,20 +108,20 @@
         />
 
 <!-- -->
-    <Button android:id="@+id/cmd_ok"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/cmd_set_geo"
-        android:layout_below="@+id/lbl_status"
-        android:layout_alignParentLeft="true"
-        />
     <Button android:id="@+id/cmd_cancel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/cancel"
+        android:text="@string/btn_cancel"
         android:layout_below="@+id/lbl_status"
-        android:layout_toRightOf="@+id/cmd_ok"
-        android:layout_toEndOf="@+id/cmd_ok" />
+        android:layout_alignParentLeft="true"
+        />
+    <Button android:id="@+id/cmd_ok"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_change"
+        android:layout_below="@+id/lbl_status"
+        android:layout_toRightOf="@+id/cmd_cancel"
+        android:layout_toEndOf="@+id/cmd_cancel" />
 
     <ProgressBar android:id="@+id/progressBar"
         style="?android:attr/progressBarStyleHorizontal"

@@ -21,6 +21,7 @@ package de.k3b.android.androFotoFinder.locationmap;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -33,10 +34,14 @@ import android.view.MenuItem;
 import android.view.Window;
 import android.widget.Toast;
 
+import org.osmdroid.api.IGeoPoint;
+
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.GalleryFilterActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.SettingsActivity;
+import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.database.SelectedItems;
@@ -59,6 +64,36 @@ public class MapGeoPickerActivity extends Activity implements Common {
 
     private GalleryFilterParameter mFilter;
     private GeoUri mGeoUriParser = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
+
+    public static void showActivity(Activity context, SelectedItems selectedItems) {
+        Uri initalUri = null;
+        final Intent intent = new Intent().setClass(context,
+                MapGeoPickerActivity.class);
+
+        if ((selectedItems != null) && (selectedItems.size() > 0)) {
+            intent.putExtra(EXTRA_SELECTED_ITEMS, selectedItems.toString());
+
+            IGeoPoint initialPoint = FotoSql.execGetPosition(context, selectedItems.first().intValue());
+            if (initialPoint != null) {
+                GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
+
+                initalUri = Uri.parse(PARSER.toUriString(initialPoint.getLatitude(),initialPoint.getLongitude(), IGeoPointInfo.NO_ZOOM));
+                intent.setData(initalUri);
+            }
+            GalleryFilterParameter filter = new GalleryFilterParameter();
+            filter.setNonGeoOnly(true);
+            intent.putExtra(EXTRA_FILTER, filter.toString());
+        }
+
+        intent.setAction(Intent.ACTION_VIEW);
+        if (Global.debugEnabled) {
+            Log.d(Global.LOG_CONTEXT, context.getClass().getSimpleName()
+                    + " > MapGeoPickerActivity.showActivity@" + initalUri);
+        }
+
+        context.startActivity(intent);
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +119,7 @@ public class MapGeoPickerActivity extends Activity implements Common {
 
         String extraTitle = intent.getStringExtra(EXTRA_TITLE);
         if (extraTitle == null && (geoPointFromIntent == null)) {
-            extraTitle = getString(R.string.app_map_name);
+            extraTitle = getString(R.string.app_map_title);
         }
 
         if (extraTitle == null) {
@@ -195,6 +230,9 @@ public class MapGeoPickerActivity extends Activity implements Common {
                 return true;
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
+                return true;
+            case R.id.cmd_settings:
+                SettingsActivity.show(this);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

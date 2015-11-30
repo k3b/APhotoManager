@@ -89,7 +89,7 @@ public class AboutDialogPreference extends DialogPreference {
         final AlertDialog.Builder alert = new AlertDialog.Builder(context);
         alert.setTitle(R.string.about_summary);
         alert.setIcon(R.drawable.foto_gallery);
-        alert.setNeutralButton(R.string.cancel,
+        alert.setNeutralButton(R.string.btn_cancel,
                 new DialogInterface.OnClickListener() {
 
                     @Override

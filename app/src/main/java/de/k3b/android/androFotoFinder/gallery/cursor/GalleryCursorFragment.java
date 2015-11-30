@@ -58,6 +58,7 @@ import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailDialogBuilder;
 import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
+import de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.R;
@@ -175,15 +176,15 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             if (data == null) {
                 FotoSql.CursorLoaderWithException loader = (FotoSql.CursorLoaderWithException) _loader;
                 String title;
-                String message = context.getString(R.string.err_sql_message, loader.getException().getMessage(), loader.getQuery().toSqlString());
+                String message = context.getString(R.string.global_err_sql_message_format, loader.getException().getMessage(), loader.getQuery().toSqlString());
                 if (loader.getException() != null) {
                     if (0 != loader.getQuery().toSqlString().compareTo(getCurrentQuery(FotoSql.queryDetail).toSqlString())) {
                         // query is not default query. revert to default query
                         mGalleryContentQuery = FotoSql.queryDetail;
                         requery("requery after query-errror");
-                        title = context.getString(R.string.err_sql_title_reload);
+                        title = context.getString(R.string.global_err_sql_title_reload);
                     } else {
-                        title = context.getString(R.string.err_system);
+                        title = context.getString(R.string.global_err_system);
                         context.finish();
                     }
                     Dialogs.messagebox(context, title, message);
@@ -687,6 +688,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 return cmdMoveOrCopyWithDestDirPicker(false, fileCommands.getLastCopyToPath(), mSelectedItems);
             case R.id.cmd_move:
                 return cmdMoveOrCopyWithDestDirPicker(true, fileCommands.getLastCopyToPath(), mSelectedItems);
+            case R.id.cmd_show_geo:
+                MapGeoPickerActivity.showActivity(this.getActivity(), mSelectedItems);
+                return true;
             case R.id.cmd_edit_geo:
                 GeoEditActivity.showActivity(this.getActivity(), mSelectedItems);
                 return true;
@@ -811,7 +815,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             }
         } else {
             // multi selection is active: update title and data for share menue
-            newTitle = getActivity().getString(R.string.title_multiselection, mSelectedItems.size());
+            newTitle = getActivity().getString(R.string.selection_status_format, mSelectedItems.size());
             multiSelectionUpdateShareIntent();
         }
 
@@ -847,7 +851,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 this.mNoShareError = true;
             } catch (Exception e) {
                 if (this.mNoShareError) {
-                    Toast.makeText(this.getActivity(), R.string.err_cannot_share, Toast.LENGTH_LONG).show();
+                    Toast.makeText(this.getActivity(), R.string.share_err_to_many, Toast.LENGTH_LONG).show();
                     this.mNoShareError = false; // do not show it again
                 }
             }

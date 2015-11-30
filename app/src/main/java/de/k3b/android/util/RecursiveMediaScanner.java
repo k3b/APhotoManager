@@ -166,20 +166,20 @@ public class RecursiveMediaScanner extends MediaScanner {
 
     public void showStatusDialog(final Activity parent) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(parent);
-        builder.setTitle(R.string.title_scanner);
+        builder.setTitle(R.string.scanner_menu_title);
         View content = parent.getLayoutInflater().inflate(R.layout.dialog_scanner_status, null);
 
         final TextView folder = (TextView) content.findViewById(R.id.folder);
         final TextView count = (TextView) content.findViewById(R.id.count);
 
         builder.setView(content);
-        builder.setNeutralButton(R.string.cancel, new DialogInterface.OnClickListener() {
+        builder.setNeutralButton(R.string.btn_cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 onStatusDialogEnd(null, true);
             }
         });
-        builder.setNegativeButton(R.string.pause, new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.btn_pause, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 onStatusDialogEnd(new ArrayList<String>(), true);
@@ -202,7 +202,7 @@ public class RecursiveMediaScanner extends MediaScanner {
                 if (mStatusDialog != null) {
                     RecursiveMediaScanner scanner = RecursiveMediaScanner.this;
                     folder.setText(scanner.mCurrentFolder);
-                    count.setText(parent.getString(R.string.loading_image_at_position, scanner.mCount));
+                    count.setText(parent.getString(R.string.image_loading_at_position_format, scanner.mCount));
                     if (scanner.mTimerRunner != null) {
                         mTimerHandler.postDelayed(scanner.mTimerRunner, 500); // e.g. 500 milliseconds
                     }

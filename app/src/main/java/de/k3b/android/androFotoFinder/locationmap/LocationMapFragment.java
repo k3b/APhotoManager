@@ -282,7 +282,7 @@ public class LocationMapFragment extends DialogFragment {
             defineButtons(view);
 
             String title = getActivity().getString(
-                    R.string.action_area_title);
+                    R.string.area_menu_title);
             getDialog().setTitle(title);
 
         }

@@ -1,32 +1,9 @@
-TODO
-	aLogCat als lib einbinden um log anzuzeigen/speichern
+	#21 additional languages
 	
-	absturz nach set Geo
-	
-	test mit android6 emulator
-		- file
-		- log
-
-	#17 Image View fullscreen
-		auto-hide actionbar http://stackoverflow.com/questions/19831090/loop-for-time-delay-when-hiding-actionbar
-		
-			Handler h = new Handler();
-			h.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					// DO DELAYED STUFF
-					getActionBar().hide();
-					getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
-				}
-			}, 3000); // e.g. 3000 milliseconds
-		
 	replace (see https://en.wikipedia.org/wiki/Constant_interface)
 		implements Common 
 		with 
 		import static de.k3b.android.androFotoFinder.Common.*;
-
-	docs
-		? bookmark
 
 	mediaScanner
 		delete orfan thumbnails

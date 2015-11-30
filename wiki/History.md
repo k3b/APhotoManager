@@ -1,7 +1,22 @@
+## todo
+* [#21 additional languages](https://github.com/k3b/AndroFotoFinder/issues/21)
+
 ## next version not released yet
 
-## [v0.4.2.*](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.2) (not released yet)
+## [v0.4.3.*](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.3) (not released yet)
 
+* [#22 Added "Show in map" action](https://github.com/k3b/AndroFotoFinder/issues/22) to [Gallery-View](Gallery-View) and [Image-View](Image-View) to show the current or selected images in the [Geografic-Map](geographic-map)
+* [#23 Set Geo with picker history](https://github.com/k3b/AndroFotoFinder/issues/23)
+	* The previous geo-picks for "Set Geo" are shown as blue markers if you select the geo from a map.
+* [#17: Image View auto-hide Actionbar](https://github.com/k3b/AndroFotoFinder/issues/17).
+* [#20 Add german translations](https://github.com/k3b/AndroFotoFinder/issues/20)
+	* Registered app for online crowd translation service [Crowdin Project](https://crowdin.com/project/androFotoFinder)
+* [#19 Add Settings dialog](https://github.com/k3b/AndroFotoFinder/issues/19)
+    * Added More debug support for 3rd party libs
+
+## [v0.4.2.151105](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.2.151105) available in [F-Droid app store](https://f-droid.org)  since 2015-11-07
+
+* after app crash the errorlog (logcat) is written to /mnt/sdcard/copy/log/androFotofinder.logcat*.txt
 * renamed from "a Foto Finder" to "a Photo Manager" to avoid naming collision with other names.
 * added [Bookmark](Bookmarks) support in [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) and [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View).
 * [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) :
@@ -46,11 +61,11 @@
 
 * [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) :
 	* [Selection](Gallery-View#Multiselection): add/remove [all visible](Gallery-View#CurrentSet)
-	* [#4 change geo: modify photo-s gps-location using a map view](https://github.com/k3b/AndroFotoFinder/issues/4)
+	* [#4 set geo: modify photo-s gps-location using a map view](https://github.com/k3b/AndroFotoFinder/issues/4)
 * [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) : 
 	* [#2 Share/Edit](https://github.com/k3b/AndroFotoFinder/issues/2)/Rename/Delete/Copy/Move
 	* Open [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) when [#3 clicking a photo file in a filemanager](https://github.com/k3b/AndroFotoFinder/issues/3) or in android-s "gallery-send menu"
-	* [#4 change geo: modify photo-s gps-location using a map view](https://github.com/k3b/AndroFotoFinder/issues/4)
+	* [#4 set geo: modify photo-s gps-location using a map view](https://github.com/k3b/AndroFotoFinder/issues/4)
 * [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) : 
 	* [#5 Show selected items as blue markers in map](https://github.com/k3b/AndroFotoFinder/issues/5)
 	* [#6 Implemented a geo-picker](https://github.com/k3b/AndroFotoFinder/issues/6) that can be used by other apps via the [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi)

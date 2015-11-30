@@ -19,6 +19,7 @@
  */
 package de.k3b.android.androFotoFinder.imagedetail;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.ActivityNotFoundException;
@@ -26,6 +27,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -35,6 +38,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.Toast;
 
 // import com.squareup.leakcanary.RefWatcher;
@@ -47,8 +51,10 @@ import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.SettingsActivity;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
+import de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.IntentUtil;
@@ -75,6 +81,9 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     private static final int DEFAULT_SORT = FotoSql.SORT_BY_NAME_LEN;
     private static final QueryParameter DEFAULT_QUERY = FotoSql.queryDetail;
     private static final int NO_INITIAL_SCROLL_POSITION = -1;
+
+    /** if smaller that these millisecs then the actionbar autohide is disabled */
+    private static final int DISABLE_HIDE_ACTIONBAR = 700;
 
     // how many changes have been made. if != 0 parent activity must invalidate cached data
     private static int mModifyCount = 0;
@@ -114,12 +123,14 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             mAdapter.swapCursor(data);
 
             // restore position is invalid
-            if (mInitialScrollPosition >= mAdapter.getCount()) mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
+            final int newItemCount = mAdapter.getCount();
+
+            if (((newItemCount == 0)) || (mInitialScrollPosition >= newItemCount)) mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
 
             if (Global.debugEnabledSql) {
                 Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onLoadFinished" +
                         getDebugContext() +
-                        " found " + ((data == null) ? 0 : data.getCount()) + " rows");
+                        " found " + ((data == null) ? 0 : newItemCount) + " rows");
             }
 
             // do change the data
@@ -257,6 +268,10 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         mDebugPrefix = "ImageDetailActivityViewPager#" + (id++)  + " ";
         Global.debugMemory(mDebugPrefix, "onCreate");
 
+        // #17: let actionbar overlap image so there is no need to resize main view item
+        // http://stackoverflow.com/questions/6749261/custom-translucent-android-actionbar
+        getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
+
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
 
@@ -283,7 +298,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             mViewPager.setOnInterceptTouchEvent(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mSlideShowStarted) startStopSlideShow(false);
+                    onGuiTouched();
                 }
             });
 
@@ -302,6 +317,59 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
             mCurorLoader = new LocalCursorLoader();
             getLoaderManager().initLoader(ACTIVITY_ID, null, mCurorLoader);
+
+            // #17: make actionbar background nearly transparent
+            // http://stackoverflow.com/questions/6749261/custom-translucent-android-actionbar
+            getActionBar().setBackgroundDrawable(new ColorDrawable(Color.argb(128, 0, 0, 0)));
+        }
+        unhideActionBar(Global.actionBarHideTimeInMilliSecs, "onCreate");
+    }
+
+    private void onGuiTouched() {
+        // stop slideshow if active
+        if (mSlideShowStarted) startStopSlideShow(false);
+        unhideActionBar(Global.actionBarHideTimeInMilliSecs, "onGuiTouched");
+    }
+
+    /** after 2 secs of user inactive the actionbar is hidden until the screen is touched */
+    private Handler mActionBarHideTimer = null;
+    private void unhideActionBar(int milliSecsUntilHide, String why) {
+        final int ACTIONBAR_HIDE_HANDLER_ID = 3;
+        boolean timer = milliSecsUntilHide >= DISABLE_HIDE_ACTIONBAR;
+
+        ActionBar bar = getActionBar();
+
+        if ((bar != null) && (!bar.isShowing())) {
+            if (Global.debugEnabled) {
+                Log.d(Global.LOG_CONTEXT, mDebugPrefix + "unhiding ActionBar(timer=" + timer +
+                        ") " + why);
+            }
+            bar.show();
+        }
+
+        if (timer) {
+            if (mActionBarHideTimer == null) {
+                mActionBarHideTimer = new Handler() {
+                    public void handleMessage(Message m) {
+                        ActionBar bar = getActionBar();
+
+                        if ((bar != null) && (bar.isShowing())) {
+                            if (Global.debugEnabled) {
+                                Log.d(Global.LOG_CONTEXT, mDebugPrefix + "hiding ActionBar");
+                            }
+                            bar.hide();
+                        }
+                    }
+                };
+
+            }
+            mActionBarHideTimer.removeMessages(ACTIONBAR_HIDE_HANDLER_ID);
+            mActionBarHideTimer.sendMessageDelayed(Message.obtain(mActionBarHideTimer, ACTIONBAR_HIDE_HANDLER_ID), milliSecsUntilHide);
+        } else {
+            if (mActionBarHideTimer != null) {
+                mActionBarHideTimer.removeMessages(ACTIONBAR_HIDE_HANDLER_ID);
+                mActionBarHideTimer = null;
+            }
         }
     }
 
@@ -396,8 +464,8 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     public void setTitle(CharSequence title) {
         super.setTitle(title);
         // http://stackoverflow.com/questions/10779037/set-activity-title-ellipse-to-middle
-        final int actionBarTitle = android.R.id.title; //  Resources.getSystem().getIdentifier("action_bar_title", "id", "android");
-        final TextView titleView = (TextView)  this.getWindow().findViewById(actionBarTitle);
+        final int ActionBarTitle = android.R.id.title; //  Resources.getSystem().getIdentifier("action_bar_title", "id", "android");
+        final TextView titleView = (TextView)  this.getWindow().findViewById(ActionBarTitle);
         if ( titleView != null ) {
             titleView.setEllipsize(TextUtils.TruncateAt.MIDDLE);
         }
@@ -406,6 +474,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     @Override
     protected void onPause () {
+        unhideActionBar(DISABLE_HIDE_ACTIONBAR, "onPause");
         Global.debugMemory(mDebugPrefix, "onPause");
         startStopSlideShow(false);
         super.onPause();
@@ -413,6 +482,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     @Override
     protected void onResume () {
+        unhideActionBar(Global.actionBarHideTimeInMilliSecs, "onResume");
         Global.debugMemory(mDebugPrefix, "onResume");
         super.onResume();
     }
@@ -420,6 +490,8 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     @Override
     protected void onDestroy() {
         Global.debugMemory(mDebugPrefix, "onDestroy");
+
+        unhideActionBar(DISABLE_HIDE_ACTIONBAR, "onDestroy");
 
         // getLoaderManager().destroyLoader(ACTIVITY_ID);
         if (mAdapter != null) {
@@ -430,6 +502,10 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             MoveOrCopyDestDirPicker.sFileCommands = null;
         }
 
+        if (mSlideShowTimer != null) {
+            startStopSlideShow(false);
+            mSlideShowTimer = null;
+        }
         super.onDestroy();
         // RefWatcher refWatcher = AndroFotoFinderApp.getRefWatcher(this);
         // refWatcher.watch(this);
@@ -444,7 +520,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             } else {
 
                 // close activity if last image of current selection has been deleted
-                String message = getString(R.string.err_no_fotos_found, mInitialFilePath);
+                String message = getString(R.string.image_err_not_found_format, mInitialFilePath);
                 Toast.makeText(this, message, Toast.LENGTH_LONG).show();
                 this.finish();
             }
@@ -481,7 +557,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
                     mDebugPrefix + "checkForIncompleteMediaDatabase-" + why,
                     fileToLoad.getParentFile());
 
-            String message = getString(R.string.err_fotos_not_in_db, jpgFullFilePath, numberOfNewItems);
+            String message = getString(R.string.image_err_not_in_db_format, jpgFullFilePath, numberOfNewItems);
             Toast.makeText(this, message, Toast.LENGTH_LONG).show();
             return true;
         }
@@ -532,6 +608,8 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        // have more time to find and press the menu
+        unhideActionBar(Global.actionBarHideTimeInMilliSecs * 3, "onPrepareOptionsMenu");
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -539,10 +617,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     public boolean onOptionsItemSelected(MenuItem item) {
         boolean slideShowStarted = mSlideShowStarted;
 
-        // every command will stop the slideshow
-        if (slideShowStarted) {
-            startStopSlideShow(false);
-        }
+        onGuiTouched();
         if (mFileCommands.onOptionsItemSelected(item, getCurrentFoto())) {
             mModifyCount++;
             return true; // case R.id.cmd_delete:
@@ -560,11 +635,11 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
                 return true;
 
             case R.id.action_edit:
-                cmdStartIntent(getCurrentFilePath(), null, Intent.ACTION_EDIT, R.string.title_chooser_edit, R.string.error_edit);
+                cmdStartIntent(getCurrentFilePath(), null, Intent.ACTION_EDIT, R.string.edit_chooser_title, R.string.edit_err_editor_not_found);
                 return true;
 
             case R.id.menu_item_share:
-                cmdStartIntent(null, getCurrentFilePath(), Intent.ACTION_SEND, R.string.title_chooser_share, R.string.error_share);
+                cmdStartIntent(null, getCurrentFilePath(), Intent.ACTION_SEND, R.string.share_menu_title, R.string.share_err_not_found);
                 return true;
 
             case R.id.cmd_copy:
@@ -573,12 +648,19 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
                 return cmdMoveOrCopyWithDestDirPicker(true, mFileCommands.getLastCopyToPath(), getCurrentFoto());
             case R.id.menu_item_rename:
                 return onRenameDirQueston(getCurrentImageId(), getCurrentFilePath(), null);
+
+            case R.id.cmd_show_geo:
+                MapGeoPickerActivity.showActivity(this, getCurrentFoto());
+                return true;
             case R.id.cmd_edit_geo:
                 GeoEditActivity.showActivity(this, getCurrentFoto());
                 return true;
 
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
+                return true;
+            case R.id.cmd_settings:
+                SettingsActivity.show(this);
                 return true;
 
             default:
@@ -587,13 +669,13 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
     }
 
-    private static final int SLIDESHOW_WHAT = 2;
+    private static final int SLIDESHOW_HANDLER_ID = 2;
     private boolean mSlideShowStarted = false;
     private Handler mSlideShowTimer = new Handler() {
         public void handleMessage(Message m) {
             if (mSlideShowStarted) {
                 onSlideShowNext();
-                sendMessageDelayed(Message.obtain(this, SLIDESHOW_WHAT), Global.slideshowIntervallInMilliSecs);
+                sendMessageDelayed(Message.obtain(this, SLIDESHOW_HANDLER_ID), Global.slideshowIntervallInMilliSecs);
             }
         }
     };
@@ -603,9 +685,9 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         if (start != mSlideShowStarted) {
             if (start) {
                 onSlideShowNext();
-                mSlideShowTimer.sendMessageDelayed(Message.obtain(mSlideShowTimer, SLIDESHOW_WHAT), Global.slideshowIntervallInMilliSecs);
+                mSlideShowTimer.sendMessageDelayed(Message.obtain(mSlideShowTimer, SLIDESHOW_HANDLER_ID), Global.slideshowIntervallInMilliSecs);
             } else {
-                mSlideShowTimer.removeMessages(SLIDESHOW_WHAT);
+                mSlideShowTimer.removeMessages(SLIDESHOW_HANDLER_ID);
             }
             mSlideShowStarted = start;
             if (mMenuSlideshow != null) mMenuSlideshow.setChecked(start);
@@ -682,7 +764,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
                     }
                 }
             };
-            dialog.editFileName(this, getString(R.string.cmd_rename), newName, fotoId, fotoPath);
+            dialog.editFileName(this, getString(R.string.rename_menu_title), newName, fotoId, fotoPath);
         }
         return true;
     }
@@ -699,10 +781,10 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
         String errorMessage = null;
         if (hasSideCar && mFileCommands.osFileExists(destXmp)) {
-            errorMessage = getString(R.string.err_file_exists, destXmp.getAbsoluteFile());
+            errorMessage = getString(R.string.image_err_file_exists_format, destXmp.getAbsoluteFile());
         }
         if (mFileCommands.osFileExists(dest)) {
-            errorMessage = getString(R.string.err_file_exists, dest.getAbsoluteFile());
+            errorMessage = getString(R.string.image_err_file_exists_format, dest.getAbsoluteFile());
         }
 
         if (errorMessage != null) {
@@ -713,7 +795,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
             mModifyCount++;
         } else {
             // rename failed
-            errorMessage = getString(R.string.err_file_rename, src.getAbsoluteFile());
+            errorMessage = getString(R.string.image_err_file_rename_format, src.getAbsoluteFile());
             Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
         }
     }
@@ -755,7 +837,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		if (isViewPagerActive()) {
+        if (isViewPagerActive()) {
             outState.putInt(INSTANCE_STATE_LAST_SCROLL_POSITION, mViewPager.getCurrentItem());
     	}
         outState.putInt(INSTANCE_STATE_MODIFY_COUNT, mModifyCount);

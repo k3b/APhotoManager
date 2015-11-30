@@ -62,7 +62,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
     @Override
     protected void onPostExecute(Integer modifyCount) {
         super.onPostExecute(modifyCount);
-        String message = this.mContext.getString(R.string.media_update_result, modifyCount);
+        String message = this.mContext.getString(R.string.scanner_update_result_format, modifyCount);
         Toast.makeText(this.mContext, message, Toast.LENGTH_LONG).show();
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, CONTEXT + "A42 scanner finished: " + message);

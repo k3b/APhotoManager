@@ -28,6 +28,9 @@ import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.LogCat;
 import de.k3b.database.QueryParameter;
+import uk.co.senab.photoview.HugeImageLoader;
+import uk.co.senab.photoview.PhotoViewAttacher;
+import uk.co.senab.photoview.gestures.CupcakeGestureDetector;
 
 // import com.squareup.leakcanary.LeakCanary;
 // import com.squareup.leakcanary.RefWatcher;
@@ -54,8 +57,11 @@ public class AndroFotoFinderApp extends Application {
     @Override public void onCreate() {
         super.onCreate();
 
+        Global.pickHistoryFile = getDatabasePath("pickHistory.geouri.txt");
+        SettingsActivity.prefs2Global(this);
+
         // create sensible defaults for domain-independant QueryParameter parsing
-        QueryParameter.sParserComment = getString(R.string.query_param_comment,
+        QueryParameter.sParserComment = getString(R.string.bookmark_file_comment_format,
                 getString(R.string.app_name),
                 GuiUtil.getAppVersionName(this),
                 new Date().toString());
@@ -66,7 +72,7 @@ public class AndroFotoFinderApp extends Application {
         for (String columnName : FotoSql.DEFAULT_GALLERY_COLUMNS) {
             QueryParameter.sParserDefaultSelect.add(columnName);
         }
-        mCrashSaveToFile = new LogCat(Global.LOG_CONTEXT);
+        mCrashSaveToFile = new LogCat(this, Global.LOG_CONTEXT, HugeImageLoader.LOG_TAG, PhotoViewAttacher.LOG_TAG, CupcakeGestureDetector.LOG_TAG);
     }
 
     @Override

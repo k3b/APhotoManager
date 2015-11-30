@@ -65,7 +65,7 @@ public class FotoGalleryActivity extends Activity implements Common,
         OnGalleryInteractionListener, DirectoryPickerFragment.OnDirectoryInteractionListener,
         LocationMapFragment.OnDirectoryInteractionListener
 {
-    private static final String mDebugPrefix = "GalA-";
+    private static final String mDebugPrefix = "GalleryA-";
 
     /** intent parameters supported by FotoGalleryActivity: EXTRA_... */
 
@@ -426,7 +426,7 @@ public class FotoGalleryActivity extends Activity implements Common,
 
         if (sorter != null) {
             StringBuilder sortTitle = new StringBuilder();
-            sortTitle.append(getString(R.string.action_sort_title))
+            sortTitle.append(getString(R.string.sort_menu_title))
                     .append(": ")
                     .append(mGalleryQueryParameter.getSortDisplayName(this));
             sorter.setTitle(sortTitle.toString());
@@ -470,8 +470,8 @@ public class FotoGalleryActivity extends Activity implements Common,
                 this.mGalleryQueryParameter.setSortID(FotoSql.SORT_BY_LOCATION);
                 reloadGui("sort geo");
                 return true;
-            case R.id.action_settings:
-                openSettings();
+            case R.id.cmd_settings:
+                SettingsActivity.show(this);
                 return true;
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
@@ -597,11 +597,6 @@ public class FotoGalleryActivity extends Activity implements Common,
     private void openSort() {
     }
 
-    private void openSettings() {
-//        Intent intent = new Intent(this, SettingsActivity.class);;
-//        startActivity(intent);
-    }
-
     /** called by Fragment: a fragment Item was clicked */
     @Override
     public void onGalleryImageClick(long imageId, Uri imageUri, int position) {
@@ -707,7 +702,7 @@ public class FotoGalleryActivity extends Activity implements Common,
 
     private void onDirectoryDataLoadComplete(IDirectory directoryRoot) {
         if (directoryRoot == null) {
-            final String message = getString(R.string.err_load_folder_failed, FotoSql.getName(this, this.mGalleryQueryParameter.getDirQueryID()));
+            final String message = getString(R.string.folder_err_load_failed_format, FotoSql.getName(this, this.mGalleryQueryParameter.getDirQueryID()));
             Toast.makeText(this, message,Toast.LENGTH_LONG).show();
         } else {
             mDirectoryRoot = directoryRoot;
@@ -739,7 +734,7 @@ public class FotoGalleryActivity extends Activity implements Common,
 
         if (title == null) {
             if (mGalleryQueryParameter.mUseLatLon) {
-                title = getString(R.string.gallery_foto);
+                title = getString(R.string.gallery_title);
             } else if (this.mGalleryQueryParameter.mCurrentPath != null) {
                 title = FotoSql.getName(this, this.mGalleryQueryParameter.getDirQueryID())
                         + " - " + this.mGalleryQueryParameter.mCurrentPath;

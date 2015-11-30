@@ -24,14 +24,14 @@
     xmlns:tools="http://schemas.android.com/tools" tools:context=".GalleryActivity">
 
     <item android:id="@+id/cmd_cancel"
-        android:title="@string/cancel"
+        android:title="@string/btn_cancel"
         android:icon="@android:drawable/ic_menu_close_clear_cancel"
         android:visible="true"
         android:orderInCategory="1"
         android:showAsAction="always" />
 
     <item android:id="@+id/cmd_selected_only"
-        android:title="Selected only"
+        android:title="@string/selected_only_menu_title"
         android:icon="@android:drawable/checkbox_off_background"
         android:visible="true"
         android:orderInCategory="1"
@@ -42,6 +42,6 @@
     <item
         android:id="@+id/menu_item_share"
         android:showAsAction="always"
-        android:title="@string/cmd_share"
+        android:title="@string/share_menu_title"
         android:orderInCategory="2" />
 </menu>

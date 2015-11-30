@@ -23,7 +23,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -54,7 +53,6 @@ import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.AndroidFileCommands;
-import de.k3b.android.widget.Dialogs;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryNavigator;
 import de.k3b.io.GalleryFilterParameter;
@@ -225,29 +223,33 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         mCmdOk.setVisibility(View.VISIBLE);
         
         mCmdCancel = (Button) view.findViewById(R.id.cmd_cancel);
-        mCmdCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onDirectoryCancel();
-            }
-        });
-        mCmdCancel.setVisibility(View.VISIBLE);
+        if (mCmdCancel != null) {
+            mCmdCancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onDirectoryCancel();
+                }
+            });
+            mCmdCancel.setVisibility(View.VISIBLE);
+        }
 
         mCmdPopup = null;
         if (mContextMenue != 0) {
             mCmdPopup = (Button) view.findViewById(R.id.cmd_popup);
-            mCmdPopup.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onShowPopUp(mCmdPopup, mCurrentSelection);
-                }
-            });
-            mCmdPopup.setVisibility(View.VISIBLE);
+            if (mCmdPopup != null) {
+                mCmdPopup.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        onShowPopUp(mCmdPopup, mCurrentSelection);
+                    }
+                });
+                mCmdPopup.setVisibility(View.VISIBLE);
+            }
         }
 
         if (mDirTypId != 0) {
             String title = mContext.getString(
-                    R.string.directory_fragment_dialog_title,
+                    R.string.folder_dialog_title_format,
                     FotoSql.getName(mContext,mDirTypId));
             getDialog().setTitle(title);
             // no api for setIcon ????
@@ -287,7 +289,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
 
     private boolean onCreateSubDirQuestion(final IDirectory parentDir) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(R.string.cmd_mk_dir);
+        builder.setTitle(R.string.mk_dir_menu_title);
         View content = getActivity().getLayoutInflater().inflate(R.layout.dialog_edit_name, null);
 
         final EditText edit = (EditText) content.findViewById(R.id.edName);
@@ -296,13 +298,13 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         edit.setSelection(0, defaultName.length());
 
         builder.setView(content);
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(R.string.btn_cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dismiss();mSubDialog=null;
             }
         });
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
             //@Override
             public void onClick(DialogInterface dialog, int which) {
                 onCreateSubDirAnswer(parentDir, edit.getText().toString());
@@ -327,11 +329,11 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         int msgId;
         if (newChild.osMkDirs()) {
             AndroidFileCommands.log(getActivity(), "mkdirs \"", newPathAbsolute, "\"" ).closeLogFile();
-            msgId = R.string.cmd_mk_success;
+            msgId = R.string.mk_success_format;
             reloadTreeViewIfAvailable();
             onParentPathBarButtonClick(newChild);
         } else {
-            msgId = R.string.cmd_mk_failed;
+            msgId = R.string.mk_err_failed_format;
             parentDir.getChildren().remove(newChild);
             newChild.destroy();
         }
@@ -467,7 +469,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             if (canPressOk) {
                 mStatus.setText(this.mCurrentSelection.getAbsolute());
             } else {
-                mStatus.setText(R.string.no_dir_selected);
+                mStatus.setText(R.string.selection_none_hint);
             }
         }
     }

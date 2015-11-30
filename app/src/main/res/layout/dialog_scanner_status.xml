@@ -7,7 +7,7 @@
         android:id="@+id/count"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/loading_image_at_position"
+        android:text="@string/image_loading_at_position_format"
         android:layout_marginTop="@dimen/grid_cell_margin"
         android:layout_marginBottom="@dimen/grid_cell_margin" />
 

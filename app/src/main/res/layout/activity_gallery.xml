@@ -26,6 +26,6 @@
         android:id="@+id/galleryCursor"
         android:name="de.k3b.android.androFotoFinder.gallery.cursor.GalleryCursorFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:layout_weight="1" />
 </LinearLayout>

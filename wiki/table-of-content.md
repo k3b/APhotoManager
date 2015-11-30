@@ -21,6 +21,7 @@
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/Gallery.png)
 
 
+* [Features](https://github.com/k3b/AndroFotoFinder/wiki/features)
 * [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map)
 	* ["geo:" picker](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map#picker)
 * [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View)
@@ -42,3 +43,4 @@
 	
 * [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)
 * [Bookmarks](Bookmarks)
+* [Settings](https://github.com/k3b/AndroFotoFinder/wiki/settings)

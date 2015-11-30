@@ -22,15 +22,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="de.k3b.android.androFotoFinder.GalleryFilterActivity">
-    <item android:id="@+id/action_settings" android:title="@string/action_settings"
-        android:orderInCategory="100" android:showAsAction="never" android:visible="false" />
-    <item android:id="@+id/action_save_as" android:title="@string/cmd_save_bookmark_as"
+    <item android:id="@+id/cmd_settings" android:title="@string/settings_title"
+        android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
+    <item android:id="@+id/action_save_as" android:title="@string/bookmark_save_as_menu_title"
         android:orderInCategory="200" android:showAsAction="never" android:visible="true" />
-    <item android:id="@+id/action_load_from" android:title="@string/cmd_load_bookmark_from"
+    <item android:id="@+id/action_load_from" android:title="@string/bookmark_load_from_menu_title"
         android:orderInCategory="200" android:showAsAction="never" android:visible="true" />
     <item android:id="@+id/cmd_about"
         android:title="@string/about_summary"
         android:visible="true"
-        android:orderInCategory="1000"
+        android:orderInCategory="10000"
         android:showAsAction="never" />
 </menu>

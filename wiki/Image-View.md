@@ -9,9 +9,17 @@ You can reach the [Image-View](Image-View) via
 * image zoom
 * swiping for next/previous image
 * show extended image info (Exif, IPTC, XMP, ICC)
-* file operations copy/move/rename/delete/change geo info (Since Version 0.4.1)
+* file operations copy/move/rename/delete/set-geo
 	* Move and Rename is blocked while Media Scanner is active to avoid conflicts/inconsistent data.
-* menu command slideshow: automatic showing next image every 1.5 seconds. Tuching the image stops the slideshow
+	* The **set geo** menu allows you to change the photos geo location (latitude/longitude).
+	  * The previous geo-picks for "Set Geo" are shown as blue markers if you select the geo from a map.
+	  * Note: You can change size and filename of the history through **Set Geo History XXX** in the [Settings View](settings).
+* menu command **slideshow** : automatic showing next image every 1.5 seconds. Tuching the image stops the slideshow
+	* Note: You can change the slide time through **Slide Show Intervall in millisecs** in the [Settings View](settings).
+* menu command **Show in map** : show the current image in the [Geografic-Map](geographic-map) with a red marker if it has geo-info.
+	* Note: Green Markers are hidden in this mode.
+* the actionbar is automatically hidden after a short time if the screen is not touched.
+	* Note: You can change this time through **Auto Hide Actionbar after millisecs** in the [Settings View](settings). "0" means do not hide.
 
 ## <a name='api'>Intent-API</a> 
 

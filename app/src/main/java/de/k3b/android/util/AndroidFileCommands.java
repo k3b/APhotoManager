@@ -73,7 +73,7 @@ public class AndroidFileCommands extends FileCommands {
         // is protected by android-os :-(
         // app will not work on devices with no external storage (sdcard)
         final File rootDir = (isSDPresent) ? Environment.getExternalStorageDirectory() : Environment.getRootDirectory();
-        final String zipfile = rootDir.getAbsolutePath() + "/" + mContext.getString(R.string.log_file_path);
+        final String zipfile = rootDir.getAbsolutePath() + "/" + mContext.getString(R.string.global_log_file_path);
         return zipfile;
     }
 
@@ -106,11 +106,11 @@ public class AndroidFileCommands extends FileCommands {
 
     private int getResourceId(int opCode) {
         switch (opCode) {
-            case OP_COPY: return R.string.format_copy_result;
-            case OP_MOVE: return R.string.format_move_result;
-            case OP_DELETE: return R.string.format_delete_result;
-            case OP_RENAME: return R.string.format_rename_result;
-            case OP_UPDATE: return R.string.format_update_result;
+            case OP_COPY: return R.string.copy_result_format;
+            case OP_MOVE: return R.string.move_result_format;
+            case OP_DELETE: return R.string.delete_result_format;
+            case OP_RENAME: return R.string.rename_result_format;
+            case OP_UPDATE: return R.string.update_result_format;
         }
         return 0;
 
@@ -163,10 +163,10 @@ public class AndroidFileCommands extends FileCommands {
             names.append(name).append("\n");
         }
         final String message = mContext
-                .getString(R.string.format_confirm_delete, names.toString());
+                .getString(R.string.delete_question_message_format, names.toString());
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        final String title = mContext.getText(R.string.title_confirm_removal)
+        final String title = mContext.getText(R.string.delete_question_title)
                 .toString();
 
         builder.setTitle(title + pathNames.length);
@@ -252,7 +252,7 @@ public class AndroidFileCommands extends FileCommands {
                 }
             };
 
-            destDir.setTitleId(R.string.title_scanner_dir);
+            destDir.setTitleId(R.string.scanner_dir_question);
             destDir.defineDirectoryNavigation(new OSDirectory("/", null),
                     FotoSql.QUERY_TYPE_UNDEFINED,
                     getLastCopyToPath());
@@ -267,11 +267,11 @@ public class AndroidFileCommands extends FileCommands {
     /** answer from "which directory to start scanner from"? */
     private void onMediaScannerAnswer(String scanRootDir) {
         if  ((AndroidFileCommands.canProcessFile(mContext)) || (RecursiveMediaScanner.sScanner == null)){
-            final String message = mContext.getString(R.string.title_start_scanner);
+            final String message = mContext.getString(R.string.scanner_menu_title);
             final RecursiveMediaScanner scanner = (RecursiveMediaScanner.sScanner != null)
                     ? RecursiveMediaScanner.sScanner :
                     new RecursiveMediaScanner(mContext, message);
-            synchronized (scanner) {
+            synchronized (this) {
                 if (RecursiveMediaScanner.sScanner == null) {
                     RecursiveMediaScanner.sScanner = scanner;
                     scanner.execute(new String[]{scanRootDir});
@@ -359,7 +359,7 @@ public class AndroidFileCommands extends FileCommands {
         if (!Global.mustCheckMediaScannerRunning) return true; // always allowed. DANGEROUS !!!
 
         if (MediaScanner.isScannerActive(context.getContentResolver())) {
-            Toast.makeText(context, R.string.cannot_change_if_scanner_active, Toast.LENGTH_LONG).show();
+            Toast.makeText(context, R.string.scanner_err_busy, Toast.LENGTH_LONG).show();
             return false;
         }
 

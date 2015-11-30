@@ -34,7 +34,7 @@
     <ImageView
         android:id="@+id/icon"
         android:layout_width="@dimen/grid_cell_icon_width"
-        android:gravity="top|left"
+        android:gravity="top|start"
 
         android:layout_height="@dimen/grid_cell_icon_height"
         android:background="@android:drawable/checkbox_on_background"
