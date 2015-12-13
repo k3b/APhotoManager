@@ -20,6 +20,7 @@
  */
  -->
 <resources>
+    <string name="about_summary">About a Photo Manager</string>
     <string name="area_menu_title">Select Map Area</string>
     <string name="background">Background</string>
     <string name="bookmark_delete_answer_format">Deleted bookmark %1$s.</string>
