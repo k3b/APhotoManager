@@ -183,6 +183,8 @@ public class MapGeoPickerActivity extends Activity implements Common {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_map_geo_picker, menu);
+        AboutDialogPreference.onPrepareOptionsMenu(this, menu);
+
         return true;
     }
 

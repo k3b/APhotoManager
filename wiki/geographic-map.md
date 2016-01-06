@@ -14,7 +14,7 @@ You can reach the [Geographic-Map](Geographic-Map) via
 
 ## Features:
 
-* The geografic map shows markers ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/app/src/main/res/drawable-mdpi/marker_green.png) at places where photos were taken.
+* The geographic map shows markers ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/app/src/main/res/drawable-mdpi/marker_green.png) at places where photos were taken.
 * The numer in the **green marker** indicates how many photos belong to the marker.
 * **Blue markers** represent selected photos if [Gallery-View](Gallery-View) is in [multi selection mode](Gallery-View#Multiselection) or if SEND_MULTIPLE.
 	* Note: For performance/memory reason only the first 256 blue markers are shown.
@@ -35,11 +35,11 @@ You can reach the [Geographic-Map](Geographic-Map) via
 * The "Cancel" button or the back button closes the map without affecting the calling activitry.
 * The menu *Filter" openes the [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)
 		* purpose: Filter the photos that are visible in the map.
-		* if [Geografic-Map](geographic-map) is started without [intent-extra-de.k3b.extra.FILTER parameter](intentapi#filter) the map uses the last used filter.
+		* if [Geographic-Map](geographic-map) is started without [intent-extra-de.k3b.extra.FILTER parameter](intentapi#filter) the map uses the last used filter.
 
 ## <a name='picker'>"geo:" picker</a>
 
-If you use the Geografic-Map as a ["geo:" picker](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map#picker) you can
+If you use the Geographic-Map as a ["geo:" picker](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map#picker) you can
 
 * tap on a green/blue marker to select the geo-location belonging to that marker (the marker becomes **red**)
 * tap somewhere in the map where no green/blue marker exists to select a place with no photo.

@@ -610,6 +610,8 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     public boolean onPrepareOptionsMenu(Menu menu) {
         // have more time to find and press the menu
         unhideActionBar(Global.actionBarHideTimeInMilliSecs * 3, "onPrepareOptionsMenu");
+        AboutDialogPreference.onPrepareOptionsMenu(this, menu);
+
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -675,7 +677,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         public void handleMessage(Message m) {
             if (mSlideShowStarted) {
                 onSlideShowNext();
-                sendMessageDelayed(Message.obtain(this, SLIDESHOW_HANDLER_ID), Global.slideshowIntervallInMilliSecs);
+                sendMessageDelayed(Message.obtain(this, SLIDESHOW_HANDLER_ID), Global.slideshowIntervalInMilliSecs);
             }
         }
     };
@@ -685,7 +687,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         if (start != mSlideShowStarted) {
             if (start) {
                 onSlideShowNext();
-                mSlideShowTimer.sendMessageDelayed(Message.obtain(mSlideShowTimer, SLIDESHOW_HANDLER_ID), Global.slideshowIntervallInMilliSecs);
+                mSlideShowTimer.sendMessageDelayed(Message.obtain(mSlideShowTimer, SLIDESHOW_HANDLER_ID), Global.slideshowIntervalInMilliSecs);
             } else {
                 mSlideShowTimer.removeMessages(SLIDESHOW_HANDLER_ID);
             }

@@ -431,6 +431,7 @@ public class FotoGalleryActivity extends Activity implements Common,
                     .append(mGalleryQueryParameter.getSortDisplayName(this));
             sorter.setTitle(sortTitle.toString());
         }
+        AboutDialogPreference.onPrepareOptionsMenu(this, menu);
         return super.onPrepareOptionsMenu(menu);
     }
 

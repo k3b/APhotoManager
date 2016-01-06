@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2015-2016 by k3b.
+ *
+ * This file is part of AndroFotoFinder.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
+
 package de.k3b.android.androFotoFinder;
 
 import android.app.Activity;
@@ -44,7 +63,7 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putBoolean("clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
 
         prefs.putString("maxSelectionMarkersInMap", "" + Global.maxSelectionMarkersInMap);
-        prefs.putString("slideshowIntervallInMilliSecs", "" + Global.slideshowIntervallInMilliSecs);
+        prefs.putString("slideshowIntervalInMilliSecs", "" + Global.slideshowIntervalInMilliSecs);
         prefs.putString("actionBarHideTimeInMilliSecs", "" + Global.actionBarHideTimeInMilliSecs);
         prefs.putString("pickHistoryMax", "" + Global.pickHistoryMax);
 
@@ -72,7 +91,7 @@ public class SettingsActivity extends PreferenceActivity {
         Global.clearSelectionAfterCommand       = getPref(prefs, "clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
 
         Global.maxSelectionMarkersInMap         = getPref(prefs, "maxSelectionMarkersInMap"     , Global.maxSelectionMarkersInMap);
-        Global.slideshowIntervallInMilliSecs    = getPref(prefs, "slideshowIntervallInMilliSecs", Global.slideshowIntervallInMilliSecs);
+        Global.slideshowIntervalInMilliSecs = getPref(prefs, "slideshowIntervalInMilliSecs", Global.slideshowIntervalInMilliSecs);
         Global.actionBarHideTimeInMilliSecs     = getPref(prefs, "actionBarHideTimeInMilliSecs" , Global.actionBarHideTimeInMilliSecs);
         Global.pickHistoryMax = getPref(prefs, "pickHistoryMax"               , Global.pickHistoryMax);
 
@@ -91,7 +110,7 @@ public class SettingsActivity extends PreferenceActivity {
 
         // int
         maxSelectionMarkersInMap
-        slideshowIntervallInMilliSecs
+        slideshowIntervalInMilliSecs
         actionBarHideTimeInMilliSecs
 
         // file

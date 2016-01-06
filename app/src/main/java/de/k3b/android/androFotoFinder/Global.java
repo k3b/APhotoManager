@@ -41,11 +41,11 @@ public class Global {
     public static boolean debugEnabledSql = true;
     public static boolean debugEnabledMemory = false;
 
-    /** The maximum number of **Blue selection markers** in the [Geografic-Map](geographic-map). */
+    /** The maximum number of **Blue selection markers** in the [Geographic-Map](geographic-map). */
     public static int maxSelectionMarkersInMap = 255;
 
     /** defines the [Image-View's](Image-View) timing of menu command **slideshow** */
-    public static int slideshowIntervallInMilliSecs = 1500;
+    public static int slideshowIntervalInMilliSecs = 1500;
 
     /** defines the timespan after which the [Image-View's](Image-View) ActionBar is hidden */
     public static int actionBarHideTimeInMilliSecs = 2000;

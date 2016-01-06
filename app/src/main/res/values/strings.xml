@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (c) 2015 by k3b.
+ * Translation to English and Copyright (c) 2015-2016 by k3b and "mary-kate".
  *
  * This file is part of "a Photo Manager (A(ndro)FotoFinder).
  *
@@ -20,6 +20,7 @@
  */
  -->
 <resources>
+    <string name="about_summary">About a Photo Manager%1$s</string>
     <string name="area_menu_title">Select Map Area</string>
     <string name="background">Background</string>
     <string name="bookmark_delete_answer_format">Deleted bookmark %1$s.</string>
@@ -41,20 +42,20 @@
     <string name="copy_result_format">copied %1$d/%2$d files</string>
     <string name="delete_menu_title">Delete</string>
 
-    <string name="delete_question_message_format">"Are you sure you want to permanently delete these Files?
+    <string name="delete_question_message_format">"Are you sure you want to permanently delete these files?
 %1$s
 
 This operation cannot be reversed."</string>
 
-    <string name="delete_question_title" >Delete Photo(s)?</string>
+    <string name="delete_question_title">Delete Photo(s)?</string>
     <string name="delete_result_format">deleted %1$d/%2$d files</string>
     <string name="destination_copy">Copy Destination</string>
     <string name="destination_move">Move Destination</string>
-    <string name="details_menu_title" >Details</string>
+    <string name="details_menu_title">Details</string>
 
-    <string name="edit_chooser_title" >Choose photo editor</string>
-    <string name="edit_err_editor_not_found" >No photo editor found</string>
-    <string name="edit_menu_title" >Edit</string>
+    <string name="edit_chooser_title">Choose photo editor</string>
+    <string name="edit_err_editor_not_found">No photo editor found</string>
+    <string name="edit_menu_title">Edit</string>
 
     <string name="filter_err_invalid_date_format">\'%1$s\' is not a valid date.</string>
     <string name="filter_err_invalid_location_format">\'%1$s\' is not a valid coordinate.</string>
@@ -69,15 +70,15 @@ This operation cannot be reversed."</string>
     <string name="geo_show_menu_title">Show in map</string>
     <string name="geo_edit_menu_title">Set geo</string>
     <string name="geo_edit_update_in_progress">Changing geo info in selected photos</string>
-    <string name="geo_picker_err_not_found" >No geo picker found</string>
-    <string name="geo_picker_title" >Select new geo for photo</string>
+    <string name="geo_picker_err_not_found">No geo picker found</string>
+    <string name="geo_picker_title">Select new geo for photo</string>
 
-    <string name="global_err_sql_message_format">Sql error \'%1$s\'\n\n%2$s</string>
+    <string name="global_err_sql_message_format">SQL error \'%1$s\'\n\n%2$s</string>
     <string name="global_err_sql_title_reload">Invalid SQL. Reloading default</string>
-    <string name="global_err_system">Systemfehler. Exiting</string>
+    <string name="global_err_system">System error. Exiting</string>
 
-    <string name="image_err_file_exists_format">The File \'%1$s\' already exists.\n Do you really want to overwrite it?</string>
-    <string name="image_err_file_rename_format">Cannot rename File \'%1$s\'.</string>
+    <string name="image_err_file_exists_format">The file \'%1$s\' already exists.\n Do you really want to overwrite it?</string>
+    <string name="image_err_file_rename_format">Cannot rename file \'%1$s\'.</string>
     <string name="image_err_not_found_format">No Photos found for %1$s.</string>
     <string name="image_err_not_in_db_format">Photo not found in media database %1$s yet. Scanning %2$d new files. The missing photo will be available soon.</string>
     <string name="image_loading_at_position_format">"loading(%1$d) &#8230;"</string>
@@ -101,7 +102,7 @@ This operation cannot be reversed."</string>
     <string name="overwrite_question_title">Overwrite?</string>
 
     <string name="rename_menu_title">Rename</string>
-    <string name="rename_result_format" >renamed %1$d/%2$d files</string>
+    <string name="rename_result_format">renamed %1$d/%2$d files</string>
 
     <string name="scanner_dir_question">Where to start scanning?</string>
     <string name="scanner_err_busy">Cannot process photo files while Android Media Scanner is busy. Try again later.</string>
@@ -111,7 +112,7 @@ This operation cannot be reversed."</string>
     <string name="selection_status_format">%1$d Selected</string>
     <string name="selection_none_hint">Select Folder with Images to enable OK</string>
     <string name="selected_only_menu_title">Selected only</string>
-    <string name="selection_add_all_menu_title"   >Selection: Add all visible</string>
+    <string name="selection_add_all_menu_title">Selection: Add all visible</string>
     <string name="selection_remove_menu_title">Selection: Remove all visible</string>
 
     <string name="settings_bookmark_dir_title">Report Folder</string>
@@ -129,7 +130,7 @@ This operation cannot be reversed."</string>
     <string name="settings_debug_view_item_title" translatable="false">LogCat Grid/Listview</string>
     <string name="settings_group_debug_title">Diagnostics</string>
 
-    <string name="settings_image_slideshow_intervall_title">Slide Show Intervall in millisecs</string>
+    <string name="settings_image_slideshow_intervall_title">Slide Show Interval in millisecs</string>
     <string name="settings_image_hide_time_title">Auto Hide Actionbar after millisecs</string>
 
     <string name="settings_log_folder_title">Error Log Folder</string>
@@ -139,11 +140,11 @@ This operation cannot be reversed."</string>
     <string name="settings_geo_history_file_title">Set Geo History File</string>
 
     <string name="settings_multisel_clear_summary">&#8230; after Copy/Move/Rename/&#8230; .</string>
-    <string name="settings_multisel_clear_title">Clear Multi-Selelection</string>
+    <string name="settings_multisel_clear_title">Clear Multi-Selection</string>
     <string name="settings_title">Settings</string>
 
-    <string name="share_err_not_found" >No send/share provider found</string>
-    <string name="share_err_to_many">sendmultible: item count exceeded</string>
+    <string name="share_err_not_found">No send/share provider found</string>
+    <string name="share_err_to_many">sendmultiple: item count exceeded</string>
     <string name="share_menu_title">Share/Send</string>
 
     <string name="show_in_gallery_menu_title">Show in new Gallery</string>
@@ -156,16 +157,16 @@ This operation cannot be reversed."</string>
     <string name="sort_by_none">Unsorted</string>
     <string name="sort_by_place">Place</string>
     <string name="sort_menu_title">Sort</string>
-    <string name="sort_order_Date_Ascending" >Date Ascending</string>
-    <string name="sort_order_Date_Descending" >Date Descending</string>
-    <string name="sort_order_Name_Ascending" >Name Ascending</string>
-    <string name="sort_order_Name_Descending" >Name Descending</string>
-    <string name="sort_order_Name_length_Ascending" >Name-length Ascending</string>
-    <string name="sort_order_Name_length_Descending" >Name-length Descending</string>
-    <string name="sort_order_Place_Ascending" >Place Ascending</string>
-    <string name="sort_order_Place_Descending" >Place Descending</string>
+    <string name="sort_order_Date_Ascending">Date Ascending</string>
+    <string name="sort_order_Date_Descending">Date Descending</string>
+    <string name="sort_order_Name_Ascending">Name Ascending</string>
+    <string name="sort_order_Name_Descending">Name Descending</string>
+    <string name="sort_order_Name_length_Ascending">Name-length Ascending</string>
+    <string name="sort_order_Name_length_Descending">Name-length Descending</string>
+    <string name="sort_order_Place_Ascending">Place Ascending</string>
+    <string name="sort_order_Place_Descending">Place Descending</string>
 
-    <string name="update_result_format" >updated %1$d/%2$d files</string>
+    <string name="update_result_format">updated %1$d/%2$d files</string>
     <string name="zoom_to_fit_menu_title">Zoom to fit</string>
 
     <string name="about_content_about">
@@ -176,18 +177,18 @@ with 'A Photo Map' in 'AndroFotoFinder'<br/>
 Features:
 <ul>
   <li>Can handle big image collections (15000+ images in 1000+ folders)</li>
-  <li>Uses Android's image content-provider. No initial image scan necessary.</li>
+  <li>Uses Android's image content provider. No initial image scan necessary.</li>
   <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Filter-View">Find images</a> via</li>
   <ul>
-    <li>folder (with hirachical <a href="https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker">Folder-Picker</a>)&nbsp;</li>
+    <li>folder (with hierarchical <a href="https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker">Folder Picker</a>)&nbsp;</li>
     <li>wildcards that match folder/filename&nbsp;</li>
     <li>date&nbsp;</li>
-    <li>area in <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geographic map</a> (if image has gps-exif info)
+    <li>area in <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geographic map</a> (if image has GPS Exif info)
     </li>
   </ul>
   <li>Show result in a scrollable <a href="https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View">gallery view</a> with</li>
   <ul>
-    <li>support for multible photo selection (since 0.4.0)</li>
+    <li>support for multiple photo selection (since 0.4.0)</li>
     <li>file operations copy, move, delete, share (since 0.4.0)</li>
   </ul>
   <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View">Photo-detail-view</a> with</li>
@@ -197,13 +198,13 @@ Features:
     <li>show extended image info (Exif, IPTC, XMP, ICC)</li>
     <li>file operations copy, move, delete, rename, share (since 0.4.1)</li>
   </ul></li>
-  <li>The <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geografic map</a> shows markers at places where photos were
+  <li>The <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geographic map</a> shows markers at places where photos were
  taken</li>
   <li>File operations</li>
   <li><ul>
-    <li>will also update Android's image content-provider-database</li>
-    <li>update xmp-sidecar-files</li>
-    <li>preserve file date if local android supports it.</li>
+    <li>will also update Android's image content provider database</li>
+    <li>update xmp-sidecar files</li>
+    <li>preserve file date if local Android supports it.</li>
   </ul></li>
 </ul>
 <br />

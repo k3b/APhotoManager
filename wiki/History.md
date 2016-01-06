@@ -1,9 +1,13 @@
 ## todo for next version (not released yet)
 * [#21 additional languages](https://github.com/k3b/AndroFotoFinder/issues/21)
-
+	* English by k3b and mary-kate
+	* German by k3b and v133
+	* Japanese by naofum
+	* French by Tuuux
+	
 ## [v0.4.3.151201](https://github.com/k3b/AndroFotoFinder/issues?q=milestone%3Av0.4.3.151201)  available in [F-Droid app store](https://f-droid.org)  since 2015-12-01
 
-* [#22 Added "Show in map" action](https://github.com/k3b/AndroFotoFinder/issues/22) to [Gallery-View](Gallery-View) and [Image-View](Image-View) to show the current or selected images in the [Geografic-Map](geographic-map)
+* [#22 Added "Show in map" action](https://github.com/k3b/AndroFotoFinder/issues/22) to [Gallery-View](Gallery-View) and [Image-View](Image-View) to show the current or selected images in the [Geographic-Map](geographic-map)
 * [#23 Set Geo with picker history](https://github.com/k3b/AndroFotoFinder/issues/23)
 	* The previous geo-picks for "Set Geo" are shown as blue markers if you select the geo from a map.
 * [#17: Image View auto-hide Actionbar](https://github.com/k3b/AndroFotoFinder/issues/17).
@@ -32,10 +36,10 @@
 	* details: added mediaDb-field-values and current sql in addition to the exif-infos
 	* Bugfix [#13 Swiping](https://github.com/k3b/AndroFotoFinder/issues/13) : Sometimes the app jumps back
 	* Fixed Send via bluetooth 
-* [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) :
+* [Geographic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) :
 	* menu to open [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)
 		* purpose: Filter the photos that are visible in the map.
-		* if [Geografic-Map](geographic-map) is opened without [intent-extra-de.k3b.extra.FILTER parameter](intentapi#filter) the map is opend with the last used filter.
+		* if [Geographic-Map](geographic-map) is opened without [intent-extra-de.k3b.extra.FILTER parameter](intentapi#filter) the map is opend with the last used filter.
 	* improved menu "zoom to fit"
 	* [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi): support for [de.k3b.extra.FILTER string](intentapi#filter)
 	* Bugfix: Map-Contextmenu popup-position at marker.
@@ -64,7 +68,7 @@
 	* [#2 Share/Edit](https://github.com/k3b/AndroFotoFinder/issues/2)/Rename/Delete/Copy/Move
 	* Open [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) when [#3 clicking a photo file in a filemanager](https://github.com/k3b/AndroFotoFinder/issues/3) or in android-s "gallery-send menu"
 	* [#4 set geo: modify photo-s gps-location using a map view](https://github.com/k3b/AndroFotoFinder/issues/4)
-* [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) : 
+* [Geographic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) : 
 	* [#5 Show selected items as blue markers in map](https://github.com/k3b/AndroFotoFinder/issues/5)
 	* [#6 Implemented a geo-picker](https://github.com/k3b/AndroFotoFinder/issues/6) that can be used by other apps via the [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi)
 	* current selected photo is visible as red marker

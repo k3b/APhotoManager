@@ -3,7 +3,7 @@ The [Filter-View](Filter-View) is used to find a set of photos by search criteri
 You can reach the [Filter-View](Filter-View) via
 
 * tapping the filter symbol or filter menu in the [Gallery-View](Gallery-View)
-* tapping the filter symbol or filter menu in the [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map)
+* tapping the filter symbol or filter menu in the [Geographic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map)
 
 ## You can search by zero, one ore more criteria:
 

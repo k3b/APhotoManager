@@ -4,9 +4,9 @@ Other Android apps can use parts of "a Photo Manager" throught the "Intent api".
   * if mimeType="image/*" and uri starts with "file:/"
 * send/sendto an image (jpg/png/gif) from **android gallery** will open the [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View)
   * if mimeType="image/*" and uri starts with "content:/external/images/media/"
-* view/send/sendto a geo-position in a [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map)
+* view/send/sendto a geo-position in a [Geographic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map)
   * if uri starts with "geo:"
-* **pick a geo-position** from a [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) or from a photo that contain geo information
+* **pick a geo-position** from a [Geographic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) or from a photo that contain geo information
   * if input-intent-uri starts with "geo:"
   * returns null (cancel) or intent with geo-uri for the selected posion in the callers onActivityResult()
 
@@ -22,11 +22,11 @@ Other Android apps can use parts of "a Photo Manager" throught the "Intent api".
   * example file:*kreta*
 	* opens [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) showing all files that contain "kreta" in its full path
 * content:/external/images/media/{id}
-  * opens image belonging to {id} in [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) for action=VIEW/SEND/SENDTO/SEND_MULTIBLE
+  * opens image belonging to {id} in [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) for action=VIEW/SEND/SENDTO/SEND_MULTIPLE
   * example content:/external/images/media/52173
 	* opens image #52173. If there is no extra[de.k3b.extra.FILTER] swiping left/right will browse to images in the same (sub-)folder as #52173
 * <a name='uri-geo'>geo:{latitude},{longitude}?z={zoomlevel}</a>
-  * opens [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) at {latitude} {longitude} {zoomlevel}
+  * opens [Geographic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) at {latitude} {longitude} {zoomlevel}
   * example geo:53.036258,8.721771?z=11
   * example geo:53,8.7
   * zoomlevel 1..14 is optional. z=3 continent; z=11 streetlevel
@@ -55,7 +55,7 @@ Other Android apps can use parts of "a Photo Manager" throught the "Intent api".
 
 * purpose define current sql that defines which photos are affected.
 	* used when opening a sub-[gallery view](Gallery-View)
-	* used when opening a [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) 
+	* used when opening a [Geographic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) 
 	* used when navigating to [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) so that the image view show the same images and in the same order as the originating Gallery-View
 * format: the same as [Internal sql format of .query files](intentapi#sql) generated in the [bookmark menues](Bookmarks) of [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View).
 * technically this defines a complete sql including sql-where, ordering and colums formulas. 
@@ -68,7 +68,7 @@ Other Android apps can use parts of "a Photo Manager" throught the "Intent api".
 ### <a name='SelectedItems'>de.k3b.extra.SELECTED_ITEMS string</a>
 
 * purpose define which items are currently selcted if [gallery is in multi selection mode](Gallery-View#Multiselection)
-* used in [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) to define the "blue selection marker"
+* used in [Geographic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) to define the "blue selection marker"
 * format {id},{id},{id},{id},{id},...
 
 ## <a name='sql'>internal sql format of .query files (since version 0.4.2)</a>
