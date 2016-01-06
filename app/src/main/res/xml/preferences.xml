@@ -20,6 +20,13 @@
             android:key="pickHistoryFile"
             android:title="@string/settings_geo_history_file_title" />
 
+        <!-- #26 android 5.1: does not support Thumbnails.getThumbnail(...,MediaStore.Images.Thumbnails.FULL_SCREEN_KIND,...) :-(
+        <CheckBoxPreference android:key="initialImageDetailResolutionHigh"
+            android:defaultValue="false"
+            android:title="@string/settings_image_initialImageDetailResolutionHigh_title"
+            android:summary="@string/settings_image_initialImageDetailResolutionHigh_summary" />
+             -->
+
         <de.k3b.android.widgets.EditTextPreferenceWithSummary
             android:key="slideshowIntervallInMilliSecs"
             android:title="@string/settings_image_slideshow_intervall_title" />

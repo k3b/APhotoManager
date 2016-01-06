@@ -20,6 +20,7 @@
 package de.k3b.android.androFotoFinder.imagedetail;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -242,11 +243,34 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  {
     private void setImage(int position, long imageID, Uri uri, PhotoView photoView) {
         /** k3b 20150913 #10: Faster initial loading: initially the view is loaded with low res image. on first zoom it is reloaded with this uri */
         photoView.setImageReloadFile(new File(getFullFilePath(position)));
-        Bitmap thumbnail = MediaStore.Images.Thumbnails.getThumbnail(
-                photoView.getContext().getContentResolver(),
-                imageID,
-                Global.imageDetailResolution,
-                new BitmapFactory.Options());
+
+        // #26 option slow-hiqh-quality-detail vs fast-lowRes
+        // #26 android 5.1: does not support Thumbnails.getThumbnail(...,MediaStore.Images.Thumbnails.FULL_SCREEN_KIND,...) :-(
+        // int resolutionKind = Global.initialImageDetailResolutionHigh ? MediaStore.Images.Thumbnails.FULL_SCREEN_KIND : MediaStore.Images.Thumbnails.MINI_KIND;
+        int resolutionKind = MediaStore.Images.Thumbnails.MINI_KIND;
+
+        Bitmap thumbnail = null;
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        final ContentResolver contentResolver = photoView.getContext().getContentResolver();
+        try {
+            thumbnail = MediaStore.Images.Thumbnails.getThumbnail(
+                    contentResolver,
+                    imageID,
+                    resolutionKind,
+                    options);
+        } catch (IllegalArgumentException ex) {
+            // #26 android 5.1: does not support Thumbnails.getThumbnail(...,MediaStore.Images.Thumbnails.FULL_SCREEN_KIND,...) :-(
+            Log.w(Global.LOG_CONTEXT, mDebugPrefix +" getThumbnail(FULL_SCREEN) not supported - resetting to getThumbnail(MINI).");
+
+            Global.initialImageDetailResolutionHigh = false;
+            resolutionKind = MediaStore.Images.Thumbnails.MINI_KIND;
+
+            thumbnail = MediaStore.Images.Thumbnails.getThumbnail(
+                    contentResolver,
+                    imageID,
+                    resolutionKind,
+                    options);
+        }
         photoView.setImageBitmap(thumbnail);
         photoView.setMaximumScale(20);
         photoView.setMediumScale(5);

@@ -58,6 +58,9 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putBoolean("debugEnabledSql", Global.debugEnabledSql);
         prefs.putBoolean("debugEnabledMemory", Global.debugEnabledMemory);
 
+        // #26
+        prefs.putBoolean("initialImageDetailResolutionHigh", Global.initialImageDetailResolutionHigh);
+
         prefs.putBoolean("debugEnableLibs", PhotoViewAttacher.DEBUG);
 
         prefs.putBoolean("clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
@@ -83,6 +86,9 @@ public class SettingsActivity extends PreferenceActivity {
         Global.debugEnabledSql                  = getPref(prefs, "debugEnabledSql", Global.debugEnabledSql);
         Global.debugEnabledMemory               = getPref(prefs, "debugEnabledMemory", Global.debugEnabledMemory);
 
+        // #26
+        Global.initialImageDetailResolutionHigh = getPref(prefs, "initialImageDetailResolutionHigh", Global.initialImageDetailResolutionHigh);
+
         // one setting for several 3d party debug-flags
         PhotoViewAttacher.DEBUG                 = getPref(prefs, "debugEnableLibs", PhotoViewAttacher.DEBUG);
         HugeImageLoader.DEBUG                   = PhotoViewAttacher.DEBUG;
@@ -106,6 +112,7 @@ public class SettingsActivity extends PreferenceActivity {
         debugEnabledViewItem
         debugEnabledSql
         debugEnabledMemory
+        initialImageDetailResolutionHigh
         clearSelectionAfterCommand
 
         // int

@@ -118,8 +118,11 @@ Dieser Vorgang kann nicht rückgängig gemacht werden."</string>
   <string name="settings_debug_view_item_summary">..., Grid/Listview Elemente.</string>
   <string name="settings_debug_view_item_title">LogCat Grid/Listview</string>
   <string name="settings_group_debug_title">Diagnose</string>
-  <string name="settings_image_slideshow_intervall_title">Diashow-Intervall in Millisekunden</string>
+
   <string name="settings_image_hide_time_title">Actionbar ausbleneden nach ... Millisekunden</string>
+  <string name="settings_image_initialImageDetailResolutionHigh_summary">Auflösung Photo-View höhere Qualität (langsamer, höherer Speicher Verbrauch)</string>
+  <string name="settings_image_initialImageDetailResolutionHigh_title">Verbesserte Anfangsqualität Photo-View</string>
+  <string name="settings_image_slideshow_intervall_title">Diashow-Intervall in Millisekunden</string>
 
   <string name="settings_log_folder_title">Ordner für Log-Meldungen</string>
   <string name="settings_map_selmarker_max_title">Max. Anzahl Mehrfach-Marker in der Karte</string>

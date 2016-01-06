@@ -130,8 +130,10 @@ This operation cannot be reversed."</string>
     <string name="settings_debug_view_item_title" translatable="false">LogCat Grid/Listview</string>
     <string name="settings_group_debug_title">Diagnostics</string>
 
-    <string name="settings_image_slideshow_intervall_title">Slide Show Interval in millisecs</string>
     <string name="settings_image_hide_time_title">Auto Hide Actionbar after millisecs</string>
+    <string name="settings_image_initialImageDetailResolutionHigh_summary">Initial Photo-View in better quality (slow, needs more memory)</string>
+    <string name="settings_image_initialImageDetailResolutionHigh_title">Improve initial Photo-View quality</string>
+    <string name="settings_image_slideshow_intervall_title">Slide Show Interval in millisecs</string>
 
     <string name="settings_log_folder_title">Error Log Folder</string>
     <string name="settings_map_selmarker_max_title">Max. Sel-Markers in Map</string>
