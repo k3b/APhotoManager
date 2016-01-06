@@ -20,6 +20,7 @@
 package de.k3b.android.androFotoFinder;
 
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import java.io.File;
@@ -68,6 +69,9 @@ public class Global {
 
     /** false: cmd setGeo => form(GeoEditActivity) => mapPicker */
     public static boolean geoNoEdit = true;
+
+    /** #26 which image resolution should the non zoomed imageView have? */
+    public static int imageDetailResolution = MediaStore.Images.Thumbnails.MINI_KIND; // FULL_SCREEN_KIND;
 
     public static void debugMemory(String modul, String message) {
         if (Global.debugEnabledMemory) {

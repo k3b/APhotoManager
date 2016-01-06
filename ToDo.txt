@@ -1,3 +1,32 @@
+	Prevent sleepmode while slideshow is active #24 
+		view.setKeepScreenOn(true)
+		
+	copy/move/delete log as /path/to/file.* instead of /path/to/file.jpg+/path/to/file.xmp
+	
+	folder rename/move
+
+	setGPS also setDateTakenFromPhotoDate if no exif to avoid loosing date	
+
+>	#26 option slow-hiqh-quality-detail vs fast-lowRes
+
+    <ListPreference
+        android:key="@string/pref_key_LocationDistanceInMeters"
+        android:title="@string/pref_title_location_distance"
+        android:defaultValue="-1"
+        android:entries="@array/pref_location_distance_names"
+        android:entryValues="@array/pref_location_distance_values"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	#21 additional languages
 	
 	replace (see https://en.wikipedia.org/wiki/Constant_interface)
@@ -10,7 +39,11 @@
 		
 	- copy in asyncTask
 	
-	? suche nach tag
+	? #25 suche nach tag
+		? tree
+			? http://stackoverflow.com/questions/18698376/treeview-like-functionality-android/
+			? D:\prj\eve\android\prj\fotos-android.wrk\tree-view-list-android\src\pl\polidea\treeview\demo 
+			? https://github.com/k3b/tree-view-list-android
 		? eigene tag-db + where _id in (id,id,...)
 			tab tags (id, name, parentID, androidFileID)
 		? CursorJoiner  (http://stackoverflow.com/questions/24615420/how-to-join-literaly-two-more-contentproviders-in-android)

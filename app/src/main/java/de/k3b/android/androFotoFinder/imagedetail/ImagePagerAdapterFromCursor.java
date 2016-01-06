@@ -245,7 +245,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  {
         Bitmap thumbnail = MediaStore.Images.Thumbnails.getThumbnail(
                 photoView.getContext().getContentResolver(),
                 imageID,
-                MediaStore.Images.Thumbnails.MINI_KIND, // FULL_SCREEN_KIND,
+                Global.imageDetailResolution,
                 new BitmapFactory.Options());
         photoView.setImageBitmap(thumbnail);
         photoView.setMaximumScale(20);
