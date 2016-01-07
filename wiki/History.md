@@ -2,6 +2,7 @@
 * *NOT IMPLEMENTED* [#26 option slow-hiqh-quality-detail vs fast-lowRes](https://github.com/k3b/AndroFotoFinder/issues/26): android 5.1: does not support Thumbnails.getThumbnail(...,MediaStore.Images.Thumbnails.FULL_SCREEN_KIND,...) :-(
 * TODO [#24 Prevent sleepmode while slideshow is active](https://github.com/k3b/AndroFotoFinder/issues/24)
 * [#21 additional languages](https://github.com/k3b/AndroFotoFinder/issues/21)
+	* Settings dialog allows to set gui language
 	* English by k3b and mary-kate
 	* German by k3b and v133
 	* Japanese by naofum

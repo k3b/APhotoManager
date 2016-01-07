@@ -48,6 +48,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.HistoryEditText;
+import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GalleryFilterParameter;
@@ -58,7 +59,7 @@ import de.k3b.io.IGeoRectangle;
 /**
  * Defines a gui for global foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.
  */
-public class GalleryFilterActivity extends Activity implements Common, DirectoryPickerFragment.OnDirectoryInteractionListener, LocationMapFragment.OnDirectoryInteractionListener {
+public class GalleryFilterActivity extends LocalizedActivity implements Common, DirectoryPickerFragment.OnDirectoryInteractionListener, LocationMapFragment.OnDirectoryInteractionListener {
     private static final String debugPrefix = "GalF-";
 
     public static final int resultID = 522;

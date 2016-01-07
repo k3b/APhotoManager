@@ -62,6 +62,7 @@ import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.Dialogs;
+import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
@@ -72,7 +73,7 @@ import de.k3b.io.OSDirectory;
  * Swipe left/right to show previous/next image.
  */
 
-public class ImageDetailActivityViewPager extends Activity implements Common {
+public class ImageDetailActivityViewPager extends LocalizedActivity implements Common {
     private static final String INSTANCE_STATE_MODIFY_COUNT = "mModifyCount";
     public static final int ACTIVITY_ID = 76621;
 

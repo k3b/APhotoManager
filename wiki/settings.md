@@ -10,6 +10,7 @@ You can reach the [Settings View](settings) via the **settings** menu of
 
 ##settings
 
+* **Language**: Allows to set gui language. Default is (device language).
 * **Clear Multi-Selection**: If checked [multi selection mode](Gallery-View#Multiselection) in [Gallery-View](Gallery-View) is canceled after a command from Actionbar or Menu
 * **Max. Sel-Markers in Map**: The maximum number of **Blue selection markers** in the [Geographic-Map](geographic-map).
 	* Note: This value is limited for performance/memory reason.

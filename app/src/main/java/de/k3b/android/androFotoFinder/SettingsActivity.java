@@ -24,22 +24,43 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.ListPreference;
+import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 
 import java.io.File;
 
+import de.k3b.android.widget.LocalizedActivity;
 import uk.co.senab.photoview.HugeImageLoader;
 import uk.co.senab.photoview.PhotoViewAttacher;
 import uk.co.senab.photoview.log.LogManager;
 
 public class SettingsActivity extends PreferenceActivity {
+    private SharedPreferences prefsInstance = null;
+    private ListPreference defaultAudioFormatPreference;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
+        LocalizedActivity.fixLocale(this);
         super.onCreate(savedInstanceState);
         this.addPreferencesFromResource(R.xml.preferences);
+        prefsInstance = PreferenceManager
+                .getDefaultSharedPreferences(this);
         global2Prefs(this.getApplication());
+        defaultAudioFormatPreference =
+                (ListPreference) findPreference(Global.PREF_KEY_USER_LOCALE);
+
+        defaultAudioFormatPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                setLanguage((String) newValue);
+                SettingsActivity.super.recreate();
+                return true; // change is allowed
+            }
+        });
+
+        updateSummary();
     }
 
     @Override
@@ -49,7 +70,7 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     public static void global2Prefs(Context context) {
-        final SharedPreferences prefsInstance = PreferenceManager
+        SharedPreferences prefsInstance = PreferenceManager
                 .getDefaultSharedPreferences(context);
 
         SharedPreferences.Editor prefs = prefsInstance.edit();
@@ -148,7 +169,7 @@ public class SettingsActivity extends PreferenceActivity {
 
     /** load value from SharedPreferences */
     private static boolean getPref(SharedPreferences prefs, String key, boolean defaultValue) {
-        return prefs.getBoolean(key,defaultValue);
+        return prefs.getBoolean(key, defaultValue);
 
         /*
         String def = "" + defaultValue ;
@@ -162,5 +183,23 @@ public class SettingsActivity extends PreferenceActivity {
     public static void show(Activity parent) {
         Intent intent = new Intent(parent, SettingsActivity.class);
         parent.startActivity(intent);
+    }
+    // This is used to show the status of some preference in the description
+    private void updateSummary() {
+        final String languageKey = prefsInstance.getString(Global.PREF_KEY_USER_LOCALE, "");
+        setLanguage(languageKey);
+    }
+
+    private void setLanguage(String languageKey) {
+        int index = defaultAudioFormatPreference.findIndexOfValue(languageKey);
+        String summary = "";
+
+        if (index >= 0) {
+            String[] names = this.getResources().getStringArray(R.array.pref_locale_names);
+            if (index < names.length) {
+                summary = names[index];
+            }
+        }
+        defaultAudioFormatPreference.setSummary(summary);
     }
 }

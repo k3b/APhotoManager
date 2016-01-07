@@ -19,11 +19,15 @@
  
 package de.k3b.android.androFotoFinder;
 
+import android.content.Context;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 
 import java.io.File;
+import java.util.Locale;
+
+import de.k3b.android.widget.LocalizedActivity;
 
 /**
  * Global Settings
@@ -32,6 +36,7 @@ import java.io.File;
  */
 public class Global {
     public static final String LOG_CONTEXT = "k3bFoto";
+    public static final String PREF_KEY_USER_LOCALE = "user_locale";
 
     /**
      * Global.xxxxx. Non final values may be changed in SettingsActivity
@@ -83,5 +88,5 @@ public class Global {
         }
     }
 
-
+    public static Locale systemLocale = Locale.getDefault();
 }

@@ -44,6 +44,7 @@ import de.k3b.android.androFotoFinder.SettingsActivity;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.android.widget.AboutDialogPreference;
+import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
@@ -51,7 +52,7 @@ import de.k3b.geo.io.GeoUri;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 
-public class MapGeoPickerActivity extends Activity implements Common {
+public class MapGeoPickerActivity extends LocalizedActivity implements Common {
     private static final String debugPrefix = "GalM-";
     private static final String STATE_Filter = "filterMap";
     private static final String STATE_LAST_GEO = "geoLastView";

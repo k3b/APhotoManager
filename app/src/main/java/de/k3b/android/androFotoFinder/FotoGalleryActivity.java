@@ -53,6 +53,7 @@ import de.k3b.android.util.GarbageCollector;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.AboutDialogPreference;
+import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryFormatter;
@@ -61,7 +62,7 @@ import de.k3b.io.GeoRectangle;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
 
-public class FotoGalleryActivity extends Activity implements Common,
+public class FotoGalleryActivity extends LocalizedActivity implements Common,
         OnGalleryInteractionListener, DirectoryPickerFragment.OnDirectoryInteractionListener,
         LocationMapFragment.OnDirectoryInteractionListener
 {

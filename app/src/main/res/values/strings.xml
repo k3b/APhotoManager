@@ -135,6 +135,9 @@ This operation cannot be reversed."</string>
     <string name="settings_image_initialImageDetailResolutionHigh_title">Improve initial Photo-View quality</string>
     <string name="settings_image_slideshow_intervall_title">Slide Show Interval in millisecs</string>
 
+    <string name="settings_locale_title">Language</string>
+    <string name="settings_locale_os_language">(device language)</string>
+
     <string name="settings_log_folder_title">Error Log Folder</string>
     <string name="settings_map_selmarker_max_title">Max. Sel-Markers in Map</string>
 

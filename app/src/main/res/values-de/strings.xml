@@ -124,6 +124,8 @@ Dieser Vorgang kann nicht rückgängig gemacht werden."</string>
   <string name="settings_image_initialImageDetailResolutionHigh_title">Verbesserte Anfangsqualität Photo-View</string>
   <string name="settings_image_slideshow_intervall_title">Diashow-Intervall in Millisekunden</string>
 
+  <string name="settings_locale_title">Sprache</string>
+  <string name="settings_locale_os_language">(Sprache des Gerätes)</string>
   <string name="settings_log_folder_title">Ordner für Log-Meldungen</string>
   <string name="settings_map_selmarker_max_title">Max. Anzahl Mehrfach-Marker in der Karte</string>
 

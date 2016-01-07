@@ -5,6 +5,15 @@
 		android:title="@string/settings_title"
 		android:key="first_category">
 
+        <ListPreference
+            android:key="user_locale"
+            android:title="@string/settings_locale_title"
+            android:defaultValue=""
+            android:entries="@array/pref_locale_names"
+            android:entryValues="@array/pref_locale_values"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null" />
+
         <CheckBoxPreference android:key="clearSelectionAfterCommand"
             android:defaultValue="true"
             android:title="@string/settings_multisel_clear_title"
