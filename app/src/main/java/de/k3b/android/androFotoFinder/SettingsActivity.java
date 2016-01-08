@@ -31,6 +31,7 @@ import android.preference.PreferenceManager;
 
 import java.io.File;
 
+import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.LocalizedActivity;
 import uk.co.senab.photoview.HugeImageLoader;
 import uk.co.senab.photoview.PhotoViewAttacher;
@@ -55,7 +56,7 @@ public class SettingsActivity extends PreferenceActivity {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 setLanguage((String) newValue);
-                SettingsActivity.super.recreate();
+                LocalizedActivity.recreate(SettingsActivity.this);
                 return true; // change is allowed
             }
         });
@@ -188,6 +189,9 @@ public class SettingsActivity extends PreferenceActivity {
     private void updateSummary() {
         final String languageKey = prefsInstance.getString(Global.PREF_KEY_USER_LOCALE, "");
         setLanguage(languageKey);
+        AboutDialogPreference about =
+                (AboutDialogPreference) findPreference("about");
+        about.setTitle(AboutDialogPreference.getAboutTitle(this));
     }
 
     private void setLanguage(String languageKey) {

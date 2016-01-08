@@ -54,7 +54,7 @@ public class AboutDialogPreference extends DialogPreference {
     }
 
     @NonNull
-    private static String getAboutTitle(Context context) {
+    public static String getAboutTitle(Context context) {
         return context.getString(R.string.about_summary,context.getString(R.string.version_postfix));
     }
 
