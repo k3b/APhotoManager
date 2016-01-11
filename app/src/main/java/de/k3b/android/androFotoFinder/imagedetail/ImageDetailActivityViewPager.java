@@ -693,6 +693,10 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                 mSlideShowTimer.removeMessages(SLIDESHOW_HANDLER_ID);
             }
             mSlideShowStarted = start;
+
+            // #24 Prevent sleepmode while slideshow is active
+            if (this.mViewPager != null) this.mViewPager.setKeepScreenOn(start);
+            
             if (mMenuSlideshow != null) mMenuSlideshow.setChecked(start);
         }
     }
