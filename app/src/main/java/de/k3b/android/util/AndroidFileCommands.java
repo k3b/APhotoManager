@@ -33,6 +33,7 @@ import android.widget.Toast;
 
 import java.io.File;
 
+import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
@@ -312,7 +313,7 @@ public class AndroidFileCommands extends FileCommands {
                         countdown = itemsPerProgress;
                         onProgress(itemcount, maxCount);
                     }
-                    ExifGps.saveLatLon(file, latitude, longitude);
+                    ExifGps.saveLatLon(file, latitude, longitude, mContext.getString(R.string.app_name), GuiUtil.getAppVersionName(mContext));
                     log("CALL setgps  ", getFilenameForLog(file),
                             " ", DirectoryFormatter.parseLatLon(latitude), " ", DirectoryFormatter.parseLatLon(longitude));
                     itemcount++;

@@ -250,12 +250,12 @@ public class QueryParameter {
     private static final String PARSER_KEYWORDS = ";FROM;QUERY-TYPE-ID;SELECT;WHERE;WHERE-PARAMETERS;GROUP-BY;HAVING;HAVING-PARAMETERS;ORDER-BY;";
 
     public static QueryParameter parse(String stringToBeParsed) {
-        List<QueryParameter> result = (stringToBeParsed != null) ? parseMultible(stringToBeParsed) : null;
+        List<QueryParameter> result = (stringToBeParsed != null) ? parseMultiple(stringToBeParsed) : null;
         if (result == null) return null;
         return result.get(0);
     }
 
-    public static List<QueryParameter> parseMultible(String stringToBeParsed) {
+    public static List<QueryParameter> parseMultiple(String stringToBeParsed) {
         List<QueryParameter> result = new ArrayList<QueryParameter>();
         QueryParameter currentParseItem = null;
 

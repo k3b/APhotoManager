@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
-
+ 
 package de.k3b.database;
 
 import org.junit.Assert;
@@ -81,7 +81,7 @@ public class QueryParameterTests {
                 .addHaving("h2", "h2Value");
 
         final String stringToBeParsed = original.toReParseableString();
-        List<QueryParameter> sut = QueryParameter.parseMultible(stringToBeParsed);
+        List<QueryParameter> sut = QueryParameter.parseMultiple(stringToBeParsed);
         Assert.assertEquals("size", 1, sut.size());
         Assert.assertEquals("from f query-type-id 4711 select c1 c2 where w1=? w2=? where-parameters w1value w2value group-by g having h1 h2 having-parameters h1value h2value order-by o",
                 normalize(sut.get(0).toReParseableString()));
@@ -93,7 +93,7 @@ public class QueryParameterTests {
                 .addWhere("w1=?", "w1Value");
 
         final String stringToBeParsed = original.toReParseableString();
-        List<QueryParameter> sut = QueryParameter.parseMultible(stringToBeParsed);
+        List<QueryParameter> sut = QueryParameter.parseMultiple(stringToBeParsed);
         Assert.assertEquals("size", 1, sut.size());
         Assert.assertEquals("where w1=? where-parameters w1value",
                 normalize(sut.get(0).toReParseableString()));
@@ -113,7 +113,7 @@ public class QueryParameterTests {
                     .addWhere("w1=?", "w1Value");
 
             final String stringToBeParsed = original.toReParseableString();
-            List<QueryParameter> sut = QueryParameter.parseMultible(stringToBeParsed);
+            List<QueryParameter> sut = QueryParameter.parseMultiple(stringToBeParsed);
             Assert.assertEquals("size", 1, sut.size());
             Assert.assertEquals("from f query-type-id 4711 select c1 c2 where w1=? where-parameters w1value",
                     normalize(sut.get(0).toReParseableString()));

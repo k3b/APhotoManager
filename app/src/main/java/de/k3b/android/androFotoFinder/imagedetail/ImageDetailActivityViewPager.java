@@ -62,6 +62,7 @@ import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.Dialogs;
+import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
@@ -72,7 +73,7 @@ import de.k3b.io.OSDirectory;
  * Swipe left/right to show previous/next image.
  */
 
-public class ImageDetailActivityViewPager extends Activity implements Common {
+public class ImageDetailActivityViewPager extends LocalizedActivity implements Common {
     private static final String INSTANCE_STATE_MODIFY_COUNT = "mModifyCount";
     public static final int ACTIVITY_ID = 76621;
 
@@ -610,6 +611,8 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
     public boolean onPrepareOptionsMenu(Menu menu) {
         // have more time to find and press the menu
         unhideActionBar(Global.actionBarHideTimeInMilliSecs * 3, "onPrepareOptionsMenu");
+        AboutDialogPreference.onPrepareOptionsMenu(this, menu);
+
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -675,7 +678,7 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         public void handleMessage(Message m) {
             if (mSlideShowStarted) {
                 onSlideShowNext();
-                sendMessageDelayed(Message.obtain(this, SLIDESHOW_HANDLER_ID), Global.slideshowIntervallInMilliSecs);
+                sendMessageDelayed(Message.obtain(this, SLIDESHOW_HANDLER_ID), Global.slideshowIntervalInMilliSecs);
             }
         }
     };
@@ -685,11 +688,15 @@ public class ImageDetailActivityViewPager extends Activity implements Common {
         if (start != mSlideShowStarted) {
             if (start) {
                 onSlideShowNext();
-                mSlideShowTimer.sendMessageDelayed(Message.obtain(mSlideShowTimer, SLIDESHOW_HANDLER_ID), Global.slideshowIntervallInMilliSecs);
+                mSlideShowTimer.sendMessageDelayed(Message.obtain(mSlideShowTimer, SLIDESHOW_HANDLER_ID), Global.slideshowIntervalInMilliSecs);
             } else {
                 mSlideShowTimer.removeMessages(SLIDESHOW_HANDLER_ID);
             }
             mSlideShowStarted = start;
+
+            // #24 Prevent sleepmode while slideshow is active
+            if (this.mViewPager != null) this.mViewPager.setKeepScreenOn(start);
+            
             if (mMenuSlideshow != null) mMenuSlideshow.setChecked(start);
         }
     }

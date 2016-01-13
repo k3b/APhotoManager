@@ -48,7 +48,7 @@ public class StringTemplateTests {
     }
 
     @Test
-    public void shouldFormatMultible() {
+    public void shouldFormatMultiple() {
         String result = sut.format("hello ${first.name} ${something.else.where}!");
 
         Assert.assertEquals("hello world ???!", result);

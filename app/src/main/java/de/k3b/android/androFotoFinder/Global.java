@@ -19,10 +19,15 @@
  
 package de.k3b.android.androFotoFinder;
 
+import android.content.Context;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import java.io.File;
+import java.util.Locale;
+
+import de.k3b.android.widget.LocalizedActivity;
 
 /**
  * Global Settings
@@ -31,6 +36,7 @@ import java.io.File;
  */
 public class Global {
     public static final String LOG_CONTEXT = "k3bFoto";
+    public static final String PREF_KEY_USER_LOCALE = "user_locale";
 
     /**
      * true: addToCompressQue several Log.d(...) to show what is going on.
@@ -41,19 +47,24 @@ public class Global {
     public static boolean debugEnabledSql = false;
     public static boolean debugEnabledMemory = false;
 
+    /** The maximum number of **Blue selection markers** in the [Geographic-Map](geographic-map). */
     public static int maxSelectionMarkersInMap = 255;
 
-    public static int slideshowIntervallInMilliSecs = 1500;
+    /** defines the [Image-View's](Image-View) timing of menu command **slideshow** */
+    public static int slideshowIntervalInMilliSecs = 1500;
 
     /** defines the timespan after which the [Image-View's](Image-View) ActionBar is hidden */
     public static int actionBarHideTimeInMilliSecs = 2000;
 
+    /** If checked [multi selection mode](Gallery-View#Multiselection) in [Gallery-View](Gallery-View) is canceled after a command from Actionbar or Menu */
     public static boolean clearSelectionAfterCommand = false;
 
     /** true update only if media scanner is not running. false=risky=always allow.  */
-    public static boolean mustCheckMediaScannerRunning = true;
+    public static final boolean mustCheckMediaScannerRunning = true;
+
+    /** defines the filesystem's directory where [Bookmark files](Bookmarks) are stored and loaded from. */
     public static File reportDir = new File(Environment.getExternalStorageDirectory(), "databases/sql");
-    public static String reportExt = ".query";
+    public static final String reportExt = ".query";
 
     /** defines the filesystem's directory where crash reports are written to. */
     public static File logCatDir = new File(Environment.getExternalStorageDirectory(), "copy/log");
@@ -65,8 +76,11 @@ public class Global {
     /** false: cmd setGeo => form(GeoEditActivity) => mapPicker */
     public static boolean geoNoEdit = true;
 
+    /** #26 which image resolution should the "non zoomed imageView" have? */
+    public static boolean initialImageDetailResolutionHigh = false; // false: MediaStore.Images.Thumbnails.MINI_KIND; true: FULL_SCREEN_KIND;
+
     public static void debugMemory(String modul, String message) {
-        if (false && Global.debugEnabled) {
+        if (Global.debugEnabledMemory) {
             Runtime r = Runtime.getRuntime();
             String formattedMessage = String.format("memory : (total/free/avail) = (%3$dK/%4$dK/%5$dK)\t- %1$s.%2$s",
                     modul, message, r.totalMemory()/1024, r.freeMemory()/1024, r.maxMemory()/1024);
@@ -75,5 +89,5 @@ public class Global {
         }
     }
 
-
+    public static Locale systemLocale = Locale.getDefault();
 }

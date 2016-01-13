@@ -45,6 +45,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.HistoryEditText;
+import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
@@ -55,7 +56,7 @@ import de.k3b.io.DirectoryFormatter;
 /**
  * Defines a gui for global foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.
  */
-public class GeoEditActivity extends Activity implements Common {
+public class GeoEditActivity extends LocalizedActivity implements Common {
     private static final String debugPrefix = "GeoEdit-";
 
     public static final int RESULT_ID = 524;

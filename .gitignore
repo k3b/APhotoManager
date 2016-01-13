@@ -22,6 +22,9 @@ build
 
 .project
 *.iml
+/gradle
+/gradlew
+/gradlew.bat
 #*.properties
 /OSMBonusPack
 /osmdroid-android

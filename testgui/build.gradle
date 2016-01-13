@@ -8,8 +8,8 @@ android {
         applicationId "de.k3b.android.androFotoFinder.testgui"
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 9
-        versionName "0.4.2.151102"
+        versionCode 11
+        versionName "0.4.4.160113"
     }
 
     buildTypes {

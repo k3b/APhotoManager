@@ -49,7 +49,7 @@ public class FileCommandTests {
     }
 
     @Test
-    public void shouldCopyWitRenameExistingMultible() {
+    public void shouldCopyWitRenameExistingMultiple() {
         registerFakeFiles(sut, "a.jpg", "b.png", "b(1).png");
         sut.moveOrCopyFilesTo(false, X_FAKE_OUTPUT_DIR, createTestFiles("a.jpg", "b.png"));
 

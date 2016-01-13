@@ -10,5 +10,18 @@
         <item>@string/sort_order_Name_length_Ascending</item>
         <item>@string/sort_order_Name_length_Descending</item>
     </string-array>
-
+    <string-array name="pref_locale_names" translatable="false">
+        <item>@string/settings_locale_os_language</item>
+        <item>en english</item>
+        <item>de german Deutsch</item>
+        <item>ja japanese 日本人</item>
+        <item>fr french Français</item>
+    </string-array>
+    <string-array name="pref_locale_values" translatable="false">
+        <item></item>
+        <item>en</item>
+        <item>de</item>
+        <item>ja</item>
+        <item>fr</item>
+    </string-array>
 </resources>

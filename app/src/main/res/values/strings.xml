@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (c) 2015 by k3b.
+ * Translation to English and Copyright (c) 2015-2016 by k3b and "mary-kate".
  *
  * This file is part of "a Photo Manager (A(ndro)FotoFinder).
  *
@@ -20,7 +20,7 @@
  */
  -->
 <resources>
-    <string name="about_summary">About a Photo Manager</string>
+    <string name="about_summary">About a Photo Manager%1$s</string>
     <string name="area_menu_title">Select Map Area</string>
     <string name="background">Background</string>
     <string name="bookmark_delete_answer_format">Deleted bookmark %1$s.</string>
@@ -130,8 +130,13 @@ This operation cannot be reversed."</string>
     <string name="settings_debug_view_item_title" translatable="false">LogCat Grid/Listview</string>
     <string name="settings_group_debug_title">Diagnostics</string>
 
-    <string name="settings_image_slideshow_intervall_title">Slide Show Interval in millisecs</string>
     <string name="settings_image_hide_time_title">Auto Hide Actionbar after millisecs</string>
+    <string name="settings_image_initialImageDetailResolutionHigh_summary">Initial Photo-View in better quality (slow, needs more memory)</string>
+    <string name="settings_image_initialImageDetailResolutionHigh_title">Improve initial Photo-View quality</string>
+    <string name="settings_image_slideshow_intervall_title">Slide Show Interval in millisecs</string>
+
+    <string name="settings_locale_title">Language</string>
+    <string name="settings_locale_os_language">(device language)</string>
 
     <string name="settings_log_folder_title">Error Log Folder</string>
     <string name="settings_map_selmarker_max_title">Max. Sel-Markers in Map</string>
@@ -144,7 +149,7 @@ This operation cannot be reversed."</string>
     <string name="settings_title">Settings</string>
 
     <string name="share_err_not_found">No send/share provider found</string>
-    <string name="share_err_to_many">sendmultible: item count exceeded</string>
+    <string name="share_err_to_many">sendmultiple: item count exceeded</string>
     <string name="share_menu_title">Share/Send</string>
 
     <string name="show_in_gallery_menu_title">Show in new Gallery</string>

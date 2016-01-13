@@ -1,3 +1,10 @@
+	# 28 Translation with longer texts may break Layout 
+		Filter - "chemin d'accés" (eng Path) not enough place to enter the path: replaced by "Fichier"
+
+	copy/move/delete log as /path/to/file.* instead of /path/to/file.jpg+/path/to/file.xmp
+	
+	folder rename/move
+
 	#21 additional languages
 	
 	replace (see https://en.wikipedia.org/wiki/Constant_interface)
@@ -10,7 +17,11 @@
 		
 	- copy in asyncTask
 	
-	? suche nach tag
+	? #25 search for tag
+		? tree
+			? http://stackoverflow.com/questions/18698376/treeview-like-functionality-android/
+			? D:\prj\eve\android\prj\fotos-android.wrk\tree-view-list-android\src\pl\polidea\treeview\demo 
+			? https://github.com/k3b/tree-view-list-android
 		? eigene tag-db + where _id in (id,id,...)
 			tab tags (id, name, parentID, androidFileID)
 		? CursorJoiner  (http://stackoverflow.com/questions/24615420/how-to-join-literaly-two-more-contentproviders-in-android)
@@ -25,30 +36,18 @@
 			?? duplicate tags in 2 hirachies
 	extra log für gps-update via csv
 		
-#6 geo-picker
-	extera_stream-uri(s) => blue: selected items via geo:, content: or file:
-
 #7 Implement picker via gallery with ACTION_GET_CONTENT / ACTION_PICK 
 	- pick photo (mime=image/*) Selecting one or more photos from the gallery and return them.
 	- pick geo: Selecting a photo that has geo-info from the gallery and return the geo-info of the selected photo.
 
 https://github.com/MikeOrtiz/TouchImageView as replacement of zoomable image	
 	
-	
 #####################################		
 		
 
 [![Download from F-Droid](https://camo.githubusercontent.com/7df0eafa4433fa4919a56f87c3d99cf81b68d01c/68747470733a2f2f662d64726f69642e6f72672f77696b692f696d616765732f632f63342f462d44726f69642d627574746f6e5f617661696c61626c652d6f6e2e706e67 "Download from F-Droid")](https://f-droid.org/repository/browse/?fdid=uk.co.ashtonbrsc.android.intentintercept)
 
-onLoadComplete what to do make call overlay.draw() happen? invalidate does not work
-
-
 ##################
-
-todo
-- Global-settings:
-   share via content-uri or filepath-uri
-   clear selecetion after execute or require explicit cancel
 
 // symlink
 mklink /D /J osmdroid-android d:\prj\eve\android\prj\fotos-android.wrk\osmdroid\osmdroid-android
@@ -58,22 +57,6 @@ LeakCanary
 
 ################################		
 		
-MapPicker DialogFragment
-	own lat-lon-group-by-query
-
-gui
-	Action (menu)
-		Navigator-FolderSymbol (Dialogfragment) current path as Album-tree/Date-tree/place-tree/map
-		
-		Filter (DialogFragment)
-			List with current filters (edit/delete)
-			add
-				Album (DialogFragment directory-tree or Edit->where data/path like %value%)
-				Date (DialogFragment date-tree or Edits From...To)
-				Place (DialogFragment Map to select area)
-				
-		SortBy path/date/location/pathlength
-
 Used libs
 	https://github.com/chrisbanes/PhotoView
 
@@ -94,24 +77,7 @@ place "C:\Progs.Portable\sdk\Android\Android Design - Icons 20131120\Action Bar 
 
 calender "D:\prj\eve\android\prj\AndroidCalendar.wrk\del\ical-import-export\iCalImportExport\res\drawable-hdpi\icon.png"
 
-
-- DirectoryBuilder (+sql) mit max(imageID)
-- loc-DirectoryBuilder im format 000.00,000.00 null replaced with 400
-
-
 -----------------------------------------
-
-
-- settings
-	debug
-	
-- gallery-filter
-		laden der thumbnails in thread?
-	- folder-gallery 
-		- settings pannel (einstellbar optionen)
-		- strict (nur direkte kinder where folder=...) sort by path
-		- with sub-folder-files (path like xxx%) sort by path length
-		- einstellbar item-layout klein (3), mittel(2), gross(1)
 
 http://stackoverflow.com/questions/24615420/how-to-join-literaly-two-more-contentproviders-in-android
 

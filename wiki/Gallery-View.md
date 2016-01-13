@@ -1,7 +1,7 @@
 You can reach the [Gallery-View](Gallery-View) via
 
 * opening from android-s app manager
-* the [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map)'s contextmenu by long tapping a marker and selecting menu "Show in new Gallery".
+* the [Geographic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map)'s contextmenu by long tapping a marker and selecting menu "Show in new Gallery".
 * the [Folder- or Date-Picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker)'s contextmenu by long tapping a folder and selecting menu "Show in new Gallery".
 
 Note: [Gallery-View](Gallery-View) is started with the [last used filter-settings](Gallery-View#CurrentSet) if it was started without [intent-extra-de.k3b.extra.FILTER parameter](intentapi#filter) .
@@ -86,7 +86,7 @@ The [Gallery-View](Gallery-View) has these elements:
 	* the **move/copy** menu will move/copy the selected photo(s) to a different folder.
 		* Move is blocked while Media Scanner is active to avoid conflicts/inconsistent data.
 	    * Pressing the "..." button or long pressing a folder in the [foder picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker) allows you to create a new folder.
-    * the **Show in map** menu show the selected images in the [Geografic-Map](geographic-map) with a blue markers
+    * the **Show in map** menu show the selected images in the [Geographic-Map](geographic-map) with a blue markers
         * Note: Green Markers are hidden in this mode.
 	* the **set geo** menu allows you to change the photos geo location (latitude/longitude).
 	    * The previous geo-picks for "Set Geo" are shown as blue markers if you select the geo from a map.
@@ -96,7 +96,7 @@ The [Gallery-View](Gallery-View) has these elements:
         * other options are: send photo(s) via bluetooth or mail
 	* the **Start Media Scanner** asks for folder where the media scanner should (re-)scan *.jpg and *.jpeg files
 
-Note: If you have checked **Clear Multi-Selelection** in the [Settings View](settings) the [multi selection mode](Gallery-View#Multiselection) is cancled after a command from Actionbar or Menu.
+Note: If you have checked **Clear Multi-Selection** in the [Settings View](settings) the [multi selection mode](Gallery-View#Multiselection) is cancled after a command from Actionbar or Menu.
 		
 ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/Gallery-MultiSelection.png)
 

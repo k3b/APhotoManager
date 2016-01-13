@@ -23,7 +23,10 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.preference.DialogPreference;
+import android.support.annotation.NonNull;
 import android.util.AttributeSet;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -44,11 +47,25 @@ public class AboutDialogPreference extends DialogPreference {
     public AboutDialogPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
         setDialogIcon(R.drawable.foto_gallery);
-        setDialogTitle(R.string.about_summary);
+        setDialogTitle(getAboutTitle(context));
         setDialogLayoutResource(R.layout.dialog_about);
         this.context = context;
 
     }
+
+    @NonNull
+    public static String getAboutTitle(Context context) {
+        return context.getString(R.string.about_summary,context.getString(R.string.version_postfix));
+    }
+
+    public static void onPrepareOptionsMenu(Context context, Menu menu) {
+        MenuItem item = menu.findItem(R.id.cmd_about);
+
+        if (item != null) {
+            item.setTitle(getAboutTitle(context));
+        }
+    }
+
 
     @Override
     protected void onBindDialogView(View view) {
@@ -87,7 +104,7 @@ public class AboutDialogPreference extends DialogPreference {
 
     public static Dialog createAboutDialog(Context context) {
         final AlertDialog.Builder alert = new AlertDialog.Builder(context);
-        alert.setTitle(R.string.about_summary);
+        alert.setTitle(getAboutTitle(context));
         alert.setIcon(R.drawable.foto_gallery);
         alert.setNeutralButton(R.string.btn_cancel,
                 new DialogInterface.OnClickListener() {

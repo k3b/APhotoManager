@@ -1,7 +1,7 @@
 # A Photo Manager ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/app/src/main/res/drawable-hdpi/foto_gallery.png), A Photo Map, AndroFotoFinder
 
 * The only enhanced android [Gallery app](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) for local images on [f-droid](https://f-droid.org/)
-* Shows photos in a [geografic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) from [openstreetmap](http://www.openstreetmap.org)
+* Shows photos in a [geographic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) from [openstreetmap](http://www.openstreetmap.org)
 * Buildin file manager for photos: find, sort, view, copy, delete, set gps exif data, send, ... .
 * Fast find local photos by (sub-)folder, date and/or geographic map.
 * [Translations](https://crowdin.com/project/androFotoFinder): English, German
@@ -21,7 +21,7 @@ Latest stable release: v0.4.3 (branch FDroid)
 
 * [Overview](https://github.com/k3b/AndroFotoFinder/wiki/features)
 * [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View)
-* [Geografic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map)
+* [Geographic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map)
 * [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View)
 * [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)
 * [Bookmarks](https://github.com/k3b/AndroFotoFinder/wiki/Bookmarks)
