@@ -19,10 +19,17 @@
 
 package de.k3b.android.util;
 
+import android.app.Activity;
 import android.media.ExifInterface;
+import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
+
+import de.k3b.android.androFotoFinder.Global;
 
 /**
  * Write geo data (lat/lon) to photo
@@ -31,7 +38,15 @@ import java.io.IOException;
  * Created by k3b on 25.08.2015.
  */
 public class ExifGps {
-    public static void saveLatLon(File filePath, double latitude, double longitude) {
+    private static SimpleDateFormat sFormatter;
+
+    static {
+        sFormatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
+        sFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
+
+    public static void saveLatLon(File filePath, double latitude, double longitude, String appName, String appVersion) {
+        StringBuilder sb = (Global.debugEnabled) ? new StringBuilder("Set Exif ") : null;
         try {
             long lastModified = filePath.lastModified();
             ExifInterface exif = new ExifInterface(filePath.getAbsolutePath());
@@ -41,6 +56,28 @@ public class ExifGps {
             exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, longitudeRef(longitude));
             // exif.setAttribute(ExifInterface.TAG_GPS_ALTITUDE, convert(0));
             // exif.setAttribute(ExifInterface.TAG_GPS_ALTITUDE_REF, longitudeRef(0));
+
+            if (sb != null) sb.append(ExifInterface.TAG_GPS_LATITUDE).append("=").append(latitude).append(" ")
+            .append(ExifInterface.TAG_GPS_LONGITUDE).append("=").append(longitude).append(" ");
+
+            // #29 set date if not in exif
+            if ((lastModified != 0) && (null == exif.getAttribute(ExifInterface.TAG_DATETIME))) {
+                final String exifDate = sFormatter.format(new Date(lastModified));
+                exif.setAttribute(ExifInterface.TAG_DATETIME, exifDate);
+                if (sb != null) sb.append(ExifInterface.TAG_DATETIME).append("=").append(exifDate).append(" ");
+            }
+            if ((appName != null) && (null == exif.getAttribute(ExifInterface.TAG_MAKE))) {
+                exif.setAttribute(ExifInterface.TAG_MAKE, appName);
+                if (sb != null) sb.append(ExifInterface.TAG_MAKE).append("=").append(appName).append(" ");
+            }
+            if ((appVersion != null) && (null == exif.getAttribute(ExifInterface.TAG_MODEL))) {
+                exif.setAttribute(ExifInterface.TAG_MODEL, appVersion);
+                if (sb != null) sb.append(ExifInterface.TAG_MODEL).append("=").append(appVersion).append(" ");
+            }
+            if (sb != null) {
+                Log.d(Global.LOG_CONTEXT, sb.toString());
+            }
+
             exif.saveAttributes();
 
             // preseve file modification date

@@ -1,5 +1,8 @@
 ## next version v0.4.4.? (not released yet)
+
+## v0.4.4.? (not released yet)
 * *NOT IMPLEMENTED* [#26 option slow-hiqh-quality-detail vs fast-lowRes](https://github.com/k3b/AndroFotoFinder/issues/26): android 5.1: does not support Thumbnails.getThumbnail(...,MediaStore.Images.Thumbnails.FULL_SCREEN_KIND,...) :-(
+* [#29 SetGeo also sets "exif-date photo taken" when there was no exif before](https://github.com/k3b/AndroFotoFinder/issues/29)
 * [#24 Prevent sleepmode while slideshow is active](https://github.com/k3b/AndroFotoFinder/issues/24)
 * [#21 additional languages](https://github.com/k3b/AndroFotoFinder/issues/21)
 	* Settings dialog allows to set gui language

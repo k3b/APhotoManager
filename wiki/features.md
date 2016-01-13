@@ -4,11 +4,11 @@
 
 **Help wanted for further [Translations](https://crowdin.com/project/androFotoFinder)**
 
-* The only enhanced android [Gallery app](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) for local images on [f-droid](https://f-droid.org/)
+* The only enhanced android [Gallery app](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) with map support for local images on [f-droid](https://f-droid.org/)
 * Shows photos in a [geographic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) from [openstreetmap](http://www.openstreetmap.org)
 * Buildin file manager for photos: find, sort, view, copy, delete, Show in map, set gps exif data, send, ... .
 * Fast find local photos by (sub-)folder, date and/or geographic map.
-* [Translations](https://crowdin.com/project/androFotoFinder): English, German(since 0.4.3)
+* [Translations](https://crowdin.com/project/androFotoFinder): English, (since 0.4.3 :) German, (since 0.4.4 :) Japanese, French
 
 * Can handle big image collections (15000+ images in 1000+ folders)
 * Uses Android's image content-provider. No initial image scan neccessary.
