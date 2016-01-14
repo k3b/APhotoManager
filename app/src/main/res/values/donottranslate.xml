@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <!--
 Copyright (C) 2014-2016 k3b
 
@@ -22,138 +22,15 @@ this program. If not, see <http://www.gnu.org/licenses/>
     resources that should NOT be localized
 -->
 <resources>
-    <string name="app_name" translatable="false">a Photo Manager (dev)</string>
-    <string name="app_image_viewer_title" translatable="false">a Photo Viewer (dev)</string>
-    <string name="app_map_title" translatable="false">a Photo Map (dev)</string>
-    <string name="btn_popup" translatable="false">&#8230;</string>
-    <string name="global_log_file_path" translatable="false">copy/aPhotoManager.log</string>
-
-    <!-- version_postfix="" for fdroid-release and version_postfix=" (dev)" for development branch-->
-    <string name="version_postfix" translatable="false">" (dev)"</string>
-
-<string name="about_content" translatable="false"><![CDATA["<html><body>
-<a href="https://github.com/k3b/AndroFotoFinder/wiki"><b>A Photo Manager</b></a><br/>Version AndroFotoFinder $versionName$
-<br />
-<hr />
-$about$
-<hr />
-<p> Minimal requirements: Android 4.0 (API 14),
- Internet/WiFi connection to download geodata
- and a SD card to cache geodata and to store photos<br />
-<br />
-Licence: <a href="http://www.gnu.org/licenses/gpl-3.0">GPLv3</a><br /><br />
-
-Required permissions: </p>
-<ul>
-  <li> INTERNET: to download map data from Open Street Map Server </li>
-  <li> ACCESS_NETWORK_STATE and ACCESS_WIFI_STATE: to find out if
- WiFi/Internet is online to start downloading geodata if necessary</li>
-  <li> WRITE_EXTERNAL_STORAGE to cache downloaded map data in local file system and to do file operations.</li>
-  <li> READ_LOGS after app crash the logcat is written to /mnt/sdcard/copy/log/androFotofinder.logcat*.txt .</li>
-</ul>
-<p> The code uses </p>
-<ul>
-  <li> <a href="https://github.com/osmdroid/osmdroid">osmdroid library</a>
- to display maps from <a href="http://www.openstreetmap.org">Open
- Street Map</a> </li>
-  <li><a href="https://github.com/chrisbanes/PhotoView">chris bane's PhotoView</a> that implemnts
-  the zoomable image view </li>
-  <li><a href="https://github.com/drewnoakes/metadata-extractor/wiki/GettingStarted">drew noakes
-  metadata-extractor</a> to display extended exif info</li>
-  <li><a href="http://www.slf4j.org/">slf4j logging for java</a> with the <a href="http://github.com/lp0/slf4j-android">https://github.com/lp0/slf4j-android</a> driver</li>
-  <li><a href="http://junit.org/">junit testing support</a> with <a href="https://github.com/mockito/mockito">Mockito</a></li>
-</ul>
-<hr/>
-<h2>History</h2>
-
-See also <a href="https://github.com/k3b/AndroFotoFinder/wiki/History">History</a> for more details.<br />
-
-Version v0.4.2<br />
-<ul>
-  <li>Renamed from "a Foto Finder" to "a Photo Manager" to avoid naming collision with others.</li>
-  <li>Added <a href="https://github.com/k3b/AndroFotoFinder/wiki/Bookmarks">Bookmark</a> support to remember search criteria.</li>
-  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View">Image-Detail-View</a>:
-      implemented slideshow, improved sliding/scaling </li>
-  <li>Improved <a href="Media scanner for android below 4.4">Media scanner for Android below 4.4</a> to directly update media database after file operations copy, rename, move, delete...  </li>
-</ul>
-
-Version v0.4.1<br />
-<ul>
-  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View">Image-Detail-View</a>:
-      implemented Share/Edit/Rename/Delete/Copy/Move/change geo infos</li>
-  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View#Multiselection">Gallery-View in Multi selection mode</a>:
-      change geo infos</li>
-  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">Geographic Map</a>:
-      selected items as blue marker; current selection as red marker; "geo:" picker; long tap context menu</li>
-</ul>
-
-Version v0.4.0.150816<br />
-<ul>
-  <li>Gallery-View: implemented multi selection mode: Share/Delete/Copy/Move/CreateFolder/Write-Log</li>
-</ul>
-
-Initial Version v0.3.4.150728<br />
-<ul>
-  <li></li>
-</ul>
-<hr />
-<h2>Links</h2>
-<ul>
-  <li>Source code of current version of "a Photo Manager" (A(ndro)FotoFinder) at git repository@github.com<br />
-    <a href="http://github.com/k3b/AndroFotoFinder/">https://github.com/k3b/AndroFotoFinder/</a></li>
-  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/History">AndroFotoFinder Changelog</a></li>
-
-  <li>Source code of osmdroid library at git repository@github.com<br />
-    <a href="https://github.com/osmdroid/osmdroid">https://github.com/osmdroid/osmdroid</a></li>
-  <li>slf4j logging for java org.slf4j:slf4j-api<br />
-    <a href="http://www.slf4j.org/">http://www.slf4j.org/</a>
-  </li>
-  <li>slf4j logging driver for android eu.lp0.slf4j:slf4j-android<br />
-    <a href="http://github.com/lp0/slf4j-android">https://github.com/lp0/slf4j-android</a>
-  </li>
-  <li>junit testing support junit:junit<br />
-    <a href="http://junit.org/">http://junit.org/</a>
-  </li>
-  <li>Mockito testing support <br />
-    <a href="https://github.com/mockito/mockito">https://github.com/mockito/mockito</a>
-  </li>
-
-  <li>Geographic data comes from Open Street Map<br />
-    <a href="http://www.openstreetmap.org">http://www.openstreetmap.org</a></li>
-
-  <li>The GPLv3 license is available at<br />
-    <a href="http://www.gnu.org/licenses/gpl-3.0">http://www.gnu.org/licenses/gpl-3.0</a></li>
-</ul>
-<br />
-<hr />
-<h2>Legal stuff</h2>
-<b>A Photo Manager (A(ndro)FotoFinder)</b>&nbsp;<br />
-&nbsp;<br />
-Copyright (c) 2015 by k3b<br />
-Licensed under GPL, Version 3.0 or later.<br />
-
-<hr />
-Translations supported <a href="http://crowdin.com">crowdin.com</a>
-<ul>
-<li>English by k3b and mary-kate
-</li><li>German by k3b and v133
-</li><li>Japanese by naofum
-</li><li>French by Tuuux
-</li>
-</ul>
-
-<br />
-Android is a trademark of Google Inc. Use of this trademark is subject 
- to Google Permissions.
-<br />
-<hr /><br />
-<br />
-<hr /><br />
-<br />
-<hr /><br />
-
-</body></html>
-"]]>
-</string>
-
+	<string name="app_name" translatable="false">a Photo Manager (dev)</string>
+	<string name="app_image_viewer_title" translatable="false">a Photo Viewer (dev)</string>
+	<string name="app_map_title" translatable="false">a Photo Map (dev)</string>
+	<string name="btn_popup" translatable="false">&#8230;</string>
+	<string name="global_log_file_path" translatable="false">copy/aPhotoManager.log</string>
+	<string name="settings_debug_libs_title" translatable="false">LogCat libs</string>
+	<string name="settings_debug_sql_title" translatable="false">LogCat SQL</string>
+	<string name="settings_debug_view_item_title" translatable="false">LogCat gridview/listview</string>
+	<!-- version_postfix="" for fdroid-release and version_postfix=" (dev)" for development branch-->
+	<string name="version_postfix" translatable="false">" (dev)"</string>
+	<string name="about_content" translatable="false"><![CDATA["<html><body><a href="https://github.com/k3b/AndroFotoFinder/wiki"><b>A Photo Manager</b></a><br/>Version AndroFotoFinder $versionName$<br /><hr />$about$<hr /><p> Minimal requirements: Android 4.0 (API 14), Internet/WiFi connection to download geodata and a SD card to cache geodata and to store photos<br /><br />Licence: <a href="http://www.gnu.org/licenses/gpl-3.0">GPLv3</a><br /><br />Required permissions: </p><ul>  <li> INTERNET: to download map data from Open Street Map Server </li>  <li> ACCESS_NETWORK_STATE and ACCESS_WIFI_STATE: to find out if WiFi/Internet is online to start downloading geodata if necessary</li>  <li> WRITE_EXTERNAL_STORAGE to cache downloaded map data in local file system and to do file operations.</li>  <li> READ_LOGS after app crash the logcat is written to /mnt/sdcard/copy/log/androFotofinder.logcat*.txt .</li></ul><p> The code uses </p><ul>  <li> <a href="https://github.com/osmdroid/osmdroid">osmdroid library</a> to display maps from <a href="http://www.openstreetmap.org">Open Street Map</a> </li>  <li><a href="https://github.com/chrisbanes/PhotoView">chris bane's PhotoView</a> that implemnts  the zoomable image view </li>  <li><a href="https://github.com/drewnoakes/metadata-extractor/wiki/GettingStarted">drew noakes  metadata-extractor</a> to display extended exif info</li>  <li><a href="http://www.slf4j.org/">slf4j logging for java</a> with the <a href="http://github.com/lp0/slf4j-android">https://github.com/lp0/slf4j-android</a> driver</li>  <li><a href="http://junit.org/">junit testing support</a> with <a href="https://github.com/mockito/mockito">Mockito</a></li></ul><hr/><h2>History</h2>See also <a href="https://github.com/k3b/AndroFotoFinder/wiki/History">History</a> for more details.<br />Version v0.4.2<br /><ul>  <li>Renamed from "a Foto Finder" to "a Photo Manager" to avoid naming collision with others.</li>  <li>Added <a href="https://github.com/k3b/AndroFotoFinder/wiki/Bookmarks">Bookmark</a> support to remember search criteria.</li>  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View">Image-Detail-View</a>:      implemented slideshow, improved sliding/scaling </li>  <li>Improved <a href="Media scanner for android below 4.4">Media scanner for Android below 4.4</a> to directly update media database after file operations copy, rename, move, delete...  </li></ul>Version v0.4.1<br /><ul>  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View">Image-Detail-View</a>: implemented Share/Edit/Rename/Delete/Copy/Move/change geo infos</li>  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View#Multiselection">Gallery-View in Multi selection mode</a>:      change geo infos</li>  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">Geographic Map</a>:      selected items as blue marker; current selection as red marker; "geo:" picker; long tap context menu</li></ul>Version v0.4.0.150816<br /><ul>  <li>Gallery-View: implemented multi selection mode: Share/Delete/Copy/Move/CreateFolder/Write-Log</li></ul>Initial Version v0.3.4.150728<br /><ul>  <li></li></ul><hr /><h2>Links</h2><ul>  <li>Source code of current version of "a Photo Manager" (A(ndro)FotoFinder) at git repository@github.com<br />    <a href="http://github.com/k3b/AndroFotoFinder/">https://github.com/k3b/AndroFotoFinder/</a></li>  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/History">AndroFotoFinder Changelog</a></li>  <li>Source code of osmdroid library at git repository@github.com<br />    <a href="https://github.com/osmdroid/osmdroid">https://github.com/osmdroid/osmdroid</a></li>  <li>slf4j logging for java org.slf4j:slf4j-api<br />    <a href="http://www.slf4j.org/">http://www.slf4j.org/</a>  </li>  <li>slf4j logging driver for android eu.lp0.slf4j:slf4j-android<br />    <a href="http://github.com/lp0/slf4j-android">https://github.com/lp0/slf4j-android</a>  </li>  <li>junit testing support junit:junit<br />    <a href="http://junit.org/">http://junit.org/</a>  </li>  <li>Mockito testing support <br />    <a href="https://github.com/mockito/mockito">https://github.com/mockito/mockito</a>  </li>  <li>Geographic data comes from Open Street Map<br />    <a href="http://www.openstreetmap.org">http://www.openstreetmap.org</a></li>  <li>The GPLv3 license is available at<br />    <a href="http://www.gnu.org/licenses/gpl-3.0">http://www.gnu.org/licenses/gpl-3.0</a></li></ul><br /><hr /><h2>Legal stuff</h2><b>A Photo Manager (A(ndro)FotoFinder)</b>&nbsp;<br />&nbsp;<br />Copyright (c) 2015 by k3b<br />Licensed under GPL, Version 3.0 or later.<br /><hr />Translations supported <a href="http://crowdin.com">crowdin.com</a><ul><li>English by k3b and mary-kate</li><li>German by k3b and v133</li><li>Japanese by naofum</li><li>French by Tuuux</li></ul><br />Android is a trademark of Google Inc. Use of this trademark is subject  to Google Permissions.<br /><hr /><br /><br /><hr /><br /><br /><hr /><br /></body></html>"]]></string>
 </resources>
