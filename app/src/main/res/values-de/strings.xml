@@ -22,7 +22,7 @@
  -->
 <resources>
 	<string name="about_summary">Über a Photo Manager%1$s</string>
-	<string name="area_menu_title">Kartenausschnitt wählen</string>
+	<string name="area_menu_title">Auswahl: Kartenausschnitt</string>
 	<string name="background">Hintergrund</string>
 	<string name="bookmark_delete_answer_format">Lesezeichen %1$s gelöscht.</string>
 	<string name="bookmark_delete_error_format">Kann Lesezeichen %1$s nicht löschen.</string>
@@ -46,21 +46,21 @@
 	<string name="destination_copy">Kopieren nach</string>
 	<string name="destination_move">Verschieben nach</string>
 	<string name="details_menu_title">Informationen</string>
-	<string name="edit_chooser_title">Wählen Sie einen Fotoeditor</string>
+	<string name="edit_chooser_title">Auswahl: Fotoeditor</string>
 	<string name="edit_err_editor_not_found">Habe keinen Fotoeditor gefunden</string>
 	<string name="edit_menu_title">Bearbeiten</string>
 	<string name="filter_err_invalid_date_format">\'%1$s\' ist kein gültiges Datum.</string>
 	<string name="filter_err_invalid_location_format">\'%1$s\' ist keine gültige Koordinate.</string>
 	<string name="filter_menu_title">Filter</string>
-	<string name="folder_dialog_title_format">Wählen Sie %1$s</string>
+	<string name="folder_dialog_title_format">Auswahl: %1$s</string>
 	<string name="folder_err_load_failed_format">Fehler beim Laden des Ordners %1$s</string>
 	<string name="folder_menu_title">Ordner-Filter</string>
 	<string name="gallery_title">Fotos</string>
 	<string name="geo_show_menu_title">In Karte anzeigen</string>
 	<string name="geo_edit_menu_title">Geo-Info ändern</string>
 	<string name="geo_edit_update_in_progress">Ändere Geo-Infos in ausgewählten Fotos</string>
-	<string name="geo_picker_err_not_found">Keine Geo Auswahl installiert</string>
-	<string name="geo_picker_title">Wählen Sie neuen Ort fürs Foto</string>
+	<string name="geo_picker_err_not_found">Keine Geo-Auswahl auf dem Gerät installiert</string>
+	<string name="geo_picker_title">Auswahl: Meuer Ort fürs Foto</string>
 	<string name="global_err_sql_message_format">Sql-Fehler \'%1$s\' \n\n%2$s</string>
 	<string name="global_err_sql_title_reload">Ungültiges SQL. Verwende statt dessen Default</string>
 	<string name="global_err_system">Systemfehler. Beende App</string>
@@ -81,7 +81,9 @@
 	<string name="mk_success_format">Erstellte %1$s</string>
 	<string name="move_menu_title">Verschieben</string>
 	<string name="move_result_format">%1$d/%2$d Dateien verschobenen</string>
-	<string name="osm_cright_title">Map Tiles (c) <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a></string>
+	<string name="osm_cright_title">Map Tiles (c) 
+		<a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>
+	</string>
 	<string name="overwrite_question_title">Überschreiben?</string>
 	<string name="rename_menu_title">Umbenennen</string>
 	<string name="rename_result_format">%1$d/%2$d Dateien umbenannt</string>
@@ -96,15 +98,12 @@
 	<string name="selection_remove_menu_title">Auswahl: alle sichtbaren abwählen</string>
 	<string name="settings_bookmark_dir_title">Ordner für Lesezeichen</string>
 	<string name="settings_debug_libs_summary">&#8230; Fremdkomponenten.</string>
-	<string name="settings_debug_libs_title">LogCat libs</string>
 	<string name="settings_debug_memory_summary">... mit Speicherverbrauch.</string>
 	<string name="settings_debug_memory_title">LogCat Speicherverbrauch</string>
 	<string name="settings_debug_sql_summary">... ausgeführtes SQL.</string>
-	<string name="settings_debug_sql_title">LogCat SQL</string>
 	<string name="settings_debug_summary">... mit anderen Log-Nachrichten.</string>
 	<string name="settings_debug_title">LogCat Sonstiges.</string>
 	<string name="settings_debug_view_item_summary">..., Grid/Listview Elemente.</string>
-	<string name="settings_debug_view_item_title">LogCat Grid/Listview</string>
 	<string name="settings_group_debug_title">Diagnose</string>
 	<string name="settings_image_hide_time_title">Actionbar ausblenden nach ... Millisekunden</string>
 	<string name="settings_image_initialImageDetailResolutionHigh_summary">Auflösung Photo-View höhere Qualität (langsamer, höherer Speicherverbrauch)</string>
@@ -141,5 +140,51 @@
 	<string name="sort_order_Place_Descending">Ort absteigend</string>
 	<string name="update_result_format">%1$d/%2$d Dateien aktualisiert</string>
 	<string name="zoom_to_fit_menu_title">Zoom ausfüllen</string>
-	<string name="about_content_about"><![CDATA["A Photo Manager mit &#39;A Photo Map&#39; und &#39;AndroFotoFinder&#39;  <br />Merkmale:  <ul>    <li>verwaltet große Bildersammlungen (15000+ Bilder in 1000+ Ordnern)</li>    <li>verwendet Androids interne Mediendatenbank. Kein initialer Bild Scan notwendig.</li>    <li>    <a href="https://github.com/k3b/AndroFotoFinder/wiki/Filter-View">Bilder finden</a>, per</li>    <li style="list-style: none; display: inline">      <ul>        <li>Ordner (mit hirachischer        <a href="https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker">Ordnerauswahl</a>)</li>        <li>Ordner/Dateinamen mit Platzhaltern</li>        <li>Datum</li>        <li>Gebiet auf einer        <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">Landkarte</a> (für Bilder Gps-Exif-Infos)</li>      </ul>    </li>    <li>Ergebnisanzeige in    <a href="https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View">Galerie-Ansicht</a></li>    <li style="list-style: none; display: inline">      <ul>        <li>Unterstützung für Mehrfach-Auswahl (seit 0.4.0)</li>        <li>Dateiverarbeitung: kopieren, verschieben, löschen, senden (seit 0.4.0)</li>      </ul>    </li>    <li>    <a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View">Foto-Ansicht</a> mit</li>    <li style="list-style: none; display: inline">      <ul>        <li>Stufenlose Vergrößerung (Zoom)</li>        <li>links/rechts wischen für nächstes/vorheriges Bild</li>        <li>Anzeige erweiterte Bildinformationen (Exif, IPTC, XMP, ICC)</li>        <li>Bilder kopieren, verschieben, löschen, umbenennen, teilen (seit 0.4.1)</li>      </ul>    </li>    <li>Die    <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geografische Karte</a> zeigt Marker an den Orten, an denen    Fotos aufgenommen wurden</li>    <li>Dateioperationen</li>    <li>      <ul>        <li>aktualisieren auch die Android-Mediandatenbank</li>        <li>erhalten das Dateidatum (falls Android dies unterstützt)</li>        <li>aktualisiert auch Xmp-Filialdateien</li>      </ul>    </li>  </ul>  <br />"]]></string>
+	<string name="about_content_about"><![CDATA["
+<h1>A Photo Manager</h1>
+mit &#39;A Photo Map&#39; und &#39;AndroFotoFinder&#39;
+  <br />Merkmale:
+  <ul>
+    <li>verwaltet große Bildersammlungen (15000+ Bilder in 1000+ Ordnern)</li>
+    <li>verwendet Androids interne Mediendatenbank. Kein initialer Bild-Scan notwendig.</li>
+    <li>
+    <a href="https://github.com/k3b/AndroFotoFinder/wiki/Filter-View">Bilder finden</a>, per
+      <ul>
+        <li>Ordner (mit hirachischer
+        <a href="https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker">Ordnerauswahl</a>)</li>
+        <li>Ordner/Dateinamen mit Platzhaltern</li>
+        <li>Datum</li>
+        <li>Gebiet auf einer
+        <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">Landkarte</a> (für Bilder mit Gps-Exif-Infos)</li>
+      </ul>
+    </li>
+    <li>Ergebnisanzeige in
+    <a href="https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View">Galerie-Ansicht</a>
+      <ul>
+        <li>Unterstützung für Mehrfach-Auswahl</li>
+        <li>Dateiverarbeitung zum Kopieren, Verschieben, Löschen, Senden, Exif-Geo Ändern</li>
+      </ul>
+    </li>
+    <li>
+    <a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View">Foto-Ansicht</a> mit
+      <ul>
+        <li>stufenloser Vergrößerung (Zoom)</li>
+        <li>links/rechts wischen für nächstes/vorheriges Bild</li>
+        <li>Anzeige für erweiterte Bildinformationen (Exif, IPTC, XMP, ICC)</li>
+        <li>zum Kopieren, Verschieben, Löschen, Umbenennen, Teilen/Senden von Bildern, Exif-Geo Ändern</li>
+      </ul>
+    </li>
+    <li>Die
+    <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geografische Karte</a> zeigt Marker an den Orten, an denen
+    Fotos aufgenommen wurden</li>
+    <li>Alle Dateioperationen
+      <ul>
+        <li>aktualisieren auch die Android-Mediandatenbank</li>
+        <li>erhalten das Dateidatum (falls Android dies unterstützt)</li>
+        <li>aktualisiert auch Xmp-Filialdateien</li>
+      </ul>
+    </li>
+  </ul>
+  <br />
+"]]></string>
 </resources>

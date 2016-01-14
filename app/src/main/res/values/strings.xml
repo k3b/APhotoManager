@@ -80,15 +80,13 @@
 	<string name="mk_success_format">Created %1$s</string>
 	<string name="move_menu_title">Move</string>
 	<string name="move_result_format">Moved %1$d/%2$d files</string>
-	<string name="osm_cright_title">Map Tiles (c) 
-		<a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>
-	</string>
+	<string name="osm_cright_title">Map Tiles (c) <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors</string>
 	<string name="overwrite_question_title">Overwrite?</string>
 	<string name="rename_menu_title">Rename</string>
 	<string name="rename_result_format">Renamed %1$d/%2$d files</string>
 	<string name="scanner_dir_question">Where to start scanning?</string>
-	<string name="scanner_err_busy">Cannot process photo files while Android Media Scanner is busy. Try again later.</string>
-	<string name="scanner_menu_title">Media Scanner</string>
+	<string name="scanner_err_busy">Cannot process photo files while Android-s media scanner is busy. Try again later.</string>
+	<string name="scanner_menu_title">Media scanner</string>
 	<string name="scanner_update_result_format">Updated %1$d Media Database Items</string>
 	<string name="selection_status_format">%1$d Selected</string>
 	<string name="selection_none_hint">Select folder with images to enable OK</string>
@@ -96,16 +94,13 @@
 	<string name="selection_add_all_menu_title">Selection: Add all visible</string>
 	<string name="selection_remove_menu_title">Selection: Remove all visible</string>
 	<string name="settings_bookmark_dir_title">Report folder</string>
-	<string name="settings_debug_libs_summary" translatable="false">&#8230; of 3d party libraries.</string>
-	<string name="settings_debug_libs_title" translatable="false">LogCat libs</string>
-	<string name="settings_debug_memory_summary">&#8230; containing Memory Consumption.</string>
+	<string name="settings_debug_libs_summary">&#8230; of 3d party libraries.</string>
+	<string name="settings_debug_memory_summary">&#8230; containing memory consumption.</string>
 	<string name="settings_debug_memory_title">LogCat memory consumption</string>
 	<string name="settings_debug_sql_summary">&#8230; containing executed SQL.</string>
-	<string name="settings_debug_sql_title" translatable="false">LogCat SQL</string>
 	<string name="settings_debug_summary">&#8230; containing other log messages.</string>
 	<string name="settings_debug_title">LogCat misc.</string>
 	<string name="settings_debug_view_item_summary">&#8230; containing gridview/listview Items.</string>
-	<string name="settings_debug_view_item_title">LogCat gridview/listview</string>
 	<string name="settings_group_debug_title">Diagnostics</string>
 	<string name="settings_image_hide_time_title">Auto hide actionbar after millisecs</string>
 	<string name="settings_image_initialImageDetailResolutionHigh_summary">Initial photo-view in better quality (slow, needs more memory)</string>
@@ -142,5 +137,47 @@
 	<string name="sort_order_Place_Descending">Place descending</string>
 	<string name="update_result_format">Updated %1$d/%2$d files</string>
 	<string name="zoom_to_fit_menu_title">Zoom to fit</string>
-	<string name="about_content_about"><![CDATA["<h1> A Photo Manager </h1>with 'A Photo Map' in 'AndroFotoFinder'<br/></p>Features:<ul>  <li>Can handle big image collections (15000+ images in 1000+ folders)</li>  <li>Uses Android's image content provider. No initial image scan necessary.</li>  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Filter-View">Find images</a> via  <ul>    <li>folder (with hierarchical <a href="https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker">Folder Picker</a>)&nbsp;</li>    <li>wildcards that match folder/filename&nbsp;</li>    <li>date&nbsp;</li>    <li>area in <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geographic map</a> (if image has GPS Exif info)    </li>  </ul>      </li>  <li>Shows result in a scrollable <a href="https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View">gallery view</a> with  <ul>    <li>support for multiple photo selection</li>    <li>file operations Copy, Move, Delete, Share</li>  </ul></li>  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View">Photo-detail-view</a> with  <ul>    <li>image zoom</li>    <li>swipe to go to next/previous image</li>    <li>shows extended image info (Exif, IPTC, XMP, ICC)</li>    <li>file operations Copy, Move, Delete, Rename, Share</li>  </ul></li>  <li>The <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geographic map</a> shows markers at places where photos were taken</li>  <li>File operations</li>  <li><ul>    <li>will also update Android's image content provider database</li>    <li>update xmp-sidecar files</li>    <li>preserve file date if local Android supports it.</li>  </ul></li></ul><br />"]]></string>
+	<string name="about_content_about"><![CDATA["
+<h1>A Photo Manager</h1>with &#39;A Photo Map&#39; in &#39;AndroFotoFinder&#39;
+  <br />Features:
+  <ul>
+    <li>Can handle big image collections (15000+ images in 1000+ folders)</li>
+    <li>Uses Android&#39;s image content provider. No initial image scan necessary.</li>
+    <li>
+    <a href="https://github.com/k3b/AndroFotoFinder/wiki/Filter-View">Find images</a> via
+    <ul>
+      <li>folder (with hierarchical
+      <a href="https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker">folder picker</a>)</li>
+      <li>wildcards that match folder/filename</li>
+      <li>date</li>
+      <li>area in
+      <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geographic map</a> (if image has GPS Exif info)</li>
+    </ul></li>
+    <li>Shows result in a scrollable
+    <a href="https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View">gallery view</a> with
+    <ul>
+      <li>support for multiple photo selection</li>
+      <li>file operations Copy, Move, Delete, Share</li>
+    </ul></li>
+    <li>
+    <a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View">Photo-detail-view</a> with
+    <ul>
+      <li>image zoom</li>
+      <li>swipe to go to next/previous image</li>
+      <li>shows extended image info (Exif, IPTC, XMP, ICC)</li>
+      <li>file operations Copy, Move, Delete, Rename, Share</li>
+    </ul></li>
+    <li>The
+    <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geographic map</a> shows markers at places where photos
+    were taken</li>
+    <li>File operations
+      <ul>
+        <li>will also update Android&#39;s image content provider database</li>
+        <li>update xmp-sidecar files</li>
+        <li>preserve file date if local Android supports it.</li>
+      </ul>
+    </li>
+  </ul>
+  <br />
+"]]></string>
 </resources>
