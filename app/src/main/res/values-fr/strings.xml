@@ -137,5 +137,49 @@
 	<string name="sort_order_Place_Descending">Emplacement décroissant</string>
 	<string name="update_result_format">mise à jour des fichiers %1$d/%2$d</string>
 	<string name="zoom_to_fit_menu_title">Ajuster le zoom</string>
-	<string name="about_content_about"><![CDATA["<h1> A Photo Manager </h1>with 'A Photo Map' sur 'AndroFotoFinder'<br/></p>Caractéristiques:<ul>  <li>Can handle big image collections (15000+ images in 1000+ folders)</li>  <li>Uses Android's image content provider. No initial image scan necessary.</li>  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Filter-View">Find images</a> via</li>  <ul>    <li>folder (with hierarchical <a href="https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker">Folder Picker</a>)&nbsp;</li>    <li>wildcards that match folder/filename&nbsp;</li>    <li>date&nbsp;</li>    <li>area in <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geographic map</a> (if image has GPS Exif info)    </li>  </ul>  <li>Show result in a scrollable <a href="https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View">gallery view</a> with</li>  <ul>    <li>Support de la sélection multiple des photos (depuis la v0.4.0)</li>    <li>Manipulation de fichier: copie, déplacement, suppression, partage (depuis la v0.4.0)</li>  </ul>  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View">Photo-detail-view</a> avec</li>  <li><ul>    <li>Zoom dans l'image</li>    <li>swipe to go to next/previous image</li>    <li>Visualisation des informations avancées des images (Exif, IPTC, XMP, ICC)</li>    <li>file operations copy, move, delete, rename, share (since 0.4.1)</li>  </ul></li>  <li>The <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geographic map</a> shows markers at places where photos were taken</li>  <li>File operations</li>  <li><ul>    <li>will also update Android's image content provider database</li>    <li>update xmp-sidecar files</li>    <li>Préserve la date des fichiers si la version installée d'Android le permet.</li>  </ul></li></ul><br />"]]></string>
+	<string name="about_content_about"><![CDATA["<h1>A Photo Manager</h1>with &#39;A Photo Map&#39; sur &#39;AndroFotoFinder&#39;
+  <br />Caractéristiques:
+  <ul>
+    <li>Can handle big image collections (15000+ images in 1000+ folders)</li>
+    <li>Uses Android&#39;s image content provider. No initial image scan necessary.</li>
+    <li>
+    <a href="https://github.com/k3b/AndroFotoFinder/wiki/Filter-View">Find images</a> via
+      <ul>
+        <li>folder (with hierarchical
+        <a href="https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker">Folder Picker</a>)</li>
+        <li>wildcards that match folder/filename</li>
+        <li>date</li>
+        <li>area in
+        <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geographic map</a> (if image has GPS Exif info)</li>
+      </ul>
+    </li>
+    <li>Show result in a scrollable
+    <a href="https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View">gallery view</a> with
+      <ul>
+        <li>Support de la sélection multiple des photos</li>
+        <li>Manipulation de fichier: copie, déplacement, suppression, partage</li>
+      </ul>
+    </li>
+    <li>
+    <a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View">Photo-detail-view</a> avec
+      <ul>
+        <li>Zoom dans l&#39;image</li>
+        <li>swipe to go to next/previous image</li>
+        <li>Visualisation des informations avancées des images (Exif, IPTC, XMP, ICC)</li>
+        <li>file operations copy, move, delete, rename, share</li>
+      </ul>
+    </li>
+    <li>The
+    <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geographic map</a> shows markers at places where photos
+    were taken</li>
+    <li>File operations
+      <ul>
+        <li>will also update Android&#39;s image content provider database</li>
+        <li>update xmp-sidecar files</li>
+        <li>Préserve la date des fichiers si la version installée d&#39;Android le permet.</li>
+      </ul>
+    </li>
+  </ul>
+  <br />
+	"]]></string>
 </resources>

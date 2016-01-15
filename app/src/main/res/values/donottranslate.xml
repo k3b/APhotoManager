@@ -27,7 +27,9 @@ this program. If not, see <http://www.gnu.org/licenses/>
     <string name="app_map_title" translatable="false">a Photo Map</string>
     <string name="btn_popup" translatable="false">&#8230;</string>
     <string name="global_log_file_path" translatable="false">copy/aPhotoManager.log</string>
-
+  <string name="settings_debug_libs_title" translatable="false">LogCat libs</string>
+  <string name="settings_debug_sql_title" translatable="false">LogCat SQL</string>
+  <string name="settings_debug_view_item_title" translatable="false">LogCat gridview/listview</string>
     <!-- version_postfix="" for fdroid-release and version_postfix=" (dev)" for development branch-->
     <string name="version_postfix" translatable="false">""</string>
 
@@ -132,5 +134,4 @@ this program. If not, see <http://www.gnu.org/licenses/>
   <br />
 "]]>
 </string>
-
 </resources>

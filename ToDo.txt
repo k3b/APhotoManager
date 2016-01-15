@@ -1,5 +1,4 @@
 	# 28 Translation with longer texts may break Layout 
-		Filter - "chemin d'accés" (eng Path) not enough place to enter the path: replaced by "Fichier"
 
 	copy/move/delete log as /path/to/file.* instead of /path/to/file.jpg+/path/to/file.xmp
 	

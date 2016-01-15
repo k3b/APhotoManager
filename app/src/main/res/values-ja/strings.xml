@@ -147,28 +147,26 @@
 <ul>
  <li>大きな画像コレクションを処理できます (1000+ フォルダーに 15000+ 画像)</li>
  <li>Android の画像コンテンツ プロバイダーを使用。初期イメージ スキャンの必要はありません。</li>
- <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Filter-View"> 画像検索</a> 経由</li>
+ <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Filter-View"> 画像検索</a> 経由
  <ul>
   <li>フォルダー (階層 <a href="https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker"> フォルダー ピッカー</a>)&nbsp;</li>
   <li>フォルダー/ファイル名に一致するワイルドカード&nbsp;</li>
   <li>日付&nbsp;</li>
   <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">地理情報地図</a> にエリア (イメージに GPS Exif 情報がある場合)</li>
- </ul>
- <li>スクロール可能な <a href="https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View"> ギャラリー ビュー</a> で結果を表示</li>
+ </ul></li>
+ <li>スクロール可能な <a href="https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View"> ギャラリー ビュー</a> で結果を表示
  <ul>
-  <li>複数写真選択のサポート (0.4.0 から)</li>
-  <li>ファイルをコピー、移動、削除、共有する操作 (0.4.0 から)</li>
- </ul>
- <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View"> 写真詳細表示</a>と</li>
- <li><ul>
+  <li>複数写真選択のサポート</li>
+  <li>ファイルをコピー、移動、削除、共有する操作</li>
+ </ul></li>
+ <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View"> 写真詳細表示</a>と<ul>
   <li>イメージ ズーム</li>
   <li>スワイプで次/前の画像に移動</li>
   <li>拡張画像情報の表示 (Exif、IPTC、XMP、ICC)</li>
-  <li>ファイルをコピー、移動、削除、名前の変更、共有する操作 (0.4.1 から)</li>
+  <li>ファイルをコピー、移動、削除、名前の変更、共有する操作</li>
  </ul></li>
  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">地理情報地図</a> 写真が撮影された場所にマーカーを示します</li>
- <li>ファイル操作</li>
- <li><ul>
+ <li>ファイル操作<ul>
   <li>Android の画像コンテンツ プロバイダー データベースも更新</li>
   <li>xmp サイドカーファイルを更新</li>
   <li>ローカルの Android がサポートしている場合、ファイルの日付を保持</li>
