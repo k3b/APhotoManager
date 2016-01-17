@@ -6,12 +6,12 @@ android {
     defaultConfig {
         // fdroid-release 'de.k3b.android.androFotoFinder'
         // main-develop-branch 'de.k3b.android.androFotoFinder.Dev'
-        applicationId 'de.k3b.android.androFotoFinder.dev'
+        applicationId 'de.k3b.android.androFotoFinder'
 		
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 11
-        versionName "0.4.4.160115"
+        versionCode 12
+        versionName "0.4.4.160117"
     }
     buildTypes {
         release {
