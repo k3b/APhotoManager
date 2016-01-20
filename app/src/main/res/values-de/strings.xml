@@ -40,7 +40,10 @@
 	<string name="copy_menu_title">Kopieren</string>
 	<string name="copy_result_format">%1$d/%2$d Dateien kopiert</string>
 	<string name="delete_menu_title">Löschen</string>
-	<string name="delete_question_message_format">"Sind Sie sicher, dass Sie diese Dateien dauerhaft löschen möchten?%1$s,Dieser Vorgang kann nicht rückgängig gemacht werden."</string>
+	<string name="delete_question_message_format">"Sind Sie sicher, dass Sie diese Dateien dauerhaft löschen möchten?
+%1$s
+
+Dieser Vorgang kann nicht rückgängig gemacht werden."</string>
 	<string name="delete_question_title">Foto(s) löschen?</string>
 	<string name="delete_result_format">%1$d/%2$d Dateien gelöscht</string>
 	<string name="destination_copy">Kopieren nach</string>

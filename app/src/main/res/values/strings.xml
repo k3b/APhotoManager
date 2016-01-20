@@ -39,7 +39,10 @@
 	<string name="copy_menu_title">Copy</string>
 	<string name="copy_result_format">Copied %1$d/%2$d files</string>
 	<string name="delete_menu_title">Delete</string>
-	<string name="delete_question_message_format">"Are you sure you want to permanently delete these files?%1$sThis operation cannot be reversed."</string>
+	<string name="delete_question_message_format">"Are you sure you want to permanently delete these files?
+	%1$s
+	
+	This operation cannot be reversed."</string>
 	<string name="delete_question_title">Delete photo(s)?</string>
 	<string name="delete_result_format">Deleted %1$d/%2$d files</string>
 	<string name="destination_copy">Copy destination</string>

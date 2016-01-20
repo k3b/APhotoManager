@@ -12,16 +12,18 @@
     </string-array>
     <string-array name="pref_locale_names" translatable="false">
         <item>@string/settings_locale_os_language</item>
-        <item>en english</item>
         <item>de german Deutsch</item>
-        <item>ja japanese 日本人</item>
+        <item>en english</item>
         <item>fr french Français</item>
+        <item>ja japanese 日本人</item>
+        <item>ro romanian Român</item>
     </string-array>
     <string-array name="pref_locale_values" translatable="false">
         <item></item>
-        <item>en</item>
         <item>de</item>
-        <item>ja</item>
+        <item>en</item>
         <item>fr</item>
+        <item>ja</item>
+        <item>ro</item>
     </string-array>
 </resources>

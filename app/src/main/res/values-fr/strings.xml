@@ -40,7 +40,10 @@
 	<string name="copy_menu_title">Copier</string>
 	<string name="copy_result_format">%1$d/%2$d fichiers copiés</string>
 	<string name="delete_menu_title">Supprimer</string>
-	<string name="delete_question_message_format">« Êtes-vous sûr de que vouloir supprimer définitivement ces fichiers ?%1$s, cette opération n\'est pas réversible\"</string>
+	<string name="delete_question_message_format">"Êtes-vous sûr de que vouloir supprimer définitivement ces fichiers 
+	?%1$s, 
+	
+	cette opération n\'est pas réversible"</string>
 	<string name="delete_question_title">Supprimer les photo(s) ?</string>
 	<string name="delete_result_format">supprimer les fichiers %1$d/%2$d</string>
 	<string name="destination_copy">Destination de la copie</string>
@@ -81,9 +84,7 @@
 	<string name="mk_success_format">%1$s Créé</string>
 	<string name="move_menu_title">Déplacer</string>
 	<string name="move_result_format">%1$d/%2$d fichier(s) déplacé(s)</string>
-	<string name="osm_cright_title">Map Tiles (c) 
-		<a href="http://www.openstreetmap.org/copyright"> OpenStreetMap</a>
-	</string>
+	<string name="osm_cright_title">Map Tiles (c) <a href="http://www.openstreetmap.org/copyright"> OpenStreetMap</a></string>
 	<string name="overwrite_question_title">Ecraser?</string>
 	<string name="rename_menu_title">Renommer</string>
 	<string name="rename_result_format">%1$d/%2$d fichiers renommés</string>
