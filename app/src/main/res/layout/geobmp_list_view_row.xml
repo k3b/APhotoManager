@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2015 by k3b.
+  ~
+  ~ This file is part of LocationMapViewer.
+  ~
+  ~ This program is free software: you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+  ~ FOR A PARTICULAR PURPOSE. See the GNU General Public License
+  ~ for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along with
+  ~ this program. If not, see <http://www.gnu.org/licenses/>
+  -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="0dip"
+    android:layout_weight="1"
+
+    android:layout_height="fill_parent"
+    >
+    <ImageView
+        android:id="@+id/thumbnail"
+        android:layout_width="@dimen/thumb_width"
+        android:layout_height="@dimen/thumb_height" />
+    <TextView android:id="@+id/name"
+        style="@style/AppTheme.TextView.Caption"
+        android:layout_width="fill_parent" android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/thumbnail"
+        android:gravity="center_vertical" />
+    <TextView android:id="@+id/summary"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" android:layout_weight="1"
+        android:layout_marginLeft="@dimen/vspace_between_list_item"
+        android:layout_toRightOf="@id/thumbnail"
+        android:layout_below="@id/name"
+        android:singleLine="true" android:ellipsize="marquee" />
+</RelativeLayout>

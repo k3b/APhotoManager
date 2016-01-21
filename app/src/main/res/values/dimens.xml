@@ -31,4 +31,10 @@
 
     <!-- used to manually calculate setEllipsize(TextUtils.TruncateAt.MIDDLE) for title -->
     <integer name="title_length_in_chars">20</integer>
+
+    <!-- #30 Bookmark support for map-areas -->
+    <dimen name="thumb_width">32px</dimen>
+    <dimen name="thumb_height">32px</dimen>
+    <dimen name="vspace_between_list_item">4px</dimen>
+
 </resources>

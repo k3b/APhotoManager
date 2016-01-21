@@ -184,7 +184,7 @@ Unique visitors https://github.com/k3b/AndroFotoFinder/graphs/traffic
 
 0118	14	
 0119	35	V0.4.4.160117 auf F-Droid
-0120	
+0120	25	started multi-lingual wiki
 0121	
 0122	
 0123	

@@ -25,5 +25,21 @@
     <style name="AppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
         <!-- Customize your theme here. -->
     </style>
+    <style name="AppTheme.ImageButton" >
+        <item name="android:layout_width">60dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <!-- <item name="android:layout_marginBottom">32dp</item> -->
+        <item name="android:background">@drawable/custom_button</item>
+    </style>
+    <style name="AppTheme.TextView" >
+    </style>
+
+    <style name="AppTheme.TextView.Caption" >
+    </style>
+
+
+
+    <drawable name="image_btn_backgroud_color_enabled" >#888888</drawable> <!-- gray -->
+    <drawable name="image_btn_backgroud_color_disabled">#eeeeee</drawable> <!-- light gray -->
 
 </resources>

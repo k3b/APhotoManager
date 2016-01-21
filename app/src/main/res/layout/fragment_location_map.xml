@@ -19,16 +19,20 @@
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
  -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+<android.support.v4.widget.DrawerLayout
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="de.k3b.android.androFotoFinder.locationmap.LocationMapFragment">
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
     <!-- the gui -->
     <RelativeLayout
         android:id="@+id/parent_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <!-- own block necessary for Navigation Drawer overlay
+         [btn cmd_unhide_bookmark_list]
+
          [map mapview]
 
          {[btn OK]}
@@ -62,6 +66,15 @@
             android:layout_above="@id/zoomBar"
             />
 
+        <!-- to show fragment_bookmark_list which is normally hidden -->
+        <ImageButton
+            android:id="@+id/cmd_unhide_bookmark_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_action_important"
+            android:visibility="gone"
+            android:layout_alignParentLeft="true"
+            />
 
         <Button
             android:layout_width="wrap_content"
@@ -84,4 +97,54 @@
             android:layout_height="@dimen/grid_cell_height" />
     </RelativeLayout>
 
-</FrameLayout>
+    <!-- made visible via @+id/cmd_unhide_bookmark_list and as navigation drawer
+        width = 5Buttons à 60 dp
+    -->
+    <RelativeLayout
+        android:id="@+id/fragment_bookmark_list"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:choiceMode="singleChoice"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp"
+        >
+        <!-- Icon toolbar -->
+        <LinearLayout android:id="@+id/commands" android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:orientation="horizontal"
+            >
+
+            <!-- hide fragment -->
+            <ImageButton android:id="@+id/cmd_cancel"
+                android:src="@drawable/ic_action_previous_item"
+                android:contentDescription="@string/title_close"
+                style="@style/AppTheme.ImageButton"
+                />
+
+            <ImageButton android:id="@+id/cmd_edit"
+                android:src="@drawable/ic_action_edit"
+                android:contentDescription="@string/rename_menu_title"
+                style="@style/AppTheme.ImageButton"
+                />
+
+            <ImageButton android:id="@+id/cmd_delete"
+                android:src="@drawable/ic_action_delete"
+                android:contentDescription="@string/delete_menu_title"
+                style="@style/AppTheme.ImageButton"
+                />
+
+        </LinearLayout>
+
+        <!-- listview with bookmarks -->
+        <ListView android:id="@+id/android:list"
+            android:layout_width="fill_parent" android:layout_height="fill_parent"
+            android:layout_below="@id/commands"
+            android:choiceMode="singleChoice"
+            android:layout_alignParentRight="@+id/commands"
+            android:layout_alignParentLeft="@+id/commands"
+            android:dividerHeight="2dp"
+            android:fastScrollEnabled="true"/>
+
+    </RelativeLayout>
+
+</android.support.v4.widget.DrawerLayout>

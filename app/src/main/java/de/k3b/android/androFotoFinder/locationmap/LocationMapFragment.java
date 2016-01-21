@@ -33,6 +33,7 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -60,6 +61,9 @@ import java.util.Stack;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.locationmap.bookmarks.BookmarkListOverlay;
+import de.k3b.android.androFotoFinder.locationmap.bookmarks.GeoBmpDto;
+import de.k3b.android.androFotoFinder.locationmap.bookmarks.GeoUtil;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
 import de.k3b.android.osmdroid.FolderOverlay;
@@ -81,7 +85,7 @@ import de.k3b.io.IGeoRectangle;
  * A location-area can be picked for filtering.
  * A simple {@link Fragment} subclass.
  */
-public class LocationMapFragment extends DialogFragment {
+public class LocationMapFragment extends DialogFragment implements BookmarkListOverlay.AdditionalPoints {
     protected static final int NO_MARKER_ID = -1;
 
     public String STATE_LAST_VIEWPORT = "LAST_VIEWPORT";
@@ -95,6 +99,9 @@ public class LocationMapFragment extends DialogFragment {
     private SeekBar mZoomBar;
     private ImageView mImage;
     private DefaultResourceProxyImplEx mResourceProxy;
+    private BookmarkListOverlay bookmarkListOverlay;
+    /** first visible window as bookmark candidate */
+    private GeoBmpDto initialWindow = null;
 
     /** temporary 1x1 pix view where popup-menu is attached to */
     private View tempPopupMenuParentView = null;
@@ -299,6 +306,27 @@ public class LocationMapFragment extends DialogFragment {
         });
 
         reloadSelectionMarker();
+
+        this.bookmarkListOverlay = new BookmarkListOverlay(this.getActivity() , this) {
+            @Override
+            protected void onSelChanged(GeoBmpDto newSelection) {
+                super.onSelChanged(newSelection);
+
+                if (newSelection != null) {
+                    BoundingBoxE6 boundingBox = new BoundingBoxE6(
+                            newSelection.getLatitude() * 1E6,
+                            newSelection.getLongitude() * 1E6,
+                            newSelection.getLatitude() * 1E6,
+                            newSelection.getLongitude() * 1E6);
+
+                    zoomToBoundingBox(boundingBox, newSelection.getZoomMin());
+                }
+            }
+        };
+
+
+
+
         return view;
     }
 
@@ -423,6 +451,15 @@ public class LocationMapFragment extends DialogFragment {
                         rectangle.getLogituedMax());
 
                 zoomToBoundingBox(boundingBox, zoomlevel);
+
+                initialWindow = new GeoBmpDto();
+                initialWindow.setLatitude(rectangle.getLatitudeMin() + rectangle.getLatitudeMax() / 2);
+                initialWindow.setLongitude(rectangle.getLogituedMax() + rectangle.getLogituedMin() / 2);
+                initialWindow.setZoomMin(zoomlevel);
+                BitmapDrawable drawable = (BitmapDrawable) getResources().getDrawable(R.drawable.marker_no_data);
+                initialWindow.setBitmap(drawable.getBitmap());
+
+                initialWindow.setName(getString(R.string.bookmark_template_initial)); // + geoPointFromIntent.getName());
             }
         }
 
@@ -921,5 +958,73 @@ public class LocationMapFragment extends DialogFragment {
         }
         return notFoundValue;
     }
+
+    /** implements interface BookmarkListOverlay.AdditionalPoints() */
+    public GeoBmpDto[] getAdditionalPoints() {
+        GeoPoint gps = null; // (this.mLocationOverlay != null) ? this.mLocationOverlay.getMyLocation() : null;
+
+        GeoBmpDto gpsWindow = null;
+        if (gps != null) {
+            gpsWindow = new GeoBmpDto();
+            GeoUtil.createBookmark(gps, IGeoPointInfo.NO_ZOOM, getString(R.string.bookmark_template_gps), gpsWindow);
+            BitmapDrawable drawable = (BitmapDrawable) getResources().getDrawable(R.drawable.person);
+            gpsWindow.setBitmap(drawable.getBitmap());
+
+        }
+        GeoBmpDto currentWindow = getCurrentAsGeoPointDto(getString(R.string.bookmark_template_current));
+        return new GeoBmpDto[]{currentWindow, gpsWindow, initialWindow};
+    }
+
+    private GeoBmpDto getCurrentAsGeoPointDto(String name) {
+        GeoBmpDto current = new GeoBmpDto();
+        GeoUtil.createBookmark(this.mMapView.getMapCenter(), this.mMapView.getZoomLevel(), name, current);
+        current.setBitmap(GeoUtil.createBitmapFromMapView(mMapView, GeoBmpDto.WIDTH, GeoBmpDto.HEIGHT));
+        return current;
+    }
+
+    /*
+    in activity
+    @Override
+    public void onBackPressed() {
+        // back should close the overlay if active
+        if (this.bookmarkListOverlay.isBookmarkListVisible()) {
+            this.bookmarkListOverlay.setBookmarkListVisible(false);
+        } else {
+            // close the activity
+            super.onBackPressed();
+        }
+    }
+
+    / * Called whenever we call invalidateOptionsMenu() * /
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        // If the nav drawer is open, hide action items related to the content view
+        boolean drawerOpen = this.bookmarkListOverlay.isBookmarkListVisible();
+
+        if (cmdShowMenu != null) {
+            cmdShowMenu.setVisibility((drawerOpen) ? View.INVISIBLE : View.VISIBLE );
+        }
+
+        menu.findItem(R.id.cmd_settings).setVisible(!drawerOpen);
+        menu.findItem(R.id.cmd_help).setVisible(!drawerOpen);
+
+        super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    protected Dialog onCreateDialog(final int id) {
+        Dialog result = this.bookmarkListOverlay.onCreateDialog(id);
+        if (result != null) return result;
+
+        switch (id) {
+            case R.id.cmd_help:
+                return AboutDialogPreference.createAboutDialog(this);
+
+        }
+        return null;
+    }
+
+
+    */
 
 }

@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2016 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -18,12 +16,17 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
- -->
-<resources>
-    <color name="blue">#00abea</color>
-    <color name="white">#ffffff</color>
-    <color name="image_label_background">#70ffffff</color>
-    <color name="drag_to">@android:color/black</color>
-    <color name="list_overlay_selected">#FFCCCCCC</color><!-- LTGRAY -->
-    <color name="list_overlay_not_selected">@android:color/transparent</color>
-</resources>
+
+package de.k3b.android.androFotoFinder.locationmap.bookmarks;
+
+
+import android.view.View;
+
+/**
+ * Allows to use findViewById() on  {@link android.app.Dialog}, {@link android.app.Activity} and
+ * {@link android.app.Fragment} with common code
+ * Created by k3b on 26.03.2015.
+ */
+public interface IViewHolder {
+    View findViewById(int id);
+}

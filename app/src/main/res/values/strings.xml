@@ -140,6 +140,18 @@
 	<string name="sort_order_Place_Descending">Place descending</string>
 	<string name="update_result_format">Updated %1$d/%2$d files</string>
 	<string name="zoom_to_fit_menu_title">Zoom to fit</string>
+
+	<!-- #30 Bookmark support for map-areas -->
+	<string name="title_bookmark_list">Bookmarks</string>
+	<string name="title_bookmark_edit">Bookmark</string>
+	<string name="bookmark_template_current">[Current Window] </string>
+	<string name="bookmark_template_initial">[Inital Window] </string>
+	<string name="bookmark_template_gps">"[GPS] "</string>
+	<string name="title_close">Close</string>
+	<string name="btn_save"> Save </string>
+
+
+
 	<string name="about_content_about"><![CDATA["
 <h1>A Photo Manager</h1>with &#39;A Photo Map&#39; in &#39;AndroFotoFinder&#39;
   <br />Features:

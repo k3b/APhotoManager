@@ -1,3 +1,29 @@
+wp*i
+klaus3b
+	
+	referer 
+		headers.put("Referer", referrer);
+		webView.loadUrl(someUrl, headers);
+		
+		
+		// from http://androidyou.blogspot.de/2011/06/how-to-set-android-webview-referrer.html
+		WebView wv;
+
+		@Overrideprotected void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+			setContentView(R.layout.mainbrownser);
+			wv = (WebView) findViewById(R.id.wv);
+			wv.getSettings().setJavaScriptEnabled(true);
+			wv.loadDataWithBaseURL("http://wwwgoogle.com/myreferrer",
+				"<img src='http://images.google.com/intl/en_ALL/images/logos/images_logo_lg.gif?a=1'>",
+				"text/html", "UTF-8","");
+		}
+			
+			
+			
+			
+	#30 Add Bookmark support for folders and map-areas
+
 	# 28 Translation with longer texts may break Layout 
 
 	copy/move/delete log as /path/to/file.* instead of /path/to/file.jpg+/path/to/file.xmp
