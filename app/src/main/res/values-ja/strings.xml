@@ -40,10 +40,10 @@
   <string name="copy_menu_title">コピー</string>
   <string name="copy_result_format">%1$d/%2$d ファイルをコピーしました</string>
   <string name="delete_menu_title">削除</string>
-  <string name="delete_question_message_format">\"これらのファイルを完全に削除してもよろしいですか?
+  <string name="delete_question_message_format">"これらのファイルを完全に削除してもよろしいですか?
 %1$s
 
-この操作を元に戻すことはできません。\"</string>
+この操作を元に戻すことはできません。"</string>
   <string name="delete_question_title">写真を削除しますか?</string>
   <string name="delete_result_format">%1$d/%2$d ファイルを削除しました</string>
   <string name="destination_copy">コピー先</string>
@@ -109,6 +109,8 @@
   <string name="settings_image_initialImageDetailResolutionHigh_summary">高品質の初期写真表示 (低速、より多くのメモリが必要)</string>
   <string name="settings_image_initialImageDetailResolutionHigh_title">初期の写真表示で、品質を向上させます</string>
   <string name="settings_image_slideshow_intervall_title">ミリ秒単位のスライド ショー間隔</string>
+  <string name="settings_locale_title">言語</string>
+  <string name="settings_locale_os_language">(デバイスの言語)</string>
   <string name="settings_log_folder_title">エラーログのフォルダー</string>
   <string name="settings_map_selmarker_max_title">最大。地図に選択マーカー</string>
   <string name="settings_geo_history_max_title">位置情報履歴数の設定</string>
@@ -138,13 +140,21 @@
   <string name="sort_order_Place_Descending">場所の降順</string>
   <string name="update_result_format">%1$d/%2$d ファイルを更新しました</string>
   <string name="zoom_to_fit_menu_title">合わせてズーム</string>
-  <string name="about_content_about">
-<![CDATA["
+  <string name="about_content_about"><![CDATA["
 <h1> Photo Manager </h1>
 と 'AndroFotoFinder' に '写真地図' <br/>
 </p>
 機能:
 <ul>
+  <li>App and internet homepage available in these languages:<ul>
+		<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/de-home">de</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/home"   >en</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/fr-home">fr</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/ja-home">ja</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/ro-home">ro</a></li>
+		<li><a href="https://github.com/k3b/AndroFotoFinder/issues/21">Help us to translate into other languages.</a></li>
+		</ul>
+	</li>
  <li>大きな画像コレクションを処理できます (1000+ フォルダーに 15000+ 画像)</li>
  <li>Android の画像コンテンツ プロバイダーを使用。初期イメージ スキャンの必要はありません。</li>
  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Filter-View"> 画像検索</a> 経由
@@ -173,6 +183,5 @@
  </ul></li>
 </ul>
 <br />
-"]]>
-</string>
+"]]></string>
 </resources>

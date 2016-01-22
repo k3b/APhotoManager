@@ -39,7 +39,10 @@
 	<string name="copy_menu_title">Copy</string>
 	<string name="copy_result_format">Copied %1$d/%2$d files</string>
 	<string name="delete_menu_title">Delete</string>
-	<string name="delete_question_message_format">"Are you sure you want to permanently delete these files?%1$sThis operation cannot be reversed."</string>
+	<string name="delete_question_message_format">"Are you sure you want to permanently delete these files?
+	%1$s
+	
+	This operation cannot be reversed."</string>
 	<string name="delete_question_title">Delete photo(s)?</string>
 	<string name="delete_result_format">Deleted %1$d/%2$d files</string>
 	<string name="destination_copy">Copy destination</string>
@@ -141,6 +144,15 @@
 <h1>A Photo Manager</h1>with &#39;A Photo Map&#39; in &#39;AndroFotoFinder&#39;
   <br />Features:
   <ul>
+  <li>App and internet homepage available in these languages:<ul>
+		<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/de-home">de</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/home"   >en</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/fr-home">fr</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/ja-home">ja</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/ro-home">ro</a></li>
+		<li><a href="https://github.com/k3b/AndroFotoFinder/issues/21">Help us to translate into other languages.</a></li>
+		</ul>
+	</li>
     <li>Can handle big image collections (15000+ images in 1000+ folders)</li>
     <li>Uses Android&#39;s image content provider. No initial image scan necessary.</li>
     <li>

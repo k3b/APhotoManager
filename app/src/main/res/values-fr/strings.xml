@@ -40,7 +40,10 @@
 	<string name="copy_menu_title">Copier</string>
 	<string name="copy_result_format">%1$d/%2$d fichiers copiés</string>
 	<string name="delete_menu_title">Supprimer</string>
-	<string name="delete_question_message_format">« Êtes-vous sûr de que vouloir supprimer définitivement ces fichiers ?%1$s, cette opération n\'est pas réversible\"</string>
+	<string name="delete_question_message_format">"Êtes-vous sûr de que vouloir supprimer définitivement ces fichiers 
+	?%1$s, 
+	
+	cette opération n\'est pas réversible"</string>
 	<string name="delete_question_title">Supprimer les photo(s) ?</string>
 	<string name="delete_result_format">supprimer les fichiers %1$d/%2$d</string>
 	<string name="destination_copy">Destination de la copie</string>
@@ -81,9 +84,7 @@
 	<string name="mk_success_format">%1$s Créé</string>
 	<string name="move_menu_title">Déplacer</string>
 	<string name="move_result_format">%1$d/%2$d fichier(s) déplacé(s)</string>
-	<string name="osm_cright_title">Map Tiles (c) 
-		<a href="http://www.openstreetmap.org/copyright"> OpenStreetMap</a>
-	</string>
+	<string name="osm_cright_title">Map Tiles (c) <a href="http://www.openstreetmap.org/copyright"> OpenStreetMap</a></string>
 	<string name="overwrite_question_title">Ecraser?</string>
 	<string name="rename_menu_title">Renommer</string>
 	<string name="rename_result_format">%1$d/%2$d fichiers renommés</string>
@@ -140,6 +141,15 @@
 	<string name="about_content_about"><![CDATA["<h1>A Photo Manager</h1>with &#39;A Photo Map&#39; sur &#39;AndroFotoFinder&#39;
   <br />Caractéristiques:
   <ul>
+  <li>App and internet homepage available in these languages:<ul>
+		<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/de-home">de</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/home"   >en</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/fr-home">fr</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/ja-home">ja</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/ro-home">ro</a></li>
+		<li><a href="https://github.com/k3b/AndroFotoFinder/issues/21">Help us to translate into other languages.</a></li>
+		</ul>
+	</li>
     <li>Can handle big image collections (15000+ images in 1000+ folders)</li>
     <li>Uses Android&#39;s image content provider. No initial image scan necessary.</li>
     <li>

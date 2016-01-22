@@ -40,7 +40,10 @@
 	<string name="copy_menu_title">Kopieren</string>
 	<string name="copy_result_format">%1$d/%2$d Dateien kopiert</string>
 	<string name="delete_menu_title">Löschen</string>
-	<string name="delete_question_message_format">"Sind Sie sicher, dass Sie diese Dateien dauerhaft löschen möchten?%1$s,Dieser Vorgang kann nicht rückgängig gemacht werden."</string>
+	<string name="delete_question_message_format">"Sind Sie sicher, dass Sie diese Dateien dauerhaft löschen möchten?
+%1$s
+
+Dieser Vorgang kann nicht rückgängig gemacht werden."</string>
 	<string name="delete_question_title">Foto(s) löschen?</string>
 	<string name="delete_result_format">%1$d/%2$d Dateien gelöscht</string>
 	<string name="destination_copy">Kopieren nach</string>
@@ -145,6 +148,15 @@
 mit &#39;A Photo Map&#39; und &#39;AndroFotoFinder&#39;
   <br />Merkmale:
   <ul>
+  <li>App und Internet-Homepage sind in diesen Sprachen verfügbar:<ul>
+		<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/de-home">de</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/home"   >en</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/fr-home">fr</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/ja-home">ja</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/ro-home">ro</a></li>
+		<li><a href="https://github.com/k3b/AndroFotoFinder/issues/21">Help us to translate into other languages.</a></li>
+		</ul>
+	</li>
     <li>verwaltet große Bildersammlungen (15000+ Bilder in 1000+ Ordnern)</li>
     <li>verwendet Androids interne Mediendatenbank. Kein initialer Bild-Scan notwendig.</li>
     <li>
