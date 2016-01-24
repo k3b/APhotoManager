@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 21
-    buildToolsVersion '22.0.1'
+    buildToolsVersion '23.0.2'
     defaultConfig {
         // fdroid-release 'de.k3b.android.androFotoFinder'
         // main-develop-branch 'de.k3b.android.androFotoFinderDev'
@@ -36,7 +36,7 @@ dependencies {
     // for view-pager
     // 21.0.2 seems to have problems with ViewPager
     // compile 'com.android.support:support-v4:21.0.2'
-    compile 'com.android.support:support-v4:22.2.0'
+    compile 'com.android.support:support-v4:23.1.1'
     // compile 'com.android.support:support-v4:21.0.2'
     // compile 'com.android.support:appcompat-v7:21.0.2'
     // exif support
@@ -44,7 +44,8 @@ dependencies {
     compile 'com.drewnoakes:metadata-extractor:2.8.1'
     // this is osmdroid
     // compile project(':osmdroid-android') // local copy
-    compile 'org.osmdroid:osmdroid-android:4.3'
+    // compile 'org.osmdroid:osmdroid-android:4.3'
+    compile 'org.osmdroid:osmdroid-android:5.1@aar'
     // non local copy from repositories
     // compile project(':osmdroid-android')
     //    compile project(':OSMBonusPack')

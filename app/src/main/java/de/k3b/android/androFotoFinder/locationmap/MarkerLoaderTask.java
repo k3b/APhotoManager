@@ -27,6 +27,7 @@ import android.os.AsyncTask;
 import android.os.SystemClock;
 
 import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.overlay.DefaultOverlayManager;
 import org.osmdroid.views.overlay.OverlayManager;
 
 import java.util.HashMap;
@@ -107,7 +108,7 @@ public abstract class MarkerLoaderTask<MARKER extends MarkerBase> extends AsyncT
             if (this.mStatus != null) {
                 this.mStatus.append("'").append(itemCount).append("' rows found for query \n\t").append(queryParameters.toSqlString());
             }
-            OverlayManager result = new OverlayManager(null);
+            OverlayManager result = new DefaultOverlayManager(null);
 
             long startTime = SystemClock.currentThreadTimeMillis();
             int colCount = cursor.getColumnIndex(FotoSql.SQL_COL_COUNT);

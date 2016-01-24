@@ -63,7 +63,7 @@ Dieser Vorgang kann nicht rückgängig gemacht werden."</string>
 	<string name="geo_edit_menu_title">Geo-Info ändern</string>
 	<string name="geo_edit_update_in_progress">Ändere Geo-Infos in ausgewählten Fotos</string>
 	<string name="geo_picker_err_not_found">Keine Geo-Auswahl auf dem Gerät installiert</string>
-	<string name="geo_picker_title">Auswahl: Meuer Ort fürs Foto</string>
+	<string name="geo_picker_title">Auswahl: Neuer Ort fürs Foto</string>
 	<string name="global_err_sql_message_format">Sql-Fehler \'%1$s\' \n\n%2$s</string>
 	<string name="global_err_sql_title_reload">Ungültiges SQL. Verwende statt dessen Default</string>
 	<string name="global_err_system">Systemfehler. Beende App</string>

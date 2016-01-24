@@ -1,5 +1,15 @@
 # A Photo Manager ![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/app/src/main/res/drawable-hdpi/foto_gallery.png), A Photo Map, AndroFotoFinder
 
+App and internet homepage available in these languages:<ul>
+		<li>
+<a href="https://github.com/k3b/AndroFotoFinder/wiki/de-home">de<img alt="Homepage de" src="https://github.com/k3b/AndroFotoFinder/blob/FDroid/wiki/png/lan_de.png"></img></a>,&nbsp;
+<a href="https://github.com/k3b/AndroFotoFinder/wiki/home"   >en<img alt="Homepage en" src="https://github.com/k3b/AndroFotoFinder/blob/FDroid/wiki/png/lan_en.png"></img></a>,&nbsp;
+<a href="https://github.com/k3b/AndroFotoFinder/wiki/fr-home">fr<img alt="Homepage fr" src="https://github.com/k3b/AndroFotoFinder/blob/FDroid/wiki/png/lan_fr.png"></img></a>,&nbsp;
+<a href="https://github.com/k3b/AndroFotoFinder/wiki/ja-home">ja<img alt="Homepage ja" src="https://github.com/k3b/AndroFotoFinder/blob/FDroid/wiki/png/lan_ja.png"></img></a>,&nbsp;
+<a href="https://github.com/k3b/AndroFotoFinder/wiki/ro-home">ro<img alt="Homepage ro" src="https://github.com/k3b/AndroFotoFinder/blob/FDroid/wiki/png/lan_ro.png"></img></a>
+		<li><a href="https://github.com/k3b/AndroFotoFinder/issues/21">Help us to translate into other languages.</a></li>
+		</ul>
+
 * The only enhanced android [Gallery app](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) for local images on [f-droid](https://f-droid.org/)
 * Shows photos in a [geographic map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) from [openstreetmap](http://www.openstreetmap.org)
 * Buildin file manager for photos: find, sort, view, copy, delete, set gps exif data, send, ... .
