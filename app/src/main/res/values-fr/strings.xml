@@ -141,6 +141,15 @@
 	<string name="about_content_about"><![CDATA["<h1>A Photo Manager</h1>with &#39;A Photo Map&#39; sur &#39;AndroFotoFinder&#39;
   <br />Caractéristiques:
   <ul>
+  <li>App and internet homepage available in these languages:<ul>
+		<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/de-home">de</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/home"   >en</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/fr-home">fr</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/ja-home">ja</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/ro-home">ro</a></li>
+		<li><a href="https://github.com/k3b/AndroFotoFinder/issues/21">Help us to translate into other languages.</a></li>
+		</ul>
+	</li>
     <li>Can handle big image collections (15000+ images in 1000+ folders)</li>
     <li>Uses Android&#39;s image content provider. No initial image scan necessary.</li>
     <li>

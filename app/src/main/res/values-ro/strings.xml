@@ -96,6 +96,15 @@ https://github.com/k3b/AndroFotoFinder/wiki/intentap#sql</string>
 &#39;Cautatorul Foto Android&#39;</h1>
 <br/>Caracteristici:
 <ul>
+  <li>App and internet homepage available in these languages:<ul>
+		<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/de-home">de</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/home"   >en</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/fr-home">fr</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/ja-home">ja</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/ro-home">ro</a></li>
+		<li><a href="https://github.com/k3b/AndroFotoFinder/issues/21">Help us to translate into other languages.</a></li>
+		</ul>
+	</li>
   <li>Poti manevra colectii mari de imagini (15000+ imagini in 1000+ fisiere)</li>
   <li>Utilizeaza&#39;furnizorul de continut imagini Android.Nu este necesara o scanare initiala.
 </li>

@@ -146,6 +146,15 @@
 </p>
 機能:
 <ul>
+  <li>App and internet homepage available in these languages:<ul>
+		<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/de-home">de</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/home"   >en</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/fr-home">fr</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/ja-home">ja</a>,&nbsp;
+		<a href="https://github.com/k3b/AndroFotoFinder/wiki/ro-home">ro</a></li>
+		<li><a href="https://github.com/k3b/AndroFotoFinder/issues/21">Help us to translate into other languages.</a></li>
+		</ul>
+	</li>
  <li>大きな画像コレクションを処理できます (1000+ フォルダーに 15000+ 画像)</li>
  <li>Android の画像コンテンツ プロバイダーを使用。初期イメージ スキャンの必要はありません。</li>
  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Filter-View"> 画像検索</a> 経由
