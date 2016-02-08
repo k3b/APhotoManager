@@ -1,12 +1,12 @@
 Other Android apps can use parts of "a Photo Manager" throught the "Intent api".
 
-* open/view/send/sendto an image (jpg/png/gif) from a **android filemanager** will open the [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View)
+* open/view/send/sendto an image (jpg/png/gif) from a **android filemanager** will open the [Image-View](https://github.com/k3b/APhotoManager/wiki/Image-View)
   * if mimeType="image/*" and uri starts with "file:/"
-* send/sendto an image (jpg/png/gif) from **android gallery** will open the [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View)
+* send/sendto an image (jpg/png/gif) from **android gallery** will open the [Image-View](https://github.com/k3b/APhotoManager/wiki/Image-View)
   * if mimeType="image/*" and uri starts with "content:/external/images/media/"
-* view/send/sendto a geo-position in a [Geographic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map)
+* view/send/sendto a geo-position in a [Geographic-Map](https://github.com/k3b/APhotoManager/wiki/geographic-map)
   * if uri starts with "geo:"
-* **pick a geo-position** from a [Geographic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) or from a photo that contain geo information
+* **pick a geo-position** from a [Geographic-Map](https://github.com/k3b/APhotoManager/wiki/geographic-map) or from a photo that contain geo information
   * if input-intent-uri starts with "geo:"
   * returns null (cancel) or intent with geo-uri for the selected posion in the callers onActivityResult()
 
@@ -15,18 +15,18 @@ Other Android apps can use parts of "a Photo Manager" throught the "Intent api".
 "a Photo Manager" supports these uri formats for data={xxx} or extra[android.intent.extra.STREAM]={xxx}
 
 * file:{/path/path/.../file.ext}
-  * opens in [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) if mime="image/*" for action=VIEW/SEND/SENDTO
+  * opens in [Image-View](https://github.com/k3b/APhotoManager/wiki/Image-View) if mime="image/*" for action=VIEW/SEND/SENDTO
   * examle file:/storage/sdcard0/copy/hello.jpg
 * file:{xxx}
-  * opens [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) with pathfilter={xxx} if mime="image/*" for action=VIEW/SEND/SENDTO if xxx is not an image file
+  * opens [Gallery-View](https://github.com/k3b/APhotoManager/wiki/Gallery-View) with pathfilter={xxx} if mime="image/*" for action=VIEW/SEND/SENDTO if xxx is not an image file
   * example file:*kreta*
-	* opens [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) showing all files that contain "kreta" in its full path
+	* opens [Gallery-View](https://github.com/k3b/APhotoManager/wiki/Gallery-View) showing all files that contain "kreta" in its full path
 * content:/external/images/media/{id}
-  * opens image belonging to {id} in [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) for action=VIEW/SEND/SENDTO/SEND_MULTIPLE
+  * opens image belonging to {id} in [Image-View](https://github.com/k3b/APhotoManager/wiki/Image-View) for action=VIEW/SEND/SENDTO/SEND_MULTIPLE
   * example content:/external/images/media/52173
 	* opens image #52173. If there is no extra[de.k3b.extra.FILTER] swiping left/right will browse to images in the same (sub-)folder as #52173
 * <a name='uri-geo'>geo:{latitude},{longitude}?z={zoomlevel}</a>
-  * opens [Geographic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) at {latitude} {longitude} {zoomlevel}
+  * opens [Geographic-Map](https://github.com/k3b/APhotoManager/wiki/geographic-map) at {latitude} {longitude} {zoomlevel}
   * example geo:53.036258,8.721771?z=11
   * example geo:53,8.7
   * zoomlevel 1..14 is optional. z=3 continent; z=11 streetlevel
@@ -43,7 +43,7 @@ Other Android apps can use parts of "a Photo Manager" throught the "Intent api".
 
 * purpose define which items should be visible
 	* see [Gallery Navigation](Gallery-View#Navigation) for details.
-* the content is the same as in [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)
+* the content is the same as in [Filter-View](https://github.com/k3b/APhotoManager/wiki/Filter-View)
 * format {latitude min},{longitude min};{latitude max},{longitude max};{date min},{date max};{path} 
 * format noGeoInfo;;{date min},{date max};{path} 
 * example 1.23,2.34;3.45,4.56;2001-02-03,2005-12-31;/some/path/
@@ -55,20 +55,20 @@ Other Android apps can use parts of "a Photo Manager" throught the "Intent api".
 
 * purpose define current sql that defines which photos are affected.
 	* used when opening a sub-[gallery view](Gallery-View)
-	* used when opening a [Geographic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) 
-	* used when navigating to [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) so that the image view show the same images and in the same order as the originating Gallery-View
-* format: the same as [Internal sql format of .query files](intentapi#sql) generated in the [bookmark menues](Bookmarks) of [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View).
+	* used when opening a [Geographic-Map](https://github.com/k3b/APhotoManager/wiki/geographic-map) 
+	* used when navigating to [Image-View](https://github.com/k3b/APhotoManager/wiki/Image-View) so that the image view show the same images and in the same order as the originating Gallery-View
+* format: the same as [Internal sql format of .query files](intentapi#sql) generated in the [bookmark menues](Bookmarks) of [Filter-View](https://github.com/k3b/APhotoManager/wiki/Filter-View).
 * technically this defines a complete sql including sql-where, ordering and colums formulas. 
 	
 ### <a name='OFFSET'>OFFSET</a>
 
-* de.k3b.extra.OFFSET offset in sql that should be initally visible in [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View).
+* de.k3b.extra.OFFSET offset in sql that should be initally visible in [Image-View](https://github.com/k3b/APhotoManager/wiki/Image-View).
 	* Example: OFFSET=5 in the gallery view will open the 5th image in the [sql-query](intentapi#EXTRA_SQL)
 
 ### <a name='SelectedItems'>de.k3b.extra.SELECTED_ITEMS string</a>
 
 * purpose define which items are currently selcted if [gallery is in multi selection mode](Gallery-View#Multiselection)
-* used in [Geographic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map) to define the "blue selection marker"
+* used in [Geographic-Map](https://github.com/k3b/APhotoManager/wiki/geographic-map) to define the "blue selection marker"
 * format {id},{id},{id},{id},{id},...
 
 ## <a name='sql'>internal sql format of .query files (since version 0.4.2)</a>
@@ -77,7 +77,7 @@ Other Android apps can use parts of "a Photo Manager" throught the "Intent api".
 	* Note: You can change this folder through **Report Folder** in the [Settings View](settings).
 * created in [Filter-View](Filter-View) via menu "Save [bookmark](Bookmarks) as ..."
 * loaded into [Filter-View](Filter-View) via menu "Load [bookmark](Bookmarks) from ..."
-* loaded into [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) via menu "Load [bookmark](Bookmarks) from ..."
+* loaded into [Gallery-View](https://github.com/k3b/APhotoManager/wiki/Gallery-View) via menu "Load [bookmark](Bookmarks) from ..."
 
 ".query files" can be used to create summery queries with count, group by, having....
 
@@ -110,7 +110,7 @@ Purpose: show only images that contain "kreta" in the full file path
 			%kreta%
 </pre>
 
-This is the same as setting "Path" in [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)
+This is the same as setting "Path" in [Filter-View](https://github.com/k3b/APhotoManager/wiki/Filter-View)
 
 The above query is the same as 
 
@@ -171,7 +171,7 @@ WHERE
 		%kreta%
 </pre>
 
-This is the same as setting all fields in [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)
+This is the same as setting all fields in [Filter-View](https://github.com/k3b/APhotoManager/wiki/Filter-View)
 
 Note: column "datetaken" value can be millisecs since 1970 or iso-date in format yyyy-mm-dd
 
@@ -193,7 +193,7 @@ Where
   ((1.0*width/height &lt; 0.3) or (1.0*width/height &gt; 3))
 </pre>
  
-This cannot be done in the [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)
+This cannot be done in the [Filter-View](https://github.com/k3b/APhotoManager/wiki/Filter-View)
 
 #### advanced complex grouping-drill-down-query 
 
@@ -228,5 +228,5 @@ ORDER-BY
     Substr(_data,1, length(_data) - length(_display_Name))
 </pre>
 	
-note: you have to load this from the [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) to make it work.
+note: you have to load this from the [Gallery-View](https://github.com/k3b/APhotoManager/wiki/Gallery-View) to make it work.
 

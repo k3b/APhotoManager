@@ -21,14 +21,14 @@
  */
  -->
 <resources>
-	<string name="about_summary">Über a Photo Manager%1$s</string>
+	<string name="about_summary">Über \'A Photo Manager%1$s\'</string>
 	<string name="area_menu_title">Auswahl: Kartenausschnitt</string>
 	<string name="background">Hintergrund</string>
 	<string name="bookmark_delete_answer_format">Lesezeichen %1$s gelöscht.</string>
 	<string name="bookmark_delete_error_format">Kann Lesezeichen %1$s nicht löschen.</string>
 	<string name="bookmark_delete_question">Lesezeichen löschen?</string>
 	<string name="bookmark_err_not_found_format">Keine Lesezeichen in %1$s.</string>
-	<string name="bookmark_file_comment_format">Erstellt am %3$s mit \'%1$s\' Version %2$s. weitere Informationen finden Sie unter https://github.com/k3b/AndroFotoFinder/wiki/intentap#sql</string>
+	<string name="bookmark_file_comment_format">Erstellt am %3$s mit \'%1$s\' Version %2$s. weitere Informationen finden Sie unter https://github.com/k3b/APhotoManager/wiki/intentap#sql</string>
 	<string name="bookmark_load_from_menu_title">Lade Lesezeichen aus&#8230;</string>
 	<string name="bookmark_save_as_menu_title">Lesezeichen speichern unter...</string>
 	<string name="btn_no">Nein</string>
@@ -145,40 +145,40 @@ Dieser Vorgang kann nicht rückgängig gemacht werden."</string>
 	<string name="zoom_to_fit_menu_title">Zoom ausfüllen</string>
 	<string name="about_content_about"><![CDATA["
 <h1>A Photo Manager</h1>
-mit &#39;A Photo Map&#39; und &#39;AndroFotoFinder&#39;
+mit &#39;A Photo Map&#39; und &#39;APhotoManager&#39;
   <br />Merkmale:
   <ul>
   <li>App und Internet-Homepage sind in diesen Sprachen verfügbar:<ul>
-		<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/de-home">de</a>,&nbsp;
-		<a href="https://github.com/k3b/AndroFotoFinder/wiki/home"   >en</a>,&nbsp;
-		<a href="https://github.com/k3b/AndroFotoFinder/wiki/fr-home">fr</a>,&nbsp;
-		<a href="https://github.com/k3b/AndroFotoFinder/wiki/ja-home">ja</a>,&nbsp;
-		<a href="https://github.com/k3b/AndroFotoFinder/wiki/ro-home">ro</a></li>
-		<li><a href="https://github.com/k3b/AndroFotoFinder/issues/21">Help us to translate into other languages.</a></li>
+		<li><a href="https://github.com/k3b/APhotoManager/wiki/de-home">de</a>,&nbsp;
+		<a href="https://github.com/k3b/APhotoManager/wiki/home"   >en</a>,&nbsp;
+		<a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr</a>,&nbsp;
+		<a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja</a>,&nbsp;
+		<a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro</a></li>
+		<li><a href="https://github.com/k3b/APhotoManager/issues/21">Help us to translate into other languages.</a></li>
 		</ul>
 	</li>
     <li>verwaltet große Bildersammlungen (15000+ Bilder in 1000+ Ordnern)</li>
     <li>verwendet Androids interne Mediendatenbank. Kein initialer Bild-Scan notwendig.</li>
     <li>
-    <a href="https://github.com/k3b/AndroFotoFinder/wiki/Filter-View">Bilder finden</a>, per
+    <a href="https://github.com/k3b/APhotoManager/wiki/Filter-View">Bilder finden</a>, per
       <ul>
         <li>Ordner (mit hirachischer
-        <a href="https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker">Ordnerauswahl</a>)</li>
+        <a href="https://github.com/k3b/APhotoManager/wiki/Folder-Picker">Ordnerauswahl</a>)</li>
         <li>Ordner/Dateinamen mit Platzhaltern</li>
         <li>Datum</li>
         <li>Gebiet auf einer
-        <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">Landkarte</a> (für Bilder mit Gps-Exif-Infos)</li>
+        <a href="https://github.com/k3b/APhotoManager/wiki/geographic-map">Landkarte</a> (für Bilder mit Gps-Exif-Infos)</li>
       </ul>
     </li>
     <li>Ergebnisanzeige in
-    <a href="https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View">Galerie-Ansicht</a>
+    <a href="https://github.com/k3b/APhotoManager/wiki/Gallery-View">Galerie-Ansicht</a>
       <ul>
         <li>Unterstützung für Mehrfach-Auswahl</li>
         <li>Dateiverarbeitung zum Kopieren, Verschieben, Löschen, Senden, Exif-Geo Ändern</li>
       </ul>
     </li>
     <li>
-    <a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View">Foto-Ansicht</a> mit
+    <a href="https://github.com/k3b/APhotoManager/wiki/Image-View">Foto-Ansicht</a> mit
       <ul>
         <li>stufenloser Vergrößerung (Zoom)</li>
         <li>links/rechts wischen für nächstes/vorheriges Bild</li>
@@ -187,7 +187,7 @@ mit &#39;A Photo Map&#39; und &#39;AndroFotoFinder&#39;
       </ul>
     </li>
     <li>Die
-    <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geografische Karte</a> zeigt Marker an den Orten, an denen
+    <a href="https://github.com/k3b/APhotoManager/wiki/geographic-map">geografische Karte</a> zeigt Marker an den Orten, an denen
     Fotos aufgenommen wurden</li>
     <li>Alle Dateioperationen
       <ul>

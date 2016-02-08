@@ -31,6 +31,6 @@ You can reach the [Image-View](Image-View) via
 * data=file:{/path/path/.../file.ext} or extra[android.intent.extra.STREAM]=file:{/path/path/.../file.ext}
   * example file:/storage/sdcard0/copy/hello.jpg
 * data=content:/external/images/media/{id} or extra[android.intent.extra.STREAM]=content:/external/images/media/{id}
-  * opens image belonging to {id} in [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View) 
+  * opens image belonging to {id} in [Image-View](https://github.com/k3b/APhotoManager/wiki/Image-View) 
   * example content:/external/images/media/52173
 	* opens image with id=52173

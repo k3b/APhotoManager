@@ -1,37 +1,37 @@
 [table-of-content](table-of-content)
 
 <ul>
-	<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">Geographic-Map</a></li>
-	<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Filter-View">Filter-View</a></li>
-	<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View">Gallery-View</a></li>
-	<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker">Folder-Picker</a></li>
-	<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View">Image-View</a></li>
-	<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/intentapi">Intent API</a></li>
-	<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/History">History</a></li>
+	<li><a href="https://github.com/k3b/APhotoManager/wiki/geographic-map">Geographic-Map</a></li>
+	<li><a href="https://github.com/k3b/APhotoManager/wiki/Filter-View">Filter-View</a></li>
+	<li><a href="https://github.com/k3b/APhotoManager/wiki/Gallery-View">Gallery-View</a></li>
+	<li><a href="https://github.com/k3b/APhotoManager/wiki/Folder-Picker">Folder-Picker</a></li>
+	<li><a href="https://github.com/k3b/APhotoManager/wiki/Image-View">Image-View</a></li>
+	<li><a href="https://github.com/k3b/APhotoManager/wiki/intentapi">Intent API</a></li>
+	<li><a href="https://github.com/k3b/APhotoManager/wiki/History">History</a></li>
 </ul>
 
-![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_unchecked.png)
-![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_cancel.png)
-![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_checked.png) 
-![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_filter.png)
-![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_folder.png)
-![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_map.png)
-![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/s_share.png)
+![](https://raw.githubusercontent.com/k3b/APhotoManager/master/wiki/png/s_unchecked.png)
+![](https://raw.githubusercontent.com/k3b/APhotoManager/master/wiki/png/s_cancel.png)
+![](https://raw.githubusercontent.com/k3b/APhotoManager/master/wiki/png/s_checked.png) 
+![](https://raw.githubusercontent.com/k3b/APhotoManager/master/wiki/png/s_filter.png)
+![](https://raw.githubusercontent.com/k3b/APhotoManager/master/wiki/png/s_folder.png)
+![](https://raw.githubusercontent.com/k3b/APhotoManager/master/wiki/png/s_map.png)
+![](https://raw.githubusercontent.com/k3b/APhotoManager/master/wiki/png/s_share.png)
 
-![](https://raw.githubusercontent.com/k3b/AndroFotoFinder/master/wiki/png/Gallery.png)
+![](https://raw.githubusercontent.com/k3b/APhotoManager/master/wiki/png/Gallery.png)
 
 
-* [Features](https://github.com/k3b/AndroFotoFinder/wiki/features)
-* [Geographic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map)
-	* ["geo:" picker](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map#picker)
-* [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View)
+* [Features](https://github.com/k3b/APhotoManager/wiki/features)
+* [Geographic-Map](https://github.com/k3b/APhotoManager/wiki/geographic-map)
+	* ["geo:" picker](https://github.com/k3b/APhotoManager/wiki/geographic-map#picker)
+* [Gallery-View](https://github.com/k3b/APhotoManager/wiki/Gallery-View)
 	* [multi selection mode](Gallery-View#Multiselection)
 	* [Gallery Navigation](Gallery-View#Navigation)
 	* [Current Visible Photos](Gallery-View#CurrentSet)
-* [Image-View](https://github.com/k3b/AndroFotoFinder/wiki/Image-View)
+* [Image-View](https://github.com/k3b/APhotoManager/wiki/Image-View)
 	* [Image-View Intent-API](Image-View#api)
-* [Folder-Picker](https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker)
-* [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi)
+* [Folder-Picker](https://github.com/k3b/APhotoManager/wiki/Folder-Picker)
+* [Intent API](https://github.com/k3b/APhotoManager/wiki/intentapi)
 	* [Uri formats](intentapi#uri)
 		* [geo: uri format](intentapi#uri-geo)
 	* [android.intent.extra.TITLE string](intentapi#EXTRA_TITLE)
@@ -41,6 +41,6 @@
 	* [de.k3b.extra.SELECTED_ITEMS string](intentapi#SelectedItems)
 	* [Internal sql format of .query files](intentapi#sql)
 	
-* [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)
+* [Filter-View](https://github.com/k3b/APhotoManager/wiki/Filter-View)
 * [Bookmarks](Bookmarks)
-* [Settings](https://github.com/k3b/AndroFotoFinder/wiki/settings)
+* [Settings](https://github.com/k3b/APhotoManager/wiki/settings)

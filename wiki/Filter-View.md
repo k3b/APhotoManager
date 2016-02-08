@@ -3,7 +3,7 @@ The [Filter-View](Filter-View) is used to find a set of photos by search criteri
 You can reach the [Filter-View](Filter-View) via
 
 * tapping the filter symbol or filter menu in the [Gallery-View](Gallery-View)
-* tapping the filter symbol or filter menu in the [Geographic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map)
+* tapping the filter symbol or filter menu in the [Geographic-Map](https://github.com/k3b/APhotoManager/wiki/geographic-map)
 
 ## You can search by zero, one ore more criteria:
 
@@ -32,7 +32,7 @@ You can reach the [Filter-View](Filter-View) via
 * The "Cancel" button or the back button closes the picker without affecting [Gallery-View](Gallery-View).
 * The "Clear Filter" sets all filter fields to empty which means "no filter".
 
-Each field in the [Filter-View](Filter-View) corresponds to a field of [EXTRA de.k3b.extra.FILTER](intentapi#filter) of the [Intent API](https://github.com/k3b/AndroFotoFinder/wiki/intentapi).
+Each field in the [Filter-View](Filter-View) corresponds to a field of [EXTRA de.k3b.extra.FILTER](intentapi#filter) of the [Intent API](https://github.com/k3b/APhotoManager/wiki/intentapi).
 
 Menu commands
 

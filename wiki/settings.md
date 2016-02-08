@@ -2,9 +2,9 @@ The [Settings View](settings) (since v0.4.3) is used to configure the behaviour 
 
 You can reach the [Settings View](settings) via the **settings** menu of 
 
-* [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View)
-* [Geographic-Map](https://github.com/k3b/AndroFotoFinder/wiki/geographic-map)
-* [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)
+* [Gallery-View](https://github.com/k3b/APhotoManager/wiki/Gallery-View)
+* [Geographic-Map](https://github.com/k3b/APhotoManager/wiki/geographic-map)
+* [Filter-View](https://github.com/k3b/APhotoManager/wiki/Filter-View)
 
 "a Photo Manager" has these settings
 

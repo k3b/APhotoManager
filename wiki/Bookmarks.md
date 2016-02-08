@@ -6,4 +6,4 @@
 	* Note: You can change this folder through **Report Folder** in the [Settings View](settings).
 * are created in [Filter-View](Filter-View) via menu "Save bookmark as ..."
 * are loaded into [Filter-View](Filter-View) via menu "Load bookmark from ..."
-* are loaded into [Gallery-View](https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View) via menu "Load bookmark from ..."
+* are loaded into [Gallery-View](https://github.com/k3b/APhotoManager/wiki/Gallery-View) via menu "Load bookmark from ..."

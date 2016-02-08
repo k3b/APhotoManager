@@ -21,14 +21,14 @@
  */
  -->
 <resources>
-	<string name="about_summary">A propos de Photo Manager%1$s</string>
+	<string name="about_summary">A propos \'A Photo Manager%1$s\'</string>
 	<string name="area_menu_title">Sélectionnez une zone sur la carte</string>
 	<string name="background">Arrière plan</string>
 	<string name="bookmark_delete_answer_format">Supprimer le signet %1$s.</string>
 	<string name="bookmark_delete_error_format">Impossible de supprimer le signet %1$s.</string>
 	<string name="bookmark_delete_question">Supprimer ce signet ?</string>
 	<string name="bookmark_err_not_found_format">Pas de requêtes trouvés dans %1$s.</string>
-	<string name="bookmark_file_comment_format">Générer sur %3$s avec \'%1$s\' Version %2$s. Allez sur https://github.com/k3b/AndroFotoFinder/wiki/intentap#sql pour plus de détails</string>
+	<string name="bookmark_file_comment_format">Générer sur %3$s avec \'%1$s\' Version %2$s. Allez sur https://github.com/k3b/APhotoManager/wiki/intentap#sql pour plus de détails</string>
 	<string name="bookmark_load_from_menu_title">Charger le Signet de &#8230;</string>
 	<string name="bookmark_save_as_menu_title">Enregistrer le signet sous &#8230;</string>
 	<string name="btn_cancel">Annuler</string>
@@ -138,55 +138,51 @@
 	<string name="sort_order_Place_Descending">Emplacement décroissant</string>
 	<string name="update_result_format">mise à jour des fichiers %1$d/%2$d</string>
 	<string name="zoom_to_fit_menu_title">Ajuster le zoom</string>
-	<string name="about_content_about"><![CDATA["<h1>A Photo Manager</h1>with &#39;A Photo Map&#39; sur &#39;AndroFotoFinder&#39;
+	<string name="about_content_about"><![CDATA["<h1>A Photo Manager</h1>avec &#39;A Photo Map&#39; sur &#39;APhotoManager&#39;
+
+App et page d'accueil Internet disponibles dans ces langues: <ul>
+		<li>
+<a href="https://github.com/k3b/APhotoManager/wiki/de-home">de<img alt="Homepage de" src="https://github.com/k3b/APhotoManager/blob/FDroid/wiki/png/lan_de.png"></img></a>,&nbsp;
+<a href="https://github.com/k3b/APhotoManager/wiki/home"   >en<img alt="Homepage en" src="https://github.com/k3b/APhotoManager/blob/FDroid/wiki/png/lan_en.png"></img></a>,&nbsp;
+<a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr<img alt="Homepage fr" src="https://github.com/k3b/APhotoManager/blob/FDroid/wiki/png/lan_fr.png"></img></a>,&nbsp;
+<a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja<img alt="Homepage ja" src="https://github.com/k3b/APhotoManager/blob/FDroid/wiki/png/lan_ja.png"></img></a>,&nbsp;
+<a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro<img alt="Homepage ro" src="https://github.com/k3b/APhotoManager/blob/FDroid/wiki/png/lan_ro.png"></img></a>
+		<li><a href="https://github.com/k3b/APhotoManager/issues/21">Aidez-nous à traduire dans d'autres langues.</a></li>
+		</ul>
+
+---
+
   <br />Caractéristiques:
   <ul>
-  <li>App and internet homepage available in these languages:<ul>
-		<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/de-home">de</a>,&nbsp;
-		<a href="https://github.com/k3b/AndroFotoFinder/wiki/home"   >en</a>,&nbsp;
-		<a href="https://github.com/k3b/AndroFotoFinder/wiki/fr-home">fr</a>,&nbsp;
-		<a href="https://github.com/k3b/AndroFotoFinder/wiki/ja-home">ja</a>,&nbsp;
-		<a href="https://github.com/k3b/AndroFotoFinder/wiki/ro-home">ro</a></li>
-		<li><a href="https://github.com/k3b/AndroFotoFinder/issues/21">Help us to translate into other languages.</a></li>
-		</ul>
-	</li>
-    <li>Can handle big image collections (15000+ images in 1000+ folders)</li>
-    <li>Uses Android&#39;s image content provider. No initial image scan necessary.</li>
+    <li> Peut gérer de grandes collections d'images (15000+ images dans plus de 1000 dossiers) </li>
+    <li> Utilise contenu de l'image de fournisseur d'Android. Pas de scan de l'image initiale nécessaire. </li>
     <li>
-    <a href="https://github.com/k3b/AndroFotoFinder/wiki/Filter-View">Find images</a> via
+    <a href="https://github.com/k3b/APhotoManager/wiki/Filter-View">Trouver des images</a> via
       <ul>
-        <li>folder (with hierarchical
-        <a href="https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker">Folder Picker</a>)</li>
-        <li>wildcards that match folder/filename</li>
-        <li>date</li>
-        <li>area in
-        <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geographic map</a> (if image has GPS Exif info)</li>
+        <li> dossier (avec hiérarchique
+        <a href="https://github.com/k3b/APhotoManager/wiki/Folder-Picker"> dossier Picker </a>) </li>
+        <li> jokers qui correspondent dossier / nom de fichier </li>
+        <li> Date </li>
+        <li> zone
+        <a href="https://github.com/k3b/APhotoManager/wiki/geographic-map"> carte géographique </a> (si l'image a des infos Exif GPS) </li>	  
       </ul>
     </li>
-    <li>Show result in a scrollable
-    <a href="https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View">gallery view</a> with
+    <li> Afficher le résultat dans un défilement 
+    <a href="https://github.com/k3b/APhotoManager/wiki/Image-View"> Photo-détail-vue </a> avec
       <ul>
-        <li>Support de la sélection multiple des photos</li>
-        <li>Manipulation de fichier: copie, déplacement, suppression, partage</li>
+        <li> glisser pour aller à l'image suivante / précédente </li>
+        <li> les opérations de fichiers copier, déplacer, supprimer, renommer, partagez </li>
       </ul>
     </li>
-    <li>
-    <a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View">Photo-detail-view</a> avec
+    <li> Le
+    <a href="https://github.com/k3b/APhotoManager/wiki/geographic-map"> carte géographique </a> montre marqueurs à des endroits où les photos
+    ont été prises </li>
+    <li> Opérations sur les fichiers
       <ul>
-        <li>Zoom dans l&#39;image</li>
-        <li>swipe to go to next/previous image</li>
-        <li>Visualisation des informations avancées des images (Exif, IPTC, XMP, ICC)</li>
-        <li>file operations copy, move, delete, rename, share</li>
-      </ul>
-    </li>
-    <li>The
-    <a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">geographic map</a> shows markers at places where photos
-    were taken</li>
-    <li>File operations
-      <ul>
-        <li>will also update Android&#39;s image content provider database</li>
-        <li>update xmp-sidecar files</li>
+        <li> va également mettre à jour la base de données image de fournisseur de contenu d'Android </li>
         <li>Préserve la date des fichiers si la version installée d&#39;Android le permet.</li>
+        <li> va également mettre à jour la base de données image de fournisseur de contenu d'Android </li>
+        <li> les fichiers XMP sidecar-mise à jour </li> 		
       </ul>
     </li>
   </ul>
