@@ -14,7 +14,6 @@ App and internet homepage available in these languages:<ul>
 * Shows photos in a [geographic map](https://github.com/k3b/APhotoManager/wiki/geographic-map) from [openstreetmap](http://www.openstreetmap.org)
 * Buildin file manager for photos: find, sort, view, copy, delete, set gps exif data, send, ... .
 * Fast find local photos by (sub-)folder, date and/or geographic map.
-* [Translations](https://crowdin.com/project/AndroFotoFinder): English, German
 
 [... features more detailed](https://github.com/k3b/APhotoManager/wiki/features)
 
@@ -23,7 +22,8 @@ App and internet homepage available in these languages:<ul>
 ## Current Project Status
 Latest stable release: v0.4.3 (branch FDroid)
 
-* available via [f-droid.org installer](https://f-droid.org/) or [apk internet download](https://f-droid.org/repository/browse/?fdid=de.k3b.android.APhotoManager) or [sourcecode at github](https://github.com/k3b/APhotoManager/tree/FDroid)
+* available via [f-droid.org installer](https://f-droid.org/) or [apk internet download](https://f-droid.org/repository/browse/?fdid=de.k3b.android.androFotoFinder) or [sourcecode at github](https://github.com/k3b/APhotoManager/tree/FDroid)
+	* **not** available via http://play.google.com/ or http://www.appbrain.com
 * Recent changes see [History](https://github.com/k3b/APhotoManager/wiki/History)
 * License under GPLv3 or later.
 
