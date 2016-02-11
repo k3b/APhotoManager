@@ -307,17 +307,17 @@ public class LocationMapFragment extends DialogFragment implements BookmarkListO
 
         reloadSelectionMarker();
 
-        this.bookmarkListOverlay = new BookmarkListOverlay(this.getActivity() , this) {
+        this.bookmarkListOverlay = new BookmarkListOverlay(this.getActivity(), view , this) {
             @Override
             protected void onSelChanged(GeoBmpDto newSelection) {
                 super.onSelChanged(newSelection);
 
                 if (newSelection != null) {
                     BoundingBoxE6 boundingBox = new BoundingBoxE6(
-                            newSelection.getLatitude() * 1E6,
-                            newSelection.getLongitude() * 1E6,
-                            newSelection.getLatitude() * 1E6,
-                            newSelection.getLongitude() * 1E6);
+                            newSelection.getLatitude(),
+                            newSelection.getLongitude(),
+                            newSelection.getLatitude(),
+                            newSelection.getLongitude());
 
                     zoomToBoundingBox(boundingBox, newSelection.getZoomMin());
                 }
@@ -442,7 +442,8 @@ public class LocationMapFragment extends DialogFragment implements BookmarkListO
             reloadSelectionMarker();
         }
 
-        if (rectangle != null) {
+        // works only if fragment is attached
+        if ((rectangle != null) && (getActivity()!= null)) {
             if (!Double.isNaN(rectangle.getLatitudeMin())) {
                 BoundingBoxE6 boundingBox = new BoundingBoxE6(
                         rectangle.getLatitudeMax(),
@@ -961,7 +962,8 @@ public class LocationMapFragment extends DialogFragment implements BookmarkListO
 
     /** implements interface BookmarkListOverlay.AdditionalPoints() */
     public GeoBmpDto[] getAdditionalPoints() {
-        GeoPoint gps = null; // (this.mLocationOverlay != null) ? this.mLocationOverlay.getMyLocation() : null;
+        /*
+        GeoPoint gps = (this.mLocationOverlay != null) ? this.mLocationOverlay.getMyLocation() : null;
 
         GeoBmpDto gpsWindow = null;
         if (gps != null) {
@@ -971,8 +973,11 @@ public class LocationMapFragment extends DialogFragment implements BookmarkListO
             gpsWindow.setBitmap(drawable.getBitmap());
 
         }
+        */
+
         GeoBmpDto currentWindow = getCurrentAsGeoPointDto(getString(R.string.bookmark_template_current));
-        return new GeoBmpDto[]{currentWindow, gpsWindow, initialWindow};
+        // return new GeoBmpDto[]{currentWindow, gpsWindow, initialWindow};
+        return new GeoBmpDto[]{currentWindow, initialWindow};
     }
 
     private GeoBmpDto getCurrentAsGeoPointDto(String name) {

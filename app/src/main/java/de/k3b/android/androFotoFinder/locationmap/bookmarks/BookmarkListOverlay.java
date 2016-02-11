@@ -65,9 +65,9 @@ public class BookmarkListOverlay implements IGeoInfoHandler {
     private GeoBmpEditDialog edit = null;
     public CharSequence oldTitle = null;
 
-    public BookmarkListOverlay(Activity context, AdditionalPoints additionalPointProvider) {
+    public BookmarkListOverlay(Activity context, View view, AdditionalPoints additionalPointProvider) {
         this.additionalPointProvider = additionalPointProvider;
-        bookMarkController = new BookmarkListController(context, (ListView) context.findViewById(android.R.id.list));
+        bookMarkController = new BookmarkListController(context, (ListView) view.findViewById(android.R.id.list));
         bookMarkController.setSelChangedListener(new BookmarkListController.OnSelChangedListener() {
             @Override
             public void onSelChanged(GeoBmpDto newSelection) {
@@ -76,7 +76,7 @@ public class BookmarkListOverlay implements IGeoInfoHandler {
         });
 
         this.context = context;
-        createButtons();
+        createButtons(view);
     }
 
     protected void onSelChanged(GeoBmpDto newSelection) {
@@ -85,10 +85,10 @@ public class BookmarkListOverlay implements IGeoInfoHandler {
         cmdDelete.setEnabled(sel && BookmarkUtil.isBookmark(newSelection));
     }
 
-    private void createButtons() {
-        mDrawerLayout = (DrawerLayout) context.findViewById(R.id.drawer_layout);
-        fragmentBookmarkList = context.findViewById(R.id.fragment_bookmark_list);
-        cmdShowFavirites = (ImageButton) context.findViewById(R.id.cmd_unhide_bookmark_list);
+    private void createButtons(View view) {
+        mDrawerLayout = (DrawerLayout) view.findViewById(R.id.drawer_layout);
+        fragmentBookmarkList = view.findViewById(R.id.fragment_bookmark_list);
+        cmdShowFavirites = (ImageButton) view.findViewById(R.id.cmd_unhide_bookmark_list);
         cmdShowFavirites.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -96,7 +96,7 @@ public class BookmarkListOverlay implements IGeoInfoHandler {
             }
         });
 
-        cmdHideFavirites = (ImageButton) context.findViewById(R.id.cmd_cancel_bookmark_list);
+        cmdHideFavirites = (ImageButton) view.findViewById(R.id.cmd_cancel_bookmark_list);
         cmdHideFavirites.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -105,8 +105,8 @@ public class BookmarkListOverlay implements IGeoInfoHandler {
         });
 
         setBookmarkListVisible(false);
-        cmdEdit = (ImageButton) context.findViewById(R.id.cmd_edit);
-        cmdDelete = (ImageButton) context.findViewById(R.id.cmd_delete);
+        cmdEdit = (ImageButton) view.findViewById(R.id.cmd_edit);
+        cmdDelete = (ImageButton) view.findViewById(R.id.cmd_delete);
 
         cmdEdit.setOnClickListener(new View.OnClickListener() {
             @Override

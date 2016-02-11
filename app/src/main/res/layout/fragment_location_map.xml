@@ -115,7 +115,7 @@
             >
 
             <!-- hide fragment -->
-            <ImageButton android:id="@+id/cmd_cancel"
+            <ImageButton android:id="@+id/cmd_cancel_bookmark_list"
                 android:src="@drawable/ic_action_previous_item"
                 android:contentDescription="@string/title_close"
                 style="@style/AppTheme.ImageButton"
