@@ -28,6 +28,8 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.util.Log;
+import android.widget.Toast;
 
 import java.io.File;
 
@@ -61,6 +63,20 @@ public class SettingsActivity extends PreferenceActivity {
             }
         });
 
+        findPreference("debugClearLog").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                onDebugClearLogCat();
+                return false; // donot close
+            }
+        });
+        findPreference("debugSaveLog").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                onDebugSaveLogCat();
+                return false; // donot close
+            }
+        });
         updateSummary();
     }
 
@@ -206,4 +222,16 @@ public class SettingsActivity extends PreferenceActivity {
         }
         defaultAudioFormatPreference.setSummary(summary);
     }
+
+    private void onDebugClearLogCat() {
+        ((AndroFotoFinderApp) getApplication()).clear();
+        Toast.makeText(this, R.string.settings_debug_clear_title, Toast.LENGTH_SHORT).show();
+        Log.e(Global.LOG_CONTEXT, "SettingsActivity-ClearLogCat()");
+    }
+
+    private void onDebugSaveLogCat() {
+        Log.e(Global.LOG_CONTEXT, "SettingsActivity-SaveLogCat()");
+        ((AndroFotoFinderApp) getApplication()).saveToFile();
+    }
+
 }
