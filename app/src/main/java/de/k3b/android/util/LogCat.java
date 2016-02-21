@@ -26,7 +26,11 @@ public class LogCat implements Thread.UncaughtExceptionHandler {
         Thread.setDefaultUncaughtExceptionHandler(this);
     }
 
-    public static void saveToFile(Context context, String... tags) {
+    public void saveToFile() {
+        saveToFile(mAppContext, mTags);
+    }
+
+    private static void saveToFile(Context context, String... tags) {
         File logDirectory = Global.logCatDir;
         File logFile = (logDirectory == null) ? null : new File(logDirectory, "androFotofinder.logcat" + System.currentTimeMillis() + ".txt");
         String message = (logFile != null)
@@ -59,13 +63,33 @@ public class LogCat implements Thread.UncaughtExceptionHandler {
         }
     }
 
+    public void clear() {
+        clear(mAppContext, mTags);
+    }
+
+    private static void clear(Context context, String... tags) {
+        StringBuilder cmdline = new StringBuilder();
+
+        // see http://developer.android.com/tools/debugging/debugging-log.html#filteringOutput
+        cmdline.append("logcat -c ");
+        for (String tag : tags) {
+            cmdline.append(tag).append(":D ");
+        }
+        try {
+            Process // process = Runtime.getRuntime().exec( "logcat -c");
+                    process = Runtime.getRuntime().exec(cmdline.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void uncaughtException(Thread thread, Throwable ex) {
 
         try {
             // Do your stuff with the exception
             Log.e(Global.LOG_CONTEXT,"LogCat.uncaughtException " + ex, ex);
-            saveToFile(mAppContext, mTags);
+            saveToFile();
         } catch (Exception e) {
             /* Ignore */
         } finally {

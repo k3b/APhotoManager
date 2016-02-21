@@ -53,9 +53,6 @@
 	<PreferenceCategory 
 		android:title="@string/settings_group_debug_title"
 		android:key="second_category">
-        <de.k3b.android.widgets.EditTextPreferenceWithSummary
-            android:key="logCatDir"
-            android:title="@string/settings_log_folder_title" />
         <CheckBoxPreference android:key="debugEnabledSql"
             android:defaultValue="false"
             android:title="@string/settings_debug_sql_title"
@@ -76,6 +73,14 @@
             android:defaultValue="false"
             android:title="@string/settings_debug_title"
             android:summary="@string/settings_debug_summary" />
-
+        <Preference
+            android:key="debugClearLog"
+            android:title="@string/settings_debug_clear_title" />
+        <Preference
+            android:key="debugSaveLog"
+            android:title="@string/settings_debug_save_title" />
+        <de.k3b.android.widgets.EditTextPreferenceWithSummary
+            android:key="logCatDir"
+            android:title="@string/settings_log_folder_title" />
 	</PreferenceCategory>
 </PreferenceScreen>

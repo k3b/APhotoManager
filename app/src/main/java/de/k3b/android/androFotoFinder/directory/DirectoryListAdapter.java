@@ -37,7 +37,7 @@ import de.k3b.io.IDirectory;
 import de.k3b.io.IExpandableListViewNavigation;
 
 /**
- * 
+ * Maps android independent IExpandableListViewNavigation to android specific ExpandableListAdapter so it can be viewed in ExpandableList
  */
 
 public class DirectoryListAdapter extends BaseExpandableListAdapter implements IExpandableListViewNavigation<Object, Object> {
