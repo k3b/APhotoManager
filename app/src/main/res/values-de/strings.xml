@@ -199,4 +199,6 @@ mit &#39;A Photo Map&#39; und &#39;APhotoManager&#39;
   </ul>
   <br />
 "]]></string>
+	<string name="settings_debug_clear_title">LogCat leeren</string>
+	<string name="settings_debug_save_title">LogCat speichern</string>
 </resources>

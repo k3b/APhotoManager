@@ -20,7 +20,7 @@
 package de.k3b.io;
 
 /**
- * android independant abstraction to andoid-s ExpandableListView(Adapter)
+ * android independent abstraction to andoid-s ExpandableListView(Adapter)
  * Created by k3b on 12.06.2015.
  */
 public interface IExpandableListViewNavigation<TGroupType, TChildType> {

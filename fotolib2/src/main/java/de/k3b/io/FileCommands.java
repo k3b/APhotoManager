@@ -285,7 +285,7 @@ public class FileCommands implements  Cloneable {
      *
      * Copies a file from the sourceFullPath path to the target path.
      */
-    private static boolean osFileCopy(File targetFullPath, File sourceFullPath) {
+    private boolean osFileCopy(File targetFullPath, File sourceFullPath) {
         FileChannel in = null, out = null;
         try {
             in = new FileInputStream(sourceFullPath).getChannel();
@@ -294,10 +294,8 @@ public class FileCommands implements  Cloneable {
             MappedByteBuffer buf = in.map(FileChannel.MapMode.READ_ONLY, 0,	size);
             out.write(buf);
             return true;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace();
+            onException(e,"osFileCopy",sourceFullPath, targetFullPath);
         } finally {
             if (in != null)
                 try {
@@ -305,10 +303,17 @@ public class FileCommands implements  Cloneable {
                     if (out != null)
                         out.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    onException(e,"osFileCopy-close",sourceFullPath, targetFullPath);
                 }
         }
         return false;
+    }
+
+    /** called for every cath(Exception...) */
+    protected void onException(final Exception e, Object... context) {
+        if (e != null) {
+            e.printStackTrace();
+        }
     }
 
     /** to be replaced by mock/stub in unittests */
@@ -356,12 +361,12 @@ public class FileCommands implements  Cloneable {
                     log("rem " , new Date());
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                onException(e, "openLogfile", mLogFilePath);
                 if (stream != null) {
                     try {
                         stream.close();
                     } catch (IOException e1) {
-                        e1.printStackTrace();
+                        onException(e1, "openLogfile-close", mLogFilePath);
                     }
                 }
             }

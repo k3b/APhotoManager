@@ -82,7 +82,7 @@ public class AndroidFileCommands extends FileCommands {
     @Override
     protected void onPreProcess(String what, String[] oldPathNames, String[] newPathNames, int opCode) {
         if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onPreProcess('" + what + "')");
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + "onPreProcess('" + what + "')");
         }
         super.onPreProcess(what, oldPathNames, newPathNames, opCode);
     }
@@ -92,7 +92,7 @@ public class AndroidFileCommands extends FileCommands {
     protected void onPostProcess(String what, String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix
-                    + " onPostProcess('" + what + "') => " + modifyCount + "/" + itemCount);
+                    + "onPostProcess('" + what + "') => " + modifyCount + "/" + itemCount);
         }
         super.onPostProcess(what, oldPathNames, newPathNames, modifyCount, itemCount, opCode);
 
@@ -103,6 +103,22 @@ public class AndroidFileCommands extends FileCommands {
         }
 
         Toast.makeText(mContext, message, Toast.LENGTH_LONG).show();
+    }
+
+    /** called for every cath(Exception...). Version with Android specific logging */
+    @Override
+    protected void onException(final Exception e, Object... params) {
+        StringBuffer message = new StringBuffer();
+        message.append(mDebugPrefix).append("onException(");
+        for (Object param : params) {
+            if (param != null) {
+                message.append(param).append(" ");
+            }
+        }
+        message.append("): ").append(e.getMessage());
+
+        Log.e(Global.LOG_CONTEXT, message.toString(), e);
+        // e.printStackTrace();
     }
 
     private int getResourceId(int opCode) {
