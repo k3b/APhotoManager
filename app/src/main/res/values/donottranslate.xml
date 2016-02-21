@@ -22,9 +22,9 @@ this program. If not, see <http://www.gnu.org/licenses/>
     resources that should NOT be localized
 -->
 <resources>
-    <string name="app_name" translatable="false">a Photo Manager</string>
-    <string name="app_image_viewer_title" translatable="false">a Photo Viewer</string>
-    <string name="app_map_title" translatable="false">a Photo Map</string>
+    <string name="app_name" translatable="false">A Photo Manager</string>
+    <string name="app_image_viewer_title" translatable="false">A Photo Viewer</string>
+    <string name="app_map_title" translatable="false">A Photo Map</string>
     <string name="btn_popup" translatable="false">&#8230;</string>
     <string name="global_log_file_path" translatable="false">copy/aPhotoManager.log</string>
   <string name="settings_debug_libs_title" translatable="false">LogCat libs</string>

@@ -20,6 +20,7 @@
 package de.k3b.android.androFotoFinder;
 
 import android.app.Application;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -73,14 +74,28 @@ public class AndroFotoFinderApp extends Application {
             QueryParameter.sParserDefaultSelect.add(columnName);
         }
         mCrashSaveToFile = new LogCat(this, Global.LOG_CONTEXT, HugeImageLoader.LOG_TAG, PhotoViewAttacher.LOG_TAG, CupcakeGestureDetector.LOG_TAG);
+
+        Log.i(Global.LOG_CONTEXT, getString(R.string.app_name) + " " + GuiUtil.getAppVersionName(this) + " created");
     }
 
     @Override
     public void onTerminate() {
+        Log.i(Global.LOG_CONTEXT, getString(R.string.app_name) + " " + GuiUtil.getAppVersionName(this) + " terminated");
         if (mCrashSaveToFile != null) {
             mCrashSaveToFile.close();
         }
         mCrashSaveToFile = null;
         super.onTerminate();
+    }
+
+    public void saveToFile() {
+        if (mCrashSaveToFile != null) {
+            mCrashSaveToFile.saveToFile();
+        }
+    }
+    public void clear() {
+        if (mCrashSaveToFile != null) {
+            mCrashSaveToFile.clear();
+        }
     }
 }
