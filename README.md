@@ -20,7 +20,7 @@ App and internet homepage available in these languages:<ul>
 **Help wanted for further [Translations](https://crowdin.com/project/AndroFotoFinder)**
 
 ## Current Project Status
-Latest stable release: v0.4.4 (branch FDroid) 
+Latest stable release: v0.4.5 (branch FDroid) 
 
 * available via [f-droid.org installer](https://f-droid.org/) or [apk internet download](https://f-droid.org/repository/browse/?fdid=de.k3b.android.androFotoFinder) or [sourcecode at github](https://github.com/k3b/APhotoManager/tree/FDroid)
 	* **not** available via http://play.google.com/ or http://www.appbrain.com

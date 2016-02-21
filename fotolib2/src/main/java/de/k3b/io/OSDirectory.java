@@ -87,7 +87,7 @@ public class OSDirectory implements IDirectory {
             File[] files = mCurrent.listFiles();
             if (files != null) {
                 for (File file : files) {
-                    if (file.isDirectory() && !file.isHidden() && !file.getName().startsWith(".")) {
+                    if (file.isDirectory() && !file.isHidden() && !file.getName().startsWith(".") && file.canWrite()) {
                         mChilden.add(new OSDirectory(file, this));
                     }
                 }
