@@ -68,7 +68,7 @@ public class RecursiveMediaScanner extends MediaScanner {
         int resultCount = 0;
         final String parentPath = parent.getAbsolutePath();
         if (!isCancelled()) {
-            if (parent.isDirectory()) {
+			if (parent.isDirectory() && !isDuplicateDir(parent)) {
                 String[] childFileNames = parent.list(new FilenameFilter() {
                     @Override
                     public boolean accept(File dir, String filename) {
@@ -76,11 +76,14 @@ public class RecursiveMediaScanner extends MediaScanner {
                     }
                 });
 
-                // convert to absolute paths
-                for (int i=0; i < childFileNames.length; i++) {
-                    childFileNames[i] = parentPath + "/" + childFileNames[i];
-                }
-                resultCount += runScanner(parentPath,  childFileNames);
+				if (childFileNames != null) {
+					// #33
+					// convert to absolute paths
+					for (int i=0; i < childFileNames.length; i++) {
+						childFileNames[i] = parentPath + "/" + childFileNames[i];
+					}
+					resultCount += runScanner(parentPath,  childFileNames);
+				}
 
                 File[] subDirs = parent.listFiles(new FileFilter() {
                     @Override
@@ -89,9 +92,12 @@ public class RecursiveMediaScanner extends MediaScanner {
                     }
                 });
 
-                for (File subDir : subDirs) {
-                    resultCount += scanDirOrFile(subDir);
-                }
+				if (subDirs != null) {
+					// #33
+					for (File subDir : subDirs) {
+						resultCount += scanDirOrFile(subDir);
+					}
+				}
             } else if (MediaScanner.isJpeg(parent.getName())) {
                 resultCount += runScanner(parentPath, parentPath);
             }
@@ -101,6 +107,11 @@ public class RecursiveMediaScanner extends MediaScanner {
         return resultCount;
     }
 
+	protected boolean isDuplicateDir(parent) {
+//!!! How to find out parent-folder is an alias of an other	??
+		return false;
+	}
+	
     /** @return true if scanner was resumable and started resume operation. */
     public boolean resumeIfNeccessary() {
         if ((getStatus() == AsyncTask.Status.PENDING) && (mPaused != null))
