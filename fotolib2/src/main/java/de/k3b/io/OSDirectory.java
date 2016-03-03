@@ -35,7 +35,7 @@ public class OSDirectory implements IDirectory {
 
     private OSDirectory mParent = null;
     public OSDirectory(String current, OSDirectory parent) {
-        this(getCanonicalFile(current), parent);
+        this(FileUtils.tryGetCanonicalFile(current), parent);
     }
 
     public OSDirectory(File current, OSDirectory parent) {
@@ -87,7 +87,7 @@ public class OSDirectory implements IDirectory {
             File[] files = mCurrent.listFiles();
             if (files != null) {
                 for (File file : files) {
-                    if (file.isDirectory() && !file.isHidden() && !file.getName().startsWith(".") && file.canWrite()) {
+                    if ((file != null) && file.isDirectory() && !file.isHidden() && !file.getName().startsWith(".") && file.canWrite() && !FileUtils.isSymlinkDir(file,true)) {
                         mChilden.add(new OSDirectory(file, this));
                     }
                 }
@@ -98,7 +98,7 @@ public class OSDirectory implements IDirectory {
 
     // package to allow unit testing
     IDirectory find(OSDirectory root, String path) {
-        return find(root, getCanonicalFile(path));
+        return find(root, FileUtils.tryGetCanonicalFile(path));
     }
 
     // package to allow unit testing
@@ -134,7 +134,7 @@ public class OSDirectory implements IDirectory {
     @Override
     public IDirectory find(String path) {
         if (path == null) return null;
-        return find(getCanonicalFile(path));
+        return find(FileUtils.tryGetCanonicalFile(path));
     }
 
     protected IDirectory find(File file) {
@@ -187,15 +187,6 @@ public class OSDirectory implements IDirectory {
         }
     }
 
-    public static File getCanonicalFile(String path) {
-        try {
-            return new File(path).getCanonicalFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     public OSDirectory addChildFolder(String newCildFolderName) {
         return addChildFolder(newCildFolderName, null);
     }
@@ -206,9 +197,11 @@ public class OSDirectory implements IDirectory {
         OSDirectory result = (OSDirectory) findChildByRelPath(children, newCildFolderName);
 
         if (result == null) {
-            File newChildFile = new File(mCurrent, newCildFolderName);
+            File newChildFile = FileUtils.tryGetCanonicalFile(new File(mCurrent, newCildFolderName), null);
             result = new OSDirectory(newChildFile, this, grandChilden);
-            children.add(result);
+            if (result != null) {
+                children.add(result);
+            }
         }
 
         return result;

@@ -33,6 +33,7 @@ import android.widget.Toast;
 
 import java.io.File;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.LocalizedActivity;
 import uk.co.senab.photoview.HugeImageLoader;
@@ -120,6 +121,8 @@ public class SettingsActivity extends PreferenceActivity {
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(context);
         Global.debugEnabled                     = getPref(prefs, "debugEnabled", Global.debugEnabled);
+        FotoLibGlobal.debugEnabled = Global.debugEnabled;
+
         Global.debugEnabledViewItem             = getPref(prefs, "debugEnabledViewItem", Global.debugEnabledViewItem);
         Global.debugEnabledSql                  = getPref(prefs, "debugEnabledSql", Global.debugEnabledSql);
         Global.debugEnabledMemory               = getPref(prefs, "debugEnabledMemory", Global.debugEnabledMemory);

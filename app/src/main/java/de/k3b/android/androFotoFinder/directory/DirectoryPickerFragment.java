@@ -324,21 +324,24 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
 
     private void onCreateSubDirAnswer(final IDirectory parentDir, String newCildFolderName) {
         OSDirectory newChild = ((OSDirectory) parentDir).addChildFolder(newCildFolderName);
-        String newPathAbsolute = newChild.getAbsolute();
 
-        int msgId;
-        if (newChild.osMkDirs()) {
-            AndroidFileCommands.log(getActivity(), "mkdirs \"", newPathAbsolute, "\"" ).closeLogFile();
-            msgId = R.string.mk_success_format;
-            reloadTreeViewIfAvailable();
-            onParentPathBarButtonClick(newChild);
-        } else {
-            msgId = R.string.mk_err_failed_format;
-            parentDir.getChildren().remove(newChild);
-            newChild.destroy();
+        if (newChild != null) {
+            String newPathAbsolute = newChild.getAbsolute();
+
+            int msgId;
+            if (newChild.osMkDirs()) {
+                AndroidFileCommands.log(getActivity(), "mkdirs \"", newPathAbsolute, "\"").closeLogFile();
+                msgId = R.string.mk_success_format;
+                reloadTreeViewIfAvailable();
+                onParentPathBarButtonClick(newChild);
+            } else {
+                msgId = R.string.mk_err_failed_format;
+                parentDir.getChildren().remove(newChild);
+                newChild.destroy();
+            }
+            Toast.makeText(getActivity(), getActivity().getString(msgId, newPathAbsolute),
+                    Toast.LENGTH_LONG).show();
         }
-        Toast.makeText(getActivity(), getActivity().getString(msgId, newPathAbsolute),
-                Toast.LENGTH_LONG).show();
     }
 
     private boolean showGallery(IDirectory selectedDir) {
