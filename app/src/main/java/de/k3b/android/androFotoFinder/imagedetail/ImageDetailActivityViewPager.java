@@ -64,6 +64,7 @@ import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
+import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
@@ -613,6 +614,12 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         unhideActionBar(Global.actionBarHideTimeInMilliSecs * 3, "onPrepareOptionsMenu");
         AboutDialogPreference.onPrepareOptionsMenu(this, menu);
 
+        MenuItem item = menu.findItem(R.id.cmd_show_geo);
+
+        if (item != null) {
+            item.setVisible(hasCurrentGeo());
+        }
+
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -830,6 +837,11 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     protected String getCurrentFilePath() {
         int itemPosition = mViewPager.getCurrentItem();
         return this.mAdapter.getFullFilePath(itemPosition);
+    }
+
+    protected boolean hasCurrentGeo() {
+        int itemPosition = mViewPager.getCurrentItem();
+        return this.mAdapter.hasGeo(itemPosition);
     }
 
     private void toggleViewPagerScrolling() {
