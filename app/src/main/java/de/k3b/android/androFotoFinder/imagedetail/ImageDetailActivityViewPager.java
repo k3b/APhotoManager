@@ -64,6 +64,7 @@ import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
+import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
@@ -420,18 +421,20 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                 QueryParameter query = new QueryParameter(DEFAULT_QUERY);
                 FotoSql.setSort(query, DEFAULT_SORT, true);
                 FotoSql.setWhereFilter(query, filter, true);
+                mGalleryContentQuery = query;
             }
         }
+
         if (mGalleryContentQuery == null) {
             Uri uri = IntentUtil.getUri(intent);
             if (uri != null) {
                 String scheme = uri.getScheme();
                 if ((scheme == null) || ("file".equals(scheme))) {
-                    getParameterFromPath(uri.getPath(), true);
+                    mGalleryContentQuery = getParameterFromPath(uri.getPath(), true);
                 } else if ("content".equals(scheme)) {
                     String path = FotoSql.execGetFotoPath(this, uri);
                     if (path != null) {
-                        getParameterFromPath(path, false);
+                        mGalleryContentQuery = getParameterFromPath(path, false);
                     }
                 }
             }
@@ -447,7 +450,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         }
     }
 
-    private void getParameterFromPath(String path, boolean isFileUri) {
+    private QueryParameter getParameterFromPath(String path, boolean isFileUri) {
         mInitialFilePath = path;
         File selectedPhoto = new File(mInitialFilePath);
         this.mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
@@ -455,7 +458,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         QueryParameter query = new QueryParameter(DEFAULT_QUERY);
         FotoSql.addPathWhere(query, selectedPhoto.getParent(), FotoSql.QUERY_TYPE_GALLERY);
         FotoSql.setSort(query, DEFAULT_SORT, true);
-        mGalleryContentQuery = query;
+        return query;
     }
 
 /* these doe not work yet (tested with for android 4.0)
@@ -613,6 +616,12 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         unhideActionBar(Global.actionBarHideTimeInMilliSecs * 3, "onPrepareOptionsMenu");
         AboutDialogPreference.onPrepareOptionsMenu(this, menu);
 
+        MenuItem item = menu.findItem(R.id.cmd_show_geo);
+
+        if (item != null) {
+            item.setVisible(hasCurrentGeo());
+        }
+
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -651,6 +660,10 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                 return cmdMoveOrCopyWithDestDirPicker(true, mFileCommands.getLastCopyToPath(), getCurrentFoto());
             case R.id.menu_item_rename:
                 return onRenameDirQueston(getCurrentImageId(), getCurrentFilePath(), null);
+
+            case R.id.cmd_gallery:
+                FotoGalleryActivity.showActivity(this, null, this.mGalleryContentQuery, 0);
+                return true;
 
             case R.id.cmd_show_geo:
                 MapGeoPickerActivity.showActivity(this, getCurrentFoto());
@@ -830,6 +843,11 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     protected String getCurrentFilePath() {
         int itemPosition = mViewPager.getCurrentItem();
         return this.mAdapter.getFullFilePath(itemPosition);
+    }
+
+    protected boolean hasCurrentGeo() {
+        int itemPosition = mViewPager.getCurrentItem();
+        return this.mAdapter.hasGeo(itemPosition);
     }
 
     private void toggleViewPagerScrolling() {

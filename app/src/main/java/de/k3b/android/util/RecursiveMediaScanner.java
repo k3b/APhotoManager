@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.io.FileUtils;
 
 /**
  * Special MediaScanner that can only handle inserNew/updateExisting for directories or jp(e)g files.
@@ -66,37 +67,47 @@ public class RecursiveMediaScanner extends MediaScanner {
 
     private int scanDirOrFile(File parent) {
         int resultCount = 0;
-        final String parentPath = parent.getAbsolutePath();
-        if (!isCancelled()) {
-            if (parent.isDirectory()) {
-                String[] childFileNames = parent.list(new FilenameFilter() {
-                    @Override
-                    public boolean accept(File dir, String filename) {
-                        return MediaScanner.isJpeg(filename);
+        final String parentPath = FileUtils.tryGetCanonicalPath(parent, null);
+        if (parentPath != null) {
+            if (!isCancelled()) {
+                if (parent.isDirectory()) {
+                    String[] childFileNames = parent.list(new FilenameFilter() {
+                        @Override
+                        public boolean accept(File dir, String filename) {
+                            return MediaScanner.isJpeg(filename);
+                        }
+                    });
+
+                    if (childFileNames != null) {
+                        // #33
+                        // convert to absolute paths
+                        for (int i = 0; i < childFileNames.length; i++) {
+                            childFileNames[i] = parentPath + "/" + childFileNames[i];
+                        }
+                        resultCount += runScanner(parentPath, childFileNames);
                     }
-                });
 
-                // convert to absolute paths
-                for (int i=0; i < childFileNames.length; i++) {
-                    childFileNames[i] = parentPath + "/" + childFileNames[i];
-                }
-                resultCount += runScanner(parentPath,  childFileNames);
+                    File[] subDirs = parent.listFiles(new FileFilter() {
+                        @Override
+                        public boolean accept(File file) {
+                            return ((file != null) && (file.isDirectory()) && (!file.getName().startsWith(".")));
+                        }
+                    });
 
-                File[] subDirs = parent.listFiles(new FileFilter() {
-                    @Override
-                    public boolean accept(File file) {
-                        return ((file != null) && (file.isDirectory()) && (!file.getName().startsWith(".")));
+                    if (subDirs != null) {
+                        // #33
+                        for (File subDir : subDirs) {
+                            if (subDir != null) {
+                                resultCount += scanDirOrFile(subDir);
+                            }
+                        }
                     }
-                });
-
-                for (File subDir : subDirs) {
-                    resultCount += scanDirOrFile(subDir);
+                } else if (MediaScanner.isJpeg(parent.getName())) {
+                    resultCount += runScanner(parentPath, parentPath);
                 }
-            } else if (MediaScanner.isJpeg(parent.getName())) {
-                resultCount += runScanner(parentPath, parentPath);
+            } else if (mPaused != null) {
+                mPaused.add(parentPath);
             }
-        } else if (mPaused != null) {
-            mPaused.add(parentPath);
         }
         return resultCount;
     }

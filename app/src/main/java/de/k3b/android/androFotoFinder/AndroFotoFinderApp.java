@@ -25,6 +25,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Date;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.LogCat;
@@ -73,7 +74,7 @@ public class AndroFotoFinderApp extends Application {
         for (String columnName : FotoSql.DEFAULT_GALLERY_COLUMNS) {
             QueryParameter.sParserDefaultSelect.add(columnName);
         }
-        mCrashSaveToFile = new LogCat(this, Global.LOG_CONTEXT, HugeImageLoader.LOG_TAG, PhotoViewAttacher.LOG_TAG, CupcakeGestureDetector.LOG_TAG);
+        mCrashSaveToFile = new LogCat(this, Global.LOG_CONTEXT, HugeImageLoader.LOG_TAG, PhotoViewAttacher.LOG_TAG, CupcakeGestureDetector.LOG_TAG, FotoLibGlobal.LOG_TAG);
 
         Log.i(Global.LOG_CONTEXT, getString(R.string.app_name) + " " + GuiUtil.getAppVersionName(this) + " created");
     }

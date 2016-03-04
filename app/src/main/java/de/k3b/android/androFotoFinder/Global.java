@@ -35,7 +35,9 @@ import de.k3b.android.widget.LocalizedActivity;
  * Created by k3b on 04.06.2015.
  */
 public class Global {
+    /** LOG_CONTEXT is used as logging source for filtering logging messages that belong to this */
     public static final String LOG_CONTEXT = "k3bFoto";
+
     public static final String PREF_KEY_USER_LOCALE = "user_locale";
 
     /**

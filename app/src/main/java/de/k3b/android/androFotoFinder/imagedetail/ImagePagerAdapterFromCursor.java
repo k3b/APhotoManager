@@ -169,15 +169,12 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  {
         return 0;
     }
 
-    public IGeoPointInfo getGeoPoint(int position) {
+    public boolean hasGeo(int position) {
         Cursor cursor = getCursorAt(position);
         if (cursor != null) {
-            int colLat = cursor.getColumnIndex(FotoSql.SQL_COL_LAT);
-            int colLon = cursor.getColumnIndex(FotoSql.SQL_COL_LON);
-
-            return new GeoPointDto(cursor.getDouble(colLat), cursor.getDouble(colLon), IGeoPointInfo.NO_ZOOM);
+            return !cursor.isNull(cursor.getColumnIndex(FotoSql.SQL_COL_GPS));
         }
-        return null;
+        return false;
     }
 
     /**
