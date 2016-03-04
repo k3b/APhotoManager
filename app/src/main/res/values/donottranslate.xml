@@ -2,7 +2,7 @@
 <!--
 Copyright (C) 2014-2016 k3b
 
-This file is part of "a Photo Manager" (https://github.com/k3b/AndroFotoFinder/)
+This file is part of "A Photo Manager" (https://github.com/k3b/AndroFotoFinder/)
 
 This program is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ this program. If not, see <http://www.gnu.org/licenses/>
 	<string name="settings_debug_view_item_title" translatable="false">LogCat gridview/listview</string>
 	<!-- version_postfix="" for fdroid-release and version_postfix=" (dev)" for development branch-->
 	<string name="version_postfix" translatable="false">" (dev)"</string>
-	<string name="about_content" translatable="false"><![CDATA["  <a href="https://github.com/k3b/AndroFotoFinder/wiki">
+	<string name="about_content" translatable="false"><![CDATA["  <a href="https://github.com/k3b/APhotoManager/wiki">
     <b>A Photo Manager</b>
   </a>
   <br />Version AndroFotoFinder $versionName$
@@ -72,16 +72,16 @@ this program. If not, see <http://www.gnu.org/licenses/>
   </ul>
   <hr />
   <h2>History</h2>
-  See <a href="https://github.com/k3b/AndroFotoFinder/wiki/History">History</a>.
+  See <a href="https://github.com/k3b/APhotoManager/wiki/History">History</a>.
   <br />
   <hr />
   <h2>Links</h2>
   <ul>
     <li>Source code of current version of &quot;a Photo Manager&quot; (A(ndro)FotoFinder) at git repository@github.com
     <br />
-    <a href="http://github.com/k3b/AndroFotoFinder/">https://github.com/k3b/AndroFotoFinder/</a></li>
+    <a href="http://github.com/k3b/APhotoManager/">https://github.com/k3b/APhotoManager/</a></li>
     <li>
-      <a href="https://github.com/k3b/AndroFotoFinder/wiki/History">AndroFotoFinder Changelog</a>
+      <a href="https://github.com/k3b/APhotoManager/wiki/History">APhotoManager Changelog</a>
     </li>
     <li>Source code of osmdroid library at git repository@github.com
     <br />
@@ -110,7 +110,7 @@ this program. If not, see <http://www.gnu.org/licenses/>
   <h2>Legal stuff</h2>
   <b>A Photo Manager (A(ndro)FotoFinder)</b>
   <br />
-  <br />Copyright (c) 2015 by k3b
+  <br />Copyright (c) 2015-2016 by k3b
   <br />Licensed under GPL, Version 3.0 or later.
   <br />
   <hr />Translations supported 

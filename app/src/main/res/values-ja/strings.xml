@@ -4,7 +4,7 @@
 /*
  * Translation to Japanese by "naofum" via crowdin.com.
  *
- * This file is part of "a Photo Manager (A(ndro)FotoFinder).
+ * This file is part of "A Photo Manager" (A(ndro)FotoFinder).
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -21,14 +21,14 @@
  */
  -->
 <resources>
-  <string name="about_summary">Photo Manager%1$s について</string>
+  <string name="about_summary">\"A Photo Manager"%1$s\" について</string>
   <string name="area_menu_title">地図表示エリアを選択</string>
   <string name="background">背景</string>
   <string name="bookmark_delete_answer_format">ブックマーク %1$s を削除しました。</string>
   <string name="bookmark_delete_error_format">ブックマーク %1$s を削除できません。</string>
   <string name="bookmark_delete_question">このブックマークを削除しますか?</string>
   <string name="bookmark_err_not_found_format">%1$s に検索クエリはありません。</string>
-  <string name="bookmark_file_comment_format">\'%1$s\' のバージョン %2$s と %3$s で生成されました。詳細は https://github.com/k3b/AndroFotoFinder/wiki/intentap#sql を参照してください。</string>
+  <string name="bookmark_file_comment_format">\'%1$s\' のバージョン %2$s と %3$s で生成されました。詳細は https://github.com/k3b/APhotoManager/wiki/intentap#sql を参照してください。</string>
   <string name="bookmark_load_from_menu_title">&#8230; からブックマークを読み込む</string>
   <string name="bookmark_save_as_menu_title">&#8230; としてブックマークを保存</string>
   <string name="btn_cancel">キャンセル</string>
@@ -141,41 +141,41 @@
   <string name="update_result_format">%1$d/%2$d ファイルを更新しました</string>
   <string name="zoom_to_fit_menu_title">合わせてズーム</string>
   <string name="about_content_about"><![CDATA["
-<h1> Photo Manager </h1>
+<h1>A Photo Manager </h1>
 と 'AndroFotoFinder' に '写真地図' <br/>
 </p>
 機能:
 <ul>
   <li>App and internet homepage available in these languages:<ul>
-		<li><a href="https://github.com/k3b/AndroFotoFinder/wiki/de-home">de</a>,&nbsp;
-		<a href="https://github.com/k3b/AndroFotoFinder/wiki/home"   >en</a>,&nbsp;
-		<a href="https://github.com/k3b/AndroFotoFinder/wiki/fr-home">fr</a>,&nbsp;
-		<a href="https://github.com/k3b/AndroFotoFinder/wiki/ja-home">ja</a>,&nbsp;
-		<a href="https://github.com/k3b/AndroFotoFinder/wiki/ro-home">ro</a></li>
-		<li><a href="https://github.com/k3b/AndroFotoFinder/issues/21">Help us to translate into other languages.</a></li>
+		<li><a href="https://github.com/k3b/APhotoManager/wiki/de-home">de</a>,&nbsp;
+		<a href="https://github.com/k3b/APhotoManager/wiki/home"   >en</a>,&nbsp;
+		<a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr</a>,&nbsp;
+		<a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja</a>,&nbsp;
+		<a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro</a></li>
+		<li><a href="https://github.com/k3b/APhotoManager/issues/21">Help us to translate into other languages.</a></li>
 		</ul>
 	</li>
  <li>大きな画像コレクションを処理できます (1000+ フォルダーに 15000+ 画像)</li>
  <li>Android の画像コンテンツ プロバイダーを使用。初期イメージ スキャンの必要はありません。</li>
- <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Filter-View"> 画像検索</a> 経由
+ <li><a href="https://github.com/k3b/APhotoManager/wiki/Filter-View"> 画像検索</a> 経由
  <ul>
-  <li>フォルダー (階層 <a href="https://github.com/k3b/AndroFotoFinder/wiki/Folder-Picker"> フォルダー ピッカー</a>)&nbsp;</li>
+  <li>フォルダー (階層 <a href="https://github.com/k3b/APhotoManager/wiki/Folder-Picker"> フォルダー ピッカー</a>)&nbsp;</li>
   <li>フォルダー/ファイル名に一致するワイルドカード&nbsp;</li>
   <li>日付&nbsp;</li>
-  <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">地理情報地図</a> にエリア (イメージに GPS Exif 情報がある場合)</li>
+  <li><a href="https://github.com/k3b/APhotoManager/wiki/geographic-map">地理情報地図</a> にエリア (イメージに GPS Exif 情報がある場合)</li>
  </ul></li>
- <li>スクロール可能な <a href="https://github.com/k3b/AndroFotoFinder/wiki/Gallery-View"> ギャラリー ビュー</a> で結果を表示
+ <li>スクロール可能な <a href="https://github.com/k3b/APhotoManager/wiki/Gallery-View"> ギャラリー ビュー</a> で結果を表示
  <ul>
   <li>複数写真選択のサポート</li>
   <li>ファイルをコピー、移動、削除、共有する操作</li>
  </ul></li>
- <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/Image-View"> 写真詳細表示</a>と<ul>
+ <li><a href="https://github.com/k3b/APhotoManager/wiki/Image-View"> 写真詳細表示</a>と<ul>
   <li>イメージ ズーム</li>
   <li>スワイプで次/前の画像に移動</li>
   <li>拡張画像情報の表示 (Exif、IPTC、XMP、ICC)</li>
   <li>ファイルをコピー、移動、削除、名前の変更、共有する操作</li>
  </ul></li>
- <li><a href="https://github.com/k3b/AndroFotoFinder/wiki/geographic-map">地理情報地図</a> 写真が撮影された場所にマーカーを示します</li>
+ <li><a href="https://github.com/k3b/APhotoManager/wiki/geographic-map">地理情報地図</a> 写真が撮影された場所にマーカーを示します</li>
  <li>ファイル操作<ul>
   <li>Android の画像コンテンツ プロバイダー データベースも更新</li>
   <li>xmp サイドカーファイルを更新</li>

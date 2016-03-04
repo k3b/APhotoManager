@@ -14,6 +14,7 @@
         <item>@string/settings_locale_os_language</item>
         <item>de german Deutsch</item>
         <item>en english</item>
+        <item>es spanish Espanol</item>
         <item>fr french Français</item>
         <item>ja japanese 日本人</item>
         <item>ro romanian Român</item>
@@ -22,6 +23,7 @@
         <item></item>
         <item>de</item>
         <item>en</item>
+        <item>es</item>
         <item>fr</item>
         <item>ja</item>
         <item>ro</item>
