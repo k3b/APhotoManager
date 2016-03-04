@@ -21,7 +21,7 @@
  */
  -->
 <resources>
-  <string name="about_summary">Über \"A Photo Manager"%1$s\"</string>
+  <string name="about_summary">Über \"A Photo Manager%1$s\"</string>
   <string name="area_menu_title">Auswahl: Kartenausschnitt</string>
   <string name="background">Hintergrund</string>
   <string name="bookmark_delete_answer_format">Lesezeichen %1$s gelöscht.</string>
