@@ -81,9 +81,7 @@
 	<string name="mk_success_format">%1$s Créé</string>
 	<string name="move_menu_title">Déplacer</string>
 	<string name="move_result_format">%1$d/%2$d fichier(s) déplacé(s)</string>
-	<string name="osm_cright_title">Map Tiles (c) 
-		<a href="http://www.openstreetmap.org/copyright"> OpenStreetMap</a>
-	</string>
+	<string name="osm_cright_title">Map Tiles (c) les contributeurs d’ <a href="http://www.openstreetmap.org/copyright"> OpenStreetMap</a></string>
 	<string name="overwrite_question_title">Ecraser?</string>
 	<string name="rename_menu_title">Renommer</string>
 	<string name="rename_result_format">%1$d/%2$d fichiers renommés</string>
