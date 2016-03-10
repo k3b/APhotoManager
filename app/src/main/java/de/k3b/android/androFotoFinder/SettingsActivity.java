@@ -42,7 +42,7 @@ import uk.co.senab.photoview.log.LogManager;
 
 public class SettingsActivity extends PreferenceActivity {
     private SharedPreferences prefsInstance = null;
-    private ListPreference defaultAudioFormatPreference;
+    private ListPreference defaultLocalePreference;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -52,10 +52,10 @@ public class SettingsActivity extends PreferenceActivity {
         prefsInstance = PreferenceManager
                 .getDefaultSharedPreferences(this);
         global2Prefs(this.getApplication());
-        defaultAudioFormatPreference =
+        defaultLocalePreference =
                 (ListPreference) findPreference(Global.PREF_KEY_USER_LOCALE);
 
-        defaultAudioFormatPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+        defaultLocalePreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 setLanguage((String) newValue);
@@ -214,7 +214,7 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     private void setLanguage(String languageKey) {
-        int index = defaultAudioFormatPreference.findIndexOfValue(languageKey);
+        int index = defaultLocalePreference.findIndexOfValue(languageKey);
         String summary = "";
 
         if (index >= 0) {
@@ -223,7 +223,7 @@ public class SettingsActivity extends PreferenceActivity {
                 summary = names[index];
             }
         }
-        defaultAudioFormatPreference.setSummary(summary);
+        defaultLocalePreference.setSummary(summary);
     }
 
     private void onDebugClearLogCat() {

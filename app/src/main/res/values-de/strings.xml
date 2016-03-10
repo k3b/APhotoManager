@@ -81,9 +81,7 @@
   <string name="mk_success_format">Erstellte %1$s</string>
   <string name="move_menu_title">Verschieben</string>
   <string name="move_result_format">%1$d/%2$d Dateien verschobenen</string>
-	<string name="osm_cright_title">Map Tiles (c)
-		<a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>
-	</string>
+  <string name="osm_cright_title">Karte (c) <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> Mitwirkend</string>
   <string name="overwrite_question_title">Überschreiben?</string>
   <string name="rename_menu_title">Umbenennen</string>
   <string name="rename_result_format">%1$d/%2$d Dateien umbenannt</string>
