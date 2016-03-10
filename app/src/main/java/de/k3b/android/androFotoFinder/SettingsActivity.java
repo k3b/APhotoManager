@@ -33,6 +33,7 @@ import android.widget.Toast;
 
 import java.io.File;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.LocalizedActivity;
 import uk.co.senab.photoview.HugeImageLoader;
@@ -41,7 +42,7 @@ import uk.co.senab.photoview.log.LogManager;
 
 public class SettingsActivity extends PreferenceActivity {
     private SharedPreferences prefsInstance = null;
-    private ListPreference defaultAudioFormatPreference;
+    private ListPreference defaultLocalePreference;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -51,10 +52,10 @@ public class SettingsActivity extends PreferenceActivity {
         prefsInstance = PreferenceManager
                 .getDefaultSharedPreferences(this);
         global2Prefs(this.getApplication());
-        defaultAudioFormatPreference =
+        defaultLocalePreference =
                 (ListPreference) findPreference(Global.PREF_KEY_USER_LOCALE);
 
-        defaultAudioFormatPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+        defaultLocalePreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 setLanguage((String) newValue);
@@ -120,6 +121,8 @@ public class SettingsActivity extends PreferenceActivity {
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(context);
         Global.debugEnabled                     = getPref(prefs, "debugEnabled", Global.debugEnabled);
+        FotoLibGlobal.debugEnabled = Global.debugEnabled;
+
         Global.debugEnabledViewItem             = getPref(prefs, "debugEnabledViewItem", Global.debugEnabledViewItem);
         Global.debugEnabledSql                  = getPref(prefs, "debugEnabledSql", Global.debugEnabledSql);
         Global.debugEnabledMemory               = getPref(prefs, "debugEnabledMemory", Global.debugEnabledMemory);
@@ -211,7 +214,7 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     private void setLanguage(String languageKey) {
-        int index = defaultAudioFormatPreference.findIndexOfValue(languageKey);
+        int index = defaultLocalePreference.findIndexOfValue(languageKey);
         String summary = "";
 
         if (index >= 0) {
@@ -220,7 +223,7 @@ public class SettingsActivity extends PreferenceActivity {
                 summary = names[index];
             }
         }
-        defaultAudioFormatPreference.setSummary(summary);
+        defaultLocalePreference.setSummary(summary);
     }
 
     private void onDebugClearLogCat() {

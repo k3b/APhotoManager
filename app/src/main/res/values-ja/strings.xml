@@ -4,7 +4,7 @@
 /*
  * Translation to Japanese by "naofum" via crowdin.com.
  *
- * This file is part of "a Photo Manager (A(ndro)FotoFinder).
+ * This file is part of "A Photo Manager" (A(ndro)FotoFinder).
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  */
  -->
 <resources>
-  <string name="about_summary">\'A Photo Manager%1$s\' について</string>
+  <string name="about_summary">\"A Photo Manager"%1$s\" について</string>
   <string name="area_menu_title">地図表示エリアを選択</string>
   <string name="background">背景</string>
   <string name="bookmark_delete_answer_format">ブックマーク %1$s を削除しました。</string>
@@ -141,7 +141,7 @@
   <string name="update_result_format">%1$d/%2$d ファイルを更新しました</string>
   <string name="zoom_to_fit_menu_title">合わせてズーム</string>
   <string name="about_content_about"><![CDATA["
-<h1> Photo Manager </h1>
+<h1>A Photo Manager </h1>
 と 'AndroFotoFinder' に '写真地図' <br/>
 </p>
 機能:

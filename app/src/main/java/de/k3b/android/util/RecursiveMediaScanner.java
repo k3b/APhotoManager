@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2015-2016 by k3b.
+ *
+ * This file is part of AndroFotoFinder.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
+ 
 package de.k3b.android.util;
 
 import android.app.Activity;
@@ -16,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.io.FileUtils;
 
 /**
  * Special MediaScanner that can only handle inserNew/updateExisting for directories or jp(e)g files.
@@ -66,37 +86,47 @@ public class RecursiveMediaScanner extends MediaScanner {
 
     private int scanDirOrFile(File parent) {
         int resultCount = 0;
-        final String parentPath = parent.getAbsolutePath();
-        if (!isCancelled()) {
-            if (parent.isDirectory()) {
-                String[] childFileNames = parent.list(new FilenameFilter() {
-                    @Override
-                    public boolean accept(File dir, String filename) {
-                        return MediaScanner.isJpeg(filename);
+        final String parentPath = FileUtils.tryGetCanonicalPath(parent, null);
+        if (parentPath != null) {
+            if (!isCancelled()) {
+                if (parent.isDirectory()) {
+                    String[] childFileNames = parent.list(new FilenameFilter() {
+                        @Override
+                        public boolean accept(File dir, String filename) {
+                            return MediaScanner.isJpeg(filename);
+                        }
+                    });
+
+                    if (childFileNames != null) {
+                        // #33
+                        // convert to absolute paths
+                        for (int i = 0; i < childFileNames.length; i++) {
+                            childFileNames[i] = parentPath + "/" + childFileNames[i];
+                        }
+                        resultCount += runScanner(parentPath, childFileNames);
                     }
-                });
 
-                // convert to absolute paths
-                for (int i=0; i < childFileNames.length; i++) {
-                    childFileNames[i] = parentPath + "/" + childFileNames[i];
-                }
-                resultCount += runScanner(parentPath,  childFileNames);
+                    File[] subDirs = parent.listFiles(new FileFilter() {
+                        @Override
+                        public boolean accept(File file) {
+                            return ((file != null) && (file.isDirectory()) && (!file.getName().startsWith(".")));
+                        }
+                    });
 
-                File[] subDirs = parent.listFiles(new FileFilter() {
-                    @Override
-                    public boolean accept(File file) {
-                        return ((file != null) && (file.isDirectory()) && (!file.getName().startsWith(".")));
+                    if (subDirs != null) {
+                        // #33
+                        for (File subDir : subDirs) {
+                            if (subDir != null) {
+                                resultCount += scanDirOrFile(subDir);
+                            }
+                        }
                     }
-                });
-
-                for (File subDir : subDirs) {
-                    resultCount += scanDirOrFile(subDir);
+                } else if (MediaScanner.isJpeg(parent.getName())) {
+                    resultCount += runScanner(parentPath, parentPath);
                 }
-            } else if (MediaScanner.isJpeg(parent.getName())) {
-                resultCount += runScanner(parentPath, parentPath);
+            } else if (mPaused != null) {
+                mPaused.add(parentPath);
             }
-        } else if (mPaused != null) {
-            mPaused.add(parentPath);
         }
         return resultCount;
     }

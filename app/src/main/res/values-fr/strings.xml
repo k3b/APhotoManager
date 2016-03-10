@@ -4,7 +4,7 @@
 /*
  * Translation to French 2016 by Tuuux.
  *
- * This file is part of "a Photo Manager (A(ndro)FotoFinder).
+ * This file is part of "A Photo Manager" (A(ndro)FotoFinder).
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  */
  -->
 <resources>
-	<string name="about_summary">A propos \'A Photo Manager%1$s\'</string>
+	<string name="about_summary">A propos de \"A Photo Manager"%1$s\"</string>
 	<string name="area_menu_title">Sélectionnez une zone sur la carte</string>
 	<string name="background">Arrière plan</string>
 	<string name="bookmark_delete_answer_format">Supprimer le signet %1$s.</string>
@@ -40,10 +40,7 @@
 	<string name="copy_menu_title">Copier</string>
 	<string name="copy_result_format">%1$d/%2$d fichiers copiés</string>
 	<string name="delete_menu_title">Supprimer</string>
-	<string name="delete_question_message_format">"Êtes-vous sûr de que vouloir supprimer définitivement ces fichiers 
-	?%1$s, 
-	
-	cette opération n\'est pas réversible"</string>
+	<string name="delete_question_message_format">"Êtes-vous sûr de que vouloir supprimer définitivement ces fichiers 	?%1$s, 	cette opération n\'est pas réversible"</string>
 	<string name="delete_question_title">Supprimer les photo(s) ?</string>
 	<string name="delete_result_format">supprimer les fichiers %1$d/%2$d</string>
 	<string name="destination_copy">Destination de la copie</string>
@@ -84,7 +81,7 @@
 	<string name="mk_success_format">%1$s Créé</string>
 	<string name="move_menu_title">Déplacer</string>
 	<string name="move_result_format">%1$d/%2$d fichier(s) déplacé(s)</string>
-	<string name="osm_cright_title">Map Tiles (c) <a href="http://www.openstreetmap.org/copyright"> OpenStreetMap</a></string>
+	<string name="osm_cright_title">Map Tiles (c) les contributeurs d’ <a href="http://www.openstreetmap.org/copyright"> OpenStreetMap</a></string>
 	<string name="overwrite_question_title">Ecraser?</string>
 	<string name="rename_menu_title">Renommer</string>
 	<string name="rename_result_format">%1$d/%2$d fichiers renommés</string>
@@ -98,6 +95,7 @@
 	<string name="selection_add_all_menu_title">Sélection : Ajouter tous les visibles</string>
 	<string name="selection_remove_menu_title">Sélection : Supprimer tous les visibles</string>
 	<string name="settings_bookmark_dir_title">Dossier de rapport</string>
+	<string name="settings_debug_libs_summary">... des autre bibliothèques.</string>
 	<string name="settings_debug_memory_summary">Enregistrer la consommation mémoire.</string>
 	<string name="settings_debug_memory_title">Consommation mémoire</string>
 	<string name="settings_debug_sql_summary">Enregistrer les requêtes SQL.</string>
@@ -109,6 +107,8 @@
 	<string name="settings_image_initialImageDetailResolutionHigh_summary">Photo-View Initial de meilleure qualité (lente, nécessite plus de mémoire)</string>
 	<string name="settings_image_initialImageDetailResolutionHigh_title">Améliorer la qualité par défaut de Photo-View</string>
 	<string name="settings_image_slideshow_intervall_title">Intervalle entre deux images du diaporama en millisecondes</string>
+	<string name="settings_locale_title">Langue</string>
+	<string name="settings_locale_os_language">(langue de l\'appareil)</string>
 	<string name="settings_log_folder_title">Dossier du journal d\'erreur</string>
 	<string name="settings_map_selmarker_max_title">Nombre max. de marqueurs sur la carte</string>
 	<string name="settings_geo_history_max_title">Configurez la taille de historique de la géolocalisation</string>
@@ -138,54 +138,54 @@
 	<string name="sort_order_Place_Descending">Emplacement décroissant</string>
 	<string name="update_result_format">mise à jour des fichiers %1$d/%2$d</string>
 	<string name="zoom_to_fit_menu_title">Ajuster le zoom</string>
-	<string name="about_content_about"><![CDATA["<h1>A Photo Manager</h1>avec &#39;A Photo Map&#39; sur &#39;APhotoManager&#39;
-
-App et page d'accueil Internet disponibles dans ces langues: <ul>
-		<li>
-<a href="https://github.com/k3b/APhotoManager/wiki/de-home">de<img alt="Homepage de" src="https://github.com/k3b/APhotoManager/blob/FDroid/wiki/png/lan_de.png"></img></a>,&nbsp;
-<a href="https://github.com/k3b/APhotoManager/wiki/home"   >en<img alt="Homepage en" src="https://github.com/k3b/APhotoManager/blob/FDroid/wiki/png/lan_en.png"></img></a>,&nbsp;
-<a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr<img alt="Homepage fr" src="https://github.com/k3b/APhotoManager/blob/FDroid/wiki/png/lan_fr.png"></img></a>,&nbsp;
-<a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja<img alt="Homepage ja" src="https://github.com/k3b/APhotoManager/blob/FDroid/wiki/png/lan_ja.png"></img></a>,&nbsp;
-<a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro<img alt="Homepage ro" src="https://github.com/k3b/APhotoManager/blob/FDroid/wiki/png/lan_ro.png"></img></a>
-		<li><a href="https://github.com/k3b/APhotoManager/issues/21">Aidez-nous à traduire dans d'autres langues.</a></li>
-		</ul>
-
----
-
+	<string name="about_content_about"><![CDATA["
+  <h1>A Photo Manager</h1>avec &#39;A Photo Map&#39; sur &#39;AndroFotoFinder&#39;App et page d&#39;accueil Internet disponibles
+  dans ces langues:
+  <ul>
+    <li>
+    <a href='https://github.com/k3b/APhotoManager/wiki/de-home'>de
+    <a href='https://github.com/k3b/APhotoManager/wiki/home'>en
+    <a href='https://github.com/k3b/APhotoManager/wiki/fr-home'>fr
+    <a href='https://github.com/k3b/APhotoManager/wiki/ja-home'>ja
+    <a href='https://github.com/k3b/APhotoManager/wiki/ro-home'>ro
+    <li>
+      <a href='https://github.com/k3b/APhotoManager/issues/21'>Aidez-nous à traduire dans d&#39;autres langues.</a>
+    </li>
+  </ul>---
   <br />Caractéristiques:
   <ul>
-    <li> Peut gérer de grandes collections d'images (15000+ images dans plus de 1000 dossiers) </li>
-    <li> Utilise contenu de l'image de fournisseur d'Android. Pas de scan de l'image initiale nécessaire. </li>
+    <li>Peut gérer de grandes collections d&#39;images (15000+ images dans plus de 1000 dossiers)</li>
+    <li>Utilise contenu de l&#39;image de fournisseur d&#39;Android. Pas de scan de l&#39;image initiale nécessaire.</li>
     <li>
-    <a href="https://github.com/k3b/APhotoManager/wiki/Filter-View">Trouver des images</a> via
-      <ul>
-        <li> dossier (avec hiérarchique
-        <a href="https://github.com/k3b/APhotoManager/wiki/Folder-Picker"> dossier Picker </a>) </li>
-        <li> jokers qui correspondent dossier / nom de fichier </li>
-        <li> Date </li>
-        <li> zone
-        <a href="https://github.com/k3b/APhotoManager/wiki/geographic-map"> carte géographique </a> (si l'image a des infos Exif GPS) </li>	  
-      </ul>
-    </li>
-    <li> Afficher le résultat dans un défilement 
-    <a href="https://github.com/k3b/APhotoManager/wiki/Image-View"> Photo-détail-vue </a> avec
-      <ul>
-        <li> glisser pour aller à l'image suivante / précédente </li>
-        <li> les opérations de fichiers copier, déplacer, supprimer, renommer, partagez </li>
-      </ul>
-    </li>
-    <li> Le
-    <a href="https://github.com/k3b/APhotoManager/wiki/geographic-map"> carte géographique </a> montre marqueurs à des endroits où les photos
-    ont été prises </li>
-    <li> Opérations sur les fichiers
-      <ul>
-        <li> va également mettre à jour la base de données image de fournisseur de contenu d'Android </li>
-        <li>Préserve la date des fichiers si la version installée d&#39;Android le permet.</li>
-        <li> va également mettre à jour la base de données image de fournisseur de contenu d'Android </li>
-        <li> les fichiers XMP sidecar-mise à jour </li> 		
-      </ul>
-    </li>
+    <a href='https://github.com/k3b/APhotoManager/wiki/Filter-View'>Trouver des images</a> via
+    <ul>
+      <li>dossier (avec hiérarchique
+      <a href='https://github.com/k3b/APhotoManager/wiki/Folder-Picker'>dossier Picker</a> )</li>
+      <li>jokers qui correspondent dossier / nom de fichier</li>
+      <li>Date</li>
+      <li>zone
+      <a href='https://github.com/k3b/APhotoManager/wiki/geographic-map'>carte géographique</a> (si l&#39;image a des infos Exif
+      GPS)</li>
+    </ul></li>
+    <li>Afficher le résultat dans un défilement
+    <a href='https://github.com/k3b/APhotoManager/wiki/Image-View'>Photo-détail-vue</a> avec
+    <ul>
+      <li>glisser pour aller à l&#39;image suivante / précédente</li>
+      <li>les opérations de fichiers copier, déplacer, supprimer, renommer, partagez</li>
+    </ul></li>
+    <li>Le
+    <a href='https://github.com/k3b/APhotoManager/wiki/geographic-map'>carte géographique</a> montre marqueurs à des endroits où
+    les photos ont été prises</li>
+    <li>Opérations sur les fichiers
+    <ul>
+      <li>va également mettre à jour la base de données image de fournisseur de contenu d&#39;Android</li>
+      <li>Préserve la date des fichiers si la version installée d&#39;Android le permet.</li>
+      <li>va également mettre à jour la base de données image de fournisseur de contenu d&#39;Android</li>
+      <li>les fichiers XMP sidecar-mise à jour</li>
+    </ul></li>
   </ul>
   <br />
-	"]]></string>
+  <br />
+  <br />
+  	"]]></string>
 </resources>
