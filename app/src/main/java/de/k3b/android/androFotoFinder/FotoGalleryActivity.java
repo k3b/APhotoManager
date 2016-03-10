@@ -531,6 +531,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
     private void onFilterChanged(IGalleryFilter filter, String why) {
         if (filter != null) {
             this.mGalleryQueryParameter.mFilter = filter;
+            this.mGalleryQueryParameter.setHasUserDefinedQuery(false);
 
             invalidateDirectories(mDebugPrefix + "#filter changed " + why);
 

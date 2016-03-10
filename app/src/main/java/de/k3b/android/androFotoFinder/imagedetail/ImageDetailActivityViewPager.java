@@ -64,7 +64,6 @@ import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
-import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
@@ -244,11 +243,12 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     /** where data comes from */
     private QueryParameter mGalleryContentQuery = null;
+    private GalleryFilterParameter mFilter = null;
 
     /** if >= 0 after load cursor scroll to this offset */
     private int mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
 
-    /** if != after load cursor scroll to this path */
+    /** if not null: after load cursor scroll to this path */
     private String mInitialFilePath = null;
 
     public static void showActivity(Activity context, Uri imageUri, int position, QueryParameter imageDetailQuery) {
@@ -409,56 +409,73 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         return (!file.exists() || !file.isFile() || !file.canRead());
     }
 
+    private void setFilter(GalleryFilterParameter value) {
+        if (value != null) {
+            QueryParameter query = new QueryParameter(DEFAULT_QUERY);
+            FotoSql.setSort(query, DEFAULT_SORT, true);
+            FotoSql.setWhereFilter(query, value, true);
+            mGalleryContentQuery = query;
+        }
+        this.mFilter = value; // #34
+
+    }
+
     /** query from EXTRA_QUERY, EXTRA_FILTER, fileParentDir , defaultQuery */
     private void getParameter(Intent intent) {
         this.mInitialScrollPosition = intent.getIntExtra(EXTRA_POSITION, this.mInitialScrollPosition);
         this.mGalleryContentQuery = QueryParameter.parse(intent.getStringExtra(EXTRA_QUERY));
 
+        this.mFilter = null;
         if (mGalleryContentQuery == null) {
             String filterValue = intent.getStringExtra(EXTRA_FILTER);
             if (filterValue != null) {
-                GalleryFilterParameter filter = GalleryFilterParameter.parse(filterValue, new GalleryFilterParameter());
-                QueryParameter query = new QueryParameter(DEFAULT_QUERY);
-                FotoSql.setSort(query, DEFAULT_SORT, true);
-                FotoSql.setWhereFilter(query, filter, true);
-                mGalleryContentQuery = query;
+                setFilter(GalleryFilterParameter.parse(filterValue, new GalleryFilterParameter()));
             }
         }
 
         if (mGalleryContentQuery == null) {
+            this.mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
             Uri uri = IntentUtil.getUri(intent);
             if (uri != null) {
                 String scheme = uri.getScheme();
                 if ((scheme == null) || ("file".equals(scheme))) {
-                    mGalleryContentQuery = getParameterFromPath(uri.getPath(), true);
+                    setFilter(getParameterFromPath(uri.getPath(), true)); // including path and index
                 } else if ("content".equals(scheme)) {
                     String path = FotoSql.execGetFotoPath(this, uri);
                     if (path != null) {
-                        mGalleryContentQuery = getParameterFromPath(path, false);
+                        setFilter(getParameterFromPath(path, false));
+                        if (Global.debugEnabled) {
+                            Log.i(Global.LOG_CONTEXT, "Translate from '" + uri +
+                                    "' to '" + path + "'");
+                        }
+                    } else {
+                        Log.i(Global.LOG_CONTEXT, "Cannot translate from '" + uri +
+                                "' to local file");
                     }
                 }
             }
         }
 
-        if (mGalleryContentQuery == null) {
-            Log.e(Global.LOG_CONTEXT, mDebugPrefix + " onCreate() : intent.extras[" + EXTRA_QUERY +
-                    "] not found. data=" + intent.getData() +
-                    ". Using default.");
+        if ((mGalleryContentQuery == null) && (mFilter == null)) {
+            Log.e(Global.LOG_CONTEXT, mDebugPrefix + " onCreate() : parameter Not found " + EXTRA_QUERY +
+                    ", " + EXTRA_FILTER + ", ] not found. Using default.");
             mGalleryContentQuery = new QueryParameter(DEFAULT_QUERY);
+            this.mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
+            //mInitialFilePath = path;
+            //this.mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
         } else if (Global.debugEnabledSql) {
-            Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onCreate() : query = " + mGalleryContentQuery);
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onCreate() : query = " + mGalleryContentQuery + "; filter = " + mFilter);
         }
     }
 
-    private QueryParameter getParameterFromPath(String path, boolean isFileUri) {
-        mInitialFilePath = path;
-        File selectedPhoto = new File(mInitialFilePath);
-        this.mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
+    private GalleryFilterParameter getParameterFromPath(String path, boolean isFileUri) {
+        if ((path == null) || (path.length() == 0)) return null;
 
-        QueryParameter query = new QueryParameter(DEFAULT_QUERY);
-        FotoSql.addPathWhere(query, selectedPhoto.getParent(), FotoSql.QUERY_TYPE_GALLERY);
-        FotoSql.setSort(query, DEFAULT_SORT, true);
-        return query;
+        File selectedPhoto = new File(path);
+        mInitialFilePath = path;
+        this.mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
+        GalleryFilterParameter filter = new GalleryFilterParameter().setPath(selectedPhoto.getParent() + "/%");
+        return filter;
     }
 
 /* these doe not work yet (tested with for android 4.0)
@@ -573,7 +590,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
         String dbPathSearch = null;
         ArrayList<String> missing = new ArrayList<String>();
-        dbPathSearch = dirToScan.getPath() + "%";
+        dbPathSearch = dirToScan.getPath() + "/%";
         List<String> known = FotoSql.execGetFotoPaths(context, dbPathSearch);
         File[] existing = dirToScan.listFiles();
 
@@ -662,7 +679,11 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                 return onRenameDirQueston(getCurrentImageId(), getCurrentFilePath(), null);
 
             case R.id.cmd_gallery:
-                FotoGalleryActivity.showActivity(this, null, this.mGalleryContentQuery, 0);
+                if (mFilter != null) {
+                    FotoGalleryActivity.showActivity(this, this.mFilter, null, 0);
+                } else {
+                    FotoGalleryActivity.showActivity(this, null, this.mGalleryContentQuery, 0);
+                }
                 return true;
 
             case R.id.cmd_show_geo:
