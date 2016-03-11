@@ -181,6 +181,13 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
     }
 
     @Override
+    public void onBackPressed() {
+        if ((mMap == null) || (!mMap.onBackPressHandled())) {
+            super.onBackPressed();
+        } // else mMap has used "Back" to close the bookmark navigation drawer
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_map_geo_picker, menu);

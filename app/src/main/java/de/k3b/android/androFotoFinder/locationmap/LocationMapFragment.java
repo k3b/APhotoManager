@@ -987,18 +987,21 @@ public class LocationMapFragment extends DialogFragment implements BookmarkListO
         return current;
     }
 
-    /*
-    in activity
-    @Override
-    public void onBackPressed() {
+    /** called by activity to find out if this fragment has handled BackPress */
+    public boolean onBackPressHandled() {
         // back should close the overlay if active
         if (this.bookmarkListOverlay.isBookmarkListVisible()) {
             this.bookmarkListOverlay.setBookmarkListVisible(false);
+            // activity should not close
+            return true;
         } else {
-            // close the activity
-            super.onBackPressed();
+            // allow activity to close
+            return false;
         }
     }
+
+    /*
+    in activity
 
     / * Called whenever we call invalidateOptionsMenu() * /
     @Override
@@ -1015,20 +1018,6 @@ public class LocationMapFragment extends DialogFragment implements BookmarkListO
 
         super.onPrepareOptionsMenu(menu);
     }
-
-    @Override
-    protected Dialog onCreateDialog(final int id) {
-        Dialog result = this.bookmarkListOverlay.onCreateDialog(id);
-        if (result != null) return result;
-
-        switch (id) {
-            case R.id.cmd_help:
-                return AboutDialogPreference.createAboutDialog(this);
-
-        }
-        return null;
-    }
-
 
     */
 

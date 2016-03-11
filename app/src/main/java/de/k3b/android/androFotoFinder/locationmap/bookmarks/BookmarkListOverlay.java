@@ -133,6 +133,7 @@ public class BookmarkListOverlay implements IGeoInfoHandler {
                 if (oldTitle != null) {
                     context.setTitle(oldTitle);
                 }
+                setBookmarkListVisible(false);
                 invalidateOptionsMenu();
             }
 
@@ -147,6 +148,7 @@ public class BookmarkListOverlay implements IGeoInfoHandler {
                     oldTitle = null;
                 }
 
+                setBookmarkListVisible(true);
                 invalidateOptionsMenu();
             }
         };
@@ -185,14 +187,15 @@ public class BookmarkListOverlay implements IGeoInfoHandler {
     public void showGeoPointEditDialog(GeoBmpDto geoPointInfo) {
         if (this.edit == null) {
             this.edit = new GeoBmpEditDialog(this.context, this, R.layout.geobmp_edit_name);
-            this.edit.setTitle(context.getString(R.string.title_bookmark_edit));
+            this.edit.setTitle(context.getString(R.string.edit_menu_title));
         }
 
         if (!BookmarkUtil.isBookmark(geoPointInfo)) {
             geoPointInfo = BookmarkUtil.createBookmark(geoPointInfo);
         }
+
         this.edit.onGeoInfo(geoPointInfo);
-        this.context.showDialog(EDIT_MENU_ID);
+        this.edit.show();
     }
 
     public Dialog onCreateDialog(final int id) {

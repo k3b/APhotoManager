@@ -200,5 +200,4 @@
 	<string name="title_bookmark_list">Bookmarks</string>
 	<string name="bookmark_template_initial">[Initial]</string>
 	<string name="bookmark_template_current">[Current]</string>
-	<string name="title_bookmark_edit">Edit</string>
 </resources>

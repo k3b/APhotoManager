@@ -194,4 +194,11 @@
   "]]></string>
   <string name="settings_debug_clear_title">LogCat leeren</string>
   <string name="settings_debug_save_title">LogCat speichern</string>
+
+  <string name="btn_save">Speichern</string>
+  <string name="title_close">Close</string>
+  <string name="title_bookmark_list">Bookmarks</string>
+  <string name="bookmark_template_initial">[Initial]</string>
+  <string name="bookmark_template_current">[Aktuell]</string>
+
 </resources>

@@ -46,7 +46,7 @@ import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 
 /**
- * LocationMapFragment working as Picker. Current result is the red marker.
+ * LocationMapFragment working as Picker. Current result is the selected red marker.
  *
  * Created by k3b on 30.08.2015.
  */
