@@ -105,7 +105,37 @@ public class GeoUriTests {
         Assert.assertEquals("geo:", result);
     }
 
+    /**
+     * geoarea:{lat},{lon},{lat},{lon}
+     * */
+    @Test
+    public void shouldFormatArea() throws Exception {
+        GeoPointDto ne = new GeoPointDto(12.345, -56.789, GeoPointDto.NO_ZOOM);
+        GeoPointDto sw = new GeoPointDto(12.0, -53, GeoPointDto.NO_ZOOM);
 
+        GeoUri sut = new GeoUri(GeoUri.OPT_DEFAULT);
+
+        String result = sut.toUriString(ne, sw);
+
+        Assert.assertEquals("geoarea:12.345,-56.789,12,-53", result);
+    }
+
+
+    /**
+     * geoarea:{lat},{lon},{lat},{lon}
+     * */
+    @Test
+    public void shouldParseArea() throws Exception {
+        GeoUri sut = new GeoUri(GeoUri.OPT_DEFAULT);
+
+        GeoPointDto[] resultPoints = new GeoPointDto[]{new GeoPointDto(),new GeoPointDto()};
+        sut.fromUri("geoarea:12.345,-56.789,12,-53", resultPoints);
+
+        String result = sut.toUriString(resultPoints[0], resultPoints[1]);
+
+        Assert.assertEquals("geoarea:12.345,-56.789,12,-53", result);
+    }
+    
     private GeoPointDto createTestGeoPoint() {
         return new GeoPointDto(12.345, -56.78901234, "name", "link", "icon", "id", "description", 5, 7, new Date(91, 2, 3, 4, 5, 6));
         /*

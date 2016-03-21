@@ -65,6 +65,7 @@ public class GeoUri {
      */
     private static final String DEFAULT_ENCODING = "UTF-8";
     public static final String GEO_SCHEME = "geo:";
+    public static final String AREA_SCHEME = "geoarea:";
 
     /* regular expressions used by the parser.<br/>
        '(?:"+something+")"' is a non capturing group; "\s" white space */
@@ -75,7 +76,9 @@ public class GeoUri {
     private final static String regexpCommaDouble = "(?:\\s*,\\s*" + regexpDouble + ")"; // i.e. " , +123.456"
     private final static String regexpCommaDoubleOptional = regexpCommaDouble + "?";
     private final static String regexpLatLonAlt = regexpDouble + regexpCommaDouble + regexpCommaDoubleOptional;
+    private final static String regexpLatLonLatLon = regexpDouble + regexpCommaDouble + regexpCommaDouble + regexpCommaDouble;
     private final static Pattern patternLatLonAlt = Pattern.compile(regexpLatLonAlt);
+    private final static Pattern patternLatLonLatLon = Pattern.compile(regexpLatLonLatLon);
     private final static Pattern patternTime = Pattern.compile("([12]\\d\\d\\d-\\d\\d-\\d\\dT\\d\\d:\\d\\d:\\d\\dZ)");
     /* current state */
 
@@ -144,6 +147,26 @@ public class GeoUri {
         return parseResult;
     }
 
+    /** load IGeopoint from uri-string into parseResult. */
+    public <TGeo extends GeoPointDto>  TGeo[] fromUri(String uri, TGeo[] parseResult) {
+        if ((uri == null) || (parseResult == null) || (parseResult.length < 2)) return null;
+        if (!uri.startsWith(AREA_SCHEME)) return null;
+
+        Matcher m = parseFindWithPattern(patternLatLonLatLon, uri);
+
+        if (m != null) {
+            int nextCoord = 1;
+            try {
+                parseResult[0].setLatitude(GeoFormatter.parseLatOrLon(m.group(nextCoord++))).setLongitude(GeoFormatter.parseLatOrLon(m.group(nextCoord++)));
+                parseResult[1].setLatitude(GeoFormatter.parseLatOrLon(m.group(nextCoord++))).setLongitude(GeoFormatter.parseLatOrLon(m.group(nextCoord++)));
+                return parseResult;
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
     private static ArrayList<String> toStringArray(String[] whereToSearch) {
         ArrayList<String> arrayList = new ArrayList<String>();
         for (String candidate : whereToSearch) {
@@ -202,12 +225,18 @@ public class GeoUri {
     private static Matcher parseFindWithPattern(Pattern pattern, List<String> whereToSearch) {
         if (whereToSearch != null) {
             for (String candidate : whereToSearch) {
-                if (candidate != null) {
-                    Matcher m = pattern.matcher(candidate);
-                    while (m.find() && (m.groupCount() > 0)) {
-                        return m;
-                    }
-                }
+                Matcher m = parseFindWithPattern(pattern, candidate);
+                if (m != null) return m;
+            }
+        }
+        return null;
+    }
+
+    private static Matcher parseFindWithPattern(Pattern pattern, String candidate) {
+        if (candidate != null) {
+            Matcher m = pattern.matcher(candidate);
+            while (m.find() && (m.groupCount() > 0)) {
+                return m;
             }
         }
         return null;
@@ -256,6 +285,18 @@ public class GeoUri {
         if (geoPoint.getTimeOfMeasurement() != null) {
             appendQueryParameter(result, GeoUriDef.TIME, GeoFormatter.formatDate(geoPoint.getTimeOfMeasurement()), false);
         }
+
+        return result.toString();
+    }
+
+
+    public String toUriString(IGeoPointInfo northEast, IGeoPointInfo southWest) {
+        StringBuffer result = new StringBuffer();
+        result.append(AREA_SCHEME);
+        result.append(GeoFormatter.formatLatLon(northEast.getLatitude())).append(",");
+        result.append(GeoFormatter.formatLatLon(northEast.getLongitude())).append(",");
+        result.append(GeoFormatter.formatLatLon(southWest.getLatitude())).append(",");
+        result.append(GeoFormatter.formatLatLon(southWest.getLongitude()));
 
         return result.toString();
     }
