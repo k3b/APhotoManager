@@ -115,6 +115,16 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
         }
     }
 
+    public static boolean isNoMedia(File file, int maxLevel) {
+        while ((--maxLevel >= 0) && (file != null)) {
+            if (new File(file, ".nomedia").exists()) {
+                return true;
+            }
+            file = file.getParentFile();
+        }
+        return false;
+    }
+
     public static boolean isGuiThread() {
         return (Looper.myLooper() == Looper.getMainLooper());
     }

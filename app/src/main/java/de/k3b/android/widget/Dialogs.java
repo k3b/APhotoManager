@@ -50,7 +50,7 @@ public abstract class Dialogs {
 	        // when an item is clicked, notify our interface "onDialogResult"
 	    	public void onClick(DialogInterface d, int position) {
 				d.dismiss();
-				onDialogResult(strings[position], strings);
+				onDialogResult(strings[position],(Object[]) strings);
 			}
 		});
 

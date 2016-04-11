@@ -60,7 +60,6 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  {
 
     private QueryParameter mParameters; // defining sql to get data
     private Cursor mCursor = null; // the content of the page
-    private boolean mDataValid = true;
 
     public ImagePagerAdapterFromCursor(final Activity context, String name) {
         mActivity = context;
@@ -115,7 +114,12 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  {
      */
     @Override
     public int getCount() {
-        return (this.mDataValid && (this.mCursor != null)) ? this.mCursor.getCount() : 0;
+        int result = 0;
+        if (this.mCursor != null) {
+            result = this.mCursor.getCount();
+        }
+
+        return result;
     }
 
     /**
@@ -213,7 +217,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  {
 
     /** internal helper. return null if position is not available */
     private Cursor getCursorAt(int position) {
-        if (this.mDataValid && (this.mCursor != null) && (position >= 0) && (position < this.mCursor.getCount())) {
+        if ((this.mCursor != null) && (position >= 0) && (position < this.mCursor.getCount())) {
             this.mCursor.moveToPosition(position);
             return this.mCursor;
         }
@@ -222,7 +226,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  {
 
     /** internal helper. return -1 if position is not available */
     public int getCursorFromPath(String path) {
-        if (this.mDataValid && (this.mCursor != null) && (path != null)) {
+        if ((this.mCursor != null) && (path != null)) {
             int index = mCursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT);
             if (index >= 0) {
                 if (mCursor.moveToFirst()) {

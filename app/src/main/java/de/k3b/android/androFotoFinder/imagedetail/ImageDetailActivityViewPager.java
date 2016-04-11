@@ -299,7 +299,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             // extra parameter
             getParameter(intent);
 
-            mAdapter = new ImagePagerAdapterFromCursor(this, mDebugPrefix);
+            mAdapter = new ImagePagerAdapterFromCursorArray(this, mDebugPrefix, mInitialFilePath);
             mViewPager.setAdapter(mAdapter);
             mViewPager.setOnInterceptTouchEvent(new View.OnClickListener() {
                 @Override
