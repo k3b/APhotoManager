@@ -147,11 +147,10 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
                     Integer id = inMediaDb.get(fileName);
                     if (id != null) {
                         // already exists
-                        update_Android42(context, id, new File(fileName));
+                        modifyCount += update_Android42(context, id, new File(fileName));
                     } else {
-                        insert_Android42(context, new File(fileName));
+                        modifyCount += insert_Android42(context, new File(fileName));
                     }
-                    modifyCount++;
                 }
             }
         }
@@ -195,9 +194,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
             int pathColNo  = c.getColumnIndex(FotoSql.SQL_COL_PATH);
             while (c.moveToNext()) {
                 String oldPath = c.getString(pathColNo);
-                MediaScanner.updatePathRelatedFields(context, c, old2NewFileNames.get(oldPath), pkColNo, pathColNo);
-
-                modifyCount++;
+                modifyCount += MediaScanner.updatePathRelatedFields(context, c, old2NewFileNames.get(oldPath), pkColNo, pathColNo);
             }
         } catch (Exception ex) {
             Log.e(Global.LOG_CONTEXT, CONTEXT + "execChangePaths() error :", ex);
@@ -274,19 +271,19 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
         }
     }
 
-    public static void updatePathRelatedFields(Context context, Cursor cursor, String newAbsolutePath) {
+    public static int updatePathRelatedFields(Context context, Cursor cursor, String newAbsolutePath) {
         int columnIndexPk = cursor.getColumnIndex(FotoSql.SQL_COL_PK);
         int columnIndexPath = cursor.getColumnIndex(FotoSql.SQL_COL_PATH);
-        updatePathRelatedFields(context, cursor, newAbsolutePath, columnIndexPk, columnIndexPath);
+        return updatePathRelatedFields(context, cursor, newAbsolutePath, columnIndexPk, columnIndexPath);
     }
 
-    public static void updatePathRelatedFields(Context context, Cursor cursor, String newAbsolutePath, int columnIndexPk, int columnIndexPath) {
+    public static int updatePathRelatedFields(Context context, Cursor cursor, String newAbsolutePath, int columnIndexPk, int columnIndexPath) {
         ContentValues values = new ContentValues();
         DatabaseUtils.cursorRowToContentValues(cursor, values);
         String oldAbsolutePath = cursor.getString(columnIndexPath);
         int id = cursor.getInt(columnIndexPk);
         setPathRelatedFieldsIfNeccessary(values, newAbsolutePath, oldAbsolutePath);
-        FotoSql.execUpdate(context, id, values);
+        return FotoSql.execUpdate(context, id, values);
     }
 
     /** sets the path related fields */
@@ -304,23 +301,25 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
         }
     }
 
-    private static void update_Android42(Context context, int id, File file) {
+    private static int update_Android42(Context context, int id, File file) {
         if ((file != null) && file.exists() && file.canRead()) {
             ContentValues values = new ContentValues();
             getExifFromFile(values, file);
-            FotoSql.execUpdate(context, id, values);
+            return FotoSql.execUpdate(context, id, values);
         }
+		return 0;
     }
 
-    private static void insert_Android42(Context context, File file) {
+    private static int insert_Android42(Context context, File file) {
         if ((file != null) && file.exists() && file.canRead()) {
             ContentValues values = new ContentValues();
             long now = new Date().getTime();
             values.put(MediaStore.Images.ImageColumns.DATE_ADDED, now / 1000);//sec
 
             getExifFromFile(values, file);
-            FotoSql.execInsert(context, values);
+            return (null != FotoSql.execInsert(context, values)) ? 1 : 0;
         }
+		return 0;
     }
 
     @NonNull

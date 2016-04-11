@@ -213,7 +213,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  {
 
     /** internal helper. return null if position is not available */
     private Cursor getCursorAt(int position) {
-        if (this.mDataValid && (this.mCursor != null)) {
+        if (this.mDataValid && (this.mCursor != null) && (position >= 0) && (position < this.mCursor.getCount())) {
             this.mCursor.moveToPosition(position);
             return this.mCursor;
         }

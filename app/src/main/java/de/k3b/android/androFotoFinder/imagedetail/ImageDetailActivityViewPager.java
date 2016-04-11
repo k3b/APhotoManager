@@ -90,6 +90,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     private static int mModifyCount = 0;
     private MenuItem mMenuSlideshow = null;
 
+    private boolean mWaitingForMediaScannerResult = false;
+
     class LocalCursorLoader implements LoaderManager.LoaderCallbacks<Cursor> {
         /** incremented every time a new curster/query is generated */
         private int mRequeryInstanceCount = 0;
@@ -101,6 +103,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             switch (loaderID) {
                 case ACTIVITY_ID:
                     mRequeryInstanceCount++;
+                    mWaitingForMediaScannerResult = false;
                     if (Global.debugEnabledSql) {
                         Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onCreateLoader" +
                                 getDebugContext() +
@@ -269,6 +272,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 	public void onCreate(Bundle savedInstanceState) {
         mDebugPrefix = "ImageDetailActivityViewPager#" + (id++)  + " ";
         Global.debugMemory(mDebugPrefix, "onCreate");
+        this.mWaitingForMediaScannerResult = false;
 
         // #17: let actionbar overlap image so there is no need to resize main view item
         // http://stackoverflow.com/questions/6749261/custom-translucent-android-actionbar
@@ -472,7 +476,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         if ((path == null) || (path.length() == 0)) return null;
 
         File selectedPhoto = new File(path);
-        mInitialFilePath = path;
+        this.mInitialFilePath = path;
         this.mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
         GalleryFilterParameter filter = new GalleryFilterParameter().setPath(selectedPhoto.getParent() + "/%");
         return filter;
@@ -572,8 +576,9 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     /** gets called if no file is found by a db-query or if jpgFullFilePath is not found in media db */
     private boolean checkForIncompleteMediaDatabase(String jpgFullFilePath, String why) {
         File fileToLoad = (jpgFullFilePath != null) ? new File(jpgFullFilePath) : null;
-        if ((fileToLoad != null) && (fileToLoad.exists()) && (fileToLoad.canRead())) {
+        if ((!this.mWaitingForMediaScannerResult) && (fileToLoad != null) && (fileToLoad.exists()) && (fileToLoad.canRead())) {
             // file exists => must update media database
+            this.mWaitingForMediaScannerResult = true;
             int numberOfNewItems = updateIncompleteMediaDatabase(mDebugPrefix, this,
                     mDebugPrefix + "checkForIncompleteMediaDatabase-" + why,
                     fileToLoad.getParentFile());
@@ -582,6 +587,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             Toast.makeText(this, message, Toast.LENGTH_LONG).show();
             return true;
         }
+        this.mWaitingForMediaScannerResult = false;
         return false;
     }
 
