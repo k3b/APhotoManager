@@ -28,7 +28,7 @@
   <string name="bookmark_delete_error_format">Kann Lesezeichen %1$s nicht löschen.</string>
   <string name="bookmark_delete_question">Lesezeichen löschen?</string>
   <string name="bookmark_err_not_found_format">Keine Lesezeichen in %1$s.</string>
-  <string name="bookmark_file_comment_format">Erstellt am %3$s mit \'%1$s\' Version %2$s. weitere Informationen finden Sie unter https://github.com/k3b/APhotoManager/wiki/intentap#sql</string>
+  <string name="bookmark_file_comment_format">Erstellt am %3$s mit \'%1$s\' Version %2$s. weitere Informationen finden Sie unter https://github.com/k3b/APhotoManager/wiki/intentap#EXTRA_SQL</string>
   <string name="bookmark_load_from_menu_title">Lade Lesezeichen aus&#8230;</string>
   <string name="bookmark_save_as_menu_title">Lesezeichen speichern unter...</string>
   <string name="btn_cancel">Abbrechen</string>
@@ -142,18 +142,6 @@
 <h1>A Photo Manager</h1>mit &#39;A Photo Map&#39; und &#39;AndroFotoFinder&#39;
   <br />Merkmale:
   <ul>
-    <li>App und Internet-Homepage sind in diesen Sprachen verfügbar:
-    <ul>
-      <li>
-      <a href="https://github.com/k3b/APhotoManager/wiki/de-home">de</a>,
-      <a href="https://github.com/k3b/APhotoManager/wiki/home">en</a>,
-      <a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr</a>,
-      <a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja</a>,
-      <a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro</a></li>
-      <li>
-        <a href="https://github.com/k3b/APhotoManager/issues/21">Help us to translate into other languages.</a>
-      </li>
-    </ul></li>
     <li>verwaltet große Bildersammlungen (15000+ Bilder in 1000+ Ordnern)</li>
     <li>verwendet Androids interne Mediendatenbank. Kein initialer Bild-Scan notwendig.</li>
     <li>
@@ -188,6 +176,19 @@
       <li>aktualisieren auch die Android-Mediandatenbank</li>
       <li>erhalten das Dateidatum (falls Android dies unterstützt)</li>
       <li>aktualisiert auch Xmp-Filialdateien</li>
+    </ul></li>
+    <li>App und Internet-Homepage sind in diesen Sprachen verfügbar:
+    <ul>
+      <li>
+      <a href="https://github.com/k3b/APhotoManager/wiki/de-home">de</a>,&nbsp;
+      <a href="https://github.com/k3b/APhotoManager/wiki/home">en</a>,&nbsp;
+      <a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr</a>,&nbsp;
+	  <a href="https://github.com/k3b/APhotoManager/wiki/it-home">it</a>,&nbsp;
+      <a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja</a>,&nbsp;
+      <a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro</a></li>
+      <li>
+        <a href="https://github.com/k3b/APhotoManager/issues/21">Help us to translate into other languages.</a>
+      </li>
     </ul></li>
   </ul>
   <br />

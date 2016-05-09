@@ -28,7 +28,7 @@
   <string name="bookmark_delete_error_format">ブックマーク %1$s を削除できません。</string>
   <string name="bookmark_delete_question">このブックマークを削除しますか?</string>
   <string name="bookmark_err_not_found_format">%1$s に検索クエリはありません。</string>
-  <string name="bookmark_file_comment_format">\'%1$s\' のバージョン %2$s と %3$s で生成されました。詳細は https://github.com/k3b/APhotoManager/wiki/intentap#sql を参照してください。</string>
+  <string name="bookmark_file_comment_format">\'%1$s\' のバージョン %2$s と %3$s で生成されました。詳細は https://github.com/k3b/APhotoManager/wiki/intentap#EXTRA_SQL を参照してください。</string>
   <string name="bookmark_load_from_menu_title">&#8230; からブックマークを読み込む</string>
   <string name="bookmark_save_as_menu_title">&#8230; としてブックマークを保存</string>
   <string name="btn_cancel">キャンセル</string>
@@ -150,6 +150,7 @@
 		<li><a href="https://github.com/k3b/APhotoManager/wiki/de-home">de</a>,&nbsp;
 		<a href="https://github.com/k3b/APhotoManager/wiki/home"   >en</a>,&nbsp;
 		<a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr</a>,&nbsp;
+		<a href="https://github.com/k3b/APhotoManager/wiki/it-home">it</a>,&nbsp;
 		<a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja</a>,&nbsp;
 		<a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro</a></li>
 		<li><a href="https://github.com/k3b/APhotoManager/issues/21">Help us to translate into other languages.</a></li>

@@ -29,7 +29,7 @@
   <string name="bookmark_delete_question">Sterg acest marcaj?</string>
   <string name="bookmark_err_not_found_format">Fara solicitari%1$s. Nu am gasit cereri.</string>
   <string name="bookmark_file_comment_format">Obtinut %3$s cu \'%1$s\' Versiunea%2$s. Pentru detalii vezi
-https://github.com/k3b/APhotoManager/wiki/intentap#sql</string>
+https://github.com/k3b/APhotoManager/wiki/intentap#EXTRA_SQL</string>
   <string name="bookmark_load_from_menu_title">Incarca marcaj de la &#8230;</string>
   <string name="bookmark_save_as_menu_title">Salveaza Marcajul ca &#8230;</string>
   <string name="btn_cancel">Anuleaza</string>
@@ -100,6 +100,7 @@ https://github.com/k3b/APhotoManager/wiki/intentap#sql</string>
 		<li><a href='https://github.com/k3b/APhotoManager/wiki/de-home'>de</a>,&nbsp;
 		<a href='https://github.com/k3b/APhotoManager/wiki/home'   >en</a>,&nbsp;
 		<a href='https://github.com/k3b/APhotoManager/wiki/fr-home'>fr</a>,&nbsp;
+		<a href="https://github.com/k3b/APhotoManager/wiki/it-home">it</a>,&nbsp;
 		<a href='https://github.com/k3b/APhotoManager/wiki/ja-home'>ja</a>,&nbsp;
 		<a href='https://github.com/k3b/APhotoManager/wiki/ro-home'>ro</a></li>
 		<li><a href='https://github.com/k3b/APhotoManager/issues/21'>Help us to translate into other languages.</a></li>

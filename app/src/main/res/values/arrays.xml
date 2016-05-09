@@ -16,6 +16,7 @@
         <item>en english</item>
         <item>es spanish Espanol</item>
         <item>fr french Français</item>
+        <item>it italian Italiano</item>
         <item>ja japanese 日本人</item>
         <item>ro romanian Român</item>
     </string-array>
@@ -25,6 +26,7 @@
         <item>en</item>
         <item>es</item>
         <item>fr</item>
+        <item>it</item>
         <item>ja</item>
         <item>ro</item>
     </string-array>
