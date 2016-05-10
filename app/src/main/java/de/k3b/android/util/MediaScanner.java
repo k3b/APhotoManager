@@ -36,6 +36,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
@@ -63,6 +64,13 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
         sFormatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
         sFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
+
+    public static final FilenameFilter JPG_FILENAME_FILTER = new FilenameFilter() {
+        @Override
+        public boolean accept(File dir, String filename) {
+            return MediaScanner.isJpeg(filename);
+        }
+    };
 
     protected final Context mContext;
     protected final String mWhy;
@@ -115,7 +123,9 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
         }
     }
 
-    public static boolean isNoMedia(File file, int maxLevel) {
+    /** return true, if file is in a ".nomedia" dir */
+    public static boolean isNoMedia(String path, int maxLevel) {
+        File file = getDir(path);
         while ((--maxLevel >= 0) && (file != null)) {
             if (new File(file, ".nomedia").exists()) {
                 return true;
@@ -125,6 +135,18 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
         return false;
     }
 
+    /** return parent of path if path is not a dir. else return path */
+    public static File getDir(String path) {
+        if ((path == null) || (path.length() == 0)) return null;
+        return getDir(new File(path));
+    }
+
+    /** return parent of file if path is not a dir. else return file */
+    public static File getDir(File file) {
+        return ((file != null) && (!file.isDirectory())) ? file.getParentFile() : file;
+    }
+
+    /** return true if this is executed in the gui thread */
     public static boolean isGuiThread() {
         return (Looper.myLooper() == Looper.getMainLooper());
     }

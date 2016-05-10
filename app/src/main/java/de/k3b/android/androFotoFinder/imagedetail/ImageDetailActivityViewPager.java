@@ -254,6 +254,9 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     /** if not null: after load cursor scroll to this path */
     private String mInitialFilePath = null;
 
+    /** if not null: photos from this dir are loaded without using media db*/
+    private String mInitialDir = null;
+
     public static void showActivity(Activity context, Uri imageUri, int position, QueryParameter imageDetailQuery) {
         Intent intent;
         //Create intent
@@ -301,6 +304,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
             mAdapter = new ImagePagerAdapterFromCursorArray(this, mDebugPrefix, mInitialFilePath);
             mViewPager.setAdapter(mAdapter);
+
             mViewPager.setOnInterceptTouchEvent(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -315,15 +319,24 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                 mModifyCount = 0;
             }
 
+            if ((mInitialFilePath != null) && (mInitialScrollPosition ==-1)) {
+                mInitialScrollPosition = mAdapter.getPositionFromPath(mInitialFilePath);
+            }
+            if ((mInitialScrollPosition >= 0) && (mInitialScrollPosition < mAdapter.getCount())) {
+                mViewPager.setCurrentItem(mInitialScrollPosition);
+            }
+
             setResult((mModifyCount == 0) ? RESULT_NOCHANGE : RESULT_CHANGE);
 
             mFileCommands.setContext(this);
             mFileCommands.setLogFilePath(mFileCommands.getDefaultLogFile());
             MoveOrCopyDestDirPicker.sFileCommands = mFileCommands;
 
-            mCurorLoader = new LocalCursorLoader();
-            getLoaderManager().initLoader(ACTIVITY_ID, null, mCurorLoader);
-
+            if (mAdapter.getCount() == 0) {
+                // if cursor does not contain data via file
+                mCurorLoader = new LocalCursorLoader();
+                getLoaderManager().initLoader(ACTIVITY_ID, null, mCurorLoader);
+            }
             // #17: make actionbar background nearly transparent
             // http://stackoverflow.com/questions/6749261/custom-translucent-android-actionbar
             getActionBar().setBackgroundDrawable(new ColorDrawable(Color.argb(128, 0, 0, 0)));
@@ -552,7 +565,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         } else if (mInitialFilePath != null) {
             // try to find selection by text
             mViewPager.invalidate();
-            int positionFound = mAdapter.getCursorFromPath(mInitialFilePath);
+            int positionFound = mAdapter.getPositionFromPath(mInitialFilePath);
             if (positionFound < 0) {
                 // not found
                 checkForIncompleteMediaDatabase(mInitialFilePath, "onLoadCompleted(Selection='" +
@@ -573,9 +586,13 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         }
     }
 
-    /** gets called if no file is found by a db-query or if jpgFullFilePath is not found in media db */
+    /**
+     * gets called if no file is found by a db-query or if jpgFullFilePath is not found in media db
+     * return false; activity must me closed
+     */
     private boolean checkForIncompleteMediaDatabase(String jpgFullFilePath, String why) {
         File fileToLoad = (jpgFullFilePath != null) ? new File(jpgFullFilePath) : null;
+
         if ((!this.mWaitingForMediaScannerResult) && (fileToLoad != null) && (fileToLoad.exists()) && (fileToLoad.canRead())) {
             // file exists => must update media database
             this.mWaitingForMediaScannerResult = true;

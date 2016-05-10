@@ -38,8 +38,6 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.GarbageCollector;
 import de.k3b.database.QueryParameter;
-import de.k3b.geo.api.GeoPointDto;
-import de.k3b.geo.api.IGeoPointInfo;
 import uk.co.senab.photoview.PhotoView;
 
 /**
@@ -51,7 +49,7 @@ import uk.co.senab.photoview.PhotoView;
 public class ImagePagerAdapterFromCursor extends PagerAdapter  {
     // debug support
     private static int id = 0;
-    private final String mDebugPrefix;
+    protected final String mDebugPrefix;
     private static final boolean SYNC = false; // true: sync loading is much easier to debug.
 
     private final Activity mActivity;
@@ -225,20 +223,23 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  {
     }
 
     /** internal helper. return -1 if position is not available */
-    public int getCursorFromPath(String path) {
+    public int getPositionFromPath(String path) {
+        int result = -1;
         if ((this.mCursor != null) && (path != null)) {
             int index = mCursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT);
             if (index >= 0) {
                 if (mCursor.moveToFirst()) {
                     do {
                         if (path.equals(mCursor.getString(index))) {
-                            return mCursor.getPosition();
+                            result = mCursor.getPosition();
+                            break;
                         }
                     } while (mCursor.moveToNext());
                 }
             }
         }
-        return -1;
+        if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, mDebugPrefix + "getPositionFromPath(" + path +") => " + result);
+        return result;
     }
 
     private void setImage(int position, long imageID, Uri uri, PhotoView photoView) {

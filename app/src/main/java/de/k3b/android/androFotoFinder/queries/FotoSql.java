@@ -19,6 +19,7 @@
  
 package de.k3b.android.androFotoFinder.queries;
 
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -654,6 +655,14 @@ public class FotoSql {
     public static CursorLoader createCursorLoader(Context context, final QueryParameter query) {
         final CursorLoader loader = new CursorLoaderWithException(context, query);
         return loader;
+    }
+
+    public static void execDeleteByPath(Activity context, String parentDirString) {
+        int delCount = context.getContentResolver().delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, FILTER_EXPR_PATH_LIKE, new String[] {parentDirString + "/%"});
+        if (Global.debugEnabledSql) {
+            Log.i(Global.LOG_CONTEXT, "FotoSql.deleted(NoMedia='" + parentDirString +
+                    "') : " + delCount + " db records" );
+        }
     }
 
     public static class CursorLoaderWithException extends CursorLoader {

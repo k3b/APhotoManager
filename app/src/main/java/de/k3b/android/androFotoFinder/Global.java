@@ -63,6 +63,9 @@ public class Global {
     /** true update only if media scanner is not running. false=risky=always allow.  */
     public static final boolean mustCheckMediaScannerRunning = true;
 
+    /** true every time a .nomedia dir/file is opend remeove items from db.  */
+    public static final boolean mustRemoveNOMEDIAfromDB = true;
+
     /** defines the filesystem's directory where [Bookmark files](Bookmarks) are stored and loaded from. */
     public static File reportDir = new File(Environment.getExternalStorageDirectory(), "databases/sql");
     public static final String reportExt = ".query";

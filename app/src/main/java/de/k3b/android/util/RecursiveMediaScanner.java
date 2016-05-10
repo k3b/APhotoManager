@@ -90,12 +90,7 @@ public class RecursiveMediaScanner extends MediaScanner {
         if (parentPath != null) {
             if (!isCancelled()) {
                 if (parent.isDirectory()) {
-                    String[] childFileNames = parent.list(new FilenameFilter() {
-                        @Override
-                        public boolean accept(File dir, String filename) {
-                            return MediaScanner.isJpeg(filename);
-                        }
-                    });
+                    String[] childFileNames = parent.list(JPG_FILENAME_FILTER);
 
                     if (childFileNames != null) {
                         // #33
