@@ -988,7 +988,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
             // might be null in in orientation change
             if (activity != null) {
-                int delCount = activity.getContentResolver().delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, query.toAndroidWhere(), null);
+                int delCount = FotoSql.deleteMedia(activity.getContentResolver(), query.toAndroidWhere(), null, true);
                 if (debugMessage != null) {
                     Log.w(Global.LOG_CONTEXT, mDebugPrefix + " deleted " + delCount +
                             " duplicates\n\tDELETE ... WHERE " + query.toAndroidWhere());

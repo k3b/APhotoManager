@@ -658,10 +658,30 @@ public class FotoSql {
     }
 
     public static void execDeleteByPath(Activity context, String parentDirString) {
-        int delCount = context.getContentResolver().delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, FILTER_EXPR_PATH_LIKE, new String[] {parentDirString + "/%"});
+        int delCount = FotoSql.deleteMedia(context.getContentResolver(), FILTER_EXPR_PATH_LIKE, new String[] {parentDirString + "/%"}, true);
         if (Global.debugEnabledSql) {
             Log.i(Global.LOG_CONTEXT, "FotoSql.deleted(NoMedia='" + parentDirString +
                     "') : " + delCount + " db records" );
+        }
+    }
+
+    /**
+     * Deletes media items specified by where with the option to prevent cascade delete of the image.
+     */
+    public static int deleteMedia(ContentResolver contentResolver, String where, String[] selectionArgs, boolean preventDeleteImage)
+    {
+        if (preventDeleteImage) {
+            // set SQL_COL_PATH empty so sql-delete cannot cascade delete the referenced image-file via delete trigger
+            ContentValues values = new ContentValues();
+            values.put(FotoSql.SQL_COL_PATH, (String) null);
+            contentResolver.update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, values,where, selectionArgs);
+            int delCount = contentResolver.delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, FotoSql.SQL_COL_PATH + " is null", null);
+
+            return delCount;
+        } else {
+            int delCount = contentResolver.delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, where, selectionArgs);
+
+            return delCount;
         }
     }
 

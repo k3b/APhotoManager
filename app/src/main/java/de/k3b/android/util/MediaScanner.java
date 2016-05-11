@@ -194,7 +194,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
         String sqlWhere = FotoSql.getWhereInFileNames(oldPathNames);
         int modifyCount = 0;
         try {
-            modifyCount = context.getContentResolver().delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, sqlWhere, null);
+            modifyCount = FotoSql.deleteMedia(context.getContentResolver(), sqlWhere, null, true);
             if (Global.debugEnabled) {
                 Log.d(Global.LOG_CONTEXT, CONTEXT + "deleteInMediaDatabase(len=" + oldPathNames.length + ", files='" + oldPathNames[0] + "'...) result count=" + modifyCount);
             }
