@@ -40,6 +40,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -152,24 +153,51 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
     }
 
     public static int updateMediaDatabase_Android42(Context context, String[] oldPathNames, String... newPathNames) {
-        int modifyCount = 0;
+        final boolean hasNew = excludeNomediaFiles(newPathNames) > 0;
+        final boolean hasOld = excludeNomediaFiles(oldPathNames) > 0;
 
-        final boolean hasNew = (newPathNames != null) && (newPathNames.length > 0);
-        final boolean hasOld = (oldPathNames != null) && (oldPathNames.length > 0);
         if (hasNew && hasOld) {
             return renameInMediaDatabase(context, oldPathNames, newPathNames);
         } else if (hasOld) {
             return deleteInMediaDatabase(context, oldPathNames);
         } if (hasNew) {
+            return insertIntoMediaDatabase(context, newPathNames);
+        }
+        return 0;
+    }
+
+    /**
+     * Replace all files that either non-jpg or in ".nomedia" folder with null so they wont be
+     * processed by media scanner
+     *
+     * @param fullPathNames
+     * @return number of items left.
+     */
+    private static int excludeNomediaFiles(String[] fullPathNames) {
+        int itemsLeft = 0;
+        if (fullPathNames != null) {
+            // ignore non-jpeg
+            for (int i = 0; i < fullPathNames.length; i++) {
+                String fullPathName = fullPathNames[i];
+                if (fullPathName != null) {
+                    if (!isJpeg(fullPathName) || isNoMedia(fullPathName, 22)) {
+                        fullPathNames[i] = null;
+                    } else {
+                        itemsLeft++;
+                    }
+                }
+            }
+        }
+
+        return itemsLeft;
+    }
+
+    private static int insertIntoMediaDatabase(Context context, String[] newPathNames) {
+        int modifyCount = 0;
+
+        if (newPathNames != null) {
             if (Global.debugEnabled) {
                 Log.i(Global.LOG_CONTEXT, CONTEXT + "A42 scanner starting with " + newPathNames.length + " files " + newPathNames[0] + "...");
-            }
-
-            // ignore non-jpeg
-            for (int i = 0; i < newPathNames.length; i++) {
-                if (!isJpeg(newPathNames[i])) {
-                    newPathNames[i] = null;
-                }
             }
 
             Map<String, Integer> inMediaDb = FotoSql.execGetPathIdMap(context.getApplicationContext(), newPathNames);
@@ -191,15 +219,18 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
 
     /** delete oldPathNames from media database */
     private static int deleteInMediaDatabase(Context context, String[] oldPathNames) {
-        String sqlWhere = FotoSql.getWhereInFileNames(oldPathNames);
         int modifyCount = 0;
-        try {
-            modifyCount = FotoSql.deleteMedia(context.getContentResolver(), sqlWhere, null, true);
-            if (Global.debugEnabled) {
-                Log.d(Global.LOG_CONTEXT, CONTEXT + "deleteInMediaDatabase(len=" + oldPathNames.length + ", files='" + oldPathNames[0] + "'...) result count=" + modifyCount);
+
+        if ((oldPathNames != null) && (oldPathNames.length > 0)) {
+            String sqlWhere = FotoSql.getWhereInFileNames(oldPathNames);
+            try {
+                modifyCount = FotoSql.deleteMedia(context.getContentResolver(), sqlWhere, null, true);
+                if (Global.debugEnabled) {
+                    Log.d(Global.LOG_CONTEXT, CONTEXT + "deleteInMediaDatabase(len=" + oldPathNames.length + ", files='" + oldPathNames[0] + "'...) result count=" + modifyCount);
+                }
+            } catch (Exception ex) {
+                Log.e(Global.LOG_CONTEXT, CONTEXT + "deleteInMediaDatabase(" + sqlWhere + ") error :", ex);
             }
-        } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, CONTEXT + "deleteInMediaDatabase(" + sqlWhere + ") error :", ex);
         }
 
         return modifyCount;
@@ -211,31 +242,53 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
             Log.i(Global.LOG_CONTEXT, CONTEXT + "renameInMediaDatabase to " + newPathNames.length + " files " + newPathNames[0] + "...");
         }
         Map<String,String> old2NewFileNames = new HashMap<>(oldPathNames.length);
+        ArrayList<String> deleteFileNames = new ArrayList<String>();
+        ArrayList<String> insertFileNames = new ArrayList<String>();
+
         for (int i = 0; i < oldPathNames.length; i++) {
-            old2NewFileNames.put(oldPathNames[i], newPathNames[i]);
-        }
+            String oldPathName = oldPathNames[i];
+            String newPathName = newPathNames[i];
 
-        QueryParameter query = new QueryParameter(FotoSql.queryChangePath);
-        FotoSql.setWhereFileNames(query, oldPathNames);
-        int modifyCount = 0;
-
-        Cursor c = null;
-        try {
-            c = FotoSql.createCursorForQuery(context, query);
-            int pkColNo  = c.getColumnIndex(FotoSql.SQL_COL_PK);
-            int pathColNo  = c.getColumnIndex(FotoSql.SQL_COL_PATH);
-            while (c.moveToNext()) {
-                String oldPath = c.getString(pathColNo);
-                modifyCount += MediaScanner.updatePathRelatedFields(context, c, old2NewFileNames.get(oldPath), pkColNo, pathColNo);
+            if ((oldPathName != null) && (newPathName != null)) {
+                old2NewFileNames.put(oldPathName, newPathName);
+            } else if (oldPathName != null) {
+                deleteFileNames.add(oldPathName);
+            } else if (newPathName != null) {
+                insertFileNames.add(newPathName);
             }
-        } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, CONTEXT + "execChangePaths() error :", ex);
-        } finally {
-            if (c != null) c.close();
         }
 
-        if (Global.debugEnabled) {
-            Log.d(Global.LOG_CONTEXT, CONTEXT + "execChangePaths() result count=" + modifyCount);
+        int modifyCount =
+                deleteInMediaDatabase(context, deleteFileNames.toArray(new String[deleteFileNames.size()]))
+                    + renameInMediaDatabase(context, old2NewFileNames)
+                    + insertIntoMediaDatabase(context, insertFileNames.toArray(new String[insertFileNames.size()]));
+        return modifyCount;
+    }
+
+    private static int renameInMediaDatabase(Context context, Map<String, String> old2NewFileNames) {
+        int modifyCount = 0;
+        if (old2NewFileNames.size() > 0) {
+            QueryParameter query = new QueryParameter(FotoSql.queryChangePath);
+            FotoSql.setWhereFileNames(query, old2NewFileNames.keySet().toArray(new String[old2NewFileNames.size()]));
+
+            Cursor c = null;
+            try {
+                c = FotoSql.createCursorForQuery(context, query);
+                int pkColNo = c.getColumnIndex(FotoSql.SQL_COL_PK);
+                int pathColNo = c.getColumnIndex(FotoSql.SQL_COL_PATH);
+                while (c.moveToNext()) {
+                    String oldPath = c.getString(pathColNo);
+                    modifyCount += MediaScanner.updatePathRelatedFields(context, c, old2NewFileNames.get(oldPath), pkColNo, pathColNo);
+                }
+            } catch (Exception ex) {
+                Log.e(Global.LOG_CONTEXT, CONTEXT + "execChangePaths() error :", ex);
+            } finally {
+                if (c != null) c.close();
+            }
+
+            if (Global.debugEnabled) {
+                Log.d(Global.LOG_CONTEXT, CONTEXT + "execChangePaths() result count=" + modifyCount);
+            }
         }
         return modifyCount;
     }
@@ -319,7 +372,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
     }
 
     /** sets the path related fields */
-    public static void setPathRelatedFieldsIfNeccessary(ContentValues values, String newAbsolutePath, String oldAbsolutePath) {
+    private static void setPathRelatedFieldsIfNeccessary(ContentValues values, String newAbsolutePath, String oldAbsolutePath) {
         setFieldIfNeccessary(values, MediaStore.MediaColumns.TITLE, generateTitleFromFilePath(newAbsolutePath), generateTitleFromFilePath(oldAbsolutePath));
         setFieldIfNeccessary(values, MediaStore.MediaColumns.DISPLAY_NAME, generateDisplayNameFromFilePath(newAbsolutePath), generateDisplayNameFromFilePath(oldAbsolutePath));
         values.put(MediaStore.MediaColumns.DATA, newAbsolutePath);
@@ -443,6 +496,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
         }
     }
 
+    /** return true if path is "*.jp(e)g" */
     public static boolean isJpeg(String path) {
         if (path == null) return false;
         String lcPath = path.toLowerCase();

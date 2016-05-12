@@ -577,6 +577,9 @@ public class FotoSql {
         return null;
     }
 
+    /**
+     * @return returns a hashmap filename => mediaID
+     */
     public static Map<String, Integer> execGetPathIdMap(Context context, String... fileNames) {
         Map<String, Integer> result = new HashMap<String, Integer>();
 
@@ -610,7 +613,7 @@ public class FotoSql {
 
             int count = 0;
             for (String fileName : fileNames) {
-                if (!FileCommands.isSidecar(fileName)) {
+                if ((fileName != null) &&!FileCommands.isSidecar(fileName)) {
                     if (count > 0) filter.append(", ");
                     filter.append("'").append(fileName).append("'");
                     count++;
