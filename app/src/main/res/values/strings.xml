@@ -83,7 +83,7 @@
 	<string name="mk_success_format">Created %1$s</string>
 	<string name="move_menu_title">Move</string>
 	<string name="move_result_format">Moved %1$d/%2$d files</string>
-	<string name="osm_cright_title">Map Tiles (c) <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors</string>
+	<string name="osm_cright_title">Map Tiles © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors</string>
 	<string name="overwrite_question_title">Overwrite?</string>
 	<string name="rename_menu_title">Rename</string>
 	<string name="rename_result_format">Renamed %1$d/%2$d files</string>
@@ -121,8 +121,8 @@
 	<string name="settings_multisel_clear_summary">&#8230; after Copy/Move/Rename/&#8230; .</string>
 	<string name="settings_multisel_clear_title">Clear multi-selection</string>
 	<string name="settings_title">Settings</string>
-	<string name="share_err_not_found">No send/share provider found</string>
-	<string name="share_err_to_many">Sendmultiple: item count exceeded</string>
+	<string name="share_err_not_found">No share/send provider found</string>
+	<string name="share_err_to_many">Send-Multiple: item count exceeded</string>
 	<string name="share_menu_title">Share/Send</string>
 	<string name="show_in_gallery_menu_title">Show in new gallery</string>
 	<string name="slideshow_menu_title">Slideshow</string>

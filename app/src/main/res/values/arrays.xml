@@ -18,6 +18,7 @@
         <item>fr french Français</item>
         <item>it italian Italiano</item>
         <item>ja japanese 日本人</item>
+        <item>nl dutch Nederlands</item>
         <item>ro romanian Român</item>
     </string-array>
     <string-array name="pref_locale_values" translatable="false">
@@ -28,6 +29,7 @@
         <item>fr</item>
         <item>it</item>
         <item>ja</item>
+        <item>nl</item>
         <item>ro</item>
     </string-array>
 </resources>
