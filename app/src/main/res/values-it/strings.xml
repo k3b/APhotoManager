@@ -94,7 +94,7 @@
   <string name="selected_only_menu_title">Solo selezionati</string>
   <string name="selection_add_all_menu_title">Selezione: aggiungi tutte quelle visibili</string>
   <string name="selection_remove_menu_title">Selezione: rimuovi tutte quelle visibili</string>
-  <string name="settings_bookmark_dir_title">Cartella di report</string>
+  <string name="settings_bookmark_dir_title">Cartella di segnalibro</string>
   <string name="settings_debug_memory_summary">&#8230; contenente il consumo di memoria.</string>
   <string name="settings_debug_memory_title">LogCat consumo di memoria</string>
   <string name="settings_debug_sql_summary">&#8230; contenente SQL eseguito.</string>
@@ -137,56 +137,4 @@
   <string name="sort_order_Place_Descending">Luogo decrescente</string>
   <string name="update_result_format">Aggiornati %1$d/%2$d file</string>
   <string name="zoom_to_fit_menu_title">Adatta alla finestra</string>
-  <string name="about_content_about"><![CDATA["
-<h1>A Photo Manager</h1>con &#39;A Photo Map&#39; in &#39;AndroFotoFinder&#39;</h1>
-  <br />Caratteristiche:
-  <ul>
-    <li>Può gestire grandi collezioni di immagini (15000+ immagini in 1000+ cartelle)</li>
-    <li>Utilizza il provider di contenuti per immagini di Android&#39;. Nessuna scansione di immagini iniziale necessaria.</li>
-    <li>
-    <a href="https://github.com/k3b/APhotoManager/wiki/Filter-View">Trova immagini</a> in base a
-    <ul>
-      <li>cartelle (con un
-      <a href="https://github.com/k3b/APhotoManager/wiki/Folder-Picker">Selettore Cartelle</a> gerarchico)</li>
-      <li>caratteri jolly che corrispondo a cartelle/nomi di file</li>
-      <li>data</li>
-      <li>area in una
-      <a href="https://github.com/k3b/APhotoManager/wiki/geographic-map">mappa geografica</a> (se l'immagine ha informazioni Exif GPS)</li>
-    </ul></li>
-    <li>Mostra i risultati in una
-    <a href="https://github.com/k3b/APhotoManager/wiki/Gallery-View">galleria</a> scorrevole con
-    <ul>
-      <li>supporto a selezione multipla di foto</li>
-      <li>operazioni sui file come Copia, Sposta, Elimina, Condividi</li>
-    </ul></li>
-    <li>
-    <a href="https://github.com/k3b/APhotoManager/wiki/Image-View">Dettagli foto</a> con
-    <ul>
-      <li>ingrandimento immagine</li>
-      <li>scorrimento tra un'immagine e l'altra</li>
-      <li>informazioni estese sull'immagine (Exif, IPTC, XMP, ICC)</li>
-      <li>operazioni sui file come Copia, Sposta, Elimina, Rinomina, Condividi</li>
-    </ul></li>
-    <li>La
-    <a href="https://github.com/k3b/APhotoManager/wiki/geographic-map">mappa geografica</a> mostra i luoghi dove sono state scattate le foto</li>
-    <li>Le operazioni sui file
-      <ul>
-        <li>aggiornano anche il database del provider di contenuti per immagini di Android&#39;</li>
-        <li>aggiornano i file xmp-sidecar</li>
-        <li>conservano la data del file se Android lo supporta.</li>
-      </ul>
-    </li>
-  <li>App and internet homepage available in these languages:<ul>
-		<li><a href="https://github.com/k3b/APhotoManager/wiki/de-home">de</a>,&nbsp;
-		<a href="https://github.com/k3b/APhotoManager/wiki/home"   >en</a>,&nbsp;
-		<a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr</a>,&nbsp;
-		<a href="https://github.com/k3b/APhotoManager/wiki/it-home">it</a>,&nbsp;
-		<a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja</a>,&nbsp;
-		<a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro</a></li>
-		<li><a href="https://github.com/k3b/APhotoManager/issues/21">Help us to translate into other languages.</a></li>
-		</ul>
-	</li>
-  </ul>
-  <br />
-"]]></string>
 </resources>

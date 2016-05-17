@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+/* string values containing translatable HTML pages
+ * Translation to Japanese by "naofum" via crowdin.com.
+ *
+ * This file is part of "A Photo Manager" (A(ndro)FotoFinder).
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
+ -->
+<resources>
+  <string name="about_content_about"><![CDATA["
+<h1>A Photo Manager </h1>
+と 'AndroFotoFinder' に '写真地図' <br/>
+</p>
+機能:
+<ul>
+  <li>App and internet homepage available in these languages:<ul>
+		<li><a href="https://github.com/k3b/APhotoManager/wiki/de-home">de</a>,&nbsp;
+		<a href="https://github.com/k3b/APhotoManager/wiki/home"   >en</a>,&nbsp;
+		<a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr</a>,&nbsp;
+		<a href="https://github.com/k3b/APhotoManager/wiki/it-home">it</a>,&nbsp;
+		<a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja</a>,&nbsp;
+		<a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro</a></li>
+		<li><a href="https://github.com/k3b/APhotoManager/issues/21">Help us to translate into other languages.</a></li>
+		</ul>
+	</li>
+ <li>大きな画像コレクションを処理できます (1000+ フォルダーに 15000+ 画像)</li>
+ <li>Android の画像コンテンツ プロバイダーを使用。初期イメージ スキャンの必要はありません。</li>
+ <li><a href="https://github.com/k3b/APhotoManager/wiki/Filter-View"> 画像検索</a> 経由
+ <ul>
+  <li>フォルダー (階層 <a href="https://github.com/k3b/APhotoManager/wiki/Folder-Picker"> フォルダー ピッカー</a>)&nbsp;</li>
+  <li>フォルダー/ファイル名に一致するワイルドカード&nbsp;</li>
+  <li>日付&nbsp;</li>
+  <li><a href="https://github.com/k3b/APhotoManager/wiki/geographic-map">地理情報地図</a> にエリア (イメージに GPS Exif 情報がある場合)</li>
+ </ul></li>
+ <li>スクロール可能な <a href="https://github.com/k3b/APhotoManager/wiki/Gallery-View"> ギャラリー ビュー</a> で結果を表示
+ <ul>
+  <li>複数写真選択のサポート</li>
+  <li>ファイルをコピー、移動、削除、共有する操作</li>
+ </ul></li>
+ <li><a href="https://github.com/k3b/APhotoManager/wiki/Image-View"> 写真詳細表示</a>と<ul>
+  <li>イメージ ズーム</li>
+  <li>スワイプで次/前の画像に移動</li>
+  <li>拡張画像情報の表示 (Exif、IPTC、XMP、ICC)</li>
+  <li>ファイルをコピー、移動、削除、名前の変更、共有する操作</li>
+ </ul></li>
+ <li><a href="https://github.com/k3b/APhotoManager/wiki/geographic-map">地理情報地図</a> 写真が撮影された場所にマーカーを示します</li>
+ <li>ファイル操作<ul>
+  <li>Android の画像コンテンツ プロバイダー データベースも更新</li>
+  <li>xmp サイドカーファイルを更新</li>
+  <li>ローカルの Android がサポートしている場合、ファイルの日付を保持</li>
+ </ul></li>
+</ul>
+<br />
+"]]></string>
+</resources>

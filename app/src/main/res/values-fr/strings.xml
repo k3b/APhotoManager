@@ -94,7 +94,7 @@
 	<string name="selected_only_menu_title">Uniquement les Sélectionnée(s)</string>
 	<string name="selection_add_all_menu_title">Sélection : Ajouter tous les visibles</string>
 	<string name="selection_remove_menu_title">Sélection : Supprimer tous les visibles</string>
-	<string name="settings_bookmark_dir_title">Dossier de rapport</string>
+	<string name="settings_bookmark_dir_title">Dossier de signet</string>
 	<string name="settings_debug_libs_summary">... des autre bibliothèques.</string>
 	<string name="settings_debug_memory_summary">Enregistrer la consommation mémoire.</string>
 	<string name="settings_debug_memory_title">Consommation mémoire</string>
@@ -138,55 +138,4 @@
 	<string name="sort_order_Place_Descending">Emplacement décroissant</string>
 	<string name="update_result_format">mise à jour des fichiers %1$d/%2$d</string>
 	<string name="zoom_to_fit_menu_title">Ajuster le zoom</string>
-	<string name="about_content_about"><![CDATA["
-  <h1>A Photo Manager</h1>avec &#39;A Photo Map&#39; sur &#39;AndroFotoFinder&#39;App et page d&#39;accueil Internet disponibles
-  dans ces langues:
-  <ul>
-    <li>
-    <a href='https://github.com/k3b/APhotoManager/wiki/de-home'>de</a>,&nbsp;
-    <a href='https://github.com/k3b/APhotoManager/wiki/home'>en</a>,&nbsp;
-    <a href='https://github.com/k3b/APhotoManager/wiki/fr-home'>fr</a>,&nbsp;
-	<a href="https://github.com/k3b/APhotoManager/wiki/it-home">it</a>,&nbsp;
-    <a href='https://github.com/k3b/APhotoManager/wiki/ja-home'>ja</a>,&nbsp;
-    <a href='https://github.com/k3b/APhotoManager/wiki/ro-home'>ro</a></li>
-    <li>
-      <a href='https://github.com/k3b/APhotoManager/issues/21'>Aidez-nous à traduire dans d&#39;autres langues.</a>
-    </li>
-  </ul>---
-  <br />Caractéristiques:
-  <ul>
-    <li>Peut gérer de grandes collections d&#39;images (15000+ images dans plus de 1000 dossiers)</li>
-    <li>Utilise contenu de l&#39;image de fournisseur d&#39;Android. Pas de scan de l&#39;image initiale nécessaire.</li>
-    <li>
-    <a href='https://github.com/k3b/APhotoManager/wiki/Filter-View'>Trouver des images</a> via
-    <ul>
-      <li>dossier (avec hiérarchique
-      <a href='https://github.com/k3b/APhotoManager/wiki/Folder-Picker'>dossier Picker</a> )</li>
-      <li>jokers qui correspondent dossier / nom de fichier</li>
-      <li>Date</li>
-      <li>zone
-      <a href='https://github.com/k3b/APhotoManager/wiki/geographic-map'>carte géographique</a> (si l&#39;image a des infos Exif
-      GPS)</li>
-    </ul></li>
-    <li>Afficher le résultat dans un défilement
-    <a href='https://github.com/k3b/APhotoManager/wiki/Image-View'>Photo-détail-vue</a> avec
-    <ul>
-      <li>glisser pour aller à l&#39;image suivante / précédente</li>
-      <li>les opérations de fichiers copier, déplacer, supprimer, renommer, partagez</li>
-    </ul></li>
-    <li>Le
-    <a href='https://github.com/k3b/APhotoManager/wiki/geographic-map'>carte géographique</a> montre marqueurs à des endroits où
-    les photos ont été prises</li>
-    <li>Opérations sur les fichiers
-    <ul>
-      <li>va également mettre à jour la base de données image de fournisseur de contenu d&#39;Android</li>
-      <li>Préserve la date des fichiers si la version installée d&#39;Android le permet.</li>
-      <li>va également mettre à jour la base de données image de fournisseur de contenu d&#39;Android</li>
-      <li>les fichiers XMP sidecar-mise à jour</li>
-    </ul></li>
-  </ul>
-  <br />
-  <br />
-  <br />
-  	"]]></string>
 </resources>
