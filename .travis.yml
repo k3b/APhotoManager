@@ -2,10 +2,19 @@
 language: android
 android:
   components:
-    - build-tools-23.0.2
+    - build-tools-23.0.1
     - android-21
     - add-on
     - extra
 
 script:
   - gradle assemble
+
+before_script:
+# fix travis build error "gradle-2.10" required
+# http://stackoverflow.com/questions/35914037/updated-gradle-to-2-10-and-now-travis-cant-find-my-tests
+    - wget http://services.gradle.org/distributions/gradle-2.10-bin.zip
+    - unzip gradle-2.10-bin.zip
+    - export GRADLE_HOME=$PWD/gradle-2.10
+    - export PATH=$GRADLE_HOME/bin:$PATH
+	
