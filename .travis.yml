@@ -1,4 +1,4 @@
-# travis build for LocationMapViewer
+# travis build for APhotoManager
 language: android
 android:
   components:
@@ -9,3 +9,12 @@ android:
 
 script:
   - gradle assemble
+  
+before_script:
+# fix travis build error "gradle-2.10" required
+# http://stackoverflow.com/questions/35914037/updated-gradle-to-2-10-and-now-travis-cant-find-my-tests
+    - wget http://services.gradle.org/distributions/gradle-2.10-bin.zip
+    - unzip gradle-2.10-bin.zip
+    - export GRADLE_HOME=$PWD/gradle-2.10
+    - export PATH=$GRADLE_HOME/bin:$PATH
+	
