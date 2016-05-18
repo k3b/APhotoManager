@@ -104,6 +104,9 @@
   <string name="settings_debug_summary">&#8230; 他のログ メッセージを含みます。</string>
   <string name="settings_debug_title">LogCat その他。</string>
   <string name="settings_debug_view_item_summary">&#8230; グリッド/リストビュー項目を含みます。</string>
+  <string name="settings_debug_clear_title">LogCat をクリア</string>
+  <string name="settings_debug_save_title">LogCat をファイルに保存</string>
+
   <string name="settings_group_debug_title">診断</string>
   <string name="settings_image_hide_time_title">ミリ秒後に、自動アクションバー非表示</string>
   <string name="settings_image_initialImageDetailResolutionHigh_summary">高品質の初期写真表示 (低速、より多くのメモリが必要)</string>
