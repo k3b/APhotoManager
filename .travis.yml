@@ -1,0 +1,11 @@
+# travis build for LocationMapViewer
+language: android
+android:
+  components:
+    - build-tools-23.0.2
+    - android-21
+    - add-on
+    - extra
+
+script:
+  - gradle assemble
