@@ -3,7 +3,7 @@ apply plugin: 'maven'
 
 android {
     compileSdkVersion 21
-    buildToolsVersion '23.0.1'
+    buildToolsVersion '23.0.2'
     defaultConfig {
         // fdroid-release 'de.k3b.android.androFotoFinder'
         // main-develop-branch 'de.k3b.android.androFotoFinderDev'

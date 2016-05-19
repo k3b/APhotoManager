@@ -7,5 +7,9 @@ android:
     - add-on
     - extra
 
+before_install:
+# http://stackoverflow.com/questions/33820638/travis-yml-gradlew-permission-denied
+ - chmod +x gradlew
+ 
 script:
   - ./gradlew assemble
