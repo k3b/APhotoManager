@@ -8,4 +8,4 @@ android:
     - extra
 
 script:
-  - gradle assemble
+  - gradlew assemble
