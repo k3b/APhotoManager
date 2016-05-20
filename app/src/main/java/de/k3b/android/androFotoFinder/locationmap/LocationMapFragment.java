@@ -821,9 +821,9 @@ public class LocationMapFragment extends DialogFragment {
 
                 switch (item.getItemId()) {
                     case R.id.cmd_gallery:
-                        return showGallery(getiGeoPointById(markerId, geoPosition));
+                        return showGallery(getGeoPointById(markerId, geoPosition));
                     case R.id.cmd_zoom:
-                        return zoomToFit(getiGeoPointById(markerId, geoPosition));
+                        return zoomToFit(getGeoPointById(markerId, geoPosition));
                     default:
                         return false;
                 }
@@ -912,9 +912,9 @@ public class LocationMapFragment extends DialogFragment {
         return 1/groupingFactor/2;
     }
 
-    private IGeoPoint getiGeoPointById(int markerId, IGeoPoint notFoundValue) {
+    private IGeoPoint getGeoPointById(int markerId, IGeoPoint notFoundValue) {
         if (markerId != NO_MARKER_ID) {
-            IGeoPoint pos = FotoSql.execGetPosition(this.getActivity(), markerId);
+            IGeoPoint pos = FotoSql.execGetPosition(this.getActivity(), null, markerId);
             if (pos != null) {
                 notFoundValue = pos;
             }

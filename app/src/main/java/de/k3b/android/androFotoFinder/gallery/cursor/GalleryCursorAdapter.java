@@ -46,9 +46,10 @@ import de.k3b.database.SelectedItems;
  *
  * Created by k3b on 02.06.2015.
  */
-public class GalleryCursorAdapter extends CursorAdapter {
+public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItems.Id2FileNameConverter  {
     // Identifies a particular Loader or a LoaderManager being used in this component
     private static final boolean SYNC = false;
+    private final Activity mContext;
     private final SelectedItems mSelectedItems;
     private OnGalleryInteractionListener callback = null;
 
@@ -63,6 +64,7 @@ public class GalleryCursorAdapter extends CursorAdapter {
 
     public GalleryCursorAdapter(final Activity context, SelectedItems selectedItems, String name) {
         super(context, null, false); // no cursor yet; no auto-requery
+        mContext = context;
         mSelectedItems = selectedItems;
 
         debugPrefix = "GalleryCursorAdapter#" + (id++) + "@" + name + " ";
@@ -76,6 +78,7 @@ public class GalleryCursorAdapter extends CursorAdapter {
         if (context instanceof OnGalleryInteractionListener) {
             this.callback = (OnGalleryInteractionListener) context;
         }
+
     }
 
     private String debugCursor(Cursor cursor, int maxRows, String delim, String... colmnNames) {
@@ -234,5 +237,10 @@ public class GalleryCursorAdapter extends CursorAdapter {
             this.holder = null;
 		}
 	}
-	
+
+    /** SelectedItems.Id2FileNameConverter: converts items.id-s to string array of filenNames via media database. */
+    @Override
+    public String[] getFileNames(SelectedItems items) {
+        return FotoSql.getFileNames(mContext, items);
+    }
 }

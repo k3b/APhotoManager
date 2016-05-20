@@ -1,25 +1,41 @@
 package de.k3b.database;
 
 import java.io.File;
+import java.util.Collection;
 
 /**
- * Unmodifyable list of file names.
+ * Unmodifyable list of file names and optional their IDs.
  *
  * Created by k3b on 17.05.2016.
  */
 public class SelectedFiles  {
     private static final String DELIMITER = ",";
+    private static final String SORUNDER = "'";
     private final String[] mFileNames;
     private final Long[] mIds;
 
     public SelectedFiles(String fileNameListAsString, String idListAsString) {
-        this(fileNameListAsString.split(DELIMITER), idListAsString);
+        this((fileNameListAsString != null) ? fileNameListAsString.split(DELIMITER) : null, idListAsString);
     }
 
     public SelectedFiles(String[] fileNameList, String idListAsString) {
         mFileNames = fileNameList;
+        if (mFileNames != null) {
+            for (int i = mFileNames.length -1; i >= 0; i--) {
+                mFileNames[i] = trunc(mFileNames[i]);
+            }
+        }
         SelectedItems ids = new SelectedItems().parse(idListAsString);
         mIds = ids.toArray(new Long[ids.size()]);
+    }
+
+    /** removes SORUNDER from beginning/end if present */
+    private String trunc(String fileName) {
+        if ((fileName != null) && (fileName.length() > 2)
+                && (fileName.startsWith(SORUNDER)) && (fileName.endsWith(SORUNDER))) {
+            return fileName.substring(1, fileName.length()-2);
+        }
+        return fileName;
     }
 
     /** convert String array of path-s to array of Files */
@@ -46,7 +62,7 @@ public class SelectedFiles  {
                     result.append(DELIMITER);
                 }
                 mustAddDelimiter = true;
-                result.append(item);
+                result.append(SORUNDER).append(item).append(SORUNDER);
             }
         }
         return result.toString();
@@ -79,5 +95,9 @@ public class SelectedFiles  {
     public Long getId(int i) {
         if ((i >= 0) && (i < mIds.length)) return mIds[i];
         return null;
+    }
+
+    public Long[] getIds() {
+        return mIds;
     }
 }

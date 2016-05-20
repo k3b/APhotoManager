@@ -67,9 +67,9 @@ import de.k3b.android.androFotoFinder.queries.Queryable;
 import de.k3b.android.androFotoFinder.queries.SqlJobTaskBase;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.MediaScanner;
-import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
+import de.k3b.database.SelectedFiles;
 import de.k3b.database.SelectedItems;
 import de.k3b.io.Directory;
 import de.k3b.io.IDirectory;
@@ -116,7 +116,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private int mLastVisiblePosition = -1;
 
     // multi selection support
-    private final SelectedFotos mSelectedItems = new SelectedFotos();
+    private final SelectedItems mSelectedItems = new SelectedItems();
     private String mOldTitle = null;
     private boolean mShowSelectedOnly = false;
     private final AndroidFileCommands mFileCommands = new LocalFileCommands();
@@ -140,7 +140,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         return fragment;
     }
 
-    public SelectedFotos getSelectedItems() {
+    public SelectedItems getSelectedItems() {
         return mSelectedItems;
     }
 
@@ -363,7 +363,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     public void onAttach(Activity activity) {
         Global.debugMemory(mDebugPrefix, "onAttach");
         super.onAttach(activity);
-        mFileCommands.setContext(activity);
+        mFileCommands.setContext(activity, mAdapter);
         mFileCommands.setLogFilePath(mFileCommands.getDefaultLogFile());
         MoveOrCopyDestDirPicker.sFileCommands = mFileCommands;
         try {
@@ -387,7 +387,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         super.onDetach();
         mGalleryListener = null;
         mDirectoryListener = null;
-        mFileCommands.setContext(null);
+        mFileCommands.setContext(null, mAdapter);
         MoveOrCopyDestDirPicker.sFileCommands = null;
     }
 
@@ -490,7 +490,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 return;
             }
             long imageID = holder.imageID;
-            mGalleryListener.onGalleryImageClick(imageID, SelectedFotos.getUri(imageID), position);
+            mGalleryListener.onGalleryImageClick(imageID, FotoSql.getUri(imageID), position);
         }
     }
 
@@ -613,7 +613,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             multiSelectionUpdateActionbar("Start multisel");
         } else {
             // in gallery mode long click is view image
-            ImageDetailActivityViewPager.showActivity(this.getActivity(), SelectedFotos.getUri(holder.imageID), position, getCurrentQuery());
+            ImageDetailActivityViewPager.showActivity(this.getActivity(), FotoSql.getUri(holder.imageID), position, getCurrentQuery());
         }
         return true;
     }
@@ -692,7 +692,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 MapGeoPickerActivity.showActivity(this.getActivity(), mSelectedItems);
                 return true;
             case R.id.cmd_edit_geo:
-                GeoEditActivity.showActivity(this.getActivity(), mSelectedItems);
+                GeoEditActivity.showActivity(this.getActivity(), new SelectedFiles(mSelectedItems.getFileNames(mAdapter), mSelectedItems.toString()));
                 return true;
             case R.id.cmd_selection_add_all:
                 addAllToSelection();
@@ -721,7 +721,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     public static class MoveOrCopyDestDirPicker extends DirectoryPickerFragment {
         static AndroidFileCommands sFileCommands = null;
 
-        public static MoveOrCopyDestDirPicker newInstance(boolean move, SelectedFotos srcFotos) {
+        public static MoveOrCopyDestDirPicker newInstance(boolean move, SelectedItems srcFotos) {
             MoveOrCopyDestDirPicker f = new MoveOrCopyDestDirPicker();
 
             // Supply index input as an argument.
@@ -741,8 +741,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             return getArguments().getBoolean("move", false);
         }
 
-        public SelectedFotos getSrcFotos() {
-            return (SelectedFotos) getArguments().getSerializable("srcFotos");
+        public SelectedItems getSrcFotos() {
+            return (SelectedItems) getArguments().getSerializable("srcFotos");
         }
 
         @Override
@@ -753,7 +753,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         }
     };
 
-    private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFotos fotos) {
+    private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedItems fotos) {
         if (AndroidFileCommands.canProcessFile(this.getActivity())) {
             MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
@@ -833,7 +833,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             if (selectionCount == 1) {
                 Long imageId = mSelectedItems.first();
                 sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(EXTRA_STREAM, SelectedFotos.getUri(imageId));
+                sendIntent.putExtra(EXTRA_STREAM, FotoSql.getUri(imageId));
             } else {
                 sendIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
 
@@ -841,7 +841,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
                 Iterator<Long> iter = mSelectedItems.iterator();
                 while (iter.hasNext()) {
-                    uris.add(SelectedFotos.getUri(iter.next()));
+                    uris.add(FotoSql.getUri(iter.next()));
                 }
                 sendIntent.putParcelableArrayListExtra(EXTRA_STREAM, uris);
             }

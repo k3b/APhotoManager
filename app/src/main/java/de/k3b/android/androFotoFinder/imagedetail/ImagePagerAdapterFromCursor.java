@@ -38,6 +38,7 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.GarbageCollector;
 import de.k3b.database.QueryParameter;
+import de.k3b.database.SelectedItems;
 import uk.co.senab.photoview.PhotoView;
 
 /**
@@ -46,7 +47,7 @@ import uk.co.senab.photoview.PhotoView;
  * Translates between position in ViewPager and content page content with image
  * Created by k3b on 04.07.2015.
  */
-public class ImagePagerAdapterFromCursor extends PagerAdapter  {
+public class ImagePagerAdapterFromCursor extends PagerAdapter implements SelectedItems.Id2FileNameConverter {
     // debug support
     private static int id = 0;
     protected final String mDebugPrefix;
@@ -330,5 +331,11 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter  {
     public void setPrimaryItem(ViewGroup container, int position, Object object) {
         super.setPrimaryItem(container, position, object);
         this.mActivity.setTitle(this.getPageTitle(position));
+    }
+
+    /** SelectedItems.Id2FileNameConverter: converts items.id-s to string array of filenNames via media database. */
+    @Override
+    public String[] getFileNames(SelectedItems items) {
+        return FotoSql.getFileNames(mActivity, items);
     }
 }

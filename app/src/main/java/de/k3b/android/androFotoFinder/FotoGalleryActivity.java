@@ -51,10 +51,10 @@ import de.k3b.android.androFotoFinder.queries.Queryable;
 import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.android.util.GarbageCollector;
 import de.k3b.android.util.IntentUtil;
-import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
+import de.k3b.database.SelectedItems;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GalleryFilterParameter;
@@ -290,7 +290,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
 
     private GalleryQueryParameter mGalleryQueryParameter = new GalleryQueryParameter();
     // multi selection support
-    private SelectedFotos mSelectedItems = null;
+    private SelectedItems mSelectedItems = null;
 
     private Queryable mGalleryGui;
 

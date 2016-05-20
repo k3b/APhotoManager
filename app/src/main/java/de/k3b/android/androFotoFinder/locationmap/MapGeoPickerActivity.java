@@ -21,7 +21,6 @@ package de.k3b.android.androFotoFinder.locationmap;
 
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -72,9 +71,11 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
                 MapGeoPickerActivity.class);
 
         if ((selectedItems != null) && (selectedItems.size() > 0)) {
-            intent.putExtra(EXTRA_SELECTED_ITEMS, selectedItems.toString());
+            intent.putExtra(EXTRA_SELECTED_ITEM_IDS, selectedItems.toString());
+            //!!! ???EXTRA_SELECTED_ITEM_PATHS
 
-            IGeoPoint initialPoint = FotoSql.execGetPosition(context, selectedItems.first().intValue());
+
+            IGeoPoint initialPoint = FotoSql.execGetPosition(context, null, selectedItems.first().intValue());
             if (initialPoint != null) {
                 GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
 
@@ -147,7 +148,9 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
             rectangle.setLogituedMax(initalZoom.getLongitude()).setLatitudeMax(initalZoom.getLatitude());
         } // else (savedInstanceState != null) restore after rotation. fragment takes care of restoring map pos
 
-        String selectedItemsString = intent.getStringExtra(EXTRA_SELECTED_ITEMS);
+        String selectedItemsString = intent.getStringExtra(EXTRA_SELECTED_ITEM_IDS);
+        //!!! ???EXTRA_SELECTED_ITEM_PATHS
+
         SelectedItems selectedItems = (selectedItemsString != null) ? new SelectedItems().parse(selectedItemsString) : null;
 
         String filter = null;

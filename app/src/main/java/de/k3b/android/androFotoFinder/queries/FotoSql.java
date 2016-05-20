@@ -34,6 +34,7 @@ import android.util.Log;
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.util.GeoPoint;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -43,6 +44,7 @@ import java.util.Map;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.database.QueryParameter;
+import de.k3b.database.SelectedFiles;
 import de.k3b.database.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
@@ -275,6 +277,14 @@ public class FotoSql {
         }
     }
 
+    public static void setWhereSelection(QueryParameter query, SelectedFiles selectedItems) {
+        if ((query != null) && (selectedItems != null) && (selectedItems.size() > 0)) {
+            query.clearWhere()
+                    .addWhere(FotoSql.SQL_COL_PATH + " in (" + selectedItems.toString() + ")")
+            ;
+        }
+    }
+
     public static void setWhereFileNames(QueryParameter query, String... fileNames) {
         if ((query != null) && (fileNames != null) && (fileNames.length > 0)) {
             query.clearWhere()
@@ -485,7 +495,7 @@ public class FotoSql {
     /**
      * Write geo data (lat/lon) media database.<br/>
      */
-    public static int execUpdateGeo(final Context context, double latitude, double longitude, SelectedItems selectedItems) {
+    public static int execUpdateGeo(final Context context, double latitude, double longitude, SelectedFiles selectedItems) {
         QueryParameter where = new QueryParameter();
         setWhereSelection(where, selectedItems);
 
@@ -553,14 +563,21 @@ public class FotoSql {
         return null;
     }
 
-    public static IGeoPoint execGetPosition(Context context, int id) {
+    /** gets IGeoPoint either from file if fullPath is not null else from db via id */
+    public static IGeoPoint execGetPosition(Context context, String fullPath, int id) {
         QueryParameter query = new QueryParameter()
         .setID(QUERY_TYPE_UNDEFINED)
                 .addColumn(SQL_COL_LAT, SQL_COL_LON)
                 .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
-                .addWhere(SQL_COL_PK + "= ?", "" + id)
                 .addWhere(SQL_COL_LAT + " IS NOT NULL")
                 .addWhere(SQL_COL_LON + " IS NOT NULL");
+
+        if (fullPath != null) {
+            query.addWhere(SQL_COL_PATH + "= ?", fullPath);
+
+        } else {
+            query.addWhere(SQL_COL_PK + "= ?", "" + id);
+        }
 
         Cursor c = null;
         try {
@@ -686,6 +703,62 @@ public class FotoSql {
 
             return delCount;
         }
+    }
+
+    /** converts imageID to content-uri */
+    public static Uri getUri(long imageID) {
+        return Uri.parse(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI.toString() + "/" + imageID);
+    }
+
+    /** converts internal ID-list to string array of filenNames via media database. */
+    public static String[] getFileNames(Context context, SelectedItems items) {
+        if (!items.isEmpty()) {
+            ArrayList<String> result = new ArrayList<>();
+
+            QueryParameter parameters = new QueryParameter(queryDetail);
+            setWhereSelection(parameters, items);
+
+            Cursor cursor = null;
+
+            try {
+                cursor = requery(context, parameters.toColumns(), parameters.toFrom(), parameters.toAndroidWhere(), parameters.toOrderBy(), parameters.toAndroidParameters());
+
+                int colPath = cursor.getColumnIndex(SQL_COL_DISPLAY_TEXT);
+                while (cursor.moveToNext()) {
+                    String path = cursor.getString(colPath);
+                    result.add(path);
+                    int ext = result.lastIndexOf(".");
+                    String xmpPath = ((ext >= 0) ? path.substring(0, ext) : path) + ".xmp";
+                    if (new File(xmpPath).exists()) {
+                        result.add(xmpPath);
+                    }
+                }
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+            int size = result.size();
+
+            if (size > 0) {
+                return result.toArray(new String[size]);
+            }
+        }
+        return null;
+
+    }
+
+    private static Cursor requery(final Context context, final String[] sqlProjection, final String from, final String sqlWhereStatement, final String sqlSortOrder, final String... sqlWhereParameters) {
+        Cursor result = context.getContentResolver().query(Uri.parse(from), // Table to query
+                sqlProjection,             // Projection to return
+                sqlWhereStatement,        // No selection clause
+                sqlWhereParameters,       // No selection arguments
+                sqlSortOrder              // Default sort order
+        );
+
+        return result;
+
     }
 
     public static class CursorLoaderWithException extends CursorLoader {

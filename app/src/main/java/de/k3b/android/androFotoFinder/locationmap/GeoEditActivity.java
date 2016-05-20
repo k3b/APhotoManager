@@ -36,16 +36,16 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.osmdroid.api.IGeoPoint;
+import java.util.Arrays;
 
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
-import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.AndroidFileCommands;
-import de.k3b.android.util.SelectedFotos;
+import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.android.widget.LocalizedActivity;
+import de.k3b.database.SelectedFiles;
 import de.k3b.database.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
@@ -56,7 +56,7 @@ import de.k3b.io.DirectoryFormatter;
 /**
  * Defines a gui for global foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.
  */
-public class GeoEditActivity extends LocalizedActivity implements Common {
+public class GeoEditActivity extends LocalizedActivity implements Common  {
     private static final String debugPrefix = "GeoEdit-";
 
     public static final int RESULT_ID = 524;
@@ -66,8 +66,10 @@ public class GeoEditActivity extends LocalizedActivity implements Common {
 
     private EditText mLatitudeFrom;
     private EditText mLongitudeFrom;
+    private String mCurrentId = null; // belonging to current lat/long
+
     private HistoryEditText mHistory;
-    private SelectedFotos mSelectedItems;
+    private SelectedFiles mSelectedItems;
 
     private GeoPointDto mCurrentPoint = new GeoPointDto();
     private Button cmdOk;
@@ -77,17 +79,19 @@ public class GeoEditActivity extends LocalizedActivity implements Common {
     private ProgressBar mProgressBar = null;
     private TextView mLblStatusMessage;
 
-    public static void showActivity(Activity context, SelectedItems selectedItems) {
+    public static void showActivity(Activity context, SelectedFiles selectedFiles) {
         Uri initalUri = null;
         final Intent intent = new Intent().setClass(context,
                 GeoEditActivity.class);
 
-        if ((selectedItems != null) && (selectedItems.size() > 0)) {
-            intent.putExtra(EXTRA_SELECTED_ITEMS, selectedItems.toString());
+        if ((selectedFiles != null) && (selectedFiles.size() > 0)) {
+            intent.putExtra(EXTRA_SELECTED_ITEM_IDS, selectedFiles.toIdString());
+            intent.putExtra(EXTRA_SELECTED_ITEM_PATHS, selectedFiles.toString());
 
-            IGeoPoint initialPoint = FotoSql.execGetPosition(context, selectedItems.first().intValue());
+            Long id = selectedFiles.getId(0);
+            IGeoPointInfo initialPoint = MediaScanner.getPositionFromFile(selectedFiles.getFileNames()[0], (id != null) ? id.toString() : null);
             if (initialPoint != null) {
-                initalUri = Uri.parse(PARSER.toUriString(initialPoint.getLatitude(),initialPoint.getLongitude(), IGeoPointInfo.NO_ZOOM));
+                initalUri = Uri.parse(PARSER.toUriString(initialPoint));
                 intent.setData(initalUri);
             }
         }
@@ -107,7 +111,7 @@ public class GeoEditActivity extends LocalizedActivity implements Common {
         setContentView(R.layout.activity_geo_edit);
         onCreateButtos();
 
-        SelectedFotos selectedItems = getItems(this.getIntent());
+        SelectedFiles selectedItems = getItems(this.getIntent());
         if (selectedItems != null) {
             mSelectedItems = selectedItems;
 
@@ -169,12 +173,13 @@ public class GeoEditActivity extends LocalizedActivity implements Common {
         super.onDestroy();
     }
 
-    public static SelectedFotos getItems(Intent intent) {
+    public static SelectedFiles getItems(Intent intent) {
         if (intent == null) return null;
-        String selectedItems = intent.getStringExtra(EXTRA_SELECTED_ITEMS);
-        if (selectedItems == null) return null;
-        SelectedFotos result = new SelectedFotos();
-        result.parse(selectedItems);
+        String selectedItems = intent.getStringExtra(EXTRA_SELECTED_ITEM_IDS);
+        String selectedFiles = intent.getStringExtra(EXTRA_SELECTED_ITEM_PATHS);
+
+        if ((selectedItems == null) || (selectedFiles == null)) return null;
+        SelectedFiles result = new SelectedFiles(selectedFiles, selectedItems);
         return result;
     }
 
@@ -182,6 +187,7 @@ public class GeoEditActivity extends LocalizedActivity implements Common {
         try {
             mCurrentPoint.setLatitude(getLatitude());
             mCurrentPoint.setLongitude(getLogitued());
+            mCurrentPoint.setId(mCurrentId);
             return PARSER.toUriString(mCurrentPoint);
         } catch (RuntimeException ex) {
             Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
@@ -260,6 +266,7 @@ public class GeoEditActivity extends LocalizedActivity implements Common {
     private void toGui(GeoPointDto src) {
         mLongitudeFrom  .setText(convertLL(src.getLongitude()));
         mLatitudeFrom   .setText(convertLL(src.getLatitude()));
+        mCurrentId  = src.getId();
     }
 
     /************* local helper *****************/
@@ -288,21 +295,21 @@ public class GeoEditActivity extends LocalizedActivity implements Common {
         intent.setData(parseUri);
         intent.putExtra(EXTRA_TITLE, getString(R.string.geo_picker_title));
 
-        SelectedFotos calculatedSelectedFotos = new SelectedFotos();
+        SelectedItems calculatedSelectedFotosIds = new SelectedItems();
 
         GeoPickHistory history = getHistory();
         if (history != null) {
-            history.addKeysTo(calculatedSelectedFotos);
+            history.addKeysTo(calculatedSelectedFotosIds);
         }
 
         if (mSelectedItems != null) {
-            calculatedSelectedFotos.addAll(mSelectedItems);
+            calculatedSelectedFotosIds.addAll(Arrays.asList(mSelectedItems.getIds()));
         }
 
-        if (calculatedSelectedFotos.size() > 0) {
-            intent.putExtra(EXTRA_SELECTED_ITEMS, calculatedSelectedFotos.toString());
+        if (calculatedSelectedFotosIds.size() > 0) {
+            intent.putExtra(EXTRA_SELECTED_ITEM_IDS, calculatedSelectedFotosIds.toString());
+            //!!! ???EXTRA_SELECTED_ITEM_PATHS
         }
-
         try {
 //          this.startActivityForResult(Intent.createChooser(intent, getText(R.string.title_chooser_geo_picker)), RESULT_ID);
             this.startActivityForResult(intent, RESULT_ID);
@@ -356,11 +363,11 @@ public class GeoEditActivity extends LocalizedActivity implements Common {
         double longitude = getLogitued();
         mHistory.saveHistory();
         if (!Double.isNaN(latitude) && !Double.isNaN(longitude) && (mSelectedItems.size() > 0)) {
-            setGeo(latitude, longitude, mSelectedItems);
+            setGeo(latitude, longitude, mCurrentId, mSelectedItems);
         }
     }
 
-    private void setGeo(final double latitude, final double longitude, final SelectedFotos selectedItems) {
+    private void setGeo(final double latitude, final double longitude, String id, final SelectedFiles selectedItems) {
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         cmdOk.setVisibility(View.INVISIBLE);
         cmdCancel.setVisibility(View.INVISIBLE);
@@ -372,7 +379,7 @@ public class GeoEditActivity extends LocalizedActivity implements Common {
 
         GeoPickHistory history = getHistory();
         if (history != null) {
-            history.add(selectedItems.getIds()[0], latitude, longitude);
+            history.add((id != null) ? Long.parseLong(id) : 0, latitude, longitude);
             history.save();
         }
 
@@ -386,7 +393,7 @@ public class GeoEditActivity extends LocalizedActivity implements Common {
                         publishProgress(itemcount, size);
                     }
                 };
-                engine.setContext(GeoEditActivity.this);
+                engine.setContext(GeoEditActivity.this, null);
             }
 
             @Override protected Integer doInBackground(Object... params) {

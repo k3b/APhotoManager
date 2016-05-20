@@ -19,6 +19,7 @@
 
 package de.k3b.android.util;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -38,6 +39,8 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.database.SelectedFiles;
+import de.k3b.database.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
 import de.k3b.io.IDirectory;
@@ -53,11 +56,12 @@ public class AndroidFileCommands extends FileCommands {
     private static final String SETTINGS_KEY_LAST_COPY_TO_PATH = "last_copy_to_path";
     private static final String mDebugPrefix = "AndroidFileCommands.";
     private Activity mContext;
+    private SelectedItems.Id2FileNameConverter mId2FileNameConverter;
     private AlertDialog mActiveAlert = null;
 
     public AndroidFileCommands() {
         // setLogFilePath(getDefaultLogFile());
-        setContext(null);
+        setContext(null, null);
     }
 
     public void closeAll() {
@@ -133,7 +137,7 @@ public class AndroidFileCommands extends FileCommands {
 
     }
 
-    public boolean onOptionsItemSelected(final MenuItem item, final SelectedFotos selectedFileNames) {
+    public boolean onOptionsItemSelected(final MenuItem item, final SelectedItems selectedFileNames) {
         if ((selectedFileNames != null) && (selectedFileNames.size() > 0)) {
             // Handle item selection
             switch (item.getItemId()) {
@@ -149,14 +153,14 @@ public class AndroidFileCommands extends FileCommands {
         return (result != 0);
     }
 
-    public void onMoveOrCopyDirectoryPick(boolean move, IDirectory destFolder, SelectedFotos srcFotos) {
+    public void onMoveOrCopyDirectoryPick(boolean move, IDirectory destFolder, SelectedItems srcFotos) {
         if (destFolder != null) {
             String copyToPath = destFolder.getAbsolute();
             setLastCopyToPath(copyToPath);
             File destDirFolder = new File(copyToPath);
 
-            String[] selectedFileNames = srcFotos.getFileNames(mContext);
-            moveOrCopyFilesTo(move, destDirFolder, SelectedFotos.getFiles(selectedFileNames));
+            String[] selectedFileNames = srcFotos.getFileNames(mId2FileNameConverter);
+            moveOrCopyFilesTo(move, destDirFolder, SelectedFiles.getFiles(selectedFileNames));
         }
     }
 
@@ -173,8 +177,8 @@ public class AndroidFileCommands extends FileCommands {
         edit.commit();
     }
 
-    public boolean cmdDeleteFileWithQuestion(final SelectedFotos fotos) {
-        String[] pathNames = fotos.getFileNames(mContext);
+    public boolean cmdDeleteFileWithQuestion(final SelectedItems fotos) {
+        String[] pathNames = fotos.getFileNames(mId2FileNameConverter);
         StringBuffer names = new StringBuffer();
         for (String name : pathNames) {
             names.append(name).append("\n");
@@ -217,11 +221,12 @@ public class AndroidFileCommands extends FileCommands {
         return true;
     }
 
-    private int deleteFiles(SelectedFotos fotos) {
-        String[] fileNames = fotos.getFileNames(mContext);
+    private int deleteFiles(SelectedItems fotos) {
+        String[] fileNames = fotos.getFileNames(mId2FileNameConverter);
         return super.deleteFiles(fileNames);
     }
 
+    @SuppressLint("ValidFragment")
     class MediaScannerDirectoryPickerFragment extends DirectoryPickerFragment {
         /** do not use activity callback */
         @Override protected void setDirectoryListener(Activity activity) {}
@@ -312,15 +317,15 @@ public class AndroidFileCommands extends FileCommands {
      * @param selectedItems
      * @param itemsPerProgress
      */
-    public int setGeo(double latitude, double longitude, SelectedFotos selectedItems, int itemsPerProgress) {
+    public int setGeo(double latitude, double longitude, SelectedFiles selectedItems, int itemsPerProgress) {
         if (!Double.isNaN(latitude) && !Double.isNaN(longitude) && (selectedItems != null) && (selectedItems.size() > 0)) {
             // in case that current activity is destroyed while running async, applicationContext will allow to finish database operation
             Context applicationContext = this.mContext.getApplicationContext();
             int itemcount = 0;
             int countdown = 0;
-            String[] fileNames = selectedItems.getFileNames(this.mContext);
+            String[] fileNames = selectedItems.getFileNames();
             if (fileNames != null) {
-                File[] files = SelectedFotos.getFiles(fileNames);
+                File[] files = SelectedFiles.getFiles(fileNames);
                 int maxCount = files.length+1;
                 openLogfile();
                 for (File file : files) {
@@ -348,16 +353,18 @@ public class AndroidFileCommands extends FileCommands {
     protected void onProgress(int itemcount, int size) {
     }
 
-    public AndroidFileCommands setContext(Activity mContext) {
+    public AndroidFileCommands setContext(Activity mContext, SelectedItems.Id2FileNameConverter id2FileNameConverter) {
         this.mContext = mContext;
         if (mContext != null) {
             closeLogFile();
         }
+        this.mId2FileNameConverter = id2FileNameConverter;
+
         return this;
     }
 
     public static AndroidFileCommands log(Activity context, Object... params) {
-        AndroidFileCommands cmd = new AndroidFileCommands().setContext(context);
+        AndroidFileCommands cmd = new AndroidFileCommands().setContext(context, null);
         cmd.setLogFilePath(cmd.getDefaultLogFile());
         cmd.openLogfile();
         cmd.log(params);

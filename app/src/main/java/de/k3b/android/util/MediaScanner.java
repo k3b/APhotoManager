@@ -50,6 +50,8 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.database.QueryParameter;
+import de.k3b.geo.api.GeoPointDto;
+import de.k3b.geo.api.IGeoPointInfo;
 
 /**
  * Since android.media.MediaScannerConnection does not work on my android-4.2
@@ -356,6 +358,23 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
         }
     }
 
+    public static IGeoPointInfo getPositionFromFile(String absolutePath, String id) {
+        ExifInterface exif = null;
+        try {
+            exif = new ExifInterface(absolutePath);
+        } catch (IOException ex) {
+            // exif is null
+        }
+
+        if (exif != null) {
+            float[] latlng = new float[2];
+            if (exif.getLatLong(latlng)) {
+                return new GeoPointDto(latlng[0], latlng[1], GeoPointDto.NO_ZOOM).setId(id);
+            }
+        }
+
+        return null;
+    }
     public static int updatePathRelatedFields(Context context, Cursor cursor, String newAbsolutePath) {
         int columnIndexPk = cursor.getColumnIndex(FotoSql.SQL_COL_PK);
         int columnIndexPath = cursor.getColumnIndex(FotoSql.SQL_COL_PATH);

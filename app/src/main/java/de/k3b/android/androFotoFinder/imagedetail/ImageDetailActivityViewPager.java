@@ -59,11 +59,12 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
-import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
+import de.k3b.database.SelectedFiles;
+import de.k3b.database.SelectedItems;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
@@ -196,7 +197,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     public static class MoveOrCopyDestDirPicker extends DirectoryPickerFragment {
         static AndroidFileCommands sFileCommands = null;
 
-        public static MoveOrCopyDestDirPicker newInstance(boolean move, SelectedFotos srcFotos) {
+        public static MoveOrCopyDestDirPicker newInstance(boolean move, SelectedItems srcFotos) {
             MoveOrCopyDestDirPicker f = new MoveOrCopyDestDirPicker();
 
             // Supply index input as an argument.
@@ -216,8 +217,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             return getArguments().getBoolean("move", false);
         }
 
-        public SelectedFotos getSrcFotos() {
-            return (SelectedFotos) getArguments().getSerializable("srcFotos");
+        public SelectedItems getSrcFotos() {
+            return (SelectedItems) getArguments().getSerializable("srcFotos");
         }
 
         @Override
@@ -291,7 +292,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             childIntent.setAction(intent.getAction());
             childIntent.setDataAndType(intent.getData(), intent.getType());
             copyExtras(childIntent, intent.getExtras(),
-                    EXTRA_FILTER, EXTRA_POSITION, EXTRA_QUERY, EXTRA_SELECTED_ITEMS, EXTRA_STREAM, EXTRA_TITLE);
+                    EXTRA_FILTER, EXTRA_POSITION, EXTRA_QUERY, EXTRA_SELECTED_ITEM_IDS,
+                    EXTRA_SELECTED_ITEM_PATHS, EXTRA_STREAM, EXTRA_TITLE);
             startActivityForResult(childIntent, ID_FORWARD);
         } else { // not in forward mode
             setContentView(R.layout.activity_image_view_pager);
@@ -328,7 +330,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
             setResult((mModifyCount == 0) ? RESULT_NOCHANGE : RESULT_CHANGE);
 
-            mFileCommands.setContext(this);
+            mFileCommands.setContext(this, mAdapter);
             mFileCommands.setLogFilePath(mFileCommands.getDefaultLogFile());
             MoveOrCopyDestDirPicker.sFileCommands = mFileCommands;
 
@@ -536,7 +538,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             mViewPager.setAdapter(null);
             mFileCommands.closeLogFile();
             mFileCommands.closeAll();
-            mFileCommands.setContext(null);
+            mFileCommands.setContext(null, mAdapter);
             MoveOrCopyDestDirPicker.sFileCommands = null;
         }
 
@@ -713,7 +715,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                 MapGeoPickerActivity.showActivity(this, getCurrentFoto());
                 return true;
             case R.id.cmd_edit_geo:
-                GeoEditActivity.showActivity(this, getCurrentFoto());
+                SelectedItems selectedItem = getCurrentFoto();
+                GeoEditActivity.showActivity(this, new SelectedFiles(selectedItem.getFileNames(mAdapter), selectedItem.toString()));
                 return true;
 
             case R.id.cmd_about:
@@ -801,7 +804,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         ImageDetailDialogBuilder.createImageDetailDialog(this, fullFilePath, currentImageId, mGalleryContentQuery, mViewPager.getCurrentItem()).show();
     }
 
-    private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFotos fotos) {
+    private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedItems fotos) {
         if (AndroidFileCommands.canProcessFile(this)) {
             MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
@@ -872,9 +875,9 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         */
     }
 
-    protected SelectedFotos getCurrentFoto() {
+    protected SelectedItems getCurrentFoto() {
         long imageId = getCurrentImageId();
-        SelectedFotos result = new SelectedFotos();
+        SelectedItems result = new SelectedItems();
         result.add(imageId);
         return  result;
     }
