@@ -46,7 +46,9 @@ public class ExifGps {
     }
 
     public static void saveLatLon(File filePath, double latitude, double longitude, String appName, String appVersion) {
-        StringBuilder sb = (Global.debugEnabled) ? new StringBuilder("Set Exif ") : null;
+        StringBuilder sb = (Global.debugEnabled)
+                ? sb = new StringBuilder("Set Exif to file='").append(filePath.getAbsolutePath()).append("'\n\t ")
+                : null;
         try {
             long lastModified = filePath.lastModified();
             ExifInterface exif = new ExifInterface(filePath.getAbsolutePath());
@@ -57,33 +59,47 @@ public class ExifGps {
             // exif.setAttribute(ExifInterface.TAG_GPS_ALTITUDE, convert(0));
             // exif.setAttribute(ExifInterface.TAG_GPS_ALTITUDE_REF, longitudeRef(0));
 
-            if (sb != null) sb.append(ExifInterface.TAG_GPS_LATITUDE).append("=").append(latitude).append(" ")
-            .append(ExifInterface.TAG_GPS_LONGITUDE).append("=").append(longitude).append(" ");
+            if (sb != null) {
+                sb.append(ExifInterface.TAG_GPS_LATITUDE).append("=").append(latitude).append(" ")
+                        .append(ExifInterface.TAG_GPS_LONGITUDE).append("='").append(longitude).append("' ");
+            }
 
             // #29 set date if not in exif
             if ((lastModified != 0) && (null == exif.getAttribute(ExifInterface.TAG_DATETIME))) {
                 final String exifDate = sFormatter.format(new Date(lastModified));
                 exif.setAttribute(ExifInterface.TAG_DATETIME, exifDate);
-                if (sb != null) sb.append(ExifInterface.TAG_DATETIME).append("=").append(exifDate).append(" ");
+                if (sb != null) sb.append(ExifInterface.TAG_DATETIME).append("='").append(exifDate).append("' ");
             }
+
             if ((appName != null) && (null == exif.getAttribute(ExifInterface.TAG_MAKE))) {
                 exif.setAttribute(ExifInterface.TAG_MAKE, appName);
-                if (sb != null) sb.append(ExifInterface.TAG_MAKE).append("=").append(appName).append(" ");
+                if (sb != null) sb.append(ExifInterface.TAG_MAKE).append("='").append(appName).append("' ");
             }
+
             if ((appVersion != null) && (null == exif.getAttribute(ExifInterface.TAG_MODEL))) {
                 exif.setAttribute(ExifInterface.TAG_MODEL, appVersion);
-                if (sb != null) sb.append(ExifInterface.TAG_MODEL).append("=").append(appVersion).append(" ");
-            }
-            if (sb != null) {
-                Log.d(Global.LOG_CONTEXT, sb.toString());
+                if (sb != null) sb.append(ExifInterface.TAG_MODEL).append("='").append(appVersion).append("' ");
             }
 
             exif.saveAttributes();
 
             // preseve file modification date
             filePath.setLastModified(lastModified);
+
+            if (sb != null) {
+                exif = new ExifInterface(filePath.getAbsolutePath());
+                sb.append("final-exifdate='").append(exif.getAttribute(ExifInterface.TAG_DATETIME)).append("' ");
+                sb.append("previous-filedate='").append(sFormatter.format(new Date(lastModified))).append("' ");
+                sb.append("final-filedate='").append(sFormatter.format(new Date(filePath.lastModified()))).append("' ");
+
+                Log.d(Global.LOG_CONTEXT, sb.toString());
+            }
+
         } catch (IOException e) {
-            e.printStackTrace();
+            if (sb == null) sb = new StringBuilder("Set Exif to file='").append(filePath.getAbsolutePath()).append("' ");
+
+            sb.append("error='").append(e.getMessage()).append("' ");
+            Log.e(Global.LOG_CONTEXT, sb.toString(), e);
         }
     }
 

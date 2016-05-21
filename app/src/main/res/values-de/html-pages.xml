@@ -55,7 +55,7 @@
     Fotos aufgenommen wurden</li>
     <li>Alle Dateioperationen
     <ul>
-      <li>aktualisieren auch die Android-Mediandatenbank</li>
+      <li>aktualisieren auch die Android-Mediendatenbank</li>
       <li>erhalten das Dateidatum (falls Android dies unterstützt)</li>
       <li>aktualisiert auch Xmp-Filialdateien</li>
     </ul></li>

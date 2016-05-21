@@ -3,16 +3,17 @@ package de.k3b.android.androFotoFinder.imagedetail;
 import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.MediaScanner;
+import de.k3b.database.SelectedItems;
 import uk.co.senab.photoview.PhotoView;
 
 /**
@@ -23,6 +24,10 @@ import uk.co.senab.photoview.PhotoView;
  * Created by k3b on 12.04.2016.
  */
 public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCursor {
+
+    /**
+     * Implements the array sepecific stuff that hopefully can be reused in other adapters, too
+     */
     public class AdapterArrayHelper {
         /** not null data comes from array instead from base implementation */
         private String[] mFullPhotoPaths = null;
@@ -73,16 +78,45 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
             }
             return -1;
         }
+
+        /** helper for SelectedItems.Id2FileNameConverter: converts items.id-s to string array of filenNames. */
+        public String[] getFileNames(SelectedItems items) {
+            if (items != null) {
+                ArrayList<String> result = new ArrayList<>();
+
+                int size = 0;
+                for(Long id : items) {
+                    String path = (id != null) ? getFullFilePathfromArray(convertBetweenPositionAndId(id.intValue())) : null;
+                    result.add(path);
+                    if (path != null) size++;
+                }
+
+                if (size > 0) {
+                    return result.toArray(new String[size]);
+                }
+            }
+            return null;
+        }
+
+        /** translates offset in adapter to id of image */
+        public long getImageId(int position) {
+            return convertBetweenPositionAndId(position);
+        }
+
+        /** translates offset in adapter to id of image and vice versa */
+        private int convertBetweenPositionAndId(int value) {
+            return -2 -value;
+        }
     }
 
     /** not null data comes from array instead from base implementation */
-    private AdapterArrayHelper mFullPhotoPaths = null;
+    private AdapterArrayHelper mArrayImpl = null;
 
     public ImagePagerAdapterFromCursorArray(final Activity context, String name, String fullPhotoPaths) {
         super(context, name);
 
         if (MediaScanner.isNoMedia(fullPhotoPaths,22)) {
-            mFullPhotoPaths = new AdapterArrayHelper(context, fullPhotoPaths);
+            mArrayImpl = new AdapterArrayHelper(context, fullPhotoPaths);
         }
     }
 
@@ -92,15 +126,15 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
         Cursor oldCursor = super.swapCursor(newCursor);
         if (super.getCount() > 0) {
             // cursor has data => disable aray
-            this.mFullPhotoPaths = null;
+            this.mArrayImpl = null;
         }
         return oldCursor;
     }
 
     @Override
     public int getCount() {
-        if (mFullPhotoPaths != null) {
-            return mFullPhotoPaths.getCount();
+        if (mArrayImpl != null) {
+            return mArrayImpl.getCount();
         }
 
         return super.getCount();
@@ -108,19 +142,20 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
 
     @Override
     public String getFullFilePath(int position) {
-        if (mFullPhotoPaths != null) return mFullPhotoPaths.getFullFilePathfromArray(position);
+        if (mArrayImpl != null) return mArrayImpl.getFullFilePathfromArray(position);
         return super.getFullFilePath(position);
     }
 
+    /** translates offset in adapter to id of image */
     @Override
     public long getImageId(int position) {
-        if (mFullPhotoPaths != null) return -2 -position;
+        if (mArrayImpl != null) return mArrayImpl.getImageId(position);
         return super.getImageId(position);
     }
 
     @Override
     public View instantiateItem(ViewGroup container, int position) {
-        final String fullPhotoPathFromArray = (mFullPhotoPaths != null) ? mFullPhotoPaths.getFullFilePathfromArray(position) : null;
+        final String fullPhotoPathFromArray = (mArrayImpl != null) ? mArrayImpl.getFullFilePathfromArray(position) : null;
         if (fullPhotoPathFromArray != null) {
             // special case image from ".nomedia" folder via absolute path not via content: uri
 
@@ -145,8 +180,8 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
     /** internal helper. return -1 if position is not available */
     @Override
     public int getPositionFromPath(String path) {
-        if (mFullPhotoPaths != null) {
-            int result = mFullPhotoPaths.getPositionFromPath(path);
+        if (mArrayImpl != null) {
+            int result = mArrayImpl.getPositionFromPath(path);
 
             if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, mDebugPrefix + "getPositionFromPath-Array(" + path +") => " + result);
             return result;
@@ -154,4 +189,11 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
         return super.getPositionFromPath(path);
     }
 
+
+    /** SelectedItems.Id2FileNameConverter: converts items.id-s to string array of filenNames via media database. */
+    @Override
+    public String[] getFileNames(SelectedItems items) {
+        if (mArrayImpl != null) return mArrayImpl.getFileNames(items);
+        return super.getFileNames(items);
+    }
 }

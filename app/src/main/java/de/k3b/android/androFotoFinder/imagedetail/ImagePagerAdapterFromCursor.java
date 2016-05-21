@@ -164,6 +164,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
         return null;
     }
 
+    /** translates offset in adapter to id of image */
     public long getImageId(int position) {
         Cursor cursor = getCursorAt(position);
         if (cursor != null) {

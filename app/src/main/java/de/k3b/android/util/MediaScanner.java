@@ -197,7 +197,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
     private static int insertIntoMediaDatabase(Context context, String[] newPathNames) {
         int modifyCount = 0;
 
-        if (newPathNames != null) {
+        if ((newPathNames != null) && (newPathNames.length > 0)) {
             if (Global.debugEnabled) {
                 Log.i(Global.LOG_CONTEXT, CONTEXT + "A42 scanner starting with " + newPathNames.length + " files " + newPathNames[0] + "...");
             }
@@ -240,31 +240,34 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
 
     /** change path and path dependant fields in media database */
     private static int renameInMediaDatabase(Context context, String[] oldPathNames, String... newPathNames) {
-        if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, CONTEXT + "renameInMediaDatabase to " + newPathNames.length + " files " + newPathNames[0] + "...");
-        }
-        Map<String,String> old2NewFileNames = new HashMap<>(oldPathNames.length);
-        ArrayList<String> deleteFileNames = new ArrayList<String>();
-        ArrayList<String> insertFileNames = new ArrayList<String>();
-
-        for (int i = 0; i < oldPathNames.length; i++) {
-            String oldPathName = oldPathNames[i];
-            String newPathName = newPathNames[i];
-
-            if ((oldPathName != null) && (newPathName != null)) {
-                old2NewFileNames.put(oldPathName, newPathName);
-            } else if (oldPathName != null) {
-                deleteFileNames.add(oldPathName);
-            } else if (newPathName != null) {
-                insertFileNames.add(newPathName);
+        if ((oldPathNames != null) && (oldPathNames.length > 0)) {
+            if (Global.debugEnabled) {
+                Log.i(Global.LOG_CONTEXT, CONTEXT + "renameInMediaDatabase to " + newPathNames.length + " files " + newPathNames[0] + "...");
             }
-        }
+            Map<String, String> old2NewFileNames = new HashMap<>(oldPathNames.length);
+            ArrayList<String> deleteFileNames = new ArrayList<String>();
+            ArrayList<String> insertFileNames = new ArrayList<String>();
 
-        int modifyCount =
-                deleteInMediaDatabase(context, deleteFileNames.toArray(new String[deleteFileNames.size()]))
-                    + renameInMediaDatabase(context, old2NewFileNames)
-                    + insertIntoMediaDatabase(context, insertFileNames.toArray(new String[insertFileNames.size()]));
-        return modifyCount;
+            for (int i = 0; i < oldPathNames.length; i++) {
+                String oldPathName = oldPathNames[i];
+                String newPathName = newPathNames[i];
+
+                if ((oldPathName != null) && (newPathName != null)) {
+                    old2NewFileNames.put(oldPathName, newPathName);
+                } else if (oldPathName != null) {
+                    deleteFileNames.add(oldPathName);
+                } else if (newPathName != null) {
+                    insertFileNames.add(newPathName);
+                }
+            }
+
+            int modifyCount =
+                    deleteInMediaDatabase(context, deleteFileNames.toArray(new String[deleteFileNames.size()]))
+                            + renameInMediaDatabase(context, old2NewFileNames)
+                            + insertIntoMediaDatabase(context, insertFileNames.toArray(new String[insertFileNames.size()]));
+            return modifyCount;
+        }
+        return 0;
     }
 
     private static int renameInMediaDatabase(Context context, Map<String, String> old2NewFileNames) {

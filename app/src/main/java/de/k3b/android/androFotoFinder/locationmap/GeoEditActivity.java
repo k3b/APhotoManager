@@ -178,7 +178,7 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
         String selectedItems = intent.getStringExtra(EXTRA_SELECTED_ITEM_IDS);
         String selectedFiles = intent.getStringExtra(EXTRA_SELECTED_ITEM_PATHS);
 
-        if ((selectedItems == null) || (selectedFiles == null)) return null;
+        if ((selectedItems == null) && (selectedFiles == null)) return null;
         SelectedFiles result = new SelectedFiles(selectedFiles, selectedItems);
         return result;
     }
@@ -362,7 +362,7 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
         double latitude = getLatitude();
         double longitude = getLogitued();
         mHistory.saveHistory();
-        if (!Double.isNaN(latitude) && !Double.isNaN(longitude) && (mSelectedItems.size() > 0)) {
+        if (!Double.isNaN(latitude) && !Double.isNaN(longitude)) {
             setGeo(latitude, longitude, mCurrentId, mSelectedItems);
         }
     }
