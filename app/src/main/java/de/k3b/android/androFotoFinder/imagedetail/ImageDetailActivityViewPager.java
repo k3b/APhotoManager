@@ -221,6 +221,22 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             return (SelectedItems) getArguments().getSerializable("srcFotos");
         }
 
+        /**
+         * To be overwritten to check if a path can be picked.
+         *
+         * @param path to be checked if it cannot be handled
+         * @return null if no error else error message with the reason why it cannot be selected
+         */
+        @Override
+        protected String getStatusErrorMessage(String path) {
+            String errorMessage = (sFileCommands == null) ? null : sFileCommands.checkWriteProtected(0, new File(path));
+            if (errorMessage != null) {
+                int pos = errorMessage.indexOf('\n');
+                return (pos > 0) ? errorMessage.substring(0,pos) : errorMessage;
+            }
+            return super.getStatusErrorMessage(path);
+        }
+
         @Override
         protected void onDirectoryPick(IDirectory selection) {
             // super.onDirectoryPick(selection);
@@ -744,20 +760,22 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     };
 
     private void startStopSlideShow(boolean start) {
-        mViewPager.setLocked(start);
-        if (start != mSlideShowStarted) {
-            if (start) {
-                onSlideShowNext();
-                mSlideShowTimer.sendMessageDelayed(Message.obtain(mSlideShowTimer, SLIDESHOW_HANDLER_ID), Global.slideshowIntervalInMilliSecs);
-            } else {
-                mSlideShowTimer.removeMessages(SLIDESHOW_HANDLER_ID);
-            }
-            mSlideShowStarted = start;
+        if (mViewPager != null) {
+            mViewPager.setLocked(start);
+            if (start != mSlideShowStarted) {
+                if (start) {
+                    onSlideShowNext();
+                    mSlideShowTimer.sendMessageDelayed(Message.obtain(mSlideShowTimer, SLIDESHOW_HANDLER_ID), Global.slideshowIntervalInMilliSecs);
+                } else {
+                    mSlideShowTimer.removeMessages(SLIDESHOW_HANDLER_ID);
+                }
+                mSlideShowStarted = start;
 
-            // #24 Prevent sleepmode while slideshow is active
-            if (this.mViewPager != null) this.mViewPager.setKeepScreenOn(start);
-            
-            if (mMenuSlideshow != null) mMenuSlideshow.setChecked(start);
+                // #24 Prevent sleepmode while slideshow is active
+                if (this.mViewPager != null) this.mViewPager.setKeepScreenOn(start);
+
+                if (mMenuSlideshow != null) mMenuSlideshow.setChecked(start);
+            }
         }
     }
 

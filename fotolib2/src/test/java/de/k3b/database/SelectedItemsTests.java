@@ -44,4 +44,10 @@ public class SelectedItemsTests {
         Assert.assertEquals("1,2,3", sut.toString());
     }
 
+    @Test
+    public void shoudReomoveApostrophes() {
+        String fileName = "/storage/sdcard0/Pictures/test/nomedia/test-image51.jpg";
+        Assert.assertEquals("with >'<", fileName, SelectedFiles.reomoveApostrophes("'" + fileName + "'"));
+        Assert.assertEquals("without >'<", fileName, SelectedFiles.reomoveApostrophes(fileName));
+    }
 }

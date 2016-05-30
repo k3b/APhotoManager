@@ -461,18 +461,32 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         if ((mDirectoryListener != null) && (selectedChild != null)) mDirectoryListener.onDirectorySelectionChanged(selectedChild.getAbsolute(), mDirTypId);
     }
 
+    /**
+     * To be overwritten to check if a path can be picked.
+     *
+     * @param path to be checked if it cannot be handled
+     * @return null if no error else error message with the reason why it cannot be selected
+     */
+    protected String getStatusErrorMessage(String path) {
+        return null;
+    }
+
     private void updateStatus() {
         int itemCount = getItemCount(mCurrentSelection);
-        boolean canPressOk = (itemCount > 0);
+
+        String selectedPath = (this.mCurrentSelection != null) ? this.mCurrentSelection.getAbsolute() : null;
+
+        String statusMessage = (itemCount == 0) ? mContext.getString(R.string.selection_none_hint)  : getStatusErrorMessage(selectedPath);
+        boolean canPressOk = (statusMessage == null);
 
         if (mCmdOk != null) mCmdOk.setEnabled(canPressOk);
         if (mCmdPopup != null) mCmdPopup.setEnabled(canPressOk);
         
         if (mStatus != null) {
-            if (canPressOk) {
+            if (statusMessage == null) {
                 mStatus.setText(this.mCurrentSelection.getAbsolute());
             } else {
-                mStatus.setText(R.string.selection_none_hint);
+                mStatus.setText(statusMessage);
             }
         }
     }

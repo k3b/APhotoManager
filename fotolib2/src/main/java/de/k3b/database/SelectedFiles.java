@@ -1,7 +1,6 @@
 package de.k3b.database;
 
 import java.io.File;
-import java.util.Collection;
 
 /**
  * Unmodifyable list of file names and optional their IDs.
@@ -22,7 +21,7 @@ public class SelectedFiles  {
         mFileNames = fileNameList;
         if (mFileNames != null) {
             for (int i = mFileNames.length -1; i >= 0; i--) {
-                mFileNames[i] = trunc(mFileNames[i]);
+                mFileNames[i] = reomoveApostrophes(mFileNames[i]);
             }
         }
         SelectedItems ids = new SelectedItems().parse(idListAsString);
@@ -30,10 +29,10 @@ public class SelectedFiles  {
     }
 
     /** removes SORUNDER from beginning/end if present */
-    private String trunc(String fileName) {
+    public static String reomoveApostrophes(String fileName) {
         if ((fileName != null) && (fileName.length() > 2)
                 && (fileName.startsWith(SORUNDER)) && (fileName.endsWith(SORUNDER))) {
-            return fileName.substring(1, fileName.length()-2);
+            return fileName.substring(1, fileName.length()-1);
         }
         return fileName;
     }
@@ -46,9 +45,12 @@ public class SelectedFiles  {
         File[] result = new File[fileNames.length];
         int i = 0;
         for (String name : fileNames) {
-            result[i++] = new File(name);
+            if (name != null) {
+                result[i++] = new File(name);
+            }
         }
 
+        if (i == 0) return null;
         return result;
     }
 

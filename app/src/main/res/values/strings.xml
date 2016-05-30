@@ -51,6 +51,7 @@
 	<string name="edit_chooser_title">Choose photo editor</string>
 	<string name="edit_err_editor_not_found">No photo editor found</string>
 	<string name="edit_menu_title">Edit</string>
+	<string name="file_err_writeprotected">writeprotected \'%1$s\'.\n\n \'%2$s\' is not possible.</string>
 	<string name="filter_err_invalid_date_format">\'%1$s\' is not a valid date.</string>
 	<string name="filter_err_invalid_location_format">\'%1$s\' is not a valid coordinate.</string>
 	<string name="filter_menu_title">Filter</string>

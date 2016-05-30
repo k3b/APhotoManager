@@ -49,6 +49,7 @@
   <string name="edit_chooser_title">Auswahl: Fotoeditor</string>
   <string name="edit_err_editor_not_found">Habe keinen Fotoeditor gefunden</string>
   <string name="edit_menu_title">Bearbeiten</string>
+  <string name="file_err_writeprotected">Schreibgeschützt: \'%1$s\'.\n\n \'%2$s\' ist nicht möglich.</string>
   <string name="filter_err_invalid_date_format">\'%1$s\' ist kein gültiges Datum.</string>
   <string name="filter_err_invalid_location_format">\'%1$s\' ist keine gültige Koordinate.</string>
   <string name="filter_menu_title">Filter</string>
