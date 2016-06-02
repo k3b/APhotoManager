@@ -158,6 +158,7 @@ public class ExifGps {
     /**
      * convert latitude into DMS (degree minute second) format. For instance<br/>
      * -79.948862 becomes<br/>
+	 * -79 degrees, 56 minutes, 55903 millisecs (equals 55.903 seconds)
      *  79/1,56/1,55903/1000<br/>
      * It works for latitude and longitude<br/>
      * @param latitude could be longitude.
@@ -171,14 +172,14 @@ public class ExifGps {
         int minute = (int) latitude;
         latitude *= 60;
         latitude -= (minute * 60.0d);
-        int second = (int) (latitude*1000.0d);
+        int milliSecond = (int) (latitude*1000.0d);
 
         StringBuilder sb = new StringBuilder(20);
         sb.append(degree);
         sb.append("/1,");
         sb.append(minute);
         sb.append("/1,");
-        sb.append(second);
+        sb.append(milliSecond);
         sb.append("/1000,");
         return sb.toString();
     }
