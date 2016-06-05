@@ -72,7 +72,9 @@ import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedFiles;
 import de.k3b.database.SelectedItems;
 import de.k3b.io.Directory;
+import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
+import de.k3b.io.IGalleryFilter;
 import de.k3b.io.OSDirectory;
 
 /**
@@ -319,7 +321,20 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         View result = inflater.inflate(R.layout.fragment_gallery, container, false);
         mGalleryView = (GridView) result.findViewById(R.id.gridView);
 
-        mAdapter = new GalleryCursorAdapter(this.getActivity(), mSelectedItems, mDebugPrefix);
+        Activity parent = this.getActivity();
+        // mAdapter = new GalleryCursorAdapter(parent, mSelectedItems, mDebugPrefix);
+
+
+        Intent intent = (parent == null) ? null : parent.getIntent();
+        String path = (intent == null) ? null : intent.getStringExtra(EXTRA_SELECTED_ITEM_PATHS);
+
+        String filterValue = ((intent != null) && (path == null)) ? intent.getStringExtra(EXTRA_FILTER) : null;
+        IGalleryFilter filter = (filterValue != null) ? GalleryFilterParameter.parse(filterValue, new GalleryFilterParameter()) : null;
+
+        if (filter != null) {
+            path = filter.getPath();
+        }
+        mAdapter = new GalleryCursorAdapterFromArray(parent, mSelectedItems, mDebugPrefix, path);
         mGalleryView.setAdapter(mAdapter);
 
         mGalleryView.setLongClickable(true);
@@ -490,15 +505,19 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 return;
             }
             long imageID = holder.imageID;
-            mGalleryListener.onGalleryImageClick(imageID, FotoSql.getUri(imageID), position);
+            mGalleryListener.onGalleryImageClick(imageID, getUri(imageID), position);
         }
+    }
+
+    private Uri getUri(long imageID) {
+        return mAdapter.getUri(imageID);
     }
 
     private void onOpenChildGallery(QueryParameter subGalleryQuery) {
         if (Global.debugEnabledSql) {
             Log.i(Global.LOG_CONTEXT, "Exec child gallery\n\t" + subGalleryQuery.toSqlString());
         }
-        FotoGalleryActivity.showActivity(getActivity(), null, subGalleryQuery, 0);
+        FotoGalleryActivity.showActivity(getActivity(), null, subGalleryQuery, 0, null);
     }
 
     /****************** path navigation *************************/
@@ -613,7 +632,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             multiSelectionUpdateActionbar("Start multisel");
         } else {
             // in gallery mode long click is view image
-            ImageDetailActivityViewPager.showActivity(this.getActivity(), FotoSql.getUri(holder.imageID), position, getCurrentQuery());
+            ImageDetailActivityViewPager.showActivity(this.getActivity(), getUri(holder.imageID), position, getCurrentQuery());
         }
         return true;
     }
@@ -833,7 +852,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             if (selectionCount == 1) {
                 Long imageId = mSelectedItems.first();
                 sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(EXTRA_STREAM, FotoSql.getUri(imageId));
+                sendIntent.putExtra(EXTRA_STREAM, getUri(imageId));
             } else {
                 sendIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
 
@@ -841,7 +860,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
                 Iterator<Long> iter = mSelectedItems.iterator();
                 while (iter.hasNext()) {
-                    uris.add(FotoSql.getUri(iter.next()));
+                    uris.add(getUri(iter.next()));
                 }
                 sendIntent.putParcelableArrayListExtra(EXTRA_STREAM, uris);
             }

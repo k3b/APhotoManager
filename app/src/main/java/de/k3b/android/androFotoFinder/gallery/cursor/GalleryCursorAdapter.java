@@ -25,6 +25,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -49,13 +50,13 @@ import de.k3b.database.SelectedItems;
 public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItems.Id2FileNameConverter  {
     // Identifies a particular Loader or a LoaderManager being used in this component
     private static final boolean SYNC = false;
-    private final Activity mContext;
-    private final SelectedItems mSelectedItems;
+    protected final Activity mContext;
+    protected final SelectedItems mSelectedItems;
     private OnGalleryInteractionListener callback = null;
 
     // for debugging
     private static int id = 1;
-    private final String debugPrefix;
+    protected final String mDebugPrefix;
 
     // for debugging: counts how many cell elements were created
     protected StringBuffer mStatus = null;
@@ -67,13 +68,13 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
         mContext = context;
         mSelectedItems = selectedItems;
 
-        debugPrefix = "GalleryCursorAdapter#" + (id++) + "@" + name + " ";
-        Global.debugMemory(debugPrefix, "ctor");
+        mDebugPrefix = "GalleryCursorAdapter#" + (id++) + "@" + name + " ";
+        Global.debugMemory(mDebugPrefix, "ctor");
 
         imageNotLoadedYet = context.getResources().getDrawable(R.drawable.image_loading);
 
         if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, debugPrefix + "()");
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + "()");
         }
         if (context instanceof OnGalleryInteractionListener) {
             this.callback = (OnGalleryInteractionListener) context;
@@ -122,7 +123,7 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
         iView.setTag(holder);
 
         // iView.setLayoutParams(new GridView.LayoutParams(200, 200));
-        if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, debugPrefix + "newView " + holder);
+        if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, mDebugPrefix + "newView " + holder);
         return iView;
     }
 
@@ -130,6 +131,7 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         final GridCellViewHolder holder = (GridCellViewHolder) view.getTag();
+
         long count = cursor.getLong(cursor.getColumnIndex(FotoSql.SQL_COL_COUNT));
         boolean gps = !cursor.isNull(cursor.getColumnIndex(FotoSql.SQL_COL_GPS));
 
@@ -144,12 +146,17 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
         holder.icon.setVisibility(((mSelectedItems != null) && (mSelectedItems.contains(imageID))) ? View.VISIBLE : View.GONE);
 
         holder.loadImageInBackground(imageID,imageNotLoadedYet );
-        if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, debugPrefix + "bindView for " + holder);
+        if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, mDebugPrefix + "bindView for " + holder);
     }
 
     @Override
     public String toString() {
-        return debugPrefix;
+        return mDebugPrefix;
+    }
+
+    /** converts imageID to uri */
+    public Uri getUri(long imageID) {
+        return FotoSql.getUri(imageID);
     }
 
     /** data belonging to gridview element */
@@ -167,6 +174,9 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
 
         /** for delay loading */
         public long imageID = 0;
+
+        /** for delay loading */
+        public String url = null;
 
         GridCellViewHolder(View parent) {
             lastInstanceNo++;
@@ -243,4 +253,28 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
     public String[] getFileNames(SelectedItems items) {
         return FotoSql.getFileNames(mContext, items);
     }
+
+    public String getFullFilePath(int position) {
+        Cursor cursor = getCursorAt(position);
+        if (cursor != null) {
+            return cursor.getString(cursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT));
+        }
+        return null;
+    }
+
+    /** internal helper. return null if position is not available */
+    private Cursor getCursorAt(int position) {
+        return (Cursor) getItem(position);
+    }
+
+    /** translates offset in adapter to id of image */
+    public long getImageId(int position) {
+        Cursor cursor = getCursorAt(position);
+        if (cursor != null) {
+            return cursor.getLong(cursor.getColumnIndex(FotoSql.SQL_COL_PK));
+        }
+        return 0;
+    }
+
+
 }

@@ -51,6 +51,7 @@ import de.k3b.android.androFotoFinder.queries.Queryable;
 import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.android.util.GarbageCollector;
 import de.k3b.android.util.IntentUtil;
+import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
@@ -94,23 +95,23 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         private static final String STATE_LAT_LON_ACTIVE = "currentLatLonActive";
 
         /** true use latLonPicker; false use directoryPicker */
-        private boolean mUseLatLon = false;
-        private GeoRectangle mCurrentLatLon = new GeoRectangle();
+        private boolean mUseLatLonInsteadOfPath = false;
+        private GeoRectangle mCurrentLatLonFromGeoAreaPicker = new GeoRectangle();
 
         /** one of the FotoSql.QUERY_TYPE_xxx values */
         int mDirQueryID = FotoSql.QUERY_TYPE_GROUP_DEFAULT;
 
         private boolean mHasUserDefinedQuery = false;
-        private int mSortID = FotoSql.SORT_BY_DEFAULT;
-        private boolean mSortAscending = true;
+        private int mCurrentSortID = FotoSql.SORT_BY_DEFAULT;
+        private boolean mCurrentSortAscending = true;
 
-        private String mCurrentPath = "/";
+        private String mCurrentPathFromFolderPicker = "/";
 
         QueryParameter mGalleryContentQuery = null;
 
-        // GalleryFilterParameter mFilter;
-        IGalleryFilter mFilter;
-        /** true: if activity started without special intent-parameters, the last mFilter is saved/loaded for next use */
+        IGalleryFilter mCurrentFilterSettings;
+
+        /** true: if activity started without special intent-parameters, the last mCurrentFilterSettings is saved/loaded for next use */
         private boolean mSaveToSharedPrefs = true;
 
         /** one of the FotoSql.QUERY_TYPE_xxx values. if undefined use default */
@@ -122,24 +123,24 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         }
 
         public int getSortID() {
-            return mSortID;
+            return mCurrentSortID;
         }
         public void setSortID(int sortID) {
-            if (sortID == mSortID) {
-                mSortAscending = !mSortAscending;
+            if (sortID == mCurrentSortID) {
+                mCurrentSortAscending = !mCurrentSortAscending;
             } else {
-                mSortAscending = true;
-                mSortID = sortID;
+                mCurrentSortAscending = true;
+                mCurrentSortID = sortID;
             }
         }
 
         public String getSortDisplayName(Context context) {
-            return  FotoSql.getName(context, this.mSortID) + ((mSortAscending) ? " ^" : " V");
+            return  FotoSql.getName(context, this.mCurrentSortID) + ((mCurrentSortAscending) ? " ^" : " V");
         }
 
         public boolean clearPathIfActive() {
-            if ((!mUseLatLon) && (mCurrentPath != null)) {
-                mCurrentPath = null;
+            if ((!mUseLatLonInsteadOfPath) && (mCurrentPathFromFolderPicker != null)) {
+                mCurrentPathFromFolderPicker = null;
                 return true;
             }
             return false;
@@ -153,19 +154,25 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         /** combine root-query plus current selected directoryRoot */
         private QueryParameter calculateEffectiveGalleryContentQuery(QueryParameter rootQuery) {
             if (rootQuery == null) return null;
-            QueryParameter result = new QueryParameter(rootQuery);
 
-            FotoSql.setWhereFilter(result, this.mFilter, !hasUserDefinedQuery());
-            if (result == null) return null;
-
-            if (mUseLatLon) {
-                FotoSql.addWhereFilterLatLon(result, mCurrentLatLon);
-            } else if (this.mCurrentPath != null) {
-                FotoSql.addPathWhere(result, this.mCurrentPath, this.getDirQueryID());
+            // .nomedia folder has no current sql
+            if ((this.mCurrentFilterSettings != null) && MediaScanner.isNoMedia(this.mCurrentFilterSettings.getPath(), 22)) {
+                return null;
             }
 
-            if (mSortID != FotoSql.SORT_BY_NONE) {
-                FotoSql.setSort(result, mSortID, mSortAscending);
+            QueryParameter result = new QueryParameter(rootQuery);
+
+            FotoSql.setWhereFilter(result, this.mCurrentFilterSettings, !hasUserDefinedQuery());
+            if (result == null) return null;
+
+            if (mUseLatLonInsteadOfPath) {
+                FotoSql.addWhereFilterLatLon(result, mCurrentLatLonFromGeoAreaPicker);
+            } else if (this.mCurrentPathFromFolderPicker != null) {
+                FotoSql.addPathWhere(result, this.mCurrentPathFromFolderPicker, this.getDirQueryID());
+            }
+
+            if (mCurrentSortID != FotoSql.SORT_BY_NONE) {
+                FotoSql.setSort(result, mCurrentSortID, mCurrentSortAscending);
             }
             return result;
         }
@@ -175,14 +182,14 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
 
             // save InstanceState
             savedInstanceState.putInt(STATE_DirQueryID, this.getDirQueryID());
-            savedInstanceState.putString(STATE_CurrentPath, this.mCurrentPath);
-            savedInstanceState.putInt(STATE_SortID, this.mSortID);
-            savedInstanceState.putBoolean(STATE_SortAscending, this.mSortAscending);
-            if (this.mFilter != null) {
-                savedInstanceState.putString(STATE_Filter, this.mFilter.toString());
+            savedInstanceState.putString(STATE_CurrentPath, this.mCurrentPathFromFolderPicker);
+            savedInstanceState.putInt(STATE_SortID, this.mCurrentSortID);
+            savedInstanceState.putBoolean(STATE_SortAscending, this.mCurrentSortAscending);
+            if (this.mCurrentFilterSettings != null) {
+                savedInstanceState.putString(STATE_Filter, this.mCurrentFilterSettings.toString());
             }
-            savedInstanceState.putString(STATE_LAT_LON, this.mCurrentLatLon.toString());
-            savedInstanceState.putBoolean(STATE_LAT_LON_ACTIVE, this.mUseLatLon);
+            savedInstanceState.putString(STATE_LAT_LON, this.mCurrentLatLonFromGeoAreaPicker.toString());
+            savedInstanceState.putBoolean(STATE_LAT_LON_ACTIVE, this.mUseLatLonInsteadOfPath);
 
         }
 
@@ -193,13 +200,13 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
                 SharedPreferences.Editor edit = sharedPref.edit();
 
                 edit.putInt(STATE_DirQueryID, this.getDirQueryID());
-                edit.putString(STATE_CurrentPath, this.mCurrentPath);
-                edit.putInt(STATE_SortID, this.mSortID);
-                edit.putBoolean(STATE_SortAscending, this.mSortAscending);
-                edit.putString(STATE_LAT_LON, this.mCurrentLatLon.toString());
+                edit.putString(STATE_CurrentPath, this.mCurrentPathFromFolderPicker);
+                edit.putInt(STATE_SortID, this.mCurrentSortID);
+                edit.putBoolean(STATE_SortAscending, this.mCurrentSortAscending);
+                edit.putString(STATE_LAT_LON, this.mCurrentLatLonFromGeoAreaPicker.toString());
 
-                if (mFilter != null) {
-                    edit.putString(STATE_Filter, mFilter.toString());
+                if (mCurrentFilterSettings != null) {
+                    edit.putString(STATE_Filter, mCurrentFilterSettings.toString());
                 }
 
                 edit.commit();
@@ -209,11 +216,11 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         // load from settings/instanceState
         private void loadSettingsAndInstanceState(Activity context, Bundle savedInstanceState) {
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-            this.mCurrentPath = sharedPref.getString(STATE_CurrentPath, this.mCurrentPath);
+            this.mCurrentPathFromFolderPicker = sharedPref.getString(STATE_CurrentPath, this.mCurrentPathFromFolderPicker);
             this.mDirQueryID = sharedPref.getInt(STATE_DirQueryID, this.getDirQueryID());
-            this.mSortID = sharedPref.getInt(STATE_SortID, this.mSortID);
-            this.mSortAscending = sharedPref.getBoolean(STATE_SortAscending, this.mSortAscending);
-            this.mCurrentLatLon.get(DirectoryFormatter.parseLatLon(sharedPref.getString(STATE_LAT_LON, null)));
+            this.mCurrentSortID = sharedPref.getInt(STATE_SortID, this.mCurrentSortID);
+            this.mCurrentSortAscending = sharedPref.getBoolean(STATE_SortAscending, this.mCurrentSortAscending);
+            this.mCurrentLatLonFromGeoAreaPicker.get(DirectoryFormatter.parseLatLon(sharedPref.getString(STATE_LAT_LON, null)));
 
             Intent intent = context.getIntent();
 
@@ -240,28 +247,28 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
             this.mSaveToSharedPrefs = (filter == null); // false if controlled via intent
             // instance state overrides settings
             if (savedInstanceState != null) {
-                this.mCurrentPath = savedInstanceState.getString(STATE_CurrentPath, this.mCurrentPath);
+                this.mCurrentPathFromFolderPicker = savedInstanceState.getString(STATE_CurrentPath, this.mCurrentPathFromFolderPicker);
                 this.mDirQueryID = savedInstanceState.getInt(STATE_DirQueryID, this.getDirQueryID());
-                this.mSortID = savedInstanceState.getInt(STATE_SortID, this.mSortID);
-                this.mSortAscending = savedInstanceState.getBoolean(STATE_SortAscending, this.mSortAscending);
+                this.mCurrentSortID = savedInstanceState.getInt(STATE_SortID, this.mCurrentSortID);
+                this.mCurrentSortAscending = savedInstanceState.getBoolean(STATE_SortAscending, this.mCurrentSortAscending);
                 filter = savedInstanceState.getString(STATE_Filter);
                 if ((filter != null) && (dbgFilter != null)) dbgFilter.append("filter from savedInstanceState=").append(filter).append("\n");
 
-                this.mCurrentLatLon.get(DirectoryFormatter.parseLatLon(savedInstanceState.getString(STATE_LAT_LON)));
+                this.mCurrentLatLonFromGeoAreaPicker.get(DirectoryFormatter.parseLatLon(savedInstanceState.getString(STATE_LAT_LON)));
 
-                this.mUseLatLon = savedInstanceState.getBoolean(STATE_LAT_LON_ACTIVE, this.mUseLatLon);
+                this.mUseLatLonInsteadOfPath = savedInstanceState.getBoolean(STATE_LAT_LON_ACTIVE, this.mUseLatLonInsteadOfPath);
             }
 
-            if ((pathFilter == null) && (filter == null) && (this.mFilter == null)) {
+            if ((pathFilter == null) && (filter == null) && (this.mCurrentFilterSettings == null)) {
                 filter = sharedPref.getString(STATE_Filter, null);
                 if ((filter != null) && (dbgFilter != null)) dbgFilter.append("filter from sharedPref=").append(filter).append("\n");
             }
 
             if (filter != null) {
-                this.mFilter = GalleryFilterParameter.parse(filter, new GalleryFilterParameter());
+                this.mCurrentFilterSettings = GalleryFilterParameter.parse(filter, new GalleryFilterParameter());
             } else if (pathFilter != null) {
                 if (!pathFilter.endsWith("%")) pathFilter += "%";
-                this.mFilter = new GalleryFilterParameter().setPath(pathFilter);
+                this.mCurrentFilterSettings = new GalleryFilterParameter().setPath(pathFilter);
             }
 
             // extra parameter
@@ -304,7 +311,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
     /** true if activity should show navigator dialog after loading mDirectoryRoot is complete */
     private boolean mMustShowNavigator = false;
 
-    public static void showActivity(Activity context, GalleryFilterParameter filter, QueryParameter query, int requestCode) {
+    public static void showActivity(Activity context, GalleryFilterParameter filter, QueryParameter query, int requestCode, String initalFileUrl) {
         Intent intent = new Intent(context, FotoGalleryActivity.class);
 
         if (filter != null) {
@@ -315,6 +322,9 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
             intent.putExtra(EXTRA_QUERY, query.toReParseableString());
         }
 
+        if ((initalFileUrl != null) && (initalFileUrl.length() > 0)) {
+            intent.putExtra(EXTRA_SELECTED_ITEM_PATHS,initalFileUrl);
+        }
         if (requestCode != 0) {
             context.startActivityForResult(intent, requestCode);
         } else {
@@ -500,7 +510,6 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
             }
         }, this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery());
     }
-
     /**
      * Call back from sub-activities.<br/>
      * Process Change StartTime (longpress start), Select StopTime before stop
@@ -530,7 +539,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
 
     private void onFilterChanged(IGalleryFilter filter, String why) {
         if (filter != null) {
-            this.mGalleryQueryParameter.mFilter = filter;
+            this.mGalleryQueryParameter.mCurrentFilterSettings = filter;
             this.mGalleryQueryParameter.setHasUserDefinedQuery(false);
 
             invalidateDirectories(mDebugPrefix + "#filter changed " + why);
@@ -540,19 +549,19 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
     }
 
     private void openLatLonPicker() {
-        mGalleryQueryParameter.mUseLatLon = true;
+        mGalleryQueryParameter.mUseLatLonInsteadOfPath = true;
 
         final FragmentManager manager = getFragmentManager();
         LocationMapFragment dialog = new LocationMapFragment();
-        dialog.defineNavigation(this.mGalleryQueryParameter.mFilter,
-                this.mGalleryQueryParameter.mCurrentLatLon, ZoomUtil.NO_ZOOM, mSelectedItems);
+        dialog.defineNavigation(this.mGalleryQueryParameter.mCurrentFilterSettings,
+                this.mGalleryQueryParameter.mCurrentLatLonFromGeoAreaPicker, ZoomUtil.NO_ZOOM, mSelectedItems);
 
         dialog.show(manager, DLG_NAVIGATOR_TAG);
     }
 
 
     private void openFolderPicker() {
-        mGalleryQueryParameter.mUseLatLon = false;
+        mGalleryQueryParameter.mUseLatLonInsteadOfPath = false;
 
         int dirQueryID = this.mGalleryQueryParameter.getDirQueryID();
 
@@ -564,7 +573,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         if (mDirectoryRoot == null) {
             // not loaded yet. load directoryRoot in background
             final QueryParameter currentDirContentQuery = new QueryParameter(FotoSql.getQuery(dirQueryID));
-            FotoSql.setWhereFilter(currentDirContentQuery, this.mGalleryQueryParameter.mFilter, this.mGalleryQueryParameter.getSortID() != FotoSql.SORT_BY_NONE);
+            FotoSql.setWhereFilter(currentDirContentQuery, this.mGalleryQueryParameter.mCurrentFilterSettings, this.mGalleryQueryParameter.getSortID() != FotoSql.SORT_BY_NONE);
 
             this.mGalleryQueryParameter.mDirQueryID = (currentDirContentQuery != null) ? currentDirContentQuery.getID() : FotoSql.QUERY_TYPE_UNDEFINED;
 
@@ -586,7 +595,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
             DirectoryPickerFragment dirDialog = new DirectoryPickerFragment(); // (DirectoryPickerFragment) manager.findFragmentByTag(DLG_NAVIGATOR_TAG);
             dirDialog.setContextMenuId(R.menu.menu_context_dirpicker);
 
-            dirDialog.defineDirectoryNavigation(mDirectoryRoot, dirQueryID, this.mGalleryQueryParameter.mCurrentPath);
+            dirDialog.defineDirectoryNavigation(mDirectoryRoot, dirQueryID, this.mGalleryQueryParameter.mCurrentPathFromFolderPicker);
 
             mDirPicker = dirDialog;
             dirDialog.show(manager, DLG_NAVIGATOR_TAG);
@@ -594,7 +603,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
     }
 
     private void openFilter() {
-        GalleryFilterActivity.showActivity(this, this.mGalleryQueryParameter.mFilter, this.mGalleryQueryParameter.mGalleryContentQuery);
+        GalleryFilterActivity.showActivity(this, this.mGalleryQueryParameter.mCurrentFilterSettings, this.mGalleryQueryParameter.mGalleryContentQuery);
     }
 
     private void openSort() {
@@ -671,14 +680,14 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
     private void navigateTo(String selectedAbsolutePath, int queryTypeId) {
 
         if (selectedAbsolutePath != null) {
-            if (mGalleryQueryParameter.mUseLatLon) {
-                Log.d(Global.LOG_CONTEXT, "FotoGalleryActivity.navigateTo " + selectedAbsolutePath + " from " + mGalleryQueryParameter.mCurrentLatLon);
-                this.mGalleryQueryParameter.mCurrentLatLon.get(DirectoryFormatter.parseLatLon(selectedAbsolutePath));
+            if (mGalleryQueryParameter.mUseLatLonInsteadOfPath) {
+                Log.d(Global.LOG_CONTEXT, "FotoGalleryActivity.navigateTo " + selectedAbsolutePath + " from " + mGalleryQueryParameter.mCurrentLatLonFromGeoAreaPicker);
+                this.mGalleryQueryParameter.mCurrentLatLonFromGeoAreaPicker.get(DirectoryFormatter.parseLatLon(selectedAbsolutePath));
 
                 reloadGui("navigate to geo");
-            } else { //  if (this.mGalleryQueryParameter.mCurrentPath.compareTo(selectedAbsolutePath) != 0) {
-                Log.d(Global.LOG_CONTEXT, "FotoGalleryActivity.navigateTo " + selectedAbsolutePath + " from " + this.mGalleryQueryParameter.mCurrentPath);
-                this.mGalleryQueryParameter.mCurrentPath = selectedAbsolutePath;
+            } else { //  if (this.mGalleryQueryParameter.mCurrentPathFromFolderPicker.compareTo(selectedAbsolutePath) != 0) {
+                Log.d(Global.LOG_CONTEXT, "FotoGalleryActivity.navigateTo " + selectedAbsolutePath + " from " + this.mGalleryQueryParameter.mCurrentPathFromFolderPicker);
+                this.mGalleryQueryParameter.mCurrentPathFromFolderPicker = selectedAbsolutePath;
                 this.mGalleryQueryParameter.mDirQueryID = queryTypeId;
                 setTitle();
 
@@ -696,7 +705,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         }
 
         if (mDirGui != null) {
-            String currentPath = this.mGalleryQueryParameter.mCurrentPath;
+            String currentPath = this.mGalleryQueryParameter.mCurrentPathFromFolderPicker;
             if (currentPath != null) {
                 mDirGui.navigateTo(currentPath);
             }
@@ -709,7 +718,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
             Toast.makeText(this, message,Toast.LENGTH_LONG).show();
         } else {
             mDirectoryRoot = directoryRoot;
-            final boolean mustDefineNavigation = (mDirGui != null) && (this.mGalleryQueryParameter.mCurrentPath != null);
+            final boolean mustDefineNavigation = (mDirGui != null) && (this.mGalleryQueryParameter.mCurrentPathFromFolderPicker != null);
             final boolean mustShowFolderPicker = (mDirectoryRoot != null) && (this.mMustShowNavigator);
 
             if (Global.debugEnabled) {
@@ -722,7 +731,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
             }
 
             if (mustDefineNavigation) {
-                mDirGui.defineDirectoryNavigation(directoryRoot, this.mGalleryQueryParameter.getDirQueryID(), this.mGalleryQueryParameter.mCurrentPath);
+                mDirGui.defineDirectoryNavigation(directoryRoot, this.mGalleryQueryParameter.getDirQueryID(), this.mGalleryQueryParameter.mCurrentPathFromFolderPicker);
             }
             Global.debugMemory(mDebugPrefix, "onDirectoryDataLoadComplete");
 
@@ -736,11 +745,11 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         String title = getIntent().getStringExtra(EXTRA_TITLE);
 
         if (title == null) {
-            if (mGalleryQueryParameter.mUseLatLon) {
+            if (mGalleryQueryParameter.mUseLatLonInsteadOfPath) {
                 title = getString(R.string.gallery_title);
-            } else if (this.mGalleryQueryParameter.mCurrentPath != null) {
+            } else if (this.mGalleryQueryParameter.mCurrentPathFromFolderPicker != null) {
                 title = FotoSql.getName(this, this.mGalleryQueryParameter.getDirQueryID())
-                        + " - " + this.mGalleryQueryParameter.mCurrentPath;
+                        + " - " + this.mGalleryQueryParameter.mCurrentPathFromFolderPicker;
             } else {
                 title = FotoSql.getName(this, this.mGalleryQueryParameter.getDirQueryID());
             }

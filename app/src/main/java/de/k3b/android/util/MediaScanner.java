@@ -128,12 +128,17 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
 
     /** return true, if file is in a ".nomedia" dir */
     public static boolean isNoMedia(String path, int maxLevel) {
-        File file = getDir(path);
-        while ((--maxLevel >= 0) && (file != null)) {
-            if (new File(file, ".nomedia").exists()) {
-                return true;
+        if (path != null) {
+            if (path.indexOf("/.") >= 0) {
+                return true; // linux convention: folder names starting with "." are hidden
             }
-            file = file.getParentFile();
+            File file = getDir(path);
+            while ((--maxLevel >= 0) && (file != null)) {
+                if (new File(file, ".nomedia").exists()) {
+                    return true;
+                }
+                file = file.getParentFile();
+            }
         }
         return false;
     }
@@ -141,6 +146,10 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
     /** return parent of path if path is not a dir. else return path */
     public static File getDir(String path) {
         if ((path == null) || (path.length() == 0)) return null;
+        if (path.endsWith("%")) {
+            // remove sql wildcard at end of name
+            path = path.substring(0,path.length() - 1);
+        }
         return getDir(new File(path));
     }
 

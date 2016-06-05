@@ -721,9 +721,9 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
             case R.id.cmd_gallery:
                 if (mFilter != null) {
-                    FotoGalleryActivity.showActivity(this, this.mFilter, null, 0);
+                    FotoGalleryActivity.showActivity(this, this.mFilter, null, 0, getCurrentFilePath());
                 } else {
-                    FotoGalleryActivity.showActivity(this, null, this.mGalleryContentQuery, 0);
+                    FotoGalleryActivity.showActivity(this, null, this.mGalleryContentQuery, 0, getCurrentFilePath());
                 }
                 return true;
 

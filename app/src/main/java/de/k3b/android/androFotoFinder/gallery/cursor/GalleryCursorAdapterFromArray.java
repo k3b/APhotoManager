@@ -1,32 +1,35 @@
-package de.k3b.android.androFotoFinder.imagedetail;
+package de.k3b.android.androFotoFinder.gallery.cursor;
 
 import android.app.Activity;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.io.File;
+
 import de.k3b.android.androFotoFinder.AdapterArrayHelper;
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.database.SelectedItems;
-import uk.co.senab.photoview.PhotoView;
 
 /**
+ * Created by k3b on 30.05.2016.
  * Purpose: allow viewing images from ".nomedia" folders where no data is available in mediadb/cursor.
- * Same as ImagePagerAdapterFromCursor but while underlaying cursor has
+ * Same as GalleryCursorAdapter but while underlaying cursor has
  * no data photos are taken from array instead.
  *
- * Created by k3b on 12.04.2016.
  */
-public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCursor {
+public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
 
     /** not null data comes from array instead from base implementation */
     private AdapterArrayHelper mArrayImpl = null;
 
-    public ImagePagerAdapterFromCursorArray(final Activity context, String name, String fullPhotoPath) {
-        super(context, name);
+    public GalleryCursorAdapterFromArray(final Activity context, SelectedItems selectedItems, String name, String fullPhotoPath) {
+        super(context, selectedItems, name);
 
         if (MediaScanner.isNoMedia(fullPhotoPath,22)) {
             mArrayImpl = new AdapterArrayHelper(context, fullPhotoPath);
@@ -66,40 +69,37 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
         return super.getImageId(position);
     }
 
-    @Override
-    public View instantiateItem(ViewGroup container, int position) {
+    /**
+     * @see android.widget.ListAdapter#getView(int, View, ViewGroup)
+     */
+    public View getView(int position, View convertView, ViewGroup parent) {
         final String fullPhotoPathFromArray = (mArrayImpl != null) ? mArrayImpl.getFullFilePathfromArray(position) : null;
         if (fullPhotoPathFromArray != null) {
-            // special case image from ".nomedia" folder via absolute path not via content: uri
+            View v;
+            if (convertView == null) {
+                v = newView(mContext, null, parent);
+            } else {
+                v = convertView;
+            }
+            final GridCellViewHolder holder = (GridCellViewHolder) v.getTag();
+            holder.url =  mArrayImpl.getFullFilePathfromArray(position);
+            holder.image.setImageURI(Uri.parse(holder.url));
+            holder.imageID = this.getImageId(position);
+            holder.icon.setVisibility(((mSelectedItems != null) && (mSelectedItems.contains(holder.imageID))) ? View.VISIBLE : View.GONE);
 
-            PhotoView photoView = new PhotoView(container.getContext());
-            photoView.setMaximumScale(20);
-            photoView.setMediumScale(5);
+            if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, mDebugPrefix + "bindView for " + holder);
+            return v;
 
-            if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, mDebugPrefix + "instantiateItemFromArray(#" + position +") => " + fullPhotoPathFromArray + " => " + photoView);
-
-            photoView.setImageURI(Uri.parse(fullPhotoPathFromArray));
-
-            container.addView(photoView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-
-            return photoView;
-
+        } else {
+            return super.getView(position,convertView, parent);
         }
-
-        // no array avaliable. Use original cursor baed implementation
-        return  super.instantiateItem(container,position);
     }
 
-    /** internal helper. return -1 if position is not available */
+    /** converts imageID to uri */
     @Override
-    public int getPositionFromPath(String path) {
-        if (mArrayImpl != null) {
-            int result = mArrayImpl.getPositionFromPath(path);
-
-            if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, mDebugPrefix + "getPositionFromPath-Array(" + path +") => " + result);
-            return result;
-        }
-        return super.getPositionFromPath(path);
+    public Uri getUri(long imageID) {
+        if (mArrayImpl != null) return Uri.parse("file:"+mArrayImpl.getFullFilePathfromArray(mArrayImpl.convertBetweenPositionAndId((int) imageID)));
+        return super.getUri(imageID);
     }
 
 
@@ -109,4 +109,5 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
         if (mArrayImpl != null) return mArrayImpl.getFileNames(items);
         return super.getFileNames(items);
     }
+
 }
