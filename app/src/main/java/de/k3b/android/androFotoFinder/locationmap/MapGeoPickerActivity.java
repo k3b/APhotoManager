@@ -52,7 +52,7 @@ import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 
 public class MapGeoPickerActivity extends LocalizedActivity implements Common {
-    private static final String debugPrefix = "GalM-";
+    private static final String mDebugPrefix = "GalM-";
     private static final String STATE_Filter = "filterMap";
     private static final String STATE_LAST_GEO = "geoLastView";
 
@@ -103,6 +103,9 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         Intent intent = this.getIntent();
+        if (Global.debugEnabled && (intent != null)){
+            Log.d(Global.LOG_CONTEXT, mDebugPrefix + "onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
+        }
 
         GeoPointDto geoPointFromIntent = getGeoPointDtoFromIntent(intent);
         // no geo: from intent: use last used value
@@ -177,7 +180,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
         }
 
         if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, debugPrefix + dbgFilter + " => " + this.mFilter);
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + dbgFilter + " => " + this.mFilter);
         }
 
         mMap.defineNavigation(this.mFilter, geoPointFromIntent, rectangle, zoom, selectedItems);

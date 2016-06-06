@@ -301,6 +301,10 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
 
+        if (Global.debugEnabled && (intent != null)){
+            Log.d(Global.LOG_CONTEXT, mDebugPrefix + "onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
+        }
+
         if (mustForward(intent)) {
             // cannot handle myself. Forward to FotoGalleryActivity
             Intent childIntent = new Intent();
@@ -719,13 +723,16 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             case R.id.menu_item_rename:
                 return onRenameDirQueston(getCurrentImageId(), getCurrentFilePath(), null);
 
-            case R.id.cmd_gallery:
-                if (mFilter != null) {
-                    FotoGalleryActivity.showActivity(this, this.mFilter, null, 0, getCurrentFilePath());
-                } else {
-                    FotoGalleryActivity.showActivity(this, null, this.mGalleryContentQuery, 0, getCurrentFilePath());
+            case R.id.cmd_gallery: {
+                String dirPath = getCurrentFilePath(); // MediaScanner.getDir().getAbsolutePath();
+                if (dirPath != null) {
+                    dirPath = MediaScanner.getDir(dirPath).getAbsolutePath();
+                    GalleryFilterParameter newFilter = new GalleryFilterParameter();
+                    newFilter.setPath(dirPath);
+                    FotoGalleryActivity.showActivity(this, this.mFilter, null, 0);
                 }
                 return true;
+            }
 
             case R.id.cmd_show_geo:
                 MapGeoPickerActivity.showActivity(this, getCurrentFoto());

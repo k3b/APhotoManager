@@ -326,6 +326,12 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
 
         Intent intent = (parent == null) ? null : parent.getIntent();
+
+        if (Global.debugEnabled && (intent != null)){
+            Log.d(Global.LOG_CONTEXT, mDebugPrefix + "onCreateView " + intent.toUri(Intent.URI_INTENT_SCHEME));
+        }
+
+
         String path = (intent == null) ? null : intent.getStringExtra(EXTRA_SELECTED_ITEM_PATHS);
 
         String filterValue = ((intent != null) && (path == null)) ? intent.getStringExtra(EXTRA_FILTER) : null;
@@ -517,7 +523,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         if (Global.debugEnabledSql) {
             Log.i(Global.LOG_CONTEXT, "Exec child gallery\n\t" + subGalleryQuery.toSqlString());
         }
-        FotoGalleryActivity.showActivity(getActivity(), null, subGalleryQuery, 0, null);
+        FotoGalleryActivity.showActivity(getActivity(), null, subGalleryQuery, 0);
     }
 
     /****************** path navigation *************************/

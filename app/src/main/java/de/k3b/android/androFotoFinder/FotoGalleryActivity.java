@@ -38,6 +38,10 @@ import android.widget.Toast;
 
 // import com.squareup.leakcanary.RefWatcher;
 
+import org.apache.http.client.utils.URIUtils;
+
+import java.io.File;
+
 import de.k3b.android.androFotoFinder.directory.DirectoryGui;
 import de.k3b.android.androFotoFinder.directory.DirectoryLoaderTask;
 import de.k3b.android.androFotoFinder.gallery.cursor.GalleryCursorFragment;
@@ -215,12 +219,6 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
 
         // load from settings/instanceState
         private void loadSettingsAndInstanceState(Activity context, Bundle savedInstanceState) {
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-            this.mCurrentPathFromFolderPicker = sharedPref.getString(STATE_CurrentPath, this.mCurrentPathFromFolderPicker);
-            this.mDirQueryID = sharedPref.getInt(STATE_DirQueryID, this.getDirQueryID());
-            this.mCurrentSortID = sharedPref.getInt(STATE_SortID, this.mCurrentSortID);
-            this.mCurrentSortAscending = sharedPref.getBoolean(STATE_SortAscending, this.mCurrentSortAscending);
-            this.mCurrentLatLonFromGeoAreaPicker.get(DirectoryFormatter.parseLatLon(sharedPref.getString(STATE_LAT_LON, null)));
 
             Intent intent = context.getIntent();
 
@@ -234,8 +232,8 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
 
                 if ((filter != null) && (dbgFilter != null)) dbgFilter.append("filter from ").append(EXTRA_FILTER).append("=").append(filter).append("\n");
 
+                Uri uri = IntentUtil.getUri(intent);
                 if (filter == null) {
-                    Uri uri = IntentUtil.getUri(intent);
 
                     if (IntentUtil.isFileUri(uri)) {
                         pathFilter = uri.getSchemeSpecificPart();
@@ -243,8 +241,20 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
                         if (dbgFilter != null) dbgFilter.append("path from uri=").append(pathFilter).append("\n");
                     }
                 }
+                this.mSaveToSharedPrefs = ((filter == null) && (pathFilter == null) && (uri == null) ); // false if controlled via intent
+            } else {
+                this.mSaveToSharedPrefs = true;
             }
-            this.mSaveToSharedPrefs = (filter == null); // false if controlled via intent
+
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+            if (this.mSaveToSharedPrefs) {
+                this.mCurrentPathFromFolderPicker = sharedPref.getString(STATE_CurrentPath, this.mCurrentPathFromFolderPicker);
+                this.mDirQueryID = sharedPref.getInt(STATE_DirQueryID, this.getDirQueryID());
+                this.mCurrentSortID = sharedPref.getInt(STATE_SortID, this.mCurrentSortID);
+                this.mCurrentSortAscending = sharedPref.getBoolean(STATE_SortAscending, this.mCurrentSortAscending);
+                this.mCurrentLatLonFromGeoAreaPicker.get(DirectoryFormatter.parseLatLon(sharedPref.getString(STATE_LAT_LON, null)));
+            }
+
             // instance state overrides settings
             if (savedInstanceState != null) {
                 this.mCurrentPathFromFolderPicker = savedInstanceState.getString(STATE_CurrentPath, this.mCurrentPathFromFolderPicker);
@@ -311,7 +321,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
     /** true if activity should show navigator dialog after loading mDirectoryRoot is complete */
     private boolean mMustShowNavigator = false;
 
-    public static void showActivity(Activity context, GalleryFilterParameter filter, QueryParameter query, int requestCode, String initalFileUrl) {
+    public static void showActivity(Activity context, GalleryFilterParameter filter, QueryParameter query, int requestCode) {
         Intent intent = new Intent(context, FotoGalleryActivity.class);
 
         if (filter != null) {
@@ -322,9 +332,6 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
             intent.putExtra(EXTRA_QUERY, query.toReParseableString());
         }
 
-        if ((initalFileUrl != null) && (initalFileUrl.length() > 0)) {
-            intent.putExtra(EXTRA_SELECTED_ITEM_PATHS,initalFileUrl);
-        }
         if (requestCode != 0) {
             context.startActivityForResult(intent, requestCode);
         } else {
@@ -342,6 +349,10 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
     protected void onCreate(Bundle savedInstanceState){
         Global.debugMemory(mDebugPrefix, "onCreate");
         super.onCreate(savedInstanceState);
+        final Intent intent = getIntent();
+        if (Global.debugEnabled && (intent != null)){
+            Log.d(Global.LOG_CONTEXT, mDebugPrefix + "onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
+        }
 
         bookmarkController = new BookmarkController(this);
 

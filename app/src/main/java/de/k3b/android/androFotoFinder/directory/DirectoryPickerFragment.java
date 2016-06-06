@@ -24,6 +24,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -146,6 +147,10 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         View view = inflater.inflate(R.layout.fragment_directory, container, false);
 
         mContext = this.getActivity();
+        if (Global.debugEnabled && (mContext != null) && (mContext.getIntent() != null)){
+            Log.d(Global.LOG_CONTEXT, "DirectoryPickerFragment onCreateView " + mContext.getIntent().toUri(Intent.URI_INTENT_SCHEME));
+        }
+
 
         mPathButtonClickHandler = new View.OnClickListener() {
             @Override
@@ -348,8 +353,12 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
         if (pathFilter != null) {
             GalleryFilterParameter filter = new GalleryFilterParameter(); //.setPath(pathFilter);
-            FotoSql.set(filter, pathFilter, mDirTypId);
-            FotoGalleryActivity.showActivity(this.getActivity(), filter, null, 0, pathFilter);
+            if (!FotoSql.set(filter, pathFilter, mDirTypId))
+            {
+                filter.setPath(pathFilter);
+            }
+
+            FotoGalleryActivity.showActivity(this.getActivity(), filter, null, 0);
             return true;
         }
         return false;

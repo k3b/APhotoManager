@@ -57,7 +57,7 @@ import de.k3b.io.DirectoryFormatter;
  * Defines a gui for global foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.
  */
 public class GeoEditActivity extends LocalizedActivity implements Common  {
-    private static final String debugPrefix = "GeoEdit-";
+    private static final String mDebugPrefix = "GeoEdit-";
 
     public static final int RESULT_ID = 524;
     private static final String DLG_NAVIGATOR_TAG = "GeoEditActivity";
@@ -106,12 +106,16 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Global.debugMemory(debugPrefix, "onCreate");
+        Global.debugMemory(mDebugPrefix, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_geo_edit);
         onCreateButtos();
 
-        SelectedFiles selectedItems = getItems(this.getIntent());
+        final Intent intent = this.getIntent();
+        if (Global.debugEnabled && (intent != null)){
+            Log.d(Global.LOG_CONTEXT, mDebugPrefix + "onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
+        }
+        SelectedFiles selectedItems = getItems(intent);
         if (selectedItems != null) {
             mSelectedItems = selectedItems;
 

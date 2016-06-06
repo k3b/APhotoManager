@@ -62,4 +62,8 @@ public class IntentUtil implements Common {
         return (uri != null) && ("file".equals(uri.getScheme()));
     }
 
+    public static boolean isFileUri(String initalFileUrl) {
+        return ((initalFileUrl != null) && ((initalFileUrl.indexOf(":") == -1)
+                || (initalFileUrl.startsWith("file:"))));
+    }
 }
