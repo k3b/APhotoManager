@@ -20,12 +20,12 @@ App and internet homepage available in these languages:<ul>
 **Help wanted for further [Translations](https://crowdin.com/project/AndroFotoFinder)**
 
 ## Current Project Status
-Latest stable release: v0.4.6 (branch FDroid) 
 
-* available via [f-droid.org installer](https://f-droid.org/) or [apk internet download](https://f-droid.org/repository/browse/?fdid=de.k3b.android.androFotoFinder) or [sourcecode at github](https://github.com/k3b/APhotoManager/tree/FDroid)
-	* **not** available via http://play.google.com/ or http://www.appbrain.com
+* Latest stable release: (branch FDroid ![](https://travis-ci.org/k3b/APhotoManager.svg?branch=FDroid)) 
+* [<img src="https://f-droid.org/badge/get-it-on.png" alt="available on F-Droid app store" height="80">](https://f-droid.org/app/de.k3b.android.androFotoFinder) or [sourcecode at github](https://github.com/k3b/APhotoManager/tree/FDroid)
 * Recent changes see [History](https://github.com/k3b/APhotoManager/wiki/History)
-* License under GPLv3 or later.
+* License under GPLv3 or later [<img src="https://img.shields.io/github/license/k3b/APhotoManager.svg"></img>](https://github.com/k3b/k3b-geoHelper/blob/master/APhotoManager).
+* Current development version (branch master ![](https://travis-ci.org/k3b/APhotoManager.svg?branch=master))
 
 ## Table of Contents
 
