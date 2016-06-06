@@ -769,4 +769,9 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
             this.setTitle(title + mTitleResultCount);
         }
     }
+
+    @Override
+    public String toString() {
+        return mDebugPrefix + "->" + this.mGalleryGui;
+    }
 }

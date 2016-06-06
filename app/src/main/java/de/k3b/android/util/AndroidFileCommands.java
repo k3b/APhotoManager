@@ -137,7 +137,7 @@ public class AndroidFileCommands extends FileCommands {
 
     }
 
-    public boolean onOptionsItemSelected(final MenuItem item, final SelectedItems selectedFileNames) {
+    public boolean onOptionsItemSelected(final MenuItem item, final SelectedFiles selectedFileNames) {
         if ((selectedFileNames != null) && (selectedFileNames.size() > 0)) {
             // Handle item selection
             switch (item.getItemId()) {
@@ -172,14 +172,14 @@ public class AndroidFileCommands extends FileCommands {
         return (result != 0);
     }
 
-    public void onMoveOrCopyDirectoryPick(boolean move, IDirectory destFolder, SelectedItems srcFotos) {
+    public void onMoveOrCopyDirectoryPick(boolean move, IDirectory destFolder, SelectedFiles srcFotos) {
         if (destFolder != null) {
             String copyToPath = destFolder.getAbsolute();
             File destDirFolder = new File(copyToPath);
 
             setLastCopyToPath(copyToPath);
 
-            String[] selectedFileNames = srcFotos.getFileNames(mId2FileNameConverter);
+            String[] selectedFileNames = srcFotos.getFileNames();
             moveOrCopyFilesTo(move, destDirFolder, SelectedFiles.getFiles(selectedFileNames));
         }
     }
@@ -197,8 +197,8 @@ public class AndroidFileCommands extends FileCommands {
         edit.commit();
     }
 
-    public boolean cmdDeleteFileWithQuestion(final SelectedItems fotos) {
-        String[] pathNames = fotos.getFileNames(mId2FileNameConverter);
+    public boolean cmdDeleteFileWithQuestion(final SelectedFiles fotos) {
+        String[] pathNames = fotos.getFileNames();
         String errorMessage = checkWriteProtected(R.string.delete_menu_title, SelectedFiles.getFiles(pathNames));
 
         if (errorMessage != null) {
@@ -248,8 +248,8 @@ public class AndroidFileCommands extends FileCommands {
         return true;
     }
 
-    private int deleteFiles(SelectedItems fotos) {
-        String[] fileNames = fotos.getFileNames(mId2FileNameConverter);
+    private int deleteFiles(SelectedFiles fotos) {
+        String[] fileNames = fotos.getFileNames();
         return super.deleteFiles(fileNames);
     }
 
@@ -424,6 +424,17 @@ public class AndroidFileCommands extends FileCommands {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+
+        if (mContext != null) {
+            result.append(mContext).append("->");
+        }
+        result.append(mDebugPrefix);
+        return result.toString();
     }
 
 }

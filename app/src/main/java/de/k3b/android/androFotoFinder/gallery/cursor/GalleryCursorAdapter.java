@@ -43,8 +43,18 @@ import de.k3b.database.SelectedItems;
 
 /**
  * CursorAdapter that queries MediaStore.Images.Media.EXTERNAL_CONTENT_URI
- * for a GridViewItem (gridCell)
+ * for a GridViewItem (gridCell).
  *
+* In android displaying an item with an image in a list or grid works like this (example):
+* 
+*     The grid needs to display item that is at position 35
+*     The grid asks its adapter for a filled griditemview for the item that is at position 35
+*     griditemview is either recycled from an old griditemview that is not visible any more or a new griditemview is created
+*     each griditemview has a corresponding viewHolder with imageID and a bitmap-gui element
+*     the image in the griditemview is initally loaded with a placeholder-image that will be visible until the imagload is complete.
+*     the adapter initiates loading the image in the background (async-task) that gets the viewHolder with imageID.
+*     when loading of the image in the background is finished the viewholder-gui element gets the loaded image.
+* 
  * Created by k3b on 02.06.2015.
  */
 public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItems.Id2FileNameConverter  {

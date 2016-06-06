@@ -355,7 +355,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             GalleryFilterParameter filter = new GalleryFilterParameter(); //.setPath(pathFilter);
             if (!FotoSql.set(filter, pathFilter, mDirTypId))
             {
-                filter.setPath(pathFilter);
+                filter.setPath(pathFilter + "/%");
             }
 
             FotoGalleryActivity.showActivity(this.getActivity(), filter, null, 0);

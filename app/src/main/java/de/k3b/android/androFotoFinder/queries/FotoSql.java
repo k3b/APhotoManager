@@ -564,7 +564,7 @@ public class FotoSql {
     }
 
     /** gets IGeoPoint either from file if fullPath is not null else from db via id */
-    public static IGeoPoint execGetPosition(Context context, String fullPath, int id) {
+    public static IGeoPoint execGetPosition(Context context, String fullPath, long id) {
         QueryParameter query = new QueryParameter()
         .setID(QUERY_TYPE_UNDEFINED)
                 .addColumn(SQL_COL_LAT, SQL_COL_LON)

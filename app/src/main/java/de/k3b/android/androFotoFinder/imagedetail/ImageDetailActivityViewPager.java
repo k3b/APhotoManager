@@ -197,13 +197,14 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     public static class MoveOrCopyDestDirPicker extends DirectoryPickerFragment {
         static AndroidFileCommands sFileCommands = null;
 
-        public static MoveOrCopyDestDirPicker newInstance(boolean move, SelectedItems srcFotos) {
+        public static MoveOrCopyDestDirPicker newInstance(boolean move, SelectedFiles srcFotos) {
             MoveOrCopyDestDirPicker f = new MoveOrCopyDestDirPicker();
 
             // Supply index input as an argument.
             Bundle args = new Bundle();
             args.putBoolean("move", move);
-            args.putSerializable("srcFotos", srcFotos);
+            args.putSerializable(EXTRA_SELECTED_ITEM_PATHS, srcFotos.toString());
+            args.putSerializable(EXTRA_SELECTED_ITEM_IDS, srcFotos.toIdString());
             f.setArguments(args);
 
             return f;
@@ -217,8 +218,13 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             return getArguments().getBoolean("move", false);
         }
 
-        public SelectedItems getSrcFotos() {
-            return (SelectedItems) getArguments().getSerializable("srcFotos");
+        public SelectedFiles getSrcFotos() {
+            String selectedItems = (String) getArguments().getSerializable(EXTRA_SELECTED_ITEM_IDS);
+            String selectedFiles = (String) getArguments().getSerializable(EXTRA_SELECTED_ITEM_PATHS);
+
+            if ((selectedItems == null) && (selectedFiles == null)) return null;
+            SelectedFiles result = new SelectedFiles(selectedFiles, selectedItems);
+            return result;
         }
 
         /**
@@ -243,8 +249,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             mModifyCount++; // copy or move initiated
             getActivity().setResult((mModifyCount == 0) ? RESULT_NOCHANGE : RESULT_CHANGE);
 
-            dismiss();
             sFileCommands.onMoveOrCopyDirectoryPick(getMove(), selection, getSrcFotos());
+            dismiss();
         }
     };
 
@@ -352,6 +358,14 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
             mFileCommands.setContext(this, mAdapter);
             mFileCommands.setLogFilePath(mFileCommands.getDefaultLogFile());
+
+            if (Global.debugEnabledMemory) {
+                Log.d(Global.LOG_CONTEXT, mDebugPrefix + " - onCreate cmd (" +
+                        MoveOrCopyDestDirPicker.sFileCommands + ") => (" + mFileCommands +
+                        ")");
+
+            }
+
             MoveOrCopyDestDirPicker.sFileCommands = mFileCommands;
 
             if (mAdapter.getCount() == 0) {
@@ -365,6 +379,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         }
         unhideActionBar(Global.actionBarHideTimeInMilliSecs, "onCreate");
     }
+
 
     private void onGuiTouched() {
         // stop slideshow if active
@@ -545,6 +560,16 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         unhideActionBar(Global.actionBarHideTimeInMilliSecs, "onResume");
         Global.debugMemory(mDebugPrefix, "onResume");
         super.onResume();
+        if (Global.debugEnabledMemory) {
+            Log.d(Global.LOG_CONTEXT, mDebugPrefix + " - onResume cmd (" +
+                    MoveOrCopyDestDirPicker.sFileCommands + ") => (" + mFileCommands +
+                    ")");
+
+        }
+
+        // workaround fragment lifecycle is newFragment.attach oldFragment.detach.
+        // this makes shure that the visible fragment has commands
+        MoveOrCopyDestDirPicker.sFileCommands = mFileCommands;
     }
 
     @Override
@@ -559,7 +584,21 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             mFileCommands.closeLogFile();
             mFileCommands.closeAll();
             mFileCommands.setContext(null, mAdapter);
+
+        }
+
+        // kill this instance only if not an other instance is active
+        if (MoveOrCopyDestDirPicker.sFileCommands == mFileCommands) {
+            if (Global.debugEnabledMemory) {
+                Log.d(Global.LOG_CONTEXT, mDebugPrefix + " - onDestroy cmd (" +
+                        MoveOrCopyDestDirPicker.sFileCommands + ") => (null) ");
+
+            }
             MoveOrCopyDestDirPicker.sFileCommands = null;
+        } else if (Global.debugEnabledMemory) {
+            Log.d(Global.LOG_CONTEXT, mDebugPrefix + " - onDestroy cmd [ignore] (" +
+                    MoveOrCopyDestDirPicker.sFileCommands + ")");
+
         }
 
         if (mSlideShowTimer != null) {
@@ -738,8 +777,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                 MapGeoPickerActivity.showActivity(this, getCurrentFoto());
                 return true;
             case R.id.cmd_edit_geo:
-                SelectedItems selectedItem = getCurrentFoto();
-                GeoEditActivity.showActivity(this, new SelectedFiles(selectedItem.getFileNames(mAdapter), selectedItem.toString()));
+                SelectedFiles selectedItem = getCurrentFoto();
+                GeoEditActivity.showActivity(this, selectedItem);
                 return true;
 
             case R.id.cmd_about:
@@ -829,7 +868,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         ImageDetailDialogBuilder.createImageDetailDialog(this, fullFilePath, currentImageId, mGalleryContentQuery, mViewPager.getCurrentItem()).show();
     }
 
-    private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedItems fotos) {
+    private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
         if (AndroidFileCommands.canProcessFile(this)) {
             MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
@@ -900,10 +939,9 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         */
     }
 
-    protected SelectedItems getCurrentFoto() {
+    protected SelectedFiles getCurrentFoto() {
         long imageId = getCurrentImageId();
-        SelectedItems result = new SelectedItems();
-        result.add(imageId);
+        SelectedFiles result = new SelectedFiles(new String[] {getCurrentFilePath()}, new Long[] {Long.valueOf(imageId)});
         return  result;
     }
 
@@ -941,4 +979,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 		super.onSaveInstanceState(outState);
 	}
 
+    @Override
+    public String toString() {
+        return mDebugPrefix + this.mAdapter;
+    }
 }

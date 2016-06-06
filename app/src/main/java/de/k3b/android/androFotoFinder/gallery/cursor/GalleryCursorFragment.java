@@ -386,6 +386,14 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         super.onAttach(activity);
         mFileCommands.setContext(activity, mAdapter);
         mFileCommands.setLogFilePath(mFileCommands.getDefaultLogFile());
+
+        if (Global.debugEnabledMemory) {
+            Log.d(Global.LOG_CONTEXT, mDebugPrefix + " - onAttach cmd (" +
+                    MoveOrCopyDestDirPicker.sFileCommands + ") => (" + mFileCommands +
+                    ")");
+
+        }
+
         MoveOrCopyDestDirPicker.sFileCommands = mFileCommands;
         try {
             mGalleryListener = (OnGalleryInteractionListener) activity;
@@ -403,13 +411,44 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     @Override
+    public void onResume() {
+        Global.debugMemory(mDebugPrefix, "onResume");
+        super.onResume(); // this may destroy an other instance of gallery(fragment)
+
+        if (Global.debugEnabledMemory) {
+            Log.d(Global.LOG_CONTEXT, mDebugPrefix + " - onResume cmd (" +
+                            MoveOrCopyDestDirPicker.sFileCommands + ") => (" + mFileCommands +
+                    ")");
+
+        }
+
+        // workaround fragment lifecycle is newFragment.attach oldFragment.detach.
+        // this makes shure that the visible fragment has commands
+        MoveOrCopyDestDirPicker.sFileCommands = mFileCommands;
+
+    }
+
+    @Override
     public void onDetach() {
         Global.debugMemory(mDebugPrefix, "onDetach");
         super.onDetach();
         mGalleryListener = null;
         mDirectoryListener = null;
         mFileCommands.setContext(null, mAdapter);
-        MoveOrCopyDestDirPicker.sFileCommands = null;
+
+        // kill this instance only if not an other instance is active
+        if (MoveOrCopyDestDirPicker.sFileCommands == mFileCommands) {
+            if (Global.debugEnabledMemory) {
+                Log.d(Global.LOG_CONTEXT, mDebugPrefix + " - onDetach cmd (" +
+                        MoveOrCopyDestDirPicker.sFileCommands + ") => (null) ");
+
+            }
+            MoveOrCopyDestDirPicker.sFileCommands = null;
+        } else if (Global.debugEnabledMemory) {
+            Log.d(Global.LOG_CONTEXT, mDebugPrefix + " - onDetach cmd [ignore] (" +
+                    MoveOrCopyDestDirPicker.sFileCommands + ")");
+
+        }
     }
 
     @Override
@@ -701,7 +740,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     public boolean onOptionsItemSelected(MenuItem menuItem) {
         // Handle menuItem selection
         AndroidFileCommands fileCommands = mFileCommands;
-        if ((mSelectedItems != null) && (fileCommands.onOptionsItemSelected(menuItem, mSelectedItems))) {
+        final SelectedFiles selectedFiles = (mSelectedItems != null) ? new SelectedFiles(this.mSelectedItems, this.mAdapter) : null;
+        if ((mSelectedItems != null) && (fileCommands.onOptionsItemSelected(menuItem, selectedFiles))) {
             return true;
         }
         switch (menuItem.getItemId()) {
@@ -710,14 +750,14 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             case R.id.cmd_selected_only:
                 return multiSelectionToggle();
             case R.id.cmd_copy:
-                return cmdMoveOrCopyWithDestDirPicker(false, fileCommands.getLastCopyToPath(), mSelectedItems);
+                return cmdMoveOrCopyWithDestDirPicker(false, fileCommands.getLastCopyToPath(), selectedFiles);
             case R.id.cmd_move:
-                return cmdMoveOrCopyWithDestDirPicker(true, fileCommands.getLastCopyToPath(), mSelectedItems);
+                return cmdMoveOrCopyWithDestDirPicker(true, fileCommands.getLastCopyToPath(), selectedFiles);
             case R.id.cmd_show_geo:
-                MapGeoPickerActivity.showActivity(this.getActivity(), mSelectedItems);
+                MapGeoPickerActivity.showActivity(this.getActivity(), selectedFiles);
                 return true;
             case R.id.cmd_edit_geo:
-                GeoEditActivity.showActivity(this.getActivity(), new SelectedFiles(mSelectedItems.getFileNames(mAdapter), mSelectedItems.toString()));
+                GeoEditActivity.showActivity(this.getActivity(), selectedFiles);
                 return true;
             case R.id.cmd_selection_add_all:
                 addAllToSelection();
@@ -746,13 +786,16 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     public static class MoveOrCopyDestDirPicker extends DirectoryPickerFragment {
         static AndroidFileCommands sFileCommands = null;
 
-        public static MoveOrCopyDestDirPicker newInstance(boolean move, SelectedItems srcFotos) {
+        public static MoveOrCopyDestDirPicker newInstance(boolean move, SelectedFiles srcFotos) {
             MoveOrCopyDestDirPicker f = new MoveOrCopyDestDirPicker();
 
             // Supply index input as an argument.
             Bundle args = new Bundle();
             args.putBoolean("move", move);
-            args.putSerializable("srcFotos", srcFotos);
+
+            args.putSerializable(EXTRA_SELECTED_ITEM_PATHS, srcFotos.toString());
+            args.putSerializable(EXTRA_SELECTED_ITEM_IDS, srcFotos.toIdString());
+
             f.setArguments(args);
 
             return f;
@@ -766,19 +809,24 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             return getArguments().getBoolean("move", false);
         }
 
-        public SelectedItems getSrcFotos() {
-            return (SelectedItems) getArguments().getSerializable("srcFotos");
+        public SelectedFiles getSrcFotos() {
+            String selectedItems = (String) getArguments().getSerializable(EXTRA_SELECTED_ITEM_IDS);
+            String selectedFiles = (String) getArguments().getSerializable(EXTRA_SELECTED_ITEM_PATHS);
+
+            if ((selectedItems == null) && (selectedFiles == null)) return null;
+            SelectedFiles result = new SelectedFiles(selectedFiles, selectedItems);
+            return result;
         }
 
         @Override
         protected void onDirectoryPick(IDirectory selection) {
             // super.onDirectoryPick(selection);
-            dismiss();
             sFileCommands.onMoveOrCopyDirectoryPick(getMove(), selection, getSrcFotos());
+            dismiss();
         }
     };
 
-    private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedItems fotos) {
+    private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
         if (AndroidFileCommands.canProcessFile(this.getActivity())) {
             MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 

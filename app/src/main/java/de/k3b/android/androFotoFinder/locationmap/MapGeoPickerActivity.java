@@ -44,6 +44,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.LocalizedActivity;
+import de.k3b.database.SelectedFiles;
 import de.k3b.database.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
@@ -65,7 +66,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
     private GalleryFilterParameter mFilter;
     private GeoUri mGeoUriParser = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
 
-    public static void showActivity(Activity context, SelectedItems selectedItems) {
+    public static void showActivity(Activity context, SelectedFiles selectedItems) {
         Uri initalUri = null;
         final Intent intent = new Intent().setClass(context,
                 MapGeoPickerActivity.class);
@@ -75,7 +76,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
             //!!! ???EXTRA_SELECTED_ITEM_PATHS
 
 
-            IGeoPoint initialPoint = FotoSql.execGetPosition(context, null, selectedItems.first().intValue());
+            IGeoPoint initialPoint = FotoSql.execGetPosition(context, null, selectedItems.getId(0));
             if (initialPoint != null) {
                 GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
 

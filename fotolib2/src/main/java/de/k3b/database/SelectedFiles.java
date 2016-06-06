@@ -18,16 +18,29 @@ public class SelectedFiles  {
     }
 
     public SelectedFiles(String[] fileNameList, String idListAsString) {
+        this(fileNameList, parseIds(idListAsString));
+    }
+
+    public SelectedFiles(String[] fileNameList, Long[] ids) {
         mFileNames = fileNameList;
         if (mFileNames != null) {
             for (int i = mFileNames.length -1; i >= 0; i--) {
                 mFileNames[i] = reomoveApostrophes(mFileNames[i]);
             }
         }
-        SelectedItems ids = new SelectedItems().parse(idListAsString);
-        mIds = ids.toArray(new Long[ids.size()]);
+        mIds = ids;
     }
 
+    public SelectedFiles(SelectedItems items, SelectedItems.Id2FileNameConverter id2FileNameConverter) {
+        this(items.getFileNames(id2FileNameConverter), items.getIds());
+    }
+
+    private static Long[] parseIds(String idListAsString) {
+        if (idListAsString == null) return null;
+
+        SelectedItems ids = new SelectedItems().parse(idListAsString);
+        return ids.toArray(new Long[ids.size()]);
+    }
     /** removes SORUNDER from beginning/end if present */
     public static String reomoveApostrophes(String fileName) {
         if ((fileName != null) && (fileName.length() > 2)
@@ -92,6 +105,11 @@ public class SelectedFiles  {
 
     public String[] getFileNames() {
         return mFileNames;
+    }
+
+    public String getFileName(int i) {
+        if ((i >= 0) && (i < mFileNames.length) && (mFileNames != null)) return mFileNames[i];
+        return null;
     }
 
     public Long getId(int i) {
