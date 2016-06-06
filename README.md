@@ -21,12 +21,15 @@ App and internet homepage available in these languages:<ul>
 
 ## Current Project Status
 
-* [<img src="https://f-droid.org/badge/get-it-on.png" alt="available on F-Droid app store" height="80">](https://f-droid.org/app/de.k3b.android.androFotoFinder) or [sourcecode at github](https://github.com/k3b/APhotoManager/tree/FDroid)
-* Latest stable release: (branch FDroid ![](https://travis-ci.org/k3b/APhotoManager.svg?branch=FDroid)) 
-* Recent changes see [History](https://github.com/k3b/APhotoManager/wiki/History)
-* License under GPLv3 or later [<img src="https://img.shields.io/github/license/k3b/APhotoManager.svg"></img>](https://github.com/k3b/APhotoManager/blob/master/LICENSE).
-* Current development version (branch master ![](https://travis-ci.org/k3b/APhotoManager.svg?branch=master))
-* [![Crowdin](https://d322cqt584bo4o.cloudfront.net/androFotoFinder/localized.svg)](https://crowdin.com/project/androFotoFinder)<a href="https://github.com/k3b/APhotoManager/issues/21">Help us to translate into other languages.</a>
+* Current release
+  * <img src="https://img.shields.io/github/release/k3b/APhotoManager.svg?maxAge=2592000" />
+  * [<img src="https://f-droid.org/badge/get-it-on.png" alt="available on F-Droid app store" height="80">](https://f-droid.org/app/de.k3b.android.androFotoFinder)
+  * [<img src="https://img.shields.io/github/license/k3b/APhotoManager.svg"></img>](https://github.com/k3b/APhotoManager/blob/master/LICENSE) or later.
+  * Source code [branch FDroid <img src="https://travis-ci.org/k3b/APhotoManager.svg?branch=FDroid" alt="link to buldserver"  />](https://travis-ci.org/k3b/APhotoManager)
+  * Recent changes see [History](https://github.com/k3b/APhotoManager/wiki/History)
+* Current development version
+  * Source code [branch master <img src="https://travis-ci.org/k3b/APhotoManager.svg?branch=master" alt="link to branches on buldserver" />](https://travis-ci.org/k3b/APhotoManager/branches)
+  * Translations [![Crowdin](https://d322cqt584bo4o.cloudfront.net/androFotoFinder/localized.svg)](https://crowdin.com/project/androFotoFinder)<a href="https://github.com/k3b/APhotoManager/issues/21">Help us to translate into other languages.</a>
 
 ## Table of Contents
 
