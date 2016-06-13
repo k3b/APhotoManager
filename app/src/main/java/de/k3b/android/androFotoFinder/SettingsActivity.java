@@ -138,7 +138,7 @@ public class SettingsActivity extends PreferenceActivity {
         // one setting for several 3d party debug-flags
         PhotoViewAttacher.DEBUG                 = getPref(prefs, "debugEnableLibs", PhotoViewAttacher.DEBUG);
         HugeImageLoader.DEBUG                   = PhotoViewAttacher.DEBUG;
-        LogManager.enableDebug(PhotoViewAttacher.DEBUG);
+        LogManager.setDebugEnabled(PhotoViewAttacher.DEBUG);
 
         Global.clearSelectionAfterCommand       = getPref(prefs, "clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
 
