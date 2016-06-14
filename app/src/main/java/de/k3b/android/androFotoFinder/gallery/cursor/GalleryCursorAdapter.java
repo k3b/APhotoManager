@@ -169,6 +169,8 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
         return FotoSql.getUri(imageID);
     }
 
+
+
     /** data belonging to gridview element */
     static class GridCellViewHolder {
         private static int lastInstanceNo = 0;
@@ -204,7 +206,7 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
 
         public void loadImageInBackground(long imageID, Drawable imageNotLoadedYet) {
             if (imageID != this.imageID) {
-                // to avoid reload the same again
+                // to avoid refreshLocal the same again
                 if (downloader != null) {
                     downloader.cancel(false);
                     downloader = null;

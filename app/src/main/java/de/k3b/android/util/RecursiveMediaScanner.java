@@ -30,7 +30,6 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -116,7 +115,7 @@ public class RecursiveMediaScanner extends MediaScanner {
                             }
                         }
                     }
-                } else if (MediaScanner.isJpeg(parent.getName())) {
+                } else if (MediaScanner.isImage(parent.getName(), true)) {
                     resultCount += runScanner(parentPath, parentPath);
                 }
             } else if (mPaused != null) {

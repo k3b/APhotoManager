@@ -179,11 +179,11 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
 
     public static SelectedFiles getItems(Intent intent) {
         if (intent == null) return null;
-        String selectedItems = intent.getStringExtra(EXTRA_SELECTED_ITEM_IDS);
+        String selectedIDs = intent.getStringExtra(EXTRA_SELECTED_ITEM_IDS);
         String selectedFiles = intent.getStringExtra(EXTRA_SELECTED_ITEM_PATHS);
 
-        if ((selectedItems == null) && (selectedFiles == null)) return null;
-        SelectedFiles result = new SelectedFiles(selectedFiles, selectedItems);
+        if ((selectedIDs == null) && (selectedFiles == null)) return null;
+        SelectedFiles result = new SelectedFiles(selectedFiles, selectedIDs);
         return result;
     }
 

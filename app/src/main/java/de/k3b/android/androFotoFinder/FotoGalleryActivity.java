@@ -634,7 +634,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         this.mTitleResultCount = (count > 0) ? ("(" + count + ")") : "";
         setTitle();
 
-        // current path does not contain photo => reload witout current path
+        // current path does not contain photo => refreshLocal witout current path
         if ((count == 0) &&(mGalleryQueryParameter.clearPathIfActive())) {
             setTitle();
             reloadGui("query changed");
@@ -666,7 +666,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
             }
             if (mDirPicker == null) {
                 mDirectoryRoot.destroy();
-                mDirectoryRoot = null; // must reload next time
+                mDirectoryRoot = null; // must refreshLocal next time
             }
         }
     }

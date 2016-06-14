@@ -1,16 +1,23 @@
 package de.k3b.android.androFotoFinder.imagedetail;
 
 import android.app.Activity;
+import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Point;
 import android.net.Uri;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+
+import java.io.File;
 
 import de.k3b.android.androFotoFinder.AdapterArrayHelper;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.database.SelectedItems;
+import uk.co.senab.photoview.HugeImageLoader;
 import uk.co.senab.photoview.PhotoView;
 
 /**
@@ -29,7 +36,7 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
         super(context, name);
 
         if (MediaScanner.isNoMedia(fullPhotoPath,22)) {
-            mArrayImpl = new AdapterArrayHelper(context, fullPhotoPath);
+            mArrayImpl = new AdapterArrayHelper(context, fullPhotoPath, "debugContext");
         }
     }
 
@@ -72,13 +79,16 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
         if (fullPhotoPathFromArray != null) {
             // special case image from ".nomedia" folder via absolute path not via content: uri
 
-            PhotoView photoView = new PhotoView(container.getContext());
+            final Context context = container.getContext();
+            PhotoView photoView = new PhotoView(context);
             photoView.setMaximumScale(20);
             photoView.setMediumScale(5);
 
             if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, mDebugPrefix + "instantiateItemFromArray(#" + position +") => " + fullPhotoPathFromArray + " => " + photoView);
 
-            photoView.setImageURI(Uri.parse(fullPhotoPathFromArray));
+            final File file = new File(fullPhotoPathFromArray);
+            photoView.setImageBitmap(HugeImageLoader.loadImage(file, context));
+            photoView.setImageReloadFile(file);
 
             container.addView(photoView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
@@ -108,5 +118,9 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
     public String[] getFileNames(SelectedItems items) {
         if (mArrayImpl != null) return mArrayImpl.getFileNames(items);
         return super.getFileNames(items);
+    }
+
+    public void refreshLocal() {
+        if (mArrayImpl != null) mArrayImpl.reload(" after move delete rename ");
     }
 }

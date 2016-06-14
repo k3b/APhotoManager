@@ -1,6 +1,7 @@
 package de.k3b.android.androFotoFinder;
 
 import android.app.Activity;
+import android.database.ContentObserver;
 import android.util.Log;
 
 import java.io.File;
@@ -14,12 +15,15 @@ import de.k3b.database.SelectedItems;
  * Implements the array sepecific stuff that hopefully can be reused in other adapters, too
  */
 public class AdapterArrayHelper {
+    private final String mDebugPrefix;
     /** not null data comes from array instead from base implementation */
     private String[] mFullPhotoPaths = null;
     private final File mRootDir;
-    public AdapterArrayHelper(Activity context, String fullPhotoPath) {
+
+    public AdapterArrayHelper(Activity context, String fullPhotoPath, String debugContext) {
+        this.mDebugPrefix = debugContext;
         mRootDir = MediaScanner.getDir(fullPhotoPath);
-        reload();
+        reload(" ctor ");
 
         if (Global.mustRemoveNOMEDIAfromDB && (mRootDir != null) && (mFullPhotoPaths != null)) {
             String parentDirString = mRootDir.getAbsolutePath();
@@ -27,15 +31,16 @@ public class AdapterArrayHelper {
         }
     }
 
-    /** reload files from inital path */
-    public void reload() {
+    /** refreshLocal files from inital path
+     * @param why*/
+    public void reload(String why) {
         mFullPhotoPaths = mRootDir.list(MediaScanner.JPG_FILENAME_FILTER);
         if ((mFullPhotoPaths != null) && (mFullPhotoPaths.length == 0)) {
             mFullPhotoPaths = null;
-            Log.i(Global.LOG_CONTEXT, "AdapterArrayHelper.reload(" + mRootDir +") " + 0);
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + why + "AdapterArrayHelper.refreshLocal(" + mRootDir +") " + 0);
         } else if (mFullPhotoPaths != null) {
             if (Global.debugEnabled) {
-                Log.i(Global.LOG_CONTEXT, "AdapterArrayHelper.reload(" + mRootDir +") " + mFullPhotoPaths.length);
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + why + "AdapterArrayHelper.refreshLocal(" + mRootDir +") " + mFullPhotoPaths.length);
             }
 
             // #33

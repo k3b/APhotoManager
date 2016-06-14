@@ -109,7 +109,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     private ShareActionProvider mShareActionProvider;
     private MenuItem mShareOnlyToggle;
-    private GalleryCursorAdapter mAdapter = null;
+    private GalleryCursorAdapterFromArray mAdapter = null;
 
     private OnGalleryInteractionListener mGalleryListener;
     private QueryParameter mGalleryContentQuery;
@@ -231,7 +231,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             if (Global.debugEnabled) {
                 Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onLoaderReset" + getDebugContext());
             }
-            // rember position where we have to scroll to after reload is finished.
+            // rember position where we have to scroll to after refreshLocal is finished.
             mLastVisiblePosition = mGalleryView.getLastVisiblePosition();
 
             mAdapter.swapCursor(null);
@@ -260,6 +260,10 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             }
 
             super.onPostProcess(what, oldPathNames, newPathNames, modifyCount, itemCount, opCode);
+
+            if ((opCode == OP_RENAME) || (opCode == OP_MOVE) || (opCode == OP_DELETE)) {
+                mAdapter.refreshLocal();
+            }
         }
     }
 
@@ -467,7 +471,6 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         mFileCommands.closeAll();
         mGalleryContentQuery = null;
         mAdapter = null;
-        super.onDestroy();
         System.gc();
         Global.debugMemory(mDebugPrefix, "after onDestroy");
         // RefWatcher refWatcher = AndroFotoFinderApp.getRefWatcher(getActivity());
@@ -810,11 +813,11 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         }
 
         public SelectedFiles getSrcFotos() {
-            String selectedItems = (String) getArguments().getSerializable(EXTRA_SELECTED_ITEM_IDS);
+            String selectedIDs = (String) getArguments().getSerializable(EXTRA_SELECTED_ITEM_IDS);
             String selectedFiles = (String) getArguments().getSerializable(EXTRA_SELECTED_ITEM_PATHS);
 
-            if ((selectedItems == null) && (selectedFiles == null)) return null;
-            SelectedFiles result = new SelectedFiles(selectedFiles, selectedItems);
+            if ((selectedIDs == null) && (selectedFiles == null)) return null;
+            SelectedFiles result = new SelectedFiles(selectedFiles, selectedIDs);
             return result;
         }
 
@@ -1068,7 +1071,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 }
 
                 if (delCount > 0) {
-                    requery("after delete duplicates"); // content has changed: must reload
+                    requery("after delete duplicates"); // content has changed: must refreshLocal
                 }
             }
         }

@@ -603,7 +603,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         navigateTo(initialAbsolutePath);
     }
 
-    /** reload tree to new newGrandParent by preserving selection */
+    /** refreshLocal tree to new newGrandParent by preserving selection */
     private void navigateTo(int newGroupSelection, IDirectory newGrandParent) {
         if (newGrandParent != null) {
             Log.d(TAG, debugPrefix + "navigateTo(" +

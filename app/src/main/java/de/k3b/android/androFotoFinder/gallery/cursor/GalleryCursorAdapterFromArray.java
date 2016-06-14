@@ -1,7 +1,6 @@
 package de.k3b.android.androFotoFinder.gallery.cursor;
 
 import android.app.Activity;
-import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
@@ -12,9 +11,10 @@ import java.io.File;
 
 import de.k3b.android.androFotoFinder.AdapterArrayHelper;
 import de.k3b.android.androFotoFinder.Global;
-import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.database.SelectedItems;
+import uk.co.senab.photoview.HugeImageLoader;
 
 /**
  * Created by k3b on 30.05.2016.
@@ -32,7 +32,7 @@ public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
         super(context, selectedItems, name);
 
         if (MediaScanner.isNoMedia(fullPhotoPath,22)) {
-            mArrayImpl = new AdapterArrayHelper(context, fullPhotoPath);
+            mArrayImpl = new AdapterArrayHelper(context, fullPhotoPath, "debugContext");
         }
     }
 
@@ -83,6 +83,10 @@ public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
             }
             final GridCellViewHolder holder = (GridCellViewHolder) v.getTag();
             holder.url =  mArrayImpl.getFullFilePathfromArray(position);
+
+            final File file = new File(fullPhotoPathFromArray);
+            holder.image.setImageBitmap(HugeImageLoader.loadImage(file, 32,32));
+
             holder.image.setImageURI(Uri.parse(holder.url));
             holder.imageID = this.getImageId(position);
             holder.icon.setVisibility(((mSelectedItems != null) && (mSelectedItems.contains(holder.imageID))) ? View.VISIBLE : View.GONE);
@@ -110,4 +114,7 @@ public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
         return super.getFileNames(items);
     }
 
+    public void refreshLocal() {
+        if (mArrayImpl != null) mArrayImpl.reload(" after move delete rename ");
+    }
 }

@@ -64,7 +64,6 @@ import de.k3b.android.widget.Dialogs;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedFiles;
-import de.k3b.database.SelectedItems;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
@@ -120,7 +119,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         /** called after media db content has changed */
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-            // to be restored after reload if there is no mInitialFilePath
+            // to be restored after refreshLocal if there is no mInitialFilePath
             if (mInitialScrollPosition == NO_INITIAL_SCROLL_POSITION) {
                 mInitialScrollPosition = mViewPager.getCurrentItem();
             }
@@ -149,7 +148,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         /** called by LoaderManager. after search criteria were changed or if activity is destroyed. */
         @Override
         public void onLoaderReset(Loader<Cursor> loader) {
-            // rember position where we have to scroll to after reload is finished.
+            // rember position where we have to scroll to after refreshLocal is finished.
             mInitialScrollPosition = mViewPager.getCurrentItem();
             mAdapter.swapCursor(null);
             if (Global.debugEnabledSql) {
@@ -190,6 +189,10 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             }
 
             super.onPostProcess(what, oldPathNames, newPathNames, modifyCount, itemCount, opCode);
+
+            if ((opCode == OP_RENAME) || (opCode == OP_MOVE) || (opCode == OP_DELETE)) {
+                mAdapter.refreshLocal();
+            }
         }
 
     }
@@ -219,11 +222,11 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         }
 
         public SelectedFiles getSrcFotos() {
-            String selectedItems = (String) getArguments().getSerializable(EXTRA_SELECTED_ITEM_IDS);
+            String selectedIDs = (String) getArguments().getSerializable(EXTRA_SELECTED_ITEM_IDS);
             String selectedFiles = (String) getArguments().getSerializable(EXTRA_SELECTED_ITEM_PATHS);
 
-            if ((selectedItems == null) && (selectedFiles == null)) return null;
-            SelectedFiles result = new SelectedFiles(selectedFiles, selectedItems);
+            if ((selectedIDs == null) && (selectedFiles == null)) return null;
+            SelectedFiles result = new SelectedFiles(selectedFiles, selectedIDs);
             return result;
         }
 
@@ -259,7 +262,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     // private static final String ISLOCKED_ARG = "isLocked";
 	
 	private LockableViewPager mViewPager = null;
-    private ImagePagerAdapterFromCursor mAdapter = null;
+    private ImagePagerAdapterFromCursorArray mAdapter = null;
 
     private final AndroidFileCommands mFileCommands = new LocalFileCommands();
 
@@ -584,7 +587,6 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             mFileCommands.closeLogFile();
             mFileCommands.closeAll();
             mFileCommands.setContext(null, mAdapter);
-
         }
 
         // kill this instance only if not an other instance is active
@@ -681,7 +683,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         if (existing != null) {
             for (File file : existing) {
                 String found = file.getAbsolutePath();
-                if (MediaScanner.isJpeg(found) && !known.contains(found)) {
+                if (MediaScanner.isImage(found, false) && !known.contains(found)) {
                     missing.add(found);
                 }
             }

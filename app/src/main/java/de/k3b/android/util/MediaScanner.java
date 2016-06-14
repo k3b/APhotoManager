@@ -71,7 +71,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
     public static final FilenameFilter JPG_FILENAME_FILTER = new FilenameFilter() {
         @Override
         public boolean accept(File dir, String filename) {
-            return MediaScanner.isJpeg(filename);
+            return MediaScanner.isImage(filename, true);
         }
     };
 
@@ -124,6 +124,19 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
                 MediaScanner.notifyChanges(context, why + " within current non-gui-task");
             }
         }
+    }
+
+
+    public static boolean isNoMedia(int maxLevel, String[] pathNames) {
+        if (pathNames != null) {
+            for(String path : pathNames) {
+                if (isNoMedia(path, maxLevel)) {
+                    return true;
+                }
+            }
+
+        }
+        return false;
     }
 
     /** return true, if file is in a ".nomedia" dir */
@@ -191,7 +204,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
             for (int i = 0; i < fullPathNames.length; i++) {
                 String fullPathName = fullPathNames[i];
                 if (fullPathName != null) {
-                    if (!isJpeg(fullPathName) || isNoMedia(fullPathName, 22)) {
+                    if (!isImage(fullPathName, false) || isNoMedia(fullPathName, 22)) {
                         fullPathNames[i] = null;
                     } else {
                         itemsLeft++;
@@ -528,9 +541,13 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
     }
 
     /** return true if path is "*.jp(e)g" */
-    public static boolean isJpeg(String path) {
+    public static boolean isImage(String path, boolean jpgOnly) {
         if (path == null) return false;
         String lcPath = path.toLowerCase();
+
+        if ((!jpgOnly) && (lcPath.endsWith(".gif") || lcPath.endsWith(".png") || lcPath.endsWith(".tiff") || lcPath.endsWith(".bmp"))) {
+            return true;
+        }
         return lcPath.endsWith(".jpg") || lcPath.endsWith(".jpeg");
     }
 }

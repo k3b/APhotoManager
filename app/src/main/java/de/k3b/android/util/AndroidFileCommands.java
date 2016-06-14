@@ -58,6 +58,7 @@ public class AndroidFileCommands extends FileCommands {
     private Activity mContext;
     private SelectedItems.Id2FileNameConverter mId2FileNameConverter;
     private AlertDialog mActiveAlert = null;
+    private boolean mHasNoMedia = false;
 
     public AndroidFileCommands() {
         // setLogFilePath(getDefaultLogFile());
@@ -88,6 +89,9 @@ public class AndroidFileCommands extends FileCommands {
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + "onPreProcess('" + what + "')");
         }
+
+        // a nomedia file is affected => must update gui
+        this.mHasNoMedia = MediaScanner.isNoMedia(22, oldPathNames) || MediaScanner.isNoMedia(22, newPathNames);
         super.onPreProcess(what, oldPathNames, newPathNames, opCode);
     }
 
@@ -106,6 +110,11 @@ public class AndroidFileCommands extends FileCommands {
             MediaScanner.updateMediaDBInBackground(mContext, message, oldPathNames, newPathNames);
         }
 
+        if (false && this.mHasNoMedia && (mContext != null)) {
+            // a nomedia file is affected => must update gui
+            this.mContext.getContentResolver().notifyChange(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, null, false);
+            this.mHasNoMedia = false;
+        }
         Toast.makeText(mContext, message, Toast.LENGTH_LONG).show();
     }
 

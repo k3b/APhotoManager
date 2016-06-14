@@ -72,9 +72,8 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
                 MapGeoPickerActivity.class);
 
         if ((selectedItems != null) && (selectedItems.size() > 0)) {
-            intent.putExtra(EXTRA_SELECTED_ITEM_IDS, selectedItems.toString());
-            //!!! ???EXTRA_SELECTED_ITEM_PATHS
-
+            intent.putExtra(EXTRA_SELECTED_ITEM_PATHS, selectedItems.toString());
+            intent.putExtra(EXTRA_SELECTED_ITEM_IDS, selectedItems.toIdString());
 
             IGeoPoint initialPoint = FotoSql.execGetPosition(context, null, selectedItems.getId(0));
             if (initialPoint != null) {
@@ -152,10 +151,8 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
             rectangle.setLogituedMax(initalZoom.getLongitude()).setLatitudeMax(initalZoom.getLatitude());
         } // else (savedInstanceState != null) restore after rotation. fragment takes care of restoring map pos
 
-        String selectedItemsString = intent.getStringExtra(EXTRA_SELECTED_ITEM_IDS);
-        //!!! ???EXTRA_SELECTED_ITEM_PATHS
-
-        SelectedItems selectedItems = (selectedItemsString != null) ? new SelectedItems().parse(selectedItemsString) : null;
+        String selectedIDsString = intent.getStringExtra(EXTRA_SELECTED_ITEM_IDS);
+        SelectedItems selectedItems = (selectedIDsString != null) ? new SelectedItems().parse(selectedIDsString) : null;
 
         String filter = null;
         // for debugging: where does the filter come from
