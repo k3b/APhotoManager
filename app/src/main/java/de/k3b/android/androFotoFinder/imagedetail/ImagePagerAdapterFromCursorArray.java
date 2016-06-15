@@ -123,4 +123,8 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
     public void refreshLocal() {
         if (mArrayImpl != null) mArrayImpl.reload(" after move delete rename ");
     }
+
+    public boolean isInArrayMode() {
+        return (mArrayImpl != null);
+    }
 }

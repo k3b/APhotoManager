@@ -191,7 +191,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             super.onPostProcess(what, oldPathNames, newPathNames, modifyCount, itemCount, opCode);
 
             if ((opCode == OP_RENAME) || (opCode == OP_MOVE) || (opCode == OP_DELETE)) {
-                mAdapter.refreshLocal();
+                refreshIfNecessary();
             }
         }
 
@@ -453,6 +453,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             setResult(resultCode, intent);
             finish();
         }
+
+        refreshIfNecessary();
     }
 
     private static boolean mustForward(Intent intent) {
@@ -649,6 +651,16 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         }
     }
 
+    private void refreshIfNecessary() {
+        if (mAdapter.isInArrayMode()) {
+            mAdapter.refreshLocal();
+            mViewPager.setAdapter(mAdapter);
+
+            // show the changes
+            onLoadCompleted();
+        }
+    }
+
     /**
      * gets called if no file is found by a db-query or if jpgFullFilePath is not found in media db
      * return false; activity must me closed
@@ -770,7 +782,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                     dirPath = MediaScanner.getDir(dirPath).getAbsolutePath();
                     GalleryFilterParameter newFilter = new GalleryFilterParameter();
                     newFilter.setPath(dirPath);
-                    FotoGalleryActivity.showActivity(this, this.mFilter, null, 0);
+                    FotoGalleryActivity.showActivity(this, this.mFilter, null, -1);
                 }
                 return true;
             }
