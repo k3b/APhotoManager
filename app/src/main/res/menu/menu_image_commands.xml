@@ -61,4 +61,11 @@
         android:orderInCategory="200"
         android:showAsAction="never" />
 
+    <item android:id="@+id/cmd_show_geo_as"
+        android:title="@string/geo_show_as_menu_title"
+        android:visible="false"
+        android:orderInCategory="200"
+        android:showAsAction="never" />
+
+
 </menu>

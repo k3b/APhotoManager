@@ -58,9 +58,10 @@
   <string name="folder_menu_title">Ordner-Filter</string>
   <string name="gallery_title">Fotos</string>
   <string name="geo_show_menu_title">In Karte anzeigen</string>
+  <string name="geo_show_as_menu_title">Mit externer geo app öffnen</string>
   <string name="geo_edit_menu_title">Geo-Info ändern</string>
-  <string name="geo_edit_update_in_progress">Ändere Geo-Infos in ausgewählten Fotos</string>
-  <string name="geo_picker_err_not_found">Keine Geo-Auswahl auf dem Gerät installiert</string>
+  <string name="geo_edit_updatet_in_progress">Ändere Geo-Infos in ausgewählten Fotos</string>
+  <string name="geo_picker_err_no_found">Keine Geo-Auswahl auf dem Gerät installiert</string>
   <string name="geo_picker_title">Auswahl: Neuer Ort fürs Foto</string>
   <string name="global_err_sql_message_format">Sql-Fehler \'%1$s\' \n\n%2$s</string>
   <string name="global_err_sql_title_reload">Ungültiges SQL. Verwende statt dessen Default</string>

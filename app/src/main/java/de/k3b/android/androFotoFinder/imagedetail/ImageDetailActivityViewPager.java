@@ -43,6 +43,8 @@ import android.widget.Toast;
 
 // import com.squareup.leakcanary.RefWatcher;
 
+import org.osmdroid.api.IGeoPoint;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,6 +66,8 @@ import de.k3b.android.widget.Dialogs;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedFiles;
+import de.k3b.geo.api.GeoPointDto;
+import de.k3b.geo.io.GeoUri;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
@@ -740,6 +744,12 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             item.setVisible(hasCurrentGeo());
         }
 
+        item = menu.findItem(R.id.cmd_show_geo_as);
+
+        if (item != null) {
+            item.setVisible(hasCurrentGeo());
+        }
+
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -765,11 +775,11 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                 return true;
 
             case R.id.action_edit:
-                cmdStartIntent(getCurrentFilePath(), null, Intent.ACTION_EDIT, R.string.edit_chooser_title, R.string.edit_err_editor_not_found);
+                IntentUtil.cmdStartIntent(this, getCurrentFilePath(), null, null, Intent.ACTION_EDIT, R.string.edit_chooser_title, R.string.edit_err_editor_not_found);
                 return true;
 
             case R.id.menu_item_share:
-                cmdStartIntent(null, getCurrentFilePath(), Intent.ACTION_SEND, R.string.share_menu_title, R.string.share_err_not_found);
+                IntentUtil.cmdStartIntent(this, null, null, getCurrentFilePath(), Intent.ACTION_SEND, R.string.share_menu_title, R.string.share_err_not_found);
                 return true;
 
             case R.id.cmd_copy:
@@ -795,6 +805,24 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             case R.id.cmd_show_geo:
                 MapGeoPickerActivity.showActivity(this, getCurrentFoto());
                 return true;
+
+            case R.id.cmd_show_geo_as: {
+                final long imageId = getCurrentImageId();
+                IGeoPoint _geo = FotoSql.execGetPosition(this, null, imageId);
+                final String currentFilePath = getCurrentFilePath();
+                GeoPointDto geo = new GeoPointDto(_geo.getLatitude(), _geo.getLongitude(), GeoPointDto.NO_ZOOM);
+
+                geo.setDescription(currentFilePath);
+                geo.setId(""+imageId);
+                geo.setName("#"+imageId);
+                GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
+                String uri = PARSER.toUriString(geo);
+
+                IntentUtil.cmdStartIntent(this, null, uri, null, Intent.ACTION_VIEW, R.string.geo_show_as_menu_title, R.string.geo_picker_err_no_found);
+
+                return true;
+            }
+
             case R.id.cmd_edit_geo:
                 SelectedFiles selectedItem = getCurrentFoto();
                 GeoEditActivity.showActivity(this, selectedItem);
@@ -848,38 +876,6 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         int pos = mViewPager.getCurrentItem() + 1;
         if (pos >= mAdapter.getCount()) pos = 0;
         mViewPager.setCurrentItem(pos);
-    }
-
-    private void cmdStartIntent(String currentFilePath, String extraPath, String action, int idChooserCaption, int idEditError) {
-
-        final Intent outIntent = new Intent()
-                .setAction(action)
-                // .putExtra(Intent.EXTRA_STREAM, uri)
-                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)
-                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-        if (currentFilePath != null) {
-            File file = new File(currentFilePath);
-            final Uri uri = Uri.fromFile(file);
-            outIntent.setDataAndType(uri, getMime(currentFilePath));
-        }
-
-        if (extraPath != null) {
-            File file = new File(extraPath);
-            final Uri uri = Uri.fromFile(file);
-            outIntent.setType(getMime(extraPath));
-            outIntent.putExtra(EXTRA_STREAM, uri);
-        }
-        if (Global.debugEnabled) {
-            Log.d(Global.LOG_CONTEXT,
-                    "cmdStartIntent(" + outIntent.toUri(Intent.URI_INTENT_SCHEME) + "')");
-        }
-
-        try {
-            this.startActivity(Intent.createChooser(outIntent, getText(idChooserCaption)));
-        } catch (ActivityNotFoundException ex) {
-            Toast.makeText(this, idEditError,Toast.LENGTH_LONG).show();
-        }
     }
 
     private void cmdShowDetails(String fullFilePath, long currentImageId) {
@@ -948,14 +944,6 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             errorMessage = getString(R.string.image_err_file_rename_format, src.getAbsoluteFile());
             Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
         }
-    }
-
-    private String getMime(String path) {
-        return "image/*";
-        /*
-        MimeTypeMap map = MimeTypeMap.getSingleton();
-        return map.getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(path));
-        */
     }
 
     protected SelectedFiles getCurrentFoto() {
