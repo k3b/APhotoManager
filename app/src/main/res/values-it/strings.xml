@@ -101,6 +101,8 @@
   <string name="settings_debug_summary">&#8230; contenente altri messaggi di log.</string>
   <string name="settings_debug_title">LogCat misc.</string>
   <string name="settings_debug_view_item_summary">... contenente elementi gridview/listview.</string>
+  <string name="settings_debug_clear_title">Svuota LogCat</string>
+  <string name="settings_debug_save_title">Salva LogCat in un file</string>
   <string name="settings_group_debug_title">Diagnostica</string>
   <string name="settings_image_hide_time_title">Auto-nascondi barra azioni dopo tot millisecondi</string>
   <string name="settings_image_initialImageDetailResolutionHigh_summary">Visualizzazione foto iniziale con qualità migliore (lento, usa più memoria)</string>
