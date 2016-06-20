@@ -160,7 +160,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
             if (rootQuery == null) return null;
 
             // .nomedia folder has no current sql
-            if ((this.mCurrentFilterSettings != null) && MediaScanner.isNoMedia(this.mCurrentFilterSettings.getPath(), 22)) {
+            if ((this.mCurrentFilterSettings != null) && MediaScanner.isNoMedia(this.mCurrentFilterSettings.getPath(), MediaScanner.DEFAULT_SCAN_DEPTH)) {
                 return null;
             }
 

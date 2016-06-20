@@ -62,7 +62,7 @@ import de.k3b.geo.api.IGeoPointInfo;
 public class MediaScanner extends AsyncTask<String[],Object,Integer> {
     private static final String CONTEXT = "MediaScanner.";
     private static SimpleDateFormat sFormatter;
-
+    public static final int DEFAULT_SCAN_DEPTH = 22;
     static {
         sFormatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
         sFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));

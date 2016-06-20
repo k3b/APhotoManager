@@ -35,7 +35,7 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
     public ImagePagerAdapterFromCursorArray(final Activity context, String name, String fullPhotoPath) {
         super(context, name);
 
-        if (MediaScanner.isNoMedia(fullPhotoPath,22)) {
+        if (MediaScanner.isNoMedia(fullPhotoPath,MediaScanner.DEFAULT_SCAN_DEPTH)) {
             mArrayImpl = new AdapterArrayHelper(context, fullPhotoPath, "debugContext");
         }
     }

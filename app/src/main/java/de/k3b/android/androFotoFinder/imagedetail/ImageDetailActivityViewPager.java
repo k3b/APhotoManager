@@ -85,6 +85,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     /** if smaller that these millisecs then the actionbar autohide is disabled */
     private static final int DISABLE_HIDE_ACTIONBAR = 700;
+    private static final int NOMEDIA_GALLERY = 8227;
 
     // how many changes have been made. if != 0 parent activity must invalidate cached data
     private static int mModifyCount = 0;
@@ -666,20 +667,22 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
      * return false; activity must me closed
      */
     private boolean checkForIncompleteMediaDatabase(String jpgFullFilePath, String why) {
-        File fileToLoad = (jpgFullFilePath != null) ? new File(jpgFullFilePath) : null;
+        if (!MediaScanner.isNoMedia(jpgFullFilePath,MediaScanner.DEFAULT_SCAN_DEPTH)) {
+            File fileToLoad = (jpgFullFilePath != null) ? new File(jpgFullFilePath) : null;
 
-        if ((!this.mWaitingForMediaScannerResult) && (fileToLoad != null) && (fileToLoad.exists()) && (fileToLoad.canRead())) {
-            // file exists => must update media database
-            this.mWaitingForMediaScannerResult = true;
-            int numberOfNewItems = updateIncompleteMediaDatabase(mDebugPrefix, this,
-                    mDebugPrefix + "checkForIncompleteMediaDatabase-" + why,
-                    fileToLoad.getParentFile());
+            if ((!this.mWaitingForMediaScannerResult) && (fileToLoad != null) && (fileToLoad.exists()) && (fileToLoad.canRead())) {
+                // file exists => must update media database
+                this.mWaitingForMediaScannerResult = true;
+                int numberOfNewItems = updateIncompleteMediaDatabase(mDebugPrefix, this,
+                        mDebugPrefix + "checkForIncompleteMediaDatabase-" + why,
+                        fileToLoad.getParentFile());
 
-            String message = getString(R.string.image_err_not_in_db_format, jpgFullFilePath, numberOfNewItems);
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-            return true;
+                String message = getString(R.string.image_err_not_in_db_format, jpgFullFilePath, numberOfNewItems);
+                Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+                return true;
+            }
+            this.mWaitingForMediaScannerResult = false;
         }
-        this.mWaitingForMediaScannerResult = false;
         return false;
     }
 
@@ -782,7 +785,9 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                     dirPath = MediaScanner.getDir(dirPath).getAbsolutePath();
                     GalleryFilterParameter newFilter = new GalleryFilterParameter();
                     newFilter.setPath(dirPath);
-                    FotoGalleryActivity.showActivity(this, this.mFilter, null, -1);
+                    int callBackId = (MediaScanner.isNoMedia(dirPath,MediaScanner.DEFAULT_SCAN_DEPTH)) ? NOMEDIA_GALLERY : 0;
+
+                    FotoGalleryActivity.showActivity(this, this.mFilter, null, callBackId);
                 }
                 return true;
             }

@@ -261,8 +261,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
             super.onPostProcess(what, oldPathNames, newPathNames, modifyCount, itemCount, opCode);
 
-            if ((opCode == OP_RENAME) || (opCode == OP_MOVE) || (opCode == OP_DELETE)) {
+            if ((mAdapter.isInArrayMode()) && ((opCode == OP_RENAME) || (opCode == OP_MOVE) || (opCode == OP_DELETE))) {
                 mAdapter.refreshLocal();
+                mGalleryView.setAdapter(mAdapter);
             }
         }
     }

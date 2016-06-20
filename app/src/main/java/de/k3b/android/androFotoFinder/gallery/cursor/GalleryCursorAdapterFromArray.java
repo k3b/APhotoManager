@@ -31,7 +31,7 @@ public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
     public GalleryCursorAdapterFromArray(final Activity context, SelectedItems selectedItems, String name, String fullPhotoPath) {
         super(context, selectedItems, name);
 
-        if (MediaScanner.isNoMedia(fullPhotoPath,22)) {
+        if (MediaScanner.isNoMedia(fullPhotoPath,MediaScanner.DEFAULT_SCAN_DEPTH)) {
             mArrayImpl = new AdapterArrayHelper(context, fullPhotoPath, "debugContext");
         }
     }
@@ -116,5 +116,9 @@ public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
 
     public void refreshLocal() {
         if (mArrayImpl != null) mArrayImpl.reload(" after move delete rename ");
+    }
+
+    public boolean isInArrayMode() {
+        return (mArrayImpl != null);
     }
 }
