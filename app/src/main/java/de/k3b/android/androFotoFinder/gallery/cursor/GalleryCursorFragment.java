@@ -727,6 +727,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             inflater.inflate(R.menu.menu_image_commands, menu);
 
             multiSelectionUpdateShareIntent();
+            Global.fixMenu(getActivity(), menu);
         }
 
         mMenuRemoveAllSelected = menu.findItem(R.id.cmd_selection_remove_all);

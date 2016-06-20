@@ -29,32 +29,38 @@
         android:title="@string/share_menu_title"
         android:orderInCategory="2" />
 
+    <item android:id="@+id/action_edit" android:title="@string/edit_menu_title"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:orderInCategory="20" android:showAsAction="ifRoom" />
+
     <item
         android:id="@+id/menu_item_rename"
         android:showAsAction="ifRoom"
         android:title="@string/rename_menu_title"
         android:orderInCategory="50" />
 
+    <item android:id="@+id/action_details" android:title="@string/details_menu_title"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:orderInCategory="900" android:showAsAction="ifRoom" />
     <item android:id="@+id/action_slideshow" android:title="@string/slideshow_menu_title"
         android:icon="@android:drawable/ic_media_play"
         android:checkable="true"
         android:orderInCategory="900" android:showAsAction="never" />
 
-    <item android:id="@+id/action_details" android:title="@string/details_menu_title"
-        android:icon="@android:drawable/ic_menu_preferences"
-        android:orderInCategory="900" android:showAsAction="ifRoom" />
-    <item android:id="@+id/action_edit" android:title="@string/edit_menu_title"
-        android:icon="@android:drawable/ic_menu_edit"
-        android:orderInCategory="20" android:showAsAction="ifRoom" />
-    <item android:id="@+id/cmd_about"
-        android:title="@string/about_summary"
-        android:visible="true"
-        android:orderInCategory="10000"
-        android:showAsAction="never" />
     <item android:id="@+id/cmd_settings"
         android:title="@string/settings_title"
         android:icon="@android:drawable/ic_menu_preferences"
         android:visible="true"
         android:orderInCategory="1000"
+        android:showAsAction="never" />
+    <item android:id="@+id/cmd_about"
+        android:title="@string/about_summary"
+        android:visible="true"
+        android:orderInCategory="10000"
+        android:showAsAction="never" />
+    <item android:id="@+id/cmd_more"
+        android:title="@string/more_menu_title"
+        android:visible="true"
+        android:orderInCategory="32700"
         android:showAsAction="never" />
 </menu>

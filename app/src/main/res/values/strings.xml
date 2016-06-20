@@ -85,6 +85,7 @@
 	<string name="mk_dir_menu_title">Create Folder</string>
 	<string name="mk_err_failed_format">Cannot create %1$s</string>
 	<string name="mk_success_format">Created %1$s</string>
+	<string name="more_menu_title">More ...</string>
 	<string name="move_menu_title">Move</string>
 	<string name="move_result_format">Moved %1$d/%2$d files</string>
 	<string name="osm_cright_title">Map Tiles © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors</string>

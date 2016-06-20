@@ -29,6 +29,7 @@ import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
@@ -56,6 +57,7 @@ import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.android.util.GarbageCollector;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
+import de.k3b.android.util.MenuUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
@@ -439,6 +441,8 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         MenuItem sorter = menu.getItem(R.id.cmd_sort);
         sorter.getSubMenu().
         */
+        Global.fixMenu(this, menu);
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -498,6 +502,14 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
                 return true;
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
+                return true;
+            case R.id.cmd_more:
+                new Handler().postDelayed(new Runnable() {
+                    public void run() {
+                        // reopen after some delay
+                        openOptionsMenu();
+                    }
+                }, 200);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

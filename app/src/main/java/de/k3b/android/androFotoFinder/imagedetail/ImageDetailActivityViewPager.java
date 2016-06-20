@@ -48,6 +48,8 @@ import org.osmdroid.api.IGeoPoint;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
@@ -61,6 +63,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
+import de.k3b.android.util.MenuUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.android.widget.LocalizedActivity;
@@ -728,7 +731,10 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_image_detail, menu);
         getMenuInflater().inflate(R.menu.menu_image_commands, menu);
+        Global.fixMenu(this, menu);
         mMenuSlideshow = menu.findItem(R.id.action_slideshow);
+
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -833,6 +839,14 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                 return true;
             case R.id.cmd_settings:
                 SettingsActivity.show(this);
+                return true;
+            case R.id.cmd_more:
+                new Handler().postDelayed(new Runnable() {
+                    public void run() {
+                        // reopen after some delay
+                        openOptionsMenu();
+                    }
+                }, 200);
                 return true;
 
             default:
