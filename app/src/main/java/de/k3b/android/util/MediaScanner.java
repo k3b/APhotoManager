@@ -71,7 +71,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
     public static final FilenameFilter JPG_FILENAME_FILTER = new FilenameFilter() {
         @Override
         public boolean accept(File dir, String filename) {
-            return MediaScanner.isImage(filename, true);
+            return MediaScanner.isImage(filename, false);
         }
     };
 
