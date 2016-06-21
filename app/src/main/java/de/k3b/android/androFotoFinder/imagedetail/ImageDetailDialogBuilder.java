@@ -70,7 +70,7 @@ public class ImageDetailDialogBuilder {
         }
     }
 
-    public static Dialog createImageDetailDialog(Activity context, String title, String block, String... moreBlocks) {
+    public static Dialog createImageDetailDialog(Activity context, String title, String block, Object... moreBlocks) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title);
 
@@ -80,8 +80,10 @@ public class ImageDetailDialogBuilder {
 
         if ((moreBlocks != null) && (moreBlocks.length > 0)) {
             StringBuilder result = new StringBuilder(block);
-            for (String subBlock : moreBlocks) {
-                append(result, subBlock);
+            for (Object subBlock : moreBlocks) {
+                if (subBlock != null) {
+                    append(result, subBlock.toString());
+                }
             }
             view.setText(result.toString());
         } else {

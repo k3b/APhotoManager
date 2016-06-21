@@ -379,7 +379,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
         reloadDirGuiIfAvailable("onCreateView");
 
-        fixMediaDatabase();
+        if (!mAdapter.isInArrayMode()) {
+            fixMediaDatabase();
+        }
 
         requery("onCreateView");
         return result;
@@ -784,8 +786,16 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     private void cmdShowDetails() {
-        ImageDetailDialogBuilder.createImageDetailDialog(this.getActivity(), getActivity().getTitle().toString(),
-                this.toString(), mGalleryContentQuery.toSqlString()).show();
+        SelectedItems ids = getSelectedItems();
+        String files = (ids != null) ? new SelectedFiles(ids, mAdapter).toString().replace(",","\n") : null;
+        ImageDetailDialogBuilder.createImageDetailDialog(
+                this.getActivity(),
+                getActivity().getTitle().toString(),
+                this.toString(),
+                ids,
+                files,
+                (mGalleryContentQuery != null) ? mGalleryContentQuery.toSqlString() : null
+        ).show();
     }
 
     public static class MoveOrCopyDestDirPicker extends DirectoryPickerFragment {

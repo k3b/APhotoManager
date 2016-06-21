@@ -101,7 +101,7 @@ public class Global {
         MenuUtils.mov2SubMenu(menu, context.getString(R.string.more_menu_title),
                 R.id.action_details,
                 R.id.action_slideshow,
-                R.id.cmd_settings,
+                // R.id.cmd_settings,
                 R.id.cmd_selection_add_all,
                 R.id.cmd_selection_remove_all,
                 R.id.cmd_about,
