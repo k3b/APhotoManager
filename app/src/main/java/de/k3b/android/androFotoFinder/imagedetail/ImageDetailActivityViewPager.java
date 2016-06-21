@@ -824,7 +824,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                 GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
                 String uri = PARSER.toUriString(geo);
 
-                IntentUtil.cmdStartIntent(this, null, uri, null, Intent.ACTION_VIEW, R.string.geo_show_as_menu_title, R.string.geo_picker_err_no_found);
+                IntentUtil.cmdStartIntent(this, null, uri, null, Intent.ACTION_VIEW, R.string.geo_show_as_menu_title, R.string.geo_picker_err_not_found);
 
                 return true;
             }
