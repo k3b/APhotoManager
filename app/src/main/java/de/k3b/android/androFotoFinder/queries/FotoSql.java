@@ -90,6 +90,8 @@ public class FotoSql {
     public static final String SQL_COL_DISPLAY_TEXT = "disp_txt";
     public static final String SQL_COL_LAT = MediaStore.Images.Media.LATITUDE;
     public static final String SQL_COL_LON = MediaStore.Images.Media.LONGITUDE;
+    public static final String SQL_COL_SIZE = MediaStore.Images.Media.SIZE;
+
     private static final String FILTER_EXPR_LAT_MAX = SQL_COL_LAT + " < ?";
     private static final String FILTER_EXPR_LAT_MIN = SQL_COL_LAT + " >= ?";
     private static final String FILTER_EXPR_NO_GPS = SQL_COL_LAT + " is null AND " + SQL_COL_LON + " is null";

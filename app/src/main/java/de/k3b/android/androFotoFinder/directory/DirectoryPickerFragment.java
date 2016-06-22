@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -49,7 +50,9 @@ import android.widget.Toast;
 // import com.squareup.leakcanary.RefWatcher;
 
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
+import de.k3b.android.androFotoFinder.imagedetail.ImageDetailDialogBuilder;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.queries.FotoThumbSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
@@ -287,6 +290,8 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                 return onCreateSubDirQuestion(mPopUpSelection);
             case R.id.cmd_gallery:
                 return showGallery(mPopUpSelection);
+            case R.id.action_details:
+                return showDirInfo(mPopUpSelection);
         }
         return false;
     }
@@ -347,6 +352,19 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             Toast.makeText(getActivity(), getActivity().getString(msgId, newPathAbsolute),
                     Toast.LENGTH_LONG).show();
         }
+    }
+
+    private boolean showDirInfo(IDirectory selectedDir) {
+        String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
+        if (pathFilter != null) {
+            ImageDetailDialogBuilder.createImageDetailDialog(
+                    this.getActivity(),
+                    pathFilter,
+                    FotoThumbSql.formatDirStatistic(this.getActivity(), pathFilter)
+            ).show();
+            return true;
+        }
+        return false;
     }
 
     private boolean showGallery(IDirectory selectedDir) {
