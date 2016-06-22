@@ -21,6 +21,7 @@ package de.k3b.android.androFotoFinder.locationmap;
 
 import android.app.Activity;
 import android.app.DialogFragment;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -67,8 +68,10 @@ import de.k3b.android.osmdroid.GuestureOverlay;
 import de.k3b.android.osmdroid.IconOverlay;
 import de.k3b.android.osmdroid.MarkerBase;
 import de.k3b.android.osmdroid.ZoomUtil;
+import de.k3b.android.util.IntentUtil;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
+import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
 import de.k3b.io.GalleryFilterParameter;
@@ -821,9 +824,26 @@ public class LocationMapFragment extends DialogFragment {
 
                 switch (item.getItemId()) {
                     case R.id.cmd_gallery:
-                        return showGallery(getiGeoPointById(markerId, geoPosition));
+                        return showGallery(getGeoPointById(markerId, geoPosition));
                     case R.id.cmd_zoom:
-                        return zoomToFit(getiGeoPointById(markerId, geoPosition));
+                        return zoomToFit(getGeoPointById(markerId, geoPosition));
+
+                    case R.id.cmd_show_geo_as: {
+                        IGeoPoint _geo = getGeoPointById(markerId, geoPosition);
+                        GeoPointDto geo = new GeoPointDto(_geo.getLatitude(), _geo.getLongitude(), GeoPointDto.NO_ZOOM);
+                        geo.setId(""+markerId);
+                        geo.setName("#"+markerId);
+                        GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
+                        String uri = PARSER.toUriString(geo);
+
+                        IntentUtil.cmdStartIntent(getActivity(), null, uri, null, Intent.ACTION_VIEW, R.string.geo_show_as_menu_title, R.string.geo_picker_err_not_found);
+
+                        return true;
+                    }
+
+
+
+
                     default:
                         return false;
                 }
@@ -912,9 +932,9 @@ public class LocationMapFragment extends DialogFragment {
         return 1/groupingFactor/2;
     }
 
-    private IGeoPoint getiGeoPointById(int markerId, IGeoPoint notFoundValue) {
+    private IGeoPoint getGeoPointById(int markerId, IGeoPoint notFoundValue) {
         if (markerId != NO_MARKER_ID) {
-            IGeoPoint pos = FotoSql.execGetPosition(this.getActivity(), markerId);
+            IGeoPoint pos = FotoSql.execGetPosition(this.getActivity(), null, markerId);
             if (pos != null) {
                 notFoundValue = pos;
             }

@@ -29,7 +29,7 @@
   <string name="bookmark_delete_question">Sterg acest marcaj?</string>
   <string name="bookmark_err_not_found_format">Fara solicitari%1$s. Nu am gasit cereri.</string>
   <string name="bookmark_file_comment_format">Obtinut %3$s cu \'%1$s\' Versiunea%2$s. Pentru detalii vezi
-https://github.com/k3b/APhotoManager/wiki/intentap#sql</string>
+https://github.com/k3b/APhotoManager/wiki/intentap#EXTRA_SQL</string>
   <string name="bookmark_load_from_menu_title">Incarca marcaj de la &#8230;</string>
   <string name="bookmark_save_as_menu_title">Salveaza Marcajul ca &#8230;</string>
   <string name="btn_cancel">Anuleaza</string>
@@ -91,57 +91,4 @@ https://github.com/k3b/APhotoManager/wiki/intentap#sql</string>
   <string name="sort_order_Place_Descending">Descreste loc Descrestere locatie</string>
   <string name="update_result_format">Fisiere apdatate %1$d/%2$d</string>
   <string name="zoom_to_fit_menu_title">Renuntare marire Renuntare la zum</string>
-  <string name="about_content_about"><![CDATA["
-  <h1>A Photo Manager</h1>cu A Photo Map in
-&#39;AndroFotoFinder&#39;</h1>
-<br/>Caracteristici:
-<ul>
-  <li>App and internet homepage available in these languages:<ul>
-		<li><a href='https://github.com/k3b/APhotoManager/wiki/de-home'>de</a>,&nbsp;
-		<a href='https://github.com/k3b/APhotoManager/wiki/home'   >en</a>,&nbsp;
-		<a href='https://github.com/k3b/APhotoManager/wiki/fr-home'>fr</a>,&nbsp;
-		<a href='https://github.com/k3b/APhotoManager/wiki/ja-home'>ja</a>,&nbsp;
-		<a href='https://github.com/k3b/APhotoManager/wiki/ro-home'>ro</a></li>
-		<li><a href='https://github.com/k3b/APhotoManager/issues/21'>Help us to translate into other languages.</a></li>
-		</ul>
-	</li>
-  <li>Poti manevra colectii mari de imagini (15000+ imagini in 1000+ fisiere)</li>
-  <li>Utilizeaza&#39;furnizorul de continut imagini Android.Nu este necesara o scanare initiala.
-</li>
-  <li>
-  <a href='https://github.com/k3b/APhotoManager/wiki/Filter-View'>Gaseste imagini </a>aici
-  <ul>
-    <li>fisier (dupa ierarhia
-<a href='https://github.com/k3b/APhotoManager/wiki/Folder-Picker'>Fisier Depozit</a>)</li>
-   <li>metacaractere care te duc la fisier/nume fisier</li>
-   <li>date</li>
-   <li>in zona
-   <a href='https://github.com/k3b/APhotoManager/wiki/geographic-map'>harta geografica</a>(daca imaginea are informatii GPS stabilite)</li>
-   </ul></li>
-   <li>Arata rezultate in derularea
-<a href='https://github.com/k3b/APhotoManager/wiki/Gallery-View'>galeriei vizitata</a>cu
-   <ul>
-     <li>sustinerea fotografiilor selectate</li>
-     <li> Operatiile in fisier de Copiere,Mutare,Stergere,Distribuire</li>
-    </ul></li>
-    <li>
-    <a href='https://github.com/k3b/APhotoManager/wiki/Image-View'>Vizualizare detalii fotografii</a>cu
-   <ul>
-    <li>marire imagine</li>
-    <li>apasa pentru a merge la urmatoarea/precedenta imagine</li>
-    <li>arata informatii desfasurate ale imaginii(Exif, IPTC, XMP, ICC)</li>
-    <li>operatiile fisierului de Copiere,Mutare,Stergere,Redenumire,Distribuire</li>
-   </ul></li>
-   <li><a href='https://github.com/k3b/APhotoManager/wiki/geographic-map'>harta geografica</a>arata marcaje unde au fost facute fotografiile</li>
-   <li>Operatiile fisierului</li>
-   <li>
-     <ul>
-        <li>va face apdatarea bazei de date a furnizorului de continut Android&#39;s</li>
-         <li>apdateaza fisierele xmp-sidecar</li>
-         <li>stocheaza datele fisierului daca are suport Android.</li>
-        </ul>
-       </li>
-      </ul>
-     <br/>
-"]]></string>
 </resources>

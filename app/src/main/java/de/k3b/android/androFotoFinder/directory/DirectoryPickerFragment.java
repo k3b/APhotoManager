@@ -24,9 +24,11 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -48,7 +50,9 @@ import android.widget.Toast;
 // import com.squareup.leakcanary.RefWatcher;
 
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
+import de.k3b.android.androFotoFinder.imagedetail.ImageDetailDialogBuilder;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.queries.FotoThumbSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
@@ -146,6 +150,10 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         View view = inflater.inflate(R.layout.fragment_directory, container, false);
 
         mContext = this.getActivity();
+        if (Global.debugEnabled && (mContext != null) && (mContext.getIntent() != null)){
+            Log.d(Global.LOG_CONTEXT, "DirectoryPickerFragment onCreateView " + mContext.getIntent().toUri(Intent.URI_INTENT_SCHEME));
+        }
+
 
         mPathButtonClickHandler = new View.OnClickListener() {
             @Override
@@ -282,6 +290,8 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                 return onCreateSubDirQuestion(mPopUpSelection);
             case R.id.cmd_gallery:
                 return showGallery(mPopUpSelection);
+            case R.id.action_details:
+                return showDirInfo(mPopUpSelection);
         }
         return false;
     }
@@ -344,11 +354,28 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         }
     }
 
+    private boolean showDirInfo(IDirectory selectedDir) {
+        String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
+        if (pathFilter != null) {
+            ImageDetailDialogBuilder.createImageDetailDialog(
+                    this.getActivity(),
+                    pathFilter,
+                    FotoThumbSql.formatDirStatistic(this.getActivity(), pathFilter)
+            ).show();
+            return true;
+        }
+        return false;
+    }
+
     private boolean showGallery(IDirectory selectedDir) {
         String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
         if (pathFilter != null) {
-            GalleryFilterParameter filter = new GalleryFilterParameter();
-            FotoSql.set(filter, pathFilter, mDirTypId);
+            GalleryFilterParameter filter = new GalleryFilterParameter(); //.setPath(pathFilter);
+            if (!FotoSql.set(filter, pathFilter, mDirTypId))
+            {
+                filter.setPath(pathFilter + "/%");
+            }
+
             FotoGalleryActivity.showActivity(this.getActivity(), filter, null, 0);
             return true;
         }
@@ -461,18 +488,32 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         if ((mDirectoryListener != null) && (selectedChild != null)) mDirectoryListener.onDirectorySelectionChanged(selectedChild.getAbsolute(), mDirTypId);
     }
 
+    /**
+     * To be overwritten to check if a path can be picked.
+     *
+     * @param path to be checked if it cannot be handled
+     * @return null if no error else error message with the reason why it cannot be selected
+     */
+    protected String getStatusErrorMessage(String path) {
+        return null;
+    }
+
     private void updateStatus() {
         int itemCount = getItemCount(mCurrentSelection);
-        boolean canPressOk = (itemCount > 0);
+
+        String selectedPath = (this.mCurrentSelection != null) ? this.mCurrentSelection.getAbsolute() : null;
+
+        String statusMessage = (itemCount == 0) ? mContext.getString(R.string.selection_none_hint)  : getStatusErrorMessage(selectedPath);
+        boolean canPressOk = (statusMessage == null);
 
         if (mCmdOk != null) mCmdOk.setEnabled(canPressOk);
         if (mCmdPopup != null) mCmdPopup.setEnabled(canPressOk);
         
         if (mStatus != null) {
-            if (canPressOk) {
+            if (statusMessage == null) {
                 mStatus.setText(this.mCurrentSelection.getAbsolute());
             } else {
-                mStatus.setText(R.string.selection_none_hint);
+                mStatus.setText(statusMessage);
             }
         }
     }
@@ -580,7 +621,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         navigateTo(initialAbsolutePath);
     }
 
-    /** reload tree to new newGrandParent by preserving selection */
+    /** refreshLocal tree to new newGrandParent by preserving selection */
     private void navigateTo(int newGroupSelection, IDirectory newGrandParent) {
         if (newGrandParent != null) {
             Log.d(TAG, debugPrefix + "navigateTo(" +

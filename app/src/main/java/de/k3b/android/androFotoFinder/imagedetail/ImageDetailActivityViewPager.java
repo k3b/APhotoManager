@@ -43,9 +43,13 @@ import android.widget.Toast;
 
 // import com.squareup.leakcanary.RefWatcher;
 
+import org.osmdroid.api.IGeoPoint;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
@@ -59,11 +63,14 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
-import de.k3b.android.util.SelectedFotos;
+import de.k3b.android.util.MenuUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
+import de.k3b.database.SelectedFiles;
+import de.k3b.geo.api.GeoPointDto;
+import de.k3b.geo.io.GeoUri;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
@@ -85,10 +92,13 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     /** if smaller that these millisecs then the actionbar autohide is disabled */
     private static final int DISABLE_HIDE_ACTIONBAR = 700;
+    private static final int NOMEDIA_GALLERY = 8227;
 
     // how many changes have been made. if != 0 parent activity must invalidate cached data
     private static int mModifyCount = 0;
     private MenuItem mMenuSlideshow = null;
+
+    private boolean mWaitingForMediaScannerResult = false;
 
     class LocalCursorLoader implements LoaderManager.LoaderCallbacks<Cursor> {
         /** incremented every time a new curster/query is generated */
@@ -101,6 +111,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             switch (loaderID) {
                 case ACTIVITY_ID:
                     mRequeryInstanceCount++;
+                    mWaitingForMediaScannerResult = false;
                     if (Global.debugEnabledSql) {
                         Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onCreateLoader" +
                                 getDebugContext() +
@@ -116,7 +127,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         /** called after media db content has changed */
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-            // to be restored after reload if there is no mInitialFilePath
+            // to be restored after refreshLocal if there is no mInitialFilePath
             if (mInitialScrollPosition == NO_INITIAL_SCROLL_POSITION) {
                 mInitialScrollPosition = mViewPager.getCurrentItem();
             }
@@ -145,7 +156,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         /** called by LoaderManager. after search criteria were changed or if activity is destroyed. */
         @Override
         public void onLoaderReset(Loader<Cursor> loader) {
-            // rember position where we have to scroll to after reload is finished.
+            // rember position where we have to scroll to after refreshLocal is finished.
             mInitialScrollPosition = mViewPager.getCurrentItem();
             mAdapter.swapCursor(null);
             if (Global.debugEnabledSql) {
@@ -186,6 +197,10 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             }
 
             super.onPostProcess(what, oldPathNames, newPathNames, modifyCount, itemCount, opCode);
+
+            if ((opCode == OP_RENAME) || (opCode == OP_MOVE) || (opCode == OP_DELETE)) {
+                refreshIfNecessary();
+            }
         }
 
     }
@@ -193,13 +208,14 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     public static class MoveOrCopyDestDirPicker extends DirectoryPickerFragment {
         static AndroidFileCommands sFileCommands = null;
 
-        public static MoveOrCopyDestDirPicker newInstance(boolean move, SelectedFotos srcFotos) {
+        public static MoveOrCopyDestDirPicker newInstance(boolean move, SelectedFiles srcFotos) {
             MoveOrCopyDestDirPicker f = new MoveOrCopyDestDirPicker();
 
             // Supply index input as an argument.
             Bundle args = new Bundle();
             args.putBoolean("move", move);
-            args.putSerializable("srcFotos", srcFotos);
+            args.putSerializable(EXTRA_SELECTED_ITEM_PATHS, srcFotos.toString());
+            args.putSerializable(EXTRA_SELECTED_ITEM_IDS, srcFotos.toIdString());
             f.setArguments(args);
 
             return f;
@@ -213,8 +229,29 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             return getArguments().getBoolean("move", false);
         }
 
-        public SelectedFotos getSrcFotos() {
-            return (SelectedFotos) getArguments().getSerializable("srcFotos");
+        public SelectedFiles getSrcFotos() {
+            String selectedIDs = (String) getArguments().getSerializable(EXTRA_SELECTED_ITEM_IDS);
+            String selectedFiles = (String) getArguments().getSerializable(EXTRA_SELECTED_ITEM_PATHS);
+
+            if ((selectedIDs == null) && (selectedFiles == null)) return null;
+            SelectedFiles result = new SelectedFiles(selectedFiles, selectedIDs);
+            return result;
+        }
+
+        /**
+         * To be overwritten to check if a path can be picked.
+         *
+         * @param path to be checked if it cannot be handled
+         * @return null if no error else error message with the reason why it cannot be selected
+         */
+        @Override
+        protected String getStatusErrorMessage(String path) {
+            String errorMessage = (sFileCommands == null) ? null : sFileCommands.checkWriteProtected(0, new File(path));
+            if (errorMessage != null) {
+                int pos = errorMessage.indexOf('\n');
+                return (pos > 0) ? errorMessage.substring(0,pos) : errorMessage;
+            }
+            return super.getStatusErrorMessage(path);
         }
 
         @Override
@@ -223,8 +260,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             mModifyCount++; // copy or move initiated
             getActivity().setResult((mModifyCount == 0) ? RESULT_NOCHANGE : RESULT_CHANGE);
 
-            dismiss();
             sFileCommands.onMoveOrCopyDirectoryPick(getMove(), selection, getSrcFotos());
+            dismiss();
         }
     };
 
@@ -233,7 +270,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     // private static final String ISLOCKED_ARG = "isLocked";
 	
 	private LockableViewPager mViewPager = null;
-    private ImagePagerAdapterFromCursor mAdapter = null;
+    private ImagePagerAdapterFromCursorArray mAdapter = null;
 
     private final AndroidFileCommands mFileCommands = new LocalFileCommands();
 
@@ -250,6 +287,9 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     /** if not null: after load cursor scroll to this path */
     private String mInitialFilePath = null;
+
+    /** if not null: photos from this dir are loaded without using media db*/
+    private String mInitialDir = null;
 
     public static void showActivity(Activity context, Uri imageUri, int position, QueryParameter imageDetailQuery) {
         Intent intent;
@@ -269,6 +309,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 	public void onCreate(Bundle savedInstanceState) {
         mDebugPrefix = "ImageDetailActivityViewPager#" + (id++)  + " ";
         Global.debugMemory(mDebugPrefix, "onCreate");
+        this.mWaitingForMediaScannerResult = false;
 
         // #17: let actionbar overlap image so there is no need to resize main view item
         // http://stackoverflow.com/questions/6749261/custom-translucent-android-actionbar
@@ -277,6 +318,10 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
 
+        if (Global.debugEnabled && (intent != null)){
+            Log.d(Global.LOG_CONTEXT, mDebugPrefix + "onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
+        }
+
         if (mustForward(intent)) {
             // cannot handle myself. Forward to FotoGalleryActivity
             Intent childIntent = new Intent();
@@ -284,7 +329,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             childIntent.setAction(intent.getAction());
             childIntent.setDataAndType(intent.getData(), intent.getType());
             copyExtras(childIntent, intent.getExtras(),
-                    EXTRA_FILTER, EXTRA_POSITION, EXTRA_QUERY, EXTRA_SELECTED_ITEMS, EXTRA_STREAM, EXTRA_TITLE);
+                    EXTRA_FILTER, EXTRA_POSITION, EXTRA_QUERY, EXTRA_SELECTED_ITEM_IDS,
+                    EXTRA_SELECTED_ITEM_PATHS, EXTRA_STREAM, EXTRA_TITLE);
             startActivityForResult(childIntent, ID_FORWARD);
         } else { // not in forward mode
             setContentView(R.layout.activity_image_view_pager);
@@ -295,8 +341,9 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             // extra parameter
             getParameter(intent);
 
-            mAdapter = new ImagePagerAdapterFromCursor(this, mDebugPrefix);
+            mAdapter = new ImagePagerAdapterFromCursorArray(this, mDebugPrefix, mInitialFilePath);
             mViewPager.setAdapter(mAdapter);
+
             mViewPager.setOnInterceptTouchEvent(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -311,21 +358,39 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                 mModifyCount = 0;
             }
 
+            if ((mInitialFilePath != null) && (mInitialScrollPosition ==-1)) {
+                mInitialScrollPosition = mAdapter.getPositionFromPath(mInitialFilePath);
+            }
+            if ((mInitialScrollPosition >= 0) && (mInitialScrollPosition < mAdapter.getCount())) {
+                mViewPager.setCurrentItem(mInitialScrollPosition);
+            }
+
             setResult((mModifyCount == 0) ? RESULT_NOCHANGE : RESULT_CHANGE);
 
-            mFileCommands.setContext(this);
+            mFileCommands.setContext(this, mAdapter);
             mFileCommands.setLogFilePath(mFileCommands.getDefaultLogFile());
+
+            if (Global.debugEnabledMemory) {
+                Log.d(Global.LOG_CONTEXT, mDebugPrefix + " - onCreate cmd (" +
+                        MoveOrCopyDestDirPicker.sFileCommands + ") => (" + mFileCommands +
+                        ")");
+
+            }
+
             MoveOrCopyDestDirPicker.sFileCommands = mFileCommands;
 
-            mCurorLoader = new LocalCursorLoader();
-            getLoaderManager().initLoader(ACTIVITY_ID, null, mCurorLoader);
-
+            if (mAdapter.getCount() == 0) {
+                // if cursor does not contain data via file
+                mCurorLoader = new LocalCursorLoader();
+                getLoaderManager().initLoader(ACTIVITY_ID, null, mCurorLoader);
+            }
             // #17: make actionbar background nearly transparent
             // http://stackoverflow.com/questions/6749261/custom-translucent-android-actionbar
             getActionBar().setBackgroundDrawable(new ColorDrawable(Color.argb(128, 0, 0, 0)));
         }
         unhideActionBar(Global.actionBarHideTimeInMilliSecs, "onCreate");
     }
+
 
     private void onGuiTouched() {
         // stop slideshow if active
@@ -396,6 +461,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             setResult(resultCode, intent);
             finish();
         }
+
+        refreshIfNecessary();
     }
 
     private static boolean mustForward(Intent intent) {
@@ -472,7 +539,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         if ((path == null) || (path.length() == 0)) return null;
 
         File selectedPhoto = new File(path);
-        mInitialFilePath = path;
+        this.mInitialFilePath = path;
         this.mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
         GalleryFilterParameter filter = new GalleryFilterParameter().setPath(selectedPhoto.getParent() + "/%");
         return filter;
@@ -506,6 +573,16 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         unhideActionBar(Global.actionBarHideTimeInMilliSecs, "onResume");
         Global.debugMemory(mDebugPrefix, "onResume");
         super.onResume();
+        if (Global.debugEnabledMemory) {
+            Log.d(Global.LOG_CONTEXT, mDebugPrefix + " - onResume cmd (" +
+                    MoveOrCopyDestDirPicker.sFileCommands + ") => (" + mFileCommands +
+                    ")");
+
+        }
+
+        // workaround fragment lifecycle is newFragment.attach oldFragment.detach.
+        // this makes shure that the visible fragment has commands
+        MoveOrCopyDestDirPicker.sFileCommands = mFileCommands;
     }
 
     @Override
@@ -519,8 +596,21 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             mViewPager.setAdapter(null);
             mFileCommands.closeLogFile();
             mFileCommands.closeAll();
-            mFileCommands.setContext(null);
+            mFileCommands.setContext(null, mAdapter);
+        }
+
+        // kill this instance only if not an other instance is active
+        if (MoveOrCopyDestDirPicker.sFileCommands == mFileCommands) {
+            if (Global.debugEnabledMemory) {
+                Log.d(Global.LOG_CONTEXT, mDebugPrefix + " - onDestroy cmd (" +
+                        MoveOrCopyDestDirPicker.sFileCommands + ") => (null) ");
+
+            }
             MoveOrCopyDestDirPicker.sFileCommands = null;
+        } else if (Global.debugEnabledMemory) {
+            Log.d(Global.LOG_CONTEXT, mDebugPrefix + " - onDestroy cmd [ignore] (" +
+                    MoveOrCopyDestDirPicker.sFileCommands + ")");
+
         }
 
         if (mSlideShowTimer != null) {
@@ -548,7 +638,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         } else if (mInitialFilePath != null) {
             // try to find selection by text
             mViewPager.invalidate();
-            int positionFound = mAdapter.getCursorFromPath(mInitialFilePath);
+            int positionFound = mAdapter.getPositionFromPath(mInitialFilePath);
             if (positionFound < 0) {
                 // not found
                 checkForIncompleteMediaDatabase(mInitialFilePath, "onLoadCompleted(Selection='" +
@@ -569,18 +659,36 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         }
     }
 
-    /** gets called if no file is found by a db-query or if jpgFullFilePath is not found in media db */
-    private boolean checkForIncompleteMediaDatabase(String jpgFullFilePath, String why) {
-        File fileToLoad = (jpgFullFilePath != null) ? new File(jpgFullFilePath) : null;
-        if ((fileToLoad != null) && (fileToLoad.exists()) && (fileToLoad.canRead())) {
-            // file exists => must update media database
-            int numberOfNewItems = updateIncompleteMediaDatabase(mDebugPrefix, this,
-                    mDebugPrefix + "checkForIncompleteMediaDatabase-" + why,
-                    fileToLoad.getParentFile());
+    private void refreshIfNecessary() {
+        if (mAdapter.isInArrayMode()) {
+            mAdapter.refreshLocal();
+            mViewPager.setAdapter(mAdapter);
 
-            String message = getString(R.string.image_err_not_in_db_format, jpgFullFilePath, numberOfNewItems);
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-            return true;
+            // show the changes
+            onLoadCompleted();
+        }
+    }
+
+    /**
+     * gets called if no file is found by a db-query or if jpgFullFilePath is not found in media db
+     * return false; activity must me closed
+     */
+    private boolean checkForIncompleteMediaDatabase(String jpgFullFilePath, String why) {
+        if (!MediaScanner.isNoMedia(jpgFullFilePath,MediaScanner.DEFAULT_SCAN_DEPTH)) {
+            File fileToLoad = (jpgFullFilePath != null) ? new File(jpgFullFilePath) : null;
+
+            if ((!this.mWaitingForMediaScannerResult) && (fileToLoad != null) && (fileToLoad.exists()) && (fileToLoad.canRead())) {
+                // file exists => must update media database
+                this.mWaitingForMediaScannerResult = true;
+                int numberOfNewItems = updateIncompleteMediaDatabase(mDebugPrefix, this,
+                        mDebugPrefix + "checkForIncompleteMediaDatabase-" + why,
+                        fileToLoad.getParentFile());
+
+                String message = getString(R.string.image_err_not_in_db_format, jpgFullFilePath, numberOfNewItems);
+                Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+                return true;
+            }
+            this.mWaitingForMediaScannerResult = false;
         }
         return false;
     }
@@ -597,7 +705,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         if (existing != null) {
             for (File file : existing) {
                 String found = file.getAbsolutePath();
-                if (MediaScanner.isJpeg(found) && !known.contains(found)) {
+                if (MediaScanner.isImage(found, false) && !known.contains(found)) {
                     missing.add(found);
                 }
             }
@@ -623,7 +731,10 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_image_detail, menu);
         getMenuInflater().inflate(R.menu.menu_image_commands, menu);
+        Global.fixMenu(this, menu);
         mMenuSlideshow = menu.findItem(R.id.action_slideshow);
+
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -634,6 +745,12 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         AboutDialogPreference.onPrepareOptionsMenu(this, menu);
 
         MenuItem item = menu.findItem(R.id.cmd_show_geo);
+
+        if (item != null) {
+            item.setVisible(hasCurrentGeo());
+        }
+
+        item = menu.findItem(R.id.cmd_show_geo_as);
 
         if (item != null) {
             item.setVisible(hasCurrentGeo());
@@ -664,11 +781,11 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                 return true;
 
             case R.id.action_edit:
-                cmdStartIntent(getCurrentFilePath(), null, Intent.ACTION_EDIT, R.string.edit_chooser_title, R.string.edit_err_editor_not_found);
+                IntentUtil.cmdStartIntent(this, getCurrentFilePath(), null, null, Intent.ACTION_EDIT, R.string.edit_chooser_title, R.string.edit_err_editor_not_found);
                 return true;
 
             case R.id.menu_item_share:
-                cmdStartIntent(null, getCurrentFilePath(), Intent.ACTION_SEND, R.string.share_menu_title, R.string.share_err_not_found);
+                IntentUtil.cmdStartIntent(this, null, null, getCurrentFilePath(), Intent.ACTION_SEND, R.string.share_menu_title, R.string.share_err_not_found);
                 return true;
 
             case R.id.cmd_copy:
@@ -678,19 +795,43 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             case R.id.menu_item_rename:
                 return onRenameDirQueston(getCurrentImageId(), getCurrentFilePath(), null);
 
-            case R.id.cmd_gallery:
-                if (mFilter != null) {
-                    FotoGalleryActivity.showActivity(this, this.mFilter, null, 0);
-                } else {
-                    FotoGalleryActivity.showActivity(this, null, this.mGalleryContentQuery, 0);
+            case R.id.cmd_gallery: {
+                String dirPath = getCurrentFilePath(); // MediaScanner.getDir().getAbsolutePath();
+                if (dirPath != null) {
+                    dirPath = MediaScanner.getDir(dirPath).getAbsolutePath();
+                    GalleryFilterParameter newFilter = new GalleryFilterParameter();
+                    newFilter.setPath(dirPath);
+                    int callBackId = (MediaScanner.isNoMedia(dirPath,MediaScanner.DEFAULT_SCAN_DEPTH)) ? NOMEDIA_GALLERY : 0;
+
+                    FotoGalleryActivity.showActivity(this, this.mFilter, null, callBackId);
                 }
                 return true;
+            }
 
             case R.id.cmd_show_geo:
                 MapGeoPickerActivity.showActivity(this, getCurrentFoto());
                 return true;
+
+            case R.id.cmd_show_geo_as: {
+                final long imageId = getCurrentImageId();
+                IGeoPoint _geo = FotoSql.execGetPosition(this, null, imageId);
+                final String currentFilePath = getCurrentFilePath();
+                GeoPointDto geo = new GeoPointDto(_geo.getLatitude(), _geo.getLongitude(), GeoPointDto.NO_ZOOM);
+
+                geo.setDescription(currentFilePath);
+                geo.setId(""+imageId);
+                geo.setName("#"+imageId);
+                GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
+                String uri = PARSER.toUriString(geo);
+
+                IntentUtil.cmdStartIntent(this, null, uri, null, Intent.ACTION_VIEW, R.string.geo_show_as_menu_title, R.string.geo_picker_err_not_found);
+
+                return true;
+            }
+
             case R.id.cmd_edit_geo:
-                GeoEditActivity.showActivity(this, getCurrentFoto());
+                SelectedFiles selectedItem = getCurrentFoto();
+                GeoEditActivity.showActivity(this, selectedItem);
                 return true;
 
             case R.id.cmd_about:
@@ -698,6 +839,14 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                 return true;
             case R.id.cmd_settings:
                 SettingsActivity.show(this);
+                return true;
+            case R.id.cmd_more:
+                new Handler().postDelayed(new Runnable() {
+                    public void run() {
+                        // reopen after some delay
+                        openOptionsMenu();
+                    }
+                }, 200);
                 return true;
 
             default:
@@ -718,20 +867,22 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     };
 
     private void startStopSlideShow(boolean start) {
-        mViewPager.setLocked(start);
-        if (start != mSlideShowStarted) {
-            if (start) {
-                onSlideShowNext();
-                mSlideShowTimer.sendMessageDelayed(Message.obtain(mSlideShowTimer, SLIDESHOW_HANDLER_ID), Global.slideshowIntervalInMilliSecs);
-            } else {
-                mSlideShowTimer.removeMessages(SLIDESHOW_HANDLER_ID);
-            }
-            mSlideShowStarted = start;
+        if (mViewPager != null) {
+            mViewPager.setLocked(start);
+            if (start != mSlideShowStarted) {
+                if (start) {
+                    onSlideShowNext();
+                    mSlideShowTimer.sendMessageDelayed(Message.obtain(mSlideShowTimer, SLIDESHOW_HANDLER_ID), Global.slideshowIntervalInMilliSecs);
+                } else {
+                    mSlideShowTimer.removeMessages(SLIDESHOW_HANDLER_ID);
+                }
+                mSlideShowStarted = start;
 
-            // #24 Prevent sleepmode while slideshow is active
-            if (this.mViewPager != null) this.mViewPager.setKeepScreenOn(start);
-            
-            if (mMenuSlideshow != null) mMenuSlideshow.setChecked(start);
+                // #24 Prevent sleepmode while slideshow is active
+                if (this.mViewPager != null) this.mViewPager.setKeepScreenOn(start);
+
+                if (mMenuSlideshow != null) mMenuSlideshow.setChecked(start);
+            }
         }
     }
 
@@ -741,44 +892,12 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         mViewPager.setCurrentItem(pos);
     }
 
-    private void cmdStartIntent(String currentFilePath, String extraPath, String action, int idChooserCaption, int idEditError) {
-
-        final Intent outIntent = new Intent()
-                .setAction(action)
-                // .putExtra(Intent.EXTRA_STREAM, uri)
-                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)
-                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-        if (currentFilePath != null) {
-            File file = new File(currentFilePath);
-            final Uri uri = Uri.fromFile(file);
-            outIntent.setDataAndType(uri, getMime(currentFilePath));
-        }
-
-        if (extraPath != null) {
-            File file = new File(extraPath);
-            final Uri uri = Uri.fromFile(file);
-            outIntent.setType(getMime(extraPath));
-            outIntent.putExtra(EXTRA_STREAM, uri);
-        }
-        if (Global.debugEnabled) {
-            Log.d(Global.LOG_CONTEXT,
-                    "cmdStartIntent(" + outIntent.toUri(Intent.URI_INTENT_SCHEME) + "')");
-        }
-
-        try {
-            this.startActivity(Intent.createChooser(outIntent, getText(idChooserCaption)));
-        } catch (ActivityNotFoundException ex) {
-            Toast.makeText(this, idEditError,Toast.LENGTH_LONG).show();
-        }
-    }
-
     private void cmdShowDetails(String fullFilePath, long currentImageId) {
 
         ImageDetailDialogBuilder.createImageDetailDialog(this, fullFilePath, currentImageId, mGalleryContentQuery, mViewPager.getCurrentItem()).show();
     }
 
-    private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFotos fotos) {
+    private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
         if (AndroidFileCommands.canProcessFile(this)) {
             MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
@@ -841,18 +960,9 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         }
     }
 
-    private String getMime(String path) {
-        return "image/*";
-        /*
-        MimeTypeMap map = MimeTypeMap.getSingleton();
-        return map.getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(path));
-        */
-    }
-
-    protected SelectedFotos getCurrentFoto() {
+    protected SelectedFiles getCurrentFoto() {
         long imageId = getCurrentImageId();
-        SelectedFotos result = new SelectedFotos();
-        result.add(imageId);
+        SelectedFiles result = new SelectedFiles(new String[] {getCurrentFilePath()}, new Long[] {Long.valueOf(imageId)});
         return  result;
     }
 
@@ -890,4 +1000,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 		super.onSaveInstanceState(outState);
 	}
 
+    @Override
+    public String toString() {
+        return mDebugPrefix + this.mAdapter;
+    }
 }

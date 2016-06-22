@@ -70,7 +70,7 @@ public class ImageDetailDialogBuilder {
         }
     }
 
-    public static Dialog createImageDetailDialog(Activity context, String title, String block, String... moreBlocks) {
+    public static Dialog createImageDetailDialog(Activity context, String title, String block, Object... moreBlocks) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title);
 
@@ -80,8 +80,10 @@ public class ImageDetailDialogBuilder {
 
         if ((moreBlocks != null) && (moreBlocks.length > 0)) {
             StringBuilder result = new StringBuilder(block);
-            for (String subBlock : moreBlocks) {
-                append(result, subBlock);
+            for (Object subBlock : moreBlocks) {
+                if (subBlock != null) {
+                    append(result, subBlock.toString());
+                }
             }
             view.setText(result.toString());
         } else {
@@ -102,18 +104,18 @@ public class ImageDetailDialogBuilder {
 
     private static void appendExifInfo(StringBuilder result, Activity context, String filepath, long currentImageId) {
         try {
+            getExifInfo_android(result, filepath);
+
+            File jpegFile = new File(filepath);
+            addExif(result, jpegFile);
+
+            int ext = filepath.lastIndexOf(".");
+
+            String xmpFilePath = (ext >= 0) ? (filepath.substring(0, ext) + ".xmp") : (filepath + ".xmp");
+            File xmpFile = new File(xmpFilePath);
+            addExif(result, xmpFile);
+
             if (currentImageId != 0) {
-                getExifInfo_android(result, filepath);
-
-                File jpegFile = new File(filepath);
-                addExif(result, jpegFile);
-
-                int ext = filepath.lastIndexOf(".");
-
-                String xmpFilePath = (ext >= 0) ? (filepath.substring(0, ext) + ".xmp") : (filepath + ".xmp");
-                File xmpFile = new File(xmpFilePath);
-                addExif(result, xmpFile);
-
 
                 ContentValues dbContent = FotoSql.getDbContent(context, currentImageId);
                 if (dbContent != null) {

@@ -19,10 +19,15 @@
 
 package de.k3b.io;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import de.k3b.FotoLibGlobal;
 
 /**
  * Operating System Directory with load on demand
@@ -30,6 +35,8 @@ import java.util.List;
  * Created by k3b on 04.08.2015.
  */
 public class OSDirectory implements IDirectory {
+    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+
     private File mCurrent = null;
     private List<IDirectory> mChilden = null;
 
@@ -87,8 +94,15 @@ public class OSDirectory implements IDirectory {
             File[] files = mCurrent.listFiles();
             if (files != null) {
                 for (File file : files) {
-                    if ((file != null) && file.isDirectory() && !file.isHidden() && !file.getName().startsWith(".") && file.canWrite() && !FileUtils.isSymlinkDir(file,true)) {
+                    if ((file != null)
+                            && file.isDirectory()
+                            && !file.isHidden()
+                            && !file.getName().startsWith(".")
+                            // && file.canWrite() // bugfix: must be visible because writeprotected parentdir may contain writeenabled subdirs
+                            && !FileUtils.isSymlinkDir(file,true)) {
                         mChilden.add(new OSDirectory(file, this));
+//                    } else if (FotoLibGlobal.debugEnabled) {
+//                        logger.debug(FileUtils.getDebugString("OSDirectory.getChildren() rejected ", file));
                     }
                 }
             }

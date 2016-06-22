@@ -67,12 +67,14 @@ import de.k3b.android.androFotoFinder.queries.Queryable;
 import de.k3b.android.androFotoFinder.queries.SqlJobTaskBase;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.MediaScanner;
-import de.k3b.android.util.SelectedFotos;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
+import de.k3b.database.SelectedFiles;
 import de.k3b.database.SelectedItems;
 import de.k3b.io.Directory;
+import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
+import de.k3b.io.IGalleryFilter;
 import de.k3b.io.OSDirectory;
 
 /**
@@ -107,7 +109,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     private ShareActionProvider mShareActionProvider;
     private MenuItem mShareOnlyToggle;
-    private GalleryCursorAdapter mAdapter = null;
+    private GalleryCursorAdapterFromArray mAdapter = null;
 
     private OnGalleryInteractionListener mGalleryListener;
     private QueryParameter mGalleryContentQuery;
@@ -116,7 +118,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private int mLastVisiblePosition = -1;
 
     // multi selection support
-    private final SelectedFotos mSelectedItems = new SelectedFotos();
+    private final SelectedItems mSelectedItems = new SelectedItems();
     private String mOldTitle = null;
     private boolean mShowSelectedOnly = false;
     private final AndroidFileCommands mFileCommands = new LocalFileCommands();
@@ -140,7 +142,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         return fragment;
     }
 
-    public SelectedFotos getSelectedItems() {
+    public SelectedItems getSelectedItems() {
         return mSelectedItems;
     }
 
@@ -229,7 +231,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             if (Global.debugEnabled) {
                 Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onLoaderReset" + getDebugContext());
             }
-            // rember position where we have to scroll to after reload is finished.
+            // rember position where we have to scroll to after refreshLocal is finished.
             mLastVisiblePosition = mGalleryView.getLastVisiblePosition();
 
             mAdapter.swapCursor(null);
@@ -258,6 +260,11 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             }
 
             super.onPostProcess(what, oldPathNames, newPathNames, modifyCount, itemCount, opCode);
+
+            if ((mAdapter.isInArrayMode()) && ((opCode == OP_RENAME) || (opCode == OP_MOVE) || (opCode == OP_DELETE))) {
+                mAdapter.refreshLocal();
+                mGalleryView.setAdapter(mAdapter);
+            }
         }
     }
 
@@ -319,7 +326,26 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         View result = inflater.inflate(R.layout.fragment_gallery, container, false);
         mGalleryView = (GridView) result.findViewById(R.id.gridView);
 
-        mAdapter = new GalleryCursorAdapter(this.getActivity(), mSelectedItems, mDebugPrefix);
+        Activity parent = this.getActivity();
+        // mAdapter = new GalleryCursorAdapter(parent, mSelectedItems, mDebugPrefix);
+
+
+        Intent intent = (parent == null) ? null : parent.getIntent();
+
+        if (Global.debugEnabled && (intent != null)){
+            Log.d(Global.LOG_CONTEXT, mDebugPrefix + "onCreateView " + intent.toUri(Intent.URI_INTENT_SCHEME));
+        }
+
+
+        String path = (intent == null) ? null : intent.getStringExtra(EXTRA_SELECTED_ITEM_PATHS);
+
+        String filterValue = ((intent != null) && (path == null)) ? intent.getStringExtra(EXTRA_FILTER) : null;
+        IGalleryFilter filter = (filterValue != null) ? GalleryFilterParameter.parse(filterValue, new GalleryFilterParameter()) : null;
+
+        if (filter != null) {
+            path = filter.getPath();
+        }
+        mAdapter = new GalleryCursorAdapterFromArray(parent, mSelectedItems, mDebugPrefix, path);
         mGalleryView.setAdapter(mAdapter);
 
         mGalleryView.setLongClickable(true);
@@ -353,7 +379,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
         reloadDirGuiIfAvailable("onCreateView");
 
-        fixMediaDatabase();
+        if (!mAdapter.isInArrayMode()) {
+            fixMediaDatabase();
+        }
 
         requery("onCreateView");
         return result;
@@ -363,8 +391,16 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     public void onAttach(Activity activity) {
         Global.debugMemory(mDebugPrefix, "onAttach");
         super.onAttach(activity);
-        mFileCommands.setContext(activity);
+        mFileCommands.setContext(activity, mAdapter);
         mFileCommands.setLogFilePath(mFileCommands.getDefaultLogFile());
+
+        if (Global.debugEnabledMemory) {
+            Log.d(Global.LOG_CONTEXT, mDebugPrefix + " - onAttach cmd (" +
+                    MoveOrCopyDestDirPicker.sFileCommands + ") => (" + mFileCommands +
+                    ")");
+
+        }
+
         MoveOrCopyDestDirPicker.sFileCommands = mFileCommands;
         try {
             mGalleryListener = (OnGalleryInteractionListener) activity;
@@ -382,13 +418,44 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     @Override
+    public void onResume() {
+        Global.debugMemory(mDebugPrefix, "onResume");
+        super.onResume(); // this may destroy an other instance of gallery(fragment)
+
+        if (Global.debugEnabledMemory) {
+            Log.d(Global.LOG_CONTEXT, mDebugPrefix + " - onResume cmd (" +
+                            MoveOrCopyDestDirPicker.sFileCommands + ") => (" + mFileCommands +
+                    ")");
+
+        }
+
+        // workaround fragment lifecycle is newFragment.attach oldFragment.detach.
+        // this makes shure that the visible fragment has commands
+        MoveOrCopyDestDirPicker.sFileCommands = mFileCommands;
+
+    }
+
+    @Override
     public void onDetach() {
         Global.debugMemory(mDebugPrefix, "onDetach");
         super.onDetach();
         mGalleryListener = null;
         mDirectoryListener = null;
-        mFileCommands.setContext(null);
-        MoveOrCopyDestDirPicker.sFileCommands = null;
+        mFileCommands.setContext(null, mAdapter);
+
+        // kill this instance only if not an other instance is active
+        if (MoveOrCopyDestDirPicker.sFileCommands == mFileCommands) {
+            if (Global.debugEnabledMemory) {
+                Log.d(Global.LOG_CONTEXT, mDebugPrefix + " - onDetach cmd (" +
+                        MoveOrCopyDestDirPicker.sFileCommands + ") => (null) ");
+
+            }
+            MoveOrCopyDestDirPicker.sFileCommands = null;
+        } else if (Global.debugEnabledMemory) {
+            Log.d(Global.LOG_CONTEXT, mDebugPrefix + " - onDetach cmd [ignore] (" +
+                    MoveOrCopyDestDirPicker.sFileCommands + ")");
+
+        }
     }
 
     @Override
@@ -407,7 +474,6 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         mFileCommands.closeAll();
         mGalleryContentQuery = null;
         mAdapter = null;
-        super.onDestroy();
         System.gc();
         Global.debugMemory(mDebugPrefix, "after onDestroy");
         // RefWatcher refWatcher = AndroFotoFinderApp.getRefWatcher(getActivity());
@@ -490,8 +556,12 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 return;
             }
             long imageID = holder.imageID;
-            mGalleryListener.onGalleryImageClick(imageID, SelectedFotos.getUri(imageID), position);
+            mGalleryListener.onGalleryImageClick(imageID, getUri(imageID), position);
         }
+    }
+
+    private Uri getUri(long imageID) {
+        return mAdapter.getUri(imageID);
     }
 
     private void onOpenChildGallery(QueryParameter subGalleryQuery) {
@@ -613,7 +683,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             multiSelectionUpdateActionbar("Start multisel");
         } else {
             // in gallery mode long click is view image
-            ImageDetailActivityViewPager.showActivity(this.getActivity(), SelectedFotos.getUri(holder.imageID), position, getCurrentQuery());
+            ImageDetailActivityViewPager.showActivity(this.getActivity(), getUri(holder.imageID), position, getCurrentQuery());
         }
         return true;
     }
@@ -659,6 +729,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             inflater.inflate(R.menu.menu_image_commands, menu);
 
             multiSelectionUpdateShareIntent();
+            Global.fixMenu(getActivity(), menu);
         }
 
         mMenuRemoveAllSelected = menu.findItem(R.id.cmd_selection_remove_all);
@@ -676,7 +747,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     public boolean onOptionsItemSelected(MenuItem menuItem) {
         // Handle menuItem selection
         AndroidFileCommands fileCommands = mFileCommands;
-        if ((mSelectedItems != null) && (fileCommands.onOptionsItemSelected(menuItem, mSelectedItems))) {
+        final SelectedFiles selectedFiles = (mSelectedItems != null) ? new SelectedFiles(this.mSelectedItems, this.mAdapter) : null;
+        if ((mSelectedItems != null) && (fileCommands.onOptionsItemSelected(menuItem, selectedFiles))) {
             return true;
         }
         switch (menuItem.getItemId()) {
@@ -685,14 +757,14 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             case R.id.cmd_selected_only:
                 return multiSelectionToggle();
             case R.id.cmd_copy:
-                return cmdMoveOrCopyWithDestDirPicker(false, fileCommands.getLastCopyToPath(), mSelectedItems);
+                return cmdMoveOrCopyWithDestDirPicker(false, fileCommands.getLastCopyToPath(), selectedFiles);
             case R.id.cmd_move:
-                return cmdMoveOrCopyWithDestDirPicker(true, fileCommands.getLastCopyToPath(), mSelectedItems);
+                return cmdMoveOrCopyWithDestDirPicker(true, fileCommands.getLastCopyToPath(), selectedFiles);
             case R.id.cmd_show_geo:
-                MapGeoPickerActivity.showActivity(this.getActivity(), mSelectedItems);
+                MapGeoPickerActivity.showActivity(this.getActivity(), selectedFiles);
                 return true;
             case R.id.cmd_edit_geo:
-                GeoEditActivity.showActivity(this.getActivity(), mSelectedItems);
+                GeoEditActivity.showActivity(this.getActivity(), selectedFiles);
                 return true;
             case R.id.cmd_selection_add_all:
                 addAllToSelection();
@@ -714,20 +786,31 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     private void cmdShowDetails() {
-        ImageDetailDialogBuilder.createImageDetailDialog(this.getActivity(), getActivity().getTitle().toString(),
-                this.toString(), mGalleryContentQuery.toSqlString()).show();
+        SelectedItems ids = getSelectedItems();
+        String files = (ids != null) ? new SelectedFiles(ids, mAdapter).toString().replace(",","\n") : null;
+        ImageDetailDialogBuilder.createImageDetailDialog(
+                this.getActivity(),
+                getActivity().getTitle().toString(),
+                this.toString(),
+                ids,
+                files,
+                (mGalleryContentQuery != null) ? mGalleryContentQuery.toSqlString() : null
+        ).show();
     }
 
     public static class MoveOrCopyDestDirPicker extends DirectoryPickerFragment {
         static AndroidFileCommands sFileCommands = null;
 
-        public static MoveOrCopyDestDirPicker newInstance(boolean move, SelectedFotos srcFotos) {
+        public static MoveOrCopyDestDirPicker newInstance(boolean move, SelectedFiles srcFotos) {
             MoveOrCopyDestDirPicker f = new MoveOrCopyDestDirPicker();
 
             // Supply index input as an argument.
             Bundle args = new Bundle();
             args.putBoolean("move", move);
-            args.putSerializable("srcFotos", srcFotos);
+
+            args.putSerializable(EXTRA_SELECTED_ITEM_PATHS, srcFotos.toString());
+            args.putSerializable(EXTRA_SELECTED_ITEM_IDS, srcFotos.toIdString());
+
             f.setArguments(args);
 
             return f;
@@ -741,19 +824,24 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             return getArguments().getBoolean("move", false);
         }
 
-        public SelectedFotos getSrcFotos() {
-            return (SelectedFotos) getArguments().getSerializable("srcFotos");
+        public SelectedFiles getSrcFotos() {
+            String selectedIDs = (String) getArguments().getSerializable(EXTRA_SELECTED_ITEM_IDS);
+            String selectedFiles = (String) getArguments().getSerializable(EXTRA_SELECTED_ITEM_PATHS);
+
+            if ((selectedIDs == null) && (selectedFiles == null)) return null;
+            SelectedFiles result = new SelectedFiles(selectedFiles, selectedIDs);
+            return result;
         }
 
         @Override
         protected void onDirectoryPick(IDirectory selection) {
             // super.onDirectoryPick(selection);
-            dismiss();
             sFileCommands.onMoveOrCopyDirectoryPick(getMove(), selection, getSrcFotos());
+            dismiss();
         }
     };
 
-    private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFotos fotos) {
+    private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
         if (AndroidFileCommands.canProcessFile(this.getActivity())) {
             MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
@@ -833,7 +921,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             if (selectionCount == 1) {
                 Long imageId = mSelectedItems.first();
                 sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(EXTRA_STREAM, SelectedFotos.getUri(imageId));
+                sendIntent.putExtra(EXTRA_STREAM, getUri(imageId));
             } else {
                 sendIntent.setAction(Intent.ACTION_SEND_MULTIPLE);
 
@@ -841,7 +929,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
                 Iterator<Long> iter = mSelectedItems.iterator();
                 while (iter.hasNext()) {
-                    uris.add(SelectedFotos.getUri(iter.next()));
+                    uris.add(getUri(iter.next()));
                 }
                 sendIntent.putParcelableArrayListExtra(EXTRA_STREAM, uris);
             }
@@ -928,9 +1016,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             @Override
             protected void doInBackground(Long id, Cursor cursor) {
                 if (mPathColNo == -2) mPathColNo = cursor.getColumnIndex(FotoSql.SQL_COL_PATH);
-                MediaScanner.updatePathRelatedFields(getActivity(), cursor, cursor.getString(mPathColNo), mColumnIndexPK, mPathColNo);
-
-                mResultCount++;
+                mResultCount += MediaScanner.updatePathRelatedFields(getActivity(), cursor, cursor.getString(mPathColNo), mColumnIndexPK, mPathColNo);
             }
 
             @Override
@@ -990,14 +1076,14 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
             // might be null in in orientation change
             if (activity != null) {
-                int delCount = activity.getContentResolver().delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, query.toAndroidWhere(), null);
+                int delCount = FotoSql.deleteMedia(activity.getContentResolver(), query.toAndroidWhere(), null, true);
                 if (debugMessage != null) {
                     Log.w(Global.LOG_CONTEXT, mDebugPrefix + " deleted " + delCount +
                             " duplicates\n\tDELETE ... WHERE " + query.toAndroidWhere());
                 }
 
                 if (delCount > 0) {
-                    requery("after delete duplicates"); // content has changed: must reload
+                    requery("after delete duplicates"); // content has changed: must refreshLocal
                 }
             }
         }

@@ -19,6 +19,7 @@
 
 package de.k3b.android.util;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -38,6 +39,8 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.database.SelectedFiles;
+import de.k3b.database.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
 import de.k3b.io.IDirectory;
@@ -53,11 +56,13 @@ public class AndroidFileCommands extends FileCommands {
     private static final String SETTINGS_KEY_LAST_COPY_TO_PATH = "last_copy_to_path";
     private static final String mDebugPrefix = "AndroidFileCommands.";
     private Activity mContext;
+    private SelectedItems.Id2FileNameConverter mId2FileNameConverter;
     private AlertDialog mActiveAlert = null;
+    private boolean mHasNoMedia = false;
 
     public AndroidFileCommands() {
         // setLogFilePath(getDefaultLogFile());
-        setContext(null);
+        setContext(null, null);
     }
 
     public void closeAll() {
@@ -84,6 +89,9 @@ public class AndroidFileCommands extends FileCommands {
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + "onPreProcess('" + what + "')");
         }
+
+        // a nomedia file is affected => must update gui
+        this.mHasNoMedia = MediaScanner.isNoMedia(22, oldPathNames) || MediaScanner.isNoMedia(22, newPathNames);
         super.onPreProcess(what, oldPathNames, newPathNames, opCode);
     }
 
@@ -102,6 +110,11 @@ public class AndroidFileCommands extends FileCommands {
             MediaScanner.updateMediaDBInBackground(mContext, message, oldPathNames, newPathNames);
         }
 
+        if (false && this.mHasNoMedia && (mContext != null)) {
+            // a nomedia file is affected => must update gui
+            this.mContext.getContentResolver().notifyChange(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, null, false);
+            this.mHasNoMedia = false;
+        }
         Toast.makeText(mContext, message, Toast.LENGTH_LONG).show();
     }
 
@@ -133,7 +146,7 @@ public class AndroidFileCommands extends FileCommands {
 
     }
 
-    public boolean onOptionsItemSelected(final MenuItem item, final SelectedFotos selectedFileNames) {
+    public boolean onOptionsItemSelected(final MenuItem item, final SelectedFiles selectedFileNames) {
         if ((selectedFileNames != null) && (selectedFileNames.size() > 0)) {
             // Handle item selection
             switch (item.getItemId()) {
@@ -144,19 +157,39 @@ public class AndroidFileCommands extends FileCommands {
         return false;
     }
 
+    /**
+     * Check if all files in selectedFileNamesToBeModified are not write protected.
+     *
+     * @return null if no error. else formated error message.
+     */
+    public String checkWriteProtected(int resIdAction, final File... filesToBeModified) {
+        //   <string name="file_err_writeprotected">\'%1$s\' ist schreibgeschützt. \'%2$s\' ist nicht möglich.</string>
+        if (filesToBeModified != null) {
+            for (File file : filesToBeModified) {
+                if ((file != null) && (file.exists()) && (!file.canWrite())) {
+                    String action = (resIdAction == 0) ? "" : mContext.getString(resIdAction);
+                    // file_err_writeprotected="writeprotected \'%1$s\'.\n\n \'%2$s\' is not possible."
+                    return mContext.getString(R.string.file_err_writeprotected, file.getAbsolutePath(), action);
+                }
+            }
+        }
+        return null;
+    }
+
     public boolean rename(Long fileId, File dest, File src) {
         int result = moveOrCopyFiles(true, "rename", new File[]{dest}, new File[]{src});
         return (result != 0);
     }
 
-    public void onMoveOrCopyDirectoryPick(boolean move, IDirectory destFolder, SelectedFotos srcFotos) {
+    public void onMoveOrCopyDirectoryPick(boolean move, IDirectory destFolder, SelectedFiles srcFotos) {
         if (destFolder != null) {
             String copyToPath = destFolder.getAbsolute();
-            setLastCopyToPath(copyToPath);
             File destDirFolder = new File(copyToPath);
 
-            String[] selectedFileNames = srcFotos.getFileNames(mContext);
-            moveOrCopyFilesTo(move, destDirFolder, SelectedFotos.getFiles(selectedFileNames));
+            setLastCopyToPath(copyToPath);
+
+            String[] selectedFileNames = srcFotos.getFileNames();
+            moveOrCopyFilesTo(move, destDirFolder, SelectedFiles.getFiles(selectedFileNames));
         }
     }
 
@@ -173,55 +206,63 @@ public class AndroidFileCommands extends FileCommands {
         edit.commit();
     }
 
-    public boolean cmdDeleteFileWithQuestion(final SelectedFotos fotos) {
-        String[] pathNames = fotos.getFileNames(mContext);
-        StringBuffer names = new StringBuffer();
-        for (String name : pathNames) {
-            names.append(name).append("\n");
+    public boolean cmdDeleteFileWithQuestion(final SelectedFiles fotos) {
+        String[] pathNames = fotos.getFileNames();
+        String errorMessage = checkWriteProtected(R.string.delete_menu_title, SelectedFiles.getFiles(pathNames));
+
+        if (errorMessage != null) {
+            Toast.makeText(this.mContext, errorMessage, Toast.LENGTH_LONG).show();
+        } else {
+            StringBuffer names = new StringBuffer();
+            for (String name : pathNames) {
+                names.append(name).append("\n");
+            }
+            final String message = mContext
+                    .getString(R.string.delete_question_message_format, names.toString());
+
+            final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            final String title = mContext.getText(R.string.delete_question_title)
+                    .toString();
+
+            builder.setTitle(title + pathNames.length);
+            builder.setMessage(message)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.btn_yes,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(
+                                        final DialogInterface dialog,
+                                        final int id) {
+                                    mActiveAlert = null;
+                                    deleteFiles(fotos);
+                                }
+                            }
+                    )
+                    .setNegativeButton(R.string.btn_no,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(
+                                        final DialogInterface dialog,
+                                        final int id) {
+                                    mActiveAlert = null;
+                                    dialog.cancel();
+                                }
+                            }
+                    );
+
+            final AlertDialog alert = builder.create();
+            mActiveAlert = alert;
+            alert.show();
         }
-        final String message = mContext
-                .getString(R.string.delete_question_message_format, names.toString());
-
-        final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        final String title = mContext.getText(R.string.delete_question_title)
-                .toString();
-
-        builder.setTitle(title + pathNames.length);
-        builder.setMessage(message)
-                .setCancelable(false)
-                .setPositiveButton(R.string.btn_yes,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(
-                                    final DialogInterface dialog,
-                                    final int id) {
-                                mActiveAlert = null; deleteFiles(fotos);
-                            }
-                        }
-                )
-                .setNegativeButton(R.string.btn_no,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(
-                                    final DialogInterface dialog,
-                                    final int id) {
-                                mActiveAlert = null;
-                                dialog.cancel();
-                            }
-                        }
-                );
-
-        final AlertDialog alert = builder.create();
-        mActiveAlert = alert;
-        alert.show();
         return true;
     }
 
-    private int deleteFiles(SelectedFotos fotos) {
-        String[] fileNames = fotos.getFileNames(mContext);
+    private int deleteFiles(SelectedFiles fotos) {
+        String[] fileNames = fotos.getFileNames();
         return super.deleteFiles(fileNames);
     }
 
+    @SuppressLint("ValidFragment")
     class MediaScannerDirectoryPickerFragment extends DirectoryPickerFragment {
         /** do not use activity callback */
         @Override protected void setDirectoryListener(Activity activity) {}
@@ -312,33 +353,39 @@ public class AndroidFileCommands extends FileCommands {
      * @param selectedItems
      * @param itemsPerProgress
      */
-    public int setGeo(double latitude, double longitude, SelectedFotos selectedItems, int itemsPerProgress) {
+    public int setGeo(double latitude, double longitude, SelectedFiles selectedItems, int itemsPerProgress) {
         if (!Double.isNaN(latitude) && !Double.isNaN(longitude) && (selectedItems != null) && (selectedItems.size() > 0)) {
             // in case that current activity is destroyed while running async, applicationContext will allow to finish database operation
-            Context applicationContext = this.mContext.getApplicationContext();
             int itemcount = 0;
             int countdown = 0;
-            String[] fileNames = selectedItems.getFileNames(this.mContext);
-            if (fileNames != null) {
-                File[] files = SelectedFotos.getFiles(fileNames);
+            File[] files = SelectedFiles.getFiles(selectedItems.getFileNames());
+            String errorMessage = checkWriteProtected(R.string.geo_edit_menu_title, files);
+
+            if (errorMessage != null) {
+                Toast.makeText(this.mContext, errorMessage, Toast.LENGTH_LONG).show();
+            } else if (files != null) {
+                Context applicationContext = this.mContext.getApplicationContext();
                 int maxCount = files.length+1;
                 openLogfile();
+                int resultFile = 0;
                 for (File file : files) {
                     countdown--;
                     if (countdown <= 0) {
                         countdown = itemsPerProgress;
                         onProgress(itemcount, maxCount);
                     }
-                    ExifGps.saveLatLon(file, latitude, longitude, mContext.getString(R.string.app_name), GuiUtil.getAppVersionName(mContext));
+                    if (ExifGps.saveLatLon(file, latitude, longitude, mContext.getString(R.string.app_name), GuiUtil.getAppVersionName(mContext))) {
+                        resultFile++;
+                    }
+                    itemcount++;
                     log("CALL setgps  ", getFilenameForLog(file),
                             " ", DirectoryFormatter.parseLatLon(latitude), " ", DirectoryFormatter.parseLatLon(longitude));
-                    itemcount++;
                 }
                 onProgress(itemcount, maxCount);
-                int result = FotoSql.execUpdateGeo(applicationContext, latitude, longitude, selectedItems);
+                int resultSql = FotoSql.execUpdateGeo(applicationContext, latitude, longitude, selectedItems);
                 closeLogFile();
                 onProgress(++itemcount, maxCount);
-                return result;
+                return Math.max(resultFile,resultSql);
             }
         }
         return 0;
@@ -348,16 +395,18 @@ public class AndroidFileCommands extends FileCommands {
     protected void onProgress(int itemcount, int size) {
     }
 
-    public AndroidFileCommands setContext(Activity mContext) {
+    public AndroidFileCommands setContext(Activity mContext, SelectedItems.Id2FileNameConverter id2FileNameConverter) {
         this.mContext = mContext;
         if (mContext != null) {
             closeLogFile();
         }
+        this.mId2FileNameConverter = id2FileNameConverter;
+
         return this;
     }
 
     public static AndroidFileCommands log(Activity context, Object... params) {
-        AndroidFileCommands cmd = new AndroidFileCommands().setContext(context);
+        AndroidFileCommands cmd = new AndroidFileCommands().setContext(context, null);
         cmd.setLogFilePath(cmd.getDefaultLogFile());
         cmd.openLogfile();
         cmd.log(params);
@@ -384,6 +433,17 @@ public class AndroidFileCommands extends FileCommands {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+
+        if (mContext != null) {
+            result.append(mContext).append("->");
+        }
+        result.append(mDebugPrefix);
+        return result.toString();
     }
 
 }

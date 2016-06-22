@@ -23,10 +23,12 @@ import android.content.Context;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Menu;
 
 import java.io.File;
 import java.util.Locale;
 
+import de.k3b.android.util.MenuUtils;
 import de.k3b.android.widget.LocalizedActivity;
 
 /**
@@ -64,6 +66,9 @@ public class Global {
     /** true update only if media scanner is not running. false=risky=always allow.  */
     public static final boolean mustCheckMediaScannerRunning = true;
 
+    /** true every time a .nomedia dir/file is opend remeove items from db.  */
+    public static final boolean mustRemoveNOMEDIAfromDB = true;
+
     /** defines the filesystem's directory where [Bookmark files](Bookmarks) are stored and loaded from. */
     public static File reportDir = new File(Environment.getExternalStorageDirectory(), "databases/sql");
     public static final String reportExt = ".query";
@@ -92,4 +97,20 @@ public class Global {
     }
 
     public static Locale systemLocale = Locale.getDefault();
+
+    public static void fixMenu(Context context, Menu menu) {
+        MenuUtils.mov2SubMenu(menu, context.getString(R.string.more_menu_title),
+                R.id.action_details,
+                R.id.action_slideshow,
+                // R.id.cmd_settings,
+                R.id.cmd_selection_add_all,
+                R.id.cmd_selection_remove_all,
+                R.id.cmd_about,
+                R.id.cmd_scan,
+                R.id.cmd_more,
+                R.id.cmd_show_geo_as
+        );
+    }
+
+
 }

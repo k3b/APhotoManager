@@ -19,7 +19,6 @@
 
 package de.k3b.android.util;
 
-import android.app.Activity;
 import android.media.ExifInterface;
 import android.util.Log;
 
@@ -45,46 +44,97 @@ public class ExifGps {
         sFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    public static void saveLatLon(File filePath, double latitude, double longitude, String appName, String appVersion) {
-        StringBuilder sb = (Global.debugEnabled) ? new StringBuilder("Set Exif ") : null;
-        try {
-            long lastModified = filePath.lastModified();
-            ExifInterface exif = new ExifInterface(filePath.getAbsolutePath());
-            exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE, convert(latitude));
-            exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, latitudeRef(latitude));
-            exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, convert(longitude));
-            exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, longitudeRef(longitude));
-            // exif.setAttribute(ExifInterface.TAG_GPS_ALTITUDE, convert(0));
-            // exif.setAttribute(ExifInterface.TAG_GPS_ALTITUDE_REF, longitudeRef(0));
+    private static StringBuilder debugExif(StringBuilder sb, String context, ExifInterface exif, File filePath) {
+        if (sb != null) {
+            sb.append("\n\t").append(context).append("\t: ");
 
-            if (sb != null) sb.append(ExifInterface.TAG_GPS_LATITUDE).append("=").append(latitude).append(" ")
-            .append(ExifInterface.TAG_GPS_LONGITUDE).append("=").append(longitude).append(" ");
-
-            // #29 set date if not in exif
-            if ((lastModified != 0) && (null == exif.getAttribute(ExifInterface.TAG_DATETIME))) {
-                final String exifDate = sFormatter.format(new Date(lastModified));
-                exif.setAttribute(ExifInterface.TAG_DATETIME, exifDate);
-                if (sb != null) sb.append(ExifInterface.TAG_DATETIME).append("=").append(exifDate).append(" ");
-            }
-            if ((appName != null) && (null == exif.getAttribute(ExifInterface.TAG_MAKE))) {
-                exif.setAttribute(ExifInterface.TAG_MAKE, appName);
-                if (sb != null) sb.append(ExifInterface.TAG_MAKE).append("=").append(appName).append(" ");
-            }
-            if ((appVersion != null) && (null == exif.getAttribute(ExifInterface.TAG_MODEL))) {
-                exif.setAttribute(ExifInterface.TAG_MODEL, appVersion);
-                if (sb != null) sb.append(ExifInterface.TAG_MODEL).append("=").append(appVersion).append(" ");
-            }
-            if (sb != null) {
-                Log.d(Global.LOG_CONTEXT, sb.toString());
+            if (exif != null) {
+                float[] latLong = new float[2];
+                if (exif.getLatLong(latLong)) {
+                    sb.append(ExifInterface.TAG_GPS_LATITUDE).append("=").append(latLong[0]).append(" ")
+                            .append(ExifInterface.TAG_GPS_LONGITUDE).append("='").append(latLong[1]).append("' ");
+                }
+                sb.append(ExifInterface.TAG_DATETIME).append("='").append(exif.getAttribute(ExifInterface.TAG_DATETIME)).append("' ");
+                sb.append(ExifInterface.TAG_MAKE).append("='").append(exif.getAttribute(ExifInterface.TAG_MAKE)).append("' ");
+                sb.append(ExifInterface.TAG_MODEL).append("='").append(exif.getAttribute(ExifInterface.TAG_MODEL)).append("' ");
             }
 
-            exif.saveAttributes();
-
-            // preseve file modification date
-            filePath.setLastModified(lastModified);
-        } catch (IOException e) {
-            e.printStackTrace();
+            if (filePath != null) {
+                sb.append("filedate='").append(sFormatter.format(new Date(filePath.lastModified()))).append("' ")
+                .append(filePath.canRead() ? "r":"-").append(filePath.canWrite() ? "w":"-").append(filePath.canExecute() ? "x":"-");
+            }
         }
+        return sb;
+    }
+
+    public static boolean saveLatLon(File filePath, double latitude, double longitude, String appName, String appVersion) {
+        StringBuilder sb = (Global.debugEnabled)
+                ? sb = createDebugStringBuilder(filePath)
+                : null;
+        if (filePath.canWrite()) {
+            ExifInterface exif = null;
+            try {
+                long lastModified = filePath.lastModified();
+                exif = new ExifInterface(filePath.getAbsolutePath());
+                debugExif(sb, "old", exif, filePath);
+
+                exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE, convert(latitude));
+                exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, latitudeRef(latitude));
+                exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, convert(longitude));
+                exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, longitudeRef(longitude));
+                // exif.setAttribute(ExifInterface.TAG_GPS_ALTITUDE, convert(0));
+                // exif.setAttribute(ExifInterface.TAG_GPS_ALTITUDE_REF, longitudeRef(0));
+
+                // #29 set data if not in exif: date, make model
+                if ((lastModified != 0) && (null == exif.getAttribute(ExifInterface.TAG_DATETIME))) {
+                    final String exifDate = sFormatter.format(new Date(lastModified));
+                    exif.setAttribute(ExifInterface.TAG_DATETIME, exifDate);
+                }
+
+                if ((appName != null) && (null == exif.getAttribute(ExifInterface.TAG_MAKE))) {
+                    exif.setAttribute(ExifInterface.TAG_MAKE, appName);
+                }
+
+                if ((appVersion != null) && (null == exif.getAttribute(ExifInterface.TAG_MODEL))) {
+                    exif.setAttribute(ExifInterface.TAG_MODEL, appVersion);
+                }
+                debugExif(sb, "assign ", exif, filePath);
+
+                exif.saveAttributes();
+
+                // preseve file modification date
+                filePath.setLastModified(lastModified);
+
+                if (sb != null) {
+                    exif = new ExifInterface(filePath.getAbsolutePath());
+                    debugExif(sb, "new ", exif, filePath);
+
+                    Log.d(Global.LOG_CONTEXT, sb.toString());
+                }
+                return true;
+            } catch (IOException e) {
+                if (sb == null) {
+                    sb = createDebugStringBuilder(filePath);
+                    debugExif(sb, "err content", exif, filePath);
+                }
+
+                sb.append("error='").append(e.getMessage()).append("' ");
+                Log.e(Global.LOG_CONTEXT, sb.toString(), e);
+                return false;
+            }
+        } else {
+            if (sb == null) {
+                sb = createDebugStringBuilder(filePath);
+            }
+
+            sb.append("error='file is write protected' ");
+            Log.e(Global.LOG_CONTEXT, sb.toString());
+            return false;
+        }
+    }
+
+    private static StringBuilder createDebugStringBuilder(File filePath) {
+        return new StringBuilder("Set Exif to file='").append(filePath.getAbsolutePath()).append("'\n\t");
     }
 
     /**
@@ -108,6 +158,7 @@ public class ExifGps {
     /**
      * convert latitude into DMS (degree minute second) format. For instance<br/>
      * -79.948862 becomes<br/>
+	 * -79 degrees, 56 minutes, 55903 millisecs (equals 55.903 seconds)
      *  79/1,56/1,55903/1000<br/>
      * It works for latitude and longitude<br/>
      * @param latitude could be longitude.
@@ -121,14 +172,14 @@ public class ExifGps {
         int minute = (int) latitude;
         latitude *= 60;
         latitude -= (minute * 60.0d);
-        int second = (int) (latitude*1000.0d);
+        int milliSecond = (int) (latitude*1000.0d);
 
         StringBuilder sb = new StringBuilder(20);
         sb.append(degree);
         sb.append("/1,");
         sb.append(minute);
         sb.append("/1,");
-        sb.append(second);
+        sb.append(milliSecond);
         sb.append("/1000,");
         return sb.toString();
     }

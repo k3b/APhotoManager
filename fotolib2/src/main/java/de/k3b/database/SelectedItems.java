@@ -19,6 +19,8 @@
 
 package de.k3b.database;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -26,15 +28,19 @@ import java.util.Set;
 
 /**
  * #1 Gallery-Multiselection
- * Container for selected items.
+ * Container for selected items via ImageID.
  *
  * Created by k3b on 01.08.2015.
  */
 public class SelectedItems extends java.util.TreeSet<Long> implements Set<Long> {
+    public interface Id2FileNameConverter {
+        /** converts items.id-s to string array of filenNames via media database. */
+        public String[] getFileNames(SelectedItems items);
+    }
 
     private static final String DELIMITER = ",";
 
-    /** converts this into komma seperated list */
+    /** converts this into komma seperated list of ID-s */
     public String toString() {
         StringBuilder result = new StringBuilder();
         boolean mustAddDelimiter = false;
@@ -49,7 +55,7 @@ public class SelectedItems extends java.util.TreeSet<Long> implements Set<Long> 
         return result.toString();
     }
 
-    /** converts this into komma seperated list */
+    /** add ids from komma seperated list to this. */
     public SelectedItems parse(String itemListAsString) {
 
         if ((itemListAsString != null) && (itemListAsString.length() > 0)) {
@@ -76,4 +82,13 @@ public class SelectedItems extends java.util.TreeSet<Long> implements Set<Long> 
             return true;
         }
     }
+
+    /** converts internal ID-list to string array of filenNames. */
+    public String[] getFileNames(Id2FileNameConverter id2FileNameConverter) {
+        if (!isEmpty()) {
+            return id2FileNameConverter.getFileNames(this);
+        }
+        return null;
+    }
+
 }

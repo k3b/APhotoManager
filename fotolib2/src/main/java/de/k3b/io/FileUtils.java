@@ -108,4 +108,16 @@ public class FileUtils {
             return errorValue;
         }
 	}
+
+    public static String getDebugString(String prefix, File file) {
+        StringBuffer result = new StringBuffer();
+        result.append(prefix)
+                .append(" dir ").append(file.isDirectory())
+                .append(", hid ").append(file.isHidden())
+                .append(", write ").append(file.canWrite())
+                .append(" syml ").append(FileUtils.isSymlinkDir(file,true))
+                .append(" : ").append(file.getAbsolutePath()
+        );
+        return result.toString();
+    }
 }

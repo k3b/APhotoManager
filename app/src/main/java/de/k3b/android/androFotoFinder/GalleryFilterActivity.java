@@ -60,7 +60,7 @@ import de.k3b.io.IGeoRectangle;
  * Defines a gui for global foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.
  */
 public class GalleryFilterActivity extends LocalizedActivity implements Common, DirectoryPickerFragment.OnDirectoryInteractionListener, LocationMapFragment.OnDirectoryInteractionListener {
-    private static final String debugPrefix = "GalF-";
+    private static final String mDebugPrefix = "GalF-";
 
     public static final int resultID = 522;
     private static final String DLG_NAVIGATOR_TAG = "GalleryFilterActivity";
@@ -107,8 +107,12 @@ public class GalleryFilterActivity extends LocalizedActivity implements Common, 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Global.debugMemory(debugPrefix, "onCreate");
+        Global.debugMemory(mDebugPrefix, "onCreate");
         super.onCreate(savedInstanceState);
+        final Intent intent = getIntent();
+        if (Global.debugEnabled && (intent != null)){
+            Log.d(Global.LOG_CONTEXT, mDebugPrefix + "onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
+        }
         setContentView(R.layout.activity_gallery_filter);
         this.mAsFilter = new AsFilter();
         onCreateButtos();
@@ -224,14 +228,14 @@ public class GalleryFilterActivity extends LocalizedActivity implements Common, 
 
     @Override
     protected void onPause () {
-        Global.debugMemory(debugPrefix, "onPause");
+        Global.debugMemory(mDebugPrefix, "onPause");
         saveLastFilter();
         super.onPause();
     }
 
     @Override
     protected void onResume () {
-        Global.debugMemory(debugPrefix, "onResume");
+        Global.debugMemory(mDebugPrefix, "onResume");
         loadLastFilter();
         super.onResume();
     }
@@ -266,7 +270,7 @@ public class GalleryFilterActivity extends LocalizedActivity implements Common, 
 
     @Override
     protected void onDestroy() {
-        Global.debugMemory(debugPrefix, "onDestroy start");
+        Global.debugMemory(mDebugPrefix, "onDestroy start");
         super.onDestroy();
 
         if (dirInfos != null)
@@ -281,7 +285,7 @@ public class GalleryFilterActivity extends LocalizedActivity implements Common, 
         }
 
         System.gc();
-        Global.debugMemory(debugPrefix, "onDestroy end");
+        Global.debugMemory(mDebugPrefix, "onDestroy end");
         // RefWatcher refWatcher = AndroFotoFinderApp.getRefWatcher(this);
         // refWatcher.watch(this);
     }
@@ -495,7 +499,7 @@ public class GalleryFilterActivity extends LocalizedActivity implements Common, 
         if (fromGui(mFilter)) {
             IDirectory directoryRoot = getOrCreateDirInfo(currentDirContentQuery.getID()).directoryRoot;
             if (directoryRoot == null) {
-                DirectoryLoaderTask loader = new DirectoryLoaderTask(this, debugPrefix) {
+                DirectoryLoaderTask loader = new DirectoryLoaderTask(this, mDebugPrefix) {
                     @Override
                     protected void onPostExecute(IDirectory directoryRoot) {
                         onDirectoryDataLoadComplete(directoryRoot, currentDirContentQuery.getID());
@@ -510,7 +514,7 @@ public class GalleryFilterActivity extends LocalizedActivity implements Common, 
 
     private void onDirectoryDataLoadComplete(IDirectory directoryRoot, int queryId) {
         if (directoryRoot != null) {
-            Global.debugMemory(debugPrefix, "onDirectoryDataLoadComplete");
+            Global.debugMemory(mDebugPrefix, "onDirectoryDataLoadComplete");
 
             DirInfo dirInfo = getOrCreateDirInfo(queryId);
             dirInfo.directoryRoot = directoryRoot;

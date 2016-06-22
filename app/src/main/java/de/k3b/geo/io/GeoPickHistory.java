@@ -42,8 +42,10 @@ public class GeoPickHistory extends GeoFileRepository<GeoPointDto> {
         mMaxSize = maxSize;
     }
 
-    /** remove all items where id or lat+lon are the same */
-    public void remove(Long id, double latitude, double longitude) {
+    /** remove all items where id or lat+lon are the same.
+     * Returns id of deleted item if exist else null */
+    public String remove(Long id, double latitude, double longitude) {
+        String resultKey = null;
         if (mData != null) {
             final String key = (id == null) ? null : id.toString();
             for (int i = mData.size() -1; i >= 0; i-- ) {
@@ -52,16 +54,26 @@ public class GeoPickHistory extends GeoFileRepository<GeoPointDto> {
                     || ((latitude == item.getLatitude()) && (longitude == item.getLongitude()))
                     || ((key != null) && key.compareTo(item.getId()) == 0)) {
                     mData.remove(i);
+
+                    if ((item != null) && (item.getId() != null)) {
+                        resultKey = item.getId();
+                    }
                 }
             }
         }
+        return resultKey;
     }
 
     /** remember a pick history */
     public GeoPickHistory add(Long id, double latitude, double longitude) {
-        remove(id, latitude, longitude);
         if (mData == null) mData = new ArrayList<GeoPointDto>();
-        mData.add(new GeoPointDto().setId((id == null) ? null : id.toString()).setLatitude(latitude).setLongitude(longitude));
+
+        // inherit id from deleted item if not overwritten.
+        String idAsString = remove(id, latitude, longitude);
+
+        if (id != null) idAsString = id.toString();
+
+        mData.add(new GeoPointDto().setId(idAsString).setLatitude(latitude).setLongitude(longitude));
         while(mData.size() > mMaxSize) mData.remove(0);
         return this;
     }

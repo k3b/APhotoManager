@@ -48,6 +48,11 @@ public class SettingsActivity extends PreferenceActivity {
     protected void onCreate(final Bundle savedInstanceState) {
         LocalizedActivity.fixLocale(this);
         super.onCreate(savedInstanceState);
+        final Intent intent = getIntent();
+        if (Global.debugEnabled && (intent != null)){
+            Log.d(Global.LOG_CONTEXT, "SettingsActivity onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
+        }
+
         this.addPreferencesFromResource(R.xml.preferences);
         prefsInstance = PreferenceManager
                 .getDefaultSharedPreferences(this);
@@ -133,7 +138,7 @@ public class SettingsActivity extends PreferenceActivity {
         // one setting for several 3d party debug-flags
         PhotoViewAttacher.DEBUG                 = getPref(prefs, "debugEnableLibs", PhotoViewAttacher.DEBUG);
         HugeImageLoader.DEBUG                   = PhotoViewAttacher.DEBUG;
-        LogManager.enableDebug(PhotoViewAttacher.DEBUG);
+        LogManager.setDebugEnabled(PhotoViewAttacher.DEBUG);
 
         Global.clearSelectionAfterCommand       = getPref(prefs, "clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
 

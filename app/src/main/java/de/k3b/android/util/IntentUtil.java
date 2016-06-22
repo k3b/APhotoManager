@@ -19,14 +19,19 @@
  
 package de.k3b.android.util;
 
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
+import android.widget.Toast;
 
 import java.io.File;
 
 import de.k3b.android.androFotoFinder.Common;
+import de.k3b.android.androFotoFinder.Global;
 
 /**
  * Created by k3b on 09.09.2015.
@@ -61,5 +66,53 @@ public class IntentUtil implements Common {
     public static boolean isFileUri(Uri uri) {
         return (uri != null) && ("file".equals(uri.getScheme()));
     }
+
+    public static boolean isFileUri(String initalFileUrl) {
+        return ((initalFileUrl != null) && ((initalFileUrl.indexOf(":") == -1)
+                || (initalFileUrl.startsWith("file:"))));
+    }
+
+    private static String getMime(String path) {
+        return "image/*";
+        /*
+        MimeTypeMap map = MimeTypeMap.getSingleton();
+        return map.getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(path));
+        */
+    }
+
+    public static void cmdStartIntent(Activity parent, String currentFilePath, String currentUri, String extraPath, String action, int idChooserCaption, int idEditError) {
+
+        final Intent outIntent = new Intent()
+                .setAction(action)
+                // .putExtra(Intent.EXTRA_STREAM, uri)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        if (currentFilePath != null) {
+            File file = new File(currentFilePath);
+            final Uri uri = Uri.fromFile(file);
+            outIntent.setDataAndType(uri, IntentUtil.getMime(currentFilePath));
+        } else if (currentUri != null) {
+            outIntent.setData(Uri.parse(currentUri));
+        }
+
+        if (extraPath != null) {
+            File file = new File(extraPath);
+            final Uri uri = Uri.fromFile(file);
+            outIntent.setType(IntentUtil.getMime(extraPath));
+            outIntent.putExtra(EXTRA_STREAM, uri);
+        }
+        if (Global.debugEnabled) {
+            Log.d(Global.LOG_CONTEXT,
+                    "cmdStartIntent(" + outIntent.toUri(Intent.URI_INTENT_SCHEME) + "')");
+        }
+
+        try {
+            parent.startActivity(Intent.createChooser(outIntent, parent.getText(idChooserCaption)));
+        } catch (ActivityNotFoundException ex) {
+            Toast.makeText(parent, idEditError,Toast.LENGTH_LONG).show();
+        }
+    }
+
 
 }

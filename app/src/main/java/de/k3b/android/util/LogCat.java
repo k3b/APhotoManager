@@ -25,6 +25,11 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import de.k3b.android.androFotoFinder.Global;
 
@@ -38,7 +43,13 @@ public class LogCat implements Thread.UncaughtExceptionHandler {
     private final Context mAppContext;
     private final String[] mTags;
 
+    // Datetime as part of the crash-log-filename
+    // inspired by http://stackoverflow.com/questions/36617172/android-mediascanner-in-uncaughtexceptionhandler-not-scanning-file
+    private static DateFormat fmtDateTime2String = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.ROOT);
+
     public LogCat(Context appContext, String... tags) {
+        fmtDateTime2String.setTimeZone(TimeZone.getTimeZone("UTC"));
+
         mAppContext = appContext;
         this.mTags = tags;
         mPreviousUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
@@ -51,7 +62,13 @@ public class LogCat implements Thread.UncaughtExceptionHandler {
 
     private static void saveToFile(Context context, String... tags) {
         File logDirectory = Global.logCatDir;
-        File logFile = (logDirectory == null) ? null : new File(logDirectory, "androFotofinder.logcat" + System.currentTimeMillis() + ".txt");
+
+        // Datetime as part of the crash-log-filename
+        // i.e. /mnt/sdcard/copy/log/androFotofinder.logcat-20160509-195217.txt
+        File logFile = (logDirectory == null) ? null : new File(logDirectory,
+                            "androFotofinder.logcat-"
+                                    + fmtDateTime2String.format(new Date(System.currentTimeMillis()))
+                                    + ".txt");
         String message = (logFile != null)
                 ? "saving errorlog ('LocCat') to " + logFile.getAbsolutePath()
                 : "Saving errorlog ('LocCat') is disabled. See Settings 'Diagnostics' for details";

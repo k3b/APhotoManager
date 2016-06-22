@@ -77,5 +77,10 @@
         android:visible="true"
         android:orderInCategory="10000"
         android:showAsAction="never" />
+    <item android:id="@+id/cmd_more"
+        android:title="@string/more_menu_title"
+        android:visible="true"
+        android:orderInCategory="32700"
+        android:showAsAction="never" />
 
 </menu>

@@ -21,7 +21,6 @@ package de.k3b.android.androFotoFinder.locationmap;
 
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -45,6 +44,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.LocalizedActivity;
+import de.k3b.database.SelectedFiles;
 import de.k3b.database.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
@@ -53,7 +53,7 @@ import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 
 public class MapGeoPickerActivity extends LocalizedActivity implements Common {
-    private static final String debugPrefix = "GalM-";
+    private static final String mDebugPrefix = "GalM-";
     private static final String STATE_Filter = "filterMap";
     private static final String STATE_LAST_GEO = "geoLastView";
 
@@ -66,15 +66,16 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
     private GalleryFilterParameter mFilter;
     private GeoUri mGeoUriParser = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
 
-    public static void showActivity(Activity context, SelectedItems selectedItems) {
+    public static void showActivity(Activity context, SelectedFiles selectedItems) {
         Uri initalUri = null;
         final Intent intent = new Intent().setClass(context,
                 MapGeoPickerActivity.class);
 
         if ((selectedItems != null) && (selectedItems.size() > 0)) {
-            intent.putExtra(EXTRA_SELECTED_ITEMS, selectedItems.toString());
+            intent.putExtra(EXTRA_SELECTED_ITEM_PATHS, selectedItems.toString());
+            intent.putExtra(EXTRA_SELECTED_ITEM_IDS, selectedItems.toIdString());
 
-            IGeoPoint initialPoint = FotoSql.execGetPosition(context, selectedItems.first().intValue());
+            IGeoPoint initialPoint = FotoSql.execGetPosition(context, null, selectedItems.getId(0));
             if (initialPoint != null) {
                 GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
 
@@ -102,6 +103,9 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         Intent intent = this.getIntent();
+        if (Global.debugEnabled && (intent != null)){
+            Log.d(Global.LOG_CONTEXT, mDebugPrefix + "onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
+        }
 
         GeoPointDto geoPointFromIntent = getGeoPointDtoFromIntent(intent);
         // no geo: from intent: use last used value
@@ -147,8 +151,8 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
             rectangle.setLogituedMax(initalZoom.getLongitude()).setLatitudeMax(initalZoom.getLatitude());
         } // else (savedInstanceState != null) restore after rotation. fragment takes care of restoring map pos
 
-        String selectedItemsString = intent.getStringExtra(EXTRA_SELECTED_ITEMS);
-        SelectedItems selectedItems = (selectedItemsString != null) ? new SelectedItems().parse(selectedItemsString) : null;
+        String selectedIDsString = intent.getStringExtra(EXTRA_SELECTED_ITEM_IDS);
+        SelectedItems selectedItems = (selectedIDsString != null) ? new SelectedItems().parse(selectedIDsString) : null;
 
         String filter = null;
         // for debugging: where does the filter come from
@@ -174,7 +178,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
         }
 
         if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, debugPrefix + dbgFilter + " => " + this.mFilter);
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + dbgFilter + " => " + this.mFilter);
         }
 
         mMap.defineNavigation(this.mFilter, geoPointFromIntent, rectangle, zoom, selectedItems);

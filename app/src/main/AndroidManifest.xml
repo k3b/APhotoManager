@@ -74,6 +74,7 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+			
         </activity>
         <activity android:name=".imagedetail.ImageDetailActivityViewPager"
             android:ellipsize="middle"  android:label="@string/app_image_viewer_title">
@@ -81,6 +82,11 @@
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SENDTO" />
+				
+				<!-- 
+				OpenCamera AlmalenceGUI.openExternalGallery() uses undocumented action="com.android.camera.action.REVIEW" which in my android-4.2.2 opens the gallery in swipe mode.
+				-->
+                <action android:name="com.android.camera.action.REVIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -94,6 +100,10 @@
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SENDTO" />
                 <action android:name="android.intent.action.VIEW" />
+				<!-- 
+				OpenCamera AlmalenceGUI.openExternalGallery() uses undocumented action="com.android.camera.action.REVIEW" which in my android-4.2.2 opens the gallery in swipe mode.
+				-->
+                <action android:name="com.android.camera.action.REVIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />

@@ -1,0 +1,17 @@
+# travis build for APhotoManager
+language: android
+android:
+  components:
+    # https://github.com/travis-ci/travis-ci/issues/5036
+    - tools
+    - build-tools-23.0.2
+    - android-21
+    - add-on
+    - extra
+
+before_install:
+# http://stackoverflow.com/questions/33820638/travis-yml-gradlew-permission-denied
+ - chmod +x gradlew
+ 
+script:
+  - ./gradlew assemble

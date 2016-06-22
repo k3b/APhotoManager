@@ -38,7 +38,9 @@ public interface Common {
      * Format:SelectedItems.toString/parseMultiple: id,id,id,....
      * See https://github.com/k3b/AndroFotoFinder/wiki/intentapi#SelectedItems
      */
-    static final String EXTRA_SELECTED_ITEMS = "de.k3b.extra.SELECTED_ITEMS";
+    static final String EXTRA_SELECTED_ITEM_IDS = "de.k3b.extra.SELECTED_ITEMS";
+
+    static final String EXTRA_SELECTED_ITEM_PATHS = "de.k3b.extra.SELECTED_ITEMS_PATH";
 
     /** detail,gallery:  sql where ... order by ... group by ... */
     public static final String EXTRA_QUERY = "de.k3b.extra.SQL";

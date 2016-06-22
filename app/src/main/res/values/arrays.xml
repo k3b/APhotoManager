@@ -16,7 +16,10 @@
         <item>en english</item>
         <item>es spanish Espanol</item>
         <item>fr french Français</item>
+        <item>it italian Italiano</item>
         <item>ja japanese 日本人</item>
+        <item>nl dutch Nederlands</item>
+        <item>pt-BR brasilian</item>
         <item>ro romanian Român</item>
     </string-array>
     <string-array name="pref_locale_values" translatable="false">
@@ -25,7 +28,10 @@
         <item>en</item>
         <item>es</item>
         <item>fr</item>
+        <item>it</item>
         <item>ja</item>
+        <item>nl</item>
+        <item>pt-BR</item>
         <item>ro</item>
     </string-array>
 </resources>

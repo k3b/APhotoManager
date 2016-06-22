@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+/* string values containing translatable HTML pages
+ * Translation to German and Copyright (c) 2015-2016 by k3b and v133.
+ *
+ * This file is part of "A Photo Manager" (A(ndro)FotoFinder).
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
+ -->
+<resources>
+  <string name="about_content_about"><![CDATA["
+<h1>A Photo Manager</h1>mit &#39;A Photo Map&#39; und &#39;AndroFotoFinder&#39;
+  <br />Merkmale:
+  <ul>
+    <li>verwaltet große Bildersammlungen (15000+ Bilder in 1000+ Ordnern)</li>
+    <li>verwendet Androids interne Mediendatenbank. Kein initialer Bild-Scan notwendig.</li>
+    <li>
+    <a href="https://github.com/k3b/APhotoManager/wiki/Filter-View">Bilder finden</a>, per
+    <ul>
+      <li>Ordner (mit hirachischer
+      <a href="https://github.com/k3b/APhotoManager/wiki/Folder-Picker">Ordnerauswahl</a>)</li>
+      <li>Ordner/Dateinamen mit Platzhaltern</li>
+      <li>Datum</li>
+      <li>Gebiet auf einer
+      <a href="https://github.com/k3b/APhotoManager/wiki/geographic-map">Landkarte</a> (für Bilder mit Gps-Exif-Infos)</li>
+    </ul></li>
+    <li>Ergebnisanzeige in
+    <a href="https://github.com/k3b/APhotoManager/wiki/Gallery-View">Galerie-Ansicht</a>
+    <ul>
+      <li>Unterstützung für Mehrfach-Auswahl</li>
+      <li>Dateiverarbeitung zum Kopieren, Verschieben, Löschen, Senden, Exif-Geo Ändern</li>
+    </ul></li>
+    <li>
+    <a href="https://github.com/k3b/APhotoManager/wiki/Image-View">Foto-Ansicht</a> mit
+    <ul>
+      <li>stufenloser Vergrößerung (Zoom)</li>
+      <li>links/rechts wischen für nächstes/vorheriges Bild</li>
+      <li>Anzeige für erweiterte Bildinformationen (Exif, IPTC, XMP, ICC)</li>
+      <li>zum Kopieren, Verschieben, Löschen, Umbenennen, Teilen/Senden von Bildern, Exif-Geo Ändern</li>
+    </ul></li>
+    <li>Die
+    <a href="https://github.com/k3b/APhotoManager/wiki/geographic-map">geografische Karte</a> zeigt Marker an den Orten, an denen
+    Fotos aufgenommen wurden</li>
+    <li>Alle Dateioperationen
+    <ul>
+      <li>aktualisieren auch die Android-Mediendatenbank</li>
+      <li>erhalten das Dateidatum (falls Android dies unterstützt)</li>
+      <li>aktualisiert auch Xmp-Filialdateien</li>
+    </ul></li>
+    <li>App und Internet-Homepage sind in diesen Sprachen verfügbar:
+    <ul>
+      <li>
+      <a href="https://github.com/k3b/APhotoManager/wiki/de-home">de</a>,&nbsp;
+      <a href="https://github.com/k3b/APhotoManager/wiki/home">en</a>,&nbsp;
+      <a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr</a>,&nbsp;
+	  <a href="https://github.com/k3b/APhotoManager/wiki/it-home">it</a>,&nbsp;
+      <a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja</a>,&nbsp;
+      <a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro</a></li>
+      <li>
+        <a href="https://github.com/k3b/APhotoManager/issues/21">Help us to translate into other languages.</a>
+      </li>
+    </ul></li>
+  </ul>
+  <br />
+  "]]></string>
+</resources>
