@@ -4,8 +4,10 @@ App and internet homepage available in these languages:<ul>
 		<li>
 <a href="https://github.com/k3b/APhotoManager/wiki/de-home">de<img alt="Homepage de" src="https://github.com/k3b/APhotoManager/blob/FDroid/wiki/png/lan_de.png"></img></a>,&nbsp;
 <a href="https://github.com/k3b/APhotoManager/wiki/home"   >en<img alt="Homepage en" src="https://github.com/k3b/APhotoManager/blob/FDroid/wiki/png/lan_en.png"></img></a>,&nbsp;
+<a href="https://github.com/k3b/APhotoManager/wiki/it-home">it<img alt="Homepage it" src="https://github.com/k3b/APhotoManager/blob/FDroid/wiki/png/lan_it.png"></img></a>,&nbsp;
 <a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr<img alt="Homepage fr" src="https://github.com/k3b/APhotoManager/blob/FDroid/wiki/png/lan_fr.png"></img></a>,&nbsp;
 <a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja<img alt="Homepage ja" src="https://github.com/k3b/APhotoManager/blob/FDroid/wiki/png/lan_ja.png"></img></a>,&nbsp;
+nl,&nbsp;
 <a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro<img alt="Homepage ro" src="https://github.com/k3b/APhotoManager/blob/FDroid/wiki/png/lan_ro.png"></img></a>
 		<li><a href="https://github.com/k3b/APhotoManager/issues/21">Help us to translate into other languages.</a></li>
 		</ul>
