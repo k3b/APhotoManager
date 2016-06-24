@@ -63,6 +63,8 @@ import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -273,9 +275,21 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(this.mContextMenue, popup.getMenu());
         mPopUpSelection = selection;
+
+        if (getTumbDir(selection) != null) {
+            MenuItem thumbMenue = popup.getMenu().findItem(R.id.action_repair_thumbnails);
+            if (thumbMenue != null) thumbMenue.setVisible(true);
+        }
         popup.show();
     }
 
+    private static File getTumbDir(IDirectory selection) {
+        if (selection != null) {
+            File thumbsDir = new File(selection.getAbsolute(),FotoThumbSql.THUMBNAIL_DIR_NAME);
+            if (thumbsDir.exists()) return thumbsDir;
+        }
+        return null;
+    }
     private IDirectory mPopUpSelection = null;
     private final PopupMenu.OnMenuItemClickListener popUpListener = new PopupMenu.OnMenuItemClickListener() {
         @Override
@@ -292,6 +306,8 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                 return showGallery(mPopUpSelection);
             case R.id.action_details:
                 return showDirInfo(mPopUpSelection);
+            case R.id.action_repair_thumbnails:
+                return showRepair(mPopUpSelection);
         }
         return false;
     }
@@ -354,14 +370,34 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         }
     }
 
+    private boolean showRepair(IDirectory selectedDir) {
+        File tbumbNailDir = getTumbDir(selectedDir);
+        if (tbumbNailDir != null) {
+            int thumbRecordsWithoutParentImage = FotoThumbSql.repairDeleteOrphanThumbRecords(this.getActivity());
+            ArrayList<Long> dbIds4Delete = new ArrayList<Long>();
+            ArrayList<String> files4Delete = new ArrayList<String>();
+
+            FotoThumbSql.repairDeleteOrphanThumbFiles(this.getActivity(), tbumbNailDir, dbIds4Delete, files4Delete);
+            int thumbRecordsWithoutFile = FotoThumbSql.deleteThumbRecords(this.getActivity(), dbIds4Delete);
+            int thumbFileWithoutRecord = FotoThumbSql.deleteThumbFiles(tbumbNailDir, files4Delete);
+            return true;
+        }
+        return false;
+    }
+
     private boolean showDirInfo(IDirectory selectedDir) {
         String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
         if (pathFilter != null) {
-            ImageDetailDialogBuilder.createImageDetailDialog(
-                    this.getActivity(),
-                    pathFilter,
-                    FotoThumbSql.formatDirStatistic(this.getActivity(), pathFilter)
-            ).show();
+
+            if (Global.useThumbApi) {
+                // #53
+            } else {
+                ImageDetailDialogBuilder.createImageDetailDialog(
+                        this.getActivity(),
+                        pathFilter,
+                        FotoThumbSql.formatDirStatistic(this.getActivity(), pathFilter)
+                ).show();
+            }
             return true;
         }
         return false;

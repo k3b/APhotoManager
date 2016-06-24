@@ -108,6 +108,7 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putBoolean("debugEnableLibs", PhotoViewAttacher.DEBUG);
 
         prefs.putBoolean("clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
+        prefs.putBoolean("useThumbApi", Global.useThumbApi);
 
         prefs.putString("maxSelectionMarkersInMap", "" + Global.maxSelectionMarkersInMap);
         prefs.putString("slideshowIntervalInMilliSecs", "" + Global.slideshowIntervalInMilliSecs);
@@ -141,6 +142,8 @@ public class SettingsActivity extends PreferenceActivity {
         LogManager.setDebugEnabled(PhotoViewAttacher.DEBUG);
 
         Global.clearSelectionAfterCommand       = getPref(prefs, "clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
+        Global.useThumbApi       = getPref(prefs, "useThumbApi", Global.useThumbApi);
+
 
         Global.maxSelectionMarkersInMap         = getPref(prefs, "maxSelectionMarkersInMap"     , Global.maxSelectionMarkersInMap);
         Global.slideshowIntervalInMilliSecs = getPref(prefs, "slideshowIntervalInMilliSecs", Global.slideshowIntervalInMilliSecs);

@@ -63,10 +63,13 @@ public class Global {
     public static boolean clearSelectionAfterCommand = false;
 
     /** true update only if media scanner is not running. false=risky=always allow.  */
-    public static final boolean mustCheckMediaScannerRunning = true;
+    public static boolean mustCheckMediaScannerRunning = true;
 
     /** true every time a .nomedia dir/file is opend remeove items from db.  */
     public static final boolean mustRemoveNOMEDIAfromDB = true;
+
+    /** true: show gui to manipulate thumbNails.  */
+    public static boolean useThumbApi = false;
 
     /** defines the filesystem's directory where [Bookmark files](Bookmarks) are stored and loaded from. */
     public static File reportDir = new File(Environment.getExternalStorageDirectory(), "databases/sql");
@@ -97,6 +100,7 @@ public class Global {
 
     public static Locale systemLocale = Locale.getDefault();
 
+    /** move some pre-defined menu-actions into the "more..." submenue */
     public static void fixMenu(Context context, Menu menu) {
         MenuUtils.mov2SubMenu(menu, context.getString(R.string.more_menu_title),
                 R.id.action_details,
@@ -110,6 +114,5 @@ public class Global {
                 R.id.cmd_show_geo_as
         );
     }
-
 
 }

@@ -30,5 +30,7 @@
     <item android:id="@+id/action_details" android:title="@string/details_menu_title"
         android:icon="@android:drawable/ic_menu_preferences"
         android:orderInCategory="900" android:showAsAction="ifRoom" />
+    <item android:id="@+id/action_repair_thumbnails" android:title="@string/repair_thumbnails_title"
+        android:orderInCategory="700" android:visible="false" android:showAsAction="never" />
 
 </menu>

@@ -42,9 +42,13 @@ public class SelectedItems extends java.util.TreeSet<Long> implements Set<Long> 
 
     /** converts this into komma seperated list of ID-s */
     public String toString() {
+        Iterator<Long> iter = this.iterator();
+        return toString(iter);
+    }
+
+    public static <T> String toString(Iterator<T> iter) {
         StringBuilder result = new StringBuilder();
         boolean mustAddDelimiter = false;
-        Iterator<Long> iter = this.iterator();
         while(iter.hasNext()) {
             if (mustAddDelimiter) {
                 result.append(DELIMITER);

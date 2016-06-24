@@ -18,6 +18,13 @@
             android:defaultValue="true"
             android:title="@string/settings_multisel_clear_title"
             android:summary="@string/settings_multisel_clear_summary" />
+
+        <CheckBoxPreference android:key="useThumbApi"
+            android:defaultValue="true"
+            android:title="@string/settings_use_thumb_api_title"
+            android:summary="@string/settings_use_thumb_api_summary" />
+
+
         <de.k3b.android.widgets.EditTextPreferenceWithSummary
             android:key="maxSelectionMarkersInMap"
             android:title="@string/settings_map_selmarker_max_title" />
