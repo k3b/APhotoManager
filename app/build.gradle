@@ -2,8 +2,10 @@ apply plugin: 'com.android.application'
 apply plugin: 'maven'
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion '23.0.2'
+    // appXXX are defined in gradle.properties
+    compileSdkVersion = Integer.valueOf(appCompileSdkVersion)
+    buildToolsVersion = appBuildToolsVersion
+
     defaultConfig {
         // fdroid-release 'de.k3b.android.androFotoFinder'
         // main-develop-branch 'de.k3b.android.androFotoFinderDev'
@@ -11,8 +13,14 @@ android {
 		
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 15
-        versionName "0.5.0.160623"
+
+        // appXXX are defined in gradle.properties
+        versionCode = Long.valueOf(appVersionCode)
+        versionName = appVersionName
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
     }
     buildTypes {
         release {
