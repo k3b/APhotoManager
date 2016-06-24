@@ -1,15 +1,23 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion "23.0.2"
+    // appXXX are defined in gradle.properties
+    compileSdkVersion = Integer.valueOf(appCompileSdkVersion)
+    buildToolsVersion = appBuildToolsVersion
 
     defaultConfig {
         applicationId "de.k3b.android.androFotoFinder.testgui"
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 6
-        versionName "0.4.1.150930"
+
+        // appXXX are defined in gradle.properties
+        versionCode = Long.valueOf(appVersionCode)
+        versionName = appVersionName
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
     }
 
     buildTypes {

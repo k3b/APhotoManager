@@ -39,10 +39,6 @@ import android.widget.Toast;
 
 // import com.squareup.leakcanary.RefWatcher;
 
-import org.apache.http.client.utils.URIUtils;
-
-import java.io.File;
-
 import de.k3b.android.androFotoFinder.directory.DirectoryGui;
 import de.k3b.android.androFotoFinder.directory.DirectoryLoaderTask;
 import de.k3b.android.androFotoFinder.gallery.cursor.GalleryCursorFragment;

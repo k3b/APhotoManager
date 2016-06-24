@@ -7,13 +7,20 @@ dependencies {
 }
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion '23.0.2'
+    // appXXX are defined in gradle.properties
+    compileSdkVersion = Integer.valueOf(appCompileSdkVersion)
+    buildToolsVersion = appBuildToolsVersion
 
     defaultConfig {
         minSdkVersion 4
         targetSdkVersion 21
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
 }
 
 // apply from: '../maven_push.gradle'
