@@ -4,8 +4,11 @@ android:
   components:
     # https://github.com/travis-ci/travis-ci/issues/5036
     - tools
+
+    # values in gradle.properties and .travis must be the same
     - build-tools-23.0.2
-    - android-21
+    - android-23
+
     - add-on
     - extra
 
