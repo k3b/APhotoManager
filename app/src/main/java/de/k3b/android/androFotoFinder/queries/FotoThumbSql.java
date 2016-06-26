@@ -117,14 +117,20 @@ public class FotoThumbSql {
                     Log.i(Global.LOG_CONTEXT, mDebugPrefix + "getStatistic " + c.getCount() +
                             "\n\t" + query.toSqlString());
                 }
-                boolean hasKind = c.getColumnCount() > 2;
-                while (c.moveToNext()) {
-                    countThumbInternal = c.getLong(0);
-                    sizeKBThumbInternal = (factor * c.getLong(1)) /  1048576; // 1MB= 1048576 Bytes. https://en.wikipedia.org/wiki/Megabyte
-                    kind = (hasKind) ? c.getLong(2) : 0;
 
-					result.append(String.format(format, type, path,countThumbInternal,sizeKBThumbInternal, kind));
-					
+                if (c.getCount() > 0) {
+                    boolean hasKind = c.getColumnCount() > 2;
+                    while (c.moveToNext()) {
+                        countThumbInternal = c.getLong(0);
+                        sizeKBThumbInternal = (factor * c.getLong(1)) / 1048576; // 1MB= 1048576 Bytes. https://en.wikipedia.org/wiki/Megabyte
+                        kind = (hasKind) ? c.getLong(2) : 0;
+
+                        result.append(String.format(format, type, path, countThumbInternal, sizeKBThumbInternal, kind));
+
+                    }
+                } else {
+                    result.append(String.format(format, type, path, countThumbInternal, sizeKBThumbInternal, kind));
+
                 }
             } catch (Exception ex) {
                 Log.e(Global.LOG_CONTEXT, mDebugPrefix + "getStatistic() : error executing " + query, ex);
