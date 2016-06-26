@@ -47,9 +47,13 @@ public class SelectedItems extends java.util.TreeSet<Long> implements Set<Long> 
     }
 
     public static <T> String toString(Iterator<T> iter) {
+        return toString(iter, 32767);
+    }
+
+    public static <T> String toString(Iterator<T> iter, int intMaxCount) {
         StringBuilder result = new StringBuilder();
         boolean mustAddDelimiter = false;
-        while(iter.hasNext()) {
+        while(iter.hasNext() && (--intMaxCount >= 0)) {
             if (mustAddDelimiter) {
                 result.append(DELIMITER);
             }

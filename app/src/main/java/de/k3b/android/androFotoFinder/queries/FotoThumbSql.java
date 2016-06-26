@@ -11,18 +11,21 @@ import android.util.Log;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
+import de.k3b.IBackgroundProcess;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.OsUtils;
 import de.k3b.database.QueryParameter;
-import de.k3b.database.SelectedFiles;
 import de.k3b.database.SelectedItems;
 
 /**
  * Created by k3b on 21.06.2016.
  */
 public class FotoThumbSql {
+    private static String mDebugPrefix = "FotoThumbSql ";
     public static final Uri SQL_TABLE_EXTERNAL_CONTENT_URI = MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI;
 
     // columns that must be avaulable in the Cursor
@@ -39,6 +42,7 @@ public class FotoThumbSql {
     static final String WHERE_THUMB_IS_ORPHAN = SQL_COL_IMAGE_ID + " not in (SELECT " + FotoSql.SQL_COL_PK +
             " from " + TABLE_IMAGES + ")";
     public static final String THUMBNAIL_DIR_NAME = ".thumbnails";
+    private static final int CHUNK_SIZE = 100;
 
     public static QueryParameter getQueryThumbSizeByPath(String imagePath, String thumpPath) {
 
@@ -88,71 +92,9 @@ public class FotoThumbSql {
                 ;
     }
 
-    public static int repairDeleteOrphanThumbRecords(Activity context) {
-        int delCount = context.getContentResolver().delete(SQL_TABLE_EXTERNAL_CONTENT_URI, WHERE_THUMB_IS_ORPHAN, null);
-        if (Global.debugEnabledSql) {
-            Log.i(Global.LOG_CONTEXT, "deleteOrphanThumb db records : " + delCount);
-        }
-        return delCount;
-    }
-
     private static String getNext(Cursor c, int dbPathOffset) {
         if (!c.moveToNext()) return null;
         return c.getString(0).substring(dbPathOffset);
-    }
-
-    // /mnt/sdcard/DCIM/.thumbnails/12345.jpg
-    public static void repairDeleteOrphanThumbFiles(Activity context, File thumbDirRoot, ArrayList<Long> dbIds4Delete, ArrayList<String> files4Delete) {
-        int dbPathOffset = thumbDirRoot.getAbsolutePath().length() + 1;
-        QueryParameter query = new QueryParameter()
-                .addColumn(FotoThumbSql.SQL_COL_PATH, FotoThumbSql.SQL_COL_PK)
-                .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
-                .addWhere(SQL_COL_PATH + " like ?", thumbDirRoot.getAbsolutePath() + "/%")
-                .addOrderBy(SQL_COL_PATH + " ASC");
-
-        Cursor c = null;
-        try {
-            String[] files = thumbDirRoot.list(MediaScanner.JPG_FILENAME_FILTER);
-            Arrays.sort(files); // sorted ascending
-
-            c = FotoSql.createCursorForQuery(context, query);
-
-            int curentFilePos = 0;
-            String csvPath = (curentFilePos < files.length) ? files[curentFilePos++] : null;
-            String dbPath = getNext(c, dbPathOffset);
-
-            // ArrayList<Long> dbIds4Delete = new ArrayList<Long>();
-            // ArrayList<String> files4Delete = new ArrayList<String>();
-
-            while ((dbPath != null) && (csvPath != null)) {
-                int compareResult = dbPath.compareTo(csvPath);
-                if (compareResult == 0) {
-                    // dbPath == csvPath
-
-                    // nothing to do
-                    csvPath = (curentFilePos < files.length) ? files[curentFilePos++] : null;
-                    dbPath = getNext(c, dbPathOffset);
-                } else if (compareResult < 0) {
-                    // dbPath < csvPath
-                    dbIds4Delete.add(c.getLong(1));
-                    dbPath = getNext(c, dbPathOffset);
-                } else {
-                    // dbPath > csvPath
-
-                    files4Delete.add(csvPath);
-                    csvPath = (curentFilePos < files.length) ? files[curentFilePos++] : null;
-                }
-            }
-
-        } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, "getStatistic() : error executing " + query, ex);
-        } finally {
-            if (c != null) c.close();
-        }
-        if (Global.debugEnabledSql) {
-            Log.i(Global.LOG_CONTEXT, "OrphanThumb IDs : " + SelectedItems.toString(dbIds4Delete.iterator()));
-            Log.i(Global.LOG_CONTEXT, "OrphanThumb Files : " + SelectedItems.toString(files4Delete.iterator()));
-        }
     }
 
     /** creats statistics row */
@@ -172,7 +114,7 @@ public class FotoThumbSql {
             try {
                 c = FotoSql.createCursorForQuery(context, query);
                 if (Global.debugEnabledSql) {
-                    Log.i(Global.LOG_CONTEXT, "getStatistic " + c.getCount() +
+                    Log.i(Global.LOG_CONTEXT, mDebugPrefix + "getStatistic " + c.getCount() +
                             "\n\t" + query.toSqlString());
                 }
                 boolean hasKind = c.getColumnCount() > 2;
@@ -185,7 +127,7 @@ public class FotoThumbSql {
 					
                 }
             } catch (Exception ex) {
-                Log.e(Global.LOG_CONTEXT, "getStatistic() : error executing " + query, ex);
+                Log.e(Global.LOG_CONTEXT, mDebugPrefix + "getStatistic() : error executing " + query, ex);
             } finally {
                 if (c != null) c.close();
             }
@@ -239,21 +181,160 @@ public class FotoThumbSql {
         return result.toString();
     }
 
-
-    public static int deleteThumbRecords(Activity context, ArrayList<Long> dbIds4Delete) {
-        if ((dbIds4Delete != null) && (dbIds4Delete.size() > 0)) {
-            final String sqlWhere = SQL_COL_PK + " in (" +
-                    SelectedItems.toString(dbIds4Delete.iterator()) + ")";
-            int delCount = 0; // context.getContentResolver().delete(SQL_TABLE_EXTERNAL_CONTENT_URI, sqlWhere, null);
-            if (Global.debugEnabledSql) {
-                Log.i(Global.LOG_CONTEXT, "deleteThumbRecords = " + delCount + " : " + sqlWhere);
-            }
-            return delCount;
+    // /mnt/sdcard/DCIM/.thumbnails/12345.jpg
+    public static void scanOrphans(Context context, File thumbDirRoot,
+                                   ArrayList<Long> dbIds4Delete, ArrayList<String> files4Delete,
+                                   IBackgroundProcess<Integer> taskControl, Integer step) {
+        if (taskControl != null) {
+            if (taskControl.isCancelled_()) return;
+            taskControl.publishProgress_(0,0, step++);
         }
-        return 0;
+
+        int dbPathOffset = thumbDirRoot.getAbsolutePath().length() + 1;
+        QueryParameter query = new QueryParameter()
+                .addColumn(FotoThumbSql.SQL_COL_PATH, FotoThumbSql.SQL_COL_PK)
+                .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
+                .addWhere(SQL_COL_PATH + " like ?", thumbDirRoot.getAbsolutePath() + "/%")
+                .addOrderBy(SQL_COL_PATH + " ASC");
+
+        Cursor c = null;
+        try {
+            String[] files = thumbDirRoot.list(MediaScanner.JPG_FILENAME_FILTER);
+            Arrays.sort(files); // sorted ascending
+
+            if (taskControl != null) {
+                if (taskControl.isCancelled_()) return;
+                taskControl.publishProgress_(0,0, step++);
+            }
+
+            c = FotoSql.createCursorForQuery(context, query);
+
+            Integer progressCount = c.getCount() + files.length; // items to be processed
+            int progressPos = 0; // incremented for every processed file/dbRow
+            int progressCountdown = 0; // decremented by processing. if <= 0 update progress
+
+            int curentFilePos = 0;
+            String filePath = (curentFilePos < files.length) ? files[curentFilePos++] : null;
+            String dbPath = getNext(c, dbPathOffset);
+
+            // ArrayList<Long> dbIds4Delete = new ArrayList<Long>();
+            // ArrayList<String> files4Delete = new ArrayList<String>();
+
+            while ((dbPath != null) && (filePath != null)) {
+                if ((progressCountdown <= 0) && (taskControl != null)) {
+                    if (taskControl.isCancelled_()) return;
+                    taskControl.publishProgress_(progressPos,progressCount, step);
+                    progressCountdown = CHUNK_SIZE + CHUNK_SIZE;
+                }
+
+                progressPos++;progressCountdown--;
+                int compareResult = dbPath.compareTo(filePath);
+                if (compareResult == 0) {
+                    // dbPath == filePath
+
+                    // nothing to do
+                    filePath = (curentFilePos < files.length) ? files[curentFilePos++] : null;
+                    dbPath = getNext(c, dbPathOffset);
+                    progressPos++;progressCountdown--;
+                } else if (compareResult < 0) {
+                    // dbPath < filePath
+                    dbIds4Delete.add(c.getLong(1));
+                    dbPath = getNext(c, dbPathOffset);
+                } else {
+                    // dbPath > filePath
+
+                    files4Delete.add(filePath);
+                    filePath = (curentFilePos < files.length) ? files[curentFilePos++] : null;
+                }
+            }
+
+        } catch (Exception ex) {
+            Log.e(Global.LOG_CONTEXT, mDebugPrefix + "scanOrphans() : error executing " + query, ex);
+        } finally {
+            if (c != null) c.close();
+            if (Global.debugEnabledSql) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "scanOrphans OrphanThumb IDs : " + SelectedItems.toString(dbIds4Delete.iterator()));
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "scanOrphans OrphanThumb Files : " + SelectedItems.toString(files4Delete.iterator()));
+            }
+        }
     }
 
-    public static int deleteThumbFiles(File rootDir, ArrayList<String> files4Delete) {
+
+    private static List<Long> getOrphanThumbIds(Context context) {
+        List<Long> result = new ArrayList<Long>();
+
+        QueryParameter query = new QueryParameter()
+                .addColumn(SQL_COL_PK)
+                .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
+                .addWhere(WHERE_THUMB_IS_ORPHAN)
+                ;
+
+        Cursor c = null;
+        try {
+            c = FotoSql.createCursorForQuery(context, query);
+            if (Global.debugEnabledSql) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "getOrphanThumbIds " + c.getCount() +
+                        "\n\t" + query.toSqlString());
+            }
+            while (c.moveToNext()) {
+                result.add(c.getLong(0));
+            }
+        } catch (Exception ex) {
+            Log.e(Global.LOG_CONTEXT,mDebugPrefix + "getOrphanThumbIds() : error executing " + query, ex);
+        } finally {
+            if (c != null) c.close();
+        }
+        return result;
+    }
+
+    public static int deleteOrphanThumbRecords(Context context, IBackgroundProcess<Integer> taskControl, Integer step) {
+        if (taskControl != null) {
+            if (taskControl.isCancelled_()) return 0;
+            taskControl.publishProgress_(0,0, step);
+        }
+        List<Long> delItems = getOrphanThumbIds(context);
+
+        int delCount = deleteThumbRecords(context, delItems, taskControl, step + 1);
+        return delCount;
+    }
+
+    public static int deleteThumbRecords(Context context, List<Long> dbIds4Delete, IBackgroundProcess<Integer> taskControl, Integer step) {
+        int delCount = 0;
+        final int delSize = (dbIds4Delete != null) ? dbIds4Delete.size() : 0;
+        if (delSize > 0) {
+            int delOffset = 0;
+
+            final Iterator<Long> delIterator = dbIds4Delete.iterator();
+            while (delOffset < delSize) {
+
+                if (taskControl != null) {
+                    if (taskControl.isCancelled_()) return delCount;
+                    taskControl.publishProgress_(delOffset, delSize, step);
+                }
+
+                final String sqlWhere = SQL_COL_PK + " in (" +
+                        SelectedItems.toString(delIterator, CHUNK_SIZE) + ")";
+
+                delCount += context.getContentResolver().delete(SQL_TABLE_EXTERNAL_CONTENT_URI, sqlWhere, null);
+                if (Global.debugEnabledSql) {
+                    Log.i(Global.LOG_CONTEXT,mDebugPrefix + "deleteThumbRecords#" + step +
+                            " = " + delOffset + "/" + delSize +
+                            " : " + sqlWhere);
+                }
+
+                delOffset += CHUNK_SIZE;
+            }
+        } else {
+            if (Global.debugEnabledSql) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "deleteThumbRecords#" + step +
+                        " nothing found to delete");
+            }
+
+        }
+        return delCount;
+    }
+
+    public static int deleteThumbFiles(File rootDir, ArrayList<String> files4Delete, IBackgroundProcess<Integer> taskControl, Integer step) {
         int delCount = 0;
 
         if (files4Delete != null) {
