@@ -543,7 +543,10 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     private void onThumbDeleteAnswer(IDirectory selectedDir) {
         String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
         if (pathFilter != null) {
-            new ThumbDeleteTask().execute(pathFilter);
+            final ThumbDeleteTask task = new ThumbDeleteTask();
+            this.mSubTask = task;
+
+            task.execute(pathFilter);
         }
     }
 
@@ -616,15 +619,19 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     private void onThumbMoveAnswer(IDirectory selectedDir, String trgetDir) {
         String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
         if (pathFilter != null) {
-            new ThumbMoveTask().execute(pathFilter, trgetDir);
+            final ThumbMoveTask task = new ThumbMoveTask();
+            this.mSubTask = task;
+
+            task.execute(pathFilter, trgetDir);
         }
     }
 
     private boolean onThumbRepair(IDirectory selectedDir) {
         File tbumbNailDir = getTumbDir(selectedDir);
         if (tbumbNailDir != null) {
-            this.mSubTask = new ThumbRepairTask();
-            mSubTask.execute(tbumbNailDir);
+            ThumbRepairTask task = new ThumbRepairTask();
+            this.mSubTask = task;
+            task.execute(tbumbNailDir);
             return true;
         }
         return false;
@@ -693,7 +700,9 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         super.onResume();
 
         // after rotation dlg has no more data: close it
-        if (this.getShowsDialog() && (this.mNavigation == null)) {
+        if (this.getShowsDialog() && (this.mNavigation == null) && isResumed()) {
+            // isResumed() else Can not perform this action after onSaveInstanceState
+            // http://stackoverflow.com/a/23034285/519334
             dismiss();
         }
     }

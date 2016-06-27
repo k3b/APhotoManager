@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -218,7 +219,7 @@ public class FotoThumbSql {
 
         Cursor c = null;
         try {
-            String[] files = thumbDirRoot.list(MediaScanner.JPG_FILENAME_FILTER);
+            String[] files = getFileNamesList(thumbDirRoot);
             Arrays.sort(files); // sorted ascending
 
             if (taskControl != null) {
@@ -275,6 +276,36 @@ public class FotoThumbSql {
                 Log.i(Global.LOG_CONTEXT, mDebugPrefix + "scanOrphans OrphanThumb IDs : " + SelectedItems.toString(dbIds4Delete.iterator()));
                 Log.i(Global.LOG_CONTEXT, mDebugPrefix + "scanOrphans OrphanThumb Files : " + SelectedItems.toString(files4Delete.iterator()));
             }
+        }
+    }
+
+    private static String[] getFileNamesList(File thumbDirRoot) {
+        // !!!! todo test auf extsd via repair
+        List<String> result = new ArrayList<String>();
+        getFileNamesList(thumbDirRoot.getAbsolutePath().length()+1, thumbDirRoot, result);
+
+        return result.toArray(new String[result.size()]);
+    }
+
+    private static void getFileNamesList(int start, File thumbDirRoot, List<String> result) {
+        final File[] rootFiles = thumbDirRoot.listFiles(MediaScanner.JPG_FILENAME_FILTER);
+
+        for(File f : rootFiles) {
+            result.add(f.getAbsolutePath().substring(start));
+        }
+
+        File[] subDirs = thumbDirRoot.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                return ((file != null) && (file.isDirectory()) && (!file.getName().startsWith(".")));
+            }
+        });
+
+        if ((subDirs != null) && (subDirs.length > 0)) {
+            for(File f : subDirs) {
+                getFileNamesList(start, f, result);
+            }
+
         }
     }
 
@@ -399,7 +430,7 @@ public class FotoThumbSql {
     }
 
     public static int thumbRecordsMoveByPath(Context context, String imageDir, File destThumbDir, IBackgroundProcess<Integer> taskControl, int step) {
-        int delCount = 0;
+        int modifyCount = 0;
         File[] srcThumpPaths = getThumbRootFiles();
         QueryParameter query;
         if (srcThumpPaths != null) {
@@ -424,39 +455,49 @@ public class FotoThumbSql {
                         }
                         while (c.moveToNext()) {
                             final File srcFile = new File(c.getString(1));
-                            moveThumb(context, c.getLong(0), srcFile, getDestThumbFile(srcFile, c.getLong(2), c.getLong(3), destThumbDir));
+                            modifyCount += moveThumb(context, c.getLong(0), srcFile, getDestThumbFile(srcFile, c.getLong(2), c.getLong(3), destThumbDir));
                         }
                     } catch (Exception ex) {
                         Log.e(Global.LOG_CONTEXT,mDebugPrefix + "thumbRecordsMoveByPath : error executing " + query, ex);
                     } finally {
                         if (c != null) c.close();
                     }
-
-                    List<Long> delItems = getIDs(context, query);
-                    delCount += deleteThumbRecords(context, delItems, taskControl, step++);
                 }
             }
         }
 
-        return delCount;
+        return modifyCount;
     }
 
-    private static void moveThumb(Context context, long id, File srcFile, File destThumbFile) {
-        if (!destThumbFile.exists()) {
+    private static int moveThumb(Context context, long id, File srcFile, File destThumbFile) {
+        String debugContext = null;
+        try {
+            debugContext = "destitination file already exists";
+            if (destThumbFile.exists()) return 0;
+
             destThumbFile.getParentFile().mkdirs();
-            if (FileCommands._osFileCopy(destThumbFile, srcFile, null)) {
-                if (updateThumbPath(context, id, destThumbFile)) {
-                    srcFile.delete();
-                } else {
-                    Log.w(Global.LOG_CONTEXT, mDebugPrefix + "moveThumb update record #" + id);
-                }
-            } else {
-                Log.w(Global.LOG_CONTEXT, mDebugPrefix + "moveThumb cannot copy from " +
+
+            debugContext = "cannot copy thumbnail file";
+            if (!FileCommands._osFileCopy(destThumbFile, srcFile, null))  return 0;
+
+            if (updateThumbPath(context, id, destThumbFile)) {
+                srcFile.delete(); // transaction complete
+                debugContext = null; // success
+                return 1;
+            }
+
+            // roolback file copy
+            destThumbFile.delete();
+            debugContext = "cannot update destThumb database row";
+            return 0;
+
+        } finally {
+            if (debugContext != null) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "moveThumb " + debugContext +
+                        ": #" + id +
+                        " from " +
                         srcFile.getAbsolutePath() + " to " + destThumbFile.getAbsolutePath());
             }
-        } else {
-            Log.w(Global.LOG_CONTEXT, mDebugPrefix + "moveThumb " + destThumbFile.getAbsolutePath() +
-                    " already exists.");
         }
     }
 
