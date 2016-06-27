@@ -125,6 +125,10 @@
 	<string name="settings_geo_history_file_title">Set geo history file</string>
 	<string name="settings_multisel_clear_summary">&#8230; after Copy/Move/Rename/&#8230; .</string>
 	<string name="settings_multisel_clear_title">Clear multi-selection</string>
+
+	<string name="settings_thumb_api_enabled_title">Enable Thumbnails Menus</string>
+	<string name="settings_thumb_api_enabled_summary">Experts only: Allow move/delete/repair of Thumbnails.</string>
+
 	<string name="settings_title">Settings</string>
 	<string name="share_err_not_found">No share/send provider found</string>
 	<string name="share_err_to_many">Send-Multiple: item count exceeded</string>
@@ -147,5 +151,11 @@
 	<string name="sort_order_Place_Ascending">Place ascending</string>
 	<string name="sort_order_Place_Descending">Place descending</string>
 	<string name="update_result_format">Updated %1$d/%2$d files</string>
+
+	<string name="thumbnails_repair_title">Repair Thumbnails.</string>
+	<string name="thumbnails_delete_title">Delete Thumbnails.</string>
+	<string name="thumbnails_move_title">Move Thumbnails.</string>
+	<string name="thumbnails_dir_not_found">"No alternative Thumbdir à la '.../DCIM/.thumbnails' found."</string>
+
 	<string name="zoom_to_fit_menu_title">Zoom to fit</string>
 </resources>

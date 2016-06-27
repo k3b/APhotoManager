@@ -85,8 +85,8 @@
             android:title="@string/settings_log_folder_title" />
         <CheckBoxPreference android:key="useThumbApi"
             android:defaultValue="false"
-            android:title="@string/settings_use_thumb_api_title"
-            android:summary="@string/settings_use_thumb_api_summary" />
+            android:title="@string/settings_thumb_api_enabled_title"
+            android:summary="@string/settings_thumb_api_enabled_summary" />
 
 
     </PreferenceCategory>
