@@ -45,6 +45,8 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -81,6 +83,115 @@ import java.util.List;
  */
 public class DirectoryPickerFragment extends DialogFragment implements DirectoryGui {
 
+    private static final int FIRST_RADIO = 5000;
+
+    /** executer for background task, that updates status-message and stops if cancel is pressed */
+    private abstract class AsyncTaskEx<Params> extends AsyncTask<Params, Integer,Integer> implements IBackgroundProcess<Integer> {
+        private final int mProgressMessageResourceId;
+
+        AsyncTaskEx(int progressMessageResourceId) {
+
+            mProgressMessageResourceId = progressMessageResourceId;
+        }
+
+        @Override
+        public void publishProgress_(Integer... values) {
+            publishProgress(values);
+        }
+
+        @Override
+        public boolean isCancelled_() {
+            return isCancelled();
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+            // values: progressPos,progressCount
+            super.onProgressUpdate(values);
+            StringBuilder message = new StringBuilder();
+            message
+                    .append(getActivity().getString(mProgressMessageResourceId))
+                    .append(": ").append(values[0])
+                    .append(" / ").append(values[1]);
+            setStatusMessage(message.toString());
+            if (Global.debugEnabled) {
+                Log.d(Global.LOG_CONTEXT, message.toString());
+            }
+        }
+
+        @Override protected void onCancelled() {
+            onDirectoryCancel();
+        }
+
+        @Override protected void onPostExecute(Integer result) {
+            StringBuilder message = new StringBuilder();
+            message
+                    .append(getActivity().getString(mProgressMessageResourceId))
+                    .append(": ").append(result);
+            Toast.makeText(getActivity(), message.toString(),
+                    Toast.LENGTH_LONG).show();
+            onDirectoryCancel();
+        }
+
+    }
+
+    private class ThumbRepairTask extends AsyncTaskEx<File> {
+        ThumbRepairTask() {
+            super(R.string.thumbnails_repair_title);
+        }
+        @Override
+        protected Integer doInBackground(File... params) {
+            File tbumbNailDir = params[0];
+
+            Integer step = 1;
+            final Context context = getActivity().getApplicationContext();
+            int thumbRecordsWithoutParentImage = FotoThumbSql.thumbRecordsDeleteOrphans(context, this, step);
+            step += 2;
+            ArrayList<Long> dbIds4Delete = new ArrayList<Long>();
+            ArrayList<String> files4Delete = new ArrayList<String>();
+
+            // do not delete orphan files because they may belong to video thumbnails
+            FotoThumbSql.scanOrphans(context, tbumbNailDir, dbIds4Delete, files4Delete, this, step);
+            step += 3;
+            int thumbRecordsWithoutFile = FotoThumbSql.deleteThumbRecords(context, dbIds4Delete, this, step++);
+
+            // do not delete orphan files because they may belong to video thumbnails
+            int thumbFileWithoutRecord = 0; // FotoThumbSql.deleteThumbFiles(tbumbNailDir, files4Delete, this, step++);
+            return Integer.valueOf(thumbRecordsWithoutParentImage + thumbRecordsWithoutFile + thumbFileWithoutRecord);
+        }
+    }
+
+    private class ThumbDeleteTask extends AsyncTaskEx<String> {
+        ThumbDeleteTask() {
+            super(R.string.thumbnails_delete_title);
+        }
+
+        @Override
+        protected Integer doInBackground(String... params) {
+            String imageDir = params[0];
+            int result = FotoThumbSql.thumbRecordsDeleteByPath(getActivity().getApplicationContext(),
+                    imageDir, this, 1);
+
+            return Integer.valueOf(result);
+        }
+    }
+
+    private class ThumbMoveTask extends AsyncTaskEx<String> {
+        ThumbMoveTask() {
+            super(R.string.thumbnails_move_title);
+        }
+
+        @Override
+        protected Integer doInBackground(String... params) {
+            String imageDir = params[0];
+            File destThumbDir = new File(params[1]);
+            int result = FotoThumbSql.thumbRecordsMoveByPath(getActivity().getApplicationContext(),
+                    imageDir, destThumbDir, this, 1);
+
+            return Integer.valueOf(result);
+        }
+    }
+
     private static final String TAG = "DirFragment";
     private static final java.lang.String INSTANCE_STATE_CONTEXT_MENU = "contextmenu";
 
@@ -116,8 +227,8 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     private int mContextMenue = 0;
 
     // not null when renumber dialog is open.
+    private AsyncTask mSubTask = null;
     private AlertDialog mSubDialog = null;
-    private RepairTask mRepairTask = null;
 
     // onsorted generated by ide-s autocomplete
 
@@ -279,8 +390,15 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         inflater.inflate(this.mContextMenue, popup.getMenu());
         mPopUpSelection = selection;
 
-        if (getTumbDir(selection) != null) {
-            MenuItem thumbMenue = popup.getMenu().findItem(R.id.action_repair_thumbnails);
+        if (Global.useThumbApi) {
+            if (getTumbDir(selection) != null) {
+                MenuItem thumbMenue = popup.getMenu().findItem(R.id.action_thumbnails_repair);
+                if (thumbMenue != null) thumbMenue.setVisible(true);
+            }
+            MenuItem thumbMenue = popup.getMenu().findItem(R.id.action_thumbnails_delete);
+            if (thumbMenue != null) thumbMenue.setVisible(true);
+
+            thumbMenue = popup.getMenu().findItem(R.id.action_thumbnails_move);
             if (thumbMenue != null) thumbMenue.setVisible(true);
         }
         popup.show();
@@ -309,12 +427,15 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                 return showGallery(mPopUpSelection);
             case R.id.action_details:
                 return showDirInfo(mPopUpSelection);
-            case R.id.action_repair_thumbnails:
-                return showRepair(mPopUpSelection);
+            case R.id.action_thumbnails_repair:
+                return onThumbRepair(mPopUpSelection);
+            case R.id.action_thumbnails_delete:
+                return onThumbDeleteQuestion(mPopUpSelection);
+            case R.id.action_thumbnails_move:
+                return onThumbMoveQuestion(mPopUpSelection);
         }
         return false;
     }
-
 
     private boolean onCreateSubDirQuestion(final IDirectory parentDir) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -373,93 +494,151 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         }
     }
 
-    private boolean showRepair(IDirectory selectedDir) {
+    public boolean onThumbDeleteQuestion(final IDirectory selectedDir) {
+        String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
+        if (pathFilter != null) {
+
+            final String message = mContext
+                    .getString(R.string.delete_question_message_format, 
+                            FotoThumbSql.formatThumbStatistic(getActivity(),pathFilter,new StringBuilder()));
+
+            final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            final String title = mContext.getText(R.string.delete_question_title)
+                    .toString();
+
+            builder.setTitle(title);
+            builder.setMessage(message)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.btn_yes,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(
+                                        final DialogInterface dialog,
+                                        final int id) {
+                                    mSubDialog = null;
+                                    onThumbDeleteAnswer(selectedDir);
+                                }
+                            }
+                    )
+                    .setNegativeButton(R.string.btn_no,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(
+                                        final DialogInterface dialog,
+                                        final int id) {
+                                    mSubDialog = null;
+                                    dialog.cancel();
+                                }
+                            }
+                    );
+
+            final AlertDialog alert = builder.create();
+            mSubDialog = alert;
+            alert.show();
+        }
+        return true;
+    }
+
+
+    private void onThumbDeleteAnswer(IDirectory selectedDir) {
+        String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
+        if (pathFilter != null) {
+            new ThumbDeleteTask().execute(pathFilter);
+        }
+    }
+
+    public boolean onThumbMoveQuestion(final IDirectory selectedDir) {
+        String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
+        if (pathFilter != null) {
+            File[] thumbDirs = FotoThumbSql.getThumbRootFiles();
+            if ((thumbDirs == null) || thumbDirs.length < 2) {
+                Toast.makeText(getActivity(), R.string.thumbnails_dir_not_found,
+                        Toast.LENGTH_LONG).show();
+                return false;
+            }
+
+            final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            final String title = mContext.getText(R.string.thumbnails_move_title)
+                    .toString();
+
+            final RadioGroup group = new RadioGroup(getActivity());
+
+            int id = FIRST_RADIO;
+            RadioButton radioButton = null;
+            for (File thumbDir : thumbDirs) {
+                if (thumbDir != null) {
+                    radioButton = new RadioButton(mContext);
+                    radioButton.setText(thumbDir.toString());
+                    radioButton.setId(id++);
+                    group.addView(radioButton);
+                }
+            }
+
+            // select the last radio button
+            if (radioButton != null) radioButton.setChecked(true);
+
+            builder.setTitle(title);
+            builder.setView(group)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.btn_yes,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(
+                                        final DialogInterface dialog,
+                                        final int id) {
+                                    RadioButton checked = (RadioButton) group.findViewById(group.getCheckedRadioButtonId());
+                                    if (checked != null) {
+                                        mSubDialog = null;
+                                        onThumbMoveAnswer(selectedDir, checked.getText().toString());
+                                    }
+                                }
+                            }
+                    )
+                    .setNegativeButton(R.string.btn_no,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(
+                                        final DialogInterface dialog,
+                                        final int id) {
+                                    mSubDialog = null;
+                                    dialog.cancel();
+                                }
+                            }
+                    );
+
+            final AlertDialog alert = builder.create();
+            mSubDialog = alert;
+            alert.show();
+        }
+        return true;
+    }
+
+    private void onThumbMoveAnswer(IDirectory selectedDir, String trgetDir) {
+        String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
+        if (pathFilter != null) {
+            new ThumbMoveTask().execute(pathFilter, trgetDir);
+        }
+    }
+
+    private boolean onThumbRepair(IDirectory selectedDir) {
         File tbumbNailDir = getTumbDir(selectedDir);
         if (tbumbNailDir != null) {
-            this.mRepairTask = new RepairTask();
-            mRepairTask.execute(tbumbNailDir);
+            this.mSubTask = new ThumbRepairTask();
+            mSubTask.execute(tbumbNailDir);
             return true;
         }
         return false;
-    }
-
-    private class RepairTask extends AsyncTask<File,Integer,Integer> implements IBackgroundProcess<Integer> {
-        @Override
-        protected Integer doInBackground(File... params) {
-            File tbumbNailDir = params[0];
-
-            Integer step = 1;
-            final Context context = getActivity().getApplicationContext();
-            int thumbRecordsWithoutParentImage = FotoThumbSql.deleteOrphanThumbRecords(context, this, step);
-            step += 2;
-            ArrayList<Long> dbIds4Delete = new ArrayList<Long>();
-            ArrayList<String> files4Delete = new ArrayList<String>();
-
-            // do not delete orphan files because they may belong to video thumbnails
-            FotoThumbSql.scanOrphans(context, tbumbNailDir, dbIds4Delete, files4Delete, this, step);
-            step += 3;
-            int thumbRecordsWithoutFile = FotoThumbSql.deleteThumbRecords(context, dbIds4Delete, this, step++);
-
-            // do not delete orphan files because they may belong to video thumbnails
-            int thumbFileWithoutRecord = 0; // FotoThumbSql.deleteThumbFiles(tbumbNailDir, files4Delete, this, step++);
-            return Integer.valueOf(thumbRecordsWithoutParentImage + thumbRecordsWithoutFile + thumbFileWithoutRecord);
-        }
-
-        @Override
-        public void publishProgress_(Integer... values) {
-            publishProgress(values);
-        }
-
-        @Override
-        public boolean isCancelled_() {
-            return isCancelled();
-        }
-
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            // values: progressPos,progressCount, step
-            super.onProgressUpdate(values);
-            StringBuilder message = new StringBuilder();
-            message
-                    .append(getActivity().getString(R.string.repair_thumbnails_title))
-                    .append("#").append(values[2])
-                    .append(": ").append(values[0])
-                    .append(" / ").append(values[1]);
-            setStatusMessage(message.toString());
-            if (Global.debugEnabled) {
-                Log.d(Global.LOG_CONTEXT, message.toString());
-            }
-        }
-
-        @Override protected void onCancelled() {
-            onDirectoryCancel();
-        }
-
-        @Override protected void onPostExecute(Integer result) {
-            StringBuilder message = new StringBuilder();
-            message
-                    .append(getActivity().getString(R.string.repair_thumbnails_title))
-                    .append(": ").append(result);
-            Toast.makeText(getActivity(), message.toString(),
-                    Toast.LENGTH_LONG).show();
-            onDirectoryCancel();
-        }
-
     }
 
     private boolean showDirInfo(IDirectory selectedDir) {
         String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
         if (pathFilter != null) {
 
-            if (Global.useThumbApi) {
-                // #53
-            } else {
-                ImageDetailDialogBuilder.createImageDetailDialog(
-                        this.getActivity(),
-                        pathFilter,
-                        FotoThumbSql.formatDirStatistic(this.getActivity(), pathFilter)
-                ).show();
-            }
+            ImageDetailDialogBuilder.createImageDetailDialog(
+                    this.getActivity(),
+                    pathFilter,
+                    FotoThumbSql.formatDirStatistic(this.getActivity(), pathFilter)
+            ).show();
             return true;
         }
         return false;
@@ -487,14 +666,14 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     }
 
     private void onDirectoryCancel() {
-        cancelRepair();
+        closeAll();
         Log.d(Global.LOG_CONTEXT, debugPrefix + "onCancel: " + mCurrentSelection);
         if (mDirectoryListener != null) mDirectoryListener.onDirectoryCancel(mDirTypId);
         dismiss();
     }
 
     protected void onDirectoryPick(IDirectory selection) {
-        cancelRepair();
+        closeAll();
         Log.d(Global.LOG_CONTEXT, debugPrefix + "onDirectoryPick: " + selection);
         if ((mDirectoryListener != null) && (selection != null)) {
             mDirectoryListener.onDirectoryPick(selection.getAbsolute()
@@ -519,18 +698,18 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         }
     }
 
-    @Override public void onDestroy() {
+    public void closeAll() {
         if (mSubDialog != null) mSubDialog.dismiss();
         mSubDialog = null;
-        cancelRepair();
+        if (mSubTask != null) mSubTask.cancel(false);
+        mSubTask = null;
+    }
+
+    @Override public void onDestroy() {
+        closeAll();
         super.onDestroy();
         // RefWatcher refWatcher = AndroFotoFinderApp.getRefWatcher(getActivity());
         // refWatcher.watch(this);
-    }
-
-    private void cancelRepair() {
-        if (mRepairTask != null) mRepairTask.cancel(false);
-        mRepairTask = null;
     }
 
     @Override

@@ -286,6 +286,18 @@ public class FileCommands implements  Cloneable {
      * Copies a file from the sourceFullPath path to the target path.
      */
     private boolean osFileCopy(File targetFullPath, File sourceFullPath) {
+        return _osFileCopy(targetFullPath, sourceFullPath, this);
+    }
+
+    /**
+     *
+     * @param sourceFullPath the path of the file that shall be copied including the file name with ending
+     * @param targetFullPath the path of the file  that shall be written to without filename
+     *
+     * Copies a file from the sourceFullPath path to the target path.
+     */
+    public static boolean _osFileCopy(File targetFullPath, File sourceFullPath, FileCommands owner) {
+
         FileChannel in = null, out = null;
         try {
             in = new FileInputStream(sourceFullPath).getChannel();
@@ -295,7 +307,9 @@ public class FileCommands implements  Cloneable {
             out.write(buf);
             return true;
         } catch (IOException e) {
-            onException(e,"osFileCopy",sourceFullPath, targetFullPath);
+            if (owner != null) {
+                owner.onException(e, "osFileCopy", sourceFullPath, targetFullPath);
+            }
         } finally {
             if (in != null)
                 try {
@@ -303,7 +317,9 @@ public class FileCommands implements  Cloneable {
                     if (out != null)
                         out.close();
                 } catch (IOException e) {
-                    onException(e,"osFileCopy-close",sourceFullPath, targetFullPath);
+                    if (owner != null) {
+                        owner.onException(e, "osFileCopy-close", sourceFullPath, targetFullPath);
+                    }
                 }
         }
         return false;

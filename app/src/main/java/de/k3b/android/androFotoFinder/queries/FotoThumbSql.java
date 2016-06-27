@@ -1,11 +1,13 @@
 package de.k3b.android.androFotoFinder.queries;
 
-import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.io.File;
@@ -16,10 +18,12 @@ import java.util.List;
 
 import de.k3b.IBackgroundProcess;
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.OsUtils;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
+import de.k3b.io.FileCommands;
 
 /**
  * Created by k3b on 21.06.2016.
@@ -44,20 +48,24 @@ public class FotoThumbSql {
     public static final String THUMBNAIL_DIR_NAME = ".thumbnails";
     private static final int CHUNK_SIZE = 100;
 
-    public static QueryParameter getQueryThumbSizeByPath(String imagePath, String thumpPath) {
+    public static QueryParameter getQueryThumbFilterByPath(String imagePath, String thumpPath) {
 
         return new QueryParameter()
-                // .setID(QUERY_TYPE_GROUP_DATE)
-                .addColumn(
-                        "count(*) as " + SQL_COL_COUNT,
-                        "sum(" + SQL_COL_WIDTH + " * " + SQL_COL_HEIGHT + ") AS " + SQL_COL_SIZE,
-                        SQL_COL_KIND
-                )
                 .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
                 .addWhere(SQL_COL_PATH + " like ?", thumpPath + "%")
                 .addWhere(SQL_COL_IMAGE_ID + " in (SELECT " + FotoSql.SQL_COL_PK +
                         " from " + TABLE_IMAGES + " where " + FotoSql.SQL_COL_PATH +
                                 " like ?)", imagePath + "%")
+                ;
+    }
+
+    public static QueryParameter getQueryThumbSizeByPath(String imagePath, String thumpPath) {
+        return getQueryThumbFilterByPath(imagePath, thumpPath)
+                .addColumn(
+                        "count(*) as " + SQL_COL_COUNT,
+                        "sum(" + SQL_COL_WIDTH + " * " + SQL_COL_HEIGHT + ") AS " + SQL_COL_SIZE,
+                        SQL_COL_KIND
+                )
                 .addGroupBy(SQL_COL_KIND)
                 .addOrderBy(SQL_COL_KIND)
                 ;
@@ -172,6 +180,11 @@ public class FotoThumbSql {
             .append(getStatistic(context, getQueryThumbSizeByOrphan(), "Orphan Tumbnail", imagePath, 0.25))
         ;
 
+        return formatThumbStatistic(context, imagePath, result);
+    }
+
+    @NonNull
+    public static String formatThumbStatistic(Context context, String imagePath, StringBuilder result) {
         File[] thumpPaths = getThumbRootFiles();
         if (thumpPaths != null) {
 			for (File thumpPath : thumpPaths) {
@@ -267,33 +280,38 @@ public class FotoThumbSql {
 
 
     private static List<Long> getOrphanThumbIds(Context context) {
-        List<Long> result = new ArrayList<Long>();
-
         QueryParameter query = new QueryParameter()
                 .addColumn(SQL_COL_PK)
                 .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
                 .addWhere(WHERE_THUMB_IS_ORPHAN)
                 ;
 
+        return getIDs(context, query);
+    }
+
+    @NonNull
+    public static List<Long> getIDs(Context context, QueryParameter query) {
+        List<Long> result = new ArrayList<Long>();
+
         Cursor c = null;
         try {
             c = FotoSql.createCursorForQuery(context, query);
             if (Global.debugEnabledSql) {
-                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "getOrphanThumbIds " + c.getCount() +
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "getIDs " + c.getCount() +
                         "\n\t" + query.toSqlString());
             }
             while (c.moveToNext()) {
                 result.add(c.getLong(0));
             }
         } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT,mDebugPrefix + "getOrphanThumbIds() : error executing " + query, ex);
+            Log.e(Global.LOG_CONTEXT,mDebugPrefix + "getIDs : error executing " + query, ex);
         } finally {
             if (c != null) c.close();
         }
         return result;
     }
 
-    public static int deleteOrphanThumbRecords(Context context, IBackgroundProcess<Integer> taskControl, Integer step) {
+    public static int thumbRecordsDeleteOrphans(Context context, IBackgroundProcess<Integer> taskControl, Integer step) {
         if (taskControl != null) {
             if (taskControl.isCancelled_()) return 0;
             taskControl.publishProgress_(0,0, step);
@@ -301,6 +319,31 @@ public class FotoThumbSql {
         List<Long> delItems = getOrphanThumbIds(context);
 
         int delCount = deleteThumbRecords(context, delItems, taskControl, step + 1);
+        return delCount;
+    }
+
+    public static int thumbRecordsDeleteByPath(Context context, String imageDir, IBackgroundProcess<Integer> taskControl, Integer step) {
+        int delCount = 0;
+        File[] thumpPaths = getThumbRootFiles();
+        QueryParameter query;
+        if (thumpPaths != null) {
+            for (File thumpPath : thumpPaths) {
+                if (thumpPath != null) {
+                    if (taskControl != null) {
+                        if (taskControl.isCancelled_()) return 0;
+                        taskControl.publishProgress_(0,0, step++);
+                    }
+
+                    String tbumbNailDir = thumpPath.getAbsolutePath() + "/";
+
+                    query = getQueryThumbFilterByPath(imageDir, tbumbNailDir)
+                        .addColumn(SQL_COL_PK);
+                    List<Long> delItems = getIDs(context, query);
+                    delCount += deleteThumbRecords(context, delItems, taskControl, step++);
+                }
+            }
+        }
+
         return delCount;
     }
 
@@ -353,5 +396,83 @@ public class FotoThumbSql {
             }
         }
         return delCount;
+    }
+
+    public static int thumbRecordsMoveByPath(Context context, String imageDir, File destThumbDir, IBackgroundProcess<Integer> taskControl, int step) {
+        int delCount = 0;
+        File[] srcThumpPaths = getThumbRootFiles();
+        QueryParameter query;
+        if (srcThumpPaths != null) {
+            for (File srcThumpPath : srcThumpPaths) {
+                if ((srcThumpPath != null) && (destThumbDir.compareTo(srcThumpPath) != 0)) {
+                    if (taskControl != null) {
+                        if (taskControl.isCancelled_()) return 0;
+                        taskControl.publishProgress_(0,0, step++);
+                    }
+
+                    String srcThumbNailDir = srcThumpPath.getAbsolutePath() + "/";
+
+                    query = getQueryThumbFilterByPath(imageDir, srcThumbNailDir)
+                            .addColumn(SQL_COL_PK, SQL_COL_PATH, SQL_COL_IMAGE_ID, SQL_COL_KIND);
+
+                    Cursor c = null;
+                    try {
+                        c = FotoSql.createCursorForQuery(context, query);
+                        if (Global.debugEnabledSql) {
+                            Log.i(Global.LOG_CONTEXT, mDebugPrefix + "thumbRecordsMoveByPath " + c.getCount() +
+                                    "\n\t" + query.toSqlString());
+                        }
+                        while (c.moveToNext()) {
+                            final File srcFile = new File(c.getString(1));
+                            moveThumb(context, c.getLong(0), srcFile, getDestThumbFile(srcFile, c.getLong(2), c.getLong(3), destThumbDir));
+                        }
+                    } catch (Exception ex) {
+                        Log.e(Global.LOG_CONTEXT,mDebugPrefix + "thumbRecordsMoveByPath : error executing " + query, ex);
+                    } finally {
+                        if (c != null) c.close();
+                    }
+
+                    List<Long> delItems = getIDs(context, query);
+                    delCount += deleteThumbRecords(context, delItems, taskControl, step++);
+                }
+            }
+        }
+
+        return delCount;
+    }
+
+    private static void moveThumb(Context context, long id, File srcFile, File destThumbFile) {
+        if (!destThumbFile.exists()) {
+            destThumbFile.getParentFile().mkdirs();
+            if (FileCommands._osFileCopy(destThumbFile, srcFile, null)) {
+                if (updateThumbPath(context, id, destThumbFile)) {
+                    srcFile.delete();
+                } else {
+                    Log.w(Global.LOG_CONTEXT, mDebugPrefix + "moveThumb update record #" + id);
+                }
+            } else {
+                Log.w(Global.LOG_CONTEXT, mDebugPrefix + "moveThumb cannot copy from " +
+                        srcFile.getAbsolutePath() + " to " + destThumbFile.getAbsolutePath());
+            }
+        } else {
+            Log.w(Global.LOG_CONTEXT, mDebugPrefix + "moveThumb " + destThumbFile.getAbsolutePath() +
+                    " already exists.");
+        }
+    }
+
+    private static boolean updateThumbPath(Context context, long id, File destThumbFile) {
+        QueryParameter where = new QueryParameter()
+                .addWhere(SQL_COL_PK + " = ?", "" + id);
+
+        ContentValues values = new ContentValues(2);
+        values.put(SQL_COL_PATH, destThumbFile.getAbsolutePath());
+        ContentResolver resolver = context.getContentResolver();
+        return 0 != resolver.update(SQL_TABLE_EXTERNAL_CONTENT_URI, values, where.toAndroidWhere(), where.toAndroidParameters());
+    }
+
+    private static File getDestThumbFile(File srcPath, long newID, long newType, File destThumbDir) {
+        // i.e img_23.1/1234523.jpg (.23 id ending with "23)
+        String name = String.format("img_%2$02d.%1$d/%3$d.jpg", newType, newID % 100, newID);
+        return new File(destThumbDir, name);
     }
 }

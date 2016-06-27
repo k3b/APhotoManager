@@ -4,6 +4,9 @@
 
     <string name="settings_use_thumb_api_title">Experimental Manage Thumbnails</string>
     <string name="settings_use_thumb_api_summary">Experimental Use at your own risk.</string>
-    <string name="repair_thumbnails_title">Repair Thumbnails.</string>
+    <string name="thumbnails_repair_title">Repair Thumbnails.</string>
+    <string name="thumbnails_delete_title">Delete Thumbnails.</string>
+    <string name="thumbnails_move_title">Move Thumbnails.</string>
+    <string name="thumbnails_dir_not_found">"No alternative Thumbdir à la '.../DCIM/.thumbnails' found."</string>
 
 </resources>
