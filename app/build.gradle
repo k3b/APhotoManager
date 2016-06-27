@@ -43,12 +43,16 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(':fotolib2')
 
-    compile project(':k3b-geoHelper')
+    // compile project(':k3b-geoHelper')
+    compile 'com.github.k3b:k3b-geoHelper:1.1.4'
 
     // zoomable image view
     // from https://github.com/chrisbanes/PhotoView
     // compile 'com.github.chrisbanes.photoview:library:1.2.3'
-    compile project(':fotoview.library')
+    // compile project(':fotoview.library')
+    // compile 'com.github.k3b.PhotoView:library:v1.2.6.k3b-SNAPSHOT' // via jitpack.io
+    compile 'com.github.k3b:PhotoView:v1.2.6.k3b-2-SNAPSHOT' // via jitpack.io
+
     // for view-pager
     // 21.0.2 seems to have problems with ViewPager
     // compile 'com.android.support:support-v4:21.0.2'
