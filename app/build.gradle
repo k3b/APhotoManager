@@ -19,8 +19,8 @@ android {
         // versionName = appVersionName
 
         // unfortunately fdroid needs magic numbers to detect version infos
-        versionCode = 15
-        versionName = '0.5.0.160623'
+        versionCode = 17
+        versionName = '0.5.0.160629'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
