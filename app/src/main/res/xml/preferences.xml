@@ -40,6 +40,11 @@
         <de.k3b.android.widgets.EditTextPreferenceWithSummary
             android:key="slideshowIntervallInMilliSecs"
             android:title="@string/settings_image_slideshow_intervall_title" />
+        <EditTextPreference
+            android:key="imageDetailTumbnailIfBiggerThan"
+            android:title="@string/settings_image_tumb_if_bigger_than_title"
+            android:summary="@string/settings_image_tumb_if_bigger_than_summary"/>
+
         <de.k3b.android.widgets.EditTextPreferenceWithSummary
             android:key="actionBarHideTimeInMilliSecs"
             android:title="@string/settings_image_hide_time_title" />
@@ -51,8 +56,7 @@
 			android:key="about"
 			android:title="@string/about_summary" />
 	</PreferenceCategory>
-	<PreferenceCategory 
-		android:title="@string/settings_group_debug_title"
+	<PreferenceCategory android:title="@string/settings_group_debug_title"
 		android:key="second_category">
         <CheckBoxPreference android:key="debugEnabledSql"
             android:defaultValue="false"

@@ -5,13 +5,11 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -19,9 +17,6 @@ import java.util.List;
 
 import de.k3b.IBackgroundProcess;
 import de.k3b.android.androFotoFinder.Global;
-import de.k3b.android.util.AndroidFileCommands;
-import de.k3b.android.util.MediaScanner;
-import de.k3b.android.util.OsUtils;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
 import de.k3b.io.FileCommands;
@@ -46,7 +41,6 @@ public class FotoThumbSql {
     private static final String TABLE_IMAGES = "images";
     static final String WHERE_THUMB_IS_ORPHAN = SQL_COL_IMAGE_ID + " not in (SELECT " + FotoSql.SQL_COL_PK +
             " from " + TABLE_IMAGES + ")";
-    public static final String THUMBNAIL_DIR_NAME = ".thumbnails";
     private static final int CHUNK_SIZE = 100;
 
     public static QueryParameter getQueryThumbFilterByPath(String imagePath, String thumpPath) {
@@ -151,27 +145,6 @@ public class FotoThumbSql {
 		return result.toString();
 	}
 
-    /** get all existing getThumbRoot-Dirs */
-    public static File[] getThumbRootFiles() {
-        File[] mountFiles = OsUtils.getExternalStorageDirFiles();
-        if (mountFiles != null) {
-            for (int i = mountFiles.length -1; i >= 0; i--) {
-                final File rootCandidate = getThumbDir(mountFiles[i]);
-                mountFiles[i] = rootCandidate.exists() ?  rootCandidate : null;
-            }
-
-            return mountFiles;
-        }
-        return null;
-    }
-
-    /** getThumbDir("/mnt/sdcard") = "/mnt/sdcard/DCIM/.thumbnails" */
-    public static File getThumbDir(File root) {
-        // /mnt/sdcard/DCIM/.thumbnails/12345.jpg
-
-        return OsUtils.buildPath(root, Environment.DIRECTORY_DCIM, THUMBNAIL_DIR_NAME);
-    }
-
     public static String formatDirStatistic(Context context, String imagePath) {
 		StringBuilder result = new StringBuilder();
 
@@ -186,7 +159,7 @@ public class FotoThumbSql {
 
     @NonNull
     public static String formatThumbStatistic(Context context, String imagePath, StringBuilder result) {
-        File[] thumpPaths = getThumbRootFiles();
+        File[] thumpPaths = FotoThumbFile.getThumbRootFiles();
         if (thumpPaths != null) {
 			for (File thumpPath : thumpPaths) {
 				if (thumpPath != null) {
@@ -219,7 +192,7 @@ public class FotoThumbSql {
 
         Cursor c = null;
         try {
-            String[] files = getFileNamesList(thumbDirRoot);
+            String[] files = FotoThumbFile.getFileNamesList(thumbDirRoot);
             Arrays.sort(files); // sorted ascending
 
             if (taskControl != null) {
@@ -279,37 +252,6 @@ public class FotoThumbSql {
         }
     }
 
-    private static String[] getFileNamesList(File thumbDirRoot) {
-        // !!!! todo test auf extsd via repair
-        List<String> result = new ArrayList<String>();
-        getFileNamesList(thumbDirRoot.getAbsolutePath().length()+1, thumbDirRoot, result);
-
-        return result.toArray(new String[result.size()]);
-    }
-
-    private static void getFileNamesList(int start, File thumbDirRoot, List<String> result) {
-        final File[] rootFiles = thumbDirRoot.listFiles(MediaScanner.JPG_FILENAME_FILTER);
-
-        for(File f : rootFiles) {
-            result.add(f.getAbsolutePath().substring(start));
-        }
-
-        File[] subDirs = thumbDirRoot.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return ((file != null) && (file.isDirectory()) && (!file.getName().startsWith(".")));
-            }
-        });
-
-        if ((subDirs != null) && (subDirs.length > 0)) {
-            for(File f : subDirs) {
-                getFileNamesList(start, f, result);
-            }
-
-        }
-    }
-
-
     private static List<Long> getOrphanThumbIds(Context context) {
         QueryParameter query = new QueryParameter()
                 .addColumn(SQL_COL_PK)
@@ -355,7 +297,7 @@ public class FotoThumbSql {
 
     public static int thumbRecordsDeleteByPath(Context context, String imageDir, IBackgroundProcess<Integer> taskControl, Integer step) {
         int delCount = 0;
-        File[] thumpPaths = getThumbRootFiles();
+        File[] thumpPaths = FotoThumbFile.getThumbRootFiles();
         QueryParameter query;
         if (thumpPaths != null) {
             for (File thumpPath : thumpPaths) {
@@ -414,24 +356,9 @@ public class FotoThumbSql {
         return delCount;
     }
 
-    public static int deleteThumbFiles(File rootDir, ArrayList<String> files4Delete, IBackgroundProcess<Integer> taskControl, Integer step) {
-        int delCount = 0;
-
-        if (files4Delete != null) {
-            for (String fileName : files4Delete) {
-                /*
-                if (new File(rootDir, fileName).delete()) {
-                    delCount ++;
-                }
-                */
-            }
-        }
-        return delCount;
-    }
-
     public static int thumbRecordsMoveByPath(Context context, String imageDir, File destThumbDir, IBackgroundProcess<Integer> taskControl, int step) {
         int modifyCount = 0;
-        File[] srcThumpPaths = getThumbRootFiles();
+        File[] srcThumpPaths = FotoThumbFile.getThumbRootFiles();
         QueryParameter query;
         if (srcThumpPaths != null) {
             for (File srcThumpPath : srcThumpPaths) {
@@ -455,7 +382,7 @@ public class FotoThumbSql {
                         }
                         while (c.moveToNext()) {
                             final File srcFile = new File(c.getString(1));
-                            modifyCount += moveThumb(context, c.getLong(0), srcFile, getDestThumbFile(srcFile, c.getLong(2), c.getLong(3), destThumbDir));
+                            modifyCount += moveThumb(context, c.getLong(0), srcFile, FotoThumbFile.getThumbFile(destThumbDir, c.getLong(2), c.getLong(3)));
                         }
                     } catch (Exception ex) {
                         Log.e(Global.LOG_CONTEXT,mDebugPrefix + "thumbRecordsMoveByPath : error executing " + query, ex);
@@ -511,9 +438,4 @@ public class FotoThumbSql {
         return 0 != resolver.update(SQL_TABLE_EXTERNAL_CONTENT_URI, values, where.toAndroidWhere(), where.toAndroidParameters());
     }
 
-    private static File getDestThumbFile(File srcPath, long newID, long newType, File destThumbDir) {
-        // i.e img_23.1/1234523.jpg (.23 id ending with "23)
-        String name = String.format("img_%2$02d.%1$d/%3$d.jpg", newType, newID % 100, newID);
-        return new File(destThumbDir, name);
-    }
 }

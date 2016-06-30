@@ -56,6 +56,7 @@ import de.k3b.IBackgroundProcess;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailDialogBuilder;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.queries.FotoThumbFile;
 import de.k3b.android.androFotoFinder.queries.FotoThumbSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.Global;
@@ -405,12 +406,9 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     }
 
     private static File getTumbDir(IDirectory selection) {
-        if (selection != null) {
-            File thumbsDir = new File(selection.getAbsolute(),FotoThumbSql.THUMBNAIL_DIR_NAME);
-            if (thumbsDir.exists()) return thumbsDir;
-        }
-        return null;
+        return FotoThumbFile.getTumbDir((selection != null) ? selection.getAbsolute() : null, 1);
     }
+
     private IDirectory mPopUpSelection = null;
     private final PopupMenu.OnMenuItemClickListener popUpListener = new PopupMenu.OnMenuItemClickListener() {
         @Override
@@ -553,7 +551,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     public boolean onThumbMoveQuestion(final IDirectory selectedDir) {
         String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
         if (pathFilter != null) {
-            File[] thumbDirs = FotoThumbSql.getThumbRootFiles();
+            File[] thumbDirs = FotoThumbFile.getThumbRootFiles();
             if ((thumbDirs == null) || thumbDirs.length < 2) {
                 Toast.makeText(getActivity(), R.string.thumbnails_dir_not_found,
                         Toast.LENGTH_LONG).show();

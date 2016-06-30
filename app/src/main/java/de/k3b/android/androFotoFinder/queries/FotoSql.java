@@ -91,6 +91,8 @@ public class FotoSql {
     public static final String SQL_COL_LAT = MediaStore.Images.Media.LATITUDE;
     public static final String SQL_COL_LON = MediaStore.Images.Media.LONGITUDE;
     public static final String SQL_COL_SIZE = MediaStore.Images.Media.SIZE;
+    public static final String SQL_COL_MAX_WITH = "max(" + MediaStore.Images.Media.WIDTH + "," +
+            MediaStore.Images.Media.HEIGHT +")";
 
     private static final String FILTER_EXPR_LAT_MAX = SQL_COL_LAT + " < ?";
     private static final String FILTER_EXPR_LAT_MIN = SQL_COL_LAT + " >= ?";
@@ -212,6 +214,7 @@ public class FotoSql {
     public static final String[] DEFAULT_GALLERY_COLUMNS = new String[]{SQL_COL_PK,
             SQL_COL_PATH + " AS " + SQL_COL_DISPLAY_TEXT,
             "0 AS " + SQL_COL_COUNT,
+            SQL_COL_MAX_WITH + " AS " + SQL_COL_SIZE,
             SQL_COL_GPS};
 
     public static final QueryParameter queryDetail = new QueryParameter()

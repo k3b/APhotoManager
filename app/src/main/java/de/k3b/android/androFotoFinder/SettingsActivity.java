@@ -23,12 +23,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Display;
 import android.widget.Toast;
 
 import java.io.File;
@@ -88,11 +90,13 @@ public class SettingsActivity extends PreferenceActivity {
 
     @Override
     public void onPause() {
-        prefs2Global(this.getApplication());
+        prefs2Global(this);
         super.onPause();
     }
 
     public static void global2Prefs(Context context) {
+        fixDefaults(context);
+
         SharedPreferences prefsInstance = PreferenceManager
                 .getDefaultSharedPreferences(context);
 
@@ -110,6 +114,7 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putBoolean("clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
         prefs.putBoolean("useThumbApi", Global.useThumbApi);
 
+        prefs.putString("imageDetailTumbnailIfBiggerThan", "" + Global.imageDetailTumbnailIfBiggerThan);
         prefs.putString("maxSelectionMarkersInMap", "" + Global.maxSelectionMarkersInMap);
         prefs.putString("slideshowIntervalInMilliSecs", "" + Global.slideshowIntervalInMilliSecs);
         prefs.putString("actionBarHideTimeInMilliSecs", "" + Global.actionBarHideTimeInMilliSecs);
@@ -125,7 +130,7 @@ public class SettingsActivity extends PreferenceActivity {
 
     public static void prefs2Global(Context context) {
         final SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(context);
+                .getDefaultSharedPreferences(context.getApplicationContext());
         Global.debugEnabled                     = getPref(prefs, "debugEnabled", Global.debugEnabled);
         FotoLibGlobal.debugEnabled = Global.debugEnabled;
 
@@ -144,6 +149,7 @@ public class SettingsActivity extends PreferenceActivity {
         Global.clearSelectionAfterCommand       = getPref(prefs, "clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
         Global.useThumbApi       = getPref(prefs, "useThumbApi", Global.useThumbApi);
 
+        Global.imageDetailTumbnailIfBiggerThan = getPref(prefs, "imageDetailTumbnailIfBiggerThan"     , Global.imageDetailTumbnailIfBiggerThan);
 
         Global.maxSelectionMarkersInMap         = getPref(prefs, "maxSelectionMarkersInMap"     , Global.maxSelectionMarkersInMap);
         Global.slideshowIntervalInMilliSecs = getPref(prefs, "slideshowIntervalInMilliSecs", Global.slideshowIntervalInMilliSecs);
@@ -175,6 +181,17 @@ public class SettingsActivity extends PreferenceActivity {
 
         */
 
+        fixDefaults(context);
+    }
+
+    private static void fixDefaults(Context context) {
+        // default: a litte bit more than screen size
+        if ((Global.imageDetailTumbnailIfBiggerThan < 0) && (context instanceof Activity)) {
+            Display display = ((Activity) context).getWindowManager().getDefaultDisplay();
+            Point size = new Point();
+            display.getSize(size);
+            Global.imageDetailTumbnailIfBiggerThan = (int) (1.2 * Math.max(size.x, size.y));
+        }
     }
 
     /** load File preference from SharedPreferences */

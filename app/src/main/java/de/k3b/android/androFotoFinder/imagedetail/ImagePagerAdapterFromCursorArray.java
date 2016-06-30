@@ -3,18 +3,15 @@ package de.k3b.android.androFotoFinder.imagedetail;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Point;
-import android.net.Uri;
 import android.util.Log;
-import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 
 import java.io.File;
 
 import de.k3b.android.androFotoFinder.AdapterArrayHelper;
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.queries.FotoThumbFile;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.database.SelectedItems;
 import uk.co.senab.photoview.HugeImageLoader;
@@ -32,8 +29,8 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
     /** not null data comes from array instead from base implementation */
     private AdapterArrayHelper mArrayImpl = null;
 
-    public ImagePagerAdapterFromCursorArray(final Activity context, String name, String fullPhotoPath) {
-        super(context, name);
+    public ImagePagerAdapterFromCursorArray(final Activity context, String name, String fullPhotoPath, FotoThumbFile thumSource) {
+        super(context, name, thumSource);
 
         if (MediaScanner.isNoMedia(fullPhotoPath,MediaScanner.DEFAULT_SCAN_DEPTH)) {
             mArrayImpl = new AdapterArrayHelper(context, fullPhotoPath, "debugContext");

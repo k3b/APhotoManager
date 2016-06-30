@@ -22,7 +22,6 @@ package de.k3b.android.androFotoFinder.imagedetail;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.LoaderManager;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
@@ -48,8 +47,6 @@ import org.osmdroid.api.IGeoPoint;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
@@ -60,10 +57,10 @@ import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
 import de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.queries.FotoThumbFile;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
-import de.k3b.android.util.MenuUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.android.widget.LocalizedActivity;
@@ -316,6 +313,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
 
         super.onCreate(savedInstanceState);
+        SettingsActivity.prefs2Global(this);
         Intent intent = getIntent();
 
         if (Global.debugEnabled && (intent != null)){
@@ -341,7 +339,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             // extra parameter
             getParameter(intent);
 
-            mAdapter = new ImagePagerAdapterFromCursorArray(this, mDebugPrefix, mInitialFilePath);
+            FotoThumbFile thumSource = new FotoThumbFile(this);
+            mAdapter = new ImagePagerAdapterFromCursorArray(this, mDebugPrefix, mInitialFilePath, thumSource);
             mViewPager.setAdapter(mAdapter);
 
             mViewPager.setOnInterceptTouchEvent(new View.OnClickListener() {

@@ -53,6 +53,10 @@ public class Global {
     /** The maximum number of **Blue selection markers** in the [Geographic-Map](geographic-map). */
     public static int maxSelectionMarkersInMap = 255;
 
+    /** if image-width-height is bigger than this show thumbnail in image detail view.
+     * (memoryefficient, fast, but low-quality). -1: default to screenresolution */
+    public static int imageDetailTumbnailIfBiggerThan = -1;
+
     /** defines the [Image-View's](Image-View) timing of menu command **slideshow** */
     public static int slideshowIntervalInMilliSecs = 1500;
 
