@@ -562,6 +562,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             final String title = mContext.getText(R.string.thumbnails_move_title)
                     .toString();
 
+            File lastSelection = new FotoThumbFile(getActivity()).getThumbRoot();
             final RadioGroup group = new RadioGroup(getActivity());
 
             int id = FIRST_RADIO;
@@ -572,11 +573,11 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                     radioButton.setText(thumbDir.toString());
                     radioButton.setId(id++);
                     group.addView(radioButton);
+                    if (thumbDir.equals(lastSelection)) {
+                        radioButton.setChecked(true);
+                    }
                 }
             }
-
-            // select the last radio button
-            if (radioButton != null) radioButton.setChecked(true);
 
             builder.setTitle(title);
             builder.setView(group)
@@ -614,13 +615,15 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         return true;
     }
 
-    private void onThumbMoveAnswer(IDirectory selectedDir, String trgetDir) {
+    private void onThumbMoveAnswer(IDirectory selectedDir, String targetDir) {
         String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
         if (pathFilter != null) {
             final ThumbMoveTask task = new ThumbMoveTask();
             this.mSubTask = task;
 
-            task.execute(pathFilter, trgetDir);
+            // remember last targetdir as default for fast thumb loading and default for next thumb move
+            new FotoThumbFile(getActivity()).setThumbRoot(new File(targetDir));
+            task.execute(pathFilter, targetDir);
         }
     }
 
