@@ -339,8 +339,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             // extra parameter
             getParameter(intent);
 
-            FotoThumbFile thumSource = new FotoThumbFile(this);
-            mAdapter = new ImagePagerAdapterFromCursorArray(this, mDebugPrefix, mInitialFilePath, thumSource);
+            mAdapter = new ImagePagerAdapterFromCursorArray(this, mDebugPrefix, mInitialFilePath);
             mViewPager.setAdapter(mAdapter);
 
             mViewPager.setOnInterceptTouchEvent(new View.OnClickListener() {

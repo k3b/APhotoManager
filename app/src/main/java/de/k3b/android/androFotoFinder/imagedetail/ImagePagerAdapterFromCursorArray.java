@@ -29,8 +29,8 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
     /** not null data comes from array instead from base implementation */
     private AdapterArrayHelper mArrayImpl = null;
 
-    public ImagePagerAdapterFromCursorArray(final Activity context, String name, String fullPhotoPath, FotoThumbFile thumSource) {
-        super(context, name, thumSource);
+    public ImagePagerAdapterFromCursorArray(final Activity context, String name, String fullPhotoPath) {
+        super(context, name);
 
         if (MediaScanner.isNoMedia(fullPhotoPath,MediaScanner.DEFAULT_SCAN_DEPTH)) {
             mArrayImpl = new AdapterArrayHelper(context, fullPhotoPath, "debugContext");

@@ -20,16 +20,18 @@
 package de.k3b.android.androFotoFinder.imagedetail;
 
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v4.view.PagerAdapter;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.display.SimpleBitmapDisplayer;
 
 import java.io.File;
 
@@ -55,20 +57,30 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
     private static final boolean SYNC = false; // true: sync loading is much easier to debug.
 
     private final Activity mActivity;
-    private final FotoThumbFile mThumSource;
     // workaround because setEllipsize(TextUtils.TruncateAt.MIDDLE) is not possible for title
     private final int mMaxTitleLength;
 
     private QueryParameter mParameters; // defining sql to get data
     private Cursor mCursor = null; // the content of the page
 
-    public ImagePagerAdapterFromCursor(final Activity context, String name, FotoThumbFile thumSource) {
+    protected DisplayImageOptions mDisplayImageOptions;
+
+    public ImagePagerAdapterFromCursor(final Activity context, String name) {
         mActivity = context;
-        mThumSource = thumSource;
         mDebugPrefix = "ImagePagerAdapterFromCursor#" + (id++) + "@" + name + " ";
         Global.debugMemory(mDebugPrefix, "ctor");
         mMaxTitleLength = context.getResources().getInteger(R.integer.title_length_in_chars);
 
+        mDisplayImageOptions = new DisplayImageOptions.Builder()
+                .showImageOnLoading(R.drawable.image_loading)
+                .showImageForEmptyUri(R.drawable.image_loading)
+                .showImageOnFail(R.drawable.image_loading)
+                .cacheInMemory(false)
+                .cacheOnDisk(true)
+                .considerExifParams(true)
+                .bitmapConfig(Bitmap.Config.ARGB_8888)
+                .displayer(new SimpleBitmapDisplayer())
+                .build();
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + "()");
         }
@@ -257,7 +269,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
 
         // if image is big use memoryefficient, fast, low-quality thumbnail (old code)
         if (size > Global.imageDetailTumbnailIfBiggerThan) {
-            setImageFromThumbnail(photoView, position, imageID, imageFile, MediaStore.Images.Thumbnails.MINI_KIND);
+            setImageFromThumbnail(photoView, position, imageFile);
         } else {
             // #53 Optimisation: no need for thumbnail - saves cache memory
             photoView.setImageReloadFile(null);
@@ -271,49 +283,12 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
         photoView.setMediumScale(5);
     }
 
-    private void setImageFromThumbnail(PhotoView photoView, int position, long imageID, File imageFile, int resolutionKind) {
+    private void setImageFromThumbnail(PhotoView photoView, int position, File imageFile) {
         photoView.setImageReloadFile(imageFile);
 
-        File fastThumbFile = (this.mThumSource != null) ? this.mThumSource.getThumbFileIfExist(imageID, resolutionKind) : null;
-        if (fastThumbFile != null) {
-            // #53 Optimisation: faster thumbnail load found
-            if (Global.debugEnabledViewItem) {
-                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "setImageFromThumbnail(#" + position +", with fast thumbnail) => " + imageFile + " => " + photoView);
-            }
-            photoView.setImageURI(Uri.fromFile(fastThumbFile));
-        } else {
-            // #53: the old way via contentprovider-getThumbnail
-            if (Global.debugEnabledViewItem) {
-                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "setImageFromThumbnail(#" + position +", no fast thumbnail) => " + imageFile + " => " + photoView);
-            }
-
-            // #26 option slow-hiqh-quality-detail vs fast-lowRes
-            // #26 android 5.1: does not support Thumbnails.getThumbnail(...,MediaStore.Images.Thumbnails.FULL_SCREEN_KIND,...) :-(
-            // int resolutionKind = Global.initialImageDetailResolutionHigh ? MediaStore.Images.Thumbnails.FULL_SCREEN_KIND : MediaStore.Images.Thumbnails.MINI_KIND;
-
-            Bitmap thumbnail = null;
-            final BitmapFactory.Options options = new BitmapFactory.Options();
-            final ContentResolver contentResolver = photoView.getContext().getContentResolver();
-            try {
-                thumbnail = MediaStore.Images.Thumbnails.getThumbnail(
-                        contentResolver,
-                        imageID,
-                        resolutionKind,
-                        options);
-            } catch (IllegalArgumentException ex) {
-                // #26 android 5.1: does not support Thumbnails.getThumbnail(...,MediaStore.Images.Thumbnails.FULL_SCREEN_KIND,...) :-(
-                Log.w(Global.LOG_CONTEXT, mDebugPrefix + " getThumbnail(FULL_SCREEN) not supported - resetting to getThumbnail(MINI).");
-
-                Global.initialImageDetailResolutionHigh = false;
-                resolutionKind = MediaStore.Images.Thumbnails.MINI_KIND;
-
-                thumbnail = MediaStore.Images.Thumbnails.getThumbnail(
-                        contentResolver,
-                        imageID,
-                        resolutionKind,
-                        options);
-            }
-            photoView.setImageBitmap(thumbnail);
+        ImageLoader.getInstance().displayImage("file://" + imageFile, photoView, mDisplayImageOptions);
+        if (Global.debugEnabledViewItem) {
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + "setImageFromThumbnail(#" + position + ") => " + imageFile + " => " + photoView);
         }
     }
 

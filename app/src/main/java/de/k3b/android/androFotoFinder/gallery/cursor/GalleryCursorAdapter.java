@@ -23,11 +23,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +31,11 @@ import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.display.SimpleBitmapDisplayer;
+
+import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.OnGalleryInteractionListener;
@@ -71,7 +72,7 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
     // for debugging: counts how many cell elements were created
     protected StringBuffer mStatus = null;
 
-    private final Drawable imageNotLoadedYet;
+    protected final DisplayImageOptions mDisplayImageOptions = ThumbNailUtils.createThumbnailOptions();
 
     public GalleryCursorAdapter(final Activity context, SelectedItems selectedItems, String name) {
         super(context, null, false); // no cursor yet; no auto-requery
@@ -81,15 +82,12 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
         mDebugPrefix = "GalleryCursorAdapter#" + (id++) + "@" + name + " ";
         Global.debugMemory(mDebugPrefix, "ctor");
 
-        imageNotLoadedYet = context.getResources().getDrawable(R.drawable.image_loading);
-
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + "()");
         }
         if (context instanceof OnGalleryInteractionListener) {
             this.callback = (OnGalleryInteractionListener) context;
         }
-
     }
 
     private String debugCursor(Cursor cursor, int maxRows, String delim, String... colmnNames) {
@@ -149,13 +147,15 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
         holder.filter =  (columnIndexWhereParam >= 0) ? cursor.getString(columnIndexWhereParam) : null;
 
         String description = cursor.getString(cursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT));
+        String uri = cursor.getString(cursor.getColumnIndex(FotoSql.SQL_COL_PATH));
+        long imageID = cursor.getLong(cursor.getColumnIndex(FotoSql.SQL_COL_PK));
         if (count > 1) description += " (" + count + ")";
         if (gps) description += "#";
         holder.description.setText(description);
-        long imageID = cursor.getLong(cursor.getColumnIndex(FotoSql.SQL_COL_PK));
         holder.icon.setVisibility(((mSelectedItems != null) && (mSelectedItems.contains(imageID))) ? View.VISIBLE : View.GONE);
+        holder.imageID = imageID;
 
-        holder.loadImageInBackground(imageID,imageNotLoadedYet );
+        ImageLoader.getInstance().displayImage( "file://" + uri, holder.image, mDisplayImageOptions);
         if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, mDebugPrefix + "bindView for " + holder);
     }
 
@@ -169,8 +169,6 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
         return FotoSql.getUri(imageID);
     }
 
-
-
     /** data belonging to gridview element */
     static class GridCellViewHolder {
         private static int lastInstanceNo = 0;
@@ -179,7 +177,6 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
         final public ImageView image;
         final public ImageView icon;
         final public TextView description;
-        private DownloadImageTask downloader = null;
 
         /** onClick add this as sql-where-filter */
         public String filter;
@@ -203,62 +200,7 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
         public String toString() {
             return debugPrefix + this.imageID;
         }
-
-        public void loadImageInBackground(long imageID, Drawable imageNotLoadedYet) {
-            if (imageID != this.imageID) {
-                // to avoid refreshLocal the same again
-                if (downloader != null) {
-                    downloader.cancel(false);
-                    downloader = null;
-                    if (Global.debugEnabledViewItem)
-                        Log.i(Global.LOG_CONTEXT, "loadImageInBackground.cancel " + this);
-                }
-
-                this.imageID = imageID;
-                image.setImageDrawable(imageNotLoadedYet);
-                this.downloader = new DownloadImageTask();
-                if (Global.debugEnabledViewItem)
-                    Log.i(Global.LOG_CONTEXT, "loadImageInBackground.execute " + this);
-                downloader.execute(this);
-            }
-        }
     }
-
-	// new DownloadImageTask(mContext).execute(holder);
-	// from https://developer.android.com/guide/components/processes-and-threads.html#WorkerThreads
-	private static class DownloadImageTask extends AsyncTask<GridCellViewHolder, Void, Bitmap> {
-        private GridCellViewHolder holder;
-
-		/** The system calls this to perform work in a worker thread and
-		  * delivers it the parameters given to AsyncTask.execute() */
-		protected Bitmap doInBackground(GridCellViewHolder... holders) {
-            this.holder = holders[0];
-            if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, "GridCellImageLoadHandler.handleMessage getThumbnail for " + holder);
-            Bitmap image = getBitmap(holder.imageID);
-			return image;
-        }
-
-        private Bitmap getBitmap(Long id) {
-            final Bitmap thumbnail = MediaStore.Images.Thumbnails.getThumbnail(
-                    holder.image.getContext().getContentResolver(),
-                    id,
-                    MediaStore.Images.Thumbnails.MICRO_KIND,
-                    new BitmapFactory.Options());
-
-            return thumbnail;
-        }
-
-		/** The system calls this to perform work in the UI thread and delivers
-		  * the result from doInBackground() */
-		protected void onPostExecute(Bitmap image) {
-            holder.downloader = null;
-            if (!isCancelled()) {
-                if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, "loadImageInBackground.done " + holder);
-                this.holder.image.setImageBitmap(image);
-            }
-            this.holder = null;
-		}
-	}
 
     /** SelectedItems.Id2FileNameConverter: converts items.id-s to string array of filenNames via media database. */
     @Override
@@ -287,6 +229,5 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
         }
         return 0;
     }
-
 
 }

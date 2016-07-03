@@ -52,8 +52,12 @@ import android.widget.Toast;
 
 // import com.squareup.leakcanary.RefWatcher;
 
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+
 import de.k3b.IBackgroundProcess;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
+import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailDialogBuilder;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoThumbFile;
@@ -862,6 +866,8 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         updateStatus();
     }
 
+    protected final DisplayImageOptions mDisplayImageOptions = ThumbNailUtils.createThumbnailOptions();
+
     private void updateBitmap(int iconID) {
         if (Global.debugEnabledViewItem) {
             Log.d(Global.LOG_CONTEXT, debugPrefix + "updateBitmap#" + iconID);
@@ -872,21 +878,10 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                 this.mImage.setVisibility(View.GONE);
             } else {
                 this.mImage.setVisibility(View.VISIBLE);
-                this.mImage.setImageBitmap(getBitmap(mLastIconID));
+                ImageLoader.getInstance().displayImage( FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI + "/" + iconID, this.mImage, mDisplayImageOptions);
             }
         }
     }
-
-    private Bitmap getBitmap(int id) {
-        final Bitmap thumbnail = MediaStore.Images.Thumbnails.getThumbnail(
-                getActivity().getContentResolver(),
-                id,
-                MediaStore.Images.Thumbnails.MICRO_KIND,
-                new BitmapFactory.Options());
-
-        return thumbnail;
-    }
-
 
     private Button createPathButton(IDirectory currentDir) {
         Button result = new Button(getActivity());

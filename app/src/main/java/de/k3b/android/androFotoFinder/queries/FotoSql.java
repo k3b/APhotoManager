@@ -118,7 +118,8 @@ public class FotoSql {
                     "max(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
                     SQL_EXPR_DAY + " AS " + SQL_COL_DISPLAY_TEXT,
                     "count(*) AS " + SQL_COL_COUNT,
-                    "max(" + SQL_COL_GPS + ") AS " + SQL_COL_GPS)
+                    "max(" + SQL_COL_GPS + ") AS " + SQL_COL_GPS,
+                    "max(" + SQL_COL_PATH + ") AS " + SQL_COL_PATH)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
             .addGroupBy(SQL_EXPR_DAY)
             .addOrderBy(SQL_EXPR_DAY);
@@ -215,7 +216,8 @@ public class FotoSql {
             SQL_COL_PATH + " AS " + SQL_COL_DISPLAY_TEXT,
             "0 AS " + SQL_COL_COUNT,
             SQL_COL_MAX_WITH + " AS " + SQL_COL_SIZE,
-            SQL_COL_GPS};
+            SQL_COL_GPS,
+            SQL_COL_PATH};
 
     public static final QueryParameter queryDetail = new QueryParameter()
             .setID(QUERY_TYPE_GALLERY)

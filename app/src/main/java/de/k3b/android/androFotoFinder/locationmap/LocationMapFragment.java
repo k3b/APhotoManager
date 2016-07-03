@@ -43,6 +43,9 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.SeekBar;
 
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+
 import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.*;
 import org.osmdroid.events.MapListener;
@@ -61,6 +64,7 @@ import java.util.Stack;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
 import de.k3b.android.osmdroid.FolderOverlay;
@@ -646,11 +650,15 @@ public class LocationMapFragment extends DialogFragment {
         }
     }
 
+    protected final DisplayImageOptions mDisplayImageOptions = ThumbNailUtils.createThumbnailOptions();
+
     /**
      * @return true if click was handeled.
      */
     protected boolean onMarkerClicked(IconOverlay marker, int markerId, IGeoPoint geoPosition, Object markerData) {
-        this.mImage.setImageBitmap(getBitmap(markerId));
+
+        ImageLoader.getInstance().displayImage( FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI + "/" + markerId, this.mImage, mDisplayImageOptions);
+
         this.mImage.setVisibility(View.VISIBLE);
 
         updateMarker(marker, markerId, geoPosition, markerData);
@@ -671,18 +679,6 @@ public class LocationMapFragment extends DialogFragment {
             mMapView.getOverlays().add(mCurrrentSelectionMarker);
         }
     }
-
-
-    private Bitmap getBitmap(int id) {
-        final Bitmap thumbnail = MediaStore.Images.Thumbnails.getThumbnail(
-                getActivity().getContentResolver(),
-                id,
-                MediaStore.Images.Thumbnails.MICRO_KIND,
-                new BitmapFactory.Options());
-
-        return thumbnail;
-    }
-
 
     /**
      * This interface must be implemented by activities that contain this

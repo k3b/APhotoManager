@@ -33,6 +33,9 @@ import android.util.Log;
 import android.view.Display;
 import android.widget.Toast;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+
 import java.io.File;
 
 import de.k3b.FotoLibGlobal;
@@ -144,7 +147,10 @@ public class SettingsActivity extends PreferenceActivity {
         // one setting for several 3d party debug-flags
         PhotoViewAttacher.DEBUG                 = getPref(prefs, "debugEnableLibs", PhotoViewAttacher.DEBUG);
         HugeImageLoader.DEBUG                   = PhotoViewAttacher.DEBUG;
+        ThumbNailUtils.DEBUG = PhotoViewAttacher.DEBUG;
         LogManager.setDebugEnabled(PhotoViewAttacher.DEBUG);
+        com.nostra13.universalimageloader.utils.L.writeDebugLogs(PhotoViewAttacher.DEBUG);
+        com.nostra13.universalimageloader.utils.L.writeLogs(PhotoViewAttacher.DEBUG);
 
         Global.clearSelectionAfterCommand       = getPref(prefs, "clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
         Global.useThumbApi       = getPref(prefs, "useThumbApi", Global.useThumbApi);

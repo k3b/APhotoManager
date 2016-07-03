@@ -46,6 +46,9 @@ dependencies {
     // compile project(':k3b-geoHelper')
     compile 'com.github.k3b:k3b-geoHelper:1.1.4'
 
+    // https://github.com/nostra13/Android-Universal-Image-Loader
+    compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
+
     // zoomable image view
     // from https://github.com/chrisbanes/PhotoView
     // compile 'com.github.chrisbanes.photoview:library:1.2.3'
