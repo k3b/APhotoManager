@@ -24,6 +24,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiskCache;
@@ -37,63 +38,18 @@ import com.nostra13.universalimageloader.core.display.SimpleBitmapDisplayer;
 import java.io.File;
 
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.queries.FotoThumbFile;
 
 /**
  * Created by k3b on 02.07.2016.
  */
 public class ThumbNailUtils {
-    private static final String THUMBNAIL_DIR_NAME = ".thumbCache";
-    private final SharedPreferences mPrefs;
-    private File mThumbRoot;
-
     public static final String LOG_TAG = "ImageLoader";
     public static boolean DEBUG = false;
 
-    public ThumbNailUtils(Context context) {
-        mPrefs = PreferenceManager
-                .getDefaultSharedPreferences(context.getApplicationContext());
-        String thumbRoot = mPrefs.getString("thumbCache", null);
-
-        mThumbRoot = null;
-
-        if (thumbRoot != null) {
-            mThumbRoot = new File(thumbRoot);
-        } else {
-            mThumbRoot = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),THUMBNAIL_DIR_NAME);
-            mThumbRoot.mkdirs();
+    public static void init(Context context, File previousCacheRoot) {
+        if ((previousCacheRoot != null) && (!previousCacheRoot.equals(Global.thumbCacheRoot))) {
+            ImageLoader.getInstance().clearDiskCache();
         }
-    }
-
-    public static File getThumbRoot(Context context) {
-        return new ThumbNailUtils(context).getThumbRoot();
-    }
-
-    public File getThumbRoot() {
-        return mThumbRoot;
-    }
-
-    public ThumbNailUtils setThumbRoot(File newValue) {
-        mThumbRoot = newValue;
-
-        mPrefs.edit()
-                .putString("thumbCache", (newValue != null) ? newValue.getAbsolutePath() : null)
-                .commit();
-        return this;
-    }
-
-    public static File getTumbDir(String fullPath, int maxDepth) {
-        File candidateParent  = (fullPath != null) ? new File(fullPath) : null;
-        while ((candidateParent != null) && (maxDepth >= 0)) {
-            File thumbsDir = new File(candidateParent, THUMBNAIL_DIR_NAME);
-            if (thumbsDir.exists()) return thumbsDir;
-            maxDepth--;
-            candidateParent = candidateParent.getParentFile();
-        }
-        return null;
-    }
-
-    public static void init(Context context) {
         // This configuration tuning is custom. You can tune every option, you may tune some of them,
         // or you can create default configuration by
         //  ImageLoaderConfiguration.createDefault(this);
@@ -101,7 +57,7 @@ public class ThumbNailUtils {
         ImageLoaderConfiguration.Builder config = new ImageLoaderConfiguration.Builder(context);
         config.threadPriority(Thread.NORM_PRIORITY - 2);
         config.denyCacheImageMultipleSizesInMemory();
-        config.diskCache(new UnlimitedDiskCache(getThumbRoot(context)));
+        config.diskCache(new UnlimitedDiskCache(Global.thumbCacheRoot));
         final Md5FileNameGenerator fileNameGenerator = new Md5FileNameGenerator();
         config.diskCacheFileNameGenerator(fileNameGenerator);
         config.diskCacheSize(50 * 1024 * 1024); // 50 MiB
@@ -110,7 +66,7 @@ public class ThumbNailUtils {
         ImageLoader.getInstance().init(config.build());
     }
 
-    public static DisplayImageOptions createThumbnailOptions() {
+    private static DisplayImageOptions createThumbnailOptions() {
         return new DisplayImageOptions.Builder()
                 .showImageOnLoading(R.drawable.image_loading)
                 .showImageForEmptyUri(R.drawable.image_loading)
@@ -126,7 +82,7 @@ public class ThumbNailUtils {
     private static final DisplayImageOptions mDisplayImageOptions = ThumbNailUtils.createThumbnailOptions();
 
     public static void getThumb(int iconID, ImageView imageView) {
-        ImageLoader.getInstance().displayImage( FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI + "/" + iconID, imageView, mDisplayImageOptions);
+        ImageLoader.getInstance().displayImage( FotoSql.getUriString(iconID), imageView, mDisplayImageOptions);
     }
 
     public static void getThumb(String fullPath, ImageView imageView) {

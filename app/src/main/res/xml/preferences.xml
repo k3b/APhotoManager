@@ -33,10 +33,15 @@
         <de.k3b.android.widgets.EditTextPreferenceWithSummary
             android:key="slideshowIntervallInMilliSecs"
             android:title="@string/settings_image_slideshow_intervall_title" />
+
         <EditTextPreference
             android:key="imageDetailThumbnailIfBiggerThan"
             android:title="@string/settings_image_thumb_if_bigger_than_title"
             android:summary="@string/settings_image_thumb_if_bigger_than_summary"/>
+
+        <de.k3b.android.widgets.EditTextPreferenceWithSummary
+            android:key="thumbCacheRoot"
+            android:title="@string/settings_image_thumb_dir_title" />
 
         <de.k3b.android.widgets.EditTextPreferenceWithSummary
             android:key="actionBarHideTimeInMilliSecs"

@@ -81,7 +81,7 @@ public class AndroFotoFinderApp extends Application {
                 PhotoViewAttacher.LOG_TAG, CupcakeGestureDetector.LOG_TAG,
                 FotoLibGlobal.LOG_TAG, ThumbNailUtils.LOG_TAG);
 
-        ThumbNailUtils.init(this);
+        ThumbNailUtils.init(this, null);
 
         Log.i(Global.LOG_CONTEXT, getString(R.string.app_name) + " " + GuiUtil.getAppVersionName(this) + " created");
     }

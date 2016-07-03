@@ -715,7 +715,12 @@ public class FotoSql {
     /** converts imageID to content-uri */
     public static Uri getUri(long imageID) {
         return Uri.parse(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI.toString() + "/" + imageID);
+                getUriString(imageID));
+    }
+
+    @NonNull
+    public static String getUriString(long imageID) {
+        return SQL_TABLE_EXTERNAL_CONTENT_URI.toString() + "/" + imageID;
     }
 
     /** converts internal ID-list to string array of filenNames via media database. */

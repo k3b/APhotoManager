@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -95,7 +96,7 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     public static void global2Prefs(Context context) {
-        fixDefaults(context);
+        fixDefaults(context, null);
 
         SharedPreferences prefsInstance = PreferenceManager
                 .getDefaultSharedPreferences(context);
@@ -121,6 +122,7 @@ public class SettingsActivity extends PreferenceActivity {
 
         prefs.putString("reportDir", (Global.reportDir != null) ? Global.reportDir.getAbsolutePath() : null);
         prefs.putString("logCatDir", (Global.logCatDir != null) ? Global.logCatDir.getAbsolutePath() : null);
+        prefs.putString("thumbCacheRoot", (Global.thumbCacheRoot != null) ? Global.thumbCacheRoot.getAbsolutePath() : null);
         prefs.putString("pickHistoryFile", (Global.pickHistoryFile != null) ? Global.pickHistoryFile.getAbsolutePath() : null);
 
         prefs.commit();
@@ -128,6 +130,7 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     public static void prefs2Global(Context context) {
+        File previousCacheRoot = Global.thumbCacheRoot;
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(context.getApplicationContext());
         Global.debugEnabled                     = getPref(prefs, "debugEnabled", Global.debugEnabled);
@@ -160,6 +163,7 @@ public class SettingsActivity extends PreferenceActivity {
         Global.reportDir                        = getPref(prefs, "reportDir", Global.reportDir);
         Global.logCatDir                        = getPref(prefs, "logCatDir", Global.logCatDir);
 
+        Global.thumbCacheRoot                  = getPref(prefs, "thumbCacheRoot", Global.thumbCacheRoot);
         Global.pickHistoryFile                  = getPref(prefs, "pickHistoryFile", Global.pickHistoryFile);
 
         /*
@@ -182,10 +186,10 @@ public class SettingsActivity extends PreferenceActivity {
 
         */
 
-        fixDefaults(context);
+        fixDefaults(context, previousCacheRoot);
     }
 
-    private static void fixDefaults(Context context) {
+    private static void fixDefaults(Context context, File previousCacheRoot) {
         // default: a litte bit more than screen size
         if ((Global.imageDetailThumbnailIfBiggerThan < 0) && (context instanceof Activity)) {
             Display display = ((Activity) context).getWindowManager().getDefaultDisplay();
@@ -193,6 +197,32 @@ public class SettingsActivity extends PreferenceActivity {
             display.getSize(size);
             Global.imageDetailThumbnailIfBiggerThan = (int) (1.2 * Math.max(size.x, size.y));
         }
+
+        if (!isValidThumbDir(Global.thumbCacheRoot)) {
+            File defaultThumbRoot = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),".thumbCache");
+            if (!isValidThumbDir(defaultThumbRoot)) {
+                defaultThumbRoot = context.getDir(".thumbCache", MODE_PRIVATE);
+                isValidThumbDir(defaultThumbRoot);
+            }
+
+            Global.thumbCacheRoot = defaultThumbRoot;
+            global2Prefs(context);
+        }
+
+        if ((previousCacheRoot != null) && (!previousCacheRoot.equals(Global.thumbCacheRoot))) {
+            ThumbNailUtils.init(context, previousCacheRoot);
+        }
+    }
+
+    private static boolean isValidThumbDir(File thumbCacheRoot) {
+        if (thumbCacheRoot == null) return false;
+
+        File parent = thumbCacheRoot.getParentFile();
+        if ((parent != null) && (parent.exists())) {
+            thumbCacheRoot.mkdirs();
+            return thumbCacheRoot.canWrite();
+        }
+        return false;
     }
 
     /** load File preference from SharedPreferences */

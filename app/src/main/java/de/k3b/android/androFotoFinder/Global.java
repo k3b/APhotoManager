@@ -57,6 +57,9 @@ public class Global {
      * (memoryefficient, fast, but low-quality). -1: default to screenresolution */
     public static int imageDetailThumbnailIfBiggerThan = -1;
 
+    /** where thumbnails are strored. defaults to /extDir/DCIM/.thumbCache */
+    public static File thumbCacheRoot = null;
+
     /** defines the [Image-View's](Image-View) timing of menu command **slideshow** */
     public static int slideshowIntervalInMilliSecs = 1500;
 

@@ -72,8 +72,10 @@ public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
     /**
      * @see android.widget.ListAdapter#getView(int, View, ViewGroup)
      */
+    @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         final String fullPhotoPathFromArray = (mArrayImpl != null) ? mArrayImpl.getFullFilePathfromArray(position) : null;
+
         if (fullPhotoPathFromArray != null) {
             View v;
             if (convertView == null) {
@@ -82,7 +84,7 @@ public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
                 v = convertView;
             }
             final GridCellViewHolder holder = (GridCellViewHolder) v.getTag();
-            holder.url =  mArrayImpl.getFullFilePathfromArray(position);
+            holder.url =  fullPhotoPathFromArray;
 
             final File file = new File(fullPhotoPathFromArray);
             ThumbNailUtils.getThumb(fullPhotoPathFromArray, holder.image);

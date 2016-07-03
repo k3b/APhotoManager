@@ -20,10 +20,10 @@
 package de.k3b.android.androFotoFinder.imagedetail;
 
 import android.app.Activity;
+import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.net.Uri;
-import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
 import android.util.Log;
 import android.view.View;
@@ -41,6 +41,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.GarbageCollector;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
+import uk.co.senab.photoview.HugeImageLoader;
 import uk.co.senab.photoview.PhotoView;
 
 /**
@@ -50,6 +51,7 @@ import uk.co.senab.photoview.PhotoView;
  * Created by k3b on 04.07.2015.
  */
 public class ImagePagerAdapterFromCursor extends PagerAdapter implements SelectedItems.Id2FileNameConverter {
+    private static final int MAX_IMAGE_DIMENSION = HugeImageLoader.getMaxTextureSize();
     // debug support
     private static int id = 0;
     protected final String mDebugPrefix;
@@ -213,16 +215,13 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
         if (cursor != null) {
             long imageID = cursor.getLong(cursor.getColumnIndex(FotoSql.SQL_COL_PK));
 
-            Uri uri = getUri(imageID);
+            String fullPhotoPath = getFullFilePath(position);
+            // determine max(with,height) from db
+            final int colSize = (cursor != null) ? cursor.getColumnIndex(FotoSql.SQL_COL_SIZE) : -1;
+            int size = (colSize >= 0) ? cursor.getInt(colSize) : 32767;
 
-            PhotoView photoView = new PhotoView(container.getContext());
+            return createViewWithContent(position, container, fullPhotoPath, "instantiateItemFromCursor(#", size);
 
-            setImage(position, imageID, uri, photoView);
-
-            // Now just add PhotoView to ViewPager and return it
-            container.addView(photoView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-
-            return photoView;
         }
         return null;
     }
@@ -256,45 +255,47 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
         return result;
     }
 
-    private void setImage(int position, long imageID, Uri uri, PhotoView photoView) {
-        /** k3b 20150913 #10: Faster initial loading: initially the view is loaded with low res image.
-         * on first zoom it is reloaded with this uri */
-        final File imageFile = new File(getFullFilePath(position));
+    @NonNull
+    protected View createViewWithContent(int position, ViewGroup container, String fullPhotoPath, String debugContext, int size) {
+        final Context context = container.getContext();
+        PhotoView photoView = new PhotoView(context);
+        photoView.setMaximumScale(20);
+        photoView.setMediumScale(5);
 
-        // determine max(with,height) from db
-        Cursor cursor = getCursorAt(position);
-        final int colSize = (cursor != null) ? cursor.getColumnIndex(FotoSql.SQL_COL_SIZE) : -1;
-        int size = (colSize >= 0) ? cursor.getInt(colSize) : 2048;
+        final File imageFile = new File(fullPhotoPath);
+
+        String loadType;
 
         // if image is big use memoryefficient, fast, low-quality thumbnail (old code)
         if (size > Global.imageDetailThumbnailIfBiggerThan) {
+            loadType = "image too big using thumb ";
             setImageFromThumbnail(photoView, position, imageFile);
         } else {
-            // #53 Optimisation: no need for thumbnail - saves cache memory
-            photoView.setImageReloadFile(null);
-            photoView.setImageURI(Uri.fromFile(imageFile));
-
-            if (Global.debugEnabledViewItem) {
-                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "setImage(#" + position +", no thumbnail) => " + uri + " => " + photoView);
+            try {
+                // #53 Optimisation: no need for thumbnail - saves cache memory but may throw OutOfMemoryError
+                loadType = "image small enough ";
+                photoView.setImageBitmap(HugeImageLoader.loadImage(imageFile, MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION));
+                photoView.setImageReloadFile(null);
+            } catch (OutOfMemoryError err) {
+                loadType = "small image out of memory using thumb ";
+                setImageFromThumbnail(photoView, position, imageFile);
             }
         }
-        photoView.setMaximumScale(20);
-        photoView.setMediumScale(5);
+        if (Global.debugEnabledViewItem) {
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + debugContext + position +", "
+                    + loadType + ") => " + fullPhotoPath + " => " + photoView);
+        }
+
+        container.addView(photoView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        return photoView;
     }
 
     private void setImageFromThumbnail(PhotoView photoView, int position, File imageFile) {
+        /** k3b 20150913 #10: Faster initial loading: initially the view is loaded with low res image.
+         * on first zoom it is reloaded with this uri */
         photoView.setImageReloadFile(imageFile);
 
         ImageLoader.getInstance().displayImage("file://" + imageFile, photoView, mDisplayImageOptions);
-        if (Global.debugEnabledViewItem) {
-            Log.i(Global.LOG_CONTEXT, mDebugPrefix + "setImageFromThumbnail(#" + position + ") => " + imageFile + " => " + photoView);
-        }
-    }
-
-    /** converts imageID to content-uri */
-    private Uri getUri(long imageID) {
-        return Uri.parse(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI.toString() + "/" + imageID);
     }
 
     /**
