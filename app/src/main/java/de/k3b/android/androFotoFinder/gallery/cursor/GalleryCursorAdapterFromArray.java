@@ -7,13 +7,11 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.nostra13.universalimageloader.core.ImageLoader;
-
 import java.io.File;
 
 import de.k3b.android.androFotoFinder.AdapterArrayHelper;
 import de.k3b.android.androFotoFinder.Global;
-import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.database.SelectedItems;
 import uk.co.senab.photoview.HugeImageLoader;
@@ -87,7 +85,7 @@ public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
             holder.url =  mArrayImpl.getFullFilePathfromArray(position);
 
             final File file = new File(fullPhotoPathFromArray);
-            ImageLoader.getInstance().displayImage( "file://" + fullPhotoPathFromArray, holder.image, mDisplayImageOptions);
+            ThumbNailUtils.getThumb(fullPhotoPathFromArray, holder.image);
             holder.image.setImageBitmap(HugeImageLoader.loadImage(file, 32,32));
 
             holder.image.setImageURI(Uri.parse(holder.url));

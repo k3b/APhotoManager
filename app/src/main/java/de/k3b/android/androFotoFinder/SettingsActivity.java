@@ -33,9 +33,6 @@ import android.util.Log;
 import android.view.Display;
 import android.widget.Toast;
 
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-
 import java.io.File;
 
 import de.k3b.FotoLibGlobal;
@@ -115,9 +112,8 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putBoolean("debugEnableLibs", PhotoViewAttacher.DEBUG);
 
         prefs.putBoolean("clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
-        prefs.putBoolean("useThumbApi", Global.useThumbApi);
 
-        prefs.putString("imageDetailTumbnailIfBiggerThan", "" + Global.imageDetailTumbnailIfBiggerThan);
+        prefs.putString("imageDetailThumbnailIfBiggerThan", "" + Global.imageDetailThumbnailIfBiggerThan);
         prefs.putString("maxSelectionMarkersInMap", "" + Global.maxSelectionMarkersInMap);
         prefs.putString("slideshowIntervalInMilliSecs", "" + Global.slideshowIntervalInMilliSecs);
         prefs.putString("actionBarHideTimeInMilliSecs", "" + Global.actionBarHideTimeInMilliSecs);
@@ -153,9 +149,8 @@ public class SettingsActivity extends PreferenceActivity {
         com.nostra13.universalimageloader.utils.L.writeLogs(PhotoViewAttacher.DEBUG);
 
         Global.clearSelectionAfterCommand       = getPref(prefs, "clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
-        Global.useThumbApi       = getPref(prefs, "useThumbApi", Global.useThumbApi);
 
-        Global.imageDetailTumbnailIfBiggerThan = getPref(prefs, "imageDetailTumbnailIfBiggerThan"     , Global.imageDetailTumbnailIfBiggerThan);
+        Global.imageDetailThumbnailIfBiggerThan = getPref(prefs, "imageDetailThumbnailIfBiggerThan"     , Global.imageDetailThumbnailIfBiggerThan);
 
         Global.maxSelectionMarkersInMap         = getPref(prefs, "maxSelectionMarkersInMap"     , Global.maxSelectionMarkersInMap);
         Global.slideshowIntervalInMilliSecs = getPref(prefs, "slideshowIntervalInMilliSecs", Global.slideshowIntervalInMilliSecs);
@@ -192,11 +187,11 @@ public class SettingsActivity extends PreferenceActivity {
 
     private static void fixDefaults(Context context) {
         // default: a litte bit more than screen size
-        if ((Global.imageDetailTumbnailIfBiggerThan < 0) && (context instanceof Activity)) {
+        if ((Global.imageDetailThumbnailIfBiggerThan < 0) && (context instanceof Activity)) {
             Display display = ((Activity) context).getWindowManager().getDefaultDisplay();
             Point size = new Point();
             display.getSize(size);
-            Global.imageDetailTumbnailIfBiggerThan = (int) (1.2 * Math.max(size.x, size.y));
+            Global.imageDetailThumbnailIfBiggerThan = (int) (1.2 * Math.max(size.x, size.y));
         }
     }
 

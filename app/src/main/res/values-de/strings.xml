@@ -121,9 +121,6 @@
   <string name="settings_multisel_clear_summary">... nach Kopieren/Verschieben/Umbenennen /...</string>
   <string name="settings_multisel_clear_title">Mehrfachauswahl deaktivieren</string>
 
-  <string name="settings_thumb_api_enabled_title">Aktiviere Thumbnail Menüs</string>
-  <string name="settings_thumb_api_enabled_summary">Nur für Experten: erlaube das Verschieben/Löschen/Reparieren von Thumbnails.</string>
-
   <string name="settings_title">Einstellungen</string>
   <string name="share_err_not_found">Kein Teilen/Senden Anbieter gefunden</string>
   <string name="share_err_to_many">Mehrfach senden: Maximale Anzahl überschritten</string>
@@ -147,10 +144,7 @@
   <string name="sort_order_Place_Descending">Ort absteigend</string>
   <string name="update_result_format">%1$d/%2$d Dateien aktualisiert</string>
 
-  <string name="thumbnails_repair_title">Repariere Thumbnails.</string>
-  <string name="thumbnails_delete_title">Lösche Thumbnails.</string>
-  <string name="thumbnails_move_title">Verschiebe Thumbnails.</string>
-  <string name="thumbnails_dir_not_found">"Kein zweites Thumb-Verzeichnis à la '.../DCIM/.thumbnails' gefunden."</string>
-
   <string name="zoom_to_fit_menu_title">Zoom ausfüllen</string>
+  <string name="settings_image_thumb_if_bigger_than_title">Breite/Höhe für große Photos</string>
+  <string name="settings_image_thumb_if_bigger_than_summary">Zeige in der Detailansicht als Thumbnail wenn das Photo größer ist. (speicher schonend, schnell, aber geringe Qualität)</string>
 </resources>

@@ -55,7 +55,7 @@ public class Global {
 
     /** if image-width-height is bigger than this show thumbnail in image detail view.
      * (memoryefficient, fast, but low-quality). -1: default to screenresolution */
-    public static int imageDetailTumbnailIfBiggerThan = -1;
+    public static int imageDetailThumbnailIfBiggerThan = -1;
 
     /** defines the [Image-View's](Image-View) timing of menu command **slideshow** */
     public static int slideshowIntervalInMilliSecs = 1500;
@@ -71,9 +71,6 @@ public class Global {
 
     /** true every time a .nomedia dir/file is opend remeove items from db.  */
     public static final boolean mustRemoveNOMEDIAfromDB = true;
-
-    /** true: show gui to manipulate thumbNails.  */
-    public static boolean useThumbApi = false;
 
     /** defines the filesystem's directory where [Bookmark files](Bookmarks) are stored and loaded from. */
     public static File reportDir = new File(Environment.getExternalStorageDirectory(), "databases/sql");

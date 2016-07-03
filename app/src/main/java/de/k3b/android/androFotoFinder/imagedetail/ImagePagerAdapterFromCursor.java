@@ -38,7 +38,6 @@ import java.io.File;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.queries.FotoThumbFile;
 import de.k3b.android.util.GarbageCollector;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
@@ -268,7 +267,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
         int size = (colSize >= 0) ? cursor.getInt(colSize) : 2048;
 
         // if image is big use memoryefficient, fast, low-quality thumbnail (old code)
-        if (size > Global.imageDetailTumbnailIfBiggerThan) {
+        if (size > Global.imageDetailThumbnailIfBiggerThan) {
             setImageFromThumbnail(photoView, position, imageFile);
         } else {
             // #53 Optimisation: no need for thumbnail - saves cache memory

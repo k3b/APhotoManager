@@ -650,14 +650,12 @@ public class LocationMapFragment extends DialogFragment {
         }
     }
 
-    protected final DisplayImageOptions mDisplayImageOptions = ThumbNailUtils.createThumbnailOptions();
-
     /**
      * @return true if click was handeled.
      */
     protected boolean onMarkerClicked(IconOverlay marker, int markerId, IGeoPoint geoPosition, Object markerData) {
 
-        ImageLoader.getInstance().displayImage( FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI + "/" + markerId, this.mImage, mDisplayImageOptions);
+        ThumbNailUtils.getThumb(markerId, mImage);
 
         this.mImage.setVisibility(View.VISIBLE);
 

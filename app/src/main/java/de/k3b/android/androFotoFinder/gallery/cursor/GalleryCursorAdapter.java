@@ -22,7 +22,6 @@ package de.k3b.android.androFotoFinder.gallery.cursor;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
 import android.view.View;
@@ -30,10 +29,6 @@ import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.display.SimpleBitmapDisplayer;
 
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
@@ -71,8 +66,6 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
 
     // for debugging: counts how many cell elements were created
     protected StringBuffer mStatus = null;
-
-    protected final DisplayImageOptions mDisplayImageOptions = ThumbNailUtils.createThumbnailOptions();
 
     public GalleryCursorAdapter(final Activity context, SelectedItems selectedItems, String name) {
         super(context, null, false); // no cursor yet; no auto-requery
@@ -155,7 +148,7 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
         holder.icon.setVisibility(((mSelectedItems != null) && (mSelectedItems.contains(imageID))) ? View.VISIBLE : View.GONE);
         holder.imageID = imageID;
 
-        ImageLoader.getInstance().displayImage( "file://" + uri, holder.image, mDisplayImageOptions);
+        ThumbNailUtils.getThumb(uri, holder.image);
         if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, mDebugPrefix + "bindView for " + holder);
     }
 
