@@ -9,7 +9,7 @@ import java.io.File;
  * Created by k3b on 22.06.2016.
  */
 public class OsUtils {
-    public static String[] getExternalStorageDirs() {
+    public static File[] getExternalStorageDirFiles() {
         // other alternatives ar described here http://stackoverflow.com/questions/5694933/find-an-external-sd-card-location
 
         // i.e. /mnt/sdcard0
@@ -17,22 +17,26 @@ public class OsUtils {
 
         // i.e. /mnt
         File mountRoot = (extDir == null) ? null :extDir.getParentFile();
-        if (mountRoot != null) {
 
-            // assuming all dirs that are below mountRoot
-            File[] mountFiles = mountRoot.listFiles();
-            String [] mounts = new String[mountFiles.length];
-            for (int i = mountFiles.length -1; i >= 0; i--) {
-                mounts[i] = mountFiles[i].getAbsolutePath();
+        return  (mountRoot != null) ? mountRoot.listFiles() : null;
+    }
+
+    private static boolean isAllowed(File mountFile) {
+        return ((mountFile != null) && mountFile.isDirectory() && !mountFile.isHidden());
+    }
+
+    /**
+     * Append path segments to given base path, returning result.
+     */
+    public static File buildPath(File base, String... segments) {
+        File cur = base;
+        for (String segment : segments) {
+            if (cur == null) {
+                cur = new File(segment);
+            } else {
+                cur = new File(cur, segment);
             }
-
-            return mounts;
-
-            // return relative files. we need absolute
-            // return mountRoot.list();
         }
-
-        if (extDir != null) return new String[] {extDir.getAbsolutePath()};
-        return null;
+        return cur;
     }
 }

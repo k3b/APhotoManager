@@ -1,24 +1,15 @@
 package de.k3b.android.androFotoFinder.imagedetail;
 
 import android.app.Activity;
-import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Point;
-import android.net.Uri;
 import android.util.Log;
-import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-
-import java.io.File;
 
 import de.k3b.android.androFotoFinder.AdapterArrayHelper;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.database.SelectedItems;
-import uk.co.senab.photoview.HugeImageLoader;
-import uk.co.senab.photoview.PhotoView;
 
 /**
  * Purpose: allow viewing images from ".nomedia" folders where no data is available in mediadb/cursor.
@@ -75,31 +66,16 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
 
     @Override
     public View instantiateItem(ViewGroup container, int position) {
-        final String fullPhotoPathFromArray = (mArrayImpl != null) ? mArrayImpl.getFullFilePathfromArray(position) : null;
-        if (fullPhotoPathFromArray != null) {
+        final String fullPhotoPath = (mArrayImpl != null) ? mArrayImpl.getFullFilePathfromArray(position) : null;
+        if (fullPhotoPath != null) {
             // special case image from ".nomedia" folder via absolute path not via content: uri
 
-            final Context context = container.getContext();
-            PhotoView photoView = new PhotoView(context);
-            photoView.setMaximumScale(20);
-            photoView.setMediumScale(5);
-
-            if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, mDebugPrefix + "instantiateItemFromArray(#" + position +") => " + fullPhotoPathFromArray + " => " + photoView);
-
-            final File file = new File(fullPhotoPathFromArray);
-            photoView.setImageBitmap(HugeImageLoader.loadImage(file, context));
-            photoView.setImageReloadFile(file);
-
-            container.addView(photoView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-
-            return photoView;
-
+            return createViewWithContent(position, container, fullPhotoPath, "instantiateItemFromArray(#", 32767);
         }
 
         // no array avaliable. Use original cursor baed implementation
         return  super.instantiateItem(container,position);
     }
-
     /** internal helper. return -1 if position is not available */
     @Override
     public int getPositionFromPath(String path) {

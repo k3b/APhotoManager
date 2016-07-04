@@ -54,6 +54,13 @@ public class Global {
     /** The maximum number of **Blue selection markers** in the [Geographic-Map](geographic-map). */
     public static int maxSelectionMarkersInMap = 255;
 
+    /** if image-width-height is bigger than this show thumbnail in image detail view.
+     * (memoryefficient, fast, but low-quality). -1: default to screenresolution */
+    public static int imageDetailThumbnailIfBiggerThan = -1;
+
+    /** where thumbnails are strored. defaults to /extDir/DCIM/.thumbCache */
+    public static File thumbCacheRoot = null;
+
     /** defines the [Image-View's](Image-View) timing of menu command **slideshow** */
     public static int slideshowIntervalInMilliSecs = 1500;
 
@@ -64,7 +71,7 @@ public class Global {
     public static boolean clearSelectionAfterCommand = false;
 
     /** true update only if media scanner is not running. false=risky=always allow.  */
-    public static final boolean mustCheckMediaScannerRunning = true;
+    public static boolean mustCheckMediaScannerRunning = true;
 
     /** true every time a .nomedia dir/file is opend remeove items from db.  */
     public static final boolean mustRemoveNOMEDIAfromDB = true;
@@ -98,6 +105,7 @@ public class Global {
 
     public static Locale systemLocale = Locale.getDefault();
 
+    /** move some pre-defined menu-actions into the "more..." submenue */
     public static void fixMenu(Context context, Menu menu) {
         MenuUtils.mov2SubMenu(menu, context.getString(R.string.more_menu_title),
                 R.id.action_details,
@@ -111,6 +119,5 @@ public class Global {
                 R.id.cmd_show_geo_as
         );
     }
-
 
 }

@@ -18,6 +18,7 @@
             android:defaultValue="true"
             android:title="@string/settings_multisel_clear_title"
             android:summary="@string/settings_multisel_clear_summary" />
+
         <de.k3b.android.widgets.EditTextPreferenceWithSummary
             android:key="maxSelectionMarkersInMap"
             android:title="@string/settings_map_selmarker_max_title" />
@@ -29,16 +30,19 @@
             android:key="pickHistoryFile"
             android:title="@string/settings_geo_history_file_title" />
 
-        <!-- #26 android 5.1: does not support Thumbnails.getThumbnail(...,MediaStore.Images.Thumbnails.FULL_SCREEN_KIND,...) :-(
-        <CheckBoxPreference android:key="initialImageDetailResolutionHigh"
-            android:defaultValue="false"
-            android:title="@string/settings_image_initialImageDetailResolutionHigh_title"
-            android:summary="@string/settings_image_initialImageDetailResolutionHigh_summary" />
-             -->
-
         <de.k3b.android.widgets.EditTextPreferenceWithSummary
             android:key="slideshowIntervallInMilliSecs"
             android:title="@string/settings_image_slideshow_intervall_title" />
+
+        <EditTextPreference
+            android:key="imageDetailThumbnailIfBiggerThan"
+            android:title="@string/settings_image_thumb_if_bigger_than_title"
+            android:summary="@string/settings_image_thumb_if_bigger_than_summary"/>
+
+        <de.k3b.android.widgets.EditTextPreferenceWithSummary
+            android:key="thumbCacheRoot"
+            android:title="@string/settings_image_thumb_dir_title" />
+
         <de.k3b.android.widgets.EditTextPreferenceWithSummary
             android:key="actionBarHideTimeInMilliSecs"
             android:title="@string/settings_image_hide_time_title" />
@@ -50,8 +54,7 @@
 			android:key="about"
 			android:title="@string/about_summary" />
 	</PreferenceCategory>
-	<PreferenceCategory 
-		android:title="@string/settings_group_debug_title"
+	<PreferenceCategory android:title="@string/settings_group_debug_title"
 		android:key="second_category">
         <CheckBoxPreference android:key="debugEnabledSql"
             android:defaultValue="false"
@@ -82,5 +85,5 @@
         <de.k3b.android.widgets.EditTextPreferenceWithSummary
             android:key="logCatDir"
             android:title="@string/settings_log_folder_title" />
-	</PreferenceCategory>
+    </PreferenceCategory>
 </PreferenceScreen>

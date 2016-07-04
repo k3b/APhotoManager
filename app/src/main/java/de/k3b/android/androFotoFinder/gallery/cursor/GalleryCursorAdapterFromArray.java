@@ -11,7 +11,7 @@ import java.io.File;
 
 import de.k3b.android.androFotoFinder.AdapterArrayHelper;
 import de.k3b.android.androFotoFinder.Global;
-import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.database.SelectedItems;
 import uk.co.senab.photoview.HugeImageLoader;
@@ -72,8 +72,10 @@ public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
     /**
      * @see android.widget.ListAdapter#getView(int, View, ViewGroup)
      */
+    @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         final String fullPhotoPathFromArray = (mArrayImpl != null) ? mArrayImpl.getFullFilePathfromArray(position) : null;
+
         if (fullPhotoPathFromArray != null) {
             View v;
             if (convertView == null) {
@@ -82,9 +84,10 @@ public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
                 v = convertView;
             }
             final GridCellViewHolder holder = (GridCellViewHolder) v.getTag();
-            holder.url =  mArrayImpl.getFullFilePathfromArray(position);
+            holder.url =  fullPhotoPathFromArray;
 
             final File file = new File(fullPhotoPathFromArray);
+            ThumbNailUtils.getThumb(fullPhotoPathFromArray, holder.image);
             holder.image.setImageBitmap(HugeImageLoader.loadImage(file, 32,32));
 
             holder.image.setImageURI(Uri.parse(holder.url));

@@ -540,6 +540,13 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
         }
     }
 
+
+    /** return true if path is "*.jp(e)g" */
+    public static boolean isImage(File path, boolean jpgOnly) {
+        if (path == null) return false;
+        return isImage(path.getName(), jpgOnly);
+    }
+
     /** return true if path is "*.jp(e)g" */
     public static boolean isImage(String path, boolean jpgOnly) {
         if (path == null) return false;

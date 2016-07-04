@@ -23,12 +23,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Point;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Display;
 import android.widget.Toast;
 
 import java.io.File;
@@ -88,11 +91,13 @@ public class SettingsActivity extends PreferenceActivity {
 
     @Override
     public void onPause() {
-        prefs2Global(this.getApplication());
+        prefs2Global(this);
         super.onPause();
     }
 
     public static void global2Prefs(Context context) {
+        fixDefaults(context, null);
+
         SharedPreferences prefsInstance = PreferenceManager
                 .getDefaultSharedPreferences(context);
 
@@ -109,6 +114,7 @@ public class SettingsActivity extends PreferenceActivity {
 
         prefs.putBoolean("clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
 
+        prefs.putString("imageDetailThumbnailIfBiggerThan", "" + Global.imageDetailThumbnailIfBiggerThan);
         prefs.putString("maxSelectionMarkersInMap", "" + Global.maxSelectionMarkersInMap);
         prefs.putString("slideshowIntervalInMilliSecs", "" + Global.slideshowIntervalInMilliSecs);
         prefs.putString("actionBarHideTimeInMilliSecs", "" + Global.actionBarHideTimeInMilliSecs);
@@ -116,6 +122,7 @@ public class SettingsActivity extends PreferenceActivity {
 
         prefs.putString("reportDir", (Global.reportDir != null) ? Global.reportDir.getAbsolutePath() : null);
         prefs.putString("logCatDir", (Global.logCatDir != null) ? Global.logCatDir.getAbsolutePath() : null);
+        prefs.putString("thumbCacheRoot", (Global.thumbCacheRoot != null) ? Global.thumbCacheRoot.getAbsolutePath() : null);
         prefs.putString("pickHistoryFile", (Global.pickHistoryFile != null) ? Global.pickHistoryFile.getAbsolutePath() : null);
 
         prefs.commit();
@@ -123,8 +130,9 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     public static void prefs2Global(Context context) {
+        File previousCacheRoot = Global.thumbCacheRoot;
         final SharedPreferences prefs = PreferenceManager
-                .getDefaultSharedPreferences(context);
+                .getDefaultSharedPreferences(context.getApplicationContext());
         Global.debugEnabled                     = getPref(prefs, "debugEnabled", Global.debugEnabled);
         FotoLibGlobal.debugEnabled = Global.debugEnabled;
 
@@ -138,9 +146,14 @@ public class SettingsActivity extends PreferenceActivity {
         // one setting for several 3d party debug-flags
         PhotoViewAttacher.DEBUG                 = getPref(prefs, "debugEnableLibs", PhotoViewAttacher.DEBUG);
         HugeImageLoader.DEBUG                   = PhotoViewAttacher.DEBUG;
+        ThumbNailUtils.DEBUG = PhotoViewAttacher.DEBUG;
         LogManager.setDebugEnabled(PhotoViewAttacher.DEBUG);
+        com.nostra13.universalimageloader.utils.L.writeDebugLogs(PhotoViewAttacher.DEBUG);
+        com.nostra13.universalimageloader.utils.L.writeLogs(PhotoViewAttacher.DEBUG);
 
         Global.clearSelectionAfterCommand       = getPref(prefs, "clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
+
+        Global.imageDetailThumbnailIfBiggerThan = getPref(prefs, "imageDetailThumbnailIfBiggerThan"     , Global.imageDetailThumbnailIfBiggerThan);
 
         Global.maxSelectionMarkersInMap         = getPref(prefs, "maxSelectionMarkersInMap"     , Global.maxSelectionMarkersInMap);
         Global.slideshowIntervalInMilliSecs = getPref(prefs, "slideshowIntervalInMilliSecs", Global.slideshowIntervalInMilliSecs);
@@ -150,6 +163,7 @@ public class SettingsActivity extends PreferenceActivity {
         Global.reportDir                        = getPref(prefs, "reportDir", Global.reportDir);
         Global.logCatDir                        = getPref(prefs, "logCatDir", Global.logCatDir);
 
+        Global.thumbCacheRoot                  = getPref(prefs, "thumbCacheRoot", Global.thumbCacheRoot);
         Global.pickHistoryFile                  = getPref(prefs, "pickHistoryFile", Global.pickHistoryFile);
 
         /*
@@ -172,6 +186,43 @@ public class SettingsActivity extends PreferenceActivity {
 
         */
 
+        fixDefaults(context, previousCacheRoot);
+    }
+
+    private static void fixDefaults(Context context, File previousCacheRoot) {
+        // default: a litte bit more than screen size
+        if ((Global.imageDetailThumbnailIfBiggerThan < 0) && (context instanceof Activity)) {
+            Display display = ((Activity) context).getWindowManager().getDefaultDisplay();
+            Point size = new Point();
+            display.getSize(size);
+            Global.imageDetailThumbnailIfBiggerThan = (int) (1.2 * Math.max(size.x, size.y));
+        }
+
+        if (!isValidThumbDir(Global.thumbCacheRoot)) {
+            File defaultThumbRoot = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),".thumbCache");
+            if (!isValidThumbDir(defaultThumbRoot)) {
+                defaultThumbRoot = context.getDir(".thumbCache", MODE_PRIVATE);
+                isValidThumbDir(defaultThumbRoot);
+            }
+
+            Global.thumbCacheRoot = defaultThumbRoot;
+            global2Prefs(context);
+        }
+
+        if ((previousCacheRoot != null) && (!previousCacheRoot.equals(Global.thumbCacheRoot))) {
+            ThumbNailUtils.init(context, previousCacheRoot);
+        }
+    }
+
+    private static boolean isValidThumbDir(File thumbCacheRoot) {
+        if (thumbCacheRoot == null) return false;
+
+        File parent = thumbCacheRoot.getParentFile();
+        if ((parent != null) && (parent.exists())) {
+            thumbCacheRoot.mkdirs();
+            return thumbCacheRoot.canWrite();
+        }
+        return false;
     }
 
     /** load File preference from SharedPreferences */

@@ -51,6 +51,10 @@ public class ImageDetailDialogBuilder {
                                                  QueryParameter query,
                                                  long offset) {
         StringBuilder result = new StringBuilder();
+        result
+                .append(imageId)
+                .append(":").append(filePath)
+                .append("\n");
         appendExifInfo(result, context, filePath, imageId);
         appendQueryInfo(result, query, offset);
         return createImageDetailDialog(context, filePath, result.toString());

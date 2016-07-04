@@ -57,6 +57,9 @@ public class AndroFotoFinderApp extends Application {
         }
         */
     @Override public void onCreate() {
+        // StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().detectAll().penaltyDialog().build());
+        // StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyDeath().build());
+
         super.onCreate();
 
         Global.pickHistoryFile = getDatabasePath("pickHistory.geouri.txt");
@@ -74,7 +77,11 @@ public class AndroFotoFinderApp extends Application {
         for (String columnName : FotoSql.DEFAULT_GALLERY_COLUMNS) {
             QueryParameter.sParserDefaultSelect.add(columnName);
         }
-        mCrashSaveToFile = new LogCat(this, Global.LOG_CONTEXT, HugeImageLoader.LOG_TAG, PhotoViewAttacher.LOG_TAG, CupcakeGestureDetector.LOG_TAG, FotoLibGlobal.LOG_TAG);
+        mCrashSaveToFile = new LogCat(this, Global.LOG_CONTEXT, HugeImageLoader.LOG_TAG,
+                PhotoViewAttacher.LOG_TAG, CupcakeGestureDetector.LOG_TAG,
+                FotoLibGlobal.LOG_TAG, ThumbNailUtils.LOG_TAG);
+
+        ThumbNailUtils.init(this, null);
 
         Log.i(Global.LOG_CONTEXT, getString(R.string.app_name) + " " + GuiUtil.getAppVersionName(this) + " created");
     }

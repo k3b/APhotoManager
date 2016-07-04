@@ -91,6 +91,8 @@ public class FotoSql {
     public static final String SQL_COL_LAT = MediaStore.Images.Media.LATITUDE;
     public static final String SQL_COL_LON = MediaStore.Images.Media.LONGITUDE;
     public static final String SQL_COL_SIZE = MediaStore.Images.Media.SIZE;
+    public static final String SQL_COL_MAX_WITH = "max(" + MediaStore.Images.Media.WIDTH + "," +
+            MediaStore.Images.Media.HEIGHT +")";
 
     private static final String FILTER_EXPR_LAT_MAX = SQL_COL_LAT + " < ?";
     private static final String FILTER_EXPR_LAT_MIN = SQL_COL_LAT + " >= ?";
@@ -116,7 +118,8 @@ public class FotoSql {
                     "max(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
                     SQL_EXPR_DAY + " AS " + SQL_COL_DISPLAY_TEXT,
                     "count(*) AS " + SQL_COL_COUNT,
-                    "max(" + SQL_COL_GPS + ") AS " + SQL_COL_GPS)
+                    "max(" + SQL_COL_GPS + ") AS " + SQL_COL_GPS,
+                    "max(" + SQL_COL_PATH + ") AS " + SQL_COL_PATH)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
             .addGroupBy(SQL_EXPR_DAY)
             .addOrderBy(SQL_EXPR_DAY);
@@ -212,7 +215,9 @@ public class FotoSql {
     public static final String[] DEFAULT_GALLERY_COLUMNS = new String[]{SQL_COL_PK,
             SQL_COL_PATH + " AS " + SQL_COL_DISPLAY_TEXT,
             "0 AS " + SQL_COL_COUNT,
-            SQL_COL_GPS};
+            SQL_COL_MAX_WITH + " AS " + SQL_COL_SIZE,
+            SQL_COL_GPS,
+            SQL_COL_PATH};
 
     public static final QueryParameter queryDetail = new QueryParameter()
             .setID(QUERY_TYPE_GALLERY)
@@ -710,7 +715,12 @@ public class FotoSql {
     /** converts imageID to content-uri */
     public static Uri getUri(long imageID) {
         return Uri.parse(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI.toString() + "/" + imageID);
+                getUriString(imageID));
+    }
+
+    @NonNull
+    public static String getUriString(long imageID) {
+        return SQL_TABLE_EXTERNAL_CONTENT_URI.toString() + "/" + imageID;
     }
 
     /** converts internal ID-list to string array of filenNames via media database. */

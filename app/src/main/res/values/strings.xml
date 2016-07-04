@@ -125,6 +125,7 @@
 	<string name="settings_geo_history_file_title">Set geo history file</string>
 	<string name="settings_multisel_clear_summary">&#8230; after Copy/Move/Rename/&#8230; .</string>
 	<string name="settings_multisel_clear_title">Clear multi-selection</string>
+
 	<string name="settings_title">Settings</string>
 	<string name="share_err_not_found">No share/send provider found</string>
 	<string name="share_err_to_many">Send-Multiple: item count exceeded</string>
@@ -147,5 +148,9 @@
 	<string name="sort_order_Place_Ascending">Place ascending</string>
 	<string name="sort_order_Place_Descending">Place descending</string>
 	<string name="update_result_format">Updated %1$d/%2$d files</string>
+
 	<string name="zoom_to_fit_menu_title">Zoom to fit</string>
+	<string name="settings_image_thumb_if_bigger_than_title">Big photo width/height</string>
+	<string name="settings_image_thumb_if_bigger_than_summary">if photo-width-height is bigger than this show thumbnail in image detail view. (memoryefficient, fast, but low-quality)</string>
+	<string name="settings_image_thumb_dir_title">Thumbnail folder</string>
 </resources>
