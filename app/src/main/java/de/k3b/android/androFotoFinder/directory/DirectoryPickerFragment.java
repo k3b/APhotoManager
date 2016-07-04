@@ -44,7 +44,6 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import de.k3b.IBackgroundProcess;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailDialogBuilder;
@@ -77,7 +76,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     private static final int FIRST_RADIO = 5000;
 
     /** executer for background task, that updates status-message and stops if cancel is pressed */
-    private abstract class AsyncTaskEx<Params> extends AsyncTask<Params, Integer,Integer> implements IBackgroundProcess<Integer> {
+    private abstract class AsyncTaskEx<Params> extends AsyncTask<Params, Integer,Integer> {
         private final int mProgressMessageResourceId;
 
         AsyncTaskEx(int progressMessageResourceId) {
@@ -85,12 +84,10 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             mProgressMessageResourceId = progressMessageResourceId;
         }
 
-        @Override
         public void publishProgress_(Integer... values) {
             publishProgress(values);
         }
 
-        @Override
         public boolean isCancelled_() {
             return isCancelled();
         }
