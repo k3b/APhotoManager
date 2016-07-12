@@ -20,12 +20,16 @@
 package de.k3b.android.util;
 
 import android.media.ExifInterface;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 
 import de.k3b.android.androFotoFinder.Global;
@@ -54,17 +58,56 @@ public class ExifGps {
                     sb.append(ExifInterface.TAG_GPS_LATITUDE).append("=").append(latLong[0]).append(" ")
                             .append(ExifInterface.TAG_GPS_LONGITUDE).append("='").append(latLong[1]).append("' ");
                 }
-                sb.append(ExifInterface.TAG_DATETIME).append("='").append(exif.getAttribute(ExifInterface.TAG_DATETIME)).append("' ");
-                sb.append(ExifInterface.TAG_MAKE).append("='").append(exif.getAttribute(ExifInterface.TAG_MAKE)).append("' ");
-                sb.append(ExifInterface.TAG_MODEL).append("='").append(exif.getAttribute(ExifInterface.TAG_MODEL)).append("' ");
+
+                HashMap<String, String> exifAttributes = null; // getAttributes(exif);
+
+                if ((exifAttributes != null) && (exifAttributes.size() > 0)) {
+                    addAttributes(sb, exifAttributes);
+                } else {
+                    append(sb, ExifInterface.TAG_DATETIME, exif.getAttribute(ExifInterface.TAG_DATETIME));
+                    append(sb, ExifInterface.TAG_MAKE, exif.getAttribute(ExifInterface.TAG_MAKE));
+                    append(sb, ExifInterface.TAG_MODEL, exif.getAttribute(ExifInterface.TAG_MODEL));
+                }
             }
 
             if (filePath != null) {
-                sb.append("filedate='").append(sFormatter.format(new Date(filePath.lastModified()))).append("' ")
-                .append(filePath.canRead() ? "r":"-").append(filePath.canWrite() ? "w":"-").append(filePath.canExecute() ? "x":"-");
+                append(sb, "filedate",sFormatter.format(new Date(filePath.lastModified())));
+                append(sb, "filemode", "" + (filePath.canRead() ? "r":"-") + (filePath.canWrite() ? "w":"-") + (filePath.canExecute() ? "x":"-"));
             }
         }
         return sb;
+    }
+
+    public static void addAttributes(StringBuilder sb, HashMap<String, String> exifAttributes) {
+        for (Map.Entry<String, String> iter : exifAttributes.entrySet()) {
+            String key = iter.getKey();
+            String val = iter.getValue();
+            append(sb, key, val);
+        }
+    }
+
+    @Nullable
+    public static HashMap<String, String> getAttributes(ExifInterface exif) {
+        HashMap<String, String> exifAttributes = null;
+        // access private member via reflection
+        // private HashMap<String, String> ExifInterface.mAttributes
+        // http://stackoverflow.com/questions/11483647/how-to-access-private-methods-and-private-data-members-via-reflection
+        try {
+
+             /*---  [GETING VALUE FROM PRIVATE FIELD]  ---*/
+            Field f = ExifInterface.class.getDeclaredField("mAttributes");
+            f.setAccessible(true);//Abracadabra
+            exifAttributes = (HashMap<String, String>) f.get(exif);
+
+        } catch (Exception ex) {
+
+        }
+
+        return (exifAttributes.size() > 0) ? exifAttributes : null;
+    }
+
+    private static StringBuilder append(StringBuilder sb, String key, String val) {
+        return sb.append(key).append("='").append(val).append("'\n");
     }
 
     public static boolean saveLatLon(File filePath, double latitude, double longitude, String appName, String appVersion) {

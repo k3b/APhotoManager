@@ -24,7 +24,7 @@ nl,&nbsp;
 ## Current Project Status
 
 * Current release
-  * <img src="https://img.shields.io/github/release/k3b/APhotoManager.svg?maxAge=2592000" />
+  * <img src="https://img.shields.io/github/release/k3b/APhotoManager.svg?maxAge=3600" />
   * [<img src="https://f-droid.org/badge/get-it-on.png" alt="available on F-Droid app store" height="80">](https://f-droid.org/app/de.k3b.android.androFotoFinder)
   * [<img src="https://img.shields.io/github/license/k3b/APhotoManager.svg"></img>](https://github.com/k3b/APhotoManager/blob/master/LICENSE) or later.
   * Source code [branch FDroid <img src="https://travis-ci.org/k3b/APhotoManager.svg?branch=FDroid" alt="link to buldserver"  />](https://travis-ci.org/k3b/APhotoManager)
