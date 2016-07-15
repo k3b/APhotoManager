@@ -23,14 +23,15 @@ import android.app.Application;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 
 import de.k3b.FotoLibGlobal;
 import de.k3b.android.GuiUtil;
+import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.LogCat;
 import de.k3b.database.QueryParameter;
-import uk.co.senab.photoview.HugeImageLoader;
 import uk.co.senab.photoview.PhotoViewAttacher;
 import uk.co.senab.photoview.gestures.CupcakeGestureDetector;
 
@@ -74,9 +75,7 @@ public class AndroFotoFinderApp extends Application {
         QueryParameter.sParserDefaultFrom = FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI.toString();
         QueryParameter.sParserDefaultQueryTypeId = FotoSql.QUERY_TYPE_DEFAULT;
         QueryParameter.sParserDefaultSelect = new ArrayList<String>();
-        for (String columnName : FotoSql.DEFAULT_GALLERY_COLUMNS) {
-            QueryParameter.sParserDefaultSelect.add(columnName);
-        }
+        Collections.addAll(QueryParameter.sParserDefaultSelect, FotoSql.DEFAULT_GALLERY_COLUMNS);
         mCrashSaveToFile = new LogCat(this, Global.LOG_CONTEXT, HugeImageLoader.LOG_TAG,
                 PhotoViewAttacher.LOG_TAG, CupcakeGestureDetector.LOG_TAG,
                 FotoLibGlobal.LOG_TAG, ThumbNailUtils.LOG_TAG);

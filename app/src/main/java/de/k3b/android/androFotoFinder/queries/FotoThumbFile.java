@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2015-2016 by k3b.
+ *
+ * This file is part of AndroFotoFinder.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
+ 
 package de.k3b.android.androFotoFinder.queries;
 
 import android.content.Context;
@@ -9,6 +28,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.OsUtils;
@@ -50,7 +70,7 @@ public class FotoThumbFile {
 
         mPrefs.edit()
                 .putString("ThumbRoot", (newValue != null) ? newValue.getAbsolutePath() : null)
-                .commit();
+                .apply();
         return this;
     }
 
@@ -67,7 +87,7 @@ public class FotoThumbFile {
     public static File getThumbFile(File thumbDirRoot, long id, long thumbType) {
         if (thumbDirRoot != null) {
             // i.e img_23.1/1234523.jpg (.23 id ending with "23)
-            String name = String.format("img_%2$02d.%1$d/%3$d.jpg", thumbType, id % 100, id);
+            String name = String.format(Locale.US, "img_%2$02d.%1$d/%3$d.jpg", thumbType, id % 100, id);
             return new File(thumbDirRoot, name);
         }
         return null;

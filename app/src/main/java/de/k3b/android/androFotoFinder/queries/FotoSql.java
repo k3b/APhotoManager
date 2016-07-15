@@ -27,6 +27,7 @@ import android.content.CursorLoader;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -91,8 +92,13 @@ public class FotoSql {
     public static final String SQL_COL_LAT = MediaStore.Images.Media.LATITUDE;
     public static final String SQL_COL_LON = MediaStore.Images.Media.LONGITUDE;
     public static final String SQL_COL_SIZE = MediaStore.Images.Media.SIZE;
-    public static final String SQL_COL_MAX_WITH = "max(" + MediaStore.Images.Media.WIDTH + "," +
-            MediaStore.Images.Media.HEIGHT +")";
+
+    // only works with api >= 16
+    public static final String SQL_COL_MAX_WITH =
+            (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+                ? "max(" + MediaStore.Images.Media.WIDTH + "," +
+                                                MediaStore.Images.Media.HEIGHT +")"
+                : "1024";
 
     private static final String FILTER_EXPR_LAT_MAX = SQL_COL_LAT + " < ?";
     private static final String FILTER_EXPR_LAT_MIN = SQL_COL_LAT + " >= ?";
@@ -702,14 +708,15 @@ public class FotoSql {
             ContentValues values = new ContentValues();
             values.put(FotoSql.SQL_COL_PATH, (String) null);
             contentResolver.update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, values,where, selectionArgs);
+
             int delCount = contentResolver.delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, FotoSql.SQL_COL_PATH + " is null", null);
 
             return delCount;
-        } else {
-            int delCount = contentResolver.delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, where, selectionArgs);
-
-            return delCount;
         }
+
+        int delCount = contentResolver.delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, where, selectionArgs);
+
+        return delCount;
     }
 
     /** converts imageID to content-uri */

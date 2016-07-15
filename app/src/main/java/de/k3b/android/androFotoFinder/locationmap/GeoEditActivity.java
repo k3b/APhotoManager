@@ -230,7 +230,7 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
 
         edit.putString(SETTINGS_KEY_LAST_URI, geoUri);
 
-        edit.commit();
+        edit.apply();
     }
 
     private GeoPointDto parseGeo(String uriAsString) {

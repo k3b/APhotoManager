@@ -37,9 +37,9 @@ import android.widget.Toast;
 import java.io.File;
 
 import de.k3b.FotoLibGlobal;
+import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.LocalizedActivity;
-import uk.co.senab.photoview.HugeImageLoader;
 import uk.co.senab.photoview.PhotoViewAttacher;
 import uk.co.senab.photoview.log.LogManager;
 
@@ -125,7 +125,7 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putString("thumbCacheRoot", (Global.thumbCacheRoot != null) ? Global.thumbCacheRoot.getAbsolutePath() : null);
         prefs.putString("pickHistoryFile", (Global.pickHistoryFile != null) ? Global.pickHistoryFile.getAbsolutePath() : null);
 
-        prefs.commit();
+        prefs.apply();
 
     }
 

@@ -19,7 +19,6 @@
  
 package de.k3b.android.osmdroid;
 
-import java.util.AbstractList;
 import java.util.List;
 
 import org.osmdroid.views.MapView;

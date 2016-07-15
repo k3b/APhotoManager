@@ -23,14 +23,11 @@ import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -42,9 +39,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.SeekBar;
-
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
 
 import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.*;
@@ -201,7 +195,7 @@ public class LocationMapFragment extends DialogFragment {
 
         edit.putString(STATE_LAST_VIEWPORT, uriCurrentViewport);
 
-        edit.commit();
+        edit.apply();
 
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + "saveLastViewPort: " + uriCurrentViewport);
@@ -615,7 +609,6 @@ public class LocationMapFragment extends DialogFragment {
     /** gets called when SummaryMarkerLoaderTask has finished.
      *
      * @param result null if there was an error
-     * @param zoomLevelChanged
      */
     private void onLoadFinishedSummaryMarker(OverlayManager result, boolean zoomLevelChanged) {
         StringBuilder dbg = (Global.debugEnabledSql || Global.debugEnabled) ? new StringBuilder() : null;

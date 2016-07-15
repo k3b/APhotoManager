@@ -35,14 +35,13 @@ import com.nostra13.universalimageloader.core.display.SimpleBitmapDisplayer;
 
 import java.io.File;
 
+import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.GarbageCollector;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
-import uk.co.senab.photoview.HugeImageLoader;
-import uk.co.senab.photoview.PhotoView;
 
 /**
  * Adapter for android.support.v4.view.ViewPager that allows swiping next/previous image.<br>
@@ -258,7 +257,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
     @NonNull
     protected View createViewWithContent(int position, ViewGroup container, String fullPhotoPath, String debugContext, int size) {
         final Context context = container.getContext();
-        PhotoView photoView = new PhotoView(context);
+        PhotoViewEx photoView = new PhotoViewEx(context);
         photoView.setMaximumScale(20);
         photoView.setMediumScale(5);
 
@@ -281,6 +280,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
                 setImageFromThumbnail(photoView, position, imageFile);
             }
         }
+        photoView.setRotationTo(GuiUtil.getRotationFromExifOrientation(fullPhotoPath));
         if (Global.debugEnabledViewItem) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + debugContext + position +", "
                     + loadType + ") => " + fullPhotoPath + " => " + photoView);
@@ -290,7 +290,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
         return photoView;
     }
 
-    private void setImageFromThumbnail(PhotoView photoView, int position, File imageFile) {
+    private void setImageFromThumbnail(PhotoViewEx photoView, int position, File imageFile) {
         /** k3b 20150913 #10: Faster initial loading: initially the view is loaded with low res image.
          * on first zoom it is reloaded with this uri */
         photoView.setImageReloadFile(imageFile);

@@ -197,7 +197,7 @@ public class HistoryEditText {
         for (EditorHandler instance: mEditorHandlers) {
             instance.saveHistory(sharedPref, edit);
         }
-        edit.commit();
+        edit.apply();
     }
 
     @Override

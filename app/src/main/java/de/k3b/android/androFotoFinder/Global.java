@@ -21,7 +21,6 @@ package de.k3b.android.androFotoFinder;
 
 import android.content.Context;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 
@@ -29,7 +28,6 @@ import java.io.File;
 import java.util.Locale;
 
 import de.k3b.android.util.MenuUtils;
-import de.k3b.android.widget.LocalizedActivity;
 
 /**
  * Global Settings
@@ -95,7 +93,7 @@ public class Global {
     public static void debugMemory(String modul, String message) {
         if (Global.debugEnabledMemory) {
             Runtime r = Runtime.getRuntime();
-            String formattedMessage = String.format("memory : (total/free/avail) = (%3$dK/%4$dK/%5$dK)\t- %1$s.%2$s",
+            String formattedMessage = String.format(Locale.US, "memory : (total/free/avail) = (%3$dK/%4$dK/%5$dK)\t- %1$s.%2$s",
                     modul, message, r.totalMemory()/1024, r.freeMemory()/1024, r.maxMemory()/1024);
 
             Log.d(Global.LOG_CONTEXT, formattedMessage);

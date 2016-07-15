@@ -203,7 +203,7 @@ public class AndroidFileCommands extends FileCommands {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
         SharedPreferences.Editor edit = sharedPref.edit();
         edit.putString(SETTINGS_KEY_LAST_COPY_TO_PATH, copyToPath);
-        edit.commit();
+        edit.apply();
     }
 
     public boolean cmdDeleteFileWithQuestion(final SelectedFiles fotos) {
@@ -347,11 +347,7 @@ public class AndroidFileCommands extends FileCommands {
     }
 
     /**
-     * Write geo data (lat/lon) to photo, media database and log.<br/>
-     *  @param latitude
-     * @param longitude
-     * @param selectedItems
-     * @param itemsPerProgress
+     * Write geo data (lat/lon) to photo, media database and log.
      */
     public int setGeo(double latitude, double longitude, SelectedFiles selectedItems, int itemsPerProgress) {
         if (!Double.isNaN(latitude) && !Double.isNaN(longitude) && (selectedItems != null) && (selectedItems.size() > 0)) {

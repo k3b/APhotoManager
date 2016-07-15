@@ -224,7 +224,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
                 edit.putString(STATE_LAST_GEO, currentGeoUri);
             }
 
-            edit.commit();
+            edit.apply();
         }
     }
 
@@ -282,7 +282,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
         if (uriAsString != null) {
             Toast.makeText(this, getString(R.string.app_name) + ": received  " + uriAsString, Toast.LENGTH_LONG).show();
 
-            pointFromIntent = (GeoPointDto) mGeoUriParser.fromUri(uriAsString, new GeoPointDto());
+            pointFromIntent = mGeoUriParser.fromUri(uriAsString, new GeoPointDto());
             if (GeoPointDto.isEmpty(pointFromIntent)) pointFromIntent = null;
         }
         return pointFromIntent;

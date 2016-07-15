@@ -36,10 +36,7 @@ public class ZoomUtil {
 
     /**
      * Similar to MapView.zoomToBoundingBox that seems to be to inexact.
-     * @param mapView
      * @param zoom if NO_ZOOM (-1) zoom is calculated from min and max
-     * @param min
-     * @param max
      */
     public static void zoomTo(MapView mapView, int zoom, IGeoPoint min, IGeoPoint max) {
         MapTileProviderBase tileProvider = mapView.getTileProvider();

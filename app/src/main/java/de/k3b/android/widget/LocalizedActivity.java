@@ -19,13 +19,13 @@
 
 package de.k3b.android.widget;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 
 import java.util.Locale;
@@ -39,7 +39,8 @@ import de.k3b.android.androFotoFinder.Global;
  *
  * Created by k3b on 07.01.2016.
  */
-public class LocalizedActivity extends Activity {
+
+public abstract class LocalizedActivity extends Activity {
     /** if myLocale != Locale.Default : activity must be recreated in on resume */
     private Locale myLocale = null;
 
@@ -63,7 +64,6 @@ public class LocalizedActivity extends Activity {
     /**
      * Set Activity-s locale to SharedPreferences-setting.
      * Must be called before
-     * @param context
      */
     public static void fixLocale(Context context)
     {
