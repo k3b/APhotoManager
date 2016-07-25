@@ -25,9 +25,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
-
-import static org.mockito.Matchers.any;
 
 /**
  * Created by k3b on 04.08.2015.

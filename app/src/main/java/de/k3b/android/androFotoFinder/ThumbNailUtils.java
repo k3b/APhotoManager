@@ -20,11 +20,7 @@
 package de.k3b.android.androFotoFinder;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.os.Environment;
-import android.preference.PreferenceManager;
-import android.util.Log;
 import android.widget.ImageView;
 
 import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiskCache;

@@ -28,6 +28,7 @@ import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -194,7 +195,6 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
      * Replace all files that either non-jpg or in ".nomedia" folder with null so they wont be
      * processed by media scanner
      *
-     * @param fullPathNames
      * @return number of items left.
      */
     private static int excludeNomediaFiles(String[] fullPathNames) {
@@ -333,7 +333,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
         BitmapFactory.decodeFile(absolutePath, options);
         int mHeight = options.outHeight;
         int mWidth = options.outWidth;
-        if (mWidth > 0 && mHeight > 0) {
+        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) && mWidth > 0 && mHeight > 0) {
             values.put(MediaStore.MediaColumns.WIDTH, mWidth);
             values.put(MediaStore.MediaColumns.HEIGHT, mHeight);
         }
@@ -485,7 +485,6 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
     /**
      * Returns number of milliseconds since Jan. 1, 1970, midnight.
      * Returns -1 if the date time information if not available.
-     * @hide
      */
     public static long getDateTime(ExifInterface exif) {
         String dateTimeString =  exif.getAttribute(ExifInterface.TAG_DATETIME);
@@ -503,8 +502,6 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
 
     /** update media db via android-s native scanner.
      * Requires android-4.4 and up to support single files
-     * @param context
-     * @param pathNames
      */
     public static void updateMediaDB_Androd44(Context context, String[] pathNames) {
         if (Global.debugEnabled) {

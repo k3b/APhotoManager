@@ -497,9 +497,6 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     /**
      * interface Queryable: Owning activity tells fragment to change its content:
      * Initiates a database requery in the background
-     *  @param context
-     * @param parameters
-     * @param why
      */
     @Override
     public void requery(Activity context, QueryParameter parameters, String why) {
@@ -1076,7 +1073,14 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
             // might be null in in orientation change
             if (activity != null) {
-                int delCount = FotoSql.deleteMedia(activity.getContentResolver(), query.toAndroidWhere(), null, true);
+                int delCount = 0;
+
+                try {
+                    delCount = FotoSql.deleteMedia(activity.getContentResolver(), query.toAndroidWhere(), null, true);
+                } catch (Exception ex) {
+                    Log.w(Global.LOG_CONTEXT, "deleteMedia via update failed for 'where " + query.toAndroidWhere() +
+                            "'.");
+                }
                 if (debugMessage != null) {
                     Log.w(Global.LOG_CONTEXT, mDebugPrefix + " deleted " + delCount +
                             " duplicates\n\tDELETE ... WHERE " + query.toAndroidWhere());

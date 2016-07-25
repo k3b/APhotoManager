@@ -121,9 +121,6 @@ public class DirectoryFormatter {
 
     /**
      * Format "lat,lon" or "lat,lon-lat,lon"
-     *
-     * @param path
-     * @return
      */
     public static IGeoRectangle parseLatLon(String path) {
         if (path != null) {

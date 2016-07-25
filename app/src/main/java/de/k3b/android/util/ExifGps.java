@@ -19,6 +19,7 @@
 
 package de.k3b.android.util;
 
+import android.annotation.SuppressLint;
 import android.media.ExifInterface;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -182,7 +183,6 @@ public class ExifGps {
 
     /**
      * returns ref for latitude which is S or N.
-     * @param latitude
      * @return S or N
      */
     private static String latitudeRef(double latitude) {
@@ -191,7 +191,6 @@ public class ExifGps {
 
     /**
      * returns ref for latitude which is S or N.
-     * @param longitude
      * @return W or E
      */
     private static String longitudeRef(double longitude) {
@@ -205,7 +204,6 @@ public class ExifGps {
      *  79/1,56/1,55903/1000<br/>
      * It works for latitude and longitude<br/>
      * @param latitude could be longitude.
-     * @return
      */
     private static final String convert(double latitude) {
         latitude=Math.abs(latitude);
@@ -217,13 +215,12 @@ public class ExifGps {
         latitude -= (minute * 60.0d);
         int milliSecond = (int) (latitude*1000.0d);
 
-        StringBuilder sb = new StringBuilder(20);
-        sb.append(degree);
-        sb.append("/1,");
-        sb.append(minute);
-        sb.append("/1,");
-        sb.append(milliSecond);
-        sb.append("/1000,");
-        return sb.toString();
+        String sb = String.valueOf(degree) +
+                "/1," +
+                minute +
+                "/1," +
+                milliSecond +
+                "/1000,";
+        return sb;
     }
 }

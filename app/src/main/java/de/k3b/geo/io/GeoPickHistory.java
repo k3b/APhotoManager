@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import de.k3b.android.androFotoFinder.Global;
-import de.k3b.database.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
 
 /**

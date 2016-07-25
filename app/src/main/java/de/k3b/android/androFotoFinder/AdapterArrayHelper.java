@@ -1,7 +1,25 @@
+/*
+ * Copyright (c) 2015-2016 by k3b.
+ *
+ * This file is part of AndroFotoFinder.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
+ 
 package de.k3b.android.androFotoFinder;
 
 import android.app.Activity;
-import android.database.ContentObserver;
 import android.util.Log;
 
 import java.io.File;
@@ -31,8 +49,7 @@ public class AdapterArrayHelper {
         }
     }
 
-    /** refreshLocal files from inital path
-     * @param why*/
+    /** refreshLocal files from inital path */
     public void reload(String why) {
         mFullPhotoPaths = mRootDir.list(MediaScanner.JPG_FILENAME_FILTER);
         if ((mFullPhotoPaths != null) && (mFullPhotoPaths.length == 0)) {

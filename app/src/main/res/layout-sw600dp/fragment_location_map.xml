@@ -91,7 +91,7 @@
             android:layout_alignParentBottom="true"
             android:id="@+id/image"
             android:layout_width="@dimen/grid_cell_width"
-            android:layout_height="@dimen/grid_cell_height" />
+            android:layout_height="@dimen/grid_cell_height"  />
     </RelativeLayout>
 
 </FrameLayout>

@@ -19,8 +19,6 @@
  
 package de.k3b.android.androFotoFinder.directory;
 
-import de.k3b.database.SelectedItems;
-import de.k3b.io.Directory;
 import de.k3b.io.IDirectory;
 
 /**

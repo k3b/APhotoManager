@@ -53,7 +53,6 @@ import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.android.util.GarbageCollector;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
-import de.k3b.android.util.MenuUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
@@ -211,7 +210,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
                     edit.putString(STATE_Filter, mCurrentFilterSettings.toString());
                 }
 
-                edit.commit();
+                edit.apply();
             }
         }
 
@@ -447,11 +446,10 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         MenuItem sorter = menu.findItem(R.id.cmd_sort);
 
         if (sorter != null) {
-            StringBuilder sortTitle = new StringBuilder();
-            sortTitle.append(getString(R.string.sort_menu_title))
-                    .append(": ")
-                    .append(mGalleryQueryParameter.getSortDisplayName(this));
-            sorter.setTitle(sortTitle.toString());
+            String sortTitle = getString(R.string.sort_menu_title) +
+                    ": " +
+                    mGalleryQueryParameter.getSortDisplayName(this);
+            sorter.setTitle(sortTitle);
         }
         AboutDialogPreference.onPrepareOptionsMenu(this, menu);
         return super.onPrepareOptionsMenu(menu);
@@ -651,9 +649,6 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
 
     /**
      * called when user selects a new directoryRoot
-     *
-     * @param selectedAbsolutePath
-     * @param queryTypeId
      */
     @Override
     public void onDirectoryPick(String selectedAbsolutePath, int queryTypeId) {
@@ -681,7 +676,6 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
 
     /**
      * called when user cancels selection of a new directoryRoot
-     * @param queryTypeId
      */
     @Override
     public void onDirectoryCancel(int queryTypeId) {

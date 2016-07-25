@@ -264,7 +264,7 @@ public class GalleryFilterActivity extends LocalizedActivity implements Common, 
                     edit.putString(SETTINGS_KEY + id, dir.currentPath);
                 }
             }
-            edit.commit();
+            edit.apply();
         }
     }
 
@@ -540,8 +540,7 @@ public class GalleryFilterActivity extends LocalizedActivity implements Common, 
         toGui(mFilter);
     }
 
-    /** interface DirectoryPickerFragment.invalidateDirectories not used
-     * @param why*/
+    /** interface DirectoryPickerFragment.invalidateDirectories not used */
     @Override
     public void invalidateDirectories(String why) {
     }

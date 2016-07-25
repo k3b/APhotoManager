@@ -57,7 +57,6 @@ import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
 import de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.queries.FotoThumbFile;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
@@ -981,7 +980,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     private void toggleViewPagerScrolling() {
     	if (isViewPagerActive()) {
-    		((LockableViewPager) mViewPager).toggleLock();
+    		mViewPager.toggleLock();
     	}
     }
     

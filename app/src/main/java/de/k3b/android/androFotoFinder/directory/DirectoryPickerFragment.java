@@ -112,11 +112,9 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         }
 
         @Override protected void onPostExecute(Integer result) {
-            StringBuilder message = new StringBuilder();
-            message
-                    .append(getActivity().getString(mProgressMessageResourceId))
-                    .append(": ").append(result);
-            Toast.makeText(getActivity(), message.toString(),
+            String message = getActivity().getString(mProgressMessageResourceId) +
+                    ": " + result;
+            Toast.makeText(getActivity(), message,
                     Toast.LENGTH_LONG).show();
             onDirectoryCancel();
         }
@@ -655,9 +653,6 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     /**
      * DirectoryGui-Public api for embedding activity
      * (Re)-Defines base parameters for Directory Navigation
-     * @param root
-     * @param dirTypId
-     * @param initialAbsolutePath
      */
     @Override
     public void defineDirectoryNavigation(IDirectory root, int dirTypId, String initialAbsolutePath) {
@@ -688,8 +683,6 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
 
     /**
      * Set curent selection to absolutePath
-     *
-     * @param absolutePath
      */
     @Override
     public void navigateTo(String absolutePath) {
@@ -741,15 +734,13 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         /** called when user picks a new directory */
         void onDirectoryPick(String selectedAbsolutePath, int queryTypeId);
 
-        /** called when user cancels picking of a new directory
-         * @param queryTypeId*/
+        /** called when user cancels picking of a new directory */
         void onDirectoryCancel(int queryTypeId);
 
         /** called after the selection in tree has changed */
         void onDirectorySelectionChanged(String selectedChild, int queryTypeId);
 
-        /** remove cached directories
-         * @param why*/
+        /** remove cached directories */
         void invalidateDirectories(String why);
     }
 }

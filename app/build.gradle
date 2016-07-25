@@ -39,7 +39,9 @@ android {
 		// http://stackoverflow.com/questions/31350350/generating-signed-apk-error7-missingtranslation-in-build-generated-res-gen
 		// MissingTranslation : not all crowdwin translations are complete so ignore them
 		// ValidFragment : local (dialog-)fragment class for customized direcotry picker is fragile but on rotation code makes shure that dialog is closed. 
-        disable 'MissingTranslation','ValidFragment'
+        disable 'MissingTranslation','ValidFragment', 'ContentDescription', 'AndroidLintPluralsCandidate', 'AndroidLintRtlHardcoded'
+
+        abortOnError false
     }
 }
 
@@ -58,7 +60,7 @@ dependencies {
     // compile 'com.github.chrisbanes.photoview:library:1.2.3'
     // compile project(':fotoview.library')
     // compile 'com.github.k3b.PhotoView:library:v1.2.6.k3b-SNAPSHOT' // via jitpack.io
-    compile 'com.github.k3b:PhotoView:v1.2.6.k3b-2-SNAPSHOT' // via jitpack.io
+    compile 'com.github.k3b:PhotoView:v1.2.6.k3b-5-SNAPSHOT' // via jitpack.io
 
     // for view-pager
     // 21.0.2 seems to have problems with ViewPager
