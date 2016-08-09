@@ -8,15 +8,25 @@ android {
 
     defaultConfig {
         // fdroid-release 'de.k3b.android.androFotoFinder'
-        // main-develop-branch 'de.k3b.android.androFotoFinderDev'
+        // main-develop-branch 'de.k3b.android.androFotoFinder.dev'
         applicationId 'de.k3b.android.androFotoFinder.dev'
 		
         minSdkVersion 14
         targetSdkVersion 21
 
+		// non-fdroid release
         // appXXX are defined in gradle.properties
-        versionCode = Long.valueOf(appVersionCode)
-        versionName = appVersionName
+        // versionCode = Long.valueOf(appVersionCode)
+        // versionName = appVersionName
+
+		// fdroid release only
+        // unfortunately fdroid needs magic numbers to detect version infos
+		// published 0.5.1.160629 (17)
+		// published 0.5.1.160712 (18)
+		// published 0.5.2.160726 (19)
+		
+        versionCode = 19
+        versionName = '0.5.2.160726'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -57,6 +67,11 @@ dependencies {
     // compile project(':fotoview.library')
     // compile 'com.github.k3b.PhotoView:library:v1.2.6.k3b-SNAPSHOT' // via jitpack.io
     compile 'com.github.k3b:PhotoView:v1.2.6.k3b-5-SNAPSHOT' // via jitpack.io
+
+	// https://github.com/davemorrissey/subsampling-scale-image-view
+	// replacement for PhotoView:library ??
+	compile 'com.davemorrissey.labs:subsampling-scale-image-view:3.5.0'
+	
 
     // for view-pager
     // 21.0.2 seems to have problems with ViewPager
