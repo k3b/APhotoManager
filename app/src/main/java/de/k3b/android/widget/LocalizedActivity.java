@@ -89,7 +89,9 @@ public abstract class LocalizedActivity extends Activity {
         }
     }
 
-    public static void recreate(Activity context) {
+    /** force all open activity to recreate */
+    public static void recreate(Activity child) {
+        Activity context = child;
         while (context != null) {
             context.recreate();
             context = context.getParent();

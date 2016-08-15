@@ -55,10 +55,8 @@ import de.k3b.database.SelectedItems;
  */
 public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItems.Id2FileNameConverter  {
     // Identifies a particular Loader or a LoaderManager being used in this component
-    private static final boolean SYNC = false;
     protected final Activity mContext;
     protected final SelectedItems mSelectedItems;
-    private OnGalleryInteractionListener callback = null;
 
     // for debugging
     private static int id = 1;
@@ -77,9 +75,6 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
 
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + "()");
-        }
-        if (context instanceof OnGalleryInteractionListener) {
-            this.callback = (OnGalleryInteractionListener) context;
         }
     }
 

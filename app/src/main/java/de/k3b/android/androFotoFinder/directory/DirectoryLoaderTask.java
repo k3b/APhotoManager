@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2016 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -107,7 +107,6 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
 
             DirectoryBuilder builder = new DirectoryBuilder();
 
-            long startTime = SystemClock.currentThreadTimeMillis();
             int colText = cursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT);
             int colCount = cursor.getColumnIndex(FotoSql.SQL_COL_COUNT);
             int colIconID = cursor.getColumnIndex(FotoSql.SQL_COL_PK);
@@ -190,7 +189,7 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
     protected void onPostExecute(IDirectory result) {
         showNotification("Downloaded " + result + " bytes");
     }
-    */
+
     private static void usageExample(Activity context, QueryParameter parameters, String debugPrefix) {
         DirectoryLoaderTask loader = new DirectoryLoaderTask(context, debugPrefix) {
             // This is called when doInBackground() is finished
@@ -206,4 +205,5 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
         };
         loader.execute(parameters);
     }
+    */
 }

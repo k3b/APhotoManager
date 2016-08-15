@@ -21,7 +21,6 @@ package de.k3b.android.androFotoFinder.gallery.cursor;
 
 import android.app.Activity;
 import android.app.LoaderManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
@@ -1018,7 +1017,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             @Override
             protected void onPostExecute(SelectedItems selectedItems) {
                 if (!isCancelled()) {
-                    onMissingDisplayNamesComplete(mResultCount, mStatus);
+                    onMissingDisplayNamesComplete(mStatus);
                 }
             }
         };
@@ -1027,7 +1026,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     /** called after MissingDisplayNamesComplete finished */
-    private void onMissingDisplayNamesComplete(int mResultCount, StringBuffer debugMessage) {
+    private void onMissingDisplayNamesComplete(StringBuffer debugMessage) {
         if (debugMessage != null) {
             Log.w(Global.LOG_CONTEXT, mDebugPrefix + debugMessage);
         }
