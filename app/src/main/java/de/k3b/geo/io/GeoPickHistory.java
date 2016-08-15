@@ -25,7 +25,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Vector;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.geo.api.GeoPointDto;

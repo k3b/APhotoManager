@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2016 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -165,6 +165,7 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
             case 3 :
                 setPath(value);
                 break;
+            default:break;
         }
     }
 

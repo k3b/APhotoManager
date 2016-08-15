@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2016 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -81,23 +81,6 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
         if (context instanceof OnGalleryInteractionListener) {
             this.callback = (OnGalleryInteractionListener) context;
         }
-    }
-
-    private String debugCursor(Cursor cursor, int maxRows, String delim, String... colmnNames) {
-        StringBuilder result = new StringBuilder();
-        if ((cursor != null) && (!cursor.isClosed())) {
-            int oldPosition = cursor.getPosition();
-            int last = Math.min(maxRows - 1, cursor.getCount() - 1);
-            for (int position = 0; position <= last; position ++) {
-                result.append("#").append(position);
-                cursor.moveToPosition(position);
-                for (String col : colmnNames) {
-                    result.append(";").append(cursor.getString(cursor.getColumnIndex(col)));
-                }
-                result.append(delim);
-            }
-        }
-        return result.toString();
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2016 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -200,24 +200,8 @@ public class FileCommands implements  Cloneable {
 
         int suffix = absolutePath.lastIndexOf(".");
 
-        if (suffix >= 0) absolutePath = absolutePath.substring(0, suffix);
-        return new File(absolutePath + EXT_SIDECAR);
-    }
-
-    private List<File> getDuplicates(File[] files) {
-        if (files != null) {
-            ArrayList<File> result = new ArrayList<File>();
-            for(File file : files) {
-                if (osFileExists(file)) {
-                    result.add(file);
-                }
-            }
-
-            if (result.size() > 0) {
-                return result;
-            }
-        }
-        return null;
+        String pathWitoutSuffix = (suffix >= 0) ?absolutePath.substring(0, suffix) : absolutePath ;
+        return new File(pathWitoutSuffix + EXT_SIDECAR);
     }
 
     /**
@@ -297,7 +281,8 @@ public class FileCommands implements  Cloneable {
      */
     public static boolean _osFileCopy(File targetFullPath, File sourceFullPath, FileCommands owner) {
 
-        FileChannel in = null, out = null;
+        FileChannel in = null;
+        FileChannel out = null;
         try {
             in = new FileInputStream(sourceFullPath).getChannel();
             out = new FileOutputStream(targetFullPath).getChannel();
@@ -348,10 +333,12 @@ public class FileCommands implements  Cloneable {
 
     /** called before copy/move/rename/delete */
     protected void onPreProcess(String what, String[] oldPathNames, String[] newPathNames, int opCode) {
+        /* can be overwritten */
     }
 
     /** called for each modified/deleted file */
     protected void onPostProcess(String what, String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
+        /* can be overwritten */
     }
 
     public void openLogfile() {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2016 by k3b.
  *
  * This file is part of LocationMapViewer.
  *
@@ -23,6 +23,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import org.osmdroid.api.IGeoPoint;
@@ -43,6 +44,8 @@ import de.k3b.android.androFotoFinder.R;
  * Created by k3b on 10.02.2015.
  */
 public class GuestureOverlay extends Overlay /* Debug */ {
+    public static boolean mDebug = false;
+    public static String mDebugPrefix = "GuestureOverlay";
     private Point mStart = null;
     private Point mEnd = null;
     // private Rect mRect = null;
@@ -90,7 +93,7 @@ public class GuestureOverlay extends Overlay /* Debug */ {
                     this.mRectVisible = false;
                     return true; // processed
                 }
-            }
+                default:break;            }
         }
         return super.onDoubleTapEvent(ev, mapView); // false: not handled yet
     }
@@ -125,6 +128,11 @@ public class GuestureOverlay extends Overlay /* Debug */ {
         this.mRectVisible = (dx > 10) || (dy > 10);
         this.mEnd.set(x,y);
 
+        if (mDebug) {
+            Log.d(mDebugPrefix,context + ": setEndPoint(x=" +
+                    x+",y=" +
+                    y+ ",visible="+ mRectVisible+") for " + mapView);
+        }
         return mRectVisible;
     }
 

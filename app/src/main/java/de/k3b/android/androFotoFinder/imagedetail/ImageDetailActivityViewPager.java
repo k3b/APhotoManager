@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright 2011, 2012 Chris Banes.
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2016 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -96,6 +96,34 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     private boolean mWaitingForMediaScannerResult = false;
 
+    private LocalCursorLoader mCurorLoader;
+
+    private static final String INSTANCE_STATE_LAST_SCROLL_POSITION = "lastScrollPosition";
+
+    // private static final String ISLOCKED_ARG = "isLocked";
+
+    private LockableViewPager mViewPager = null;
+    private ImagePagerAdapterFromCursorArray mAdapter = null;
+
+    private final AndroidFileCommands mFileCommands = new LocalFileCommands();
+
+    // for debugging
+    private static int id = 1;
+    private String mDebugPrefix;
+
+    /** where data comes from */
+    private QueryParameter mGalleryContentQuery = null;
+    private GalleryFilterParameter mFilter = null;
+
+    /** if >= 0 after load cursor scroll to this offset */
+    private int mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
+
+    /** if not null: after load cursor scroll to this path */
+    private String mInitialFilePath = null;
+
+    /** after 2 secs of user inactive the actionbar is hidden until the screen is touched */
+    private Handler mActionBarHideTimer = null;
+
     class LocalCursorLoader implements LoaderManager.LoaderCallbacks<Cursor> {
         /** incremented every time a new curster/query is generated */
         private int mRequeryInstanceCount = 0;
@@ -170,7 +198,6 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                     "')";
         }
     }
-    LocalCursorLoader mCurorLoader;
 
     class LocalFileCommands extends AndroidFileCommands {
         @Override
@@ -190,6 +217,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                         mInitialFilePath = oldPathNames[0];
                     }
                     break;
+                default:break;
             }
 
             super.onPostProcess(what, oldPathNames, newPathNames, modifyCount, itemCount, opCode);
@@ -202,7 +230,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     }
 
     public static class MoveOrCopyDestDirPicker extends DirectoryPickerFragment {
-        static AndroidFileCommands sFileCommands = null;
+        protected static AndroidFileCommands sFileCommands = null;
 
         public static MoveOrCopyDestDirPicker newInstance(boolean move, SelectedFiles srcFotos) {
             MoveOrCopyDestDirPicker f = new MoveOrCopyDestDirPicker();
@@ -217,9 +245,9 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             return f;
         }
 
-        /** do not use activity callback */
+        /* do not use activity callback */
         @Override
-        protected void setDirectoryListener(Activity activity) {}
+        protected void setDirectoryListener(Activity activity) {/* do not use activity callback */}
 
         public boolean getMove() {
             return getArguments().getBoolean("move", false);
@@ -260,32 +288,6 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             dismiss();
         }
     };
-
-    private static final String INSTANCE_STATE_LAST_SCROLL_POSITION = "lastScrollPosition";
-
-    // private static final String ISLOCKED_ARG = "isLocked";
-	
-	private LockableViewPager mViewPager = null;
-    private ImagePagerAdapterFromCursorArray mAdapter = null;
-
-    private final AndroidFileCommands mFileCommands = new LocalFileCommands();
-
-    // for debugging
-    private static int id = 1;
-    private String mDebugPrefix;
-
-    /** where data comes from */
-    private QueryParameter mGalleryContentQuery = null;
-    private GalleryFilterParameter mFilter = null;
-
-    /** if >= 0 after load cursor scroll to this offset */
-    private int mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
-
-    /** if not null: after load cursor scroll to this path */
-    private String mInitialFilePath = null;
-
-    /** if not null: photos from this dir are loaded without using media db*/
-    private String mInitialDir = null;
 
     public static void showActivity(Activity context, Uri imageUri, int position, QueryParameter imageDetailQuery) {
         Intent intent;
@@ -395,8 +397,6 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         unhideActionBar(Global.actionBarHideTimeInMilliSecs, "onGuiTouched");
     }
 
-    /** after 2 secs of user inactive the actionbar is hidden until the screen is touched */
-    private Handler mActionBarHideTimer = null;
     private void unhideActionBar(int milliSecsUntilHide, String why) {
         final int ACTIONBAR_HIDE_HANDLER_ID = 3;
         boolean timer = milliSecsUntilHide >= DISABLE_HIDE_ACTIONBAR;
@@ -503,11 +503,11 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             if (uri != null) {
                 String scheme = uri.getScheme();
                 if ((scheme == null) || ("file".equals(scheme))) {
-                    setFilter(getParameterFromPath(uri.getPath(), true)); // including path and index
+                    setFilter(getParameterFromPath(uri.getPath())); // including path and index
                 } else if ("content".equals(scheme)) {
                     String path = FotoSql.execGetFotoPath(this, uri);
                     if (path != null) {
-                        setFilter(getParameterFromPath(path, false));
+                        setFilter(getParameterFromPath(path));
                         if (Global.debugEnabled) {
                             Log.i(Global.LOG_CONTEXT, "Translate from '" + uri +
                                     "' to '" + path + "'");
@@ -532,7 +532,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         }
     }
 
-    private GalleryFilterParameter getParameterFromPath(String path, boolean isFileUri) {
+    private GalleryFilterParameter getParameterFromPath(String path) {
         if ((path == null) || (path.length() == 0)) return null;
 
         File selectedPhoto = new File(path);
@@ -907,11 +907,12 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         return false;
     }
 
-    private boolean onRenameDirQueston(final long fotoId, final String fotoPath, String newName) {
+    private boolean onRenameDirQueston(final long fotoId, final String fotoPath, final String _newName) {
         if (AndroidFileCommands.canProcessFile(this)) {
-            if (newName == null) {
-                newName = new File(getCurrentFilePath()).getName();
-            }
+            final String newName = (_newName == null)
+                    ? new File(getCurrentFilePath()).getName()
+                    : _newName;
+
 
             Dialogs dialog = new Dialogs() {
                 @Override
@@ -934,7 +935,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         File dest = new File(src.getParentFile(), newFileName);
         File destXmp = mFileCommands.getSidecar(dest);
 
-        if (src == dest) return; // new name == old name ==> nothing to do
+        if (src.equals(dest)) return; // new name == old name ==> nothing to do
 
         String errorMessage = null;
         if (hasSideCar && mFileCommands.osFileExists(destXmp)) {
@@ -978,12 +979,6 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         return this.mAdapter.hasGeo(itemPosition);
     }
 
-    private void toggleViewPagerScrolling() {
-    	if (isViewPagerActive()) {
-    		mViewPager.toggleLock();
-    	}
-    }
-    
     private boolean isViewPagerActive() {
     	return (mViewPager != null && mViewPager instanceof LockableViewPager);
     }

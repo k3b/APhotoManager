@@ -385,12 +385,12 @@ public class LocationMapFragment extends DialogFragment {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
+                /* change ignored */
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                /* change ignored */
             }
         });
     }
@@ -417,16 +417,14 @@ public class LocationMapFragment extends DialogFragment {
             reloadSelectionMarker();
         }
 
-        if (rectangle != null) {
-            if (!Double.isNaN(rectangle.getLatitudeMin())) {
-                BoundingBoxE6 boundingBox = new BoundingBoxE6(
-                        rectangle.getLatitudeMax(),
-                        rectangle.getLogituedMin(),
-                        rectangle.getLatitudeMin(),
-                        rectangle.getLogituedMax());
+        if ((rectangle != null) && !Double.isNaN(rectangle.getLatitudeMin())) {
+            BoundingBoxE6 boundingBox = new BoundingBoxE6(
+                    rectangle.getLatitudeMax(),
+                    rectangle.getLogituedMin(),
+                    rectangle.getLatitudeMin(),
+                    rectangle.getLogituedMax());
 
-                zoomToBoundingBox(boundingBox, zoomlevel);
-            }
+            zoomToBoundingBox(boundingBox, zoomlevel);
         }
 
         if (rootFilter != null) {

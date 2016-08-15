@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2016 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -40,7 +40,6 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.GarbageCollector;
-import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
 
 /**
@@ -54,13 +53,11 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
     // debug support
     private static int id = 0;
     protected final String mDebugPrefix;
-    private static final boolean SYNC = false; // true: sync loading is much easier to debug.
 
     private final Activity mActivity;
     // workaround because setEllipsize(TextUtils.TruncateAt.MIDDLE) is not possible for title
     private final int mMaxTitleLength;
 
-    private QueryParameter mParameters; // defining sql to get data
     private Cursor mCursor = null; // the content of the page
 
     protected DisplayImageOptions mDisplayImageOptions;
@@ -102,24 +99,6 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
         Cursor oldCursor = mCursor;
         mCursor = newCursor;
         return oldCursor;
-    }
-
-    /** debug support for logging current cursor content */
-    private String debugCursor(Cursor cursor, int maxRows, String delim, String... colmnNames) {
-        StringBuilder result = new StringBuilder();
-        if ((cursor != null) && (!cursor.isClosed())) {
-            int oldPosition = cursor.getPosition();
-            int last = Math.min(maxRows - 1, cursor.getCount() - 1);
-            for (int position = 0; position <= last; position ++) {
-                result.append("#").append(position);
-                cursor.moveToPosition(position);
-                for (String col : colmnNames) {
-                    result.append(";").append(cursor.getString(cursor.getColumnIndex(col)));
-                }
-                result.append(delim);
-            }
-        }
-        return result.toString();
     }
 
     /**
@@ -212,8 +191,6 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
     public View instantiateItem(ViewGroup container, int position) {
         Cursor cursor = getCursorAt(position);
         if (cursor != null) {
-            long imageID = cursor.getLong(cursor.getColumnIndex(FotoSql.SQL_COL_PK));
-
             String fullPhotoPath = getFullFilePath(position);
             // determine max(with,height) from db
             final int colSize = (cursor != null) ? cursor.getColumnIndex(FotoSql.SQL_COL_SIZE) : -1;
@@ -239,15 +216,13 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
         int result = -1;
         if ((this.mCursor != null) && (path != null)) {
             int index = mCursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT);
-            if (index >= 0) {
-                if (mCursor.moveToFirst()) {
-                    do {
-                        if (path.equals(mCursor.getString(index))) {
-                            result = mCursor.getPosition();
-                            break;
-                        }
-                    } while (mCursor.moveToNext());
-                }
+            if ((index >= 0) && (mCursor.moveToFirst())) {
+                do {
+                    if (path.equals(mCursor.getString(index))) {
+                        result = mCursor.getPosition();
+                        break;
+                    }
+                } while (mCursor.moveToNext());
             }
         }
         if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, mDebugPrefix + "getPositionFromPath(" + path +") => " + result);
@@ -268,7 +243,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
         // if image is big use memoryefficient, fast, low-quality thumbnail (old code)
         if (size > Global.imageDetailThumbnailIfBiggerThan) {
             loadType = "image too big using thumb ";
-            setImageFromThumbnail(photoView, position, imageFile);
+            setImageFromThumbnail(photoView, imageFile);
         } else {
             try {
                 // #53 Optimisation: no need for thumbnail - saves cache memory but may throw OutOfMemoryError
@@ -277,7 +252,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
                 photoView.setImageReloadFile(null);
             } catch (OutOfMemoryError err) {
                 loadType = "small image out of memory using thumb ";
-                setImageFromThumbnail(photoView, position, imageFile);
+                setImageFromThumbnail(photoView, imageFile);
             }
         }
         photoView.setRotationTo(GuiUtil.getRotationFromExifOrientation(fullPhotoPath));
@@ -290,7 +265,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
         return photoView;
     }
 
-    private void setImageFromThumbnail(PhotoViewEx photoView, int position, File imageFile) {
+    private void setImageFromThumbnail(PhotoViewEx photoView, File imageFile) {
         /** k3b 20150913 #10: Faster initial loading: initially the view is loaded with low res image.
          * on first zoom it is reloaded with this uri */
         photoView.setImageReloadFile(imageFile);
