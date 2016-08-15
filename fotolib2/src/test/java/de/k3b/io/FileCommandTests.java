@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2016 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -30,9 +30,10 @@ import static org.mockito.Mockito.*;
  */
 public class FileCommandTests {
     private static final File X_FAKE_OUTPUT_DIR = new File("x:/fakeOutputDir");
-    FileCommands sut;
+    private FileCommands sut;
+
     @Before
-    public void setup() {
+    public void setUp() {
         sut = spy(new FileCommands());
         doReturn(true).when(sut).osCreateDirIfNeccessary(any(File.class));
         doReturn(true).when(sut).osFileMoveOrCopy(anyBoolean(), any(File.class), any(File.class));
@@ -88,7 +89,7 @@ public class FileCommandTests {
         }
     }
 
-    static File[] createTestFiles(String... files) {
+    private static File[] createTestFiles(String... files) {
         File[] result = new File[files.length];
         int pos = 0;
         for (String file : files) {

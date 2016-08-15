@@ -41,7 +41,7 @@ public class CsvLoader extends Path2DbIdProcessor {
     }
 
     @Override
-    void process(IPathID _csv, Integer id) {
+    protected void process(IPathID _csv, Integer id) {
         CsvItem csv = (CsvItem) _csv;
 
         if (id == null) {
@@ -112,6 +112,7 @@ public class CsvLoader extends Path2DbIdProcessor {
 
         @Override
         public void remove() {
+            /* not used */
         }
     }
 

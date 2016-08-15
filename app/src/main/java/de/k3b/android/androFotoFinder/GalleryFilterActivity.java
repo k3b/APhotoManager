@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2016 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -68,7 +68,7 @@ public class GalleryFilterActivity extends LocalizedActivity implements Common, 
     private static final String FILTER_VALUE = "CURRENT_FILTER";
     private static QueryParameter mRootQuery;
 
-    GalleryFilterParameter mFilter = new GalleryFilterParameter();
+    private GalleryFilterParameter mFilter = new GalleryFilterParameter();
 
     private AsFilter mAsFilter = null;
     private HistoryEditText mHistory;
@@ -150,7 +150,7 @@ public class GalleryFilterActivity extends LocalizedActivity implements Common, 
             @Override
             public void onClick(View v) {
 //              showDirectoryPicker(FotoSql.queryGroupByPlace);
-                showLatLonPicker(FotoSql.queryGroupByPlace);
+                showLatLonPicker();
             }
         });
 
@@ -193,7 +193,7 @@ public class GalleryFilterActivity extends LocalizedActivity implements Common, 
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        switch (item.getItemId()) {
+        switch (id) {
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
                 return true;
@@ -330,7 +330,7 @@ public class GalleryFilterActivity extends LocalizedActivity implements Common, 
 
         }
 
-        void showLatLon(boolean noGeoInfo) {
+       protected void showLatLon(boolean noGeoInfo) {
             show(noGeoInfo, R.id.cmd_select_lat_lon, R.id.lbl_latitude, R.id.cmd_lat_from_history, R.id.edit_latitude_from,
                     R.id.cmd_lat_to_history, R.id.edit_latitude_to, R.id.lbl_longitude, R.id.cmd_lon_from_history,
                     R.id.edit_longitude_from,R.id.cmd_lon_to_history, R.id.edit_longitude_to);
@@ -469,13 +469,13 @@ public class GalleryFilterActivity extends LocalizedActivity implements Common, 
 
     /**************** DirectoryPicker *****************/
     private static class DirInfo {
-        int queryId = 0;
-        IDirectory directoryRoot = null;
-        String currentPath = null;
+        public int queryId = 0;
+        public IDirectory directoryRoot = null;
+        public String currentPath = null;
     }
 
     private HashMap<Integer, DirInfo> dirInfos = new HashMap<Integer, DirInfo>();
-    DirInfo getOrCreateDirInfo(int queryId) {
+    private DirInfo getOrCreateDirInfo(int queryId) {
         DirInfo result = dirInfos.get(queryId);
         if (result == null) {
             result = new DirInfo();
@@ -485,7 +485,7 @@ public class GalleryFilterActivity extends LocalizedActivity implements Common, 
         return result;
     }
 
-    private void showLatLonPicker(final QueryParameter currentDirContentQuery) {
+    private void showLatLonPicker() {
         if (fromGui(mFilter)) {
             final FragmentManager manager = getFragmentManager();
             LocationMapFragment dirDialog = new LocationMapFragment();
