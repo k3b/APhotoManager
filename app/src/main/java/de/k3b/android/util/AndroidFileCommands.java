@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2016 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -141,6 +141,7 @@ public class AndroidFileCommands extends FileCommands {
             case OP_DELETE: return R.string.delete_result_format;
             case OP_RENAME: return R.string.rename_result_format;
             case OP_UPDATE: return R.string.update_result_format;
+            default:break;
         }
         return 0;
 
@@ -152,6 +153,7 @@ public class AndroidFileCommands extends FileCommands {
             switch (item.getItemId()) {
                 case R.id.cmd_delete:
                     return cmdDeleteFileWithQuestion(selectedFileNames);
+                default:break;
             }
         }
         return false;

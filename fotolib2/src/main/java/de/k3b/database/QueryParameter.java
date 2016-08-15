@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2016 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -298,6 +298,7 @@ public class QueryParameter {
                     case "HAVING": params = currentParseItem.mHaving; break;
                     case "HAVING-PARAMETERS": params = currentParseItem.mHavingParameters; break;
                     case "ORDER-BY": params = currentParseItem.mOrderBy; break;
+                    default:break;
                 }
             } else if ((params != null) && (isNoComment(line)) && (line.trim().length() > 0)) {
                 params.add(line);

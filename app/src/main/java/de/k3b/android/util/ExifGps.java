@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2016 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -203,10 +203,10 @@ public class ExifGps {
 	 * -79 degrees, 56 minutes, 55903 millisecs (equals 55.903 seconds)
      *  79/1,56/1,55903/1000<br/>
      * It works for latitude and longitude<br/>
-     * @param latitude could be longitude.
+     * @param _latitude could be longitude.
      */
-    private static final String convert(double latitude) {
-        latitude=Math.abs(latitude);
+    private static final String convert(double _latitude) {
+        double latitude=Math.abs(_latitude);
         int degree = (int) latitude;
         latitude *= 60;
         latitude -= (degree * 60.0d);

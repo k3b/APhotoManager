@@ -108,9 +108,9 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
 
         private String mCurrentPathFromFolderPicker = "/";
 
-        QueryParameter mGalleryContentQuery = null;
+        protected QueryParameter mGalleryContentQuery = null;
 
-        IGalleryFilter mCurrentFilterSettings;
+        protected IGalleryFilter mCurrentFilterSettings;
 
         /** true: if activity started without special intent-parameters, the last mCurrentFilterSettings is saved/loaded for next use */
         private boolean mSaveToSharedPrefs = true;

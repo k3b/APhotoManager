@@ -159,6 +159,7 @@ public class BookmarkController {
                     return onRenameQuestion(items[itemIndex], items[itemIndex]);
                 case R.id.cmd_delete:
                     return onDeleteQuestion(itemIndex, items);
+                default:break;
             }
         }
         return false;

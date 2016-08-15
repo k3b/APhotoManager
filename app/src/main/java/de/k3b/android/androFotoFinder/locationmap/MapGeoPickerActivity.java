@@ -79,7 +79,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
             if (initialPoint != null) {
                 GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
 
-                initalUri = Uri.parse(PARSER.toUriString(initialPoint.getLatitude(),initialPoint.getLongitude(), IGeoPointInfo.NO_ZOOM));
+                initalUri = Uri.parse(PARSER.toUriString(new GeoPointDto(initialPoint.getLatitude(),initialPoint.getLongitude(), IGeoPointInfo.NO_ZOOM)));
                 intent.setData(initalUri);
             }
             GalleryFilterParameter filter = new GalleryFilterParameter();

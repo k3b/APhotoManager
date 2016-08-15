@@ -41,6 +41,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
 import de.k3b.android.osmdroid.IconOverlay;
 import de.k3b.database.SelectedItems;
+import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
@@ -144,7 +145,8 @@ public class PickerLocationMapFragment extends LocationMapFragment {
 
         if (result != null) {
             int currentZoomLevel = this.mMapView.getZoomLevel();
-            String uriCurrentViewport = mGeoUriEngine.toUriString(result.getLatitude(), result.getLongitude(), currentZoomLevel);
+            String uriCurrentViewport = mGeoUriEngine.toUriString(
+                    new GeoPointDto(result.getLatitude(), result.getLongitude(), currentZoomLevel));
 
             if (Global.debugEnabled) {
                 Log.i(Global.LOG_CONTEXT, mDebugPrefix + "onOk: " + uriCurrentViewport);

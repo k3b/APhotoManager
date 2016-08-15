@@ -166,6 +166,43 @@
 
                 <data android:scheme="geo" />
             </intent-filter>
+
+
+            <intent-filter>
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:host="maps.google.com" />
+                <data android:host="maps.google.de" />
+                <data android:host="www.openstreetmap.org" />
+                <data android:host="openstreetmap.org" />
+
+                <data android:host="maps.yandex.ru"  />
+                <data android:host="maps.yandex.com" />
+
+                <data android:host="here.com" />
+                <data android:host="www.here.com" />
+                <data android:host="share.here.com" />
+                <data android:host="goto.here.com" />
+                <data android:host="go.here.com" />
+                <data android:host="wego.here.com" />
+
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+            <intent-filter>
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:pathPrefix="/maps"  />
+
+                <data android:host="www.yandex.ru"  />
+                <data android:host="www.yandex.com" />
+                <data android:host="www.google.com" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+
         </activity>
         <activity android:name=".SettingsActivity"
             android:label="Settings" >

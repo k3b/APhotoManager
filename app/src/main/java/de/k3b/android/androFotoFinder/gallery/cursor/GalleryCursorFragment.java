@@ -874,7 +874,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         return true;
     }
 
-    void multiSelectionReplaceTitleIfNecessary() {
+    private void multiSelectionReplaceTitleIfNecessary() {
         if (!mSelectedItems.isEmpty()) {
             mOldTitle = getActivity().getTitle().toString();
             multiSelectionUpdateActionbar("selection my have changed");

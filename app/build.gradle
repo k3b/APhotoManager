@@ -56,7 +56,7 @@ dependencies {
     compile project(':fotolib2')
 
     // compile project(':k3b-geoHelper')
-    compile 'com.github.k3b:k3b-geoHelper:1.1.4'
+    compile 'com.github.k3b:k3b-geoHelper:1.1.5'
 
     // https://github.com/nostra13/Android-Universal-Image-Loader
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
