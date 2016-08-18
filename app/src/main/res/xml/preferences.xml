@@ -20,6 +20,10 @@
             android:summary="@string/settings_multisel_clear_summary" />
 
         <de.k3b.android.widgets.EditTextPreferenceWithSummary
+            android:key="mapsForgeDir"
+            android:title="@string/settings_maps_forge_dir_title" />
+
+        <de.k3b.android.widgets.EditTextPreferenceWithSummary
             android:key="maxSelectionMarkersInMap"
             android:title="@string/settings_map_selmarker_max_title" />
 

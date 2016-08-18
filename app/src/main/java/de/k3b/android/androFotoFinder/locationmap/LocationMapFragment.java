@@ -66,6 +66,7 @@ import de.k3b.android.osmdroid.GuestureOverlay;
 import de.k3b.android.osmdroid.IconOverlay;
 import de.k3b.android.osmdroid.MarkerBase;
 import de.k3b.android.osmdroid.ZoomUtil;
+import de.k3b.android.osmdroid.forge.MapsForgeSupport;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
@@ -226,7 +227,6 @@ public class LocationMapFragment extends DialogFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         int zoomLevel = NO_ZOOM;
         BoundingBoxE6 boundingBoxE6 = null;
         /** after ratation restore selelected view port */
@@ -250,6 +250,9 @@ public class LocationMapFragment extends DialogFragment {
         View view = inflater.inflate(R.layout.fragment_location_map, container, false);
 
         mMapView = (MapView) view.findViewById(R.id.mapview);
+
+        MapsForgeSupport.load(getActivity(), mMapView, Global.mapsForgeDir);
+
         this.mImage = (ImageView) view.findViewById(R.id.image);
         this.mImage.setOnClickListener(new View.OnClickListener() {
             @Override

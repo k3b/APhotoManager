@@ -73,12 +73,23 @@ public class Global {
     /** true every time a .nomedia dir/file is opend remeove items from db.  */
     public static final boolean mustRemoveNOMEDIAfromDB = true;
 
+    private static final File externalStorageDirectory = Environment.getExternalStorageDirectory();
+
     /** defines the filesystem's directory where [Bookmark files](Bookmarks) are stored and loaded from. */
-    public static File reportDir = new File(Environment.getExternalStorageDirectory(), "databases/sql");
+    public static File reportDir = (externalStorageDirectory == null)
+            ? null
+            : new File(externalStorageDirectory, "databases/sql");
     public static final String reportExt = ".query";
 
     /** defines the filesystem's directory where crash reports are written to. */
-    public static File logCatDir = new File(Environment.getExternalStorageDirectory(), "copy/log");
+    public static File logCatDir = (externalStorageDirectory == null)
+            ? null
+            : new File(Environment.getExternalStorageDirectory(), "copy/log");
+
+    /** #60 where osm-mapsforge-offline-maps (*.map) are found. defaults to /extDir/osmdroid/ */
+    public static File mapsForgeDir = (externalStorageDirectory == null)
+            ? null
+            : new File(Environment.getExternalStorageDirectory(), "osmdroid");
 
     /** remember last picked geo-s */
     public static File pickHistoryFile = null; // initialized in app.onCreate with local database file

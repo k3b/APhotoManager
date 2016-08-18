@@ -96,7 +96,7 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     public static void global2Prefs(Context context) {
-        fixDefaults(context, null);
+        fixDefaults(context, null, null);
 
         SharedPreferences prefsInstance = PreferenceManager
                 .getDefaultSharedPreferences(context);
@@ -123,6 +123,8 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putString("reportDir", (Global.reportDir != null) ? Global.reportDir.getAbsolutePath() : null);
         prefs.putString("logCatDir", (Global.logCatDir != null) ? Global.logCatDir.getAbsolutePath() : null);
         prefs.putString("thumbCacheRoot", (Global.thumbCacheRoot != null) ? Global.thumbCacheRoot.getAbsolutePath() : null);
+        prefs.putString("mapsForgeDir", (Global.mapsForgeDir != null) ? Global.mapsForgeDir.getAbsolutePath() : null);
+
         prefs.putString("pickHistoryFile", (Global.pickHistoryFile != null) ? Global.pickHistoryFile.getAbsolutePath() : null);
 
         prefs.apply();
@@ -131,6 +133,8 @@ public class SettingsActivity extends PreferenceActivity {
 
     public static void prefs2Global(Context context) {
         File previousCacheRoot = Global.thumbCacheRoot;
+        File previousMapsForgeDir = Global.mapsForgeDir;
+
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(context.getApplicationContext());
         Global.debugEnabled                     = getPref(prefs, "debugEnabled", Global.debugEnabled);
@@ -163,7 +167,9 @@ public class SettingsActivity extends PreferenceActivity {
         Global.reportDir                        = getPref(prefs, "reportDir", Global.reportDir);
         Global.logCatDir                        = getPref(prefs, "logCatDir", Global.logCatDir);
 
-        Global.thumbCacheRoot                  = getPref(prefs, "thumbCacheRoot", Global.thumbCacheRoot);
+        Global.thumbCacheRoot                   = getPref(prefs, "thumbCacheRoot", Global.thumbCacheRoot);
+        Global.mapsForgeDir                     = getPref(prefs, "mapsForgeDir", Global.mapsForgeDir);
+
         Global.pickHistoryFile                  = getPref(prefs, "pickHistoryFile", Global.pickHistoryFile);
 
         /*
@@ -186,29 +192,43 @@ public class SettingsActivity extends PreferenceActivity {
 
         */
 
-        fixDefaults(context, previousCacheRoot);
+        fixDefaults(context, previousCacheRoot, previousMapsForgeDir);
     }
 
-    private static void fixDefaults(Context context, File previousCacheRoot) {
+    private static void fixDefaults(Context context, File previousCacheRoot, File previousMapsForgeDir) {
+        boolean mustSave = false;
+
         // default: a litte bit more than screen size
         if ((Global.imageDetailThumbnailIfBiggerThan < 0) && (context instanceof Activity)) {
             Display display = ((Activity) context).getWindowManager().getDefaultDisplay();
             Point size = new Point();
             display.getSize(size);
             Global.imageDetailThumbnailIfBiggerThan = (int) (1.2 * Math.max(size.x, size.y));
+            mustSave = true;
         }
 
         if (!isValidThumbDir(Global.thumbCacheRoot)) {
-            File defaultThumbRoot = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),".thumbCache");
+            File defaultThumbRoot = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), ".thumbCache");
             if (!isValidThumbDir(defaultThumbRoot)) {
                 defaultThumbRoot = context.getDir(".thumbCache", MODE_PRIVATE);
                 isValidThumbDir(defaultThumbRoot);
             }
 
             Global.thumbCacheRoot = defaultThumbRoot;
-            global2Prefs(context);
+            mustSave = true;
         }
 
+        if (Global.mapsForgeDir == null) // || (!previousMapsForgeDir.exists()))
+        {
+            File externalStorageDirectory = Environment.getExternalStorageDirectory();
+            if (externalStorageDirectory == null) externalStorageDirectory = Environment.getDataDirectory();
+            Global.mapsForgeDir = new File(externalStorageDirectory, "osmdroid");
+            mustSave = true;
+        }
+
+        if (mustSave) {
+            global2Prefs(context);
+        }
         if ((previousCacheRoot != null) && (!previousCacheRoot.equals(Global.thumbCacheRoot))) {
             ThumbNailUtils.init(context, previousCacheRoot);
         }

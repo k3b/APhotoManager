@@ -84,8 +84,16 @@ dependencies {
     compile 'com.drewnoakes:metadata-extractor:2.8.1'
     // this is osmdroid
     // compile project(':osmdroid-android') // local copy
-    // compile 'org.osmdroid:osmdroid-android:4.3'
-    compile 'org.osmdroid:osmdroid-android:5.1@aar'
+    //TODO update to org.osmdroid:osmdroid-android:5.2.1 when pending changes are merged
+    // compile 'org.osmdroid:osmdroid-android:5.2.1'
+    compile 'org.osmdroid:osmdroid-android:5.1'
+
+    // #60 todo remove {transitive = false} once osmdroid 5.2 pending changes are merged
+    compile ('org.osmdroid:osmdroid-mapsforge:5.2') {transitive = false}
+    //Mapsforge rendering and database support, which is LGPL
+    compile 'org.mapsforge:mapsforge-map-android:0.6.0'
+    compile 'org.mapsforge:mapsforge-map:0.6.0'
+
     // non local copy from repositories
     // compile project(':osmdroid-android')
     //    compile project(':OSMBonusPack')
