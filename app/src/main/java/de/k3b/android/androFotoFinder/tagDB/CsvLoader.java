@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2016 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -41,7 +41,7 @@ public class CsvLoader extends Path2DbIdProcessor {
     }
 
     @Override
-    void process(IPathID _csv, Integer id) {
+    protected void process(IPathID _csv, Integer id) {
         CsvItem csv = (CsvItem) _csv;
 
         if (id == null) {
@@ -51,9 +51,9 @@ public class CsvLoader extends Path2DbIdProcessor {
         }
     }
 
-    class CsvItem implements IPathID {
+    protected class CsvItem implements IPathID {
         private final int mPathIndex;
-        String[] mCurrentLineFields = null;
+        private String[] mCurrentLineFields = null;
 
         CsvItem(List<String> header) {
             mPathIndex = header.indexOf("SourceFile");
@@ -82,7 +82,7 @@ public class CsvLoader extends Path2DbIdProcessor {
         }
     }
 
-    class CsvItemIterator implements Iterator<IPathID> {
+    protected class CsvItemIterator implements Iterator<IPathID> {
         private final CsvItem mItem;
         private final CsvReader mCsvReader;
         private boolean isEOF = false;
@@ -112,6 +112,7 @@ public class CsvLoader extends Path2DbIdProcessor {
 
         @Override
         public void remove() {
+            /* not used */
         }
     }
 

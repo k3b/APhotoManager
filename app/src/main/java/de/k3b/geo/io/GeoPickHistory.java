@@ -24,6 +24,7 @@ import android.util.Log;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.geo.api.GeoPointDto;
@@ -45,14 +46,15 @@ public class GeoPickHistory extends GeoFileRepository<GeoPointDto> {
      * Returns id of deleted item if exist else null */
     public String remove(Long id, double latitude, double longitude) {
         String resultKey = null;
-        if (mData != null) {
+        List<GeoPointDto> data = this.load();
+        if (data != null) {
             final String key = (id == null) ? null : id.toString();
-            for (int i = mData.size() -1; i >= 0; i-- ) {
-                GeoPointDto item = mData.get(i);
+            for (int i = data.size() -1; i >= 0; i-- ) {
+                GeoPointDto item = data.get(i);
                 if ((item == null)
                     || ((latitude == item.getLatitude()) && (longitude == item.getLongitude()))
                     || ((key != null) && key.compareTo(item.getId()) == 0)) {
-                    mData.remove(i);
+                    data.remove(i);
 
                     if ((item != null) && (item.getId() != null)) {
                         resultKey = item.getId();
@@ -65,23 +67,27 @@ public class GeoPickHistory extends GeoFileRepository<GeoPointDto> {
 
     /** remember a pick history */
     public GeoPickHistory add(Long id, double latitude, double longitude) {
-        if (mData == null) mData = new ArrayList<GeoPointDto>();
+        List<GeoPointDto> data = this.load();
+
+        if (data == null) data = new ArrayList<GeoPointDto>();
 
         // inherit id from deleted item if not overwritten.
         String idAsString = remove(id, latitude, longitude);
 
         if (id != null) idAsString = id.toString();
 
-        mData.add(new GeoPointDto().setId(idAsString).setLatitude(latitude).setLongitude(longitude));
-        while(mData.size() > mMaxSize) mData.remove(0);
+        data.add(new GeoPointDto().setId(idAsString).setLatitude(latitude).setLongitude(longitude));
+        while(data.size() > mMaxSize) data.remove(0);
         return this;
     }
 
     /** add keys to SelectedItems or SelectedKeys */
     public void addKeysTo(Collection dest) {
-        if (mData != null) {
-            for (int i = mData.size() -1; i >= 0; i-- ) {
-                GeoPointDto item = mData.get(i);
+        List<GeoPointDto> data = this.load();
+
+        if (data != null) {
+            for (int i = data.size() -1; i >= 0; i-- ) {
+                GeoPointDto item = data.get(i);
                 String id = (item == null) ? null : item.getId();
                 if ((id != null) && (id.length() > 0)) {
                     try {
@@ -92,7 +98,7 @@ public class GeoPickHistory extends GeoFileRepository<GeoPointDto> {
                     } catch (Exception ex) {
                         Log.w(Global.LOG_CONTEXT, "GeoPickHistory.addKeysTo('" + id +
                                 "'): removing invalid imageid " + ex.getMessage());
-                        mData.remove(i);
+                        data.remove(i);
                     }
                 }
             }

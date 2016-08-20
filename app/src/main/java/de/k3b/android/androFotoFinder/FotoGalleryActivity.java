@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2016 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -73,7 +73,6 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
     /** intent parameters supported by FotoGalleryActivity: EXTRA_... */
 
     private static final String DLG_NAVIGATOR_TAG = "navigator";
-    private static final String STATE_CurrentSelections = "CurrentSelections";
 
     /** after media db change cached Directories must be recalculated */
     private final ContentObserver mMediaObserverDirectory = new ContentObserver(null) {
@@ -85,6 +84,22 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
 
     /** set while dir picker is active */
     private DialogFragment mDirPicker = null;
+
+    private GalleryQueryParameter mGalleryQueryParameter = new GalleryQueryParameter();
+    // multi selection support
+    private SelectedItems mSelectedItems = null;
+
+    private Queryable mGalleryGui;
+
+    private boolean mHasEmbeddedDirPicker = false;
+    private DirectoryGui mDirGui;
+
+    private String mTitleResultCount = "";
+
+    private IDirectory mDirectoryRoot = null;
+
+    /** true if activity should show navigator dialog after loading mDirectoryRoot is complete */
+    private boolean mMustShowNavigator = false;
 
     private static class GalleryQueryParameter {
         private static final String STATE_CurrentPath = "CurrentPath";
@@ -100,7 +115,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         private GeoRectangle mCurrentLatLonFromGeoAreaPicker = new GeoRectangle();
 
         /** one of the FotoSql.QUERY_TYPE_xxx values */
-        int mDirQueryID = FotoSql.QUERY_TYPE_GROUP_DEFAULT;
+        protected int mDirQueryID = FotoSql.QUERY_TYPE_GROUP_DEFAULT;
 
         private boolean mHasUserDefinedQuery = false;
         private int mCurrentSortID = FotoSql.SORT_BY_DEFAULT;
@@ -108,9 +123,9 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
 
         private String mCurrentPathFromFolderPicker = "/";
 
-        QueryParameter mGalleryContentQuery = null;
+        protected QueryParameter mGalleryContentQuery = null;
 
-        IGalleryFilter mCurrentFilterSettings;
+        protected IGalleryFilter mCurrentFilterSettings;
 
         /** true: if activity started without special intent-parameters, the last mCurrentFilterSettings is saved/loaded for next use */
         private boolean mSaveToSharedPrefs = true;
@@ -302,21 +317,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         }
     }
 
-    private GalleryQueryParameter mGalleryQueryParameter = new GalleryQueryParameter();
-    // multi selection support
-    private SelectedItems mSelectedItems = null;
-
-    private Queryable mGalleryGui;
-
-    private boolean mHasEmbeddedDirPicker = false;
-    private DirectoryGui mDirGui;
-
-    private String mTitleResultCount = "";
-
-    private IDirectory mDirectoryRoot = null;
-
-    /** true if activity should show navigator dialog after loading mDirectoryRoot is complete */
-    private boolean mMustShowNavigator = false;
+    private BookmarkController bookmarkController = null;
 
     public static void showActivity(Activity context, GalleryFilterParameter filter, QueryParameter query, int requestCode) {
         Intent intent = new Intent(context, FotoGalleryActivity.class);
@@ -472,9 +473,6 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
             case R.id.cmd_load_bookmark:
                 loadBookmark();
                 return true;
-            case R.id.cmd_sort:
-                openSort();
-                return true;
             case R.id.cmd_sort_date:
                 this.mGalleryQueryParameter.setSortID(FotoSql.SORT_BY_DATE);
                 reloadGui("sort date");
@@ -510,8 +508,6 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         }
 
     }
-
-    private BookmarkController bookmarkController = null;
 
     private void loadBookmark() {
         bookmarkController.onLoadFromQuestion(new BookmarkController.IQueryConsumer() {
@@ -551,6 +547,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
                     invalidateDirectories(mDebugPrefix + "#onActivityResult from GeoEditActivity");
                 }
                 break;
+            default:break;
         }
     }
 
@@ -621,9 +618,6 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
 
     private void openFilter() {
         GalleryFilterActivity.showActivity(this, this.mGalleryQueryParameter.mCurrentFilterSettings, this.mGalleryQueryParameter.mGalleryContentQuery);
-    }
-
-    private void openSort() {
     }
 
     /** called by Fragment: a fragment Item was clicked */

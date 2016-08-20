@@ -147,7 +147,8 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
                 return true; // linux convention: folder names starting with "." are hidden
             }
             File file = getDir(path);
-            while ((--maxLevel >= 0) && (file != null)) {
+            int level = maxLevel;
+            while ((--level >= 0) && (file != null)) {
                 if (new File(file, ".nomedia").exists()) {
                     return true;
                 }
@@ -162,7 +163,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
         if ((path == null) || (path.length() == 0)) return null;
         if (path.endsWith("%")) {
             // remove sql wildcard at end of name
-            path = path.substring(0,path.length() - 1);
+            return getDir(new File(path.substring(0,path.length() - 1)));
         }
         return getDir(new File(path));
     }
@@ -453,8 +454,8 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
 
     @NonNull
     // generates a title based on file name
-    public static String generateTitleFromFilePath(String filePath) {
-        filePath = generateDisplayNameFromFilePath(filePath);
+    public static String generateTitleFromFilePath(String _filePath) {
+        String filePath = generateDisplayNameFromFilePath(_filePath);
 
         if (filePath != null) {
             // truncate the file extension (if any)
@@ -475,7 +476,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
             if (lastSlash >= 0) {
                 lastSlash++;
                 if (lastSlash < filePath.length()) {
-                    filePath = filePath.substring(lastSlash);
+                    return filePath.substring(lastSlash);
                 }
             }
         }
@@ -525,11 +526,9 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
             cursor = cr.query(MediaStore.getMediaScannerUri(),
                     new String[]{MediaStore.MEDIA_SCANNER_VOLUME},
                     null, null, null);
-            if (cursor != null) {
-                if (cursor.getCount() == 1) {
-                    cursor.moveToFirst();
-                    result = "external".equals(cursor.getString(0));
-                }
+            if ((cursor != null) && (cursor.getCount() == 1)) {
+                cursor.moveToFirst();
+                result = "external".equals(cursor.getString(0));
             }
             return result;
         } finally {

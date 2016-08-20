@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'maven'
+apply plugin: 'project-report'
 
 android {
     // appXXX are defined in gradle.properties
@@ -24,9 +25,10 @@ android {
 		// published 0.5.1.160629 (17)
 		// published 0.5.1.160712 (18)
 		// published 0.5.2.160726 (19)
+        // not published 0.5.2.160920 (20)
 		
-        versionCode = 19
-        versionName = '0.5.2.160726'
+        versionCode = 20
+        versionName = '0.5.2.160920'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -91,3 +93,18 @@ dependencies {
     //  releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.3.1'
     // debugcompile optional GhostLog-Integration for non rooted android devices
 }
+
+// unknown
+// DependencyReport.configurations ["_releaseApk"]
+
+// reports.configurations ["_releaseApk"]
+
+//htmlDependencyReport.configurations ["_releaseApk"]
+
+/*
+project.configurations.compile.resolvedConfiguration.resolvedArtifacts.each {
+    println it.name // << the artifact name
+    println it.file // << the file reference
+}
+*/
+

@@ -20,7 +20,10 @@
 package de.k3b.android.androFotoFinder;
 
 import android.app.Application;
+import android.support.annotation.NonNull;
 import android.util.Log;
+
+import org.osmdroid.tileprovider.constants.OpenStreetMapTileProviderConstants;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -82,12 +85,21 @@ public class AndroFotoFinderApp extends Application {
 
         ThumbNailUtils.init(this, null);
 
-        Log.i(Global.LOG_CONTEXT, getString(R.string.app_name) + " " + GuiUtil.getAppVersionName(this) + " created");
+        //https://github.com/osmdroid/osmdroid/issues/366
+        //super important. Many tile servers, including open street maps, will BAN applications by user
+        OpenStreetMapTileProviderConstants.setUserAgentValue(getAppId() + " https://github.com/k3b/APhotoManager"); // BuildConfig.APPLICATION_ID);
+
+        Log.i(Global.LOG_CONTEXT, getAppId() + " created");
+    }
+
+    @NonNull
+    private String getAppId() {
+        return getString(R.string.app_name) + " " + GuiUtil.getAppVersionName(this);
     }
 
     @Override
     public void onTerminate() {
-        Log.i(Global.LOG_CONTEXT, getString(R.string.app_name) + " " + GuiUtil.getAppVersionName(this) + " terminated");
+        Log.i(Global.LOG_CONTEXT, getAppId() + " terminated");
         if (mCrashSaveToFile != null) {
             mCrashSaveToFile.close();
         }

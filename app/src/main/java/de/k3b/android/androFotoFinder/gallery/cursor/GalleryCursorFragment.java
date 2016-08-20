@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2016 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -21,7 +21,6 @@ package de.k3b.android.androFotoFinder.gallery.cursor;
 
 import android.app.Activity;
 import android.app.LoaderManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
@@ -98,7 +97,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private HorizontalScrollView mParentPathBarScroller;
     private LinearLayout mParentPathBar;
 
-    private HorizontalScrollView mChildPathBarScroller;
+    // private HorizontalScrollView mChildPathBarScroller;
     private LinearLayout mChildPathBar;
 
     // for debugging
@@ -220,7 +219,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             // show the changes
 
             if (context instanceof OnGalleryInteractionListener) {
-                ((OnGalleryInteractionListener) context).setResultCount(resultCount);;
+                ((OnGalleryInteractionListener) context).setResultCount(resultCount);
             }
             multiSelectionReplaceTitleIfNecessary();
         }
@@ -239,7 +238,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         }
 
         @NonNull
-        String getDebugContext() {
+        protected String getDebugContext() {
             return "(@" + loaderID + ", #" + mRequeryInstanceCount +
                     ", LastVisiblePosition=" + mLastVisiblePosition +
 //                    ",  Path='" + mInitialFilePath +
@@ -247,13 +246,12 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         }
     }
 
-    LocalCursorLoader mCurorLoader = null;
+    protected LocalCursorLoader mCurorLoader = null;
 
-    class LocalFileCommands extends AndroidFileCommands {
+    protected class LocalFileCommands extends AndroidFileCommands {
 
         @Override
         protected void onPostProcess(String what, String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
-            Context context = getActivity().getApplicationContext();
             if (Global.clearSelectionAfterCommand || (opCode == OP_DELETE) || (opCode == OP_MOVE)) {
                 mShowSelectedOnly = true;
                 multiSelectionCancel();
@@ -375,7 +373,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         this.mParentPathBarScroller = (HorizontalScrollView) result.findViewById(R.id.parent_scroller);
 
         this.mChildPathBar = (LinearLayout) result.findViewById(R.id.child_owner);
-        this.mChildPathBarScroller = (HorizontalScrollView) result.findViewById(R.id.child_scroller);
+        // this.mChildPathBarScroller = (HorizontalScrollView) result.findViewById(R.id.child_scroller);
 
         reloadDirGuiIfAvailable("onCreateView");
 
@@ -796,7 +794,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     public static class MoveOrCopyDestDirPicker extends DirectoryPickerFragment {
-        static AndroidFileCommands sFileCommands = null;
+        protected static AndroidFileCommands sFileCommands = null;
 
         public static MoveOrCopyDestDirPicker newInstance(boolean move, SelectedFiles srcFotos) {
             MoveOrCopyDestDirPicker f = new MoveOrCopyDestDirPicker();
@@ -874,7 +872,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         return true;
     }
 
-    void multiSelectionReplaceTitleIfNecessary() {
+    private void multiSelectionReplaceTitleIfNecessary() {
         if (!mSelectedItems.isEmpty()) {
             mOldTitle = getActivity().getTitle().toString();
             multiSelectionUpdateActionbar("selection my have changed");
@@ -1019,7 +1017,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             @Override
             protected void onPostExecute(SelectedItems selectedItems) {
                 if (!isCancelled()) {
-                    onMissingDisplayNamesComplete(mResultCount, mStatus);
+                    onMissingDisplayNamesComplete(mStatus);
                 }
             }
         };
@@ -1028,12 +1026,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     /** called after MissingDisplayNamesComplete finished */
-    private void onMissingDisplayNamesComplete(int mResultCount, StringBuffer debugMessage) {
+    private void onMissingDisplayNamesComplete(StringBuffer debugMessage) {
         if (debugMessage != null) {
             Log.w(Global.LOG_CONTEXT, mDebugPrefix + debugMessage);
-        }
-
-        if (mResultCount > 0) {
         }
     }
 

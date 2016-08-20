@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2016 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -177,7 +177,9 @@ public class LocationMapFragment extends DialogFragment {
 
         GeoPoint currentCenter = currentViewPort.getCenter();
         int currentZoomLevel = this.mMapView.getZoomLevel();
-        String uriCurrentViewport = mGeoUriEngine.toUriString(currentCenter.getLatitude(), currentCenter.getLongitude(), currentZoomLevel);
+        String uriCurrentViewport = mGeoUriEngine.toUriString(
+                new GeoPointDto(currentCenter.getLatitude(), currentCenter.getLongitude()
+                        , currentZoomLevel));
         return uriCurrentViewport;
     }
 
@@ -383,12 +385,12 @@ public class LocationMapFragment extends DialogFragment {
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
+                /* change ignored */
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                /* change ignored */
             }
         });
     }
@@ -415,16 +417,14 @@ public class LocationMapFragment extends DialogFragment {
             reloadSelectionMarker();
         }
 
-        if (rectangle != null) {
-            if (!Double.isNaN(rectangle.getLatitudeMin())) {
-                BoundingBoxE6 boundingBox = new BoundingBoxE6(
-                        rectangle.getLatitudeMax(),
-                        rectangle.getLogituedMin(),
-                        rectangle.getLatitudeMin(),
-                        rectangle.getLogituedMax());
+        if ((rectangle != null) && !Double.isNaN(rectangle.getLatitudeMin())) {
+            BoundingBoxE6 boundingBox = new BoundingBoxE6(
+                    rectangle.getLatitudeMax(),
+                    rectangle.getLogituedMin(),
+                    rectangle.getLatitudeMin(),
+                    rectangle.getLogituedMax());
 
-                zoomToBoundingBox(boundingBox, zoomlevel);
-            }
+            zoomToBoundingBox(boundingBox, zoomlevel);
         }
 
         if (rootFilter != null) {
@@ -923,7 +923,7 @@ public class LocationMapFragment extends DialogFragment {
         if (markerId != NO_MARKER_ID) {
             IGeoPoint pos = FotoSql.execGetPosition(this.getActivity(), null, markerId);
             if (pos != null) {
-                notFoundValue = pos;
+                return pos;
             }
         }
         return notFoundValue;

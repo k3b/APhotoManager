@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2016 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -108,11 +108,11 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
  
     @Override
     //in this method you must getFrom the text to see the parent/group on the list
-    public View getGroupView(int groupIndex, boolean b, View view, ViewGroup viewGroup) {
-    	
-        if (view == null) {
-            view = inflater.inflate(R.layout.list_item_directory_parent, viewGroup,false);
-        }
+    public View getGroupView(int groupIndex, boolean b, View _view, ViewGroup viewGroup) {
+
+        View view = (_view == null)
+                ? inflater.inflate(R.layout.list_item_directory_parent, viewGroup,false)
+                : _view;
         // getFrom category name as tag so view can be found view later
         IDirectory group = mParent.getGroup(groupIndex);
         view.setTag(group);
@@ -126,26 +126,14 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
         return view;
     }
 
-    /** getFrom tree display text */
-    static Spanned getDirectoryDisplayText(String prefix, IDirectory directory, int options) {
-        StringBuilder result = new StringBuilder();
-        boolean asHtml = (options & Directory.OPT_AS_HTML) != 0;
-        if (asHtml) result.append("<b>");
-        if (prefix != null) result.append(prefix);
-        result.append(directory.getRelPath()).append(" ");
-        if (asHtml) result.append("</b>");
-        Directory.appendCount(result, directory, options);
-        return Html.fromHtml(result.toString());
-    }
-
     @Override
     //in this method you must getFrom the text to see the children on the list
-    public View getChildView(int groupIndex, int childIndex, boolean b, View view, ViewGroup viewGroup) {
-        if (view == null) {
-            view = inflater.inflate(R.layout.list_item_directory_child, viewGroup,false);
-        }
- 
-        
+    public View getChildView(int groupIndex, int childIndex, boolean b, View _view, ViewGroup viewGroup) {
+        View view = (_view == null)
+                ? inflater.inflate(R.layout.list_item_directory_child, viewGroup,false)
+                : _view;
+
+
         TextView textView = (TextView) view.findViewById(R.id.list_item_text_child);
         
         //"groupIndex" is the position of the parent/group in the list and
@@ -177,5 +165,17 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
      
         lastExpandedGroupPosition = groupPosition;
         
+    }
+
+    /** getFrom tree display text */
+    public static Spanned getDirectoryDisplayText(String prefix, IDirectory directory, int options) {
+        StringBuilder result = new StringBuilder();
+        boolean asHtml = (options & Directory.OPT_AS_HTML) != 0;
+        if (asHtml) result.append("<b>");
+        if (prefix != null) result.append(prefix);
+        result.append(directory.getRelPath()).append(" ");
+        if (asHtml) result.append("</b>");
+        Directory.appendCount(result, directory, options);
+        return Html.fromHtml(result.toString());
     }
 }

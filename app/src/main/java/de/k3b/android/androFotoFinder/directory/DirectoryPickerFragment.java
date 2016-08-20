@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2016 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -84,14 +84,6 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             mProgressMessageResourceId = progressMessageResourceId;
         }
 
-        public void publishProgress_(Integer... values) {
-            publishProgress(values);
-        }
-
-        public boolean isCancelled_() {
-            return isCancelled();
-        }
-
         @Override
         protected void onProgressUpdate(Integer... values) {
             // values: progressPos,progressCount
@@ -133,7 +125,6 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     private ExpandableListView mTreeView;
     private TextView mStatus = null;
     private Button mCmdOk = null;
-    private Button mCmdCancel = null;
     private Button mCmdPopup = null;
 
     private View.OnClickListener mPathButtonClickHandler;
@@ -274,16 +265,16 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             }
         });
         mCmdOk.setVisibility(View.VISIBLE);
-        
-        mCmdCancel = (Button) view.findViewById(R.id.cmd_cancel);
-        if (mCmdCancel != null) {
-            mCmdCancel.setOnClickListener(new View.OnClickListener() {
+
+        Button cmdCancel = (Button) view.findViewById(R.id.cmd_cancel);
+        if (cmdCancel != null) {
+            cmdCancel.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     onDirectoryCancel();
                 }
             });
-            mCmdCancel.setVisibility(View.VISIBLE);
+            cmdCancel.setVisibility(View.VISIBLE);
         }
 
         mCmdPopup = null;
@@ -338,6 +329,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                 return showGallery(mPopUpSelection);
             case R.id.action_details:
                 return showDirInfo(mPopUpSelection);
+            default:break;
         }
         return false;
     }

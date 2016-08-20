@@ -40,10 +40,11 @@ import de.k3b.io.FileUtils;
 public class BookmarkController {
     private QueryParameter mCurrentFilter = null;
 
+    private final Activity mContext;
+
     public interface IQueryConsumer {
         void setQuery(QueryParameter newQuery);
     }
-    private final Activity mContext;
 
     public BookmarkController(Activity context) {
 
@@ -159,6 +160,7 @@ public class BookmarkController {
                     return onRenameQuestion(items[itemIndex], items[itemIndex]);
                 case R.id.cmd_delete:
                     return onDeleteQuestion(itemIndex, items);
+                default:break;
             }
         }
         return false;
@@ -172,10 +174,12 @@ public class BookmarkController {
         return true;
     }
 
-    private boolean onRenameQuestion(String newName, final String oldName) {
-        if (newName == null) return false;
+    private boolean onRenameQuestion(String _newName, final String oldName) {
+        if (_newName == null) return false;
 
-        if (newName.endsWith(Global.reportExt)) newName = newName.substring(0, newName.length() - Global.reportExt.length());
+        String newName = (_newName.endsWith(Global.reportExt))
+                ? _newName.substring(0, _newName.length() - Global.reportExt.length())
+                : _newName;
 
         Dialogs dialog = new Dialogs() {
             @Override

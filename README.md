@@ -27,6 +27,7 @@ nl,&nbsp;
   * <img src="https://img.shields.io/github/release/k3b/APhotoManager.svg?maxAge=3600" />
   * [<img src="https://f-droid.org/badge/get-it-on.png" alt="available on F-Droid app store" height="80">](https://f-droid.org/app/de.k3b.android.androFotoFinder)
   * [<img src="https://img.shields.io/github/license/k3b/APhotoManager.svg"></img>](https://github.com/k3b/APhotoManager/blob/master/LICENSE) or later.
+  * Code Quality [![Codacy Badge](https://api.codacy.com/project/badge/Grade/df65509fc428454791603de5f3bb7707)](https://www.codacy.com/app/klaus3b-github/APhotoManager?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=k3b/APhotoManager&amp;utm_campaign=Badge_Grade)
   * Source code [branch FDroid <img src="https://travis-ci.org/k3b/APhotoManager.svg?branch=FDroid" alt="link to buldserver"  />](https://travis-ci.org/k3b/APhotoManager)
   * Recent changes see [History](https://github.com/k3b/APhotoManager/wiki/History)
 * Current development version

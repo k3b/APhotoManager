@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2016 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -93,14 +93,8 @@ public class GeoRectangle implements IGeoRectangle {
     }
 
     public GeoRectangle setLatitude(double min, double max) {
-        if (min > max) {
-            // swap
-            double temp = min;
-            min = max;
-            max = temp;
-        }
-        setLatitudeMin(min);
-        setLatitudeMax(max);
+        setLatitudeMin(Math.min(min, max));
+        setLatitudeMax(Math.max(min, max));
         return this;
     }
 
@@ -110,14 +104,8 @@ public class GeoRectangle implements IGeoRectangle {
     }
 
     public GeoRectangle setLogitude(double min, double max) {
-        if (min > max) {
-            // swap
-            double temp = min;
-            min = max;
-            max = temp;
-        }
-        setLogituedMin(min);
-        setLogituedMax(max);
+        setLogituedMin(Math.min(min, max));
+        setLogituedMax(Math.max(min, max));
         return this;
     }
 
