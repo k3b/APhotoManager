@@ -1,4 +1,8 @@
 apply plugin: 'java'
+// markdown in javadoc
+// https://github.com/Abnaxos/pegdown-doclet
+apply plugin: 'ch.raffael.pegdown-doclet'
+
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
