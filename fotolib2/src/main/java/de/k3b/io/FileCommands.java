@@ -258,7 +258,25 @@ public class FileCommands implements  Cloneable {
 
     /** can be replaced by mock/stub in unittests */
     protected boolean osFileMove(File dest, File source) {
-        return source.renameTo(dest);
+        if (source.renameTo(dest)) {
+            // move within same mountpoint
+            return true;
+        }
+
+        // #61 cannot move between different mountpoints/devices/partitions. do Copy+Delete instead
+        if (source.exists() && source.isFile() && source.canRead()
+                && source.canWrite() // to delete after success
+                && !dest.exists()) {
+            if (osFileCopy(dest, source)) {
+                if (osDeleteFile(source)) {
+                    return true; // move: copy + delete(source) : success
+                } else {
+                    // cannot delete souce: undo copy
+                    osDeleteFile(dest);
+                }
+            }
+        }
+        return false;
     }
 
     /**
