@@ -568,7 +568,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         final FragmentManager manager = getFragmentManager();
         LocationMapFragment dialog = new LocationMapFragment();
         dialog.defineNavigation(this.mGalleryQueryParameter.mCurrentFilterSettings,
-                this.mGalleryQueryParameter.mCurrentLatLonFromGeoAreaPicker, ZoomUtil.NO_ZOOM, mSelectedItems);
+                this.mGalleryQueryParameter.mCurrentLatLonFromGeoAreaPicker, ZoomUtil.NO_ZOOM, mSelectedItems, null);
 
         dialog.show(manager, DLG_NAVIGATOR_TAG);
     }

@@ -76,9 +76,13 @@
             </intent-filter>
 			
         </activity>
+
+        <!-- mime image/* for SEND(_TO)/(RE)VIEW for file -->
         <activity android:name=".imagedetail.ImageDetailActivityViewPager"
             android:ellipsize="middle"  android:label="@string/app_image_viewer_title">
-            <intent-filter > <!-- file with mime -->
+
+            <!-- ImageDetail view/send(to) schema=file with mime=image/* -->
+            <intent-filter >
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SENDTO" />
@@ -96,7 +100,9 @@
                     android:mimeType="image/*"
                     android:scheme="file" />
             </intent-filter>
-            <intent-filter > <!-- mime only SEND(_TO) -->
+
+            <!-- ImageDetail mime image/* for SEND(_TO)/(RE)VIEW for null-schema-->
+            <intent-filter >
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SENDTO" />
                 <action android:name="android.intent.action.VIEW" />
@@ -118,6 +124,7 @@
                 <data android:mimeType="image/*" />
                 <!-- example content://media/external/images/media/4711 -->
             </intent-filter>
+
         </activity>
         <activity android:name=".GalleryFilterActivity"
             android:label="@string/filter_menu_title" >
@@ -131,14 +138,17 @@
         <activity android:name=".locationmap.MapGeoPickerActivity"
             android:icon="@drawable/ic_foto_map"
             android:label="@string/app_map_title" >
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.CATEGORY_APP_MAPS" />
             </intent-filter>
-            <intent-filter><!-- android:label="LMV#2"> -->
 
-                <!-- trigger if there is uri=geo:.... with any mime -->
+            <!-- map view/pick/send(to/multible) for "geo:" with all mimes (*/*) -->
+            <intent-filter>
+
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.PICK" />
                 <action android:name="android.intent.action.SEND" />
@@ -151,10 +161,9 @@
                 <data android:mimeType="*/*" />
                 <data android:scheme="geo" />
             </intent-filter>
-            <intent-filter><!-- android:label="LMV#3"> -->
 
-                <!-- trigger if there is uri=geo:.... without mime -->
-
+            <!-- map view/pick/send(to/multible) for "geo:" without mime -->
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.PICK" />
                 <action android:name="android.intent.action.SEND" />
@@ -167,7 +176,7 @@
                 <data android:scheme="geo" />
             </intent-filter>
 
-
+            <!-- #58 map view http(s) for online mapservices (google, yandex, here, openstreetmap) any server-path -->
             <intent-filter>
                 <data android:scheme="http" />
                 <data android:scheme="https" />
@@ -190,6 +199,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
+
+            <!-- #58 map view http(s) for online mapservices (google, yandex) with server-path /maps -->
             <intent-filter>
                 <data android:scheme="http" />
                 <data android:scheme="https" />
@@ -203,7 +214,67 @@
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
 
+            <!-- #61 map view file: *.gpx *.kml *.poi -->
+            <intent-filter >
+                <!-- executed in android4.4/2.1-tc-openWith hello.gpx.
+                    in android 2.1  also hello.kml -->
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:host="*"
+                    android:mimeType="*/*"
+                    android:pathPattern=".*\\.gpx"
+                    android:scheme="file" />
+                <data android:host="*"
+                    android:mimeType="*/*"
+                    android:pathPattern=".*\\.poi"
+                    android:scheme="file" />
+                <data android:host="*"
+                    android:mimeType="*/*"
+                    android:pathPattern=".*\\.kml"
+                    android:scheme="file" />
+            </intent-filter>
+
+            <!-- #61 map view all hosts; http(s), ftp; mime kml/gpx/poi  -->
+            <intent-filter>
+                <!-- executed in android4.4-tc-openWith hello.kml -->
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:scheme="ftp" />
+                <data android:mimeType="application/vnd.google-earth.kml+xml" />
+                <data android:mimeType="application/xml+kml" />
+                <data android:mimeType="application/xml+gpx" />
+                <data android:mimeType="application/xml+poi" />
+                <data android:host="*" />
+            </intent-filter>
+
+            <!-- #61 map view null host; http(s), ftp; mime kml/gpx/poi  -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:scheme="ftp" />
+                <data android:scheme="file" />
+
+                <data android:mimeType="application/vnd.google-earth.kml+xml" />
+                <data android:mimeType="application/xml+kml" />
+                <data android:mimeType="application/xml+gpx" />
+                <data android:mimeType="application/xml+poi" />
+            </intent-filter>
+
         </activity>
+
         <activity android:name=".SettingsActivity"
             android:label="Settings" >
         </activity>

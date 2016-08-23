@@ -21,10 +21,12 @@ package de.k3b.android.androFotoFinder.locationmap;
 
 import android.app.Activity;
 import android.app.DialogFragment;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.preference.PreferenceManager;
@@ -50,7 +52,10 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayManager;
+import org.xml.sax.InputSource;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
@@ -70,8 +75,10 @@ import de.k3b.android.util.IntentUtil;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
+import de.k3b.geo.api.IGeoInfoHandler;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
+import de.k3b.geo.io.gpx.GpxReaderBase;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGalleryFilter;
@@ -101,11 +108,16 @@ public class LocationMapFragment extends DialogFragment {
     private View tempPopupMenuParentView = null;
 
     /** contain the markers with itmen-count that gets recalculated on every map move/zoom */
-    private FolderOverlay mFolderOverlaySummaryMarker;
-    private FolderOverlay mFolderOverlaySelectionMarker;
+    private FolderOverlay mFolderOverlayGreenPhotoMarker;
+
+    /** Selected items in gallery */
+    private FolderOverlay mFolderOverlayBlueSelectionMarker;
+
+    /** Selected items in gallery */
+    private FolderOverlay mFolderOverlayBlueBackgroundMarker = null;
 
     // handling current selection
-    protected IconOverlay mCurrrentSelectionMarker = null;
+    protected IconOverlay mCurrrentBlueSelectionMarker = null;
     protected int mMarkerId = -1;
 
     // api to fragment owner
@@ -301,7 +313,7 @@ public class LocationMapFragment extends DialogFragment {
             }
         });
 
-        reloadSelectionMarker();
+        reloadBlueMarker();
         return view;
     }
 
@@ -312,12 +324,12 @@ public class LocationMapFragment extends DialogFragment {
     protected void definteOverlays(MapView mapView, DefaultResourceProxyImplEx resourceProxy) {
         final List<Overlay> overlays = mapView.getOverlays();
 
-        this.mCurrrentSelectionMarker = createSelectedItemOverlay(resourceProxy);
+        this.mCurrrentBlueSelectionMarker = createSelectedItemOverlay(resourceProxy);
 
-        this.mSelectionMarker = getActivity().getResources().getDrawable(R.drawable.marker_blue);
-        mFolderOverlaySummaryMarker = createFolderOverlay(overlays);
+        this.mBlueMarker = getActivity().getResources().getDrawable(R.drawable.marker_blue);
+        mFolderOverlayGreenPhotoMarker = createFolderOverlay(overlays);
 
-        mFolderOverlaySelectionMarker = createFolderOverlay(overlays);
+        mFolderOverlayBlueSelectionMarker = createFolderOverlay(overlays);
 
         overlays.add(new GuestureOverlay(getActivity()));
 
@@ -403,7 +415,9 @@ public class LocationMapFragment extends DialogFragment {
         return result;
     }
 
-    public void defineNavigation(IGalleryFilter rootFilter, GeoRectangle rectangle, int zoomlevel, SelectedItems selectedItems) {
+    /** get all important parameters for displaying the map */
+    public void defineNavigation(IGalleryFilter rootFilter, GeoRectangle rectangle, int zoomlevel,
+                                 SelectedItems selectedItems, Uri additionalPointsContentUri) {
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + "defineNavigation: " + rectangle + ";z=" + zoomlevel);
         }
@@ -412,9 +426,35 @@ public class LocationMapFragment extends DialogFragment {
             this.mRootFilter = rootFilter;
         }
 
+        if (additionalPointsContentUri != null) {
+            final FolderOverlay folderForNewItems = new FolderOverlay(getActivity());
+
+            ContentResolver cr = getActivity().getContentResolver();
+            final GeoPointDtoEx p = new GeoPointDtoEx();
+            try {
+                InputStream is = cr.openInputStream(additionalPointsContentUri);
+                GpxReaderBase parser = new GpxReaderBase(new IGeoInfoHandler() {
+                    @Override
+                    public boolean onGeoInfo(IGeoPointInfo iGeoPointInfo) {
+                        folderForNewItems.add(new IconOverlay(mResourceProxy, (IGeoPoint) p.clone(), mBlueMarker));
+                        return true;
+                    }
+                }, p);
+                parser.parse(new InputSource(is));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (mFolderOverlayBlueBackgroundMarker != null) {
+                mMapView.getOverlays().remove(mFolderOverlayBlueBackgroundMarker);
+                mFolderOverlayBlueBackgroundMarker = null;
+            }
+            mFolderOverlayBlueBackgroundMarker = folderForNewItems;
+            mMapView.getOverlays().add(0, mFolderOverlayBlueBackgroundMarker);
+        }
+
         if ((selectedItems != null) && (this.mSelectedItems != selectedItems)) {
             this.mSelectedItems = selectedItems;
-            reloadSelectionMarker();
+            reloadBlueMarker();
         }
 
         if ((rectangle != null) && !Double.isNaN(rectangle.getLatitudeMin())) {
@@ -487,7 +527,7 @@ public class LocationMapFragment extends DialogFragment {
             // initialized
             if (mCurrentSummaryMarkerLoader == null) {
                 // not active yet
-                List<Overlay> oldItems = mFolderOverlaySummaryMarker.getItems();
+                List<Overlay> oldItems = mFolderOverlayGreenPhotoMarker.getItems();
 
                 mLastZoom = this.mMapView.getZoomLevel();
                 double groupingFactor = getGroupingFactor(mLastZoom);
@@ -569,13 +609,13 @@ public class LocationMapFragment extends DialogFragment {
 
         // This is called when doInBackground() is finished
         @Override
-        protected void onPostExecute(OverlayManager result) {
+        protected void onPostExecute(OverlayManager folderOverlayContent) {
             boolean zoomLevelChanged = mMapView.getZoomLevel() != mLastZoom;
 
             if (isCancelled()) {
                 onLoadFinishedSummaryMarker(null, zoomLevelChanged);
             } else {
-                onLoadFinishedSummaryMarker(result, zoomLevelChanged);
+                onLoadFinishedSummaryMarker(folderOverlayContent, zoomLevelChanged);
 
                 recyleItems(zoomLevelChanged, mOldItems);
             }
@@ -608,17 +648,17 @@ public class LocationMapFragment extends DialogFragment {
 
     /** gets called when SummaryMarkerLoaderTask has finished.
      *
-     * @param result null if there was an error
+     * @param folderOverlayContent null if there was an error
      */
-    private void onLoadFinishedSummaryMarker(OverlayManager result, boolean zoomLevelChanged) {
+    private void onLoadFinishedSummaryMarker(OverlayManager folderOverlayContent, boolean zoomLevelChanged) {
         StringBuilder dbg = (Global.debugEnabledSql || Global.debugEnabled) ? new StringBuilder() : null;
         if (dbg != null) {
-            int found = (result != null) ? result.size() : 0;
+            int found = (folderOverlayContent != null) ? folderOverlayContent.size() : 0;
             dbg.append(mDebugPrefix).append("onLoadFinishedSummaryMarker() markers created: ").append(found).append(". ");
         }
 
-        if (result != null) {
-            OverlayManager old = mFolderOverlaySummaryMarker.setOverlayManager(result);
+        if (folderOverlayContent != null) {
+            OverlayManager old = mFolderOverlayGreenPhotoMarker.setOverlayManager(folderOverlayContent);
             if (old != null) {
                 if (dbg != null) {
                     dbg.append(mDebugPrefix).append(" previous : : ").append(old.size());
@@ -664,10 +704,10 @@ public class LocationMapFragment extends DialogFragment {
 
     protected void updateMarker(IconOverlay marker, int markerId, IGeoPoint makerPosition, Object markerData) {
         mMarkerId = markerId;
-        if (mCurrrentSelectionMarker != null) {
-            mMapView.getOverlays().remove(mCurrrentSelectionMarker);
-            mCurrrentSelectionMarker.moveTo(makerPosition, mMapView);
-            mMapView.getOverlays().add(mCurrrentSelectionMarker);
+        if (mCurrrentBlueSelectionMarker != null) {
+            mMapView.getOverlays().remove(mCurrrentBlueSelectionMarker);
+            mCurrrentBlueSelectionMarker.moveTo(makerPosition, mMapView);
+            mMapView.getOverlays().add(mCurrrentBlueSelectionMarker);
         }
     }
 
@@ -691,14 +731,14 @@ public class LocationMapFragment extends DialogFragment {
     private SelectedItems mSelectedItems = null;
 
     /** To allow canceling of loading task. There are 0 or one tasks running at a time */
-    private SelectionMarkerLoaderTask mCurrentSelectionMarkerLoader = null;
+    private BlueMarkerLoaderTask mCurrentBlueMarkerLoader = null;
 
-    private Drawable mSelectionMarker;
+    private Drawable mBlueMarker;
 
-    /** to load markers for current selected items */
-    private class SelectionMarkerLoaderTask extends MarkerLoaderTaskWithRecycling<FotoMarker> {
-        public SelectionMarkerLoaderTask(HashMap<Integer, FotoMarker> oldItems) {
-            super(getActivity(), LocationMapFragment.this.mDebugPrefix + "-SelectionMarkerLoaderTask#" + (sInstanceCountFotoLoader++) + "-", mMarkerRecycler,
+    /** to load blue markers for current selected items */
+    private class BlueMarkerLoaderTask extends MarkerLoaderTaskWithRecycling<FotoMarker> {
+        public BlueMarkerLoaderTask(HashMap<Integer, FotoMarker> oldItems) {
+            super(getActivity(), LocationMapFragment.this.mDebugPrefix + "-BlueMarkerLoaderTask#" + (sInstanceCountFotoLoader++) + "-", mMarkerRecycler,
                     oldItems, Global.maxSelectionMarkersInMap);
         }
 
@@ -709,11 +749,11 @@ public class LocationMapFragment extends DialogFragment {
 
         // This is called when doInBackground() is finished
         @Override
-        protected void onPostExecute(OverlayManager result) {
+        protected void onPostExecute(OverlayManager folderOverlayContent) {
             if (isCancelled()) {
-                onLoadFinishedSelection(null);
+                onLoadFinishedBlueMarker(null);
             } else {
-                onLoadFinishedSelection(result);
+                onLoadFinishedBlueMarker(folderOverlayContent);
 
                 recyleItems(false, mOldItems);
             }
@@ -733,27 +773,27 @@ public class LocationMapFragment extends DialogFragment {
         }
 
         protected BitmapDrawable createIcon(String iconText) {
-            return (BitmapDrawable) mSelectionMarker;
+            return (BitmapDrawable) mBlueMarker;
         }
 
-    } // class SelectionMarkerLoaderTask
+    } // class BlueMarkerLoaderTask
 
-    private void reloadSelectionMarker() {
-        if ((mFolderOverlaySelectionMarker != null) &&
+    private void reloadBlueMarker() {
+        if ((mFolderOverlayBlueSelectionMarker != null) &&
                 (mSelectedItems != null) && (!mSelectedItems.isEmpty())) {
-            if (mCurrentSelectionMarkerLoader != null) {
-                mCurrentSelectionMarkerLoader.cancel(false);
-                mCurrentSelectionMarkerLoader = null;
+            if (mCurrentBlueMarkerLoader != null) {
+                mCurrentBlueMarkerLoader.cancel(false);
+                mCurrentBlueMarkerLoader = null;
             }
 
-            List<Overlay> oldItems = mFolderOverlaySelectionMarker.getItems();
+            List<Overlay> oldItems = mFolderOverlayBlueSelectionMarker.getItems();
 
             QueryParameter query = new QueryParameter(FotoSql.queryGps);
             FotoSql.setWhereSelection(query, mSelectedItems);
             FotoSql.addWhereLatLonNotNull(query);
 
-            mCurrentSelectionMarkerLoader = new SelectionMarkerLoaderTask(createHashMap(oldItems));
-            mCurrentSelectionMarkerLoader.execute(query);
+            mCurrentBlueMarkerLoader = new BlueMarkerLoaderTask(createHashMap(oldItems));
+            mCurrentBlueMarkerLoader.execute(query);
         }
     }
 
@@ -769,18 +809,18 @@ public class LocationMapFragment extends DialogFragment {
 
     /** gets called when MarkerLoaderTask has finished.
      *
-     * @param result null if there was an error
+     * @param folderOverlayContent null if there was an error
      */
-    protected void onLoadFinishedSelection(OverlayManager result) {
-        mCurrentSelectionMarkerLoader = null;
+    protected void onLoadFinishedBlueMarker(OverlayManager folderOverlayContent) {
+        mCurrentBlueMarkerLoader = null;
         StringBuilder dbg = (Global.debugEnabledSql || Global.debugEnabled) ? new StringBuilder() : null;
         if (dbg != null) {
-            int found = (result != null) ? result.size() : 0;
-            dbg.append(mDebugPrefix).append("onLoadFinishedSelection() markers created: ").append(found);
+            int found = (folderOverlayContent != null) ? folderOverlayContent.size() : 0;
+            dbg.append(mDebugPrefix).append("onLoadFinishedBlueMarker() markers created: ").append(found);
         }
 
-        if (result != null) {
-            OverlayManager old = mFolderOverlaySelectionMarker.setOverlayManager(result);
+        if (folderOverlayContent != null) {
+            OverlayManager old = mFolderOverlayBlueSelectionMarker.setOverlayManager(folderOverlayContent);
             if (old != null) {
                 if (dbg != null) {
                     dbg.append(mDebugPrefix).append(" previous : : ").append(old.size());

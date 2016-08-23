@@ -39,11 +39,11 @@ import android.view.MotionEvent;
  */
 public class FolderOverlay extends Overlay {
 
-    protected OverlayManager mOverlayManager;
+    protected OverlayManager mFolderOverlayContent;
 
     public FolderOverlay(Context ctx) {
         super(ctx);
-        mOverlayManager = new DefaultOverlayManager(null);
+        mFolderOverlayContent = new DefaultOverlayManager(null);
     }
 
     @SuppressLint("WrongCall")
@@ -51,7 +51,7 @@ public class FolderOverlay extends Overlay {
     protected void draw(Canvas canvas, MapView osm, boolean shadow) {
         if (shadow)
             return;
-        mOverlayManager.onDraw(canvas, osm);
+        mFolderOverlayContent.onDraw(canvas, osm);
     }
 
     /**
@@ -59,48 +59,48 @@ public class FolderOverlay extends Overlay {
      * Doesn't provide a copy, but the actual list.
      */
     public List<Overlay> getItems(){
-        return mOverlayManager ;
+        return mFolderOverlayContent;
     }
 
     public boolean add(Overlay item){
-        return mOverlayManager.add(item);
+        return mFolderOverlayContent.add(item);
     }
 
     public boolean remove(Overlay item){
-        return mOverlayManager.remove(item);
+        return mFolderOverlayContent.remove(item);
     }
 
     /** replaces the current overlaymanager. @returns the previous */
-    public OverlayManager setOverlayManager(OverlayManager newItems) {
-        OverlayManager old = mOverlayManager;
-        mOverlayManager = newItems;
+    public OverlayManager setOverlayManager(OverlayManager newFolderOverlayContent) {
+        OverlayManager old = mFolderOverlayContent;
+        mFolderOverlayContent = newFolderOverlayContent;
         return old;
     }
 
     @Override public boolean onSingleTapUp(MotionEvent e, MapView mapView){
         if (isEnabled())
-            return mOverlayManager.onSingleTapUp(e, mapView);
+            return mFolderOverlayContent.onSingleTapUp(e, mapView);
         else
             return false;
     }
 
     @Override public boolean onSingleTapConfirmed(MotionEvent e, MapView mapView){
         if (isEnabled())
-            return mOverlayManager.onSingleTapConfirmed(e, mapView);
+            return mFolderOverlayContent.onSingleTapConfirmed(e, mapView);
         else
             return false;
     }
 
     @Override public boolean onLongPress(MotionEvent e, MapView mapView){
         if (isEnabled())
-            return mOverlayManager.onLongPress(e, mapView);
+            return mFolderOverlayContent.onLongPress(e, mapView);
         else
             return false;
     }
 
     @Override public boolean onTouchEvent(MotionEvent e, MapView mapView){
         if (isEnabled())
-            return mOverlayManager.onTouchEvent(e, mapView);
+            return mFolderOverlayContent.onTouchEvent(e, mapView);
         else
             return false;
     }
@@ -108,7 +108,7 @@ public class FolderOverlay extends Overlay {
     @Override
     public void onDetach(MapView mapView) {
         super.onDetach(mapView);
-        mOverlayManager.onDetach(mapView);
+        mFolderOverlayContent.onDetach(mapView);
     }
 
     //TODO: implement other events...
@@ -118,7 +118,7 @@ public class FolderOverlay extends Overlay {
      * This only operates on overlays that inherit from OverlayWithIW.
      */
     public void closeAllInfoWindows(){
-        for (Overlay overlay:mOverlayManager){
+        for (Overlay overlay: mFolderOverlayContent){
             if (overlay instanceof FolderOverlay){
                 ((FolderOverlay)overlay).closeAllInfoWindows();
             }

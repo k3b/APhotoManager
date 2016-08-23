@@ -111,6 +111,8 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
         // no geo: from intent: use last used value
         mSaveLastUsedGeoToSharedPrefs = (geoPointFromIntent == null);
 
+        Uri additionalPointsContentUri = ((intent != null) && (geoPointFromIntent == null)) ? intent.getData() : null;
+
         String lastGeoUri = sharedPref.getString(STATE_LAST_GEO, "geo:53,8?z=6");
         IGeoPointInfo lastGeo = mGeoUriParser.fromUri(lastGeoUri);
         if ((geoPointFromIntent != null) && (lastGeo != null)) {
@@ -154,6 +156,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
         String selectedIDsString = intent.getStringExtra(EXTRA_SELECTED_ITEM_IDS);
         SelectedItems selectedItems = (selectedIDsString != null) ? new SelectedItems().parse(selectedIDsString) : null;
 
+        // TODO !!! #62 gpx/kml files: wie an LocatonMapFragment übergeben??
         String filter = null;
         // for debugging: where does the filter come from
         String dbgFilter = null;
@@ -181,7 +184,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + dbgFilter + " => " + this.mFilter);
         }
 
-        mMap.defineNavigation(this.mFilter, geoPointFromIntent, rectangle, zoom, selectedItems);
+        mMap.defineNavigation(this.mFilter, geoPointFromIntent, rectangle, zoom, selectedItems, additionalPointsContentUri);
     }
 
     @Override
@@ -267,7 +270,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
     private void onFilterChanged(GalleryFilterParameter filter) {
         if (filter != null) {
             this.mFilter = filter;
-            mMap.defineNavigation(this.mFilter, null, ZoomUtil.NO_ZOOM, null);
+            mMap.defineNavigation(this.mFilter, null, ZoomUtil.NO_ZOOM, null, null);
         }
     }
 
