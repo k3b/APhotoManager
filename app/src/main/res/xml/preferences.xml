@@ -19,6 +19,11 @@
             android:title="@string/settings_multisel_clear_title"
             android:summary="@string/settings_multisel_clear_summary" />
 
+        <CheckBoxPreference android:key="mapsForgeEnabled"
+            android:defaultValue="false"
+            android:title="@string/settings_maps_forge_enable_tile"
+            android:summary="@string/settings_maps_forge_enable_summary" />
+
         <de.k3b.android.widgets.EditTextPreferenceWithSummary
             android:key="mapsForgeDir"
             android:title="@string/settings_maps_forge_dir_title" />

@@ -113,6 +113,7 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putBoolean("debugEnableLibs", PhotoViewAttacher.DEBUG);
 
         prefs.putBoolean("clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
+        prefs.putBoolean("mapsForgeEnabled", Global.mapsForgeEnabled);
 
         prefs.putString("imageDetailThumbnailIfBiggerThan", "" + Global.imageDetailThumbnailIfBiggerThan);
         prefs.putString("maxSelectionMarkersInMap", "" + Global.maxSelectionMarkersInMap);
@@ -157,6 +158,9 @@ public class SettingsActivity extends PreferenceActivity {
 
         Global.clearSelectionAfterCommand       = getPref(prefs, "clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
 
+        Global.mapsForgeEnabled                 = getPref(prefs, "mapsForgeEnabled", Global.mapsForgeEnabled);
+
+                
         Global.imageDetailThumbnailIfBiggerThan = getPref(prefs, "imageDetailThumbnailIfBiggerThan"     , Global.imageDetailThumbnailIfBiggerThan);
 
         Global.maxSelectionMarkersInMap         = getPref(prefs, "maxSelectionMarkersInMap"     , Global.maxSelectionMarkersInMap);

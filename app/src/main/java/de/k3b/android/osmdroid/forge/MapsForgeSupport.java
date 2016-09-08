@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
 import org.mapsforge.map.android.rendertheme.AssetsRenderTheme;
+import org.mapsforge.map.reader.ReadBuffer;
 import org.mapsforge.map.rendertheme.XmlRenderTheme;
 import org.osmdroid.mapsforge.MapsForgeTileProvider;
 import org.osmdroid.mapsforge.MapsForgeTileSource;
@@ -29,6 +30,9 @@ import java.util.Set;
 public class MapsForgeSupport {
     public static void createInstance(Application application) {
         AndroidGraphicFactory.createInstance(application);
+
+        // see https://github.com/mapsforge/mapsforge/issues/868
+        ReadBuffer.setMaximumBufferSize(6500000);
     }
 
     public static void load(Activity activity, MapView mMap, File mapsForgeDir) {

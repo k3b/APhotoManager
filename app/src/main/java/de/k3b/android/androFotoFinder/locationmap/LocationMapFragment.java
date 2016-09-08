@@ -252,7 +252,13 @@ public class LocationMapFragment extends DialogFragment {
 
         mMapView = (MapView) view.findViewById(R.id.mapview);
 
-        MapsForgeSupport.load(getActivity(), mMapView, Global.mapsForgeDir);
+        if ((Global.mapsForgeDir == null) || (!Global.mapsForgeDir.exists()) || (!Global.mapsForgeDir.isDirectory())) {
+            Global.mapsForgeEnabled = false;
+        }
+
+        if (Global.mapsForgeEnabled) {
+            MapsForgeSupport.load(getActivity(), mMapView, Global.mapsForgeDir);
+        }
 
         this.mImage = (ImageView) view.findViewById(R.id.image);
         this.mImage.setOnClickListener(new View.OnClickListener() {

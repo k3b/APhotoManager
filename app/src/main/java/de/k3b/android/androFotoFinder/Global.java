@@ -100,6 +100,7 @@ public class Global {
 
     /** #26 which image resolution should the "non zoomed imageView" have? */
     public static boolean initialImageDetailResolutionHigh = false; // false: MediaStore.Images.Thumbnails.MINI_KIND; true: FULL_SCREEN_KIND;
+    public static boolean mapsForgeEnabled = false;
 
     public static void debugMemory(String modul, String message) {
         if (Global.debugEnabledMemory) {
