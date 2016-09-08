@@ -59,6 +59,7 @@ import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
+import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
 import de.k3b.android.osmdroid.FolderOverlay;
@@ -813,6 +814,8 @@ public class LocationMapFragment extends DialogFragment {
                 mMapView.removeView(tempPopupMenuParentView);
 
                 switch (item.getItemId()) {
+                    case R.id.cmd_photo:
+                        return showPoto(getGeoPointById(markerId, geoPosition));
                     case R.id.cmd_gallery:
                         return showGallery(getGeoPointById(markerId, geoPosition));
                     case R.id.cmd_zoom:
@@ -855,6 +858,16 @@ public class LocationMapFragment extends DialogFragment {
         tempPopupMenuParentView.setVisibility(View.VISIBLE);
         mMapView.addView(tempPopupMenuParentView, lp);
         return tempPopupMenuParentView;
+    }
+
+    private boolean showPoto(IGeoPoint geoPosition) {
+        GalleryFilterParameter filter = getMarkerFilter(geoPosition);
+        QueryParameter query = new QueryParameter();
+        FotoSql.setWhereFilter(query, filter, false);
+        FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
+
+        ImageDetailActivityViewPager.showActivity(this.getActivity(), null, 0, query);
+        return true;
     }
 
     private boolean showGallery(IGeoPoint geoPosition) {

@@ -46,6 +46,7 @@ import android.widget.Toast;
 
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
+import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailDialogBuilder;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoThumbSql;
@@ -53,6 +54,7 @@ import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.AndroidFileCommands;
+import de.k3b.database.QueryParameter;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryNavigator;
 import de.k3b.io.GalleryFilterParameter;
@@ -325,6 +327,8 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         switch (menuItem.getItemId()) {
             case R.id.cmd_mk_dir:
                 return onCreateSubDirQuestion(mPopUpSelection);
+            case R.id.cmd_photo:
+                return showPhoto(mPopUpSelection);
             case R.id.cmd_gallery:
                 return showGallery(mPopUpSelection);
             case R.id.action_details:
@@ -400,6 +404,24 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                     pathFilter,
                     FotoThumbSql.formatDirStatistic(this.getActivity(), pathFilter)
             ).show();
+            return true;
+        }
+        return false;
+    }
+
+    private boolean showPhoto(IDirectory selectedDir) {
+        String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
+        if (pathFilter != null) {
+            GalleryFilterParameter filter = new GalleryFilterParameter(); //.setPath(pathFilter);
+            if (!FotoSql.set(filter, pathFilter, mDirTypId))
+            {
+                filter.setPath(pathFilter + "/%");
+            }
+
+            QueryParameter query = new QueryParameter();
+            FotoSql.setWhereFilter(query, filter, true);
+            FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
+            ImageDetailActivityViewPager.showActivity(this.getActivity(), null, 0, query);
             return true;
         }
         return false;

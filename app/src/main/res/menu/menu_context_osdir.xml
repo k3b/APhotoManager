@@ -25,8 +25,11 @@
         android:visible="true"
         android:orderInCategory="10"
         android:showAsAction="never" />
+    <item android:id="@+id/cmd_photo" android:title="@string/show_photo"
+        android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
     <item android:id="@+id/cmd_gallery" android:title="@string/show_in_gallery_menu_title"
         android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
+
     <item android:id="@+id/action_details" android:title="@string/details_menu_title"
         android:icon="@android:drawable/ic_menu_preferences"
         android:orderInCategory="900" android:showAsAction="ifRoom" />
