@@ -37,7 +37,7 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
 import de.k3b.android.osmdroid.IconFactory;
-import de.k3b.android.osmdroid.MarkerBase;
+import de.k3b.android.osmdroid.ClickableIconOverlay;
 import de.k3b.database.QueryParameter;
 
 /**
@@ -60,7 +60,7 @@ import de.k3b.database.QueryParameter;
  *
  * Created by k3b on 16.07.2015.
  */
-public abstract class MarkerLoaderTask<MARKER extends MarkerBase> extends AsyncTask<QueryParameter, Integer, OverlayManager> {
+public abstract class MarkerLoaderTask<MARKER extends ClickableIconOverlay> extends AsyncTask<QueryParameter, Integer, OverlayManager> {
     public static final int NO_MARKER_COUNT_LIMIT = 0;
     // every 500 items the progress indicator is advanced
     private static final int PROGRESS_INCREMENT = 500;

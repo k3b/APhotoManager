@@ -37,7 +37,7 @@ public class IconFactory {
 
     /** cluster icon anchor */
     /** anchor point to draw the number of markers inside the cluster icon */
-    private float mTextAnchorU = MarkerBase.ANCHOR_CENTER, mTextAnchorV = MarkerBase.ANCHOR_CENTER;
+    private float mTextAnchorU = ClickableIconOverlay.ANCHOR_CENTER, mTextAnchorV = ClickableIconOverlay.ANCHOR_CENTER;
 
     private final Bitmap mBackground;
     private Paint mTextPaint;

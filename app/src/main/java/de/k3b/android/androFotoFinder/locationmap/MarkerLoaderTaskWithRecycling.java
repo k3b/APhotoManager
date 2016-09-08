@@ -28,13 +28,13 @@ import java.util.HashMap;
 import java.util.Stack;
 
 import de.k3b.android.androFotoFinder.Global;
-import de.k3b.android.osmdroid.MarkerBase;
+import de.k3b.android.osmdroid.ClickableIconOverlay;
 import de.k3b.database.QueryParameter;
 
 /**
  * Created by k3b on 24.08.2015.
  */
-public abstract class MarkerLoaderTaskWithRecycling<MARKER extends MarkerBase> extends MarkerLoaderTask<MARKER> {
+public abstract class MarkerLoaderTaskWithRecycling<MARKER extends ClickableIconOverlay> extends MarkerLoaderTask<MARKER> {
     /** The factory LocationMapFragment.SummaryMarkerLoaderTask#createMarker() tries to recycle old
      *     unused Fotomarkers before creating new */
     private final Stack<MARKER> mRecycler;

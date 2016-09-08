@@ -64,7 +64,7 @@ import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
 import de.k3b.android.osmdroid.FolderOverlay;
 import de.k3b.android.osmdroid.GuestureOverlay;
 import de.k3b.android.osmdroid.IconOverlay;
-import de.k3b.android.osmdroid.MarkerBase;
+import de.k3b.android.osmdroid.ClickableIconOverlay;
 import de.k3b.android.osmdroid.ZoomUtil;
 import de.k3b.android.osmdroid.forge.MapsForgeSupport;
 import de.k3b.android.util.IntentUtil;
@@ -461,7 +461,7 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     /** all marker clicks will be delegated to LocationMapFragment#onMarkerClicked() */
-    private class FotoMarker extends MarkerBase<Object> {
+    private class FotoMarker extends ClickableIconOverlay<Object> {
 
         public FotoMarker(ResourceProxy pResourceProxy) {
             super(pResourceProxy);

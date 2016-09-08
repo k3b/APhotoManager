@@ -35,14 +35,14 @@ import java.util.List;
  *
  * Created by k3b on 17.07.2015.
  */
-public abstract class MarkerBase<DataType> extends IconOverlay {
+public abstract class ClickableIconOverlay<DataType> extends IconOverlay {
     protected int mId = 0;
     private DataType mData = null;
 
     /**
      * save to be called in non-gui-thread
      */
-    protected MarkerBase(ResourceProxy pResourceProxy) {
+    protected ClickableIconOverlay(ResourceProxy pResourceProxy) {
         super(pResourceProxy);
     }
 
@@ -52,7 +52,7 @@ public abstract class MarkerBase<DataType> extends IconOverlay {
     abstract protected boolean onMarkerClicked(MapView mapView, int markerId, IGeoPoint makerPosition, DataType markerData);
 
     /** used to recycle this */
-    public MarkerBase set(int id, IGeoPoint position, Drawable icon, DataType data) {
+    public ClickableIconOverlay set(int id, IGeoPoint position, Drawable icon, DataType data) {
         set(position, icon);
         mId = id;
         mData = data;
@@ -108,8 +108,8 @@ public abstract class MarkerBase<DataType> extends IconOverlay {
         return false;
     }
 
-    public static MarkerBase find(List<MarkerBase> list, int id) {
-        for (MarkerBase item : list) {
+    public static ClickableIconOverlay find(List<ClickableIconOverlay> list, int id) {
+        for (ClickableIconOverlay item : list) {
             if ((item != null) && (item.mId == id)) return item;
         }
         return null;
