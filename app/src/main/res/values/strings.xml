@@ -123,8 +123,8 @@
 	<string name="settings_map_selmarker_max_title">Max. sel-markers in map</string>
 	<string name="settings_geo_history_max_title">Set geo history count</string>
 	<string name="settings_geo_history_file_title">Set geo history file</string>
-	<string name="settings_multisel_clear_summary">&#8230; after Copy/Move/Rename/&#8230; .</string>
-	<string name="settings_multisel_clear_title">Clear multi-selection</string>
+	<string name="settings_multisel_clear_summary">Copy, move, rename, etc.</string>
+	<string name="settings_multisel_clear_title">Clear multi-selection after action</string>
 
 	<string name="settings_title">Settings</string>
 	<string name="share_err_not_found">No share/send provider found</string>
