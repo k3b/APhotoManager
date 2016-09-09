@@ -102,7 +102,7 @@
 	<string name="selection_add_all_menu_title">Selection: Add all visible</string>
 	<string name="selection_remove_menu_title">Selection: Remove all visible</string>
 	<string name="settings_bookmark_dir_title">Bookmark folder</string>
-	<string name="settings_debug_libs_summary">&#8230; of 3d party libraries.</string>
+	<string name="settings_debug_libs_summary">&#8230; of 3rd party libraries.</string>
 	<string name="settings_debug_memory_summary">&#8230; containing memory consumption.</string>
 	<string name="settings_debug_memory_title">LogCat memory consumption</string>
 	<string name="settings_debug_sql_summary">&#8230; containing executed SQL.</string>
