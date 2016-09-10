@@ -4,7 +4,7 @@
 /*
  * Translation to Dutch by keunes..
  *
- * This file is part of "a Photo Manager (A(ndro)FotoFinder).
+ * This file is part of "A Photo Manager" (A(ndro)FotoFinder).
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  */
  -->
 <resources>
-  <string name="about_summary">Over a Photo Manager%1$s</string>
+  <string name="about_summary">Over \"A Photo Manager%1$s\"</string>
   <string name="area_menu_title">Selecteer gebied op de kaart</string>
   <string name="background">Achtergrond</string>
   <string name="bookmark_delete_answer_format">Bladwijzer %1$s verwijderd.</string>
@@ -40,7 +40,10 @@
   <string name="copy_menu_title">Kopiëren</string>
   <string name="copy_result_format">%1$d van %2$d bestanden gekopieerd</string>
   <string name="delete_menu_title">Verwijderen</string>
-  <string name="delete_question_message_format">"Weet u zeker dat u deze bestanden definitief wilt verwijderen?%1$sDit kan niet ongedaan gemaakt worden."</string>
+  <string name="delete_question_message_format">"Weet u zeker dat u deze bestanden definitief wilt verwijderen?
+    %1$s
+
+    Dit kan niet ongedaan gemaakt worden."</string>
   <string name="delete_question_title">Foto(\'s) verwijderen?</string>
   <string name="delete_result_format">%1$d van %2$d bestanden verwijderd</string>
   <string name="destination_copy">Kopieer naar</string>
@@ -49,6 +52,7 @@
   <string name="edit_chooser_title">Kies een fotobewerker</string>
   <string name="edit_err_editor_not_found">Geen app voor fotobewerking gevonden</string>
   <string name="edit_menu_title">Bewerken</string>
+  <string name="file_err_writeprotected">writeprotected \'%1$s\'.\n\n \'%2$s\' is not possible.</string>
   <string name="filter_err_invalid_date_format">\'%1$s\' is geen geldige datum.</string>
   <string name="filter_err_invalid_location_format">\'%1$s\' is geen geldige coördinaat.</string>
   <string name="filter_menu_title">Filter</string>
@@ -57,6 +61,7 @@
   <string name="folder_menu_title">Map filter</string>
   <string name="gallery_title">Foto\'s</string>
   <string name="geo_show_menu_title">Op de kaart weergeven</string>
+  <string name="geo_show_as_menu_title">weergeven in externe geolocatie-browser</string>
   <string name="geo_edit_menu_title">Geolocatie instellen</string>
   <string name="geo_edit_update_in_progress">Geolocatie aanpassen voor geselecteerde foto\'s</string>
   <string name="geo_picker_err_not_found">Geen geolocatie-kiezer gevonden</string>
@@ -67,7 +72,7 @@
   <string name="image_err_file_exists_format">Het bestand \'%1$s\' bestaat al.\nWeet u zeker dat u het wilt overschrijven?</string>
   <string name="image_err_file_rename_format">Kan \'%1$s\' niet hernoemen.</string>
   <string name="image_err_not_found_format">Geen foto\'s gevonden voor %1$s.</string>
-  <string name="image_err_not_in_db_format">Foto in media database %1$s nog niet gevonden. %2$d nieuwe bestanden worden gescant. De ontbrekende foto zal binnenkort beschikbaar zijn.</string>
+  <string name="image_err_not_in_db_format">Foto in media database (%1$s) nog niet gevonden. %2$d nieuwe bestanden worden gescand. De ontbrekende foto zal binnenkort beschikbaar zijn.</string>
   <string name="image_loading_at_position_format">"Laden (%1$d) …"</string>
   <string name="image_success_update_format">%1$d foto\'s geüpdatet.</string>
   <string name="lbl_date">Datum</string>
@@ -79,49 +84,59 @@
   <string name="mk_dir_menu_title">Map aanmaken</string>
   <string name="mk_err_failed_format">Kan %1$s niet maken</string>
   <string name="mk_success_format">%1$s aangemaakt</string>
+  <string name="more_menu_title">Meer…</string>
   <string name="move_menu_title">Verplaatsen</string>
   <string name="move_result_format">%1$d van %2$d bestanden verplaatst</string>
   <string name="osm_cright_title">Kaarttegels © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a></string>
   <string name="overwrite_question_title">Overschrijven?</string>
   <string name="rename_menu_title">Hernoemen</string>
   <string name="rename_result_format">%1$d van %2$d bestanden hernoemd</string>
+  <string name="scanner_dir_question">Waar te beginnen met scannen?</string>
   <string name="scanner_err_busy">Kan geen foto\'s verwerken zolang de Android Media Scanner bezig is. Probeer het later nog een keer.</string>
+  <string name="scanner_menu_title">Media-scanner</string>
   <string name="scanner_update_result_format">%1$d items in de media-database geüpdatet</string>
   <string name="selection_status_format">%1$d geselecteerd</string>
   <string name="selection_none_hint">Kies een map met foto\'s</string>
   <string name="selected_only_menu_title">Alleen geselecteerde</string>
   <string name="selection_add_all_menu_title">Selectie: alle zichtbare toevoegen</string>
   <string name="selection_remove_menu_title">Selectie: alle zichtbare verwijderen</string>
-  <string name="settings_bookmark_dir_title">Locatie bladwijzers</string>
+  <string name="settings_bookmark_dir_title">Locatie van bladwijzers</string>
+  <string name="settings_debug_libs_summary">&#8230; of 3d party libraries.</string>
   <string name="settings_debug_memory_summary">&#8230; met geheugengebruik.</string>
   <string name="settings_debug_memory_title">LogCat geheugengebruik</string>
   <string name="settings_debug_sql_summary">&#8230; met uitgevoerde SQL.</string>
   <string name="settings_debug_summary">&#8230; met overige logberichten.</string>
   <string name="settings_debug_title">LogCat overig</string>
   <string name="settings_debug_view_item_summary">&#8230; met item-informatie van grid/lijsten</string>
+  <string name="settings_debug_clear_title">LogCat legen</string>
+  <string name="settings_debug_save_title">LogCat opslaan</string>
   <string name="settings_group_debug_title">Foutrapportages</string>
-  <string name="settings_image_hide_time_title">Automatisch menubalk verbergen na (miliseconden)</string>
+  <string name="settings_image_hide_time_title">Menubalk automatisch verbergen na (miliseconden)</string>
   <string name="settings_image_initialImageDetailResolutionHigh_summary">Hogere kwaliteit miniaturen (langzamer, meer geheugengebruik)</string>
   <string name="settings_image_initialImageDetailResolutionHigh_title">Verbeter kwaliteit miniaturen</string>
   <string name="settings_image_slideshow_intervall_title">Interval slideshow (miliseconden)</string>
   <string name="settings_locale_title">Taal</string>
-  <string name="settings_locale_os_language">van apparaat</string>
-  <string name="settings_log_folder_title">Map voor logbestand</string>
-  <string name="settings_map_selmarker_max_title">Maximumaantal markers op de kaart</string>
+  <string name="settings_locale_os_language">Systeemstandaard</string>
+  <string name="settings_log_folder_title">Locatie van logbestand</string>
+  <string name="settings_map_selmarker_max_title">Maximum aantal markers op de kaart</string>
   <string name="settings_geo_history_max_title">Aantal onthouden geolocaties</string>
+  <string name="settings_geo_history_file_title">Bestand voor geschiedenis geolocaties instellen</string>
   <string name="settings_multisel_clear_summary">&#8230; na kopiëren, verplaatsen, hernoemen, enz.</string>
   <string name="settings_multisel_clear_title">Alle items deselecteren</string>
   <string name="settings_title">Instellingen</string>
   <string name="share_err_not_found">Geen app gevonden voor delen/verzenden</string>
   <string name="share_err_to_many">Teveel items geselecteerd om tegelijk te kunnen verzenden</string>
   <string name="share_menu_title">Delen/Versturen</string>
+  <string name="show_in_gallery_menu_title">In nieuwe gallerij</string>
+  <string name="slideshow_menu_title">Slideshow</string>
   <string name="sort_by_date">Datum</string>
   <string name="sort_by_folder">Map</string>
   <string name="sort_by_name">Naam</string>
-  <string name="sort_by_name_len">Lengte</string>
+  <string name="sort_by_name_len">Lengte bestandslocatie</string>
   <string name="sort_by_none">Niet gesorteerd</string>
   <string name="sort_by_place">Locatie</string>
   <string name="sort_menu_title">Sorteren</string>
-  <string name="update_result_format">Updated %1$d/%2$d files</string>
-  <string name="zoom_to_fit_menu_title">Zoom to fit</string>
-</resources>
+  <string name="update_result_format">%1$d/%2$d bestanden geüpdatet</string>
+  <string name="settings_image_thumb_if_bigger_than_summary">Laat de miniatuur zien als de afbeelding breder of hoger is dan deze waarde. Dit is sneller, maar leidt tot lagere kwaliteit weergaven.</string>
+  <string name="settings_image_thumb_dir_title">Locatie voor voorbeeldweergaven</string>
+ </resources>
