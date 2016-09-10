@@ -26,6 +26,8 @@ this program. If not, see <http://www.gnu.org/licenses/>
 	<string name="global_log_file_path" translatable="false">copy/aPhotoManager.log</string>
 	<string name="settings_debug_libs_title" translatable="false">LogCat libs</string>
 	<string name="settings_debug_sql_title" translatable="false">LogCat SQL</string>
+	<string name="settings_debug_map_title">LogCat geo map</string>
+
 	<string name="settings_debug_view_item_title" translatable="false">LogCat gridview/listview</string>
 	<!-- version_postfix="" for fdroid-release and version_postfix=" (dev)" for development branch-->
 	<string name="about_content" translatable="false"><![CDATA["  <a href="https://github.com/k3b/APhotoManager/wiki">

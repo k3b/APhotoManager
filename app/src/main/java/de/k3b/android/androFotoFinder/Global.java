@@ -43,9 +43,10 @@ public class Global {
     /**
      * Global.xxxxx. Non final values may be changed in SettingsActivity
      */
-    public static boolean debugEnabled = true;
+    public static boolean debugEnabled = false;
     public static boolean debugEnabledViewItem = false;
-    public static boolean debugEnabledSql = true;
+    public static boolean debugEnabledSql = false;
+    public static boolean debugEnabledMap = false;
     public static boolean debugEnabledMemory = false;
 
     /** The maximum number of **Blue selection markers** in the [Geographic-Map](geographic-map). */

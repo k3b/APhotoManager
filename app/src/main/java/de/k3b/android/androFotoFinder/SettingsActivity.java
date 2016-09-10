@@ -34,6 +34,8 @@ import android.util.Log;
 import android.view.Display;
 import android.widget.Toast;
 
+import org.osmdroid.tileprovider.constants.OpenStreetMapTileProviderConstants;
+
 import java.io.File;
 
 import de.k3b.FotoLibGlobal;
@@ -105,6 +107,8 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putBoolean("debugEnabled", Global.debugEnabled);
         prefs.putBoolean("debugEnabledViewItem", Global.debugEnabledViewItem);
         prefs.putBoolean("debugEnabledSql", Global.debugEnabledSql);
+        prefs.putBoolean("debugEnabledMap", Global.debugEnabledMap);
+
         prefs.putBoolean("debugEnabledMemory", Global.debugEnabledMemory);
 
         // #26
@@ -143,18 +147,27 @@ public class SettingsActivity extends PreferenceActivity {
 
         Global.debugEnabledViewItem             = getPref(prefs, "debugEnabledViewItem", Global.debugEnabledViewItem);
         Global.debugEnabledSql                  = getPref(prefs, "debugEnabledSql", Global.debugEnabledSql);
+
+        Global.debugEnabledMap                  = getPref(prefs, "debugEnabledMap", Global.debugEnabledMap);
+
         Global.debugEnabledMemory               = getPref(prefs, "debugEnabledMemory", Global.debugEnabledMemory);
+
+        // one setting for several 3d party debug-flags
+        boolean debug3rdParty                   = getPref(prefs, "debugEnableLibs", PhotoViewAttacher.DEBUG);
+
+        PhotoViewAttacher.DEBUG                 = debug3rdParty;
+        HugeImageLoader.DEBUG                   = debug3rdParty;
+        ThumbNailUtils.DEBUG = debug3rdParty;
+        LogManager.setDebugEnabled(debug3rdParty);
+        com.nostra13.universalimageloader.utils.L.writeDebugLogs(debug3rdParty);
+        com.nostra13.universalimageloader.utils.L.writeLogs(debug3rdParty);
+
+        // details osmdroid debugging only if Global.debugEnabledMap && debug3rdParty
+        OpenStreetMapTileProviderConstants.DEBUG_TILE_PROVIDERS = Global.debugEnabledMap && debug3rdParty;
+        OpenStreetMapTileProviderConstants.DEBUGMODE = Global.debugEnabledMap && debug3rdParty;
 
         // #26
         Global.initialImageDetailResolutionHigh = getPref(prefs, "initialImageDetailResolutionHigh", Global.initialImageDetailResolutionHigh);
-
-        // one setting for several 3d party debug-flags
-        PhotoViewAttacher.DEBUG                 = getPref(prefs, "debugEnableLibs", PhotoViewAttacher.DEBUG);
-        HugeImageLoader.DEBUG                   = PhotoViewAttacher.DEBUG;
-        ThumbNailUtils.DEBUG = PhotoViewAttacher.DEBUG;
-        LogManager.setDebugEnabled(PhotoViewAttacher.DEBUG);
-        com.nostra13.universalimageloader.utils.L.writeDebugLogs(PhotoViewAttacher.DEBUG);
-        com.nostra13.universalimageloader.utils.L.writeLogs(PhotoViewAttacher.DEBUG);
 
         Global.clearSelectionAfterCommand       = getPref(prefs, "clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
 

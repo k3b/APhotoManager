@@ -23,6 +23,7 @@ import android.app.Application;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import org.osmdroid.api.IMapView;
 import org.osmdroid.tileprovider.constants.OpenStreetMapTileProviderConstants;
 
 import java.util.ArrayList;
@@ -82,7 +83,7 @@ public class AndroFotoFinderApp extends Application {
         Collections.addAll(QueryParameter.sParserDefaultSelect, FotoSql.DEFAULT_GALLERY_COLUMNS);
         mCrashSaveToFile = new LogCat(this, Global.LOG_CONTEXT, HugeImageLoader.LOG_TAG,
                 PhotoViewAttacher.LOG_TAG, CupcakeGestureDetector.LOG_TAG,
-                FotoLibGlobal.LOG_TAG, ThumbNailUtils.LOG_TAG);
+                FotoLibGlobal.LOG_TAG, ThumbNailUtils.LOG_TAG, IMapView.LOGTAG);
 
         ThumbNailUtils.init(this, null);
 
