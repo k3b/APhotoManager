@@ -108,11 +108,11 @@ public class LocationMapFragment extends DialogFragment {
     private View mTempPopupMenuParentView = null;
 
     /** contain the markers with itmen-count that gets recalculated on every map move/zoom */
-    private FolderOverlay mFolderOverlayGreenSummaryMarker;
+    private FolderOverlay mFolderOverlayGreenPhotoMarker;
     private FolderOverlay mFolderOverlayBlueSelectionMarker;
 
     // handling current selection
-    protected IconOverlay mCurrrentRedSelectionMarker = null;
+    protected IconOverlay mCurrrentBlueSelectionMarker = null;
     protected int mMarkerId = -1;
 
     // api to fragment owner
@@ -354,10 +354,10 @@ public class LocationMapFragment extends DialogFragment {
     protected void definteOverlays(MapView mapView, DefaultResourceProxyImplEx resourceProxy) {
         final List<Overlay> overlays = mapView.getOverlays();
 
-        this.mCurrrentRedSelectionMarker = createSelectedItemOverlay(resourceProxy);
+        this.mCurrrentBlueSelectionMarker = createSelectedItemOverlay(resourceProxy);
 
         this.mSelectionMarker = getActivity().getResources().getDrawable(R.drawable.marker_blue);
-        mFolderOverlayGreenSummaryMarker = createFolderOverlay(overlays);
+        mFolderOverlayGreenPhotoMarker = createFolderOverlay(overlays);
 
         mFolderOverlayBlueSelectionMarker = createFolderOverlay(overlays);
 
@@ -539,7 +539,7 @@ public class LocationMapFragment extends DialogFragment {
             // initialized
             if (mCurrentSummaryMarkerLoader == null) {
                 // not active yet
-                List<Overlay> oldItems = mFolderOverlayGreenSummaryMarker.getItems();
+                List<Overlay> oldItems = mFolderOverlayGreenPhotoMarker.getItems();
 
                 mLastZoom = this.mMapView.getZoomLevel();
                 double groupingFactor = getGroupingFactor(mLastZoom);
@@ -677,7 +677,7 @@ public class LocationMapFragment extends DialogFragment {
         }
 
         if (newSummaryIcons != null) {
-            OverlayManager oldSummaryIcons = mFolderOverlayGreenSummaryMarker.setOverlayManager(newSummaryIcons);
+            OverlayManager oldSummaryIcons = mFolderOverlayGreenPhotoMarker.setOverlayManager(newSummaryIcons);
             if (oldSummaryIcons != null) {
                 if (dbg != null) {
                     dbg.append(mDebugPrefix).append(" previous : : ").append(oldSummaryIcons.size());
@@ -723,10 +723,10 @@ public class LocationMapFragment extends DialogFragment {
 
     protected void updateMarker(IconOverlay marker, int markerId, IGeoPoint makerPosition, Object markerData) {
         mMarkerId = markerId;
-        if (mCurrrentRedSelectionMarker != null) {
-            mMapView.getOverlays().remove(mCurrrentRedSelectionMarker);
-            mCurrrentRedSelectionMarker.moveTo(makerPosition, mMapView);
-            mMapView.getOverlays().add(mCurrrentRedSelectionMarker);
+        if (mCurrrentBlueSelectionMarker != null) {
+            mMapView.getOverlays().remove(mCurrrentBlueSelectionMarker);
+            mCurrrentBlueSelectionMarker.moveTo(makerPosition, mMapView);
+            mMapView.getOverlays().add(mCurrrentBlueSelectionMarker);
         }
     }
 

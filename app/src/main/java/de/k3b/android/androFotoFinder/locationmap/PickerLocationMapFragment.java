@@ -140,7 +140,7 @@ public class PickerLocationMapFragment extends LocationMapFragment {
         }
 
         if (result == null) {
-            result = this.mCurrrentRedSelectionMarker.getPosition();
+            result = this.mCurrrentBlueSelectionMarker.getPosition();
         }
 
         if (result != null) {
