@@ -21,10 +21,12 @@ package de.k3b.android.androFotoFinder.locationmap;
 
 import android.app.Activity;
 import android.app.DialogFragment;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.preference.PreferenceManager;
@@ -51,7 +53,10 @@ import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayManager;
+import org.xml.sax.InputSource;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
@@ -73,8 +78,10 @@ import de.k3b.android.util.IntentUtil;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
+import de.k3b.geo.api.IGeoInfoHandler;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
+import de.k3b.geo.io.gpx.GpxReaderBase;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGalleryFilter;
@@ -111,8 +118,11 @@ public class LocationMapFragment extends DialogFragment {
     private FolderOverlay mFolderOverlayGreenPhotoMarker;
     private FolderOverlay mFolderOverlayBlueSelectionMarker;
 
+    /** Selected items in gallery */
+    private FolderOverlay mFolderOverlayBlueGpxMarker = null;
+
     // handling current selection
-    protected IconOverlay mCurrrentBlueSelectionMarker = null;
+    protected IconOverlay mCurrrentSelectionRedMarker = null;
     protected int mMarkerId = -1;
 
     // api to fragment owner
@@ -354,9 +364,9 @@ public class LocationMapFragment extends DialogFragment {
     protected void definteOverlays(MapView mapView, DefaultResourceProxyImplEx resourceProxy) {
         final List<Overlay> overlays = mapView.getOverlays();
 
-        this.mCurrrentBlueSelectionMarker = createSelectedItemOverlay(resourceProxy);
+        this.mCurrrentSelectionRedMarker = createSelectedItemOverlay(resourceProxy);
 
-        this.mSelectionMarker = getActivity().getResources().getDrawable(R.drawable.marker_blue);
+        this.mBlueMarker = getActivity().getResources().getDrawable(R.drawable.marker_blue);
         mFolderOverlayGreenPhotoMarker = createFolderOverlay(overlays);
 
         mFolderOverlayBlueSelectionMarker = createFolderOverlay(overlays);
@@ -447,13 +457,40 @@ public class LocationMapFragment extends DialogFragment {
         return result;
     }
 
-    public void defineNavigation(IGalleryFilter rootFilter, GeoRectangle rectangle, int zoomlevel, SelectedItems selectedItems) {
+    public void defineNavigation(IGalleryFilter rootFilter, GeoRectangle rectangle, int zoomlevel,
+                                 SelectedItems selectedItems, Uri additionalPointsContentUri) {
         if (Global.debugEnabled || Global.debugEnabledMap) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + "defineNavigation: " + rectangle + ";z=" + zoomlevel);
         }
 
         if (rootFilter != null) {
             this.mRootFilter = rootFilter;
+        }
+
+        if (additionalPointsContentUri != null) {
+            final FolderOverlay folderForNewItems = new FolderOverlay(getActivity());
+
+            ContentResolver cr = getActivity().getContentResolver();
+            final GeoPointDtoEx p = new GeoPointDtoEx();
+            try {
+                InputStream is = cr.openInputStream(additionalPointsContentUri);
+                GpxReaderBase parser = new GpxReaderBase(new IGeoInfoHandler() {
+                    @Override
+                    public boolean onGeoInfo(IGeoPointInfo iGeoPointInfo) {
+                        folderForNewItems.add(new IconOverlay(mResourceProxy, (IGeoPoint) p.clone(), mBlueMarker));
+                        return true;
+                    }
+                }, p);
+                parser.parse(new InputSource(is));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (mFolderOverlayBlueGpxMarker != null) {
+                mMapView.getOverlays().remove(mFolderOverlayBlueGpxMarker);
+                mFolderOverlayBlueGpxMarker = null;
+            }
+            mFolderOverlayBlueGpxMarker = folderForNewItems;
+            mMapView.getOverlays().add(0, mFolderOverlayBlueGpxMarker);
         }
 
         if ((selectedItems != null) && (this.mSelectedItems != selectedItems)) {
@@ -723,10 +760,10 @@ public class LocationMapFragment extends DialogFragment {
 
     protected void updateMarker(IconOverlay marker, int markerId, IGeoPoint makerPosition, Object markerData) {
         mMarkerId = markerId;
-        if (mCurrrentBlueSelectionMarker != null) {
-            mMapView.getOverlays().remove(mCurrrentBlueSelectionMarker);
-            mCurrrentBlueSelectionMarker.moveTo(makerPosition, mMapView);
-            mMapView.getOverlays().add(mCurrrentBlueSelectionMarker);
+        if (mCurrrentSelectionRedMarker != null) {
+            mMapView.getOverlays().remove(mCurrrentSelectionRedMarker);
+            mCurrrentSelectionRedMarker.moveTo(makerPosition, mMapView);
+            mMapView.getOverlays().add(mCurrrentSelectionRedMarker);
         }
     }
 
@@ -752,7 +789,7 @@ public class LocationMapFragment extends DialogFragment {
     /** To allow canceling of loading task. There are 0 or one tasks running at a time */
     private SelectionMarkerLoaderTask mCurrentSelectionMarkerLoader = null;
 
-    private Drawable mSelectionMarker;
+    private Drawable mBlueMarker;
 
     /** to load markers for current selected items */
     private class SelectionMarkerLoaderTask extends MarkerLoaderTaskWithRecycling<FotoMarker> {
@@ -792,7 +829,7 @@ public class LocationMapFragment extends DialogFragment {
         }
 
         protected BitmapDrawable createIcon(String iconText) {
-            return (BitmapDrawable) mSelectionMarker;
+            return (BitmapDrawable) mBlueMarker;
         }
 
     } // class SelectionMarkerLoaderTask
