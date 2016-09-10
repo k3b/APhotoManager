@@ -1,5 +1,13 @@
 # travis build for APhotoManager
 language: android
+
+addons:
+  apt:
+    packages:
+# graphviz to render javadoc uml
+# https://docs.travis-ci.com/user/multi-os/
+      - graphviz
+
 android:
   components:
     # https://github.com/travis-ci/travis-ci/issues/5036

@@ -1,5 +1,9 @@
 apply plugin: 'com.android.application'
 apply plugin: 'maven'
+// markdown in javadoc
+// https://github.com/Abnaxos/pegdown-doclet
+apply plugin: 'ch.raffael.pegdown-doclet'
+
 
 android {
     // appXXX are defined in gradle.properties

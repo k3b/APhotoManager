@@ -119,12 +119,15 @@ public class PickerLocationMapFragment extends LocationMapFragment {
         !!!!!!
 
 
-        onLoadFinishedSelection(items);
+        onLoadFinishedBlueMarker(items);
         */
     }
 
-    public void defineNavigation(GalleryFilterParameter rootFilter, IGeoPointInfo currentSelection, GeoRectangle rectangle, int zoomlevel, SelectedItems selectedItems) {
-        super.defineNavigation(rootFilter, rectangle, zoomlevel, selectedItems);
+    /** get all important parameters for displaying the map */
+    public void defineNavigation(GalleryFilterParameter rootFilter, IGeoPointInfo currentSelection,
+                                 GeoRectangle rectangle, int zoomlevel,
+                                 SelectedItems selectedItems, Uri additionalPointsContentUri) {
+        super.defineNavigation(rootFilter, rectangle, zoomlevel, selectedItems, additionalPointsContentUri);
         if (currentSelection != null) {
             updateMarker(null, NO_MARKER_ID, new GeoPoint(currentSelection.getLatitude(), currentSelection.getLongitude()), null);
         }
