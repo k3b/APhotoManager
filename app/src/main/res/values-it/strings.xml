@@ -132,14 +132,6 @@
 	<string name="sort_by_none">Non ordinato</string>
 	<string name="sort_by_place">Luogo</string>
 	<string name="sort_menu_title">Ordina</string>
-	<string name="sort_order_Date_Ascending">Data crescente</string>
-	<string name="sort_order_Date_Descending">Data decrescente</string>
-	<string name="sort_order_Name_Ascending">Nome crescente</string>
-	<string name="sort_order_Name_Descending">Nome decrescente</string>
-	<string name="sort_order_Name_length_Ascending">Lunghezza-nome crescente</string>
-	<string name="sort_order_Name_length_Descending">Lunghezza-nome decrescente</string>
-	<string name="sort_order_Place_Ascending">Luogo crescente</string>
-	<string name="sort_order_Place_Descending">Luogo decrescente</string>
 	<string name="update_result_format">Aggiornati %1$d/%2$d file</string>
 	<string name="zoom_to_fit_menu_title">Adatta alla finestra</string>
 	<string name="settings_image_thumb_if_bigger_than_title">Foto grande larghezza/altezza</string>

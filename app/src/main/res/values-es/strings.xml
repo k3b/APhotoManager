@@ -55,10 +55,4 @@
   <string name="sort_by_none">Sin clasificar</string>
   <string name="sort_by_place">Lugar</string>
   <string name="sort_menu_title">Clasificar</string>
-  <string name="sort_order_Date_Ascending">Fecha ascendente</string>
-  <string name="sort_order_Date_Descending">Fecha descendente</string>
-  <string name="sort_order_Name_Ascending">Nombre ascendente</string>
-  <string name="sort_order_Name_Descending">Nombre descendente</string>
-  <string name="sort_order_Place_Ascending">Lugar ascendente</string>
-  <string name="sort_order_Place_Descending">Lugar descendente</string>
 </resources>

@@ -132,14 +132,6 @@
 	<string name="sort_by_none">並び替えない</string>
 	<string name="sort_by_place">場所</string>
 	<string name="sort_menu_title">並べ変え</string>
-	<string name="sort_order_Date_Ascending">日付の昇順</string>
-	<string name="sort_order_Date_Descending">日付の降順</string>
-	<string name="sort_order_Name_Ascending">名前の昇順</string>
-	<string name="sort_order_Name_Descending">名前の降順</string>
-	<string name="sort_order_Name_length_Ascending">名前の長さで昇順</string>
-	<string name="sort_order_Name_length_Descending">名前の長さで降順</string>
-	<string name="sort_order_Place_Ascending">場所の昇順</string>
-	<string name="sort_order_Place_Descending">場所の降順</string>
 	<string name="update_result_format">%1$d/%2$d ファイルを更新しました</string>
 	<string name="zoom_to_fit_menu_title">合わせてズーム</string>
 	<string name="settings_image_thumb_if_bigger_than_title">大きな写真の幅/高さ</string>

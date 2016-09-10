@@ -134,14 +134,6 @@
   <string name="sort_by_none">Unsortiert</string>
   <string name="sort_by_place">Ort</string>
   <string name="sort_menu_title">Sortieren</string>
-  <string name="sort_order_Date_Ascending">Datum aufsteigend</string>
-  <string name="sort_order_Date_Descending">Datum absteigend</string>
-  <string name="sort_order_Name_Ascending">Name aufsteigend</string>
-  <string name="sort_order_Name_Descending">Name absteigend</string>
-  <string name="sort_order_Name_length_Ascending">Namenslänge aufsteigend</string>
-  <string name="sort_order_Name_length_Descending">Namenslänge absteigend</string>
-  <string name="sort_order_Place_Ascending">Ort aufsteigend</string>
-  <string name="sort_order_Place_Descending">Ort absteigend</string>
   <string name="update_result_format">%1$d/%2$d Dateien aktualisiert</string>
 
   <string name="zoom_to_fit_menu_title">Zoom ausfüllen</string>

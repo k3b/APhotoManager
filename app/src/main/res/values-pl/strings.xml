@@ -135,14 +135,6 @@
   <string name="sort_by_none">Niesortowane</string>
   <string name="sort_by_place">Miejsce</string>
   <string name="sort_menu_title">Sortuj</string>
-  <string name="sort_order_Date_Ascending">Data rosnąco</string>
-  <string name="sort_order_Date_Descending">Data malejąco</string>
-  <string name="sort_order_Name_Ascending">Nazwa rosnąco</string>
-  <string name="sort_order_Name_Descending">Nazwa malejąco</string>
-  <string name="sort_order_Name_length_Ascending">Długość nazwy rosnąco</string>
-  <string name="sort_order_Name_length_Descending">Długość nazwy malejąco</string>
-  <string name="sort_order_Place_Ascending">Miejsce rosnąco</string>
-  <string name="sort_order_Place_Descending">Miejsce malejąco</string>
   <string name="update_result_format">Zaktualizowano %1$d/%2$d plików</string>
   <string name="zoom_to_fit_menu_title">Przybliż do dopasowania</string>
   <string name="settings_image_thumb_if_bigger_than_title">Szerokość/wysokość dużego zdjęcia</string>

@@ -139,14 +139,6 @@
 	<string name="sort_by_none">Unsorted</string>
 	<string name="sort_by_place">Place</string>
 	<string name="sort_menu_title">Sort</string>
-	<string name="sort_order_Date_Ascending">Date ascending</string>
-	<string name="sort_order_Date_Descending">Date descending</string>
-	<string name="sort_order_Name_Ascending">Name ascending</string>
-	<string name="sort_order_Name_Descending">Name descending</string>
-	<string name="sort_order_Name_length_Ascending">Name-length ascending</string>
-	<string name="sort_order_Name_length_Descending">Name-length descending</string>
-	<string name="sort_order_Place_Ascending">Place ascending</string>
-	<string name="sort_order_Place_Descending">Place descending</string>
 	<string name="update_result_format">Updated %1$d/%2$d files</string>
 
 	<string name="zoom_to_fit_menu_title">Zoom to fit</string>
