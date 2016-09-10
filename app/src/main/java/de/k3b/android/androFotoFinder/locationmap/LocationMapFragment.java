@@ -131,6 +131,8 @@ public class LocationMapFragment extends DialogFragment {
     private boolean mIsInitialized = false;
 
     private IGalleryFilter mRootFilter;
+    private int mMinZoomLevel;
+    private int mMaxZoomLevel;
 
     public LocationMapFragment() {
         // Required empty public constructor
@@ -283,7 +285,7 @@ public class LocationMapFragment extends DialogFragment {
             @Override
             public boolean onZoom(ZoomEvent event) {
                 int zoomLevel1 = mMapView.getZoomLevel();
-                mZoomBar.setProgress(zoomLevel1);
+                setZoomBarZoomLevel("onZoom ", zoomLevel1);
 
                 reloadSummaryMarker("onZoom " + zoomLevel1);
                 return false;
@@ -319,6 +321,30 @@ public class LocationMapFragment extends DialogFragment {
 
         reloadSelectionMarker();
         return view;
+    }
+
+    protected void setZoomBarZoomLevel(String why, int zoomLevel) {
+        // map: mMinZoomLevel..mMaxZoomLevel
+        // mZoomBar: 0..mMaxZoomLevel-mMinZoomLevel
+        int newProgress = zoomLevel - mMinZoomLevel;
+        if (newProgress != mZoomBar.getProgress()) {
+            // only if changed to avoid zoom events that modify the map
+            if (Global.debugEnabledMap) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix
+                        + "setZoomBarZoomLevel(" + why
+                        + ") :"
+                        + newProgress
+                        + " (from "
+                        + mZoomBar.getProgress()
+                        + ") - " + mMinZoomLevel
+                        + ".." + zoomLevel
+                        + ".." + mMaxZoomLevel
+
+                );
+
+            }
+            mZoomBar.setProgress(newProgress);
+        }
     }
 
     protected void hideImage() {
@@ -390,13 +416,15 @@ public class LocationMapFragment extends DialogFragment {
         mMapView.setBuiltInZoomControls(true);
 
         mZoomBar = (SeekBar) view.findViewById(R.id.zoomBar);
+        mMinZoomLevel = mMapView.getMinZoomLevel();
+        mMaxZoomLevel = mMapView.getMaxZoomLevel();
 
-        mZoomBar.setMax(mMapView.getMaxZoomLevel() - mMapView.getMinZoomLevel());
+        mZoomBar.setMax(mMaxZoomLevel - mMinZoomLevel);
         mZoomBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser)
-                    mMapView.getController().setZoom(progress - mMapView.getMinZoomLevel());
+                    mMapView.getController().setZoom(progress + mMinZoomLevel);
             }
 
             @Override
@@ -459,6 +487,7 @@ public class LocationMapFragment extends DialogFragment {
                 } else {
                     GeoPoint max = new GeoPoint(boundingBox.getLatNorthE6(), boundingBox.getLonEastE6());
                     ZoomUtil.zoomTo(this.mMapView, ZoomUtil.NO_ZOOM, min, max);
+
                     // this.mMapView.zoomToBoundingBox(boundingBox); this is to inexact
                 }
                 if (Global.debugEnabledMap) {
@@ -471,6 +500,7 @@ public class LocationMapFragment extends DialogFragment {
                             + mMapView.getBoundingBox()
                             );
                 }
+                setZoomBarZoomLevel(why, mMapView.getZoomLevel());
             } else {
                 // map not initialized yet. do it later.
                 this.mDelayedZoomToBoundingBox = boundingBox;
@@ -642,7 +672,8 @@ public class LocationMapFragment extends DialogFragment {
         StringBuilder dbg = (Global.debugEnabledSql || Global.debugEnabledMap) ? new StringBuilder() : null;
         if (dbg != null) {
             int found = (newSummaryIcons != null) ? newSummaryIcons.size() : 0;
-            dbg.append(mDebugPrefix).append("onLoadFinishedSummaryMarker() markers created: ").append(found).append(". ");
+            dbg.append(mDebugPrefix).append("onLoadFinishedSummaryMarker(z=" + mMapView.getZoomLevel() +
+                    ") markers created: ").append(found).append(". ");
         }
 
         if (newSummaryIcons != null) {
