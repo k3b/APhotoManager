@@ -19,6 +19,7 @@
  
 package de.k3b.android.osmdroid;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -32,9 +33,7 @@ import android.graphics.drawable.Drawable;
  * Created by k3b on 16.07.2015.
  */
 public class IconFactory {
-
-    private final DefaultResourceProxyImplEx mResourceProxy;
-
+    private final Resources resources;
     /** cluster icon anchor */
     /** anchor point to draw the number of markers inside the cluster icon */
     private float mTextAnchorU = ClickableIconOverlay.ANCHOR_CENTER, mTextAnchorV = ClickableIconOverlay.ANCHOR_CENTER;
@@ -43,12 +42,13 @@ public class IconFactory {
     private Paint mTextPaint;
 
     /** must be called from the gui-Thread */
-    public IconFactory(DefaultResourceProxyImplEx resourceProxy, Drawable background) {
-        this(resourceProxy, ((BitmapDrawable) background).getBitmap());
+    public IconFactory(Resources resources, Drawable background) {
+        this(resources, ((BitmapDrawable) background).getBitmap());
     }
 
     /** must be called from the gui-Thread */
-    public IconFactory(DefaultResourceProxyImplEx resourceProxy, Bitmap background) {
+    public IconFactory(Resources resources, Bitmap background) {
+        this.resources = resources;
         mTextPaint = new Paint();
         mTextPaint.setColor(Color.WHITE);
         mTextPaint.setTextSize(15.0f);
@@ -57,7 +57,6 @@ public class IconFactory {
         mTextPaint.setAntiAlias(true);
 
         mBackground = background;
-        this.mResourceProxy = resourceProxy;
     }
 
     // inspired by org.osmdroid.bonuspack.clustering.MarkerClusterer.
@@ -70,6 +69,6 @@ public class IconFactory {
                 mTextAnchorU * finalIcon.getWidth(),
                 mTextAnchorV * finalIcon.getHeight() - textHeight / 2,
                 mTextPaint);
-        return new BitmapDrawable(mResourceProxy.getResources(),  finalIcon);
+        return new BitmapDrawable(resources,  finalIcon);
     }
 }

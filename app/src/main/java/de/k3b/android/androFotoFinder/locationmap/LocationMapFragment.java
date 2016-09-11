@@ -42,13 +42,12 @@ import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.SeekBar;
 
-import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.*;
 import org.osmdroid.events.DelayedMapListener;
 import org.osmdroid.events.MapListener;
 import org.osmdroid.events.ScrollEvent;
 import org.osmdroid.events.ZoomEvent;
-import org.osmdroid.util.BoundingBoxE6;
+import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Overlay;
@@ -67,8 +66,7 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
-import de.k3b.android.osmdroid.FolderOverlay;
+import de.k3b.android.osmdroid.FolderOverlayEx;
 import de.k3b.android.osmdroid.GuestureOverlay;
 import de.k3b.android.osmdroid.IconOverlay;
 import de.k3b.android.osmdroid.ClickableIconOverlay;
@@ -109,17 +107,16 @@ public class LocationMapFragment extends DialogFragment {
     protected MapView mMapView;
     private SeekBar mZoomBar;
     private ImageView mCurrentPhoto;
-    private DefaultResourceProxyImplEx mResourceProxy;
 
     /** temporary 1x1 pix view where popup-menu is attached to */
     private View mTempPopupMenuParentView = null;
 
     /** contain the markers with itmen-count that gets recalculated on every map move/zoom */
-    private FolderOverlay mFolderOverlayGreenPhotoMarker;
-    private FolderOverlay mFolderOverlayBlueSelectionMarker;
+    private FolderOverlayEx mFolderOverlayGreenPhotoMarker;
+    private FolderOverlayEx mFolderOverlayBlueSelectionMarker;
 
     /** Selected items in gallery */
-    private FolderOverlay mFolderOverlayBlueGpxMarker = null;
+    private FolderOverlayEx mFolderOverlayBlueGpxMarker = null;
 
     // handling current selection
     protected IconOverlay mCurrrentSelectionRedMarker = null;
@@ -136,7 +133,7 @@ public class LocationMapFragment extends DialogFragment {
      * <p/>
      * see http://stackoverflow.com/questions/10411975/how-to-get-the-width-and-height-of-an-image-view-in-android/10412209#10412209
      */
-    private BoundingBoxE6 mDelayedZoomToBoundingBox = null;
+    private BoundingBox mDelayedZoomToBoundingBox = null;
     private int mDelayedZoomLevel = NO_ZOOM;
     private boolean mIsInitialized = false;
 
@@ -193,7 +190,7 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     public String getCurrentGeoUri() {
-        BoundingBoxE6 currentViewPort = this.mMapView.getBoundingBox();
+        BoundingBox currentViewPort = this.mMapView.getBoundingBox();
 
         GeoPoint currentCenter = currentViewPort.getCenter();
         int currentZoomLevel = this.mMapView.getZoomLevel();
@@ -204,7 +201,7 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     private void saveLastViewPort(Bundle savedInstanceState) {
-        BoundingBoxE6 currentViewPort = this.mMapView.getBoundingBox();
+        BoundingBox currentViewPort = this.mMapView.getBoundingBox();
 
         if (savedInstanceState != null) {
             savedInstanceState.putParcelable(STATE_LAST_VIEWPORT, currentViewPort);
@@ -247,23 +244,23 @@ public class LocationMapFragment extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         int zoomLevel = NO_ZOOM;
-        BoundingBoxE6 boundingBoxE6 = null;
+        BoundingBox boundingBox = null;
         /** after ratation restore selelected view port */
         if (savedInstanceState != null) {
-            boundingBoxE6 =  savedInstanceState.getParcelable(STATE_LAST_VIEWPORT);
+            boundingBox =  savedInstanceState.getParcelable(STATE_LAST_VIEWPORT);
         }
-        if (boundingBoxE6 == null) {
+        if (boundingBox == null) {
             // if not initialized from outside show last used value
             IGeoPointInfo rectangle = loadLastViewPort();
             zoomLevel = rectangle.getZoomMin();
 
-            boundingBoxE6 = new BoundingBoxE6(
+            boundingBox = new BoundingBox(
                     rectangle.getLatitude(),
                     rectangle.getLongitude(),
                     rectangle.getLatitude(),
                     rectangle.getLongitude());
         }
-        zoomToBoundingBox("onCreateView", boundingBoxE6 , zoomLevel);
+        zoomToBoundingBox("onCreateView", boundingBox , zoomLevel);
 
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_location_map, container, false);
@@ -303,9 +300,7 @@ public class LocationMapFragment extends DialogFragment {
             }
         }, DEFAULT_INACTIVITY_DELAY_IN_MILLISECS));
 
-        mResourceProxy = new DefaultResourceProxyImplEx(getActivity().getApplicationContext());
-
-        definteOverlays(mMapView, mResourceProxy);
+        definteOverlays(mMapView);
 
 
         // mFolderOverlay.add(createMarker(mMapView, ...));
@@ -362,10 +357,10 @@ public class LocationMapFragment extends DialogFragment {
         mCurrentPhoto.setVisibility(View.GONE);
     }
 
-    protected void definteOverlays(MapView mapView, DefaultResourceProxyImplEx resourceProxy) {
+    protected void definteOverlays(MapView mapView) {
         final List<Overlay> overlays = mapView.getOverlays();
 
-        this.mCurrrentSelectionRedMarker = createSelectedItemOverlay(resourceProxy);
+        this.mCurrrentSelectionRedMarker = createSelectedItemOverlay();
 
         mSelectedItemsHandler.mBlueMarker = getActivity().getResources().getDrawable(R.drawable.marker_blue);
         mFolderOverlayGreenPhotoMarker = createFolderOverlay(overlays);
@@ -377,10 +372,10 @@ public class LocationMapFragment extends DialogFragment {
         mapView.setMultiTouchControls(true);
     }
 
-    protected IconOverlay createSelectedItemOverlay(DefaultResourceProxyImplEx resourceProxy) {
+    protected IconOverlay createSelectedItemOverlay() {
         Drawable currrentSelectionIcon = getActivity().getResources().getDrawable(R.drawable.marker_red);
         // fixed positon, not updated on pick
-        return new IconOverlay(resourceProxy, null, currrentSelectionIcon);
+        return new IconOverlay(null, currrentSelectionIcon);
     }
 
     protected void defineButtons(View view) {
@@ -451,8 +446,8 @@ public class LocationMapFragment extends DialogFragment {
     }
 
 
-    private FolderOverlay createFolderOverlay(List<Overlay> overlays) {
-        FolderOverlay result = new FolderOverlay(this.getActivity());
+    private FolderOverlayEx createFolderOverlay(List<Overlay> overlays) {
+        FolderOverlayEx result = new FolderOverlayEx();
         overlays.add(result);
 
         return result;
@@ -482,7 +477,7 @@ public class LocationMapFragment extends DialogFragment {
 
     protected void zoomToBoundingBox(String debugContext, GeoRectangle rectangle, int zoomlevel) {
         if ((rectangle != null) && !rectangle.isEmpty()) {
-            BoundingBoxE6 boundingBox = new BoundingBoxE6(
+            BoundingBox boundingBox = new BoundingBox(
                     rectangle.getLatitudeMax(),
                     rectangle.getLogituedMin(),
                     rectangle.getLatitudeMin(),
@@ -494,7 +489,7 @@ public class LocationMapFragment extends DialogFragment {
 
     protected GeoRectangle defineGpxAdditionalPoints(Uri gpxAdditionalPointsContentUri, GeoRectangle rectangle) {
         if (gpxAdditionalPointsContentUri != null) {
-            final FolderOverlay folderForNewItems = new FolderOverlay(getActivity());
+            final FolderOverlayEx folderForNewItems = new FolderOverlayEx();
 
             final GeoRectangle gpxBox = (rectangle == null) ? new GeoRectangle() : null;
             ContentResolver cr = getActivity().getContentResolver();
@@ -523,23 +518,23 @@ public class LocationMapFragment extends DialogFragment {
         return rectangle;
     }
 
-    protected boolean addGeopoint(FolderOverlay destination, GeoPointDtoEx point, GeoRectangle box) {
+    protected boolean addGeopoint(FolderOverlayEx destination, GeoPointDtoEx point, GeoRectangle box) {
         GeoPointDtoEx newGeoPoint = (GeoPointDtoEx) point.clone();
-        destination.add(new IconOverlay(mResourceProxy, newGeoPoint, mSelectedItemsHandler.mBlueMarker));
+        destination.add(new IconOverlay(newGeoPoint, mSelectedItemsHandler.mBlueMarker));
         if (box != null) box.inflate(newGeoPoint.getLatitude(), newGeoPoint.getLongitude());
         return true;
     }
 
-    private void zoomToBoundingBox(String why, BoundingBoxE6 boundingBox, int zoomLevel) {
+    private void zoomToBoundingBox(String why, BoundingBox boundingBox, int zoomLevel) {
         if (boundingBox != null) {
             if (mIsInitialized) {
                 // if map is already initialized
-                GeoPoint min = new GeoPoint(boundingBox.getLatSouthE6(), boundingBox.getLonWestE6());
+                GeoPoint min = new GeoPoint(boundingBox.getLatSouth(), boundingBox.getLonWest());
 
                 if (zoomLevel != NO_ZOOM) {
                     ZoomUtil.zoomTo(this.mMapView, zoomLevel, min, null);
                 } else {
-                    GeoPoint max = new GeoPoint(boundingBox.getLatNorthE6(), boundingBox.getLonEastE6());
+                    GeoPoint max = new GeoPoint(boundingBox.getLatNorth(), boundingBox.getLonEast());
                     ZoomUtil.zoomTo(this.mMapView, ZoomUtil.NO_ZOOM, min, max);
 
                     // this.mMapView.zoomToBoundingBox(boundingBox); this is to inexact
@@ -566,8 +561,8 @@ public class LocationMapFragment extends DialogFragment {
     /** all marker clicks will be delegated to LocationMapFragment#onFotoMarkerClicked() */
     private class FotoMarker extends ClickableIconOverlay<Object> {
 
-        public FotoMarker(ResourceProxy pResourceProxy) {
-            super(pResourceProxy);
+        public FotoMarker() {
+            super();
         }
 
         /**
@@ -597,7 +592,7 @@ public class LocationMapFragment extends DialogFragment {
 
                 mLastZoom = this.mMapView.getZoomLevel();
                 double groupingFactor = getGroupingFactor(mLastZoom);
-                BoundingBoxE6 world = this.mMapView.getBoundingBox();
+                BoundingBox world = this.mMapView.getBoundingBox();
                 if (Global.debugEnabledMap) {
                     Log.d(Global.LOG_CONTEXT, mDebugPrefix + "reloadFotoMarker(" + why + ")"
                             + world + ", zoom " + mLastZoom);
@@ -611,7 +606,7 @@ public class LocationMapFragment extends DialogFragment {
         }
     }
 
-    private void reloadFotoMarker(BoundingBoxE6 latLonArea, double groupingFactor, List<Overlay> oldItems) {
+    private void reloadFotoMarker(BoundingBox latLonArea, double groupingFactor, List<Overlay> oldItems) {
         QueryParameter query = FotoSql.getQueryGroupByPlace(groupingFactor);
         query.clearWhere();
 
@@ -633,10 +628,10 @@ public class LocationMapFragment extends DialogFragment {
         mCurrentFotoMarkerLoader.execute(query);
     }
 
-    private IGeoRectangle getGeoRectangle(BoundingBoxE6 boundingBox) {
+    private IGeoRectangle getGeoRectangle(BoundingBox boundingBox) {
         GeoRectangle result = new GeoRectangle();
-        result.setLatitude(boundingBox.getLatSouthE6() * 1E-6, boundingBox.getLatNorthE6() * 1E-6);
-        result.setLogitude(boundingBox.getLonWestE6() * 1E-6, boundingBox.getLonEastE6() * 1E-6);
+        result.setLatitude(boundingBox.getLatSouth(), boundingBox.getLatNorth());
+        result.setLogitude(boundingBox.getLonWest(), boundingBox.getLonEast());
 
         return result;
     }
@@ -675,7 +670,7 @@ public class LocationMapFragment extends DialogFragment {
 
         @NonNull
         protected FotoMarker createNewMarker() {
-            return new FotoMarker(mResourceProxy);
+            return new FotoMarker();
         }
 
         // This is called when doInBackground() is finished
@@ -831,7 +826,7 @@ public class LocationMapFragment extends DialogFragment {
 
             @NonNull
             protected FotoMarker createNewMarker() {
-                return new FotoMarker(mResourceProxy);
+                return new FotoMarker();
             }
 
             // This is called when doInBackground() is finished
@@ -1008,16 +1003,16 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     private boolean zoomToFit(IGeoPoint geoPosition) {
-        BoundingBoxE6 boundingBoxE6 = null;
+        BoundingBox BoundingBox = null;
 
         IGeoRectangle fittingRectangle = FotoSql.execGetGeoRectangle(this.getActivity(), getMarkerFilter(geoPosition), null);
         double delta = getDelta(fittingRectangle);
         if (delta < 1e-6) {
-            boundingBoxE6 = getMarkerBoundingBox(geoPosition);
+            BoundingBox = getMarkerBoundingBox(geoPosition);
 
         } else {
             double enlarge = delta * 0.2;
-            boundingBoxE6 = new BoundingBoxE6(
+            BoundingBox = new BoundingBox(
                     fittingRectangle.getLatitudeMax()+enlarge,
                     fittingRectangle.getLogituedMax()+enlarge,
                     fittingRectangle.getLatitudeMin()-enlarge,
@@ -1026,9 +1021,9 @@ public class LocationMapFragment extends DialogFragment {
         if (Global.debugEnabledMap) {
             Log.i(Global.LOG_CONTEXT, "zoomToFit(): " + fittingRectangle +
                     " delta " + delta +
-                    " => box " + boundingBoxE6);
+                    " => box " + BoundingBox);
         }
-        zoomToBoundingBox("zoomToFit()", boundingBoxE6, NO_ZOOM);
+        zoomToBoundingBox("zoomToFit()", BoundingBox, NO_ZOOM);
         return true;
     }
 
@@ -1050,10 +1045,10 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     @NonNull
-    private BoundingBoxE6 getMarkerBoundingBox(IGeoPoint geoPosition) {
+    private BoundingBox getMarkerBoundingBox(IGeoPoint geoPosition) {
         double delta = getMarkerDelta();
 
-        return new BoundingBoxE6(
+        return new BoundingBox(
                 geoPosition.getLatitude()+delta,
                 geoPosition.getLongitude()+delta,
                 geoPosition.getLatitude()-delta,

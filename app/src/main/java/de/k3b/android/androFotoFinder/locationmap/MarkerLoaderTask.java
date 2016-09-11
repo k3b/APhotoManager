@@ -35,7 +35,6 @@ import java.util.HashMap;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
 import de.k3b.android.osmdroid.IconFactory;
 import de.k3b.android.osmdroid.ClickableIconOverlay;
 import de.k3b.database.QueryParameter;
@@ -68,7 +67,6 @@ public abstract class MarkerLoaderTask<MARKER extends ClickableIconOverlay> exte
     private final Activity mContext;
     protected final String mDebugPrefix;
     private final IconFactory mIconFactory;
-    private final DefaultResourceProxyImplEx mResourceProxy;
     private final int mMarkerCountLimit;
     protected HashMap<Integer, MARKER> mOldItems;
     protected StringBuffer mStatus = null;
@@ -84,8 +82,7 @@ public abstract class MarkerLoaderTask<MARKER extends ClickableIconOverlay> exte
         this.mContext = context;
         this.mDebugPrefix = debugPrefix;
         mOldItems = oldItems;
-        mResourceProxy = new DefaultResourceProxyImplEx(context);
-        mIconFactory = new IconFactory(mResourceProxy, context.getResources().getDrawable(R.drawable.marker_green));
+        mIconFactory = new IconFactory(context.getResources(), context.getResources().getDrawable(R.drawable.marker_green));
     }
 
     protected abstract MARKER createMarker();

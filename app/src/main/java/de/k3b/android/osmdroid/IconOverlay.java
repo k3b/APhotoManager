@@ -25,7 +25,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 
-import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.*;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.Projection;
@@ -56,12 +55,12 @@ public class IconOverlay extends Overlay {
     protected Point mPositionPixels = new Point();
 
     /** save to be called in non-gui-thread */
-    protected IconOverlay(final ResourceProxy pResourceProxy) {
-        super(pResourceProxy);
+    protected IconOverlay() {
+        super();
     }
         /** save to be called in non-gui-thread */
-    public IconOverlay(final ResourceProxy pResourceProxy, IGeoPoint position, Drawable icon) {
-        super(pResourceProxy);
+    public IconOverlay(IGeoPoint position, Drawable icon) {
+        super();
         set(position, icon);
     }
 

@@ -19,24 +19,24 @@
  
 package de.k3b.android.osmdroid;
 
+import java.util.List;
+
+import org.osmdroid.views.MapView;
+import org.osmdroid.views.overlay.DefaultOverlayManager;
+import org.osmdroid.views.overlay.FolderOverlay;
+import org.osmdroid.views.overlay.Overlay;
+import org.osmdroid.views.overlay.OverlayManager;
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.res.Resources;
+import android.graphics.Canvas;
+import android.view.MotionEvent;
 
-import org.osmdroid.DefaultResourceProxyImpl;
+public class FolderOverlayEx extends FolderOverlay {
 
-/**
- * Created by k3b on 16.07.2015.
- */
-public class DefaultResourceProxyImplEx extends DefaultResourceProxyImpl {
-    private Resources mResources = null;
-    public DefaultResourceProxyImplEx(Context pContext) {
-        super(pContext);
-        if (pContext != null) {
-            mResources = pContext.getResources();
-        }
-    }
-
-    public Resources getResources() {
-        return mResources;
+    /** replaces the current overlaymanager. @returns the previous */
+    public OverlayManager setOverlayManager(OverlayManager newFolderOverlayContent) {
+        OverlayManager old = mOverlayManager;
+        mOverlayManager = newFolderOverlayContent;
+        return old;
     }
 }

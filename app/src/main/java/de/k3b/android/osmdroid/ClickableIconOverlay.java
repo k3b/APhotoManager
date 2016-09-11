@@ -23,7 +23,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 
-import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.*;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.Projection;
@@ -42,8 +41,8 @@ public abstract class ClickableIconOverlay<DataType> extends IconOverlay {
     /**
      * save to be called in non-gui-thread
      */
-    protected ClickableIconOverlay(ResourceProxy pResourceProxy) {
-        super(pResourceProxy);
+    protected ClickableIconOverlay() {
+        super();
     }
 
     /**

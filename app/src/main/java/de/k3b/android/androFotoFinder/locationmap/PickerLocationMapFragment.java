@@ -30,7 +30,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.osmdroid.ResourceProxy;
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
@@ -38,7 +37,6 @@ import org.osmdroid.views.MapView;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
 import de.k3b.android.osmdroid.IconOverlay;
 import de.k3b.database.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
@@ -62,8 +60,8 @@ public class PickerLocationMapFragment extends LocationMapFragment {
      * non tap-able marker that moves to last tap position
      */
     private class CurrentSelectionMarker extends IconOverlay {
-        public CurrentSelectionMarker(ResourceProxy pResourceProxy, IGeoPoint position, Drawable icon) {
-            super(pResourceProxy, position, icon);
+        public CurrentSelectionMarker(IGeoPoint position, Drawable icon) {
+            super(position, icon);
         }
 
         /**
@@ -95,20 +93,20 @@ public class PickerLocationMapFragment extends LocationMapFragment {
         return result;
     }
 
-    protected IconOverlay createSelectedItemOverlay(DefaultResourceProxyImplEx resourceProxy) {
+    protected IconOverlay createSelectedItemOverlay() {
         if (mUsePicker) {
             Drawable currrentSelectionIcon = getActivity().getResources().getDrawable(R.drawable.marker_red);
-            return new CurrentSelectionMarker(resourceProxy, null, currrentSelectionIcon);
+            return new CurrentSelectionMarker(null, currrentSelectionIcon);
         } else {
             Drawable currrentSelectionIcon = getActivity().getResources().getDrawable(R.drawable.marker_red);
             // fixed positon, not updated on pick
-            return new IconOverlay(resourceProxy, null, currrentSelectionIcon);
+            return new IconOverlay(null, currrentSelectionIcon);
         }
 
     }
     @Override
-    protected void definteOverlays(MapView mapView, DefaultResourceProxyImplEx resourceProxy) {
-        super.definteOverlays(mapView, resourceProxy);
+    protected void definteOverlays(MapView mapView) {
+        super.definteOverlays(mapView);
 
         /// TODO
         /*

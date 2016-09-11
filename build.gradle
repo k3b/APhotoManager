@@ -3,6 +3,7 @@
 buildscript {
     repositories {
         jcenter()
+        // mavenCentral()
     }
     dependencies {
 		// see https://jcenter.bintray.com/com/android/tools/build/gradle/
