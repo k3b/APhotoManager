@@ -35,7 +35,7 @@ import de.k3b.database.QueryParameter;
  * Created by k3b on 24.08.2015.
  */
 public abstract class MarkerLoaderTaskWithRecycling<MARKER extends ClickableIconOverlay> extends MarkerLoaderTask<MARKER> {
-    /** The factory LocationMapFragment.SummaryMarkerLoaderTask#createMarker() tries to recycle old
+    /** The factory LocationMapFragment.FotoMarkerLoaderTask#createMarker() tries to recycle old
      *     unused Fotomarkers before creating new */
     private final Stack<MARKER> mRecycler;
 

@@ -108,7 +108,7 @@ public class LocationMapFragment extends DialogFragment {
 
     protected MapView mMapView;
     private SeekBar mZoomBar;
-    private ImageView mImage;
+    private ImageView mCurrentPhoto;
     private DefaultResourceProxyImplEx mResourceProxy;
 
     /** temporary 1x1 pix view where popup-menu is attached to */
@@ -156,10 +156,11 @@ public class LocationMapFragment extends DialogFragment {
 
     @Override public void onDestroy() {
         saveLastViewPort(null);
-        if (mCurrentSummaryMarkerLoader != null) mCurrentSummaryMarkerLoader.cancel(false);
-        mCurrentSummaryMarkerLoader = null;
+        if (mCurrentFotoMarkerLoader != null) mCurrentFotoMarkerLoader.cancel(false);
+        mCurrentFotoMarkerLoader = null;
 
-        if (mMarkerRecycler != null) mMarkerRecycler.empty();
+        if (mFotoMarkerRecycler != null) mFotoMarkerRecycler.empty();
+        mSelectedItemsHandler = null;
         super.onDestroy();
         // RefWatcher refWatcher = AndroFotoFinderApp.getRefWatcher(getActivity());
         // refWatcher.watch(this);
@@ -277,8 +278,8 @@ public class LocationMapFragment extends DialogFragment {
             MapsForgeSupport.load(getActivity(), mMapView, Global.mapsForgeDir);
         }
 
-        this.mImage = (ImageView) view.findViewById(R.id.image);
-        this.mImage.setOnClickListener(new View.OnClickListener() {
+        this.mCurrentPhoto = (ImageView) view.findViewById(R.id.image);
+        this.mCurrentPhoto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 hideImage();
@@ -288,7 +289,7 @@ public class LocationMapFragment extends DialogFragment {
         mMapView.setMapListener(new DelayedMapListener(new MapListener() {
             @Override
             public boolean onScroll(ScrollEvent event) {
-                reloadSummaryMarker("onScroll");
+                reloadFotoMarker("onScroll");
                 return false;
             }
 
@@ -297,7 +298,7 @@ public class LocationMapFragment extends DialogFragment {
                 int zoomLevel1 = mMapView.getZoomLevel();
                 setZoomBarZoomLevel("onZoom ", zoomLevel1);
 
-                reloadSummaryMarker("onZoom " + zoomLevel1);
+                reloadFotoMarker("onZoom " + zoomLevel1);
                 return false;
             }
         }, DEFAULT_INACTIVITY_DELAY_IN_MILLISECS));
@@ -329,7 +330,7 @@ public class LocationMapFragment extends DialogFragment {
             }
         });
 
-        reloadSelectionMarker();
+        mSelectedItemsHandler.reloadSelectionMarker();
         return view;
     }
 
@@ -358,7 +359,7 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     protected void hideImage() {
-        mImage.setVisibility(View.GONE);
+        mCurrentPhoto.setVisibility(View.GONE);
     }
 
     protected void definteOverlays(MapView mapView, DefaultResourceProxyImplEx resourceProxy) {
@@ -366,7 +367,7 @@ public class LocationMapFragment extends DialogFragment {
 
         this.mCurrrentSelectionRedMarker = createSelectedItemOverlay(resourceProxy);
 
-        this.mBlueMarker = getActivity().getResources().getDrawable(R.drawable.marker_blue);
+        mSelectedItemsHandler.mBlueMarker = getActivity().getResources().getDrawable(R.drawable.marker_blue);
         mFolderOverlayGreenPhotoMarker = createFolderOverlay(overlays);
 
         mFolderOverlayBlueSelectionMarker = createFolderOverlay(overlays);
@@ -458,7 +459,7 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     public void defineNavigation(IGalleryFilter rootFilter, GeoRectangle rectangle, int zoomlevel,
-                                 SelectedItems selectedItems, Uri additionalPointsContentUri) {
+                                 SelectedItems selectedItems, Uri gpxAdditionalPointsContentUri) {
         if (Global.debugEnabled || Global.debugEnabledMap) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + "defineNavigation: " + rectangle + ";z=" + zoomlevel);
         }
@@ -467,20 +468,45 @@ public class LocationMapFragment extends DialogFragment {
             this.mRootFilter = rootFilter;
         }
 
-        if (additionalPointsContentUri != null) {
+        rectangle = defineGpxAdditionalPoints(gpxAdditionalPointsContentUri, rectangle);
+
+        mSelectedItemsHandler.define(selectedItems);
+
+        String debugContext = "defineNavigation";
+        zoomToBoundingBox(debugContext, rectangle, zoomlevel);
+
+        if (rootFilter != null) {
+            reloadFotoMarker(debugContext);
+        }
+    }
+
+    protected void zoomToBoundingBox(String debugContext, GeoRectangle rectangle, int zoomlevel) {
+        if ((rectangle != null) && !rectangle.isEmpty()) {
+            BoundingBoxE6 boundingBox = new BoundingBoxE6(
+                    rectangle.getLatitudeMax(),
+                    rectangle.getLogituedMin(),
+                    rectangle.getLatitudeMin(),
+                    rectangle.getLogituedMax());
+
+            zoomToBoundingBox(debugContext, boundingBox, zoomlevel);
+        }
+    }
+
+    protected GeoRectangle defineGpxAdditionalPoints(Uri gpxAdditionalPointsContentUri, GeoRectangle rectangle) {
+        if (gpxAdditionalPointsContentUri != null) {
             final FolderOverlay folderForNewItems = new FolderOverlay(getActivity());
 
+            final GeoRectangle gpxBox = (rectangle == null) ? new GeoRectangle() : null;
             ContentResolver cr = getActivity().getContentResolver();
-            final GeoPointDtoEx p = new GeoPointDtoEx();
+            final GeoPointDtoEx currentLoadedGeoPoint = new GeoPointDtoEx();
             try {
-                InputStream is = cr.openInputStream(additionalPointsContentUri);
+                InputStream is = cr.openInputStream(gpxAdditionalPointsContentUri);
                 GpxReaderBase parser = new GpxReaderBase(new IGeoInfoHandler() {
                     @Override
                     public boolean onGeoInfo(IGeoPointInfo iGeoPointInfo) {
-                        folderForNewItems.add(new IconOverlay(mResourceProxy, (IGeoPoint) p.clone(), mBlueMarker));
-                        return true;
+                        return addGeopoint(folderForNewItems, currentLoadedGeoPoint, gpxBox);
                     }
-                }, p);
+                }, currentLoadedGeoPoint);
                 parser.parse(new InputSource(is));
             } catch (IOException e) {
                 e.printStackTrace();
@@ -491,26 +517,17 @@ public class LocationMapFragment extends DialogFragment {
             }
             mFolderOverlayBlueGpxMarker = folderForNewItems;
             mMapView.getOverlays().add(0, mFolderOverlayBlueGpxMarker);
-        }
 
-        if ((selectedItems != null) && (this.mSelectedItems != selectedItems)) {
-            this.mSelectedItems = selectedItems;
-            reloadSelectionMarker();
+            if (gpxBox != null) rectangle = gpxBox;
         }
+        return rectangle;
+    }
 
-        if ((rectangle != null) && !Double.isNaN(rectangle.getLatitudeMin())) {
-            BoundingBoxE6 boundingBox = new BoundingBoxE6(
-                    rectangle.getLatitudeMax(),
-                    rectangle.getLogituedMin(),
-                    rectangle.getLatitudeMin(),
-                    rectangle.getLogituedMax());
-
-            zoomToBoundingBox("defineNavigation", boundingBox, zoomlevel);
-        }
-
-        if (rootFilter != null) {
-            reloadSummaryMarker("defineNavigation");
-        }
+    protected boolean addGeopoint(FolderOverlay destination, GeoPointDtoEx point, GeoRectangle box) {
+        GeoPointDtoEx newGeoPoint = (GeoPointDtoEx) point.clone();
+        destination.add(new IconOverlay(mResourceProxy, newGeoPoint, mSelectedItemsHandler.mBlueMarker));
+        if (box != null) box.inflate(newGeoPoint.getLatitude(), newGeoPoint.getLongitude());
+        return true;
     }
 
     private void zoomToBoundingBox(String why, BoundingBoxE6 boundingBox, int zoomLevel) {
@@ -546,7 +563,7 @@ public class LocationMapFragment extends DialogFragment {
         }
     }
 
-    /** all marker clicks will be delegated to LocationMapFragment#onMarkerClicked() */
+    /** all marker clicks will be delegated to LocationMapFragment#onFotoMarkerClicked() */
     private class FotoMarker extends ClickableIconOverlay<Object> {
 
         public FotoMarker(ResourceProxy pResourceProxy) {
@@ -558,7 +575,7 @@ public class LocationMapFragment extends DialogFragment {
          */
         @Override
         protected boolean onMarkerClicked(MapView mapView, int markerId, IGeoPoint makerPosition, Object markerData) {
-            return LocationMapFragment.this.onMarkerClicked(this, markerId, makerPosition, markerData);
+            return LocationMapFragment.this.onFotoMarkerClicked(this, markerId, makerPosition, markerData);
         }
 
         /**
@@ -566,15 +583,15 @@ public class LocationMapFragment extends DialogFragment {
          */
         @Override
         protected boolean onMarkerLongPress(MapView mapView, int markerId, IGeoPoint geoPosition, Object data) {
-            return LocationMapFragment.this.onMarkerLongPress(this, markerId, geoPosition, data);
+            return LocationMapFragment.this.onFotoMarkerLongPress(this, markerId, geoPosition, data);
         }
 
     }
 
-    private void reloadSummaryMarker(String why) {
+    private void reloadFotoMarker(String why) {
         if (mIsInitialized) {
             // initialized
-            if (mCurrentSummaryMarkerLoader == null) {
+            if (mCurrentFotoMarkerLoader == null) {
                 // not active yet
                 List<Overlay> oldItems = mFolderOverlayGreenPhotoMarker.getItems();
 
@@ -582,19 +599,19 @@ public class LocationMapFragment extends DialogFragment {
                 double groupingFactor = getGroupingFactor(mLastZoom);
                 BoundingBoxE6 world = this.mMapView.getBoundingBox();
                 if (Global.debugEnabledMap) {
-                    Log.d(Global.LOG_CONTEXT, mDebugPrefix + "reloadSummaryMarker(" + why + ")"
+                    Log.d(Global.LOG_CONTEXT, mDebugPrefix + "reloadFotoMarker(" + why + ")"
                             + world + ", zoom " + mLastZoom);
                 }
 
-                reloadSummaryMarker(world, groupingFactor, oldItems);
+                reloadFotoMarker(world, groupingFactor, oldItems);
             } else {
                 // background load is already active. Remember that at least one scroll/zoom was missing
-                mSummaryMarkerPendingLoads++;
+                mFotoMarkerPendingLoads++;
             }
         }
     }
 
-    private void reloadSummaryMarker(BoundingBoxE6 latLonArea, double groupingFactor, List<Overlay> oldItems) {
+    private void reloadFotoMarker(BoundingBoxE6 latLonArea, double groupingFactor, List<Overlay> oldItems) {
         QueryParameter query = FotoSql.getQueryGroupByPlace(groupingFactor);
         query.clearWhere();
 
@@ -612,8 +629,8 @@ public class LocationMapFragment extends DialogFragment {
                 , rect.getLogituedMin() - delta
                 , rect.getLogituedMax() + delta);
 
-        mCurrentSummaryMarkerLoader = new SummaryMarkerLoaderTask(createHashMap(oldItems));
-        mCurrentSummaryMarkerLoader.execute(query);
+        mCurrentFotoMarkerLoader = new FotoMarkerLoaderTask(createHashMap(oldItems));
+        mCurrentFotoMarkerLoader.execute(query);
     }
 
     private IGeoRectangle getGeoRectangle(BoundingBoxE6 boundingBox) {
@@ -639,21 +656,21 @@ public class LocationMapFragment extends DialogFragment {
      * because the marker clustering is different */
     private int mLastZoom = NO_ZOOM;
 
-    /** how much mCurrentSummaryMarkerLoader are tirggerd while task is loading */
-    private int mSummaryMarkerPendingLoads = 0;
+    /** how much mCurrentFotoMarkerLoader are tirggerd while task is loading */
+    private int mFotoMarkerPendingLoads = 0;
 
-    /** The factory LocationMapFragment.SummaryMarkerLoaderTask#createMarker() tries to recycle old
+    /** The factory LocationMapFragment.FotoMarkerLoaderTask#createMarker() tries to recycle old
      *     unused Fotomarkers before creating new */
-    private Stack<FotoMarker> mMarkerRecycler = new Stack<FotoMarker>();
+    private Stack<FotoMarker> mFotoMarkerRecycler = new Stack<FotoMarker>();
 
     /** To allow canceling of loading task. There are 0 or one tasks running at a time */
-    private SummaryMarkerLoaderTask mCurrentSummaryMarkerLoader = null;
+    private FotoMarkerLoaderTask mCurrentFotoMarkerLoader = null;
 
-    /** to load summary marker with numbers in the icons */
-    private class SummaryMarkerLoaderTask extends MarkerLoaderTaskWithRecycling<FotoMarker> {
-        public SummaryMarkerLoaderTask(HashMap<Integer, FotoMarker> oldItems) {
-            super(getActivity(), LocationMapFragment.this.mDebugPrefix + "-SummaryMarkerLoaderTask#" + (sInstanceCountFotoLoader++) + "-",
-                    mMarkerRecycler, oldItems, NO_MARKER_COUNT_LIMIT);
+    /** to load foto summary marker with numbers in the icons */
+    private class FotoMarkerLoaderTask extends MarkerLoaderTaskWithRecycling<FotoMarker> {
+        public FotoMarkerLoaderTask(HashMap<Integer, FotoMarker> oldItems) {
+            super(getActivity(), LocationMapFragment.this.mDebugPrefix + "-FotoMarkerLoaderTask#" + (sInstanceCountFotoLoader++) + "-",
+                    mFotoMarkerRecycler, oldItems, NO_MARKER_COUNT_LIMIT);
         }
 
         @NonNull
@@ -667,22 +684,22 @@ public class LocationMapFragment extends DialogFragment {
             boolean zoomLevelChanged = mMapView.getZoomLevel() != mLastZoom;
 
             if (isCancelled()) {
-                onLoadFinishedSummaryMarker(null, zoomLevelChanged);
+                onLoadFinishedFotoMarker(null, zoomLevelChanged);
             } else {
-                onLoadFinishedSummaryMarker(result, zoomLevelChanged);
+                onLoadFinishedFotoMarker(result, zoomLevelChanged);
 
                 recyleItems(zoomLevelChanged, mOldItems);
             }
 
             mOldItems.clear();
             mOldItems = null;
-            int recyclerSize = mMarkerRecycler.size();
+            int recyclerSize = mFotoMarkerRecycler.size();
             if (mStatus != null) {
                 mStatus.append("\n\tRecycler: ").append(mRecyclerSizeBefore).append(",")
                         .append(mRecyclerSizeAfter).append(",").append(recyclerSize)
                         .append("\n\t").append(mMapView.getBoundingBox())
                         .append(", z= ").append(mMapView.getZoomLevel())
-                        .append("\n\tPendingLoads: ").append(mSummaryMarkerPendingLoads);
+                        .append("\n\tPendingLoads: ").append(mFotoMarkerPendingLoads);
                 if (Global.debugEnabledSql) {
                     Log.w(Global.LOG_CONTEXT, mDebugPrefix + mStatus);
                 } else {
@@ -691,46 +708,46 @@ public class LocationMapFragment extends DialogFragment {
             }
 
             // in the meantime the mapview has moved: must recalculate again.
-            mCurrentSummaryMarkerLoader = null;
-            if (mSummaryMarkerPendingLoads > 0) {
-                String why = (Global.debugEnabledMap) ? ("Lost zoom/scroll event(s): " + mSummaryMarkerPendingLoads) : null;
-                mSummaryMarkerPendingLoads = 0;
-                reloadSummaryMarker(why);
+            mCurrentFotoMarkerLoader = null;
+            if (mFotoMarkerPendingLoads > 0) {
+                String why = (Global.debugEnabledMap) ? ("Lost zoom/scroll event(s): " + mFotoMarkerPendingLoads) : null;
+                mFotoMarkerPendingLoads = 0;
+                reloadFotoMarker(why);
             }
         }
 
-    } // class SummaryMarkerLoaderTask
+    } // class FotoMarkerLoaderTask
 
-    /** gets called when SummaryMarkerLoaderTask has finished.
+    /** gets called when FotoMarkerLoaderTask has finished.
      *
-     * @param newSummaryIcons null if there was an error
+     * @param newFotoIcons null if there was an error
      */
-    private void onLoadFinishedSummaryMarker(OverlayManager newSummaryIcons, boolean zoomLevelChanged) {
+    private void onLoadFinishedFotoMarker(OverlayManager newFotoIcons, boolean zoomLevelChanged) {
         StringBuilder dbg = (Global.debugEnabledSql || Global.debugEnabledMap) ? new StringBuilder() : null;
         if (dbg != null) {
-            int found = (newSummaryIcons != null) ? newSummaryIcons.size() : 0;
-            dbg.append(mDebugPrefix).append("onLoadFinishedSummaryMarker(z=" + mMapView.getZoomLevel() +
+            int found = (newFotoIcons != null) ? newFotoIcons.size() : 0;
+            dbg.append(mDebugPrefix).append("onLoadFinishedFotoMarker(z=" + mMapView.getZoomLevel() +
                     ") markers created: ").append(found).append(". ");
         }
 
-        if (newSummaryIcons != null) {
-            OverlayManager oldSummaryIcons = mFolderOverlayGreenPhotoMarker.setOverlayManager(newSummaryIcons);
-            if (oldSummaryIcons != null) {
+        if (newFotoIcons != null) {
+            OverlayManager oldFotoIcons = mFolderOverlayGreenPhotoMarker.setOverlayManager(newFotoIcons);
+            if (oldFotoIcons != null) {
                 if (dbg != null) {
-                    dbg.append(mDebugPrefix).append(" previous : : ").append(oldSummaryIcons.size());
+                    dbg.append(mDebugPrefix).append(" previous : : ").append(oldFotoIcons.size());
                 }
                 if (zoomLevelChanged) {
                     if (dbg != null) dbg
                             .append(" zoomLevelChanged - recycling : ")
-                            .append(oldSummaryIcons.size())
+                            .append(oldFotoIcons.size())
                             .append(" items");
 
-                    for (Overlay item : oldSummaryIcons) {
-                        mMarkerRecycler.add((FotoMarker) item);
+                    for (Overlay item : oldFotoIcons) {
+                        mFotoMarkerRecycler.add((FotoMarker) item);
                     }
                 }
-                oldSummaryIcons.onDetach(this.mMapView);
-                oldSummaryIcons.clear();
+                oldFotoIcons.onDetach(this.mMapView);
+                oldFotoIcons.clear();
             }
             this.mMapView.invalidate();
         }
@@ -742,19 +759,19 @@ public class LocationMapFragment extends DialogFragment {
     /**
      * @return true if click was handeled.
      */
-    protected boolean onMarkerClicked(IconOverlay marker, int markerId, IGeoPoint geoPosition, Object markerData) {
+    protected boolean onFotoMarkerClicked(IconOverlay marker, int markerId, IGeoPoint geoPosition, Object markerData) {
 
-        ThumbNailUtils.getThumb(markerId, mImage);
+        ThumbNailUtils.getThumb(markerId, mCurrentPhoto);
 
-        this.mImage.setVisibility(View.VISIBLE);
+        this.mCurrentPhoto.setVisibility(View.VISIBLE);
 
         updateMarker(marker, markerId, geoPosition, markerData);
 
         return true; // TODO
     }
 
-    protected boolean onMarkerLongPress(IconOverlay marker, int markerId, IGeoPoint geoPosition, Object markerData) {
-        onMarkerClicked(marker, markerId, geoPosition, markerData);
+    protected boolean onFotoMarkerLongPress(IconOverlay marker, int markerId, IGeoPoint geoPosition, Object markerData) {
+        onFotoMarkerClicked(marker, markerId, geoPosition, markerData);
         return showContextMenu(this.mMapView, markerId, geoPosition, markerData);
     }
 
@@ -782,74 +799,124 @@ public class LocationMapFragment extends DialogFragment {
         void onDirectoryPick(String selectedAbsolutePath, int queryTypeId);
     }
 
-    /**************************** Support for non-clustered selected items ********************/
+    private SelectedItemsHandler mSelectedItemsHandler = new SelectedItemsHandler();
 
-    private SelectedItems mSelectedItems = null;
+    /** Support for non-clustered selected items */
+    private class SelectedItemsHandler {
 
-    /** To allow canceling of loading task. There are 0 or one tasks running at a time */
-    private SelectionMarkerLoaderTask mCurrentSelectionMarkerLoader = null;
-
-    private Drawable mBlueMarker;
-
-    /** to load markers for current selected items */
-    private class SelectionMarkerLoaderTask extends MarkerLoaderTaskWithRecycling<FotoMarker> {
-        public SelectionMarkerLoaderTask(HashMap<Integer, FotoMarker> oldItems) {
-            super(getActivity(), LocationMapFragment.this.mDebugPrefix + "-SelectionMarkerLoaderTask#" + (sInstanceCountFotoLoader++) + "-", mMarkerRecycler,
-                    oldItems, Global.maxSelectionMarkersInMap);
+        public void define(SelectedItems selectedItems) {
+            if ((selectedItems != null) && (this.mSelectedItems != selectedItems)) {
+                this.mSelectedItems = selectedItems;
+                reloadSelectionMarker();
+            }
         }
 
-        @NonNull
-        protected FotoMarker createNewMarker() {
-            return new FotoMarker(mResourceProxy);
-        }
+        private SelectedItems mSelectedItems = null;
 
-        // This is called when doInBackground() is finished
-        @Override
-        protected void onPostExecute(OverlayManager result) {
-            if (isCancelled()) {
-                onLoadFinishedSelection(null);
-            } else {
-                onLoadFinishedSelection(result);
+        /**
+         * To allow canceling of loading task. There are 0 or one tasks running at a time
+         */
+        private SelectionMarkerLoaderTask mCurrentSelectionMarkerLoader = null;
 
-                recyleItems(false, mOldItems);
+        private Drawable mBlueMarker;
+
+        /**
+         * to load markers for current selected items
+         */
+        private class SelectionMarkerLoaderTask extends MarkerLoaderTaskWithRecycling<FotoMarker> {
+            public SelectionMarkerLoaderTask(HashMap<Integer, FotoMarker> oldItems) {
+                super(getActivity(), LocationMapFragment.this.mDebugPrefix + "-SelectionMarkerLoaderTask#" + (sInstanceCountFotoLoader++) + "-", mFotoMarkerRecycler,
+                        oldItems, Global.maxSelectionMarkersInMap);
             }
 
-            mOldItems.clear();
-            mOldItems = null;
-            int recyclerSize = mMarkerRecycler.size();
-            if (mStatus != null) {
-                mStatus.append("\n\tRecycler: ").append(mRecyclerSizeBefore).append(",")
-                        .append(mRecyclerSizeAfter).append(",").append(recyclerSize);
-                if (Global.debugEnabledSql) {
-                    Log.w(Global.LOG_CONTEXT, mDebugPrefix + mStatus);
+            @NonNull
+            protected FotoMarker createNewMarker() {
+                return new FotoMarker(mResourceProxy);
+            }
+
+            // This is called when doInBackground() is finished
+            @Override
+            protected void onPostExecute(OverlayManager result) {
+                if (isCancelled()) {
+                    onLoadFinishedSelection(null);
                 } else {
-                    Log.i(Global.LOG_CONTEXT, mDebugPrefix + mStatus);
+                    onLoadFinishedSelection(result);
+
+                    recyleItems(false, mOldItems);
+                }
+
+                mOldItems.clear();
+                mOldItems = null;
+                int recyclerSize = mFotoMarkerRecycler.size();
+                if (mStatus != null) {
+                    mStatus.append("\n\tRecycler: ").append(mRecyclerSizeBefore).append(",")
+                            .append(mRecyclerSizeAfter).append(",").append(recyclerSize);
+                    if (Global.debugEnabledSql) {
+                        Log.w(Global.LOG_CONTEXT, mDebugPrefix + mStatus);
+                    } else {
+                        Log.i(Global.LOG_CONTEXT, mDebugPrefix + mStatus);
+                    }
                 }
             }
-        }
 
-        protected BitmapDrawable createIcon(String iconText) {
-            return (BitmapDrawable) mBlueMarker;
-        }
-
-    } // class SelectionMarkerLoaderTask
-
-    private void reloadSelectionMarker() {
-        if ((mFolderOverlayBlueSelectionMarker != null) &&
-                (mSelectedItems != null) && (!mSelectedItems.isEmpty())) {
-            if (mCurrentSelectionMarkerLoader != null) {
-                mCurrentSelectionMarkerLoader.cancel(false);
-                mCurrentSelectionMarkerLoader = null;
+            protected BitmapDrawable createIcon(String iconText) {
+                return (BitmapDrawable) mBlueMarker;
             }
 
-            List<Overlay> oldItems = mFolderOverlayBlueSelectionMarker.getItems();
+        } // class SelectionMarkerLoaderTask
 
-            QueryParameter query = new QueryParameter(FotoSql.queryGps);
-            FotoSql.setWhereSelection(query, mSelectedItems);
-            FotoSql.addWhereLatLonNotNull(query);
+        /** gets called when MarkerLoaderTask has finished.
+         *
+         * @param result null if there was an error
+         */
+        protected void onLoadFinishedSelection(OverlayManager result) {
+            mCurrentSelectionMarkerLoader = null;
+            StringBuilder dbg = (Global.debugEnabledSql || Global.debugEnabledMap) ? new StringBuilder() : null;
+            if (dbg != null) {
+                int found = (result != null) ? result.size() : 0;
+                dbg.append(mDebugPrefix).append("onLoadFinishedSelection() markers created: ").append(found);
+            }
 
-            mCurrentSelectionMarkerLoader = new SelectionMarkerLoaderTask(createHashMap(oldItems));
-            mCurrentSelectionMarkerLoader.execute(query);
+            if (result != null) {
+                OverlayManager old = mFolderOverlayBlueSelectionMarker.setOverlayManager(result);
+                if (old != null) {
+                    if (dbg != null) {
+                        dbg.append(mDebugPrefix).append(" previous : : ").append(old.size());
+                    }
+                    old.onDetach(mMapView);
+                    old.clear();
+                }
+                mMapView.invalidate();
+                GeoRectangle box = new GeoRectangle();
+                for (Overlay item: result) {
+                    IGeoPoint pos = ((IconOverlay) item).getPosition();
+
+                    box.inflate(pos.getLatitude(), pos.getLongitude());
+                }
+                zoomToBoundingBox("onLoadFinished Selection", box, NO_ZOOM);
+            }
+            if (dbg != null) {
+                Log.d(Global.LOG_CONTEXT, dbg.toString());
+            }
+        }
+
+        private void reloadSelectionMarker() {
+            if ((mFolderOverlayBlueSelectionMarker != null) &&
+                    (mSelectedItems != null) && (!mSelectedItems.isEmpty())) {
+                if (mCurrentSelectionMarkerLoader != null) {
+                    mCurrentSelectionMarkerLoader.cancel(false);
+                    mCurrentSelectionMarkerLoader = null;
+                }
+
+                List<Overlay> oldItems = mFolderOverlayBlueSelectionMarker.getItems();
+
+                QueryParameter query = new QueryParameter(FotoSql.queryGps);
+                FotoSql.setWhereSelection(query, mSelectedItems);
+                FotoSql.addWhereLatLonNotNull(query);
+
+                mCurrentSelectionMarkerLoader = new SelectionMarkerLoaderTask(createHashMap(oldItems));
+                mCurrentSelectionMarkerLoader.execute(query);
+            }
         }
     }
 
@@ -861,34 +928,6 @@ public class LocationMapFragment extends DialogFragment {
             oldItemsHash.put(marker.getID(), marker);
         }
         return oldItemsHash;
-    }
-
-    /** gets called when MarkerLoaderTask has finished.
-     *
-     * @param result null if there was an error
-     */
-    protected void onLoadFinishedSelection(OverlayManager result) {
-        mCurrentSelectionMarkerLoader = null;
-        StringBuilder dbg = (Global.debugEnabledSql || Global.debugEnabledMap) ? new StringBuilder() : null;
-        if (dbg != null) {
-            int found = (result != null) ? result.size() : 0;
-            dbg.append(mDebugPrefix).append("onLoadFinishedSelection() markers created: ").append(found);
-        }
-
-        if (result != null) {
-            OverlayManager old = mFolderOverlayBlueSelectionMarker.setOverlayManager(result);
-            if (old != null) {
-                if (dbg != null) {
-                    dbg.append(mDebugPrefix).append(" previous : : ").append(old.size());
-                }
-                old.onDetach(this.mMapView);
-                old.clear();
-            }
-            this.mMapView.invalidate();
-        }
-        if (dbg != null) {
-            Log.d(Global.LOG_CONTEXT, dbg.toString());
-        }
     }
 
     protected   boolean showContextMenu(final View parent, final int markerId,

@@ -146,7 +146,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
 
         GeoRectangle rectangle = null;
         int zoom = ZoomUtil.NO_ZOOM;
-        if ((savedInstanceState == null) && (initalZoom != null)) {
+        if ((savedInstanceState == null) && (initalZoom != null) && (additionalPointsContentUri == null)) {
             rectangle = new GeoRectangle();
             zoom = initalZoom.getZoomMin();
             rectangle.setLogituedMin(initalZoom.getLongitude()).setLatitudeMin(initalZoom.getLatitude());
