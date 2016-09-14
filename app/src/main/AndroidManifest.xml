@@ -62,6 +62,12 @@
     <!-- after app crash the logcat is written to /mnt/sdcard/copy/log/androFotofinder.logcat*.txt -->
     <uses-permission android:name="android.permission.READ_LOGS" />
 
+    <!-- permissions inherited from a lib that the app does not need.
+         tools:node="remove" means remove permission
+         see http://stackoverflow.com/questions/37223379/google-play-game-service-adds-an-unwanted-permission-in-my-app-phone-status-and -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" tools:node="remove" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" tools:node="remove" />
+
     <application android:name=".AndroFotoFinderApp"
         android:allowBackup="false"
         android:largeHeap="true"
