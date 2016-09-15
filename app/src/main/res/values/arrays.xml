@@ -2,16 +2,16 @@
 <resources>
     <string-array name="pref_locale_names" translatable="false">
         <item>@string/settings_locale_os_language</item>
-        <item>Deutsch</item>
+        <item>Deutsch (German)</item>
         <item>English</item>
-        <item>Espanol</item>
-        <item>Français</item>
-        <item>Italiano</item>
-        <item>日本人</item>
-        <item>Nederlands</item>
-        <item>Polskie</item>
-        <item>Português (Brasil)</item>
-        <item>Român</item>
+        <item>Espanol (Spanish)</item>
+        <item>Français (French)</item>
+        <item>Italiano (Italian)</item>
+        <item>日本人 (Japanese)</item>
+        <item>Nederlands (Dutch)</item>
+        <item>Polskie (Polish)</item>
+        <item>Português, Brasil (Portuguese)</item>
+        <item>Român (Romanian)</item>
     </string-array>
     <string-array name="pref_locale_values" translatable="false">
         <item></item>
