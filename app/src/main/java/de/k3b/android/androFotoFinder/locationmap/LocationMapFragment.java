@@ -50,8 +50,7 @@ import org.osmdroid.events.ZoomEvent;
 import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.Overlay;
-import org.osmdroid.views.overlay.OverlayManager;
+import org.osmdroid.views.overlay.*;
 import org.xml.sax.InputSource;
 
 import java.io.IOException;
@@ -70,7 +69,9 @@ import de.k3b.android.osmdroid.FolderOverlayEx;
 import de.k3b.android.osmdroid.GuestureOverlay;
 import de.k3b.android.osmdroid.IconOverlay;
 import de.k3b.android.osmdroid.ClickableIconOverlay;
-import de.k3b.android.osmdroid.ZoomUtil;
+import de.k3b.android.osmdroid.MarkerBubblePopup;
+import de.k3b.android.osmdroid.MarkerEx;
+import de.k3b.android.osmdroid.OsmdroidUtil;
 import de.k3b.android.osmdroid.forge.MapsForgeSupport;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.database.QueryParameter;
@@ -94,7 +95,7 @@ public class LocationMapFragment extends DialogFragment {
     protected static final int NO_MARKER_ID = -1;
 
     public String STATE_LAST_VIEWPORT = "LAST_VIEWPORT";
-    private static final int NO_ZOOM = ZoomUtil.NO_ZOOM;
+    private static final int NO_ZOOM = OsmdroidUtil.NO_ZOOM;
 
     /** If there is more than 200 millisecs no zoom/scroll update markers */
     protected static final int DEFAULT_INACTIVITY_DELAY_IN_MILLISECS = 200;
@@ -166,6 +167,7 @@ public class LocationMapFragment extends DialogFragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+        mPopup = new MarkerBubblePopup<GeoPointDtoEx>(activity);
         try {
             if (activity instanceof  OnDirectoryInteractionListener) {
                 mDirectoryListener = (OnDirectoryInteractionListener) activity;
@@ -178,6 +180,11 @@ public class LocationMapFragment extends DialogFragment {
 
     @Override
     public void onDetach() {
+        if (mPopup != null) {
+            mPopup.close();
+        }
+        mPopup = null;
+
         super.onDetach();
         mDirectoryListener = null;
     }
@@ -489,6 +496,10 @@ public class LocationMapFragment extends DialogFragment {
 
     protected GeoRectangle defineGpxAdditionalPoints(Uri gpxAdditionalPointsContentUri, GeoRectangle rectangle) {
         if (gpxAdditionalPointsContentUri != null) {
+            if (Global.debugEnabled || Global.debugEnabledMap) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "defineGpxAdditionalPoints: " + gpxAdditionalPointsContentUri);
+            }
+
             final FolderOverlayEx folderForNewItems = new FolderOverlayEx();
 
             final GeoRectangle gpxBox = (rectangle == null) ? new GeoRectangle() : null;
@@ -499,7 +510,7 @@ public class LocationMapFragment extends DialogFragment {
                 GpxReaderBase parser = new GpxReaderBase(new IGeoInfoHandler() {
                     @Override
                     public boolean onGeoInfo(IGeoPointInfo iGeoPointInfo) {
-                        return addGeopoint(folderForNewItems, currentLoadedGeoPoint, gpxBox);
+                        return addGpxGeoPoint(folderForNewItems, currentLoadedGeoPoint, gpxBox);
                     }
                 }, currentLoadedGeoPoint);
                 parser.parse(new InputSource(is));
@@ -512,17 +523,52 @@ public class LocationMapFragment extends DialogFragment {
             }
             mFolderOverlayBlueGpxMarker = folderForNewItems;
             mMapView.getOverlays().add(0, mFolderOverlayBlueGpxMarker);
+            if (Global.debugEnabled || Global.debugEnabledMap) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "defineGpxAdditionalPoints itemcount: " + folderForNewItems.getItems().size());
+            }
+
 
             if (gpxBox != null) rectangle = gpxBox;
         }
         return rectangle;
     }
 
-    protected boolean addGeopoint(FolderOverlayEx destination, GeoPointDtoEx point, GeoRectangle box) {
-        GeoPointDtoEx newGeoPoint = (GeoPointDtoEx) point.clone();
-        destination.add(new IconOverlay(newGeoPoint, mSelectedItemsHandler.mBlueMarker));
-        if (box != null) box.inflate(newGeoPoint.getLatitude(), newGeoPoint.getLongitude());
+    private MarkerBubblePopup<GeoPointDtoEx> mPopup;
+
+    private static int mId = 1;
+    protected boolean addGpxGeoPoint(FolderOverlayEx destination, GeoPointDtoEx point, GeoRectangle box) {
+
+
+        // Overlay marker = createIconOverlay(point);
+        // Overlay marker = createMarker(point);
+        Overlay marker = createMarkerEx(point);
+        destination.add(marker);
+        if (box != null) box.inflate(point.getLatitude(), point.getLongitude());
         return true;
+    }
+/*
+    @NonNull
+    private Overlay createIconOverlay(GeoPointDtoEx point) {
+        return new IconOverlay(new GeoPoint(point.getLatitude(), point.getLongitude()), mSelectedItemsHandler.mBlueMarker);
+    }
+
+    @NonNull
+    private Marker createMarker(GeoPointDtoEx point) {
+        Marker marker = new Marker(mMapView);
+        marker.setPosition(new GeoPoint(point.getLatitude(), point.getLongitude()));
+        marker.setTitle(point.getName());
+        marker.setSubDescription(point.getDescription());
+        if (point.getLink() != null)
+        marker.setSnippet("<a href='" + point.getLink() + "'>" + point.getLink() + "</a>");
+        return marker;
+    }
+*/
+
+    private Overlay createMarkerEx(GeoPointDtoEx point) {
+        GeoPointDtoEx position = (GeoPointDtoEx) point.clone();
+        // MarkerEx.setDefaultIcon(mSelectedItemsHandler.mBlueMarker);
+        // marker.setIcon(mSelectedItemsHandler.mBlueMarker); use global
+        return new MarkerEx<GeoPointDtoEx>(mPopup).set(mId++, position, mSelectedItemsHandler.mBlueMarker, position );
     }
 
     private void zoomToBoundingBox(String why, BoundingBox boundingBox, int zoomLevel) {
@@ -532,10 +578,10 @@ public class LocationMapFragment extends DialogFragment {
                 GeoPoint min = new GeoPoint(boundingBox.getLatSouth(), boundingBox.getLonWest());
 
                 if (zoomLevel != NO_ZOOM) {
-                    ZoomUtil.zoomTo(this.mMapView, zoomLevel, min, null);
+                    OsmdroidUtil.zoomTo(this.mMapView, zoomLevel, min, null);
                 } else {
                     GeoPoint max = new GeoPoint(boundingBox.getLatNorth(), boundingBox.getLonEast());
-                    ZoomUtil.zoomTo(this.mMapView, ZoomUtil.NO_ZOOM, min, max);
+                    OsmdroidUtil.zoomTo(this.mMapView, OsmdroidUtil.NO_ZOOM, min, max);
 
                     // this.mMapView.zoomToBoundingBox(boundingBox); this is to inexact
                 }
@@ -927,17 +973,18 @@ public class LocationMapFragment extends DialogFragment {
 
     protected   boolean showContextMenu(final View parent, final int markerId,
                                         final IGeoPoint geoPosition, final Object markerData) {
+        closePopup();
         MenuInflater inflater = getActivity().getMenuInflater();
-        mMapView.removeView(mTempPopupMenuParentView);
 
-        PopupMenu menu = new PopupMenu(getActivity(), createTempPopupParentMenuView(new GeoPoint(geoPosition.getLatitudeE6(), geoPosition.getLongitudeE6())));
+        mTempPopupMenuParentView = OsmdroidUtil.openMapPopupView(mMapView, 0, new GeoPoint(geoPosition.getLatitude(), geoPosition.getLongitude()));
+        PopupMenu menu = new PopupMenu(getActivity(), mTempPopupMenuParentView);
 
         inflater.inflate(R.menu.menu_map_context, menu.getMenu());
 
         menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                mMapView.removeView(mTempPopupMenuParentView);
+                closePopup();
 
                 switch (item.getItemId()) {
                     case R.id.cmd_photo:
@@ -972,18 +1019,9 @@ public class LocationMapFragment extends DialogFragment {
         return true;
     }
 
-    // inspired by org.osmdroid.bonuspack.overlays.InfoWindow
-    private View createTempPopupParentMenuView(GeoPoint position) {
-        if (mTempPopupMenuParentView != null) mMapView.removeView(mTempPopupMenuParentView);
-        mTempPopupMenuParentView = new View(getActivity());
-        MapView.LayoutParams lp = new MapView.LayoutParams(
-                1,
-                1,
-                position, MapView.LayoutParams.CENTER,
-                0, 0);
-        mTempPopupMenuParentView.setVisibility(View.VISIBLE);
-        mMapView.addView(mTempPopupMenuParentView, lp);
-        return mTempPopupMenuParentView;
+    protected void closePopup() {
+        OsmdroidUtil.closeMapPopupView(mMapView, mTempPopupMenuParentView);
+        mTempPopupMenuParentView = null;
     }
 
     private boolean showPoto(IGeoPoint geoPosition) {

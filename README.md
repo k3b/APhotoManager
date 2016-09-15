@@ -1,6 +1,8 @@
 # "A Photo Manager" ![](https://raw.githubusercontent.com/k3b/APhotoManager/master/app/src/main/res/drawable-hdpi/foto_gallery.png) with "A Photo Map", AndroFotoFinder
 
-App and internet homepage available in these languages:<ul>
+... is a free Android Gallery App to manage local photos: find, sort, view, copy, delete, send, ... . Geotag support: set gps exif data, show in map, find via geoarea/map, ... .
+
+App and internet homepage are available in these languages:<ul>
 		<li>
 <a href="https://github.com/k3b/APhotoManager/wiki/de-home">de<img alt="Homepage de" src="https://github.com/k3b/APhotoManager/blob/FDroid/wiki/png/lan_de.png"></img></a>,&nbsp;
 <a href="https://github.com/k3b/APhotoManager/wiki/home"   >en<img alt="Homepage en" src="https://github.com/k3b/APhotoManager/blob/FDroid/wiki/png/lan_en.png"></img></a>,&nbsp;
@@ -8,12 +10,14 @@ App and internet homepage available in these languages:<ul>
 <a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr<img alt="Homepage fr" src="https://github.com/k3b/APhotoManager/blob/FDroid/wiki/png/lan_fr.png"></img></a>,&nbsp;
 <a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja<img alt="Homepage ja" src="https://github.com/k3b/APhotoManager/blob/FDroid/wiki/png/lan_ja.png"></img></a>,&nbsp;
 nl,&nbsp;
+pl,&nbsp;
 <a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro<img alt="Homepage ro" src="https://github.com/k3b/APhotoManager/blob/FDroid/wiki/png/lan_ro.png"></img></a>
+        </li>
 		<li><a href="https://github.com/k3b/APhotoManager/issues/21">Help us to translate into other languages.</a></li>
 		</ul>
 
-* The only enhanced android [Gallery app](https://github.com/k3b/APhotoManager/wiki/Gallery-View) for local images on [f-droid](https://f-droid.org/)
-* Shows photos in a [geographic map](https://github.com/k3b/APhotoManager/wiki/geographic-map) from [openstreetmap](http://www.openstreetmap.org)
+* available on [f-droid](https://f-droid.org/)
+* Shows geotaged photos in a [geographic map](https://github.com/k3b/APhotoManager/wiki/geographic-map) from [openstreetmap](http://www.openstreetmap.org)
 * Buildin file manager for photos: find, sort, view, copy, delete, set gps exif data, send, ... .
 * Fast find local photos by (sub-)folder, date and/or geographic map.
 

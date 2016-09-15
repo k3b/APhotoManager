@@ -106,7 +106,7 @@ public class GuestureOverlay extends Overlay /* Debug */ {
         if (ddragMode) {
             IGeoPoint start = projection.fromPixels(this.mStart.x, this.mStart.y);
             IGeoPoint end = projection.fromPixels(this.mEnd.x, this.mEnd.y);
-            ZoomUtil.zoomTo(mapView, ZoomUtil.NO_ZOOM, start, end);
+            OsmdroidUtil.zoomTo(mapView, OsmdroidUtil.NO_ZOOM, start, end);
         } else {
             IGeoPoint center = projection.fromPixels(this.mStart.x, this.mStart.y);
             controller.setCenter(center);

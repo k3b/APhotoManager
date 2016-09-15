@@ -41,7 +41,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.SettingsActivity;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.osmdroid.ZoomUtil;
+import de.k3b.android.osmdroid.OsmdroidUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.SelectedFiles;
@@ -145,7 +145,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
         mMap.STATE_LAST_VIEWPORT = "ignore"; // do not use last viewport in settings
 
         GeoRectangle rectangle = null;
-        int zoom = ZoomUtil.NO_ZOOM;
+        int zoom = OsmdroidUtil.NO_ZOOM;
         if ((savedInstanceState == null) && (initalZoom != null) && (additionalPointsContentUri == null)) {
             rectangle = new GeoRectangle();
             zoom = initalZoom.getZoomMin();
@@ -270,7 +270,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
     private void onFilterChanged(GalleryFilterParameter filter) {
         if (filter != null) {
             this.mFilter = filter;
-            mMap.defineNavigation(this.mFilter, null, ZoomUtil.NO_ZOOM, null, null);
+            mMap.defineNavigation(this.mFilter, null, OsmdroidUtil.NO_ZOOM, null, null);
         }
     }
 
