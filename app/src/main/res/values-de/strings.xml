@@ -144,9 +144,9 @@
   <string name="settings_image_thumb_if_bigger_than_summary">Zeige in der Detailansicht als Thumbnail wenn das Photo größer ist. (speicher schonend, schnell, aber geringe Qualität)</string>
   <string name="settings_image_thumb_dir_title">Ordner für Thumbnails</string>
 
-  <string name="settings_maps_forge_enable_tile">Lokale *.map Karten Dateien verwenden</string>
+  <string name="settings_maps_forge_enable_tile">Mapsforge offline Karten</string>
   <string name="settings_maps_forge_enable_summary">die zuvor manuell per PC heruntergladen worden sind.</string>
-  <string name="settings_maps_forge_dir_title">Ordner für *.map Karten Dateien</string>
+  <string name="settings_maps_forge_dir_title">Mapsforge offline Ordner</string>
 
   <string name="show_photo">Zeige Foto(s)</string>
 </resources>

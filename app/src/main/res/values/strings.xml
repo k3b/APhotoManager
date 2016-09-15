@@ -146,9 +146,9 @@
 	<string name="settings_image_thumb_if_bigger_than_summary">if photo-width-height is bigger than this show thumbnail in image detail view. (memoryefficient, fast, but low-quality)</string>
 	<string name="settings_image_thumb_dir_title">Thumbnail folder</string>
 
-	<string name="settings_maps_forge_enable_tile">Use local *.map Map Files</string>
-	<string name="settings_maps_forge_enable_summary">which you manually downloaded via pc</string>
-	<string name="settings_maps_forge_dir_title">*.map Map Files Folder</string>
+	<string name="settings_maps_forge_enable_tile">Use Mapsforge offline map</string>
+	<string name="settings_maps_forge_enable_summary">... which you manually downloaded via pc</string>
+	<string name="settings_maps_forge_dir_title">Mapsforge offline Folder</string>
 
 	<string name="show_photo">Show Photo(s)</string>
 </resources>
