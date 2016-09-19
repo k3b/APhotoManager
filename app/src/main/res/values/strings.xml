@@ -130,7 +130,7 @@
 	<string name="share_err_not_found">No share/send provider found</string>
 	<string name="share_err_to_many">Too many items selected to share at once</string>
 	<string name="share_menu_title">Share/Send</string>
-	<string name="show_in_gallery_menu_title">Show in gallery</string>
+	<string name="show_in_gallery_menu_title">Show in new gallery</string>
 	<string name="slideshow_menu_title">Slideshow</string>
 	<string name="sort_by_date">Date</string>
 	<string name="sort_by_folder">Folder</string>
