@@ -60,7 +60,7 @@
 	<string name="folder_menu_title">Folder filter</string>
 	<string name="gallery_title">Photos</string>
 	<string name="geo_show_menu_title">Show in map</string>
-	<string name="geo_show_as_menu_title">view in external geo app</string>
+	<string name="geo_show_as_menu_title">View in external geo app</string>
 
 	<string name="geo_edit_menu_title">Set geo</string>
 	<string name="geo_edit_update_in_progress">Changing geo info in selected photos</string>
