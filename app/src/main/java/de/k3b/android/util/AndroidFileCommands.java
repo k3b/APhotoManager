@@ -120,7 +120,7 @@ public class AndroidFileCommands extends FileCommands {
 
     /** called for every cath(Exception...). Version with Android specific logging */
     @Override
-    protected void onException(final Exception e, Object... params) {
+    protected void onException(final Throwable e, Object... params) {
         StringBuffer message = new StringBuffer();
         message.append(mDebugPrefix).append("onException(");
         for (Object param : params) {

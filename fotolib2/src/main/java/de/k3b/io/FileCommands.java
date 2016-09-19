@@ -298,6 +298,7 @@ public class FileCommands implements  Cloneable {
      * Copies a file from the sourceFullPath path to the target path.
      */
     public static boolean _osFileCopy(File targetFullPath, File sourceFullPath, FileCommands owner) {
+        boolean result = true;
 
         FileChannel in = null;
         FileChannel out = null;
@@ -307,10 +308,10 @@ public class FileCommands implements  Cloneable {
             long size = in.size();
             MappedByteBuffer buf = in.map(FileChannel.MapMode.READ_ONLY, 0,	size);
             out.write(buf);
-            return true;
-        } catch (IOException e) {
+        } catch (Throwable e) {
+            result = false;
             if (owner != null) {
-                owner.onException(e, "osFileCopy", sourceFullPath, targetFullPath);
+                owner.onException(e, "_osFileCopy", sourceFullPath, targetFullPath);
             }
         } finally {
             if (in != null)
@@ -318,17 +319,17 @@ public class FileCommands implements  Cloneable {
                     in.close();
                     if (out != null)
                         out.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     if (owner != null) {
                         owner.onException(e, "osFileCopy-close", sourceFullPath, targetFullPath);
                     }
                 }
         }
-        return false;
+        return result;
     }
 
     /** called for every cath(Exception...) */
-    protected void onException(final Exception e, Object... context) {
+    protected void onException(final Throwable e, Object... context) {
         if (e != null) {
             e.printStackTrace();
         }
@@ -380,7 +381,7 @@ public class FileCommands implements  Cloneable {
                     mLogFile = new PrintWriter(logFile, "UTF-8");
                     log("rem " , new Date());
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 onException(e, "openLogfile", mLogFilePath);
                 if (stream != null) {
                     try {
