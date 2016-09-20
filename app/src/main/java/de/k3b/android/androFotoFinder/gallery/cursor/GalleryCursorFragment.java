@@ -65,6 +65,7 @@ import de.k3b.android.androFotoFinder.OnGalleryInteractionListener;
 import de.k3b.android.androFotoFinder.queries.Queryable;
 import de.k3b.android.androFotoFinder.queries.SqlJobTaskBase;
 import de.k3b.android.util.AndroidFileCommands;
+import de.k3b.android.util.AndroidFileCommands44;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
@@ -248,7 +249,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     protected LocalCursorLoader mCurorLoader = null;
 
-    protected class LocalFileCommands extends AndroidFileCommands {
+    protected class LocalFileCommands extends AndroidFileCommands44 {
 
         @Override
         protected void onPostProcess(String what, String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {

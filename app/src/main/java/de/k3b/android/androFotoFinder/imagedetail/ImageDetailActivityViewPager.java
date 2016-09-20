@@ -58,6 +58,7 @@ import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
 import de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.AndroidFileCommands;
+import de.k3b.android.util.AndroidFileCommands44;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.AboutDialogPreference;
@@ -199,7 +200,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         }
     }
 
-    class LocalFileCommands extends AndroidFileCommands {
+    class LocalFileCommands extends AndroidFileCommands44 {
         @Override
         protected void onPostProcess(String what, String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
             mInitialFilePath = null;

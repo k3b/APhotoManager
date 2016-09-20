@@ -42,11 +42,11 @@ public class FileCommands implements  Cloneable {
     public static final int OP_UPDATE = 5;
     private static final String EXT_SIDECAR = ".xmp";
 
-    private String mLogFilePath;
+    protected String mLogFilePath;
     // private static final String LOG_FILE_ENCODING = "UTF-8";
-    private PrintWriter mLogFile;
-    private ArrayList<String> mModifiedDestFiles;
-    private ArrayList<String> mModifiedSrcFiles;
+    protected PrintWriter mLogFile;
+    protected ArrayList<String> mModifiedDestFiles;
+    protected ArrayList<String> mModifiedSrcFiles;
 
     public FileCommands() {
         setLogFilePath(null);
@@ -60,7 +60,9 @@ public class FileCommands implements  Cloneable {
             for (String path : paths) {
                 if (deleteFileWitSidecar(new File(path))) result++;
             }
-            onPostProcess("delete", paths, null, result, paths.length, OP_DELETE);
+            if (result > 0) {
+                onPostProcess("delete", paths, null, result, paths.length, OP_DELETE);
+            }
             closeLogFile();
         }
         return result;
@@ -286,7 +288,7 @@ public class FileCommands implements  Cloneable {
      *
      * Copies a file from the sourceFullPath path to the target path.
      */
-    private boolean osFileCopy(File targetFullPath, File sourceFullPath) {
+    protected boolean osFileCopy(File targetFullPath, File sourceFullPath) {
         return _osFileCopy(targetFullPath, sourceFullPath, this);
     }
 
