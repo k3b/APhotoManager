@@ -43,6 +43,9 @@ public class Global {
     /**
      * Global.xxxxx. Non final values may be changed in SettingsActivity
      */
+
+    /** #64: {@link Global#showEditChooser} : true => open editor via chooser. false: donot present chooser */
+    public static boolean showEditChooser = false;
     public static boolean debugEnabled = false;
     public static boolean debugEnabledViewItem = false;
     public static boolean debugEnabledSql = false;
