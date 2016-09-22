@@ -196,7 +196,9 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
             final int colSize = (cursor != null) ? cursor.getColumnIndex(FotoSql.SQL_COL_SIZE) : -1;
             int size = (colSize >= 0) ? cursor.getInt(colSize) : 32767;
 
-            return createViewWithContent(position, container, fullPhotoPath, "instantiateItemFromCursor(#", size);
+            if (fullPhotoPath != null) {
+                return createViewWithContent(position, container, fullPhotoPath, "instantiateItemFromCursor(#", size);
+            }
 
         }
         return null;

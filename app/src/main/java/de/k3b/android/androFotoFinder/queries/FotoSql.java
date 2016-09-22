@@ -174,6 +174,8 @@ public class FotoSql {
 
     // the bigger the smaller the area
     private static final double GROUPFACTOR_FOR_Z0 = 0.025;
+    private static final String DELETED_FILE_MARKER = "/must/be/deleted.txt";
+
     public static final double getGroupFactor(final int _zoomLevel) {
         int zoomLevel = _zoomLevel;
         double result = GROUPFACTOR_FOR_Z0;
@@ -282,15 +284,24 @@ public class FotoSql {
         return ((result != null) && (result.length > 0)) ? result[0] : null;
     }
 
-    public static void setWhereSelection(QueryParameter query, SelectedItems selectedItems) {
+    public static QueryParameter setWhereSelectionPks(QueryParameter query, SelectedItems selectedItems) {
         if ((query != null) && (selectedItems != null) && (!selectedItems.isEmpty())) {
-            query.clearWhere()
-                    .addWhere(FotoSql.SQL_COL_PK + " in (" + selectedItems.toString() + ")")
-            ;
+            String pksAsListString = selectedItems.toString();
+            setWhereSelectionPks(query, pksAsListString);
         }
+        return query;
     }
 
-    public static void setWhereSelection(QueryParameter query, SelectedFiles selectedItems) {
+    public static QueryParameter setWhereSelectionPks(QueryParameter query, String pksAsListString) {
+        if ((pksAsListString != null) && (pksAsListString.length() > 0)) {
+            query.clearWhere()
+                    .addWhere(FotoSql.SQL_COL_PK + " in (" + pksAsListString + ")")
+            ;
+        }
+        return query;
+    }
+
+    public static void setWhereSelectionPaths(QueryParameter query, SelectedFiles selectedItems) {
         if ((query != null) && (selectedItems != null) && (selectedItems.size() > 0)) {
             query.clearWhere()
                     .addWhere(FotoSql.SQL_COL_PATH + " in (" + selectedItems.toString() + ")")
@@ -511,7 +522,7 @@ public class FotoSql {
      */
     public static int execUpdateGeo(final Context context, double latitude, double longitude, SelectedFiles selectedItems) {
         QueryParameter where = new QueryParameter();
-        setWhereSelection(where, selectedItems);
+        setWhereSelectionPaths(where, selectedItems);
 
         ContentValues values = new ContentValues(2);
         values.put(SQL_COL_LAT, DirectoryFormatter.parseLatLon(latitude));
@@ -551,7 +562,7 @@ public class FotoSql {
         }
 
         if (selectedItems != null) {
-            setWhereSelection(query, selectedItems);
+            setWhereSelectionPks(query, selectedItems);
         }
         FotoSql.addWhereLatLonNotNull(query);
 
@@ -704,19 +715,29 @@ public class FotoSql {
      */
     public static int deleteMedia(ContentResolver contentResolver, String where, String[] selectionArgs, boolean preventDeleteImage)
     {
-        if (preventDeleteImage) {
-            // set SQL_COL_PATH empty so sql-delete cannot cascade delete the referenced image-file via delete trigger
-            ContentValues values = new ContentValues();
-            values.put(FotoSql.SQL_COL_PATH, (String) null);
-            contentResolver.update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, values,where, selectionArgs);
+        int delCount = 0;
+        try {
+            if (preventDeleteImage) {
+                // set SQL_COL_PATH empty so sql-delete cannot cascade delete the referenced image-file via delete trigger
+                ContentValues values = new ContentValues();
+                values.put(FotoSql.SQL_COL_PATH, DELETED_FILE_MARKER);
+                contentResolver.update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, values, where, selectionArgs);
 
-            int delCount = contentResolver.delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, FotoSql.SQL_COL_PATH + " is null", null);
+                where = // FotoSql.SQL_COL_PATH + " is null or " +
+                        FotoSql.SQL_COL_PATH + "= '"+DELETED_FILE_MARKER + "'";
+                delCount = contentResolver.delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, where, null);
+            } else {
+                delCount = contentResolver.delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, where, selectionArgs);
+            }
+        } catch (Exception ex) {
+            // null pointer exception when delete matches not items??
+            final String msg = "FotoSql.deleteMedia("
+                    + QueryParameter.toString(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI.toString(),null
+                        , where, selectionArgs, null)
+                    + " : " + ex.getMessage();
+            Log.e(Global.LOG_CONTEXT, msg, ex);
 
-            return delCount;
         }
-
-        int delCount = contentResolver.delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, where, selectionArgs);
-
         return delCount;
     }
 
@@ -737,7 +758,7 @@ public class FotoSql {
             ArrayList<String> result = new ArrayList<>();
 
             QueryParameter parameters = new QueryParameter(queryDetail);
-            setWhereSelection(parameters, items);
+            setWhereSelectionPks(parameters, items);
 
             Cursor cursor = null;
 

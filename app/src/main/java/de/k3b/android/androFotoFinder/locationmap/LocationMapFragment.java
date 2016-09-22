@@ -952,7 +952,7 @@ public class LocationMapFragment extends DialogFragment {
                 List<Overlay> oldItems = mFolderOverlayBlueSelectionMarker.getItems();
 
                 QueryParameter query = new QueryParameter(FotoSql.queryGps);
-                FotoSql.setWhereSelection(query, mSelectedItems);
+                FotoSql.setWhereSelectionPks(query, mSelectedItems);
                 FotoSql.addWhereLatLonNotNull(query);
 
                 mCurrentSelectionMarkerLoader = new SelectionMarkerLoaderTask(createHashMap(oldItems));

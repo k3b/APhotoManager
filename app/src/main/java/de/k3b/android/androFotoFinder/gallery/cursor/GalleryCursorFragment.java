@@ -528,7 +528,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         QueryParameter selFilter = null;
         if (mShowSelectedOnly) {
             selFilter = new QueryParameter(rootQuery);
-            FotoSql.setWhereSelection(selFilter, mSelectedItems);
+            FotoSql.setWhereSelectionPks(selFilter, mSelectedItems);
         } else {
             selFilter = rootQuery;
         }
@@ -1038,6 +1038,15 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             @Override
             protected void doInBackground(Long id, Cursor cursor) {
                 this.mSelectedItems.add(id);
+                if (mStatus != null) {
+                    mStatus
+                            .append("\nduplicate found ")
+                            .append(id)
+                            .append("#")
+                            .append(cursor.getString(cursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT)))
+                            //.append("\n")
+                    ;
+                }
             }
 
             @Override
@@ -1048,6 +1057,12 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                     } else {
                         onDuplicatesFound(null, mStatus);
                     }
+                } else {
+                    if (mStatus != null) {
+                        mStatus.append("\nTask canceled");
+                        Log.w(Global.LOG_CONTEXT, mDebugPrefix + mStatus);
+                    }
+
                 }
             }
         };
@@ -1063,7 +1078,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
         if (selectedItems != null) {
             QueryParameter query = new QueryParameter();
-            FotoSql.setWhereSelection(query, selectedItems);
+            FotoSql.setWhereSelectionPks(query, selectedItems);
 
             final Activity activity = getActivity();
 
@@ -1071,15 +1086,16 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             if (activity != null) {
                 int delCount = 0;
 
+                String sqlWhere = query.toAndroidWhere(); //  + " OR " + FotoSql.SQL_COL_PATH + " is null";
                 try {
-                    delCount = FotoSql.deleteMedia(activity.getContentResolver(), query.toAndroidWhere(), null, true);
+                    delCount = FotoSql.deleteMedia(activity.getContentResolver(), sqlWhere, null, true);
                 } catch (Exception ex) {
-                    Log.w(Global.LOG_CONTEXT, "deleteMedia via update failed for 'where " + query.toAndroidWhere() +
+                    Log.w(Global.LOG_CONTEXT, "deleteMedia via update failed for 'where " + sqlWhere +
                             "'.");
                 }
                 if (debugMessage != null) {
                     Log.w(Global.LOG_CONTEXT, mDebugPrefix + " deleted " + delCount +
-                            " duplicates\n\tDELETE ... WHERE " + query.toAndroidWhere());
+                            " duplicates\n\tDELETE ... WHERE " + sqlWhere);
                 }
 
                 if (delCount > 0) {

@@ -29,7 +29,6 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created by k3b on 03.08.2015.
@@ -58,11 +57,13 @@ public class FileCommands implements  Cloneable {
             openLogfile();
             onPreProcess("delete", paths, null, OP_DELETE);
             for (String path : paths) {
-                if (deleteFileWitSidecar(new File(path))) result++;
+                if (path != null) {
+                    if (deleteFileWithSidecar(new File(path))) {
+                        result++;
+                    }
+                }
             }
-            if (result > 0) {
-                onPostProcess("delete", paths, null, result, paths.length, OP_DELETE);
-            }
+            onPostProcess("delete", paths, null, result, paths.length, OP_DELETE);
             closeLogFile();
         }
         return result;
@@ -75,7 +76,7 @@ public class FileCommands implements  Cloneable {
     /**
      * @return true if file was deleted or does not exist (any more)
      */
-    protected boolean deleteFileWitSidecar(File file) {
+    protected boolean deleteFileWithSidecar(File file) {
         boolean result = false;
 
         if (file != null) {

@@ -40,6 +40,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedFiles;
 import de.k3b.database.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
@@ -261,8 +262,21 @@ public class AndroidFileCommands extends FileCommands {
     }
 
     private int deleteFiles(SelectedFiles fotos) {
-        String[] fileNames = fotos.getFileNames();
-        return super.deleteFiles(fileNames);
+        int nameCount = fotos.getNonEmptyNameCount();
+        int deleteCount = 0;
+        if (nameCount > 0) {
+            String[] fileNames = fotos.getFileNames();
+            deleteCount = super.deleteFiles(fileNames);
+        }
+
+        if ((nameCount == 0) || (nameCount == deleteCount)) {
+            // no delete file error so also delete media-items
+            QueryParameter where = new QueryParameter();
+            FotoSql.setWhereSelectionPks (where, fotos.toIdString());
+
+            FotoSql.deleteMedia(mContext.getContentResolver(), where.toAndroidWhere(), null, true);
+        }
+        return deleteCount;
     }
 
     @SuppressLint("ValidFragment")
