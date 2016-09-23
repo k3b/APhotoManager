@@ -40,7 +40,10 @@
 	<string name="copy_menu_title">Copia</string>
 	<string name="copy_result_format">Copiati %1$d/%2$d file</string>
 	<string name="delete_menu_title">Elimina</string>
-	<string name="delete_question_message_format">"Sei sicuro di volere eliminare in modo definitivo questi file?%1$sQuesta operazione non può essere annullata."</string>
+	<string name="delete_question_message_format">"Sei sicuro di volere eliminare in modo definitivo questi file?
+	%1$s
+	
+	Questa operazione non può essere annullata."</string>
 	<string name="delete_question_title">Eliminare la/le foto?</string>
 	<string name="delete_result_format">Eliminati %1$d/%2$d file</string>
 	<string name="destination_copy">Copia destinazione</string>
@@ -84,7 +87,9 @@
 	<string name="more_menu_title">Altro ...</string>
 	<string name="move_menu_title">Sposta</string>
 	<string name="move_result_format">Spostati %1$d/%2$d file</string>
-	<string name="osm_cright_title">Tile Mappe (c) <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a></string>
+	<string name="osm_cright_title">Tile Mappe (c) 
+		<a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>
+	</string>
 	<string name="overwrite_question_title">Sovrascrivere?</string>
 	<string name="rename_menu_title">Rinomina</string>
 	<string name="rename_result_format">Rinominati %1$d/%2$d file</string>
@@ -98,27 +103,27 @@
 	<string name="selection_add_all_menu_title">Selezione: aggiungi tutte quelle visibili</string>
 	<string name="selection_remove_menu_title">Selezione: rimuovi tutte quelle visibili</string>
 	<string name="settings_bookmark_dir_title">Cartella di segnalibro</string>
-	<string name="settings_debug_memory_summary">&#8230; contenente il consumo di memoria.</string>
-	<string name="settings_debug_memory_title">LogCat consumo di memoria</string>
+	<string name="settings_group_debug_title">Diagnostica</string>
 	<string name="settings_debug_sql_summary">&#8230; contenente SQL eseguito.</string>
-	<string name="settings_debug_summary">&#8230; contenente altri messaggi di log.</string>
-	<string name="settings_debug_title">LogCat misc.</string>
 	<string name="settings_debug_view_item_summary">... contenente elementi gridview/listview.</string>
+	<string name="settings_debug_memory_title">LogCat consumo di memoria</string>
+	<string name="settings_debug_libs_summary">&#8230; of 3rd party libraries.</string>
+	<string name="settings_debug_title">LogCat misc.</string>
+	<string name="settings_debug_summary">&#8230; contenente altri messaggi di log.</string>
 	<string name="settings_debug_clear_title">Svuota LogCat</string>
 	<string name="settings_debug_save_title">Salva LogCat in un file</string>
-	<string name="settings_group_debug_title">Diagnostica</string>
+	<string name="settings_log_folder_title">Cartella Errorlog</string>
 	<string name="settings_image_hide_time_title">Auto-nascondi barra azioni dopo tot millisecondi</string>
 	<string name="settings_image_initialImageDetailResolutionHigh_summary">Visualizzazione foto iniziale con qualità migliore (lento, usa più memoria)</string>
 	<string name="settings_image_initialImageDetailResolutionHigh_title">Migliora qualità vista foto iniziale</string>
 	<string name="settings_image_slideshow_intervall_title">Intervallo presentazione in millisecondi</string>
 	<string name="settings_locale_title">Language</string>
 	<string name="settings_locale_os_language">(device language)</string>
-	<string name="settings_log_folder_title">Cartella Errorlog</string>
 	<string name="settings_map_selmarker_max_title">Max selettori sulla mappa</string>
 	<string name="settings_geo_history_max_title">Imposta conteggio cronologia geo</string>
 	<string name="settings_geo_history_file_title">Imposta file cronologia geo</string>
-	<string name="settings_multisel_clear_summary">&#8230; dopo Copia/Sposta/Rinomina/&#8230; .</string>
 	<string name="settings_multisel_clear_title">Cancella la selezione</string>
+	<string name="settings_multisel_clear_summary">… dopo Copia/Sposta/Rinomina/… .</string>
 	<string name="settings_title">Impostazioni</string>
 	<string name="share_err_not_found">Nessun provider Invia/Condividi trovato</string>
 	<string name="share_err_to_many">Invio multiplo: numero di elementi eccessivo</string>
@@ -137,4 +142,8 @@
 	<string name="settings_image_thumb_if_bigger_than_title">Foto grande larghezza/altezza</string>
 	<string name="settings_image_thumb_if_bigger_than_summary">se la larghezza-altezza della foto è maggiore di questo, mostra miniatura nella visualizzazione dettagliata. (migliore memoria, veloce, ma scarsa qualità)</string>
 	<string name="settings_image_thumb_dir_title">Cartella miniatura</string>
+	<string name="settings_maps_forge_enable_tile">Usa i file di mappa locali *.map</string>
+	<string name="settings_maps_forge_enable_summary">che hai scaricato manualmente tramite pc</string>
+	<string name="settings_maps_forge_dir_title">Cartella file di mappa *.map</string>
+	<string name="show_photo">Mostra foto</string>
 </resources>
