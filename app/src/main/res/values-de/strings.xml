@@ -102,7 +102,6 @@
   <string name="selection_remove_menu_title">Auswahl: alle sichtbaren abwählen</string>
   <string name="settings_bookmark_dir_title">Ordner für Lesezeichen</string>
   <string name="settings_debug_libs_summary">&#8230; Fremdkomponenten.</string>
-  <string name="settings_debug_memory_summary">... mit Speicherverbrauch.</string>
   <string name="settings_debug_memory_title">LogCat Speicherverbrauch</string>
   <string name="settings_debug_sql_summary">... ausgeführtes SQL.</string>
   <string name="settings_debug_summary">... mit anderen Log-Nachrichten.</string>

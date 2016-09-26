@@ -28,7 +28,9 @@ android {
 		// published 0.5.1.160629 (17)
 		// published 0.5.1.160712 (18)
 		// published 0.5.2.160726 (19)
-        // published 0.5.3.160927 (21)
+        // not published 0.5.2.160920 (20)
+        // 0.5.3.160927 (21)
+
         versionCode = 21
         versionName = '0.5.3.160927'
     }
@@ -62,6 +64,7 @@ dependencies {
     // compile project(':k3b-geoHelper')
     compile 'com.github.k3b:k3b-geoHelper:1.1.5'
 
+    // https://github.com/nostra13/Android-Universal-Image-Loader
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
 
     // zoomable image view
@@ -71,13 +74,11 @@ dependencies {
     // compile 'com.github.k3b.PhotoView:library:v1.2.6.k3b-SNAPSHOT' // via jitpack.io
     compile 'com.github.k3b:PhotoView:v1.2.6.k3b-5-SNAPSHOT' // via jitpack.io
 
-	// https://github.com/davemorrissey/subsampling-scale-image-view
-	// replacement for PhotoView:library ??
-	compile 'com.davemorrissey.labs:subsampling-scale-image-view:3.5.0'
-
     // for view-pager
     compile 'com.android.support:support-v4:21.0.2'
-
+    // compile 'com.android.support:support-v4:23.1.1'
+    // compile 'com.android.support:support-v4:21.0.2'
+    // compile 'com.android.support:appcompat-v7:21.0.2'
     // exif support
     // https://github.com/drewnoakes/metadata-extractor/wiki/GettingStarted licence: http://www.apache.org/licenses/LICENSE-2.0
     compile 'com.drewnoakes:metadata-extractor:2.8.1'
@@ -89,7 +90,6 @@ dependencies {
     compile 'org.mapsforge:mapsforge-map-android:0.6.1'
     compile 'org.mapsforge:mapsforge-map:0.6.1'
 
-    // non local copy from repositories
     compile 'org.slf4j:slf4j-api:1.7.7@jar'
     compile 'eu.lp0.slf4j:slf4j-android:1.7.7-1@jar'
 }
