@@ -29,7 +29,6 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created by k3b on 03.08.2015.
@@ -42,11 +41,11 @@ public class FileCommands implements  Cloneable {
     public static final int OP_UPDATE = 5;
     private static final String EXT_SIDECAR = ".xmp";
 
-    private String mLogFilePath;
+    protected String mLogFilePath;
     // private static final String LOG_FILE_ENCODING = "UTF-8";
-    private PrintWriter mLogFile;
-    private ArrayList<String> mModifiedDestFiles;
-    private ArrayList<String> mModifiedSrcFiles;
+    protected PrintWriter mLogFile;
+    protected ArrayList<String> mModifiedDestFiles;
+    protected ArrayList<String> mModifiedSrcFiles;
 
     public FileCommands() {
         setLogFilePath(null);
@@ -58,7 +57,11 @@ public class FileCommands implements  Cloneable {
             openLogfile();
             onPreProcess("delete", paths, null, OP_DELETE);
             for (String path : paths) {
-                if (deleteFileWitSidecar(new File(path))) result++;
+                if (path != null) {
+                    if (deleteFileWithSidecar(new File(path))) {
+                        result++;
+                    }
+                }
             }
             onPostProcess("delete", paths, null, result, paths.length, OP_DELETE);
             closeLogFile();
@@ -73,7 +76,7 @@ public class FileCommands implements  Cloneable {
     /**
      * @return true if file was deleted or does not exist (any more)
      */
-    protected boolean deleteFileWitSidecar(File file) {
+    protected boolean deleteFileWithSidecar(File file) {
         boolean result = false;
 
         if (file != null) {
@@ -258,7 +261,25 @@ public class FileCommands implements  Cloneable {
 
     /** can be replaced by mock/stub in unittests */
     protected boolean osFileMove(File dest, File source) {
-        return source.renameTo(dest);
+        if (source.renameTo(dest)) {
+            // move within same mountpoint
+            return true;
+        }
+
+        // #61 cannot move between different mountpoints/devices/partitions. do Copy+Delete instead
+        if (source.exists() && source.isFile() && source.canRead()
+                && source.canWrite() // to delete after success
+                && !dest.exists()) {
+            if (osFileCopy(dest, source)) {
+                if (osDeleteFile(source)) {
+                    return true; // move: copy + delete(source) : success
+                } else {
+                    // cannot delete souce: undo copy
+                    osDeleteFile(dest);
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -268,7 +289,7 @@ public class FileCommands implements  Cloneable {
      *
      * Copies a file from the sourceFullPath path to the target path.
      */
-    private boolean osFileCopy(File targetFullPath, File sourceFullPath) {
+    protected boolean osFileCopy(File targetFullPath, File sourceFullPath) {
         return _osFileCopy(targetFullPath, sourceFullPath, this);
     }
 
@@ -280,6 +301,7 @@ public class FileCommands implements  Cloneable {
      * Copies a file from the sourceFullPath path to the target path.
      */
     public static boolean _osFileCopy(File targetFullPath, File sourceFullPath, FileCommands owner) {
+        boolean result = true;
 
         FileChannel in = null;
         FileChannel out = null;
@@ -289,10 +311,10 @@ public class FileCommands implements  Cloneable {
             long size = in.size();
             MappedByteBuffer buf = in.map(FileChannel.MapMode.READ_ONLY, 0,	size);
             out.write(buf);
-            return true;
-        } catch (IOException e) {
+        } catch (Throwable e) {
+            result = false;
             if (owner != null) {
-                owner.onException(e, "osFileCopy", sourceFullPath, targetFullPath);
+                owner.onException(e, "_osFileCopy", sourceFullPath, targetFullPath);
             }
         } finally {
             if (in != null)
@@ -300,17 +322,17 @@ public class FileCommands implements  Cloneable {
                     in.close();
                     if (out != null)
                         out.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     if (owner != null) {
                         owner.onException(e, "osFileCopy-close", sourceFullPath, targetFullPath);
                     }
                 }
         }
-        return false;
+        return result;
     }
 
     /** called for every cath(Exception...) */
-    protected void onException(final Exception e, Object... context) {
+    protected void onException(final Throwable e, Object... context) {
         if (e != null) {
             e.printStackTrace();
         }
@@ -362,7 +384,7 @@ public class FileCommands implements  Cloneable {
                     mLogFile = new PrintWriter(logFile, "UTF-8");
                     log("rem " , new Date());
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 onException(e, "openLogfile", mLogFilePath);
                 if (stream != null) {
                     try {

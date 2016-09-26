@@ -40,7 +40,10 @@
 	<string name="copy_menu_title">コピー</string>
 	<string name="copy_result_format">%1$d/%2$d ファイルをコピーしました</string>
 	<string name="delete_menu_title">削除</string>
-	<string name="delete_question_message_format">"これらのファイルを完全に削除してもよろしいですか?%1$sこの操作を元に戻すことはできません。"</string>
+	<string name="delete_question_message_format">"これらのファイルを完全に削除してもよろしいですか?
+	%1$s
+	
+	この操作を元に戻すことはできません。"</string>
 	<string name="delete_question_title">写真を削除しますか?</string>
 	<string name="delete_result_format">%1$d/%2$d ファイルを削除しました</string>
 	<string name="destination_copy">コピー先</string>
@@ -84,7 +87,9 @@
 	<string name="more_menu_title">さらに ...</string>
 	<string name="move_menu_title">移動</string>
 	<string name="move_result_format">%1$d/%2$d ファイルを移動しました</string>
-	<string name="osm_cright_title">Map Tiles (c) <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a></string>
+	<string name="osm_cright_title">Map Tiles (c) 
+		<a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>
+	</string>
 	<string name="overwrite_question_title">上書きしますか?</string>
 	<string name="rename_menu_title">名前の変更</string>
 	<string name="rename_result_format">%1$d/%2$d ファイルの名前を変更しました</string>
@@ -98,27 +103,27 @@
 	<string name="selection_add_all_menu_title">選択: すべての表示を追加</string>
 	<string name="selection_remove_menu_title">選択: すべての表示を削除</string>
 	<string name="settings_bookmark_dir_title">レポート フォルダー</string>
-	<string name="settings_debug_memory_summary">&#8230; メモリ消費量を含みます。</string>
-	<string name="settings_debug_memory_title">LogCat メモリ消費量</string>
+	<string name="settings_group_debug_title">診断</string>
 	<string name="settings_debug_sql_summary">&#8230; 実行した SQL を含みます。</string>
-	<string name="settings_debug_summary">&#8230; 他のログ メッセージを含みます。</string>
-	<string name="settings_debug_title">LogCat その他。</string>
 	<string name="settings_debug_view_item_summary">&#8230; グリッド/リストビュー項目を含みます。</string>
+	<string name="settings_debug_memory_title">LogCat メモリ消費量</string>
+	<string name="settings_debug_libs_summary">&#8230; of 3rd party libraries.</string>
+	<string name="settings_debug_title">LogCat その他。</string>
+	<string name="settings_debug_summary">&#8230; 他のログ メッセージを含みます。</string>
 	<string name="settings_debug_clear_title">LogCat をクリア</string>
 	<string name="settings_debug_save_title">LogCat をファイルに保存</string>
-	<string name="settings_group_debug_title">診断</string>
+	<string name="settings_log_folder_title">エラーログのフォルダー</string>
 	<string name="settings_image_hide_time_title">ミリ秒後に、自動アクションバー非表示</string>
 	<string name="settings_image_initialImageDetailResolutionHigh_summary">高品質の初期写真表示 (低速、より多くのメモリが必要)</string>
 	<string name="settings_image_initialImageDetailResolutionHigh_title">初期の写真表示で、品質を向上させます</string>
 	<string name="settings_image_slideshow_intervall_title">ミリ秒単位のスライド ショー間隔</string>
 	<string name="settings_locale_title">言語</string>
 	<string name="settings_locale_os_language">(デバイスの言語)</string>
-	<string name="settings_log_folder_title">エラーログのフォルダー</string>
 	<string name="settings_map_selmarker_max_title">最大。地図に選択マーカー</string>
 	<string name="settings_geo_history_max_title">位置情報履歴数の設定</string>
 	<string name="settings_geo_history_file_title">位置情報履歴ファイルの設定</string>
-	<string name="settings_multisel_clear_summary">&#8230; コピー/移動/名前の変更/&#8230; 後に。</string>
 	<string name="settings_multisel_clear_title">複数選択をクリア</string>
+	<string name="settings_multisel_clear_summary">… コピー/移動/名前の変更/… 後に。</string>
 	<string name="settings_title">設定</string>
 	<string name="share_err_not_found">送信/共有プロバイダーが見つかりません</string>
 	<string name="share_err_to_many">複数送信: 項目の件数が超過しました</string>
@@ -132,17 +137,13 @@
 	<string name="sort_by_none">並び替えない</string>
 	<string name="sort_by_place">場所</string>
 	<string name="sort_menu_title">並べ変え</string>
-	<string name="sort_order_Date_Ascending">日付の昇順</string>
-	<string name="sort_order_Date_Descending">日付の降順</string>
-	<string name="sort_order_Name_Ascending">名前の昇順</string>
-	<string name="sort_order_Name_Descending">名前の降順</string>
-	<string name="sort_order_Name_length_Ascending">名前の長さで昇順</string>
-	<string name="sort_order_Name_length_Descending">名前の長さで降順</string>
-	<string name="sort_order_Place_Ascending">場所の昇順</string>
-	<string name="sort_order_Place_Descending">場所の降順</string>
 	<string name="update_result_format">%1$d/%2$d ファイルを更新しました</string>
 	<string name="zoom_to_fit_menu_title">合わせてズーム</string>
 	<string name="settings_image_thumb_if_bigger_than_title">大きな写真の幅/高さ</string>
 	<string name="settings_image_thumb_if_bigger_than_summary">写真の幅と高さがこれより大きい場合、画像の詳細表示でサムネイルを表示します。 (省メモリ、高速、ただし低品質)</string>
 	<string name="settings_image_thumb_dir_title">サムネイル フォルダー</string>
+	<string name="settings_maps_forge_enable_tile">ローカル *.map 地図ファイルを使用する</string>
+	<string name="settings_maps_forge_enable_summary">pc 経由で手動でダウンロードしたもの</string>
+	<string name="settings_maps_forge_dir_title">*.map 地図ファイル フォルダー</string>
+	<string name="show_photo">写真を表示</string>
 </resources>

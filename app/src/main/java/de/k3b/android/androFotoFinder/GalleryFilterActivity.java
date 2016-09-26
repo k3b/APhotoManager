@@ -45,7 +45,7 @@ import de.k3b.android.androFotoFinder.directory.DirectoryLoaderTask;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.locationmap.LocationMapFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.osmdroid.ZoomUtil;
+import de.k3b.android.osmdroid.OsmdroidUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.android.widget.LocalizedActivity;
@@ -489,7 +489,7 @@ public class GalleryFilterActivity extends LocalizedActivity implements Common, 
         if (fromGui(mFilter)) {
             final FragmentManager manager = getFragmentManager();
             LocationMapFragment dirDialog = new LocationMapFragment();
-            dirDialog.defineNavigation(null, mFilter, ZoomUtil.NO_ZOOM, null);
+            dirDialog.defineNavigation(null, mFilter, OsmdroidUtil.NO_ZOOM, null, null);
 
             dirDialog.show(manager, DLG_NAVIGATOR_TAG);
         }

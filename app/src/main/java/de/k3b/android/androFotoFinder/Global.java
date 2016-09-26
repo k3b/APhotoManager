@@ -41,8 +41,7 @@ public class Global {
     public static final String PREF_KEY_USER_LOCALE = "user_locale";
 
     /**
-     * true: addToCompressQue several Log.d(...) to show what is going on.
-     * debugEnabled is updated by the SettingsActivity
+     * Global.xxxxx. Non final values may be changed in SettingsActivity
      */
     public static boolean debugEnabled = false;
     public static boolean debugEnabledViewItem = false;

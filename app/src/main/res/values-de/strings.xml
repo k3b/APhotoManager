@@ -40,7 +40,10 @@
   <string name="copy_menu_title">Kopieren</string>
   <string name="copy_result_format">%1$d/%2$d Dateien kopiert</string>
   <string name="delete_menu_title">Löschen</string>
-  <string name="delete_question_message_format">Sind Sie sicher, dass Sie diese Dateien dauerhaft löschen möchten?%1$sDieser Vorgang kann nicht rückgängig gemacht werden.</string>
+  <string name="delete_question_message_format">"Sind Sie sicher, dass Sie diese Dateien dauerhaft löschen möchten?
+    %1$s
+
+    Dieser Vorgang kann nicht rückgängig gemacht werden."</string>
   <string name="delete_question_title">Foto(s) löschen?</string>
   <string name="delete_result_format">%1$d/%2$d Dateien gelöscht</string>
   <string name="destination_copy">Kopieren nach</string>
@@ -84,7 +87,7 @@
   <string name="move_menu_title">Verschieben</string>
   <string name="more_menu_title">Mehr ...</string>
   <string name="move_result_format">%1$d/%2$d Dateien verschobenen</string>
-  <string name="osm_cright_title">Karte (c) <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> Mitwirkend</string>
+  <string name="osm_cright_title">Karte (c) <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> Mitwirkende</string>
   <string name="overwrite_question_title">Überschreiben?</string>
   <string name="rename_menu_title">Umbenennen</string>
   <string name="rename_result_format">%1$d/%2$d Dateien umbenannt</string>
@@ -134,18 +137,16 @@
   <string name="sort_by_none">Unsortiert</string>
   <string name="sort_by_place">Ort</string>
   <string name="sort_menu_title">Sortieren</string>
-  <string name="sort_order_Date_Ascending">Datum aufsteigend</string>
-  <string name="sort_order_Date_Descending">Datum absteigend</string>
-  <string name="sort_order_Name_Ascending">Name aufsteigend</string>
-  <string name="sort_order_Name_Descending">Name absteigend</string>
-  <string name="sort_order_Name_length_Ascending">Namenslänge aufsteigend</string>
-  <string name="sort_order_Name_length_Descending">Namenslänge absteigend</string>
-  <string name="sort_order_Place_Ascending">Ort aufsteigend</string>
-  <string name="sort_order_Place_Descending">Ort absteigend</string>
   <string name="update_result_format">%1$d/%2$d Dateien aktualisiert</string>
 
   <string name="zoom_to_fit_menu_title">Zoom ausfüllen</string>
   <string name="settings_image_thumb_if_bigger_than_title">Breite/Höhe für große Photos</string>
   <string name="settings_image_thumb_if_bigger_than_summary">Zeige in der Detailansicht als Thumbnail wenn das Photo größer ist. (speicher schonend, schnell, aber geringe Qualität)</string>
   <string name="settings_image_thumb_dir_title">Ordner für Thumbnails</string>
+
+  <string name="settings_maps_forge_enable_tile">Mapsforge offline Karten</string>
+  <string name="settings_maps_forge_enable_summary">die zuvor manuell per PC heruntergladen worden sind.</string>
+  <string name="settings_maps_forge_dir_title">Mapsforge offline Ordner</string>
+
+  <string name="show_photo">Zeige Foto(s)</string>
 </resources>

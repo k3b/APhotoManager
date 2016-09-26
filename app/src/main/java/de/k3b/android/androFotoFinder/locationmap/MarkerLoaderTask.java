@@ -35,9 +35,8 @@ import java.util.HashMap;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.osmdroid.DefaultResourceProxyImplEx;
 import de.k3b.android.osmdroid.IconFactory;
-import de.k3b.android.osmdroid.MarkerBase;
+import de.k3b.android.osmdroid.ClickableIconOverlay;
 import de.k3b.database.QueryParameter;
 
 /**
@@ -60,7 +59,7 @@ import de.k3b.database.QueryParameter;
  *
  * Created by k3b on 16.07.2015.
  */
-public abstract class MarkerLoaderTask<MARKER extends MarkerBase> extends AsyncTask<QueryParameter, Integer, OverlayManager> {
+public abstract class MarkerLoaderTask<MARKER extends ClickableIconOverlay> extends AsyncTask<QueryParameter, Integer, OverlayManager> {
     public static final int NO_MARKER_COUNT_LIMIT = 0;
     // every 500 items the progress indicator is advanced
     private static final int PROGRESS_INCREMENT = 500;
@@ -68,7 +67,6 @@ public abstract class MarkerLoaderTask<MARKER extends MarkerBase> extends AsyncT
     private final Activity mContext;
     protected final String mDebugPrefix;
     private final IconFactory mIconFactory;
-    private final DefaultResourceProxyImplEx mResourceProxy;
     private final int mMarkerCountLimit;
     protected HashMap<Integer, MARKER> mOldItems;
     protected StringBuffer mStatus = null;
@@ -84,8 +82,7 @@ public abstract class MarkerLoaderTask<MARKER extends MarkerBase> extends AsyncT
         this.mContext = context;
         this.mDebugPrefix = debugPrefix;
         mOldItems = oldItems;
-        mResourceProxy = new DefaultResourceProxyImplEx(context);
-        mIconFactory = new IconFactory(mResourceProxy, context.getResources().getDrawable(R.drawable.marker_green));
+        mIconFactory = new IconFactory(context.getResources(), context.getResources().getDrawable(R.drawable.marker_green));
     }
 
     protected abstract MARKER createMarker();

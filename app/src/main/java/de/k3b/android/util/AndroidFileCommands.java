@@ -25,6 +25,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -39,6 +40,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedFiles;
 import de.k3b.database.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
@@ -55,7 +57,7 @@ import de.k3b.io.OSDirectory;
 public class AndroidFileCommands extends FileCommands {
     private static final String SETTINGS_KEY_LAST_COPY_TO_PATH = "last_copy_to_path";
     private static final String mDebugPrefix = "AndroidFileCommands.";
-    private Activity mContext;
+    protected Activity mContext;
     private SelectedItems.Id2FileNameConverter mId2FileNameConverter;
     private AlertDialog mActiveAlert = null;
     private boolean mHasNoMedia = false;
@@ -120,7 +122,7 @@ public class AndroidFileCommands extends FileCommands {
 
     /** called for every cath(Exception...). Version with Android specific logging */
     @Override
-    protected void onException(final Exception e, Object... params) {
+    protected void onException(final Throwable e, Object... params) {
         StringBuffer message = new StringBuffer();
         message.append(mDebugPrefix).append("onException(");
         for (Object param : params) {
@@ -260,8 +262,21 @@ public class AndroidFileCommands extends FileCommands {
     }
 
     private int deleteFiles(SelectedFiles fotos) {
-        String[] fileNames = fotos.getFileNames();
-        return super.deleteFiles(fileNames);
+        int nameCount = fotos.getNonEmptyNameCount();
+        int deleteCount = 0;
+        if (nameCount > 0) {
+            String[] fileNames = fotos.getFileNames();
+            deleteCount = super.deleteFiles(fileNames);
+        }
+
+        if ((nameCount == 0) || (nameCount == deleteCount)) {
+            // no delete file error so also delete media-items
+            QueryParameter where = new QueryParameter();
+            FotoSql.setWhereSelectionPks (where, fotos.toIdString());
+
+            FotoSql.deleteMedia(mContext.getContentResolver(), where.toAndroidWhere(), null, true);
+        }
+        return deleteCount;
     }
 
     @SuppressLint("ValidFragment")

@@ -23,6 +23,7 @@ import android.app.Application;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import org.osmdroid.api.IMapView;
 import org.osmdroid.tileprovider.constants.OpenStreetMapTileProviderConstants;
 
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import java.util.Date;
 import de.k3b.FotoLibGlobal;
 import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
+import de.k3b.android.osmdroid.forge.MapsForgeSupport;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.LogCat;
 import de.k3b.database.QueryParameter;
@@ -81,13 +83,16 @@ public class AndroFotoFinderApp extends Application {
         Collections.addAll(QueryParameter.sParserDefaultSelect, FotoSql.DEFAULT_GALLERY_COLUMNS);
         mCrashSaveToFile = new LogCat(this, Global.LOG_CONTEXT, HugeImageLoader.LOG_TAG,
                 PhotoViewAttacher.LOG_TAG, CupcakeGestureDetector.LOG_TAG,
-                FotoLibGlobal.LOG_TAG, ThumbNailUtils.LOG_TAG);
+                FotoLibGlobal.LOG_TAG, ThumbNailUtils.LOG_TAG, IMapView.LOGTAG);
 
         ThumbNailUtils.init(this, null);
 
         //https://github.com/osmdroid/osmdroid/issues/366
         //super important. Many tile servers, including open street maps, will BAN applications by user
         OpenStreetMapTileProviderConstants.setUserAgentValue(getAppId() + " https://github.com/k3b/APhotoManager"); // BuildConfig.APPLICATION_ID);
+
+        // #60: configure some of the mapsforge settings first
+        MapsForgeSupport.createInstance(this);
 
         Log.i(Global.LOG_CONTEXT, getAppId() + " created");
     }

@@ -34,6 +34,8 @@ import android.util.Log;
 import android.view.Display;
 import android.widget.Toast;
 
+import org.osmdroid.tileprovider.constants.OpenStreetMapTileProviderConstants;
+
 import java.io.File;
 
 import de.k3b.FotoLibGlobal;
@@ -96,7 +98,7 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     public static void global2Prefs(Context context) {
-        fixDefaults(context, null);
+        fixDefaults(context, null, null);
 
         SharedPreferences prefsInstance = PreferenceManager
                 .getDefaultSharedPreferences(context);
@@ -105,6 +107,8 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putBoolean("debugEnabled", Global.debugEnabled);
         prefs.putBoolean("debugEnabledViewItem", Global.debugEnabledViewItem);
         prefs.putBoolean("debugEnabledSql", Global.debugEnabledSql);
+        prefs.putBoolean("debugEnabledMap", Global.debugEnabledMap);
+
         prefs.putBoolean("debugEnabledMemory", Global.debugEnabledMemory);
 
         // #26
@@ -113,6 +117,7 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putBoolean("debugEnableLibs", PhotoViewAttacher.DEBUG);
 
         prefs.putBoolean("clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
+        prefs.putBoolean("mapsForgeEnabled", Global.mapsForgeEnabled);
 
         prefs.putString("imageDetailThumbnailIfBiggerThan", "" + Global.imageDetailThumbnailIfBiggerThan);
         prefs.putString("maxSelectionMarkersInMap", "" + Global.maxSelectionMarkersInMap);
@@ -123,6 +128,8 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putString("reportDir", (Global.reportDir != null) ? Global.reportDir.getAbsolutePath() : null);
         prefs.putString("logCatDir", (Global.logCatDir != null) ? Global.logCatDir.getAbsolutePath() : null);
         prefs.putString("thumbCacheRoot", (Global.thumbCacheRoot != null) ? Global.thumbCacheRoot.getAbsolutePath() : null);
+        prefs.putString("mapsForgeDir", (Global.mapsForgeDir != null) ? Global.mapsForgeDir.getAbsolutePath() : null);
+
         prefs.putString("pickHistoryFile", (Global.pickHistoryFile != null) ? Global.pickHistoryFile.getAbsolutePath() : null);
 
         prefs.apply();
@@ -131,6 +138,8 @@ public class SettingsActivity extends PreferenceActivity {
 
     public static void prefs2Global(Context context) {
         File previousCacheRoot = Global.thumbCacheRoot;
+        File previousMapsForgeDir = Global.mapsForgeDir;
+
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(context.getApplicationContext());
         Global.debugEnabled                     = getPref(prefs, "debugEnabled", Global.debugEnabled);
@@ -138,21 +147,33 @@ public class SettingsActivity extends PreferenceActivity {
 
         Global.debugEnabledViewItem             = getPref(prefs, "debugEnabledViewItem", Global.debugEnabledViewItem);
         Global.debugEnabledSql                  = getPref(prefs, "debugEnabledSql", Global.debugEnabledSql);
+
+        Global.debugEnabledMap                  = getPref(prefs, "debugEnabledMap", Global.debugEnabledMap);
+
         Global.debugEnabledMemory               = getPref(prefs, "debugEnabledMemory", Global.debugEnabledMemory);
+
+        // one setting for several 3d party debug-flags
+        boolean debug3rdParty                   = getPref(prefs, "debugEnableLibs", PhotoViewAttacher.DEBUG);
+
+        PhotoViewAttacher.DEBUG                 = debug3rdParty;
+        HugeImageLoader.DEBUG                   = debug3rdParty;
+        ThumbNailUtils.DEBUG = debug3rdParty;
+        LogManager.setDebugEnabled(debug3rdParty);
+        com.nostra13.universalimageloader.utils.L.writeDebugLogs(debug3rdParty);
+        com.nostra13.universalimageloader.utils.L.writeLogs(debug3rdParty);
+
+        // details osmdroid debugging only if Global.debugEnabledMap && debug3rdParty
+        OpenStreetMapTileProviderConstants.DEBUG_TILE_PROVIDERS = Global.debugEnabledMap && debug3rdParty;
+        OpenStreetMapTileProviderConstants.DEBUGMODE = Global.debugEnabledMap && debug3rdParty;
 
         // #26
         Global.initialImageDetailResolutionHigh = getPref(prefs, "initialImageDetailResolutionHigh", Global.initialImageDetailResolutionHigh);
 
-        // one setting for several 3d party debug-flags
-        PhotoViewAttacher.DEBUG                 = getPref(prefs, "debugEnableLibs", PhotoViewAttacher.DEBUG);
-        HugeImageLoader.DEBUG                   = PhotoViewAttacher.DEBUG;
-        ThumbNailUtils.DEBUG = PhotoViewAttacher.DEBUG;
-        LogManager.setDebugEnabled(PhotoViewAttacher.DEBUG);
-        com.nostra13.universalimageloader.utils.L.writeDebugLogs(PhotoViewAttacher.DEBUG);
-        com.nostra13.universalimageloader.utils.L.writeLogs(PhotoViewAttacher.DEBUG);
-
         Global.clearSelectionAfterCommand       = getPref(prefs, "clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
 
+        Global.mapsForgeEnabled                 = getPref(prefs, "mapsForgeEnabled", Global.mapsForgeEnabled);
+
+                
         Global.imageDetailThumbnailIfBiggerThan = getPref(prefs, "imageDetailThumbnailIfBiggerThan"     , Global.imageDetailThumbnailIfBiggerThan);
 
         Global.maxSelectionMarkersInMap         = getPref(prefs, "maxSelectionMarkersInMap"     , Global.maxSelectionMarkersInMap);
@@ -163,7 +184,9 @@ public class SettingsActivity extends PreferenceActivity {
         Global.reportDir                        = getPref(prefs, "reportDir", Global.reportDir);
         Global.logCatDir                        = getPref(prefs, "logCatDir", Global.logCatDir);
 
-        Global.thumbCacheRoot                  = getPref(prefs, "thumbCacheRoot", Global.thumbCacheRoot);
+        Global.thumbCacheRoot                   = getPref(prefs, "thumbCacheRoot", Global.thumbCacheRoot);
+        Global.mapsForgeDir                     = getPref(prefs, "mapsForgeDir", Global.mapsForgeDir);
+
         Global.pickHistoryFile                  = getPref(prefs, "pickHistoryFile", Global.pickHistoryFile);
 
         /*
@@ -186,29 +209,43 @@ public class SettingsActivity extends PreferenceActivity {
 
         */
 
-        fixDefaults(context, previousCacheRoot);
+        fixDefaults(context, previousCacheRoot, previousMapsForgeDir);
     }
 
-    private static void fixDefaults(Context context, File previousCacheRoot) {
+    private static void fixDefaults(Context context, File previousCacheRoot, File previousMapsForgeDir) {
+        boolean mustSave = false;
+
         // default: a litte bit more than screen size
         if ((Global.imageDetailThumbnailIfBiggerThan < 0) && (context instanceof Activity)) {
             Display display = ((Activity) context).getWindowManager().getDefaultDisplay();
             Point size = new Point();
             display.getSize(size);
             Global.imageDetailThumbnailIfBiggerThan = (int) (1.2 * Math.max(size.x, size.y));
+            mustSave = true;
         }
 
         if (!isValidThumbDir(Global.thumbCacheRoot)) {
-            File defaultThumbRoot = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),".thumbCache");
+            File defaultThumbRoot = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), ".thumbCache");
             if (!isValidThumbDir(defaultThumbRoot)) {
                 defaultThumbRoot = context.getDir(".thumbCache", MODE_PRIVATE);
                 isValidThumbDir(defaultThumbRoot);
             }
 
             Global.thumbCacheRoot = defaultThumbRoot;
-            global2Prefs(context);
+            mustSave = true;
         }
 
+        if (Global.mapsForgeDir == null) // || (!previousMapsForgeDir.exists()))
+        {
+            File externalStorageDirectory = Environment.getExternalStorageDirectory();
+            if (externalStorageDirectory == null) externalStorageDirectory = Environment.getDataDirectory();
+            Global.mapsForgeDir = new File(externalStorageDirectory, "osmdroid");
+            mustSave = true;
+        }
+
+        if (mustSave) {
+            global2Prefs(context);
+        }
         if ((previousCacheRoot != null) && (!previousCacheRoot.equals(Global.thumbCacheRoot))) {
             ThumbNailUtils.init(context, previousCacheRoot);
         }

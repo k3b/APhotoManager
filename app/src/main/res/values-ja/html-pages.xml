@@ -27,12 +27,13 @@
 機能:
 <ul>
   <li>App and internet homepage available in these languages:<ul>
-		<li><a href="https://github.com/k3b/APhotoManager/wiki/de-home">de</a>,&nbsp;
-		<a href="https://github.com/k3b/APhotoManager/wiki/home"   >en</a>,&nbsp;
-		<a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr</a>,&nbsp;
-		<a href="https://github.com/k3b/APhotoManager/wiki/it-home">it</a>,&nbsp;
-		<a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja</a>,&nbsp;
-		<a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro</a></li>
+		<li>  <a href="https://github.com/k3b/APhotoManager/wiki/de-home">de</a>,&nbsp;
+  <a href="https://github.com/k3b/APhotoManager/wiki/home">en</a>,&nbsp;
+  <a href="https://github.com/k3b/APhotoManager/wiki/it-home">it</a>,&nbsp;
+  <a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr</a>,&nbsp;
+  <a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja</a>,&nbsp;nl,&nbsp;pl,&nbsp;
+  <a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro</a></body>
+</li>
 		<li><a href="https://github.com/k3b/APhotoManager/issues/21">Help us to translate into other languages.</a></li>
 		</ul>
 	</li>

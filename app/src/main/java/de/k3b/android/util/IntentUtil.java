@@ -80,7 +80,23 @@ public class IntentUtil implements Common {
         */
     }
 
-    public static void cmdStartIntent(Activity parent, String currentFilePath, String currentUri, String extraPath, String action, int idChooserCaption, int idEditError) {
+    /**
+     * Helper to Execute parent.startActivity(ForResult)()
+     *
+     * @param parentActivity    activity used to start and to receive actionResult
+     * @param currentFilePath   for setData: null or file-path that also defines the content type.
+     * @param currentUri        for setData: null or uri to be procesed (i.e. content:...)
+     * @param extraPath         null or uri for EXTRA_STREAM
+     * @param action            edit, send, view, ....
+     * @param idChooserCaption  if != 0 string-resource-id for chooser caption. if 0 no chooser.
+     * @param idEditError       string-resource-id for error message if there is no hadler for action
+     * @param idActivityResultRequestCode  if != 0 execute startActivityForResult else startActivity
+     */
+    public static void cmdStartIntent(Activity parentActivity,
+                                      String currentFilePath, String currentUri,
+                                      String extraPath, String action,
+                                      int idChooserCaption, int idEditError,
+                                      int idActivityResultRequestCode) {
 
         final Intent outIntent = new Intent()
                 .setAction(action)
@@ -88,6 +104,11 @@ public class IntentUtil implements Common {
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET)
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
+        if (Intent.ACTION_EDIT.equalsIgnoreCase(action)) {
+            // #64 edit allow to modify file
+            outIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                    .addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        }
         if (currentFilePath != null) {
             File file = new File(currentFilePath);
             final Uri uri = Uri.fromFile(file);
@@ -108,9 +129,18 @@ public class IntentUtil implements Common {
         }
 
         try {
-            parent.startActivity(Intent.createChooser(outIntent, parent.getText(idChooserCaption)));
+            // #64: edit image (not) via chooser
+            final Intent execIntent = (idChooserCaption == 0)
+                    ? outIntent
+                    : Intent.createChooser(outIntent, parentActivity.getText(idChooserCaption));
+
+            if (idActivityResultRequestCode == 0) {
+                parentActivity.startActivity(execIntent);
+            } else {
+                parentActivity.startActivityForResult(execIntent, idActivityResultRequestCode);
+            }
         } catch (ActivityNotFoundException ex) {
-            Toast.makeText(parent, idEditError,Toast.LENGTH_LONG).show();
+            Toast.makeText(parentActivity, idEditError,Toast.LENGTH_LONG).show();
         }
     }
 

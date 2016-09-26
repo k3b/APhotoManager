@@ -81,14 +81,6 @@ https://github.com/k3b/APhotoManager/wiki/intentap#EXTRA_SQL</string>
   <string name="sort_by_none">Nesortate Nesortat</string>
   <string name="sort_by_place">Loc</string>
   <string name="sort_menu_title">Sorteaza</string>
-  <string name="sort_order_Date_Ascending">Evoluare date</string>
-  <string name="sort_order_Date_Descending">Descrestere date</string>
-  <string name="sort_order_Name_Ascending">Evolueaza nume</string>
-  <string name="sort_order_Name_Descending">Descreste nume</string>
-  <string name="sort_order_Name_length_Ascending">Evolueaza lungime-nume</string>
-  <string name="sort_order_Name_length_Descending">Descreste lungime-nume</string>
-  <string name="sort_order_Place_Ascending">Evolueaza loc Evoluare locatie</string>
-  <string name="sort_order_Place_Descending">Descreste loc Descrestere locatie</string>
   <string name="update_result_format">Fisiere apdatate %1$d/%2$d</string>
   <string name="zoom_to_fit_menu_title">Renuntare marire Renuntare la zum</string>
 </resources>

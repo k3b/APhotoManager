@@ -58,6 +58,7 @@ import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
 import de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.AndroidFileCommands;
+import de.k3b.android.util.AndroidFileCommands44;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.AboutDialogPreference;
@@ -81,7 +82,11 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     public static final int ACTIVITY_ID = 76621;
 
     /** activityRequestCode: in forward mode: intent is forwarded to gallery */
-    private static final int ID_FORWARD = 471102;
+    private static final int ACTION_RESULT_FORWARD = 471102;
+
+    // #64: after image edit rescan file
+    private static final int ACTION_RESULT_MUST_MEDIA_SCAN = 47103;
+
     private static final int DEFAULT_SORT = FotoSql.SORT_BY_NAME_LEN;
     private static final QueryParameter DEFAULT_QUERY = FotoSql.queryDetail;
     private static final int NO_INITIAL_SCROLL_POSITION = -1;
@@ -199,7 +204,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         }
     }
 
-    class LocalFileCommands extends AndroidFileCommands {
+    class LocalFileCommands extends AndroidFileCommands44 {
         @Override
         protected void onPostProcess(String what, String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
             mInitialFilePath = null;
@@ -330,7 +335,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             copyExtras(childIntent, intent.getExtras(),
                     EXTRA_FILTER, EXTRA_POSITION, EXTRA_QUERY, EXTRA_SELECTED_ITEM_IDS,
                     EXTRA_SELECTED_ITEM_PATHS, EXTRA_STREAM, EXTRA_TITLE);
-            startActivityForResult(childIntent, ID_FORWARD);
+            startActivityForResult(childIntent, ACTION_RESULT_FORWARD);
         } else { // not in forward mode
             setContentView(R.layout.activity_image_view_pager);
 
@@ -453,10 +458,17 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                                     final int resultCode, final Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
-        if (requestCode == ID_FORWARD) {
+        if (requestCode == ACTION_RESULT_FORWARD) {
             // forward result from child-activity to parent-activity
             setResult(resultCode, intent);
             finish();
+        } else if (requestCode == ACTION_RESULT_MUST_MEDIA_SCAN) {
+            // #64 after edit the content might have been changed. update media DB.
+            String orgiginalFileToScan = getCurrentFilePath();
+
+            if (orgiginalFileToScan != null) {
+                MediaScanner.updateMediaDatabase_Android42(this, null, orgiginalFileToScan);
+            }
         }
 
         refreshIfNecessary();
@@ -778,11 +790,15 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                 return true;
 
             case R.id.action_edit:
-                IntentUtil.cmdStartIntent(this, getCurrentFilePath(), null, null, Intent.ACTION_EDIT, R.string.edit_chooser_title, R.string.edit_err_editor_not_found);
+                // #64: (not) open editor via chooser
+                IntentUtil.cmdStartIntent(this, getCurrentFilePath(), null, null,
+                        Intent.ACTION_EDIT,
+                        (Global.showEditChooser) ? R.string.edit_chooser_title : 0,
+                        R.string.edit_err_editor_not_found, ACTION_RESULT_MUST_MEDIA_SCAN);
                 return true;
 
             case R.id.menu_item_share:
-                IntentUtil.cmdStartIntent(this, null, null, getCurrentFilePath(), Intent.ACTION_SEND, R.string.share_menu_title, R.string.share_err_not_found);
+                IntentUtil.cmdStartIntent(this, null, null, getCurrentFilePath(), Intent.ACTION_SEND, R.string.share_menu_title, R.string.share_err_not_found, 0);
                 return true;
 
             case R.id.cmd_copy:
@@ -821,7 +837,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                 GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
                 String uri = PARSER.toUriString(geo);
 
-                IntentUtil.cmdStartIntent(this, null, uri, null, Intent.ACTION_VIEW, R.string.geo_show_as_menu_title, R.string.geo_picker_err_not_found);
+                IntentUtil.cmdStartIntent(this, null, uri, null, Intent.ACTION_VIEW, R.string.geo_show_as_menu_title, R.string.geo_picker_err_not_found, 0);
 
                 return true;
             }

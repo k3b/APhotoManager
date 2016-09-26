@@ -41,7 +41,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.SettingsActivity;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.osmdroid.ZoomUtil;
+import de.k3b.android.osmdroid.OsmdroidUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.SelectedFiles;
@@ -111,6 +111,8 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
         // no geo: from intent: use last used value
         mSaveLastUsedGeoToSharedPrefs = (geoPointFromIntent == null);
 
+        Uri additionalPointsContentUri = ((intent != null) && (geoPointFromIntent == null)) ? intent.getData() : null;
+
         String lastGeoUri = sharedPref.getString(STATE_LAST_GEO, "geo:53,8?z=6");
         IGeoPointInfo lastGeo = mGeoUriParser.fromUri(lastGeoUri);
         if ((geoPointFromIntent != null) && (lastGeo != null)) {
@@ -143,8 +145,8 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
         mMap.STATE_LAST_VIEWPORT = "ignore"; // do not use last viewport in settings
 
         GeoRectangle rectangle = null;
-        int zoom = ZoomUtil.NO_ZOOM;
-        if ((savedInstanceState == null) && (initalZoom != null)) {
+        int zoom = OsmdroidUtil.NO_ZOOM;
+        if ((savedInstanceState == null) && (initalZoom != null) && (additionalPointsContentUri == null)) {
             rectangle = new GeoRectangle();
             zoom = initalZoom.getZoomMin();
             rectangle.setLogituedMin(initalZoom.getLongitude()).setLatitudeMin(initalZoom.getLatitude());
@@ -154,6 +156,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
         String selectedIDsString = intent.getStringExtra(EXTRA_SELECTED_ITEM_IDS);
         SelectedItems selectedItems = (selectedIDsString != null) ? new SelectedItems().parse(selectedIDsString) : null;
 
+        // TODO !!! #62 gpx/kml files: wie an LocatonMapFragment übergeben??
         String filter = null;
         // for debugging: where does the filter come from
         String dbgFilter = null;
@@ -181,7 +184,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + dbgFilter + " => " + this.mFilter);
         }
 
-        mMap.defineNavigation(this.mFilter, geoPointFromIntent, rectangle, zoom, selectedItems);
+        mMap.defineNavigation(this.mFilter, geoPointFromIntent, rectangle, zoom, selectedItems, additionalPointsContentUri);
     }
 
     @Override
@@ -267,7 +270,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
     private void onFilterChanged(GalleryFilterParameter filter) {
         if (filter != null) {
             this.mFilter = filter;
-            mMap.defineNavigation(this.mFilter, null, ZoomUtil.NO_ZOOM, null);
+            mMap.defineNavigation(this.mFilter, null, OsmdroidUtil.NO_ZOOM, null, null);
         }
     }
 

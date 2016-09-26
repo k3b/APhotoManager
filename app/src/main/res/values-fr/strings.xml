@@ -128,14 +128,6 @@
 	<string name="sort_by_none">Non triés</string>
 	<string name="sort_by_place">Emplacement</string>
 	<string name="sort_menu_title">Trier</string>
-	<string name="sort_order_Date_Ascending">Par date croissante</string>
-	<string name="sort_order_Date_Descending">Par date décroissante</string>
-	<string name="sort_order_Name_Ascending">Nom croissant</string>
-	<string name="sort_order_Name_Descending">Nom décroissant</string>
-	<string name="sort_order_Name_length_Ascending">Longueur du nom croissante</string>
-	<string name="sort_order_Name_length_Descending">Longueur du nom décroissante</string>
-	<string name="sort_order_Place_Ascending">Emplacement croissant</string>
-	<string name="sort_order_Place_Descending">Emplacement décroissant</string>
 	<string name="update_result_format">mise à jour des fichiers %1$d/%2$d</string>
 	<string name="zoom_to_fit_menu_title">Ajuster le zoom</string>
 </resources>

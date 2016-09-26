@@ -60,6 +60,28 @@ public class GeoRectangle implements IGeoRectangle {
         this.latitudeMin = latitudeMin; return this;
     }
 
+    public boolean isEmpty() {
+        return Double.isNaN(latitudeMin)
+                || ((latitudeMin == latitudeMax) && (logituedMin == logituedMax));
+    }
+
+    public void inflate(double lat, double lon) {
+        latitudeMin = min(latitudeMin, lat);
+        latitudeMax = max(latitudeMax, lat);
+        logituedMin = min(logituedMin, lon);
+        logituedMax = max(logituedMax, lon);
+
+    }
+
+    private static double min(double old, double newValue) {
+        if (Double.isNaN(old) || (newValue < old)) return newValue;
+        return old;
+    }
+    private static double max(double old, double newValue) {
+        if (Double.isNaN(old) || (newValue > old)) return newValue;
+        return old;
+    }
+
     @Override
     public double getLatitudeMax() {
         return latitudeMax;

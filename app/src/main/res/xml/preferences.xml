@@ -19,6 +19,15 @@
             android:title="@string/settings_multisel_clear_title"
             android:summary="@string/settings_multisel_clear_summary" />
 
+        <CheckBoxPreference android:key="mapsForgeEnabled"
+            android:defaultValue="false"
+            android:title="@string/settings_maps_forge_enable_tile"
+            android:summary="@string/settings_maps_forge_enable_summary" />
+
+        <de.k3b.android.widgets.EditTextPreferenceWithSummary
+            android:key="mapsForgeDir"
+            android:title="@string/settings_maps_forge_dir_title" />
+
         <de.k3b.android.widgets.EditTextPreferenceWithSummary
             android:key="maxSelectionMarkersInMap"
             android:title="@string/settings_map_selmarker_max_title" />
@@ -64,10 +73,13 @@
             android:defaultValue="false"
             android:title="@string/settings_debug_view_item_title"
             android:summary="@string/settings_debug_view_item_summary" />
+        <CheckBoxPreference android:key="debugEnabledMap"
+            android:defaultValue="false"
+            android:title="@string/settings_debug_map_title" />
+
         <CheckBoxPreference android:key="debugEnabledMemory"
             android:defaultValue="false"
-            android:title="@string/settings_debug_memory_title"
-            android:summary="@string/settings_debug_memory_summary" />
+            android:title="@string/settings_debug_memory_title" />
         <CheckBoxPreference android:key="debugEnableLibs"
             android:defaultValue="false"
             android:title="@string/settings_debug_libs_title"

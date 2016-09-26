@@ -67,17 +67,31 @@ public class SelectedFiles  {
         return result;
     }
 
+    public int getNonEmptyNameCount() {
+        int result = 0;
+        if (mFileNames != null) {
+            for (String item : mFileNames) {
+                if (item != null) {
+                    result++;
+                }
+            }
+        }
+        return result;
+    }
+
     /** converts this into komma seperated list of names */
     public String toString() {
         StringBuilder result = new StringBuilder();
         if (mFileNames != null) {
             boolean mustAddDelimiter = false;
             for (String item : mFileNames) {
-                if (mustAddDelimiter) {
-                    result.append(DELIMITER);
+                if (item != null) {
+                    if (mustAddDelimiter) {
+                        result.append(DELIMITER);
+                    }
+                    mustAddDelimiter = true;
+                    result.append(SORUNDER).append(item).append(SORUNDER);
                 }
-                mustAddDelimiter = true;
-                result.append(SORUNDER).append(item).append(SORUNDER);
             }
         }
         return result.toString();
