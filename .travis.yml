@@ -14,7 +14,7 @@ android:
     - tools
 
     # values in gradle.properties and .travis must be the same
-    - build-tools-23.0.2
+    - build-tools-24.0.2
     - android-23
 
     - add-on
