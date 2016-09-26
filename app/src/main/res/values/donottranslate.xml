@@ -54,8 +54,10 @@ this program. If not, see <http://www.gnu.org/licenses/>
   <p>The code uses</p>
   <ul>
     <li>
-    <a href="https://github.com/osmdroid/osmdroid">osmdroid library</a> to display maps from 
+    <a href="https://github.com/osmdroid/osmdroid">osmdroid library</a> to display online maps from
     <a href="http://www.openstreetmap.org">Open Street Map</a></li>
+    <li>
+    <a href="https://github.com/mapsforge/mapsforge">mapsforge library</a> to display offline maps</li>
     <li>
     <a href="https://github.com/chrisbanes/PhotoView">chris bane&#39;s PhotoView</a> that implemnts the zoomable image view.
     <a href="https://github.com/k3b/PhotoView">Using k3b-s extended version with "reload on zoom" and "hugeimage-support")</a> that has not been merged into the original yet</li>
@@ -124,11 +126,12 @@ this program. If not, see <http://www.gnu.org/licenses/>
   <a href="http://crowdin.com">crowdin.com</a>
   <ul>
   	<li>Dutch by keunes</li>
-    <li>English by k3b,v133 and mary-kate</li>
+    <li>English by k3b, v133, keunes and mary-kate</li>
     <li>French by Tuuux</li>
     <li>German by k3b and v133</li>
-    <li>Italian by "random_r</li>
-    <li>Japanese by naofum</li>	
+    <li>Italian by random_r</li>
+    <li>Japanese by naofum</li>
+    <li>Polish by Maselkowicz</li>
     <li>Romanian by mironeasav</li>	
   </ul>
   <br />Android is a trademark of Google Inc. Use of this trademark is subject to Google Permissions.
