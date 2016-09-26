@@ -28,8 +28,8 @@ android {
 		// published 0.5.1.160629 (17)
 		// published 0.5.1.160712 (18)
 		// published 0.5.2.160726 (19)
-        // published 0.5.3.160927 (20)
-        versionCode = 20
+        // published 0.5.3.160927 (21)
+        versionCode = 21
         versionName = '0.5.3.160927'
     }
     compileOptions {
