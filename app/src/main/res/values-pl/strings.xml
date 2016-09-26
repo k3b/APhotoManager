@@ -101,7 +101,6 @@
   <string name="selection_add_all_menu_title">Zaznaczenie: Dodaj wszystkie widoczne</string>
   <string name="selection_remove_menu_title">Zaznaczenie: Usuń wszystkie widoczne</string>
   <string name="settings_bookmark_dir_title">Folder zakładek</string>
-  <string name="settings_debug_memory_summary">&#8230; zawierający zużycie pamięci.</string>
   <string name="settings_debug_memory_title">Zapotrzebowanie pamięci LogCata</string>
   <string name="settings_debug_sql_summary">&#8230; zawierający wykonane SQL.</string>
   <string name="settings_debug_summary">&#8230; zawierający inne komunikaty.</string>

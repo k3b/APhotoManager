@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
- 
+
 package de.k3b.android.androFotoFinder;
 
 import android.content.Context;
@@ -43,9 +43,13 @@ public class Global {
     /**
      * Global.xxxxx. Non final values may be changed in SettingsActivity
      */
+
+    /** #64: {@link Global#showEditChooser} : true => open editor via chooser. false: donot present chooser */
+    public static boolean showEditChooser = false;
     public static boolean debugEnabled = false;
     public static boolean debugEnabledViewItem = false;
     public static boolean debugEnabledSql = false;
+    public static boolean debugEnabledMap = false;
     public static boolean debugEnabledMemory = false;
 
     /** The maximum number of **Blue selection markers** in the [Geographic-Map](geographic-map). */
@@ -73,12 +77,23 @@ public class Global {
     /** true every time a .nomedia dir/file is opend remeove items from db.  */
     public static final boolean mustRemoveNOMEDIAfromDB = true;
 
+    private static final File externalStorageDirectory = Environment.getExternalStorageDirectory();
+
     /** defines the filesystem's directory where [Bookmark files](Bookmarks) are stored and loaded from. */
-    public static File reportDir = new File(Environment.getExternalStorageDirectory(), "databases/sql");
+    public static File reportDir = (externalStorageDirectory == null)
+            ? null
+            : new File(externalStorageDirectory, "databases/sql");
     public static final String reportExt = ".query";
 
     /** defines the filesystem's directory where crash reports are written to. */
-    public static File logCatDir = new File(Environment.getExternalStorageDirectory(), "copy/log");
+    public static File logCatDir = (externalStorageDirectory == null)
+            ? null
+            : new File(Environment.getExternalStorageDirectory(), "copy/log");
+
+    /** #60 where osm-mapsforge-offline-maps (*.map) are found. defaults to /extDir/osmdroid/ */
+    public static File mapsForgeDir = (externalStorageDirectory == null)
+            ? null
+            : new File(Environment.getExternalStorageDirectory(), "osmdroid");
 
     /** remember last picked geo-s */
     public static File pickHistoryFile = null; // initialized in app.onCreate with local database file
@@ -89,6 +104,7 @@ public class Global {
 
     /** #26 which image resolution should the "non zoomed imageView" have? */
     public static boolean initialImageDetailResolutionHigh = false; // false: MediaStore.Images.Thumbnails.MINI_KIND; true: FULL_SCREEN_KIND;
+    public static boolean mapsForgeEnabled = false;
 
     public static void debugMemory(String modul, String message) {
         if (Global.debugEnabledMemory) {

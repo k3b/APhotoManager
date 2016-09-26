@@ -96,7 +96,6 @@
 	<string name="selection_remove_menu_title">Sélection : Supprimer tous les visibles</string>
 	<string name="settings_bookmark_dir_title">Dossier de signet</string>
 	<string name="settings_debug_libs_summary">... des autre bibliothèques.</string>
-	<string name="settings_debug_memory_summary">Enregistrer la consommation mémoire.</string>
 	<string name="settings_debug_memory_title">Consommation mémoire</string>
 	<string name="settings_debug_sql_summary">Enregistrer les requêtes SQL.</string>
 	<string name="settings_debug_summary">Enregistrer les autres évènements.</string>
