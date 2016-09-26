@@ -1,6 +1,9 @@
 # travis build for APhotoManager
 language: android
 
+jdk:
+  - oraclejdk8
+  
 addons:
   apt:
     packages:
@@ -28,4 +31,5 @@ before_install:
 # - chmod +x gradlew
  
 script:
+  - jdk_switcher use oraclejdk8
   - ./gradlew assemble
