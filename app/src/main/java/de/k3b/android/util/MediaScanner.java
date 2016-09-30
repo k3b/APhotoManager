@@ -50,6 +50,7 @@ import java.util.TimeZone;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.database.QueryParameter;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
@@ -381,6 +382,11 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
                 }
                 values.put(MediaStore.Images.Media.ORIENTATION, degree);
             }
+        }
+
+        if (false && Global.enableTagSupport) {
+            TagSql.setTags(values,"test1", "test2");
+            TagSql.setDescription(values,"test");
         }
     }
 

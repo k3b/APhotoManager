@@ -100,7 +100,10 @@ public class Global {
     public static int pickHistoryMax = 25;
 
     /** false: cmd setGeo => form(GeoEditActivity) => mapPicker */
-    public static boolean geoNoEdit = true;
+    public static final boolean geoNoEdit = true;
+
+    /** true: experimental. Not fully implemented yet. */
+    public static final boolean enableTagSupport = true;
 
     /** #26 which image resolution should the "non zoomed imageView" have? */
     public static boolean initialImageDetailResolutionHigh = false; // false: MediaStore.Images.Thumbnails.MINI_KIND; true: FULL_SCREEN_KIND;
