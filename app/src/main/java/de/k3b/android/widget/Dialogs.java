@@ -34,6 +34,9 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.util.MenuUtils;
+
+import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
 
 /**
  * Helper Dialogs
@@ -104,6 +107,11 @@ public abstract class Dialogs {
 		int selectLen = name.lastIndexOf(".");
 		if (selectLen == -1) selectLen = name.length();
 		edit.setSelection(0, selectLen);
+
+		// on my android 4.4 cellphone i have SHOW_AS_ACTION_ALWAYS|SHOW_AS_ACTION_WITH_TEXT.
+		// Consequence: not enough space so show cut/copy actions - they are not reachable.
+		// This will fix it
+		MenuUtils.changeShowAsActionFlags(edit, SHOW_AS_ACTION_IF_ROOM, android.R.id.copy, android.R.id.cut, android.R.id.selectAll);
 
 		builder.setView(content);
 		builder.setNegativeButton(R.string.btn_cancel, new DialogInterface.OnClickListener() {
