@@ -27,8 +27,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -54,6 +57,7 @@ import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.AndroidFileCommands;
+import de.k3b.android.util.MenuUtils;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryNavigator;
@@ -62,6 +66,9 @@ import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
 
 import java.util.List;
+
+import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
+import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 
 /**
  * A fragment with a Listing of Directories to be picked.
@@ -347,6 +354,11 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         String defaultName = getString(R.string.mk_dir_default);
         edit.setText(defaultName);
         edit.setSelection(0, defaultName.length());
+
+        // on my android 4.4 cellphone i have SHOW_AS_ACTION_ALWAYS|SHOW_AS_ACTION_WITH_TEXT.
+        // Consequence: not enough space so show cut/copy actions - they are not reachable.
+        // This will fix it
+        MenuUtils.changeShowAsActionFlags(edit, SHOW_AS_ACTION_IF_ROOM, android.R.id.copy, android.R.id.cut, android.R.id.selectAll);
 
         builder.setView(content);
         builder.setNegativeButton(R.string.btn_cancel, new DialogInterface.OnClickListener() {
