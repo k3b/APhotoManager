@@ -89,7 +89,6 @@ public class ExifGps {
 
     @Nullable
     public static HashMap<String, String> getAttributes(ExifInterface exif) {
-        HashMap<String, String> exifAttributes = null;
         // access private member via reflection
         // private HashMap<String, String> ExifInterface.mAttributes
         // http://stackoverflow.com/questions/11483647/how-to-access-private-methods-and-private-data-members-via-reflection
@@ -98,13 +97,13 @@ public class ExifGps {
              /*---  [GETING VALUE FROM PRIVATE FIELD]  ---*/
             Field f = ExifInterface.class.getDeclaredField("mAttributes");
             f.setAccessible(true);//Abracadabra
-            exifAttributes = (HashMap<String, String>) f.get(exif);
+            HashMap<String, String> exifAttributes = (HashMap<String, String>) f.get(exif);
+            if  ((exifAttributes != null) && (exifAttributes.size() > 0)) return exifAttributes;
 
         } catch (Exception ex) {
 
         }
-
-        return (exifAttributes.size() > 0) ? exifAttributes : null;
+        return null;
     }
 
     private static StringBuilder append(StringBuilder sb, String key, String val) {
