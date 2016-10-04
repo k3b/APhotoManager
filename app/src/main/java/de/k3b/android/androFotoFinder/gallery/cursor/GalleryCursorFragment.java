@@ -1012,7 +1012,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             @Override
             protected void doInBackground(Long id, Cursor cursor) {
                 if (mPathColNo == -2) mPathColNo = cursor.getColumnIndex(FotoSql.SQL_COL_PATH);
-                mResultCount += MediaScanner.updatePathRelatedFields(getActivity(), cursor, cursor.getString(mPathColNo), mColumnIndexPK, mPathColNo);
+                mResultCount += MediaScanner.getInstance(getActivity()).updatePathRelatedFields(getActivity(), cursor, cursor.getString(mPathColNo), mColumnIndexPK, mPathColNo);
             }
 
             @Override

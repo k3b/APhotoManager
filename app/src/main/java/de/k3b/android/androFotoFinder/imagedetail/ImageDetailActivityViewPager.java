@@ -61,6 +61,7 @@ import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.AndroidFileCommands44;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
+import de.k3b.android.util.MediaScannerAsyncTask;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.android.widget.LocalizedActivity;
@@ -467,7 +468,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             String orgiginalFileToScan = getCurrentFilePath();
 
             if (orgiginalFileToScan != null) {
-                MediaScanner.updateMediaDatabase_Android42(this, null, orgiginalFileToScan);
+                MediaScanner.getInstance(this).updateMediaDatabase_Android42(this, null, orgiginalFileToScan);
             }
         }
 
@@ -731,7 +732,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             Log.d(Global.LOG_CONTEXT, message.toString());
         }
 
-        MediaScanner scanner = new MediaScanner(context, why);
+        MediaScannerAsyncTask scanner = new MediaScannerAsyncTask(MediaScanner.getInstance(context), context, why);
         scanner.execute(null, missing.toArray(new String[missing.size()]));
         return missing.size();
     }
@@ -811,7 +812,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             case R.id.cmd_gallery: {
                 String dirPath = getCurrentFilePath(); // MediaScanner.getDir().getAbsolutePath();
                 if (dirPath != null) {
-                    dirPath = MediaScanner.getDir(dirPath).getAbsolutePath();
+                    dirPath = MediaScanner.getInstance(this).getDir(dirPath).getAbsolutePath();
                     GalleryFilterParameter newFilter = new GalleryFilterParameter();
                     newFilter.setPath(dirPath);
                     int callBackId = (MediaScanner.isNoMedia(dirPath,MediaScanner.DEFAULT_SCAN_DEPTH)) ? NOMEDIA_GALLERY : 0;

@@ -25,7 +25,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -61,6 +60,7 @@ public class AndroidFileCommands extends FileCommands {
     private SelectedItems.Id2FileNameConverter mId2FileNameConverter;
     private AlertDialog mActiveAlert = null;
     private boolean mHasNoMedia = false;
+    private MediaScanner mScanner = null;
 
     public AndroidFileCommands() {
         // setLogFilePath(getDefaultLogFile());
@@ -93,7 +93,7 @@ public class AndroidFileCommands extends FileCommands {
         }
 
         // a nomedia file is affected => must update gui
-        this.mHasNoMedia = MediaScanner.isNoMedia(22, oldPathNames) || MediaScanner.isNoMedia(22, newPathNames);
+        this.mHasNoMedia = mScanner.isNoMedia(22, oldPathNames) || MediaScanner.isNoMedia(22, newPathNames);
         super.onPreProcess(what, oldPathNames, newPathNames, opCode);
     }
 
@@ -108,8 +108,8 @@ public class AndroidFileCommands extends FileCommands {
 
         int resId = getResourceId(opCode);
         String message = mContext.getString(resId, Integer.valueOf(modifyCount), Integer.valueOf(itemCount));
-        if (itemCount > 0) {
-            MediaScanner.updateMediaDBInBackground(mContext, message, oldPathNames, newPathNames);
+        if ((itemCount > 0) && (mScanner != null)) {
+            MediaScannerAsyncTask.updateMediaDBInBackground(mScanner, mContext, message, oldPathNames, newPathNames);
         }
 
         if (false && this.mHasNoMedia && (mContext != null)) {
@@ -294,7 +294,7 @@ public class AndroidFileCommands extends FileCommands {
     }
 
     public boolean cmdMediaScannerWithQuestion() {
-        final RecursiveMediaScanner scanner = RecursiveMediaScanner.sScanner;
+        final RecursiveMediaScannerAsyncTask scanner = RecursiveMediaScannerAsyncTask.sScanner;
 
         if (scanner != null) {
             // connect gui to already running scanner if possible
@@ -341,23 +341,23 @@ public class AndroidFileCommands extends FileCommands {
 
     /** answer from "which directory to start scanner from"? */
     private void onMediaScannerAnswer(String scanRootDir) {
-        if  ((AndroidFileCommands.canProcessFile(mContext)) || (RecursiveMediaScanner.sScanner == null)){
+        if  ((AndroidFileCommands.canProcessFile(mContext)) || (RecursiveMediaScannerAsyncTask.sScanner == null)){
             final String message = mContext.getString(R.string.scanner_menu_title);
-            final RecursiveMediaScanner scanner = (RecursiveMediaScanner.sScanner != null)
-                    ? RecursiveMediaScanner.sScanner :
-                    new RecursiveMediaScanner(mContext, message);
+            final RecursiveMediaScannerAsyncTask scanner = (RecursiveMediaScannerAsyncTask.sScanner != null)
+                    ? RecursiveMediaScannerAsyncTask.sScanner :
+                    new RecursiveMediaScannerAsyncTask(mScanner, mContext, message);
             synchronized (this) {
-                if (RecursiveMediaScanner.sScanner == null) {
-                    RecursiveMediaScanner.sScanner = scanner;
+                if (RecursiveMediaScannerAsyncTask.sScanner == null) {
+                    RecursiveMediaScannerAsyncTask.sScanner = scanner;
                     scanner.execute(new String[]{scanRootDir});
                 } // else scanner is already running
             }
 
-            showMediaScannerStatus(RecursiveMediaScanner.sScanner);
+            showMediaScannerStatus(RecursiveMediaScannerAsyncTask.sScanner);
         }
     }
 
-    private void showMediaScannerStatus(RecursiveMediaScanner mediaScanner) {
+    private void showMediaScannerStatus(RecursiveMediaScannerAsyncTask mediaScanner) {
         if (mediaScanner != null) {
             mediaScanner.showStatusDialog(mContext);
         }
@@ -412,6 +412,7 @@ public class AndroidFileCommands extends FileCommands {
         this.mContext = mContext;
         if (mContext != null) {
             closeLogFile();
+            mScanner = MediaScanner.getInstance(mContext);
         }
         this.mId2FileNameConverter = id2FileNameConverter;
 
@@ -442,7 +443,7 @@ public class AndroidFileCommands extends FileCommands {
             return false;
         }
 
-        if (RecursiveMediaScanner.getBusyScanner() != null) {
+        if (RecursiveMediaScannerAsyncTask.getBusyScanner() != null) {
             return false;
         }
         return true;

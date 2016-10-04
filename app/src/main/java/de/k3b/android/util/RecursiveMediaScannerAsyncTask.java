@@ -44,11 +44,11 @@ import de.k3b.io.FileUtils;
  *
  * Created by k3b on 22.10.2015.
  */
-public class RecursiveMediaScanner extends MediaScanner {
+public class RecursiveMediaScannerAsyncTask extends MediaScannerAsyncTask {
     /** Either
      * - current running scanner instance
      * - or reumable instanc */
-    public static RecursiveMediaScanner sScanner = null;
+    public static RecursiveMediaScannerAsyncTask sScanner = null;
 
     // statistics displayed in the status dialog
     private String mCurrentFolder = "";
@@ -63,8 +63,8 @@ public class RecursiveMediaScanner extends MediaScanner {
      * - or in pausing mode collecting all canceled scans here to be processed in resumeIfNecessary() */
     private List<String> mPaused = null;
 
-    public RecursiveMediaScanner(Context context, String why) {
-        super(context, why);
+    public RecursiveMediaScannerAsyncTask(MediaScanner scanner, Context context, String why) {
+        super(scanner, context, why);
     }
 
     @Override
@@ -89,7 +89,7 @@ public class RecursiveMediaScanner extends MediaScanner {
         if (parentPath != null) {
             if (!isCancelled()) {
                 if (parent.isDirectory()) {
-                    String[] childFileNames = parent.list(JPG_FILENAME_FILTER);
+                    String[] childFileNames = parent.list(mScanner.JPG_FILENAME_FILTER);
 
                     if (childFileNames != null) {
                         // #33
@@ -115,7 +115,7 @@ public class RecursiveMediaScanner extends MediaScanner {
                             }
                         }
                     }
-                } else if (MediaScanner.isImage(parent.getName(), true)) {
+                } else if (mScanner.isImage(parent.getName(), true)) {
                     resultCount += runScanner(parentPath, parentPath);
                 }
             } else if (mPaused != null) {
@@ -160,7 +160,7 @@ public class RecursiveMediaScanner extends MediaScanner {
     }
 
     private void handleScannerCancel() {
-        final boolean mustCreateResumeScanner = (mPaused != null) && ((this == RecursiveMediaScanner.sScanner) || (null == RecursiveMediaScanner.sScanner));
+        final boolean mustCreateResumeScanner = (mPaused != null) && ((this == RecursiveMediaScannerAsyncTask.sScanner) || (null == RecursiveMediaScannerAsyncTask.sScanner));
         onStatusDialogEnd(mPaused, false);
 
         if (sScanner == this) {
@@ -168,9 +168,9 @@ public class RecursiveMediaScanner extends MediaScanner {
         }
 
         if (mustCreateResumeScanner) {
-            RecursiveMediaScanner newScanner = new RecursiveMediaScanner(mContext,"resumed " + mWhy);
+            RecursiveMediaScannerAsyncTask newScanner = new RecursiveMediaScannerAsyncTask(mScanner, mScanner.mContext,"resumed " + mWhy);
             newScanner.mPaused = this.mPaused;
-            RecursiveMediaScanner.sScanner = newScanner;
+            RecursiveMediaScannerAsyncTask.sScanner = newScanner;
         }
     }
 
@@ -181,9 +181,9 @@ public class RecursiveMediaScanner extends MediaScanner {
     }
 
     /** returns null if scanner is not busy-active */
-    public static RecursiveMediaScanner getBusyScanner() {
-        if ((RecursiveMediaScanner.sScanner != null) && (RecursiveMediaScanner.sScanner.getStatus() == Status.RUNNING)) {
-            return RecursiveMediaScanner.sScanner;
+    public static RecursiveMediaScannerAsyncTask getBusyScanner() {
+        if ((RecursiveMediaScannerAsyncTask.sScanner != null) && (RecursiveMediaScannerAsyncTask.sScanner.getStatus() == Status.RUNNING)) {
+            return RecursiveMediaScannerAsyncTask.sScanner;
         }
         return null;
     }
@@ -224,7 +224,7 @@ public class RecursiveMediaScanner extends MediaScanner {
             @Override
             public void run() {
                 if (mStatusDialog != null) {
-                    RecursiveMediaScanner scanner = RecursiveMediaScanner.this;
+                    RecursiveMediaScannerAsyncTask scanner = RecursiveMediaScannerAsyncTask.this;
                     folder.setText(scanner.mCurrentFolder);
                     count.setText(parent.getString(R.string.image_loading_at_position_format, scanner.mCount));
                     if (scanner.mTimerRunner != null) {
@@ -253,8 +253,8 @@ public class RecursiveMediaScanner extends MediaScanner {
             mPaused = pauseState;
             cancel(false);
 
-            if (RecursiveMediaScanner.sScanner == this) {
-                RecursiveMediaScanner.sScanner = null;
+            if (RecursiveMediaScannerAsyncTask.sScanner == this) {
+                RecursiveMediaScannerAsyncTask.sScanner = null;
             }
         }
     }
