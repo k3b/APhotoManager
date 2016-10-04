@@ -40,6 +40,8 @@ import java.io.File;
 
 import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
+import de.k3b.android.util.MediaScanner;
+import de.k3b.android.util.MediaScannerEx;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.tagDB.TagRepository;
@@ -47,6 +49,7 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 import uk.co.senab.photoview.log.LogManager;
 
 public class SettingsActivity extends PreferenceActivity {
+    private static Boolean sOldEnableTagSupport = null;
     private SharedPreferences prefsInstance = null;
     private ListPreference defaultLocalePreference;
 
@@ -127,7 +130,6 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putString("pickHistoryMax", "" + Global.pickHistoryMax);
 
         prefs.putString("reportDir", (Global.reportDir != null) ? Global.reportDir.getAbsolutePath() : null);
-        TagRepository.setInstance(Global.reportDir);
         prefs.putString("logCatDir", (Global.logCatDir != null) ? Global.logCatDir.getAbsolutePath() : null);
         prefs.putString("thumbCacheRoot", (Global.thumbCacheRoot != null) ? Global.thumbCacheRoot.getAbsolutePath() : null);
         prefs.putString("mapsForgeDir", (Global.mapsForgeDir != null) ? Global.mapsForgeDir.getAbsolutePath() : null);
@@ -184,7 +186,6 @@ public class SettingsActivity extends PreferenceActivity {
         Global.pickHistoryMax = getPref(prefs, "pickHistoryMax"               , Global.pickHistoryMax);
 
         Global.reportDir                        = getPref(prefs, "reportDir", Global.reportDir);
-        TagRepository.setInstance(Global.reportDir);
 
         Global.logCatDir                        = getPref(prefs, "logCatDir", Global.logCatDir);
 
@@ -252,6 +253,13 @@ public class SettingsActivity extends PreferenceActivity {
         }
         if ((previousCacheRoot != null) && (!previousCacheRoot.equals(Global.thumbCacheRoot))) {
             ThumbNailUtils.init(context, previousCacheRoot);
+        }
+        TagRepository.setInstance(Global.reportDir);
+
+        // true if first run or change
+        if ((sOldEnableTagSupport == null) || (sOldEnableTagSupport.booleanValue() != Global.enableTagSupport)) {
+            MediaScanner.setInstance((Global.enableTagSupport) ? new MediaScannerEx(context) : new MediaScanner(context));
+            sOldEnableTagSupport = Global.enableTagSupport;
         }
     }
 
