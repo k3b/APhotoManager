@@ -9,6 +9,7 @@ import java.util.Date;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.database.QueryParameter;
+import de.k3b.tagDB.TagConverter;
 
 /**
  * Database related code to handle non standard image processing (Tags, Description)

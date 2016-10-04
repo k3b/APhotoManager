@@ -1,4 +1,4 @@
-package de.k3b.android.androFotoFinder.tagDB;
+package de.k3b.tagDB;
 
 import java.util.Arrays;
 
