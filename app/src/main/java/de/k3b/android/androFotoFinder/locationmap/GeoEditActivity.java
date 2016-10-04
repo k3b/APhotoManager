@@ -90,7 +90,7 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
             intent.putExtra(EXTRA_SELECTED_ITEM_PATHS, selectedFiles.toString());
 
             Long id = selectedFiles.getId(0);
-            IGeoPointInfo initialPoint = MediaScanner.getPositionFromFile(selectedFiles.getFileNames()[0], (id != null) ? id.toString() : null);
+            IGeoPointInfo initialPoint = MediaScanner.getInstance(context).getPositionFromFile(selectedFiles.getFileNames()[0], (id != null) ? id.toString() : null);
             if (initialPoint != null) {
                 initalUri = Uri.parse(PARSER.toUriString(initialPoint));
                 intent.setData(initalUri);

@@ -61,10 +61,13 @@ import de.k3b.geo.api.IGeoPointInfo;
  *
  * Created by k3b on 14.09.2015.
  */
-public class MediaScanner extends AsyncTask<String[],Object,Integer> {
+public class MediaScanner  {
     private static final String CONTEXT = "MediaScanner.";
     private static SimpleDateFormat sFormatter;
     public static final int DEFAULT_SCAN_DEPTH = 22;
+
+    private static MediaScanner sInstance = null;
+
     static {
         sFormatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
         sFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -77,57 +80,20 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
         }
     };
 
-    protected final Context mContext;
-    protected final String mWhy;
+    final Context mContext;
 
-    public MediaScanner(Context context, String why) {
-        mWhy = why;
+    public MediaScanner(Context context) {
         mContext = context.getApplicationContext();
     }
 
-    @Override
-    protected Integer doInBackground(String[]... pathNames) {
-        if (pathNames.length != 2) throw new IllegalArgumentException(CONTEXT + ".execute(oldFileNames, newFileNames)");
-        return updateMediaDatabase_Android42(mContext, pathNames[0], pathNames[1]);
-    }
 
-    @Override
-    protected void onPostExecute(Integer modifyCount) {
-        super.onPostExecute(modifyCount);
-        String message = this.mContext.getString(R.string.scanner_update_result_format, modifyCount);
-        Toast.makeText(this.mContext, message, Toast.LENGTH_LONG).show();
-        if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, CONTEXT + "A42 scanner finished: " + message);
-        }
-
-        if (modifyCount > 0) {
-            notifyChanges(mContext, mWhy);
-        }
-    }
-
-    public static void notifyChanges(Context context, String why) {
+    public void notifyChanges(Context context, String why) {
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, CONTEXT + "notifyChanges(" + why + ") "
                     + FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI);
         }
         context.getContentResolver().notifyChange(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, null);
     }
-
-    /** do not wait for result. */
-    public static void updateMediaDBInBackground(Context context, String why, String[] oldPathNames, String[] newPathNames) {
-        if (isGuiThread()) {
-            // update_Android42 scanner in seperate background task
-            MediaScanner scanTask = new MediaScanner(context.getApplicationContext(), why + " from completed new AsycTask");
-            scanTask.execute(oldPathNames, newPathNames);
-        } else {
-            // Continute in background task
-            int modifyCount = MediaScanner.updateMediaDatabase_Android42(context.getApplicationContext(), oldPathNames, newPathNames);
-            if (modifyCount > 0) {
-                MediaScanner.notifyChanges(context, why + " within current non-gui-task");
-            }
-        }
-    }
-
 
     public static boolean isNoMedia(int maxLevel, String[] pathNames) {
         if (pathNames != null) {
@@ -170,16 +136,11 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
     }
 
     /** return parent of file if path is not a dir. else return file */
-    public static File getDir(File file) {
+    private static File getDir(File file) {
         return ((file != null) && (!file.isDirectory())) ? file.getParentFile() : file;
     }
 
-    /** return true if this is executed in the gui thread */
-    public static boolean isGuiThread() {
-        return (Looper.myLooper() == Looper.getMainLooper());
-    }
-
-    public static int updateMediaDatabase_Android42(Context context, String[] oldPathNames, String... newPathNames) {
+    public int updateMediaDatabase_Android42(Context context, String[] oldPathNames, String... newPathNames) {
         final boolean hasNew = excludeNomediaFiles(newPathNames) > 0;
         final boolean hasOld = excludeNomediaFiles(oldPathNames) > 0;
 
@@ -199,7 +160,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
      *
      * @return number of items left.
      */
-    private static int excludeNomediaFiles(String[] fullPathNames) {
+    private int excludeNomediaFiles(String[] fullPathNames) {
         int itemsLeft = 0;
         if (fullPathNames != null) {
             // ignore non-jpeg
@@ -218,7 +179,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
         return itemsLeft;
     }
 
-    private static int insertIntoMediaDatabase(Context context, String[] newPathNames) {
+    private int insertIntoMediaDatabase(Context context, String[] newPathNames) {
         int modifyCount = 0;
 
         if ((newPathNames != null) && (newPathNames.length > 0)) {
@@ -244,7 +205,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
     }
 
     /** delete oldPathNames from media database */
-    private static int deleteInMediaDatabase(Context context, String[] oldPathNames) {
+    private int deleteInMediaDatabase(Context context, String[] oldPathNames) {
         int modifyCount = 0;
 
         if ((oldPathNames != null) && (oldPathNames.length > 0)) {
@@ -263,7 +224,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
     }
 
     /** change path and path dependant fields in media database */
-    private static int renameInMediaDatabase(Context context, String[] oldPathNames, String... newPathNames) {
+    private int renameInMediaDatabase(Context context, String[] oldPathNames, String... newPathNames) {
         if ((oldPathNames != null) && (oldPathNames.length > 0)) {
             if (Global.debugEnabled) {
                 Log.i(Global.LOG_CONTEXT, CONTEXT + "renameInMediaDatabase to " + newPathNames.length + " files " + newPathNames[0] + "...");
@@ -294,7 +255,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
         return 0;
     }
 
-    private static int renameInMediaDatabase(Context context, Map<String, String> old2NewFileNames) {
+    private int renameInMediaDatabase(Context context, Map<String, String> old2NewFileNames) {
         int modifyCount = 0;
         if (old2NewFileNames.size() > 0) {
             QueryParameter query = new QueryParameter(FotoSql.queryChangePath);
@@ -307,7 +268,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
                 int pathColNo = c.getColumnIndex(FotoSql.SQL_COL_PATH);
                 while (c.moveToNext()) {
                     String oldPath = c.getString(pathColNo);
-                    modifyCount += MediaScanner.updatePathRelatedFields(context, c, old2NewFileNames.get(oldPath), pkColNo, pathColNo);
+                    modifyCount += updatePathRelatedFields(context, c, old2NewFileNames.get(oldPath), pkColNo, pathColNo);
                 }
             } catch (Exception ex) {
                 Log.e(Global.LOG_CONTEXT, CONTEXT + "execChangePaths() error :", ex);
@@ -323,7 +284,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
     }
 
     /** updates values with current values of file */
-    private static void getExifFromFile(ContentValues values, File file) {
+    protected void getExifFromFile(ContentValues values, File file) {
         String absolutePath = file.getAbsolutePath();
         setPathRelatedFieldsIfNeccessary(values, absolutePath, null);
 
@@ -390,7 +351,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
         }
     }
 
-    public static IGeoPointInfo getPositionFromFile(String absolutePath, String id) {
+    public IGeoPointInfo getPositionFromFile(String absolutePath, String id) {
         ExifInterface exif = null;
         try {
             exif = new ExifInterface(absolutePath);
@@ -407,13 +368,13 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
 
         return null;
     }
-    public static int updatePathRelatedFields(Context context, Cursor cursor, String newAbsolutePath) {
+    public int updatePathRelatedFields(Context context, Cursor cursor, String newAbsolutePath) {
         int columnIndexPk = cursor.getColumnIndex(FotoSql.SQL_COL_PK);
         int columnIndexPath = cursor.getColumnIndex(FotoSql.SQL_COL_PATH);
         return updatePathRelatedFields(context, cursor, newAbsolutePath, columnIndexPk, columnIndexPath);
     }
 
-    public static int updatePathRelatedFields(Context context, Cursor cursor, String newAbsolutePath, int columnIndexPk, int columnIndexPath) {
+    public int updatePathRelatedFields(Context context, Cursor cursor, String newAbsolutePath, int columnIndexPk, int columnIndexPath) {
         ContentValues values = new ContentValues();
         DatabaseUtils.cursorRowToContentValues(cursor, values);
         String oldAbsolutePath = cursor.getString(columnIndexPath);
@@ -423,21 +384,21 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
     }
 
     /** sets the path related fields */
-    private static void setPathRelatedFieldsIfNeccessary(ContentValues values, String newAbsolutePath, String oldAbsolutePath) {
+    private void setPathRelatedFieldsIfNeccessary(ContentValues values, String newAbsolutePath, String oldAbsolutePath) {
         setFieldIfNeccessary(values, MediaStore.MediaColumns.TITLE, generateTitleFromFilePath(newAbsolutePath), generateTitleFromFilePath(oldAbsolutePath));
         setFieldIfNeccessary(values, MediaStore.MediaColumns.DISPLAY_NAME, generateDisplayNameFromFilePath(newAbsolutePath), generateDisplayNameFromFilePath(oldAbsolutePath));
         values.put(MediaStore.MediaColumns.DATA, newAbsolutePath);
     }
 
     /** values[fieldName]=newCalculatedValue if current not set or equals oldCalculatedValue */
-    private static void setFieldIfNeccessary(ContentValues values, String fieldName, String newCalculatedValue, String oldCalculatedValue) {
+    private void setFieldIfNeccessary(ContentValues values, String fieldName, String newCalculatedValue, String oldCalculatedValue) {
         String currentValue = values.getAsString(fieldName);
         if ((currentValue == null) || (TextUtils.isEmpty(currentValue.trim())) || (currentValue.equals(oldCalculatedValue))) {
             values.put(fieldName, newCalculatedValue);
         }
     }
 
-    private static int update_Android42(Context context, int id, File file) {
+    private int update_Android42(Context context, int id, File file) {
         if ((file != null) && file.exists() && file.canRead()) {
             ContentValues values = new ContentValues();
             getExifFromFile(values, file);
@@ -446,7 +407,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
 		return 0;
     }
 
-    private static int insert_Android42(Context context, File file) {
+    private int insert_Android42(Context context, File file) {
         if ((file != null) && file.exists() && file.canRead()) {
             ContentValues values = new ContentValues();
             long now = new Date().getTime();
@@ -460,7 +421,7 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
 
     @NonNull
     // generates a title based on file name
-    public static String generateTitleFromFilePath(String _filePath) {
+    protected String generateTitleFromFilePath(String _filePath) {
         String filePath = generateDisplayNameFromFilePath(_filePath);
 
         if (filePath != null) {
@@ -558,5 +519,14 @@ public class MediaScanner extends AsyncTask<String[],Object,Integer> {
             return true;
         }
         return lcPath.endsWith(".jpg") || lcPath.endsWith(".jpeg");
+    }
+
+    public static MediaScanner getInstance(Context context) {
+        if (sInstance == null) sInstance = new MediaScanner(context);
+        return sInstance;
+    }
+
+    public static void setInstance(MediaScanner sInstance) {
+        MediaScanner.sInstance = sInstance;
     }
 }

@@ -40,7 +40,7 @@ public class AdapterArrayHelper {
 
     public AdapterArrayHelper(Activity context, String fullPhotoPath, String debugContext) {
         this.mDebugPrefix = debugContext;
-        mRootDir = MediaScanner.getDir(fullPhotoPath);
+        mRootDir = MediaScanner.getInstance(context).getDir(fullPhotoPath);
         reload(" ctor ");
 
         if (Global.mustRemoveNOMEDIAfromDB && (mRootDir != null) && (mFullPhotoPaths != null)) {
