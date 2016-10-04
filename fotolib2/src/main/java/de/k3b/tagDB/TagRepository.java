@@ -24,6 +24,9 @@ public class TagRepository {
 
     /** Lines starting with char are comments. These lines are not interpreted */
     public static final java.lang.String COMMENT = "#";
+    private static final String DB_NAME = "tagDB.txt";
+
+    private static TagRepository sInstance = null;
 
     /** Where data is loaded from/saved to */
     private final File mFile;
@@ -34,6 +37,47 @@ public class TagRepository {
     /** Connect repository to a {@link File}. */
     public TagRepository(File file) {
         this.mFile = file;
+    }
+
+    public static TagRepository getInstance() {
+        return sInstance;
+    }
+
+    public static void setInstance(TagRepository instance) {
+        TagRepository.sInstance = instance;
+    }
+
+    public static void setInstance(File parentDir) {
+        if (parentDir == null) throw new IllegalArgumentException("TagRepository.setInstance(null)");
+
+        List<Tag> old = null;
+        File newFile = new File(parentDir, DB_NAME);
+        if (TagRepository.sInstance != null){
+            if (TagRepository.sInstance.mFile.equals(newFile)) return; // no change: nothing to do
+
+            old = TagRepository.sInstance.load();
+        }
+        TagRepository.sInstance = new TagRepository(newFile);
+
+        if (old != null) {
+            if (TagRepository.sInstance.include(old) > 0) {
+                TagRepository.sInstance.save();
+            }
+        }
+    }
+
+    public int include(List<Tag> items) {
+        int changes = 0;
+        if ((items != null) && (items.size() > 0)) {
+            List<Tag> newItems = this.load();
+            for (Tag oldItem : items) {
+                if (!newItems.contains(oldItem)) {
+                    newItems.add(oldItem);
+                    changes++;
+                }
+            }
+        }
+        return changes;
     }
 
     /** Load from repository-file to memory.

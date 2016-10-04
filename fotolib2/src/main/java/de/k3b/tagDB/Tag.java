@@ -1,5 +1,8 @@
 package de.k3b.tagDB;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Represents a possible tag or keyword that can be attached to an image.
  *
@@ -33,5 +36,17 @@ public class Tag{
         if (name == null) return false;
         if (!(o instanceof Tag)) return false;
         return name.equals(((Tag)o).name);
+    }
+
+    public static List<Tag> toList(String... items) {
+        if ((items != null) && (items.length > 0)) {
+            List<Tag> result = new ArrayList<>();
+
+            for (String oldItem : items) {
+                result.add(new Tag().setName(oldItem));
+            }
+            return result;
+        }
+        return null;
     }
 }

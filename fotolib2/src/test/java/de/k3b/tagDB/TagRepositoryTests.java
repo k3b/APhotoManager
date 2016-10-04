@@ -79,4 +79,22 @@ public class TagRepositoryTests {
         Assert.assertEquals(3, items.size());
     }
 
+    @Test
+    public void shouldIncludeItem() throws Exception {
+        // 1,2,3
+        TagRepository originalItems = createUnsavedRepo("shouldIncludeItem", 3)
+                .save();
+
+        // 1,2,7
+        List additionalItems = createUnsavedRepo("shouldIncludeItem", 2).load();
+        Tag added = createItem(7);
+        additionalItems.add(added);
+
+        // 7,1,2,3
+        int changes = originalItems.include(additionalItems);
+        List<Tag> items = originalItems.load();
+        Assert.assertEquals(added + "added 1", 1, changes);
+        Assert.assertEquals(4, items.size());
+    }
+
 }

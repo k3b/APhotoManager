@@ -52,6 +52,9 @@ import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 
 /**
+ * Android Media Scanner for images/photos/jpg compatible with android-5.0 Media scanner.
+ * This Class handles standard Android-5.0 image fields.
+ *
  * Since android.media.MediaScannerConnection does not work on my android-4.2
  * here is my own implementation.
  *
