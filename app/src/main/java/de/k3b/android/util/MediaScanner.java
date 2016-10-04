@@ -27,14 +27,11 @@ import android.database.DatabaseUtils;
 import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
-import android.os.AsyncTask;
 import android.os.Build;
-import android.os.Looper;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -48,7 +45,6 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import de.k3b.android.androFotoFinder.Global;
-import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.database.QueryParameter;
@@ -63,14 +59,35 @@ import de.k3b.geo.api.IGeoPointInfo;
  */
 public class MediaScanner  {
     private static final String CONTEXT = "MediaScanner.";
-    private static SimpleDateFormat sFormatter;
+
+    // the DB_XXXX fields are updated by the scanner
+    private static final String DB_DATE_TAKEN = MediaStore.Images.Media.DATE_TAKEN;
+    private static final String DB_LONGITUDE = MediaStore.Images.Media.LONGITUDE;
+    private static final String DB_LATITUDE = MediaStore.Images.Media.LATITUDE;
+    private static final String DB_ORIENTATION = MediaStore.Images.Media.ORIENTATION;
+    private static final String DB_DATE_MODIFIED = MediaStore.MediaColumns.DATE_MODIFIED;
+    private static final String DB_SIZE = MediaStore.MediaColumns.SIZE;
+    private static final String DB_WIDTH = MediaStore.MediaColumns.WIDTH;
+    private static final String DB_HEIGHT = MediaStore.MediaColumns.HEIGHT;
+    private static final String DB_MIME_TYPE = MediaStore.MediaColumns.MIME_TYPE;
+    private static final String DB_TITLE = MediaStore.MediaColumns.TITLE;
+    private static final String DB_DISPLAY_NAME = MediaStore.MediaColumns.DISPLAY_NAME;
+    private static final String DB_DATA = MediaStore.MediaColumns.DATA;
+    private static final String DB_DATE_ADDED = MediaStore.Images.ImageColumns.DATE_ADDED;
+
+    // the TAG_XXXX attributes are read/written by the scanner
+    private static final String TAG_DATETIME = ExifInterface.TAG_DATETIME;
+    private static final String TAG_ORIENTATION = ExifInterface.TAG_ORIENTATION;
+
+    private static SimpleDateFormat sExifDateTimeFormatter;
     public static final int DEFAULT_SCAN_DEPTH = 22;
 
+    /** singelton */
     private static MediaScanner sInstance = null;
 
     static {
-        sFormatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
-        sFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        sExifDateTimeFormatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
+        sExifDateTimeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     public static final FilenameFilter JPG_FILENAME_FILTER = new FilenameFilter() {
@@ -288,8 +305,8 @@ public class MediaScanner  {
         String absolutePath = file.getAbsolutePath();
         setPathRelatedFieldsIfNeccessary(values, absolutePath, null);
 
-        values.put(MediaStore.MediaColumns.DATE_MODIFIED, file.lastModified() / 1000);
-        values.put(MediaStore.MediaColumns.SIZE, file.length());
+        values.put(DB_DATE_MODIFIED, file.lastModified() / 1000);
+        values.put(DB_SIZE, file.length());
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true; // only need with/height but not content
@@ -297,11 +314,11 @@ public class MediaScanner  {
         int mHeight = options.outHeight;
         int mWidth = options.outWidth;
         if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) && mWidth > 0 && mHeight > 0) {
-            values.put(MediaStore.MediaColumns.WIDTH, mWidth);
-            values.put(MediaStore.MediaColumns.HEIGHT, mHeight);
+            values.put(DB_WIDTH, mWidth);
+            values.put(DB_HEIGHT, mHeight);
         }
         String imageType = options.outMimeType;
-        values.put(MediaStore.MediaColumns.MIME_TYPE, imageType);
+        values.put(DB_MIME_TYPE, imageType);
 
         ExifInterface exif = null;
         try {
@@ -313,17 +330,17 @@ public class MediaScanner  {
         if (exif != null) {
             float[] latlng = new float[2];
             if (exif.getLatLong(latlng)) {
-                values.put(MediaStore.Images.Media.LATITUDE, latlng[0]);
-                values.put(MediaStore.Images.Media.LONGITUDE, latlng[1]);
+                values.put(DB_LATITUDE, latlng[0]);
+                values.put(DB_LONGITUDE, latlng[1]);
             }
 
             long time = getDateTime(exif);
             if (time != -1) {
-                values.put(MediaStore.Images.Media.DATE_TAKEN, time);
+                values.put(DB_DATE_TAKEN, time);
             }
 
             int orientation = exif.getAttributeInt(
-                    ExifInterface.TAG_ORIENTATION, -1);
+                    TAG_ORIENTATION, -1);
             if (orientation != -1) {
                 // We only recognize a subset of orientation tag values.
                 int degree;
@@ -341,7 +358,7 @@ public class MediaScanner  {
                         degree = 0;
                         break;
                 }
-                values.put(MediaStore.Images.Media.ORIENTATION, degree);
+                values.put(DB_ORIENTATION, degree);
             }
         }
 
@@ -385,9 +402,9 @@ public class MediaScanner  {
 
     /** sets the path related fields */
     private void setPathRelatedFieldsIfNeccessary(ContentValues values, String newAbsolutePath, String oldAbsolutePath) {
-        setFieldIfNeccessary(values, MediaStore.MediaColumns.TITLE, generateTitleFromFilePath(newAbsolutePath), generateTitleFromFilePath(oldAbsolutePath));
-        setFieldIfNeccessary(values, MediaStore.MediaColumns.DISPLAY_NAME, generateDisplayNameFromFilePath(newAbsolutePath), generateDisplayNameFromFilePath(oldAbsolutePath));
-        values.put(MediaStore.MediaColumns.DATA, newAbsolutePath);
+        setFieldIfNeccessary(values, DB_TITLE, generateTitleFromFilePath(newAbsolutePath), generateTitleFromFilePath(oldAbsolutePath));
+        setFieldIfNeccessary(values, DB_DISPLAY_NAME, generateDisplayNameFromFilePath(newAbsolutePath), generateDisplayNameFromFilePath(oldAbsolutePath));
+        values.put(DB_DATA, newAbsolutePath);
     }
 
     /** values[fieldName]=newCalculatedValue if current not set or equals oldCalculatedValue */
@@ -411,7 +428,7 @@ public class MediaScanner  {
         if ((file != null) && file.exists() && file.canRead()) {
             ContentValues values = new ContentValues();
             long now = new Date().getTime();
-            values.put(MediaStore.Images.ImageColumns.DATE_ADDED, now / 1000);//sec
+            values.put(DB_DATE_ADDED, now / 1000);//sec
 
             getExifFromFile(values, file);
             return (null != FotoSql.execInsert(context, values)) ? 1 : 0;
@@ -455,12 +472,12 @@ public class MediaScanner  {
      * Returns -1 if the date time information if not available.
      */
     public static long getDateTime(ExifInterface exif) {
-        String dateTimeString =  exif.getAttribute(ExifInterface.TAG_DATETIME);
+        String dateTimeString =  exif.getAttribute(TAG_DATETIME);
         if (dateTimeString == null) return -1;
 
         ParsePosition pos = new ParsePosition(0);
         try {
-            Date datetime = sFormatter.parse(dateTimeString, pos);
+            Date datetime = sExifDateTimeFormatter.parse(dateTimeString, pos);
             if (datetime == null) return -1;
             return datetime.getTime();
         } catch (IllegalArgumentException ex) {
