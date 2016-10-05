@@ -154,6 +154,7 @@ public class FotoSql {
                     SQL_COL_PATH + " AS " + SQL_COL_DISPLAY_TEXT,
                     "count(*) AS " + SQL_COL_COUNT)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
+            .addWhere(SQL_COL_PATH + " IS NOT NULL ")
             .addGroupBy(SQL_COL_PATH)
             .addHaving("count(*) > 1")
             .addOrderBy(SQL_COL_PATH);
@@ -174,7 +175,10 @@ public class FotoSql {
 
     // the bigger the smaller the area
     private static final double GROUPFACTOR_FOR_Z0 = 0.025;
-    private static final String DELETED_FILE_MARKER = "/must/be/deleted.txt";
+
+    /** to avoid cascade delete of linked file when mediaDB-item is deleted
+     *  the links are first set to null before delete. */
+    private static final String DELETED_FILE_MARKER = null;
 
     public static final double getGroupFactor(final int _zoomLevel) {
         int zoomLevel = _zoomLevel;
@@ -723,8 +727,7 @@ public class FotoSql {
                 values.put(FotoSql.SQL_COL_PATH, DELETED_FILE_MARKER);
                 contentResolver.update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, values, where, selectionArgs);
 
-                where = // FotoSql.SQL_COL_PATH + " is null or " +
-                        FotoSql.SQL_COL_PATH + "= '"+DELETED_FILE_MARKER + "'";
+                where = FotoSql.SQL_COL_PATH + " is null";
                 delCount = contentResolver.delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, where, null);
             } else {
                 delCount = contentResolver.delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, where, selectionArgs);
