@@ -470,12 +470,12 @@ public class LocationMapFragment extends DialogFragment {
             this.mRootFilter = rootFilter;
         }
 
-        rectangle = defineGpxAdditionalPoints(gpxAdditionalPointsContentUri, rectangle);
+        GeoRectangle increasedRrectangle = defineGpxAdditionalPoints(gpxAdditionalPointsContentUri, rectangle);
 
         mSelectedItemsHandler.define(selectedItems);
 
         String debugContext = "defineNavigation";
-        zoomToBoundingBox(debugContext, rectangle, zoomlevel);
+        zoomToBoundingBox(debugContext, increasedRrectangle, zoomlevel);
 
         if (rootFilter != null) {
             reloadFotoMarker(debugContext);
@@ -528,7 +528,7 @@ public class LocationMapFragment extends DialogFragment {
             }
 
 
-            if (gpxBox != null) rectangle = gpxBox;
+            if (gpxBox != null) return gpxBox;
         }
         return rectangle;
     }
