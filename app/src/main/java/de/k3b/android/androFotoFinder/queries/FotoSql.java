@@ -30,6 +30,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.osmdroid.api.IGeoPoint;
@@ -88,6 +89,7 @@ public class FotoSql {
 
     // columns that must be avaulable in the Cursor
     public static final String SQL_COL_PK = MediaStore.Images.Media._ID;
+    public static final String FILTER_COL_PK = SQL_COL_PK + "= ?";
     public static final String SQL_COL_DISPLAY_TEXT = "disp_txt";
     public static final String SQL_COL_LAT = MediaStore.Images.Media.LATITUDE;
     public static final String SQL_COL_LON = MediaStore.Images.Media.LONGITUDE;
@@ -170,7 +172,7 @@ public class FotoSql {
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString());
 
     /* image entries may not have DISPLAY_NAME which is essential for calculating the item-s folder. */
-    public static final QueryParameter queryGetMissingDisplayNames = queryChangePath
+    public static final QueryParameter queryGetMissingDisplayNames = new QueryParameter(queryChangePath)
             .addWhere(MediaStore.MediaColumns.DISPLAY_NAME + " is null");
 
     // the bigger the smaller the area
@@ -605,7 +607,7 @@ public class FotoSql {
             query.addWhere(SQL_COL_PATH + "= ?", fullPath);
 
         } else {
-            query.addWhere(SQL_COL_PK + "= ?", "" + id);
+            query.addWhere(FILTER_COL_PK, "" + id);
         }
 
         Cursor c = null;
@@ -678,7 +680,7 @@ public class FotoSql {
 
         Cursor c = null;
         try {
-            c = resolver.query(SQL_TABLE_EXTERNAL_CONTENT_URI, new String[]{"*"}, FotoSql.SQL_COL_PK + " = ?", new String[]{"" + id}, null);
+            c = resolver.query(SQL_TABLE_EXTERNAL_CONTENT_URI, new String[]{"*"}, FILTER_COL_PK, new String[]{"" + id}, null);
             if (c.moveToNext()) {
                 ContentValues values = new ContentValues();
                 DatabaseUtils.cursorRowToContentValues(c, values);
@@ -693,7 +695,7 @@ public class FotoSql {
     }
 
     public static int execUpdate(Context context, int id, ContentValues values) {
-        return context.getContentResolver().update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, values, SQL_COL_PK + " = ?", new String[]{Integer.toString(id)});
+        return context.getContentResolver().update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, values, FILTER_COL_PK, new String[]{Integer.toString(id)});
     }
 
     public static Uri execInsert(Context context, ContentValues values) {
@@ -719,24 +721,25 @@ public class FotoSql {
      */
     public static int deleteMedia(ContentResolver contentResolver, String where, String[] selectionArgs, boolean preventDeleteImage)
     {
+        String lastUsedWhereClause = where;
         int delCount = 0;
         try {
             if (preventDeleteImage) {
                 // set SQL_COL_PATH empty so sql-delete cannot cascade delete the referenced image-file via delete trigger
                 ContentValues values = new ContentValues();
                 values.put(FotoSql.SQL_COL_PATH, DELETED_FILE_MARKER);
-                contentResolver.update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, values, where, selectionArgs);
+                contentResolver.update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, values, lastUsedWhereClause, selectionArgs);
 
-                where = FotoSql.SQL_COL_PATH + " is null";
-                delCount = contentResolver.delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, where, null);
+                lastUsedWhereClause = FotoSql.SQL_COL_PATH + " is null";
+                delCount = contentResolver.delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, lastUsedWhereClause, null);
             } else {
-                delCount = contentResolver.delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, where, selectionArgs);
+                delCount = contentResolver.delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, lastUsedWhereClause, selectionArgs);
             }
         } catch (Exception ex) {
             // null pointer exception when delete matches not items??
             final String msg = "FotoSql.deleteMedia("
                     + QueryParameter.toString(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI.toString(),null
-                        , where, selectionArgs, null)
+                        , lastUsedWhereClause, selectionArgs, null)
                     + " : " + ex.getMessage();
             Log.e(Global.LOG_CONTEXT, msg, ex);
 
@@ -753,6 +756,48 @@ public class FotoSql {
     @NonNull
     public static String getUriString(long imageID) {
         return SQL_TABLE_EXTERNAL_CONTENT_URI.toString() + "/" + imageID;
+    }
+
+    public static SelectedFiles getSelectedfiles(Context context, String sqlWhere) {
+        QueryParameter query = new QueryParameter(FotoSql.queryChangePath);
+        query.addWhere(sqlWhere);
+        query.addOrderBy(FotoSql.SQL_COL_PATH);
+
+        return getSelectedfiles(context, query);
+
+    }
+
+    @Nullable
+    private static SelectedFiles getSelectedfiles(Context context, QueryParameter query) {
+        SelectedFiles result = null;
+        Cursor c = null;
+
+        try {
+            c = FotoSql.createCursorForQuery(context, query);
+            int len = c.getCount();
+            Long[] ids = new Long[len];
+            String[] paths = new String[len];
+            int pkColNo = c.getColumnIndex(FotoSql.SQL_COL_PK);
+            int pathColNo = c.getColumnIndex(FotoSql.SQL_COL_PATH);
+            int row = 0;
+            while (c.moveToNext()) {
+                paths[row] = c.getString(pathColNo);
+                ids[row] = c.getLong(pkColNo);
+                row++;
+            }
+
+            result = new SelectedFiles(paths, ids);
+        } catch (Exception ex) {
+            Log.e(Global.LOG_CONTEXT, "FotoSql.getSelectedfiles() error :", ex);
+        } finally {
+            if (c != null) c.close();
+        }
+
+        if (Global.debugEnabled) {
+            Log.d(Global.LOG_CONTEXT, "FotoSql.getSelectedfiles result count=" + ((result != null) ? result.size():0));
+        }
+
+        return result;
     }
 
     /** converts internal ID-list to string array of filenNames via media database. */

@@ -23,15 +23,15 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import android.view.ActionMode;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -57,18 +57,23 @@ import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.AndroidFileCommands;
+import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.MenuUtils;
 import de.k3b.database.QueryParameter;
+import de.k3b.database.SelectedFiles;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryNavigator;
+import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
 
+import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 
 import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
-import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
+// import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 
 /**
  * A fragment with a Listing of Directories to be picked.
@@ -313,13 +318,25 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
 
     /** called via pathBar-Button-LongClick, tree-item-LongClick, popUp-button */
     private void onShowPopUp(View anchor, IDirectory selection) {
+        PopupMenu popup = onCreatePopupMenu(anchor, selection);
+
+        if (popup != null) {
+            popup.show();
+        }
+    }
+
+    @NonNull
+    private PopupMenu onCreatePopupMenu(View anchor, IDirectory selection) {
         PopupMenu popup = new PopupMenu(getActivity(), anchor);
         popup.setOnMenuItemClickListener(popUpListener);
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(this.mContextMenue, popup.getMenu());
         mPopUpSelection = selection;
-
-        popup.show();
+        MenuItem menuItem = popup.getMenu().findItem(R.id.cmd_fix_link);
+        if ((menuItem != null) && (FileUtils.isSymlinkDir(new File(selection.getAbsolute()), false))) {
+            menuItem.setVisible(true);
+        }
+        return popup;
     }
 
     private IDirectory mPopUpSelection = null;
@@ -340,6 +357,8 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                 return showGallery(mPopUpSelection);
             case R.id.action_details:
                 return showDirInfo(mPopUpSelection);
+            case R.id.cmd_fix_link:
+                return fixLinks(mPopUpSelection);
             default:break;
         }
         return false;
@@ -405,6 +424,62 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             Toast.makeText(getActivity(), getActivity().getString(msgId, newPathAbsolute),
                     Toast.LENGTH_LONG).show();
         }
+    }
+
+    private boolean fixLinks(IDirectory linkDir) {
+        Context context = getActivity();
+        String linkPath = (linkDir != null) ? linkDir.getAbsolute() : null;
+        if (linkPath != null) {
+            File linkFile = new File(linkPath);
+            if (FileUtils.isSymlinkDir(linkFile, false)) {
+                String canonicalPath = FileUtils.tryGetCanonicalPath(linkFile, null);
+                if ((canonicalPath != null) && linkFile.exists() && linkFile.isDirectory()) {
+                    if (!linkPath.endsWith("/")) linkPath+="/";
+                    if (!canonicalPath.endsWith("/")) canonicalPath+="/";
+
+                    String sqlWhereLink = FotoSql.SQL_COL_PATH + " like '" + linkPath + "%'";
+                    SelectedFiles linkFiles = FotoSql.getSelectedfiles(context, sqlWhereLink);
+
+                    String sqlWhereCanonical = FotoSql.SQL_COL_PATH + " in (" + linkFiles.toString() + ")";
+                    sqlWhereCanonical = sqlWhereCanonical.replace(linkPath,canonicalPath);
+                    SelectedFiles canonicalFiles = FotoSql.getSelectedfiles(context, sqlWhereCanonical);
+                    HashMap<String, String> link2canonical = new HashMap<String, String>();
+                    for(String cann : canonicalFiles.getFileNames()) {
+                        link2canonical.put(linkPath + cann.substring(canonicalPath.length()), cann);
+                    }
+
+                    if (Global.debugEnabled) {
+                        Log.d(Global.LOG_CONTEXT, "\tlinkFiles      " + linkFiles.toString());
+                        Log.d(Global.LOG_CONTEXT, "\tcanonicalFiles " + canonicalFiles.toString());
+                    }
+
+                    ContentValues updateValues = new ContentValues(2);
+
+                    String[] linkFileNames = linkFiles.getFileNames();
+                    Long[] linkIds = linkFiles.getIds();
+                    for(int i = linkFileNames.length -1; i >= 0; i--) {
+                        String lin = linkFileNames[i];
+                        String cann = link2canonical.get(lin);
+                        if (Global.debugEnabled) {
+                            Log.d(Global.LOG_CONTEXT, "\t\tmap " + lin + "\t-> " + cann);
+                        }
+
+                        if (cann == null) {
+                            // rename linkFile to canonicalFile
+                            updateValues.put(FotoSql.SQL_COL_PATH, canonicalPath + lin.substring(linkPath.length()));
+                            FotoSql.execUpdate(context, linkIds[i].intValue() ,updateValues);
+                        } else {
+                            FotoSql.deleteMedia(context.getContentResolver(), FotoSql.FILTER_COL_PK, new String[] {linkIds[i].toString()}, true);
+                        }
+                    }
+                    MediaScanner.notifyChanges(context, "Fixed link/canonical duplicates");
+
+
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean showDirInfo(IDirectory selectedDir) {

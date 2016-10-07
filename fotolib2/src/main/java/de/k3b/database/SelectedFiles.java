@@ -81,10 +81,16 @@ public class SelectedFiles  {
 
     /** converts this into komma seperated list of names */
     public String toString() {
+        String[] mFileNames = this.mFileNames;
+        return toString(SORUNDER, mFileNames);
+    }
+
+    public static <T> String toString(String SORUNDER, T[] values) {
+        // Arrays.asList()
         StringBuilder result = new StringBuilder();
-        if (mFileNames != null) {
+        if (values != null) {
             boolean mustAddDelimiter = false;
-            for (String item : mFileNames) {
+            for (T item : values) {
                 if (item != null) {
                     if (mustAddDelimiter) {
                         result.append(DELIMITER);
@@ -99,18 +105,7 @@ public class SelectedFiles  {
 
     /** converts this into komma seperated list of names */
     public String toIdString() {
-        StringBuilder result = new StringBuilder();
-        if (mIds != null) {
-            boolean mustAddDelimiter = false;
-            for (Long item : mIds) {
-                if (mustAddDelimiter) {
-                    result.append(DELIMITER);
-                }
-                mustAddDelimiter = true;
-                result.append(item);
-            }
-        }
-        return result.toString();
+        return toString("", this.mIds);
     }
 
     public int size() {

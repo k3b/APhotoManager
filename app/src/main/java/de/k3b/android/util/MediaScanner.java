@@ -103,7 +103,7 @@ public class MediaScanner  {
     }
 
 
-    public void notifyChanges(Context context, String why) {
+    public static void notifyChanges(Context context, String why) {
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, CONTEXT + "notifyChanges(" + why + ") "
                     + FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI);

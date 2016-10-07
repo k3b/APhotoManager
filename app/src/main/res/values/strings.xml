@@ -151,4 +151,5 @@
 	<string name="settings_maps_forge_dir_title">Mapsforge offline Folder</string>
 
 	<string name="show_photo">Show Photo(s)</string>
+	<string name="fix_link_menu_title">Repair duplicates</string>
 </resources>
