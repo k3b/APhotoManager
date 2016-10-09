@@ -82,6 +82,9 @@ dependencies {
     // exif support
     // https://github.com/drewnoakes/metadata-extractor/wiki/GettingStarted licence: http://www.apache.org/licenses/LICENSE-2.0
     compile 'com.drewnoakes:metadata-extractor:2.8.1'
+	
+	// compile 'com.adobe.xmp:xmpcore:6.1.10' // update for drewnoakes:metadata-extractor requires java-8 compiler does not run on my android-4.4.
+	compile 'com.adobe.xmp:xmpcore:5.1.2' // current version for drewnoakes:metadata-extractor
 
     // this is osmdroid
     compile 'org.osmdroid:osmdroid-android:5.4:release@aar'

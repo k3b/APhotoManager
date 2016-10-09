@@ -35,11 +35,11 @@ import com.nostra13.universalimageloader.core.display.SimpleBitmapDisplayer;
 
 import java.io.File;
 
-import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.GarbageCollector;
+import de.k3b.android.util.JpgMetaWorkflow;
 import de.k3b.database.SelectedItems;
 
 /**
@@ -257,7 +257,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
                 setImageFromThumbnail(photoView, imageFile);
             }
         }
-        photoView.setRotationTo(GuiUtil.getRotationFromExifOrientation(fullPhotoPath));
+        photoView.setRotationTo(JpgMetaWorkflow.getRotationFromExifOrientation(fullPhotoPath));
         if (Global.debugEnabledViewItem) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + debugContext + position +", "
                     + loadType + ") => " + fullPhotoPath + " => " + photoView);
@@ -305,7 +305,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
      */
     @Override
     public boolean isViewFromObject(View view, Object object) {
-        return view == object;
+        return (view != null) && view.equals(object);
     }
 
     /**

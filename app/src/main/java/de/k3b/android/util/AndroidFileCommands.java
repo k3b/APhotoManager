@@ -387,7 +387,7 @@ public class AndroidFileCommands extends FileCommands {
                         countdown = itemsPerProgress;
                         onProgress(itemcount, maxCount);
                     }
-                    if (ExifGps.saveLatLon(file, latitude, longitude, mContext.getString(R.string.app_name), GuiUtil.getAppVersionName(mContext))) {
+                    if (JpgMetaWorkflow.saveLatLon(file, latitude, longitude, mContext.getString(R.string.app_name), GuiUtil.getAppVersionName(mContext))) {
                         resultFile++;
                     }
                     itemcount++;

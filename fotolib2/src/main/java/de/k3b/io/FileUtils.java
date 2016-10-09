@@ -88,24 +88,22 @@ public class FileUtils {
 
     /** @return true if directory is an alias of an other (symlink-dir). */
 	public static  boolean isSymlinkDir(File directory, boolean errorValue) {
-        if (FotoLibGlobal.ignoreSymLinks) {
+        if (FotoLibGlobal.ignoreSymLinks || (directory == null)) {
             return false;
         }
 
-		try {
-			// from http://stackoverflow.com/questions/813710/java-1-6-determine-symbolic-links
-			boolean result = !directory.getAbsolutePath().equals(directory.getCanonicalPath());
+        // from http://stackoverflow.com/questions/813710/java-1-6-determine-symbolic-links
+        String canonicalPath = tryGetCanonicalPath(directory, null);
+        if (canonicalPath != null) {
+            boolean result = !directory.getAbsolutePath().equals(canonicalPath);
             if (result && FotoLibGlobal.debugEnabled) {
-                logger.debug("isSymlinkDir('" + directory.getAbsolutePath() + "') => true because CanonicalPath='" + directory.getCanonicalPath() + "'");
+                logger.debug("isSymlinkDir('" + directory.getAbsolutePath() + "') => true because CanonicalPath='" + canonicalPath + "'");
             }
 			
 			return result;
-        } catch (IOException ex) {
-            if (FotoLibGlobal.debugEnabled) {
-                logger.warn("Error isSymlinkDir('" + directory.getAbsolutePath() + "') exception " + ex.getMessage(), ex);
-            }
-            return errorValue;
         }
+        return errorValue;
+
 	}
 
     public static String getDebugString(String prefix, File file) {

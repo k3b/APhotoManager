@@ -6,7 +6,7 @@ import android.widget.ImageView;
 
 import java.io.File;
 
-import de.k3b.android.GuiUtil;
+import de.k3b.android.util.JpgMetaWorkflow;
 import uk.co.senab.photoview.PhotoView;
 import uk.co.senab.photoview.PhotoViewAttacher;
 import uk.co.senab.photoview.log.LogManager;
@@ -76,7 +76,7 @@ public class PhotoViewEx extends PhotoView {
                             MAX_IMAGE_DIMENSION = (Build.VERSION.SDK_INT < Build.VERSION_CODES.FROYO) ? 4096 : HugeImageLoader.getMaxTextureSize();
                         }
                         imageView.setImageBitmap(HugeImageLoader.loadImage(mImageReloadFile.getAbsoluteFile(), MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION));
-                        this.setRotationTo(GuiUtil.getRotationFromExifOrientation(mImageReloadFile.getAbsolutePath()));
+                        this.setRotationTo(JpgMetaWorkflow.getRotationFromExifOrientation(mImageReloadFile.getAbsolutePath()));
 
                     } catch (OutOfMemoryError e) {
                         LogManager.getLogger().e(

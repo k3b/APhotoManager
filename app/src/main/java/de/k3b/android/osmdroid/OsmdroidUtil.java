@@ -47,6 +47,7 @@ public class OsmdroidUtil {
      * @param zoom if NO_ZOOM (-1) zoom is calculated from min and max
      */
     public static void zoomTo(MapView mapView, int zoom, IGeoPoint min, IGeoPoint max) {
+        int calculatedZoom = zoom;
         MapTileProviderBase tileProvider = mapView.getTileProvider();
         IMapController controller = mapView.getController();
         IGeoPoint center = min;
@@ -54,15 +55,15 @@ public class OsmdroidUtil {
         if (max != null) {
             center = new GeoPoint((max.getLatitudeE6() + min.getLatitudeE6()) / 2, (max.getLongitudeE6() + min.getLongitudeE6()) / 2);
 
-            if (zoom == NO_ZOOM) {
+            if (calculatedZoom == NO_ZOOM) {
                 // int pixels = Math.min(mapView.getWidth(), mapView.getHeight());
                 double pixels = Math.sqrt((mapView.getWidth() * mapView.getWidth()) + (mapView.getHeight() * mapView.getHeight()));
                 final double requiredMinimalGroundResolutionInMetersPerPixel = ((double) new GeoPoint(min.getLatitudeE6(), min.getLongitudeE6()).distanceTo(max)) / pixels;
-                zoom = calculateZoom(center.getLatitude(), requiredMinimalGroundResolutionInMetersPerPixel, tileProvider.getMaximumZoomLevel(), tileProvider.getMinimumZoomLevel());
+                calculatedZoom = calculateZoom(center.getLatitude(), requiredMinimalGroundResolutionInMetersPerPixel, tileProvider.getMaximumZoomLevel(), tileProvider.getMinimumZoomLevel());
             }
         }
-        if (zoom != NO_ZOOM) {
-            controller.setZoom(zoom);
+        if (calculatedZoom != NO_ZOOM) {
+            controller.setZoom(calculatedZoom);
         }
 
         if (center != null) {

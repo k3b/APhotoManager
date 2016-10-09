@@ -129,8 +129,8 @@ public class HistoryEditText {
             return result.toString();
         }
 
-        private List<String>  include(List<String>  history, String newValue) {
-            history = new ArrayList<String>(history);
+        private List<String>  include(List<String>  history_, String newValue) {
+            List<String>  history = new ArrayList<String>(history_);
             if ((newValue != null) && (newValue.length() > 0)) {
                 history.remove(newValue);
                 history.add(0, newValue);

@@ -340,8 +340,8 @@ public class QueryParameter {
     }
 
     private static boolean isKeyword(String line) {
-        line = (line != null) ? (";" + line.trim().toUpperCase() + ";") : null;
-        return ((line != null) && (PARSER_KEYWORDS.indexOf(line) >= 0));
+        String fixedLine = (line != null) ? (";" + line.trim().toUpperCase() + ";") : null;
+        return ((fixedLine != null) && (PARSER_KEYWORDS.indexOf(fixedLine) >= 0));
     }
 
     public String toSqlString() {
