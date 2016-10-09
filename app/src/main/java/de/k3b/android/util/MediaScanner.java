@@ -25,7 +25,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.BitmapFactory;
-import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
 import android.os.Build;
 import android.provider.MediaStore;
@@ -36,13 +35,10 @@ import android.util.Log;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.text.ParsePosition;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TimeZone;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
@@ -74,20 +70,10 @@ public class MediaScanner  {
     private static final String DB_DATA = MediaStore.MediaColumns.DATA;
     private static final String DB_DATE_ADDED = MediaStore.Images.ImageColumns.DATE_ADDED;
 
-    // the TAG_XXXX attributes are read/written by the scanner
-    private static final String TAG_DATETIME = ExifInterface.TAG_DATETIME;
-    private static final String TAG_ORIENTATION = ExifInterface.TAG_ORIENTATION;
-
-    private static SimpleDateFormat sExifDateTimeFormatter;
     public static final int DEFAULT_SCAN_DEPTH = 22;
 
     /** singelton */
     private static MediaScanner sInstance = null;
-
-    static {
-        sExifDateTimeFormatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
-        sExifDateTimeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
 
     public static final FilenameFilter JPG_FILENAME_FILTER = new FilenameFilter() {
         @Override
@@ -319,38 +305,38 @@ public class MediaScanner  {
         String imageType = options.outMimeType;
         values.put(DB_MIME_TYPE, imageType);
 
-        ExifInterface exif = null;
+        ExifInterfaceEx exif = null;
         try {
-            exif = new ExifInterface(absolutePath);
+            exif = new ExifInterfaceEx(absolutePath);
         } catch (IOException ex) {
             // exif is null
         }
 
         if (exif != null) {
-            float[] latlng = new float[2];
-            if (exif.getLatLong(latlng)) {
-                values.put(DB_LATITUDE, latlng[0]);
-                values.put(DB_LONGITUDE, latlng[1]);
+            Double latitude = exif.getLatitude();
+            if (latitude != null) {
+                values.put(DB_LATITUDE, latitude);
+                values.put(DB_LONGITUDE, exif.getLongitude());
             }
 
-            long time = getDateTime(exif);
-            if (time != -1) {
-                values.put(DB_DATE_TAKEN, time);
+            Date time = exif.getDateTimeTaken();
+            if (time != null) {
+                values.put(DB_DATE_TAKEN, time.getTime() );
             }
 
             int orientation = exif.getAttributeInt(
-                    TAG_ORIENTATION, -1);
+                    ExifInterfaceEx.TAG_ORIENTATION, -1);
             if (orientation != -1) {
                 // We only recognize a subset of orientation tag values.
                 int degree;
                 switch(orientation) {
-                    case ExifInterface.ORIENTATION_ROTATE_90:
+                    case ExifInterfaceEx.ORIENTATION_ROTATE_90:
                         degree = 90;
                         break;
-                    case ExifInterface.ORIENTATION_ROTATE_180:
+                    case ExifInterfaceEx.ORIENTATION_ROTATE_180:
                         degree = 180;
                         break;
-                    case ExifInterface.ORIENTATION_ROTATE_270:
+                    case ExifInterfaceEx.ORIENTATION_ROTATE_270:
                         degree = 270;
                         break;
                     default:
@@ -363,17 +349,17 @@ public class MediaScanner  {
     }
 
     public IGeoPointInfo getPositionFromFile(String absolutePath, String id) {
-        ExifInterface exif = null;
+        ExifInterfaceEx exif = null;
         try {
-            exif = new ExifInterface(absolutePath);
+            exif = new ExifInterfaceEx(absolutePath);
         } catch (IOException ex) {
             // exif is null
         }
 
         if (exif != null) {
-            float[] latlng = new float[2];
-            if (exif.getLatLong(latlng)) {
-                return new GeoPointDto(latlng[0], latlng[1], GeoPointDto.NO_ZOOM).setId(id);
+            Double latitude = exif.getLatitude();
+            if (latitude != null) {
+                return new GeoPointDto(latitude, exif.getLongitude(), GeoPointDto.NO_ZOOM).setId(id);
             }
         }
 
@@ -459,24 +445,6 @@ public class MediaScanner  {
             }
         }
         return filePath;
-    }
-
-    /**
-     * Returns number of milliseconds since Jan. 1, 1970, midnight.
-     * Returns -1 if the date time information if not available.
-     */
-    public static long getDateTime(ExifInterface exif) {
-        String dateTimeString =  exif.getAttribute(TAG_DATETIME);
-        if (dateTimeString == null) return -1;
-
-        ParsePosition pos = new ParsePosition(0);
-        try {
-            Date datetime = sExifDateTimeFormatter.parse(dateTimeString, pos);
-            if (datetime == null) return -1;
-            return datetime.getTime();
-        } catch (IllegalArgumentException ex) {
-            return -1;
-        }
     }
 
     /** update media db via android-s native scanner.
