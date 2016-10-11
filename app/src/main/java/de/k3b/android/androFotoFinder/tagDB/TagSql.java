@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2016 by k3b.
+ *
+ * This file is part of AndroFotoFinder.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
+
 package de.k3b.android.androFotoFinder.tagDB;
 
 import android.content.ContentValues;
@@ -8,6 +27,7 @@ import java.util.Date;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.media.IMetaApi;
 import de.k3b.database.QueryParameter;
 import de.k3b.tagDB.TagConverter;
 
@@ -21,8 +41,9 @@ public class TagSql extends FotoSql {
     /** used to query non-standard-image fields */
     public static final Uri SQL_TABLE_EXTERNAL_CONTENT_URI_FILE = MediaStore.Files.getContentUri("external");
 
-    private static final String SQL_COL_EXT_TAGS = MediaStore.Video.Media.TAGS;
-    private static final String SQL_COL_EXT_DESCRIPTION = MediaStore.Images.Media.DESCRIPTION;
+    public static final String SQL_COL_EXT_TAGS = MediaStore.Video.Media.TAGS;
+    public static final String SQL_COL_EXT_DESCRIPTION = MediaStore.Images.Media.DESCRIPTION;
+    public static final String SQL_COL_EXT_TITLE = MediaStore.Images.Media.TITLE;
 
     /** The date & time when last non standard media-scan took place
      *  <P>Type: INTEGER (long) as seconds since jan 1, 1970</P> */
@@ -34,7 +55,7 @@ public class TagSql extends FotoSql {
 
     /** only rows containing all tags are visible */
     public static void addWhereTag(QueryParameter newQuery, String... tags) {
-        String tagvalue = (Global.enableTagSupport) ? TagConverter.tagsAsString("%", tags) : null;
+        String tagvalue = (Global.enableTagSupport) ? TagConverter.asString("%", tags) : null;
         if (tagvalue != null) {
             newQuery.addWhere(SQL_COL_EXT_TAGS + " like ?", tagvalue);
             switchFrom(newQuery, SQL_TABLE_EXTERNAL_CONTENT_URI_FILE);
@@ -65,7 +86,7 @@ public class TagSql extends FotoSql {
     }
 
     public static void setTags(ContentValues values, String... tags) {
-        values.put(SQL_COL_EXT_TAGS, TagConverter.tagsAsString("",tags));
+        values.put(SQL_COL_EXT_TAGS, TagConverter.asString("",tags));
         setLastScanDate(values, new Date());
     }
 
@@ -74,7 +95,7 @@ public class TagSql extends FotoSql {
         setLastScanDate(values, new Date());
     }
 
-    private static void setLastScanDate(ContentValues values, Date lastScanDate) {
+    public static void setLastScanDate(ContentValues values, Date lastScanDate) {
         Long now = (lastScanDate != null)
                 ? lastScanDate.getTime() / 1000 // sec
                 : null;
@@ -87,5 +108,9 @@ public class TagSql extends FotoSql {
             newQuery.addWhere(SQL_COL_EXT_LAST_EXT_SCAN + " is null");
             switchFrom(newQuery, SQL_TABLE_EXTERNAL_CONTENT_URI_FILE);
         }
+    }
+
+    public static void setValues(ContentValues values, IMetaApi data) {
+
     }
 }

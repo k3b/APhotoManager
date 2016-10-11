@@ -17,54 +17,32 @@
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
 
-package de.k3b.android.androFotoFinder.tagDB;
-
-import android.content.Context;
-import android.support.annotation.Nullable;
+package de.k3b.csv2db.csv;
 
 import java.io.Reader;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-
-import de.k3b.csv2db.csv.CsvReader;
 
 /**
  * Loads csv content into tags-db
  *
  * Created by k3b on 21.09.2015.
  */
-public class CsvLoader extends Path2DbIdProcessor {
-    public void load(final Context context, Reader reader) {
-        CsvItemIterator csvReader = new CsvItemIterator(reader);
-        this.process(context, csvReader);
-    }
-
-    @Override
-    protected void process(IPathID _csv, Integer id) {
-        CsvItem csv = (CsvItem) _csv;
-
-        if (id == null) {
-            // !!! TODO not found
-        } else {
-            // !!! TODO
+abstract public class CsvLoader<T extends CsvLoader.CsvItem> {
+    public void load(Reader reader, T item) {
+        CsvItemIterator<T> iter = new CsvItemIterator<T>(reader, item);
+        while (iter.hasNext()) {
+            onNextItem(iter.next());
         }
     }
 
-    protected class CsvItem implements IPathID {
-        private final int mPathIndex;
+    abstract protected void onNextItem(T next);
+
+    abstract public static class CsvItem {
         private String[] mCurrentLineFields = null;
 
-        CsvItem(List<String> header) {
-            mPathIndex = header.indexOf("SourceFile");
-        }
-
-        @Override
-        public String getPath() {
-            return getString(mPathIndex);
-        }
-
-        @Nullable
         protected String getString(int columnNumber) {
             if ((columnNumber < 0) || (mCurrentLineFields == null) || (columnNumber >= mCurrentLineFields.length)) {
                 return null;
@@ -72,8 +50,39 @@ public class CsvLoader extends Path2DbIdProcessor {
             return mCurrentLineFields[columnNumber];
         }
 
-        @Override
-        public Integer getID() {
+        protected Double getDouble(int columnNumber) {
+            String stringValue = getString(columnNumber);
+            if ((stringValue != null) && (stringValue.length()> 0)) {
+                try {
+                    return Double.valueOf(stringValue);
+                } catch (NumberFormatException ex) {
+
+                }
+            }
+            return null;
+        }
+
+        protected Integer getInteger(int columnNumber) {
+            String stringValue = getString(columnNumber);
+            if ((stringValue != null) && (stringValue.length()> 0)) {
+                try {
+                    return Integer.valueOf(stringValue);
+                } catch (NumberFormatException ex) {
+
+                }
+            }
+            return null;
+        }
+
+        protected Date getDate(int columnNumber) {
+            Integer stringValue = getInteger(columnNumber);
+            if ((stringValue != null) && (stringValue.intValue() != 0)) {
+                try {
+                    Long.valueOf(stringValue);
+                } catch (NumberFormatException ex) {
+
+                }
+            }
             return null;
         }
 
@@ -82,15 +91,15 @@ public class CsvLoader extends Path2DbIdProcessor {
         }
     }
 
-    protected class CsvItemIterator implements Iterator<IPathID> {
-        private final CsvItem mItem;
+    protected class CsvItemIterator<T extends CsvItem> implements Iterator<T> {
+        private final T mItem;
         private final CsvReader mCsvReader;
         private boolean isEOF = false;
 
-        CsvItemIterator(Reader reader) {
+        CsvItemIterator(Reader reader, T item) {
             mCsvReader = new CsvReader(reader);
             List<String> header = Arrays.asList(mCsvReader.readLine());
-            mItem = new CsvItem(header);
+            mItem = item;
         }
 
         @Override
@@ -99,7 +108,7 @@ public class CsvLoader extends Path2DbIdProcessor {
         }
 
         @Override
-        public IPathID next() {
+        public T next() {
             String[] line = mCsvReader.readLine();
             mItem.setData(line);
 

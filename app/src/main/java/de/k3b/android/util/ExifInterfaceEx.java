@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2016 by k3b.
+ *
+ * This file is part of AndroFotoFinder.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
+
 package de.k3b.android.util;
 
 import android.media.ExifInterface;
@@ -10,14 +29,17 @@ import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.TimeZone;
+
+import de.k3b.media.IMetaApi;
 
 /**
  * Thin Wrapper around Android-s ExifInterface to read/write exif data from jpg file
  * Created by k3b on 08.10.2016.
  */
 
-public class ExifInterfaceEx extends ExifInterface {
+public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     private static final String NL = "\n";
 
     private static final SimpleDateFormat sExifDateTimeFormatter;
@@ -39,10 +61,17 @@ public class ExifInterfaceEx extends ExifInterface {
         mFilename = filename;
     }
 
-    /**
-     * Returns number of milliseconds since Jan. 1, 1970, midnight.
-     * Returns -1 if the date time information if not available.
-     */
+    @Override
+    public String getPath() {
+        return null;
+    }
+
+    @Override
+    public IMetaApi setPath(String filePath) {
+        return this;
+    }
+
+    @Override
     public Date getDateTimeTaken() {
         String dateTimeString =  this.getAttribute(ExifInterfaceEx.TAG_DATETIME);
         if (dateTimeString == null) return null;
@@ -55,8 +84,10 @@ public class ExifInterfaceEx extends ExifInterface {
         }
     }
 
-    public void setDateTimeTaken(Date value) {
+    @Override
+    public ExifInterfaceEx setDateTimeTaken(Date value) {
         setAttribute(ExifInterfaceEx.TAG_DATETIME, toExifDateTimeString(value));
+        return this;
     }
 
     public static String toExifDateTimeString(Date value) {
@@ -187,18 +218,23 @@ public class ExifInterfaceEx extends ExifInterface {
 
     private Double mLatitude = null;
     private Double mLongitude = null;
-    public void setLatitude(Double latitude) {
+    @Override
+    public ExifInterfaceEx setLatitude(Double latitude) {
         setAttribute(ExifInterfaceEx.TAG_GPS_LATITUDE, convert(latitude));
         setAttribute(ExifInterfaceEx.TAG_GPS_LATITUDE_REF, latitudeRef(latitude));
         mLatitude = latitude;
+        return this;
     }
 
-    public void setLongitude(Double longitude) {
+    @Override
+    public ExifInterfaceEx setLongitude(Double longitude) {
         setAttribute(ExifInterfaceEx.TAG_GPS_LONGITUDE, convert(longitude));
         setAttribute(ExifInterfaceEx.TAG_GPS_LONGITUDE_REF, longitudeRef(longitude));
         mLongitude = longitude;
+        return this;
     }
 
+    @Override
     public Double getLatitude() {
         if (mLatitude == null) {
             loadLatLon();
@@ -206,11 +242,42 @@ public class ExifInterfaceEx extends ExifInterface {
         return mLatitude;
     }
 
+    @Override
     public Double getLongitude() {
         if (mLongitude == null) {
             loadLatLon();
         }
         return mLongitude;
+    }
+
+    @Override
+    public String getTitle() {
+        return null;
+    }
+
+    @Override
+    public IMetaApi setTitle(String title) {
+        return this;
+    }
+
+    @Override
+    public String getDescription() {
+        return null;
+    }
+
+    @Override
+    public IMetaApi setDescription(String description) {
+        return this;
+    }
+
+    @Override
+    public List<String> getTags() {
+        return null;
+    }
+
+    @Override
+    public IMetaApi setTags(List<String> tags) {
+        return this;
     }
 
     private void loadLatLon() {
