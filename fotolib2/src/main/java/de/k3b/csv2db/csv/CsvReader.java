@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2016 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -34,7 +34,7 @@ import java.util.Vector;
 public class CsvReader {
 
 	public static final char FIELDLEN_DELIMITER = ':';
-	private static final char CHAR_LINE_DELIMITER = '\n';
+	public static final char CHAR_LINE_DELIMITER = '\n';
 	private static final char CHAR_IGNORE = '\r';
 	private static final char CHAR_FIELD_SURROUNDER = '\"';
 	private char fieldDelimiter = 0;

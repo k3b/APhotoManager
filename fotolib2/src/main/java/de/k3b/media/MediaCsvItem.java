@@ -29,19 +29,19 @@ import de.k3b.tagDB.TagConverter;
  * Created by k3b on 10.10.2016.
  */
 
-public class MediaCsv extends CsvLoader.CsvItem implements IMetaApi {
+public class MediaCsvItem extends CsvLoader.CsvItem implements IMetaApi {
     private static final String CSV_PATH = "SourceFile"; // used by exiftool-csv
-    private final int colFilePath;
-    private final int colDateTimeTaken;
-    private final int colTitle;
-    private final int colDescription;
-    private final int colTags;
-    private final int colLatitude;
-    private final int colLongitude;
-    private final List<String> header;
+    private int colFilePath;
+    private int colDateTimeTaken;
+    private int colTitle;
+    private int colDescription;
+    private int colTags;
+    private int colLatitude;
+    private int colLongitude;
 
-    public MediaCsv(List<String> header) {
-        this.header = header;
+    @Override
+    public void setHeader(List<String> header) {
+        super.setHeader(header);
         colFilePath         = getColumnIndex(XmpFieldDefinition.PATH);
         colDateTimeTaken    = getColumnIndex(XmpFieldDefinition.DateTimeOriginal);
         colTitle            = getColumnIndex(XmpFieldDefinition.TITLE);

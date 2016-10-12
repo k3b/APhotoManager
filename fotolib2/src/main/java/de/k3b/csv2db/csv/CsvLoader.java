@@ -25,6 +25,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import de.k3b.media.MediaUtil;
+
 /**
  * Loads csv content into tags-db
  *
@@ -42,6 +44,11 @@ abstract public class CsvLoader<T extends CsvLoader.CsvItem> {
 
     abstract public static class CsvItem {
         private String[] mCurrentLineFields = null;
+        protected List<String> header;
+
+        public void setHeader(List<String> header) {
+            this.header = header;
+        }
 
         protected String getString(int columnNumber) {
             if ((columnNumber < 0) || (mCurrentLineFields == null) || (columnNumber >= mCurrentLineFields.length)) {
@@ -75,15 +82,24 @@ abstract public class CsvLoader<T extends CsvLoader.CsvItem> {
         }
 
         protected Date getDate(int columnNumber) {
-            Integer stringValue = getInteger(columnNumber);
-            if ((stringValue != null) && (stringValue.intValue() != 0)) {
-                try {
-                    Long.valueOf(stringValue);
-                } catch (NumberFormatException ex) {
+            Date result = null;
 
+            // if date as string
+            String stringValue = getString(columnNumber);
+            result = MediaUtil.parseIsoDate(stringValue);
+
+            if (result == null) {
+                // if date as integer
+                Integer intValue = getInteger(columnNumber);
+                if ((intValue != null) && (intValue.intValue() != 0)) {
+                    try {
+                        result = new Date(Long.valueOf(intValue));
+                    } catch (NumberFormatException ex) {
+
+                    }
                 }
             }
-            return null;
+            return result;
         }
 
         public void setData(String[] line) {
@@ -98,8 +114,13 @@ abstract public class CsvLoader<T extends CsvLoader.CsvItem> {
 
         CsvItemIterator(Reader reader, T item) {
             mCsvReader = new CsvReader(reader);
-            List<String> header = Arrays.asList(mCsvReader.readLine());
+            List<String> header = Arrays.asList(readLine());
             mItem = item;
+            mItem.setHeader(header);
+        }
+
+        private String[] readLine() {
+            return mCsvReader.readLine();
         }
 
         @Override
@@ -109,7 +130,7 @@ abstract public class CsvLoader<T extends CsvLoader.CsvItem> {
 
         @Override
         public T next() {
-            String[] line = mCsvReader.readLine();
+            String[] line = readLine();
             mItem.setData(line);
 
             if (line == null) {

@@ -24,20 +24,14 @@ package de.k3b.media;
  */
 
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.Date;
-import java.util.List;
-
-import de.k3b.tagDB.TagConverter;
+import de.k3b.csv2db.csv.TestUtil;
 
 public class MediaUtilTests {
     @Test
     public void shouldCopyAllFields() {
-        MediaDTO expected = createTestItem(1);
+        MediaDTO expected = TestUtil.createTestMediaDTO(1);
         MediaDTO actual = new MediaDTO();
         MediaUtil.copy(actual, expected, true, true);
         Assert.assertEquals(expected.toString(), actual.toString());
@@ -74,20 +68,4 @@ public class MediaUtilTests {
                 ")=>" +expected, expected, dest.getTitle());
     }
 
-    public static MediaDTO createTestItem(int id) {
-        MediaDTO result = new MediaDTO();
-
-
-        result.setPath("Path" + id);
-        result.setTitle("Title" + id);
-        result.setDescription("Description" + id);
-        String month = ("" + (((id -1) % 12) +101)).substring(1);
-        String day = ("" + (((id -1) % 30) +101)).substring(1);
-        result.setDateTimeTaken(MediaUtil.parseIsoDate("" + (2000+ id) + "-" + month + "-" + day));
-        result.setLatitude(50 + id + (0.01 * id));
-        result.setLongitude(10 + id + (0.01 * id));
-        result.setTags(TagConverter.fromString("tag" + id));
-
-        return result;
-    }
 }
