@@ -57,14 +57,14 @@ public class MediaCsvTests {
             }
         }
 
-        List<IMetaApi>  load(int... ids) {
+        List<IMetaApi> load(int... ids) {
             String data = createTestCsv(ids);
             return load(data);
         }
-		
-        List<IMetaApi>  load(String data) {
+
+        List<IMetaApi> load(String data) {
             result.clear();
-            super.load(TestUtil.createReader(data),new MediaCsvItem());
+            super.load(TestUtil.createReader(data), new MediaCsvItem());
             return result;
         }
     }
@@ -79,16 +79,15 @@ public class MediaCsvTests {
 
     @Test
     public void shouldLoadExtremas() {
-		String csv = "a;" + XmpFieldDefinition.TITLE.getShortName() + ";c\n" 
-				+ "normal;#1;regular\n"
-				+ "short;#2\n"
-				+ "long;#3;something;extra column\n"
+        String csv = "a;" + XmpFieldDefinition.TITLE.getShortName() + ";c\n"
+                + "normal;#1;regular\n"
+                + "short;#2\n"
+                + "long;#3;something;extra column\n"
                 + "empty\n"
-				+ "quoted;\"#5\";regular\n";
+                + "quoted;\"#5\";regular\n";
         Sut sut = new Sut();
         List<IMetaApi> actual = sut.load(csv);
         Assert.assertEquals("#", 5, actual.size());
         Assert.assertEquals("unquote", "#5", actual.get(4).getTitle());
     }
-
 }

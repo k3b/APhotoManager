@@ -11,10 +11,12 @@ import de.k3b.io.DateUtil;
 abstract public class CsvItem {
     public static final char DEFAULT_CHAR_LINE_DELIMITER = '\n';
     public static final String DEFAULT_CSV_FIELD_DELIMITER = ";";
+    public static final char CHAR_FIELD_SURROUNDER = '\"';
     private String[] mCurrentLineFields = null;
     protected List<String> header;
 
     private String mFieldDelimiter = DEFAULT_CSV_FIELD_DELIMITER;
+    private String mCsvSpecialChars = null;
 
     public void setHeader(List<String> header) {
         this.header = header;
@@ -107,17 +109,30 @@ abstract public class CsvItem {
         int last = getLastNonEmptyIndex();
         if (last < 0) return null;
         StringBuilder result = new StringBuilder();
-        result.append(escape(mCurrentLineFields[0]));
+        result.append(quouteIfNecessary(mCurrentLineFields[0]));
         for (int i = 1; i <= last; i++) {
             result
                     .append(getFieldDelimiter())
-                    .append(escape(mCurrentLineFields[i]));
+                    .append(quouteIfNecessary(mCurrentLineFields[i]));
         }
         return result.toString();
     }
 
-    private String escape(String fieldValue) {
+    /** places quote around fieldValue if necessary */
+    String quouteIfNecessary(String fieldValue) {
+        if (mustQuote(fieldValue)) {
+            return CHAR_FIELD_SURROUNDER + fieldValue.replace(""+CHAR_FIELD_SURROUNDER, "'") + CHAR_FIELD_SURROUNDER;
+        }
         return fieldValue;
+    }
+
+    /** return true if contentmust be quoted because it contains problematic chars */
+    boolean mustQuote(String fieldValue) {
+        if (fieldValue == null) return false;
+        for (char forbidden : mCsvSpecialChars.toCharArray()) {
+            if (fieldValue.indexOf(forbidden) >= 0) return true;
+        }
+        return false;
     }
 
     protected int getLastNonEmptyIndex() {
@@ -136,5 +151,6 @@ abstract public class CsvItem {
 
     public void setFieldDelimiter(String fieldDelimiter) {
         this.mFieldDelimiter = fieldDelimiter;
+        this.mCsvSpecialChars = fieldDelimiter + "\r" + DEFAULT_CHAR_LINE_DELIMITER + CHAR_FIELD_SURROUNDER;
     }
 }

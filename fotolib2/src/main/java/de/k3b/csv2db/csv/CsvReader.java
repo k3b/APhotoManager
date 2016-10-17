@@ -37,7 +37,6 @@ public class CsvReader {
 
 	public static final char FIELDLEN_DELIMITER = ':';
 	private static final char CHAR_IGNORE = '\r';
-	private static final char CHAR_FIELD_SURROUNDER = '\"';
 
 	private char fieldDelimiter = 0;
 
@@ -85,7 +84,7 @@ public class CsvReader {
 						content.append((char) ch);
 					}
 					
-					if (ch == CHAR_FIELD_SURROUNDER)
+					if (ch == CsvItem.CHAR_FIELD_SURROUNDER)
 						this.fieldSurrounder = (char) ch; // start -"- area
 				} else {
 					// waiting for end--"-
@@ -130,9 +129,9 @@ public class CsvReader {
     {
 		if (content.length() > 0)
 		{
-			if (content.charAt(0) == CHAR_FIELD_SURROUNDER)
+			if (content.charAt(0) == CsvItem.CHAR_FIELD_SURROUNDER)
 				content.deleteCharAt(0);
-			if (content.charAt(content.length() -1 ) == CHAR_FIELD_SURROUNDER)
+			if (content.charAt(content.length() -1 ) == CsvItem.CHAR_FIELD_SURROUNDER)
 				content.deleteCharAt(content.length() -1);
 			if (content.length() > 0)
 				return content.toString();
