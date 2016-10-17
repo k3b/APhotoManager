@@ -55,7 +55,7 @@ public class TagSql extends FotoSql {
 
     /** only rows containing all tags are visible */
     public static void addWhereTag(QueryParameter newQuery, String... tags) {
-        String tagvalue = (Global.enableTagSupport) ? TagConverter.asString("%", tags) : null;
+        String tagvalue = (Global.enableTagSupport) ? TagConverter.asDbString("%", tags) : null;
         if (tagvalue != null) {
             newQuery.addWhere(SQL_COL_EXT_TAGS + " like ?", tagvalue);
             switchFrom(newQuery, SQL_TABLE_EXTERNAL_CONTENT_URI_FILE);
@@ -86,7 +86,7 @@ public class TagSql extends FotoSql {
     }
 
     public static void setTags(ContentValues values, String... tags) {
-        values.put(SQL_COL_EXT_TAGS, TagConverter.asString("",tags));
+        values.put(SQL_COL_EXT_TAGS, TagConverter.asDbString("", tags));
         setLastScanDate(values, new Date());
     }
 

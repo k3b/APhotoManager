@@ -10,7 +10,7 @@ import de.k3b.io.DateUtil;
  */
 abstract public class CsvItem {
     public static final char DEFAULT_CHAR_LINE_DELIMITER = '\n';
-    public static final String DEFAULT_CSV_FIELD_DELIMITER = ";";
+    public static final String DEFAULT_CSV_FIELD_DELIMITER = ",";
     public static final char CHAR_FIELD_SURROUNDER = '\"';
     private String[] mCurrentLineFields = null;
     protected List<String> header;

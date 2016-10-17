@@ -28,41 +28,49 @@ import java.util.List;
  */
 
 public class TagConverter {
-    public static final String TAG_DELIMITER = ",";
+    public static final String TAG_DB_DELIMITER = ";";
 
-    public static String asString(String extraDelimiter, List<String> tags) {
+    public static String asDbString(String wildcard, List<String> tags) {
         if ((tags == null) || (tags.size() == 0)) return null;
-        return asString(extraDelimiter, tags.toArray(new String[tags.size()]));
+        String[] tagsArray = tags.toArray(new String[tags.size()]);
+        if (wildcard == null)
+            return asDbString("","", ", ", "", tagsArray);
+        return asDbString(wildcard, tagsArray);
     }
 
-    /**
-     *
-     * @param extraDelimiter
-     * @param tags
-     * @return i.e. "%;tag1;%;tag2;%" or ";tag1;;tag2;"
-     */
-    public static String asString(String extraDelimiter, String... tags) {
+    private static String asDbString(String wildcard, String prefix, String seperator, String Suffix, String... tags) {
         StringBuilder result = null;
         if ((tags != null) && (tags.length > 0)) {
             Arrays.sort(tags);
+            String nextSeperator = "";
             for (String tag : tags) {
                 if ((tag != null) && (tag.length() > 0)) {
-                    if (result == null) result = new StringBuilder().append(extraDelimiter);
-                    result.append(TAG_DELIMITER)
+                    if (result == null) result = new StringBuilder().append(wildcard);
+                    result  .append(nextSeperator)
+                            .append(prefix)
                             .append(tag.replace(",", "").replace(" ", ""))
-                            .append(TAG_DELIMITER).append(extraDelimiter);
+                            .append(Suffix).append(wildcard);
+                    nextSeperator = seperator;
                 }
             }
         }
         if (result == null) return null;
         return result.toString();
     }
+
+    /**
+     *  @param wildcard
+     * @param tags  @return i.e. "%;tag1;%;tag2;%" or ";tag1;;tag2;%"
+     * */
+    public static String asDbString(String wildcard, String... tags) {
+        return asDbString(wildcard,TAG_DB_DELIMITER, "", TAG_DB_DELIMITER, tags);
+    }
     public static List<String> fromString(String tags) {
         if (tags == null) return null;
         ArrayList<String> result = new ArrayList<String>();
-        for(String elem : tags.split(TAG_DELIMITER)) {
+        for(String elem : tags.split("[,;:]")) {
             if ((elem != null) && (elem.length() > 0)) {
-                result.add(elem);
+                result.add(elem.trim());
             }
         }
         if (result.size() == 0) return null;

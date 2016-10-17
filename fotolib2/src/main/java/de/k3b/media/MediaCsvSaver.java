@@ -44,6 +44,7 @@ public class MediaCsvSaver {
             MediaUtil.copy(csvLine, item, true, true);
             if (!csvLine.isEmpty()) {
                 this.printer.write(csvLine.toString());
+                this.printer.write(CsvItem.DEFAULT_CHAR_LINE_DELIMITER);
             }
         }
     }

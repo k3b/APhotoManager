@@ -21,7 +21,6 @@ package de.k3b.media;
 
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 import de.k3b.io.DateUtil;
 import de.k3b.tagDB.TagConverter;
@@ -41,7 +40,7 @@ public class MediaUtil {
                 " description " + item.getDescription() +
                 " latitude " + item.getLatitude() +
                 " longitude " + item.getLongitude() +
-                " tags " + TagConverter.asString("", item.getTags());
+                " tags " + TagConverter.asDbString(null, item.getTags());
     }
 
     public static void copy(IMetaApi destination, IMetaApi source, boolean allowSetNull, boolean overwriteExisting) {

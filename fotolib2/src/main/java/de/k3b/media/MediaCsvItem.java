@@ -137,7 +137,7 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
 
     @Override
     public IMetaApi setTags(List<String> tags) {
-        setString(colTags, TagConverter.asString(TagConverter.TAG_DELIMITER, tags));
+        setString(colTags, TagConverter.asDbString(null, tags));
         return this;
     }
 

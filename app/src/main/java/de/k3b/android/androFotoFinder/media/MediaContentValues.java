@@ -137,7 +137,7 @@ public class MediaContentValues implements IMetaApi {
 
     @Override
     public IMetaApi setTags(List<String> tags) {
-        data.put(SQL_COL_EXT_TAGS, TagConverter.asString("",tags));
+        data.put(SQL_COL_EXT_TAGS, TagConverter.asDbString("",tags));
         setLastScanDate(data, new Date());
         return this;
     }
