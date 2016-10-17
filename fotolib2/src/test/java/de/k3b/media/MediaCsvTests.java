@@ -22,11 +22,13 @@ package de.k3b.media;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.k3b.csv2db.csv.CsvItem;
 import de.k3b.csv2db.csv.CsvLoader;
-import de.k3b.csv2db.csv.CsvReader;
 import de.k3b.csv2db.csv.TestUtil;
 
 /**
@@ -35,31 +37,12 @@ import de.k3b.csv2db.csv.TestUtil;
 
 public class MediaCsvTests {
 
-    private static final String CSV_FIELD_DELIMITERC = ";";
-
-    public final static String header = XmpFieldDefinition.PATH.getShortName() + CSV_FIELD_DELIMITERC +
-            XmpFieldDefinition.TITLE.getShortName() + CSV_FIELD_DELIMITERC +
-            XmpFieldDefinition.DESCRIPTION.getShortName() + CSV_FIELD_DELIMITERC +
-            XmpFieldDefinition.DateTimeOriginal.getShortName() + CSV_FIELD_DELIMITERC +
-            XmpFieldDefinition.GPSLatitude.getShortName() + CSV_FIELD_DELIMITERC +
-            XmpFieldDefinition.GPSLongitude.getShortName() + CSV_FIELD_DELIMITERC +
-            XmpFieldDefinition.TAGS.getShortName() + CSV_FIELD_DELIMITERC +
-            CsvReader.CHAR_LINE_DELIMITER;
-
     public static String createTestCsv(int... ids) {
-        StringBuilder result = new StringBuilder();
-        result.append(header);
-
+        StringWriter result = new StringWriter();
+        MediaCsvSaver saver = new MediaCsvSaver(new PrintWriter(result));
         for (int id : ids) {
-            result.append("Path").append(id).append(CSV_FIELD_DELIMITERC);
-            result.append("Title").append(id).append(CSV_FIELD_DELIMITERC);
-            result.append("Description").append(id).append(CSV_FIELD_DELIMITERC);
-            String month = ("" + (((id - 1) % 12) + 101)).substring(1);
-            String day = ("" + (((id - 1) % 30) + 101)).substring(1);
-            result.append(2000 + id).append("-").append(month).append("-").append(day).append(CSV_FIELD_DELIMITERC);
-            result.append(50 + id + (0.01 * id)).append(CSV_FIELD_DELIMITERC);
-            result.append(10 + id + (0.01 * id)).append(CSV_FIELD_DELIMITERC);
-            result.append("tag").append(id).append(CsvReader.CHAR_LINE_DELIMITER);
+            MediaDTO item = TestUtil.createTestMediaDTO(id);
+            saver.save(item);
         }
         return result.toString();
     }
@@ -75,8 +58,12 @@ public class MediaCsvTests {
         }
 
         List<IMetaApi>  load(int... ids) {
-            result.clear();
             String data = createTestCsv(ids);
+            return load(data);
+        }
+		
+        List<IMetaApi>  load(String data) {
+            result.clear();
             super.load(TestUtil.createReader(data),new MediaCsvItem());
             return result;
         }
@@ -88,6 +75,20 @@ public class MediaCsvTests {
         List<IMetaApi> actual = sut.load(1);
         MediaDTO expected = TestUtil.createTestMediaDTO(1);
         Assert.assertEquals(expected.toString(), actual.get(0).toString());
+    }
+
+    @Test
+    public void shouldLoadExtremas() {
+		String csv = "a;" + XmpFieldDefinition.TITLE.getShortName() + ";c\n" 
+				+ "normal;#1;regular\n"
+				+ "short;#2\n"
+				+ "long;#3;something;extra column\n"
+                + "empty\n"
+				+ "quoted;\"#5\";regular\n";
+        Sut sut = new Sut();
+        List<IMetaApi> actual = sut.load(csv);
+        Assert.assertEquals("#", 5, actual.size());
+        Assert.assertEquals("unquote", "#5", actual.get(4).getTitle());
     }
 
 }

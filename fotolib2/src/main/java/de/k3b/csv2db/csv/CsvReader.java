@@ -32,12 +32,15 @@ import java.util.Vector;
  *
  */
 public class CsvReader {
+	/** the first occurence in the first line of one othe these chars will become the {@link #fieldDelimiter} */
+	private static final String POSSIBLE_DELIMITER_CHARS = ",;\t";
 
 	public static final char FIELDLEN_DELIMITER = ':';
-	public static final char CHAR_LINE_DELIMITER = '\n';
 	private static final char CHAR_IGNORE = '\r';
 	private static final char CHAR_FIELD_SURROUNDER = '\"';
+
 	private char fieldDelimiter = 0;
+
 	private char fieldSurrounder = 0; // != 0: look for matching -"- to allow multiline fields
 
 	private Reader reader;
@@ -47,13 +50,12 @@ public class CsvReader {
 
 	// csv recordnumber
 	private int recordNumber = 0;
-	
+
 	public CsvReader(Reader reader) {
 		this.reader = reader;
 	}
 
 	public String[] readLine() {
-		final String trennChars = ",;\t";
 		Vector<String> result = new Vector<String>();
 		StringBuffer content = new StringBuffer();
 		this.fieldSurrounder = 0;
@@ -63,19 +65,19 @@ public class CsvReader {
 			int ch;
 			while ((ch=this.reader.read()) != -1) // ,0,cbuf.length) > 0)
 			{
-				if (ch==CHAR_LINE_DELIMITER) this.lineNumber++;
+				if (ch== CsvItem.DEFAULT_CHAR_LINE_DELIMITER) this.lineNumber++;
 				
 				if (this.fieldSurrounder == 0) {
 					if (fieldDelimiter == 0)
 					{
 						// fieldDelimiter unknown: infer
-						if (trennChars.indexOf(ch) >= 0)
+						if (POSSIBLE_DELIMITER_CHARS.indexOf(ch) >= 0)
 							fieldDelimiter = (char) ch;
 					}
 					if (ch == fieldDelimiter) {
 						result.addElement(getStringWithoutDelimiters(content));
 						content.setLength(0);
-					} else if (ch==CHAR_LINE_DELIMITER) {
+					} else if (ch== CsvItem.DEFAULT_CHAR_LINE_DELIMITER) {
 						result.addElement(getStringWithoutDelimiters(content));
 						this.recordNumber++;
 						return toStringArray(result);
@@ -121,7 +123,6 @@ public class CsvReader {
 	}
 
 	/**
-	 * 
 	 * @param content that may contain starting and ending -"-
 	 * @return string without starting and ending -"-
 	 */
@@ -145,5 +146,13 @@ public class CsvReader {
 
 	public int getRecordNumber() {
 		return this.recordNumber;
+	}
+
+	public char getFieldDelimiter() {
+		return fieldDelimiter;
+	}
+
+	public void setFieldDelimiter(char fieldDelimiter) {
+		this.fieldDelimiter = fieldDelimiter;
 	}
 }

@@ -21,18 +21,15 @@ package de.k3b.csv2db.csv;
 
 import java.io.Reader;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-
-import de.k3b.media.MediaUtil;
 
 /**
  * Loads csv content into tags-db
  *
  * Created by k3b on 21.09.2015.
  */
-abstract public class CsvLoader<T extends CsvLoader.CsvItem> {
+abstract public class CsvLoader<T extends CsvItem> {
     public void load(Reader reader, T item) {
         CsvItemIterator<T> iter = new CsvItemIterator<T>(reader, item);
         while (iter.hasNext()) {
@@ -41,71 +38,6 @@ abstract public class CsvLoader<T extends CsvLoader.CsvItem> {
     }
 
     abstract protected void onNextItem(T next);
-
-    abstract public static class CsvItem {
-        private String[] mCurrentLineFields = null;
-        protected List<String> header;
-
-        public void setHeader(List<String> header) {
-            this.header = header;
-        }
-
-        protected String getString(int columnNumber) {
-            if ((columnNumber < 0) || (mCurrentLineFields == null) || (columnNumber >= mCurrentLineFields.length)) {
-                return null;
-            }
-            return mCurrentLineFields[columnNumber];
-        }
-
-        protected Double getDouble(int columnNumber) {
-            String stringValue = getString(columnNumber);
-            if ((stringValue != null) && (stringValue.length()> 0)) {
-                try {
-                    return Double.valueOf(stringValue);
-                } catch (NumberFormatException ex) {
-
-                }
-            }
-            return null;
-        }
-
-        protected Integer getInteger(int columnNumber) {
-            String stringValue = getString(columnNumber);
-            if ((stringValue != null) && (stringValue.length()> 0)) {
-                try {
-                    return Integer.valueOf(stringValue);
-                } catch (NumberFormatException ex) {
-
-                }
-            }
-            return null;
-        }
-
-        protected Date getDate(int columnNumber) {
-            Date result = null;
-
-            // if date as string
-            String stringValue = getString(columnNumber);
-            result = MediaUtil.parseIsoDate(stringValue);
-
-            if (result == null) {
-                // if date as integer
-                Integer intValue = getInteger(columnNumber);
-                if ((intValue != null) && (intValue.intValue() != 0)) {
-                    try {
-                        result = new Date(Long.valueOf(intValue));
-                    } catch (NumberFormatException ex) {
-
-                    }
-                }
-            }
-            return result;
-        }
-
-        public void setData(String[] line) {
-            mCurrentLineFields = line;
-        }
-    }
 
     protected class CsvItemIterator<T extends CsvItem> implements Iterator<T> {
         private final T mItem;
@@ -117,6 +49,7 @@ abstract public class CsvLoader<T extends CsvLoader.CsvItem> {
             List<String> header = Arrays.asList(readLine());
             mItem = item;
             mItem.setHeader(header);
+            mItem.setFieldDelimiter("" + mCsvReader.getFieldDelimiter());
         }
 
         private String[] readLine() {
@@ -130,13 +63,15 @@ abstract public class CsvLoader<T extends CsvLoader.CsvItem> {
 
         @Override
         public T next() {
-            String[] line = readLine();
-            mItem.setData(line);
+            do {
+                String[] line = readLine();
+                mItem.setData(line);
 
-            if (line == null) {
-                isEOF = true;
-                return null;
-            }
+                if (line == null) {
+                    isEOF = true;
+                    return null;
+                }
+            } while (mItem.isEmpty());
             return mItem;
         }
 

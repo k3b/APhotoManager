@@ -28,10 +28,10 @@ import java.util.List;
  */
 
 public class TagConverter {
-    public static final String TAG_DELIMITER = ";";
+    public static final String TAG_DELIMITER = ",";
 
     public static String asString(String extraDelimiter, List<String> tags) {
-        if ((tags == null) && (tags.size() == 0)) return null;
+        if ((tags == null) || (tags.size() == 0)) return null;
         return asString(extraDelimiter, tags.toArray(new String[tags.size()]));
     }
 

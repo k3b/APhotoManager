@@ -19,36 +19,24 @@
 
 package de.k3b.media;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.TimeZone;
-import java.util.logging.SimpleFormatter;
 
+import de.k3b.io.DateUtil;
 import de.k3b.tagDB.TagConverter;
-import de.k3b.util.IsoDateTimeParser;
 
 /**
  * Created by k3b on 10.10.2016.
  */
 
 public class MediaUtil {
-    private static final DateFormat IsoDateTimeFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss", Locale.ROOT);
-    private static final DateFormat IsoDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
-
-    static {
-        IsoDateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        IsoDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
 
     public static String toString(IMetaApi item) {
         if (item == null) return "";
         return item.getClass().getSimpleName() + ":" +
                 " path " + item.getPath() +
-                " dateTimeTaken " + toIsoDateString(item.getDateTimeTaken()) +
+                " dateTimeTaken " + DateUtil.toIsoDateString(item.getDateTimeTaken()) +
                 " title " + item.getTitle() +
                 " description " + item.getDescription() +
                 " latitude " + item.getLatitude() +
@@ -92,19 +80,4 @@ public class MediaUtil {
         return ((newValue != null) || allowSetNull);
     }
 
-    public static Date parseIsoDate(String dateString) {
-        Date result = IsoDateTimeParser.parse(dateString);
-        if (result == null) {
-            try {
-                result = IsoDateFormat.parse(dateString);
-            } catch (ParseException e) {
-            }
-        }
-        return result;
-    }
-
-    public static String toIsoDateString(Date date) {
-        if (date == null) return "";
-        return IsoDateTimeFormat.format(date);
-    }
 }
