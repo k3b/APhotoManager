@@ -41,6 +41,8 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
     private static final String CSV_PATH = "SourceFile"; // used by exiftool-csv
     private int colFilePath;
     private int colDateTimeTaken;
+    private int colDateCreated;
+    private int colCreateDate;
     private int colTitle;
     private int colDescription;
     private int colTags;
@@ -56,6 +58,8 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
         super.setHeader(header);
         colFilePath         = getColumnIndex(XmpFieldDefinition.PATH);
         colDateTimeTaken    = getColumnIndex(XmpFieldDefinition.DateTimeOriginal);
+        colDateCreated    = getColumnIndex(XmpFieldDefinition.DateCreated);
+        colCreateDate    = getColumnIndex(XmpFieldDefinition.CreateDate);
         colTitle            = getColumnIndex(XmpFieldDefinition.TITLE);
         colDescription      = getColumnIndex(XmpFieldDefinition.DESCRIPTION);
         colTags             = getColumnIndex(XmpFieldDefinition.TAGS);
@@ -70,41 +74,41 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
 
     @Override
     public IMetaApi setPath(String filePath) {
-        setString(colFilePath, filePath);
+        setString(filePath, colFilePath);
         return this;
     }
 
     @Override
     public Date getDateTimeTaken() {
-        return getDate(colDateTimeTaken);
+        return getDate(colDateTimeTaken, colDateCreated, colCreateDate);
     }
 
     @Override
     public IMetaApi setDateTimeTaken(Date value) {
-        setDate(colDateTimeTaken, value);
+        setDate(value, colCreateDate, colDateCreated, colDateTimeTaken );
         return this;
     }
 
     @Override
     public IMetaApi setLatitude(Double latitude) {
-        setString(colLatitude, latitude);
+        setString(latitude, colLatitude);
         return this;
     }
 
     @Override
     public IMetaApi setLongitude(Double longitude) {
-        setString(colLongitude, longitude);
+        setString(longitude, colLongitude);
         return this;
     }
 
     @Override
     public Double getLatitude() {
-        return getDouble(colLatitude);
+        return getDouble(colLatitude,"NS");
     }
 
     @Override
     public Double getLongitude() {
-        return getDouble(colLongitude);
+        return getDouble(colLongitude,"EW");
     }
 
     @Override
@@ -114,7 +118,7 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
 
     @Override
     public IMetaApi setTitle(String title) {
-        setString(colTitle, title);
+        setString(title, colTitle);
         return this;
     }
 
@@ -125,7 +129,7 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
 
     @Override
     public IMetaApi setDescription(String description) {
-        setString(colDescription,description);
+        setString(description, colDescription);
         return this;
     }
 
@@ -137,7 +141,7 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
 
     @Override
     public IMetaApi setTags(List<String> tags) {
-        setString(colTags, TagConverter.asDbString(null, tags));
+        setString(TagConverter.asDbString(null, tags), colTags);
         return this;
     }
 

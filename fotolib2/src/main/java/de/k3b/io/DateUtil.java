@@ -14,13 +14,14 @@ import de.k3b.util.IsoDateTimeParser;
  */
 
 public class DateUtil {
-    public static final DateFormat IsoDateTimeFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss", Locale.ROOT);
+    public static final DateFormat IsoDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ROOT);
     public static final DateFormat IsoDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
     public static final DateFormat IsoDateFormat2 = new SimpleDateFormat("yyyyMMdd", Locale.ROOT);
 
     static {
         DateUtil.IsoDateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         DateUtil.IsoDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        DateUtil.IsoDateFormat2.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     public static Date parseIsoDate(String dateString) {

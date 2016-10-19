@@ -28,13 +28,16 @@ import de.k3b.media.XmpNamespace;
 public enum XmpFieldDefinition {
     PATH(XmpNamespace.NONE,"SourceFile"), // used by exiftool-csv
 
+    CreateDate(XmpNamespace.XAP,"CreateDate"),          // JPhotoTagger default
+    DateCreated(XmpNamespace.PHOTOSHOP,"DateCreated"),  // exiftool default
     DateTimeOriginal(XmpNamespace.EXIF,"DateTimeOriginal"),
+
     GPSLatitude(XmpNamespace.EXIF,"GPSLatitude"),
     GPSLongitude(XmpNamespace.EXIF,"GPSLongitude"),
 
     TITLE(XmpNamespace.DC,"Title"),
-    TAGS(XmpNamespace.DC,"Subject"),
-    DESCRIPTION(XmpNamespace.DC,"Description");
+    DESCRIPTION(XmpNamespace.DC,"Description"),
+    TAGS(XmpNamespace.DC,"Subject");
 
     private final XmpNamespace xmpNamespace;
     private final String name;

@@ -26,8 +26,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
-import de.k3b.csv2db.csv.CsvItem;
 import de.k3b.csv2db.csv.CsvLoader;
 import de.k3b.csv2db.csv.TestUtil;
 
@@ -71,6 +71,7 @@ public class MediaCsvTests {
 
     @Test
     public void shouldLoad1() {
+        TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
         Sut sut = new Sut();
         List<IMetaApi> actual = sut.load(1);
         MediaDTO expected = TestUtil.createTestMediaDTO(1);

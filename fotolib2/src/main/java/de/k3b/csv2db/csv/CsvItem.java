@@ -1,12 +1,32 @@
+/*
+ * Copyright (c) 2015 by k3b.
+ *
+ * This file is part of AndroFotoFinder.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
+
 package de.k3b.csv2db.csv;
 
 import java.util.Date;
 import java.util.List;
 
 import de.k3b.io.DateUtil;
+import de.k3b.io.GeoUtil;
 
 /**
- * Created by EVE on 17.10.2016.
+ * Created by k3b on 17.10.2016.
  */
 abstract public class CsvItem {
     public static final char DEFAULT_CHAR_LINE_DELIMITER = '\n';
@@ -41,7 +61,7 @@ abstract public class CsvItem {
         return mCurrentLineFields[columnNumber];
     }
 
-    protected void setString(int columnNumber, Object value) {
+    protected void setString(Object value, int columnNumber) {
         if (!isInvalidIndex(columnNumber)) {
             mCurrentLineFields[columnNumber] = (value != null) ? value.toString() : null;
         }
@@ -51,12 +71,12 @@ abstract public class CsvItem {
         return (columnNumber < 0) || (mCurrentLineFields == null) || (columnNumber >= mCurrentLineFields.length);
     }
 
-    protected Double getDouble(int columnNumber) {
+    protected Double getDouble(int columnNumber, String plusMinus) {
         String stringValue = getString(columnNumber);
         if ((stringValue != null) && (stringValue.length() > 0)) {
             try {
-                return Double.valueOf(stringValue);
-            } catch (NumberFormatException ex) {
+                return Double.valueOf(GeoUtil.parse(stringValue, plusMinus));
+            } catch (Exception ex) {
 
             }
         }
@@ -75,26 +95,35 @@ abstract public class CsvItem {
         return null;
     }
 
-    protected void setDate(int columnNumber, Date value) {
-        setString(columnNumber, DateUtil.toIsoDateString(value));
+    // last wins
+    protected void setDate(Date value, int... columnNumbers) {
+        for (int columnNumber : columnNumbers) {
+            setString(DateUtil.toIsoDateString(value), columnNumber);
+        }
     }
 
-    protected Date getDate(int columnNumber) {
+    // first wins
+    protected Date getDate(int... columnNumbers) {
         Date result = null;
 
-        // if date as string
-        String stringValue = getString(columnNumber);
-        result = DateUtil.parseIsoDate(stringValue);
+        for (int columnNumber : columnNumbers) {
+            if (columnNumber >= 0) {
+                // if date as string
+                String stringValue = getString(columnNumber);
+                result = DateUtil.parseIsoDate(stringValue);
 
-        if (result == null) {
-            // if date as integer
-            Integer intValue = getInteger(columnNumber);
-            if ((intValue != null) && (intValue.intValue() != 0)) {
-                try {
-                    result = new Date(Long.valueOf(intValue));
-                } catch (NumberFormatException ex) {
+                if (result == null) {
+                    // if date as integer
+                    Integer intValue = getInteger(columnNumber);
+                    if ((intValue != null) && (intValue.intValue() != 0)) {
+                        try {
+                            result = new Date(Long.valueOf(intValue));
+                        } catch (NumberFormatException ex) {
 
+                        }
+                    }
                 }
+                if (result != null) return result;
             }
         }
         return result;

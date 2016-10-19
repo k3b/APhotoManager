@@ -25,8 +25,10 @@ package de.k3b.media;
 
 public enum XmpNamespace {
     NONE("",""),
-    EXIF("exif",""),
-    DC("XMP-dc", "");
+    EXIF("XMP-exif","http://ns.adobe.com/exif/1.0/"),
+    XAP("XMP-xmp","http://ns.adobe.com/xap/1.0/"),
+    DC("XMP-dc", "http://purl.org/dc/elements/1.1/"),
+    PHOTOSHOP("","http://ns.adobe.com/photoshop/1.0/");
 
 
     private final String prefix;
