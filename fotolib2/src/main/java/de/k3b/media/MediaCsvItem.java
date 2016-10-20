@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.List;
 
 import de.k3b.csv2db.csv.CsvItem;
+import de.k3b.io.GeoUtil;
 import de.k3b.tagDB.TagConverter;
 
 /**
@@ -91,24 +92,24 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
 
     @Override
     public IMetaApi setLatitude(Double latitude) {
-        setString(latitude, colLatitude);
+        setString(GeoUtil.toCsvStringLatLon(latitude), colLatitude);
         return this;
     }
 
     @Override
     public IMetaApi setLongitude(Double longitude) {
-        setString(longitude, colLongitude);
+        setString(GeoUtil.toCsvStringLatLon(longitude), colLongitude);
         return this;
     }
 
     @Override
     public Double getLatitude() {
-        return getDouble(colLatitude,"NS");
+        return GeoUtil.parse(getString(colLatitude),"NS");
     }
 
     @Override
     public Double getLongitude() {
-        return getDouble(colLongitude,"EW");
+        return GeoUtil.parse(getString(colLongitude),"EW");
     }
 
     @Override

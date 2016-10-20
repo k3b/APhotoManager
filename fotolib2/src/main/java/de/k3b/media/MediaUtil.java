@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.List;
 
 import de.k3b.io.DateUtil;
+import de.k3b.io.GeoUtil;
 import de.k3b.tagDB.TagConverter;
 
 /**
@@ -38,8 +39,8 @@ public class MediaUtil {
                 " dateTimeTaken " + DateUtil.toIsoDateString(item.getDateTimeTaken()) +
                 " title " + item.getTitle() +
                 " description " + item.getDescription() +
-                " latitude " + item.getLatitude() +
-                " longitude " + item.getLongitude() +
+                " latitude " + GeoUtil.toCsvStringLatLon(item.getLatitude()) +
+                " longitude " + GeoUtil.toCsvStringLatLon(item.getLongitude()) +
                 " tags " + TagConverter.asDbString(null, item.getTags());
     }
 

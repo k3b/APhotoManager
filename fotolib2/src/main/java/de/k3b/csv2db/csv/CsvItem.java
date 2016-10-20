@@ -71,18 +71,6 @@ abstract public class CsvItem {
         return (columnNumber < 0) || (mCurrentLineFields == null) || (columnNumber >= mCurrentLineFields.length);
     }
 
-    protected Double getDouble(int columnNumber, String plusMinus) {
-        String stringValue = getString(columnNumber);
-        if ((stringValue != null) && (stringValue.length() > 0)) {
-            try {
-                return Double.valueOf(GeoUtil.parse(stringValue, plusMinus));
-            } catch (Exception ex) {
-
-            }
-        }
-        return null;
-    }
-
     protected Integer getInteger(int columnNumber) {
         String stringValue = getString(columnNumber);
         if ((stringValue != null) && (stringValue.length() > 0)) {
