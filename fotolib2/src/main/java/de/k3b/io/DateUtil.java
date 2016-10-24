@@ -18,10 +18,12 @@ public class DateUtil {
     public static final DateFormat IsoDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
     public static final DateFormat IsoDateFormat2 = new SimpleDateFormat("yyyyMMdd", Locale.ROOT);
 
+    public static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+
     static {
-        DateUtil.IsoDateTimeFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        DateUtil.IsoDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        DateUtil.IsoDateFormat2.setTimeZone(TimeZone.getTimeZone("UTC"));
+        DateUtil.IsoDateTimeFormat.setTimeZone(UTC);
+        DateUtil.IsoDateFormat.setTimeZone(UTC);
+        DateUtil.IsoDateFormat2.setTimeZone(UTC);
     }
 
     public static Date parseIsoDate(String dateString) {
@@ -46,7 +48,7 @@ public class DateUtil {
     }
 
     public static String toIsoDateString(Date date) {
-        if (date == null) return "";
+        if (date == null) return null;
         return IsoDateTimeFormat.format(date);
     }
 }

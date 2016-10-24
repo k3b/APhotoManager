@@ -19,28 +19,23 @@
 
 package de.k3b.media;
 
+import org.junit.Assert;
+import org.junit.Test;
+
+import de.k3b.csv2db.csv.TestUtil;
+
 /**
- * Created by k3b on 10.10.2016.
+ * Created by k3b on 24.10.2016.
  */
 
-public enum XmpNamespace {
-    NONE("",""),
-    EXIF("XMP-exif","http://ns.adobe.com/exif/1.0/"),
-    XAP("XMP-xmp","http://ns.adobe.com/xap/1.0/"),
-    DC("XMP-dc", "http://purl.org/dc/elements/1.1/"),
-    PHOTOSHOP("","http://ns.adobe.com/photoshop/1.0/");
+public class MediaXmpTests {
+    @Test
+    public void shouldCopyAllFields() {
+        MediaXmpItem sut = new MediaXmpItem();
+        MediaDTO expected = TestUtil.createTestMediaDTO(1);
+        MediaUtil.copy(sut, expected, true, true);
+        MediaDTO actual = new MediaDTO(sut);
 
-
-    private final String prefix;
-    private final String uri;
-
-    private XmpNamespace(String prefix, String uri) {
-        this.prefix = prefix;
-
-        this.uri = uri;
-    }
-
-    public String getUriAsString() {
-        return uri;
+        Assert.assertEquals(expected.toString(), actual.toString());
     }
 }

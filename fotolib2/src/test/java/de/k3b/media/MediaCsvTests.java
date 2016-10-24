@@ -30,6 +30,7 @@ import java.util.TimeZone;
 
 import de.k3b.csv2db.csv.CsvLoader;
 import de.k3b.csv2db.csv.TestUtil;
+import de.k3b.io.DateUtil;
 
 /**
  * Created by k3b on 11.10.2016.
@@ -71,7 +72,7 @@ public class MediaCsvTests {
 
     @Test
     public void shouldLoad1() {
-        TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
+        TimeZone.setDefault(DateUtil.UTC);
         Sut sut = new Sut();
         List<IMetaApi> actual = sut.load(1);
         MediaDTO expected = TestUtil.createTestMediaDTO(1);

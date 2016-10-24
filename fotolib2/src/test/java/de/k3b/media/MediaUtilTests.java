@@ -38,6 +38,13 @@ public class MediaUtilTests {
     }
 
     @Test
+    public void shouldCountChanges() {
+        MediaDTO expected = TestUtil.createTestMediaDTO(1);
+        Assert.assertEquals("all different", 7, MediaUtil.countChangedProperties(expected, TestUtil.createTestMediaDTO(2), false));
+        Assert.assertEquals("all same", 0, MediaUtil.countChangedProperties(expected, TestUtil.createTestMediaDTO(1), false));
+    }
+
+    @Test
     public void shouldCopyAlways() {
         check("src", "dest", true, true, "src");
         check("src", null, true, true, "src");

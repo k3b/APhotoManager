@@ -44,34 +44,114 @@ public class MediaUtil {
                 " tags " + TagConverter.asDbString(null, item.getTags());
     }
 
-    public static void copy(IMetaApi destination, IMetaApi source, boolean allowSetNull, boolean overwriteExisting) {
+    /** copy content from source to destination. @return number of copied properties */
+    public static int copy(IMetaApi destination, IMetaApi source, boolean allowSetNull, boolean overwriteExisting) {
+        int changes = 0;
         String sValue = source.getDescription();
-        if (allowed(allowSetNull, sValue, overwriteExisting, destination.getDescription()))
+        if (allowed(allowSetNull, sValue, overwriteExisting, destination.getDescription())) {
             destination.setDescription(sValue);
+            changes++;
+        }
 
         sValue = source.getPath();
-        if (allowed(allowSetNull, sValue, overwriteExisting, destination.getPath()))
+        if (allowed(allowSetNull, sValue, overwriteExisting, destination.getPath())) {
             destination.setPath(sValue);
+            changes++;
+        }
 
         sValue = source.getTitle();
-        if (allowed(allowSetNull, sValue, overwriteExisting, destination.getTitle()))
+        if (allowed(allowSetNull, sValue, overwriteExisting, destination.getTitle())) {
             destination.setTitle(sValue);
+            changes++;
+        }
 
         Date dValue = source.getDateTimeTaken();
-        if (allowed(allowSetNull, dValue, overwriteExisting, destination.getDateTimeTaken()))
+        if (allowed(allowSetNull, dValue, overwriteExisting, destination.getDateTimeTaken())) {
             destination.setDateTimeTaken(dValue);
+            changes++;
+        }
 
         Double doValue = source.getLatitude();
-        if (allowed(allowSetNull, doValue, overwriteExisting, destination.getLatitude()))
+        if (allowed(allowSetNull, doValue, overwriteExisting, destination.getLatitude())) {
             destination.setLatitude(doValue);
+            changes++;
+        }
 
         doValue = source.getLongitude();
-        if (allowed(allowSetNull, doValue, overwriteExisting, destination.getLongitude()))
+        if (allowed(allowSetNull, doValue, overwriteExisting, destination.getLongitude())) {
             destination.setLongitude(doValue);
+            changes++;
+        }
 
         List<String> tValue = source.getTags();
-        if (allowed(allowSetNull, tValue, overwriteExisting, destination.getTags()))
+        if (allowed(allowSetNull, tValue, overwriteExisting, destination.getTags())) {
             destination.setTags(tValue);
+            changes++;
+        }
+        return changes;
+    }
+
+    /**
+     * Calculate the number of properties that are different between destination and other.
+     * Used to skip "save" if there are no changes.
+     *
+     * @param setIdenticalPropsToNull If true set all properties of destination to null
+     *                                that are identical to the properties of "other".
+     **/
+    public static int countChangedProperties(IMetaApi destination, IMetaApi other,
+                                             boolean setIdenticalPropsToNull) {
+        int differentCount = 0;
+        if (isSameOrNull(other.getDescription(), destination.getDescription())) {
+            if (setIdenticalPropsToNull) destination.setDescription(null);
+        } else {
+            differentCount++;
+        }
+
+        if (isSameOrNull(other.getPath(), destination.getPath())) {
+            if (setIdenticalPropsToNull) destination.setPath(null);
+        } else {
+            differentCount++;
+        }
+
+        if (isSameOrNull(other.getTitle(), destination.getTitle())) {
+            if (setIdenticalPropsToNull) destination.setTitle(null);
+        } else {
+            differentCount++;
+        }
+
+        if (isSameOrNull(other.getDateTimeTaken(), destination.getDateTimeTaken())) {
+            if (setIdenticalPropsToNull) destination.setDateTimeTaken(null);
+        } else {
+            differentCount++;
+        }
+
+        if (isSameOrNull(other.getLatitude(), destination.getLatitude())) {
+            if (setIdenticalPropsToNull) destination.setLatitude(null);
+        } else {
+            differentCount++;
+        }
+
+        if (isSameOrNull(other.getLongitude(), destination.getLongitude())) {
+            if (setIdenticalPropsToNull) destination.setLongitude(null);
+        } else {
+            differentCount++;
+        }
+
+        List<String> tValue = other.getTags();
+        if (isSameOrNull(TagConverter.asDbString(null, other.getTags()), TagConverter.asDbString(null, destination.getTags()))) {
+            if (setIdenticalPropsToNull) destination.setTags(tValue);
+        } else {
+            differentCount++;
+        }
+        return differentCount;
+    }
+
+    private static boolean isSameOrNull(Object me, Object other) {
+        if (me == null) return true;
+        if (other != null) {
+            return me.equals(other);
+        }
+        return false;
     }
 
     private static boolean allowed(boolean allowSetNull, Object newValue,
