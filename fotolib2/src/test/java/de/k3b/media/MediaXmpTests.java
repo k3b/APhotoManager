@@ -22,6 +22,12 @@ package de.k3b.media;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 import de.k3b.csv2db.csv.TestUtil;
 
 /**
@@ -38,4 +44,30 @@ public class MediaXmpTests {
 
         Assert.assertEquals(expected.toString(), actual.toString());
     }
+
+    private static final File OUTDIR = new File("./build/testresults/MediaXmpTests");
+
+    @Test
+    public void shouldSaveAndLoadXmp() throws IOException {
+        MediaDTO content = TestUtil.createTestMediaDTO(1);
+        content.setPath(null); // path is not copied to/from xmp file
+        MediaXmpItem sut = new MediaXmpItem();
+        MediaUtil.copy(sut, content, true, true);
+
+        OUTDIR.mkdirs();
+        File outFile = new File(OUTDIR, "shouldSaveAsXmp.xmp");
+        FileOutputStream fos = new FileOutputStream(outFile);
+        sut.save(fos, true);
+        fos.close();
+
+        FileInputStream fis = new FileInputStream(outFile);
+        sut = new MediaXmpItem();
+        sut.load(fis);
+        fis.close();
+
+        MediaDTO actual = new MediaDTO(sut);
+
+        Assert.assertEquals(content.toString(), actual.toString());
+    }
+
 }

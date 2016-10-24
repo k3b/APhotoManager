@@ -43,4 +43,9 @@ public enum XmpNamespace {
     public String getUriAsString() {
         return uri;
     }
+
+    @Override
+    public String toString() {
+        return prefix+"="+uri;
+    }
 }

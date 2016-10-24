@@ -54,4 +54,9 @@ public enum XmpFieldDefinition {
     public String getShortName() {
         return name;
     }
+
+    @Override
+    public String toString() {
+        return getShortName() + "@" + getXmpNamespace();
+    }
 }

@@ -19,19 +19,17 @@
 
 package de.k3b.media;
 
-import com.adobe.xmp.XMPDateTime;
 import com.adobe.xmp.XMPException;
-import com.adobe.xmp.XMPIterator;
 import com.adobe.xmp.XMPMeta;
+import com.adobe.xmp.XMPMetaFactory;
 import com.adobe.xmp.XMPUtils;
-import com.adobe.xmp.impl.XMPMetaImpl;
-import com.adobe.xmp.options.IteratorOptions;
-import com.adobe.xmp.options.ParseOptions;
 import com.adobe.xmp.options.PropertyOptions;
+import com.adobe.xmp.options.SerializeOptions;
 import com.adobe.xmp.properties.XMPProperty;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -39,7 +37,7 @@ import java.util.List;
  * Created by k3b on 20.10.2016.
  */
 
-public class XmpSegment extends XMPMetaImpl {
+public class XmpSegment {
     private XMPMeta xmpMeta = null;
 
     protected String getPropertyAsString(XmpFieldDefinition... definitions) {
@@ -47,7 +45,7 @@ public class XmpSegment extends XMPMetaImpl {
             XMPProperty result = getProperty(definitions);
             if (result != null) return result.getValue();
         } catch (XMPException e) {
-            onError(e);
+            onError("getPropertyAsString", e);
         }
         return null;
     }
@@ -57,7 +55,7 @@ public class XmpSegment extends XMPMetaImpl {
             String result = getPropertyAsString(definitions);
             if (result != null) return XMPUtils.convertToDate(result).getCalendar().getTime();
         } catch (XMPException e) {
-            onError(e);
+            onError("getPropertyAsDate", e);
         }
         return null;
     }
@@ -85,7 +83,7 @@ public class XmpSegment extends XMPMetaImpl {
                 getXmpMeta().setProperty(definition.getXmpNamespace().getUriAsString(), definition.getShortName(), value);
             } // else both porperty and value do not exist
         } catch (XMPException e) {
-            onError(e);
+            onError("setProperty", e);
         }
     }
 
@@ -102,7 +100,7 @@ public class XmpSegment extends XMPMetaImpl {
                 meta.appendArrayItem(definition.getXmpNamespace().getUriAsString(), definition.getShortName(),option, value,null);
             }
         } catch (XMPException e) {
-            onError(e);
+            onError("replacePropertyArray", e);
         }
     }
 
@@ -119,21 +117,43 @@ public class XmpSegment extends XMPMetaImpl {
                 return values;
             }
         } catch (XMPException e) {
-            onError(e);
+            onError("getPropertyArray", e);
         }
         return null;
     }
 
-    private void onError(XMPException e) {
+    private void onError(String debugContext, XMPException e) {
         e.printStackTrace();
     }
 
     protected XMPMeta getXmpMeta() {
-        if (xmpMeta == null) xmpMeta = new XMPMetaImpl();
+        if (xmpMeta == null) xmpMeta = XMPMetaFactory.create();
         return xmpMeta;
     }
 
     protected void setXmpMeta(XMPMeta xmpMeta) {
         this.xmpMeta = xmpMeta;
+    }
+
+    public XmpSegment load(InputStream is) {
+        try {
+            setXmpMeta(XMPMetaFactory.parse(is));
+        } catch (XMPException e) {
+            onError("load", e);
+        }
+        return this;
+    }
+
+    public XmpSegment save(OutputStream os, boolean humanReadable) {
+        // humanReadable = false;
+        try {
+            SerializeOptions options = new SerializeOptions(0);
+            options.setPadding(1);
+            if (!humanReadable) options.setIndent("");
+            XMPMetaFactory.serialize(getXmpMeta(), os, options);
+        } catch (XMPException e) {
+            onError("save", e);
+        }
+        return this;
     }
 }

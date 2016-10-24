@@ -19,13 +19,11 @@
 
 package de.k3b.media;
 
-import com.adobe.xmp.XMPDateTime;
 import com.adobe.xmp.XMPUtils;
 import com.adobe.xmp.impl.XMPDateTimeImpl;
 
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 import de.k3b.io.DateUtil;
 import de.k3b.io.GeoUtil;
