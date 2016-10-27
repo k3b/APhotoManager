@@ -153,28 +153,6 @@ public class GalleryFilterActivity extends LocalizedActivity implements Common, 
                 showLatLonPicker();
             }
         });
-
-        cmd = (Button) findViewById(R.id.cmd_ok);
-        cmd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onOk();
-            }
-        });
-        cmd = (Button) findViewById(R.id.cmd_cancel);
-        cmd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
-        cmd = (Button) findViewById(R.id.cmd_clear);
-        cmd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                clearFilter();
-            }
-        });
     }
 
     @Override
@@ -194,6 +172,15 @@ public class GalleryFilterActivity extends LocalizedActivity implements Common, 
         int id = item.getItemId();
 
         switch (id) {
+            case R.id.cmd_cancel:
+                finish();
+                return true;
+            case R.id.cmd_clear:
+                clearFilter();
+                return true;
+            case R.id.cmd_ok:
+                onOk();
+                return true;
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
                 return true;
