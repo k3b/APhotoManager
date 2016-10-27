@@ -276,8 +276,17 @@ public class SettingsActivity extends PreferenceActivity {
         String def = "" + defaultValue ;
         String value         = prefs.getString(key, def);
 
-        if ((def == null) || (def.trim().length() == 0)) return defaultValue;
-        return Integer.valueOf(value);
+        if ((def != null) && (def.trim().length() > 0)) {
+            // #73 fix NumberFormatException
+            try {
+                return Integer.valueOf(value);
+            } catch (Exception ex) {
+                Log.i(Global.LOG_CONTEXT, "SettingsActivity.getPref(key=" + key
+                        +"): " + value+
+                        " => " + ex.getMessage(),ex);
+            }
+        }
+        return defaultValue;
     }
 
     /** load value from SharedPreferences */
