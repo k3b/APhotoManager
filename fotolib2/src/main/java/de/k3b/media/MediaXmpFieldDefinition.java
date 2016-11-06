@@ -19,13 +19,12 @@
 
 package de.k3b.media;
 
-import de.k3b.media.XmpNamespace;
-
 /**
+ * Supported predefined Xmp-Fileds
  * Created by k3b on 10.10.2016.
  */
 
-public enum XmpFieldDefinition {
+public enum MediaXmpFieldDefinition {
     PATH(XmpNamespace.NONE,"SourceFile"), // used by exiftool-csv
 
     CreateDate(XmpNamespace.XAP,"CreateDate"),          // JPhotoTagger default
@@ -42,7 +41,7 @@ public enum XmpFieldDefinition {
     private final XmpNamespace xmpNamespace;
     private final String name;
 
-    private XmpFieldDefinition(XmpNamespace xmpNamespace, String name) {
+    private MediaXmpFieldDefinition(XmpNamespace xmpNamespace, String name) {
         this.xmpNamespace = xmpNamespace;
         this.name = name;
     }

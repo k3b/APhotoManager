@@ -81,7 +81,7 @@ public class MediaCsvTests {
 
     @Test
     public void shouldLoadExtremas() {
-        String csv = "a;" + XmpFieldDefinition.TITLE.getShortName() + ";c\n"
+        String csv = "a;" + MediaXmpFieldDefinition.TITLE.getShortName() + ";c\n"
                 + "normal;#1;regular\n"
                 + "short;#2\n"
                 + "long;#3;something;extra column\n"

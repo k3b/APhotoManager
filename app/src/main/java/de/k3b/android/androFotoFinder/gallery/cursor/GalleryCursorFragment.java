@@ -55,7 +55,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.directory.DirectoryGui;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
-import de.k3b.android.androFotoFinder.imagedetail.ImageDetailDialogBuilder;
+import de.k3b.android.androFotoFinder.imagedetail.ImageDetailMetaDialogBuilder;
 import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
 import de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
@@ -784,7 +784,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private void cmdShowDetails() {
         SelectedItems ids = getSelectedItems();
         String files = (ids != null) ? new SelectedFiles(ids, mAdapter).toString().replace(",","\n") : null;
-        ImageDetailDialogBuilder.createImageDetailDialog(
+        ImageDetailMetaDialogBuilder.createImageDetailDialog(
                 this.getActivity(),
                 getActivity().getTitle().toString(),
                 this.toString(),

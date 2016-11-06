@@ -29,11 +29,11 @@ import de.k3b.io.DateUtil;
 import de.k3b.io.GeoUtil;
 
 /**
- * Hides Implementation details of xmp lib
+ * XmpSegment that implements IMetaApi
  * Created by k3b on 20.10.2016.
  */
 
-public class MediaXmpItem extends XmpSegment implements IMetaApi {
+public class MediaXmpSegment extends XmpSegment implements IMetaApi {
     /** the full path of the image where this xmp-file belongs to */
     private String path = null;
 
@@ -53,17 +53,17 @@ public class MediaXmpItem extends XmpSegment implements IMetaApi {
     @Override
     public Date getDateTimeTaken() {
         return getPropertyAsDate(
-                XmpFieldDefinition.CreateDate,   // JPhotoTagger default
-                XmpFieldDefinition.DateCreated,  // exiftool default
-                XmpFieldDefinition.DateTimeOriginal);
+                MediaXmpFieldDefinition.CreateDate,   // JPhotoTagger default
+                MediaXmpFieldDefinition.DateCreated,  // exiftool default
+                MediaXmpFieldDefinition.DateTimeOriginal);
     }
 
     @Override
     public IMetaApi setDateTimeTaken(Date value) {
         setProperty(XMPUtils.convertFromDate(new XMPDateTimeImpl(value, DateUtil.UTC)), // DateUtil.toIsoDateString(value),
-                XmpFieldDefinition.CreateDate,   // JPhotoTagger default
-                XmpFieldDefinition.DateCreated,  // exiftool default
-                XmpFieldDefinition.DateTimeOriginal); // EXIF
+                MediaXmpFieldDefinition.CreateDate,   // JPhotoTagger default
+                MediaXmpFieldDefinition.DateCreated,  // exiftool default
+                MediaXmpFieldDefinition.DateTimeOriginal); // EXIF
         return this;
     }
 
@@ -75,7 +75,7 @@ public class MediaXmpItem extends XmpSegment implements IMetaApi {
     @Override
     public IMetaApi setLatitude(Double latitude) {
         setProperty(GeoUtil.toXmpStringLatNorth(latitude),
-                XmpFieldDefinition.GPSLatitude);
+                MediaXmpFieldDefinition.GPSLatitude);
         return this;
     }
 
@@ -87,52 +87,52 @@ public class MediaXmpItem extends XmpSegment implements IMetaApi {
     @Override
     public IMetaApi setLongitude(Double longitude) {
         setProperty(GeoUtil.toXmpStringLonEast(longitude),
-                XmpFieldDefinition.GPSLongitude);
+                MediaXmpFieldDefinition.GPSLongitude);
         return this;
     }
 
     @Override
     public Double getLatitude() {
-        return GeoUtil.parse(getPropertyAsString(XmpFieldDefinition.GPSLatitude),"NS");
+        return GeoUtil.parse(getPropertyAsString(MediaXmpFieldDefinition.GPSLatitude),"NS");
     }
 
     @Override
     public Double getLongitude() {
-        return GeoUtil.parse(getPropertyAsString(XmpFieldDefinition.GPSLongitude),"EW");
+        return GeoUtil.parse(getPropertyAsString(MediaXmpFieldDefinition.GPSLongitude),"EW");
     }
 
     @Override
     public String getTitle() {
-        return getPropertyAsString(XmpFieldDefinition.TITLE);
+        return getPropertyAsString(MediaXmpFieldDefinition.TITLE);
     }
 
     @Override
     public IMetaApi setTitle(String title) {
         setProperty(title,
-                XmpFieldDefinition.TITLE);
+                MediaXmpFieldDefinition.TITLE);
         return this;
     }
 
     @Override
     public String getDescription() {
-        return getPropertyAsString(XmpFieldDefinition.DESCRIPTION);
+        return getPropertyAsString(MediaXmpFieldDefinition.DESCRIPTION);
     }
 
     @Override
     public IMetaApi setDescription(String description) {
         setProperty(description,
-                XmpFieldDefinition.DESCRIPTION);
+                MediaXmpFieldDefinition.DESCRIPTION);
         return this;
     }
 
     @Override
     public List<String> getTags() {
-        return getPropertyArray(XmpFieldDefinition.TAGS);
+        return getPropertyArray(MediaXmpFieldDefinition.TAGS);
     }
 
     @Override
     public IMetaApi setTags(List<String> tags) {
-        replacePropertyArray(XmpFieldDefinition.TAGS, tags);
+        replacePropertyArray(MediaXmpFieldDefinition.TAGS, tags);
         return this;
     }
 }

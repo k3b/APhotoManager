@@ -24,7 +24,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -37,7 +36,7 @@ import de.k3b.csv2db.csv.TestUtil;
 public class MediaXmpTests {
     @Test
     public void shouldCopyAllFields() {
-        MediaXmpItem sut = new MediaXmpItem();
+        MediaXmpSegment sut = new MediaXmpSegment();
         MediaDTO expected = TestUtil.createTestMediaDTO(1);
         MediaUtil.copy(sut, expected, true, true);
         MediaDTO actual = new MediaDTO(sut);
@@ -51,7 +50,7 @@ public class MediaXmpTests {
     public void shouldSaveAndLoadXmp() throws IOException {
         MediaDTO content = TestUtil.createTestMediaDTO(1);
         content.setPath(null); // path is not copied to/from xmp file
-        MediaXmpItem sut = new MediaXmpItem();
+        MediaXmpSegment sut = new MediaXmpSegment();
         MediaUtil.copy(sut, content, true, true);
 
         OUTDIR.mkdirs();
@@ -61,7 +60,7 @@ public class MediaXmpTests {
         fos.close();
 
         FileInputStream fis = new FileInputStream(outFile);
-        sut = new MediaXmpItem();
+        sut = new MediaXmpSegment();
         sut.load(fis);
         fis.close();
 

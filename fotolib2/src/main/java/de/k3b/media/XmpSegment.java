@@ -20,12 +20,15 @@
 package de.k3b.media;
 
 import com.adobe.xmp.XMPException;
+import com.adobe.xmp.XMPIterator;
 import com.adobe.xmp.XMPMeta;
 import com.adobe.xmp.XMPMetaFactory;
+import com.adobe.xmp.XMPSchemaRegistry;
 import com.adobe.xmp.XMPUtils;
 import com.adobe.xmp.options.PropertyOptions;
 import com.adobe.xmp.options.SerializeOptions;
 import com.adobe.xmp.properties.XMPProperty;
+import com.adobe.xmp.properties.XMPPropertyInfo;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -34,13 +37,15 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * Hides Implementation details of xmp lib
  * Created by k3b on 20.10.2016.
  */
 
 public class XmpSegment {
     private XMPMeta xmpMeta = null;
+    private static XMPSchemaRegistry registry = XMPMetaFactory.getSchemaRegistry();
 
-    protected String getPropertyAsString(XmpFieldDefinition... definitions) {
+    protected String getPropertyAsString(MediaXmpFieldDefinition... definitions) {
         try {
             XMPProperty result = getProperty(definitions);
             if (result != null) return result.getValue();
@@ -50,7 +55,7 @@ public class XmpSegment {
         return null;
     }
 
-    protected Date getPropertyAsDate(XmpFieldDefinition... definitions) {
+    protected Date getPropertyAsDate(MediaXmpFieldDefinition... definitions) {
         try {
             String result = getPropertyAsString(definitions);
             if (result != null) return XMPUtils.convertToDate(result).getCalendar().getTime();
@@ -60,25 +65,25 @@ public class XmpSegment {
         return null;
     }
 
-    protected XMPProperty getProperty(XmpFieldDefinition... definitions) throws XMPException {
-        for (XmpFieldDefinition definition: definitions) {
+    protected XMPProperty getProperty(MediaXmpFieldDefinition... definitions) throws XMPException {
+        for (MediaXmpFieldDefinition definition: definitions) {
             XMPProperty result = getXmpMeta().getProperty(definition.getXmpNamespace().getUriAsString(), definition.getShortName());
             if (result != null) return result;
         }
         return null;
     }
 
-    protected XmpFieldDefinition findFirst(boolean returnNullIfNotFound, XmpFieldDefinition... definitions) throws XMPException {
-        for (XmpFieldDefinition definition: definitions) {
+    protected MediaXmpFieldDefinition findFirst(boolean returnNullIfNotFound, MediaXmpFieldDefinition... definitions) throws XMPException {
+        for (MediaXmpFieldDefinition definition: definitions) {
             XMPProperty result = getXmpMeta().getProperty(definition.getXmpNamespace().getUriAsString(), definition.getShortName());
             if (result != null) return definition;
         }
         return definitions[0];
     }
 
-    protected void setProperty(Object value, XmpFieldDefinition... definitions) {
+    protected void setProperty(Object value, MediaXmpFieldDefinition... definitions) {
         try {
-            XmpFieldDefinition definition = findFirst(value == null, definitions);
+            MediaXmpFieldDefinition definition = findFirst(value == null, definitions);
             if (definition != null) {
                 getXmpMeta().setProperty(definition.getXmpNamespace().getUriAsString(), definition.getShortName(), value);
             } // else both porperty and value do not exist
@@ -87,7 +92,7 @@ public class XmpSegment {
         }
     }
 
-    protected void replacePropertyArray(XmpFieldDefinition definition, List<String> values) {
+    protected void replacePropertyArray(MediaXmpFieldDefinition definition, List<String> values) {
         try {
             XMPMeta meta = getXmpMeta();
             int oldItemCount = meta.countArrayItems(definition.getXmpNamespace().getUriAsString(), definition.getShortName());
@@ -104,7 +109,7 @@ public class XmpSegment {
         }
     }
 
-    protected List<String>  getPropertyArray(XmpFieldDefinition definition) {
+    protected List<String>  getPropertyArray(MediaXmpFieldDefinition definition) {
         try {
             XMPMeta meta = getXmpMeta();
             int oldItemCount = meta.countArrayItems(definition.getXmpNamespace().getUriAsString(), definition.getShortName());
@@ -156,4 +161,46 @@ public class XmpSegment {
         }
         return this;
     }
+
+    public String toString() {
+        final StringBuilder result = new StringBuilder();
+        appendXmp(result);
+        if (result.length() > 0) return result.toString();
+        return null;
+    }
+
+    public void appendXmp(StringBuilder result) {
+        XMPMeta meta = getXmpMeta();
+        try {
+            for (XMPIterator it = meta.iterator(); it.hasNext();)
+            {
+                XMPPropertyInfo prop = (XMPPropertyInfo) it.next();
+                appendXmpPropertyInfo(result, prop);
+            }
+        } catch (XMPException e) {
+            e.printStackTrace();
+            result.append(e.toString());
+        }
+    }
+
+    /**
+     * @param prop an <code>XMPPropertyInfo</code> from the <code>XMPIterator</code>.
+     */
+    private void appendXmpPropertyInfo(final StringBuilder result, XMPPropertyInfo prop) {
+        String path = prop.getPath();
+        if (path == null) {
+            result.append("\n");
+        } else {
+            String namespace = prop.getNamespace();
+            String prefix = registry.getNamespacePrefix(namespace);
+            if (prefix == null) prefix = namespace;
+
+            result
+                    .append(prefix).append(".").append(path)
+                    .append("=").append(prop.getValue())
+                    .append(" (" + prop.getOptions().getOptionsString() + ")\n");
+        }
+    }
+
+
 }

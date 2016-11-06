@@ -33,6 +33,7 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Map;
 
@@ -40,11 +41,13 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.ExifInterfaceEx;
 import de.k3b.database.QueryParameter;
+import de.k3b.media.XmpSegment;
 
 /**
+ * Creates a popup dialog that displays the MetaData.
  * Created by k3b on 15.07.2015.
  */
-public class ImageDetailDialogBuilder {
+public class ImageDetailMetaDialogBuilder {
     private static final String NL = "\n";
 
     public static Dialog createImageDetailDialog(Activity context, String filePath, long imageId,
@@ -117,7 +120,7 @@ public class ImageDetailDialogBuilder {
 
             String xmpFilePath = (ext >= 0) ? (filepath.substring(0, ext) + ".xmp") : (filepath + ".xmp");
             File xmpFile = new File(xmpFilePath);
-            addExif(result, xmpFile);
+            addXmp(result, xmpFile);
 
             if (currentImageId != 0) {
 
@@ -166,6 +169,18 @@ public class ImageDetailDialogBuilder {
             */
                 builder.append(NL).append(line).append(NL);
             }
+        } else {
+            builder.append(NL).append(file).append(" not found.").append(NL);
+        }
+    }
+
+    private static void addXmp(StringBuilder builder, File file) throws ImageProcessingException, IOException {
+        if (file.exists()) {
+            XmpSegment meta = new XmpSegment();
+            meta.load(new FileInputStream(file));
+            builder.append(NL).append(file).append(NL).append(NL);
+            meta.appendXmp(builder);
+            builder.append(NL).append(line).append(NL);
         } else {
             builder.append(NL).append(file).append(" not found.").append(NL);
         }

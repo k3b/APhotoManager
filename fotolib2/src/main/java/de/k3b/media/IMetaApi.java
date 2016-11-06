@@ -23,6 +23,8 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * All Properties that are supported by "A Photo Manager".
+ *
  * Created by k3b on 09.10.2016.
  */
 public interface IMetaApi {

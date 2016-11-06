@@ -31,13 +31,13 @@ import de.k3b.tagDB.TagConverter;
  */
 
 public class MediaCsvItem extends CsvItem implements IMetaApi {
-    public final static String MEDIA_CSV_STANDARD_HEADER = XmpFieldDefinition.PATH.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
-            XmpFieldDefinition.TITLE.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
-            XmpFieldDefinition.DESCRIPTION.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
-            XmpFieldDefinition.DateTimeOriginal.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
-            XmpFieldDefinition.GPSLatitude.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
-            XmpFieldDefinition.GPSLongitude.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
-            XmpFieldDefinition.TAGS.getShortName();
+    public final static String MEDIA_CSV_STANDARD_HEADER = MediaXmpFieldDefinition.PATH.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
+            MediaXmpFieldDefinition.TITLE.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
+            MediaXmpFieldDefinition.DESCRIPTION.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
+            MediaXmpFieldDefinition.DateTimeOriginal.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
+            MediaXmpFieldDefinition.GPSLatitude.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
+            MediaXmpFieldDefinition.GPSLongitude.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
+            MediaXmpFieldDefinition.TAGS.getShortName();
 
     private static final String CSV_PATH = "SourceFile"; // used by exiftool-csv
     private int colFilePath;
@@ -57,15 +57,15 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
     public void setHeader(List<String> header) {
         maxColumnIndex = -1;
         super.setHeader(header);
-        colFilePath         = getColumnIndex(XmpFieldDefinition.PATH);
-        colDateTimeTaken    = getColumnIndex(XmpFieldDefinition.DateTimeOriginal);
-        colDateCreated    = getColumnIndex(XmpFieldDefinition.DateCreated);
-        colCreateDate    = getColumnIndex(XmpFieldDefinition.CreateDate);
-        colTitle            = getColumnIndex(XmpFieldDefinition.TITLE);
-        colDescription      = getColumnIndex(XmpFieldDefinition.DESCRIPTION);
-        colTags             = getColumnIndex(XmpFieldDefinition.TAGS);
-        colLatitude         = getColumnIndex(XmpFieldDefinition.GPSLatitude);
-        colLongitude        = getColumnIndex(XmpFieldDefinition.GPSLongitude);
+        colFilePath         = getColumnIndex(MediaXmpFieldDefinition.PATH);
+        colDateTimeTaken    = getColumnIndex(MediaXmpFieldDefinition.DateTimeOriginal);
+        colDateCreated    = getColumnIndex(MediaXmpFieldDefinition.DateCreated);
+        colCreateDate    = getColumnIndex(MediaXmpFieldDefinition.CreateDate);
+        colTitle            = getColumnIndex(MediaXmpFieldDefinition.TITLE);
+        colDescription      = getColumnIndex(MediaXmpFieldDefinition.DESCRIPTION);
+        colTags             = getColumnIndex(MediaXmpFieldDefinition.TAGS);
+        colLatitude         = getColumnIndex(MediaXmpFieldDefinition.GPSLatitude);
+        colLongitude        = getColumnIndex(MediaXmpFieldDefinition.GPSLongitude);
     }
 
     @Override
@@ -153,7 +153,7 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
      * @return the zero-based column index for the given column name, or -1 if
      * the column name does not exist.
      */
-    protected int getColumnIndex(XmpFieldDefinition columnDefinition) {
+    protected int getColumnIndex(MediaXmpFieldDefinition columnDefinition) {
         String destCcolumnName = columnDefinition.getShortName();
         int columnIndex = header.indexOf(destCcolumnName);
         if (columnIndex > maxColumnIndex) maxColumnIndex = columnIndex;
