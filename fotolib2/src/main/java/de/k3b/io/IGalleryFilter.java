@@ -20,6 +20,7 @@
 package de.k3b.io;
 
 /**
+ * Definition of pssible filter parameters
  * Created by k3b on 13.07.2015.
  */
 public interface IGalleryFilter extends IGeoRectangle {

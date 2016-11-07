@@ -59,7 +59,9 @@ import de.k3b.io.IGeoRectangle;
 /**
  * Defines a gui for global foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.
  */
-public class GalleryFilterActivity extends LocalizedActivity implements Common, DirectoryPickerFragment.OnDirectoryInteractionListener, LocationMapFragment.OnDirectoryInteractionListener {
+public class GalleryFilterActivity extends LocalizedActivity
+        implements Common, DirectoryPickerFragment.OnDirectoryInteractionListener,
+        LocationMapFragment.OnDirectoryInteractionListener {
     private static final String mDebugPrefix = "GalF-";
 
     public static final int resultID = 522;
@@ -70,7 +72,7 @@ public class GalleryFilterActivity extends LocalizedActivity implements Common, 
 
     private GalleryFilterParameter mFilter = new GalleryFilterParameter();
 
-    private AsFilter mAsFilter = null;
+    private FilterValue mFilterValue = null;
     private HistoryEditText mHistory;
     private BookmarkController bookmarkController = null;
 
@@ -114,7 +116,7 @@ public class GalleryFilterActivity extends LocalizedActivity implements Common, 
             Log.d(Global.LOG_CONTEXT, mDebugPrefix + "onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
         }
         setContentView(R.layout.activity_gallery_filter);
-        this.mAsFilter = new AsFilter();
+        this.mFilterValue = new FilterValue();
         onCreateButtos();
 
         GalleryFilterParameter filter = (savedInstanceState == null)
@@ -124,7 +126,7 @@ public class GalleryFilterActivity extends LocalizedActivity implements Common, 
         if (filter != null) {
             mFilter = filter;
             toGui(mFilter);
-            mAsFilter.showLatLon(filter.isNonGeoOnly());
+            mFilterValue.showLatLon(filter.isNonGeoOnly());
         }
 
         bookmarkController = new BookmarkController(this);
@@ -278,7 +280,7 @@ public class GalleryFilterActivity extends LocalizedActivity implements Common, 
     }
 
     /** gui content seen as IGalleryFilter */
-    private class AsFilter implements IGalleryFilter {
+    private class FilterValue implements IGalleryFilter {
         final private java.text.DateFormat isoDateformatter = new SimpleDateFormat(
                 "yyyy-MM-dd", Locale.US);
 
@@ -292,7 +294,7 @@ public class GalleryFilterActivity extends LocalizedActivity implements Common, 
         private EditText mLatitudeFrom;
         private CheckBox mWithNoGeoInfo;
 
-        AsFilter() {
+        FilterValue() {
             this.mPath = (EditText) findViewById(R.id.edit_path);
             this.mDateFrom = (EditText) findViewById(R.id.edit_date_from);
             this.mDateTo = (EditText) findViewById(R.id.edit_date_to);
@@ -350,7 +352,11 @@ public class GalleryFilterActivity extends LocalizedActivity implements Common, 
 
         @Override
         public String getPath() {
-            return mPath.getText().toString();
+            // smart filter path edit:  if the field does not contain a path element "/" then surround
+            // the value with sql wildcard "%"
+            String result = mPath.getText().toString().replace('\\','/');
+            if (!result.contains("/")) result = "%" + result + "%";
+            return result;
         }
 
         @Override
@@ -423,12 +429,12 @@ public class GalleryFilterActivity extends LocalizedActivity implements Common, 
     };
 
     private void toGui(IGalleryFilter gf) {
-        mAsFilter.get(gf);
+        mFilterValue.get(gf);
     }
 
     private boolean fromGui(IGalleryFilter dest) {
         try {
-            dest.get(mAsFilter);
+            dest.get(mFilterValue);
             return true;
         } catch (RuntimeException ex) {
             Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
