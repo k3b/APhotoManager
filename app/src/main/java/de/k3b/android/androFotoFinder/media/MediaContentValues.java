@@ -29,11 +29,12 @@ import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.media.IMetaApi;
 import de.k3b.tagDB.TagConverter;
 
+import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_EXT_RATING;
 import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_EXT_TAGS;
 import static de.k3b.android.androFotoFinder.tagDB.TagSql.setLastScanDate;
 
 /**
- * r/w {@link IMetaApi} Implementation for {@link ContentValues}.
+ * r/w {@link IMetaApi} Implementation for android databse/contentprovider {@link ContentValues}.
  *
  * Created by k3b on 10.10.2016.
  */
@@ -138,6 +139,21 @@ public class MediaContentValues implements IMetaApi {
     @Override
     public IMetaApi setTags(List<String> tags) {
         data.put(SQL_COL_EXT_TAGS, TagConverter.asDbString("",tags));
+        setLastScanDate(data, new Date());
+        return this;
+    }
+
+    /**
+     * 5=best .. 1=worst or 0/null unknown
+     */
+    @Override
+    public Integer getRating() {
+        return data.getAsInteger(TagSql.SQL_COL_EXT_RATING);
+    }
+
+    @Override
+    public IMetaApi setRating(Integer value) {
+        data.put(SQL_COL_EXT_RATING, value);
         setLastScanDate(data, new Date());
         return this;
     }

@@ -23,6 +23,8 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * DTO=DataTransferObject: In Memory implementation of {@link IMetaApi}.
+ *
  * Created by k3b on 10.10.2016.
  */
 
@@ -34,6 +36,7 @@ public class MediaDTO implements IMetaApi {
     String title;
     String description;
     List<String> tags;
+    private Integer rating;
 
     public MediaDTO() {}
 
@@ -115,6 +118,20 @@ public class MediaDTO implements IMetaApi {
     @Override
     public IMetaApi setTags(List<String> tags) {
         this.tags = tags;
+        return this;
+    }
+
+    /**
+     * 5=best .. 1=worst or 0/null unknown
+     */
+    @Override
+    public Integer getRating() {
+        return this.rating;
+    }
+
+    @Override
+    public IMetaApi setRating(Integer value) {
+        this.rating = value;
         return this;
     }
 

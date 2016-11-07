@@ -26,9 +26,12 @@ public class MediaScannerEx extends MediaScanner {
     @Override
     protected void getExifFromFile(ContentValues values, File file) {
         super.getExifFromFile(values, file);
-        if (false && Global.enableTagSupport) {
+
+        // for first tests generate test data
+        if (false && Global.enableNonStandardMediaFields) {
             addTags(values,"test1", "test2");
             TagSql.setDescription(values,"test");
+            TagSql.setRating(values, 3);
         }
     }
 
@@ -36,7 +39,7 @@ public class MediaScannerEx extends MediaScanner {
     @Override
     public int updateMediaDatabase_Android42(Context context, String[] oldPathNames, String... newPathNames) {
         int result = super.updateMediaDatabase_Android42(context, oldPathNames, newPathNames);
-        if ((result > 0) && (Global.enableTagSupport)) {
+        if ((result > 0) && (Global.enableNonStandardMediaFields)) {
             TagRepository.getInstance().save();
         }
         return result;

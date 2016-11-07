@@ -37,7 +37,8 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
             MediaXmpFieldDefinition.DateTimeOriginal.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
             MediaXmpFieldDefinition.GPSLatitude.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
             MediaXmpFieldDefinition.GPSLongitude.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
-            MediaXmpFieldDefinition.TAGS.getShortName();
+            MediaXmpFieldDefinition.TAGS.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
+            MediaXmpFieldDefinition.RATING.getShortName();
 
     private static final String CSV_PATH = "SourceFile"; // used by exiftool-csv
     private int colFilePath;
@@ -49,6 +50,7 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
     private int colTags;
     private int colLatitude;
     private int colLongitude;
+    private int colRating;
 
     /** there are cols 0..maxColumnIndex */
     int maxColumnIndex;
@@ -59,13 +61,14 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
         super.setHeader(header);
         colFilePath         = getColumnIndex(MediaXmpFieldDefinition.PATH);
         colDateTimeTaken    = getColumnIndex(MediaXmpFieldDefinition.DateTimeOriginal);
-        colDateCreated    = getColumnIndex(MediaXmpFieldDefinition.DateCreated);
-        colCreateDate    = getColumnIndex(MediaXmpFieldDefinition.CreateDate);
+        colDateCreated      = getColumnIndex(MediaXmpFieldDefinition.DateCreated);
+        colCreateDate       = getColumnIndex(MediaXmpFieldDefinition.CreateDate);
         colTitle            = getColumnIndex(MediaXmpFieldDefinition.TITLE);
         colDescription      = getColumnIndex(MediaXmpFieldDefinition.DESCRIPTION);
         colTags             = getColumnIndex(MediaXmpFieldDefinition.TAGS);
         colLatitude         = getColumnIndex(MediaXmpFieldDefinition.GPSLatitude);
         colLongitude        = getColumnIndex(MediaXmpFieldDefinition.GPSLongitude);
+        colRating           = getColumnIndex(MediaXmpFieldDefinition.RATING);
     }
 
     @Override
@@ -143,6 +146,18 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
     @Override
     public IMetaApi setTags(List<String> tags) {
         setString(TagConverter.asDbString(null, tags), colTags);
+        return this;
+    }
+
+
+    @Override
+    public Integer getRating() {
+        return getInteger(colRating);
+    }
+
+    @Override
+    public IMetaApi setRating(Integer value) {
+        setString(value, colRating);
         return this;
     }
 

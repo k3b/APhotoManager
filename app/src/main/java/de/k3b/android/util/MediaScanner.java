@@ -351,9 +351,11 @@ public class MediaScanner  {
             }
         }
 
-        if (false && Global.enableTagSupport) {
+        // for first tests generate test data
+        if (false && Global.enableNonStandardMediaFields) {
             TagSql.setTags(values,"test1", "test2");
             TagSql.setDescription(values,"test");
+            TagSql.setRating(values, 3);
         }
     }
 

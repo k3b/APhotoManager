@@ -43,6 +43,7 @@ public class MediaCursor implements IMetaApi {
     private final int colTags;
     private final int colLatitude;
     private final int colLongitude;
+    private final int colRating;
 
     public MediaCursor(Cursor cursor) {
         this.cursor = cursor;
@@ -55,6 +56,7 @@ public class MediaCursor implements IMetaApi {
         colTags             = getColumnIndex(TagSql.SQL_COL_EXT_TAGS);
         colLatitude         = getColumnIndex(TagSql.SQL_COL_LAT);
         colLongitude        = getColumnIndex(TagSql.SQL_COL_LON);
+        colRating           = getColumnIndex(TagSql.SQL_COL_EXT_RATING);
     }
 
     public Integer getID() {
@@ -99,6 +101,16 @@ public class MediaCursor implements IMetaApi {
         if (colDescription == -1) return null;
         return cursor.getString(colDescription);
     }
+
+    /**
+     * 5=best .. 1=worst or 0/null unknown
+     */
+    @Override
+    public Integer getRating() {
+        if (colDescription == -1) return null;
+        return cursor.getInt(colRating);
+    }
+
 
     @Override
     public List<String> getTags() {
@@ -152,5 +164,8 @@ public class MediaCursor implements IMetaApi {
         throw new UnsupportedOperationException();
     }
 
-
+    @Override
+    public IMetaApi setRating(Integer value) {
+        throw new UnsupportedOperationException();
+    }
 }

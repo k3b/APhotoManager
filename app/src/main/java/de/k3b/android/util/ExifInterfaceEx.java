@@ -250,33 +250,51 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
         return mLongitude;
     }
 
+    /** not implemented in {@link ExifInterface} */
     @Override
     public String getTitle() {
         return null;
     }
 
+    /** not implemented in {@link ExifInterface} */
     @Override
     public IMetaApi setTitle(String title) {
         return this;
     }
 
+    /** not implemented in {@link ExifInterface} */
     @Override
     public String getDescription() {
         return null;
     }
 
+    /** not implemented in {@link ExifInterface} */
     @Override
     public IMetaApi setDescription(String description) {
         return this;
     }
 
+    /** not implemented in {@link ExifInterface} */
     @Override
     public List<String> getTags() {
         return null;
     }
 
+    /** not implemented in {@link ExifInterface} */
     @Override
     public IMetaApi setTags(List<String> tags) {
+        return this;
+    }
+
+    /** not implemented in {@link ExifInterface} */
+    @Override
+    public Integer getRating() {
+        return null;
+    }
+
+    /** not implemented in {@link ExifInterface} */
+    @Override
+    public IMetaApi setRating(Integer value) {
         return this;
     }
 

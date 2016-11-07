@@ -102,8 +102,11 @@ public class Global {
     /** false: cmd setGeo => form(GeoEditActivity) => mapPicker */
     public static final boolean geoNoEdit = true;
 
+    /** Support extra parameters true: experimental. Not fully implemented yet. */
+    public static final boolean enableNonStandardMediaFields = true;
+
     /** true: experimental. Not fully implemented yet. */
-    public static final boolean enableTagSupport = true;
+    public static final boolean enableNonStandardMediaFieldsUpdateLastSCanTimestamp = enableNonStandardMediaFields && false;
 
     /** #26 which image resolution should the "non zoomed imageView" have? */
     public static boolean initialImageDetailResolutionHigh = false; // false: MediaStore.Images.Thumbnails.MINI_KIND; true: FULL_SCREEN_KIND;

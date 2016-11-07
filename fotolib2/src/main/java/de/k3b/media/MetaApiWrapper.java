@@ -25,6 +25,8 @@ import java.util.List;
 import de.k3b.media.IMetaApi;
 
 /**
+ * (Default) Implementation of {@link IMetaApi} to forward all methods to an inner {@link IMetaApi}.
+ *
  * Created by k3b on 09.10.2016.
  */
 
@@ -92,6 +94,20 @@ public class MetaApiWrapper implements IMetaApi {
 
     public MetaApiWrapper setTags(List<String> tags) {
         child.setTags(tags);
+        return this;
+    }
+
+    /**
+     * 5=best .. 1=worst or 0/null unknown
+     */
+    @Override
+    public Integer getRating() {
+        return child.getRating();
+    }
+
+    @Override
+    public IMetaApi setRating(Integer value) {
+        child.setRating(value);
         return this;
     }
 

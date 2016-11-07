@@ -44,6 +44,7 @@ public class TagSql extends FotoSql {
     public static final String SQL_COL_EXT_TAGS = MediaStore.Video.Media.TAGS;
     public static final String SQL_COL_EXT_DESCRIPTION = MediaStore.Images.Media.DESCRIPTION;
     public static final String SQL_COL_EXT_TITLE = MediaStore.Images.Media.TITLE;
+    public static final String SQL_COL_EXT_RATING = MediaStore.Video.Media.BOOKMARK;
 
     /** The date & time when last non standard media-scan took place
      *  <P>Type: INTEGER (long) as seconds since jan 1, 1970</P> */
@@ -55,7 +56,7 @@ public class TagSql extends FotoSql {
 
     /** only rows containing all tags are visible */
     public static void addWhereTag(QueryParameter newQuery, String... tags) {
-        String tagvalue = (Global.enableTagSupport) ? TagConverter.asDbString("%", tags) : null;
+        String tagvalue = (Global.enableNonStandardMediaFields) ? TagConverter.asDbString("%", tags) : null;
         if (tagvalue != null) {
             newQuery.addWhere(SQL_COL_EXT_TAGS + " like ?", tagvalue);
             switchFrom(newQuery, SQL_TABLE_EXTERNAL_CONTENT_URI_FILE);
@@ -95,16 +96,23 @@ public class TagSql extends FotoSql {
         setLastScanDate(values, new Date());
     }
 
+    public static void setRating(ContentValues values, Integer value) {
+        values.put(SQL_COL_EXT_RATING, value);
+        setLastScanDate(values, new Date());
+    }
+
     public static void setLastScanDate(ContentValues values, Date lastScanDate) {
-        Long now = (lastScanDate != null)
-                ? lastScanDate.getTime() / 1000 // sec
-                : null;
-        values.put(SQL_COL_EXT_LAST_EXT_SCAN, now);
+        if (Global.enableNonStandardMediaFieldsUpdateLastSCanTimestamp) {
+            Long now = (lastScanDate != null)
+                    ? lastScanDate.getTime() / 1000 // sec
+                    : null;
+            values.put(SQL_COL_EXT_LAST_EXT_SCAN, now);
+        }
     }
 
     /** only rows are visible that needs to run the ext media scanner */
     public static void addWhereNeedsExtMediaScan(QueryParameter newQuery) {
-        if (Global.enableTagSupport) {
+        if (Global.enableNonStandardMediaFields) {
             newQuery.addWhere(SQL_COL_EXT_LAST_EXT_SCAN + " is null");
             switchFrom(newQuery, SQL_TABLE_EXTERNAL_CONTENT_URI_FILE);
         }

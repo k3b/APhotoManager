@@ -28,9 +28,11 @@ import java.util.List;
  * Created by k3b on 09.10.2016.
  */
 public interface IMetaApi {
+    /** normalized absolute path to file (jpg or xmp) */
     String getPath();
     IMetaApi setPath(String filePath);
 
+    /** when the photo was taken (not file create/modify date) in local time or utc*/
     Date getDateTimeTaken();
     IMetaApi setDateTimeTaken(Date value);
 
@@ -41,13 +43,20 @@ public interface IMetaApi {
     Double getLatitude();
     Double getLongitude();
 
+    /** Short Descrioption used as caption */
     String getTitle();
     IMetaApi setTitle(String title);
 
+    /** longer Description may have more than one line */
     String getDescription();
     IMetaApi setDescription(String description);
 
+    /** Keywords or categories used to group/sort/find images */
     List<String> getTags();
     IMetaApi setTags(List<String> tags);
+
+    /** 5=best .. 1=worst or 0/null unknown */
+    Integer getRating();
+    IMetaApi setRating(Integer value);
 
 }

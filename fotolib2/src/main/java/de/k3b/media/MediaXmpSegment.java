@@ -29,7 +29,8 @@ import de.k3b.io.DateUtil;
 import de.k3b.io.GeoUtil;
 
 /**
- * XmpSegment that implements IMetaApi
+ * {@link XmpSegment} that implements {@link IMetaApi} to read/write xmp.
+ *
  * Created by k3b on 20.10.2016.
  */
 
@@ -133,6 +134,29 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
     @Override
     public IMetaApi setTags(List<String> tags) {
         replacePropertyArray(MediaXmpFieldDefinition.TAGS, tags);
+        return this;
+    }
+
+    /**
+     * 5=best .. 1=worst or 0/null unknown
+     */
+    @Override
+    public Integer getRating() {
+        String result = getPropertyAsString(MediaXmpFieldDefinition.RATING);
+        if (result != null) {
+            try {
+                return Integer.parseInt(result);
+            } catch (NumberFormatException ex) {
+                ex.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public IMetaApi setRating(Integer value) {
+        setProperty(value,
+                MediaXmpFieldDefinition.RATING);
         return this;
     }
 }

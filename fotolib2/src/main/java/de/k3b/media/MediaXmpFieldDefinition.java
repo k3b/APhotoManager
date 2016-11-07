@@ -36,6 +36,8 @@ public enum MediaXmpFieldDefinition {
 
     TITLE(XmpNamespace.DC,"Title"),
     DESCRIPTION(XmpNamespace.DC,"Description"),
+
+    RATING(XmpNamespace.DC,"Rating"),
     TAGS(XmpNamespace.DC,"Subject");
 
     private final XmpNamespace xmpNamespace;
