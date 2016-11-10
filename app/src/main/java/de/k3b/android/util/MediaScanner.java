@@ -41,11 +41,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.media.MediaContentValues;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.database.QueryParameter;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
+import de.k3b.io.FileUtils;
+import de.k3b.media.IMetaApi;
+import de.k3b.media.MediaUtil;
 
 /**
  * Android Media Scanner for images/photos/jpg compatible with android-5.0 Media scanner.
@@ -291,8 +295,7 @@ public class MediaScanner  {
 
     /** updates values with current values of file */
     protected void getExifFromFile(ContentValues values, File file) {
-        String absolutePath = file.getAbsolutePath();
-        setPathRelatedFieldsIfNeccessary(values, absolutePath, null);
+        String absolutePath = FileUtils.tryGetCanonicalPath(file, file.getAbsolutePath());
 
         values.put(DB_DATE_MODIFIED, file.lastModified() / 1000);
         values.put(DB_SIZE, file.length());
@@ -317,17 +320,6 @@ public class MediaScanner  {
         }
 
         if (exif != null) {
-            Double latitude = exif.getLatitude();
-            if (latitude != null) {
-                values.put(DB_LATITUDE, latitude);
-                values.put(DB_LONGITUDE, exif.getLongitude());
-            }
-
-            Date time = exif.getDateTimeTaken();
-            if (time != null) {
-                values.put(DB_DATE_TAKEN, time.getTime() );
-            }
-
             int orientation = exif.getAttributeInt(
                     ExifInterfaceEx.TAG_ORIENTATION, -1);
             if (orientation != -1) {
@@ -351,12 +343,15 @@ public class MediaScanner  {
             }
         }
 
-        // for first tests generate test data
-        if (false && Global.enableNonStandardMediaFields) {
-            TagSql.setTags(values,"test1", "test2");
-            TagSql.setDescription(values,"test");
-            TagSql.setRating(values, 3);
-        }
+        MediaContentValues dest = new MediaContentValues().set(values);
+        getExifValues(dest, file, exif);
+
+        setPathRelatedFieldsIfNeccessary(values, absolutePath, null);
+    }
+
+    /** @return number of copied properties */
+    protected int getExifValues(MediaContentValues dest, File file, ExifInterfaceEx exif) {
+        return MediaUtil.copy(dest, exif, false, true);
     }
 
     public IGeoPointInfo getPositionFromFile(String absolutePath, String id) {

@@ -41,6 +41,7 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.ExifInterfaceEx;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.FileUtils;
 import de.k3b.media.XmpSegment;
 
 /**
@@ -116,10 +117,7 @@ public class ImageDetailMetaDialogBuilder {
             File jpegFile = new File(filepath);
             addExif(result, jpegFile);
 
-            int ext = filepath.lastIndexOf(".");
-
-            String xmpFilePath = (ext >= 0) ? (filepath.substring(0, ext) + ".xmp") : (filepath + ".xmp");
-            File xmpFile = new File(xmpFilePath);
+            File xmpFile = FileUtils.getXmpFile(filepath);
             addXmp(result, xmpFile);
 
             if (currentImageId != 0) {

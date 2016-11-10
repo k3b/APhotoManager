@@ -47,46 +47,49 @@ public class MediaUtil {
     /** copy content from source to destination. @return number of copied properties */
     public static int copy(IMetaApi destination, IMetaApi source, boolean allowSetNull, boolean overwriteExisting) {
         int changes = 0;
-        String sValue = source.getDescription();
-        if (allowed(allowSetNull, sValue, overwriteExisting, destination.getDescription())) {
-            destination.setDescription(sValue);
-            changes++;
-        }
 
-        sValue = source.getPath();
-        if (allowed(allowSetNull, sValue, overwriteExisting, destination.getPath())) {
-            destination.setPath(sValue);
-            changes++;
-        }
+        if ((destination != null) && (source != null)) {
+            String sValue = source.getDescription();
+            if (allowed(allowSetNull, sValue, overwriteExisting, destination.getDescription())) {
+                destination.setDescription(sValue);
+                changes++;
+            }
 
-        sValue = source.getTitle();
-        if (allowed(allowSetNull, sValue, overwriteExisting, destination.getTitle())) {
-            destination.setTitle(sValue);
-            changes++;
-        }
+            sValue = source.getPath();
+            if (allowed(allowSetNull, sValue, overwriteExisting, destination.getPath())) {
+                destination.setPath(sValue);
+                changes++;
+            }
 
-        Date dValue = source.getDateTimeTaken();
-        if (allowed(allowSetNull, dValue, overwriteExisting, destination.getDateTimeTaken())) {
-            destination.setDateTimeTaken(dValue);
-            changes++;
-        }
+            sValue = source.getTitle();
+            if (allowed(allowSetNull, sValue, overwriteExisting, destination.getTitle())) {
+                destination.setTitle(sValue);
+                changes++;
+            }
 
-        Double doValue = source.getLatitude();
-        if (allowed(allowSetNull, doValue, overwriteExisting, destination.getLatitude())) {
-            destination.setLatitude(doValue);
-            changes++;
-        }
+            Date dValue = source.getDateTimeTaken();
+            if (allowed(allowSetNull, dValue, overwriteExisting, destination.getDateTimeTaken())) {
+                destination.setDateTimeTaken(dValue);
+                changes++;
+            }
 
-        doValue = source.getLongitude();
-        if (allowed(allowSetNull, doValue, overwriteExisting, destination.getLongitude())) {
-            destination.setLongitude(doValue);
-            changes++;
-        }
+            Double doValue = source.getLatitude();
+            if (allowed(allowSetNull, doValue, overwriteExisting, destination.getLatitude())) {
+                destination.setLatitude(doValue);
+                changes++;
+            }
 
-        List<String> tValue = source.getTags();
-        if (allowed(allowSetNull, tValue, overwriteExisting, destination.getTags())) {
-            destination.setTags(tValue);
-            changes++;
+            doValue = source.getLongitude();
+            if (allowed(allowSetNull, doValue, overwriteExisting, destination.getLongitude())) {
+                destination.setLongitude(doValue);
+                changes++;
+            }
+
+            List<String> tValue = source.getTags();
+            if (allowed(allowSetNull, tValue, overwriteExisting, destination.getTags())) {
+                destination.setTags(tValue);
+                changes++;
+            }
         }
         return changes;
     }

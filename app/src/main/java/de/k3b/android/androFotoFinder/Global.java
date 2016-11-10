@@ -103,10 +103,13 @@ public class Global {
     public static final boolean geoNoEdit = true;
 
     /** Support extra parameters true: experimental. Not fully implemented yet. */
-    public static final boolean enableNonStandardMediaFields = true;
+    public static boolean enableNonStandardMediaFields = true;
 
     /** true: experimental. Not fully implemented yet. */
-    public static final boolean enableNonStandardMediaFieldsUpdateLastSCanTimestamp = enableNonStandardMediaFields && false;
+    public static final boolean enableNonStandardMediaFieldsUpdateLastScanTimestamp = enableNonStandardMediaFields && false;
+
+    /** true: xmp value is more important than exif (if both values are present. */
+    public static final boolean xmpOverwritesExif = enableNonStandardMediaFields && false;
 
     /** #26 which image resolution should the "non zoomed imageView" have? */
     public static boolean initialImageDetailResolutionHigh = false; // false: MediaStore.Images.Thumbnails.MINI_KIND; true: FULL_SCREEN_KIND;

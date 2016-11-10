@@ -102,7 +102,7 @@ public class TagSql extends FotoSql {
     }
 
     public static void setLastScanDate(ContentValues values, Date lastScanDate) {
-        if (Global.enableNonStandardMediaFieldsUpdateLastSCanTimestamp) {
+        if (Global.enableNonStandardMediaFieldsUpdateLastScanTimestamp) {
             Long now = (lastScanDate != null)
                     ? lastScanDate.getTime() / 1000 // sec
                     : null;
