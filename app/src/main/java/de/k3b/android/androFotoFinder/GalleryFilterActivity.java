@@ -68,6 +68,7 @@ public class GalleryFilterActivity extends LocalizedActivity
     private static final String DLG_NAVIGATOR_TAG = "GalleryFilterActivity";
     private static final String SETTINGS_KEY = "GalleryFilterActivity-";
     private static final String FILTER_VALUE = "CURRENT_FILTER";
+    private static final String WILDCARD = "%";
     private static QueryParameter mRootQuery;
 
     private GalleryFilterParameter mFilter = new GalleryFilterParameter();
@@ -354,8 +355,8 @@ public class GalleryFilterActivity extends LocalizedActivity
         public String getPath() {
             // smart filter path edit:  if the field does not contain a path element "/" then surround
             // the value with sql wildcard "%"
-            String result = mPath.getText().toString().replace('\\','/');
-            if (!result.contains("/")) result = "%" + result + "%";
+            String result = mPath.getText().toString().trim().replace('\\','/');
+            if ((result.length() > 0) && !result.contains("/") && !result.contains(WILDCARD)) result = WILDCARD + result + WILDCARD;
             return result;
         }
 
