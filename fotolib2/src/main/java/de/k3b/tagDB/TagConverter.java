@@ -65,10 +65,10 @@ public class TagConverter {
     public static String asDbString(String wildcard, String... tags) {
         return asDbString(wildcard,TAG_DB_DELIMITER, "", TAG_DB_DELIMITER, tags);
     }
-    public static List<String> fromString(String tags) {
+    public static List<String> fromString(Object tags) {
         if (tags == null) return null;
         ArrayList<String> result = new ArrayList<String>();
-        for(String elem : tags.split("[,;:]")) {
+        for(String elem : tags.toString().split("[,;:]")) {
             if ((elem != null) && (elem.length() > 0)) {
                 result.add(elem.trim());
             }

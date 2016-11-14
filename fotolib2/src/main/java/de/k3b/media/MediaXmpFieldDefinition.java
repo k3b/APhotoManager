@@ -19,33 +19,43 @@
 
 package de.k3b.media;
 
+import com.adobe.xmp.options.PropertyOptions;
+
 /**
  * Supported predefined Xmp-Fileds
  * Created by k3b on 10.10.2016.
  */
 
 public enum MediaXmpFieldDefinition {
-    PATH(XmpNamespace.NONE,"SourceFile"), // used by exiftool-csv
+    PATH(XmpNamespace.NONE), // used by exiftool-csv
 
-    CreateDate(XmpNamespace.XAP,"CreateDate"),          // JPhotoTagger default
-    DateCreated(XmpNamespace.PHOTOSHOP,"DateCreated"),  // exiftool default
-    DateTimeOriginal(XmpNamespace.EXIF,"DateTimeOriginal"),
+    CreateDate(XmpNamespace.XAP),          // JPhotoTagger default
 
-    GPSLatitude(XmpNamespace.EXIF,"GPSLatitude"),
-    GPSLongitude(XmpNamespace.EXIF,"GPSLongitude"),
+    DateCreated(XmpNamespace.PHOTOSHOP),  // exiftool default
 
-    TITLE(XmpNamespace.DC,"Title"),
-    DESCRIPTION(XmpNamespace.DC,"Description"),
+    DateTimeOriginal(XmpNamespace.EXIF),
+    GPSLatitude(XmpNamespace.EXIF),
+    GPSLongitude(XmpNamespace.EXIF),
 
-    RATING(XmpNamespace.DC,"Rating"),
-    TAGS(XmpNamespace.DC,"Subject");
+    creator(XmpNamespace.DC,PropertyOptions.ARRAY | PropertyOptions.ARRAY_ORDERED),
+    rights(XmpNamespace.DC, PropertyOptions.ARRAY_ALT_TEXT | PropertyOptions.ARRAY_ALTERNATE | PropertyOptions.ARRAY_ALT_TEXT),
+    title(XmpNamespace.DC, PropertyOptions.ARRAY | PropertyOptions.ARRAY_ORDERED | PropertyOptions.ARRAY_ALTERNATE | PropertyOptions.ARRAY_ALT_TEXT),
+    description(XmpNamespace.DC,
+            PropertyOptions.ARRAY_ALT_TEXT | PropertyOptions.ARRAY |
+                    PropertyOptions.ARRAY_ORDERED | PropertyOptions.ARRAY_ALTERNATE),
+    Rating(XmpNamespace.DC),
+    subject(XmpNamespace.DC, PropertyOptions.ARRAY);
 
     private final XmpNamespace xmpNamespace;
-    private final String name;
+    private final int arrayOption;
 
-    private MediaXmpFieldDefinition(XmpNamespace xmpNamespace, String name) {
+    private MediaXmpFieldDefinition(XmpNamespace xmpNamespace) {
+        this(xmpNamespace, PropertyOptions.NO_OPTIONS);
+    }
+
+    private MediaXmpFieldDefinition(XmpNamespace xmpNamespace, int arrayOption) {
         this.xmpNamespace = xmpNamespace;
-        this.name = name;
+        this.arrayOption = arrayOption;
     }
 
     public XmpNamespace getXmpNamespace() {
@@ -53,11 +63,19 @@ public enum MediaXmpFieldDefinition {
     }
 
     public String getShortName() {
-        return name;
+        return super.toString();
     }
 
     @Override
     public String toString() {
         return getShortName() + "@" + getXmpNamespace();
+    }
+
+    public boolean isArray() {
+        return getArrayOption() != PropertyOptions.NO_OPTIONS;
+    }
+
+    public int getArrayOption() {
+        return arrayOption;
     }
 }

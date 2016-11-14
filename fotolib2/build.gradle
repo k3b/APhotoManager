@@ -16,3 +16,11 @@ dependencies {
     compile 'com.github.k3b:k3b-geoHelper:1.1.5'
     compile 'com.adobe.xmp:xmpcore:5.1.2'
 }
+
+// workaround because android-studio does not make the test resources available
+// see https://code.google.com/p/android/issues/detail?id=64887#c13
+task copyTestResources(type: Copy) {
+    from sourceSets.test.resources
+    into sourceSets.test.output.classesDir
+}
+processTestResources.dependsOn copyTestResources

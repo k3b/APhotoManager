@@ -63,11 +63,12 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
 
     @Override
     public String getPath() {
-        return null;
+        return mFilename;
     }
 
     @Override
     public IMetaApi setPath(String filePath) {
+        mFilename = filePath;
         return this;
     }
 

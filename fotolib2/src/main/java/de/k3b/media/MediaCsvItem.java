@@ -32,13 +32,13 @@ import de.k3b.tagDB.TagConverter;
 
 public class MediaCsvItem extends CsvItem implements IMetaApi {
     public final static String MEDIA_CSV_STANDARD_HEADER = MediaXmpFieldDefinition.PATH.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
-            MediaXmpFieldDefinition.TITLE.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
-            MediaXmpFieldDefinition.DESCRIPTION.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
+            MediaXmpFieldDefinition.title.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
+            MediaXmpFieldDefinition.description.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
             MediaXmpFieldDefinition.DateTimeOriginal.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
             MediaXmpFieldDefinition.GPSLatitude.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
             MediaXmpFieldDefinition.GPSLongitude.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
-            MediaXmpFieldDefinition.TAGS.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
-            MediaXmpFieldDefinition.RATING.getShortName();
+            MediaXmpFieldDefinition.subject.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
+            MediaXmpFieldDefinition.Rating.getShortName();
 
     private static final String CSV_PATH = "SourceFile"; // used by exiftool-csv
     private int colFilePath;
@@ -63,12 +63,12 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
         colDateTimeTaken    = getColumnIndex(MediaXmpFieldDefinition.DateTimeOriginal);
         colDateCreated      = getColumnIndex(MediaXmpFieldDefinition.DateCreated);
         colCreateDate       = getColumnIndex(MediaXmpFieldDefinition.CreateDate);
-        colTitle            = getColumnIndex(MediaXmpFieldDefinition.TITLE);
-        colDescription      = getColumnIndex(MediaXmpFieldDefinition.DESCRIPTION);
-        colTags             = getColumnIndex(MediaXmpFieldDefinition.TAGS);
+        colTitle            = getColumnIndex(MediaXmpFieldDefinition.title);
+        colDescription      = getColumnIndex(MediaXmpFieldDefinition.description);
+        colTags             = getColumnIndex(MediaXmpFieldDefinition.subject);
         colLatitude         = getColumnIndex(MediaXmpFieldDefinition.GPSLatitude);
         colLongitude        = getColumnIndex(MediaXmpFieldDefinition.GPSLongitude);
-        colRating           = getColumnIndex(MediaXmpFieldDefinition.RATING);
+        colRating           = getColumnIndex(MediaXmpFieldDefinition.Rating);
     }
 
     @Override

@@ -49,7 +49,7 @@ public class MediaScannerEx extends MediaScanner {
 
         File xmpFile = FileUtils.getXmpFile(file.getAbsolutePath());
         MediaXmpSegment xmp = null;
-        if (xmpFile.exists() && xmpFile.isFile()) {
+        if ((xmpFile != null) && xmpFile.exists() && xmpFile.isFile()) {
             xmp = new MediaXmpSegment();
             try {
                 xmp.load(new FileInputStream(xmpFile));

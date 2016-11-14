@@ -259,7 +259,7 @@ public class SettingsActivity extends PreferenceActivity {
         // true if first run or change
         if ((sOldEnableTagSupport == null) || (sOldEnableTagSupport.booleanValue() != Global.enableNonStandardMediaFields)) {
             MediaScanner.setInstance((Global.enableNonStandardMediaFields) ? new MediaScannerEx(context) : new MediaScanner(context));
-            Global.enableNonStandardMediaFields = sOldEnableTagSupport;
+            sOldEnableTagSupport = Global.enableNonStandardMediaFields;
         }
     }
 

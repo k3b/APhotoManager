@@ -36,6 +36,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import de.k3b.tagDB.TagConverter;
+
 /**
  * Hides Implementation details of xmp lib
  * Created by k3b on 20.10.2016.
@@ -46,9 +48,16 @@ public class XmpSegment {
     private static XMPSchemaRegistry registry = XMPMetaFactory.getSchemaRegistry();
 
     protected String getPropertyAsString(MediaXmpFieldDefinition... definitions) {
+        List<String> values = getPropertyArray(definitions);
+        if ((values != null) && (values.size() > 0)) {
+            return TagConverter.asDbString(null, values);
+        }
+
         try {
             XMPProperty result = getProperty(definitions);
-            if (result != null) return result.getValue();
+            if (result != null) {
+                return result.getValue();
+            }
         } catch (XMPException e) {
             onError("getPropertyAsString", e);
         }
@@ -67,8 +76,10 @@ public class XmpSegment {
 
     protected XMPProperty getProperty(MediaXmpFieldDefinition... definitions) throws XMPException {
         for (MediaXmpFieldDefinition definition: definitions) {
-            XMPProperty result = getXmpMeta().getProperty(definition.getXmpNamespace().getUriAsString(), definition.getShortName());
-            if (result != null) return result;
+            if (!definition.isArray()) {
+                XMPProperty result = getXmpMeta().getProperty(definition.getXmpNamespace().getUriAsString(), definition.getShortName());
+                if (result != null) return result;
+            }
         }
         return null;
     }
@@ -85,41 +96,52 @@ public class XmpSegment {
         try {
             MediaXmpFieldDefinition definition = findFirst(value == null, definitions);
             if (definition != null) {
-                getXmpMeta().setProperty(definition.getXmpNamespace().getUriAsString(), definition.getShortName(), value);
+                if (definition.isArray()) {
+                    replacePropertyArray(TagConverter.fromString(value), definition);
+                } else {
+                    getXmpMeta().setProperty(definition.getXmpNamespace().getUriAsString(), definition.getShortName(), value);
+                }
             } // else both porperty and value do not exist
         } catch (XMPException e) {
             onError("setProperty", e);
         }
     }
 
-    protected void replacePropertyArray(MediaXmpFieldDefinition definition, List<String> values) {
+    protected void replacePropertyArray(List<String> values, MediaXmpFieldDefinition... definitions) {
         try {
-            XMPMeta meta = getXmpMeta();
-            int oldItemCount = meta.countArrayItems(definition.getXmpNamespace().getUriAsString(), definition.getShortName());
-            for (int i = oldItemCount; i > 0; i--) {
-                meta.deleteArrayItem(definition.getXmpNamespace().getUriAsString(), definition.getShortName(), i);
-            }
+            MediaXmpFieldDefinition definition = findFirst(false, definitions);
+            if ((definition != null) && definition.isArray()) {
+                XMPMeta meta = getXmpMeta();
+                int oldItemCount = meta.countArrayItems(definition.getXmpNamespace().getUriAsString(), definition.getShortName());
+                for (int i = oldItemCount; i > 0; i--) {
+                    meta.deleteArrayItem(definition.getXmpNamespace().getUriAsString(), definition.getShortName(), i);
+                }
 
-            PropertyOptions option = new PropertyOptions(PropertyOptions.ARRAY);
-            for (String value : values) {
-                meta.appendArrayItem(definition.getXmpNamespace().getUriAsString(), definition.getShortName(),option, value,null);
+                PropertyOptions option = new PropertyOptions(definition.getArrayOption());
+                for (String value : values) {
+                    meta.appendArrayItem(definition.getXmpNamespace().getUriAsString(), definition.getShortName(), option, value, null);
+                }
             }
         } catch (XMPException e) {
             onError("replacePropertyArray", e);
         }
     }
 
-    protected List<String>  getPropertyArray(MediaXmpFieldDefinition definition) {
+    protected List<String>  getPropertyArray(MediaXmpFieldDefinition... definitions) {
         try {
             XMPMeta meta = getXmpMeta();
-            int oldItemCount = meta.countArrayItems(definition.getXmpNamespace().getUriAsString(), definition.getShortName());
-            if (oldItemCount > 0) {
-                List<String> values = new ArrayList<String>();
-                for (int i = 1; i <= oldItemCount; i++) {
-                    XMPProperty item = meta.getArrayItem(definition.getXmpNamespace().getUriAsString(), definition.getShortName(), i);
-                    values.add(item.getValue());
+            for (MediaXmpFieldDefinition definition : definitions) {
+                if (definition.isArray()) {
+                    int oldItemCount = meta.countArrayItems(definition.getXmpNamespace().getUriAsString(), definition.getShortName());
+                    if (oldItemCount > 0) {
+                        List<String> values = new ArrayList<String>();
+                        for (int i = 1; i <= oldItemCount; i++) {
+                            XMPProperty item = meta.getArrayItem(definition.getXmpNamespace().getUriAsString(), definition.getShortName(), i);
+                            values.add(item.getValue());
+                        }
+                        return values;
+                    }
                 }
-                return values;
             }
         } catch (XMPException e) {
             onError("getPropertyArray", e);

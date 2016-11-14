@@ -24,8 +24,10 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import de.k3b.csv2db.csv.TestUtil;
 
@@ -34,6 +36,54 @@ import de.k3b.csv2db.csv.TestUtil;
  */
 
 public class MediaXmpTests {
+    // D:\prj\eve\android\prj\fotos-android.wrk\FotoGallery\FotoGallery\fotolib2\src\test\resources\testdata
+    // test-WitExtraData.xmp
+    private static final String RESOURCES_ROOT = "testdata/";
+
+    @Test
+    public void shouldReadExistingXmpFile() throws IOException {
+        MediaXmpSegment sut = new MediaXmpSegment();
+        InputStream fis = getStream("test-WitExtraData.xmp");
+        sut = new MediaXmpSegment();
+        sut.load(fis);
+        fis.close();
+
+        MediaDTO actual = new MediaDTO(sut);
+
+        Assert.assertEquals(sut.toString(), "MediaDTO: path null dateTimeTaken 1962-11-07T09:38:46 title Headline description XPSubject latitude 27.818611 longitude -15.764444 tags Marker1, Marker2", actual.toString());
+    }
+
+    private String currentResourceName = null;
+
+    private InputStream getStream(String _resourceName) {
+        this.currentResourceName = _resourceName;
+
+        // this does not work with test-resources :-(
+        // or i donot know how to do it with AndroidStudio-1.02/gradle-2.2
+        InputStream result = this.getClass().getResourceAsStream(this.currentResourceName);
+
+        if (result == null) {
+            File prjRoot = new File(".").getAbsoluteFile();
+            while (prjRoot.getName().compareToIgnoreCase("fotolib2") != 0) {
+                prjRoot = prjRoot.getParentFile();
+                if (prjRoot == null) return null;
+            }
+
+            // assuming this src folder structure:
+            // .../LocationMapViewer/k3b-geoHelper/src/test/resources/....
+            File resourceFile = new File(prjRoot, "build/resources/de/k3b/media/" + _resourceName);
+// D:\prj\eve\android\prj\fotos-android.wrk\FotoGallery\FotoGallery\fotolib2\src\test\resources\de\k3b\media
+            this.currentResourceName = resourceFile.getAbsolutePath(); // . new Path(resourceName).get;
+            try {
+                result = new FileInputStream(this.currentResourceName);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        return result;
+    }
+
     @Test
     public void shouldCopyAllFields() {
         MediaXmpSegment sut = new MediaXmpSegment();

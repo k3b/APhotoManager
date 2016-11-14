@@ -104,36 +104,36 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
 
     @Override
     public String getTitle() {
-        return getPropertyAsString(MediaXmpFieldDefinition.TITLE);
+        return getPropertyAsString(MediaXmpFieldDefinition.title);
     }
 
     @Override
     public IMetaApi setTitle(String title) {
         setProperty(title,
-                MediaXmpFieldDefinition.TITLE);
+                MediaXmpFieldDefinition.title);
         return this;
     }
 
     @Override
     public String getDescription() {
-        return getPropertyAsString(MediaXmpFieldDefinition.DESCRIPTION);
+        return getPropertyAsString(MediaXmpFieldDefinition.description);
     }
 
     @Override
     public IMetaApi setDescription(String description) {
         setProperty(description,
-                MediaXmpFieldDefinition.DESCRIPTION);
+                MediaXmpFieldDefinition.description);
         return this;
     }
 
     @Override
     public List<String> getTags() {
-        return getPropertyArray(MediaXmpFieldDefinition.TAGS);
+        return getPropertyArray(MediaXmpFieldDefinition.subject);
     }
 
     @Override
     public IMetaApi setTags(List<String> tags) {
-        replacePropertyArray(MediaXmpFieldDefinition.TAGS, tags);
+        replacePropertyArray(tags, MediaXmpFieldDefinition.subject);
         return this;
     }
 
@@ -142,7 +142,7 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
      */
     @Override
     public Integer getRating() {
-        String result = getPropertyAsString(MediaXmpFieldDefinition.RATING);
+        String result = getPropertyAsString(MediaXmpFieldDefinition.Rating);
         if (result != null) {
             try {
                 return Integer.parseInt(result);
@@ -156,7 +156,7 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
     @Override
     public IMetaApi setRating(Integer value) {
         setProperty(value,
-                MediaXmpFieldDefinition.RATING);
+                MediaXmpFieldDefinition.Rating);
         return this;
     }
 }

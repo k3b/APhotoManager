@@ -125,6 +125,7 @@ public class FileUtils {
 
             String xmpFilePath = (ext >= 0) ? (filepath.substring(0, ext) + ".xmp") : (filepath + ".xmp");
             File xmpFile = new File(xmpFilePath);
+            return xmpFile;
         }
         return null;
     }
