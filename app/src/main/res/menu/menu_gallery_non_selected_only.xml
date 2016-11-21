@@ -27,14 +27,14 @@
         android:title="@string/folder_menu_title"
         android:icon="@drawable/ic_action_holo_dark_folder"
         android:visible="true"
-        android:orderInCategory="1"
+        android:orderInCategory="2"
         android:showAsAction="ifRoom" />
 
     <item android:id="@+id/cmd_select_lat_lon"
         android:title="@string/area_menu_title"
         android:icon="@android:drawable/ic_dialog_map"
         android:visible="true"
-        android:orderInCategory="1"
+        android:orderInCategory="2"
         android:showAsAction="ifRoom" />
 
     <item android:id="@+id/cmd_selection_add_all"

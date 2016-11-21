@@ -41,7 +41,7 @@ public class IntentUtil implements Common {
     /** get uri from data. if there is no data from EXTRA_STREAM */
     @Nullable
     public static Uri getUri(Intent intent) {
-        Uri uri = intent.getData();
+        Uri uri = (intent == null) ? null : intent.getData();
         Bundle extras = (uri != null) ? null : intent.getExtras();
         Object stream = (extras == null) ? null : extras.get(EXTRA_STREAM);
         if (stream != null) {

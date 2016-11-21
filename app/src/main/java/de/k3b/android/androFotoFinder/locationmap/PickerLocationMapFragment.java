@@ -83,7 +83,8 @@ public class PickerLocationMapFragment extends LocationMapFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Intent intent = this.getActivity().getIntent();
-        mUsePicker = ((Intent.ACTION_PICK.equals(intent.getAction())) || (Intent.ACTION_GET_CONTENT.equals(intent.getAction())));
+        String action = (intent != null) ? intent.getAction() : null;
+        mUsePicker = ((action != null) && ((Intent.ACTION_PICK.equals(action)) || (Intent.ACTION_GET_CONTENT.equals(action))));
 
         View result = super.onCreateView(inflater, container, savedInstanceState);
 

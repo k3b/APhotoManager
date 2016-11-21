@@ -331,21 +331,25 @@ public class GalleryFilterActivity extends LocalizedActivity
                 findViewById(id).setVisibility((!checked) ? View.VISIBLE : View.INVISIBLE );
         }
 
+        /** minimum latitude, in degrees north. -90..+90 */
         @Override
         public double getLatitudeMin() {
             return convertLL(mLatitudeFrom.getText().toString());
         }
 
+        /** maximum latitude, in degrees north. -90..+90 */
         @Override
         public double getLatitudeMax() {
             return convertLL(mLatitudeTo.getText().toString());
         }
 
+        /** minimum longitude, in degrees east. -180..+180 */
         @Override
         public double getLogituedMin() {
             return convertLL(mLongitudeFrom.getText().toString());
         }
 
+        /** maximum longitude, in degrees east. -180..+180 */
         @Override
         public double getLogituedMax() {
             return convertLL(mLongitudeTo.getText().toString());

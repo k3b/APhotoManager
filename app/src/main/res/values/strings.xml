@@ -152,4 +152,6 @@
 
 	<string name="show_photo">Show Photo(s)</string>
 	<string name="fix_link_menu_title">Repair duplicates</string>
+
+	<string name="geo_picker_from_photo_title">Pick Geo from Photo	</string>
 </resources>

@@ -141,5 +141,4 @@ public class Global {
                 R.id.cmd_show_geo_as
         );
     }
-
 }

@@ -83,7 +83,38 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-			
+
+            <!-- map view/pick/send(to/multible) for "geo:" with all mimes (*/*) -->
+            <intent-filter android:label="@string/geo_picker_from_photo_title">
+                <action android:name="android.intent.action.PICK" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:mimeType="*/*" />
+                <data android:scheme="geo" />
+            </intent-filter>
+
+            <!-- map view/pick/send(to/multible) for "geo:" without mime -->
+            <intent-filter  android:label="@string/geo_picker_from_photo_title">
+                <action android:name="android.intent.action.PICK" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="geo" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.PICK"/>
+                <action android:name="android.intent.action.GET_CONTENT"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+
+                <data android:mimeType="image/*"/>
+                <data android:mimeType="vnd.android.cursor.dir/image"/>
+            </intent-filter>
+
         </activity>
 
         <!-- mime image/* for SEND(_TO)/(RE)VIEW for file -->
