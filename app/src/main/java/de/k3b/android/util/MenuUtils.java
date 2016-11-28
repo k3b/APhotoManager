@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2015-2016 by k3b.
+ *
+ * This file is part of AndroFotoFinder.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
 package de.k3b.android.util;
 
 import android.support.annotation.NonNull;
@@ -13,9 +31,12 @@ import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
  * Created by k3b on 20.06.2016.
  */
 public class MenuUtils {
+    private final static int id_more = 199827;
     public static void mov2SubMenu(Menu menue, String subMenue, int... ids2move) {
         if (menue != null) {
-            SubMenu subMenu = menue.addSubMenu(Menu.NONE, Menu.NONE, 32767, subMenue);
+            MenuItem subMenuOwner = menue.findItem(id_more);
+            SubMenu subMenu = (subMenuOwner != null) ? subMenuOwner.getSubMenu() : null;
+            if (subMenu == null) subMenu = menue.addSubMenu(Menu.NONE, id_more, 32767, subMenue);
 
             for (int idSub : ids2move) {
                 MenuItem oldMenuItem = menue.findItem(idSub);

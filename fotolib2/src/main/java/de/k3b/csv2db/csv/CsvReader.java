@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2016 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -32,12 +32,14 @@ import java.util.Vector;
  *
  */
 public class CsvReader {
+	/** the first occurence in the first line of one othe these chars will become the {@link #fieldDelimiter} */
+	private static final String POSSIBLE_DELIMITER_CHARS = ",;\t";
 
 	public static final char FIELDLEN_DELIMITER = ':';
-	private static final char CHAR_LINE_DELIMITER = '\n';
 	private static final char CHAR_IGNORE = '\r';
-	private static final char CHAR_FIELD_SURROUNDER = '\"';
+
 	private char fieldDelimiter = 0;
+
 	private char fieldSurrounder = 0; // != 0: look for matching -"- to allow multiline fields
 
 	private Reader reader;
@@ -47,13 +49,12 @@ public class CsvReader {
 
 	// csv recordnumber
 	private int recordNumber = 0;
-	
+
 	public CsvReader(Reader reader) {
 		this.reader = reader;
 	}
 
 	public String[] readLine() {
-		final String trennChars = ",;\t";
 		Vector<String> result = new Vector<String>();
 		StringBuffer content = new StringBuffer();
 		this.fieldSurrounder = 0;
@@ -63,19 +64,19 @@ public class CsvReader {
 			int ch;
 			while ((ch=this.reader.read()) != -1) // ,0,cbuf.length) > 0)
 			{
-				if (ch==CHAR_LINE_DELIMITER) this.lineNumber++;
+				if (ch== CsvItem.DEFAULT_CHAR_LINE_DELIMITER) this.lineNumber++;
 				
 				if (this.fieldSurrounder == 0) {
 					if (fieldDelimiter == 0)
 					{
 						// fieldDelimiter unknown: infer
-						if (trennChars.indexOf(ch) >= 0)
+						if (POSSIBLE_DELIMITER_CHARS.indexOf(ch) >= 0)
 							fieldDelimiter = (char) ch;
 					}
 					if (ch == fieldDelimiter) {
 						result.addElement(getStringWithoutDelimiters(content));
 						content.setLength(0);
-					} else if (ch==CHAR_LINE_DELIMITER) {
+					} else if (ch== CsvItem.DEFAULT_CHAR_LINE_DELIMITER) {
 						result.addElement(getStringWithoutDelimiters(content));
 						this.recordNumber++;
 						return toStringArray(result);
@@ -83,7 +84,7 @@ public class CsvReader {
 						content.append((char) ch);
 					}
 					
-					if (ch == CHAR_FIELD_SURROUNDER)
+					if (ch == CsvItem.CHAR_FIELD_SURROUNDER)
 						this.fieldSurrounder = (char) ch; // start -"- area
 				} else {
 					// waiting for end--"-
@@ -121,7 +122,6 @@ public class CsvReader {
 	}
 
 	/**
-	 * 
 	 * @param content that may contain starting and ending -"-
 	 * @return string without starting and ending -"-
 	 */
@@ -129,9 +129,9 @@ public class CsvReader {
     {
 		if (content.length() > 0)
 		{
-			if (content.charAt(0) == CHAR_FIELD_SURROUNDER)
+			if (content.charAt(0) == CsvItem.CHAR_FIELD_SURROUNDER)
 				content.deleteCharAt(0);
-			if (content.charAt(content.length() -1 ) == CHAR_FIELD_SURROUNDER)
+			if (content.charAt(content.length() -1 ) == CsvItem.CHAR_FIELD_SURROUNDER)
 				content.deleteCharAt(content.length() -1);
 			if (content.length() > 0)
 				return content.toString();
@@ -145,5 +145,13 @@ public class CsvReader {
 
 	public int getRecordNumber() {
 		return this.recordNumber;
+	}
+
+	public char getFieldDelimiter() {
+		return fieldDelimiter;
+	}
+
+	public void setFieldDelimiter(char fieldDelimiter) {
+		this.fieldDelimiter = fieldDelimiter;
 	}
 }

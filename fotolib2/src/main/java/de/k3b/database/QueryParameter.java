@@ -94,6 +94,11 @@ public class QueryParameter {
         return addToList(mFrom, false, froms);
     }
 
+    public QueryParameter replaceFrom(String... froms) {
+        mFrom.clear();
+        return addFrom(froms);
+    }
+
     public String toFrom() {
         StringBuilder result = new StringBuilder();
         if (!Helper.append(result, null, mFrom, ", ", "", "")) {
@@ -120,6 +125,11 @@ public class QueryParameter {
     public QueryParameter addWhere(String where, String... parameters) {
         mWhere.add(where);
         return addToList(mParameters, true, parameters);
+    }
+
+    public QueryParameter removeWhere(String where) {
+        getWhereParameter(where,true);
+        return this;
     }
 
     public String[] getWhereParameter(String sqlExprWithParameters, boolean remove) {

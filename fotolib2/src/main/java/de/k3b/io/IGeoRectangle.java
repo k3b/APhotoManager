@@ -23,12 +23,16 @@ package de.k3b.io;
  * Created by k3b on 13.07.2015.
  */
 public interface IGeoRectangle {
+    /** minimum latitude, in degrees north. -90..+90 */
     double getLatitudeMin();
 
+    /** maximum latitude, in degrees north. -90..+90 */
     double getLatitudeMax();
 
+    /** minimum longitude, in degrees east. -180..+180 */
     double getLogituedMin();
 
+    /** maximum longitude, in degrees east. -180..+180 */
     double getLogituedMax();
 
     IGeoRectangle get(IGeoRectangle src);

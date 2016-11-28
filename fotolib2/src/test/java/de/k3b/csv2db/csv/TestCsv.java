@@ -23,12 +23,13 @@ import static org.junit.Assert.*;
 
 import java.io.Reader;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import de.k3b.csv2db.csv.TestUtil;
 import de.k3b.csv2db.csv.CsvReader;
 
-public class TestCsvReader {
+public class TestCsv {
 	@Test
 	public void emptyReaderShouldReturnNoData() throws Throwable {
 		Reader inputStream = TestUtil.createReader("");
@@ -94,5 +95,25 @@ public class TestCsvReader {
 		while (null!=parser.readLine()) {};
 		
 		assertEquals(2, parser.getRecordNumber());
+	}
+
+
+	@Test
+	public void shouldQuote() {
+		CsvItem sut = new CsvItem() {
+		};
+		sut.setFieldDelimiter(";");
+		Assert.assertEquals(true, sut.mustQuote(";"));
+		Assert.assertEquals(true, sut.mustQuote("\""));
+		Assert.assertEquals(true, sut.mustQuote("\n"));
+		Assert.assertEquals(true, sut.mustQuote("\r"));
+		Assert.assertEquals(false, sut.mustQuote("hello'world"));
+
+		Assert.assertEquals("hello'world", sut.quouteIfNecessary("hello'world"));
+		Assert.assertEquals("\"hello';\n\r\tworld\"", sut.quouteIfNecessary("hello\";\n" +
+				"\r" +
+				"\tworld"));
+
+
 	}
 }

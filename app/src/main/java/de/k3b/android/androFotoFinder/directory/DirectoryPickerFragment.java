@@ -50,7 +50,7 @@ import android.widget.Toast;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
-import de.k3b.android.androFotoFinder.imagedetail.ImageDetailDialogBuilder;
+import de.k3b.android.androFotoFinder.imagedetail.ImageDetailMetaDialogBuilder;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoThumbSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
@@ -486,7 +486,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
         if (pathFilter != null) {
 
-            ImageDetailDialogBuilder.createImageDetailDialog(
+            ImageDetailMetaDialogBuilder.createImageDetailDialog(
                     this.getActivity(),
                     pathFilter,
                     FotoThumbSql.formatDirStatistic(this.getActivity(), pathFilter)

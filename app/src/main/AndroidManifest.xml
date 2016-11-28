@@ -83,7 +83,38 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-			
+
+            <!-- pick geo from image for "geo:" with all mimes (*/*) -->
+            <intent-filter android:label="@string/geo_picker_from_photo_title">
+                <action android:name="android.intent.action.PICK" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:mimeType="*/*" />
+                <data android:scheme="geo" />
+            </intent-filter>
+
+            <!-- pick geo from image for "geo:"  without mime -->
+            <intent-filter  android:label="@string/geo_picker_from_photo_title">
+                <action android:name="android.intent.action.PICK" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="geo" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.PICK"/>
+                <action android:name="android.intent.action.GET_CONTENT"/>
+
+                <category android:name="android.intent.category.DEFAULT"/>
+
+                <data android:mimeType="image/*"/>
+                <data android:mimeType="vnd.android.cursor.dir/image"/>
+            </intent-filter>
+
         </activity>
 
         <!-- mime image/* for SEND(_TO)/(RE)VIEW for file -->
@@ -155,11 +186,10 @@
                 <category android:name="android.intent.category.CATEGORY_APP_MAPS" />
             </intent-filter>
 
-            <!-- map view/pick/send(to/multible) for "geo:" with all mimes (*/*) -->
+            <!-- map view/send(to/multible) for "geo:" with all mimes (*/*) -->
             <intent-filter>
 
                 <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.PICK" />
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SENDTO" />
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
@@ -171,10 +201,9 @@
                 <data android:scheme="geo" />
             </intent-filter>
 
-            <!-- map view/pick/send(to/multible) for "geo:" without mime -->
+            <!-- map view/send(to/multible) for "geo:" without mime -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-                <action android:name="android.intent.action.PICK" />
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SENDTO" />
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
@@ -184,6 +213,28 @@
 
                 <data android:scheme="geo" />
             </intent-filter>
+
+            <!-- map pick for "geo:" with all mimes (*/*) -->
+            <intent-filter android:label="@string/geo_picker_from_map_title">
+                <action android:name="android.intent.action.PICK" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:mimeType="*/*" />
+                <data android:scheme="geo" />
+            </intent-filter>
+
+            <!-- map pick for "geo:" without mimes -->
+            <intent-filter android:label="@string/geo_picker_from_map_title">
+                <action android:name="android.intent.action.PICK" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="geo" />
+            </intent-filter>
+
 
             <!-- #58 map view http(s) for online mapservices (google, yandex, here, openstreetmap) any server-path -->
             <intent-filter>

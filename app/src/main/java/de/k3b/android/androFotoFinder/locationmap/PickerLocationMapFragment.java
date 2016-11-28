@@ -21,9 +21,11 @@ package de.k3b.android.androFotoFinder.locationmap;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -50,6 +52,7 @@ import de.k3b.io.GeoRectangle;
  * Created by k3b on 30.08.2015.
  */
 public class PickerLocationMapFragment extends LocationMapFragment {
+    private static final String STATE_LAST_SELECTED_POINT = "last_geo_pick";
     private final String mDebugPrefix;
     private boolean mUsePicker;
 
@@ -83,7 +86,8 @@ public class PickerLocationMapFragment extends LocationMapFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         Intent intent = this.getActivity().getIntent();
-        mUsePicker = ((Intent.ACTION_PICK.equals(intent.getAction())) || (Intent.ACTION_GET_CONTENT.equals(intent.getAction())));
+        String action = (intent != null) ? intent.getAction() : null;
+        mUsePicker = ((action != null) && ((Intent.ACTION_PICK.equals(action)) || (Intent.ACTION_GET_CONTENT.equals(action))));
 
         View result = super.onCreateView(inflater, container, savedInstanceState);
 
@@ -125,10 +129,25 @@ public class PickerLocationMapFragment extends LocationMapFragment {
     public void defineNavigation(GalleryFilterParameter rootFilter, IGeoPointInfo currentSelection,
                                  GeoRectangle rectangle, int zoomlevel,
                                  SelectedItems selectedItems, Uri additionalPointsContentUri) {
+        if ((currentSelection == null) && (getCurrentSelectionPosition() == null)) {
+            // first call with no geo: take last use from config
+            // save as value if picker is called again with no geo-coordinate
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            String lastValue = sharedPref.getString(STATE_LAST_SELECTED_POINT, null);
+            currentSelection = (lastValue == null) ? null : mGeoUriEngine.fromUri(lastValue);
+        }
+
         super.defineNavigation(rootFilter, rectangle, zoomlevel, selectedItems, additionalPointsContentUri);
         if (currentSelection != null) {
             updateMarker(null, NO_MARKER_ID, new GeoPoint(currentSelection.getLatitude(), currentSelection.getLongitude()), null);
         }
+    }
+
+    protected IGeoPoint getCurrentSelectionPosition() {
+        if (this.mCurrrentSelectionRedMarker == null) return null;
+        IGeoPoint pos = this.mCurrrentSelectionRedMarker.getPosition();
+        if ((pos == null) || GeoPointDto.isEmpty(pos.getLatitude(), pos.getLongitude())) return null;
+        return pos;
     }
 
     @Override
@@ -141,19 +160,27 @@ public class PickerLocationMapFragment extends LocationMapFragment {
         }
 
         if (result == null) {
-            result = this.mCurrrentSelectionRedMarker.getPosition();
+            result = getCurrentSelectionPosition();
         }
 
         if (result != null) {
             int currentZoomLevel = this.mMapView.getZoomLevel();
-            String uriCurrentViewport = mGeoUriEngine.toUriString(
+            String uriCurrentPoint = mGeoUriEngine.toUriString(
                     new GeoPointDto(result.getLatitude(), result.getLongitude(), currentZoomLevel));
 
+            // save as value if picker is called again with no geo-coordinate
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            SharedPreferences.Editor edit = sharedPref.edit();
+
+            edit.putString(STATE_LAST_SELECTED_POINT, uriCurrentPoint);
+
+            edit.apply();
+
             if (Global.debugEnabled) {
-                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "onOk: " + uriCurrentViewport);
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "onOk: " + uriCurrentPoint);
             }
             Intent resultIntent = new Intent(activity.getIntent());
-            resultIntent.setData(Uri.parse(uriCurrentViewport));
+            resultIntent.setData(Uri.parse(uriCurrentPoint));
             activity.setResult(1, resultIntent);
             activity.finish();
         }

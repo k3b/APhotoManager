@@ -145,7 +145,7 @@ public class QueryParameterTests {
                 .addWhere("w2 between ? and ?", "w21Value", "w22Value");
 
         // remove param
-        sut.getWhereParameter("w1=?", true);
+        sut.removeWhere("w1=?");
         Assert.assertEquals("where (w0) and (w2 between ? and ?) parameters w21value, w22value",
                 normalize(sut.toSqlString()));
     }

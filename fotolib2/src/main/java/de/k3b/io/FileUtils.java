@@ -117,4 +117,16 @@ public class FileUtils {
         );
         return result.toString();
     }
+
+    public static File getXmpFile(String filepath) {
+        if (filepath != null) {
+            // String filepath = file.getAbsolutePath();
+            int ext = filepath.lastIndexOf(".");
+
+            String xmpFilePath = (ext >= 0) ? (filepath.substring(0, ext) + ".xmp") : (filepath + ".xmp");
+            File xmpFile = new File(xmpFilePath);
+            return xmpFile;
+        }
+        return null;
+    }
 }

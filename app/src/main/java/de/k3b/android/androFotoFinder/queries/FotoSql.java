@@ -70,7 +70,7 @@ public class FotoSql {
     public static final int SORT_BY_NAME = 2;
     public static final int SORT_BY_LOCATION = 3;
     public static final int SORT_BY_NAME_LEN = 4;
-    public static final int SORT_BY_DEFAULT = SORT_BY_NAME;
+    public static final int SORT_BY_DEFAULT = SORT_BY_DATE;
 
     public static final int QUERY_TYPE_UNDEFINED = 0;
     public static final int QUERY_TYPE_GALLERY = 11;
