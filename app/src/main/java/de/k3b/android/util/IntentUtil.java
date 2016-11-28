@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -37,6 +38,13 @@ import de.k3b.android.androFotoFinder.Global;
  * Created by k3b on 09.09.2015.
  */
 public class IntentUtil implements Common {
+
+    public static Intent setDataAndTypeAndNormalize(Intent intent, Uri data, String type) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            return intent.setDataAndTypeAndNormalize(data, type);
+        }
+        return intent.setDataAndType(data, type);
+    }
 
     /** get uri from data. if there is no data from EXTRA_STREAM */
     @Nullable

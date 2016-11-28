@@ -332,7 +332,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             Intent childIntent = new Intent();
             childIntent.setClass(this, FotoGalleryActivity.class);
             childIntent.setAction(intent.getAction());
-            childIntent.setDataAndType(intent.getData(), intent.getType());
+            IntentUtil.setDataAndTypeAndNormalize(childIntent, intent.getData(), intent.getType());
             copyExtras(childIntent, intent.getExtras(),
                     EXTRA_FILTER, EXTRA_POSITION, EXTRA_QUERY, EXTRA_SELECTED_ITEM_IDS,
                     EXTRA_SELECTED_ITEM_PATHS, EXTRA_STREAM, EXTRA_TITLE);

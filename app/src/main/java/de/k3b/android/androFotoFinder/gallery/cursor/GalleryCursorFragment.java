@@ -44,8 +44,6 @@ import android.widget.LinearLayout;
 import android.widget.ShareActionProvider;
 import android.widget.Toast;
 
-// import com.squareup.leakcanary.RefWatcher;
-
 import org.osmdroid.api.IGeoPoint;
 
 import java.util.ArrayList;
@@ -878,8 +876,13 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         if (resultUri != null) {
             final Intent intent = new Intent();
 
+            // permission result.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             intent.setData(resultUri);
-            parent.setResult(1, intent);
+            if (!mGetGeo) {
+                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
+
+            parent.setResult(Activity.RESULT_OK, intent);
             parent.finish();
 
         }

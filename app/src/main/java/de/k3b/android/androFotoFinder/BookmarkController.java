@@ -30,6 +30,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.FileUtils;
@@ -168,7 +169,7 @@ public class BookmarkController {
 
     private boolean onEdit(File file) {
         Intent sendIntent = new Intent();
-        sendIntent.setDataAndType(Uri.fromFile(file), "text/plain");
+        IntentUtil.setDataAndTypeAndNormalize(sendIntent, Uri.fromFile(file), "text/plain");
         sendIntent.setAction(Intent.ACTION_EDIT);
         mContext.startActivity(sendIntent);
         return true;

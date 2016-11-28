@@ -204,15 +204,15 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
             saveSettings(context);
 
             // save InstanceState
-            savedInstanceState.putInt(STATE_DirQueryID  + mStatSuffix, this.getDirQueryID());
+            savedInstanceState.putInt(STATE_DirQueryID , this.getDirQueryID());
             if (mStatSuffix.length() == 0) {
                 savedInstanceState.putString(STATE_LAT_LON, this.mCurrentLatLonFromGeoAreaPicker.toString());
                 savedInstanceState.putString(STATE_CurrentPath, this.mCurrentPathFromFolderPicker);
             }
-            savedInstanceState.putInt(STATE_SortID + mStatSuffix, this.mCurrentSortID);
-            savedInstanceState.putBoolean(STATE_SortAscending + mStatSuffix, this.mCurrentSortAscending);
+            savedInstanceState.putInt(STATE_SortID, this.mCurrentSortID);
+            savedInstanceState.putBoolean(STATE_SortAscending, this.mCurrentSortAscending);
             if (this.getCurrentFilterSettings() != null) {
-                savedInstanceState.putString(STATE_Filter + mStatSuffix, this.getCurrentFilterSettings().toString());
+                savedInstanceState.putString(STATE_Filter, this.getCurrentFilterSettings().toString());
             }
             savedInstanceState.putBoolean(STATE_LAT_LON_ACTIVE, this.mUseLatLonInsteadOfPath);
 
@@ -298,10 +298,10 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
                     this.mCurrentLatLonFromGeoAreaPicker.get(DirectoryFormatter.parseLatLon(savedInstanceState.getString(STATE_LAT_LON)));
                     this.mCurrentPathFromFolderPicker = savedInstanceState.getString(STATE_CurrentPath, this.mCurrentPathFromFolderPicker);
                 }
-                this.mDirQueryID = savedInstanceState.getInt(STATE_DirQueryID + mStatSuffix, this.getDirQueryID());
-                this.mCurrentSortID = savedInstanceState.getInt(STATE_SortID + mStatSuffix, this.mCurrentSortID);
-                this.mCurrentSortAscending = savedInstanceState.getBoolean(STATE_SortAscending + mStatSuffix, this.mCurrentSortAscending);
-                filter = savedInstanceState.getString(STATE_Filter + mStatSuffix);
+                this.mDirQueryID = savedInstanceState.getInt(STATE_DirQueryID, this.getDirQueryID());
+                this.mCurrentSortID = savedInstanceState.getInt(STATE_SortID, this.mCurrentSortID);
+                this.mCurrentSortAscending = savedInstanceState.getBoolean(STATE_SortAscending, this.mCurrentSortAscending);
+                filter = savedInstanceState.getString(STATE_Filter);
                 if ((filter != null) && (dbgFilter != null)) dbgFilter.append("filter from savedInstanceState=").append(filter).append("\n");
 
 
