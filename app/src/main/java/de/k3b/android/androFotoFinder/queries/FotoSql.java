@@ -675,25 +675,6 @@ public class FotoSql {
         return null;
     }
 
-    public static ContentValues getDbContent(Context context, final long id) {
-        ContentResolver resolver = context.getContentResolver();
-
-        Cursor c = null;
-        try {
-            c = resolver.query(SQL_TABLE_EXTERNAL_CONTENT_URI, new String[]{"*"}, FILTER_COL_PK, new String[]{"" + id}, null);
-            if (c.moveToNext()) {
-                ContentValues values = new ContentValues();
-                DatabaseUtils.cursorRowToContentValues(c, values);
-                return values;
-            }
-        } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, "FotoSql.getDbContent(id=" + id + ") failed", ex);
-        } finally {
-            if (c != null) c.close();
-        }
-        return null;
-    }
-
     public static int execUpdate(Context context, int id, ContentValues values) {
         return context.getContentResolver().update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, values, FILTER_COL_PK, new String[]{Integer.toString(id)});
     }

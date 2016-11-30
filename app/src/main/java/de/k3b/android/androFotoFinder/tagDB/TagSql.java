@@ -19,9 +19,14 @@
 
 package de.k3b.android.androFotoFinder.tagDB;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import java.util.Date;
 
@@ -121,4 +126,25 @@ public class TagSql extends FotoSql {
     public static void setValues(ContentValues values, IMetaApi data) {
 
     }
+
+    public static ContentValues getDbContent(Context context, final long id) {
+        ContentResolver resolver = context.getContentResolver();
+
+        Cursor c = null;
+        try {
+            c = resolver.query(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, new String[]{"*"}, FILTER_COL_PK, new String[]{"" + id}, null);
+            if (c.moveToNext()) {
+                ContentValues values = new ContentValues();
+                DatabaseUtils.cursorRowToContentValues(c, values);
+                return values;
+            }
+        } catch (Exception ex) {
+            Log.e(Global.LOG_CONTEXT, "FotoSql.getDbContent(id=" + id + ") failed", ex);
+        } finally {
+            if (c != null) c.close();
+        }
+        return null;
+    }
+
+
 }

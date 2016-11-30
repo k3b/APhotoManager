@@ -24,7 +24,6 @@ import android.util.Log;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 import de.k3b.android.androFotoFinder.Global;
@@ -47,7 +46,7 @@ public class JpgMetaWorkflow {
         return sb;
     }
 
-    public static void addAttributes(StringBuilder sb, HashMap<String, String> exifAttributes) {
+    public static void addAttributes(StringBuilder sb, Map<String, String> exifAttributes) {
         for (Map.Entry<String, String> iter : exifAttributes.entrySet()) {
             String key = iter.getKey();
             String val = iter.getValue();

@@ -28,9 +28,10 @@ import java.lang.reflect.Field;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
+import java.util.TreeMap;
 
 import de.k3b.media.IMetaApi;
 
@@ -97,31 +98,31 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     }
 
     @Nullable
-    public HashMap<String, String> getAttributes() {
-        // access private member via reflection
-        // private HashMap<String, String> ExifInterfaceEx.mAttributes
-        // http://stackoverflow.com/questions/11483647/how-to-access-private-methods-and-private-data-members-via-reflection
+    public Map<String, String> getAttributes() {
+        // access private attribute ExifInterface.mAttributes via reflection
+        // http://stackoverflow.com/questions/1196192/how-do-i-read-a-private-field-in-java
         try {
 
              /*---  [GETING VALUE FROM PRIVATE FIELD]  ---*/
-            Field f = ExifInterfaceEx.class.getDeclaredField("mAttributes");
+            Field f = ExifInterface.class.getDeclaredField("mAttributes");
             f.setAccessible(true);//Abracadabra
-            HashMap<String, String> exifAttributes = (HashMap<String, String>) f.get(this);
+            Object field = f.get((ExifInterface) this);
+            Map<String, String> exifAttributes = (field instanceof Map) ? (Map<String, String>) field : null;
             if  ((exifAttributes != null) && (exifAttributes.size() > 0)) return exifAttributes;
 
         } catch (Exception ex) {
-
+            // ??? add logging to find out what goes wrong
         }
         return null;
     }
 
-
     public String getDebugString(String seperator) {
         StringBuilder builder = new StringBuilder();
-        HashMap<String, String> exifAttributes = this.getAttributes();
+        Map<String, String> exifAttributes = this.getAttributes();
 
         if ((exifAttributes != null) && (exifAttributes.size() > 0)) {
-            JpgMetaWorkflow.addAttributes(builder, exifAttributes);
+            // TreeMap to sort by key
+            JpgMetaWorkflow.addAttributes(builder, new TreeMap<String, String>(exifAttributes));
             Double latitude = getLatitude();
             if (latitude != null) {
                 builder.append("GPS Latitude: ").append(latitude).append(seperator);
@@ -157,8 +158,8 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
         if (mFilename != null) {
             File filePath = new File(mFilename);
             Date date = new Date(filePath.lastModified());
-            builder.append(seperator).append("filedate").append(ExifInterfaceEx.toExifDateTimeString(date)).append(seperator);;
-            builder.append("filemode").append( "" + (filePath.canRead() ? "r":"-") + (filePath.canWrite() ? "w":"-") + (filePath.canExecute() ? "x":"-")).append(seperator);;
+            builder.append(seperator).append("filedate: ").append(ExifInterfaceEx.toExifDateTimeString(date)).append(seperator);;
+            builder.append("filemode: ").append( "" + (filePath.canRead() ? "r":"-") + (filePath.canWrite() ? "w":"-") + (filePath.canExecute() ? "x":"-")).append(seperator);;
         }
 
         return builder.toString();
