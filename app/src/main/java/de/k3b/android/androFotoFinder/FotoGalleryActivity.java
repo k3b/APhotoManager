@@ -474,7 +474,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
     public boolean onCreateOptionsMenu(Menu menu) {
         Intent intent = this.getIntent();
         String action = (intent != null) ? intent.getAction() : null;
-        if ((action != null) && ((Intent.ACTION_PICK.compareTo(action) != 0) && (Intent.ACTION_GET_CONTENT.compareTo(action) != 0))) {
+        if ((action == null) || (((Intent.ACTION_PICK.compareTo(action) != 0) && (Intent.ACTION_GET_CONTENT.compareTo(action) != 0)))) {
             MenuInflater inflater = getMenuInflater();
 
             inflater.inflate(R.menu.menu_gallery_non_selected_only, menu);
