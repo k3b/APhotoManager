@@ -19,6 +19,7 @@
  
 package de.k3b.android.util;
 
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -33,6 +34,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -79,6 +81,7 @@ public class MediaScanner  {
     private static final String DB_DATE_ADDED = MediaStore.Images.ImageColumns.DATE_ADDED;
 
     public static final int DEFAULT_SCAN_DEPTH = 22;
+    public static final String MEDIA_IGNORE_FILENAME = MediaStore.MEDIA_IGNORE_FILENAME;
 
     /** singelton */
     private static MediaScanner sInstance = null;
@@ -120,19 +123,57 @@ public class MediaScanner  {
     /** return true, if file is in a ".nomedia" dir */
     public static boolean isNoMedia(String path, int maxLevel) {
         if (path != null) {
-            if (path.indexOf("/.") >= 0) {
-                return true; // linux convention: folder names starting with "." are hidden
-            }
+            if (isHiddenFolder(path))
+                return true;
             File file = getDir(path);
             int level = maxLevel;
             while ((--level >= 0) && (file != null)) {
-                if (new File(file, ".nomedia").exists()) {
+                if (new File(file, MEDIA_IGNORE_FILENAME).exists()) {
                     return true;
                 }
                 file = file.getParentFile();
             }
         }
         return false;
+    }
+
+    // linux convention: folder names starting with "." are hidden
+    private static boolean isHiddenFolder(String path) {
+        if (path.indexOf("/.") >= 0) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean canHideFolderMedia(String absoluteSelectedPath) {
+        return !MediaScanner.isNoMedia(absoluteSelectedPath, MediaScanner.DEFAULT_SCAN_DEPTH);
+    }
+
+    public static int hideFolderMedia(Activity context, String path) {
+        int result = 0;
+        if (canHideFolderMedia(path)) {
+            File nomedia = new File(path, MEDIA_IGNORE_FILENAME);
+            try {
+                if (Global.debugEnabled) {
+                    Log.i(Global.LOG_CONTEXT, CONTEXT + " hideFolderMedia: creating " + nomedia);
+                }
+
+                FileWriter writer = new FileWriter(nomedia, true);
+                writer.close();
+            } catch (IOException e) {
+                Log.e(Global.LOG_CONTEXT, CONTEXT + " cannot create  " + nomedia, e);
+            }
+            if (nomedia.exists()) {
+                if (Global.debugEnabled) {
+                    Log.i(Global.LOG_CONTEXT, CONTEXT + " hideFolderMedia: delete from media db " + path + "/**");
+                }
+                result = FotoSql.execDeleteByPath(context, path);
+                if (result > 0) {
+                    MediaScanner.notifyChanges(context, "hide " + path + "/**");
+                }
+            }
+        }
+        return result;
     }
 
     /** return parent of path if path is not a dir. else return path */

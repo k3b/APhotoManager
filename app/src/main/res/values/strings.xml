@@ -155,4 +155,14 @@
 
 	<string name="geo_picker_from_photo_title">Pick Geo from Photo</string>
 	<string name="geo_picker_from_map_title">Pick Geo from Map</string>
+	<string name="folder_hide_images_menu_title">Hide Images</string>
+	<string name="folder_hide_images_question_message_format">"Are you sure?
+
+Do you want to make all media (photo, video, audio) files below
+
+    %1$s
+
+invisible for media database, gallery apps and the media scanner?
+
+You can undo hiding by calling the mediascanner from gallery-menu."</string>
 </resources>

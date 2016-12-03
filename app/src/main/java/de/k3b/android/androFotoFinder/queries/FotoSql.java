@@ -689,23 +689,24 @@ public class FotoSql {
         return loader;
     }
 
-    public static void execDeleteByPath(Activity context, String parentDirString) {
+    public static int execDeleteByPath(Activity context, String parentDirString) {
         int delCount = FotoSql.deleteMedia(context.getContentResolver(), FILTER_EXPR_PATH_LIKE, new String[] {parentDirString + "/%"}, true);
         if (Global.debugEnabledSql) {
             Log.i(Global.LOG_CONTEXT, "FotoSql.deleted(NoMedia='" + parentDirString +
                     "') : " + delCount + " db records" );
         }
+        return delCount;
     }
 
     /**
      * Deletes media items specified by where with the option to prevent cascade delete of the image.
      */
-    public static int deleteMedia(ContentResolver contentResolver, String where, String[] selectionArgs, boolean preventDeleteImage)
+    public static int deleteMedia(ContentResolver contentResolver, String where, String[] selectionArgs, boolean preventDeleteImageFile)
     {
         String lastUsedWhereClause = where;
         int delCount = 0;
         try {
-            if (preventDeleteImage) {
+            if (preventDeleteImageFile) {
                 // set SQL_COL_PATH empty so sql-delete cannot cascade delete the referenced image-file via delete trigger
                 ContentValues values = new ContentValues();
                 values.put(FotoSql.SQL_COL_PATH, DELETED_FILE_MARKER);

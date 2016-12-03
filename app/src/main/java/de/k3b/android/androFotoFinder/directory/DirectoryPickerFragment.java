@@ -19,6 +19,7 @@
  
 package de.k3b.android.androFotoFinder.directory;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -59,6 +60,7 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.MenuUtils;
+import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedFiles;
 import de.k3b.io.Directory;
@@ -331,10 +333,19 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         popup.setOnMenuItemClickListener(popUpListener);
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(this.mContextMenue, popup.getMenu());
-        mPopUpSelection = selection;
-        MenuItem menuItem = popup.getMenu().findItem(R.id.cmd_fix_link);
-        if ((menuItem != null) && (FileUtils.isSymlinkDir(new File(selection.getAbsolute()), false))) {
-            menuItem.setVisible(true);
+        if (selection != null) {
+            mPopUpSelection = selection;
+            MenuItem menuItem = popup.getMenu().findItem(R.id.cmd_fix_link);
+            String absoluteSelectedPath = selection.getAbsolute();
+            if ((menuItem != null) && (FileUtils.isSymlinkDir(new File(absoluteSelectedPath), false))) {
+                menuItem.setVisible(true);
+            }
+
+            menuItem = popup.getMenu().findItem(R.id.cmd_folder_hide_images);
+            if ((menuItem != null) && MediaScanner.canHideFolderMedia(absoluteSelectedPath)) {
+                menuItem.setVisible(true);
+            }
+
         }
         return popup;
     }
@@ -359,9 +370,31 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                 return showDirInfo(mPopUpSelection);
             case R.id.cmd_fix_link:
                 return fixLinks(mPopUpSelection);
+            case R.id.cmd_folder_hide_images:
+                onHideFolderMediaQuestion(mPopUpSelection.getAbsolute());
+                return true;
             default:break;
         }
         return false;
+    }
+
+    private boolean onHideFolderMediaQuestion(final String path) {
+        if (AndroidFileCommands.canProcessFile(mContext)) {
+            Dialogs dlg = new Dialogs() {
+                @Override
+                protected void onDialogResult(String result, Object[] parameters) {
+                    if (result != null) {
+                        MediaScanner.hideFolderMedia(mContext, path);
+                        onDirectoryCancel();
+                        if (mDirectoryListener != null) mDirectoryListener.invalidateDirectories("hide folder " + path);
+                    }
+                }
+            };
+
+            dlg.yesNoQuestion(mContext, mContext.getString(R.string.folder_hide_images_menu_title),
+                    mContext.getString(R.string.folder_hide_images_question_message_format, path));
+        } // else toast "cannot process because scanner is active"
+        return true;
     }
 
     private boolean onCreateSubDirQuestion(final IDirectory parentDir) {
