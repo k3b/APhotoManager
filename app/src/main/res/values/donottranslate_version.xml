@@ -24,9 +24,9 @@ this program. If not, see <http://www.gnu.org/licenses/>
 	"(dev)" for development version @master
 -->
 <resources>
-	<string name="app_name" translatable="false">A Photo Manager (dev)</string>
-	<string name="app_image_viewer_title" translatable="false">A Photo Viewer (dev)</string>
-	<string name="app_map_title" translatable="false">A Photo Map (dev)</string>
-	<!-- version_postfix="" for fdroid-release and version_postfix=" (dev)" for development branch-->
-	<string name="version_postfix" translatable="false">" (dev)"</string>
+	<string name="app_name" translatable="false">A Photo Manager</string>
+	<string name="app_image_viewer_title" translatable="false">A Photo Viewer</string>
+	<string name="app_map_title" translatable="false">A Photo Map</string>
+	<!-- version_postfix="" for fdroid-release and version_postfix="" for development branch-->
+	<string name="version_postfix" translatable="false">""</string>
 </resources>
