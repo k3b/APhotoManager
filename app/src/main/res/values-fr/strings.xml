@@ -40,10 +40,7 @@
 	<string name="copy_menu_title">Copier</string>
 	<string name="copy_result_format">%1$d/%2$d fichiers copiés</string>
 	<string name="delete_menu_title">Supprimer</string>
-	<string name="delete_question_message_format">"Êtes-vous sûr de que vouloir supprimer définitivement ces fichiers
-	  ?%1$s,
-	  
-	  cette opération n\'est pas réversible."</string>
+	<string name="delete_question_message_format">"Êtes-vous sûr de que vouloir supprimer définitivement ces fichiers	  ?%1$s,	  cette opération n\'est pas réversible."</string>
 	<string name="delete_question_title">Supprimer les photo(s) ?</string>
 	<string name="delete_result_format">supprimer les fichiers %1$d/%2$d</string>
 	<string name="destination_copy">Destination de la copie</string>
@@ -61,7 +58,7 @@
 	<string name="folder_menu_title">Filtre de dossier</string>
 	<string name="gallery_title">Photos</string>
 	<string name="geo_show_menu_title">Voir sur la carte</string>
-	<string name="geo_show_as_menu_title">Voir avec application de géo-loc. externe</string>
+	<string name="geo_show_as_menu_title">Voir avec une application de géo-loc. externe</string>
 	<string name="geo_edit_menu_title">Configurer la géolocalisation</string>
 	<string name="geo_edit_update_in_progress">Modifier les informations de géolocalisation des photos sélectionnées</string>
 	<string name="geo_picker_err_not_found">Aucune source de géolocalisation trouvée</string>
