@@ -32,9 +32,10 @@ android {
         // 0.5.3.160927 (21)
         // 0.5.4.161111 (22)
         // 0.5.4.161112 (23)
+        // 0.5.5.161220 (24)
 
-        versionCode = 23
-        versionName = '0.5.4.161112'
+        versionCode = 24
+        versionName = '0.5.5.161220'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
