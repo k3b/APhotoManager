@@ -158,7 +158,7 @@
 	<string name="folder_hide_images_menu_title">Hide Images</string>
 	<string name="folder_hide_images_question_message_format">"Are you sure?
 
-Do you want to make all media (photo, video, audio) files below
+Do you want to make all media files (photo, video, audio) below
 
     %1$s
 

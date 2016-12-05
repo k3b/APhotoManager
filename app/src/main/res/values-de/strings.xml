@@ -152,4 +152,17 @@
 
   <string name="geo_picker_from_photo_title">Wähle Geo aus Foto</string>
   <string name="geo_picker_from_map_title">Wähle Geo aus Landkarte</string>
+
+  <string name="folder_hide_images_menu_title">Bilder verstecken</string>
+	<string name="folder_hide_images_question_message_format">"Sind Sie sicher?
+
+Wollen Sie alle Medien-Dateien (Foto, Video, Audio) unterhalb von
+
+    %1$s
+
+unsichtbar machen für Medien-Datenbank, Gallery-Apps und den Media-Scanner?
+
+Verstecken kann über das 'Media-Scanner' Gallery-Menü rückgängig gemacht werden."</string>
+
+
 </resources>
