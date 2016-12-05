@@ -35,6 +35,8 @@ import de.k3b.FotoLibGlobal;
  */
 public class FileUtils {
     private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+    public static final String MEDIA_IGNORE_FILENAME = ".nomedia"; // MediaStore.MEDIA_IGNORE_FILENAME;
+
 
     public static String readFile(File file) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(file));
@@ -129,4 +131,45 @@ public class FileUtils {
         }
         return null;
     }
+
+    /** return parent of path if path is not a dir. else return path */
+    public static File getDir(String path) {
+        if ((path == null) || (path.length() == 0)) return null;
+        if (path.endsWith("%")) {
+            // remove sql wildcard at end of name
+            return getDir(new File(path.substring(0,path.length() - 1)));
+        }
+        return getDir(new File(path));
+    }
+
+    /** return parent of file if path is not a dir. else return file */
+    private static File getDir(File file) {
+        return ((file != null) && (!file.isDirectory())) ? file.getParentFile() : file;
+    }
+
+    /** return true, if file is in a ".nomedia" dir */
+    public static boolean isNoMedia(String path, int maxLevel) {
+        if (path != null) {
+            if (isHiddenFolder(path))
+                return true;
+            File file = getDir(path);
+            int level = maxLevel;
+            while ((--level >= 0) && (file != null)) {
+                if (new File(file, MEDIA_IGNORE_FILENAME).exists()) {
+                    return true;
+                }
+                file = file.getParentFile();
+            }
+        }
+        return false;
+    }
+
+    // linux convention: folder names starting with "." are hidden
+    public static boolean isHiddenFolder(String path) {
+        if (path.indexOf("/.") >= 0) {
+            return true;
+        }
+        return false;
+    }
+
 }

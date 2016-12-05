@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.database.SelectedItems;
+import de.k3b.io.FileUtils;
 
 /**
  * Implements the array sepecific stuff that hopefully can be reused in other adapters, too
@@ -40,7 +41,7 @@ public class AdapterArrayHelper {
 
     public AdapterArrayHelper(Activity context, String fullPhotoPath, String debugContext) {
         this.mDebugPrefix = debugContext;
-        mRootDir = MediaScanner.getInstance(context).getDir(fullPhotoPath);
+        mRootDir = FileUtils.getDir(fullPhotoPath);
         reload(" ctor ");
 
         if (Global.mustRemoveNOMEDIAfromDB && (mRootDir != null) && (mFullPhotoPaths != null)) {

@@ -69,6 +69,7 @@ import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedFiles;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.io.GeoUri;
+import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
@@ -812,7 +813,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             case R.id.cmd_gallery: {
                 String dirPath = getCurrentFilePath(); // MediaScanner.getDir().getAbsolutePath();
                 if (dirPath != null) {
-                    dirPath = MediaScanner.getInstance(this).getDir(dirPath).getAbsolutePath();
+                    dirPath = FileUtils.getDir(dirPath).getAbsolutePath();
                     GalleryFilterParameter newFilter = new GalleryFilterParameter();
                     newFilter.setPath(dirPath);
                     int callBackId = (MediaScanner.isNoMedia(dirPath,MediaScanner.DEFAULT_SCAN_DEPTH)) ? NOMEDIA_GALLERY : 0;

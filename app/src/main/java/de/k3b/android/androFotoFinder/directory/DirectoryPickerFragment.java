@@ -19,7 +19,6 @@
  
 package de.k3b.android.androFotoFinder.directory;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -749,7 +748,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         }
 
         if (mImage != null) {
-            updateBitmap(selectedChild.getIconID());
+            updateBitmap(selectedChild.getSelectionIconID());
         }
 
         this.mCurrentSelection = selectedChild;

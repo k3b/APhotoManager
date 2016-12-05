@@ -40,6 +40,9 @@ public class OSDirectory implements IDirectory {
     private List<IDirectory> mChilden = null;
 
     private OSDirectory mParent = null;
+
+    private int mDirFlags = DIR_FLAG_NONE;
+
     public OSDirectory(String current, OSDirectory parent) {
         this(FileUtils.tryGetCanonicalFile(current), parent);
     }
@@ -53,11 +56,23 @@ public class OSDirectory implements IDirectory {
         setCurrent(current);
         mParent = parent;
         mChilden = childen;
+        if ((getDirFlags() == DIR_FLAG_NONE)
+                && (mParent != null)
+                && (mParent.getDirFlags() != DIR_FLAG_NONE)) {
+            setDirFlags(DIR_FLAG_NOMEDIA);
+        }
     }
 
     public OSDirectory setCurrent(File current) {
         destroy();
         mCurrent = current;
+        if (mCurrent != null) {
+            if (new File(current, FileUtils.MEDIA_IGNORE_FILENAME).exists()) {
+                setDirFlags(DIR_FLAG_NOMEDIA_ROOT);
+            } else if (FileUtils.isHiddenFolder(current.getAbsolutePath())) {
+                setDirFlags(DIR_FLAG_NOMEDIA);
+            }
+        }
         return this;
     }
 
@@ -172,7 +187,7 @@ public class OSDirectory implements IDirectory {
     }
 
     @Override
-    public int getIconID() {
+    public int getSelectionIconID() {
         return 0;
     }
 
@@ -226,5 +241,14 @@ public class OSDirectory implements IDirectory {
      **/
     public boolean osMkDirs() {
         return mCurrent.mkdirs() || mCurrent.isDirectory();
+    }
+
+    @Override
+    public int getDirFlags() {
+        return mDirFlags;
+    }
+
+    public void setDirFlags(int dirFlags) {
+        this.mDirFlags = dirFlags;
     }
 }

@@ -255,8 +255,13 @@ public class Directory implements IDirectory {
     }
 
     @Override
-    public int getIconID() {
+    public int getSelectionIconID() {
         return iconID;
+    }
+
+    @Override
+    public int getDirFlags() {
+        return 0;
     }
 
     public IDirectory setIconID(int iconID) {

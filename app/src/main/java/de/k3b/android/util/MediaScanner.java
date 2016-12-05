@@ -81,7 +81,7 @@ public class MediaScanner  {
     private static final String DB_DATE_ADDED = MediaStore.Images.ImageColumns.DATE_ADDED;
 
     public static final int DEFAULT_SCAN_DEPTH = 22;
-    public static final String MEDIA_IGNORE_FILENAME = MediaStore.MEDIA_IGNORE_FILENAME;
+    public static final String MEDIA_IGNORE_FILENAME = FileUtils.MEDIA_IGNORE_FILENAME; //  MediaStore.MEDIA_IGNORE_FILENAME;
 
     /** singelton */
     private static MediaScanner sInstance = null;
@@ -122,27 +122,7 @@ public class MediaScanner  {
 
     /** return true, if file is in a ".nomedia" dir */
     public static boolean isNoMedia(String path, int maxLevel) {
-        if (path != null) {
-            if (isHiddenFolder(path))
-                return true;
-            File file = getDir(path);
-            int level = maxLevel;
-            while ((--level >= 0) && (file != null)) {
-                if (new File(file, MEDIA_IGNORE_FILENAME).exists()) {
-                    return true;
-                }
-                file = file.getParentFile();
-            }
-        }
-        return false;
-    }
-
-    // linux convention: folder names starting with "." are hidden
-    private static boolean isHiddenFolder(String path) {
-        if (path.indexOf("/.") >= 0) {
-            return true;
-        }
-        return false;
+        return FileUtils.isNoMedia(path,maxLevel);
     }
 
     public static boolean canHideFolderMedia(String absoluteSelectedPath) {
@@ -174,21 +154,6 @@ public class MediaScanner  {
             }
         }
         return result;
-    }
-
-    /** return parent of path if path is not a dir. else return path */
-    public static File getDir(String path) {
-        if ((path == null) || (path.length() == 0)) return null;
-        if (path.endsWith("%")) {
-            // remove sql wildcard at end of name
-            return getDir(new File(path.substring(0,path.length() - 1)));
-        }
-        return getDir(new File(path));
-    }
-
-    /** return parent of file if path is not a dir. else return file */
-    private static File getDir(File file) {
-        return ((file != null) && (!file.isDirectory())) ? file.getParentFile() : file;
     }
 
     public int updateMediaDatabase_Android42(Context context, String[] oldPathNames, String... newPathNames) {

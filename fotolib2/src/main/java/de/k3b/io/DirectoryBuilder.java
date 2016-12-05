@@ -51,7 +51,7 @@ public class DirectoryBuilder {
                 createStatistics(child.getChildren());
                 IDirectory parent = child.getParent();
                 if (parent != null) {
-                    ((Directory)parent).addChildStatistics(child.getSubDirCount(), child.getNonDirSubItemCount(), child.getIconID());
+                    ((Directory)parent).addChildStatistics(child.getSubDirCount(), child.getNonDirSubItemCount(), child.getSelectionIconID());
                 }
             }
         }
