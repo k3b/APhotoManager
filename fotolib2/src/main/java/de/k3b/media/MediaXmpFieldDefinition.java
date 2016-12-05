@@ -43,7 +43,7 @@ public enum MediaXmpFieldDefinition {
     description(XmpNamespace.DC,
             PropertyOptions.ARRAY_ALT_TEXT | PropertyOptions.ARRAY |
                     PropertyOptions.ARRAY_ORDERED | PropertyOptions.ARRAY_ALTERNATE),
-    Rating(XmpNamespace.DC),
+    Rating(XmpNamespace.XAP),
     subject(XmpNamespace.DC, PropertyOptions.ARRAY);
 
     private final XmpNamespace xmpNamespace;

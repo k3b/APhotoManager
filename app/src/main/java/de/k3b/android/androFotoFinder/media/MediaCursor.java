@@ -107,7 +107,7 @@ public class MediaCursor implements IMetaApi {
      */
     @Override
     public Integer getRating() {
-        if (colDescription == -1) return null;
+        if (colRating == -1) return null;
         return cursor.getInt(colRating);
     }
 

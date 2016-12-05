@@ -49,21 +49,11 @@ public class MediaUtil {
         int changes = 0;
 
         if ((destination != null) && (source != null)) {
-            String sValue = source.getDescription();
-            if (allowed(allowSetNull, sValue, overwriteExisting, destination.getDescription())) {
-                destination.setDescription(sValue);
-                changes++;
-            }
+            String sValue;
 
             sValue = source.getPath();
             if (allowed(allowSetNull, sValue, overwriteExisting, destination.getPath())) {
                 destination.setPath(sValue);
-                changes++;
-            }
-
-            sValue = source.getTitle();
-            if (allowed(allowSetNull, sValue, overwriteExisting, destination.getTitle())) {
-                destination.setTitle(sValue);
                 changes++;
             }
 
@@ -85,11 +75,30 @@ public class MediaUtil {
                 changes++;
             }
 
+            sValue = source.getTitle();
+            if (allowed(allowSetNull, sValue, overwriteExisting, destination.getTitle())) {
+                destination.setTitle(sValue);
+                changes++;
+            }
+
+            sValue = source.getDescription();
+            if (allowed(allowSetNull, sValue, overwriteExisting, destination.getDescription())) {
+                destination.setDescription(sValue);
+                changes++;
+            }
+
             List<String> tValue = source.getTags();
             if (allowed(allowSetNull, tValue, overwriteExisting, destination.getTags())) {
                 destination.setTags(tValue);
                 changes++;
             }
+
+            Integer iValue = source.getRating();
+            if (allowed(allowSetNull, iValue, overwriteExisting, destination.getDateTimeTaken())) {
+                destination.setRating(iValue);
+                changes++;
+            }
+
         }
         return changes;
     }

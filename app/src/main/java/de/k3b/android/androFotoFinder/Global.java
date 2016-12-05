@@ -103,7 +103,7 @@ public class Global {
     public static final boolean geoNoEdit = true;
 
     /** Support extra parameters true: experimental. Not fully implemented yet. */
-    public static final boolean enableNonStandardMediaFields = false;
+    public static final boolean enableNonStandardMediaFields = true;
 
     /** true: experimental. Not fully implemented yet. */
     public static final boolean enableNonStandardMediaFieldsUpdateLastScanTimestamp = enableNonStandardMediaFields && false;
