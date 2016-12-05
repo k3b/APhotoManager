@@ -21,7 +21,7 @@
  */
  -->
 <resources>
-	<string name="about_summary">A propos de \"A Photo Manager"%1$s\"</string>
+	<string name="about_summary">À propos de \"A Photo Manager%1$s\"</string>
 	<string name="area_menu_title">Sélectionnez une zone sur la carte</string>
 	<string name="background">Arrière plan</string>
 	<string name="bookmark_delete_answer_format">Supprimer le signet %1$s.</string>
@@ -40,7 +40,7 @@
 	<string name="copy_menu_title">Copier</string>
 	<string name="copy_result_format">%1$d/%2$d fichiers copiés</string>
 	<string name="delete_menu_title">Supprimer</string>
-	<string name="delete_question_message_format">"Êtes-vous sûr de que vouloir supprimer définitivement ces fichiers 	?%1$s, 	cette opération n\'est pas réversible"</string>
+	<string name="delete_question_message_format">"Êtes-vous sûr de que vouloir supprimer définitivement ces fichiers	  ?%1$s,	  cette opération n\'est pas réversible."</string>
 	<string name="delete_question_title">Supprimer les photo(s) ?</string>
 	<string name="delete_result_format">supprimer les fichiers %1$d/%2$d</string>
 	<string name="destination_copy">Destination de la copie</string>
@@ -49,6 +49,7 @@
 	<string name="edit_chooser_title">Choisir le logiciel de retouche photo</string>
 	<string name="edit_err_editor_not_found">Aucun logiciel de retouche photo disponible</string>
 	<string name="edit_menu_title">Editer</string>
+	<string name="file_err_writeprotected">protégées contre l’écriture \'%1$s\'.\n\n \'%2$s\' opération impossible.</string>
 	<string name="filter_err_invalid_date_format">«%1$s » n\'est pas une date valide.</string>
 	<string name="filter_err_invalid_location_format">«%1$s » n\'est pas une coordonnée valide.</string>
 	<string name="filter_menu_title">Filtre</string>
@@ -57,6 +58,7 @@
 	<string name="folder_menu_title">Filtre de dossier</string>
 	<string name="gallery_title">Photos</string>
 	<string name="geo_show_menu_title">Voir sur la carte</string>
+	<string name="geo_show_as_menu_title">Voir avec une application de géo-loc. externe</string>
 	<string name="geo_edit_menu_title">Configurer la géolocalisation</string>
 	<string name="geo_edit_update_in_progress">Modifier les informations de géolocalisation des photos sélectionnées</string>
 	<string name="geo_picker_err_not_found">Aucune source de géolocalisation trouvée</string>
@@ -68,7 +70,7 @@
 	<string name="image_err_file_rename_format">Impossible de renommer le fichier «%1$s ».</string>
 	<string name="image_err_not_found_format">Aucune photo trouvée dans %1$s.</string>
 	<string name="image_err_not_in_db_format">Actuellement aucune photo n’a pu êtres trouvée dans la base de donnée %1$s. Le scanne de %2$d nouveau(x) fichier(s) est en cours. Les photos manquantes seront bientôt disponibles.</string>
-	<string name="image_loading_at_position_format">"chargement(%1$d) …"</string>
+	<string name="image_loading_at_position_format">"chargement(%1$d) &#8230;"</string>
 	<string name="image_success_update_format">Mise à jour de %1$d photos.</string>
 	<string name="lbl_date">Date</string>
 	<string name="lbl_latitude_short">Lat</string>
@@ -79,9 +81,12 @@
 	<string name="mk_dir_menu_title">Créer un Dossier</string>
 	<string name="mk_err_failed_format">Impossible de créer %1$s</string>
 	<string name="mk_success_format">%1$s Créé</string>
+	<string name="more_menu_title">Plus &#8230;</string>
 	<string name="move_menu_title">Déplacer</string>
 	<string name="move_result_format">%1$d/%2$d fichier(s) déplacé(s)</string>
-	<string name="osm_cright_title">Map Tiles (c) les contributeurs d’ <a href="http://www.openstreetmap.org/copyright"> OpenStreetMap</a></string>
+	<string name="osm_cright_title">Map Tiles (c) les contributeurs d’ 
+		<a href="http://www.openstreetmap.org/copyright"> OpenStreetMap</a>
+	</string>
 	<string name="overwrite_question_title">Ecraser?</string>
 	<string name="rename_menu_title">Renommer</string>
 	<string name="rename_result_format">%1$d/%2$d fichiers renommés</string>
@@ -95,25 +100,27 @@
 	<string name="selection_add_all_menu_title">Sélection : Ajouter tous les visibles</string>
 	<string name="selection_remove_menu_title">Sélection : Supprimer tous les visibles</string>
 	<string name="settings_bookmark_dir_title">Dossier de signet</string>
-	<string name="settings_debug_libs_summary">... des autre bibliothèques.</string>
-	<string name="settings_debug_memory_title">Consommation mémoire</string>
-	<string name="settings_debug_sql_summary">Enregistrer les requêtes SQL.</string>
-	<string name="settings_debug_summary">Enregistrer les autres évènements.</string>
-	<string name="settings_debug_title">Divers.</string>
-	<string name="settings_debug_view_item_summary">Enregistrer les évènements de la grille et des vues.</string>
 	<string name="settings_group_debug_title">Diagnostiques</string>
+	<string name="settings_debug_sql_summary">Enregistrer les requêtes SQL.</string>
+	<string name="settings_debug_view_item_summary">Enregistrer les évènements de la grille et des vues.</string>
+	<string name="settings_debug_memory_title">Consommation mémoire</string>
+	<string name="settings_debug_libs_summary">... des autre bibliothèques.</string>
+	<string name="settings_debug_title">Divers.</string>
+	<string name="settings_debug_summary">Enregistrer les autres évènements.</string>
+	<string name="settings_debug_clear_title">Nettoyer LogCat</string>
+	<string name="settings_debug_save_title">Enregistrer le LogCat dans un fichier</string>
+	<string name="settings_log_folder_title">Dossier du journal d\'erreur</string>
 	<string name="settings_image_hide_time_title">Cacher la barre d\'Action après ... millisecs</string>
 	<string name="settings_image_initialImageDetailResolutionHigh_summary">Photo-View Initial de meilleure qualité (lente, nécessite plus de mémoire)</string>
 	<string name="settings_image_initialImageDetailResolutionHigh_title">Améliorer la qualité par défaut de Photo-View</string>
 	<string name="settings_image_slideshow_intervall_title">Intervalle entre deux images du diaporama en millisecondes</string>
 	<string name="settings_locale_title">Langue</string>
 	<string name="settings_locale_os_language">(langue de l\'appareil)</string>
-	<string name="settings_log_folder_title">Dossier du journal d\'erreur</string>
 	<string name="settings_map_selmarker_max_title">Nombre max. de marqueurs sur la carte</string>
 	<string name="settings_geo_history_max_title">Configurez la taille de historique de la géolocalisation</string>
 	<string name="settings_geo_history_file_title">Définir un fichier de géolocalisation</string>
-	<string name="settings_multisel_clear_summary">... Après Copie/Déplacement/Renommage /... .</string>
 	<string name="settings_multisel_clear_title">Effacer les sélections multiples</string>
+	<string name="settings_multisel_clear_summary">... Après Copie/Déplacement/Renommage /... .</string>
 	<string name="settings_title">Préférences</string>
 	<string name="share_err_not_found">Aucune plateforme d’envoi ou de partage trouvée</string>
 	<string name="share_err_to_many">envois Multiples: Le nombre maximum d\'objet est atteint</string>
@@ -129,4 +136,11 @@
 	<string name="sort_menu_title">Trier</string>
 	<string name="update_result_format">mise à jour des fichiers %1$d/%2$d</string>
 	<string name="zoom_to_fit_menu_title">Ajuster le zoom</string>
+	<string name="settings_image_thumb_if_bigger_than_title">Créer des vignettes miniature pour les grandes images</string>
+	<string name="settings_image_thumb_if_bigger_than_summary">Affiche la vignette miniature dans les information de l\'image si la hauteur ou la largeur de l’image le permet. (Économise la mémoire efficace, Plus rapide mais la qualité sera dégradée).</string>
+	<string name="settings_image_thumb_dir_title">Répertoire des vignettes miniature</string>
+	<string name="settings_maps_forge_enable_tile">Utilser les cartes de Mapsforge en mode hors connexion</string>
+	<string name="settings_maps_forge_enable_summary">... que vous avez téléchargé manuellement via un pc</string>
+	<string name="settings_maps_forge_dir_title">Dossier de stockage des informations hors connexion de Mapsforge</string>
+	<string name="show_photo">Voir la/les photo(s)</string>
 </resources>

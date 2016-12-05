@@ -170,11 +170,32 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
     /** getFrom tree display text */
     public static Spanned getDirectoryDisplayText(String prefix, IDirectory directory, int options) {
         StringBuilder result = new StringBuilder();
-        boolean asHtml = (options & Directory.OPT_AS_HTML) != 0;
-        if (asHtml) result.append("<b>");
+
+        String formatPrefix = "";
+        String formatSuffix = "";
+        int flags = directory.getDirFlags();
+        switch (flags) {
+            case IDirectory.DIR_FLAG_NOMEDIA:
+                formatPrefix = "[";
+                formatSuffix = "]";
+                break;
+            case IDirectory.DIR_FLAG_NOMEDIA_ROOT:
+                formatPrefix = "*[";
+                formatSuffix = "]";
+                break;
+            case IDirectory.DIR_FLAG_NONE:
+                if ((options & Directory.OPT_AS_HTML) != 0) {
+                    formatPrefix = "<b>";
+                    formatSuffix = "</b>";
+                }
+                break;
+        }
+
         if (prefix != null) result.append(prefix);
+        result.append(formatPrefix);
         result.append(directory.getRelPath()).append(" ");
-        if (asHtml) result.append("</b>");
+        result.append(formatSuffix);
+
         Directory.appendCount(result, directory, options);
         return Html.fromHtml(result.toString());
     }

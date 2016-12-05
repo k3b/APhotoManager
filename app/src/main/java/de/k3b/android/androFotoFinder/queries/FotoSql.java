@@ -70,7 +70,7 @@ public class FotoSql {
     public static final int SORT_BY_NAME = 2;
     public static final int SORT_BY_LOCATION = 3;
     public static final int SORT_BY_NAME_LEN = 4;
-    public static final int SORT_BY_DEFAULT = SORT_BY_NAME;
+    public static final int SORT_BY_DEFAULT = SORT_BY_DATE;
 
     public static final int QUERY_TYPE_UNDEFINED = 0;
     public static final int QUERY_TYPE_GALLERY = 11;
@@ -675,25 +675,6 @@ public class FotoSql {
         return null;
     }
 
-    public static ContentValues getDbContent(Context context, final long id) {
-        ContentResolver resolver = context.getContentResolver();
-
-        Cursor c = null;
-        try {
-            c = resolver.query(SQL_TABLE_EXTERNAL_CONTENT_URI, new String[]{"*"}, FILTER_COL_PK, new String[]{"" + id}, null);
-            if (c.moveToNext()) {
-                ContentValues values = new ContentValues();
-                DatabaseUtils.cursorRowToContentValues(c, values);
-                return values;
-            }
-        } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, "FotoSql.getDbContent(id=" + id + ") failed", ex);
-        } finally {
-            if (c != null) c.close();
-        }
-        return null;
-    }
-
     public static int execUpdate(Context context, int id, ContentValues values) {
         return context.getContentResolver().update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, values, FILTER_COL_PK, new String[]{Integer.toString(id)});
     }
@@ -708,23 +689,24 @@ public class FotoSql {
         return loader;
     }
 
-    public static void execDeleteByPath(Activity context, String parentDirString) {
+    public static int execDeleteByPath(Activity context, String parentDirString) {
         int delCount = FotoSql.deleteMedia(context.getContentResolver(), FILTER_EXPR_PATH_LIKE, new String[] {parentDirString + "/%"}, true);
         if (Global.debugEnabledSql) {
             Log.i(Global.LOG_CONTEXT, "FotoSql.deleted(NoMedia='" + parentDirString +
                     "') : " + delCount + " db records" );
         }
+        return delCount;
     }
 
     /**
      * Deletes media items specified by where with the option to prevent cascade delete of the image.
      */
-    public static int deleteMedia(ContentResolver contentResolver, String where, String[] selectionArgs, boolean preventDeleteImage)
+    public static int deleteMedia(ContentResolver contentResolver, String where, String[] selectionArgs, boolean preventDeleteImageFile)
     {
         String lastUsedWhereClause = where;
         int delCount = 0;
         try {
-            if (preventDeleteImage) {
+            if (preventDeleteImageFile) {
                 // set SQL_COL_PATH empty so sql-delete cannot cascade delete the referenced image-file via delete trigger
                 ContentValues values = new ContentValues();
                 values.put(FotoSql.SQL_COL_PATH, DELETED_FILE_MARKER);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2016 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -17,14 +17,35 @@
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
 
-package de.k3b.android.androFotoFinder.tagDB;
+package de.k3b.media;
 
 /**
- * Used by Path2IDTranslator
- *
- * Created by k3b on 21.09.2015.
+ * Created by k3b on 10.10.2016.
  */
-public interface IPathID {
-    String getPath();
-    Integer getID();
+
+public enum XmpNamespace {
+    NONE("",""),
+    EXIF("XMP-exif","http://ns.adobe.com/exif/1.0/"),
+    XAP("XMP-xmp","http://ns.adobe.com/xap/1.0/"),
+    DC("XMP-dc", "http://purl.org/dc/elements/1.1/"),
+    PHOTOSHOP("","http://ns.adobe.com/photoshop/1.0/");
+
+
+    private final String prefix;
+    private final String uri;
+
+    private XmpNamespace(String prefix, String uri) {
+        this.prefix = prefix;
+
+        this.uri = uri;
+    }
+
+    public String getUriAsString() {
+        return uri;
+    }
+
+    @Override
+    public String toString() {
+        return prefix+"="+uri;
+    }
 }

@@ -40,12 +40,16 @@ import java.io.File;
 
 import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
+import de.k3b.android.util.MediaScanner;
+import de.k3b.android.util.MediaScannerEx;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.LocalizedActivity;
+import de.k3b.tagDB.TagRepository;
 import uk.co.senab.photoview.PhotoViewAttacher;
 import uk.co.senab.photoview.log.LogManager;
 
 public class SettingsActivity extends PreferenceActivity {
+    private static Boolean sOldEnableTagSupport = null;
     private SharedPreferences prefsInstance = null;
     private ListPreference defaultLocalePreference;
 
@@ -182,6 +186,7 @@ public class SettingsActivity extends PreferenceActivity {
         Global.pickHistoryMax = getPref(prefs, "pickHistoryMax"               , Global.pickHistoryMax);
 
         Global.reportDir                        = getPref(prefs, "reportDir", Global.reportDir);
+
         Global.logCatDir                        = getPref(prefs, "logCatDir", Global.logCatDir);
 
         Global.thumbCacheRoot                   = getPref(prefs, "thumbCacheRoot", Global.thumbCacheRoot);
@@ -248,6 +253,13 @@ public class SettingsActivity extends PreferenceActivity {
         }
         if ((previousCacheRoot != null) && (!previousCacheRoot.equals(Global.thumbCacheRoot))) {
             ThumbNailUtils.init(context, previousCacheRoot);
+        }
+        TagRepository.setInstance(Global.reportDir);
+
+        // true if first run or change
+        if ((sOldEnableTagSupport == null) || (sOldEnableTagSupport.booleanValue() != Global.enableNonStandardMediaFields)) {
+            MediaScanner.setInstance((Global.enableNonStandardMediaFields) ? new MediaScannerEx(context) : new MediaScanner(context));
+            sOldEnableTagSupport = Global.enableNonStandardMediaFields;
         }
     }
 

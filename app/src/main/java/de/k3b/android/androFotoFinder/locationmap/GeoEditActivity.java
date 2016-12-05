@@ -316,8 +316,9 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
             //!!! ???EXTRA_SELECTED_ITEM_PATHS
         }
         try {
-//          this.startActivityForResult(Intent.createChooser(intent, getText(R.string.title_chooser_geo_picker)), RESULT_ID);
-            this.startActivityForResult(intent, RESULT_ID);
+            // #7: allow choosing geo pick from map or from "photo with geo"
+            this.startActivityForResult(Intent.createChooser(intent, this.getString(R.string.geo_edit_menu_title)), RESULT_ID);
+            // this.startActivityForResult(intent, RESULT_ID);
         } catch (ActivityNotFoundException ex) {
             Toast.makeText(this, R.string.geo_picker_err_not_found,Toast.LENGTH_LONG).show();
         }

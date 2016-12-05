@@ -23,18 +23,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".GalleryActivity">
 
-    <item android:id="@+id/cmd_cancel"
+    <item android:id="@+id/cmd_cancel_multiselect"
         android:title="@string/btn_cancel"
         android:icon="@android:drawable/ic_menu_close_clear_cancel"
         android:visible="true"
-        android:orderInCategory="1"
+        android:orderInCategory="2"
         android:showAsAction="always" />
 
     <item android:id="@+id/cmd_selected_only"
         android:title="@string/selected_only_menu_title"
         android:icon="@android:drawable/checkbox_off_background"
         android:visible="true"
-        android:orderInCategory="1"
+        android:orderInCategory="2"
         android:checkable="true"
         android:checked="false"
         android:showAsAction="always" />
@@ -43,5 +43,5 @@
         android:id="@+id/menu_item_share"
         android:showAsAction="always"
         android:title="@string/share_menu_title"
-        android:orderInCategory="2" />
+        android:orderInCategory="3" />
 </menu>

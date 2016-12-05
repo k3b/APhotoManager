@@ -28,6 +28,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -43,7 +44,7 @@ import android.widget.LinearLayout;
 import android.widget.ShareActionProvider;
 import android.widget.Toast;
 
-// import com.squareup.leakcanary.RefWatcher;
+import org.osmdroid.api.IGeoPoint;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -55,7 +56,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.directory.DirectoryGui;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
-import de.k3b.android.androFotoFinder.imagedetail.ImageDetailDialogBuilder;
+import de.k3b.android.androFotoFinder.imagedetail.ImageDetailMetaDialogBuilder;
 import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
 import de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
@@ -71,6 +72,9 @@ import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedFiles;
 import de.k3b.database.SelectedItems;
+import de.k3b.geo.api.GeoPointDto;
+import de.k3b.geo.api.IGeoPointInfo;
+import de.k3b.geo.io.GeoUri;
 import de.k3b.io.Directory;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
@@ -91,6 +95,10 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private static final String INSTANCE_STATE_OLD_TITLE = "oldTitle";
     private static final String INSTANCE_STATE_SEL_ONLY = "selectedOnly";
     private static final String INSTANCE_STATE_LOADER_ID = "loaderID";
+
+    private static final int MODE_VIEW = 0;
+    private static final int MODE_PICK_SINGLE = 1;
+    private static final int MODE_PICK_MULTIBLE = 2;
 
     private static int nextLoaderID = 100;
     private int loaderID = -1;
@@ -126,6 +134,11 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     /* false: prevent showing error message again */
     private boolean mNoShareError = true;
+
+    /** true pick geo; false pick image */
+    private boolean mGetGeo = false;
+
+    private int mode = MODE_VIEW;
 
     /**************** construction ******************/
     /**
@@ -291,7 +304,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             mSelectedItems.parse(savedInstanceState.getString(INSTANCE_STATE_SELECTED_ITEM_IDS, old));
             this.mOldTitle = savedInstanceState.getString(INSTANCE_STATE_OLD_TITLE, this.mOldTitle);
             this.mShowSelectedOnly = savedInstanceState.getBoolean(INSTANCE_STATE_SEL_ONLY, this.mShowSelectedOnly);
-            if (!mSelectedItems.isEmpty()) {
+            if (isMultiSelectionActive()) {
                 mMustReplaceMenue = true;
                 getActivity().invalidateOptionsMenu();
             }
@@ -328,13 +341,20 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         Activity parent = this.getActivity();
         // mAdapter = new GalleryCursorAdapter(parent, mSelectedItems, mDebugPrefix);
 
-
         Intent intent = (parent == null) ? null : parent.getIntent();
 
         if (Global.debugEnabled && (intent != null)){
             Log.d(Global.LOG_CONTEXT, mDebugPrefix + "onCreateView " + intent.toUri(Intent.URI_INTENT_SCHEME));
         }
 
+        String action = (intent != null) ? intent.getAction() : null;
+
+        if ((action != null) && ((Intent.ACTION_PICK.compareTo(action) == 0) || (Intent.ACTION_GET_CONTENT.compareTo(action) == 0))) {
+            this.mode = (intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE,false)) ? MODE_PICK_MULTIBLE : MODE_PICK_SINGLE;
+            mMustReplaceMenue = true;
+            String schema = intent.getScheme();
+            mGetGeo = ((schema != null) && ("geo".compareTo(schema) == 0));
+        }
 
         String path = (intent == null) ? null : intent.getStringExtra(EXTRA_SELECTED_ITEM_PATHS);
 
@@ -671,7 +691,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     /** starts mutliselection */
     private boolean onGalleryLongImageClick(final GalleryCursorAdapter.GridCellViewHolder holder, int position) {
-        if (mSelectedItems.isEmpty()) {
+        if (!isMultiSelectionActive()) {
             startMultiSelectionMode();
 
             mSelectedItems.add(holder.imageID);
@@ -692,40 +712,34 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         getActivity().invalidateOptionsMenu();
     }
 
-    /** return true if multiselection is active */
-    private boolean multiSelectionHandleClick(GalleryCursorAdapter.GridCellViewHolder holder) {
-        if (!mSelectedItems.isEmpty()) {
-            long imageID = holder.imageID;
-            holder.icon.setVisibility((mSelectedItems.toggle(imageID)) ? View.VISIBLE : View.GONE);
-            multiSelectionUpdateActionbar("changed mutli sel");
-            return true;
-        }
-        multiSelectionUpdateActionbar("lost multi sel");
-        return false;
-    }
-
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
+        MenuInflater inflater = getActivity().getMenuInflater();
         if (mMustReplaceMenue) {
+
             mMustReplaceMenue = false;
             menu.clear();
-            MenuInflater inflater = getActivity().getMenuInflater();
-            inflater.inflate(R.menu.menu_gallery_multiselect_mode_all, menu);
-            mShareOnlyToggle = menu.findItem(R.id.cmd_selected_only);
-            if (mShowSelectedOnly) {
-                mShareOnlyToggle.setIcon(android.R.drawable.checkbox_on_background);
-                mShareOnlyToggle.setChecked(true);
+            if (mode == MODE_VIEW) {
+                inflater.inflate(R.menu.menu_gallery_multiselect_mode_all, menu);
+                mShareOnlyToggle = menu.findItem(R.id.cmd_selected_only);
+                if (mShowSelectedOnly) {
+                    mShareOnlyToggle.setIcon(android.R.drawable.checkbox_on_background);
+                    mShareOnlyToggle.setChecked(true);
+                } else { // if (mode != MODE_VIEW) {
+                    inflater.inflate(R.menu.menu_gallery_non_selected_only, menu);
+                }
+                MenuItem shareItem = menu.findItem(R.id.menu_item_share);
+                shareItem.setActionProvider(mShareActionProvider);
+                // multiSelectionUpdateShareIntent();
+                inflater.inflate(R.menu.menu_image_commands, menu);
+
+                multiSelectionUpdateShareIntent();
+                Global.fixMenu(getActivity(), menu);
+
             } else {
-                inflater.inflate(R.menu.menu_gallery_non_selected_only, menu);
+                inflater.inflate(R.menu.menu_gallery_pick, menu);
             }
-
-            MenuItem shareItem = menu.findItem(R.id.menu_item_share);
-            shareItem.setActionProvider(mShareActionProvider);
-            inflater.inflate(R.menu.menu_image_commands, menu);
-
-            multiSelectionUpdateShareIntent();
-            Global.fixMenu(getActivity(), menu);
         }
 
         mMenuRemoveAllSelected = menu.findItem(R.id.cmd_selection_remove_all);
@@ -735,7 +749,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     protected void updateSelectionCount() {
         if (mMenuRemoveAllSelected != null) {
-            mMenuRemoveAllSelected.setVisible(!mSelectedItems.isEmpty());
+            mMenuRemoveAllSelected.setVisible(isMultiSelectionActive());
         }
     }
 
@@ -748,8 +762,13 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             return true;
         }
         switch (menuItem.getItemId()) {
-            case R.id.cmd_cancel:
-                return multiSelectionCancel();
+            case R.id.cmd_cancel_multiselect:
+                    return multiSelectionCancel();
+            case R.id.cmd_cancel_pick:
+                    getActivity().finish();
+                    return true;
+            case R.id.cmd_ok:
+                return onPickOk();
             case R.id.cmd_selected_only:
                 return multiSelectionToggle();
             case R.id.cmd_copy:
@@ -784,7 +803,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private void cmdShowDetails() {
         SelectedItems ids = getSelectedItems();
         String files = (ids != null) ? new SelectedFiles(ids, mAdapter).toString().replace(",","\n") : null;
-        ImageDetailDialogBuilder.createImageDetailDialog(
+        ImageDetailMetaDialogBuilder.createImageDetailDialog(
                 this.getActivity(),
                 getActivity().getTitle().toString(),
                 this.toString(),
@@ -850,6 +869,51 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         return false;
     }
 
+    private boolean onPickOk() {
+        Activity parent = getActivity();
+        Uri resultUri = getSelectedUri(parent);
+
+        if (resultUri != null) {
+            final Intent intent = new Intent();
+
+            // permission result.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            intent.setData(resultUri);
+            if (!mGetGeo) {
+                intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
+
+            parent.setResult(Activity.RESULT_OK, intent);
+            parent.finish();
+
+        }
+        return true;
+    }
+
+    @Nullable
+    private Uri getSelectedUri(Activity parent) {
+        Uri resultUri = null;
+
+        SelectedItems items = getSelectedItems();
+        if ((items != null) && (items.size() > 0)) {
+            long id = items.first();
+
+            if (mGetGeo) {
+                IGeoPoint initialPoint = FotoSql.execGetPosition(parent, null, id);
+
+                if (initialPoint != null) {
+                    GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
+
+                    resultUri = Uri.parse(PARSER.toUriString(new GeoPointDto(initialPoint.getLatitude(),initialPoint.getLongitude(), IGeoPointInfo.NO_ZOOM)));
+                }
+
+
+            } else {
+                resultUri = FotoSql.getUri(id);
+            }
+        }
+        return resultUri;
+    }
+
     private boolean multiSelectionToggle() {
         mShowSelectedOnly = !mShowSelectedOnly;
         mMustReplaceMenue = true;
@@ -860,6 +924,12 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     private boolean multiSelectionCancel() {
+        clearSelections();
+        multiSelectionUpdateActionbar("multiSelectionCancel");
+        return true;
+    }
+
+    private void clearSelections() {
         mSelectedItems.clear();
 
         for (int i = mGalleryView.getChildCount() - 1; i >= 0; i--)
@@ -869,12 +939,10 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 holder.icon.setVisibility(View.GONE);
             }
         }
-        multiSelectionUpdateActionbar("multiSelectionCancel");
-        return true;
     }
 
     private void multiSelectionReplaceTitleIfNecessary() {
-        if (!mSelectedItems.isEmpty()) {
+        if (isMultiSelectionActive()) {
             mOldTitle = getActivity().getTitle().toString();
             multiSelectionUpdateActionbar("selection my have changed");
         }
@@ -882,7 +950,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     private void multiSelectionUpdateActionbar(String why) {
         String newTitle = null;
-        if (mSelectedItems.isEmpty()) {
+        if (!isMultiSelectionActive()) {
 
             // lost last selection. revert mShowSelectedOnly if neccessary
             if (mShowSelectedOnly) {
@@ -1104,4 +1172,37 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             }
         }
     }
+
+    private boolean isMultiSelectionActive() {
+        if (mode != MODE_VIEW) return true;
+        return !mSelectedItems.isEmpty();
+    }
+
+    /** return true if multiselection is active */
+    private boolean multiSelectionHandleClick(GalleryCursorAdapter.GridCellViewHolder holder) {
+        if (isMultiSelectionActive()) {
+            long imageID = holder.imageID;
+            holder.icon.setVisibility(toggleSelection(imageID) ? View.VISIBLE : View.GONE);
+            multiSelectionUpdateActionbar("changed mutli sel");
+            return true;
+        }
+        multiSelectionUpdateActionbar("lost multi sel");
+        return false;
+    }
+
+    /** return true if included; false if excluded */
+    private boolean toggleSelection(long imageID) {
+        boolean contains = mSelectedItems.contains(imageID);
+        if (mode == MODE_PICK_SINGLE) {
+            clearSelections();
+        }
+        if (contains) {
+            mSelectedItems.remove(imageID);
+            return false;
+        } else {
+            mSelectedItems.add(imageID);
+            return true;
+        }
+    }
+
 }

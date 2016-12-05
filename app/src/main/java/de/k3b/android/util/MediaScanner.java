@@ -19,6 +19,7 @@
  
 package de.k3b.android.util;
 
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -33,6 +34,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,12 +43,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.media.MediaContentValues;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.database.QueryParameter;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
+import de.k3b.io.FileUtils;
+import de.k3b.media.IMetaApi;
+import de.k3b.media.MediaUtil;
 
 /**
+ * Android Media Scanner for images/photos/jpg compatible with android-5.0 Media scanner.
+ * This Class handles standard Android-5.0 image fields.
+ *
  * Since android.media.MediaScannerConnection does not work on my android-4.2
  * here is my own implementation.
  *
@@ -71,6 +81,7 @@ public class MediaScanner  {
     private static final String DB_DATE_ADDED = MediaStore.Images.ImageColumns.DATE_ADDED;
 
     public static final int DEFAULT_SCAN_DEPTH = 22;
+    public static final String MEDIA_IGNORE_FILENAME = FileUtils.MEDIA_IGNORE_FILENAME; //  MediaStore.MEDIA_IGNORE_FILENAME;
 
     /** singelton */
     private static MediaScanner sInstance = null;
@@ -111,35 +122,38 @@ public class MediaScanner  {
 
     /** return true, if file is in a ".nomedia" dir */
     public static boolean isNoMedia(String path, int maxLevel) {
-        if (path != null) {
-            if (path.indexOf("/.") >= 0) {
-                return true; // linux convention: folder names starting with "." are hidden
-            }
-            File file = getDir(path);
-            int level = maxLevel;
-            while ((--level >= 0) && (file != null)) {
-                if (new File(file, ".nomedia").exists()) {
-                    return true;
+        return FileUtils.isNoMedia(path,maxLevel);
+    }
+
+    public static boolean canHideFolderMedia(String absoluteSelectedPath) {
+        return !MediaScanner.isNoMedia(absoluteSelectedPath, MediaScanner.DEFAULT_SCAN_DEPTH);
+    }
+
+    public static int hideFolderMedia(Activity context, String path) {
+        int result = 0;
+        if (canHideFolderMedia(path)) {
+            File nomedia = new File(path, MEDIA_IGNORE_FILENAME);
+            try {
+                if (Global.debugEnabled) {
+                    Log.i(Global.LOG_CONTEXT, CONTEXT + " hideFolderMedia: creating " + nomedia);
                 }
-                file = file.getParentFile();
+
+                FileWriter writer = new FileWriter(nomedia, true);
+                writer.close();
+            } catch (IOException e) {
+                Log.e(Global.LOG_CONTEXT, CONTEXT + " cannot create  " + nomedia, e);
+            }
+            if (nomedia.exists()) {
+                if (Global.debugEnabled) {
+                    Log.i(Global.LOG_CONTEXT, CONTEXT + " hideFolderMedia: delete from media db " + path + "/**");
+                }
+                result = FotoSql.execDeleteByPath(context, path);
+                if (result > 0) {
+                    MediaScanner.notifyChanges(context, "hide " + path + "/**");
+                }
             }
         }
-        return false;
-    }
-
-    /** return parent of path if path is not a dir. else return path */
-    public static File getDir(String path) {
-        if ((path == null) || (path.length() == 0)) return null;
-        if (path.endsWith("%")) {
-            // remove sql wildcard at end of name
-            return getDir(new File(path.substring(0,path.length() - 1)));
-        }
-        return getDir(new File(path));
-    }
-
-    /** return parent of file if path is not a dir. else return file */
-    private static File getDir(File file) {
-        return ((file != null) && (!file.isDirectory())) ? file.getParentFile() : file;
+        return result;
     }
 
     public int updateMediaDatabase_Android42(Context context, String[] oldPathNames, String... newPathNames) {
@@ -287,8 +301,7 @@ public class MediaScanner  {
 
     /** updates values with current values of file */
     protected void getExifFromFile(ContentValues values, File file) {
-        String absolutePath = file.getAbsolutePath();
-        setPathRelatedFieldsIfNeccessary(values, absolutePath, null);
+        String absolutePath = FileUtils.tryGetCanonicalPath(file, file.getAbsolutePath());
 
         values.put(DB_DATE_MODIFIED, file.lastModified() / 1000);
         values.put(DB_SIZE, file.length());
@@ -313,17 +326,6 @@ public class MediaScanner  {
         }
 
         if (exif != null) {
-            Double latitude = exif.getLatitude();
-            if (latitude != null) {
-                values.put(DB_LATITUDE, latitude);
-                values.put(DB_LONGITUDE, exif.getLongitude());
-            }
-
-            Date time = exif.getDateTimeTaken();
-            if (time != null) {
-                values.put(DB_DATE_TAKEN, time.getTime() );
-            }
-
             int orientation = exif.getAttributeInt(
                     ExifInterfaceEx.TAG_ORIENTATION, -1);
             if (orientation != -1) {
@@ -346,6 +348,16 @@ public class MediaScanner  {
                 values.put(DB_ORIENTATION, degree);
             }
         }
+
+        MediaContentValues dest = new MediaContentValues().set(values);
+        getExifValues(dest, file, exif);
+
+        setPathRelatedFieldsIfNeccessary(values, absolutePath, null);
+    }
+
+    /** @return number of copied properties */
+    protected int getExifValues(MediaContentValues dest, File file, ExifInterfaceEx exif) {
+        return MediaUtil.copy(dest, exif, false, true);
     }
 
     public IGeoPointInfo getPositionFromFile(String absolutePath, String id) {

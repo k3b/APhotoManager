@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2016 by k3b.
+ *
+ * This file is part of AndroFotoFinder.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
+
 package de.k3b.android.util;
 
 import android.media.ExifInterface;
@@ -9,15 +28,19 @@ import java.lang.reflect.Field;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
+import java.util.TreeMap;
+
+import de.k3b.media.IMetaApi;
 
 /**
  * Thin Wrapper around Android-s ExifInterface to read/write exif data from jpg file
  * Created by k3b on 08.10.2016.
  */
 
-public class ExifInterfaceEx extends ExifInterface {
+public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     private static final String NL = "\n";
 
     private static final SimpleDateFormat sExifDateTimeFormatter;
@@ -39,10 +62,18 @@ public class ExifInterfaceEx extends ExifInterface {
         mFilename = filename;
     }
 
-    /**
-     * Returns number of milliseconds since Jan. 1, 1970, midnight.
-     * Returns -1 if the date time information if not available.
-     */
+    @Override
+    public String getPath() {
+        return mFilename;
+    }
+
+    @Override
+    public IMetaApi setPath(String filePath) {
+        mFilename = filePath;
+        return this;
+    }
+
+    @Override
     public Date getDateTimeTaken() {
         String dateTimeString =  this.getAttribute(ExifInterfaceEx.TAG_DATETIME);
         if (dateTimeString == null) return null;
@@ -55,8 +86,10 @@ public class ExifInterfaceEx extends ExifInterface {
         }
     }
 
-    public void setDateTimeTaken(Date value) {
+    @Override
+    public ExifInterfaceEx setDateTimeTaken(Date value) {
         setAttribute(ExifInterfaceEx.TAG_DATETIME, toExifDateTimeString(value));
+        return this;
     }
 
     public static String toExifDateTimeString(Date value) {
@@ -65,31 +98,31 @@ public class ExifInterfaceEx extends ExifInterface {
     }
 
     @Nullable
-    public HashMap<String, String> getAttributes() {
-        // access private member via reflection
-        // private HashMap<String, String> ExifInterfaceEx.mAttributes
-        // http://stackoverflow.com/questions/11483647/how-to-access-private-methods-and-private-data-members-via-reflection
+    public Map<String, String> getAttributes() {
+        // access private attribute ExifInterface.mAttributes via reflection
+        // http://stackoverflow.com/questions/1196192/how-do-i-read-a-private-field-in-java
         try {
 
              /*---  [GETING VALUE FROM PRIVATE FIELD]  ---*/
-            Field f = ExifInterfaceEx.class.getDeclaredField("mAttributes");
+            Field f = ExifInterface.class.getDeclaredField("mAttributes");
             f.setAccessible(true);//Abracadabra
-            HashMap<String, String> exifAttributes = (HashMap<String, String>) f.get(this);
+            Object field = f.get((ExifInterface) this);
+            Map<String, String> exifAttributes = (field instanceof Map) ? (Map<String, String>) field : null;
             if  ((exifAttributes != null) && (exifAttributes.size() > 0)) return exifAttributes;
 
         } catch (Exception ex) {
-
+            // ??? add logging to find out what goes wrong
         }
         return null;
     }
 
-
     public String getDebugString(String seperator) {
         StringBuilder builder = new StringBuilder();
-        HashMap<String, String> exifAttributes = this.getAttributes();
+        Map<String, String> exifAttributes = this.getAttributes();
 
         if ((exifAttributes != null) && (exifAttributes.size() > 0)) {
-            JpgMetaWorkflow.addAttributes(builder, exifAttributes);
+            // TreeMap to sort by key
+            JpgMetaWorkflow.addAttributes(builder, new TreeMap<String, String>(exifAttributes));
             Double latitude = getLatitude();
             if (latitude != null) {
                 builder.append("GPS Latitude: ").append(latitude).append(seperator);
@@ -125,8 +158,8 @@ public class ExifInterfaceEx extends ExifInterface {
         if (mFilename != null) {
             File filePath = new File(mFilename);
             Date date = new Date(filePath.lastModified());
-            builder.append(seperator).append("filedate").append(ExifInterfaceEx.toExifDateTimeString(date)).append(seperator);;
-            builder.append("filemode").append( "" + (filePath.canRead() ? "r":"-") + (filePath.canWrite() ? "w":"-") + (filePath.canExecute() ? "x":"-")).append(seperator);;
+            builder.append(seperator).append("filedate: ").append(ExifInterfaceEx.toExifDateTimeString(date)).append(seperator);;
+            builder.append("filemode: ").append( "" + (filePath.canRead() ? "r":"-") + (filePath.canWrite() ? "w":"-") + (filePath.canExecute() ? "x":"-")).append(seperator);;
         }
 
         return builder.toString();
@@ -187,18 +220,23 @@ public class ExifInterfaceEx extends ExifInterface {
 
     private Double mLatitude = null;
     private Double mLongitude = null;
-    public void setLatitude(Double latitude) {
+    @Override
+    public ExifInterfaceEx setLatitude(Double latitude) {
         setAttribute(ExifInterfaceEx.TAG_GPS_LATITUDE, convert(latitude));
         setAttribute(ExifInterfaceEx.TAG_GPS_LATITUDE_REF, latitudeRef(latitude));
         mLatitude = latitude;
+        return this;
     }
 
-    public void setLongitude(Double longitude) {
+    @Override
+    public ExifInterfaceEx setLongitude(Double longitude) {
         setAttribute(ExifInterfaceEx.TAG_GPS_LONGITUDE, convert(longitude));
         setAttribute(ExifInterfaceEx.TAG_GPS_LONGITUDE_REF, longitudeRef(longitude));
         mLongitude = longitude;
+        return this;
     }
 
+    @Override
     public Double getLatitude() {
         if (mLatitude == null) {
             loadLatLon();
@@ -206,11 +244,60 @@ public class ExifInterfaceEx extends ExifInterface {
         return mLatitude;
     }
 
+    @Override
     public Double getLongitude() {
         if (mLongitude == null) {
             loadLatLon();
         }
         return mLongitude;
+    }
+
+    /** not implemented in {@link ExifInterface} */
+    @Override
+    public String getTitle() {
+        return null;
+    }
+
+    /** not implemented in {@link ExifInterface} */
+    @Override
+    public IMetaApi setTitle(String title) {
+        return this;
+    }
+
+    /** not implemented in {@link ExifInterface} */
+    @Override
+    public String getDescription() {
+        return null;
+    }
+
+    /** not implemented in {@link ExifInterface} */
+    @Override
+    public IMetaApi setDescription(String description) {
+        return this;
+    }
+
+    /** not implemented in {@link ExifInterface} */
+    @Override
+    public List<String> getTags() {
+        return null;
+    }
+
+    /** not implemented in {@link ExifInterface} */
+    @Override
+    public IMetaApi setTags(List<String> tags) {
+        return this;
+    }
+
+    /** not implemented in {@link ExifInterface} */
+    @Override
+    public Integer getRating() {
+        return null;
+    }
+
+    /** not implemented in {@link ExifInterface} */
+    @Override
+    public IMetaApi setRating(Integer value) {
+        return this;
     }
 
     private void loadLatLon() {

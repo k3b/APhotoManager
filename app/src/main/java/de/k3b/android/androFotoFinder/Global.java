@@ -100,7 +100,16 @@ public class Global {
     public static int pickHistoryMax = 25;
 
     /** false: cmd setGeo => form(GeoEditActivity) => mapPicker */
-    public static boolean geoNoEdit = true;
+    public static final boolean geoNoEdit = true;
+
+    /** Support extra parameters true: experimental. Not fully implemented yet. */
+    public static final boolean enableNonStandardMediaFields = false;
+
+    /** true: experimental. Not fully implemented yet. */
+    public static final boolean enableNonStandardMediaFieldsUpdateLastScanTimestamp = enableNonStandardMediaFields && false;
+
+    /** true: xmp value is more important than exif (if both values are present. */
+    public static final boolean xmpOverwritesExif = enableNonStandardMediaFields && true;
 
     /** #26 which image resolution should the "non zoomed imageView" have? */
     public static boolean initialImageDetailResolutionHigh = false; // false: MediaStore.Images.Thumbnails.MINI_KIND; true: FULL_SCREEN_KIND;
@@ -132,5 +141,4 @@ public class Global {
                 R.id.cmd_show_geo_as
         );
     }
-
 }

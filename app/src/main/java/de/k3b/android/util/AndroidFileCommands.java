@@ -342,6 +342,19 @@ public class AndroidFileCommands extends FileCommands {
     /** answer from "which directory to start scanner from"? */
     private void onMediaScannerAnswer(String scanRootDir) {
         if  ((AndroidFileCommands.canProcessFile(mContext)) || (RecursiveMediaScannerAsyncTask.sScanner == null)){
+
+            // remove ".nomedia" file from scan root
+            File nomedia = new File(scanRootDir, MediaScanner.MEDIA_IGNORE_FILENAME);
+            if (nomedia.exists()) {
+                if (Global.debugEnabled) {
+                    Log.i(Global.LOG_CONTEXT, mDebugPrefix + "onMediaScannerAnswer deleting " + nomedia);
+                }
+                nomedia.delete();
+            }
+            if (Global.debugEnabled) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "onMediaScannerAnswer start scanning " + scanRootDir);
+            }
+
             final String message = mContext.getString(R.string.scanner_menu_title);
             final RecursiveMediaScannerAsyncTask scanner = (RecursiveMediaScannerAsyncTask.sScanner != null)
                     ? RecursiveMediaScannerAsyncTask.sScanner :

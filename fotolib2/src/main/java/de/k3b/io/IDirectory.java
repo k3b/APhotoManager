@@ -27,6 +27,10 @@ import java.util.List;
  * Created by k3b on 04.08.2015.
  */
 public interface IDirectory {
+    public static final int DIR_FLAG_NONE           = 0;
+    public static final int DIR_FLAG_NOMEDIA        = 1; // below linux hidden dir ".*" or below DIR_FLAG_NOMEDIA_ROOT
+    public static final int DIR_FLAG_NOMEDIA_ROOT   = 2; // containing ".nomedia"
+
     String getRelPath();
     String getAbsolute();
 
@@ -38,6 +42,8 @@ public interface IDirectory {
 
     void destroy();
 
-    int getIconID();
+    int getSelectionIconID();
+
+    int getDirFlags();
 
 }

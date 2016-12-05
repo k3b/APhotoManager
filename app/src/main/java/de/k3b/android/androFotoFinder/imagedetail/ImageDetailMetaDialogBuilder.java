@@ -33,18 +33,24 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import de.k3b.android.androFotoFinder.R;
-import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.util.ExifInterfaceEx;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.FileUtils;
+import de.k3b.media.XmpSegment;
 
 /**
+ * Creates a popup dialog that displays the MetaData.
  * Created by k3b on 15.07.2015.
  */
-public class ImageDetailDialogBuilder {
+public class ImageDetailMetaDialogBuilder {
     private static final String NL = "\n";
 
     public static Dialog createImageDetailDialog(Activity context, String filePath, long imageId,
@@ -113,20 +119,25 @@ public class ImageDetailDialogBuilder {
             File jpegFile = new File(filepath);
             addExif(result, jpegFile);
 
-            int ext = filepath.lastIndexOf(".");
-
-            String xmpFilePath = (ext >= 0) ? (filepath.substring(0, ext) + ".xmp") : (filepath + ".xmp");
-            File xmpFile = new File(xmpFilePath);
-            addExif(result, xmpFile);
+            File xmpFile = FileUtils.getXmpFile(filepath);
+            addXmp(result, xmpFile);
 
             if (currentImageId != 0) {
 
-                ContentValues dbContent = FotoSql.getDbContent(context, currentImageId);
+                ContentValues dbContent = TagSql.getDbContent(context, currentImageId);
                 if (dbContent != null) {
                     result.append(NL).append(line).append(NL);
-                    result.append(NL).append(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI).append(NL).append(NL);
-                    for (Map.Entry<String, Object> item : dbContent.valueSet()) {
-                        result.append(item.getKey()).append("=").append(item.getValue()).append(NL);
+                    result.append(NL).append(TagSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE).append(NL).append(NL);
+                    // sort by keys
+                    List<String> sortedKeys=new ArrayList(dbContent.keySet());
+                    Collections.sort(sortedKeys);
+                    for (String key : sortedKeys) {
+                        Object value = dbContent.get(key);
+                        String sValue = (value != null) ? value.toString() : null;
+                        if ((sValue != null) && (sValue.length() > 0) && (sValue.compareTo("0") != 0)) {
+                            // show only non empty values
+                            result.append(key).append("=").append(sValue).append(NL);
+                        }
                     }
                 }
             }
@@ -166,6 +177,18 @@ public class ImageDetailDialogBuilder {
             */
                 builder.append(NL).append(line).append(NL);
             }
+        } else {
+            builder.append(NL).append(file).append(" not found.").append(NL);
+        }
+    }
+
+    private static void addXmp(StringBuilder builder, File file) throws ImageProcessingException, IOException {
+        if (file.exists()) {
+            XmpSegment meta = new XmpSegment();
+            meta.load(new FileInputStream(file));
+            builder.append(NL).append(file).append(NL).append(NL);
+            meta.appendXmp(builder);
+            builder.append(NL).append(line).append(NL);
         } else {
             builder.append(NL).append(file).append(" not found.").append(NL);
         }

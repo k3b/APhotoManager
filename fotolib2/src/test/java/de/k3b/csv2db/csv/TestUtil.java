@@ -21,7 +21,9 @@ package de.k3b.csv2db.csv;
 
 import java.io.Reader;
 
-import de.k3b.csv2db.csv.CsvReader;
+import de.k3b.io.DateUtil;
+import de.k3b.media.MediaDTO;
+import de.k3b.tagDB.TagConverter;
 
 public class TestUtil {
 	public static Reader createReader(String csvSrc) {
@@ -32,4 +34,21 @@ public class TestUtil {
 	public static CsvReader createParser(String csvSrc) {
 		return new CsvReader(TestUtil.createReader(csvSrc));
 	}
+
+	public static MediaDTO createTestMediaDTO(int id) {
+        MediaDTO result = new MediaDTO();
+
+
+        result.setPath("Path" + id);
+        result.setTitle("Title" + id);
+        result.setDescription("Description" + id);
+        String month = ("" + (((id -1) % 12) +101)).substring(1);
+        String day = ("" + (((id -1) % 30) +101)).substring(1);
+        result.setDateTimeTaken(DateUtil.parseIsoDate("" + (2000+ id) + "-" + month + "-" + day));
+        result.setLatitude(50 + id + (0.01 * id));
+        result.setLongitude(10 + id + (0.01 * id));
+        result.setTags(TagConverter.fromString("tagA" + id + TagConverter.TAG_DB_DELIMITER + "tagB" + id));
+
+        return result;
+    }
 }

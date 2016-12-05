@@ -69,6 +69,7 @@ import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedFiles;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.io.GeoUri;
+import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
@@ -332,7 +333,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             Intent childIntent = new Intent();
             childIntent.setClass(this, FotoGalleryActivity.class);
             childIntent.setAction(intent.getAction());
-            childIntent.setDataAndType(intent.getData(), intent.getType());
+            IntentUtil.setDataAndTypeAndNormalize(childIntent, intent.getData(), intent.getType());
             copyExtras(childIntent, intent.getExtras(),
                     EXTRA_FILTER, EXTRA_POSITION, EXTRA_QUERY, EXTRA_SELECTED_ITEM_IDS,
                     EXTRA_SELECTED_ITEM_PATHS, EXTRA_STREAM, EXTRA_TITLE);
@@ -812,7 +813,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             case R.id.cmd_gallery: {
                 String dirPath = getCurrentFilePath(); // MediaScanner.getDir().getAbsolutePath();
                 if (dirPath != null) {
-                    dirPath = MediaScanner.getInstance(this).getDir(dirPath).getAbsolutePath();
+                    dirPath = FileUtils.getDir(dirPath).getAbsolutePath();
                     GalleryFilterParameter newFilter = new GalleryFilterParameter();
                     newFilter.setPath(dirPath);
                     int callBackId = (MediaScanner.isNoMedia(dirPath,MediaScanner.DEFAULT_SCAN_DEPTH)) ? NOMEDIA_GALLERY : 0;
@@ -908,7 +909,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     private void cmdShowDetails(String fullFilePath, long currentImageId) {
 
-        ImageDetailDialogBuilder.createImageDetailDialog(this, fullFilePath, currentImageId, mGalleryContentQuery, mViewPager.getCurrentItem()).show();
+        ImageDetailMetaDialogBuilder.createImageDetailDialog(this, fullFilePath, currentImageId, mGalleryContentQuery, mViewPager.getCurrentItem()).show();
     }
 
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
