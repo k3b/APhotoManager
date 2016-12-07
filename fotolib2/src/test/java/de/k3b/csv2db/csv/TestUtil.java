@@ -48,6 +48,7 @@ public class TestUtil {
         result.setLatitude(50 + id + (0.01 * id));
         result.setLongitude(10 + id + (0.01 * id));
         result.setTags(TagConverter.fromString("tagA" + id + TagConverter.TAG_DB_DELIMITER + "tagB" + id));
+        result.setRating(3);
 
         return result;
     }

@@ -28,7 +28,7 @@ public enum XmpNamespace {
     EXIF("XMP-exif","http://ns.adobe.com/exif/1.0/"),
     XAP("XMP-xmp","http://ns.adobe.com/xap/1.0/"),
     DC("XMP-dc", "http://purl.org/dc/elements/1.1/"),
-    PHOTOSHOP("","http://ns.adobe.com/photoshop/1.0/");
+    PHOTOSHOP("photoshop","http://ns.adobe.com/photoshop/1.0/");
 
 
     private final String prefix;
@@ -47,5 +47,9 @@ public enum XmpNamespace {
     @Override
     public String toString() {
         return prefix+"="+uri;
+    }
+
+    public String getPrefix() {
+        return prefix;
     }
 }
