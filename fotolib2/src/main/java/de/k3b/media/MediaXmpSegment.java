@@ -143,7 +143,7 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
     @Override
     public Integer getRating() {
         String result = getPropertyAsString(MediaXmpFieldDefinition.Rating);
-        if (result != null) {
+        if ((result != null) && (result.length() > 0)){
             try {
                 return Integer.parseInt(result);
             } catch (NumberFormatException ex) {

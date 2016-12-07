@@ -28,6 +28,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.TimeZone;
 
 import de.k3b.csv2db.csv.TestUtil;
 
@@ -42,6 +43,7 @@ public class MediaXmpTests {
 
     @Test
     public void shouldReadExistingXmpFile() throws IOException {
+        TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
         MediaXmpSegment sut = new MediaXmpSegment();
         InputStream fis = getStream("test-WitExtraData.xmp");
         sut = new MediaXmpSegment();
