@@ -159,7 +159,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
             // to be restored after refreshLocal if there is no mInitialFilePath
-            if (mInitialScrollPosition == NO_INITIAL_SCROLL_POSITION) {
+            if ((mInitialScrollPosition == NO_INITIAL_SCROLL_POSITION) && (mViewPager != null)) {
                 mInitialScrollPosition = mViewPager.getCurrentItem();
             }
             // do change the data
@@ -671,7 +671,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     }
 
     private void refreshIfNecessary() {
-        if (mAdapter.isInArrayMode()) {
+        if ((mAdapter != null) && (mViewPager != null) && (mAdapter.isInArrayMode())) {
             mAdapter.refreshLocal();
             mViewPager.setAdapter(mAdapter);
 
@@ -983,18 +983,27 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     }
 
     private long getCurrentImageId() {
-        int itemPosition = mViewPager.getCurrentItem();
-        return this.mAdapter.getImageId(itemPosition);
+        if ((mViewPager != null) && (mAdapter != null)) {
+            int itemPosition = mViewPager.getCurrentItem();
+            return this.mAdapter.getImageId(itemPosition);
+        }
+        return -1;
     }
 
     protected String getCurrentFilePath() {
-        int itemPosition = mViewPager.getCurrentItem();
-        return this.mAdapter.getFullFilePath(itemPosition);
+        if ((mViewPager != null) && (mAdapter != null)) {
+            int itemPosition = mViewPager.getCurrentItem();
+            return this.mAdapter.getFullFilePath(itemPosition);
+        }
+        return "";
     }
 
     protected boolean hasCurrentGeo() {
-        int itemPosition = mViewPager.getCurrentItem();
-        return this.mAdapter.hasGeo(itemPosition);
+        if ((mViewPager != null) && (mAdapter != null)) {
+            int itemPosition = mViewPager.getCurrentItem();
+            return this.mAdapter.hasGeo(itemPosition);
+        }
+        return false;
     }
 
     private boolean isViewPagerActive() {
