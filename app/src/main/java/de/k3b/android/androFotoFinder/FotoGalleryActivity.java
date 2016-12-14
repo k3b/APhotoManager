@@ -119,14 +119,19 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         protected int mDirQueryID = FotoSql.QUERY_TYPE_GROUP_DEFAULT;
 
         private boolean mHasUserDefinedQuery = false;
+
+        /** current sort order */
         private int mCurrentSortID = FotoSql.SORT_BY_DEFAULT;
+        /** current sort order */
         private boolean mCurrentSortAscending = false;
 
         private String mCurrentPathFromFolderPicker = "/";
 
-        protected QueryParameter mGalleryContentQuery = null;
-
+        /** Filter parameter defining current visible items */
         private IGalleryFilter mCurrentFilterSettings;
+
+        /** sql defines current visible items with optional sort order */
+        protected QueryParameter mGalleryContentQuery = null;
 
         /** true: if activity started without special intent-parameters,
          *  the last mCurrentFilterSettings is saved/loaded for next use */
@@ -158,7 +163,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         }
 
         public String getSortDisplayName(Context context) {
-            return  FotoSql.getName(context, this.mCurrentSortID) + ((mCurrentSortAscending) ? " ^" : " V");
+            return  FotoSql.getName(context, this.mCurrentSortID) + " " + ((mCurrentSortAscending) ? IGalleryFilter.SORT_DIRECTION_ASCENDING : IGalleryFilter.SORT_DIRECTION_DESCENDING);
         }
 
         public boolean clearPathIfActive() {
@@ -194,7 +199,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
                 FotoSql.addPathWhere(result, this.mCurrentPathFromFolderPicker, this.getDirQueryID());
             }
 
-            if (mCurrentSortID != FotoSql.SORT_BY_NONE) {
+            if (mCurrentSortID != IGalleryFilter.SORT_BY_NONE) {
                 FotoSql.setSort(result, mCurrentSortID, mCurrentSortAscending);
             }
             return result;
@@ -563,7 +568,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
             public void setQuery(QueryParameter newQuery) {
                 final IGalleryFilter whereFilter = FotoSql.getWhereFilter(newQuery, true);
                 mGalleryQueryParameter.mGalleryContentQuery = newQuery;
-                mGalleryQueryParameter.setSortID(FotoSql.SORT_BY_NONE);
+                mGalleryQueryParameter.setSortID(IGalleryFilter.SORT_BY_NONE);
                 onFilterChanged(whereFilter, "loadBookmark");
                 invalidateDirectories(mDebugPrefix + "#loaded bookmark");
                 mGalleryQueryParameter.setHasUserDefinedQuery(true);
@@ -635,7 +640,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         if (mDirectoryRoot == null) {
             // not loaded yet. load directoryRoot in background
             final QueryParameter currentDirContentQuery = new QueryParameter(FotoSql.getQuery(dirQueryID));
-            FotoSql.setWhereFilter(currentDirContentQuery, this.mGalleryQueryParameter.getCurrentFilterSettings(), this.mGalleryQueryParameter.getSortID() != FotoSql.SORT_BY_NONE);
+            FotoSql.setWhereFilter(currentDirContentQuery, this.mGalleryQueryParameter.getCurrentFilterSettings(), this.mGalleryQueryParameter.getSortID() != IGalleryFilter.SORT_BY_NONE);
 
             this.mGalleryQueryParameter.mDirQueryID = (currentDirContentQuery != null) ? currentDirContentQuery.getID() : FotoSql.QUERY_TYPE_UNDEFINED;
 

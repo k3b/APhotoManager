@@ -87,7 +87,7 @@ public class GalleryFilterActivity extends LocalizedActivity
         final Intent intent = new Intent().setClass(context,
                 GalleryFilterActivity.class);
 
-        if (filter != null) {
+        if (!GalleryFilterParameter.isEmpty(filter)) {
             intent.putExtra(EXTRA_FILTER, filter.toString());
         }
 
@@ -379,14 +379,32 @@ public class GalleryFilterActivity extends LocalizedActivity
             return mWithNoGeoInfo.isChecked();
         }
 
+        /**
+         * number defining current sorting
+         */
+        @Override
+        public int getSortID() {
+            return (mFilter != null) ? mFilter.getSortID() :  SORT_BY_NONE;
+        }
+
+        /**
+         * false: sort descending
+         */
+        @Override
+        public boolean isSortAscending() {
+            return (mFilter != null) ? mFilter.isSortAscending() :  false;
+        }
+
         @Override
         public IGalleryFilter get(IGalleryFilter src) {
-            get((IGeoRectangle) src);
-            mPath           .setText(src.getPath());
-            mDateFrom       .setText(convertDate(src.getDateMin()));
-            mDateTo         .setText(convertDate(src.getDateMax()));
-            mWithNoGeoInfo.setChecked(src.isNonGeoOnly());
-            showLatLon(src.isNonGeoOnly());
+            if (src != null) {
+                get((IGeoRectangle) src);
+                mPath.setText(src.getPath());
+                mDateFrom.setText(convertDate(src.getDateMin()));
+                mDateTo.setText(convertDate(src.getDateMax()));
+                mWithNoGeoInfo.setChecked(src.isNonGeoOnly());
+                showLatLon(src.isNonGeoOnly());
+            }
             return this;
         }
 
@@ -439,7 +457,9 @@ public class GalleryFilterActivity extends LocalizedActivity
 
     private boolean fromGui(IGalleryFilter dest) {
         try {
-            dest.get(mFilterValue);
+            if (dest != null) {
+                dest.get(mFilterValue);
+            }
             return true;
         } catch (RuntimeException ex) {
             Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
@@ -448,7 +468,13 @@ public class GalleryFilterActivity extends LocalizedActivity
     }
 
     private void clearFilter() {
-        mFilter = new GalleryFilterParameter();
+        GalleryFilterParameter filter = new GalleryFilterParameter();
+
+        if (mFilter != null) {
+            filter.setSort(mFilter.getSortID(), mFilter.isSortAscending());
+        }
+
+        this.mFilter = filter;
         toGui(mFilter);
     }
 
