@@ -37,6 +37,9 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
 
     private boolean nonGeoOnly = false;
 
+    private int mSortId = SORT_BY_NONE;
+    private boolean mSortAscending = false;
+
     public GalleryFilterParameter get(IGalleryFilter src) {
         super.get(src);
         if (src != null) {
@@ -44,9 +47,12 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
             this.setDateMin(src.getDateMin());
             this.setPath(src.getPath());
             this.setNonGeoOnly(src.isNonGeoOnly());
+            this.setSort(src.getSortID(),src.isSortAscending());
         }
         return this;
     }
+
+
 
     /******************** properties **************************/
     @Override
@@ -94,6 +100,38 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
         return this;
     }
 
+    /**
+     * number defining current sorting
+     */
+    @Override
+    public int getSortID() {
+        return mSortId;
+    }
+
+    public GalleryFilterParameter setSortID(int sortID) {
+        mSortId = sortID;
+        return this;
+    }
+
+    /**
+     * false: sort descending
+     */
+    @Override
+    public boolean isSortAscending() {
+        return mSortAscending;
+    }
+
+    public GalleryFilterParameter setSortAscending(boolean sortAscending) {
+        mSortAscending = sortAscending;
+        return this;
+    }
+
+    public GalleryFilterParameter setSort(int sortID, boolean sortAscending) {
+        this.setSortID(sortID);
+        this.setSortAscending(sortAscending);
+        return this;
+    }
+
     /********************* string conversion support ***************/
     @Override
     public StringBuilder toStringBuilder() {
@@ -107,6 +145,9 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
         }
         appendSubFields(result, format(getDateMin()), format(getDateMax()));
         appendSubFields(result, format(getPath()));
+        if ((mSortId != SORT_BY_NONE) && (mSortId != SORT_BY_NONE_OLD)) {
+            appendSubFields(result, "" + (char) mSortId, mSortAscending ? SORT_DIRECTION_ASCENDING : SORT_DIRECTION_DESCENDING);
+        }
         return result;
     }
 
@@ -132,7 +173,10 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
 
     private void assign(int fieldIndex, String[] subfields) {
         for (int subFieldIndex=0; subFieldIndex < subfields.length; subFieldIndex++) {
-            this.assign(fieldIndex, subFieldIndex, subfields[subFieldIndex]);
+            String subfieldValue = subfields[subFieldIndex];
+            if ((subfieldValue != null) && (subfieldValue.length() > 0)) {
+                this.assign(fieldIndex, subFieldIndex, subfieldValue);
+            }
         }
     }
 
@@ -165,6 +209,12 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
             case 3 :
                 setPath(value);
                 break;
+            case 4 :
+                if (subfield == 0)
+                    setSortID(value.charAt(0));
+                else
+                    setSortAscending(value.charAt(0) == SORT_DIRECTION_ASCENDING.charAt(0));
+                break;
             default:break;
         }
     }
@@ -184,5 +234,14 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
                 return 0;
             }
         }
+    }
+
+    public static boolean isEmpty(IGalleryFilter filter) {
+        if (filter == null) return true;
+        return (GeoRectangle.isEmpty(filter)
+                && (filter.getDateMin() == 0)
+                && (filter.getDateMax() == 0)
+                && (!filter.isNonGeoOnly())
+                && (filter.getPath()==null));
     }
 }
