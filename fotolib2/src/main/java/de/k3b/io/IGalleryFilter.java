@@ -24,6 +24,11 @@ package de.k3b.io;
  * Created by k3b on 13.07.2015.
  */
 public interface IGalleryFilter extends IGeoRectangle {
+    int SORT_BY_NONE_OLD = 0;
+    int SORT_BY_NONE = ' ';
+    String SORT_DIRECTION_ASCENDING = "^";
+    String SORT_DIRECTION_DESCENDING = "V";
+
     /******************** properties **************************/
     String getPath();
 
@@ -31,7 +36,14 @@ public interface IGalleryFilter extends IGeoRectangle {
 
     long getDateMax();
 
+    /** true: only photos whith no geo info (lat==lon==null) */
     boolean isNonGeoOnly();
+
+    /** number defining current sorting */
+    int getSortID();
+
+    /** false: sort descending */
+    boolean isSortAscending();
 
     IGalleryFilter get(IGalleryFilter src);
 }

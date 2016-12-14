@@ -35,28 +35,31 @@ public class GalleryFilterParameterTest {
         sut.setLatitude(1.23,3.45).setLogitude(2.34, 4.56);
         sut.setDateMin(Date.valueOf("2001-02-03").getTime()).setDateMax(Date.valueOf("2005-12-31").getTime());
         sut.setPath("/some/path/");
+        sut.setSortID('q');
+        sut.setSortAscending(true);
 
-        assertEquals("1.23,2.34;3.45,4.56;2001-02-03,2005-12-31;/some/path/;", sut.toString());
-
+        assertEquals("1.23,2.34;3.45,4.56;2001-02-03,2005-12-31;/some/path/;q,^;", sut.toString());
+        assertEquals("not empty", false,  GalleryFilterParameter.isEmpty(sut));
     }
 
     @Test
     public void toStringEmptyTest() {
         GalleryFilterParameter sut = new GalleryFilterParameter();
         assertEquals(";;;;", sut.toString());
+        assertEquals("empty", true,  GalleryFilterParameter.isEmpty(sut));
     }
 
     @Test
     public void shouldParseFull() {
-        GalleryFilterParameter sutParsed = GalleryFilterParameter.parse("1.23,2.34;3.45,4.56;2001-02-03,2005-12-31;/some/path/;", new GalleryFilterParameter());
+        GalleryFilterParameter sutParsed = GalleryFilterParameter.parse("1.23,2.34;3.45,4.56;2001-02-03,2005-12-31;/some/path/;q,^;", new GalleryFilterParameter());
         GalleryFilterParameter sut = new GalleryFilterParameter().get(sutParsed);
-        assertEquals("1.23,2.34;3.45,4.56;2001-02-03,2005-12-31;/some/path/;", sut.toString());
+        assertEquals("1.23,2.34;3.45,4.56;2001-02-03,2005-12-31;/some/path/;q,^;", sut.toString());
     }
 
     @Test
     public void shouldParseFullNoGeo() {
-        GalleryFilterParameter sutParsed = GalleryFilterParameter.parse("n;;2001-02-03,2005-12-31;/some/path/;", new GalleryFilterParameter());
+        GalleryFilterParameter sutParsed = GalleryFilterParameter.parse("n;;2001-02-03,2005-12-31;/some/path/;q,^;", new GalleryFilterParameter());
         GalleryFilterParameter sut = new GalleryFilterParameter().get(sutParsed);
-        assertEquals("noGeoInfo;;2001-02-03,2005-12-31;/some/path/;", sut.toString());
+        assertEquals("noGeoInfo;;2001-02-03,2005-12-31;/some/path/;q,^;", sut.toString());
     }
 }

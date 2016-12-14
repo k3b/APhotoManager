@@ -25,7 +25,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
@@ -65,11 +64,16 @@ public class FotoSql {
 //    public static final String SQL_EXPR_DAY = "(ROUND("
 //            + MediaStore.Images.Media.SQL_COL_DATE_TAKEN + "/" + PER_DAY + ") * " + PER_DAY + ")";
 
-    public static final int SORT_BY_NONE = 0;
-    public static final int SORT_BY_DATE = 1;
-    public static final int SORT_BY_NAME = 2;
-    public static final int SORT_BY_LOCATION = 3;
-    public static final int SORT_BY_NAME_LEN = 4;
+    public static final int SORT_BY_DATE_OLD = 1;
+    public static final int SORT_BY_NAME_OLD = 2;
+    public static final int SORT_BY_LOCATION_OLD = 3;
+    public static final int SORT_BY_NAME_LEN_OLD = 4;
+
+    public static final int SORT_BY_DATE = 'd';
+    public static final int SORT_BY_NAME = 'n';
+    public static final int SORT_BY_LOCATION = 'l';
+    public static final int SORT_BY_NAME_LEN = 's'; // size
+
     public static final int SORT_BY_DEFAULT = SORT_BY_DATE;
 
     public static final int QUERY_TYPE_UNDEFINED = 0;
@@ -249,7 +253,7 @@ public class FotoSql {
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString());
 
     public static void setWhereFilter(QueryParameter parameters, IGalleryFilter filter, boolean clearWhereBefore) {
-        if ((parameters != null) && (filter != null)) {
+        if ((parameters != null) && (!GalleryFilterParameter.isEmpty(filter))) {
             if (clearWhereBefore) {
                 parameters.clearWhere();
             }
@@ -415,14 +419,19 @@ public class FotoSql {
 
     public static String getName(Context context, int id) {
         switch (id) {
-            case SORT_BY_NONE:
+            case IGalleryFilter.SORT_BY_NONE_OLD:
+            case IGalleryFilter.SORT_BY_NONE:
                 return context.getString(R.string.sort_by_none);
+            case SORT_BY_DATE_OLD:
             case SORT_BY_DATE:
                 return context.getString(R.string.sort_by_date);
+            case SORT_BY_NAME_OLD:
             case SORT_BY_NAME:
                 return context.getString(R.string.sort_by_name);
+            case SORT_BY_LOCATION_OLD:
             case SORT_BY_LOCATION:
                 return context.getString(R.string.sort_by_place);
+            case SORT_BY_NAME_LEN_OLD:
             case SORT_BY_NAME_LEN:
                 return context.getString(R.string.sort_by_name_len);
 
@@ -449,12 +458,16 @@ public class FotoSql {
         String asc = (ascending) ? " asc" : " desc";
         result.replaceOrderBy();
         switch (sortID) {
+            case SORT_BY_DATE_OLD:
             case SORT_BY_DATE:
                 return result.replaceOrderBy(SQL_COL_DATE_TAKEN + asc);
+            case SORT_BY_NAME_OLD:
             case SORT_BY_NAME:
                 return result.replaceOrderBy(SQL_COL_PATH + asc);
+            case SORT_BY_LOCATION_OLD:
             case SORT_BY_LOCATION:
                 return result.replaceOrderBy(SQL_COL_GPS + asc, MediaStore.Images.Media.LATITUDE + asc);
+            case SORT_BY_NAME_LEN_OLD:
             case SORT_BY_NAME_LEN:
                 return result.replaceOrderBy("length(" + SQL_COL_PATH + ")"+asc);
             default: return  result;
@@ -563,7 +576,7 @@ public class FotoSql {
                 )
                 .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString());
 
-        if (filter != null) {
+        if (!GalleryFilterParameter.isEmpty(filter)) {
             setWhereFilter(query, filter, true);
         }
 

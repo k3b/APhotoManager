@@ -40,10 +40,7 @@
 	<string name="copy_menu_title">Copia</string>
 	<string name="copy_result_format">Copiati %1$d/%2$d file</string>
 	<string name="delete_menu_title">Elimina</string>
-	<string name="delete_question_message_format">"Sei sicuro di volere eliminare in modo definitivo questi file?
-	%1$s
-	
-	Questa operazione non può essere annullata."</string>
+	<string name="delete_question_message_format">"Sei sicuro di volere eliminare in modo definitivo questi file?    %1$sQuesta operazione non può essere annullata."</string>
 	<string name="delete_question_title">Eliminare la/le foto?</string>
 	<string name="delete_result_format">Eliminati %1$d/%2$d file</string>
 	<string name="destination_copy">Copia destinazione</string>
@@ -146,4 +143,16 @@
 	<string name="settings_maps_forge_enable_summary">che hai scaricato manualmente tramite pc</string>
 	<string name="settings_maps_forge_dir_title">Cartella file di mappa *.map</string>
 	<string name="show_photo">Mostra foto</string>
+	<string name="fix_link_menu_title">Ripara duplicati</string>
+	<string name="geo_picker_from_photo_title">Scegli geo dalla foto</string>
+	<string name="geo_picker_from_map_title">Scegli geo dalla mappa</string>
+	<string name="folder_hide_images_menu_title">Nascondi immagini</string>
+	<string name="folder_hide_images_question_message_format">"Sei sicuro?
+
+Vuoi rendere tutti i file multimediali (foto, video, audio) sotto
+
+      %1$s
+
+invisibili ai database, app galleria e media scanner?
+Puoi annullare l\'azione avviando il media scanner dal menu galleria."</string>
 </resources>
