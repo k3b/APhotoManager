@@ -32,6 +32,8 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.k3b.FotoLibGlobal;
+
 /**
  * Persistence for all known tags.
  *
@@ -39,7 +41,9 @@ import java.util.List;
  */
 
 public class TagRepository {
-    private static final Logger logger = LoggerFactory.getLogger(TagRepository.class);
+    // android - log compatible
+    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+    private static final String dbg_context = "TagRepository: ";
 
     /** Lines starting with char are comments. These lines are not interpreted */
     public static final java.lang.String COMMENT = "#";
@@ -99,6 +103,21 @@ public class TagRepository {
         return changes;
     }
 
+    public int includeString(List<String> items) {
+        int changes = 0;
+        if ((items != null) && (items.size() > 0)) {
+            List<Tag> newItems = this.load();
+            for (String oldItem : items) {
+                if (!contains(oldItem)) {
+                    newItems.add(new Tag().setName(oldItem));
+                    changes++;
+                }
+            }
+        }
+        return changes;
+    }
+
+
     /** Load from repository-file to memory.
      *
      * @return data loaded
@@ -113,11 +132,11 @@ public class TagRepository {
                     e.printStackTrace();
                 }
             }
-            if (logger.isDebugEnabled()) {
-                logger.debug("load(): " + mItemList.size() + " items from " + this.mFile);
-            }
-        } else if (logger.isDebugEnabled()) {
-            logger.debug("load() cached value : " + mItemList.size() + " items from " + this.mFile);
+
+            logger.debug(dbg_context + "load(): " + mItemList.size() + " items from " + this.mFile);
+
+        } else if (FotoLibGlobal.debugEnabled) {
+            // logger.debug(dbg_context + "load() cached value : " + mItemList.size() + " items from " + this.mFile);
         }
         return mItemList;
     }
@@ -157,16 +176,16 @@ public class TagRepository {
                 if (!this.mFile.exists()) {
                     this.mFile.getParentFile().mkdirs();
                 }
-                if (logger.isDebugEnabled()) {
-                    logger.debug("save(): " + mItemList.size() + " items to " + this.mFile);
-                }
+
+                logger.debug(dbg_context + "save(): " + mItemList.size() + " items to " + this.mFile);
+
                 save(mItemList, new FileWriter(this.mFile, false));
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (logger.isDebugEnabled()) {
-            logger.debug("save(): no items for " + this.mFile);
+        if (FotoLibGlobal.debugEnabled) {
+            logger.debug(dbg_context + "save(): no items for " + this.mFile);
         }
         return this;
     }
@@ -181,8 +200,8 @@ public class TagRepository {
             if ((line.length() > 0) && (!line.startsWith(COMMENT))) {
                 Tag item = loadItem(line);
                 final boolean valid = isValid(item);
-                if (logger.isDebugEnabled()) {
-                    logger.debug("load(" + line + "): " + ((valid) ? "loaded" : "ignored"));
+                if (FotoLibGlobal.debugEnabled) {
+                    logger.debug(dbg_context + "load(" + line + "): " + ((valid) ? "loaded" : "ignored"));
                 }
 
                 if (valid) result.add((Tag) item);
@@ -223,8 +242,8 @@ public class TagRepository {
             writer.write(line);
             writer.write("\n");
         }
-        if (logger.isDebugEnabled()) {
-            logger.debug("save(" + line + "): " + ((valid) ? "saved" : "ignored" ));
+        if (FotoLibGlobal.debugEnabled) {
+            logger.debug(dbg_context + "save(" + line + "): " + ((valid) ? "saved" : "ignored" ));
         }
         return valid;
     }
@@ -239,4 +258,21 @@ public class TagRepository {
         return ((id != null) && (!id.startsWith("#")));
     }
 
+    public boolean contains(Tag name) {
+        List<Tag> items = load();
+        if (items != null) {
+            return items.contains(name);
+        }
+        return false;
+    }
+
+    public boolean contains(String name) {
+        List<Tag> items = load();
+        if (items != null) {
+            for (Tag item : items) {
+                if (name.equals(item.getName())) return true;
+            }
+        }
+        return false;
+    }
 }

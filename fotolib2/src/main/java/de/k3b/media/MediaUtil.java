@@ -19,6 +19,7 @@
 
 package de.k3b.media;
 
+import java.io.File;
 import java.util.Date;
 import java.util.List;
 
@@ -172,4 +173,20 @@ public class MediaUtil {
         return ((newValue != null) || allowSetNull);
     }
 
+    /** return true if path is "*.jp(e)g" */
+    public static boolean isImage(File path, boolean jpgOnly) {
+        if (path == null) return false;
+        return isImage(path.getName(), jpgOnly);
+    }
+
+    /** return true if path is "*.jp(e)g" */
+    public static boolean isImage(String path, boolean jpgOnly) {
+        if (path == null) return false;
+        String lcPath = path.toLowerCase();
+
+        if ((!jpgOnly) && (lcPath.endsWith(".gif") || lcPath.endsWith(".png") || lcPath.endsWith(".tiff") || lcPath.endsWith(".bmp"))) {
+            return true;
+        }
+        return lcPath.endsWith(".jpg") || lcPath.endsWith(".jpeg");
+    }
 }

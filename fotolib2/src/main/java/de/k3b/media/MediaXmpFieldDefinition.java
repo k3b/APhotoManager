@@ -27,7 +27,8 @@ import com.adobe.xmp.options.PropertyOptions;
  */
 
 public enum MediaXmpFieldDefinition {
-    PATH(XmpNamespace.NONE), // used by exiftool-csv
+    SourceFile(XmpNamespace.NONE), // used by exiftool-csv
+    FileModifyDate(XmpNamespace.NONE), // used by exiftool-csv
 
     CreateDate(XmpNamespace.XAP),          // JPhotoTagger default
 

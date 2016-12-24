@@ -41,19 +41,25 @@ import de.k3b.tagDB.TagConverter;
  *
  * Created by k3b on 30.09.2016.
  */
-
 public class TagSql extends FotoSql {
-    /** used to query non-standard-image fields */
-    public static final Uri SQL_TABLE_EXTERNAL_CONTENT_URI_FILE = MediaStore.Files.getContentUri("external");
-
     public static final String SQL_COL_EXT_TAGS = MediaStore.Video.Media.TAGS;
+
     public static final String SQL_COL_EXT_DESCRIPTION = MediaStore.Images.Media.DESCRIPTION;
     public static final String SQL_COL_EXT_TITLE = MediaStore.Images.Media.TITLE;
     public static final String SQL_COL_EXT_RATING = MediaStore.Video.Media.BOOKMARK;
 
     /** The date & time when last non standard media-scan took place
-     *  <P>Type: INTEGER (long) as seconds since jan 1, 1970</P> */
-    private static final String SQL_COL_EXT_LAST_EXT_SCAN = MediaStore.Video.Media.DURATION;
+     *  <P>Type: INTEGER (long) as milliseconds since jan 1, 1970</P> */
+    private static final String SQL_COL_EXT_XMP_LAST_MODIFIED_DATE = MediaStore.Video.Media.DURATION;
+
+    public static final int EXT_LAST_EXT_SCAN_UNKNOWN = 0;
+    public static final int EXT_LAST_EXT_SCAN_NO_XMP_IN_CSV = 5;
+    public static final int EXT_LAST_EXT_SCAN_NO_XMP = 10;
+
+    protected static final String FILTER_EXPR_PATH_LIKE_XMP_DATE = FILTER_EXPR_PATH_LIKE
+            + " and ("
+            + SQL_COL_EXT_XMP_LAST_MODIFIED_DATE + " is null or "
+            + SQL_COL_EXT_XMP_LAST_MODIFIED_DATE + " < ?) ";
 
     private static final String EXT_FILTER_MEDIA_TYPE
             = MediaStore.Files.FileColumns.MEDIA_TYPE
@@ -61,7 +67,7 @@ public class TagSql extends FotoSql {
 
     /** only rows containing all tags are visible */
     public static void addWhereTag(QueryParameter newQuery, String... tags) {
-        String tagvalue = (Global.enableNonStandardMediaFields) ? TagConverter.asDbString("%", tags) : null;
+        String tagvalue = (Global.Media.enableNonStandardMediaFields) ? TagConverter.asDbString("%", tags) : null;
         if (tagvalue != null) {
             newQuery.addWhere(SQL_COL_EXT_TAGS + " like ?", tagvalue);
             switchFrom(newQuery, SQL_TABLE_EXTERNAL_CONTENT_URI_FILE);
@@ -91,40 +97,42 @@ public class TagSql extends FotoSql {
         }
     }
 
-    public static void setTags(ContentValues values, String... tags) {
+    public static void setTags(ContentValues values, Date xmpFileModifyDate, String... tags) {
         values.put(SQL_COL_EXT_TAGS, TagConverter.asDbString("", tags));
-        setLastScanDate(values, new Date());
+        setXmpFileModifyDate(values, xmpFileModifyDate);
     }
 
-    public static void setDescription(ContentValues values, String description) {
+    public static void setDescription(ContentValues values, Date xmpFileModifyDate, String description) {
         values.put(SQL_COL_EXT_DESCRIPTION, description);
-        setLastScanDate(values, new Date());
+        setXmpFileModifyDate(values, xmpFileModifyDate);
     }
 
-    public static void setRating(ContentValues values, Integer value) {
+    public static void setRating(ContentValues values, Date xmpFileModifyDate, Integer value) {
         values.put(SQL_COL_EXT_RATING, value);
-        setLastScanDate(values, new Date());
+        setXmpFileModifyDate(values, xmpFileModifyDate);
     }
 
-    public static void setLastScanDate(ContentValues values, Date lastScanDate) {
-        if (Global.enableNonStandardMediaFieldsUpdateLastScanTimestamp) {
-            Long now = (lastScanDate != null)
-                    ? lastScanDate.getTime() / 1000 // sec
-                    : null;
-            values.put(SQL_COL_EXT_LAST_EXT_SCAN, now);
+    public static void setXmpFileModifyDate(ContentValues values, Date xmpFileModifyDate) {
+        long lastScan = (xmpFileModifyDate != null)
+                ? xmpFileModifyDate.getTime() // millisec since 1970-01-01
+                : EXT_LAST_EXT_SCAN_UNKNOWN;
+        setXmpFileModifyDate(values, lastScan);
+    }
+
+    public static void setXmpFileModifyDate(ContentValues values, long xmpFileModifyDateMilliSecs) {
+        if ((values != null)
+                && (xmpFileModifyDateMilliSecs != EXT_LAST_EXT_SCAN_UNKNOWN)
+                && Global.Media.enableNonStandardMediaFieldsUpdateLastScanTimestamp) {
+            values.put(SQL_COL_EXT_XMP_LAST_MODIFIED_DATE, xmpFileModifyDateMilliSecs);
         }
     }
 
     /** only rows are visible that needs to run the ext media scanner */
     public static void addWhereNeedsExtMediaScan(QueryParameter newQuery) {
-        if (Global.enableNonStandardMediaFields) {
-            newQuery.addWhere(SQL_COL_EXT_LAST_EXT_SCAN + " is null");
+        if (Global.Media.enableNonStandardMediaFields) {
+            newQuery.addWhere(SQL_COL_EXT_XMP_LAST_MODIFIED_DATE + " is null");
             switchFrom(newQuery, SQL_TABLE_EXTERNAL_CONTENT_URI_FILE);
         }
-    }
-
-    public static void setValues(ContentValues values, IMetaApi data) {
-
     }
 
     public static ContentValues getDbContent(Context context, final long id) {
@@ -144,6 +152,15 @@ public class TagSql extends FotoSql {
             if (c != null) c.close();
         }
         return null;
+    }
+
+    public static int execUpdate(Context context, String path, long xmpFileDate, ContentValues values) {
+        if ((!Global.Media.enableXmpNone) || (xmpFileDate == EXT_LAST_EXT_SCAN_UNKNOWN)) {
+            return execUpdate(context, path, values);
+        }
+        return context.getContentResolver().update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE
+                , values
+                , FILTER_EXPR_PATH_LIKE_XMP_DATE, new String[]{path, Long.toString(xmpFileDate)});
     }
 
 

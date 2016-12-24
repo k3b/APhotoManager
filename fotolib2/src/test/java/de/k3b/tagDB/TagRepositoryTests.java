@@ -86,7 +86,7 @@ public class TagRepositoryTests {
                 .save();
 
         // 1,2,7
-        List additionalItems = createUnsavedRepo("shouldIncludeItem", 2).load();
+        List<Tag> additionalItems = createUnsavedRepo("shouldIncludeItem", 2).load();
         Tag added = createItem(7);
         additionalItems.add(added);
 
@@ -95,6 +95,15 @@ public class TagRepositoryTests {
         List<Tag> items = originalItems.load();
         Assert.assertEquals(added + "added 1", 1, changes);
         Assert.assertEquals(4, items.size());
+    }
+
+    @Test
+    public void shouldFindByString() throws Exception {
+        // 1,2,3
+        TagRepository items = createUnsavedRepo("shouldFindByString", 3);
+
+        Assert.assertEquals("Name2", true, items.contains("Name2"));
+        Assert.assertEquals("Name5", false, items.contains("Name5"));
     }
 
 }

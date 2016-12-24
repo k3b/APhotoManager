@@ -35,6 +35,7 @@ import java.util.List;
 
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.io.FileUtils;
+import de.k3b.media.MediaUtil;
 
 /**
  * Special MediaScanner that can only handle inserNew/updateExisting for directories or jp(e)g files.
@@ -115,7 +116,7 @@ public class RecursiveMediaScannerAsyncTask extends MediaScannerAsyncTask {
                             }
                         }
                     }
-                } else if (mScanner.isImage(parent.getName(), true)) {
+                } else if (MediaUtil.isImage(parent.getName(), true)) {
                     resultCount += runScanner(parentPath, parentPath);
                 }
             } else if (mPaused != null) {

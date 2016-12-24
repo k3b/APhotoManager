@@ -12,7 +12,6 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.media.MediaContentValues;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.io.FileUtils;
-import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaUtil;
 import de.k3b.media.MediaXmpSegment;
 import de.k3b.tagDB.Tag;
@@ -34,32 +33,39 @@ public class MediaScannerEx extends MediaScanner {
         super.getExifFromFile(values, file);
 
         // for first tests generate test data
-        if (false && Global.enableNonStandardMediaFields) {
-            addTags(values,"test1", "test2");
-            TagSql.setDescription(values,"test");
-            TagSql.setRating(values, 3);
+        if (false && Global.Media.enableNonStandardMediaFields) {
+            addTags(values, null, "test1", "test2");
+            TagSql.setDescription(values, null, "test");
+            TagSql.setRating(values, null, 3);
         }
     }
 
-    /** updates values with current values of file.
-     * Override: also get xmp data (i.e. Tags) */
+    /**
+     * updates values with current values of file.
+     * Override: also get xmp data (i.e. Tags)
+     */
     @Override
     protected int getExifValues(MediaContentValues dest, File file, ExifInterfaceEx exif) {
         int changes = 0;
+        long xmpFileModifyDate = TagSql.EXT_LAST_EXT_SCAN_UNKNOWN;
 
         File xmpFile = FileUtils.getXmpFile(file.getAbsolutePath());
         MediaXmpSegment xmp = null;
         if ((xmpFile != null) && xmpFile.exists() && xmpFile.isFile()) {
             xmp = new MediaXmpSegment();
             try {
+                TagSql.setXmpFileModifyDate(dest.getContentValues(), xmpFile.lastModified());
                 xmp.load(new FileInputStream(xmpFile));
+                TagRepository.getInstance().includeString(xmp.getTags());
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
             xmpFile = null;
+        } else if (Global.Media.enableXmpNone) {
+            xmpFileModifyDate = TagSql.EXT_LAST_EXT_SCAN_NO_XMP;
         }
 
-        if (Global.xmpOverwritesExif) {
+        if (Global.Media.xmpOverwritesExif) {
             // xmp overwrites exif so execute first exif then xmp
             changes += super.getExifValues(dest, file, exif);
             changes += MediaUtil.copy(dest, xmp, false, true);
@@ -69,22 +75,26 @@ public class MediaScannerEx extends MediaScanner {
             changes += super.getExifValues(dest, file, exif);
         }
 
+        if (xmpFileModifyDate != TagSql.EXT_LAST_EXT_SCAN_UNKNOWN) {
+            TagSql.setXmpFileModifyDate(dest.getContentValues(), xmpFileModifyDate);
+        }
         return changes;
     }
 
-    /** Override: make shure that TagDB is saved */
+    /**
+     * Override: make shure that TagDB is saved
+     */
     @Override
     public int updateMediaDatabase_Android42(Context context, String[] oldPathNames, String... newPathNames) {
         int result = super.updateMediaDatabase_Android42(context, oldPathNames, newPathNames);
-        if ((result > 0) && (Global.enableNonStandardMediaFields)) {
+        if ((result > 0) && (Global.Media.enableNonStandardMediaFields)) {
             TagRepository.getInstance().save();
         }
         return result;
     }
-    
-    private int addTags(ContentValues values, String... tags) {
-        TagSql.setTags(values,tags);
+
+    private int addTags(ContentValues values,  Date xmpFileModifyDate, String... tags) {
+        TagSql.setTags(values, xmpFileModifyDate, tags);
         return TagRepository.getInstance().include(Tag.toList(tags));
     }
-
 }

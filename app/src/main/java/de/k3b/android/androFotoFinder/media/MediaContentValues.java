@@ -29,10 +29,6 @@ import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.media.IMetaApi;
 import de.k3b.tagDB.TagConverter;
 
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_EXT_RATING;
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_EXT_TAGS;
-import static de.k3b.android.androFotoFinder.tagDB.TagSql.setLastScanDate;
-
 /**
  * r/w {@link IMetaApi} Implementation for android databse/contentprovider {@link ContentValues}.
  *
@@ -40,42 +36,48 @@ import static de.k3b.android.androFotoFinder.tagDB.TagSql.setLastScanDate;
  */
 
 public class MediaContentValues implements IMetaApi {
-    private ContentValues data;
+    private ContentValues mData;
+    private Date mXmpFileModifyDate;
 
-    public MediaContentValues set(ContentValues data) {
-        this.data = data;
+    public MediaContentValues set(ContentValues data, Date xmpLastFileModifyDate) {
+        if (data != null) this.mData = data;
+        mXmpFileModifyDate = xmpLastFileModifyDate;
         return this;
     }
 
+    public ContentValues getContentValues(){
+        return mData;
+    }
+
     public MediaContentValues setID(Integer id) {
-        data.put(FotoSql.SQL_COL_PK, id);
+        mData.put(FotoSql.SQL_COL_PK, id);
         return this;
     }
 
     public Integer getID() {
-        return data.getAsInteger(FotoSql.SQL_COL_PK);
+        return mData.getAsInteger(FotoSql.SQL_COL_PK);
     }
 
     public MediaContentValues clear(){
-        data.clear();
+        mData.clear();
         return this;
     }
     // ############# IMetaApi
 
     @Override
     public String getPath() {
-        return data.getAsString(FotoSql.SQL_COL_PATH);
+        return mData.getAsString(FotoSql.SQL_COL_PATH);
     }
 
     @Override
     public IMetaApi setPath(String filePath) {
-        data.put(FotoSql.SQL_COL_PATH, filePath);
+        mData.put(FotoSql.SQL_COL_PATH, filePath);
         return this;
     }
 
     @Override
     public Date getDateTimeTaken() {
-        Integer milliSecsOrNull = data.getAsInteger(FotoSql.SQL_COL_DATE_TAKEN);
+        Integer milliSecsOrNull = mData.getAsInteger(FotoSql.SQL_COL_DATE_TAKEN);
         int milliSecs = (milliSecsOrNull == null) ? 0 : milliSecsOrNull.intValue();
         if (milliSecs == 0) return null;
         return new Date(milliSecs);
@@ -83,63 +85,63 @@ public class MediaContentValues implements IMetaApi {
 
     @Override
     public IMetaApi setDateTimeTaken(Date value) {
-        data.put(FotoSql.SQL_COL_PATH, (value != null) ? value.getTime() : null);
+        mData.put(FotoSql.SQL_COL_PATH, (value != null) ? value.getTime() : null);
         return this;
     }
 
     @Override
     public IMetaApi setLatitude(Double latitude) {
-        data.put(FotoSql.SQL_COL_LAT, latitude);
+        mData.put(FotoSql.SQL_COL_LAT, latitude);
         return this;
     }
 
     @Override
     public IMetaApi setLongitude(Double longitude) {
-        data.put(FotoSql.SQL_COL_LON, longitude);
+        mData.put(FotoSql.SQL_COL_LON, longitude);
         return this;
     }
 
     @Override
     public Double getLatitude() {
-        return  data.getAsDouble(FotoSql.SQL_COL_LAT);
+        return  mData.getAsDouble(FotoSql.SQL_COL_LAT);
     }
 
     @Override
     public Double getLongitude() {
-        return  data.getAsDouble(FotoSql.SQL_COL_LON);
+        return  mData.getAsDouble(FotoSql.SQL_COL_LON);
     }
 
     @Override
     public String getTitle() {
-        return data.getAsString(TagSql.SQL_COL_EXT_TITLE);
+        return mData.getAsString(TagSql.SQL_COL_EXT_TITLE);
     }
 
     @Override
     public IMetaApi setTitle(String title) {
-        data.put(TagSql.SQL_COL_EXT_TITLE, title);
+        mData.put(TagSql.SQL_COL_EXT_TITLE, title);
         return this;
     }
 
     @Override
     public String getDescription() {
-        return data.getAsString(TagSql.SQL_COL_EXT_DESCRIPTION);
+        return mData.getAsString(TagSql.SQL_COL_EXT_DESCRIPTION);
     }
 
     @Override
     public IMetaApi setDescription(String description) {
-        TagSql.setDescription(data, description);
+        TagSql.setDescription(mData, mXmpFileModifyDate, description);
         return this;
     }
 
     @Override
     public List<String> getTags() {
-        return TagConverter.fromString(data.getAsString(TagSql.SQL_COL_EXT_TAGS));
+        return TagConverter.fromString(mData.getAsString(TagSql.SQL_COL_EXT_TAGS));
     }
 
     @Override
     public IMetaApi setTags(List<String> tags) {
-        data.put(SQL_COL_EXT_TAGS, TagConverter.asDbString("",tags));
-        setLastScanDate(data, new Date());
+        mData.put(TagSql.SQL_COL_EXT_TAGS, TagConverter.asDbString("",tags));
+        setLastXmpFileModifyDate();
         return this;
     }
 
@@ -148,13 +150,19 @@ public class MediaContentValues implements IMetaApi {
      */
     @Override
     public Integer getRating() {
-        return data.getAsInteger(TagSql.SQL_COL_EXT_RATING);
+        return mData.getAsInteger(TagSql.SQL_COL_EXT_RATING);
     }
 
     @Override
     public IMetaApi setRating(Integer value) {
-        data.put(SQL_COL_EXT_RATING, value);
-        setLastScanDate(data, new Date());
+        mData.put(TagSql.SQL_COL_EXT_RATING, value);
+        setLastXmpFileModifyDate();
         return this;
+    }
+
+    protected void setLastXmpFileModifyDate() {
+        if (mXmpFileModifyDate != null) {
+            TagSql.setXmpFileModifyDate(mData, mXmpFileModifyDate);
+        }
     }
 }

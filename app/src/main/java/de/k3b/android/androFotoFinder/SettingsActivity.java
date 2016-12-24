@@ -257,9 +257,9 @@ public class SettingsActivity extends PreferenceActivity {
         TagRepository.setInstance(Global.reportDir);
 
         // true if first run or change
-        if ((sOldEnableTagSupport == null) || (sOldEnableTagSupport.booleanValue() != Global.enableNonStandardMediaFields)) {
-            MediaScanner.setInstance((Global.enableNonStandardMediaFields) ? new MediaScannerEx(context) : new MediaScanner(context));
-            sOldEnableTagSupport = Global.enableNonStandardMediaFields;
+        if ((sOldEnableTagSupport == null) || (sOldEnableTagSupport.booleanValue() != Global.Media.enableNonStandardMediaFields)) {
+            MediaScanner.setInstance((Global.Media.enableNonStandardMediaFields) ? new MediaScannerEx(context) : new MediaScanner(context));
+            sOldEnableTagSupport = Global.Media.enableNonStandardMediaFields;
         }
     }
 

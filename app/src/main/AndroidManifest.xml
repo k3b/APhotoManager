@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
 /*
  * Copyright (c) 2015 by k3b.
  *
@@ -22,14 +21,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="de.k3b.android.androFotoFinder"
-    android:installLocation="auto" >
+    android:installLocation="auto">
 
     <supports-screens
         android:anyDensity="true"
         android:largeScreens="true"
         android:normalScreens="true" />
 
-    <uses-feature android:glEsVersion="0x00020000" android:required="false" />
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="false" />
 
     <!-- to read fotos from gallery in android-4.4 -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -62,22 +63,29 @@
     <!-- after app crash the logcat is written to /mnt/sdcard/copy/log/androFotofinder.logcat*.txt -->
     <uses-permission android:name="android.permission.READ_LOGS" />
 
-    <!-- permissions inherited from a lib that the app does not need.
+    <!--
+         permissions inherited from a lib that the app does not need.
          tools:node="remove" means remove permission
-         see http://stackoverflow.com/questions/37223379/google-play-game-service-adds-an-unwanted-permission-in-my-app-phone-status-and -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" tools:node="remove" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" tools:node="remove" />
+         see http://stackoverflow.com/questions/37223379/google-play-game-service-adds-an-unwanted-permission-in-my-app-phone-status-and
+    -->
+    <uses-permission
+        android:name="android.permission.ACCESS_FINE_LOCATION"
+        tools:node="remove" />
+    <uses-permission
+        android:name="android.permission.ACCESS_COARSE_LOCATION"
+        tools:node="remove" />
 
-    <application android:name=".AndroFotoFinderApp"
+    <application
+        android:name=".AndroFotoFinderApp"
         android:allowBackup="false"
-        android:largeHeap="true"
         android:icon="@drawable/foto_gallery"
         android:label="@string/app_name"
+        android:largeHeap="true"
         android:theme="@style/AppTheme"
-        tools:replace="android:allowBackup"
-        >
-        <activity android:name=".FotoGalleryActivity"
-            android:label="@string/app_name" >
+        tools:replace="android:allowBackup">
+        <activity
+            android:name=".FotoGalleryActivity"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -96,7 +104,7 @@
             </intent-filter>
 
             <!-- pick geo from image for "geo:"  without mime -->
-            <intent-filter  android:label="@string/geo_picker_from_photo_title">
+            <intent-filter android:label="@string/geo_picker_from_photo_title">
                 <action android:name="android.intent.action.PICK" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -104,32 +112,30 @@
 
                 <data android:scheme="geo" />
             </intent-filter>
-
             <intent-filter>
-                <action android:name="android.intent.action.PICK"/>
-                <action android:name="android.intent.action.GET_CONTENT"/>
+                <action android:name="android.intent.action.PICK" />
+                <action android:name="android.intent.action.GET_CONTENT" />
 
-                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.DEFAULT" />
 
-                <data android:mimeType="image/*"/>
-                <data android:mimeType="vnd.android.cursor.dir/image"/>
+                <data android:mimeType="image/*" />
+                <data android:mimeType="vnd.android.cursor.dir/image" />
             </intent-filter>
-
         </activity>
 
         <!-- mime image/* for SEND(_TO)/(RE)VIEW for file -->
-        <activity android:name=".imagedetail.ImageDetailActivityViewPager"
-            android:ellipsize="middle"  android:label="@string/app_image_viewer_title">
+        <activity
+            android:name=".imagedetail.ImageDetailActivityViewPager"
+            android:ellipsize="middle"
+            android:label="@string/app_image_viewer_title">
 
             <!-- ImageDetail view/send(to) schema=file with mime=image/* -->
-            <intent-filter >
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SENDTO" />
-				
-				<!-- 
-				OpenCamera AlmalenceGUI.openExternalGallery() uses undocumented action="com.android.camera.action.REVIEW" which in my android-4.2.2 opens the gallery in swipe mode.
-				-->
+
+                <!-- 				OpenCamera AlmalenceGUI.openExternalGallery() uses undocumented action="com.android.camera.action.REVIEW" which in my android-4.2.2 opens the gallery in swipe mode. -->
                 <action android:name="com.android.camera.action.REVIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -141,14 +147,12 @@
                     android:scheme="file" />
             </intent-filter>
 
-            <!-- ImageDetail mime image/* for SEND(_TO)/(RE)VIEW for null-schema-->
-            <intent-filter >
+            <!-- ImageDetail mime image/* for SEND(_TO)/(RE)VIEW for null-schema -->
+            <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SENDTO" />
                 <action android:name="android.intent.action.VIEW" />
-				<!-- 
-				OpenCamera AlmalenceGUI.openExternalGallery() uses undocumented action="com.android.camera.action.REVIEW" which in my android-4.2.2 opens the gallery in swipe mode.
-				-->
+                <!-- 				OpenCamera AlmalenceGUI.openExternalGallery() uses undocumented action="com.android.camera.action.REVIEW" which in my android-4.2.2 opens the gallery in swipe mode. -->
                 <action android:name="com.android.camera.action.REVIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -164,21 +168,18 @@
                 <data android:mimeType="image/*" />
                 <!-- example content://media/external/images/media/4711 -->
             </intent-filter>
-
         </activity>
-        <activity android:name=".GalleryFilterActivity"
-            android:label="@string/filter_menu_title" >
-        </activity>
-
-        <activity android:name=".locationmap.GeoEditActivity"
-            android:label="@string/geo_edit_menu_title"
-            android:icon="@drawable/ic_geo_edit">
-        </activity>
-
-        <activity android:name=".locationmap.MapGeoPickerActivity"
+        <activity
+            android:name=".GalleryFilterActivity"
+            android:label="@string/filter_menu_title"></activity>
+        <activity
+            android:name=".locationmap.GeoEditActivity"
+            android:icon="@drawable/ic_geo_edit"
+            android:label="@string/geo_edit_menu_title"></activity>
+        <activity
+            android:name=".locationmap.MapGeoPickerActivity"
             android:icon="@drawable/ic_foto_map"
-            android:label="@string/app_map_title" >
-
+            android:label="@string/app_map_title">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -188,7 +189,6 @@
 
             <!-- map view/send(to/multible) for "geo:" with all mimes (*/*) -->
             <intent-filter>
-
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SENDTO" />
@@ -235,7 +235,6 @@
                 <data android:scheme="geo" />
             </intent-filter>
 
-
             <!-- #58 map view http(s) for online mapservices (google, yandex, here, openstreetmap) any server-path -->
             <intent-filter>
                 <data android:scheme="http" />
@@ -244,10 +243,8 @@
                 <data android:host="maps.google.de" />
                 <data android:host="www.openstreetmap.org" />
                 <data android:host="openstreetmap.org" />
-
-                <data android:host="maps.yandex.ru"  />
+                <data android:host="maps.yandex.ru" />
                 <data android:host="maps.yandex.com" />
-
                 <data android:host="here.com" />
                 <data android:host="www.here.com" />
                 <data android:host="share.here.com" />
@@ -256,6 +253,7 @@
                 <data android:host="wego.here.com" />
 
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
@@ -264,41 +262,49 @@
             <intent-filter>
                 <data android:scheme="http" />
                 <data android:scheme="https" />
-                <data android:pathPrefix="/maps"  />
-
-                <data android:host="www.yandex.ru"  />
+                <data android:pathPrefix="/maps" />
+                <data android:host="www.yandex.ru" />
                 <data android:host="www.yandex.com" />
                 <data android:host="www.google.com" />
+
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
 
             <!-- #61 map view file: *.gpx *.kml *.poi -->
-            <intent-filter >
-                <!-- executed in android4.4/2.1-tc-openWith hello.gpx.
-                    in android 2.1  also hello.kml -->
+            <intent-filter>
+
+                <!--
+                     executed in android4.4/2.1-tc-openWith hello.gpx.
+                    in android 2.1  also hello.kml
+                -->
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:host="*"
+                <data
+                    android:host="*"
                     android:mimeType="*/*"
                     android:pathPattern=".*\\.gpx"
                     android:scheme="file" />
-                <data android:host="*"
+                <data
+                    android:host="*"
                     android:mimeType="*/*"
                     android:pathPattern=".*\\.poi"
                     android:scheme="file" />
-                <data android:host="*"
+                <data
+                    android:host="*"
                     android:mimeType="*/*"
                     android:pathPattern=".*\\.kml"
                     android:scheme="file" />
             </intent-filter>
 
-            <!-- #61 map view all hosts; http(s), ftp; mime kml/gpx/poi  -->
+            <!-- #61 map view all hosts; http(s), ftp; mime kml/gpx/poi -->
             <intent-filter>
+
                 <!-- executed in android4.4-tc-openWith hello.kml -->
                 <action android:name="android.intent.action.VIEW" />
 
@@ -315,7 +321,7 @@
                 <data android:host="*" />
             </intent-filter>
 
-            <!-- #61 map view null host; http(s), ftp; mime kml/gpx/poi  -->
+            <!-- #61 map view null host; http(s), ftp; mime kml/gpx/poi -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -326,17 +332,29 @@
                 <data android:scheme="https" />
                 <data android:scheme="ftp" />
                 <data android:scheme="file" />
-
                 <data android:mimeType="application/vnd.google-earth.kml+xml" />
                 <data android:mimeType="application/xml+kml" />
                 <data android:mimeType="application/xml+gpx" />
                 <data android:mimeType="application/xml+poi" />
             </intent-filter>
-
         </activity>
+        <activity
+            android:name=".SettingsActivity"
+            android:label="Settings"></activity>
+        <activity
+            android:name=".media.MediaDBActivity"
+            android:label="@string/scanner_menu_title">
+            <intent-filter
+                    android:label="@string/scanner_menu_title"
+                    android:icon="@drawable/foto_gallery">
+                <action android:name="android.intent.action.VIEW" />^
 
-        <activity android:name=".SettingsActivity"
-            android:label="Settings" >
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="file" />
+                <data android:mimeType="*/*" />
+                <data android:pathPattern=".*\\.csv" />
+            </intent-filter>
         </activity>
     </application>
 

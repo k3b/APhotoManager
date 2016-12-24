@@ -45,12 +45,10 @@ import java.util.Map;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.media.MediaContentValues;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.database.QueryParameter;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.io.FileUtils;
-import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaUtil;
 
 /**
@@ -89,7 +87,7 @@ public class MediaScanner  {
     public static final FilenameFilter JPG_FILENAME_FILTER = new FilenameFilter() {
         @Override
         public boolean accept(File dir, String filename) {
-            return MediaScanner.isImage(filename, false);
+            return MediaUtil.isImage(filename, false);
         }
     };
 
@@ -183,7 +181,7 @@ public class MediaScanner  {
             for (int i = 0; i < fullPathNames.length; i++) {
                 String fullPathName = fullPathNames[i];
                 if (fullPathName != null) {
-                    if (!isImage(fullPathName, false) || isNoMedia(fullPathName, 22)) {
+                    if (!MediaUtil.isImage(fullPathName, false) || isNoMedia(fullPathName, 22)) {
                         fullPathNames[i] = null;
                     } else {
                         itemsLeft++;
@@ -349,7 +347,7 @@ public class MediaScanner  {
             }
         }
 
-        MediaContentValues dest = new MediaContentValues().set(values);
+        MediaContentValues dest = new MediaContentValues().set(values, null);
         getExifValues(dest, file, exif);
 
         setPathRelatedFieldsIfNeccessary(values, absolutePath, null);
@@ -494,23 +492,6 @@ public class MediaScanner  {
         }
     }
 
-
-    /** return true if path is "*.jp(e)g" */
-    public static boolean isImage(File path, boolean jpgOnly) {
-        if (path == null) return false;
-        return isImage(path.getName(), jpgOnly);
-    }
-
-    /** return true if path is "*.jp(e)g" */
-    public static boolean isImage(String path, boolean jpgOnly) {
-        if (path == null) return false;
-        String lcPath = path.toLowerCase();
-
-        if ((!jpgOnly) && (lcPath.endsWith(".gif") || lcPath.endsWith(".png") || lcPath.endsWith(".tiff") || lcPath.endsWith(".bmp"))) {
-            return true;
-        }
-        return lcPath.endsWith(".jpg") || lcPath.endsWith(".jpeg");
-    }
 
     public static MediaScanner getInstance(Context context) {
         if (sInstance == null) sInstance = new MediaScanner(context);

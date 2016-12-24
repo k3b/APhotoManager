@@ -19,6 +19,7 @@
 
 package de.k3b.media;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -31,7 +32,7 @@ import de.k3b.tagDB.TagConverter;
  */
 
 public class MediaCsvItem extends CsvItem implements IMetaApi {
-    public final static String MEDIA_CSV_STANDARD_HEADER = MediaXmpFieldDefinition.PATH.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
+    public final static String MEDIA_CSV_STANDARD_HEADER = MediaXmpFieldDefinition.SourceFile.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
             MediaXmpFieldDefinition.title.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
             MediaXmpFieldDefinition.description.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
             MediaXmpFieldDefinition.DateTimeOriginal.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
@@ -40,8 +41,9 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
             MediaXmpFieldDefinition.subject.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
             MediaXmpFieldDefinition.Rating.getShortName();
 
-    private static final String CSV_PATH = "SourceFile"; // used by exiftool-csv
     private int colFilePath;
+    private int colFileModifyDate;
+
     private int colDateTimeTaken;
     private int colDateCreated;
     private int colCreateDate;
@@ -59,16 +61,25 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
     public void setHeader(List<String> header) {
         maxColumnIndex = -1;
         super.setHeader(header);
-        colFilePath         = getColumnIndex(MediaXmpFieldDefinition.PATH);
-        colDateTimeTaken    = getColumnIndex(MediaXmpFieldDefinition.DateTimeOriginal);
-        colDateCreated      = getColumnIndex(MediaXmpFieldDefinition.DateCreated);
-        colCreateDate       = getColumnIndex(MediaXmpFieldDefinition.CreateDate);
-        colTitle            = getColumnIndex(MediaXmpFieldDefinition.title);
-        colDescription      = getColumnIndex(MediaXmpFieldDefinition.description);
-        colTags             = getColumnIndex(MediaXmpFieldDefinition.subject);
-        colLatitude         = getColumnIndex(MediaXmpFieldDefinition.GPSLatitude);
-        colLongitude        = getColumnIndex(MediaXmpFieldDefinition.GPSLongitude);
-        colRating           = getColumnIndex(MediaXmpFieldDefinition.Rating);
+
+        List<String> lcHeader = new ArrayList<String>(header.size());
+        for (String lc: header) {
+            lcHeader.add(lc.toLowerCase());
+        }
+
+        // import specific
+        colFilePath         = getColumnIndex(lcHeader, MediaXmpFieldDefinition.SourceFile);
+        colFileModifyDate = getColumnIndex(lcHeader, MediaXmpFieldDefinition.FileModifyDate);
+
+        colDateTimeTaken    = getColumnIndex(lcHeader, MediaXmpFieldDefinition.DateTimeOriginal);
+        colDateCreated      = getColumnIndex(lcHeader, MediaXmpFieldDefinition.DateCreated);
+        colCreateDate       = getColumnIndex(lcHeader, MediaXmpFieldDefinition.CreateDate);
+        colTitle            = getColumnIndex(lcHeader, MediaXmpFieldDefinition.title);
+        colDescription      = getColumnIndex(lcHeader, MediaXmpFieldDefinition.description);
+        colTags             = getColumnIndex(lcHeader, MediaXmpFieldDefinition.subject);
+        colLatitude         = getColumnIndex(lcHeader, MediaXmpFieldDefinition.GPSLatitude);
+        colLongitude        = getColumnIndex(lcHeader, MediaXmpFieldDefinition.GPSLongitude);
+        colRating           = getColumnIndex(lcHeader, MediaXmpFieldDefinition.Rating);
     }
 
     @Override
@@ -80,6 +91,10 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
     public IMetaApi setPath(String filePath) {
         setString(filePath, colFilePath);
         return this;
+    }
+
+    public Date getFileModifyDate() {
+        return getDate(colFileModifyDate);
     }
 
     @Override
@@ -164,13 +179,15 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
     /**
      * Returns the zero-based index for the given column name, or -1 if the column doesn't exist.
      *
+     *
+     * @param lcHeader
      * @param columnDefinition contains the name of the target column.
      * @return the zero-based column index for the given column name, or -1 if
      * the column name does not exist.
      */
-    protected int getColumnIndex(MediaXmpFieldDefinition columnDefinition) {
+    protected int getColumnIndex(List<String> lcHeader, MediaXmpFieldDefinition columnDefinition) {
         String destCcolumnName = columnDefinition.getShortName();
-        int columnIndex = header.indexOf(destCcolumnName);
+        int columnIndex = lcHeader.indexOf(destCcolumnName.toLowerCase());
         if (columnIndex > maxColumnIndex) maxColumnIndex = columnIndex;
         return columnIndex;
     }

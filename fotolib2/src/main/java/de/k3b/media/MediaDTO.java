@@ -44,6 +44,18 @@ public class MediaDTO implements IMetaApi {
         MediaUtil.copy(this, src, true, true);
     }
 
+    public MediaDTO clear() {
+        path  = null;
+        dateTimeTaken  = null;
+        latitude  = null;
+        longitude  = null;
+        title  = null;
+        description  = null;
+        tags  = null;
+        rating  = null;
+        return this;
+    }
+
     @Override
     public String getPath() {
         return path;

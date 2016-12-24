@@ -52,7 +52,7 @@ public class MediaCsvTests {
         private ArrayList<IMetaApi> result = new ArrayList<IMetaApi>();
 
         @Override
-        protected void onNextItem(MediaCsvItem next) {
+        protected void onNextItem(MediaCsvItem next, int lineNumber, int recordNumber) {
             if (next != null) {
                 result.add(new MediaDTO(next));
             }

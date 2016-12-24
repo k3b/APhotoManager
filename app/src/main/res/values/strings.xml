@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<!--
+<?xml version="1.0" encoding="utf-8" ?><!--
 /*
  * Translation to English and Copyright (c) 2015-2016 by k3b, "mary-kate" & keunes.
  *
@@ -20,142 +19,142 @@
  */
  -->
 <resources>
-	<string name="about_summary">About \"A Photo Manager%1$s\"</string>
-	<string name="area_menu_title">Select map area</string>
-	<string name="background">Background</string>
-	<string name="bookmark_delete_answer_format">Deleted bookmark %1$s.</string>
-	<string name="bookmark_delete_error_format">Cannot delete bookmark %1$s.</string>
-	<string name="bookmark_delete_question">Delete this bookmark?</string>
-	<string name="bookmark_err_not_found_format">No queries found in %1$s.</string>
-	<string name="bookmark_file_comment_format">Generated on %3$s with \'%1$s\' Version %2$s. See https://github.com/k3b/APhotoManager/wiki/intentap#EXTRA_SQL for details</string>
-	<string name="bookmark_load_from_menu_title">Load bookmark from &#8230;</string>
-	<string name="bookmark_save_as_menu_title">Save bookmark as &#8230;</string>
-	<string name="btn_cancel">Cancel</string>
-	<string name="btn_no">No</string>
-	<string name="btn_yes">Yes</string>
-	<string name="btn_change">Change</string>
-	<string name="btn_ok">OK</string>
-	<string name="btn_pause">Pause</string>
-	<string name="copy_menu_title">Copy</string>
-	<string name="copy_result_format">Copied %1$d/%2$d files</string>
-	<string name="delete_menu_title">Delete</string>
+    <string name="about_summary">About \"A Photo Manager%1$s\"</string>
+    <string name="area_menu_title">Select map area</string>
+    <string name="background">Background</string>
+    <string name="bookmark_delete_answer_format">Deleted bookmark %1$s.</string>
+    <string name="bookmark_delete_error_format">Cannot delete bookmark %1$s.</string>
+    <string name="bookmark_delete_question">Delete this bookmark?</string>
+    <string name="bookmark_err_not_found_format">No queries found in %1$s.</string>
+    <string name="bookmark_file_comment_format">Generated on %3$s with \'%1$s\' Version %2$s. See https://github.com/k3b/APhotoManager/wiki/intentap#EXTRA_SQL for details</string>
+    <string name="bookmark_load_from_menu_title">Load bookmark from &#8230;</string>
+    <string name="bookmark_save_as_menu_title">Save bookmark as &#8230;</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_no">No</string>
+    <string name="btn_yes">Yes</string>
+    <string name="btn_change">Change</string>
+    <string name="btn_ok">OK</string>
+    <string name="btn_pause">Pause</string>
+    <string name="copy_menu_title">Copy</string>
+    <string name="copy_result_format">Copied %1$d/%2$d files</string>
+    <string name="delete_menu_title">Delete</string>
 	<string name="delete_question_message_format">"Are you sure you want to permanently delete these files?
 	%1$s
 	
 	This operation cannot be reversed."</string>
-	<string name="delete_question_title">Delete photo(s)?</string>
-	<string name="delete_result_format">Deleted %1$d/%2$d files</string>
-	<string name="destination_copy">Copy destination</string>
-	<string name="destination_move">Move destination</string>
-	<string name="details_menu_title">Details</string>
-	<string name="edit_chooser_title">Choose photo editor</string>
-	<string name="edit_err_editor_not_found">No photo editor found</string>
-	<string name="edit_menu_title">Edit</string>
-	<string name="file_err_writeprotected">writeprotected \'%1$s\'.\n\n \'%2$s\' is not possible.</string>
-	<string name="filter_err_invalid_date_format">\'%1$s\' is not a valid date.</string>
-	<string name="filter_err_invalid_location_format">\'%1$s\' is not a valid coordinate.</string>
-	<string name="filter_menu_title">Filter</string>
-	<string name="folder_dialog_title_format">Select %1$s</string>
-	<string name="folder_err_load_failed_format">Loading folder %1$s failed</string>
-	<string name="folder_menu_title">Folder filter</string>
-	<string name="gallery_title">Photos</string>
-	<string name="geo_show_menu_title">Show in map</string>
-	<string name="geo_show_as_menu_title">View in external geo app</string>
+    <string name="delete_question_title">Delete photo(s)?</string>
+    <string name="delete_result_format">Deleted %1$d/%2$d files</string>
+    <string name="destination_copy">Copy destination</string>
+    <string name="destination_move">Move destination</string>
+    <string name="details_menu_title">Details</string>
+    <string name="edit_chooser_title">Choose photo editor</string>
+    <string name="edit_err_editor_not_found">No photo editor found</string>
+    <string name="edit_menu_title">Edit</string>
+    <string name="file_err_writeprotected">writeprotected \'%1$s\'.\n\n \'%2$s\' is not possible.</string>
+    <string name="filter_err_invalid_date_format">\'%1$s\' is not a valid date.</string>
+    <string name="filter_err_invalid_location_format">\'%1$s\' is not a valid coordinate.</string>
+    <string name="filter_menu_title">Filter</string>
+    <string name="folder_dialog_title_format">Select %1$s</string>
+    <string name="folder_err_load_failed_format">Loading folder %1$s failed</string>
+    <string name="folder_menu_title">Folder filter</string>
+    <string name="gallery_title">Photos</string>
+    <string name="geo_show_menu_title">Show in map</string>
+    <string name="geo_show_as_menu_title">View in external geo app</string>
 
-	<string name="geo_edit_menu_title">Set geo</string>
-	<string name="geo_edit_update_in_progress">Changing geo info in selected photos</string>
-	<string name="geo_picker_err_not_found">No geo picker found</string>
-	<string name="geo_picker_title">Select new geo for photo</string>
+    <string name="geo_edit_menu_title">Set geo</string>
+    <string name="geo_edit_update_in_progress">Changing geo info in selected photos</string>
+    <string name="geo_picker_err_not_found">No geo picker found</string>
+    <string name="geo_picker_title">Select new geo for photo</string>
 
-	<string name="global_err_sql_message_format">SQL error \'%1$s\'\n\n%2$s</string>
-	<string name="global_err_sql_title_reload">Invalid SQL. Reloading default</string>
-	<string name="global_err_system">System error. Exiting</string>
-	<string name="image_err_file_exists_format">The file \'%1$s\' already exists.\n Do you really want to overwrite it?</string>
-	<string name="image_err_file_rename_format">Cannot rename file \'%1$s\'.</string>
-	<string name="image_err_not_found_format">No photos found for %1$s.</string>
-	<string name="image_err_not_in_db_format">Photo not found in media database %1$s yet. Scanning %2$d new files. The missing photo will be available soon.</string>
-	<string name="image_loading_at_position_format">"Loading (%1$d) &#8230;"</string>
-	<string name="image_success_update_format">Updated %1$d photos.</string>
-	<string name="lbl_date">Date</string>
-	<string name="lbl_latitude_short">Lat</string>
-	<string name="lbl_longitude_short">Lon</string>
-	<string name="lbl_path">Path</string>
-	<string name="lbl_with_no_geo">With no geo info</string>
-	<string name="mk_dir_default">new_folder</string>
-	<string name="mk_dir_menu_title">Create Folder</string>
-	<string name="mk_err_failed_format">Cannot create %1$s</string>
-	<string name="mk_success_format">Created %1$s</string>
-	<string name="more_menu_title">More &#8230;</string>
-	<string name="move_menu_title">Move</string>
-	<string name="move_result_format">Moved %1$d/%2$d files</string>
-	<string name="osm_cright_title">Map Tiles © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors</string>
-	<string name="overwrite_question_title">Overwrite?</string>
-	<string name="rename_menu_title">Rename</string>
-	<string name="rename_result_format">Renamed %1$d/%2$d files</string>
-	<string name="scanner_dir_question">Where to start scanning?</string>
-	<string name="scanner_err_busy">Cannot process photo files while Android-s media scanner is busy. Try again later.</string>
-	<string name="scanner_menu_title">Media scanner</string>
-	<string name="scanner_update_result_format">Updated %1$d Media Database Items</string>
-	<string name="selection_status_format">%1$d Selected</string>
-	<string name="selection_none_hint">Select folder with images to enable OK</string>
-	<string name="selected_only_menu_title">Selected only</string>
-	<string name="selection_add_all_menu_title">Selection: Add all visible</string>
-	<string name="selection_remove_menu_title">Selection: Remove all visible</string>
-	<string name="settings_bookmark_dir_title">Bookmark folder</string>
-	
-	<string name="settings_group_debug_title">Diagnostics</string>
-	<string name="settings_debug_sql_summary">&#8230; containing executed SQL.</string>
-	<string name="settings_debug_view_item_summary">&#8230; containing gridview/listview Items.</string>
-	<string name="settings_debug_memory_title">LogCat memory consumption</string>
-	<string name="settings_debug_libs_summary">&#8230; of 3rd party libraries.</string>
-	<string name="settings_debug_title">LogCat misc.</string>
-	<string name="settings_debug_summary">&#8230; containing other log messages.</string>
-	<string name="settings_debug_clear_title">Clear LogCat</string>
-	<string name="settings_debug_save_title">Save LogCat to file</string>
-	<string name="settings_log_folder_title">Errorlog folder</string>
+    <string name="global_err_sql_message_format">SQL error \'%1$s\'\n\n%2$s</string>
+    <string name="global_err_sql_title_reload">Invalid SQL. Reloading default</string>
+    <string name="global_err_system">System error. Exiting</string>
+    <string name="image_err_file_exists_format">The file \'%1$s\' already exists.\n Do you really want to overwrite it?</string>
+    <string name="image_err_file_rename_format">Cannot rename file \'%1$s\'.</string>
+    <string name="image_err_not_found_format">No photos found for %1$s.</string>
+    <string name="image_err_not_in_db_format">Photo not found in media database %1$s yet. Scanning %2$d new files. The missing photo will be available soon.</string>
+    <string name="image_loading_at_position_format">"Loading (%1$d) &#8230;"</string>
+    <string name="image_success_update_format">Updated %1$d photos.</string>
+    <string name="lbl_date">Date</string>
+    <string name="lbl_latitude_short">Lat</string>
+    <string name="lbl_longitude_short">Lon</string>
+    <string name="lbl_path">Path</string>
+    <string name="lbl_with_no_geo">With no geo info</string>
+    <string name="mk_dir_default">new_folder</string>
+    <string name="mk_dir_menu_title">Create Folder</string>
+    <string name="mk_err_failed_format">Cannot create %1$s</string>
+    <string name="mk_success_format">Created %1$s</string>
+    <string name="more_menu_title">More &#8230;</string>
+    <string name="move_menu_title">Move</string>
+    <string name="move_result_format">Moved %1$d/%2$d files</string>
+    <string name="osm_cright_title">Map Tiles © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors</string>
+    <string name="overwrite_question_title">Overwrite?</string>
+    <string name="rename_menu_title">Rename</string>
+    <string name="rename_result_format">Renamed %1$d/%2$d files</string>
+    <string name="scanner_dir_question">Where to start scanning?</string>
+    <string name="scanner_err_busy">Cannot process photo files while Android-s media scanner is busy. Try again later.</string>
+    <string name="scanner_menu_title">Media scanner</string>
+    <string name="scanner_update_result_format">Updated %1$d Media Database Items</string>
+    <string name="selection_status_format">%1$d Selected</string>
+    <string name="selection_none_hint">Select folder with images to enable OK</string>
+    <string name="selected_only_menu_title">Selected only</string>
+    <string name="selection_add_all_menu_title">Selection: Add all visible</string>
+    <string name="selection_remove_menu_title">Selection: Remove all visible</string>
+    <string name="settings_bookmark_dir_title">Bookmark folder</string>
 
-	<string name="settings_image_hide_time_title">Auto hide actionbar after millisecs</string>
-	<string name="settings_image_initialImageDetailResolutionHigh_summary">Initial photo-view in better quality (slow, needs more memory)</string>
-	<string name="settings_image_initialImageDetailResolutionHigh_title">Improve initial photo-view quality</string>
-	<string name="settings_image_slideshow_intervall_title">Slideshow interval in millisecs</string>
-	<string name="settings_locale_title">Language</string>
-	<string name="settings_locale_os_language">System default</string>
-	<string name="settings_map_selmarker_max_title">Max. sel-markers in map</string>
-	<string name="settings_geo_history_max_title">Set geo history count</string>
-	<string name="settings_geo_history_file_title">Set geo history file</string>
-	<string name="settings_multisel_clear_title">Clear multi-selection after action</string>
-	<string name="settings_multisel_clear_summary">Copy, move, rename, etc.</string>
+    <string name="settings_group_debug_title">Diagnostics</string>
+    <string name="settings_debug_sql_summary">&#8230; containing executed SQL.</string>
+    <string name="settings_debug_view_item_summary">&#8230; containing gridview/listview Items.</string>
+    <string name="settings_debug_memory_title">LogCat memory consumption</string>
+    <string name="settings_debug_libs_summary">&#8230; of 3rd party libraries.</string>
+    <string name="settings_debug_title">LogCat misc.</string>
+    <string name="settings_debug_summary">&#8230; containing other log messages.</string>
+    <string name="settings_debug_clear_title">Clear LogCat</string>
+    <string name="settings_debug_save_title">Save LogCat to file</string>
+    <string name="settings_log_folder_title">Errorlog folder</string>
 
-	<string name="settings_title">Settings</string>
-	<string name="share_err_not_found">No share/send provider found</string>
-	<string name="share_err_to_many">Too many items selected to share at once</string>
-	<string name="share_menu_title">Share/Send</string>
-	<string name="show_in_gallery_menu_title">Show in new gallery</string>
-	<string name="slideshow_menu_title">Slideshow</string>
-	<string name="sort_by_date">Date</string>
-	<string name="sort_by_folder">Folder</string>
-	<string name="sort_by_name">Name</string>
-	<string name="sort_by_name_len">File path length</string>
-	<string name="sort_by_none">Unsorted</string>
-	<string name="sort_by_place">Place</string>
-	<string name="sort_menu_title">Sort</string>
-	<string name="update_result_format">Updated %1$d/%2$d files</string>
+    <string name="settings_image_hide_time_title">Auto hide actionbar after millisecs</string>
+    <string name="settings_image_initialImageDetailResolutionHigh_summary">Initial photo-view in better quality (slow, needs more memory)</string>
+    <string name="settings_image_initialImageDetailResolutionHigh_title">Improve initial photo-view quality</string>
+    <string name="settings_image_slideshow_intervall_title">Slideshow interval in millisecs</string>
+    <string name="settings_locale_title">Language</string>
+    <string name="settings_locale_os_language">System default</string>
+    <string name="settings_map_selmarker_max_title">Max. sel-markers in map</string>
+    <string name="settings_geo_history_max_title">Set geo history count</string>
+    <string name="settings_geo_history_file_title">Set geo history file</string>
+    <string name="settings_multisel_clear_title">Clear multi-selection after action</string>
+    <string name="settings_multisel_clear_summary">Copy, move, rename, etc.</string>
 
-	<string name="zoom_to_fit_menu_title">Zoom to fit</string>
-	<string name="settings_image_thumb_if_bigger_than_title">Show thumbnail for big images</string>
-	<string name="settings_image_thumb_if_bigger_than_summary">Show thumbnail in image detail view if image width or height is bigger than this value (pixels). Memory efficient, fast, but low quality.</string>
-	<string name="settings_image_thumb_dir_title">Thumbnail folder</string>
+    <string name="settings_title">Settings</string>
+    <string name="share_err_not_found">No share/send provider found</string>
+    <string name="share_err_to_many">Too many items selected to share at once</string>
+    <string name="share_menu_title">Share/Send</string>
+    <string name="show_in_gallery_menu_title">Show in new gallery</string>
+    <string name="slideshow_menu_title">Slideshow</string>
+    <string name="sort_by_date">Date</string>
+    <string name="sort_by_folder">Folder</string>
+    <string name="sort_by_name">Name</string>
+    <string name="sort_by_name_len">File path length</string>
+    <string name="sort_by_none">Unsorted</string>
+    <string name="sort_by_place">Place</string>
+    <string name="sort_menu_title">Sort</string>
+    <string name="update_result_format">Updated %1$d/%2$d files</string>
 
-	<string name="settings_maps_forge_enable_tile">Use Mapsforge offline map</string>
-	<string name="settings_maps_forge_enable_summary">... which you manually downloaded via pc</string>
-	<string name="settings_maps_forge_dir_title">Mapsforge offline Folder</string>
+    <string name="zoom_to_fit_menu_title">Zoom to fit</string>
+    <string name="settings_image_thumb_if_bigger_than_title">Show thumbnail for big images</string>
+    <string name="settings_image_thumb_if_bigger_than_summary">Show thumbnail in image detail view if image width or height is bigger than this value (pixels). Memory efficient, fast, but low quality.</string>
+    <string name="settings_image_thumb_dir_title">Thumbnail folder</string>
 
-	<string name="show_photo">Show Photo(s)</string>
-	<string name="fix_link_menu_title">Repair duplicates</string>
+    <string name="settings_maps_forge_enable_tile">Use Mapsforge offline map</string>
+    <string name="settings_maps_forge_enable_summary">... which you manually downloaded via pc</string>
+    <string name="settings_maps_forge_dir_title">Mapsforge offline Folder</string>
 
-	<string name="geo_picker_from_photo_title">Pick Geo from Photo</string>
-	<string name="geo_picker_from_map_title">Pick Geo from Map</string>
-	<string name="folder_hide_images_menu_title">Hide Images</string>
+    <string name="show_photo">Show Photo(s)</string>
+    <string name="fix_link_menu_title">Repair duplicates</string>
+
+    <string name="geo_picker_from_photo_title">Pick Geo from Photo</string>
+    <string name="geo_picker_from_map_title">Pick Geo from Map</string>
+    <string name="folder_hide_images_menu_title">Hide Images</string>
 	<string name="folder_hide_images_question_message_format">"Are you sure?
 
 Do you want to make all media files (photo, video, audio) below

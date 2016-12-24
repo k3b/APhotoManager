@@ -49,6 +49,7 @@ import de.k3b.database.SelectedFiles;
 import de.k3b.database.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
+import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGalleryFilter;
@@ -91,6 +92,9 @@ public class FotoSql {
 
     public static final Uri SQL_TABLE_EXTERNAL_CONTENT_URI = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
 
+    /** used to query non-standard-image fields */
+    public static final Uri SQL_TABLE_EXTERNAL_CONTENT_URI_FILE = MediaStore.Files.getContentUri("external");
+
     // columns that must be avaulable in the Cursor
     public static final String SQL_COL_PK = MediaStore.Images.Media._ID;
     public static final String FILTER_COL_PK = SQL_COL_PK + "= ?";
@@ -119,7 +123,7 @@ public class FotoSql {
     private static final String FILTER_EXPR_DATE_MAX = SQL_COL_DATE_TAKEN + " < ?";
     private static final String FILTER_EXPR_DATE_MIN = SQL_COL_DATE_TAKEN + " >= ?";
     public static final String SQL_COL_PATH = MediaStore.Images.Media.DATA;
-    private static final String FILTER_EXPR_PATH_LIKE = SQL_COL_PATH + " like ?";
+    protected static final String FILTER_EXPR_PATH_LIKE = "(" + SQL_COL_PATH + " like ?) ";
 
     // same format as dir. i.e. description='/2014/12/24/' or '/mnt/sdcard/pictures/'
     public static final String SQL_EXPR_DAY = "strftime('/%Y/%m/%d/', " + SQL_COL_DATE_TAKEN + " /1000, 'unixepoch', 'localtime')";
@@ -692,6 +696,10 @@ public class FotoSql {
         return context.getContentResolver().update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, values, FILTER_COL_PK, new String[]{Integer.toString(id)});
     }
 
+    public static int execUpdate(Context context, String path, ContentValues values) {
+        return context.getContentResolver().update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, values, FotoSql.FILTER_EXPR_PATH_LIKE, new String[]{path});
+    }
+
     public static Uri execInsert(Context context, ContentValues values) {
         return context.getContentResolver().insert(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, values);
     }
@@ -812,8 +820,7 @@ public class FotoSql {
                 while (cursor.moveToNext()) {
                     String path = cursor.getString(colPath);
                     result.add(path);
-                    int ext = result.lastIndexOf(".");
-                    String xmpPath = ((ext >= 0) ? path.substring(0, ext) : path) + ".xmp";
+                    String xmpPath = FileUtils.replaceExtension(path, ".xmp");
                     if (new File(xmpPath).exists()) {
                         result.add(xmpPath);
                     }

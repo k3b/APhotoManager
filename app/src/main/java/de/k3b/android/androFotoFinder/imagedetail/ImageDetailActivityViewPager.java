@@ -73,6 +73,7 @@ import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
+import de.k3b.media.MediaUtil;
 
 /**
  * Shows a zoomable imagee.<br>
@@ -716,7 +717,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         if (existing != null) {
             for (File file : existing) {
                 String found = file.getAbsolutePath();
-                if (MediaScanner.isImage(found, false) && !known.contains(found)) {
+                if (MediaUtil.isImage(found, false) && !known.contains(found)) {
                     missing.add(found);
                 }
             }

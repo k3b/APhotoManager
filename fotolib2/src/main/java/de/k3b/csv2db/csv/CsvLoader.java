@@ -30,14 +30,19 @@ import java.util.List;
  * Created by k3b on 21.09.2015.
  */
 abstract public class CsvLoader<T extends CsvItem> {
+    private boolean mNotCanceled = true;
     public void load(Reader reader, T item) {
         CsvItemIterator<T> iter = new CsvItemIterator<T>(reader, item);
         while (iter.hasNext()) {
-            onNextItem(iter.next());
+            onNextItem(iter.next(), iter.getLineNumner(), iter.getRecordNumber());
         }
     }
 
-    abstract protected void onNextItem(T next);
+    abstract protected void onNextItem(T next, int lineNumber, int recordNumber);
+
+    public void cancel() {
+        mNotCanceled = false;
+    }
 
     protected class CsvItemIterator<T extends CsvItem> implements Iterator<T> {
         private final T mItem;
@@ -58,7 +63,7 @@ abstract public class CsvLoader<T extends CsvItem> {
 
         @Override
         public boolean hasNext() {
-            return ((mCsvReader != null) && (!isEOF));
+            return ((mNotCanceled) && (mCsvReader != null) && (!isEOF));
         }
 
         @Override
@@ -79,6 +84,15 @@ abstract public class CsvLoader<T extends CsvItem> {
         public void remove() {
             /* not used */
         }
+
+        public int getLineNumner() {
+            return (mCsvReader == null) ? -1 : mCsvReader.getLineNumner();
+        }
+
+        public int getRecordNumber() {
+            return (mCsvReader == null) ? -1 : mCsvReader.getRecordNumber();
+        }
+
     }
 
 }

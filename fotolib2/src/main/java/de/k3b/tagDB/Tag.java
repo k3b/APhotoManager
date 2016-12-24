@@ -53,6 +53,9 @@ public class Tag{
     @Override
     public boolean equals(Object o) {
         if (name == null) return false;
+        if (o instanceof String) {
+            return name.equals((String)o);
+        }
         if (!(o instanceof Tag)) return false;
         return name.equals(((Tag)o).name);
     }

@@ -122,14 +122,17 @@ public class FileUtils {
 
     public static File getXmpFile(String filepath) {
         if (filepath != null) {
-            // String filepath = file.getAbsolutePath();
-            int ext = filepath.lastIndexOf(".");
-
-            String xmpFilePath = (ext >= 0) ? (filepath.substring(0, ext) + ".xmp") : (filepath + ".xmp");
+            String xmpFilePath = replaceExtension(filepath,".xmp");
             File xmpFile = new File(xmpFilePath);
             return xmpFile;
         }
         return null;
+    }
+
+    public static String replaceExtension(String path, String extension) {
+        if (path == null) return null;
+        int ext = path.lastIndexOf(".");
+        return ((ext >= 0) ? path.substring(0, ext) : path) + extension;
     }
 
     /** return parent of path if path is not a dir. else return path */
