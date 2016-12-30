@@ -20,6 +20,7 @@
 package de.k3b.tagDB;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -29,6 +30,15 @@ import java.util.List;
  */
 
 public class Tag{
+    public static final Comparator<Tag> COMPARATOR_NAME_IGNORE_CASE = new Comparator<Tag>() {
+        @Override
+        public int compare(Tag lhs, Tag rhs) {
+            String lhsName = (lhs == null) ? null : lhs.getName();
+            String rhsName = (rhs == null) ? null : rhs.getName();
+            if (lhsName == null) return (rhsName == null) ? 0 : -1;
+            return lhsName.compareToIgnoreCase(rhsName);
+        }
+    };
     private String name;
 
     public String getName() {

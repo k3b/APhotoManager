@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import de.k3b.FotoLibGlobal;
@@ -128,6 +130,8 @@ public class TagRepository {
             if (this.mFile.exists()) {
                 try {
                     load(mItemList, new FileReader(this.mFile));
+
+                    sortByNameIgnoreCase();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -139,6 +143,10 @@ public class TagRepository {
             // logger.debug(dbg_context + "load() cached value : " + mItemList.size() + " items from " + this.mFile);
         }
         return mItemList;
+    }
+
+    public void sortByNameIgnoreCase() {
+        Collections.sort(mItemList, Tag.COMPARATOR_NAME_IGNORE_CASE);
     }
 
     /**

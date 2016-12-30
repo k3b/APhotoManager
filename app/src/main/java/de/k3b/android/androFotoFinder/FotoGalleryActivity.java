@@ -49,6 +49,7 @@ import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.queries.Queryable;
+import de.k3b.android.androFotoFinder.tagDB.TagsActivity;
 import de.k3b.android.osmdroid.OsmdroidUtil;
 import de.k3b.android.util.GarbageCollector;
 import de.k3b.android.util.IntentUtil;
@@ -520,6 +521,9 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
             case R.id.cmd_select_lat_lon:
                 openLatLonPicker();
                 return true;
+            case R.id.cmd_select_tag:
+                openTagPicker();
+                return true;
             case R.id.cmd_filter:
                 openFilter();
                 return true;
@@ -626,6 +630,9 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         dialog.show(manager, DLG_NAVIGATOR_TAG);
     }
 
+    private void openTagPicker() {
+        TagsActivity.showActivity(this);
+    }
 
     private void openFolderPicker() {
         mGalleryQueryParameter.mUseLatLonInsteadOfPath = false;

@@ -37,6 +37,14 @@
         android:orderInCategory="2"
         android:showAsAction="ifRoom" />
 
+
+    <item android:id="@+id/cmd_select_tag"
+        android:title="@string/tags_activity_title"
+        android:icon="@drawable/ic_action_tag"
+        android:visible="true"
+        android:orderInCategory="2"
+        android:showAsAction="ifRoom" />
+
     <item android:id="@+id/cmd_selection_add_all"
         android:title="@string/selection_add_all_menu_title"
         android:visible="true"

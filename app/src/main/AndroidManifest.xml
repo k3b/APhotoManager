@@ -135,7 +135,7 @@
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SENDTO" />
 
-                <!-- 				OpenCamera AlmalenceGUI.openExternalGallery() uses undocumented action="com.android.camera.action.REVIEW" which in my android-4.2.2 opens the gallery in swipe mode. -->
+                <!-- OpenCamera AlmalenceGUI.openExternalGallery() uses undocumented action="com.android.camera.action.REVIEW" which in my android-4.2.2 opens the gallery in swipe mode. -->
                 <action android:name="com.android.camera.action.REVIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -152,7 +152,7 @@
                 <action android:name="android.intent.action.SEND" />
                 <action android:name="android.intent.action.SENDTO" />
                 <action android:name="android.intent.action.VIEW" />
-                <!-- 				OpenCamera AlmalenceGUI.openExternalGallery() uses undocumented action="com.android.camera.action.REVIEW" which in my android-4.2.2 opens the gallery in swipe mode. -->
+                <!-- OpenCamera AlmalenceGUI.openExternalGallery() uses undocumented action="com.android.camera.action.REVIEW" which in my android-4.2.2 opens the gallery in swipe mode. -->
                 <action android:name="com.android.camera.action.REVIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -171,11 +171,12 @@
         </activity>
         <activity
             android:name=".GalleryFilterActivity"
-            android:label="@string/filter_menu_title"></activity>
+            android:icon="@android:drawable/ic_menu_search"
+            android:label="@string/filter_menu_title" />
         <activity
             android:name=".locationmap.GeoEditActivity"
             android:icon="@drawable/ic_geo_edit"
-            android:label="@string/geo_edit_menu_title"></activity>
+            android:label="@string/geo_edit_menu_title" />
         <activity
             android:name=".locationmap.MapGeoPickerActivity"
             android:icon="@drawable/ic_foto_map"
@@ -340,22 +341,28 @@
         </activity>
         <activity
             android:name=".SettingsActivity"
-            android:label="Settings"></activity>
+            android:label="Settings" />
         <activity
             android:name=".media.MediaDBActivity"
             android:label="@string/scanner_menu_title">
             <intent-filter
-                    android:label="@string/scanner_menu_title"
-                    android:icon="@drawable/foto_gallery">
-                <action android:name="android.intent.action.VIEW" />^
-
+                android:icon="@drawable/foto_gallery"
+                android:label="@string/scanner_menu_title">
+                <action android:name="android.intent.action.VIEW" />
+                ^
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data android:scheme="file" />
                 <data android:mimeType="*/*" />
                 <data android:pathPattern=".*\\.csv" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".tagDB.TagsActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:icon="@drawable/tag"
+            android:label="@string/tags_activity_title"></activity>
     </application>
 
 </manifest>

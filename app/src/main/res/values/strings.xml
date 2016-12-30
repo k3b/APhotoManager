@@ -164,4 +164,8 @@ Do you want to make all media files (photo, video, audio) below
 invisible for media database, gallery apps and the media scanner?
 
 You can undo hiding by calling the mediascanner from gallery-menu."</string>
+
+    <string name="tags_activity_title">Select Tags</string>
+    <string name="tags_search_hint">Type here to filter ...</string>
+    <string name="tags_search_no_matching_items_found">No matching tags found</string>
 </resources>
