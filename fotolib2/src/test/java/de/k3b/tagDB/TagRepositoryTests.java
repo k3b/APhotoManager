@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2016-2017 by k3b.
+ *
+ * This file is part of AndroFotoFinder.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
+
 package de.k3b.tagDB;
 
 import org.junit.Assert;
@@ -7,6 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -91,7 +113,7 @@ public class TagRepositoryTests {
         additionalItems.add(added);
 
         // 7,1,2,3
-        int changes = originalItems.include(additionalItems);
+        int changes = originalItems.include(null, additionalItems);
         List<Tag> items = originalItems.load();
         Assert.assertEquals(added + "added 1", 1, changes);
         Assert.assertEquals(4, items.size());
@@ -104,6 +126,37 @@ public class TagRepositoryTests {
 
         Assert.assertEquals("Name2", true, items.contains("Name2"));
         Assert.assertEquals("Name5", false, items.contains("Name5"));
+    }
+
+    @Test
+    public void shouldLoadHierarchy() throws Exception {
+        String tagData =
+                "__first\n" +
+                "a\n" +
+                " ab\n" +
+                " ac\n" +
+                "  aca\n" +
+                "   doppelt\n" +
+                "  acb\n" +
+                "anderes\n" +
+                "b\n" +
+                " ba\n" +
+                "  baa\n" +
+                "  bab\n" +
+                " bb\n" +
+                "besonderes\n" +
+                " doppelt\n" +
+                "c\n" +
+                "";
+
+        ArrayList<Tag> items = new ArrayList<>();
+        TagRepository sut = new TagRepository(null);
+        sut.load(items, new StringReader(tagData));
+
+        StringWriter wr = new StringWriter();
+        sut.save(items, wr, " ");
+
+        Assert.assertEquals(tagData, wr.toString());
     }
 
 }

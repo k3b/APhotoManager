@@ -31,7 +31,6 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import de.k3b.FotoLibGlobal;
@@ -50,6 +49,8 @@ public class TagRepository {
     /** Lines starting with char are comments. These lines are not interpreted */
     public static final java.lang.String COMMENT = "#";
     private static final String DB_NAME = "tagDB.txt";
+    private static final String IMPORT_ROOT = "unsorted";
+    public static final String INDENT = "\t";
 
     private static TagRepository sInstance = null;
 
@@ -85,19 +86,20 @@ public class TagRepository {
         TagRepository.sInstance = new TagRepository(newFile);
 
         if (old != null) {
-            if (TagRepository.sInstance.include(old) > 0) {
+            if (TagRepository.sInstance.include(null, old) > 0) {
                 TagRepository.sInstance.save();
             }
         }
     }
 
-    public int include(List<Tag> items) {
+    public int include(Tag parent, List<Tag> newItems) {
         int changes = 0;
-        if ((items != null) && (items.size() > 0)) {
-            List<Tag> newItems = this.load();
-            for (Tag oldItem : items) {
-                if (!newItems.contains(oldItem)) {
-                    newItems.add(oldItem);
+        if ((newItems != null) && (newItems.size() > 0)) {
+            List<Tag> existingItems = this.load();
+            for (Tag newItem : newItems) {
+                if (!existingItems.contains(newItem)) {
+                    if (parent != null) newItem.setParent(parent);
+                    existingItems.add(newItem);
                     changes++;
                 }
             }
@@ -105,13 +107,15 @@ public class TagRepository {
         return changes;
     }
 
-    public int includeString(List<String> items) {
+    public int includeString(Tag parent, List<String> newItems) {
         int changes = 0;
-        if ((items != null) && (items.size() > 0)) {
-            List<Tag> newItems = this.load();
-            for (String oldItem : items) {
-                if (!contains(oldItem)) {
-                    newItems.add(new Tag().setName(oldItem));
+        if ((newItems != null) && (newItems.size() > 0)) {
+            List<Tag> existingItems = this.load();
+            for (String newItem : newItems) {
+                if (!contains(newItem)) {
+                    Tag newTag = new Tag().setName(newItem);
+                    if (parent != null) newTag.setParent(parent);
+                    existingItems.add(newTag);
                     changes++;
                 }
             }
@@ -146,7 +150,7 @@ public class TagRepository {
     }
 
     public void sortByNameIgnoreCase() {
-        Collections.sort(mItemList, Tag.COMPARATOR_NAME_IGNORE_CASE);
+        Collections.sort(mItemList, Tag.COMPARATOR_HIERARCHY);
     }
 
     /**
@@ -187,7 +191,7 @@ public class TagRepository {
 
                 logger.debug(dbg_context + "save(): " + mItemList.size() + " items to " + this.mFile);
 
-                save(mItemList, new FileWriter(this.mFile, false));
+                save(mItemList, new FileWriter(this.mFile, false), INDENT);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -201,10 +205,12 @@ public class TagRepository {
     // Load(new InputStreamReader(inputStream, "UTF-8"))
     /** Load points from reader */
     public void load(List<Tag> result, Reader reader) throws IOException {
-        String line;
+        String rawLine;
         BufferedReader br = new BufferedReader(reader);
-        while ((line = br.readLine()) != null) {
-            line = line.trim();
+        int initialResultSize = result.size();
+        List<Integer> indents = new ArrayList<Integer>();
+        while ((rawLine = br.readLine()) != null) {
+            String line = rawLine.trim();
             if ((line.length() > 0) && (!line.startsWith(COMMENT))) {
                 Tag item = loadItem(line);
                 final boolean valid = isValid(item);
@@ -212,10 +218,55 @@ public class TagRepository {
                     logger.debug(dbg_context + "load(" + line + "): " + ((valid) ? "loaded" : "ignored"));
                 }
 
-                if (valid) result.add((Tag) item);
+                if (valid) {
+                    result.add((Tag) item);
+                    indents.add(getIndent(rawLine));
+                }
+
             }
         }
         br.close();
+
+        inferParentsFromIndents(result, initialResultSize, indents);
+    }
+
+    private void inferParentsFromIndents(List<Tag> result, int initialResultSize, List<Integer> indents) {
+        Tag lastTag     = null;
+        int lastIndent  = indents.get(0);
+        Tag lastParent     = null;
+
+        for (int i = 0; i < indents.size(); i++) {
+            Tag cur = result.get(initialResultSize + i);
+            int indent = indents.get(i);
+            if (indent > lastIndent) {
+                lastParent = lastTag;
+            } else if (indent < lastIndent) {
+                int parentIndex = findParentIndexByIndent(indents, i, indent);
+                if (parentIndex >= 0) {
+                    lastParent  = result.get(initialResultSize + parentIndex);
+                } else {
+                    lastParent     = null;
+                }
+            } // else if (indent == lastIndent) lastParent remains the same
+            cur.setParent(lastParent);
+            lastIndent = indent;
+            lastTag = cur;
+        }
+    }
+
+    private int findParentIndexByIndent(List<Integer> indents, int index, int indent) {
+        while ((index >= 0) && (indents.get(index) >= indent)) index--;
+        return index;
+    }
+
+    private int getIndent(String rawLine) {
+        int nonIndent = 0;
+        while (nonIndent < rawLine.length()) {
+            int c = rawLine.charAt(nonIndent);
+            if ((c != ' ') && c != '\t') return nonIndent;
+            nonIndent++;
+        }
+        return nonIndent;
     }
 
     /** Implementation detail: Load point from file line. */
@@ -234,19 +285,25 @@ public class TagRepository {
     }
 
     /** Save source-points to writer */
-    protected void save(List<Tag> source, Writer writer) throws IOException {
-        for (Tag item : source) {
-            saveItem(writer, item);
+    protected void save(List<Tag> source, Writer writer, String indent) throws IOException {
+        List<Tag> sorted = new ArrayList<>(source);
+        Collections.sort(sorted, Tag.COMPARATOR_HIERARCHY);
+
+        for (Tag item : sorted) {
+            saveItem(writer, item, indent);
         }
         writer.close();
     }
 
     /** Saves one point to writer */
-    protected boolean saveItem(Writer writer, Tag item) throws IOException {
+    protected boolean saveItem(Writer writer, Tag item, String indent) throws IOException {
         final boolean valid = isValid(item);
 
         final String line = item.toString();
         if (valid) {
+            for (int indentCount = item.getParentCount(); indentCount > 0; indentCount--) {
+                writer.write(indent);
+            }
             writer.write(line);
             writer.write("\n");
         }
@@ -275,12 +332,28 @@ public class TagRepository {
     }
 
     public boolean contains(String name) {
+        return null != findFirstByName(name);
+    }
+
+    public Tag findFirstByName(String name) {
         List<Tag> items = load();
         if (items != null) {
             for (Tag item : items) {
-                if (name.equals(item.getName())) return true;
+                if (name.equals(item.getName())) return item;
             }
         }
-        return false;
+        return null;
     }
+
+    /** get or create parent-tag where alle imports are appendend as children */
+    public Tag getImportRoot() {
+        Tag result = findFirstByName(IMPORT_ROOT);
+        if (result == null) {
+            List<Tag> existingItems = this.load();
+            result = new Tag().setName(IMPORT_ROOT).setParent(null);
+            existingItems.add(result);
+        }
+        return result;
+    }
+
 }

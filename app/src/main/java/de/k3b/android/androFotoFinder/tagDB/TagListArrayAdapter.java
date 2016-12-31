@@ -56,7 +56,7 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 		// Lookup view for data population
 		TextView tvName = (TextView) convertView.findViewById(R.id.titel);
 		// Populate the data into the template view using the data object
-		tvName.setText(currentTag.getName());
+		tvName.setText(currentTag.getPath());
 		// Return the completed view to render on screen
 		return convertView;
 	}

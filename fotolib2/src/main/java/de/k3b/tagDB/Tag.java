@@ -39,14 +39,41 @@ public class Tag{
             return lhsName.compareToIgnoreCase(rhsName);
         }
     };
+
+    public static final Comparator<Tag> COMPARATOR_HIERARCHY = new Comparator<Tag>() {
+        @Override
+        public int compare(Tag lhs, Tag rhs) {
+            String lhsName = (lhs == null) ? null : lhs.getPath();
+            String rhsName = (rhs == null) ? null : rhs.getPath();
+            if (lhsName == null) return (rhsName == null) ? 0 : -1;
+            return lhsName.compareToIgnoreCase(rhsName);
+        }
+    };
+
     private String name;
+    private Tag parent;
 
     public String getName() {
         return name;
     }
-
     public Tag setName(String name) {
         this.name = name;
+        return this;
+    }
+
+    public Tag getParent() {
+        return parent;
+    }
+
+    public Tag setParent(Tag parent) {
+        Tag cur = parent;
+        while (cur != null) {
+            if (parent == this) return this; // do not allow recursion
+            cur = cur.getParent();
+        }
+
+        // there is no recursion
+        this.parent = parent;
         return this;
     }
 
@@ -80,5 +107,41 @@ public class Tag{
             return result;
         }
         return null;
+    }
+
+    /** return item as path where parents are appended.
+     * child <- parent <- grandparent */
+    public String getReversePath() {
+        StringBuilder result = new StringBuilder();
+        Tag cur = this;
+        while (cur != null) {
+            if (result.length() > 0) result.append(" <- ");
+            result.append(cur.getName());
+            cur = cur.getParent();
+        }
+        return result.toString();
+    }
+
+    /** return item as path where parents are prependet.
+     * grandparent -> parent -> child */
+    public String getPath() {
+        StringBuilder result = new StringBuilder();
+        Tag cur = this;
+        while (cur != null) {
+            if (result.length() > 0) result.insert(0," -> ");
+            result.insert(0,cur.getName());
+            cur = cur.getParent();
+        }
+        return result.toString();
+    }
+
+    public int getParentCount() {
+        int result = -1;
+        Tag cur = this;
+        while (cur != null) {
+            result++;
+            cur = cur.getParent();
+        }
+        return result;
     }
 }

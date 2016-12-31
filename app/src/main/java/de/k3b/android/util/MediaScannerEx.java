@@ -24,6 +24,8 @@ import de.k3b.tagDB.TagRepository;
  */
 
 public class MediaScannerEx extends MediaScanner {
+    private Tag mImportRoot = null;
+
     public MediaScannerEx(Context context) {
         super(context);
     }
@@ -56,7 +58,7 @@ public class MediaScannerEx extends MediaScanner {
             try {
                 TagSql.setXmpFileModifyDate(dest.getContentValues(), xmpFile.lastModified());
                 xmp.load(new FileInputStream(xmpFile));
-                TagRepository.getInstance().includeString(xmp.getTags());
+                TagRepository.getInstance().includeString(getImportRoot(), xmp.getTags());
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
@@ -95,6 +97,14 @@ public class MediaScannerEx extends MediaScanner {
 
     private int addTags(ContentValues values,  Date xmpFileModifyDate, String... tags) {
         TagSql.setTags(values, xmpFileModifyDate, tags);
-        return TagRepository.getInstance().include(Tag.toList(tags));
+        return TagRepository.getInstance().include(getImportRoot(), Tag.toList(tags));
+    }
+
+    /** get or create parent-tag where alle imports are appendend as children */
+    public Tag getImportRoot() {
+        if (mImportRoot == null) {
+            mImportRoot = TagRepository.getInstance().getImportRoot();
+        }
+        return mImportRoot;
     }
 }

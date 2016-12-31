@@ -45,6 +45,7 @@ import de.k3b.csv2db.csv.CsvLoader;
 import de.k3b.io.FileUtils;
 import de.k3b.media.MediaCsvItem;
 import de.k3b.media.MediaUtil;
+import de.k3b.tagDB.Tag;
 import de.k3b.tagDB.TagRepository;
 
 public class MediaDBActivity extends Activity {
@@ -233,6 +234,7 @@ public class MediaDBActivity extends Activity {
 
             private ContentValues mDbValues = new ContentValues();
             private MediaContentValues mMediaValueAdapter = new MediaContentValues();
+            private Tag mImportRoot = null;
 
             public MediaCsvLoader(File csvRootDir) {
                 mCsvRootDir = csvRootDir;
@@ -251,12 +253,18 @@ public class MediaDBActivity extends Activity {
 
                         String canonicalPath = FileUtils.tryGetCanonicalPath(new File(mCsvRootDir, path), null);
                         updateDB(canonicalPath, fileModifyDateMilliSecs, mDbValues);
-                        TagRepository.getInstance().includeString(mMediaValueAdapter.getTags());
+                        TagRepository.getInstance().includeString(getImportRoot(), mMediaValueAdapter.getTags());
                     }
                 }
             }
 
-
+            /** get or create parent-tag where alle imports are appendend as children */
+            public Tag getImportRoot() {
+                if (mImportRoot == null) {
+                    mImportRoot = TagRepository.getInstance().getImportRoot();
+                }
+                return mImportRoot;
+            }
         }
     }
 
