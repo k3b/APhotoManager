@@ -34,4 +34,6 @@ public class FotoLibGlobal {
 
     /** false do not follow symlinks when scanning Directories.  */
     public static final boolean ignoreSymLinks = false;
+
+    public static boolean visibilityShowPrivateByDefault = false;
 }

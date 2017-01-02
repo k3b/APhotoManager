@@ -29,6 +29,9 @@ import static org.junit.Assert.*;
  * Created by k3b on 01.09.2015.
  */
 public class GalleryFilterParameterTest {
+
+    public static final String FILTER_STRING_FULL_EXAMPLE = "1.23,2.34;3.45,4.56;2001-02-03,2005-12-31;/some/path/;q,^;filter;tag1,tag2,tag3;utag1,utag2,utag3;notags;3;";
+
     @Test
     public void toStringFullTest() {
         GalleryFilterParameter sut = new GalleryFilterParameter();
@@ -37,29 +40,34 @@ public class GalleryFilterParameterTest {
         sut.setPath("/some/path/");
         sut.setSortID('q');
         sut.setSortAscending(true);
+        sut.setInAnyField("filter");
+        sut.setTagsAllIncluded(GalleryFilterParameter.convertList("tag1,tag2,tag3"));
+        sut.setTagsAllExcluded(GalleryFilterParameter.convertList("utag1,utag2 utag3"));
+        sut.setVisibility(IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+        sut.setWithNoTags(true);
 
-        assertEquals("1.23,2.34;3.45,4.56;2001-02-03,2005-12-31;/some/path/;q,^;", sut.toString());
+        assertEquals(FILTER_STRING_FULL_EXAMPLE, sut.toString());
         assertEquals("not empty", false,  GalleryFilterParameter.isEmpty(sut));
     }
 
     @Test
     public void toStringEmptyTest() {
         GalleryFilterParameter sut = new GalleryFilterParameter();
-        assertEquals(";;;;", sut.toString());
+        assertEquals(";;;;;;;;;", sut.toString());
         assertEquals("empty", true,  GalleryFilterParameter.isEmpty(sut));
     }
 
     @Test
     public void shouldParseFull() {
-        GalleryFilterParameter sutParsed = GalleryFilterParameter.parse("1.23,2.34;3.45,4.56;2001-02-03,2005-12-31;/some/path/;q,^;", new GalleryFilterParameter());
+        GalleryFilterParameter sutParsed = GalleryFilterParameter.parse(FILTER_STRING_FULL_EXAMPLE, new GalleryFilterParameter());
         GalleryFilterParameter sut = new GalleryFilterParameter().get(sutParsed);
-        assertEquals("1.23,2.34;3.45,4.56;2001-02-03,2005-12-31;/some/path/;q,^;", sut.toString());
+        assertEquals(FILTER_STRING_FULL_EXAMPLE, sut.toString());
     }
 
     @Test
     public void shouldParseFullNoGeo() {
-        GalleryFilterParameter sutParsed = GalleryFilterParameter.parse("n;;2001-02-03,2005-12-31;/some/path/;q,^;", new GalleryFilterParameter());
+        GalleryFilterParameter sutParsed = GalleryFilterParameter.parse("n;;2001-02-03,2005-12-31;/some/path/;q,^;a;b;c;notags;3;", new GalleryFilterParameter());
         GalleryFilterParameter sut = new GalleryFilterParameter().get(sutParsed);
-        assertEquals("noGeoInfo;;2001-02-03,2005-12-31;/some/path/;q,^;", sut.toString());
+        assertEquals("noGeoInfo;;2001-02-03,2005-12-31;/some/path/;q,^;a;b;c;notags;3;", sut.toString());
     }
 }

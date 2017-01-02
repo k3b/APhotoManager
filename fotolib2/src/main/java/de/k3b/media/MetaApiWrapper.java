@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 by k3b.
+ * Copyright (c) 2016-2017 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -21,8 +21,6 @@ package de.k3b.media;
 
 import java.util.Date;
 import java.util.List;
-
-import de.k3b.media.IMetaApi;
 
 /**
  * (Default) Implementation of {@link IMetaApi} to forward all methods to an inner {@link IMetaApi}.

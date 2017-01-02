@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -19,6 +19,8 @@
  
 package de.k3b.io;
 
+import java.util.List;
+
 /**
  * Definition of pssible filter parameters
  * Created by k3b on 13.07.2015.
@@ -28,6 +30,11 @@ public interface IGalleryFilter extends IGeoRectangle {
     int SORT_BY_NONE = ' ';
     String SORT_DIRECTION_ASCENDING = "^";
     String SORT_DIRECTION_DESCENDING = "V";
+
+    public static final int VISIBILITY_DEFAULT          = 0;
+    public static final int VISIBILITY_PRIVATE          = 1;
+    public static final int VISIBILITY_PUBLIC           = 2;
+    public static final int VISIBILITY_PRIVATE_PUBLIC   = 3;
 
     /******************** properties **************************/
     String getPath();
@@ -45,5 +52,20 @@ public interface IGalleryFilter extends IGeoRectangle {
     /** false: sort descending */
     boolean isSortAscending();
 
+    boolean isWithNoTags();
+
+    /** All Tags/Keywords/Categories/VirtualAlbum that the image must contain. ("AND") */
+    List<String> getTagsAllIncluded();
+
+    /** None of the Tags/Keywords/Categories/VirtualAlbum that the image must NOT contain. ("AND NOT") */
+    List<String> getTagsAllExcluded();
+
+    /** match if the text is in path, filename, title, description, tags */
+    String getInAnyField();
+
+    /** one of the VISIBILITY_XXXX values for public/private images */
+    int getVisibility();
+
+    /** load content of other IGalleryFilter implementation into this */
     IGalleryFilter get(IGalleryFilter src);
 }

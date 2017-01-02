@@ -165,6 +165,19 @@ invisible for media database, gallery apps and the media scanner?
 
 You can undo hiding by calling the mediascanner from gallery-menu."</string>
 
+
+    <string name="filter_path_hint">Part of Folder or Filename. %=Wildcard</string>
+
+    <string name="lbl_any">Find</string>
+    <string name="filter_any_hint">Part of Tags, Title, Description or Path</string>
+
+    <string name="lbl_images_public">Public Images</string>
+    <string name="lbl_images_private">Private Images</string>
+
+    <string name="lbl_with_no_tags">With no Tags</string>
+    <string name="lbl_tags_include">Tags</string>
+    <string name="lbl_tags_exclude">- Tags</string>
+
     <string name="tags_activity_title">Select Tags</string>
     <string name="tags_search_hint">Type here to filter ...</string>
     <string name="tags_search_no_matching_items_found">No matching tags found</string>

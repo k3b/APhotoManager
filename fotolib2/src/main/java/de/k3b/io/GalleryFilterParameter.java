@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -21,6 +21,12 @@ package de.k3b.io;
 
 import java.sql.Date;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import de.k3b.FotoLibGlobal;
+import de.k3b.database.SelectedItems;
 
 /**
  * parameter for foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.
@@ -32,10 +38,18 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
     private static final String NON_GEO_ONLY_FIND = NON_GEO_ONLY.substring(0, 1);
     private String path = null;
 
+    private List<String> tagsAllIncluded;
+    private List<String> tagsAllExcluded;
+    private String inAnyField;
+
     private long dateMin = 0;
     private long dateMax = 0;
 
     private boolean nonGeoOnly = false;
+    private boolean withNoTags = false;
+
+    /** one of the VISIBILITY_XXXX values */
+    int visibility = VISIBILITY_DEFAULT;
 
     private int mSortId = SORT_BY_NONE;
     private boolean mSortAscending = false;
@@ -47,12 +61,16 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
             this.setDateMin(src.getDateMin());
             this.setPath(src.getPath());
             this.setNonGeoOnly(src.isNonGeoOnly());
+            this.setWithNoTags(src.isWithNoTags());
+            this.setVisibility(src.getVisibility());
+
             this.setSort(src.getSortID(),src.isSortAscending());
+            this.setTagsAllIncluded(src.getTagsAllIncluded());
+            this.setTagsAllExcluded(src.getTagsAllExcluded());
+            this.setInAnyField(src.getInAnyField());
         }
         return this;
     }
-
-
 
     /******************** properties **************************/
     @Override
@@ -97,6 +115,61 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
 
     public GalleryFilterParameter setNonGeoOnly(boolean nonGeoOnly) {
         this.nonGeoOnly = nonGeoOnly;
+        return this;
+    }
+
+    @Override
+    public boolean isWithNoTags() {
+        return withNoTags;
+    }
+
+    public GalleryFilterParameter setWithNoTags(boolean withNoTags) {
+        this.withNoTags = withNoTags;
+        return this;
+    }
+
+
+    /** All Tags/Keywords/Categories/VirtualAlbum that the image must contain. ("AND") */
+    @Override
+    public List<String> getTagsAllIncluded() {
+        return tagsAllIncluded;
+    }
+
+    public GalleryFilterParameter setTagsAllIncluded(List<String> tagsAllIncluded) {
+        this.tagsAllIncluded = (tagsAllIncluded != null) ? new ArrayList<String>(tagsAllIncluded) : new ArrayList<String>();
+        return this;
+    }
+
+    /** None of the Tags/Keywords/Categories/VirtualAlbum that the image must NOT contain. ("AND NOT") */
+    @Override
+    public List<String> getTagsAllExcluded() {
+        return tagsAllExcluded;
+    }
+
+    public GalleryFilterParameter setTagsAllExcluded(List<String> tagsAllExcluded) {
+        this.tagsAllExcluded = (tagsAllExcluded != null) ? new ArrayList<String>(tagsAllExcluded) : new ArrayList<String>();
+        return this;
+    }
+
+    /** match if the text is in path, filename, title, description, tags */
+    @Override
+    public String getInAnyField() {
+        return inAnyField;
+    }
+
+    public GalleryFilterParameter setInAnyField(String inAnyField) {
+        this.inAnyField = inAnyField;
+        return this;
+    }
+
+    /** one of the VISIBILITY_XXXX values */
+    public int getVisibility() {return visibility;}
+    public GalleryFilterParameter setVisibility(int value) {
+        if ((value >= VISIBILITY_DEFAULT) && (value <= VISIBILITY_PRIVATE_PUBLIC)) {
+            visibility = value;
+        } else {
+            visibility = VISIBILITY_DEFAULT;
+        }
         return this;
     }
 
@@ -147,7 +220,16 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
         appendSubFields(result, format(getPath()));
         if ((mSortId != SORT_BY_NONE) && (mSortId != SORT_BY_NONE_OLD)) {
             appendSubFields(result, "" + (char) mSortId, mSortAscending ? SORT_DIRECTION_ASCENDING : SORT_DIRECTION_DESCENDING);
+        } else {
+            appendSubFields(result, "");
         }
+        appendSubFields(result, format(getInAnyField()));
+        appendSubFields(result, convertList(getTagsAllIncluded()));
+        appendSubFields(result, convertList(getTagsAllExcluded()));
+        appendSubFields(result, (isWithNoTags()) ? "notags" : "");
+
+        appendSubFields(result, (getVisibility() != VISIBILITY_DEFAULT) ? (""+getVisibility()):"");
+
         return result;
     }
 
@@ -156,9 +238,9 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
         return dateFormat.format(new Date(millisecs));
     }
 
-    private static String format(String doubleValue) {
-        if (doubleValue==null) return "";
-        return doubleValue;
+    private static String format(String value) {
+        if (value==null) return "";
+        return value;
     }
 
     public static GalleryFilterParameter parse(String s, GalleryFilterParameter result) {
@@ -215,6 +297,27 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
                 else
                     setSortAscending(value.charAt(0) == SORT_DIRECTION_ASCENDING.charAt(0));
                 break;
+            case 5 :
+                setInAnyField(value);
+                break;
+            case 6 :
+                if (subfield == 0) {
+                    setTagsAllIncluded(null);
+                }
+                getTagsAllIncluded().add(value);
+                break;
+            case 7 :
+                if (subfield == 0) {
+                    setTagsAllExcluded(null);
+                }
+                getTagsAllExcluded().add(value);
+                break;
+            case 8 :
+                setWithNoTags(((value!=null) && (value.length() > 0)));
+                break;
+            case 9 :
+                setVisibility(convertVisibility(value));
+                break;
             default:break;
         }
     }
@@ -242,6 +345,43 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
                 && (filter.getDateMin() == 0)
                 && (filter.getDateMax() == 0)
                 && (!filter.isNonGeoOnly())
-                && (filter.getPath()==null));
+                && (!filter.isWithNoTags())
+                && (filter.getPath()==null)
+                && (filter.getInAnyField()==null)
+                && (filter.getTagsAllIncluded()==null)
+                && (filter.getTagsAllExcluded()==null)
+                && (filter.getVisibility()==VISIBILITY_DEFAULT)
+        );
     }
+
+    public static String[] convertArray(String string) {
+        if ((string == null) || (string.length() == 0)) {
+            return null;
+        }
+        return string.split("[ ,\t]");
+    }
+
+    public static List<String> convertList(String string) {
+        String[] array = convertArray(string);
+        if ((array == null) || (array.length == 0)) {
+            return null;
+        }
+        return Arrays.asList(array);
+    }
+
+    public static String convertList(List<String> strings) {
+        if (strings == null) return "";
+        return SelectedItems.toString(strings.iterator());
+    }
+
+    public static int convertVisibility(String value) {
+        if ((value != null) && (value.length() > 0)) {
+            try {
+                return Integer.parseInt(value, 10);
+            } catch (Exception ex) {
+            }
+        }
+        return VISIBILITY_DEFAULT;
+    }
+
 }

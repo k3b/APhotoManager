@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 by k3b.
+ * Copyright (c) 2016-2017 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -28,30 +28,30 @@ import java.util.List;
  * Created by k3b on 09.10.2016.
  */
 public interface IMetaApi {
-    /** normalized absolute path to file (jpg or xmp) */
+    /** Normalized absolute path to file (jpg or xmp) */
     String getPath();
     IMetaApi setPath(String filePath);
 
-    /** when the photo was taken (not file create/modify date) in local time or utc*/
+    /** When the photo was taken (not file create/modify date) in local time or utc*/
     Date getDateTimeTaken();
     IMetaApi setDateTimeTaken(Date value);
 
-    /** latitude, in degrees north. */
+    /** Latitude, in degrees north. */
     IMetaApi setLatitude(Double latitude);
-    /** longitude, in degrees east. */
+    /** Longitude, in degrees east. */
     IMetaApi setLongitude(Double longitude);
     Double getLatitude();
     Double getLongitude();
 
-    /** Short Descrioption used as caption */
+    /** Title = Short Descrioption used as caption */
     String getTitle();
     IMetaApi setTitle(String title);
 
-    /** longer Description may have more than one line */
+    /** Longer description = comment. may have more than one line */
     String getDescription();
     IMetaApi setDescription(String description);
 
-    /** Keywords or categories used to group/sort/find images */
+    /** Tags/Keywords/Categories/VirtualAlbum used to find images */
     List<String> getTags();
     IMetaApi setTags(List<String> tags);
 

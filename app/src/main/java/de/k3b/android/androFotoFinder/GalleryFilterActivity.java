@@ -37,10 +37,14 @@ import android.widget.Toast;
 // import com.squareup.leakcanary.RefWatcher;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.directory.DirectoryLoaderTask;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.locationmap.LocationMapFragment;
@@ -50,6 +54,7 @@ import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
+import de.k3b.database.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
@@ -294,9 +299,19 @@ public class GalleryFilterActivity extends LocalizedActivity
         private EditText mLatitudeTo;
         private EditText mLatitudeFrom;
         private CheckBox mWithNoGeoInfo;
+        private CheckBox mWithNoTags;
+        private CheckBox mPublic        ;
+        private CheckBox mPrivate       ;
+        private EditText mAny            ;
+        private EditText mTagsInclude    ;
+        private EditText mTagsExclude    ;
+        private int      mVisibility = VISIBILITY_DEFAULT;
 
         FilterValue() {
             this.mPath = (EditText) findViewById(R.id.edit_path);
+            this.mAny             = (EditText) findViewById(R.id.edit_any);
+            this.mTagsInclude     = (EditText) findViewById(R.id.edit_tags_include);
+            this.mTagsExclude     = (EditText) findViewById(R.id.edit_tags_exclude);
             this.mDateFrom = (EditText) findViewById(R.id.edit_date_from);
             this.mDateTo = (EditText) findViewById(R.id.edit_date_to);
             this.mLatitudeFrom = (EditText) findViewById(R.id.edit_latitude_from);
@@ -304,6 +319,10 @@ public class GalleryFilterActivity extends LocalizedActivity
             this.mLongitudeFrom = (EditText) findViewById(R.id.edit_longitude_from);
             this.mLongitudeTo = (EditText) findViewById(R.id.edit_longitude_to);
             this.mWithNoGeoInfo = (CheckBox) findViewById(R.id.chk_with_no_geo);
+            this.mWithNoTags = (CheckBox) findViewById(R.id.chk_with_no_tags);
+
+            this.mPublic        = (CheckBox) findViewById(R.id.chk_public);
+            this.mPrivate       = (CheckBox) findViewById(R.id.chk_private);
 
             mWithNoGeoInfo.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -312,15 +331,74 @@ public class GalleryFilterActivity extends LocalizedActivity
                 }
 
             });
+            mPublic.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showVisibility(mPublic, mPrivate);
+                }
+
+            });
+            mPrivate.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showVisibility(mPrivate, mPublic);
+                }
+
+            });
 
             mHistory = new HistoryEditText(GalleryFilterActivity.this, new int[] {
-                    R.id.cmd_path_history, R.id.cmd_date_from_history, R.id.cmd_date_to_history,
-                    R.id.cmd_lat_from_history, R.id.cmd_lat_to_history, R.id.cmd_lon_from_history, R.id.cmd_lon_to_history} ,
-                    mPath ,mDateFrom ,mDateTo, mLatitudeFrom, mLatitudeTo, mLongitudeFrom, mLongitudeTo);
-
+                    R.id.cmd_path_history,
+                    R.id.cmd_date_from_history,
+                    R.id.cmd_date_to_history,
+                    R.id.cmd_lat_from_history, R.id.cmd_lat_to_history, R.id.cmd_lon_from_history, R.id.cmd_lon_to_history ,
+                    R.id.cmd_any_history,
+                    R.id.cmd_tags_include_history,
+                    R.id.cmd_tags_exclude_history} ,
+                    mPath ,
+                    mDateFrom ,
+                    mDateTo, mLatitudeFrom, mLatitudeTo, mLongitudeFrom, mLongitudeTo,
+                    mAny             ,
+                    mTagsInclude     ,
+                    mTagsExclude);
         }
 
-       protected void showLatLon(boolean noGeoInfo) {
+        protected void showVisibility(int visibility) {
+            if (visibility == VISIBILITY_DEFAULT) {
+                visibility = (FotoLibGlobal.visibilityShowPrivateByDefault) ? VISIBILITY_PRIVATE_PUBLIC : VISIBILITY_PUBLIC;
+            }
+
+            switch (visibility) {
+                case VISIBILITY_PRIVATE:
+                    mPrivate.setChecked(true);
+                    mPublic.setChecked(false);
+                    break;
+                case VISIBILITY_PRIVATE_PUBLIC:
+                    mPrivate.setChecked(true);
+                    mPublic.setChecked(true);
+                    break;
+                case VISIBILITY_PUBLIC:
+                default:
+                    mPublic.setChecked(true);
+                    mPrivate.setChecked(false);
+                    break;
+
+            }
+        }
+
+        private void showVisibility(CheckBox chk1, CheckBox chk2) {
+            if ((!chk1.isChecked()) && (!chk2.isChecked())) chk2.setChecked(true);
+            if (mPrivate.isChecked()) {
+                if (mPublic.isChecked()) {
+                    mVisibility = VISIBILITY_PRIVATE_PUBLIC;
+                } else {
+                    mVisibility = VISIBILITY_PRIVATE;
+                }
+            } else {
+                mVisibility = VISIBILITY_PUBLIC;
+            }
+        }
+
+        protected void showLatLon(boolean noGeoInfo) {
             show(noGeoInfo, R.id.cmd_select_lat_lon, R.id.lbl_latitude, R.id.cmd_lat_from_history, R.id.edit_latitude_from,
                     R.id.cmd_lat_to_history, R.id.edit_latitude_to, R.id.lbl_longitude, R.id.cmd_lon_from_history,
                     R.id.edit_longitude_from,R.id.cmd_lon_to_history, R.id.edit_longitude_to);
@@ -365,6 +443,21 @@ public class GalleryFilterActivity extends LocalizedActivity
         }
 
         @Override
+        public String getInAnyField() {
+            return mAny.getText().toString();
+        }
+
+        @Override
+        public List<String> getTagsAllIncluded() {
+            return GalleryFilterParameter.convertList(mTagsInclude.getText().toString());
+        }
+
+        @Override
+        public List<String>  getTagsAllExcluded() {
+            return GalleryFilterParameter.convertList(mTagsExclude.getText().toString());
+        }
+
+        @Override
         public long getDateMin() {
             return convertDate(mDateFrom.getText().toString());
         }
@@ -377,6 +470,16 @@ public class GalleryFilterActivity extends LocalizedActivity
         @Override
         public boolean isNonGeoOnly() {
             return mWithNoGeoInfo.isChecked();
+        }
+
+        @Override
+        public boolean isWithNoTags() {
+            return mWithNoTags.isChecked();
+        }
+
+        @Override
+        public int getVisibility() {
+            return mVisibility;
         }
 
         /**
@@ -400,9 +503,17 @@ public class GalleryFilterActivity extends LocalizedActivity
             if (src != null) {
                 get((IGeoRectangle) src);
                 mPath.setText(src.getPath());
+                mAny            .setText(src.getInAnyField());
+                mTagsInclude    .setText(GalleryFilterParameter.convertList(src.getTagsAllIncluded()));
+                mTagsExclude    .setText(GalleryFilterParameter.convertList(src.getTagsAllExcluded()));
                 mDateFrom.setText(convertDate(src.getDateMin()));
                 mDateTo.setText(convertDate(src.getDateMax()));
                 mWithNoGeoInfo.setChecked(src.isNonGeoOnly());
+                mWithNoTags.setChecked(src.isWithNoTags());
+                mVisibility = src.getVisibility();
+
+                showVisibility(mVisibility);
+
                 showLatLon(src.isNonGeoOnly());
             }
             return this;
@@ -449,7 +560,8 @@ public class GalleryFilterActivity extends LocalizedActivity
                 throw new RuntimeException(getString(R.string.filter_err_invalid_date_format, string), ex);
             }
         }
-    };
+
+    }
 
     private void toGui(IGalleryFilter gf) {
         mFilterValue.get(gf);

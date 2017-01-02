@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -32,37 +32,38 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="de.k3b.android.androFotoFinder.GalleryFilterActivity">
 
-    <Button android:id="@+id/cmd_path"
+    <Button android:id="@+id/cmd_any"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/btn_popup"
+        android:visibility="invisible"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true" />
-    <TextView android:id="@+id/lbl_path"
-        android:text="@string/lbl_path"
+    <TextView android:id="@+id/lbl_any"
+        android:text="@string/lbl_any"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:layout_alignParentLeft="true"
-        android:layout_alignBaseline="@+id/cmd_path"
-         />
-    <ImageButton android:id="@+id/cmd_path_history"
+        android:layout_alignBaseline="@+id/cmd_any"
+        />
+    <ImageButton android:id="@+id/cmd_any_history"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@android:drawable/ic_menu_more"
-        android:layout_alignBottom="@+id/cmd_path"
-        android:layout_toLeftOf="@+id/cmd_path"
-        android:layout_toStartOf="@+id/cmd_path"  />
-    <EditText android:id="@+id/edit_path"
+        android:layout_alignBottom="@+id/cmd_any"
+        android:layout_toLeftOf="@+id/cmd_any"
+        android:layout_toStartOf="@+id/cmd_any"  />
+    <EditText android:id="@+id/edit_any"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/cmd_path"
-        android:layout_alignTop="@+id/cmd_path"
-        android:layout_toLeftOf="@+id/cmd_path_history"
-        android:layout_toRightOf="@+id/lbl_path"
-        android:layout_toEndOf="@+id/lbl_path"
-        android:layout_alignBaseline="@+id/lbl_path"
+        android:layout_alignBottom="@+id/cmd_any"
+        android:layout_alignTop="@+id/cmd_any"
+        android:layout_toLeftOf="@+id/cmd_any_history"
+        android:layout_toRightOf="@+id/lbl_any"
+        android:layout_toEndOf="@+id/lbl_any"
+        android:layout_alignBaseline="@+id/lbl_any"
         android:ellipsize="end"
         android:nestedScrollingEnabled="false"
         android:inputType="text"
@@ -70,6 +71,54 @@
         android:lines="1"
         android:maxLines="1"
         tools:ignore="UnusedAttribute" />
+
+  <!-- -->
+    <Button android:id="@+id/cmd_path"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_popup"
+        android:layout_below="@+id/edit_any"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        />
+    <TextView android:id="@+id/lbl_path"
+        android:text="@string/lbl_path"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+
+        android:layout_below="@+id/cmd_any"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignBaseline="@+id/cmd_path"
+        />
+
+    <ImageButton android:id="@+id/cmd_path_history"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:drawable/ic_menu_more"
+        android:layout_alignBottom="@+id/cmd_path"
+        android:layout_toLeftOf="@+id/cmd_path"
+        />
+    <EditText android:id="@+id/edit_path"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:ellipsize="end"
+        android:nestedScrollingEnabled="false"
+        android:inputType="text"
+        android:singleLine="true"
+        android:lines="1"
+        android:maxLines="1"
+        tools:ignore="UnusedAttribute"
+
+        android:layout_alignBottom="@+id/cmd_path"
+        android:layout_toRightOf="@+id/lbl_path"
+        android:layout_alignBaseline="@+id/lbl_path"
+        android:layout_toLeftOf="@+id/cmd_path_history"
+        android:layout_toStartOf="@+id/cmd_path_history"
+        android:layout_below="@+id/edit_any"
+        />
 <!-- -->
     <Button android:id="@+id/cmd_date"
         android:layout_width="wrap_content"
@@ -126,11 +175,135 @@
         android:layout_toStartOf="@+id/cmd_date_from_history" />
     <!-- -->
 
+    <CheckBox android:id="@+id/chk_public"
+        android:text="@string/lbl_images_public"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/edit_date_to"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        />
+
+    <CheckBox android:id="@+id/chk_private"
+        android:text="@string/lbl_images_private"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/edit_date_to"
+        android:layout_toRightOf="@+id/chk_public"
+        />
+
+    <!-- -->
+
+    <CheckBox android:id="@+id/chk_with_no_tags"
+        android:text="@string/lbl_with_no_tags"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/chk_public"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        />
+
+    <!-- -->
+    <Button android:id="@+id/cmd_tags_include"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_popup"
+        android:layout_below="@+id/chk_with_no_tags"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        />
+    <TextView android:id="@+id/lbl_tags_include"
+        android:text="@string/lbl_tags_include"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+
+        android:layout_below="@+id/chk_with_no_tags"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignBaseline="@+id/cmd_tags_include"
+        />
+
+    <ImageButton android:id="@+id/cmd_tags_include_history"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:drawable/ic_menu_more"
+        android:layout_alignBottom="@+id/cmd_tags_include"
+        android:layout_toLeftOf="@+id/cmd_tags_include"
+        />
+    <EditText android:id="@+id/edit_tags_include"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:inputType="text"
+        android:singleLine="false"
+        android:lines="2"
+        android:maxLines="2"
+        tools:ignore="UnusedAttribute"
+
+        android:layout_alignBottom="@+id/cmd_tags_include"
+        android:layout_toRightOf="@+id/lbl_tags_include"
+        android:layout_alignBaseline="@+id/lbl_tags_include"
+        android:layout_toLeftOf="@+id/cmd_tags_include_history"
+        android:layout_toStartOf="@+id/cmd_tags_include_history"
+        android:layout_below="@+id/chk_with_no_tags"
+        />
+
+    <!-- -->
+    <Button android:id="@+id/cmd_tags_exclude"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_popup"
+        android:layout_below="@+id/edit_tags_include"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        />
+    <TextView android:id="@+id/lbl_tags_exclude"
+        android:text="@string/lbl_tags_exclude"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+
+        android:layout_below="@+id/cmd_tags_include"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignBaseline="@+id/cmd_tags_exclude"
+        />
+
+    <ImageButton android:id="@+id/cmd_tags_exclude_history"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:drawable/ic_menu_more"
+        android:layout_alignBottom="@+id/cmd_tags_exclude"
+        android:layout_toLeftOf="@+id/cmd_tags_exclude"
+        />
+    <EditText android:id="@+id/edit_tags_exclude"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:ellipsize="end"
+        android:nestedScrollingEnabled="false"
+        android:inputType="text"
+        android:singleLine="true"
+        android:lines="1"
+        android:maxLines="1"
+        tools:ignore="UnusedAttribute"
+
+        android:layout_alignBottom="@+id/cmd_tags_exclude"
+        android:layout_toRightOf="@+id/lbl_tags_exclude"
+        android:layout_alignBaseline="@+id/lbl_tags_exclude"
+        android:layout_toLeftOf="@+id/cmd_tags_exclude_history"
+        android:layout_toStartOf="@+id/cmd_tags_exclude_history"
+        android:layout_below="@+id/edit_tags_include"
+        />
+
+    <!-- -->
+
     <CheckBox android:id="@+id/chk_with_no_geo"
         android:text="@string/lbl_with_no_geo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/edit_date_to"
+        android:layout_below="@+id/edit_tags_exclude"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         />
@@ -149,7 +322,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/lbl_latitude_short"
-        android:layout_below="@+id/edit_date_to"
+        android:layout_below="@+id/edit_tags_exclude"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignBaseline="@+id/cmd_select_lat_lon" />
