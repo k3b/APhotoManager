@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2016 by k3b.
+ * Copyright (c) 2016-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -19,6 +19,9 @@
 
 package de.k3b.media;
 
+import com.adobe.xmp.XMPException;
+import com.adobe.xmp.XMPMetaFactory;
+
 /**
  * Created by k3b on 10.10.2016.
  */
@@ -28,6 +31,7 @@ public enum XmpNamespace {
     EXIF("XMP-exif","http://ns.adobe.com/exif/1.0/"),
     XAP("XMP-xmp","http://ns.adobe.com/xap/1.0/"),
     DC("XMP-dc", "http://purl.org/dc/elements/1.1/"),
+    APM("apm", "https://github.com/k3b/APhotoManager/wiki/spec"),
     PHOTOSHOP("photoshop","http://ns.adobe.com/photoshop/1.0/");
 
 
@@ -52,4 +56,13 @@ public enum XmpNamespace {
     public String getPrefix() {
         return prefix;
     }
+
+    static {
+        try {
+            XMPMetaFactory.getSchemaRegistry().registerNamespace(APM.getUriAsString(), APM.getPrefix());
+        } catch (XMPException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

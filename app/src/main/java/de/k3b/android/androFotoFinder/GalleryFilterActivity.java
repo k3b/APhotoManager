@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 package de.k3b.android.androFotoFinder;
 
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -37,8 +38,6 @@ import android.widget.Toast;
 // import com.squareup.leakcanary.RefWatcher;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -49,24 +48,28 @@ import de.k3b.android.androFotoFinder.directory.DirectoryLoaderTask;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.locationmap.LocationMapFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.tagDB.TagSql;
+import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.osmdroid.OsmdroidUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
-import de.k3b.database.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
+import de.k3b.io.ListUtils;
 
 /**
  * Defines a gui for global foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.
  */
 public class GalleryFilterActivity extends LocalizedActivity
         implements Common, DirectoryPickerFragment.OnDirectoryInteractionListener,
-        LocationMapFragment.OnDirectoryInteractionListener {
+        LocationMapFragment.OnDirectoryInteractionListener,
+        TagsPickerFragment.ITagsPicker
+{
     private static final String mDebugPrefix = "GalF-";
 
     public static final int resultID = 522;
@@ -81,6 +84,7 @@ public class GalleryFilterActivity extends LocalizedActivity
     private FilterValue mFilterValue = null;
     private HistoryEditText mHistory;
     private BookmarkController bookmarkController = null;
+    private DialogFragment mDlg;
 
     public static void showActivity(Activity context, IGalleryFilter filter, QueryParameter rootQuery) {
         mRootQuery = rootQuery;
@@ -92,9 +96,9 @@ public class GalleryFilterActivity extends LocalizedActivity
         final Intent intent = new Intent().setClass(context,
                 GalleryFilterActivity.class);
 
-        if (!GalleryFilterParameter.isEmpty(filter)) {
+        //if (!GalleryFilterParameter.isEmpty(filter)) {
             intent.putExtra(EXTRA_FILTER, filter.toString());
-        }
+        //}
 
         context.startActivityForResult(intent, resultID);
     }
@@ -161,6 +165,14 @@ public class GalleryFilterActivity extends LocalizedActivity
                 showLatLonPicker();
             }
         });
+        cmd = (Button) findViewById(R.id.cmd_tags_include);
+        cmd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//              showDirectoryPicker(FotoSql.queryGroupByPlace);
+                showTagPicker(R.string.tags_activity_title);
+            }
+        });
     }
 
     @Override
@@ -203,7 +215,7 @@ public class GalleryFilterActivity extends LocalizedActivity
                 bookmarkController.onLoadFromQuestion(new BookmarkController.IQueryConsumer() {
                     @Override
                     public void setQuery(QueryParameter newQuery) {
-                        IGalleryFilter filter = FotoSql.getWhereFilter(newQuery, false);
+                        IGalleryFilter filter = TagSql.parseQueryEx(newQuery, false);
                         toGui(filter);
                     }
                 }, getAsQuery());
@@ -217,7 +229,7 @@ public class GalleryFilterActivity extends LocalizedActivity
         IGalleryFilter filter = new GalleryFilterParameter();
         fromGui(filter);
         QueryParameter query = new QueryParameter(mRootQuery);
-        FotoSql.setWhereFilter(query, filter, true);
+        TagSql.filter2QueryEx(query, filter, true);
         return query;
     }
 
@@ -225,6 +237,10 @@ public class GalleryFilterActivity extends LocalizedActivity
     protected void onPause () {
         Global.debugMemory(mDebugPrefix, "onPause");
         saveLastFilter();
+        if ((mDlg != null) && (mDlg.isVisible()) ){
+            mDlg.dismiss();
+        }
+        mDlg = null;
         super.onPause();
     }
 
@@ -621,13 +637,45 @@ public class GalleryFilterActivity extends LocalizedActivity
         return result;
     }
 
+    private void showTagPicker(int idTitle) {
+        if (fromGui(mFilter)) {
+            final FragmentManager manager = getFragmentManager();
+            TagsPickerFragment dlg = new TagsPickerFragment();
+            dlg.setFragmentOnwner(this);
+            dlg.setTitleId(idTitle);
+            dlg.setContextMenuId(R.menu.menu_context_dirpicker);
+            dlg.setAddNames(mFilter.getTagsAllIncluded());
+            dlg.setRemoveNames(mFilter.getTagsAllExcluded());
+            dlg.show(manager, DLG_NAVIGATOR_TAG);
+            mDlg = dlg;
+        }
+    }
+
+    /** called by {@link TagsPickerFragment} */
+    @Override
+    public boolean onCancel(String msg) {
+        mDlg = null;
+        return true;
+    }
+
+    /** called by {@link TagsPickerFragment} */
+    @Override
+    public boolean onOk(List<String> addNames, List<String> removeNames) {
+        mFilter.setTagsAllIncluded(addNames);
+        mFilter.setTagsAllExcluded(removeNames);
+        toGui(mFilter);
+        mDlg = null;
+        return true;
+    }
+
     private void showLatLonPicker() {
         if (fromGui(mFilter)) {
             final FragmentManager manager = getFragmentManager();
-            LocationMapFragment dirDialog = new LocationMapFragment();
-            dirDialog.defineNavigation(null, mFilter, OsmdroidUtil.NO_ZOOM, null, null);
+            LocationMapFragment dlg = new LocationMapFragment();
+            dlg.defineNavigation(null, mFilter, OsmdroidUtil.NO_ZOOM, null, null);
 
-            dirDialog.show(manager, DLG_NAVIGATOR_TAG);
+            dlg.show(manager, DLG_NAVIGATOR_TAG);
+            mDlg = dlg;
         }
     }
 
@@ -655,12 +703,14 @@ public class GalleryFilterActivity extends LocalizedActivity
             DirInfo dirInfo = getOrCreateDirInfo(queryId);
             dirInfo.directoryRoot = directoryRoot;
             final FragmentManager manager = getFragmentManager();
-            DirectoryPickerFragment dirDialog = new DirectoryPickerFragment();
-            dirDialog.setContextMenuId(R.menu.menu_context_dirpicker);
+            DirectoryPickerFragment dlg = new DirectoryPickerFragment();
+            dlg.setContextMenuId(R.menu.menu_context_dirpicker);
 
-            dirDialog.defineDirectoryNavigation(dirInfo.directoryRoot, dirInfo.queryId, dirInfo.currentPath);
+            dlg.defineDirectoryNavigation(dirInfo.directoryRoot, dirInfo.queryId, dirInfo.currentPath);
 
-            dirDialog.show(manager, DLG_NAVIGATOR_TAG);
+            dlg.show(manager, DLG_NAVIGATOR_TAG);
+            mDlg = dlg;
+
         }
     }
 

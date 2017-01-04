@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import de.k3b.io.ListUtils;
+
 /**
  * Add history-popup to EditText.
  * invoke via Clipboard ContextActionBar: star (history) to open a popupmenu with previous values.
@@ -115,18 +117,7 @@ public class HistoryEditText {
         }
 
         private String toString(List<String> list) {
-            StringBuffer result = new StringBuffer();
-            String nextDelim = "";
-            for (String instance : list) {
-                if (instance != null) {
-                    instance = instance.trim();
-                    if (instance.length() > 0) {
-                        result.append(nextDelim).append(instance);
-                        nextDelim = mDelimiter;
-                    }
-                }
-            }
-            return result.toString();
+            return ListUtils.toString(list, mDelimiter);
         }
 
         private List<String>  include(List<String>  history_, String newValue) {

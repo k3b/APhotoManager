@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2016-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -43,6 +43,7 @@ import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.csv2db.csv.CsvLoader;
 import de.k3b.io.FileUtils;
+import de.k3b.io.IGalleryFilter;
 import de.k3b.media.MediaCsvItem;
 import de.k3b.media.MediaUtil;
 import de.k3b.tagDB.Tag;
@@ -202,7 +203,7 @@ public class MediaDBActivity extends Activity {
                 if (xmlLastFileModifyDate != TagSql.EXT_LAST_EXT_SCAN_UNKNOWN) {
                     TagSql.setXmpFileModifyDate(dbValues, xmlLastFileModifyDate);
                 }
-                mUpdateCount += TagSql.execUpdate(MediaDBActivity.this, path, xmlLastFileModifyDate, dbValues);
+                mUpdateCount += TagSql.execUpdate(MediaDBActivity.this, path, xmlLastFileModifyDate, dbValues, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
                 mItemCount++;
             }
         }

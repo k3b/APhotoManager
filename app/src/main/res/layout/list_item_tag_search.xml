@@ -3,7 +3,7 @@
 /*
  * Copyright (c) 2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -22,14 +22,56 @@
 
 <!-- listview-item for tags-list/picker -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="6dip" >
+    android:orientation="horizontal"
+     >
 
-    <TextView
-        android:id="@+id/titel"
+    <ImageView
+        android:id="@+id/bookmark"
+        android:src="@android:drawable/btn_star_big_off"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TextView" />
+        android:scaleType="fitStart"
+        android:layout_gravity="start"
+        android:adjustViewBounds="false"
+        android:cropToPadding="false"
+        android:clickable="true"
+        android:layout_weight="1"
+        />
+
+    <ImageView
+        android:id="@+id/add"
+        android:src="@android:drawable/ic_menu_add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleType="fitStart"
+        android:layout_gravity="start"
+        android:adjustViewBounds="false"
+        android:cropToPadding="false"
+        android:clickable="true"
+        android:layout_weight="1" />
+
+    <ImageView
+        android:id="@+id/remove"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleType="fitStart"
+        android:layout_gravity="start"
+        android:adjustViewBounds="false"
+        android:cropToPadding="false"
+        android:clickable="true"
+        android:layout_weight="1"
+        />
+
+    <TextView
+        android:id="@+id/name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="hello world"
+        android:layout_x="50px"
+        android:layout_y="22px"
+        android:layout_weight="100" />
 </LinearLayout>

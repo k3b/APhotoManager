@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -65,6 +65,7 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.osmdroid.FolderOverlayEx;
 import de.k3b.android.osmdroid.GuestureOverlay;
 import de.k3b.android.osmdroid.IconOverlay;
@@ -657,7 +658,7 @@ public class LocationMapFragment extends DialogFragment {
         query.clearWhere();
 
         if (this.mRootFilter != null) {
-            FotoSql.setWhereFilter(query, this.mRootFilter, true);
+            TagSql.filter2QueryEx(query, this.mRootFilter, true);
         }
 
         // delta: make the grouping area a little bit bigger than the viewport
@@ -988,7 +989,7 @@ public class LocationMapFragment extends DialogFragment {
 
                 switch (item.getItemId()) {
                     case R.id.cmd_photo:
-                        return showPoto(getGeoPointById(markerId, geoPosition));
+                        return showPhoto(getGeoPointById(markerId, geoPosition));
                     case R.id.cmd_gallery:
                         return showGallery(getGeoPointById(markerId, geoPosition));
                     case R.id.cmd_zoom:
@@ -1024,10 +1025,10 @@ public class LocationMapFragment extends DialogFragment {
         mTempPopupMenuParentView = null;
     }
 
-    private boolean showPoto(IGeoPoint geoPosition) {
+    private boolean showPhoto(IGeoPoint geoPosition) {
         GalleryFilterParameter filter = getMarkerFilter(geoPosition);
         QueryParameter query = new QueryParameter();
-        FotoSql.setWhereFilter(query, filter, false);
+        TagSql.filter2QueryEx(query, filter, false);
         FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
 
         ImageDetailActivityViewPager.showActivity(this.getActivity(), null, 0, query);

@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2016 by k3b.
+ * Copyright (c) 2016-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 
 package de.k3b.media;
 
+import com.adobe.xmp.XMPMetaFactory;
 import com.adobe.xmp.XMPUtils;
 import com.adobe.xmp.impl.XMPDateTimeImpl;
 
@@ -48,6 +49,11 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
     @Override
     public IMetaApi setPath(String filePath) {
         this.path = filePath;
+        return this;
+    }
+
+    public IMetaApi setOriginalFileName(String filePath) {
+        setProperty(filePath, MediaXmpFieldDefinition.OriginalFileName);
         return this;
     }
 
@@ -159,4 +165,5 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
                 MediaXmpFieldDefinition.Rating);
         return this;
     }
+
 }

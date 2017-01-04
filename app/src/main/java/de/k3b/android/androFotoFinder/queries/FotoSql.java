@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.database.QueryParameter;
@@ -60,10 +61,7 @@ import de.k3b.io.IGeoRectangle;
  *
  * Created by k3b on 04.06.2015.
  */
-public class FotoSql {
-//    private static final int PER_DAY = 1000 * 60 * 60 * 24;
-//    public static final String SQL_EXPR_DAY = "(ROUND("
-//            + MediaStore.Images.Media.SQL_COL_DATE_TAKEN + "/" + PER_DAY + ") * " + PER_DAY + ")";
+public class FotoSql extends FotoSqlBase {
 
     public static final int SORT_BY_DATE_OLD = 1;
     public static final int SORT_BY_NAME_OLD = 2;
@@ -90,11 +88,6 @@ public class FotoSql {
     public static final int QUERY_TYPE_GROUP_DEFAULT = QUERY_TYPE_GROUP_ALBUM;
     public static final int QUERY_TYPE_DEFAULT = QUERY_TYPE_GALLERY;
 
-    public static final Uri SQL_TABLE_EXTERNAL_CONTENT_URI = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-
-    /** used to query non-standard-image fields */
-    public static final Uri SQL_TABLE_EXTERNAL_CONTENT_URI_FILE = MediaStore.Files.getContentUri("external");
-
     // columns that must be avaulable in the Cursor
     public static final String SQL_COL_PK = MediaStore.Images.Media._ID;
     public static final String FILTER_COL_PK = SQL_COL_PK + "= ?";
@@ -109,6 +102,18 @@ public class FotoSql {
                 ? "max(" + MediaStore.Images.Media.WIDTH + "," +
                                                 MediaStore.Images.Media.HEIGHT +")"
                 : "1024";
+
+
+    public static final String SQL_COL_EXT_MEDIA_TYPE = MediaStore.Files.FileColumns.MEDIA_TYPE;
+    public static final int MEDIA_TYPE_IMAGE = MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;    // 1
+    public static final int MEDIA_TYPE_IMAGE_PRIVATE = 1000 + MEDIA_TYPE_IMAGE;                 // 1001 APhoto manager specific
+
+    protected static final String FILTER_EXPR_PRIVATE
+            = "(" + SQL_COL_EXT_MEDIA_TYPE + " = " + MEDIA_TYPE_IMAGE_PRIVATE + ")";
+    protected static final String FILTER_EXPR_PRIVATE_PUBLIC
+            = "(" + SQL_COL_EXT_MEDIA_TYPE + " in (" + MEDIA_TYPE_IMAGE_PRIVATE + "," + MEDIA_TYPE_IMAGE +"))";
+    protected static final String FILTER_EXPR_PUBLIC
+            = "(" + SQL_COL_EXT_MEDIA_TYPE + " = " + MEDIA_TYPE_IMAGE + ")";
 
     private static final String FILTER_EXPR_LAT_MAX = SQL_COL_LAT + " < ?";
     private static final String FILTER_EXPR_LAT_MIN = SQL_COL_LAT + " >= ?";
@@ -136,10 +141,9 @@ public class FotoSql {
                     "count(*) AS " + SQL_COL_COUNT,
                     "max(" + SQL_COL_GPS + ") AS " + SQL_COL_GPS,
                     "max(" + SQL_COL_PATH + ") AS " + SQL_COL_PATH)
-            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
+            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
             .addGroupBy(SQL_EXPR_DAY)
             .addOrderBy(SQL_EXPR_DAY);
-
 
     public static final String SQL_EXPR_FOLDER = "substr(" + SQL_COL_PATH + ",1,length(" + SQL_COL_PATH + ") - length(" + MediaStore.Images.Media.DISPLAY_NAME + "))";
     public static final QueryParameter queryGroupByDir = new QueryParameter()
@@ -151,7 +155,7 @@ public class FotoSql {
                     // (Substr(_data,1, length(_data) -  length(_display_Name)) = '/storage/sdcard0/DCIM/onw7b/2013/')
                     // "'(" + SQL_EXPR_FOLDER + " = ''' || " + SQL_EXPR_FOLDER + " || ''')'"
                     "max(" + SQL_COL_GPS + ") AS " + SQL_COL_GPS)
-            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
+            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
             .addGroupBy(SQL_EXPR_FOLDER)
             .addOrderBy(SQL_EXPR_FOLDER);
 
@@ -163,7 +167,7 @@ public class FotoSql {
                     "min(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
                     SQL_COL_PATH + " AS " + SQL_COL_DISPLAY_TEXT,
                     "count(*) AS " + SQL_COL_COUNT)
-            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
+            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
             .addWhere(SQL_COL_PATH + " IS NOT NULL ")
             .addGroupBy(SQL_COL_PATH)
             .addHaving("count(*) > 1")
@@ -177,7 +181,8 @@ public class FotoSql {
                     SQL_COL_PATH,
                     MediaStore.MediaColumns.DISPLAY_NAME,
                     MediaStore.MediaColumns.TITLE)
-            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString());
+            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
+            ;
 
     /* image entries may not have DISPLAY_NAME which is essential for calculating the item-s folder. */
     public static final QueryParameter queryGetMissingDisplayNames = new QueryParameter(queryChangePath)
@@ -227,7 +232,7 @@ public class FotoSql {
                         SQL_EXPR_LAT + " AS " + SQL_COL_LAT,
                         SQL_EXPR_LON + " AS " + SQL_COL_LON,
                         "count(*) AS " + SQL_COL_COUNT)
-                .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
+                .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
                 .addGroupBy(SQL_EXPR_LAT, SQL_EXPR_LON)
                 .addOrderBy(SQL_EXPR_LAT, SQL_EXPR_LON);
 
@@ -245,7 +250,8 @@ public class FotoSql {
             .setID(QUERY_TYPE_GALLERY)
             .addColumn(
                     DEFAULT_GALLERY_COLUMNS)
-            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString());
+            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
+            ;
 
     public static final QueryParameter queryGps = new QueryParameter()
             .setID(QUERY_TYPE_UNDEFINED)
@@ -254,48 +260,57 @@ public class FotoSql {
                     // SQL_COL_PATH + " AS " + SQL_COL_DISPLAY_TEXT,
                     "0 AS " + SQL_COL_COUNT,
                     SQL_COL_LAT, SQL_COL_LON)
-            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString());
+            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
+            ;
 
-    public static void setWhereFilter(QueryParameter parameters, IGalleryFilter filter, boolean clearWhereBefore) {
-        if ((parameters != null) && (!GalleryFilterParameter.isEmpty(filter))) {
+    public static void filter2Query(QueryParameter resultQuery, IGalleryFilter filter, boolean clearWhereBefore) {
+        if ((resultQuery != null) && (!GalleryFilterParameter.isEmpty(filter))) {
             if (clearWhereBefore) {
-                parameters.clearWhere();
+                resultQuery.clearWhere();
             }
 
             if (filter.isNonGeoOnly()) {
-                parameters.addWhere(FILTER_EXPR_NO_GPS);
+                resultQuery.addWhere(FILTER_EXPR_NO_GPS);
             } else {
-                addWhereFilterLatLon(parameters, filter);
+                addWhereFilterLatLon(resultQuery, filter);
             }
 
-            if (filter.getDateMin() != 0) parameters.addWhere(FILTER_EXPR_DATE_MIN, Long.toString(filter.getDateMin()));
-            if (filter.getDateMax() != 0) parameters.addWhere(FILTER_EXPR_DATE_MAX, Long.toString(filter.getDateMax()));
+            if (filter.getDateMin() != 0) resultQuery.addWhere(FILTER_EXPR_DATE_MIN, Long.toString(filter.getDateMin()));
+            if (filter.getDateMax() != 0) resultQuery.addWhere(FILTER_EXPR_DATE_MAX, Long.toString(filter.getDateMax()));
 
             String path = filter.getPath();
-            if ((path != null) && (path.length() > 0)) parameters.addWhere(FILTER_EXPR_PATH_LIKE, path);
+            if ((path != null) && (path.length() > 0)) resultQuery.addWhere(FILTER_EXPR_PATH_LIKE, path);
         }
     }
 
-    public static IGalleryFilter getWhereFilter(QueryParameter parameters, boolean remove) {
-        if (parameters != null) {
+    /** translates a query back to filter */
+    public static IGalleryFilter parseQuery(QueryParameter query, boolean remove) {
+        if (query != null) {
             GalleryFilterParameter filter = new GalleryFilterParameter();
-            if (null != parameters.getWhereParameter(FILTER_EXPR_NO_GPS, remove)) {
+            if (null != getParams(query, FILTER_EXPR_NO_GPS, remove)) {
                 filter.setNonGeoOnly(true);
             } else {
-                filter.setLogitude(getParam(parameters, FILTER_EXPR_LON_MIN, remove), getParam(parameters, FILTER_EXPR_LON_MAX, remove));
-                filter.setLatitude(getParam(parameters, FILTER_EXPR_LAT_MIN, remove), getParam(parameters, FILTER_EXPR_LAT_MAX, remove));
+                filter.setLogitude(getParam(query, FILTER_EXPR_LON_MIN, remove), getParam(query, FILTER_EXPR_LON_MAX, remove));
+                filter.setLatitude(getParam(query, FILTER_EXPR_LAT_MIN, remove), getParam(query, FILTER_EXPR_LAT_MAX, remove));
             }
 
-	        filter.setDate(getParam(parameters, FILTER_EXPR_DATE_MIN, remove), getParam(parameters, FILTER_EXPR_DATE_MAX, remove));
-            filter.setPath(getParam(parameters, FILTER_EXPR_PATH_LIKE, remove));
+	        filter.setDate(getParam(query, FILTER_EXPR_DATE_MIN, remove), getParam(query, FILTER_EXPR_DATE_MAX, remove));
+            filter.setPath(getParam(query, FILTER_EXPR_PATH_LIKE, remove));
+
             return filter;
         }
         return null;
     }
 
-    private static String getParam(QueryParameter query, String expresion, boolean remove) {
-        final String[] result = query.getWhereParameter(expresion, remove);
+    /** @return return param for expression inside query. null if expression is not in query or number of params is not 1. */
+    protected static String getParam(QueryParameter query, String expresion, boolean remove) {
+        final String[] result = getParams(query, expresion, remove);
         return ((result != null) && (result.length > 0)) ? result[0] : null;
+    }
+
+    /** @return return all params for expression inside query. null if expression is not in query */
+    protected static String[] getParams(QueryParameter query, String expresion, boolean remove) {
+        return query.getWhereParameter(expresion, remove);
     }
 
     public static QueryParameter setWhereSelectionPks(QueryParameter query, SelectedItems selectedItems) {
@@ -503,28 +518,35 @@ public class FotoSql {
         return false;
     }
 
-    public static String execGetFotoPath(Context context, Uri uri) {
+	/** converts content-Uri-with-id to full path */
+    public static String execGetFotoPath(Context context, Uri uriWithID) {
         Cursor c = null;
         try {
-            c = createCursorForQuery(context, uri.toString(), null, null, null, FotoSql.SQL_COL_PATH);
+            c = createCursorForQuery(context, uriWithID.toString(), null, null, null, FotoSql.SQL_COL_PATH);
             if (c.moveToFirst()) {
                 return c.getString(c.getColumnIndex(FotoSql.SQL_COL_PATH));
             }
         } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, "FotoSql.execGetFotoPath() Cannot get path from " + uri, ex);
+            Log.e(Global.LOG_CONTEXT, "FotoSql.execGetFotoPath() Cannot get path from " + uriWithID, ex);
         } finally {
             if (c != null) c.close();
         }
         return null;
     }
 
+	/** search for all full-image-file-paths that matches pathfilter  */
     public static List<String> execGetFotoPaths(Context context, String pathFilter) {
         ArrayList<String> result = new ArrayList<String>();
         ContentResolver resolver = context.getContentResolver();
 
         Cursor c = null;
         try {
-            c = resolver.query(SQL_TABLE_EXTERNAL_CONTENT_URI, new String[]{FotoSql.SQL_COL_PATH}, FotoSql.SQL_COL_PATH + " like ?", new String[]{pathFilter}, FotoSql.SQL_COL_PATH);
+            c = resolver.query(
+					SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, 
+					new String[]{FotoSql.SQL_COL_PATH}, 
+					FotoSql.SQL_COL_PATH + " like ? and " + FILTER_EXPR_PRIVATE_PUBLIC, 
+					new String[]{pathFilter}, 
+					FotoSql.SQL_COL_PATH);
             while (c.moveToNext()) {
                 result.add(c.getString(0));
             }
@@ -546,15 +568,17 @@ public class FotoSql {
     public static int execUpdateGeo(final Context context, double latitude, double longitude, SelectedFiles selectedItems) {
         QueryParameter where = new QueryParameter();
         setWhereSelectionPaths(where, selectedItems);
+		setWhereVisibility(where, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
 
         ContentValues values = new ContentValues(2);
         values.put(SQL_COL_LAT, DirectoryFormatter.parseLatLon(latitude));
         values.put(SQL_COL_LON, DirectoryFormatter.parseLatLon(longitude));
         ContentResolver resolver = context.getContentResolver();
-        return resolver.update(SQL_TABLE_EXTERNAL_CONTENT_URI, values, where.toAndroidWhere(), where.toAndroidParameters());
+        return resolver.update(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, values, where.toAndroidWhere(), where.toAndroidParameters());
     }
-
-    public static Cursor createCursorForQuery(final Context context, QueryParameter parameters) {
+	
+    public static Cursor createCursorForQuery(final Context context, QueryParameter parameters, int visibility) {
+        setWhereVisibility(parameters, visibility);
         return createCursorForQuery(context, parameters.toFrom(), parameters.toAndroidWhere(),
                 parameters.toAndroidParameters(), parameters.toOrderBy(),
                 parameters.toColumns()
@@ -578,10 +602,11 @@ public class FotoSql {
                         "max(" + SQL_COL_LON + ") AS LON_MAX",
                         "count(*)"
                 )
-                .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString());
+                .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
+                ;
 
         if (!GalleryFilterParameter.isEmpty(filter)) {
-            setWhereFilter(query, filter, true);
+            filter2Query(query, filter, true);
         }
 
         if (selectedItems != null) {
@@ -591,7 +616,7 @@ public class FotoSql {
 
         Cursor c = null;
         try {
-            c = createCursorForQuery(context, query);
+            c = createCursorForQuery(context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
             if (c.moveToFirst()) {
                 GeoRectangle result = new GeoRectangle();
                 result.setLatitude(c.getDouble(0), c.getDouble(1));
@@ -616,7 +641,7 @@ public class FotoSql {
         QueryParameter query = new QueryParameter()
         .setID(QUERY_TYPE_UNDEFINED)
                 .addColumn(SQL_COL_LAT, SQL_COL_LON)
-                .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
+                .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
                 .addWhere(SQL_COL_LAT + " IS NOT NULL")
                 .addWhere(SQL_COL_LON + " IS NOT NULL");
 
@@ -629,7 +654,7 @@ public class FotoSql {
 
         Cursor c = null;
         try {
-            c = createCursorForQuery(context, query);
+            c = createCursorForQuery(context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
             if (c.moveToFirst()) {
                 GeoPoint result = new GeoPoint(c.getDouble(0),c.getDouble(1));
                 return result;
@@ -653,12 +678,12 @@ public class FotoSql {
             QueryParameter query = new QueryParameter()
                     .setID(QUERY_TYPE_UNDEFINED)
                     .addColumn(SQL_COL_PK, SQL_COL_PATH)
-                    .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
+                    .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
                     .addWhere(whereFileNames);
 
             Cursor c = null;
             try {
-                c = createCursorForQuery(context, query);
+                c = createCursorForQuery(context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
                 while (c.moveToNext()) {
                     result.put(c.getString(1),c.getInt(0));
                 }
@@ -692,16 +717,21 @@ public class FotoSql {
         return null;
     }
 
-    public static int execUpdate(Context context, int id, ContentValues values) {
-        return context.getContentResolver().update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, values, FILTER_COL_PK, new String[]{Integer.toString(id)});
+    public static int execUpdate(Context context, long id, ContentValues values) {
+        return context.getContentResolver().update(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, values, FILTER_COL_PK, new String[]{Long.toString(id)});
     }
 
-    public static int execUpdate(Context context, String path, ContentValues values) {
-        return context.getContentResolver().update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, values, FotoSql.FILTER_EXPR_PATH_LIKE, new String[]{path});
+    protected static String getFilterExprPathLikeWithVisibility(int visibility) {
+        // visibility IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC
+        return FotoSql.FILTER_EXPR_PATH_LIKE + " AND " + getFilterExpressionVisibility(visibility);
+    }
+
+    public static int execUpdate(Context context, String path, ContentValues values, int visibility) {
+        return context.getContentResolver().update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, values, getFilterExprPathLikeWithVisibility(visibility), new String[]{path});
     }
 
     public static Uri execInsert(Context context, ContentValues values) {
-        return context.getContentResolver().insert(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, values);
+        return context.getContentResolver().insert(SQL_TABLE_EXTERNAL_CONTENT_URI, values);
     }
 
     @NonNull
@@ -710,8 +740,8 @@ public class FotoSql {
         return loader;
     }
 
-    public static int execDeleteByPath(Activity context, String parentDirString) {
-        int delCount = FotoSql.deleteMedia(context.getContentResolver(), FILTER_EXPR_PATH_LIKE, new String[] {parentDirString + "/%"}, true);
+    public static int execDeleteByPath(Activity context, String parentDirString, int visibility) {
+        int delCount = FotoSql.deleteMedia(context.getContentResolver(), getFilterExprPathLikeWithVisibility(visibility), new String[] {parentDirString + "/%"}, true);
         if (Global.debugEnabledSql) {
             Log.i(Global.LOG_CONTEXT, "FotoSql.deleted(NoMedia='" + parentDirString +
                     "') : " + delCount + " db records" );
@@ -731,17 +761,17 @@ public class FotoSql {
                 // set SQL_COL_PATH empty so sql-delete cannot cascade delete the referenced image-file via delete trigger
                 ContentValues values = new ContentValues();
                 values.put(FotoSql.SQL_COL_PATH, DELETED_FILE_MARKER);
-                contentResolver.update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, values, lastUsedWhereClause, selectionArgs);
+                contentResolver.update(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, values, lastUsedWhereClause, selectionArgs);
 
                 lastUsedWhereClause = FotoSql.SQL_COL_PATH + " is null";
-                delCount = contentResolver.delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, lastUsedWhereClause, null);
+                delCount = contentResolver.delete(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, lastUsedWhereClause, null);
             } else {
-                delCount = contentResolver.delete(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, lastUsedWhereClause, selectionArgs);
+                delCount = contentResolver.delete(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, lastUsedWhereClause, selectionArgs);
             }
         } catch (Exception ex) {
             // null pointer exception when delete matches not items??
             final String msg = "FotoSql.deleteMedia("
-                    + QueryParameter.toString(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI.toString(),null
+                    + QueryParameter.toString(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,null
                         , lastUsedWhereClause, selectionArgs, null)
                     + " : " + ex.getMessage();
             Log.e(Global.LOG_CONTEXT, msg, ex);
@@ -758,7 +788,7 @@ public class FotoSql {
 
     @NonNull
     public static String getUriString(long imageID) {
-        return SQL_TABLE_EXTERNAL_CONTENT_URI.toString() + "/" + imageID;
+        return SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME + "/" + imageID;
     }
 
     public static SelectedFiles getSelectedfiles(Context context, String sqlWhere) {
@@ -776,7 +806,7 @@ public class FotoSql {
         Cursor c = null;
 
         try {
-            c = FotoSql.createCursorForQuery(context, query);
+            c = FotoSql.createCursorForQuery(context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
             int len = c.getCount();
             Long[] ids = new Long[len];
             String[] paths = new String[len];
@@ -850,6 +880,38 @@ public class FotoSql {
 
         return result;
 
+    }
+
+    protected static String getFilterExpressionVisibility(int visibility) {
+        // add visibility column only if not included yet
+        if (visibility == IGalleryFilter.VISIBILITY_DEFAULT) {
+            visibility = (FotoLibGlobal.visibilityShowPrivateByDefault)
+                    ? IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC
+                    : IGalleryFilter.VISIBILITY_PUBLIC;
+        }
+
+        switch (visibility) {
+            case IGalleryFilter.VISIBILITY_PRIVATE:
+                return FILTER_EXPR_PRIVATE;
+            case IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC:
+                return FILTER_EXPR_PRIVATE_PUBLIC;
+            case IGalleryFilter.VISIBILITY_PUBLIC:
+            default:
+                return FILTER_EXPR_PUBLIC;
+        }
+    }
+
+    /** adds visibility to sql of parameters, if not set yet */
+    public static QueryParameter setWhereVisibility(QueryParameter parameters, int visibility) {
+        if (parameters.toFrom() == null) {
+            parameters.addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME);
+        }
+        String sqlWhere = parameters.toAndroidWhere();
+        if ((sqlWhere == null) || !sqlWhere.contains(SQL_COL_EXT_MEDIA_TYPE)) {
+           parameters.addWhere(getFilterExpressionVisibility(visibility));
+        }
+
+        return parameters;
     }
 
     public static class CursorLoaderWithException extends CursorLoader {

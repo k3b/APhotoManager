@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -33,8 +33,9 @@ import java.util.Date;
 import de.k3b.FotoLibGlobal;
 import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
-import de.k3b.android.osmdroid.forge.MapsForgeSupport;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.queries.FotoSqlBase;
+import de.k3b.android.osmdroid.forge.MapsForgeSupport;
 import de.k3b.android.util.LogCat;
 import de.k3b.database.QueryParameter;
 import uk.co.senab.photoview.PhotoViewAttacher;
@@ -48,6 +49,7 @@ import uk.co.senab.photoview.gestures.CupcakeGestureDetector;
  */
 public class AndroFotoFinderApp extends Application {
     private LogCat mCrashSaveToFile = null;
+
 
     /*
         private RefWatcher refWatcher;
@@ -65,6 +67,7 @@ public class AndroFotoFinderApp extends Application {
     @Override public void onCreate() {
         // StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().detectAll().penaltyDialog().build());
         // StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyDeath().build());
+        FotoSqlBase.init();
 
         super.onCreate();
 
@@ -77,7 +80,7 @@ public class AndroFotoFinderApp extends Application {
                 GuiUtil.getAppVersionName(this),
                 new Date().toString());
 
-        QueryParameter.sParserDefaultFrom = FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI.toString();
+        QueryParameter.sParserDefaultFrom = FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE.toString();
         QueryParameter.sParserDefaultQueryTypeId = FotoSql.QUERY_TYPE_DEFAULT;
         QueryParameter.sParserDefaultSelect = new ArrayList<String>();
         Collections.addAll(QueryParameter.sParserDefaultSelect, FotoSql.DEFAULT_GALLERY_COLUMNS);

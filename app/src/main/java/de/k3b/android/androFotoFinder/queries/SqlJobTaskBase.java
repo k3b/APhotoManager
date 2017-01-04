@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.database.QueryParameter;
@@ -96,6 +97,9 @@ public abstract class SqlJobTaskBase extends AsyncTask<QueryParameter, Integer, 
             }
 
             return this.mSelectedItems;
+        } catch (Exception ex){
+            Log.e(Global.LOG_CONTEXT, mDebugPrefix + query, ex);
+            throw new RuntimeException(mDebugPrefix + query + "\n" + ex.getMessage(), ex);
         } finally {
             if (cursor != null) {
                 cursor.close();

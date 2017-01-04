@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -101,6 +101,7 @@ public class Global {
 
     /** false: cmd setGeo => form(GeoEditActivity) => mapPicker */
     public static final boolean geoNoEdit = true;
+    public static final boolean saveXmpAsHumanReadable = true;
 
     public static class Media {
         /** Support extra parameters true: experimental. Not fully implemented yet. */
@@ -144,6 +145,8 @@ public class Global {
                 R.id.cmd_about,
                 R.id.cmd_scan,
                 R.id.cmd_more,
+                R.id.cmd_show_geo,
+                R.id.cmd_gallery,
                 R.id.cmd_show_geo_as
         );
     }

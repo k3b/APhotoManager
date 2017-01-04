@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2016 by k3b.
+ * Copyright (c) 2016-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import de.k3b.io.ListUtils;
+
 /**
  * Created by k3b on 29.09.2016.
  */
@@ -31,8 +33,8 @@ public class TagConverter {
     public static final String TAG_DB_DELIMITER = ";";
 
     public static String asDbString(String wildcard, List<String> tags) {
-        if ((tags == null) || (tags.size() == 0)) return null;
-        String[] tagsArray = tags.toArray(new String[tags.size()]);
+        String[] tagsArray = ListUtils.asStringArray(tags);
+        if (tagsArray == null) return null;
         if (wildcard == null)
             return asDbString("","", ", ", "", tagsArray);
         return asDbString(wildcard, tagsArray);
@@ -58,8 +60,21 @@ public class TagConverter {
         return result.toString();
     }
 
+    /** format tags for bat-command "tag1" "tag2" .... */
+    public static String asBatString(List<String> tags) {
+        String[] tagsArray = ListUtils.asStringArray(tags);
+
+        return asBatString(tagsArray);
+    }
+
+    public static String asBatString(String... tagsArray) {
+        String tagsString = (tagsArray != null) ? asDbString("", "\"", " ", "\"", tagsArray) : null;
+
+        return tagsString;
+    }
+
     /**
-     *  @param wildcard
+     * @param wildcard
      * @param tags  @return i.e. "%;tag1;%;tag2;%" or ";tag1;;tag2;%"
      * */
     public static String asDbString(String wildcard, String... tags) {
@@ -69,7 +84,7 @@ public class TagConverter {
         if (tags == null) return null;
         ArrayList<String> result = new ArrayList<String>();
         for(String elem : tags.toString().split("[,;:]")) {
-            if ((elem != null) && (elem.length() > 0)) {
+            if ((elem != null) && (elem.length() > 0) && ("%".compareTo(elem) != 0)) {
                 result.add(elem.trim());
             }
         }

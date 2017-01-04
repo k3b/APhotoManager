@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright (c) 2016-2017 by k3b.
+ *
+ * This file is part of AndroFotoFinder / #APhotoManager.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
+ -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" tools:context=".directory.DirectoryPickerFragment">
+
+    <!--
+    [path_scroller with path_owner containing Button-s with path elements]
+    [android:list]
+    [cmd_cancel] [cmd_ok]
+    [status [current path] or 'Select Directory with Images to enable OK']
+    -->
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        >
+
+        <ImageView
+            android:id="@+id/searchSymbol"
+            android:contentDescription="Search Symbol"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:src="@android:drawable/ic_menu_search" />
+
+        <ImageButton
+            android:id="@+id/cmd_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_action_cancel"
+            android:layout_alignParentRight="true"
+            android:backgroundTint="@android:color/darker_gray"
+            />
+        <ImageButton
+            android:id="@+id/cmd_ok"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_action_accept"
+            android:layout_toLeftOf="@id/cmd_cancel"
+            android:backgroundTint="@android:color/darker_gray"
+            />
+        <EditText
+            android:id="@+id/myFilter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/searchSymbol"
+            android:layout_toLeftOf="@id/cmd_ok"
+            android:layout_alignBottom="@id/cmd_cancel"
+            android:ems="10"
+            android:hint="@string/tags_search_hint"
+            android:singleLine="true" />
+
+
+        <ListView
+            android:id="@+id/list"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:fastScrollEnabled="true"
+            android:layout_below="@+id/myFilter"
+            android:layout_above="@+id/status"
+            />
+
+        <TextView android:id="@+id/android:empty"
+            android:layout_width="fill_parent" android:layout_height="fill_parent"
+            android:text="@string/tags_search_no_matching_items_found"
+            android:layout_below="@+id/myFilter"
+            android:layout_above="@+id/status"
+            android:visibility="invisible"
+            android:layout_centerVertical="true"
+            />
+
+        <ImageView
+            android:id="@+id/image"
+            android:layout_width="@dimen/grid_cell_width"
+            android:layout_height="@dimen/grid_cell_height"
+            android:layout_above="@+id/status"
+            android:layout_alignParentRight="true"
+            android:visibility="gone"
+            />
+
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:ellipsize="start"
+            android:singleLine="true"
+
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentBottom="true"
+
+            android:text="@string/selection_none_hint"
+            android:visibility="gone" />
+
+    </RelativeLayout>
+
+</FrameLayout>
+
+

@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -65,6 +65,8 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.OnGalleryInteractionListener;
 import de.k3b.android.androFotoFinder.queries.Queryable;
 import de.k3b.android.androFotoFinder.queries.SqlJobTaskBase;
+import de.k3b.android.androFotoFinder.tagDB.TagWorflow;
+import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.AndroidFileCommands44;
 import de.k3b.android.util.MediaScanner;
@@ -89,7 +91,7 @@ import de.k3b.io.OSDirectory;
  * Use the {@link GalleryCursorFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class GalleryCursorFragment extends Fragment  implements Queryable, DirectoryGui,Common {
+public class GalleryCursorFragment extends Fragment  implements Queryable, DirectoryGui,Common, TagsPickerFragment.ITagsPicker {
     private static final String INSTANCE_STATE_LAST_VISIBLE_POSITION = "lastVisiblePosition";
     private static final String INSTANCE_STATE_SELECTED_ITEM_IDS = "selectedItems";
     private static final String INSTANCE_STATE_OLD_TITLE = "oldTitle";
@@ -124,6 +126,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     private DirectoryPickerFragment.OnDirectoryInteractionListener mDirectoryListener;
     private int mLastVisiblePosition = -1;
+
+    private TagWorflow mTagWorflow = null;
 
     // multi selection support
     private final SelectedItems mSelectedItems = new SelectedItems();
@@ -521,6 +525,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     public void requery(Activity context, QueryParameter parameters, String why) {
         this.mGalleryContentQuery = parameters;
 
+        FotoSql.setWhereVisibility(this.mGalleryContentQuery,IGalleryFilter.VISIBILITY_DEFAULT);
         requery(why);
     }
 
@@ -545,13 +550,11 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     private QueryParameter getCurrentQuery(QueryParameter rootQuery) {
-        QueryParameter selFilter = null;
+        QueryParameter selFilter = new QueryParameter(rootQuery);
         if (mShowSelectedOnly) {
-            selFilter = new QueryParameter(rootQuery);
             FotoSql.setWhereSelectionPks(selFilter, mSelectedItems);
-        } else {
-            selFilter = rootQuery;
         }
+        selFilter.replaceFrom(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE.toString());
         return selFilter;
     }
 
@@ -781,6 +784,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             case R.id.cmd_edit_geo:
                 GeoEditActivity.showActivity(this.getActivity(), selectedFiles);
                 return true;
+            case R.id.cmd_edit_tags: {
+                return tagsShowEditDialog(selectedFiles);
+            }
             case R.id.cmd_selection_add_all:
                 addAllToSelection();
                 return true;
@@ -811,6 +817,39 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 files,
                 (mGalleryContentQuery != null) ? mGalleryContentQuery.toSqlString() : null
         ).show();
+    }
+
+    private boolean tagsShowEditDialog(SelectedFiles fotos) {
+        mTagWorflow = new TagWorflow().init(this.getActivity(), fotos);
+        TagsPickerFragment dlg = new TagsPickerFragment();
+        dlg.setFragmentOnwner(this);
+        dlg.setTitleId(R.string.tags_edit_menu_title);
+        dlg.setAffectedNames(mTagWorflow.getAffected());
+        dlg.setAddNames(new ArrayList<String>());
+        dlg.setRemoveNames(new ArrayList<String>());
+        dlg.show(getFragmentManager(), "editTags");
+        return true;
+    }
+
+    /** called by {@link TagsPickerFragment} */
+    @Override
+    public boolean onCancel(String msg) {
+        mTagWorflow = null;
+        return true;
+    }
+
+    /** called by {@link TagsPickerFragment} */
+    @Override
+    public boolean onOk(List<String> addNames, List<String> removeNames) {
+        if (mTagWorflow != null) {
+            mTagWorflow.updateTags(addNames, removeNames);
+        }
+        mTagWorflow = null;
+        return true;
+    }
+
+    private void tagsUpdate(TagWorflow fotos, List<String> addNames, List<String> removeNames) {
+        fotos.updateTags(addNames,removeNames);
     }
 
     public static class MoveOrCopyDestDirPicker extends DirectoryPickerFragment {
@@ -1023,6 +1062,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             }
         };
         QueryParameter query = getCurrentQuery();
+        FotoSql.setWhereVisibility(query, IGalleryFilter.VISIBILITY_DEFAULT);
         task.execute(query);
     }
 
@@ -1039,6 +1079,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             }
         };
         QueryParameter query = getCurrentQuery();
+        FotoSql.setWhereVisibility(query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
         task.execute(query);
     }
 
@@ -1091,6 +1132,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             }
         };
         QueryParameter query = FotoSql.queryGetMissingDisplayNames;
+        FotoSql.setWhereVisibility(query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
         task.execute(query);
     }
 
@@ -1135,6 +1177,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             }
         };
         QueryParameter query = FotoSql.queryGetDuplicates;
+        FotoSql.setWhereVisibility(query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
         task.execute(query);
     }
 

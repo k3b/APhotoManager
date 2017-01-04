@@ -1,8 +1,8 @@
 /*******************************************************************************
  * Copyright 2011, 2012 Chris Banes.
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -57,6 +57,9 @@ import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
 import de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.tagDB.TagSql;
+import de.k3b.android.androFotoFinder.tagDB.TagWorflow;
+import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.AndroidFileCommands44;
 import de.k3b.android.util.IntentUtil;
@@ -80,7 +83,7 @@ import de.k3b.media.MediaUtil;
  * Swipe left/right to show previous/next image.
  */
 
-public class ImageDetailActivityViewPager extends LocalizedActivity implements Common {
+public class ImageDetailActivityViewPager extends LocalizedActivity implements Common, TagsPickerFragment.ITagsPicker {
     private static final String INSTANCE_STATE_MODIFY_COUNT = "mModifyCount";
     public static final int ACTIVITY_ID = 76621;
 
@@ -112,6 +115,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     private LockableViewPager mViewPager = null;
     private ImagePagerAdapterFromCursorArray mAdapter = null;
+    private TagWorflow mTagWorflow = null;
 
     private final AndroidFileCommands mFileCommands = new LocalFileCommands();
 
@@ -492,7 +496,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         if (value != null) {
             QueryParameter query = new QueryParameter(DEFAULT_QUERY);
             FotoSql.setSort(query, DEFAULT_SORT, true);
-            FotoSql.setWhereFilter(query, value, true);
+            TagSql.filter2QueryEx(query, value, true);
             mGalleryContentQuery = query;
         }
         this.mFilter = value; // #34
@@ -845,10 +849,16 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                 return true;
             }
 
-            case R.id.cmd_edit_geo:
+            case R.id.cmd_edit_geo: {
                 SelectedFiles selectedItem = getCurrentFoto();
                 GeoEditActivity.showActivity(this, selectedItem);
                 return true;
+            }
+            case R.id.cmd_edit_tags: {
+                SelectedFiles selectedItem = getCurrentFoto();
+                tagsShowEditDialog(selectedItem);
+                return true;
+            }
 
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
@@ -975,6 +985,35 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             errorMessage = getString(R.string.image_err_file_rename_format, src.getAbsoluteFile());
             Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
         }
+    }
+
+    private boolean tagsShowEditDialog(SelectedFiles fotos) {
+        mTagWorflow = new TagWorflow().init(this, fotos);
+        TagsPickerFragment dlg = new TagsPickerFragment();
+        dlg.setFragmentOnwner(this);
+        dlg.setTitleId(R.string.tags_edit_menu_title);
+        dlg.setAffectedNames(mTagWorflow.getAffected());
+        dlg.setAddNames(new ArrayList<String>());
+        dlg.setRemoveNames(new ArrayList<String>());
+        dlg.show(getFragmentManager(), "editTags");
+        return true;
+    }
+
+    /** called by {@link TagsPickerFragment} */
+    @Override
+    public boolean onCancel(String msg) {
+        mTagWorflow = null;
+        return true;
+    }
+
+    /** called by {@link TagsPickerFragment} */
+    @Override
+    public boolean onOk(List<String> addNames, List<String> removeNames) {
+        if (mTagWorflow != null) {
+            mTagWorflow.updateTags(addNames, removeNames);
+        }
+        mTagWorflow = null;
+        return true;
     }
 
     protected SelectedFiles getCurrentFoto() {

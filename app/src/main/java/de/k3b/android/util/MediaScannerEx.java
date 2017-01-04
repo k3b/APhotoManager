@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2015-2017 by k3b.
+ *
+ * This file is part of AndroFotoFinder / #APhotoManager.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
+
 package de.k3b.android.util;
 
 import android.content.ContentValues;
@@ -42,16 +61,7 @@ public class MediaScannerEx extends MediaScanner {
         }
     }
 
-    /**
-     * updates values with current values of file.
-     * Override: also get xmp data (i.e. Tags)
-     */
-    @Override
-    protected int getExifValues(MediaContentValues dest, File file, ExifInterfaceEx exif) {
-        int changes = 0;
-        long xmpFileModifyDate = TagSql.EXT_LAST_EXT_SCAN_UNKNOWN;
-
-        File xmpFile = FileUtils.getXmpFile(file.getAbsolutePath());
+    public MediaXmpSegment loadXmp(MediaContentValues dest, File xmpFile) {
         MediaXmpSegment xmp = null;
         if ((xmpFile != null) && xmpFile.exists() && xmpFile.isFile()) {
             xmp = new MediaXmpSegment();
@@ -62,6 +72,23 @@ public class MediaScannerEx extends MediaScanner {
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
+        }
+        return xmp;
+    }
+
+    /**
+     * updates values with current values of file.
+     * Override: also get xmp data (i.e. Tags)
+     */
+    @Override
+    protected int getExifValues(MediaContentValues dest, File file, ExifInterfaceEx exif) {
+        int changes = 0;
+        long xmpFileModifyDate = TagSql.EXT_LAST_EXT_SCAN_UNKNOWN;
+
+        File xmpFile = FileUtils.getXmpFile(file.getAbsolutePath());
+        MediaXmpSegment xmp = loadXmp(dest, xmpFile);
+
+        if (xmp != null) {
             xmpFile = null;
         } else if (Global.Media.enableXmpNone) {
             xmpFileModifyDate = TagSql.EXT_LAST_EXT_SCAN_NO_XMP;

@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2016 by k3b.
+ * Copyright (c) 2016-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -33,6 +33,8 @@ public enum MediaXmpFieldDefinition {
     CreateDate(XmpNamespace.XAP),          // JPhotoTagger default
 
     DateCreated(XmpNamespace.PHOTOSHOP),  // exiftool default
+
+    OriginalFileName(XmpNamespace.APM), // apm specific: the original file name of the image file
 
     DateTimeOriginal(XmpNamespace.EXIF),
     GPSLatitude(XmpNamespace.EXIF),

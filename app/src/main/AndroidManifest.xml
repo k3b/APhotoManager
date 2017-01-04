@@ -358,11 +358,6 @@
                 <data android:pathPattern=".*\\.csv" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".tagDB.TagsActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:icon="@drawable/tag"
-            android:label="@string/tags_activity_title"></activity>
     </application>
 
 </manifest>
