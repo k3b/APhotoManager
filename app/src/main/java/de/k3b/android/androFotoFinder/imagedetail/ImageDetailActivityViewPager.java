@@ -1,8 +1,8 @@
 /*******************************************************************************
  * Copyright 2011, 2012 Chris Banes.
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -57,6 +57,7 @@ import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
 import de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.AndroidFileCommands44;
 import de.k3b.android.util.IntentUtil;
@@ -492,7 +493,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         if (value != null) {
             QueryParameter query = new QueryParameter(DEFAULT_QUERY);
             FotoSql.setSort(query, DEFAULT_SORT, true);
-            FotoSql.setWhereFilter(query, value, true);
+            TagSql.filter2QueryEx(query, value, true);
             mGalleryContentQuery = query;
         }
         this.mFilter = value; // #34

@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.database.SelectedItems;
 import de.k3b.io.FileUtils;
+import de.k3b.io.IGalleryFilter;
 
 /**
  * Implements the array sepecific stuff that hopefully can be reused in other adapters, too
@@ -46,7 +47,7 @@ public class AdapterArrayHelper {
 
         if (Global.mustRemoveNOMEDIAfromDB && (mRootDir != null) && (mFullPhotoPaths != null)) {
             String parentDirString = mRootDir.getAbsolutePath();
-            FotoSql.execDeleteByPath(context, parentDirString);
+            FotoSql.execDeleteByPath(context, parentDirString, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
         }
     }
 

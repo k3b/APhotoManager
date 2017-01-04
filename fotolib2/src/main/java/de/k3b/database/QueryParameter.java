@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -132,6 +132,7 @@ public class QueryParameter {
         return this;
     }
 
+    /** @return return all params for sqlExprWithParameters inside this. null if sqlExprWithParameters is not in this */
     public String[] getWhereParameter(String sqlExprWithParameters, boolean remove) {
         return getExpresionParameter(sqlExprWithParameters, mWhere, mParameters, remove);
     }

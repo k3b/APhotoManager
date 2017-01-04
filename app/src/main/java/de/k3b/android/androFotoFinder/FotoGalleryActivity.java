@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -49,6 +49,7 @@ import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.queries.Queryable;
+import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagsActivity;
 import de.k3b.android.osmdroid.OsmdroidUtil;
 import de.k3b.android.util.GarbageCollector;
@@ -191,7 +192,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
 
             QueryParameter result = new QueryParameter(rootQuery);
 
-            FotoSql.setWhereFilter(result, this.getCurrentFilterSettings(), !hasUserDefinedQuery());
+            TagSql.filter2QueryEx(result, this.getCurrentFilterSettings(), !hasUserDefinedQuery());
             if (result == null) return null;
 
             if (mUseLatLonInsteadOfPath) {
@@ -406,6 +407,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         bookmarkController = new BookmarkController(this);
 
         this.getContentResolver().registerContentObserver(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, true, mMediaObserverDirectory);
+        this.getContentResolver().registerContentObserver(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, true, mMediaObserverDirectory);
         setContentView(R.layout.activity_gallery); // .gallery_activity);
 
         this.mGalleryQueryParameter.loadSettingsAndInstanceState(this, savedInstanceState);
@@ -570,7 +572,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         bookmarkController.onLoadFromQuestion(new BookmarkController.IQueryConsumer() {
             @Override
             public void setQuery(QueryParameter newQuery) {
-                final IGalleryFilter whereFilter = FotoSql.getWhereFilter(newQuery, true);
+                final IGalleryFilter whereFilter = TagSql.parseQueryEx(newQuery, true);
                 mGalleryQueryParameter.mGalleryContentQuery = newQuery;
                 mGalleryQueryParameter.setSortID(IGalleryFilter.SORT_BY_NONE);
                 onFilterChanged(whereFilter, "loadBookmark");
@@ -647,7 +649,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         if (mDirectoryRoot == null) {
             // not loaded yet. load directoryRoot in background
             final QueryParameter currentDirContentQuery = new QueryParameter(FotoSql.getQuery(dirQueryID));
-            FotoSql.setWhereFilter(currentDirContentQuery, this.mGalleryQueryParameter.getCurrentFilterSettings(), this.mGalleryQueryParameter.getSortID() != IGalleryFilter.SORT_BY_NONE);
+            TagSql.filter2QueryEx(currentDirContentQuery, this.mGalleryQueryParameter.getCurrentFilterSettings(), this.mGalleryQueryParameter.getSortID() != IGalleryFilter.SORT_BY_NONE);
 
             this.mGalleryQueryParameter.mDirQueryID = (currentDirContentQuery != null) ? currentDirContentQuery.getID() : FotoSql.QUERY_TYPE_UNDEFINED;
 

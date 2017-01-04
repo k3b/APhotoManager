@@ -98,4 +98,6 @@ dependencies {
 
     compile 'org.slf4j:slf4j-api:1.7.7@jar'
     compile 'eu.lp0.slf4j:slf4j-android:1.7.7-1@jar'
+
+    testCompile 'junit:junit:4.11'
 }

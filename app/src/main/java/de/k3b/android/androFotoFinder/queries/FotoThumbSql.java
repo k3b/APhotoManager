@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import android.util.Log;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.IGalleryFilter;
 
 /**
  * Created by k3b on 21.06.2016.
@@ -38,14 +39,15 @@ public class FotoThumbSql {
 
     public static QueryParameter getQueryImageSizeByPath(String imagePath) {
 
-        return new QueryParameter()
+        return FotoSql.setWhereVisibility(new QueryParameter()
                 // .setID(QUERY_TYPE_GROUP_DATE)
                 .addColumn(
                         "count(*) as " + SQL_COL_COUNT,
                         "sum(" + FotoSql.SQL_COL_SIZE + ") AS " + SQL_COL_SIZE)
-                .addFrom(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI.toString())
+                .addFrom(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE.toString())
                 .addWhere(FotoSql.SQL_COL_PATH +
-                        " like ?", imagePath + "%")
+                        " like ?", imagePath + "%"),
+                IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC)
                 ;
     }
 
@@ -64,7 +66,7 @@ public class FotoThumbSql {
 
             Cursor c = null;
             try {
-                c = FotoSql.createCursorForQuery(context, query);
+                c = FotoSql.createCursorForQuery(context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
                 if (Global.debugEnabledSql) {
                     Log.i(Global.LOG_CONTEXT, mDebugPrefix + "getStatistic " + c.getCount() +
                             "\n\t" + query.toSqlString());

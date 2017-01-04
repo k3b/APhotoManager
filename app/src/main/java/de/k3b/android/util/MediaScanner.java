@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -49,6 +49,7 @@ import de.k3b.database.QueryParameter;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.io.FileUtils;
+import de.k3b.io.IGalleryFilter;
 import de.k3b.media.MediaUtil;
 
 /**
@@ -101,9 +102,9 @@ public class MediaScanner  {
     public static void notifyChanges(Context context, String why) {
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, CONTEXT + "notifyChanges(" + why + ") "
-                    + FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI);
+                    + FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE);
         }
-        context.getContentResolver().notifyChange(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, null);
+        context.getContentResolver().notifyChange(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, null);
     }
 
     public static boolean isNoMedia(int maxLevel, String[] pathNames) {
@@ -145,7 +146,7 @@ public class MediaScanner  {
                 if (Global.debugEnabled) {
                     Log.i(Global.LOG_CONTEXT, CONTEXT + " hideFolderMedia: delete from media db " + path + "/**");
                 }
-                result = FotoSql.execDeleteByPath(context, path);
+                result = FotoSql.execDeleteByPath(context, path, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
                 if (result > 0) {
                     MediaScanner.notifyChanges(context, "hide " + path + "/**");
                 }
@@ -277,7 +278,7 @@ public class MediaScanner  {
 
             Cursor c = null;
             try {
-                c = FotoSql.createCursorForQuery(context, query);
+                c = FotoSql.createCursorForQuery(context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
                 int pkColNo = c.getColumnIndex(FotoSql.SQL_COL_PK);
                 int pathColNo = c.getColumnIndex(FotoSql.SQL_COL_PATH);
                 while (c.moveToNext()) {

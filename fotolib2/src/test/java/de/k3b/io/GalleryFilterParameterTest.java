@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -53,14 +53,16 @@ public class GalleryFilterParameterTest {
     @Test
     public void toStringEmptyTest() {
         GalleryFilterParameter sut = new GalleryFilterParameter();
-        assertEquals(";;;;;;;;;", sut.toString());
+        assertEquals(";;;;;;;;;;", sut.toString());
         assertEquals("empty", true,  GalleryFilterParameter.isEmpty(sut));
     }
 
     @Test
     public void shouldParseFull() {
-        GalleryFilterParameter sutParsed = GalleryFilterParameter.parse(FILTER_STRING_FULL_EXAMPLE, new GalleryFilterParameter());
-        GalleryFilterParameter sut = new GalleryFilterParameter().get(sutParsed);
+        GalleryFilterParameter filterString = GalleryFilterParameter.parse(FILTER_STRING_FULL_EXAMPLE, new GalleryFilterParameter());
+        GalleryFilterParameter sut = new GalleryFilterParameter().get(filterString);
+
+
         assertEquals(FILTER_STRING_FULL_EXAMPLE, sut.toString());
     }
 

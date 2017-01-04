@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -37,8 +37,6 @@ import android.widget.Toast;
 // import com.squareup.leakcanary.RefWatcher;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -49,12 +47,12 @@ import de.k3b.android.androFotoFinder.directory.DirectoryLoaderTask;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.locationmap.LocationMapFragment;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.osmdroid.OsmdroidUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
-import de.k3b.database.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
@@ -92,9 +90,9 @@ public class GalleryFilterActivity extends LocalizedActivity
         final Intent intent = new Intent().setClass(context,
                 GalleryFilterActivity.class);
 
-        if (!GalleryFilterParameter.isEmpty(filter)) {
+        //if (!GalleryFilterParameter.isEmpty(filter)) {
             intent.putExtra(EXTRA_FILTER, filter.toString());
-        }
+        //}
 
         context.startActivityForResult(intent, resultID);
     }
@@ -203,7 +201,7 @@ public class GalleryFilterActivity extends LocalizedActivity
                 bookmarkController.onLoadFromQuestion(new BookmarkController.IQueryConsumer() {
                     @Override
                     public void setQuery(QueryParameter newQuery) {
-                        IGalleryFilter filter = FotoSql.getWhereFilter(newQuery, false);
+                        IGalleryFilter filter = TagSql.parseQueryEx(newQuery, false);
                         toGui(filter);
                     }
                 }, getAsQuery());
@@ -217,7 +215,7 @@ public class GalleryFilterActivity extends LocalizedActivity
         IGalleryFilter filter = new GalleryFilterParameter();
         fromGui(filter);
         QueryParameter query = new QueryParameter(mRootQuery);
-        FotoSql.setWhereFilter(query, filter, true);
+        TagSql.filter2QueryEx(query, filter, true);
         return query;
     }
 

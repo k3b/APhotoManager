@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -114,7 +114,7 @@ public class AndroidFileCommands extends FileCommands {
 
         if (false && this.mHasNoMedia && (mContext != null)) {
             // a nomedia file is affected => must update gui
-            this.mContext.getContentResolver().notifyChange(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, null, false);
+            this.mContext.getContentResolver().notifyChange(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, null, false);
             this.mHasNoMedia = false;
         }
         Toast.makeText(mContext, message, Toast.LENGTH_LONG).show();

@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2016 by k3b.
+ * Copyright (c) 2016-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ public class TagConverter {
         if (tags == null) return null;
         ArrayList<String> result = new ArrayList<String>();
         for(String elem : tags.toString().split("[,;:]")) {
-            if ((elem != null) && (elem.length() > 0)) {
+            if ((elem != null) && (elem.length() > 0) && ("%".compareTo(elem) != 0)) {
                 result.add(elem.trim());
             }
         }
