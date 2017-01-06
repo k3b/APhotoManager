@@ -1,39 +1,22 @@
 <?xml version='1.0' encoding='utf-8'?>
   <!--
   /*
-
  * Copyright (c) 2015 by k3b.
-
  *
-
  * This file is part of AndroFotoFinder.
-
  *
-
  * This program is free software: you can redistribute it and/or modify it
-
  * under the terms of the GNU General Public License as published by
-
  * the Free Software Foundation, either version 3 of the License, or
-
  * (at your option) any later version.
-
  *
-
  * This program is distributed in the hope that it will be useful, but WITHOUT
-
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License
-
  * for more details.
-
  *
-
  * You should have received a copy of the GNU General Public License along with
-
  * this program. If not, see <http://www.gnu.org/licenses/>
-
  */
 
  -->
@@ -42,13 +25,9 @@
    android:layout_height="match_parent"
    android:orientation="vertical">
   <!--
-
     [HorizontalScrollView-parent_scroller[parent_owner[[parentButton] [parentButton] [parentButton] ...]]]
-
     [HorizontalScrollView-child_scroller [child_owner [[childButton ] [childButton ] [childButton ] ...]]]
-
     [GridView-gridView]
-
     -->
 
   <HorizontalScrollView android:id="@+id/parent_scroller"
@@ -65,74 +44,40 @@
       android:layout_height="wrap_content">
       <!-- path bar goes here as dynamically inserted buttons -->
       <!-- to see it in layout-editor uncomment this
-
             <Button
-
                 android:layout_width="wrap_content"
-
                 android:layout_height="wrap_content"
-
                 android:text="path goes here"
                   />
-
             <Button
-
                 android:layout_width="wrap_content"
-
                 android:layout_height="wrap_content"
-
                 android:text="path goes here"
-
                 />
-
             <Button
-
                 android:layout_width="wrap_content"
-
                 android:layout_height="wrap_content"
-
                 android:text="path goes here"
-
                 />
-
             <Button
-
                 android:layout_width="wrap_content"
-
                 android:layout_height="wrap_content"
-
                 android:text="path goes here"
-
                 />
-
             <Button
-
                 android:layout_width="wrap_content"
-
                 android:layout_height="wrap_content"
-
                 android:text="path goes here"
-
                 />
-
             <Button
-
                 android:layout_width="wrap_content"
-
                 android:layout_height="wrap_content"
-
                 android:text="path goes here"
-
                 />
-
             <Button
-
                 android:layout_width="wrap_content"
-
                 android:layout_height="wrap_content"
-
                 android:text="path goes here"
-
                 />
 
             -->
@@ -155,74 +100,40 @@
       android:layout_height="wrap_content">
       <!-- path bar goes here as dynamically inserted buttons -->
       <!-- to see it in layout-editor uncomment this
-
             <Button
-
                 android:layout_width="wrap_content"
-
                 android:layout_height="wrap_content"
-
                 android:text="path goes here"
                   />
-
             <Button
-
                 android:layout_width="wrap_content"
-
                 android:layout_height="wrap_content"
-
                 android:text="path goes here"
-
                 />
-
             <Button
-
                 android:layout_width="wrap_content"
-
                 android:layout_height="wrap_content"
-
                 android:text="path goes here"
-
                 />
-
             <Button
-
                 android:layout_width="wrap_content"
-
                 android:layout_height="wrap_content"
-
                 android:text="path goes here"
-
                 />
-
             <Button
-
                 android:layout_width="wrap_content"
-
                 android:layout_height="wrap_content"
-
                 android:text="path goes here"
-
                 />
-
             <Button
-
                 android:layout_width="wrap_content"
-
                 android:layout_height="wrap_content"
-
                 android:text="path goes here"
-
                 />
-
             <Button
-
                 android:layout_width="wrap_content"
-
                 android:layout_height="wrap_content"
-
                 android:text="path goes here"
-
                 />
                   -->
     </LinearLayout>
