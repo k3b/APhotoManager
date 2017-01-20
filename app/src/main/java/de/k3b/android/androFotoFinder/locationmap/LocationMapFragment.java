@@ -522,7 +522,7 @@ public class LocationMapFragment extends DialogFragment {
                 parser.parse(new InputSource(is));
                 if (gpxBox != null) {
                     // box 50% more on right,left,top,button. delta >= 0.01 degrees
-                    gpxBox.increase(100.0, 0.01);
+                    gpxBox.increase(Global.mapMultiselectionBoxIncreaseByProcent, Global.mapMultiselectionBoxIncreaseMinSizeInDegrees);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -926,7 +926,7 @@ public class LocationMapFragment extends DialogFragment {
                     box.inflate(pos.getLatitude(), pos.getLongitude());
                 }
                 // box 50% more on right,left,top,button. delta >= 0.01 degrees
-                box.increase(100.0, 0.01);
+                box.increase(Global.mapMultiselectionBoxIncreaseByProcent, Global.mapMultiselectionBoxIncreaseMinSizeInDegrees);
                 zoomToBoundingBox("onLoadFinished Selection", box, NO_ZOOM);
             }
             if (dbg != null) {

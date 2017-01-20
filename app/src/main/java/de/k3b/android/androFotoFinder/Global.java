@@ -30,7 +30,9 @@ import java.util.Locale;
 import de.k3b.android.util.MenuUtils;
 
 /**
- * Global Settings
+ * Global Settings used throughout the app.
+ *
+ * Non-final values can be modified by the app settings
  *
  * Created by k3b on 04.06.2015.
  */
@@ -114,6 +116,11 @@ public class Global {
     /** #26 which image resolution should the "non zoomed imageView" have? */
     public static boolean initialImageDetailResolutionHigh = false; // false: MediaStore.Images.Thumbnails.MINI_KIND; true: FULL_SCREEN_KIND;
     public static boolean mapsForgeEnabled = false;
+
+    /** map with blue selection markers: how much to area to increase */
+    public static final double mapMultiselectionBoxIncreaseByProcent = 100.0;
+    /** map with blue selection markers: minimum size of zoom box in degrees */
+    public static final double mapMultiselectionBoxIncreaseMinSizeInDegrees = 0.01;
 
     public static void debugMemory(String modul, String message) {
         if (Global.debugEnabledMemory) {
