@@ -28,7 +28,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -89,13 +88,13 @@ import de.k3b.io.IGeoRectangle;
 
 /**
  * A fragment to display Foto locations in a geofrafic map.
- * A location-area can be picked for filtering.
- * A simple {@link Fragment} subclass.
+ * Used as Dialog to pick a location-area for filtering.
  */
 public class LocationMapFragment extends DialogFragment {
     protected static final int NO_MARKER_ID = -1;
 
-    public String STATE_LAST_VIEWPORT = "LAST_VIEWPORT";
+    protected String STATE_LAST_VIEWPORT = "LAST_VIEWPORT";
+
     private static final int NO_ZOOM = OsmdroidUtil.NO_ZOOM;
 
     /** If there is more than 200 millisecs no zoom/scroll update markers */
@@ -471,6 +470,7 @@ public class LocationMapFragment extends DialogFragment {
             this.mRootFilter = rootFilter;
         }
 
+        // load this.mFolderOverlayBlueGpxMarker
         GeoRectangle increasedRrectangle = defineGpxAdditionalPoints(gpxAdditionalPointsContentUri, rectangle);
 
         mSelectedItemsHandler.define(selectedItems);
@@ -495,13 +495,19 @@ public class LocationMapFragment extends DialogFragment {
         }
     }
 
+    /**
+     * Loads items from gpxAdditionalPointsContentUri into this.mFolderOverlayBlueGpxMarker.
+     * @param gpxAdditionalPointsContentUri where the gpx data comes from or null if no gpx
+     * @param rectangle previous geo-rectangle-map-area
+     * @return new geo-rectangle-map-area from gpx
+     */
     protected GeoRectangle defineGpxAdditionalPoints(Uri gpxAdditionalPointsContentUri, GeoRectangle rectangle) {
         if (gpxAdditionalPointsContentUri != null) {
             if (Global.debugEnabled || Global.debugEnabledMap) {
                 Log.i(Global.LOG_CONTEXT, mDebugPrefix + "defineGpxAdditionalPoints: " + gpxAdditionalPointsContentUri);
             }
 
-            final FolderOverlayEx folderForNewItems = new FolderOverlayEx();
+            final FolderOverlayEx folderForNewGpxItems = new FolderOverlayEx();
 
             final GeoRectangle gpxBox = (rectangle == null) ? new GeoRectangle() : null;
             ContentResolver cr = getActivity().getContentResolver();
@@ -511,10 +517,14 @@ public class LocationMapFragment extends DialogFragment {
                 GpxReaderBase parser = new GpxReaderBase(new IGeoInfoHandler() {
                     @Override
                     public boolean onGeoInfo(IGeoPointInfo iGeoPointInfo) {
-                        return addGpxGeoPoint(folderForNewItems, currentLoadedGeoPoint, gpxBox);
+                        return addGpxGeoPoint(folderForNewGpxItems, currentLoadedGeoPoint, gpxBox);
                     }
                 }, currentLoadedGeoPoint);
                 parser.parse(new InputSource(is));
+                if (gpxBox != null) {
+                    // box 50% more on right,left,top,button. delta >= 0.01 degrees
+                    gpxBox.increase(Global.mapMultiselectionBoxIncreaseByProcent, Global.mapMultiselectionBoxIncreaseMinSizeInDegrees);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -522,10 +532,10 @@ public class LocationMapFragment extends DialogFragment {
                 mMapView.getOverlays().remove(mFolderOverlayBlueGpxMarker);
                 mFolderOverlayBlueGpxMarker = null;
             }
-            mFolderOverlayBlueGpxMarker = folderForNewItems;
+            mFolderOverlayBlueGpxMarker = folderForNewGpxItems;
             mMapView.getOverlays().add(0, mFolderOverlayBlueGpxMarker);
             if (Global.debugEnabled || Global.debugEnabledMap) {
-                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "defineGpxAdditionalPoints itemcount: " + folderForNewItems.getItems().size());
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "defineGpxAdditionalPoints itemcount: " + folderForNewGpxItems.getItems().size());
             }
 
 
@@ -537,33 +547,13 @@ public class LocationMapFragment extends DialogFragment {
     private MarkerBubblePopup<GeoPointDtoEx> mPopup;
 
     private static int mId = 1;
+
     protected boolean addGpxGeoPoint(FolderOverlayEx destination, GeoPointDtoEx point, GeoRectangle box) {
-
-
-        // Overlay marker = createIconOverlay(point);
-        // Overlay marker = createMarker(point);
         Overlay marker = createMarkerEx(point);
         destination.add(marker);
         if (box != null) box.inflate(point.getLatitude(), point.getLongitude());
         return true;
     }
-/*
-    @NonNull
-    private Overlay createIconOverlay(GeoPointDtoEx point) {
-        return new IconOverlay(new GeoPoint(point.getLatitude(), point.getLongitude()), mSelectedItemsHandler.mBlueMarker);
-    }
-
-    @NonNull
-    private Marker createMarker(GeoPointDtoEx point) {
-        Marker marker = new Marker(mMapView);
-        marker.setPosition(new GeoPoint(point.getLatitude(), point.getLongitude()));
-        marker.setTitle(point.getName());
-        marker.setSubDescription(point.getDescription());
-        if (point.getLink() != null)
-        marker.setSnippet("<a href='" + point.getLink() + "'>" + point.getLink() + "</a>");
-        return marker;
-    }
-*/
 
     private Overlay createMarkerEx(GeoPointDtoEx point) {
         GeoPointDtoEx position = (GeoPointDtoEx) point.clone();
@@ -909,18 +899,18 @@ public class LocationMapFragment extends DialogFragment {
 
         /** gets called when MarkerLoaderTask has finished.
          *
-         * @param result null if there was an error
+         * @param loadedBlueMarkers null if there was an error
          */
-        protected void onLoadFinishedSelection(OverlayManager result) {
+        protected void onLoadFinishedSelection(OverlayManager loadedBlueMarkers) {
             mCurrentSelectionMarkerLoader = null;
             StringBuilder dbg = (Global.debugEnabledSql || Global.debugEnabledMap) ? new StringBuilder() : null;
             if (dbg != null) {
-                int found = (result != null) ? result.size() : 0;
+                int found = (loadedBlueMarkers != null) ? loadedBlueMarkers.size() : 0;
                 dbg.append(mDebugPrefix).append("onLoadFinishedSelection() markers created: ").append(found);
             }
 
-            if (result != null) {
-                OverlayManager old = mFolderOverlayBlueSelectionMarker.setOverlayManager(result);
+            if ((loadedBlueMarkers != null) && (loadedBlueMarkers.size() > 0)) {
+                OverlayManager old = mFolderOverlayBlueSelectionMarker.setOverlayManager(loadedBlueMarkers);
                 if (old != null) {
                     if (dbg != null) {
                         dbg.append(mDebugPrefix).append(" previous : : ").append(old.size());
@@ -929,12 +919,15 @@ public class LocationMapFragment extends DialogFragment {
                     old.clear();
                 }
                 mMapView.invalidate();
+
                 GeoRectangle box = new GeoRectangle();
-                for (Overlay item: result) {
+                for (Overlay item: loadedBlueMarkers) {
                     IGeoPoint pos = ((IconOverlay) item).getPosition();
 
                     box.inflate(pos.getLatitude(), pos.getLongitude());
                 }
+                // box 50% more on right,left,top,button. delta >= 0.01 degrees
+                box.increase(Global.mapMultiselectionBoxIncreaseByProcent, Global.mapMultiselectionBoxIncreaseMinSizeInDegrees);
                 zoomToBoundingBox("onLoadFinished Selection", box, NO_ZOOM);
             }
             if (dbg != null) {

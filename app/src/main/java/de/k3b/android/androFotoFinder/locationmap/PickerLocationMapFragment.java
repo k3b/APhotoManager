@@ -53,11 +53,13 @@ import de.k3b.io.GeoRectangle;
  */
 public class PickerLocationMapFragment extends LocationMapFragment {
     private static final String STATE_LAST_SELECTED_POINT = "last_geo_pick";
+
     private final String mDebugPrefix;
     private boolean mUsePicker;
 
     public PickerLocationMapFragment() {
         mDebugPrefix = "PickerLocationMapFragment ";
+        STATE_LAST_VIEWPORT = "LAST_PICKER_VIEWPORT";
     }
     /**
      * non tap-able marker that moves to last tap position

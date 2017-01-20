@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-/*
+<?xml version='1.0' encoding='utf-8'?>
+  <!--
+  /*
  * Copyright (c) 2015 by k3b.
  *
  * This file is part of AndroFotoFinder.
@@ -18,42 +18,37 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
- -->
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    >
-    <!--
+ -->
+   <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+   android:layout_width="match_parent"
+   android:layout_height="match_parent"
+   android:orientation="vertical">
+  <!--
     [HorizontalScrollView-parent_scroller[parent_owner[[parentButton] [parentButton] [parentButton] ...]]]
     [HorizontalScrollView-child_scroller [child_owner [[childButton ] [childButton ] [childButton ] ...]]]
     [GridView-gridView]
     -->
-    <HorizontalScrollView
-        android:id="@+id/parent_scroller"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="horizontal"
-        android:scrollbarSize="2dp"
-        android:scrollbarStyle="insideInset"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        >
-        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/parent_owner"
-            android:orientation="horizontal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            >
 
-            <!-- path bar goes here as dynamically inserted buttons -->
-            <!-- to see it in layout-editor uncomment this
+  <HorizontalScrollView android:id="@+id/parent_scroller"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:scrollbars="horizontal"
+    android:scrollbarSize="2dp"
+    android:scrollbarStyle="insideInset">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+      android:id="@+id/parent_owner"
+      android:orientation="horizontal"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content">
+      <!-- path bar goes here as dynamically inserted buttons -->
+      <!-- to see it in layout-editor uncomment this
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="path goes here" />
+                android:text="path goes here"
+                  />
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -84,33 +79,32 @@
                 android:layout_height="wrap_content"
                 android:text="path goes here"
                 />
+
             -->
+    </LinearLayout>
+    <!--Removed ObsoleteLayoutParam: layout_alignParentLeft-->
+    <!--Removed ObsoleteLayoutParam: layout_alignParentTop-->
+  </HorizontalScrollView>
 
-        </LinearLayout>
-    </HorizontalScrollView>
-    <HorizontalScrollView
-        android:id="@+id/child_scroller"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="horizontal"
-        android:scrollbarSize="2dp"
-        android:scrollbarStyle="insideInset"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        >
-        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:id="@+id/child_owner"
-            android:orientation="horizontal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            >
+  <HorizontalScrollView android:id="@+id/child_scroller"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:scrollbars="horizontal"
+    android:scrollbarSize="2dp"
+    android:scrollbarStyle="insideInset">
 
-            <!-- path bar goes here as dynamically inserted buttons -->
-            <!-- to see it in layout-editor uncomment this
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+      android:id="@+id/child_owner"
+      android:orientation="horizontal"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content">
+      <!-- path bar goes here as dynamically inserted buttons -->
+      <!-- to see it in layout-editor uncomment this
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="path goes here" />
+                android:text="path goes here"
+                  />
             <Button
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -141,26 +135,25 @@
                 android:layout_height="wrap_content"
                 android:text="path goes here"
                 />
--->
+                  -->
+    </LinearLayout>
+    <!--Removed ObsoleteLayoutParam: layout_alignParentLeft-->
+    <!--Removed ObsoleteLayoutParam: layout_alignParentTop-->
+  </HorizontalScrollView>
 
-        </LinearLayout>
-    </HorizontalScrollView>
-
-    <GridView
-            android:orientation="horizontal"
-            android:background="#f0f0f0"
-            android:id="@+id/gridView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/grid_cell_margin"
-            android:columnWidth="@dimen/grid_cell_width"
-            android:drawSelectorOnTop="true"
-            android:gravity="center"
-            android:numColumns="auto_fit"
-            android:stretchMode="columnWidth"
-            android:verticalSpacing="@dimen/grid_cell_margin"
-            android:horizontalSpacing="@dimen/grid_cell_margin"
-            android:focusable="true"
-            android:clickable="true"/>
-
+  <GridView android:orientation="horizontal"
+    android:background="#f0f0f0"
+    android:id="@+id/gridView"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/grid_cell_margin"
+    android:columnWidth="@dimen/grid_cell_width"
+    android:drawSelectorOnTop="true"
+    android:gravity="center"
+    android:numColumns="auto_fit"
+    android:stretchMode="columnWidth"
+    android:verticalSpacing="@dimen/grid_cell_margin"
+    android:horizontalSpacing="@dimen/grid_cell_margin"
+    android:focusable="true"
+    android:clickable="true"/>
 </LinearLayout>

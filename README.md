@@ -3,6 +3,13 @@
 Enhanced Android [Gallery App](https://github.com/k3b/APhotoManager/wiki/Gallery-View) to manage local photos: [geo map](https://github.com/k3b/APhotoManager/wiki/geographic-map), 
 find, sort, view, copy, delete, set gps exif data, send, ... .
 
+**DISCLAIMER com.PlayZone.quickimagegallery**: Sombody has created a clone of #APhotoManager app, changed some icons, added google-advertising-code (and may be other code???) and put it into google play store https://play.google.com/store/apps/details?id=com.PlayZone.quickimagegallery<br/>I (k3b) have nothing to do with this clone and i cannot garantee that the clone has no unwanted buildin code.
+
+* sizeof com.PlayZone.quickimagegallery.apk version 0.5.5: 2.7 MB
+* sizeof de.k3b.android.androFotoFinder.apk version 0.5.5: 1.7 MB 
+
+
+
 ## Features
 
 * Free, opensource, no adds, no user tracking, available on [f-droid](https://f-droid.org/)

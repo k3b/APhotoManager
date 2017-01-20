@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-/*
+<?xml version='1.0' encoding='utf-8'?>
+  <!--
+  /*
  * Copyright (c) 2015 by k3b.
  *
  * This file is part of AndroFotoFinder.
@@ -18,17 +18,18 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
- -->
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity">
-    <fragment
-        android:id="@+id/fragment_map"
-        android:name="de.k3b.android.androFotoFinder.locationmap.PickerLocationMapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="4" />
 
+ -->
+   <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+   xmlns:tools="http://schemas.android.com/tools"
+   android:layout_width="match_parent"
+   android:layout_height="match_parent"
+   tools:context="de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity">
+
+  <fragment android:id="@+id/fragment_map"
+    android:name="de.k3b.android.androFotoFinder.locationmap.PickerLocationMapFragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <!--Removed ObsoleteLayoutParam: layout_weight-->
+  </fragment>
 </RelativeLayout>

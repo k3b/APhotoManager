@@ -70,13 +70,23 @@ public class GeoRectangle implements IGeoRectangle {
         return isEmpty(this);
     }
 
-
+    /** inflate this-rectangle so that lat/lon is inside  */
     public void inflate(double lat, double lon) {
         latitudeMin = min(latitudeMin, lat);
         latitudeMax = max(latitudeMax, lat);
         logituedMin = min(logituedMin, lon);
         logituedMax = max(logituedMax, lon);
+    }
 
+    /** inflate this-rectangle so that it occupies percent more sapce >= minValue. */
+    public void increase(double percent, double minValue) {
+        double latitudeDelta = max(((latitudeMax - latitudeMin) * percent) / 200, minValue);
+        latitudeMax = min(latitudeMax + latitudeDelta, 85.0);
+        latitudeMin = max(latitudeMin - latitudeDelta, -85.0);
+
+        double logitudeDelta = max(((logituedMax - logituedMin) * percent) / 200, minValue);
+        logituedMax = min(logituedMax + logitudeDelta, 180.0);
+        logituedMin = max(logituedMin - logitudeDelta, -180.0);
     }
 
     private static double min(double old, double newValue) {

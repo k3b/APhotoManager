@@ -141,7 +141,6 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
         }
 
         mMap = (PickerLocationMapFragment) getFragmentManager().findFragmentById(R.id.fragment_map);
-        mMap.STATE_LAST_VIEWPORT = "ignore"; // do not use last viewport in settings
 
         GeoRectangle rectangle = null;
         int zoom = OsmdroidUtil.NO_ZOOM;
