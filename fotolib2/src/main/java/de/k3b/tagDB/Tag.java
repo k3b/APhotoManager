@@ -53,6 +53,8 @@ public class Tag{
     private String name;
     private Tag parent;
 
+    public Tag(){}
+
     public String getName() {
         return name;
     }
@@ -94,7 +96,13 @@ public class Tag{
             return name.equals((String)o);
         }
         if (!(o instanceof Tag)) return false;
-        return name.equals(((Tag)o).name);
+        Tag other = (Tag) o;
+        if (name.equals(other.name)) {
+            if (this.parent == null) return other.parent == null;
+            return parent.equals(other.parent);
+        }
+        return false;
+        // return name.equals(((Tag)o).name);
     }
 
     public static List<Tag> toList(String... items) {
@@ -141,6 +149,60 @@ public class Tag{
         while (cur != null) {
             result++;
             cur = cur.getParent();
+        }
+        return result;
+    }
+
+    public List<Tag> getChildren(List<Tag> all, boolean recursive, boolean includeThis) {
+        return getChildren(new ArrayList<Tag>(), all, recursive, includeThis);
+    }
+
+    private List<Tag> getChildren(List<Tag> result, List<Tag> all, boolean recursive, boolean includeThis) {
+        if (includeThis) result.add(this);
+        if (all != null) {
+            for(Tag candidate : all) {
+                if ((candidate != null) && (candidate.parent == this)) {
+                    result.add(candidate);
+                    if (recursive) candidate.getChildren(result, all, true, includeThis);
+                }
+            }
+        }
+        if (result.size() == 0) return null;
+        return result;
+    }
+
+    public static Tag findFirstChildByName(List<Tag> all, Tag parent, String name) {
+        if (all != null) {
+            for(Tag candidate : all) {
+                if ((candidate != null) && (candidate.parent == parent) && name.equals(candidate.getName())) {
+					return candidate;
+                }
+            }
+        }
+        return null;
+    }
+
+	
+    public int delete(List<Tag> all, boolean recursive) {
+        int result = 0;
+        if (all != null) {
+            List<Tag> children = getChildren(all, false, false);
+            if (children != null) {
+                for (Tag child : children) {
+                    if (child != null) {
+                        if (recursive) {
+                            result += child.delete(all, recursive);
+                        } else {
+                            child.parent = this.parent;
+                        }
+                    }
+                }
+            }
+
+            if (all.contains(this)) {
+                all.remove(this);
+                result++;
+            }
         }
         return result;
     }

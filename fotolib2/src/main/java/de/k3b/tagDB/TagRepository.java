@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2016 by k3b.
+ * Copyright (c) 2016-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -86,13 +86,13 @@ public class TagRepository {
         TagRepository.sInstance = new TagRepository(newFile);
 
         if (old != null) {
-            if (TagRepository.sInstance.include(null, old) > 0) {
+            if (TagRepository.sInstance.includeChildTags(null, old) > 0) {
                 TagRepository.sInstance.save();
             }
         }
     }
 
-    public int include(Tag parent, List<Tag> newItems) {
+    public int includeChildTags(Tag parent, List<Tag> newItems) {
         int changes = 0;
         if ((newItems != null) && (newItems.size() > 0)) {
             List<Tag> existingItems = this.load();
@@ -107,23 +107,83 @@ public class TagRepository {
         return changes;
     }
 
-    public int includeString(Tag parent, List<String> newItems) {
+    public int include(Tag parent, List<String> children) {
         int changes = 0;
-        if ((newItems != null) && (newItems.size() > 0)) {
+        if ((children != null) && (children.size() > 0)) {
             List<Tag> existingItems = this.load();
-            for (String newItem : newItems) {
-                if (!contains(newItem)) {
-                    Tag newTag = new Tag().setName(newItem);
-                    if (parent != null) newTag.setParent(parent);
-                    existingItems.add(newTag);
-                    changes++;
-                }
+            for (String newItem : children) {
+                changes += include(existingItems, parent, null, newItem);
             }
         }
         return changes;
     }
 
+    /**
+     * make shure that newSubItemsExpression is included in all below parent. Inserts if neccessary.
+     *
+     * @param all contain all items
+     * @param parent where relative items are added to. if null relative items go to root.
+     * @param target if not null this tag should get the name of newSubItemsExpression
+     *@param childNameExpression i.e. /d,a,b,c/c1/c11 adds d to root, a,b,c as children to parent and c gets child c1 and c1 gets child c11.  @return number of (sub-)tags that where inserted
+     */
+    public static int include(List<Tag> all, Tag parent, Tag target, String childNameExpression) {
+        int changes = 0;
 
+        Tag firstTarget = target;
+		if (childNameExpression != null) {
+			String[] newSubPathExpression = childNameExpression.split("[,;:|]+");
+			for(String newChild : newSubPathExpression) {
+				changes += includeTagChildren(all, parent, firstTarget, newChild);
+                firstTarget = null;
+			}
+		}
+		
+		return changes;
+	}
+
+	/** make shure that newSubPathExpression is included in all below parent. Inserts if neccessary.
+	  * newSubPathExpression i.e. c/c1/c11 adds c as child to parent and c gets child c1 and c1 gets child c11.
+	  * @return number of (sub-)tags that where inserted */
+    private static int includeTagChildren(List<Tag> all, Tag tagParent, Tag target, String newSubPathExpression) {
+        int changes = 0;
+		
+        if (newSubPathExpression != null) {
+            Tag tagRoot = tagParent;
+            if (newSubPathExpression.startsWith("/") || newSubPathExpression.startsWith("\\")) {
+                // add to root
+                tagRoot = null;
+            }
+
+            Tag currentTagParent = tagRoot;
+            String[] newPathNames = newSubPathExpression.split("[\\/]+");
+
+            for(String pathName : newPathNames) {
+				if (pathName != null) { 
+					pathName = pathName.trim();
+					if (pathName.length() > 0) {
+						Tag tag = Tag.findFirstChildByName(all, currentTagParent, pathName);
+						if (tag == null) {
+							// there is no currentTagParent with name=pathName yet: insert
+							tag = new Tag().setName(pathName);
+							tag.setParent(currentTagParent);
+							all.add(tag);
+							changes++;						
+						} // else already existing
+						currentTagParent = tag;
+					}
+				}
+            }
+
+            if ((target != null) && (currentTagParent != null)) {
+                target.setName(currentTagParent.getName());
+                target.setParent(currentTagParent.getParent());
+                all.remove(currentTagParent);
+            }
+
+        }
+		return changes;
+    }
+    
     /** Load from repository-file to memory.
      *
      * @return data loaded
@@ -336,7 +396,10 @@ public class TagRepository {
     }
 
     public Tag findFirstByName(String name) {
-        List<Tag> items = load();
+        return findFirstByName(load(), name);
+    }
+
+    public static Tag findFirstByName(List<Tag> items, String name) {
         if (items != null) {
             for (Tag item : items) {
                 if (name.equals(item.getName())) return item;
@@ -356,4 +419,22 @@ public class TagRepository {
         return result;
     }
 
+    public int includeIfNotFound(List<String>... lists) {
+        List<Tag> allTags = load();
+        int modified = 0;
+        Tag root = null;
+        for (List<String> list : lists) {
+            if (list != null) {
+                for(String item : list) {
+                    if ((item != null) && (item.length() > 0) && (null == findFirstByName(allTags, item))) {
+                        if (root == null) root = getImportRoot();
+
+                        allTags.add(new Tag().setName(item).setParent(root));
+                        modified++;
+                    }
+                }
+            }
+        }
+        return modified;
+    }
 }

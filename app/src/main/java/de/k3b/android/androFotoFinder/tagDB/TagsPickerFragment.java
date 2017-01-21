@@ -20,7 +20,9 @@
 package de.k3b.android.androFotoFinder.tagDB;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DialogFragment;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -37,7 +39,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -48,26 +50,44 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
+import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.widget.Dialogs;
+import de.k3b.database.QueryParameter;
+import de.k3b.io.GalleryFilterParameter;
+import de.k3b.io.IGalleryFilter;
 import de.k3b.io.ListUtils;
 import de.k3b.tagDB.Tag;
 import de.k3b.tagDB.TagRepository;
 
 /**
+ * A DialogFragment to select Tags to be added/removed.
+ * Closes on screen rotation.
+ * Needs additional Parameters that are currently not backed up by settings/preferences.
+ *
  * Created by k3b on 04.01.2017.
  */
 
 public class TagsPickerFragment  extends DialogFragment  {
 
     private ITagsPicker mFragmentOnwner = null;
+    private boolean mIsFilterMode = true;
+    private ImageView mFilterMode;
+    private ImageView mBookmarkMode;
 
     /** Owning Activity must implement this if it wants to handle the result of ok and cancel */
     public interface ITagsPicker {
+        /** tag-dialog cancel pressed */
         boolean onCancel(String msg);
 
+        /** tag-dialog ok pressed */
         boolean onOk(List<String> addNames,
                      List<String> removeNames);
+
+        boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag);
     };
 
     public static final int ACTIVITY_ID = 78921;
@@ -86,15 +106,20 @@ public class TagsPickerFragment  extends DialogFragment  {
     private ImageView mImage;
 
     private TextView mStatus = null;
-    private Button mCmdPopup = null;
-    
-    private int mContextMenue = 0;
+
+    // not null when dialog is open that must be closed.
+    private AlertDialog mSubDialog = null;
+
+
+    private int mContextMenueId = R.menu.menu_tags_context;
     private int mTitleId = 0;
 
     // local data
     protected Activity mContext;
-    private Tag mCurrentSelection;
-    private List<Tag> mSelectedItems = new ArrayList<Tag>();
+    private Tag mCurrentMenuSelection;
+    private Tag mClipboardItem = null;
+    private int mClipboardType = 0;
+
     private final List<String> mBookMarkNames = new ArrayList<String>();
     private List<String> mAddNames = null;
     private List<String> mRemoveNames = null;
@@ -103,14 +128,6 @@ public class TagsPickerFragment  extends DialogFragment  {
     // for debugging
     private static int id = 1;
     private final String debugPrefix;
-
-    View.OnLongClickListener onLongClickListener = new View.OnLongClickListener() {
-        @Override
-        public boolean onLongClick(View v) {
-            onShowPopUp(mCmdPopup, mCurrentSelection);
-            return false;
-        }
-    };
 
     public TagsPickerFragment() {
         // Required empty public constructor
@@ -128,7 +145,7 @@ public class TagsPickerFragment  extends DialogFragment  {
     }
 
     public TagsPickerFragment setContextMenuId(int contextMenuId) {
-        mContextMenue = contextMenuId;
+        mContextMenueId = contextMenuId;
         return this;
     }
 
@@ -173,7 +190,7 @@ public class TagsPickerFragment  extends DialogFragment  {
         }
 
         if (savedInstanceState != null) {
-            this.mContextMenue = savedInstanceState.getInt(INSTANCE_STATE_CONTEXT_MENU, this.mContextMenue);
+            this.mContextMenueId = savedInstanceState.getInt(INSTANCE_STATE_CONTEXT_MENU, this.mContextMenueId);
         }
         SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(this.getActivity());
@@ -192,24 +209,40 @@ public class TagsPickerFragment  extends DialogFragment  {
             mBookMarkNames.addAll(ListUtils.fromString(lastBookMarkNames));
         }
 
+        TagRepository repository = TagRepository.getInstance();
+        repository.includeIfNotFound(mAddNames, mRemoveNames, mAffectedNames, mBookMarkNames);
         this.mDataAdapter = new TagListArrayAdapter(this.getActivity(),
-                TagRepository.getInstance().load(),
-                mAddNames, mRemoveNames, mAffectedNames, mBookMarkNames,
-                onLongClickListener);
+                repository.reload(),
+                mAddNames, mRemoveNames, mAffectedNames, mBookMarkNames
+        );
 
         mList = (ListView)view.findViewById(R.id.list);
         mList.setAdapter(mDataAdapter);
 
-        if (mContextMenue != 0) {
+        if (mContextMenueId != 0)
+
+        {
             mList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                 @Override
                 public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                    return false;
+                    mCurrentMenuSelection = (position >= 0) ? mDataAdapter.getItem(position) : null;
+                    Log.d(Global.LOG_CONTEXT,"tag-OnItemLongClick-" + ((mCurrentMenuSelection != null) ? mCurrentMenuSelection.getPath() : ""));
+                    onShowPopUp(mContextMenueId, view, mCurrentMenuSelection);
+                    return true;
                 }
             });
         }
-
         this.mImage = (ImageView) view.findViewById(R.id.image);
+        this.mFilterMode = (ImageView) view.findViewById(R.id.cmd_find_mode);
+        View.OnClickListener click = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setFilterMode(!mIsFilterMode);
+            }
+        };
+        this.mFilterMode.setOnClickListener(click);
+        this.mBookmarkMode = (ImageView) view.findViewById(R.id.cmd_bookmark_mode);
+        this.mBookmarkMode.setOnClickListener(click);
 
         this.mFilterEdit = (EditText) view.findViewById(R.id.myFilter);
         this.mFilterEdit.addTextChangedListener(new TextWatcher() {
@@ -252,6 +285,20 @@ public class TagsPickerFragment  extends DialogFragment  {
         
     }
 
+    private void setFilterMode(boolean newValue) {
+        mIsFilterMode = newValue;
+        this.mBookmarkMode.setImageDrawable(getActivity().getResources().getDrawable(
+                !mIsFilterMode ? android.R.drawable.btn_star_big_on : android.R.drawable.btn_star_big_off));
+
+        this.mFilterMode.setImageDrawable(getActivity().getResources().getDrawable(
+                mIsFilterMode ? R.drawable.ic_btn_search_blue : R.drawable.ic_btn_search));
+
+        // drawable.setColorFilter(0x00ff0000, PorterDuff.Mode.ADD);
+        this.mFilterEdit.setVisibility(mIsFilterMode ? View.VISIBLE : View.INVISIBLE);
+
+        refershResultList();
+    }
+
     private void saveSettings() {
         if (mFragmentOnwner != null) {
             // not recreate after rotation
@@ -268,6 +315,12 @@ public class TagsPickerFragment  extends DialogFragment  {
     public void onDetach() {
         saveSettings();
         super.onDetach();
+    }
+
+    @Override public void onDestroy() {
+        if (mSubDialog != null) mSubDialog.dismiss();
+        mSubDialog = null;
+        super.onDestroy();
     }
 
 
@@ -289,18 +342,9 @@ public class TagsPickerFragment  extends DialogFragment  {
             cmdCancel.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    onCancel(debugPrefix + "onCancel: " + mCurrentSelection);
+                    onCancel(debugPrefix + "onCancel: " + mCurrentMenuSelection);
                 }
             });
-        }
-
-        mCmdPopup = null;
-        if (mContextMenue != 0) {
-            mCmdPopup = (Button) view.findViewById(R.id.cmd_popup);
-            if (mCmdPopup != null) {
-                mCmdPopup.setOnLongClickListener(onLongClickListener);
-                mCmdPopup.setVisibility(View.VISIBLE);
-            }
         }
 
         this.getDialog().setTitle(mTitleId);
@@ -318,7 +362,7 @@ public class TagsPickerFragment  extends DialogFragment  {
 
     public boolean onOk(List<String> addNames,
                         List<String> removeNames) {
-        Log.d(Global.LOG_CONTEXT, debugPrefix + "onOk: " + mCurrentSelection);
+        Log.d(Global.LOG_CONTEXT, debugPrefix + "onOk: " + mCurrentMenuSelection);
 
         if ((mFragmentOnwner != null) && (!mFragmentOnwner.onOk(addNames, removeNames))) return false;
 
@@ -329,8 +373,14 @@ public class TagsPickerFragment  extends DialogFragment  {
     }
 
     /** called via pathBar-Button-LongClick, tree-item-LongClick, popUp-button */
-    private void onShowPopUp(View anchor, Tag selection) {
-        PopupMenu popup = onCreatePopupMenu(anchor, selection);
+    private void onShowPopUp(int contextMenueId, View anchor, Tag selection) {
+        PopupMenu popup = onCreatePopupMenu(contextMenueId, anchor, selection);
+
+        // without mClipboardItem paste is not possible
+        if (mClipboardItem == null) {
+            MenuItem menuItem = popup.getMenu().findItem(android.R.id.paste);
+            menuItem.setVisible(false);
+        }
 
         if (popup != null) {
             popup.show();
@@ -339,13 +389,13 @@ public class TagsPickerFragment  extends DialogFragment  {
 
 
     @NonNull
-    private PopupMenu onCreatePopupMenu(View anchor, Tag selection) {
+    private PopupMenu onCreatePopupMenu(int contextMenueId, View anchor, Tag selection) {
         PopupMenu popup = new PopupMenu(getActivity(), anchor);
         popup.setOnMenuItemClickListener(popUpListener);
         MenuInflater inflater = popup.getMenuInflater();
-        inflater.inflate(this.mContextMenue, popup.getMenu());
+        inflater.inflate(contextMenueId, popup.getMenu());
         if (selection != null) {
-            mCurrentSelection = selection;
+            mCurrentMenuSelection = selection;
         }
         return popup;
     }
@@ -358,24 +408,335 @@ public class TagsPickerFragment  extends DialogFragment  {
     };
 
     private boolean onPopUpClick(MenuItem menuItem) {
+        if (mFragmentOnwner.onTagPopUpClick(menuItem.getItemId(), mCurrentMenuSelection)) return true;
         switch (menuItem.getItemId()) {
+                    /*!!!!!
+                    mCurrentMenuSelection = mDataAdapter.getItem(position);
+                    */
             /*
-            case R.id.cmd_mk_dir:
-                return onCreateSubDirQuestion(mCurrentSelection);
             case R.id.cmd_photo:
-                return showPhoto(mCurrentSelection);
+                return showPhoto(mCurrentMenuSelection);
             case R.id.cmd_gallery:
-                return showGallery(mCurrentSelection);
-            case R.id.action_details:
-                return showDirInfo(mCurrentSelection);
-            case R.id.cmd_fix_link:
-                return fixLinks(mCurrentSelection);
-            case R.id.cmd_folder_hide_images:
-                onHideFolderMediaQuestion(mCurrentSelection.getAbsolute());
-                return true;
                 */
+            case android.R.id.cut:
+            case android.R.id.copy:
+                mClipboardItem = mCurrentMenuSelection;
+                mClipboardType = menuItem.getItemId();
+                break;
+            case android.R.id.paste:
+                return onPaste(mCurrentMenuSelection);
+            case R.id.cmd_tags_add:
+                return showTagAddDialog(mCurrentMenuSelection);
+            case R.id.menu_item_rename:
+                return showTagRenameDialog(mCurrentMenuSelection);
+            case R.id.cmd_delete:
+                return showTagDeleteDialog(mCurrentMenuSelection);
+/*
+    implemented by owner
+            case R.id.cmd_photo:
+            case R.id.cmd_gallery:
+                return showGallery(mCurrentMenuSelection);
+            case R.id.cmd_show_geo:
+*/
             default:break;
         }
+        return false;
+    }
+
+
+    public static boolean handleMenuShow(int menuItemItemId, Tag selectedTag, Activity context, IGalleryFilter parentFilter) {
+        switch (menuItemItemId) {
+            case R.id.cmd_photo:
+                ImageDetailActivityViewPager.showActivity(context, null, 0, createSubQueryByTag(parentFilter, selectedTag));
+                return true;
+            case R.id.cmd_gallery:
+                FotoGalleryActivity.showActivity(context, createSubFilterByTag(parentFilter, selectedTag), null, 0);
+                return true;
+            default:break;
+        }
+        return false;
+    }
+
+    @NonNull
+    private static QueryParameter createSubQueryByTag(IGalleryFilter parentFilter, Tag selectedTag) {
+        GalleryFilterParameter filter = createSubFilterByTag(parentFilter, selectedTag);
+        QueryParameter query = new QueryParameter();
+        TagSql.filter2QueryEx(query, filter, false);
+        FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
+        return query;
+    }
+
+    @NonNull
+    private static GalleryFilterParameter createSubFilterByTag(IGalleryFilter parentFilter, Tag selectedTag) {
+        GalleryFilterParameter filter = new GalleryFilterParameter().get(parentFilter);
+        filter.setTagsAllIncluded(ListUtils.toStringList(selectedTag));
+        return filter;
+    }
+
+    public boolean showTagDeleteDialog(final Tag item) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle(R.string.delete_menu_title);
+        View content = getActivity().getLayoutInflater().inflate(R.layout.dialog_tag_delete, null);
+
+        ((TextView) content.findViewById(R.id.lblTag)).setText(item.getName());
+
+        final CheckBox chkUpdateAffectedPhotos = (CheckBox) content.findViewById(R.id.chkUpdateAffectedPhotos);
+
+        final CheckBox chkDeleteChildren = (CheckBox) content.findViewById(R.id.chkDeleteChildren);
+        TextView childTags = (TextView) content.findViewById(R.id.lblTagChildren);
+
+        List<Tag> rootList = new ArrayList<Tag>();
+        rootList.add(item);
+        final int rootTagReferenceCount = TagSql.getTagRefCount(getActivity(), rootList);
+
+        List<Tag> children = item.getChildren(TagRepository.getInstance().load(), true, false);
+
+        if (children != null) rootList.addAll(children);
+        final int allTagReferenceCount = (children == null)
+                ? rootTagReferenceCount
+                : TagSql.getTagRefCount(getActivity(), rootList);
+
+        if (children == null) {
+            chkDeleteChildren.setVisibility(View.GONE);
+            childTags.setVisibility(View.GONE);
+        } else {
+            childTags.setText(ListUtils.toString(children));
+            chkDeleteChildren.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    chkUpdateAffectedPhotos.setText(getString(R.string.tags_update_photos) + " (" +
+                            ((chkDeleteChildren.isChecked())
+                                    ? allTagReferenceCount
+                                    : rootTagReferenceCount )  + ")");
+                }
+            });
+        }
+
+        chkUpdateAffectedPhotos.setText(getString(R.string.tags_update_photos) + " (" +
+                rootTagReferenceCount + ")");
+        builder.setView(content);
+        builder.setNegativeButton(R.string.btn_cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
+            //@Override
+            public void onClick(DialogInterface dialog, int which) {
+                tagDelete(item, chkDeleteChildren.isChecked(), chkUpdateAffectedPhotos.isChecked());
+                dialog.dismiss();
+            }
+        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+
+        return true;
+    }
+
+    private class TagDeleteWithDbUpdateTask extends TagTask<List<Tag>> {
+        TagDeleteWithDbUpdateTask() {
+            super(getActivity(), R.string.delete_menu_title);
+        }
+
+        @Override
+        protected Integer doInBackground(List<Tag>... params) {
+            publishProgress("...");
+            getWorkflow().init(getActivity(), null, params[0]);
+            return getWorkflow().updateTags(null, ListUtils.toStringList(params[0]));
+        }
+    }
+
+
+    private boolean tagDelete(Tag item, boolean recursive, boolean deleteFromPhotos) {
+        if (item != null) {
+            TagRepository repository = TagRepository.getInstance();
+            List<Tag> existingItems = repository.load();
+            List<Tag> children = (recursive) ? item.getChildren(existingItems, true, false) : null;
+
+            if (deleteFromPhotos) {
+                List<Tag> affectedTags = new ArrayList<Tag>();
+                affectedTags.add(item);
+                if (children != null) affectedTags.addAll(children);
+
+                new TagDeleteWithDbUpdateTask().execute(affectedTags);
+            }
+
+            if ((existingItems != null) && (item.delete(existingItems, recursive) > 0)) {
+                updateKnownLists(null, item.getName());
+                mDataAdapter.remove(item);
+                if (children != null) {
+                    for (Tag child : children) {
+                        mDataAdapter.remove(child);
+                    }
+                }
+                repository.save();
+                mDataAdapter.reloadList();
+            }
+
+            return true;
+        }
+        return false;
+    }
+
+    private boolean showTagRenameDialog(final Tag tag) {
+        Dialogs dialog = new Dialogs() {
+            CheckBox chkUpdatePhotos;
+
+            @Override
+            protected View onCreateContentView(Activity parent) {
+                View result = parent.getLayoutInflater().inflate(R.layout.dialog_tag_rename, null);
+                chkUpdatePhotos = (CheckBox) result.findViewById(R.id.chkUpdatePhotos);
+
+                List<Tag> rootList = new ArrayList<Tag>();
+                rootList.add(tag);
+                final int rootTagReferenceCount = TagSql.getTagRefCount(getActivity(), rootList);
+
+                chkUpdatePhotos.setText(getString(R.string.tags_update_photos) + " (" +
+                        rootTagReferenceCount + ")");
+
+                return result;
+            }
+
+            @Override
+            protected void onDialogResult(String newFileName, Object... parameters) {
+                if (newFileName != null) {
+                    tagRename(tag, newFileName, chkUpdatePhotos.isChecked());
+                }
+                mSubDialog=null;
+
+            }
+        };
+        mSubDialog=dialog.editFileName(getActivity(), getString(R.string.rename_menu_title), tag.getName(), tag);
+
+        return true;
+    }
+
+    private boolean showTagAddDialog(final Tag tagParent) {
+        String defaultName = getString(R.string.tags_add_default);
+        Dialogs dialog = new Dialogs() {
+            @Override
+            protected void onDialogResult(String newFileName, Object... parameters) {
+                if (newFileName != null) {
+                    tagAdd(tagParent, newFileName);
+                }
+                mSubDialog=null;
+
+            }
+        };
+        mSubDialog=dialog.editFileName(getActivity(), getString(R.string.tags_add_menu_title), defaultName, tagParent);
+
+        return true;
+    }
+
+    private class TagRenameWithDbUpdateTask extends TagTask<Object> {
+        private final Tag oldTag;
+        private final String newName;
+
+        TagRenameWithDbUpdateTask(Tag oldTag, String newName) {
+            super(getActivity(), R.string.rename_menu_title);
+            this.oldTag = oldTag;
+            this.newName = newName;
+        }
+
+        @Override
+        protected Integer doInBackground(Object... params) {
+            List<Tag> affectedTags = new ArrayList<Tag>();
+            affectedTags.add(oldTag);
+            publishProgress("...");
+            getWorkflow().init(getActivity(), null, affectedTags);
+            return getWorkflow().updateTags(ListUtils.toStringList(newName), ListUtils.toStringList(affectedTags));
+        }
+
+        @Override
+        protected void onPostExecute(Integer result) {
+            tagRename(oldTag, newName, false);
+            super.onPostExecute(result);
+        }
+    }
+
+    private void tagRename(Tag oldTag, String newName, boolean updateDatabase) {
+        String oldName = oldTag.getName();
+
+        if ((newName != null) && (newName.compareTo(oldName) != 0)) {
+            if (updateDatabase) {
+                new TagRenameWithDbUpdateTask(oldTag, newName).execute();
+                return;
+            }
+            updateKnownLists(newName, oldName);
+            mDataAdapter.remove(oldTag);
+            oldTag.setName(newName);
+            mDataAdapter.add(oldTag);
+            mDataAdapter.reloadList();
+        }
+    }
+
+    private void updateKnownLists(String newName, String oldName) {
+        if (updateLists(oldName, newName, mBookMarkNames,mAddNames,mRemoveNames,mAffectedNames) > 0) {
+            saveSettings();
+        }
+        TagRepository.getInstance().save();
+    }
+
+    private int updateLists(String oldName, String newName, List<String>... lists) {
+        int changes = 0;
+        for (List<String> list :lists) {
+            if ((list != null) && list.remove(oldName)) {
+                changes ++;
+                if (newName != null) {
+                    list.add(newName);
+                }
+            }
+        }
+        return changes;
+    }
+
+    private void tagAdd(Tag parent, String itemExpression) {
+        TagRepository repository = TagRepository.getInstance();
+        List<Tag> existingItems = repository.load();
+        int changeCount = TagRepository.include(existingItems, parent, null, itemExpression);
+
+        if (changeCount > 0) {
+            int len = existingItems.size();
+
+            for (int i = len - changeCount; i < len; i++) {
+                Tag t = existingItems.get(i);
+                existingItems.add(t);
+                mDataAdapter.add(t);
+            }
+            mDataAdapter.reloadList();
+            repository.save();
+            mDataAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private void tagChange(Tag tag, Tag parent) {
+        TagRepository repository = TagRepository.getInstance();
+        List<Tag> existingItems = repository.load();
+        tag.setParent(parent);
+        if (!existingItems.contains(tag)) {
+            existingItems.add(tag);
+            mDataAdapter.add(tag);
+            mDataAdapter.reloadList();
+        }
+        repository.save();
+        mDataAdapter.notifyDataSetChanged();
+    }
+
+    private boolean onPaste(Tag currentMenuSelection) {
+        if (mClipboardItem == null) return false;
+
+        if (mClipboardType == android.R.id.cut) {
+            tagChange(mClipboardItem, currentMenuSelection);
+            mClipboardItem = null;
+            return true;
+        }
+        if (mClipboardType == android.R.id.copy) {
+            tagChange(new Tag().setName(mClipboardItem.getName()), currentMenuSelection);
+            mClipboardItem = null;
+            return true;
+        }
+
         return false;
     }
 
@@ -428,8 +789,8 @@ public class TagsPickerFragment  extends DialogFragment  {
     }
     
     private void refershResultList() {
-        final String filter = TagsPickerFragment.this.mFilterEdit.getText()
-                .toString();
+        final String filter = (mIsFilterMode) ? TagsPickerFragment.this.mFilterEdit.getText()
+                .toString() : "@@@@";
         mDataAdapter.setFilterParam(filter);
         boolean empty = TagsPickerFragment.this.mDataAdapter.getCount() == 0;
         mList.setVisibility(empty ? View.INVISIBLE : View.VISIBLE);

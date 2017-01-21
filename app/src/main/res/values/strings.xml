@@ -177,9 +177,16 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
     <string name="lbl_with_no_tags">With no Tags</string>
     <string name="lbl_tags_include">+Tags</string>
     <string name="lbl_tags_exclude">-Tags</string>
+    <string name="lbl_tag">Tag</string>
 
     <string name="tags_activity_title">Select Tags</string>
     <string name="tags_search_hint">Type here to filter ...</string>
     <string name="tags_search_no_matching_items_found">No matching tags found</string>
     <string name="tags_edit_menu_title">Set Tags</string>
+
+    <string name="tags_add_menu_title">Create new Tag</string>
+    <string name="tags_add_default">new_tag</string>
+    <string name="tags_delete_children_title">Delete children</string>
+    <string name="tags_update_photos">Update tags in affected photos</string>
+    <string name="tags_update_result_format">Updated tags of %1$d photos</string>
 </resources>

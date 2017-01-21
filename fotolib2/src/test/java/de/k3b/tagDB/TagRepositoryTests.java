@@ -104,20 +104,101 @@ public class TagRepositoryTests {
     @Test
     public void shouldIncludeItem() throws Exception {
         // 1,2,3
-        TagRepository originalItems = createUnsavedRepo("shouldIncludeItem", 3)
+        TagRepository originalItems = createUnsavedRepo("shouldIncludeItem123", 3)
                 .save();
 
         // 1,2,7
-        List<Tag> additionalItems = createUnsavedRepo("shouldIncludeItem", 2).load();
+        List<Tag> additionalItems = createUnsavedRepo("shouldIncludeItem127", 2).load();
         Tag added = createItem(7);
         additionalItems.add(added);
 
         // 7,1,2,3
-        int changes = originalItems.include(null, additionalItems);
+        int changes = originalItems.includeChildTags(null, additionalItems);
         List<Tag> items = originalItems.load();
         Assert.assertEquals(added + "added 1", 1, changes);
         Assert.assertEquals(4, items.size());
     }
+
+    @Test
+    public void shouldAddExpression() throws Exception {
+        // Name1
+        TagRepository repo = createUnsavedRepo("shouldAddExpression", 1);
+        List<Tag> items = repo.load();
+        TagRepository.include(items, items.get(0), null, "/a,b,c/c1/c11");
+        StringWriter wr = new StringWriter();
+        repo.save(items, wr, " ");
+
+        String expected =
+                "a\n" +
+                "Name1\n" +
+                " b\n" +
+                " c\n" +
+                "  c1\n" +
+                "   c11\n";
+        Assert.assertEquals(expected, wr.toString());
+    }
+
+    @Test
+    public void shouldRenameSimple() throws Exception {
+        // Name1
+        TagRepository repo = createUnsavedRepo("shouldAddExpression", 0);
+        List<Tag> items = repo.load();
+        TagRepository.include(items, null, null, "/c/c1/c11");
+        Tag c1 = repo.findFirstByName("c1");
+
+        TagRepository.include(items, c1.getParent(), c1, "c1New");
+
+        StringWriter wr = new StringWriter();
+        repo.save(items, wr, " ");
+
+        String expected =
+                        "c\n" +
+                        " c1New\n" +
+                        "  c11\n";
+        Assert.assertEquals(expected, wr.toString());
+    }
+
+    @Test
+    public void shouldRenameRoot() throws Exception {
+        // Name1
+        TagRepository repo = createUnsavedRepo("shouldAddExpression", 0);
+        List<Tag> items = repo.load();
+        TagRepository.include(items, null, null, "/c/c1/c11");
+        Tag c1 = repo.findFirstByName("c1");
+
+        TagRepository.include(items, c1.getParent(), c1, "/c1AsRoot");
+
+        StringWriter wr = new StringWriter();
+        repo.save(items, wr, " ");
+
+        String expected =
+                "c\n" +
+                "c1AsRoot\n" +
+                " c11\n";
+        Assert.assertEquals(expected, wr.toString());
+    }
+
+    @Test
+    public void shouldRenameWithInsert() throws Exception {
+        // Name1
+        TagRepository repo = createUnsavedRepo("shouldAddExpression", 0);
+        List<Tag> items = repo.load();
+        TagRepository.include(items, null, null, "/c/c1/c11");
+        Tag c1 = repo.findFirstByName("c1");
+
+        TagRepository.include(items, c1.getParent(), c1, "c1a/c1b");
+
+        StringWriter wr = new StringWriter();
+        repo.save(items, wr, " ");
+
+        String expected =
+                "c\n" +
+                " c1a\n" +
+                "  c1b\n" +
+                "   c11\n";
+        Assert.assertEquals(expected, wr.toString());
+    }
+
 
     @Test
     public void shouldFindByString() throws Exception {
@@ -157,6 +238,71 @@ public class TagRepositoryTests {
         sut.save(items, wr, " ");
 
         Assert.assertEquals(tagData, wr.toString());
+    }
+
+    @Test
+    public void shouldGetChildren() throws Exception {
+        String tagData =
+                        "a\n" +
+                        " ab\n" +
+                        " ac\n" +
+                        "   acz\n" +
+                        "b\n" +
+                        "";
+
+        ArrayList<Tag> items = new ArrayList<>();
+        TagRepository sut = new TagRepository(null);
+        sut.load(items, new StringReader(tagData));
+
+        Tag a = sut.findFirstByName(items, "a");
+        List<Tag> children = a.getChildren(items, true, false);
+        Assert.assertEquals(3, children.size());
+    }
+
+    @Test
+    public void shouldDelete() throws Exception {
+        String tagData =
+                "a\n" +
+                " ab\n" +
+                " ac\n" +
+                "   acz\n" +
+                "b\n" +
+                "";
+
+        ArrayList<Tag> items = new ArrayList<>();
+        TagRepository sut = new TagRepository(null);
+        sut.load(items, new StringReader(tagData));
+
+        Tag a = sut.findFirstByName(items, "a");
+        int delCount = a.delete(items, false);
+        Assert.assertEquals("delCount", 1, delCount);
+
+        a = sut.findFirstByName(items, "a");
+        Assert.assertEquals("find a again", null, a);
+
+        Tag z = sut.findFirstByName(items, "acz");
+        Assert.assertEquals("z after delete", "ac -> acz", z.getPath());
+
+    }
+
+    @Test
+    public void shouldDeleteRecursive() throws Exception {
+        String tagData =
+                "a\n" +
+                " ab\n" +
+                " ac\n" +
+                "   acz\n" +
+                "b\n" +
+                "";
+
+        ArrayList<Tag> items = new ArrayList<>();
+        TagRepository sut = new TagRepository(null);
+        sut.load(items, new StringReader(tagData));
+
+        Tag a = sut.findFirstByName(items, "a");
+        int delCount = a.delete(items, true);
+        List<Tag> children = a.getChildren(items, false, false);
+        Assert.assertEquals("delCount", 4, delCount);
     }
 
 }

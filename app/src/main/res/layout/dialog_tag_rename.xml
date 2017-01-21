@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015 by k3b.
  *
- * This file is part of AndroFotoFinder / #APhotoManager.
+ * This file is part of AndroFotoFinder.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -20,23 +20,40 @@
  */
  -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:id="@+id/edit_text_dialog_root"
+    android:layout_width="130dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="5sp">
 
     <TextView
-        android:id="@+id/count"
+        android:id="@+id/lblName"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/image_loading_at_position_format"
-        android:layout_marginTop="@dimen/grid_cell_margin"
-        android:layout_marginBottom="@dimen/grid_cell_margin" />
+        android:text="@string/sort_by_name"
+        />
 
-    <TextView
-        android:id="@+id/folder"
+    <EditText android:id="@+id/edName"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/sort_by_folder"
-        android:layout_marginTop="@dimen/grid_cell_margin"
-        android:layout_marginBottom="@dimen/grid_cell_margin" />
+        android:inputType="text"
+        android:singleLine="true"/>
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="2dip"
+        android:layout_weight="0"
+        android:background="#FF909090" />
+
+
+    <CheckBox
+        android:id="@+id/chkUpdatePhotos"
+        android:text="@string/tags_update_photos"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:button="@null"
+        android:drawableRight="?android:attr/listChoiceIndicatorMultiple"
+        android:checked="false" />
+
 
 </LinearLayout>

@@ -58,7 +58,7 @@ import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
 import de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
-import de.k3b.android.androFotoFinder.tagDB.TagWorflow;
+import de.k3b.android.androFotoFinder.tagDB.TagTask;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.AndroidFileCommands44;
@@ -77,6 +77,7 @@ import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
 import de.k3b.media.MediaUtil;
+import de.k3b.tagDB.Tag;
 
 /**
  * Shows a zoomable imagee.<br>
@@ -115,7 +116,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     private LockableViewPager mViewPager = null;
     private ImagePagerAdapterFromCursorArray mAdapter = null;
-    private TagWorflow mTagWorflow = null;
+    private TagUpdateTask mTagWorflow = null;
 
     private final AndroidFileCommands mFileCommands = new LocalFileCommands();
 
@@ -300,6 +301,21 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             dismiss();
         }
     };
+
+    private class TagUpdateTask extends TagTask<List<String>> {
+
+        TagUpdateTask(SelectedFiles fotos) {
+            super(ImageDetailActivityViewPager.this,R.string.tags_activity_title);
+            this.getWorkflow().init(ImageDetailActivityViewPager.this, fotos, null);
+
+        }
+
+        @Override
+        protected Integer doInBackground(List<String>... params) {
+            return getWorkflow().updateTags(params[0], params[1]);
+        }
+
+    }
 
     public static void showActivity(Activity context, Uri imageUri, int position, QueryParameter imageDetailQuery) {
         Intent intent;
@@ -988,11 +1004,11 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     }
 
     private boolean tagsShowEditDialog(SelectedFiles fotos) {
-        mTagWorflow = new TagWorflow().init(this, fotos);
+        mTagWorflow = new TagUpdateTask(fotos);
         TagsPickerFragment dlg = new TagsPickerFragment();
         dlg.setFragmentOnwner(this);
         dlg.setTitleId(R.string.tags_edit_menu_title);
-        dlg.setAffectedNames(mTagWorflow.getAffected());
+        dlg.setAffectedNames(mTagWorflow.getWorkflow().getAffected());
         dlg.setAddNames(new ArrayList<String>());
         dlg.setRemoveNames(new ArrayList<String>());
         dlg.show(getFragmentManager(), "editTags");
@@ -1002,6 +1018,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     /** called by {@link TagsPickerFragment} */
     @Override
     public boolean onCancel(String msg) {
+        if (mTagWorflow != null) mTagWorflow.destroy();
         mTagWorflow = null;
         return true;
     }
@@ -1010,10 +1027,16 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     @Override
     public boolean onOk(List<String> addNames, List<String> removeNames) {
         if (mTagWorflow != null) {
-            mTagWorflow.updateTags(addNames, removeNames);
+            mTagWorflow.execute(addNames, removeNames);
         }
         mTagWorflow = null;
         return true;
+    }
+
+    /** called by {@link TagsPickerFragment} */
+    @Override
+    public boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag) {
+        return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, this, this.mFilter);
     }
 
     protected SelectedFiles getCurrentFoto() {

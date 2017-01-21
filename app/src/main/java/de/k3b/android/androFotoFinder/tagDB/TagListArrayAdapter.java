@@ -40,26 +40,23 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 	private final List<String> mBookMarkNames;
 	private List<String> mAddNames;
 	private final List<String> mRemoveNames;
-	private final View.OnLongClickListener mOnLongClickListener;
-	private String lastFilterParam = null;
+	private String mLastFilterParam = null;
 
 	public TagListArrayAdapter(final Context ctx,
 							   List<Tag> existingTags,
 							   List<String> addNames,
 							   List<String> removeNames,
 							   List<String> affectedNames,
-							   List<String> bookMarkNames,
-							   View.OnLongClickListener onLongClickListener) {
+							   List<String> bookMarkNames) {
 		super(ctx, 0, 0, existingTags);
 		mAffectedNames = affectedNames;
 		mBookMarkNames = bookMarkNames;
 		mRemoveNames = removeNames;
 		mAddNames = addNames;
-		mOnLongClickListener = onLongClickListener;
 	}
 
 	public void setFilterParam(String filterParam) {
-		this.lastFilterParam = filterParam;
+		this.mLastFilterParam = filterParam;
 		getFilter().filter(filterParam);
 	}
 
@@ -128,10 +125,14 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 				tag = tag.getParent();
 			}
 			if (modifyCount > 0) {
-				setFilterParam(lastFilterParam);
-				notifyDataSetChanged();
+				reloadList();
 			}
 		}
+	}
+
+	public void reloadList() {
+		setFilterParam(mLastFilterParam);
+		notifyDataSetChanged();
 	}
 
 	@Override
@@ -144,9 +145,7 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 			convertView.setTag(holder);
 			holder.name = (TextView) convertView.findViewById(R.id.name);
 			holder.name.setTag(holder);
-			if (mOnLongClickListener != null) {
-				holder.name.setOnLongClickListener(mOnLongClickListener);
-			}
+
 			holder.bookmarkIcon = (ImageView) convertView.findViewById(R.id.bookmark);
 			if (mBookMarkNames != null) {
 				holder.bookmarkIcon.setOnClickListener(new View.OnClickListener() {
@@ -228,6 +227,17 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 			holder.setBookmark(mBookMarkNames.contains(tagName));
 		}
 		return convertView;
+	}
+
+	public static Tag getTag(Object v) {
+		Object parent = v;
+		while (parent instanceof View) {
+			View parentView = (View) parent;
+			Object tag = parentView.getTag();
+			if (tag instanceof Holder) return ((Holder)tag).currentTag;
+			parent =  parentView.getParent();
+		}
+		return null;
 	}
 
 	/** replace  */

@@ -112,7 +112,7 @@ public class Global {
         /** true: experimental. Not fully implemented yet. */
         public static final boolean enableNonStandardMediaFieldsUpdateLastScanTimestamp = enableNonStandardMediaFields && true;
 
-        /** true: xmp value is more important than exif (if both values are present. */
+        /** true: xmp value is more important than jpg-exif (if both values are present.) */
         public static final boolean xmpOverwritesExif = enableNonStandardMediaFields && true;
 
         /** true: if there is no xmp-file or entry xmp-entry in csv mark this

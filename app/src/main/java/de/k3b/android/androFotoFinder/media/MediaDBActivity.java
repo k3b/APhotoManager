@@ -254,7 +254,7 @@ public class MediaDBActivity extends Activity {
 
                         String canonicalPath = FileUtils.tryGetCanonicalPath(new File(mCsvRootDir, path), null);
                         updateDB(canonicalPath, fileModifyDateMilliSecs, mDbValues);
-                        TagRepository.getInstance().includeString(getImportRoot(), mMediaValueAdapter.getTags());
+                        TagRepository.getInstance().include(getImportRoot(), mMediaValueAdapter.getTags());
                     }
                 }
             }

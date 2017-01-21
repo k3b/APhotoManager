@@ -61,6 +61,7 @@ import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
 import de.k3b.io.ListUtils;
+import de.k3b.tagDB.Tag;
 
 /**
  * Defines a gui for global foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.
@@ -96,9 +97,9 @@ public class GalleryFilterActivity extends LocalizedActivity
         final Intent intent = new Intent().setClass(context,
                 GalleryFilterActivity.class);
 
-        //if (!GalleryFilterParameter.isEmpty(filter)) {
+        if ((intent != null) && (filter != null)) {
             intent.putExtra(EXTRA_FILTER, filter.toString());
-        //}
+        }
 
         context.startActivityForResult(intent, resultID);
     }
@@ -619,6 +620,7 @@ public class GalleryFilterActivity extends LocalizedActivity
         }
     }
 
+
     /**************** DirectoryPicker *****************/
     private static class DirInfo {
         public int queryId = 0;
@@ -643,7 +645,6 @@ public class GalleryFilterActivity extends LocalizedActivity
             TagsPickerFragment dlg = new TagsPickerFragment();
             dlg.setFragmentOnwner(this);
             dlg.setTitleId(idTitle);
-            dlg.setContextMenuId(R.menu.menu_context_dirpicker);
             dlg.setAddNames(mFilter.getTagsAllIncluded());
             dlg.setRemoveNames(mFilter.getTagsAllExcluded());
             dlg.show(manager, DLG_NAVIGATOR_TAG);
@@ -666,6 +667,12 @@ public class GalleryFilterActivity extends LocalizedActivity
         toGui(mFilter);
         mDlg = null;
         return true;
+    }
+
+    /** called by {@link TagsPickerFragment} */
+    @Override
+    public boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag) {
+        return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, this, this.mFilterValue);
     }
 
     private void showLatLonPicker() {

@@ -398,42 +398,17 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     }
 
     private boolean onCreateSubDirQuestion(final IDirectory parentDir) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(R.string.mk_dir_menu_title);
-        View content = getActivity().getLayoutInflater().inflate(R.layout.dialog_edit_name, null);
-
-        final EditText edit = (EditText) content.findViewById(R.id.edName);
         String defaultName = getString(R.string.mk_dir_default);
-        edit.setText(defaultName);
-        edit.setSelection(0, defaultName.length());
-
-        // on my android 4.4 cellphone i have SHOW_AS_ACTION_ALWAYS|SHOW_AS_ACTION_WITH_TEXT.
-        // Consequence: not enough space so show cut/copy actions - they are not reachable.
-        // This will fix it
-        MenuUtils.changeShowAsActionFlags(edit, SHOW_AS_ACTION_IF_ROOM, android.R.id.copy, android.R.id.cut, android.R.id.selectAll);
-
-        builder.setView(content);
-        builder.setNegativeButton(R.string.btn_cancel, new DialogInterface.OnClickListener() {
+        Dialogs dialog = new Dialogs() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dismiss();mSubDialog=null;
-            }
-        });
-        builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
-            //@Override
-            public void onClick(DialogInterface dialog, int which) {
-                onCreateSubDirAnswer(parentDir, edit.getText().toString());
+            protected void onDialogResult(String newFileName, Object... parameters) {
+                if (newFileName != null) {
+                    onCreateSubDirAnswer(parentDir, newFileName);
+                }
                 mSubDialog=null;
             }
-        });
-        AlertDialog alertDialog = builder.create();
-        alertDialog.show();
-
-        int width = (int ) (8 * edit.getTextSize());
-        // DisplayMetrics metrics = getResources().getDisplayMetrics();
-        // int width = metrics.widthPixels;
-        alertDialog.getWindow().setLayout(width*2, LinearLayout.LayoutParams.WRAP_CONTENT);
-        mSubDialog = alertDialog;
+        };
+        mSubDialog = dialog.editFileName(getActivity(), getString(R.string.mk_dir_menu_title), defaultName);
         return true;
     }
 

@@ -18,6 +18,7 @@
  */
 package de.k3b.io;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,19 +38,35 @@ public class ListUtils {
         return Arrays.asList(stringWithElements.split(elementDelimiter));
     }
 
-    public static String toString(List<String> list) {
+    public static String toString(List<?> list) {
         return toString(list, DEFAULT_LIST_ELEMENT_DELIMITER);
     }
 
-    public static String toString(List<String> list, String elementDelimiter) {
+    public static List<String> toStringList(List<?> list) {
+        ArrayList<String> result = new ArrayList<String>();
+        for(Object item : list) {
+            if (item != null) result.add(item.toString());
+        }
+        return result;
+    }
+
+    public static List<String> toStringList(Object... list) {
+        ArrayList<String> result = new ArrayList<String>();
+        for(Object item : list) {
+            if (item != null) result.add(item.toString());
+        }
+        return result;
+    }
+
+    public static String toString(List<?> list, String elementDelimiter) {
         StringBuffer result = new StringBuffer();
         if (list != null) {
             String nextDelim = "";
-            for (String instance : list) {
+            for (Object instance : list) {
                 if (instance != null) {
-                    instance = instance.trim();
-                    if (instance.length() > 0) {
-                        result.append(nextDelim).append(instance);
+                    String instanceString = instance.toString().trim();
+                    if (instanceString.length() > 0) {
+                        result.append(nextDelim).append(instanceString);
                         nextDelim = elementDelimiter;
                     }
                 }

@@ -47,6 +47,11 @@ public class MediaUtil {
 
     /** copy content from source to destination. @return number of copied properties */
     public static int copy(IMetaApi destination, IMetaApi source, boolean allowSetNull, boolean overwriteExisting) {
+        return copyExif(destination, source, allowSetNull, overwriteExisting) + copyXmp(destination, source, allowSetNull, overwriteExisting);
+    }
+
+    /** copy exif-prio content from source to destination. @return number of copied properties */
+    public static int copyExif(IMetaApi destination, IMetaApi source, boolean allowSetNull, boolean overwriteExisting) {
         int changes = 0;
 
         if ((destination != null) && (source != null)) {
@@ -75,7 +80,16 @@ public class MediaUtil {
                 destination.setLongitude(doValue);
                 changes++;
             }
+        }
+        return changes;
+    }
 
+    /** copy xmp-priority content from source to destination. @return number of copied properties */
+    public static int copyXmp(IMetaApi destination, IMetaApi source, boolean allowSetNull, boolean overwriteExisting) {
+        int changes = 0;
+        if ((destination != null) && (source != null)) {
+
+            String sValue;// xmp-only attributes
             sValue = source.getTitle();
             if (allowed(allowSetNull, sValue, overwriteExisting, destination.getTitle())) {
                 destination.setTitle(sValue);
@@ -99,7 +113,6 @@ public class MediaUtil {
                 destination.setRating(iValue);
                 changes++;
             }
-
         }
         return changes;
     }

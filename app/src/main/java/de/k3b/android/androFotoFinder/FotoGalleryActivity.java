@@ -69,6 +69,7 @@ import de.k3b.io.GeoRectangle;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.ListUtils;
+import de.k3b.tagDB.Tag;
 
 public class FotoGalleryActivity extends LocalizedActivity implements Common,
         OnGalleryInteractionListener, DirectoryPickerFragment.OnDirectoryInteractionListener,
@@ -656,7 +657,6 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         TagsPickerFragment dlg = new TagsPickerFragment();
         dlg.setFragmentOnwner(this);
         dlg.setTitleId(R.string.tags_activity_title);
-        dlg.setContextMenuId(R.menu.menu_context_dirpicker);
         dlg.setAddNames(mGalleryQueryParameter.mCurrentTagsFromPicker);
         dlg.show(manager, DLG_NAVIGATOR_TAG);
     }
@@ -677,6 +677,11 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         return true;
     }
 
+    /** called by {@link TagsPickerFragment} */
+    @Override
+    public boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag) {
+        return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, this, this.mGalleryQueryParameter.getCurrentFilterSettings());
+    }
 
     private void openFolderPicker() {
         mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_PATH;

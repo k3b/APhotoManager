@@ -24,6 +24,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
 
@@ -39,6 +40,7 @@ import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.database.QueryParameter;
+import de.k3b.tagDB.Tag;
 import de.k3b.tagDB.TagConverter;
 
 /**
@@ -161,6 +163,35 @@ public class TagSql extends FotoSql {
         }
     }
 
+    /** return number of applied tags */
+    public static int addWhereAnyOfTags(QueryParameter resultQuery, List<Tag> tags) {
+        StringBuilder sqlWhereStatement = new StringBuilder();
+        int index = 0;
+        String[] params = null;
+
+        if (tags != null) {
+            params = new String[tags.size()];
+            int end = params.length;
+            for (Tag tag : tags) {
+                String tagValue = (tag != null) ? tag.getName() : null;
+                if ((tagValue != null) && (tagValue.length() > 0)) {
+                    if (index > 0) sqlWhereStatement.append(" OR ");
+                    sqlWhereStatement
+                            .append("(").append(SQL_COL_EXT_TAGS)
+                            .append(" like ?)");
+
+                    params[index++] = "%;" + tagValue + ";%";
+                } else {
+                    params[--end] = null;
+                }
+            }
+        }
+
+        if (index > 0) {
+            resultQuery.addWhere(sqlWhereStatement.toString(), params);
+        }
+        return index;
+    }
     public static void addWhereTagsIncluded(QueryParameter resultQuery, List<String> includes, boolean withNoTags) {
         if ((includes != null) && (includes.size() == 0)) includes = null;
         if (includes != null) {
@@ -235,6 +266,26 @@ public class TagSql extends FotoSql {
                 , FILTER_EXPR_PATH_LIKE_XMP_DATE, new String[]{path, Long.toString(xmpFileDate)});
     }
 
+    /** return how many photos exist that have one or more tags from list */
+    public static int getTagRefCount(Context context, List<Tag> tags) {
+        QueryParameter query = new QueryParameter()
+                .addColumn("count(*)").addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME);
+        if (addWhereAnyOfTags(query, tags) > 0) {
+            Cursor c = null;
+            try {
+                c = createCursorForQuery(context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                if (c.moveToFirst()) {
+                    return c.getInt(0);
+                }
+            } catch (Exception ex) {
+                Log.e(Global.LOG_CONTEXT, "FotoSql.execGetGeoRectangle(): error executing " + query, ex);
+            } finally {
+                if (c != null) c.close();
+            }
+        }
+        return 0;
+    }
+
     static class TagWorflowItem {
         final long id;
         final long xmpLastModifiedDate;
@@ -249,28 +300,46 @@ public class TagSql extends FotoSql {
         }
     }
 
-    public static List<TagWorflowItem> loadTagWorflowItems(Context context, String selectedItems) {
+    /**
+     * converts selectedItemPks and/or anyOfTags to TagWorflowItem-s
+     * @param context
+     * @param selectedItemPks if not null list of comma seperated item-pks
+     * @param anyOfTags if not null list of tag-s where at least one oft the tag must be in the photo.
+     * @return
+     */
+    public static List<TagWorflowItem> loadTagWorflowItems(Context context, String selectedItemPks, List<Tag> anyOfTags) {
         QueryParameter query = new QueryParameter()
                 .addColumn(TagSql.SQL_COL_PK, TagSql.SQL_COL_PATH, TagSql.SQL_COL_EXT_TAGS, TagSql.SQL_COL_EXT_XMP_LAST_MODIFIED_DATE);
 
+        int filterCount = 0;
+        if (selectedItemPks != null) {
+            filterCount += selectedItemPks.trim().length();
+            TagSql.setWhereSelectionPks(query, selectedItemPks);
+        }
 
-        TagSql.setWhereSelectionPks(query, selectedItems);
+        if (anyOfTags != null) {
+            filterCount += TagSql.addWhereAnyOfTags(query, anyOfTags);
+        }
 
         Cursor c = null;
         List<TagWorflowItem> result = new ArrayList<TagWorflowItem>();
-        try {
-            c = createCursorForQuery(context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
-            if (c.moveToFirst()) {
+
+        if (filterCount > 0) {
+            try {
                 c = createCursorForQuery(context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
-                while (c.moveToNext()) {
-                    result.add(new TagWorflowItem(c.getInt(0), c.getString(1), TagConverter.fromString(c.getString(2)),
-                            c.getInt(3)));
+                if (c.moveToFirst()) {
+                    do {
+                        result.add(new TagWorflowItem(c.getInt(0), c.getString(1), TagConverter.fromString(c.getString(2)),
+                                c.getInt(3)));
+                    } while (c.moveToNext());
                 }
+            } catch (Exception ex) {
+                Log.e(Global.LOG_CONTEXT, "TagSql.loadTagWorflowItems(): error executing " + query, ex);
+            } finally {
+                if (c != null) c.close();
             }
-        } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, "FotoSql.execGetGeoRectangle(): error executing " + query, ex);
-        } finally {
-            if (c != null) c.close();
+        } else {
+            Log.e(Global.LOG_CONTEXT, "TagSql.loadTagWorflowItems(): error no items because no filter in " + query);
         }
         return result;
     }

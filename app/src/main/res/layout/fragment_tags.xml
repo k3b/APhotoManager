@@ -35,13 +35,23 @@
         android:layout_height="fill_parent"
         >
 
-        <ImageView
-            android:id="@+id/searchSymbol"
-            android:contentDescription="Search Symbol"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:src="@android:drawable/ic_menu_search" />
+        <ImageButton
+            android:id="@+id/cmd_bookmark_mode"
+            android:layout_width="32sp"
+            android:layout_height="32sp"
+            android:src="@android:drawable/btn_star_big_off"
+            android:backgroundTint="@android:color/darker_gray"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true" />
+        <ImageButton
+            android:id="@+id/cmd_find_mode"
+            android:layout_width="32sp"
+            android:layout_height="32sp"
+            android:src="@drawable/ic_btn_search_blue"
+            android:backgroundTint="@android:color/darker_gray"
+            android:layout_toRightOf="@+id/cmd_bookmark_mode"
+            android:layout_toEndOf="@+id/cmd_bookmark_mode"
+            />
 
         <ImageButton
             android:id="@+id/cmd_cancel"
@@ -49,6 +59,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/ic_action_cancel"
             android:layout_alignParentRight="true"
+
             android:backgroundTint="@android:color/darker_gray"
             />
         <ImageButton
@@ -63,7 +74,7 @@
             android:id="@+id/myFilter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/searchSymbol"
+            android:layout_toRightOf="@id/cmd_find_mode"
             android:layout_toLeftOf="@id/cmd_ok"
             android:layout_alignBottom="@id/cmd_cancel"
             android:ems="10"

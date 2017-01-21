@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -95,10 +95,10 @@ public abstract class Dialogs {
 		dialog.show();
 	}
 
-	public void editFileName(Activity parent, String title, String name, final Object... parameters) {
+	public AlertDialog editFileName(Activity parent, String title, String name, final Object... parameters) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(parent);
 		builder.setTitle(title); // R.string.cmd_save_bookmark_as);
-		View content = parent.getLayoutInflater().inflate(R.layout.dialog_edit_name, null);
+		View content = onCreateContentView(parent);
 
 		final EditText edit = (EditText) content.findViewById(R.id.edName);
 		edit.setText(name);
@@ -133,9 +133,14 @@ public abstract class Dialogs {
 
 		fixLayout(alertDialog, edit);
 		setEditFocus(alertDialog, edit);
+		return alertDialog;
 	}
 
-    private void setEditFocus(AlertDialog alertDialog, EditText edit) {
+	protected View onCreateContentView(Activity parent) {
+		return parent.getLayoutInflater().inflate(R.layout.dialog_edit_name, null);
+	}
+
+	private void setEditFocus(AlertDialog alertDialog, EditText edit) {
 		edit.requestFocus();
 
 		// request keyboard. See http://stackoverflow.com/questions/2403632/android-show-soft-keyboard-automatically-when-focus-is-on-an-edittext

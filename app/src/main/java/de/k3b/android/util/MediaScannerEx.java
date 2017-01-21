@@ -21,6 +21,7 @@ package de.k3b.android.util;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -61,19 +62,34 @@ public class MediaScannerEx extends MediaScanner {
         }
     }
 
-    public MediaXmpSegment loadXmp(MediaContentValues dest, File xmpFile) {
+    /**
+     * Loads xmp content from xmp-file
+     *
+     * @param mediaContentValuesToReceiveLastUpdated   if not null: xmp-content-lastModified is
+     *                                                 updated from xmpFileSource.lastModified
+     * @param xmpFileSource i.e. "/path/to/file.xmp"
+     * @return              the loaded segment or null if not found or error
+     */
+    public MediaXmpSegment loadXmp(MediaContentValues mediaContentValuesToReceiveLastUpdated, File xmpFileSource) {
         MediaXmpSegment xmp = null;
-        if ((xmpFile != null) && xmpFile.exists() && xmpFile.isFile()) {
+        if ((xmpFileSource != null) && xmpFileSource.exists() && xmpFileSource.isFile()) {
             xmp = new MediaXmpSegment();
             try {
-                TagSql.setXmpFileModifyDate(dest.getContentValues(), xmpFile.lastModified());
-                xmp.load(new FileInputStream(xmpFile));
-                TagRepository.getInstance().includeString(getImportRoot(), xmp.getTags());
+                getLastUpdated(mediaContentValuesToReceiveLastUpdated, xmpFileSource);
+                xmp.load(new FileInputStream(xmpFileSource));
+                TagRepository.getInstance().include(getImportRoot(), xmp.getTags());
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                Log.e(Global.LOG_CONTEXT, "MediaScannerEx:loadXmp(xmpFileSource=" + xmpFileSource +") failed " + e.getMessage(),e);
+                xmp = null;
             }
         }
         return xmp;
+    }
+
+    public static void getLastUpdated(MediaContentValues mediaContentValuesToReceiveLastUpdated, File xmpFileSource) {
+        if (mediaContentValuesToReceiveLastUpdated != null) {
+            TagSql.setXmpFileModifyDate(mediaContentValuesToReceiveLastUpdated.getContentValues(), xmpFileSource.lastModified());
+        }
     }
 
     /**
@@ -124,7 +140,7 @@ public class MediaScannerEx extends MediaScanner {
 
     private int addTags(ContentValues values,  Date xmpFileModifyDate, String... tags) {
         TagSql.setTags(values, xmpFileModifyDate, tags);
-        return TagRepository.getInstance().include(getImportRoot(), Tag.toList(tags));
+        return TagRepository.getInstance().includeChildTags(getImportRoot(), Tag.toList(tags));
     }
 
     /** get or create parent-tag where alle imports are appendend as children */
