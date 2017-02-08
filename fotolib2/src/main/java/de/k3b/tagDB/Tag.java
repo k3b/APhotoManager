@@ -131,15 +131,18 @@ public class Tag{
     }
 
     /** return item as path where parents are prependet.
-     * grandparent -> parent -> child */
+     * /grandparent/parent/child */
     public String getPath() {
         StringBuilder result = new StringBuilder();
         Tag cur = this;
         while (cur != null) {
-            if (result.length() > 0) result.insert(0," -> ");
+            if (result.length() > 0) result.insert(0,"/");
             result.insert(0,cur.getName());
             cur = cur.getParent();
         }
+		
+		// leading "/"
+		result.insert(0,"/");
         return result.toString();
     }
 

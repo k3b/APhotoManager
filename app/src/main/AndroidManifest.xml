@@ -354,7 +354,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="file" />
-                <data android:mimeType="*/*" />
+                <data android:mimeType="text/comma-separated-values" />
                 <data android:pathPattern=".*\\.csv" />
             </intent-filter>
         </activity>

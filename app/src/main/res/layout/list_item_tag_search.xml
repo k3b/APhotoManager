@@ -66,6 +66,7 @@
         android:layout_weight="1"
         />
 
+	<!-- ellipsize&singleLine right align text with preceeding "..." if space is not long enough -->
     <TextView
         android:id="@+id/name"
         android:layout_width="wrap_content"
@@ -73,5 +74,9 @@
         android:text="hello world"
         android:layout_x="50px"
         android:layout_y="22px"
+		
+		android:ellipsize="start"
+		android:singleLine="true"
+		
         android:layout_weight="100" />
 </LinearLayout>

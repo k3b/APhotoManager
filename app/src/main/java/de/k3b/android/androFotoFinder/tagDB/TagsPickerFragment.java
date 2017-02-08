@@ -569,7 +569,7 @@ public class TagsPickerFragment  extends DialogFragment  {
             }
 
             if ((existingItems != null) && (item.delete(existingItems, recursive) > 0)) {
-                updateKnownLists(null, item.getName());
+                updateKnownLists(null, item.getName(), true);
                 mDataAdapter.remove(item);
                 if (children != null) {
                     for (Tag child : children) {
@@ -607,7 +607,7 @@ public class TagsPickerFragment  extends DialogFragment  {
             @Override
             protected void onDialogResult(String newFileName, Object... parameters) {
                 if (newFileName != null) {
-                    tagRename(tag, newFileName, chkUpdatePhotos.isChecked());
+                    tagRename(tag, newFileName, chkUpdatePhotos.isChecked(), false);
                 }
                 mSubDialog=null;
 
@@ -656,12 +656,12 @@ public class TagsPickerFragment  extends DialogFragment  {
 
         @Override
         protected void onPostExecute(Integer result) {
-            tagRename(oldTag, newName, false);
+            tagRename(oldTag, newName, false, true);
             super.onPostExecute(result);
         }
     }
 
-    private void tagRename(Tag oldTag, String newName, boolean updateDatabase) {
+    private void tagRename(Tag oldTag, String newName, boolean updateDatabase, boolean updateAffected) {
         String oldName = oldTag.getName();
 
         if ((newName != null) && (newName.compareTo(oldName) != 0)) {
@@ -669,7 +669,7 @@ public class TagsPickerFragment  extends DialogFragment  {
                 new TagRenameWithDbUpdateTask(oldTag, newName).execute();
                 return;
             }
-            updateKnownLists(newName, oldName);
+            updateKnownLists(newName, oldName, updateAffected);
             mDataAdapter.remove(oldTag);
             oldTag.setName(newName);
             mDataAdapter.add(oldTag);
@@ -677,8 +677,10 @@ public class TagsPickerFragment  extends DialogFragment  {
         }
     }
 
-    private void updateKnownLists(String newName, String oldName) {
-        if (updateLists(oldName, newName, mBookMarkNames,mAddNames,mRemoveNames,mAffectedNames) > 0) {
+    private void updateKnownLists(String newName, String oldName, boolean updateAffected) {
+        int modified = updateLists(oldName, newName, mBookMarkNames, mAddNames);
+        if (updateAffected) modified += updateLists(oldName, newName, mRemoveNames, mAffectedNames);
+        if (modified > 0) {
             saveSettings();
         }
         TagRepository.getInstance().save();
@@ -796,8 +798,8 @@ public class TagsPickerFragment  extends DialogFragment  {
         final String filter = (mIsFilterMode) ? TagsPickerFragment.this.mFilterEdit.getText()
                 .toString() : "@@@@";
         mDataAdapter.setFilterParam(filter);
-        boolean empty = TagsPickerFragment.this.mDataAdapter.getCount() == 0;
-        mList.setVisibility(empty ? View.INVISIBLE : View.VISIBLE);
+        // boolean empty = TagsPickerFragment.this.mDataAdapter.getCount() == 0;
+        // mList.setVisibility(empty ? View.INVISIBLE : View.VISIBLE);
     }
 
     private void refreshCounter() {
