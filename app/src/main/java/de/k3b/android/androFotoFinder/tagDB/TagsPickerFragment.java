@@ -209,10 +209,9 @@ public class TagsPickerFragment  extends DialogFragment  {
             mBookMarkNames.addAll(ListUtils.fromString(lastBookMarkNames));
         }
 
-        TagRepository repository = TagRepository.getInstance();
-        repository.includeIfNotFound(mAddNames, mRemoveNames, mAffectedNames, mBookMarkNames);
+        TagRepository.getInstance().includeIfNotFound(mAddNames, mRemoveNames, mAffectedNames, mBookMarkNames);
         this.mDataAdapter = new TagListArrayAdapter(this.getActivity(),
-                repository.reload(),
+                loadTagRepositoryItems(true),
                 mAddNames, mRemoveNames, mAffectedNames, mBookMarkNames
         );
 
@@ -489,7 +488,7 @@ public class TagsPickerFragment  extends DialogFragment  {
         rootList.add(item);
         final int rootTagReferenceCount = TagSql.getTagRefCount(getActivity(), rootList);
 
-        List<Tag> children = item.getChildren(TagRepository.getInstance().load(), true, false);
+        List<Tag> children = item.getChildren(loadTagRepositoryItems(false), true, false);
 
         if (children != null) rootList.addAll(children);
         final int allTagReferenceCount = (children == null)
@@ -534,6 +533,14 @@ public class TagsPickerFragment  extends DialogFragment  {
         return true;
     }
 
+    private List<Tag> loadTagRepositoryItems(boolean reload) {
+        List<Tag> result = reload ? TagRepository.getInstance().reload() : TagRepository.getInstance().load();
+        if (result.size() == 0) {
+            TagRepository.include(result,null,null,getString(R.string.tags_defaults));
+        }
+        return result;
+    }
+
     private class TagDeleteWithDbUpdateTask extends TagTask<List<Tag>> {
         TagDeleteWithDbUpdateTask() {
             super(getActivity(), R.string.delete_menu_title);
@@ -550,8 +557,7 @@ public class TagsPickerFragment  extends DialogFragment  {
 
     private boolean tagDelete(Tag item, boolean recursive, boolean deleteFromPhotos) {
         if (item != null) {
-            TagRepository repository = TagRepository.getInstance();
-            List<Tag> existingItems = repository.load();
+            List<Tag> existingItems = loadTagRepositoryItems(false);
             List<Tag> children = (recursive) ? item.getChildren(existingItems, true, false) : null;
 
             if (deleteFromPhotos) {
@@ -570,7 +576,7 @@ public class TagsPickerFragment  extends DialogFragment  {
                         mDataAdapter.remove(child);
                     }
                 }
-                repository.save();
+                TagRepository.getInstance().save();
                 mDataAdapter.reloadList();
             }
 
@@ -692,8 +698,7 @@ public class TagsPickerFragment  extends DialogFragment  {
     }
 
     private void tagAdd(Tag parent, String itemExpression) {
-        TagRepository repository = TagRepository.getInstance();
-        List<Tag> existingItems = repository.load();
+        List<Tag> existingItems = loadTagRepositoryItems(false);
         int changeCount = TagRepository.include(existingItems, parent, null, itemExpression);
 
         if (changeCount > 0) {
@@ -705,21 +710,20 @@ public class TagsPickerFragment  extends DialogFragment  {
                 mDataAdapter.add(t);
             }
             mDataAdapter.reloadList();
-            repository.save();
+            TagRepository.getInstance().save();
             mDataAdapter.notifyDataSetChanged();
         }
     }
 
     private void tagChange(Tag tag, Tag parent) {
-        TagRepository repository = TagRepository.getInstance();
-        List<Tag> existingItems = repository.load();
+        List<Tag> existingItems = loadTagRepositoryItems(false);
         tag.setParent(parent);
         if (!existingItems.contains(tag)) {
             existingItems.add(tag);
             mDataAdapter.add(tag);
             mDataAdapter.reloadList();
         }
-        repository.save();
+        TagRepository.getInstance().save();
         mDataAdapter.notifyDataSetChanged();
     }
 

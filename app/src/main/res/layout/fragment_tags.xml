@@ -120,7 +120,7 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentBottom="true"
 
-            android:text="@string/selection_none_hint"
+            android:text="@string/tags_hint"
             android:visibility="gone" />
 
     </RelativeLayout>
