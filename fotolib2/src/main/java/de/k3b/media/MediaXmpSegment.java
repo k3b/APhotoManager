@@ -23,9 +23,13 @@ import com.adobe.xmp.XMPMetaFactory;
 import com.adobe.xmp.XMPUtils;
 import com.adobe.xmp.impl.XMPDateTimeImpl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Date;
 import java.util.List;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.io.DateUtil;
 import de.k3b.io.GeoUtil;
 
@@ -36,6 +40,9 @@ import de.k3b.io.GeoUtil;
  */
 
 public class MediaXmpSegment extends XmpSegment implements IMetaApi {
+    private static final String dbg_context = "MediaXmpSegment: ";
+    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+
     /** the full path of the image where this xmp-file belongs to */
     private String path = null;
 
@@ -153,7 +160,7 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
             try {
                 return Integer.parseInt(result);
             } catch (NumberFormatException ex) {
-                ex.printStackTrace();
+                logger.error(dbg_context, "getRating", ex);
             }
         }
         return null;

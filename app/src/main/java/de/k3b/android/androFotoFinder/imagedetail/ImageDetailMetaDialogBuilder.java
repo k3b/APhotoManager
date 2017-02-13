@@ -185,7 +185,7 @@ public class ImageDetailMetaDialogBuilder {
     private static void addXmp(StringBuilder builder, File file) throws ImageProcessingException, IOException {
         if (file.exists()) {
             XmpSegment meta = new XmpSegment();
-            meta.load(new FileInputStream(file));
+            meta.load(file);
             builder.append(NL).append(file).append(NL).append(NL);
             meta.appendXmp(builder);
             builder.append(NL).append(line).append(NL);

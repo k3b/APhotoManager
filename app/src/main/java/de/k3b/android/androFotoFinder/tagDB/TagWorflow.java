@@ -147,7 +147,7 @@ public class TagWorflow extends TagProcessor {
 
             // update xmp-sidecar-file
             try {
-                xmp.save(new FileOutputStream(xmpFile), Global.saveXmpAsHumanReadable);
+                xmp.save(xmpFile, Global.saveXmpAsHumanReadable);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -191,7 +191,7 @@ public class TagWorflow extends TagProcessor {
         if ((xmpFile != null) && (xmpFile.exists())) {
             try {
                 MediaXmpSegment xmp = new MediaXmpSegment();
-                xmp.load(new FileInputStream(xmpFile));
+                xmp.load(xmpFile);
                 return xmp;
             } catch (IOException e) {
                 e.printStackTrace();

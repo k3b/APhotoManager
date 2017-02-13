@@ -20,9 +20,12 @@
 package de.k3b.io;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +41,11 @@ public class FileUtils {
     public static final String MEDIA_IGNORE_FILENAME = ".nomedia"; // MediaStore.MEDIA_IGNORE_FILENAME;
 
 
+    public static InputStream streamFromStringContent(String data) {
+        ByteArrayInputStream s = new ByteArrayInputStream(data.getBytes());
+        return s;
+    }
+
     public static String readFile(File file) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(file));
         StringBuilder sb = new StringBuilder();
@@ -48,10 +56,20 @@ public class FileUtils {
             sb.append("\n");
             line = br.readLine();
         }
-        br.close();
+        close(br, file);
         return sb.toString();
     }
 
+	public static void close(Closeable stream, Object source) {
+		if (stream != null) {
+			try {			
+				stream.close();
+			} catch (IOException e) {
+                logger.warn("Error close " + source, e);
+			}
+		}
+	}
+		
     /** tryGetCanonicalFile without exception */
     public static File tryGetCanonicalFile(String path) {
         if (path == null) return null;

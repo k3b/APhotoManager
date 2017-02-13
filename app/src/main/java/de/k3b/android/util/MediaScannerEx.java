@@ -76,7 +76,7 @@ public class MediaScannerEx extends MediaScanner {
             xmp = new MediaXmpSegment();
             try {
                 getLastUpdated(mediaContentValuesToReceiveLastUpdated, xmpFileSource);
-                xmp.load(new FileInputStream(xmpFileSource));
+                xmp.load(xmpFileSource);
                 TagRepository.getInstance().include(getImportRoot(), xmp.getTags());
             } catch (FileNotFoundException e) {
                 Log.e(Global.LOG_CONTEXT, "MediaScannerEx:loadXmp(xmpFileSource=" + xmpFileSource +") failed " + e.getMessage(),e);

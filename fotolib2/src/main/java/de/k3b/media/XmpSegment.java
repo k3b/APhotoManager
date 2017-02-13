@@ -30,12 +30,23 @@ import com.adobe.xmp.options.SerializeOptions;
 import com.adobe.xmp.properties.XMPProperty;
 import com.adobe.xmp.properties.XMPPropertyInfo;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import de.k3b.FotoLibGlobal;
+import de.k3b.io.FileUtils;
 import de.k3b.tagDB.TagConverter;
 
 /**
@@ -44,6 +55,10 @@ import de.k3b.tagDB.TagConverter;
  */
 
 public class XmpSegment {
+    private static final String dbg_context = "XmpSegment: ";
+    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+
+
     private XMPMeta xmpMeta = null;
     private static XMPSchemaRegistry registry = XMPMetaFactory.getSchemaRegistry();
 
@@ -149,8 +164,8 @@ public class XmpSegment {
         return null;
     }
 
-    private void onError(String debugContext, XMPException e) {
-        e.printStackTrace();
+    private void onError(String debugContext, Exception e) {
+        logger.error(dbg_context, debugContext, e);
     }
 
     protected XMPMeta getXmpMeta() {
@@ -171,6 +186,42 @@ public class XmpSegment {
         return this;
     }
 
+    public XmpSegment load(File file) throws FileNotFoundException {
+		FileInputStream stream = null;
+        try {
+			stream = new FileInputStream(file);
+            setXmpMeta(XMPMetaFactory.parse(stream));
+        } catch (XMPException e) {
+            onError("load " + file, e);
+			
+            // workaround: my android-4.2 tahblet cannot re-read it-s xmp without trailing "\n"
+            if (file.exists()) {
+                try {
+                    setXmpMeta(XMPMetaFactory.parse(FileUtils.streamFromStringContent(FileUtils.readFile(file)+"\n")));
+                } catch (IOException e1) {
+                    onError("load-via-string " + file, e);
+                } catch (XMPException e1) {
+                    onError("load-via-string " + file, e);
+                }
+            }
+        } finally {
+			FileUtils.close(stream, file);
+		}
+        return this;
+    }
+
+    public XmpSegment save(File file, boolean humanReadable) throws FileNotFoundException {
+        FileOutputStream stream = null;
+        try {
+            stream = new FileOutputStream(file);
+            save(stream, humanReadable);
+        } finally {
+            FileUtils.close(stream, file);
+        }
+        return this;
+
+    }
+
     public XmpSegment save(OutputStream os, boolean humanReadable) {
         // humanReadable = false;
         try {
@@ -178,6 +229,11 @@ public class XmpSegment {
             options.setPadding(1);
             if (!humanReadable) options.setIndent("");
             XMPMetaFactory.serialize(getXmpMeta(), os, options);
+
+            // workaround: my android-4.2 tahblet cannot re-read it-s xmp without this. on my android-4.4 handset this is not neccessary
+            os.write("\n".getBytes());
+        } catch (IOException e) {
+            onError("save", e);
         } catch (XMPException e) {
             onError("save", e);
         }
@@ -200,8 +256,8 @@ public class XmpSegment {
                 appendXmpPropertyInfo(result, prop);
             }
         } catch (XMPException e) {
-            e.printStackTrace();
             result.append(e.toString());
+            onError("appendXmp",e);
         }
     }
 

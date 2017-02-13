@@ -78,32 +78,27 @@ public class TagProcessor {
 
     /** calculate the new tags out of added and removed tags. returns null if there is no change neccessary */
     public List<String> getUpdated(List<String> originalCurrentTags, List<String> addedTags, List<String> removedTags) {
-        ArrayList<String> currentTags = (originalCurrentTags == null) ? null : new ArrayList<String>(originalCurrentTags);
+        ArrayList<String> currentTags = (originalCurrentTags == null) ? new ArrayList<String>() : new ArrayList<String>(originalCurrentTags);
         int modifyCount = 0;
-        if ((currentTags != null) && (currentTags.size() > 0)) {
-            if (addedTags != null) {
-                for (String tag : addedTags) {
-                    if (!currentTags.contains(tag)) {
-                        currentTags.add(tag);
-                        modifyCount++;
-                    }
+        if (addedTags != null) {
+            for (String tag : addedTags) {
+                if (!currentTags.contains(tag)) {
+                    currentTags.add(tag);
+                    modifyCount++;
                 }
-
             }
-            if (removedTags != null) {
-                for (int i= removedTags.size()-1; i >= 0; i--) {
-                    String tag = removedTags.get(i);
-                    if (currentTags.contains(tag)) {
-                        currentTags.remove(tag);
-                        modifyCount++;
-                    }
-                }
 
-            }
-            return (modifyCount > 0) ? currentTags : null;
-        } else if ((addedTags != null) && (addedTags.size() > 0)) {
-            return new ArrayList<String>(addedTags);
         }
-        return null;
+        if (removedTags != null) {
+            for (int i= removedTags.size()-1; i >= 0; i--) {
+                String tag = removedTags.get(i);
+                if (currentTags.contains(tag)) {
+                    currentTags.remove(tag);
+                    modifyCount++;
+                }
+            }
+
+        }
+        return (modifyCount > 0) ? currentTags : null;
     }
 }

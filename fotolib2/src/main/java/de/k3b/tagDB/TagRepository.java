@@ -43,8 +43,8 @@ import de.k3b.FotoLibGlobal;
 
 public class TagRepository {
     // android - log compatible
-    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
     private static final String dbg_context = "TagRepository: ";
+    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
 
     /** Lines starting with char are comments. These lines are not interpreted */
     public static final java.lang.String COMMENT = "#";
