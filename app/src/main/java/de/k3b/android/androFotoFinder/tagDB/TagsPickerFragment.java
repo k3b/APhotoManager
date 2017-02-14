@@ -704,13 +704,17 @@ public class TagsPickerFragment  extends DialogFragment  {
         int changeCount = TagRepository.include(existingItems, parent, null, itemExpression);
 
         if (changeCount > 0) {
+
             int len = existingItems.size();
 
             for (int i = len - changeCount; i < len; i++) {
                 Tag t = existingItems.get(i);
-                existingItems.add(t);
+                // existingItems.add(t);
                 mDataAdapter.add(t);
             }
+
+            mDataAdapter.notifyDataSetInvalidated();
+            mDataAdapter.notifyDataSetChanged();
             mDataAdapter.reloadList();
             TagRepository.getInstance().save();
             mDataAdapter.notifyDataSetChanged();
