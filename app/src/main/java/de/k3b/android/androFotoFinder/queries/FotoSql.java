@@ -736,6 +736,7 @@ public class FotoSql extends FotoSqlBase {
 
     @NonNull
     public static CursorLoader createCursorLoader(Context context, final QueryParameter query) {
+        FotoSql.setWhereVisibility(query, IGalleryFilter.VISIBILITY_DEFAULT);
         final CursorLoader loader = new CursorLoaderWithException(context, query);
         return loader;
     }
