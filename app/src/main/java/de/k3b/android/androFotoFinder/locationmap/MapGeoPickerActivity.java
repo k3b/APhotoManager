@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -37,14 +37,17 @@ import android.widget.Toast;
 import org.osmdroid.api.IGeoPoint;
 
 import de.k3b.android.androFotoFinder.Common;
+import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.GalleryFilterActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.SettingsActivity;
+import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.osmdroid.OsmdroidUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.LocalizedActivity;
+import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedFiles;
 import de.k3b.database.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
@@ -52,6 +55,7 @@ import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
+import de.k3b.io.IGeoRectangle;
 
 public class MapGeoPickerActivity extends LocalizedActivity implements Common {
     private static final String mDebugPrefix = "GalM-";
@@ -242,12 +246,33 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
             case R.id.cmd_settings:
                 SettingsActivity.show(this);
                 return true;
+			case R.id.cmd_photo:
+				return showPhoto(mMap.getCurrentGeoRectangle());
+			case R.id.cmd_gallery:
+				return showGallery(mMap.getCurrentGeoRectangle());
             default:
                 return super.onOptionsItemSelected(item);
         }
 
     }
 
+    private boolean showPhoto(IGeoRectangle geoArea) {
+        QueryParameter query = new QueryParameter();
+        FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
+        FotoSql.addWhereFilterLatLon(query, geoArea);
+
+        ImageDetailActivityViewPager.showActivity(this, null, 0, query);
+        return true;
+    }
+
+    private boolean showGallery(IGeoRectangle geoArea) {
+        GalleryFilterParameter filter = new GalleryFilterParameter();
+        filter.get(geoArea);
+        FotoGalleryActivity.showActivity(this, filter, null, 0);
+        return true;
+    }
+
+	
     /**
      * Call back from sub-activities.<br/>
      * Process Change StartTime (longpress start), Select StopTime before stop

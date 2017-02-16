@@ -413,9 +413,14 @@ public class LocationMapFragment extends DialogFragment {
         dismiss();
     }
 
+	public IGeoRectangle getCurrentGeoRectangle() {
+		IGeoRectangle result = getGeoRectangle(mMapView.getBoundingBox());
+		return result;
+	}
+
     protected void onOk() {
         if (mDirectoryListener != null) {
-            IGeoRectangle result = getGeoRectangle(mMapView.getBoundingBox());
+            IGeoRectangle result = getCurrentGeoRectangle();
             if (Global.debugEnabled) {
                 Log.i(Global.LOG_CONTEXT, mDebugPrefix + "onOk: " + result);
             }
