@@ -850,10 +850,12 @@ public class FotoSql extends FotoSqlBase {
                 int colPath = cursor.getColumnIndex(SQL_COL_DISPLAY_TEXT);
                 while (cursor.moveToNext()) {
                     String path = cursor.getString(colPath);
-                    result.add(path);
-                    String xmpPath = FileUtils.replaceExtension(path, ".xmp");
-                    if (new File(xmpPath).exists()) {
-                        result.add(xmpPath);
+                    if ((path != null) && (path.length() > 0)) {
+                        result.add(path);
+                        String xmpPath = FileUtils.replaceExtension(path, ".xmp");
+                        if (new File(xmpPath).exists()) {
+                            result.add(xmpPath);
+                        }
                     }
                 }
             } finally {
