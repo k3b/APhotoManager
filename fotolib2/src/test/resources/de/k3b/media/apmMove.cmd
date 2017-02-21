@@ -24,12 +24,16 @@ echo moved %2
 goto end
 
 :fileAlreadyExists
+echo ##### file alreay exists: %imageDst% >> apmBatchErrors.log
+echo ##### %0 %* >> apmBatchErrors.log
 echo file alreay exists: %imageDst%
 echo .
 
 goto usage
 
 :fileNotFound
+echo ##### file not found: %imageSrc% >> apmBatchErrors.log
+echo ##### %0 %* >> apmBatchErrors.log
 echo file not found: %imageSrc%
 echo .
 

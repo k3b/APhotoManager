@@ -18,8 +18,11 @@ if NOT EXIST %image% goto fileNotFound
 IF "%~n2"=="" goto show
 
 rem if xmp does not exist yet create it with the content of the jpg file
-if NOT EXIST %xmp% rem echo apmTagsRemove-createXmp %exe% %xmp% -tagsFromFile %image% -@ "%bindir%apmJpg2xmp.args" 
-if NOT EXIST %xmp% %exe% %xmp% -tagsFromFile %image% -@ "%bindir%apmJpg2xmp.args" 
+rem if NOT EXIST %xmp% echo apmTagsAdd-createxmp %exe% %xmp% -tagsFromFile %image% -@ "%bindir%apmJpg2xmp.args" 
+if NOT EXIST %xmp% %exe% %xmp% -tagsFromFile %image% -@ "%bindir%apmJpg2xmp.args" > nul 2> nul
+
+rem -tagsFromFile may have failed, if jpg has no matching meta inside: copy empty xmp
+if NOT EXIST %xmp% copy "%bindir%empty.xmp" %xmp% > nul 2> nul
 
 set iptcParams=
 set xmpParams=
@@ -28,20 +31,20 @@ set xmpParams=
 	set xmpParams=%xmpParams% "-xmp-dc:subject-=%~n2"
 
 	shift
-IF NOT "%2"=="" goto loop
+IF NOT "%~n2"=="" goto loop
 
 rem update tags in xmp file directly
-rem echo apmTagsRemove-updateXmp %exe% -overwrite_original %xmp% %xmpParams%
-%exe% -overwrite_original %xmp% %xmpParams%  
+echo apmTagsRemove-updateXmp %exe% -overwrite_original %xmp% %xmpParams%
+%exe% -overwrite_original %xmp% %xmpParams%   > nul 2> nul
 
 rem alternative 1
 rem update tags in jpg file directly
 rem %exe% -P -overwrite_original %image% %iptcParams%
 
-rem alternative 2
+rem alternative 2: use only if xmp is more acurate than jpg (i.e. when using JPhotoTagger)
 rem copy tags from xmp file to jpg file
-rem echo apmTagsRemove-copyXmp2Jpg %exe% -P -overwrite_original  %image% -tagsFromFile %xmp% "-IPTC:Keywords < XMP-dc:Subject" %jpg%
-%exe% -P -overwrite_original  %image% -tagsFromFile %xmp% "-IPTC:Keywords < XMP-dc:Subject" %jpg%  
+rem echo apmTagsRemove-copyXmp2Jpg %exe% -P -overwrite_original  %image% -tagsFromFile %xmp% "-IPTC:Keywords < XMP-dc:Subject"
+%exe% -P -overwrite_original  %image% -tagsFromFile %xmp% "-IPTC:Keywords < XMP-dc:Subject"
 
 goto end
 

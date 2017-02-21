@@ -43,6 +43,9 @@ goto end
 
 
 :notFound
+echo ##### file %image% not found >> apmBatchErrors.log
+echo ##### %0 %* >> apmBatchErrors.log
+
 echo file %image% not found
 
 :usage

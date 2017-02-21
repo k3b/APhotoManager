@@ -18,6 +18,9 @@ echo deleted %1
 goto end
 
 :fileNotFound
+echo ##### file not found: %imageSrc% >> apmBatchErrors.log
+echo ##### %0 %* >> apmBatchErrors.log
+
 echo file not found: %imageSrc%
 echo .
 
