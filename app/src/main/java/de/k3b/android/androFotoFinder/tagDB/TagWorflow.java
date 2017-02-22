@@ -24,8 +24,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
@@ -43,6 +41,9 @@ import de.k3b.tagDB.Tag;
 import de.k3b.tagDB.TagConverter;
 import de.k3b.tagDB.TagProcessor;
 import de.k3b.tagDB.TagRepository;
+import de.k3b.transactionlog.MediaTransactionLogEntryType;
+
+import static de.k3b.android.util.AndroidFileCommands.createFileCommand;
 
 /**
  *  Class to handle tag update for one or more photos.
@@ -163,15 +164,26 @@ public class TagWorflow extends TagProcessor {
             TagSql.execUpdate(this.context, tagWorflowItemFromDB.id, dbValues);
 
         // update batch
+            long now = new Date().getTime();
             String tagsString = TagConverter.asBatString(removedTags);
+            AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(context);
             if (tagsString != null) {
-                AndroidFileCommands.log(context, "call apmTagsRemove.cmd \"", tagWorflowItemFromDB.path, "\" ", tagsString).closeLogFile();
+                cmd.log("call apmTagsRemove.cmd \"", tagWorflowItemFromDB.path, "\" ", tagsString);
+                cmd.addTransactionLog(tagWorflowItemFromDB.id, tagWorflowItemFromDB.path, now,
+                        MediaTransactionLogEntryType.TAGSREMOVE, tagsString);
             }
 
             tagsString = TagConverter.asBatString(addedTags);
             if (tagsString != null) {
-                AndroidFileCommands.log(context, "call apmTagsAdd.cmd \"", tagWorflowItemFromDB.path, "\" ", tagsString).closeLogFile();
+                cmd.log("call apmTagsAdd.cmd \"", tagWorflowItemFromDB.path, "\" ", tagsString);
+                cmd.addTransactionLog(tagWorflowItemFromDB.id, tagWorflowItemFromDB.path, now,
+                        MediaTransactionLogEntryType.TAGSADD, tagsString);
             }
+
+            cmd.addTransactionLog(tagWorflowItemFromDB.id, tagWorflowItemFromDB.path, now,
+                    MediaTransactionLogEntryType.TAGS, TagConverter.asBatString(xmp.getTags()));
+
+            cmd.closeLogFile();
         }
 
         return xmpFile;

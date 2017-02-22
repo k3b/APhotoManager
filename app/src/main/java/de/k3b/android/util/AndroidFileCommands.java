@@ -22,9 +22,11 @@ package de.k3b.android.util;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -33,12 +35,15 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import java.io.File;
+import java.util.Date;
 
 import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
+import de.k3b.android.androFotoFinder.queries.DatabaseHelper;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.transactionlog.TransactionLogSql;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedFiles;
 import de.k3b.database.SelectedItems;
@@ -46,6 +51,8 @@ import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
+import de.k3b.transactionlog.MediaTransactionLogDto;
+import de.k3b.transactionlog.MediaTransactionLogEntryType;
 
 /**
  * Api to manipulate files/photos.
@@ -181,7 +188,7 @@ public class AndroidFileCommands extends FileCommands {
     }
 
     public boolean rename(Long fileId, File dest, File src) {
-        int result = moveOrCopyFiles(true, "rename", new File[]{dest}, new File[]{src});
+        int result = moveOrCopyFiles(true, "rename", new Long[]{fileId}, new File[]{dest}, new File[]{src});
         return (result != 0);
     }
 
@@ -193,7 +200,7 @@ public class AndroidFileCommands extends FileCommands {
             setLastCopyToPath(copyToPath);
 
             String[] selectedFileNames = srcFotos.getFileNames();
-            moveOrCopyFilesTo(move, destDirFolder, SelectedFiles.getFiles(selectedFileNames));
+            moveOrCopyFilesTo(move, destDirFolder, srcFotos.getIds(), SelectedFiles.getFiles(selectedFileNames));
         }
     }
 
@@ -267,6 +274,10 @@ public class AndroidFileCommands extends FileCommands {
         if (nameCount > 0) {
             String[] fileNames = fotos.getFileNames();
             deleteCount = super.deleteFiles(fileNames);
+            long now = new Date().getTime();
+            for(int i = 0; i < nameCount; i++) {
+                addTransactionLog(fotos.getId(i), fotos.getFileName(i), now, MediaTransactionLogEntryType.DELETE, null);
+            }
         }
 
         if ((nameCount == 0) || (nameCount == deleteCount)) {
@@ -394,6 +405,8 @@ public class AndroidFileCommands extends FileCommands {
                 int maxCount = files.length+1;
                 openLogfile();
                 int resultFile = 0;
+
+                String latLong = DirectoryFormatter.parseLatLon(latitude) + " " + DirectoryFormatter.parseLatLon(longitude);
                 for (File file : files) {
                     countdown--;
                     if (countdown <= 0) {
@@ -404,13 +417,20 @@ public class AndroidFileCommands extends FileCommands {
                         resultFile++;
                     }
                     itemcount++;
-                    log("CALL setgps  ", getFilenameForLog(file),
-                            " ", DirectoryFormatter.parseLatLon(latitude), " ", DirectoryFormatter.parseLatLon(longitude));
+                    log("CALL apmGps.cmd ", getFilenameForLog(file),
+                            " ", latLong);
                 }
                 onProgress(itemcount, maxCount);
                 int resultSql = FotoSql.execUpdateGeo(applicationContext, latitude, longitude, selectedItems);
+
+                long now = new Date().getTime();
+                for(int i = 0; i < selectedItems.size(); i++) {
+                    addTransactionLog(selectedItems.getId(i), selectedItems.getFileName(i), now, MediaTransactionLogEntryType.GPS, latLong);
+                }
+
                 closeLogFile();
                 onProgress(++itemcount, maxCount);
+
                 return Math.max(resultFile,resultSql);
             }
         }
@@ -432,11 +452,11 @@ public class AndroidFileCommands extends FileCommands {
         return this;
     }
 
-    public static AndroidFileCommands log(Activity context, Object... params) {
+    @NonNull
+    public static AndroidFileCommands createFileCommand(Activity context) {
         AndroidFileCommands cmd = new AndroidFileCommands().setContext(context, null);
         cmd.setLogFilePath(cmd.getDefaultLogFile());
         cmd.openLogfile();
-        cmd.log(params);
         return cmd;
     }
 
@@ -473,4 +493,16 @@ public class AndroidFileCommands extends FileCommands {
         return result.toString();
     }
 
+    @Override
+    public void addTransactionLog(
+            long currentMediaID, String fileFullPath, long modificationDate,
+            MediaTransactionLogEntryType mediaTransactionLogEntryType, String commandData) {
+        super.addTransactionLog(currentMediaID, fileFullPath, modificationDate,
+                mediaTransactionLogEntryType, commandData);
+        SQLiteDatabase db = DatabaseHelper.getWritableDatabase(mContext);
+        ContentValues values = TransactionLogSql.set(null,currentMediaID, fileFullPath, modificationDate,
+                mediaTransactionLogEntryType, commandData);
+        db.insert(TransactionLogSql.TABLE, null, values);
+    }
 }
+

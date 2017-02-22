@@ -19,6 +19,9 @@
 
 package de.k3b.io;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -30,16 +33,22 @@ import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Date;
 
+import de.k3b.FotoLibGlobal;
+import de.k3b.transactionlog.MediaTransactionLogDto;
+import de.k3b.transactionlog.MediaTransactionLogEntryType;
+
 /**
  * Created by k3b on 03.08.2015.
  */
 public class FileCommands implements  Cloneable {
+    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+
     public static final int OP_COPY = 1;
     public static final int OP_MOVE = 2;
     public static final int OP_DELETE = 3;
     public static final int OP_RENAME = 4;
     public static final int OP_UPDATE = 5;
-    private static final String EXT_SIDECAR = ".xmp";
+    private static final String EXT_SIDECAR = FileUtils.EXT_SIDECAR;
 
     protected String mLogFilePath;
     // private static final String LOG_FILE_ENCODING = "UTF-8";
@@ -83,7 +92,6 @@ public class FileCommands implements  Cloneable {
             File sidecar = getSidecar(file);
             if (osFileExists(sidecar)) {
                 osDeleteFile(sidecar); // dont care if delete was successfull
-                log("del " , getFilenameForLog(sidecar));
             }
 
             if (osFileExists(file)) {
@@ -97,7 +105,7 @@ public class FileCommands implements  Cloneable {
                 result = true; // it is gone
             }
         }
-        log("del ", getFilenameForLog(file));
+        log("call apmDelete.cmd ", getFilenameForLog(file));
         return result;
     }
 
@@ -111,13 +119,13 @@ public class FileCommands implements  Cloneable {
         return "\"" + absolutePath.replace("/", "\\") + "\"";
     }
 
-    public int moveOrCopyFilesTo(boolean move, File destDirFolder, File... sourceFiles) {
+    public int moveOrCopyFilesTo(boolean move, File destDirFolder, Long[] ids, File... sourceFiles) {
         int result = 0;
         if (canProcessFile(move ? OP_MOVE : OP_COPY)) {
             if (osCreateDirIfNeccessary(destDirFolder)) {
                 File[] destFiles = createDestFiles(destDirFolder, sourceFiles);
 
-                result = moveOrCopyFiles(move, (move ? "mov" : "copy"), destFiles, sourceFiles);
+                result = moveOrCopyFiles(move, (move ? "mov" : "copy"), ids, destFiles, sourceFiles);
 
             } else {
                 log("rem Target dir ", getFilenameForLog(destDirFolder), " cannot be created");
@@ -127,7 +135,7 @@ public class FileCommands implements  Cloneable {
     }
 
     /** does the copying. also used by unittesting */
-    protected int moveOrCopyFiles(boolean move, String what, File[] destFiles, File[] sourceFiles) {
+    protected int moveOrCopyFiles(boolean move, String what, Long[] ids, File[] destFiles, File[] sourceFiles) {
         int opCode = (move) ? OP_MOVE : OP_COPY;
 
         mModifiedSrcFiles = (move) ? new ArrayList<String>() : null;
@@ -139,21 +147,25 @@ public class FileCommands implements  Cloneable {
         int itemCount = 0;
         int pos = 0;
         int fileCount = destFiles.length;
+        long now = new Date().getTime();
+        String dosCommand = (move) ? "call apmMove.cmd " : "call apmCopy.cmd ";
+        MediaTransactionLogEntryType transaction = (move) ? MediaTransactionLogEntryType.MOVE : MediaTransactionLogEntryType.COPY;
 
         while (pos < fileCount) {
             File sourceFile = sourceFiles[pos];
             File destFile = destFiles[pos];
+            Long id = ids[pos];
 
             File destRenamed = renameDuplicate(destFile);
             if (osFileMoveOrCopy(move, destRenamed, sourceFile)) itemCount++;
-            log(((move) ? "MOVE /y " : "COPY /y "), getFilenameForLog(sourceFile), " " , getFilenameForLog(destRenamed));
+            log(dosCommand, getFilenameForLog(sourceFile), " " , getFilenameForLog(destRenamed));
 
             File sourceSidecar = getSidecar(sourceFile);
             if (osFileExists(sourceSidecar)) {
                 File destSidecar = getSidecar(destRenamed);
                 if (osFileMoveOrCopy(move, destSidecar, sourceSidecar)) itemCount++;
-                log(((move) ? "MOVE /y " : "COPY /y "), getFilenameForLog(sourceSidecar), " " , getFilenameForLog(destSidecar));
             }
+            addTransactionLog(id, sourceFile.getPath(), now, transaction, destFile.getPath());
             pos++;
         }
         int modifyCount = mModifiedDestFiles.size();
@@ -419,4 +431,17 @@ public class FileCommands implements  Cloneable {
         }
         return this;
     }
+
+    public void addTransactionLog(
+            long currentMediaID, String fileFullPath, long modificationDate,
+            MediaTransactionLogEntryType mediaTransactionLogEntryType, String commandData) {
+
+        if (FotoLibGlobal.debugEnabled) {
+            MediaTransactionLogDto dto = new MediaTransactionLogDto(currentMediaID, fileFullPath, modificationDate,
+                mediaTransactionLogEntryType, commandData);
+            logger.info(getClass().getSimpleName() + ".addTransactionLog(" + dto.toString() + ")");
+        }
+
+    }
+
 }

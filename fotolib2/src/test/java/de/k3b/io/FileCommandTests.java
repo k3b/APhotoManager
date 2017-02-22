@@ -43,7 +43,7 @@ public class FileCommandTests {
     @Test
     public void shouldCopy() {
         registerFakeFiles(sut);
-        sut.moveOrCopyFilesTo(false, X_FAKE_OUTPUT_DIR, createTestFiles("a.jpg"));
+        sut.moveOrCopyFilesTo(false, X_FAKE_OUTPUT_DIR, createIds(1), createTestFiles("a.jpg"));
 
         verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "/a.jpg"), createTestFile("a.jpg"));
 
@@ -52,7 +52,7 @@ public class FileCommandTests {
     @Test
     public void shouldCopyWitRenameExistingMultiple() {
         registerFakeFiles(sut, "a.jpg", "b.png", "b(1).png");
-        sut.moveOrCopyFilesTo(false, X_FAKE_OUTPUT_DIR, createTestFiles("a.jpg", "b.png"));
+        sut.moveOrCopyFilesTo(false, X_FAKE_OUTPUT_DIR, createIds(2), createTestFiles("a.jpg", "b.png"));
 
         verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(1).jpg"), createTestFile("a.jpg"));
         verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "b(2).png"), createTestFile("b.png"));
@@ -62,10 +62,18 @@ public class FileCommandTests {
     public void shouldCopyRenameExistingWithXmp() {
         registerFakeFiles(sut, "a.jpg", "a.xmp", "a(1).xmp", "a(2).jpg"); // a(3) is next possible
 
-        sut.moveOrCopyFilesTo(false, X_FAKE_OUTPUT_DIR, createTestFiles("a.jpg"));
+        sut.moveOrCopyFilesTo(false, X_FAKE_OUTPUT_DIR, createIds(1), createTestFiles("a.jpg"));
 
         verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(3).jpg"), createTestFile("a.jpg"));
         verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(3).xmp"), createTestFile("a.xmp"));
+    }
+
+    private Long[] createIds(int count) {
+        Long[] result = new Long[count];
+        for (int i = 0; i < count; i++) {
+            result[i]= Long.valueOf(i+1);
+        }
+        return result;
     }
 
     @Test

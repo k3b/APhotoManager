@@ -281,7 +281,7 @@ public class TagRepositoryTests {
         Assert.assertEquals("find a again", null, a);
 
         Tag z = sut.findFirstByName(items, "acz");
-        Assert.assertEquals("z after delete", "ac -> acz", z.getPath());
+        Assert.assertEquals("z after delete", "/ac/acz", z.getPath());
 
     }
 

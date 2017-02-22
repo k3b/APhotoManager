@@ -24,6 +24,7 @@ public class DateUtil {
         DateUtil.IsoDateTimeFormat.setTimeZone(UTC);
         DateUtil.IsoDateFormat.setTimeZone(UTC);
         DateUtil.IsoDateFormat2.setTimeZone(UTC);
+        TimeZone.setDefault(UTC);
     }
 
     public static Date parseIsoDate(String dateString) {
