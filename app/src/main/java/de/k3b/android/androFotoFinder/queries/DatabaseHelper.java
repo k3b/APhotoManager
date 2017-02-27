@@ -25,7 +25,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import de.k3b.android.androFotoFinder.transactionlog.TransactionLogDB;
+import de.k3b.android.androFotoFinder.transactionlog.TransactionLogSql;
 import de.k3b.android.util.DatabaseContext;
 
 /**
@@ -51,7 +51,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      */
     @Override
     public void onCreate(final SQLiteDatabase db) {
-        db.execSQL(TransactionLogDB.CREATE_TABLE);
+        db.execSQL(TransactionLogSql.CREATE_TABLE);
 
         this.version3Upgrade_TIMESLICE_WITH_NOTES(db);
     }
@@ -69,8 +69,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private void version3Upgrade_TIMESLICE_WITH_NOTES(final SQLiteDatabase db) {
         // added timeslice.notes
         /*
-        db.execSQL("ALTER TABLE " + TransactionLogDB.TABLE
-                + " ADD COLUMN " + TransactionLogDB.COL_NOTES + " TEXT");
+        db.execSQL("ALTER TABLE " + TransactionLogSql.TABLE
+                + " ADD COLUMN " + TransactionLogSql.COL_NOTES + " TEXT");
         */
     }
 

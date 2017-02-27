@@ -27,7 +27,7 @@ import de.k3b.transactionlog.MediaTransactionLogEntryType;
  * Created by k3b on 22.02.2017.
  */
 
-public class TransactionLogDB {
+public class TransactionLogSql {
     public static final String TABLE = "TransactionLog";
     static final String COL_PK = "_id";
     static final String COL_mediaID = "mediaID";
