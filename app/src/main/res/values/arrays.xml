@@ -12,6 +12,8 @@
         <item>Polskie (Polish)</item>
         <item>Português, Brasil (Portuguese)</item>
         <item>Român (Romanian)</item>
+        <item>Русский (Russian)</item>
+        <item>(For Translators)</item>
     </string-array>
     <string-array name="pref_locale_values" translatable="false">
         <item></item>
@@ -25,5 +27,7 @@
         <item>pl</item>
         <item>pt-BR</item>
         <item>ro</item>
+        <item>ru</item>
+        <item>zz</item>
     </string-array>
 </resources>

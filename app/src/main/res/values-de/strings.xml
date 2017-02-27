@@ -154,7 +154,7 @@
   <string name="geo_picker_from_map_title">Wähle Geo aus Landkarte</string>
 
   <string name="folder_hide_images_menu_title">Bilder verstecken</string>
-	<string name="folder_hide_images_question_message_format">"Sind Sie sicher?
+  <string name="folder_hide_images_question_message_format">"Sind Sie sicher?
 
 Wollen Sie alle Medien-Dateien (Foto, Video, Audio) unterhalb von
 
@@ -164,5 +164,31 @@ unsichtbar machen für Medien-Datenbank, Gallery-Apps und den Media-Scanner?
 
 Verstecken kann über das 'Media-Scanner' Gallery-Menü rückgängig gemacht werden."</string>
 
+
+  <string name="filter_path_hint">Teil von Ordner oder Dateiname. %=Wildcard</string>
+
+  <string name="lbl_any">Suche</string>
+  <string name="filter_any_hint">in Tags, Title, Beschreibung oder Pfad</string>
+
+  <string name="lbl_images_public">Öffentliche Bilder</string>
+  <string name="lbl_images_private">Private Bilder</string>
+
+  <string name="lbl_with_no_tags">Ohne Tags</string>
+  <string name="lbl_tags_include">+Tags</string>
+  <string name="lbl_tags_exclude">-Tags</string>
+  <string name="lbl_tag">Tag</string>
+
+  <string name="tags_activity_title">Wähle Tags</string>
+  <string name="tags_search_hint">Eingabe aktiviert Filter ...</string>
+  <string name="tags_search_no_matching_items_found">Keine Tags gefunden</string>
+  <string name="tags_edit_menu_title">Tags zuweisen</string>
+
+  <string name="tags_add_menu_title">Neues Tag erzeugen</string>
+  <string name="tags_add_default">neues_tag</string>
+  <string name="tags_delete_children_title">Unter-Tags löschen</string>
+  <string name="tags_update_photos">Tags in betroffenen photos aktualisieren</string>
+  <string name="tags_update_result_format">Tags von %1$d Photos aktualisiert</string>
+  <string name="tags_hint">Long-Tap tagname öffnet das Menu</string>
+  <string name="tags_defaults">Aktivitäten,Menschen,Orte,Themen,Projekte</string>
 
 </resources>
