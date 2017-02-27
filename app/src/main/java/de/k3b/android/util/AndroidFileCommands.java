@@ -43,7 +43,7 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.queries.DatabaseHelper;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.transactionlog.TransactionLogSql;
+import de.k3b.android.androFotoFinder.transactionlog.TransactionLogDB;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedFiles;
 import de.k3b.database.SelectedItems;
@@ -51,7 +51,6 @@ import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
-import de.k3b.transactionlog.MediaTransactionLogDto;
 import de.k3b.transactionlog.MediaTransactionLogEntryType;
 
 /**
@@ -500,9 +499,9 @@ public class AndroidFileCommands extends FileCommands {
         super.addTransactionLog(currentMediaID, fileFullPath, modificationDate,
                 mediaTransactionLogEntryType, commandData);
         SQLiteDatabase db = DatabaseHelper.getWritableDatabase(mContext);
-        ContentValues values = TransactionLogSql.set(null,currentMediaID, fileFullPath, modificationDate,
+        ContentValues values = TransactionLogDB.set(null,currentMediaID, fileFullPath, modificationDate,
                 mediaTransactionLogEntryType, commandData);
-        db.insert(TransactionLogSql.TABLE, null, values);
+        db.insert(TransactionLogDB.TABLE, null, values);
     }
 }
 
