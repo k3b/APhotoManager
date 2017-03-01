@@ -1,6 +1,6 @@
 # ![](https://raw.githubusercontent.com/k3b/APhotoManager/master/app/src/main/res/drawable-hdpi/foto_gallery.png) "A Photo Manager" with "A Photo Map", AndroFotoFinder
 
-Enhanced Android [Gallery App](https://github.com/k3b/APhotoManager/wiki/Gallery-View) to manage local photos: [geo map](https://github.com/k3b/APhotoManager/wiki/geographic-map), 
+Enhanced Android [Gallery App](https://github.com/k3b/APhotoManager/wiki/Gallery-View) to manage local photos: [geotagging with map](https://github.com/k3b/APhotoManager/wiki/geographic-map), [tags (keywords)](https://github.com/k3b/APhotoManager/wiki/Tags),
 find, sort, view, copy, delete, set gps exif data, send, ... .
 
 **DISCLAIMER com.PlayZone.quickimagegallery**: Sombody has created a clone of #APhotoManager app, changed some icons, added google-advertising-code (and may be other code???) and put it into google play store https://play.google.com/store/apps/details?id=com.PlayZone.quickimagegallery<br/>I (k3b) have nothing to do with this clone and i cannot garantee that the clone has no unwanted buildin code.
@@ -15,8 +15,8 @@ find, sort, view, copy, delete, set gps exif data, send, ... .
 * Free, opensource, no adds, no user tracking, available on [f-droid](https://f-droid.org/)
 * Geotagging: Shows photos in a [geographic map](https://github.com/k3b/APhotoManager/wiki/geographic-map) from [openstreetmap](http://www.openstreetmap.org)
 * Buildin file manager for photos: find, sort, view, copy, delete, Show in map, set gps exif data, send, ... .
-* Fast [find](https://github.com/k3b/APhotoManager/wiki/Filter-View) local photos by (sub-)folder, date and/or geographic map.
-* [Translations](https://crowdin.com/project/AndroFotoFinder): &nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/de-home">de</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/home"   >en</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/it-home">it</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja</a>,&nbsp;nl,&nbsp;pl,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro</a>
+* Fast [find](https://github.com/k3b/APhotoManager/wiki/Filter-View) local photos by (sub-)folder, date, [geographic map](https://github.com/k3b/APhotoManager/wiki/geographic-map)or [tags (keywords)](https://github.com/k3b/APhotoManager/wiki/Tags).
+* [Translations](https://crowdin.com/project/AndroFotoFinder): &nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/de-home">de</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/home"   >en</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/it-home">it</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja</a>,&nbsp;nl,&nbsp;pl,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro</a>,&nbsp;ru
 	* [![Crowdin](https://d322cqt584bo4o.cloudfront.net/androFotoFinder/localized.svg)](https://crowdin.com/project/androFotoFinder)<a href="https://github.com/k3b/APhotoManager/issues/21">Help us to translate into other languages.</a>
 	
 ---
@@ -45,6 +45,7 @@ find, sort, view, copy, delete, set gps exif data, send, ... .
 * [Geographic-Map](https://github.com/k3b/APhotoManager/wiki/geographic-map)
 * [Image-View](https://github.com/k3b/APhotoManager/wiki/Image-View)
 * [Filter-View](https://github.com/k3b/APhotoManager/wiki/Filter-View)
+* [tags (keywords)](https://github.com/k3b/APhotoManager/wiki/Tags)
 * [Bookmarks](https://github.com/k3b/APhotoManager/wiki/Bookmarks)
 * [Folder-Picker](https://github.com/k3b/APhotoManager/wiki/Folder-Picker)
 * [Settings](https://github.com/k3b/APhotoManager/wiki/settings)
