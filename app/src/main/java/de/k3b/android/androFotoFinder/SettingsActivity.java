@@ -399,7 +399,6 @@ public class SettingsActivity extends PreferenceActivity {
                 builder.create().show();
             } else { // neither stringlate nor f-droid-app-store installed
                 Log.i(Global.LOG_CONTEXT, "SettingsActivity-Stringlate-install-appstore not found");
-                Api.install(SettingsActivity.this, INSTALL_REQUEST_CODE);
             }
         } else { // stringlate already installed
             translate();
