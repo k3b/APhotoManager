@@ -1,5 +1,7 @@
-package de.k3b.android.stringlate;
+package io.github.lonamiwebs.stringlate.utilities;
 
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -36,7 +38,14 @@ public class Api {
     public static final String ACTION_TRANSLATE = "io.github.lonamiwebs.stringlate.TRANSLATE";
 
     // used to install stringlate from fdroid-app-store
-    public static final String APP_MARKET_URL = "market://search?q=io.github.lonamiwebs.stringlate";
+    // works on my android-4.4 phone :-)
+    public static final String APP_PKG_NAME = "io.github.lonamiwebs.stringlate";
+    public static final String APP_MARKET_URL = "market://details?id=" + APP_PKG_NAME;
+    // public static final String APP_MARKET_URL = "market://search?q=" + APP_PKG_NAME;
+
+    // see http://stackoverflow.com/questions/6813322/install-uninstall-apks-programmatically-packagemanager-vs-intents
+    // does not work on my android-4.4 phone
+    public static final String APP_PACKAGE_URL = "package:" + APP_PKG_NAME;
     //endregion
 
     //region Extras
@@ -61,34 +70,65 @@ public class Api {
 
     //region Public methods
 
-    // ACTION_TRANSLATE wrapper.
-    //
-    public static void translate(final Context context, final String gitUrl)  {
+    /**
+     * ACTION_TRANSLATE wrapper.
+     *
+     * example use: api.translate(getActivity(), "https://github.com/LonamiWebs/Stringlate");
+     *
+     * @param context activity that asks for translation service.
+     * @throws ActivityNotFoundException
+     */
+    public static void translate(final Context context, final String gitUrl) throws ActivityNotFoundException {
         Intent intent = createTranslateIntent(gitUrl);
         context.startActivity(intent);
     }
 
+    /**
+     * @return true, if Stringlate ver 0.9.9 or up is installed
+     */
     public static boolean isInstalled(final Context context) {
         Intent intent = createTranslateIntent("");
         return isInstalled(context, intent);
     }
 
+    /**
+     * @return true, if an appstore is installed that can be used to install stringlate
+     */
     public static boolean canInstall(final Context context) {
         Intent intent = createInstallIntent();
         return isInstalled(context, intent);
     }
 
-    public static void install(final Context context) {
+    /**
+     * Installs Stringlate from f-droid app store
+     *
+     * @param context activity that asks stringlate installation.
+     * @param requestCode If > 0, this code will be returned in
+     *                    onActivityResult() when the activity exits.
+     */
+    public static void install(final Activity context, int requestCode) throws ActivityNotFoundException {
         Intent intent = createInstallIntent();
-        context.startActivity(intent);
+        if (requestCode > 0) {
+            context.startActivityForResult(intent, requestCode);
+        } else {
+            context.startActivity(intent);
+        }
     }
 
+    /**
+     * Local helper to test if an intent is executable
+     *
+     * @return true, is installed
+     */
     private static boolean isInstalled(Context context, Intent intent) {
         final List<ResolveInfo> list = ((PackageManager)context.getPackageManager()).queryIntentActivities(intent, 0);
 
         return ((list != null) && (list.size() > 0));
     }
 
+    /**
+     * Local helper to create the translate intent
+     */
     @NonNull
     private static Intent createTranslateIntent(String gitUrl) {
         Intent intent = new Intent(ACTION_TRANSLATE);
@@ -98,11 +138,20 @@ public class Api {
         return intent;
     }
 
+    /**
+     * Local helper to create the install intent
+     */
     @NonNull
     private static Intent createInstallIntent() {
-        Intent market = new Intent(Intent.ACTION_VIEW, Uri.parse(APP_MARKET_URL));
-        market.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-        return market;
+        // see http://stackoverflow.com/questions/6813322/install-uninstall-apks-programmatically-packagemanager-vs-intents
+        // does not work on my android-4.4 phone :-(
+        // Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE, Uri.parse(APP_PACKAGE_URL));
+        // intent.putExtra(Intent.EXTRA_RETURN_RESULT, true);
+
+        // works on my android-4.4 phone :-)
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(APP_MARKET_URL));
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        return intent;
     }
 
     //endregion

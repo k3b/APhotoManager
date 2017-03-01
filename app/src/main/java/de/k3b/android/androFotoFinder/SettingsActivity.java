@@ -47,7 +47,7 @@ import de.k3b.android.util.MediaScannerEx;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.tagDB.TagRepository;
-import de.k3b.android.stringlate.Api;
+import io.github.lonamiwebs.stringlate.utilities.Api;
 import uk.co.senab.photoview.PhotoViewAttacher;
 import uk.co.senab.photoview.log.LogManager;
 
@@ -55,6 +55,8 @@ public class SettingsActivity extends PreferenceActivity {
     private static Boolean sOldEnableTagSupport = null;
     private SharedPreferences prefsInstance = null;
     private ListPreference defaultLocalePreference;
+
+    private int INSTALL_REQUEST_CODE = 1927;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -362,41 +364,63 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     private void onTranslate() {
-        Log.e(Global.LOG_CONTEXT, "SettingsActivity-SaveLogCat()");
         if (!Api.isInstalled(this)) {
-            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            // either ask or catch ActivityNotFoundException
 
-            builder.setTitle(R.string.settings_translate_title);
-            builder.setMessage(R.string.message_translate_not_installed)
-                    .setCancelable(false)
-                    .setPositiveButton(R.string.btn_yes,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(
-                                        final DialogInterface dialog,
-                                        final int id) {
-                                    Api.install(SettingsActivity.this);
-                                }
-                            }
-                    )
-                    .setNegativeButton(R.string.btn_no,
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(
-                                        final DialogInterface dialog,
-                                        final int id) {
-                                    dialog.cancel();
-                                }
-                            }
-                    );
+            if (Api.canInstall(this)) {
+                // either ask or catch ActivityNotFoundException
+                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-            builder.create().show();
-        } else {
+                builder.setTitle(R.string.settings_translate_title);
+                builder.setMessage(R.string.message_translate_not_installed)
+                        .setCancelable(false)
+                        .setPositiveButton(R.string.btn_yes,
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(
+                                            final DialogInterface dialog,
+                                            final int id) {
+                                        Log.i(Global.LOG_CONTEXT, "SettingsActivity-Stringlate-start-install");
+                                        Api.install(SettingsActivity.this, INSTALL_REQUEST_CODE);
+                                    }
+                                }
+                        )
+                        .setNegativeButton(R.string.btn_no,
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(
+                                            final DialogInterface dialog,
+                                            final int id) {
+                                        dialog.cancel();
+                                    }
+                                }
+                        );
+
+                builder.create().show();
+            } else { // neither stringlate nor f-droid-app-store installed
+                Log.i(Global.LOG_CONTEXT, "SettingsActivity-Stringlate-install-appstore not found");
+                Api.install(SettingsActivity.this, INSTALL_REQUEST_CODE);
+            }
+        } else { // stringlate already installed
             translate();
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == INSTALL_REQUEST_CODE) {
+            if (Api.isInstalled(this)) {
+                Log.i(Global.LOG_CONTEXT, "SettingsActivity-Stringlate-install-success");
+                translate();
+            } else {
+                Log.i(Global.LOG_CONTEXT, "SettingsActivity-Stringlate-install-error or canceled");
+            }
+        }
+    }
+
     private void translate() {
+        Log.i(Global.LOG_CONTEXT, "SettingsActivity-Stringlate-install-success");
         Api.translate(this, "https://github.com/k3b/APhotoManager");
     }
 }
