@@ -14,6 +14,11 @@
             android:negativeButtonText="@null"
             android:positiveButtonText="@null" />
 
+        <Preference
+            android:key="translate"
+            android:title="@string/settings_translate_title"
+            android:summary="@string/settings_translate_summary" />
+
         <CheckBoxPreference android:key="clearSelectionAfterCommand"
             android:defaultValue="true"
             android:title="@string/settings_multisel_clear_title"

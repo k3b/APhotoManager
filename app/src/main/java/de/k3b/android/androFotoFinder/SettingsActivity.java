@@ -20,7 +20,9 @@
 package de.k3b.android.androFotoFinder;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Point;
@@ -45,6 +47,7 @@ import de.k3b.android.util.MediaScannerEx;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.tagDB.TagRepository;
+import de.k3b.android.stringlate.Api;
 import uk.co.senab.photoview.PhotoViewAttacher;
 import uk.co.senab.photoview.log.LogManager;
 
@@ -89,6 +92,13 @@ public class SettingsActivity extends PreferenceActivity {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 onDebugSaveLogCat();
+                return false; // donot close
+            }
+        });
+        findPreference("translate").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                onTranslate();
                 return false; // donot close
             }
         });
@@ -351,4 +361,42 @@ public class SettingsActivity extends PreferenceActivity {
         ((AndroFotoFinderApp) getApplication()).saveToFile();
     }
 
+    private void onTranslate() {
+        Log.e(Global.LOG_CONTEXT, "SettingsActivity-SaveLogCat()");
+        if (!Api.isInstalled(this)) {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+            builder.setTitle(R.string.settings_translate_title);
+            builder.setMessage(R.string.message_translate_not_installed)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.btn_yes,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(
+                                        final DialogInterface dialog,
+                                        final int id) {
+                                    Api.install(SettingsActivity.this);
+                                }
+                            }
+                    )
+                    .setNegativeButton(R.string.btn_no,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(
+                                        final DialogInterface dialog,
+                                        final int id) {
+                                    dialog.cancel();
+                                }
+                            }
+                    );
+
+            builder.create().show();
+        } else {
+            translate();
+        }
+    }
+
+    private void translate() {
+        Api.translate(this, "https://github.com/k3b/APhotoManager");
+    }
 }
