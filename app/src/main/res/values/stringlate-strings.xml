@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<resources>
-    <string name="settings_translate_title">Translate this app</string>
-    <string name="settings_translate_summary">... using StringLate app</string>
-    <string name="message_translate_not_installed">StringLate app not found. Do you want to install it from f-droid app store?</string>
-</resources>
