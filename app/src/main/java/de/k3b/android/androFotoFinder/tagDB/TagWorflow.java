@@ -43,8 +43,6 @@ import de.k3b.tagDB.TagProcessor;
 import de.k3b.tagDB.TagRepository;
 import de.k3b.transactionlog.MediaTransactionLogEntryType;
 
-import static de.k3b.android.util.AndroidFileCommands.createFileCommand;
-
 /**
  *  Class to handle tag update for one or more photos.
  *
@@ -161,7 +159,7 @@ public class TagWorflow extends TagProcessor {
             MediaContentValues mediaContentValues = new MediaContentValues().set(dbValues, null);
             MediaUtil.copyXmp(mediaContentValues, xmp,false, true);
             TagSql.setXmpFileModifyDate(dbValues, new Date());
-            TagSql.execUpdate(this.context, tagWorflowItemFromDB.id, dbValues);
+            TagSql.execUpdate("updateTags", this.context, tagWorflowItemFromDB.id, dbValues);
 
         // update batch
             long now = new Date().getTime();

@@ -157,7 +157,7 @@ public class MediaDBActivity extends Activity {
                             mProgressCountDown = 10;
                             publishProgress(getString(R.string.scanner_menu_title) + " (" + mItemCount + ", +" + mUpdateCount + ") " + uri.toString());
 
-                            updateDB(csvRootDir.getAbsolutePath() + "/%", TagSql.EXT_LAST_EXT_SCAN_NO_XMP_IN_CSV, new ContentValues());
+                            updateDB("set all xmp-file-dates to EXT_LAST_EXT_SCAN_NO_XMP_IN_CSV", csvRootDir.getAbsolutePath() + "/%", TagSql.EXT_LAST_EXT_SCAN_NO_XMP_IN_CSV, new ContentValues());
                         }
                     }
                     mLoader = null;
@@ -179,7 +179,7 @@ public class MediaDBActivity extends Activity {
             return message;
         }
 
-        private void updateDB(String path, long xmlLastFileModifyDate, ContentValues dbValues) {
+        private void updateDB(String dbgContext, String path, long xmlLastFileModifyDate, ContentValues dbValues) {
             if (path != null) {
                 if (!path.contains("%")) {
                     if (MediaUtil.isImage(path, false)) {
@@ -203,7 +203,7 @@ public class MediaDBActivity extends Activity {
                 if (xmlLastFileModifyDate != TagSql.EXT_LAST_EXT_SCAN_UNKNOWN) {
                     TagSql.setXmpFileModifyDate(dbValues, xmlLastFileModifyDate);
                 }
-                mUpdateCount += TagSql.execUpdate(MediaDBActivity.this, path, xmlLastFileModifyDate, dbValues, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                mUpdateCount += TagSql.execUpdate(dbgContext, MediaDBActivity.this, path, xmlLastFileModifyDate, dbValues, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
                 mItemCount++;
             }
         }
@@ -253,7 +253,7 @@ public class MediaDBActivity extends Activity {
                         long fileModifyDateMilliSecs = (fileModifyDate != null) ? fileModifyDate.getTime() : TagSql.EXT_LAST_EXT_SCAN_NO_XMP_IN_CSV;
 
                         String canonicalPath = FileUtils.tryGetCanonicalPath(new File(mCsvRootDir, path), null);
-                        updateDB(canonicalPath, fileModifyDateMilliSecs, mDbValues);
+                        updateDB("MediaCsvLoader.onNextItem", canonicalPath, fileModifyDateMilliSecs, mDbValues);
                         TagRepository.getInstance().include(getImportRoot(), mMediaValueAdapter.getTags());
                     }
                 }

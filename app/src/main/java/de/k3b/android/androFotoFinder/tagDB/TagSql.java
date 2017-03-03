@@ -24,7 +24,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
-import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
 
@@ -34,10 +33,7 @@ import java.util.List;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.database.SelectedFiles;
-import de.k3b.database.SelectedItems;
 import de.k3b.io.GalleryFilterParameter;
-import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.database.QueryParameter;
 import de.k3b.tagDB.Tag;
@@ -257,13 +253,11 @@ public class TagSql extends FotoSql {
         return null;
     }
 
-    public static int execUpdate(Context context, String path, long xmpFileDate, ContentValues values, int visibility) {
+    public static int execUpdate(String dbgContext, Context context, String path, long xmpFileDate, ContentValues values, int visibility) {
         if ((!Global.Media.enableXmpNone) || (xmpFileDate == EXT_LAST_EXT_SCAN_UNKNOWN)) {
-            return execUpdate(context, path, values, visibility);
+            return execUpdate(dbgContext, context, path, values, visibility);
         }
-        return context.getContentResolver().update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE
-                , values
-                , FILTER_EXPR_PATH_LIKE_XMP_DATE, new String[]{path, Long.toString(xmpFileDate)});
+        return exexUpdateImpl(dbgContext, context, values, FILTER_EXPR_PATH_LIKE_XMP_DATE, new String[]{path, Long.toString(xmpFileDate)});
     }
 
     /** return how many photos exist that have one or more tags from list */
@@ -273,7 +267,7 @@ public class TagSql extends FotoSql {
         if (addWhereAnyOfTags(query, tags) > 0) {
             Cursor c = null;
             try {
-                c = createCursorForQuery(context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                c = createCursorForQuery("getTagRefCount", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
                 if (c.moveToFirst()) {
                     return c.getInt(0);
                 }
@@ -326,7 +320,7 @@ public class TagSql extends FotoSql {
 
         if (filterCount > 0) {
             try {
-                c = createCursorForQuery(context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                c = createCursorForQuery("loadTagWorflowItems", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
                 if (c.moveToFirst()) {
                     do {
                         result.add(new TagWorflowItem(c.getInt(0), c.getString(1), TagConverter.fromString(c.getString(2)),

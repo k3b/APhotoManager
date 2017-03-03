@@ -35,7 +35,6 @@ import android.util.Log;
 import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.util.GeoPoint;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -50,7 +49,6 @@ import de.k3b.database.SelectedFiles;
 import de.k3b.database.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
-import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGalleryFilter;
@@ -522,7 +520,7 @@ public class FotoSql extends FotoSqlBase {
     public static String execGetFotoPath(Context context, Uri uriWithID) {
         Cursor c = null;
         try {
-            c = createCursorForQuery(context, uriWithID.toString(), null, null, null, FotoSql.SQL_COL_PATH);
+            c = createCursorForQuery("execGetFotoPath", context, uriWithID.toString(), null, null, null, FotoSql.SQL_COL_PATH);
             if (c.moveToFirst()) {
                 return c.getString(c.getColumnIndex(FotoSql.SQL_COL_PATH));
             }
@@ -537,16 +535,12 @@ public class FotoSql extends FotoSqlBase {
 	/** search for all full-image-file-paths that matches pathfilter  */
     public static List<String> execGetFotoPaths(Context context, String pathFilter) {
         ArrayList<String> result = new ArrayList<String>();
-        ContentResolver resolver = context.getContentResolver();
 
         Cursor c = null;
         try {
-            c = resolver.query(
-					SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, 
-					new String[]{FotoSql.SQL_COL_PATH}, 
-					FotoSql.SQL_COL_PATH + " like ? and " + FILTER_EXPR_PRIVATE_PUBLIC, 
-					new String[]{pathFilter}, 
-					FotoSql.SQL_COL_PATH);
+            c = createCursorForQuery("execGetFotoPaths", context,SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
+                        FotoSql.SQL_COL_PATH + " like ? and " + FILTER_EXPR_PRIVATE_PUBLIC,
+                        new String[]{pathFilter}, FotoSql.SQL_COL_PATH, FotoSql.SQL_COL_PATH);
             while (c.moveToNext()) {
                 result.add(c.getString(0));
             }
@@ -574,22 +568,31 @@ public class FotoSql extends FotoSqlBase {
         values.put(SQL_COL_LAT, DirectoryFormatter.parseLatLon(latitude));
         values.put(SQL_COL_LON, DirectoryFormatter.parseLatLon(longitude));
         ContentResolver resolver = context.getContentResolver();
-        return resolver.update(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, values, where.toAndroidWhere(), where.toAndroidParameters());
+
+        return exexUpdateImpl("execUpdateGeo", context, values, where.toAndroidWhere(), where.toAndroidParameters());
     }
 	
-    public static Cursor createCursorForQuery(final Context context, QueryParameter parameters, int visibility) {
+    public static Cursor createCursorForQuery(String dbgContext, final Context context, QueryParameter parameters, int visibility) {
         setWhereVisibility(parameters, visibility);
-        return createCursorForQuery(context, parameters.toFrom(), parameters.toAndroidWhere(),
+        return createCursorForQuery(dbgContext, context, parameters.toFrom(), parameters.toAndroidWhere(),
                 parameters.toAndroidParameters(), parameters.toOrderBy(),
                 parameters.toColumns()
         );
     }
 
-    private static Cursor createCursorForQuery(final Context context, final String from, final String sqlWhereStatement,
+    /** every cursor query should go through this. adds logging if enabled */
+    private static Cursor createCursorForQuery(String dbgContext, final Context context, final String from, final String sqlWhereStatement,
                                                final String[] sqlWhereParameters, final String sqlSortOrder,
                                                final String... sqlSelectColums) {
         ContentResolver resolver = context.getContentResolver();
-        return resolver.query(Uri.parse(from), sqlSelectColums, sqlWhereStatement, sqlWhereParameters, sqlSortOrder);
+        Cursor query = resolver.query(Uri.parse(from), sqlSelectColums, sqlWhereStatement, sqlWhereParameters, sqlSortOrder);
+        if (Global.debugEnabledSql) {
+            Log.i(Global.LOG_CONTEXT, dbgContext +": FotoSql.createCursorForQuery:\n" +
+                    QueryParameter.toString(sqlSelectColums, null, from, sqlWhereStatement,
+                            sqlWhereParameters, sqlSortOrder, query.getCount()));
+        }
+
+        return query;
     }
 
     public static IGeoRectangle execGetGeoRectangle(Context context, IGalleryFilter filter, SelectedItems selectedItems) {
@@ -616,7 +619,7 @@ public class FotoSql extends FotoSqlBase {
 
         Cursor c = null;
         try {
-            c = createCursorForQuery(context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+            c = createCursorForQuery("execGetGeoRectangle", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
             if (c.moveToFirst()) {
                 GeoRectangle result = new GeoRectangle();
                 result.setLatitude(c.getDouble(0), c.getDouble(1));
@@ -654,7 +657,7 @@ public class FotoSql extends FotoSqlBase {
 
         Cursor c = null;
         try {
-            c = createCursorForQuery(context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+            c = createCursorForQuery("execGetPosition", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
             if (c.moveToFirst()) {
                 GeoPoint result = new GeoPoint(c.getDouble(0),c.getDouble(1));
                 return result;
@@ -683,7 +686,7 @@ public class FotoSql extends FotoSqlBase {
 
             Cursor c = null;
             try {
-                c = createCursorForQuery(context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                c = createCursorForQuery("execGetPathIdMap", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
                 while (c.moveToNext()) {
                     result.put(c.getString(1),c.getInt(0));
                 }
@@ -717,8 +720,25 @@ public class FotoSql extends FotoSqlBase {
         return null;
     }
 
-    public static int execUpdate(Context context, long id, ContentValues values) {
-        return context.getContentResolver().update(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, values, FILTER_COL_PK, new String[]{Long.toString(id)});
+    public static int execUpdate(String dbgContext, Context context, long id, ContentValues values) {
+        return exexUpdateImpl(dbgContext, context, values, FILTER_COL_PK, new String[]{Long.toString(id)});
+    }
+
+    public static int execUpdate(String dbgContext, Context context, String path, ContentValues values, int visibility) {
+        return exexUpdateImpl(dbgContext, context, values, getFilterExprPathLikeWithVisibility(visibility), new String[]{path});
+    }
+
+    /** every database update should go through this. adds logging if enabled */
+    protected static int exexUpdateImpl(String dbgContext, Context context, ContentValues values, String sqlWhere, String[] selectionArgs) {
+        int result = context.getContentResolver().update(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE,
+                    values, sqlWhere,
+                    selectionArgs);
+        if (Global.debugEnabledSql) {
+            Log.i(Global.LOG_CONTEXT, dbgContext + ":FotoSql.exexUpdate\n" +
+                    QueryParameter.toString(null, values.toString(), SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
+                    sqlWhere, selectionArgs, null, result));
+        }
+        return result;
     }
 
     protected static String getFilterExprPathLikeWithVisibility(int visibility) {
@@ -726,12 +746,14 @@ public class FotoSql extends FotoSqlBase {
         return FotoSql.FILTER_EXPR_PATH_LIKE + " AND " + getFilterExpressionVisibility(visibility);
     }
 
-    public static int execUpdate(Context context, String path, ContentValues values, int visibility) {
-        return context.getContentResolver().update(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, values, getFilterExprPathLikeWithVisibility(visibility), new String[]{path});
-    }
-
-    public static Uri execInsert(Context context, ContentValues values) {
-        return context.getContentResolver().insert(SQL_TABLE_EXTERNAL_CONTENT_URI, values);
+    /** every database insert should go through this. adds logging if enabled */
+    public static Uri execInsert(String dbgContext, Context context, ContentValues values) {
+        Uri result = context.getContentResolver().insert(SQL_TABLE_EXTERNAL_CONTENT_URI, values);
+        if (Global.debugEnabledSql) {
+            Log.i(Global.LOG_CONTEXT, dbgContext + ":FotoSql.execInsert" +
+                    values.toString() + " => " + result);
+        }
+        return result;
     }
 
     @NonNull
@@ -741,19 +763,15 @@ public class FotoSql extends FotoSqlBase {
         return loader;
     }
 
-    public static int execDeleteByPath(Activity context, String parentDirString, int visibility) {
-        int delCount = FotoSql.deleteMedia(context.getContentResolver(), getFilterExprPathLikeWithVisibility(visibility), new String[] {parentDirString + "/%"}, true);
-        if (Global.debugEnabledSql) {
-            Log.i(Global.LOG_CONTEXT, "FotoSql.deleted(NoMedia='" + parentDirString +
-                    "') : " + delCount + " db records" );
-        }
+    public static int execDeleteByPath(String dbgContext, Activity context, String parentDirString, int visibility) {
+        int delCount = FotoSql.deleteMedia(dbgContext, context, getFilterExprPathLikeWithVisibility(visibility), new String[] {parentDirString + "/%"}, true);
         return delCount;
     }
 
     /**
      * Deletes media items specified by where with the option to prevent cascade delete of the image.
      */
-    public static int deleteMedia(ContentResolver contentResolver, String where, String[] selectionArgs, boolean preventDeleteImageFile)
+    public static int deleteMedia(String dbgContext, Context context, String where, String[] selectionArgs, boolean preventDeleteImageFile)
     {
         String lastUsedWhereClause = where;
         int delCount = 0;
@@ -762,18 +780,34 @@ public class FotoSql extends FotoSqlBase {
                 // set SQL_COL_PATH empty so sql-delete cannot cascade delete the referenced image-file via delete trigger
                 ContentValues values = new ContentValues();
                 values.put(FotoSql.SQL_COL_PATH, DELETED_FILE_MARKER);
-                contentResolver.update(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, values, lastUsedWhereClause, selectionArgs);
+                values.put(FotoSql.SQL_COL_EXT_MEDIA_TYPE, 0); // so it will not be shown as image any more
+                int updateCount = exexUpdateImpl(dbgContext + "-a: FotoSql.deleteMedia: ",
+                        context, values, lastUsedWhereClause, selectionArgs);
 
                 lastUsedWhereClause = FotoSql.SQL_COL_PATH + " is null";
-                delCount = contentResolver.delete(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, lastUsedWhereClause, null);
+                selectionArgs = null;
+                delCount = context.getContentResolver()
+                        .delete(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, lastUsedWhereClause, selectionArgs);
+                if (Global.debugEnabledSql) {
+                    Log.i(Global.LOG_CONTEXT, dbgContext + "-b: FotoSql.deleteMedia delete\n" +
+                            QueryParameter.toString(null, null, SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
+                            lastUsedWhereClause, selectionArgs, null, delCount));
+                }
             } else {
-                delCount = contentResolver.delete(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, lastUsedWhereClause, selectionArgs);
+                delCount = context.getContentResolver()
+                        .delete(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, lastUsedWhereClause, selectionArgs);
+                if (Global.debugEnabledSql) {
+                    Log.i(Global.LOG_CONTEXT, dbgContext +": FotoSql.deleteMedia\ndelete " +
+                            QueryParameter.toString(null, null,
+                                    SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
+                                    lastUsedWhereClause, selectionArgs, null, delCount));
+                }
             }
         } catch (Exception ex) {
             // null pointer exception when delete matches not items??
-            final String msg = "FotoSql.deleteMedia("
-                    + QueryParameter.toString(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,null
-                        , lastUsedWhereClause, selectionArgs, null)
+            final String msg = dbgContext + ": Exception in FotoSql.deleteMedia:\n" +
+                    QueryParameter.toString(null, null, SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
+                    lastUsedWhereClause, selectionArgs, null, -1)
                     + " : " + ex.getMessage();
             Log.e(Global.LOG_CONTEXT, msg, ex);
 
@@ -807,7 +841,7 @@ public class FotoSql extends FotoSqlBase {
         Cursor c = null;
 
         try {
-            c = FotoSql.createCursorForQuery(context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+            c = FotoSql.createCursorForQuery("getSelectedfiles", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
             int len = c.getCount();
             Long[] ids = new Long[len];
             String[] paths = new String[len];
@@ -845,7 +879,7 @@ public class FotoSql extends FotoSqlBase {
             Cursor cursor = null;
 
             try {
-                cursor = requery(context, parameters.toColumns(), parameters.toFrom(), parameters.toAndroidWhere(), parameters.toOrderBy(), parameters.toAndroidParameters());
+                cursor = createCursorForQuery("getFileNames", context, parameters, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
 
                 int colPath = cursor.getColumnIndex(SQL_COL_DISPLAY_TEXT);
                 while (cursor.moveToNext()) {
@@ -866,18 +900,6 @@ public class FotoSql extends FotoSqlBase {
             }
         }
         return null;
-
-    }
-
-    private static Cursor requery(final Context context, final String[] sqlProjection, final String from, final String sqlWhereStatement, final String sqlSortOrder, final String... sqlWhereParameters) {
-        Cursor result = context.getContentResolver().query(Uri.parse(from), // Table to query
-                sqlProjection,             // Projection to return
-                sqlWhereStatement,        // No selection clause
-                sqlWhereParameters,       // No selection arguments
-                sqlSortOrder              // Default sort order
-        );
-
-        return result;
 
     }
 

@@ -533,7 +533,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     private void requery(String why) {
         if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, mDebugPrefix + why + " requery " + ((mGalleryContentQuery != null) ? mGalleryContentQuery.toSqlString() : null));
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + why + " requery\n" + ((mGalleryContentQuery != null) ? mGalleryContentQuery.toSqlString() : null));
         }
 
         if (mGalleryContentQuery != null) {
@@ -1223,7 +1223,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
                 String sqlWhere = query.toAndroidWhere(); //  + " OR " + FotoSql.SQL_COL_PATH + " is null";
                 try {
-                    delCount = FotoSql.deleteMedia(activity.getContentResolver(), sqlWhere, null, true);
+                    delCount = FotoSql.deleteMedia(mDebugPrefix + "onDuplicatesFound", activity, sqlWhere, null, true);
                 } catch (Exception ex) {
                     Log.w(Global.LOG_CONTEXT, "deleteMedia via update failed for 'where " + sqlWhere +
                             "'.");

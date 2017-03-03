@@ -66,7 +66,7 @@ public class FotoThumbSql {
 
             Cursor c = null;
             try {
-                c = FotoSql.createCursorForQuery(context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                c = FotoSql.createCursorForQuery(mDebugPrefix + "getStatistic", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
                 if (Global.debugEnabledSql) {
                     Log.i(Global.LOG_CONTEXT, mDebugPrefix + "getStatistic " + c.getCount() +
                             "\n\t" + query.toSqlString());

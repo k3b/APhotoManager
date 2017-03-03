@@ -362,18 +362,25 @@ public class QueryParameter {
     }
 
     public String toSqlStringAndroid() {
-        return toString(toFrom(), toColumns(), toAndroidWhere(), toAndroidParameters(), toOrderBy());
+        return toString(toColumns(), null, toFrom(), toAndroidWhere(), toAndroidParameters(), toOrderBy(), -1);
     }
 
-    public static String toString(String from, String[] sqlProjection, String sqlWhereStatement, String[] sqlWhereParameters, String sqlSortOrder) {
+    /** Creates sql debug string */
+    public static String toString(String[] sqlSelectFields, String sqlUpdateValues,
+                                  String from,
+                                  String sqlWhereStatement, String[] sqlWhereParameters,
+                                  String sqlSortOrder, int rowcount) {
         StringBuilder result = new StringBuilder();
-        Helper.append(result, " SELECT ", sqlProjection, ", ", "", "");
+        Helper.append(result, " SELECT ", sqlSelectFields, ", ", "", "");
+        Helper.append(result, " UPDATE ", sqlUpdateValues);
         Helper.append(result, " \nFROM ", from);
-        Helper.append(result, " \nWHERE (", sqlWhereStatement);
-        Helper.append(result, ") \nORDER BY ", sqlSortOrder);
-
+        Helper.append(result, " \nWHERE (", sqlWhereStatement, ")");
+        Helper.append(result, " \nORDER BY ", sqlSortOrder);
         Helper.append(result, " \n\tPARAMETERS ", sqlWhereParameters, ", ", "", "");
 
+        if (rowcount >= 0) {
+            result.append(" \n=> ").append(rowcount).append(" rows affected");
+        }
         if (result.length() == 0) return null;
 
         return result.toString();
@@ -441,12 +448,19 @@ public class QueryParameter {
             return false;
         }
 
-        private static boolean append(StringBuilder result, String blockPrefix, String list) {
-            if ((list != null) && (list.length() > 0)) {
+        private static boolean append(StringBuilder result, String blockPrefix, String nonEmptyItem) {
+            return append(result, blockPrefix, nonEmptyItem, null);
+        }
+
+        private static boolean append(StringBuilder result, String blockPrefix, String nonEmptyItem, String blockSuffix) {
+            if ((nonEmptyItem != null) && (nonEmptyItem.length() > 0)) {
                 if (blockPrefix != null) {
                     result.append(blockPrefix);
                 }
-                result.append(list);
+                result.append(nonEmptyItem);
+                if (blockSuffix != null) {
+                    result.append(blockSuffix);
+                }
                 return true;
             }
             return false;

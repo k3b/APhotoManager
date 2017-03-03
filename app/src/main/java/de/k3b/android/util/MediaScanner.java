@@ -146,7 +146,7 @@ public class MediaScanner  {
                 if (Global.debugEnabled) {
                     Log.i(Global.LOG_CONTEXT, CONTEXT + " hideFolderMedia: delete from media db " + path + "/**");
                 }
-                result = FotoSql.execDeleteByPath(context, path, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                result = FotoSql.execDeleteByPath(CONTEXT + " hideFolderMedia", context, path, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
                 if (result > 0) {
                     MediaScanner.notifyChanges(context, "hide " + path + "/**");
                 }
@@ -209,9 +209,9 @@ public class MediaScanner  {
                     Integer id = inMediaDb.get(fileName);
                     if (id != null) {
                         // already exists
-                        modifyCount += update_Android42(context, id, new File(fileName));
+                        modifyCount += update_Android42("MediaScanner.insertIntoMediaDatabase already existing ", context, id, new File(fileName));
                     } else {
-                        modifyCount += insert_Android42(context, new File(fileName));
+                        modifyCount += insert_Android42("MediaScanner.insertIntoMediaDatabase new item ", context, new File(fileName));
                     }
                 }
             }
@@ -226,7 +226,7 @@ public class MediaScanner  {
         if ((oldPathNames != null) && (oldPathNames.length > 0)) {
             String sqlWhere = FotoSql.getWhereInFileNames(oldPathNames);
             try {
-                modifyCount = FotoSql.deleteMedia(context.getContentResolver(), sqlWhere, null, true);
+                modifyCount = FotoSql.deleteMedia(CONTEXT + "deleteInMediaDatabase", context, sqlWhere, null, true);
                 if (Global.debugEnabled) {
                     Log.d(Global.LOG_CONTEXT, CONTEXT + "deleteInMediaDatabase(len=" + oldPathNames.length + ", files='" + oldPathNames[0] + "'...) result count=" + modifyCount);
                 }
@@ -278,7 +278,7 @@ public class MediaScanner  {
 
             Cursor c = null;
             try {
-                c = FotoSql.createCursorForQuery(context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                c = FotoSql.createCursorForQuery("renameInMediaDatabase", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
                 int pkColNo = c.getColumnIndex(FotoSql.SQL_COL_PK);
                 int pathColNo = c.getColumnIndex(FotoSql.SQL_COL_PATH);
                 while (c.moveToNext()) {
@@ -388,7 +388,7 @@ public class MediaScanner  {
         String oldAbsolutePath = cursor.getString(columnIndexPath);
         int id = cursor.getInt(columnIndexPk);
         setPathRelatedFieldsIfNeccessary(values, newAbsolutePath, oldAbsolutePath);
-        return FotoSql.execUpdate(context, id, values);
+        return FotoSql.execUpdate("updatePathRelatedFields", context, id, values);
     }
 
     /** sets the path related fields */
@@ -406,23 +406,23 @@ public class MediaScanner  {
         }
     }
 
-    private int update_Android42(Context context, int id, File file) {
+    private int update_Android42(String dbgContext, Context context, int id, File file) {
         if ((file != null) && file.exists() && file.canRead()) {
             ContentValues values = new ContentValues();
             getExifFromFile(values, file);
-            return FotoSql.execUpdate(context, id, values);
+            return FotoSql.execUpdate(dbgContext, context, id, values);
         }
 		return 0;
     }
 
-    private int insert_Android42(Context context, File file) {
+    private int insert_Android42(String dbgContext, Context context, File file) {
         if ((file != null) && file.exists() && file.canRead()) {
             ContentValues values = new ContentValues();
             long now = new Date().getTime();
             values.put(DB_DATE_ADDED, now / 1000);//sec
 
             getExifFromFile(values, file);
-            return (null != FotoSql.execInsert(context, values)) ? 1 : 0;
+            return (null != FotoSql.execInsert(dbgContext, context, values)) ? 1 : 0;
         }
 		return 0;
     }

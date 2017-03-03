@@ -25,7 +25,6 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -38,7 +37,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -59,7 +57,6 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.MediaScanner;
-import de.k3b.android.util.MenuUtils;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedFiles;
@@ -73,8 +70,6 @@ import de.k3b.io.OSDirectory;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
-
-import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
 // import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 
 /**
@@ -475,9 +470,9 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                         if (cann == null) {
                             // rename linkFile to canonicalFile
                             updateValues.put(FotoSql.SQL_COL_PATH, canonicalPath + lin.substring(linkPath.length()));
-                            FotoSql.execUpdate(context, linkIds[i].intValue() ,updateValues);
+                            FotoSql.execUpdate("fixLinks", context, linkIds[i].intValue() ,updateValues);
                         } else {
-                            FotoSql.deleteMedia(context.getContentResolver(), FotoSql.FILTER_COL_PK, new String[] {linkIds[i].toString()}, true);
+                            FotoSql.deleteMedia("DirectoryPickerFragment.fixLinks", context, FotoSql.FILTER_COL_PK, new String[] {linkIds[i].toString()}, true);
                         }
                     }
                     MediaScanner.notifyChanges(context, "Fixed link/canonical duplicates");

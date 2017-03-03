@@ -284,7 +284,7 @@ public class AndroidFileCommands extends FileCommands {
             QueryParameter where = new QueryParameter();
             FotoSql.setWhereSelectionPks (where, fotos.toIdString());
 
-            FotoSql.deleteMedia(mContext.getContentResolver(), where.toAndroidWhere(), null, true);
+            FotoSql.deleteMedia("AndroidFileCommands.deleteFiles", mContext, where.toAndroidWhere(), null, true);
         }
         return deleteCount;
     }
@@ -496,12 +496,14 @@ public class AndroidFileCommands extends FileCommands {
     public void addTransactionLog(
             long currentMediaID, String fileFullPath, long modificationDate,
             MediaTransactionLogEntryType mediaTransactionLogEntryType, String commandData) {
-        super.addTransactionLog(currentMediaID, fileFullPath, modificationDate,
-                mediaTransactionLogEntryType, commandData);
-        SQLiteDatabase db = DatabaseHelper.getWritableDatabase(mContext);
-        ContentValues values = TransactionLogSql.set(null,currentMediaID, fileFullPath, modificationDate,
-                mediaTransactionLogEntryType, commandData);
-        db.insert(TransactionLogSql.TABLE, null, values);
+        if (fileFullPath != null) {
+            super.addTransactionLog(currentMediaID, fileFullPath, modificationDate,
+                    mediaTransactionLogEntryType, commandData);
+            SQLiteDatabase db = DatabaseHelper.getWritableDatabase(mContext);
+            ContentValues values = TransactionLogSql.set(null, currentMediaID, fileFullPath, modificationDate,
+                    mediaTransactionLogEntryType, commandData);
+            db.insert(TransactionLogSql.TABLE, null, values);
+        }
     }
 }
 

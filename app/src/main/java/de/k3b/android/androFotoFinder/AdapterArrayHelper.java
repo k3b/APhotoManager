@@ -47,7 +47,7 @@ public class AdapterArrayHelper {
 
         if (Global.mustRemoveNOMEDIAfromDB && (mRootDir != null) && (mFullPhotoPaths != null)) {
             String parentDirString = mRootDir.getAbsolutePath();
-            FotoSql.execDeleteByPath(context, parentDirString, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+            FotoSql.execDeleteByPath(debugContext + " AdapterArrayHelper mustRemoveNOMEDIAfromDB ", context, parentDirString, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
         }
     }
 
