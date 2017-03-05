@@ -56,13 +56,13 @@ pc2android.png
     }
 
     [JpegFile hires] -> [Irfanview.exe]
-    [Irfanview.exe] -> [JpegFile 1024]
+    [Irfanview.exe] -> [JpegFile 1024] : {a}
 
     [JpegFile hires] -> [apmJpg2xmp.cmd]
-    [apmJpg2xmp.cmd] -> [XmpFile] : {a}
+    [apmJpg2xmp.cmd] -> [XmpFile] : {b}
 
     [JpegFile hires] -> [apm2csv.cmd]
-    [apm2csv.cmd] -> [CsvFile] : {b}
+    [apm2csv.cmd] -> [CsvFile] : {c}
 
     [JpegFile 1024] -> [MediaScanner]
     [MediaScanner] -> [MediaDB]
