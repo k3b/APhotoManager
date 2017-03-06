@@ -29,13 +29,14 @@ android {
 		// published 0.5.1.160712 (18)
 		// published 0.5.2.160726 (19)
         // not published 0.5.2.160920 (20)
-        // 0.5.3.160927 (21)
+        // 0.5.3.160927 (21)    mapsforge offline maps; *.gpx and *.kml files
         // 0.5.4.161111 (22)
         // 0.5.4.161112 (23)
-        // 0.5.5.161220 (24)
+        // 0.5.5.161220 (24)    Image Picker
+        // 0.6.0.170309 (25)    Tag support
 
-        versionCode = 24
-        versionName = '0.5.5.161220'
+        versionCode = 25
+        versionName = '0.6.0.170309'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
