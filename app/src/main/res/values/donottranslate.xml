@@ -57,6 +57,10 @@ this program. If not, see <http://www.gnu.org/licenses/>
     <a href="https://github.com/osmdroid/osmdroid">osmdroid library</a> to display online maps from
     <a href="http://www.openstreetmap.org">Open Street Map</a></li>
     <li>
+    <li>
+    <a href="https://github.com/LonamiWebs/Stringlate/">Andrid Stringlate app</a> to allow the app
+    user to thranslate this app to other gui-languages</li>
+    <li>
     <a href="https://github.com/mapsforge/mapsforge">mapsforge library</a> to display offline maps</li>
     <li>
     <a href="https://github.com/chrisbanes/PhotoView">chris bane&#39;s PhotoView</a> that implemnts the zoomable image view.
@@ -77,6 +81,9 @@ this program. If not, see <http://www.gnu.org/licenses/>
     <a href="http://github.com/lp0/slf4j-android">https://github.com/lp0/slf4j-android</a> driver</li>
     <li>
     <a href="http://junit.org/">junit testing support</a> with 
+    <a href="https://github.com/mockito/mockito">Mockito</a></li>
+    <li>
+    <a href="http://junit.org/">junit testing support</a> with
     <a href="https://github.com/mockito/mockito">Mockito</a></li>
   </ul>
   <hr />
@@ -132,7 +139,8 @@ this program. If not, see <http://www.gnu.org/licenses/>
     <li>Italian by random_r</li>
     <li>Japanese by naofum</li>
     <li>Polish by Maselkowicz</li>
-    <li>Romanian by mironeasav</li>	
+    <li>Romanian by mironeasav</li>
+    <li>russian by divizdev</li>
   </ul>
   <br />Android is a trademark of Google Inc. Use of this trademark is subject to Google Permissions.
   <br />
