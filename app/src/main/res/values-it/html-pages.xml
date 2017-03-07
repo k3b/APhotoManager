@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!--
 /* string values containing translatable HTML pages
- * Translation to Italian by "random_r".
+ * Translation to Italian 2016-2017 by "random_r".
  *
  * This file is part of "A Photo Manager" (A(ndro)FotoFinder).
  *
@@ -65,9 +65,18 @@
   <a href="https://github.com/k3b/APhotoManager/wiki/it-home">it</a>,&nbsp;
   <a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr</a>,&nbsp;
   <a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja</a>,&nbsp;nl,&nbsp;pl,&nbsp;
-  <a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro</a></body>
+  <a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro</a>, &nbsp;ru
 </li>
-		<li><a href="https://github.com/k3b/APhotoManager/issues/21">Help us to translate into other languages.</a></li>
+      <li>
+        <b>Help us to translate this app into other languages:</b>
+		<ul>
+		  <li>On a pc with keyboard and internet access through the
+			<a href="https://github.com/k3b/APhotoManager/issues/21">crowdin.com website.</a>
+		  </li>
+		  <li>On android through the "A Photo Manager" menu <b>Settings/Translate</b> using the stringlate app.
+		  </li>
+		</ul>
+      </li>
 		</ul>
 	</li>
   </ul>

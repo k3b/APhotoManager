@@ -30,10 +30,17 @@
   <a href='https://github.com/k3b/APhotoManager/wiki/fr-home'>fr</a>,&nbsp;
   <a href='https://github.com/k3b/APhotoManager/wiki/it-home'>it</a>,&nbsp;
   <a href='https://github.com/k3b/APhotoManager/wiki/ja-home'>ja</a>,&nbsp;nl,&nbsp;pl,&nbsp;
-  <a href='https://github.com/k3b/APhotoManager/wiki/ro-home'>ro</a></body>
-<li>
-      <a href='https://github.com/k3b/APhotoManager/issues/21'>Aidez-nous à traduire dans d&#39;autres langues.</a>
-    </li>
+  <a href='https://github.com/k3b/APhotoManager/wiki/ro-home'>ro</a>,&nbsp;ru</li>
+      <li>
+        <b>Help us to translate this app into other languages:</b>
+		<ul>
+		  <li>On a pc with keyboard and internet access through the
+			<a href="https://github.com/k3b/APhotoManager/issues/21">crowdin.com website.</a>
+		  </li>
+		  <li>On android through the "A Photo Manager" menu <b>Settings/Translate</b> using the stringlate app.
+		  </li>
+		</ul>
+      </li>
   </ul>---
   <br />Caractéristiques:
   <ul>
@@ -46,6 +53,7 @@
       <a href='https://github.com/k3b/APhotoManager/wiki/Folder-Picker'>dossier Picker</a> )</li>
       <li>jokers qui correspondent dossier / nom de fichier</li>
       <li>Date</li>
+      <li>Tags</li>
       <li>zone
       <a href='https://github.com/k3b/APhotoManager/wiki/geographic-map'>carte géographique</a> (si l&#39;image a des infos Exif
       GPS)</li>
@@ -61,8 +69,6 @@
     les photos ont été prises</li>
     <li>Opérations sur les fichiers
     <ul>
-      <li>va également mettre à jour la base de données image de fournisseur de contenu d&#39;Android</li>
-      <li>Préserve la date des fichiers si la version installée d&#39;Android le permet.</li>
       <li>va également mettre à jour la base de données image de fournisseur de contenu d&#39;Android</li>
       <li>les fichiers XMP sidecar-mise à jour</li>
     </ul></li>

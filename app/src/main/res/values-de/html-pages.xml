@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!--
 /* string values containing translatable HTML pages
- * Translation to German and Copyright (c) 2015-2016 by k3b and v133.
+ * Translation to German and Copyright (c) 2015-2017 by k3b and v133.
  *
  * This file is part of "A Photo Manager" (A(ndro)FotoFinder).
  *
@@ -29,10 +29,12 @@
     <li>
     <a href="https://github.com/k3b/APhotoManager/wiki/Filter-View">Bilder finden</a>, per
     <ul>
+      <li>Schnellsuche in Dateipfad, Dateiname, Bildtitel, Bildbeschreibung, Tags(Suchbegriffe) mit Platzhaltern (neu in version 0.6.0)</li>
       <li>Ordner (mit hirachischer
       <a href="https://github.com/k3b/APhotoManager/wiki/Folder-Picker">Ordnerauswahl</a>)</li>
       <li>Ordner/Dateinamen mit Platzhaltern</li>
       <li>Datum</li>
+      <li>Enthaltene/nicht enthaltene Tags(Suchbegriffe) mit Platzhaltern (neu in version 0.6.0)</li>
       <li>Gebiet auf einer
       <a href="https://github.com/k3b/APhotoManager/wiki/geographic-map">Landkarte</a> (für Bilder mit Gps-Exif-Infos)</li>
     </ul></li>
@@ -40,7 +42,7 @@
     <a href="https://github.com/k3b/APhotoManager/wiki/Gallery-View">Galerie-Ansicht</a>
     <ul>
       <li>Unterstützung für Mehrfach-Auswahl</li>
-      <li>Dateiverarbeitung zum Kopieren, Verschieben, Löschen, Senden, Exif-Geo Ändern</li>
+      <li>Dateiverarbeitung zum Kopieren, Verschieben, Löschen, Senden, Exif-Geo/Tags(Suchbegriffe) Ändern (Tags(Suchbegriffe) neu in version 0.6.0)</li>
     </ul></li>
     <li>
     <a href="https://github.com/k3b/APhotoManager/wiki/Image-View">Foto-Ansicht</a> mit
@@ -48,15 +50,17 @@
       <li>stufenloser Vergrößerung (Zoom)</li>
       <li>links/rechts wischen für nächstes/vorheriges Bild</li>
       <li>Anzeige für erweiterte Bildinformationen (Exif, IPTC, XMP, ICC)</li>
-      <li>zum Kopieren, Verschieben, Löschen, Umbenennen, Teilen/Senden von Bildern, Exif-Geo Ändern</li>
+      <li>zum Kopieren, Verschieben, Löschen, Umbenennen, Teilen/Senden von Bildern, Exif-Geo/Tags(Suchbegriffe) Ändern (Tags(Suchbegriffe) neu in version 0.6.0)</li>
     </ul></li>
     <li>Die
     <a href="https://github.com/k3b/APhotoManager/wiki/geographic-map">geografische Karte</a> zeigt Marker an den Orten, an denen
     Fotos aufgenommen wurden</li>
+    <li>Änderungen an den Photo-Metadaten (Exif-Geo, Tags(Suchbegriffe), Pfad, Dateiname, ...) können
+    zwischen MS-Windows-Pc und Android übertragen werden (neu in version 0.6.0).
+    Details siehe <a href="https://github.com/k3b/APhotoManager/wiki/sync">Sync between Android and PC</a>.</li>
     <li>Alle Dateioperationen
     <ul>
       <li>aktualisieren auch die Android-Mediendatenbank</li>
-      <li>erhalten das Dateidatum (falls Android dies unterstützt)</li>
       <li>aktualisiert auch Xmp-Filialdateien</li>
     </ul></li>
     <li>App und Internet-Homepage sind in diesen Sprachen verfügbar:
@@ -67,9 +71,18 @@
   <a href="https://github.com/k3b/APhotoManager/wiki/it-home">it</a>,&nbsp;
   <a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr</a>,&nbsp;
   <a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja</a>,&nbsp;nl,&nbsp;pl,&nbsp;
-  <a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro</a></body>
+  <a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro</a>
+    , &nbsp;ru
+</li>
       <li>
-        <a href="https://github.com/k3b/APhotoManager/issues/21">Help us to translate into other languages.</a>
+        <b>Help us to translate this app into other languages:</b>
+		<ul>
+		  <li>On a pc with keyboard and internet access through the
+			<a href="https://github.com/k3b/APhotoManager/issues/21">crowdin.com website.</a>
+		  </li>
+		  <li>On android through the "A Photo Manager" menu <b>Settings/Translate</b> using the stringlate app.
+		  </li>
+		</ul>
       </li>
     </ul></li>
   </ul>

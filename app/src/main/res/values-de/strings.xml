@@ -22,7 +22,7 @@
  -->
 <resources>
   <string name="about_summary">Über \"A Photo Manager%1$s\"</string>
-  <string name="area_menu_title">Auswahl: Kartenausschnitt</string>
+  <string name="area_menu_title">Karten-Filter</string>
   <string name="background">Hintergrund</string>
   <string name="bookmark_delete_answer_format">Lesezeichen %1$s gelöscht.</string>
   <string name="bookmark_delete_error_format">Kann Lesezeichen %1$s nicht löschen.</string>
@@ -178,7 +178,7 @@ Verstecken kann über das 'Media-Scanner' Gallery-Menü rückgängig gemacht wer
   <string name="lbl_tags_exclude">-Tags</string>
   <string name="lbl_tag">Tag</string>
 
-  <string name="tags_activity_title">Wähle Tags</string>
+  <string name="tags_activity_title">Tag-Filter</string>
   <string name="tags_search_hint">Eingabe aktiviert Filter ...</string>
   <string name="tags_search_no_matching_items_found">Keine Tags gefunden</string>
   <string name="tags_edit_menu_title">Tags zuweisen</string>

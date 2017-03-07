@@ -20,7 +20,7 @@
  -->
 <resources>
     <string name="about_summary">About \"A Photo Manager%1$s\"</string>
-    <string name="area_menu_title">Select map area</string>
+    <string name="area_menu_title">Map Area Filter</string>
     <string name="background">Background</string>
     <string name="bookmark_delete_answer_format">Deleted bookmark %1$s.</string>
     <string name="bookmark_delete_error_format">Cannot delete bookmark %1$s.</string>
@@ -56,7 +56,7 @@
     <string name="filter_menu_title">Filter</string>
     <string name="folder_dialog_title_format">Select %1$s</string>
     <string name="folder_err_load_failed_format">Loading folder %1$s failed</string>
-    <string name="folder_menu_title">Folder filter</string>
+    <string name="folder_menu_title">Folder Filter</string>
     <string name="gallery_title">Photos</string>
     <string name="geo_show_menu_title">Show in map</string>
     <string name="geo_show_as_menu_title">View in external geo app</string>
@@ -179,7 +179,7 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
     <string name="lbl_tags_exclude">-Tags</string>
     <string name="lbl_tag">Tag</string>
 
-    <string name="tags_activity_title">Select Tags</string>
+    <string name="tags_activity_title">Tag Filter</string>
     <string name="tags_search_hint">Type here to filter ...</string>
     <string name="tags_search_no_matching_items_found">No matching tags found</string>
     <string name="tags_edit_menu_title">Set Tags</string>
