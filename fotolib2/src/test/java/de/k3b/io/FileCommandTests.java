@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -29,7 +29,8 @@ import static org.mockito.Mockito.*;
  * Created by k3b on 06.08.2015.
  */
 public class FileCommandTests {
-    private static final File X_FAKE_OUTPUT_DIR = new File("x:/fakeOutputDir");
+    private static final File X_FAKE_OUTPUT_DIR = new File("/fakeOutputDir").getAbsoluteFile();
+    private static final File X_FAKE_INPUT_DIR = new File("/fakeInputDir").getAbsoluteFile();
     private FileCommands sut;
 
     @Before
@@ -43,29 +44,29 @@ public class FileCommandTests {
     @Test
     public void shouldCopy() {
         registerFakeFiles(sut);
-        sut.moveOrCopyFilesTo(false, X_FAKE_OUTPUT_DIR, createIds(1), createTestFiles("a.jpg"));
+        sut.moveOrCopyFilesTo(false, X_FAKE_OUTPUT_DIR, createIds(1), createTestFiles(X_FAKE_OUTPUT_DIR, "a.jpg"));
 
-        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "/a.jpg"), createTestFile("a.jpg"));
+        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a.jpg"), createTestFile(X_FAKE_OUTPUT_DIR, "a.jpg"));
 
     }
 
     @Test
     public void shouldCopyWitRenameExistingMultiple() {
         registerFakeFiles(sut, "a.jpg", "b.png", "b(1).png");
-        sut.moveOrCopyFilesTo(false, X_FAKE_OUTPUT_DIR, createIds(2), createTestFiles("a.jpg", "b.png"));
+        sut.moveOrCopyFilesTo(false, X_FAKE_OUTPUT_DIR, createIds(2), createTestFiles(X_FAKE_INPUT_DIR, "a.jpg", "b.png"));
 
-        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(1).jpg"), createTestFile("a.jpg"));
-        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "b(2).png"), createTestFile("b.png"));
+        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(1).jpg"), createTestFile(X_FAKE_INPUT_DIR, "a.jpg"));
+        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "b(2).png"), createTestFile(X_FAKE_INPUT_DIR, "b.png"));
     }
 
     @Test
     public void shouldCopyRenameExistingWithXmp() {
         registerFakeFiles(sut, "a.jpg", "a.xmp", "a(1).xmp", "a(2).jpg"); // a(3) is next possible
 
-        sut.moveOrCopyFilesTo(false, X_FAKE_OUTPUT_DIR, createIds(1), createTestFiles("a.jpg"));
+        sut.moveOrCopyFilesTo(false, X_FAKE_OUTPUT_DIR, createIds(1), createTestFiles(X_FAKE_INPUT_DIR, "a.jpg"));
 
-        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(3).jpg"), createTestFile("a.jpg"));
-        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(3).xmp"), createTestFile("a.xmp"));
+        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(3).jpg"), createTestFile(X_FAKE_INPUT_DIR, "a.jpg"));
+        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(3).xmp"), createTestFile(X_FAKE_INPUT_DIR, "a.xmp"));
     }
 
     private Long[] createIds(int count) {
@@ -79,10 +80,10 @@ public class FileCommandTests {
     @Test
     public void shouldDeleteExistingWithXmp() {
         registerFakeFiles(sut, "a.jpg", "a.xmp");
-        sut.deleteFiles(createTestFile("a.jpg").getAbsolutePath());
+        sut.deleteFiles(createTestFile(X_FAKE_OUTPUT_DIR, "a.jpg").getAbsolutePath());
 
-        verify(sut).osDeleteFile(createTestFile("a.jpg"));
-        verify(sut).osDeleteFile(createTestFile("a.xmp"));
+        verify(sut).osDeleteFile(createTestFile(X_FAKE_OUTPUT_DIR, "a.jpg"));
+        verify(sut).osDeleteFile(createTestFile(X_FAKE_OUTPUT_DIR, "a.xmp"));
     }
 
     /** these files exist in source-dir and in dest-dir */
@@ -92,21 +93,23 @@ public class FileCommandTests {
         } else {
             for (String filename : filenames) {
                 doReturn(true).when(sut).osFileExists(new File(X_FAKE_OUTPUT_DIR, filename));
-                doReturn(true).when(sut).osFileExists(createTestFile(filename));
+                doReturn(true).when(sut).osFileExists(createTestFile(X_FAKE_OUTPUT_DIR, filename));
+                doReturn(true).when(sut).osFileExists(new File(X_FAKE_INPUT_DIR, filename));
+                doReturn(true).when(sut).osFileExists(createTestFile(X_FAKE_INPUT_DIR, filename));
             }
         }
     }
 
-    private static File[] createTestFiles(String... files) {
+    private static File[] createTestFiles(File destDir, String... files) {
         File[] result = new File[files.length];
         int pos = 0;
         for (String file : files) {
-            result[pos++] = createTestFile(file);
+            result[pos++] = createTestFile(destDir, file);
         }
         return result;
     }
 
-    private static File createTestFile(String name) {
-        return new File(name).getAbsoluteFile();
+    private static File createTestFile(File destDir, String name) {
+        return new File(destDir, name);
     }
 }
