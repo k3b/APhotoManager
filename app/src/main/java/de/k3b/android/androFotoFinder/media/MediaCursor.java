@@ -74,8 +74,8 @@ public class MediaCursor implements IMetaApi {
     @Override
     public Date getDateTimeTaken() {
         if (colDateTimeTaken == -1) return null;
-        Integer value = cursor.getInt(colDateTimeTaken);
-        return (value != null) ? new Date(value.intValue()) : null;
+        Long value = cursor.getLong(colDateTimeTaken);
+        return (value != null) ? new Date(value.longValue()) : null;
     }
 
     @Override
