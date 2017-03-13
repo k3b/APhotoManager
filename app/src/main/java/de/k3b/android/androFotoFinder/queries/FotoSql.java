@@ -673,8 +673,8 @@ public class FotoSql extends FotoSqlBase {
     /**
      * @return returns a hashmap filename => mediaID
      */
-    public static Map<String, Integer> execGetPathIdMap(Context context, String... fileNames) {
-        Map<String, Integer> result = new HashMap<String, Integer>();
+    public static Map<String, Long> execGetPathIdMap(Context context, String... fileNames) {
+        Map<String, Long> result = new HashMap<String, Long>();
 
         String whereFileNames = getWhereInFileNames(fileNames);
         if (whereFileNames != null) {
@@ -688,7 +688,7 @@ public class FotoSql extends FotoSqlBase {
             try {
                 c = createCursorForQuery("execGetPathIdMap", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
                 while (c.moveToNext()) {
-                    result.put(c.getString(1),c.getInt(0));
+                    result.put(c.getString(1),c.getLong(0));
                 }
             } catch (Exception ex) {
                 Log.e(Global.LOG_CONTEXT, "FotoSql.execGetPathIdMap: error executing " + query, ex);

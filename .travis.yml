@@ -32,4 +32,4 @@ before_install:
  
 script:
   - jdk_switcher use oraclejdk8
-  - ./gradlew assemble
+  - ./gradlew assemble test

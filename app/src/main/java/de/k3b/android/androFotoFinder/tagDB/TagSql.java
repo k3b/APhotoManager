@@ -285,6 +285,7 @@ public class TagSql extends FotoSql {
         final long xmpLastModifiedDate;
         final String path;
         final List<String> tags;
+        boolean xmpMoreRecentThanSql = false;
 
         public TagWorflowItem(long id, String path, List<String> tags, long xmpLastModifiedDate) {
             this.tags = tags;
@@ -323,8 +324,8 @@ public class TagSql extends FotoSql {
                 c = createCursorForQuery("loadTagWorflowItems", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
                 if (c.moveToFirst()) {
                     do {
-                        result.add(new TagWorflowItem(c.getInt(0), c.getString(1), TagConverter.fromString(c.getString(2)),
-                                c.getInt(3)));
+                        result.add(new TagWorflowItem(c.getLong(0), c.getString(1), TagConverter.fromString(c.getString(2)),
+                                c.getLong(3)));
                     } while (c.moveToNext());
                 }
             } catch (Exception ex) {

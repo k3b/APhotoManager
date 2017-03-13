@@ -202,11 +202,11 @@ public class MediaScanner  {
                 Log.i(Global.LOG_CONTEXT, CONTEXT + "A42 scanner starting with " + newPathNames.length + " files " + newPathNames[0] + "...");
             }
 
-            Map<String, Integer> inMediaDb = FotoSql.execGetPathIdMap(context.getApplicationContext(), newPathNames);
+            Map<String, Long> inMediaDb = FotoSql.execGetPathIdMap(context.getApplicationContext(), newPathNames);
 
             for (String fileName : newPathNames) {
                 if (fileName != null) {
-                    Integer id = inMediaDb.get(fileName);
+                    Long id = inMediaDb.get(fileName);
                     if (id != null) {
                         // already exists
                         modifyCount += update_Android42("MediaScanner.insertIntoMediaDatabase already existing ", context, id, new File(fileName));
@@ -406,7 +406,7 @@ public class MediaScanner  {
         }
     }
 
-    private int update_Android42(String dbgContext, Context context, int id, File file) {
+    private int update_Android42(String dbgContext, Context context, long id, File file) {
         if ((file != null) && file.exists() && file.canRead()) {
             ContentValues values = new ContentValues();
             getExifFromFile(values, file);
