@@ -126,7 +126,7 @@ public class FotoSql extends FotoSqlBase {
     private static final String FILTER_EXPR_DATE_MAX = SQL_COL_DATE_TAKEN + " < ?";
     private static final String FILTER_EXPR_DATE_MIN = SQL_COL_DATE_TAKEN + " >= ?";
     public static final String SQL_COL_PATH = MediaStore.Images.Media.DATA;
-    protected static final String FILTER_EXPR_PATH_LIKE = "(" + SQL_COL_PATH + " like ?) ";
+    protected static final String FILTER_EXPR_PATH_LIKE = "(" + SQL_COL_PATH + " like ?)";
 
     // same format as dir. i.e. description='/2014/12/24/' or '/mnt/sdcard/pictures/'
     public static final String SQL_EXPR_DAY = "strftime('/%Y/%m/%d/', " + SQL_COL_DATE_TAKEN + " /1000, 'unixepoch', 'localtime')";

@@ -101,12 +101,15 @@ public abstract class Dialogs {
 		View content = onCreateContentView(parent);
 
 		final EditText edit = (EditText) content.findViewById(R.id.edName);
-		edit.setText(name);
 
-		// select text without extension
-		int selectLen = name.lastIndexOf(".");
-		if (selectLen == -1) selectLen = name.length();
-		edit.setSelection(0, selectLen);
+		if (name != null) {
+			edit.setText(name);
+
+			// select text without extension
+			int selectLen = name.lastIndexOf(".");
+			if (selectLen == -1) selectLen = name.length();
+			edit.setSelection(0, selectLen);
+		}
 
 		// on my android 4.4 cellphone i have SHOW_AS_ACTION_ALWAYS|SHOW_AS_ACTION_WITH_TEXT.
 		// Consequence: not enough space so show cut/copy actions - they are not reachable.

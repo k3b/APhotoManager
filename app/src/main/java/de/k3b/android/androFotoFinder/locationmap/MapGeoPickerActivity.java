@@ -27,7 +27,6 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -298,7 +297,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
     }
 
     private void openFilter() {
-        GalleryFilterActivity.showActivity(this, this.mFilter, null);
+        GalleryFilterActivity.showActivity(this, this.mFilter, null, null);
     }
 
     private GeoPointDto getGeoPointDtoFromIntent(Intent intent) {
