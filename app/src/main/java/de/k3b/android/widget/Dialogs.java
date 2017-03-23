@@ -33,6 +33,8 @@ import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import java.util.List;
+
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.MenuUtils;
 
@@ -44,6 +46,10 @@ import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
  * Created by k3b on 05.10.2015.
  */
 public abstract class Dialogs {
+	// showStringPicker(this, "Open query", "FileName1.query", "FileName2.query");
+	public void pickFromStrings(final Activity parent, String title, final int idContextMenu, List<String> strings) {
+		pickFromStrings(parent, title, idContextMenu, strings.toArray(new String[strings.size()]));
+	}
 	// showStringPicker(this, "Open query", "FileName1.query", "FileName2.query");
 	public void pickFromStrings(final Activity parent, String title, final int idContextMenu, final String... strings) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(parent);

@@ -125,8 +125,13 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
         holder.icon.setVisibility(((mSelectedItems != null) && (mSelectedItems.contains(imageID))) ? View.VISIBLE : View.GONE);
         holder.imageID = imageID;
 
-        ThumbNailUtils.getThumb(uri, holder.image);
-        if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, mDebugPrefix + "bindView for " + holder);
+        if (uri != null) {
+            ThumbNailUtils.getThumb(uri, holder.image);
+            if (Global.debugEnabledViewItem)
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "bindView for " + holder);
+        } else {
+            Log.w(Global.LOG_CONTEXT, mDebugPrefix + "bindView for " + holder + ": no uri found in col " + FotoSql.SQL_COL_PATH);
+        }
     }
 
     @Override

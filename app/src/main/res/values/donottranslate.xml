@@ -28,6 +28,8 @@ this program. If not, see <http://www.gnu.org/licenses/>
 	<string name="settings_debug_sql_title" translatable="false">LogCat SQL</string>
 	<string name="settings_debug_map_title">LogCat geo map</string>
 
+	<string name="bookmark_reset">RESET</string>
+
 	<string name="settings_debug_view_item_title" translatable="false">LogCat gridview/listview</string>
 	<!-- version_postfix="" for fdroid-release and version_postfix=" (dev)" for development branch-->
 	<string name="about_content" translatable="false"><![CDATA["  <a href="https://github.com/k3b/APhotoManager/wiki">

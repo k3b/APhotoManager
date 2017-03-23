@@ -31,7 +31,12 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
+import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
@@ -144,6 +149,8 @@ public class BookmarkController {
 
     public void onLoadFromQuestion(final IQueryConsumer consumer, final QueryParameter currentFilter) {
         mCurrentFilter = currentFilter;
+        List<String> fileNamesPlusReset = new ArrayList<String>();
+        fileNamesPlusReset.add("<< " + mContext.getString(R.string.bookmark_reset) + " >>");
         String[] fileNames = Global.reportDir.list(new FilenameFilter() {
             @Override public boolean accept(File dir, String filename) {
                 return ((filename != null) && (filename.endsWith(Global.reportExt)));
@@ -151,19 +158,16 @@ public class BookmarkController {
         });
 
         if ((fileNames != null) && (fileNames.length > 0)) {
-            Dialogs dlg = new Dialogs() {
-                @Override protected boolean onContextMenuItemClick(int menuItemId, int itemIndex, String[] items) {
-                    return onBookmarkMenuItemClick(menuItemId, itemIndex, items);
-                }
-
-                @Override protected void onDialogResult(String fileName, Object[] parameters) {onLoadFromAnswer(fileName, consumer);}
-            };
-            dlg.pickFromStrings(mContext, mContext.getString(R.string.bookmark_load_from_menu_title), R.menu.menu_bookmark_context, fileNames);
-        } else {
-            Toast.makeText(mContext,
-                    mContext.getString(R.string.bookmark_err_not_found_format, getFile("*").getAbsolutePath()),
-                    Toast.LENGTH_LONG).show();
+            fileNamesPlusReset.addAll(Arrays.asList(fileNames));
         }
+        Dialogs dlg = new Dialogs() {
+            @Override protected boolean onContextMenuItemClick(int menuItemId, int itemIndex, String[] items) {
+                return onBookmarkMenuItemClick(menuItemId, itemIndex, items);
+            }
+
+            @Override protected void onDialogResult(String fileName, Object[] parameters) {onLoadFromAnswer(fileName, consumer);}
+        };
+        dlg.pickFromStrings(mContext, mContext.getString(R.string.bookmark_load_from_menu_title), R.menu.menu_bookmark_context, fileNamesPlusReset);
     }
 
     public void onLoadFromAnswer(final String fileName, final IQueryConsumer consumer) {
@@ -175,25 +179,29 @@ public class BookmarkController {
         // #76: used as default for save-as
         mLastBookmarkFileName = fileName;
         if (fileName != null) {
-            File inFile = getFile(fileName);
+            if (fileName.contains("<")) {
+                consumer.setQuery(null, new QueryParameter(FotoSql.queryDetail));
+            } else {
+                File inFile = getFile(fileName);
 
-            String sql;
-            try {
-                sql = FileUtils.readFile(inFile);
-                QueryParameter query = QueryParameter.parse(sql);
-                consumer.setQuery(fileName, query);
-            } catch (Exception e) {
-                Toast.makeText(mContext,
-                        e.getMessage(),
-                        Toast.LENGTH_LONG).show();
-                Log.e(Global.LOG_CONTEXT, "Error load query file '" + inFile.getAbsolutePath() + "'", e);
-                e.printStackTrace();
+                String sql;
+                try {
+                    sql = FileUtils.readFile(inFile);
+                    QueryParameter query = QueryParameter.parse(sql);
+                    consumer.setQuery(fileName, query);
+                } catch (Exception e) {
+                    Toast.makeText(mContext,
+                            e.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                    Log.e(Global.LOG_CONTEXT, "Error load query file '" + inFile.getAbsolutePath() + "'", e);
+                    e.printStackTrace();
+                }
             }
         }
     }
 
     protected boolean onBookmarkMenuItemClick(int menuItemId, int itemIndex, String[] items) {
-        if ((itemIndex >= 0) && (itemIndex < items.length)) {
+        if ((itemIndex > 0) && (itemIndex < items.length)) {
             switch (menuItemId) {
                 case R.id.action_save_as:
                     onSaveAsQuestion(mLastBookmarkFileName, mCurrentFilter); return true;
@@ -205,7 +213,7 @@ public class BookmarkController {
                     return onDeleteQuestion(itemIndex, items);
                 default:break;
             }
-        }
+        } // ignore index 0 = reset.
         return false;
     }
 

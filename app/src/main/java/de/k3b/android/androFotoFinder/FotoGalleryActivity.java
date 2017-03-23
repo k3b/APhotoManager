@@ -96,7 +96,6 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
             final IGalleryFilter whereFilter = TagSql.parseQueryEx(newQuery, true);
             mGalleryQueryParameter.mGalleryContentQuery = newQuery;
             mBookmarkController.setlastBookmarkFileName(fileName);
-            mGalleryQueryParameter.setSortID(IGalleryFilter.SORT_BY_NONE);
             String why = "#loadedBookmark " + fileName;
             onFilterChanged(whereFilter, why);
             invalidateDirectories(mDebugPrefix + why);
@@ -709,7 +708,8 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         if (mDirectoryRoot == null) {
             // not loaded yet. load directoryRoot in background
             final QueryParameter currentDirContentQuery = new QueryParameter(FotoSql.getQuery(dirQueryID));
-            TagSql.filter2QueryEx(currentDirContentQuery, this.mGalleryQueryParameter.getCurrentFilterSettings(), this.mGalleryQueryParameter.getSortID() != IGalleryFilter.SORT_BY_NONE);
+            TagSql.filter2QueryEx(currentDirContentQuery, this.mGalleryQueryParameter.getCurrentFilterSettings(),
+                    this.mGalleryQueryParameter.getSortID() != IGalleryFilter.SORT_BY_NONE);
 
             this.mGalleryQueryParameter.mDirQueryID = (currentDirContentQuery != null) ? currentDirContentQuery.getID() : FotoSql.QUERY_TYPE_UNDEFINED;
 

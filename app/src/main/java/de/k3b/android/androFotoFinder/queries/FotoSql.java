@@ -935,7 +935,7 @@ public class FotoSql extends FotoSqlBase {
             parameters.addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME);
         }
         String sqlWhere = parameters.toAndroidWhere();
-        if ((sqlWhere == null) || !sqlWhere.contains(SQL_COL_EXT_MEDIA_TYPE)) {
+        if ((sqlWhere == null) || (parameters.toFrom().contains(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME) && !sqlWhere.contains(SQL_COL_EXT_MEDIA_TYPE))) {
            parameters.addWhere(getFilterExpressionVisibility(visibility));
         }
 
