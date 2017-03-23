@@ -38,6 +38,7 @@ import java.io.File;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.util.DBUtils;
 import de.k3b.android.util.GarbageCollector;
 import de.k3b.android.util.JpgMetaWorkflow;
 import de.k3b.database.SelectedItems;
@@ -128,12 +129,12 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
     public CharSequence getPageTitle(int position) {
         Cursor cursor = getCursorAt(position);
         if (cursor != null) {
-            String name = cursor.getString(cursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT));
+            String name = DBUtils.getString(cursor,FotoSql.SQL_COL_DISPLAY_TEXT, null);
             if (name != null) {
                 StringBuilder result = new StringBuilder();
 
                 if (Global.debugEnabled) {
-                    long imageID = cursor.getLong(cursor.getColumnIndex(FotoSql.SQL_COL_PK));
+                    long imageID = DBUtils.getLong(cursor, FotoSql.SQL_COL_PK,0);
                     result.append("#").append(imageID).append(":");
                 }
 
@@ -152,27 +153,18 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
 
     public String getFullFilePath(int position) {
         Cursor cursor = getCursorAt(position);
-        if (cursor != null) {
-            return cursor.getString(cursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT));
-        }
-        return null;
+        return DBUtils.getString(cursor,FotoSql.SQL_COL_DISPLAY_TEXT, null);
     }
 
     /** translates offset in adapter to id of image */
     public long getImageId(int position) {
         Cursor cursor = getCursorAt(position);
-        if (cursor != null) {
-            return cursor.getLong(cursor.getColumnIndex(FotoSql.SQL_COL_PK));
-        }
-        return 0;
+        return DBUtils.getLong(cursor, FotoSql.SQL_COL_PK,0);
     }
 
     public boolean hasGeo(int position) {
         Cursor cursor = getCursorAt(position);
-        if (cursor != null) {
-            return !cursor.isNull(cursor.getColumnIndex(FotoSql.SQL_COL_GPS));
-        }
-        return false;
+        return !DBUtils.isNull(cursor,FotoSql.SQL_COL_GPS,true);
     }
 
     /**

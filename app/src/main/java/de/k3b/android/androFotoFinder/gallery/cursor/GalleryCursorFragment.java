@@ -70,6 +70,7 @@ import de.k3b.android.androFotoFinder.tagDB.TagWorflow;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.AndroidFileCommands44;
+import de.k3b.android.util.DBUtils;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
@@ -1177,7 +1178,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                             .append("\nduplicate found ")
                             .append(id)
                             .append("#")
-                            .append(cursor.getString(cursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT)))
+                            .append(DBUtils.getString(cursor,FotoSql.SQL_COL_DISPLAY_TEXT,"???"))
                             //.append("\n")
                     ;
                 }

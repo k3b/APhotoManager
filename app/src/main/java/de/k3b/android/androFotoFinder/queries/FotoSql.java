@@ -44,6 +44,7 @@ import java.util.Map;
 import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.util.DBUtils;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedFiles;
 import de.k3b.database.SelectedItems;
@@ -244,7 +245,7 @@ public class FotoSql extends FotoSqlBase {
 
     public static final String[] DEFAULT_GALLERY_COLUMNS = new String[]{SQL_COL_PK,
             SQL_COL_PATH + " AS " + SQL_COL_DISPLAY_TEXT,
-            "0 AS " + SQL_COL_COUNT,
+            // "0 AS " + SQL_COL_COUNT,
             SQL_COL_MAX_WITH + " AS " + SQL_COL_SIZE,
             SQL_COL_GPS,
             SQL_COL_PATH};
@@ -261,7 +262,7 @@ public class FotoSql extends FotoSqlBase {
             .addColumn(
                     SQL_COL_PK,
                     // SQL_COL_PATH + " AS " + SQL_COL_DISPLAY_TEXT,
-                    "0 AS " + SQL_COL_COUNT,
+                    // "0 AS " + SQL_COL_COUNT,
                     SQL_COL_LAT, SQL_COL_LON)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
             ;
@@ -527,7 +528,7 @@ public class FotoSql extends FotoSqlBase {
         try {
             c = createCursorForQuery("execGetFotoPath", context, uriWithID.toString(), null, null, null, FotoSql.SQL_COL_PATH);
             if (c.moveToFirst()) {
-                return c.getString(c.getColumnIndex(FotoSql.SQL_COL_PATH));
+                return DBUtils.getString(c,FotoSql.SQL_COL_PATH, null);
             }
         } catch (Exception ex) {
             Log.e(Global.LOG_CONTEXT, "FotoSql.execGetFotoPath() Cannot get path from " + uriWithID, ex);

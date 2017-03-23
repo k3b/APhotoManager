@@ -82,7 +82,10 @@ public class ThumbNailUtils {
     }
 
     public static void getThumb(String fullPath, ImageView imageView) {
-        ImageLoader.getInstance().displayImage( "file://" + fullPath, imageView, mDisplayImageOptions);
+
+        if ((imageView != null) && (fullPath != null) && (fullPath.length() > 0)) {
+            ImageLoader.getInstance().displayImage("file://" + fullPath, imageView, mDisplayImageOptions);
+        }
     }
 
 }
