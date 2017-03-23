@@ -140,6 +140,7 @@ public class FotoSql extends FotoSqlBase {
                     "max(" + SQL_COL_GPS + ") AS " + SQL_COL_GPS,
                     "max(" + SQL_COL_PATH + ") AS " + SQL_COL_PATH)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
+            .addWhere(FILTER_EXPR_PRIVATE_PUBLIC)
             .addGroupBy(SQL_EXPR_DAY)
             .addOrderBy(SQL_EXPR_DAY);
 
@@ -154,6 +155,7 @@ public class FotoSql extends FotoSqlBase {
                     // "'(" + SQL_EXPR_FOLDER + " = ''' || " + SQL_EXPR_FOLDER + " || ''')'"
                     "max(" + SQL_COL_GPS + ") AS " + SQL_COL_GPS)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
+            .addWhere(FILTER_EXPR_PRIVATE_PUBLIC)
             .addGroupBy(SQL_EXPR_FOLDER)
             .addOrderBy(SQL_EXPR_FOLDER);
 
@@ -184,7 +186,9 @@ public class FotoSql extends FotoSqlBase {
 
     /* image entries may not have DISPLAY_NAME which is essential for calculating the item-s folder. */
     public static final QueryParameter queryGetMissingDisplayNames = new QueryParameter(queryChangePath)
-            .addWhere(MediaStore.MediaColumns.DISPLAY_NAME + " is null");
+            .addWhere(MediaStore.MediaColumns.DISPLAY_NAME + " is null")
+            .addWhere(FILTER_EXPR_PRIVATE_PUBLIC)
+            ;
 
     // the bigger the smaller the area
     private static final double GROUPFACTOR_FOR_Z0 = 0.025;
@@ -231,6 +235,7 @@ public class FotoSql extends FotoSqlBase {
                         SQL_EXPR_LON + " AS " + SQL_COL_LON,
                         "count(*) AS " + SQL_COL_COUNT)
                 .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
+                .addWhere(FILTER_EXPR_PRIVATE_PUBLIC)
                 .addGroupBy(SQL_EXPR_LAT, SQL_EXPR_LON)
                 .addOrderBy(SQL_EXPR_LAT, SQL_EXPR_LON);
 

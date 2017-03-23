@@ -23,7 +23,6 @@ import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.SystemClock;
 import android.util.Log;
 
 import java.util.List;
@@ -62,7 +61,6 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
     private static final int PROGRESS_INCREMENT = 500;
 
     private final Activity context;
-    private final String debugPrefix;
 
     // will receive debug output
     private StringBuffer mStatus = null;
@@ -71,12 +69,12 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
 
     public DirectoryLoaderTask(Activity context, String debugPrefix) {
         this.context = context;
-        this.debugPrefix = debugPrefix;
-        Global.debugMemory(debugPrefix, "ctor");
+        String combinedDebugPrefix = debugPrefix + "-DirectoryLoaderTask";
+        Global.debugMemory(combinedDebugPrefix, "ctor");
 
         if (Global.debugEnabledSql || Global.debugEnabled) {
             mStatus = new StringBuffer();
-            mStatus.append(this.debugPrefix);
+            mStatus.append(combinedDebugPrefix);
         } else {
             mStatus = null;
         }
@@ -178,32 +176,4 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
         // if (result == null) return this.context.getString(R.string.unknown);
         return result;
     }
-
-    /*
-    // This is called each time you call publishProgress()
-    protected void onProgressUpdate(Integer... progress) {
-        setProgressPercent(progress[0]);
-    }
-
-    // This is called when doInBackground() is finished
-    protected void onPostExecute(IDirectory result) {
-        showNotification("Downloaded " + result + " bytes");
-    }
-
-    private static void usageExample(Activity context, QueryParameter parameters, String debugPrefix) {
-        DirectoryLoaderTask loader = new DirectoryLoaderTask(context, debugPrefix) {
-            // This is called when doInBackground() is finished
-            @Override
-            protected void onPostExecute(IDirectory result) {
-                // updateGui(result);
-            }
-            // This is called each time you call publishProgress()
-            protected void onProgressUpdate(Integer... progress) {
-                // setStatus("Loaded " + progress[0] + "/" + progress[1]);
-            }
-
-        };
-        loader.execute(parameters);
-    }
-    */
 }
