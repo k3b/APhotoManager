@@ -61,15 +61,15 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 	}
 
 	private class Holder {
-		Tag currentTag;
-		ImageView bookmarkIcon;
-		ImageView addIcon;
-		ImageView removeIcon;
-		boolean isBookmark = false;
-		boolean isAdd = false;
-		boolean isRemove = false;
-		boolean isAffected = true;
-		TextView name;
+		public Tag currentTag;
+		public ImageView bookmarkIcon;
+		public ImageView addIcon;
+		public ImageView removeIcon;
+		public boolean isBookmark = false;
+		public boolean isAdd = false;
+		public boolean isRemove = false;
+		public boolean isAffected = true;
+		public TextView name;
 
 		public void setBookmark(boolean value) {
 			this.isBookmark = value;

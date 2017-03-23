@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -141,6 +141,7 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
 
     /** data belonging to gridview element */
     static class GridCellViewHolder {
+        /** used to create a debug-instance name. +=1 for every new instance */
         private static int lastInstanceNo = 0;
         private final String debugPrefix;
 

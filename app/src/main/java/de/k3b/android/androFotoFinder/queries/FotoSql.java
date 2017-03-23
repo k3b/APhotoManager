@@ -779,6 +779,7 @@ public class FotoSql extends FotoSqlBase {
      */
     public static int deleteMedia(String dbgContext, Context context, String where, String[] selectionArgs, boolean preventDeleteImageFile)
     {
+        String[] lastSelectionArgs = selectionArgs;
         String lastUsedWhereClause = where;
         int delCount = 0;
         try {
@@ -788,32 +789,32 @@ public class FotoSql extends FotoSqlBase {
                 values.put(FotoSql.SQL_COL_PATH, DELETED_FILE_MARKER);
                 values.put(FotoSql.SQL_COL_EXT_MEDIA_TYPE, 0); // so it will not be shown as image any more
                 int updateCount = exexUpdateImpl(dbgContext + "-a: FotoSql.deleteMedia: ",
-                        context, values, lastUsedWhereClause, selectionArgs);
+                        context, values, lastUsedWhereClause, lastSelectionArgs);
 
                 lastUsedWhereClause = FotoSql.SQL_COL_PATH + " is null";
-                selectionArgs = null;
+                lastSelectionArgs = null;
                 delCount = context.getContentResolver()
-                        .delete(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, lastUsedWhereClause, selectionArgs);
+                        .delete(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, lastUsedWhereClause, lastSelectionArgs);
                 if (Global.debugEnabledSql) {
                     Log.i(Global.LOG_CONTEXT, dbgContext + "-b: FotoSql.deleteMedia delete\n" +
                             QueryParameter.toString(null, null, SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
-                            lastUsedWhereClause, selectionArgs, null, delCount));
+                            lastUsedWhereClause, lastSelectionArgs, null, delCount));
                 }
             } else {
                 delCount = context.getContentResolver()
-                        .delete(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, lastUsedWhereClause, selectionArgs);
+                        .delete(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, lastUsedWhereClause, lastSelectionArgs);
                 if (Global.debugEnabledSql) {
                     Log.i(Global.LOG_CONTEXT, dbgContext +": FotoSql.deleteMedia\ndelete " +
                             QueryParameter.toString(null, null,
                                     SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
-                                    lastUsedWhereClause, selectionArgs, null, delCount));
+                                    lastUsedWhereClause, lastSelectionArgs, null, delCount));
                 }
             }
         } catch (Exception ex) {
             // null pointer exception when delete matches not items??
             final String msg = dbgContext + ": Exception in FotoSql.deleteMedia:\n" +
                     QueryParameter.toString(null, null, SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
-                    lastUsedWhereClause, selectionArgs, null, -1)
+                    lastUsedWhereClause, lastSelectionArgs, null, -1)
                     + " : " + ex.getMessage();
             Log.e(Global.LOG_CONTEXT, msg, ex);
 

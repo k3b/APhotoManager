@@ -28,13 +28,13 @@ import de.k3b.transactionlog.MediaTransactionLogEntryType;
  */
 
 public class TransactionLogSql {
-    public static final String TABLE = "TransactionLog";
-    static final String COL_PK = "_id";
-    static final String COL_mediaID = "mediaID";
-    static final String COL_modificationdate = "modificationDate";
-    static final String COL_fullPath = "fullPath";
-    static final String COL_command = "command";
-    static final String COL_commandData = "commandData";
+    public   static final String TABLE = "TransactionLog";
+    private  static final String COL_PK = "_id";
+    private  static final String COL_mediaID = "mediaID";
+    private  static final String COL_modificationdate = "modificationDate";
+    private  static final String COL_fullPath = "fullPath";
+    private  static final String COL_command = "command";
+    private  static final String COL_commandData = "commandData";
 
     private long mediaID;
     private String fullPath;

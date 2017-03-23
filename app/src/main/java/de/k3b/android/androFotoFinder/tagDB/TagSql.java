@@ -281,11 +281,11 @@ public class TagSql extends FotoSql {
     }
 
     static class TagWorflowItem {
-        final long id;
-        final long xmpLastModifiedDate;
-        final String path;
-        final List<String> tags;
-        boolean xmpMoreRecentThanSql = false;
+        public final long id;
+        public final long xmpLastModifiedDate;
+        public final String path;
+        public final List<String> tags;
+        public boolean xmpMoreRecentThanSql = false;
 
         public TagWorflowItem(long id, String path, List<String> tags, long xmpLastModifiedDate) {
             this.tags = tags;

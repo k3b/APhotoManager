@@ -92,7 +92,7 @@ public class MediaScanner  {
         }
     };
 
-    final Context mContext;
+    public final Context mContext;
 
     public MediaScanner(Context context) {
         mContext = context.getApplicationContext();

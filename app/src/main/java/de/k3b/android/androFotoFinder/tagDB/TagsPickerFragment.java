@@ -102,10 +102,6 @@ public class TagsPickerFragment  extends DialogFragment  {
 
     private TagListArrayAdapter mDataAdapter;
     private EditText mFilterEdit;
-    private ListView mList;
-    private ImageView mImage;
-
-    private TextView mStatus = null;
 
     // not null when dialog is open that must be closed.
     private AlertDialog mSubDialog = null;
@@ -215,13 +211,13 @@ public class TagsPickerFragment  extends DialogFragment  {
                 mAddNames, mRemoveNames, mAffectedNames, mBookMarkNames
         );
 
-        mList = (ListView)view.findViewById(R.id.list);
-        mList.setAdapter(mDataAdapter);
+        final ListView list = (ListView)view.findViewById(R.id.list);
+        list.setAdapter(mDataAdapter);
 
         if (mContextMenueId != 0)
 
         {
-            mList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                 @Override
                 public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                     mCurrentMenuSelection = (position >= 0) ? mDataAdapter.getItem(position) : null;
@@ -231,7 +227,6 @@ public class TagsPickerFragment  extends DialogFragment  {
                 }
             });
         }
-        this.mImage = (ImageView) view.findViewById(R.id.image);
         this.mFilterMode = (ImageView) view.findViewById(R.id.cmd_find_mode);
         View.OnClickListener click = new View.OnClickListener() {
             @Override
@@ -325,9 +320,6 @@ public class TagsPickerFragment  extends DialogFragment  {
 
     /** handle init for dialog-only controlls: cmdOk, cmdCancel, status */
     private void onCreateViewDialog(View view) {
-        this.mStatus = (TextView) view.findViewById(R.id.status);
-        this.mStatus.setVisibility(View.VISIBLE);
-
         ImageButton cmdOk = (ImageButton) view.findViewById(R.id.cmd_ok);
         cmdOk.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -802,8 +794,6 @@ public class TagsPickerFragment  extends DialogFragment  {
         final String filter = (mIsFilterMode) ? TagsPickerFragment.this.mFilterEdit.getText()
                 .toString() : "@@@@";
         mDataAdapter.setFilterParam(filter);
-        // boolean empty = TagsPickerFragment.this.mDataAdapter.getCount() == 0;
-        // mList.setVisibility(empty ? View.INVISIBLE : View.VISIBLE);
     }
 
     private void refreshCounter() {
