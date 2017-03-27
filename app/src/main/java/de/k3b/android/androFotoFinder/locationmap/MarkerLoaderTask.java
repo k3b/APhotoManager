@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.SystemClock;
+import android.util.Log;
 
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.overlay.DefaultOverlayManager;
@@ -107,13 +108,18 @@ public abstract class MarkerLoaderTask<MARKER extends ClickableIconOverlay> exte
             }
             OverlayManager result = new DefaultOverlayManager(null);
 
-            long startTime = SystemClock.currentThreadTimeMillis();
             int colCount = cursor.getColumnIndex(FotoSql.SQL_COL_COUNT);
             int colIconID = cursor.getColumnIndex(FotoSql.SQL_COL_PK);
 
             int colLat = cursor.getColumnIndex(FotoSql.SQL_COL_LAT);
             int colLon = cursor.getColumnIndex(FotoSql.SQL_COL_LON);
 
+            if ((colIconID == -1) || (colLat == -1) || (colLon == -1)) {
+                throw new IllegalArgumentException("Missing SQL Column " + FotoSql.SQL_COL_LON +
+                        "," + FotoSql.SQL_COL_LAT +
+                        " or " + FotoSql.SQL_COL_PK);
+            }
+            String markerItemCount = "1";
             int increment = PROGRESS_INCREMENT;
             while (cursor.moveToNext()) {
                 int id = cursor.getInt(colIconID);
@@ -125,7 +131,8 @@ public abstract class MarkerLoaderTask<MARKER extends ClickableIconOverlay> exte
                 } else {
                     marker = createMarker();
                     GeoPoint point = new GeoPoint(cursor.getDouble(colLat),cursor.getDouble(colLon));
-                    BitmapDrawable icon = createIcon(cursor.getString(colCount));
+                    if (colCount != -1) markerItemCount = cursor.getString(colCount);
+                    BitmapDrawable icon = (colCount != -1) ? null : createIcon(markerItemCount);
                     marker.set(id, point, icon,null );
                 }
 
@@ -151,6 +158,18 @@ public abstract class MarkerLoaderTask<MARKER extends ClickableIconOverlay> exte
             }
 
             return result;
+        } catch (Exception ex){
+            if (this.mStatus != null) {
+                this.mStatus.append("\n\texception : ").append(ex.getMessage());
+                Log.e(Global.LOG_CONTEXT, mDebugPrefix + "doInBackground : "
+                    + this.mStatus.toString(), ex);
+            } else {
+                Log.e(Global.LOG_CONTEXT, mDebugPrefix
+                    + "doInBackground (settings[debug(sql)] disabled) : "
+                    + ex.getMessage(), ex);
+            }
+
+            throw ex;
         } finally {
             if (cursor != null) {
                 cursor.close();

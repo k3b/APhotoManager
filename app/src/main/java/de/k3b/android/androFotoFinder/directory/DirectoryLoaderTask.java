@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -105,18 +105,32 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
 
             DirectoryBuilder builder = new DirectoryBuilder();
 
-            int colText = cursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT);
             int colCount = cursor.getColumnIndex(FotoSql.SQL_COL_COUNT);
             int colIconID = cursor.getColumnIndex(FotoSql.SQL_COL_PK);
 
+            int colText = cursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT);
             int colLat = cursor.getColumnIndex(FotoSql.SQL_COL_LAT);
             int colLon = cursor.getColumnIndex(FotoSql.SQL_COL_LON);
 
+            int markerItemCount = 1;
             int increment = PROGRESS_INCREMENT;
+
+            if (colIconID == -1) {
+                throw new IllegalArgumentException("Missing SQL Column " + FotoSql.SQL_COL_PK);
+            }
+
+            if ((colText == -1) && ((colLat == -1) || (colLon == -1))) {
+                throw new IllegalArgumentException("Missing SQL Column. Need either " +
+                        FotoSql.SQL_COL_DISPLAY_TEXT +
+                        " or " + FotoSql.SQL_COL_LAT +
+                                " + " +FotoSql.SQL_COL_LON);
+            }
+
             while (cursor.moveToNext()) {
                 String path = (colText >= 0) ? cursor.getString(colText) : getLatLonPath(cursor.getDouble(colLat), cursor.getDouble(colLon));
                 if (path != null) {
-                    builder.add(path, cursor.getInt(colCount), cursor.getInt(colIconID));
+                    if (colCount != -1) markerItemCount = cursor.getInt(colCount);
+                    builder.add(path, markerItemCount, cursor.getInt(colIconID));
                     itemCount++;
                     if ((--increment) <= 0) {
                         publishProgress(itemCount, expectedCount);
@@ -128,7 +142,7 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
                 }
             }
             if (mStatus != null) {
-                mStatus.append("\n\tfound ").append(cursor.getCount()).append(" db rows");
+                mStatus.append("\n\tfound ").append(itemCount).append(" db rows");
             }
 
             IDirectory result = builder.getRoot();
