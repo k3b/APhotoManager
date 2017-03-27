@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -67,11 +67,9 @@ public class CsvReader {
 				if (ch== CsvItem.DEFAULT_CHAR_LINE_DELIMITER) this.lineNumber++;
 				
 				if (this.fieldSurrounder == 0) {
-					if (fieldDelimiter == 0)
-					{
+					if ((fieldDelimiter == 0) && POSSIBLE_DELIMITER_CHARS.indexOf(ch) >= 0) {
 						// fieldDelimiter unknown: infer
-						if (POSSIBLE_DELIMITER_CHARS.indexOf(ch) >= 0)
-							fieldDelimiter = (char) ch;
+ 						fieldDelimiter = (char) ch;
 					}
 					if (ch == fieldDelimiter) {
 						result.addElement(getStringWithoutDelimiters(content));

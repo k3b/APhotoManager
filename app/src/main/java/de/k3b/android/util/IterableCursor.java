@@ -26,8 +26,8 @@ import android.database.Cursor;
     inspired by http://stackoverflow.com/questions/10723770/whats-the-best-way-to-iterate-an-android-cursor/28765773#28765773 
 */
 public class IterableCursor<T extends Cursor> implements Iterable<T>, Iterator<T> {
-    T cursor;
-    int toVisit;
+    protected T cursor;
+    protected int toVisit;
     public IterableCursor(T cursor) {
         this.cursor = cursor;
         toVisit = cursor.getCount();

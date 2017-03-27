@@ -32,7 +32,7 @@ import de.k3b.io.ListUtils;
  */
 
 public class TagProcessorTests {
-    TagProcessor sut = null;
+    private TagProcessor sut = null;
 
     @Before
     public void setup() {

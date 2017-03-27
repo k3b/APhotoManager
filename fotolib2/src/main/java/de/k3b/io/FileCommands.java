@@ -279,14 +279,13 @@ public class FileCommands implements  Cloneable {
         // #61 cannot move between different mountpoints/devices/partitions. do Copy+Delete instead
         if (source.exists() && source.isFile() && source.canRead()
                 && source.canWrite() // to delete after success
-                && !dest.exists()) {
-            if (osFileCopy(dest, source)) {
-                if (osDeleteFile(source)) {
-                    return true; // move: copy + delete(source) : success
-                } else {
-                    // cannot delete souce: undo copy
-                    osDeleteFile(dest);
-                }
+                && !dest.exists()
+                && osFileCopy(dest, source)) {
+            if (osDeleteFile(source)) {
+                return true; // move: copy + delete(source) : success
+            } else {
+                // cannot delete souce: undo copy
+                osDeleteFile(dest);
             }
         }
         return false;

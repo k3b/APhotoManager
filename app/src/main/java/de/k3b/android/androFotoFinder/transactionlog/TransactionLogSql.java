@@ -51,10 +51,11 @@ public class TransactionLogSql {
             + COL_commandData + " TEXT"
             + ")";
 
-    public static ContentValues set(ContentValues values, long currentMediaID, String fileFullPath,
+    public static ContentValues set(ContentValues valuesOrNull, long currentMediaID, String fileFullPath,
                            long modificationDate,
                            MediaTransactionLogEntryType mediaTransactionLogEntryType,
                            String commandData) {
+        ContentValues values = valuesOrNull;
         if (values == null) {
             values = new ContentValues();
         } else {

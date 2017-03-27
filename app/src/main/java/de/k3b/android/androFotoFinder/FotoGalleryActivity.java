@@ -277,7 +277,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         }
 
         public boolean isGeoPick() {
-            return mStatSuffix == PICK_GEO_SUFFIX;
+            return (mStatSuffix != null) && mStatSuffix.equals(PICK_GEO_SUFFIX);
         }
 
         // load from settings/instanceState

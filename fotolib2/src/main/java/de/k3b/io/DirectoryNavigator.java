@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -99,8 +99,8 @@ public class DirectoryNavigator implements IExpandableListViewNavigation<IDirect
         setCurrentSelection(newSelection);
     }
 
-    /** package to allow unit testing: calclulate Grandparent for navigateTo */
-    IDirectory getNavigationGrandparent(IDirectory newSelection) {
+    /** protected to allow unit testing: calclulate Grandparent for navigateTo */
+    protected IDirectory getNavigationGrandparent(IDirectory newSelection) {
         if (newSelection != null) {
             IDirectory parent = newSelection.getParent();
             if (parent != null) {

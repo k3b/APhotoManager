@@ -758,18 +758,21 @@ public class TagsPickerFragment  extends DialogFragment  {
     private final Handler delayProcessor = new Handler() {
         @Override
         public void handleMessage(final Message msg) {
-            TagsPickerFragment.this.clearDelayProcessor();
-            switch (msg.what) {
-                case TagsPickerFragment.HANDLER_FILTER_TEXT_CHANGED:
-                    TagsPickerFragment.this.refershResultList();
-                    TagsPickerFragment.this.sendDelayed(
-                            TagsPickerFragment.HANDLER_FILTER_COUNT_UPDATE,
-                            TagsPickerFragment.HANDLER_FILTER_COUNT_DELAY);
-                    break;
-                case TagsPickerFragment.HANDLER_FILTER_COUNT_UPDATE:
-                    TagsPickerFragment.this.refreshCounter();
-                    break;
-            }
+        TagsPickerFragment.this.clearDelayProcessor();
+        switch (msg.what) {
+            case TagsPickerFragment.HANDLER_FILTER_TEXT_CHANGED:
+                TagsPickerFragment.this.refershResultList();
+                TagsPickerFragment.this.sendDelayed(
+                        TagsPickerFragment.HANDLER_FILTER_COUNT_UPDATE,
+                        TagsPickerFragment.HANDLER_FILTER_COUNT_DELAY);
+                break;
+            case TagsPickerFragment.HANDLER_FILTER_COUNT_UPDATE:
+                TagsPickerFragment.this.refreshCounter();
+                break;
+            default:
+                // not implemented
+                throw new IllegalStateException();
+        }
         }
 
     };

@@ -117,7 +117,7 @@ public class MediaDBActivity extends Activity {
         private int mItemCount = 0;
         private int mUpdateCount = 0;
         private int mProgressCountDown = 0;
-        MediaCsvLoader mLoader = null;
+        protected MediaCsvLoader mLoader = null;
 
         /**
          * Override this method to perform a computation on a background thread. The

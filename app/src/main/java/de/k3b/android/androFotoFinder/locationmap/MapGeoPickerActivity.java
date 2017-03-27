@@ -294,6 +294,8 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
                 mBookmarkController.loadState(intent, null);
                 onFilterChanged(GalleryFilterActivity.getFilter(intent));
                 break;
+            default:
+                throw new IllegalStateException();
         }
     }
 

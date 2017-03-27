@@ -137,7 +137,7 @@ public class QueryParameter {
         return getExpresionParameter(sqlExprWithParameters, mWhere, mParameters, remove);
     }
 
-    static String[] getExpresionParameter(String sqlExprWithParameters, List<String> expressions, List<String> parameters, boolean remove) {
+    protected static String[] getExpresionParameter(String sqlExprWithParameters, List<String> expressions, List<String> parameters, boolean remove) {
         if ((sqlExprWithParameters != null) && (expressions != null) && (parameters != null)) {
             int paramNo = 0;
             for (String p : expressions) {

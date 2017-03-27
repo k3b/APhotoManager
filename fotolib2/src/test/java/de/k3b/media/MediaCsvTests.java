@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2016 by k3b.
+ * Copyright (c) 2016-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ public class MediaCsvTests {
         return result.toString();
     }
 
-    static class Sut extends CsvLoader<MediaCsvItem> {
+    private static class Sut extends CsvLoader<MediaCsvItem> {
         private ArrayList<IMetaApi> result = new ArrayList<IMetaApi>();
 
         @Override
@@ -58,7 +58,7 @@ public class MediaCsvTests {
             }
         }
 
-        List<IMetaApi> load(int... ids) {
+        protected List<IMetaApi> load(int... ids) {
             String data = createTestCsv(ids);
             return load(data);
         }

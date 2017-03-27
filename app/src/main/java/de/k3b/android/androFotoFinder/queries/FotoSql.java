@@ -910,7 +910,8 @@ public class FotoSql extends FotoSqlBase {
 
     }
 
-    protected static String getFilterExpressionVisibility(int visibility) {
+    protected static String getFilterExpressionVisibility(int _visibility) {
+        int visibility = _visibility;
         // add visibility column only if not included yet
         if (visibility == IGalleryFilter.VISIBILITY_DEFAULT) {
             visibility = (FotoLibGlobal.visibilityShowPrivateByDefault)

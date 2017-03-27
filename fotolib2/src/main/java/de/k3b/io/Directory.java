@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -125,7 +125,7 @@ public class Directory implements IDirectory {
         return result.toString();
     }
 
-    static StringBuilder toTreeString(StringBuilder result, Directory item, String delimiter, int options) {
+    protected static StringBuilder toTreeString(StringBuilder result, Directory item, String delimiter, int options) {
         if (item != null) {
             result.append(item.getRelPath());
             appendCount(result, item, options);

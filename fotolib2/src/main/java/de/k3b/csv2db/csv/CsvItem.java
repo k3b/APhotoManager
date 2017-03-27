@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -136,7 +136,7 @@ abstract public class CsvItem {
     }
 
     /** places quote around fieldValue if necessary */
-    String quouteIfNecessary(String fieldValue) {
+    protected String quouteIfNecessary(String fieldValue) {
         if (mustQuote(fieldValue)) {
             return CHAR_FIELD_SURROUNDER + fieldValue.replace(""+CHAR_FIELD_SURROUNDER, "'") + CHAR_FIELD_SURROUNDER;
         }
@@ -144,7 +144,7 @@ abstract public class CsvItem {
     }
 
     /** return true if contentmust be quoted because it contains problematic chars */
-    boolean mustQuote(String fieldValue) {
+    protected boolean mustQuote(String fieldValue) {
         if (fieldValue == null) return false;
         for (char forbidden : mCsvSpecialChars.toCharArray()) {
             if (fieldValue.indexOf(forbidden) >= 0) return true;

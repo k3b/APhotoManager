@@ -383,11 +383,12 @@ public class GalleryFilterActivity extends LocalizedActivity
         }
 
         protected void showVisibility(int visibility) {
-            if (visibility == VISIBILITY_DEFAULT) {
-                visibility = (FotoLibGlobal.visibilityShowPrivateByDefault) ? VISIBILITY_PRIVATE_PUBLIC : VISIBILITY_PUBLIC;
+            int actualVisibility = visibility;
+            if (actualVisibility == VISIBILITY_DEFAULT) {
+                actualVisibility = (FotoLibGlobal.visibilityShowPrivateByDefault) ? VISIBILITY_PRIVATE_PUBLIC : VISIBILITY_PUBLIC;
             }
 
-            switch (visibility) {
+            switch (actualVisibility) {
                 case VISIBILITY_PRIVATE:
                     mPrivate.setChecked(true);
                     mPublic.setChecked(false);
