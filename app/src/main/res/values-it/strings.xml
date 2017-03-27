@@ -103,7 +103,6 @@
 	<string name="settings_debug_sql_summary">&#8230; contenente SQL eseguito.</string>
 	<string name="settings_debug_view_item_summary">... contenente elementi gridview/listview.</string>
 	<string name="settings_debug_memory_title">LogCat consumo di memoria</string>
-	<string name="settings_debug_libs_summary">&#8230; of 3rd party libraries.</string>
 	<string name="settings_debug_title">LogCat misc.</string>
 	<string name="settings_debug_summary">&#8230; contenente altri messaggi di log.</string>
 	<string name="settings_debug_clear_title">Svuota LogCat</string>
@@ -146,12 +145,25 @@
 	<string name="geo_picker_from_photo_title">Scegli geo dalla foto</string>
 	<string name="geo_picker_from_map_title">Scegli geo dalla mappa</string>
 	<string name="folder_hide_images_menu_title">Nascondi immagini</string>
-	<string name="folder_hide_images_question_message_format">"Sei sicuro?
-
-Vuoi rendere tutti i file multimediali (foto, video, audio) sotto
-
-      %1$s
-
-invisibili ai database, app galleria e media scanner?
-Puoi annullare l\'azione avviando il media scanner dal menu galleria."</string>
+	<string name="folder_hide_images_question_message_format">"Sei sicuro?Vuoi rendere tutti i file multimediali (foto, video, audio) sotto    %1$sinvisibili ai database, app galleria e media scanner?Puoi annullare l\'azione avviando il media scanner dal menu galleria."</string>
+	<string name="filter_path_hint">Parte della cartella o nome file. % = Carattere jolly</string>
+	<string name="lbl_any">Trova</string>
+	<string name="filter_any_hint">Parte del tag, titolo, descrizione o percorso</string>
+	<string name="lbl_images_public">Immagini pubbliche</string>
+	<string name="lbl_images_private">Immagini private</string>
+	<string name="lbl_with_no_tags">Senza tag</string>
+	<string name="lbl_tags_include">+ Tag</string>
+	<string name="lbl_tags_exclude">-Tag</string>
+	<string name="lbl_tag">Tag</string>
+	<string name="tags_activity_title">Filtro tag</string>
+	<string name="tags_search_hint">Digita qui per filtrare...</string>
+	<string name="tags_search_no_matching_items_found">Nessun tag corrispondente trovato</string>
+	<string name="tags_edit_menu_title">Imposta tag</string>
+	<string name="tags_add_menu_title">Crea nuovo Tag</string>
+	<string name="tags_add_default">nuovo_tag</string>
+	<string name="tags_delete_children_title">Eliminazione dei contenuti</string>
+	<string name="tags_update_photos">Aggiorna i tag nelle foto coinvolte</string>
+	<string name="tags_update_result_format">Aggiornati i tag di %1$d foto</string>
+	<string name="tags_hint">Premendo a lungo il nome del tag apre il menu</string>
+	<string name="tags_defaults">Attività,Persone,Luoghi,Temi,Progetti</string>
 </resources>
