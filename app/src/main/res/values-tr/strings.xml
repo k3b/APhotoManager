@@ -27,7 +27,6 @@
   <string name="bookmark_delete_answer_format">%1$s yer imi silindi.</string>
   <string name="bookmark_delete_error_format">%1$s yer imi silinemedi.</string>
   <string name="bookmark_delete_question">Bu yer imi silinsin mi?</string>
-  <string name="bookmark_err_not_found_format">%1$s içerisinde hiçbir sorgu bulunamadı.</string>
   <string name="bookmark_load_from_menu_title">Yer imini al &#8230;</string>
   <string name="bookmark_save_as_menu_title">Yer imi olarak kaydet&#8230;</string>
   <string name="btn_cancel">İptal</string>

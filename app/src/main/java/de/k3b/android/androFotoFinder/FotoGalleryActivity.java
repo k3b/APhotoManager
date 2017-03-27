@@ -623,8 +623,11 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
 
         switch (requestCode) {
             case GalleryFilterActivity.resultID :
-                onFilterChanged(GalleryFilterActivity.getFilter(intent), mDebugPrefix + "#onActivityResult from GalleryFilterActivity");
+                if (BookmarkController.isReset(intent)) {
+                    mGalleryQueryParameter.mGalleryContentQuery = new QueryParameter(FotoSql.queryDetail);
+                }
                 mBookmarkController.loadState(intent, null);
+                onFilterChanged(GalleryFilterActivity.getFilter(intent), mDebugPrefix + "#onActivityResult from GalleryFilterActivity");
                 break;
             case ImageDetailActivityViewPager.ACTIVITY_ID:
                 if (resultCode == ImageDetailActivityViewPager.RESULT_CHANGE) {

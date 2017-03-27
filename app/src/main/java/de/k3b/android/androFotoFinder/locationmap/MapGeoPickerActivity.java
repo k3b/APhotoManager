@@ -35,6 +35,7 @@ import android.widget.Toast;
 
 import org.osmdroid.api.IGeoPoint;
 
+import de.k3b.android.androFotoFinder.BookmarkController;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.GalleryFilterActivity;
@@ -69,6 +70,8 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
 
     private GalleryFilterParameter mFilter;
     private GeoUri mGeoUriParser = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
+
+    private BookmarkController mBookmarkController = null;
 
     public static void showActivity(Activity context, SelectedFiles selectedItems) {
         Uri initalUri = null;
@@ -108,6 +111,9 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
         if (Global.debugEnabled && (intent != null)){
             Log.d(Global.LOG_CONTEXT, mDebugPrefix + "onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
         }
+
+        mBookmarkController = new BookmarkController(this);
+        mBookmarkController.loadState(intent,savedInstanceState);
 
         GeoPointDto geoPointFromIntent = getGeoPointDtoFromIntent(intent);
         // no geo: from intent: use last used value
@@ -207,6 +213,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         saveSettings(this);
+        mBookmarkController.saveState(null, savedInstanceState);
 
         if ((savedInstanceState != null) && (this.mFilter != null)) {
             savedInstanceState.putString(STATE_Filter, this.mFilter.toString());
@@ -284,6 +291,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
 
         switch (requestCode) {
             case GalleryFilterActivity.resultID :
+                mBookmarkController.loadState(intent, null);
                 onFilterChanged(GalleryFilterActivity.getFilter(intent));
                 break;
         }
@@ -297,7 +305,8 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
     }
 
     private void openFilter() {
-        GalleryFilterActivity.showActivity(this, this.mFilter, null, null);
+        GalleryFilterActivity.showActivity(this, this.mFilter, null,
+                mBookmarkController.getlastBookmarkFileName());
     }
 
     private GeoPointDto getGeoPointDtoFromIntent(Intent intent) {

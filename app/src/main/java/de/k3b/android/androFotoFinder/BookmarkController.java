@@ -49,6 +49,10 @@ public class BookmarkController {
     /** #76: used as default for save-as */
     private static final String STATE_LastBookmarkFileName = "LastBookmarkFileName";
 
+    /** virtual bookmarkfile to reset is sourounden by this. */
+    private static final String RESET_PREFIX = "<< ";
+    private static final String RESET_SUFFIX = " >>";
+
     private QueryParameter mCurrentFilter = null;
 
     /** #76: used as default for save-as */
@@ -62,6 +66,10 @@ public class BookmarkController {
 
     public BookmarkController(Activity context) {
         mContext = context;
+    }
+
+    public static String getlastBookmarkFileName(Intent intent) {
+        return (intent != null) ? intent.getStringExtra(BookmarkController.STATE_LastBookmarkFileName) : null;
     }
 
     public String getlastBookmarkFileName() {return mLastBookmarkFileName;}
@@ -79,6 +87,14 @@ public class BookmarkController {
         }
     }
 
+    public static boolean isReset(String bookmarkFilname) {
+        return (bookmarkFilname != null) && bookmarkFilname.startsWith(RESET_PREFIX);
+    }
+
+    public static boolean isReset(Intent intent) {
+        return isReset(getlastBookmarkFileName(intent));
+    }
+
     public void loadState(Intent intent, Bundle savedInstanceState) {
         if (savedInstanceState != null) {
             setlastBookmarkFileName(savedInstanceState.getString(BookmarkController.STATE_LastBookmarkFileName, null));
@@ -90,12 +106,18 @@ public class BookmarkController {
     public void onSaveAsQuestion(final String name, final QueryParameter currentFilter) {
         mCurrentFilter = currentFilter;
         Dialogs dlg = new Dialogs() {
-            @Override protected void onDialogResult(String fileName, Object[] parameters) {
+            @Override
+            protected void onDialogResult(String fileName, Object[] parameters) {
                 onSaveAsAnswer(fileName, true);
             }
 
         };
-        dlg.editFileName(mContext, mContext.getString(R.string.bookmark_save_as_menu_title), name, 0);
+
+        if (isReset(name)) {
+            dlg.editFileName(mContext, mContext.getString(R.string.bookmark_save_as_menu_title), null, 0);
+        } else {
+            dlg.editFileName(mContext, mContext.getString(R.string.bookmark_save_as_menu_title), name, 0);
+        }
     }
 
     private void onSaveAsAnswer(final String fileName, boolean askToOverwrite) {
@@ -150,7 +172,7 @@ public class BookmarkController {
     public void onLoadFromQuestion(final IQueryConsumer consumer, final QueryParameter currentFilter) {
         mCurrentFilter = currentFilter;
         List<String> fileNamesPlusReset = new ArrayList<String>();
-        fileNamesPlusReset.add("<< " + mContext.getString(R.string.bookmark_reset) + " >>");
+        fileNamesPlusReset.add(RESET_PREFIX + mContext.getString(R.string.bookmark_reset) + RESET_SUFFIX);
         String[] fileNames = Global.reportDir.list(new FilenameFilter() {
             @Override public boolean accept(File dir, String filename) {
                 return ((filename != null) && (filename.endsWith(Global.reportExt)));
@@ -172,15 +194,14 @@ public class BookmarkController {
 
     public void onLoadFromAnswer(final String fileName, final IQueryConsumer consumer) {
         if (Global.debugEnabled) {
-            Log.d(Global.LOG_CONTEXT, "onLoadFromAnswer(" + fileName +
-                    ")");
+            Log.d(Global.LOG_CONTEXT, "onLoadFromAnswer(" + fileName + ")");
         }
 
         // #76: used as default for save-as
         mLastBookmarkFileName = fileName;
         if (fileName != null) {
-            if (fileName.contains("<")) {
-                consumer.setQuery(null, new QueryParameter(FotoSql.queryDetail));
+            if (isReset(fileName)) {
+                consumer.setQuery(fileName, new QueryParameter(FotoSql.queryDetail));
             } else {
                 File inFile = getFile(fileName);
 

@@ -27,7 +27,6 @@
   <string name="bookmark_delete_answer_format">Удаленные закладки %1$s.</string>
   <string name="bookmark_delete_error_format">Невозможно удалить закладку %1$s.</string>
   <string name="bookmark_delete_question">Удалить закладку?</string>
-  <string name="bookmark_err_not_found_format">В %1$s не найдено.</string>
   <string name="bookmark_file_comment_format">Сформировано на %3$s с \'%1$s\' версии %2$s. Смотри https://github.com/k3b/APhotoManager/wiki/intentap#EXTRA_SQL</string>
   <string name="bookmark_load_from_menu_title">Загрузить закладки из &#8230;</string>
   <string name="bookmark_save_as_menu_title">Сохранить как &#8230;</string>

@@ -27,7 +27,6 @@
   <string name="bookmark_delete_answer_format">Usunięte zakładki %1$s.</string>
   <string name="bookmark_delete_error_format">Nie można usunąć zakladkii %1$s.</string>
   <string name="bookmark_delete_question">Usunąć te zakładkę?</string>
-  <string name="bookmark_err_not_found_format">Nie znaleziono zapytań w %1$s.</string>
   <string name="bookmark_file_comment_format">Wygenerowano na %3$s z \'%1$s\' Wersja %2$s. Zobacz https://github.com/k3b/APhotoManager/wiki/intentap#EXTRA_SQL</string>
   <string name="bookmark_load_from_menu_title">Wczytaj zakładki z &#8230;</string>
   <string name="bookmark_save_as_menu_title">Zapisz zakładkę jako &#8230;</string>
