@@ -71,7 +71,7 @@ public class Directory implements IDirectory {
         parent = null;
     }
 
-    void addChild(IDirectory child) {
+    protected void addChild(IDirectory child) {
         if (this.children == null)
             this.children = new ArrayList<>();
         this.children.add(child);

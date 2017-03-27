@@ -91,8 +91,7 @@ public class LogCat implements Thread.UncaughtExceptionHandler {
             }
             // clear the previous logcat and then write the new one to the file
             try {
-                Process // process = Runtime.getRuntime().exec( "logcat -c");
-                        process = Runtime.getRuntime().exec(cmdline.toString());
+                Runtime.getRuntime().exec(cmdline.toString());
             } catch (IOException e) {
                 e.printStackTrace();
             }

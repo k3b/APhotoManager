@@ -188,7 +188,8 @@ public class TagSql extends FotoSql {
         }
         return index;
     }
-    public static void addWhereTagsIncluded(QueryParameter resultQuery, List<String> includes, boolean withNoTags) {
+    public static void addWhereTagsIncluded(QueryParameter resultQuery, List<String> _includes, boolean withNoTags) {
+        List<String> includes = _includes;
         if ((includes != null) && (includes.size() == 0)) includes = null;
         if (includes != null) {
             String includesWhere = TagConverter.asDbString("%", includes);

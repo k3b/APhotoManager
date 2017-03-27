@@ -23,7 +23,6 @@ import java.util.Date;
 import java.util.List;
 
 import de.k3b.io.DateUtil;
-import de.k3b.io.GeoUtil;
 
 /**
  * Created by k3b on 17.10.2016.

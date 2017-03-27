@@ -36,12 +36,6 @@ public class TransactionLogSql {
     private  static final String COL_command = "command";
     private  static final String COL_commandData = "commandData";
 
-    private long mediaID;
-    private String fullPath;
-    private long modificationDate;
-    private String command;
-    private String commandData;
-
     public static final String CREATE_TABLE = "CREATE TABLE " + TABLE
             + "(" + COL_PK + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + COL_mediaID + " INTEGER, "// " INTEGER REFERENCES " + TimeSliceCategorySql.TABLE + "(_id), "

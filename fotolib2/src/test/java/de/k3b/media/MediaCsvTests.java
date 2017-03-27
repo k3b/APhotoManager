@@ -63,7 +63,7 @@ public class MediaCsvTests {
             return load(data);
         }
 
-        List<IMetaApi> load(String data) {
+        protected List<IMetaApi> load(String data) {
             result.clear();
             super.load(TestUtil.createReader(data), new MediaCsvItem());
             return result;

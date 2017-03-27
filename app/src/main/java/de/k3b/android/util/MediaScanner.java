@@ -64,10 +64,13 @@ import de.k3b.media.MediaUtil;
 public class MediaScanner  {
     private static final String CONTEXT = "MediaScanner.";
 
-    // the DB_XXXX fields are updated by the scanner
+    /* the DB_XXXX fields are updated by the scanner via ExifInterfaceEx
     private static final String DB_DATE_TAKEN = MediaStore.Images.Media.DATE_TAKEN;
     private static final String DB_LONGITUDE = MediaStore.Images.Media.LONGITUDE;
     private static final String DB_LATITUDE = MediaStore.Images.Media.LATITUDE;
+    */
+
+    // the DB_XXXX fields are updated directly by the scanner
     private static final String DB_ORIENTATION = MediaStore.Images.Media.ORIENTATION;
     private static final String DB_DATE_MODIFIED = MediaStore.MediaColumns.DATE_MODIFIED;
     private static final String DB_SIZE = MediaStore.MediaColumns.SIZE;

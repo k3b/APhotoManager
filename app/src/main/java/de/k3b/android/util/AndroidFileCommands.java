@@ -46,7 +46,6 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.transactionlog.TransactionLogSql;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedFiles;
-import de.k3b.database.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
 import de.k3b.io.IDirectory;
@@ -63,14 +62,13 @@ public class AndroidFileCommands extends FileCommands {
     private static final String SETTINGS_KEY_LAST_COPY_TO_PATH = "last_copy_to_path";
     private static final String mDebugPrefix = "AndroidFileCommands.";
     protected Activity mContext;
-    private SelectedItems.Id2FileNameConverter mId2FileNameConverter;
     private AlertDialog mActiveAlert = null;
     private boolean mHasNoMedia = false;
     private MediaScanner mScanner = null;
 
     public AndroidFileCommands() {
         // setLogFilePath(getDefaultLogFile());
-        setContext(null, null);
+        setContext(null);
     }
 
     public void closeAll() {
@@ -440,20 +438,19 @@ public class AndroidFileCommands extends FileCommands {
     protected void onProgress(int itemcount, int size) {
     }
 
-    public AndroidFileCommands setContext(Activity mContext, SelectedItems.Id2FileNameConverter id2FileNameConverter) {
+    public AndroidFileCommands setContext(Activity mContext) {
         this.mContext = mContext;
         if (mContext != null) {
             closeLogFile();
             mScanner = MediaScanner.getInstance(mContext);
         }
-        this.mId2FileNameConverter = id2FileNameConverter;
 
         return this;
     }
 
     @NonNull
     public static AndroidFileCommands createFileCommand(Activity context) {
-        AndroidFileCommands cmd = new AndroidFileCommands().setContext(context, null);
+        AndroidFileCommands cmd = new AndroidFileCommands().setContext(context);
         cmd.setLogFilePath(cmd.getDefaultLogFile());
         cmd.openLogfile();
         return cmd;
@@ -475,10 +472,7 @@ public class AndroidFileCommands extends FileCommands {
             return false;
         }
 
-        if (RecursiveMediaScannerAsyncTask.getBusyScanner() != null) {
-            return false;
-        }
-        return true;
+        return (RecursiveMediaScannerAsyncTask.getBusyScanner() == null);
     }
 
     @Override

@@ -179,7 +179,8 @@ public class MediaDBActivity extends Activity {
             return message;
         }
 
-        private void updateDB(String dbgContext, String path, long xmlLastFileModifyDate, ContentValues dbValues) {
+        private void updateDB(String dbgContext, String _path, long xmlLastFileModifyDate, ContentValues dbValues) {
+            String path = _path;
             if (path != null) {
                 if (!path.contains("%")) {
                     if (MediaUtil.isImage(path, false)) {

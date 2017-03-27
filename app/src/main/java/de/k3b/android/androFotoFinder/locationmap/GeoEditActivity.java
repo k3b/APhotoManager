@@ -61,7 +61,6 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
     private static final String mDebugPrefix = "GeoEdit-";
 
     public static final int RESULT_ID = 524;
-    private static final String DLG_NAVIGATOR_TAG = "GeoEditActivity";
     private static final String SETTINGS_KEY_LAST_URI = "GeoEditActivity-";
     private static final GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
 
@@ -400,7 +399,7 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
                         publishProgress(itemcount, size);
                     }
                 };
-                engine.setContext(GeoEditActivity.this, null);
+                engine.setContext(GeoEditActivity.this);
             }
 
             @Override protected Integer doInBackground(Object... params) {

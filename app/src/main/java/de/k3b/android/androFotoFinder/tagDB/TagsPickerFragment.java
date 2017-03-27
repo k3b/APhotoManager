@@ -800,7 +800,6 @@ public class TagsPickerFragment  extends DialogFragment  {
     }
 
     private void refreshCounter() {
-        final int itemCcount = TagsPickerFragment.this.mDataAdapter.getCount();
-        // TagsPickerFragment.this.setCount(itemCcount);
+        TagsPickerFragment.this.mDataAdapter.getCount();
     }
 }

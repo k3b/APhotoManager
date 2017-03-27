@@ -53,8 +53,6 @@ public class Tag{
     private String name;
     private Tag parent;
 
-    public Tag(){}
-
     public String getName() {
         return name;
     }

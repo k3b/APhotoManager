@@ -788,7 +788,7 @@ public class FotoSql extends FotoSqlBase {
                 ContentValues values = new ContentValues();
                 values.put(FotoSql.SQL_COL_PATH, DELETED_FILE_MARKER);
                 values.put(FotoSql.SQL_COL_EXT_MEDIA_TYPE, 0); // so it will not be shown as image any more
-                int updateCount = exexUpdateImpl(dbgContext + "-a: FotoSql.deleteMedia: ",
+                exexUpdateImpl(dbgContext + "-a: FotoSql.deleteMedia: ",
                         context, values, lastUsedWhereClause, lastSelectionArgs);
 
                 lastUsedWhereClause = FotoSql.SQL_COL_PATH + " is null";

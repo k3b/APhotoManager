@@ -394,7 +394,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
             setResult((mModifyCount == 0) ? RESULT_NOCHANGE : RESULT_CHANGE);
 
-            mFileCommands.setContext(this, mAdapter);
+            mFileCommands.setContext(this);
             mFileCommands.setLogFilePath(mFileCommands.getDefaultLogFile());
 
             if (Global.debugEnabledMemory) {
@@ -628,7 +628,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             mViewPager.setAdapter(null);
             mFileCommands.closeLogFile();
             mFileCommands.closeAll();
-            mFileCommands.setContext(null, mAdapter);
+            mFileCommands.setContext(null);
         }
 
         // kill this instance only if not an other instance is active

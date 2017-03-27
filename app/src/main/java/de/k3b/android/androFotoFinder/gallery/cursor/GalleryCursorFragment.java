@@ -417,7 +417,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     public void onAttach(Activity activity) {
         Global.debugMemory(mDebugPrefix, "onAttach");
         super.onAttach(activity);
-        mFileCommands.setContext(activity, mAdapter);
+        mFileCommands.setContext(activity);
         mFileCommands.setLogFilePath(mFileCommands.getDefaultLogFile());
 
         if (Global.debugEnabledMemory) {
@@ -467,7 +467,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         super.onDetach();
         mGalleryListener = null;
         mDirectoryListener = null;
-        mFileCommands.setContext(null, mAdapter);
+        mFileCommands.setContext(null);
 
         // kill this instance only if not an other instance is active
         if (MoveOrCopyDestDirPicker.sFileCommands == mFileCommands) {
