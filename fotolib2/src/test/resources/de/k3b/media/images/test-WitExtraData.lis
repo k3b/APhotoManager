@@ -1,0 +1,225 @@
+content from exiftool
+
+======== test-WitExtraData (2).jpg
+[ExifTool]      ExifTool Version Number         : 10.30
+[System]        File Name                       : test-WitExtraData (2).jpg
+[System]        Directory                       : .
+[System]        File Size                       : 16 kB
+[System]        File Modification Date/Time     : 2017:03:28 09:25:56+02:00
+[System]        File Access Date/Time           : 2017:03:28 09:27:19+02:00
+[System]        File Creation Date/Time         : 2017:03:28 09:27:19+02:00
+[System]        File Permissions                : rw-rw-rw-
+[File]          File Type                       : JPEG
+[File]          File Type Extension             : jpg
+[File]          MIME Type                       : image/jpeg
+[File]          Exif Byte Order                 : Big-endian (Motorola, MM)
+[File]          Current IPTC Digest             : 859a4fe52bfe0253738bc76013dd61ab
+[File]          Comment                         : Comment
+[File]          Image Width                     : 167
+[File]          Image Height                    : 65
+[File]          Encoding Process                : Baseline DCT, Huffman coding
+[File]          Bits Per Sample                 : 8
+[File]          Color Components                : 3
+[File]          Y Cb Cr Sub Sampling            : YCbCr4:2:0 (2 2)
+[JFIF]          JFIF Version                    : 1.01
+[IFD0]          Image Description               : ImageDescription
+[IFD0]          Make                            : Manufacturer
+[IFD0]          Camera Model Name               : Model
+[IFD0]          X Resolution                    : 96
+[IFD0]          Y Resolution                    : 96
+[IFD0]          Resolution Unit                 : inches
+[IFD0]          Artist                          : Autohor
+[IFD0]          Y Cb Cr Positioning             : Centered
+[IFD0]          Copyright                       : Copyright
+[IFD0]          XP Title                        : XPTitle
+[IFD0]          XP Comment                      : Comment
+[IFD0]          XP Author                       : Autohor
+[IFD0]          XP Keywords                     : Marker1;Marker2
+[IFD0]          XP Subject                      : XPSubject
+[IFD0]          Padding                         : (Binary data 2060 bytes, use -b option to extract)
+[ExifIFD]       Exif Version                    : 0231
+[ExifIFD]       Date/Time Original              : 1962:11:07 09:38:46
+[ExifIFD]       Create Date                     : 1962:11:07 09:38:46
+[ExifIFD]       Components Configuration        : Y, Cb, Cr, -
+[ExifIFD]       Sub Sec Time Original           : 48
+[ExifIFD]       Sub Sec Time Digitized          : 48
+[ExifIFD]       Flashpix Version                : 0100
+[ExifIFD]       Color Space                     : Uncalibrated
+[ExifIFD]       Image Unique ID                 : deadbeefdeadbeef
+[GPS]           GPS Version ID                  : 2.3.0.0
+[GPS]           GPS Latitude                    : 11 deg 0' 0.00"
+[GPS]           GPS Longitude                   : 53 deg 0' 0.00"
+[IPTC]          Coded Character Set             : UTF8
+[IPTC]          Headline                        : Headline
+[IPTC]          Caption-Abstract                : Caption-Abstract
+[IPTC]          Application Record Version      : 4
+[IPTC]          Date Created                    : 1962:11:07
+[IPTC]          Time Created                    : 09:38:46+00:00
+[IPTC]          By-line                         : Autohor
+[IPTC]          Copyright Notice                : Copyright
+[IPTC]          Keywords                        : Marker1, Marker2
+[Photoshop]     IPTC Digest                     : 859a4fe52bfe0253738bc76013dd61ab
+[XMP-x]         XMP Toolkit                     : Image::ExifTool 10.30
+[XMP-rdf]       About                           : uuid:faf5bdd5-ba3d-11da-ad31-d33d75182f1b
+[XMP-microsoft] Camera Serial Number            : camera-serial
+[XMP-microsoft] Date Acquired                   : 1962:11:07 09:38:57.270
+[XMP-microsoft] Last Keyword IPTC               : Marker1, Marker2
+[XMP-microsoft] Last Keyword XMP                : Marker1, Marker2
+[XMP-dc]        Creator                         : Autohor
+[XMP-dc]        Rights                          : Copyright
+[XMP-dc]        Subject                         : Marker1, Marker2
+[XMP-xmp]       Rating                          : 3
+[XMP-xmpMM]     Document ID                     : deadbeefdeadbeef
+[Composite]     Date/Time Created               : 1962:11:07 09:38:46+00:00
+[Composite]     Image Size                      : 167x65
+[Composite]     Megapixels                      : 0.011
+[Composite]     Create Date                     : 1962:11:07 09:38:46.48
+[Composite]     Date/Time Original              : 1962:11:07 09:38:46.48
+[Composite]     GPS Position                    : 11 deg 0' 0.00", 53 deg 0' 0.00"
+======== test-WitExtraData.jpg
+[ExifTool]      ExifTool Version Number         : 10.30
+[System]        File Name                       : test-WitExtraData.jpg
+[System]        Directory                       : .
+[System]        File Size                       : 17 kB
+[System]        File Modification Date/Time     : 2016:12:05 19:55:24+01:00
+[System]        File Access Date/Time           : 2016:12:05 19:55:24+01:00
+[System]        File Creation Date/Time         : 2016:12:05 19:55:24+01:00
+[System]        File Permissions                : rw-rw-rw-
+[File]          File Type                       : JPEG
+[File]          File Type Extension             : jpg
+[File]          MIME Type                       : image/jpeg
+[File]          Exif Byte Order                 : Big-endian (Motorola, MM)
+[File]          Current IPTC Digest             : 859a4fe52bfe0253738bc76013dd61ab
+[File]          Comment                         : Comment
+[File]          Image Width                     : 167
+[File]          Image Height                    : 65
+[File]          Encoding Process                : Baseline DCT, Huffman coding
+[File]          Bits Per Sample                 : 8
+[File]          Color Components                : 3
+[File]          Y Cb Cr Sub Sampling            : YCbCr4:2:0 (2 2)
+[JFIF]          JFIF Version                    : 1.01
+[IFD0]          Image Description               : ImageDescription
+[IFD0]          Make                            : Manufacturer
+[IFD0]          Camera Model Name               : Model
+[IFD0]          X Resolution                    : 96
+[IFD0]          Y Resolution                    : 96
+[IFD0]          Resolution Unit                 : inches
+[IFD0]          Artist                          : Autohor
+[IFD0]          Y Cb Cr Positioning             : Centered
+[IFD0]          Copyright                       : Copyright
+[IFD0]          XP Title                        : XPTitle
+[IFD0]          XP Comment                      : Comment
+[IFD0]          XP Author                       : Autohor
+[IFD0]          XP Keywords                     : Marker1;Marker2
+[IFD0]          XP Subject                      : XPSubject
+[IFD0]          Padding                         : (Binary data 2060 bytes, use -b option to extract)
+[ExifIFD]       Exif Version                    : 0231
+[ExifIFD]       Date/Time Original              : 1962:11:07 09:38:46
+[ExifIFD]       Create Date                     : 1962:11:07 09:38:46
+[ExifIFD]       Components Configuration        : Y, Cb, Cr, -
+[ExifIFD]       Sub Sec Time Original           : 48
+[ExifIFD]       Sub Sec Time Digitized          : 48
+[ExifIFD]       Flashpix Version                : 0100
+[ExifIFD]       Color Space                     : Uncalibrated
+[ExifIFD]       Image Unique ID                 : deadbeefdeadbeef
+[GPS]           GPS Version ID                  : 2.3.0.0
+[GPS]           GPS Latitude Ref                : North
+[GPS]           GPS Longitude Ref               : West
+[IPTC]          Coded Character Set             : UTF8
+[IPTC]          Headline                        : Headline
+[IPTC]          Caption-Abstract                : Caption-Abstract
+[IPTC]          Application Record Version      : 4
+[IPTC]          Date Created                    : 1962:11:07
+[IPTC]          Time Created                    : 09:38:46+00:00
+[IPTC]          By-line                         : Autohor
+[IPTC]          Copyright Notice                : Copyright
+[IPTC]          Keywords                        : Marker1, Marker2
+[Photoshop]     IPTC Digest                     : 859a4fe52bfe0253738bc76013dd61ab
+[XMP-x]         XMP Toolkit                     : Image::ExifTool 10.30
+[XMP-rdf]       About                           : uuid:faf5bdd5-ba3d-11da-ad31-d33d75182f1b
+[XMP-microsoft] Camera Serial Number            : camera-serial
+[XMP-microsoft] Date Acquired                   : 1962:11:07 09:38:57.270
+[XMP-microsoft] Last Keyword IPTC               : Marker1, Marker2
+[XMP-microsoft] Last Keyword XMP                : Marker1, Marker2
+[XMP-dc]        Creator                         : Autohor
+[XMP-dc]        Rights                          : Copyright
+[XMP-dc]        Subject                         : Marker1, Marker2
+[XMP-xmp]       Rating                          : 3
+[XMP-xmpMM]     Document ID                     : deadbeefdeadbeef
+[Composite]     Date/Time Created               : 1962:11:07 09:38:46+00:00
+[Composite]     GPS Latitude                    : 27 deg 49' 7.00" N
+[Composite]     GPS Longitude                   : 15 deg 45' 52.00" W
+[Composite]     GPS Position                    : 27 deg 49' 7.00" N, 15 deg 45' 52.00" W
+[Composite]     Image Size                      : 167x65
+[Composite]     Megapixels                      : 0.011
+[Composite]     Create Date                     : 1962:11:07 09:38:46.48
+[Composite]     Date/Time Original              : 1962:11:07 09:38:46.48
+    2 image files read
+
+-----------------
+content from lib
+
+
+Exif IFD0.:ExifIFD0Directory
+Exif IFD0.Image Description(270)=ImageDescription
+Exif IFD0.Make(271)=Manufacturer
+Exif IFD0.Model(272)=Model
+Exif IFD0.X Resolution(282)=96 dots per inch
+Exif IFD0.Y Resolution(283)=96 dots per inch
+Exif IFD0.Resolution Unit(296)=Inch
+Exif IFD0.Artist(315)=Autohor
+Exif IFD0.YCbCr Positioning(531)=Center of pixel array
+Exif IFD0.Rating(18246)=3
+Exif IFD0.Copyright(33432)=Copyright
+Exif IFD0.Windows XP Title(40091)=XPTitle
+Exif IFD0.Windows XP Comment(40092)=Comment
+Exif IFD0.Windows XP Author(40093)=Autohor
+Exif IFD0.Windows XP Keywords(40094)=Marker1;Marker2
+Exif IFD0.Windows XP Subject(40095)=XPSubject
+Exif IFD0.Padding(59932)=[2060 bytes]
+
+JPEG.:JpegDirectory
+JPEG.Compression Type(-3)=Baseline
+JPEG.Data Precision(0)=8 bits
+JPEG.Image Height(1)=65 pixels
+JPEG.Image Width(3)=167 pixels
+JPEG.Number of Components(5)=3
+JPEG.Component 1(6)=Y component: Quantization table 0, Sampling factors 2 horiz/2 vert
+JPEG.Component 2(7)=Cb component: Quantization table 1, Sampling factors 1 horiz/1 vert
+JPEG.Component 3(8)=Cr component: Quantization table 1, Sampling factors 1 horiz/1 vert
+
+GPS.:GpsDirectory
+GPS.GPS Version ID(0)=2.300
+GPS.GPS Latitude Ref(1)=N
+GPS.GPS Latitude(2)=27° 49' 7"
+GPS.GPS Longitude Ref(3)=W
+GPS.GPS Longitude(4)=-15° 45' 52"
+
+Xmp.:XmpDirectory
+Xmp.XMP Value Count(65535)=21
+Xmp.Rating(4097)=3.0
+Xmp.Subject(8193)=Marker1 Marker2
+
+Photoshop.:PhotoshopDirectory
+Photoshop.Caption Digest(1061)=-123 -102 79 -27 43 -2 2 83 115 -117 -57 96 19 -35 97 -85
+
+JFIF.:JfifDirectory
+JFIF.Version(5)=1.1
+JFIF.Resolution Units(7)=inch
+JFIF.X Resolution(8)=96 dots
+JFIF.Y Resolution(10)=96 dots
+
+IPTC.:IptcDirectory
+IPTC.Coded Character Set(346)=UTF-8
+IPTC.Headline(617)=Headline
+IPTC.Caption/Abstract(632)=Caption-Abstract
+IPTC.Application Record Version(512)=4
+IPTC.Date Created(567)=Wed Nov 07 00:00:00 CET 1962
+IPTC.Time Created(572)=09:38:46+0000
+IPTC.By-line(592)=Autohor
+IPTC.Copyright Notice(628)=Copyright
+IPTC.Keywords(537)=Marker1;Marker2
+
+JpegComment.:JpegCommentDirectory
+JpegComment.JPEG Comment(0)=Comment
+	

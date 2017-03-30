@@ -22,6 +22,40 @@ package de.k3b.media;
 import java.util.Date;
 import java.util.List;
 
+/*
+This is sourcecode of uml diagrams using
+http://plantuml.com/
+notation
+
+pc2android.png
+@startuml
+    title IMetaApi implementation
+    [IMetaApi] --> [MediaContentValues]
+	[IMetaApi] --> [MediaCursor]
+	[IMetaApi] --> [ExifInterfaceEx]
+	[IMetaApi] --> [MediaCsvItem]
+	[MediaDTO] <- [IMetaApi]
+	[IMetaApi] --> [MediaXmpSegment]
+	[IMetaApi] -> [MetaApiWrapper]
+	
+    [MediaContentValues] --> [MediaDB]
+    [MediaCursor] <-- [MediaDB]
+
+    [AndroidFileCommands44] -> [JPG file]
+    [ExifInterfaceEx] <-- [JPG file]
+    [ExifInterfaceEx] --> [JPG file]
+
+    [MediaCsvItem] --> [CSV file]
+    [MediaCsvItem] <-- [CSV file]
+
+	[MediaXmpSegment]  --> [XMP file]
+	[MediaXmpSegment]  <-- [XMP file]
+
+@enduml
+
+
+ */
+
 /**
  * All Properties that are supported by "A Photo Manager".
  *

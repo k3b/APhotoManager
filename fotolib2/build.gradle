@@ -15,6 +15,7 @@ dependencies {
     testCompile "org.mockito:mockito-core:1.9.5"
     compile 'com.github.k3b:k3b-geoHelper:1.1.5'
     compile 'com.adobe.xmp:xmpcore:5.1.2'
+    compile 'com.drewnoakes:metadata-extractor:2.8.1'
 }
 
 // workaround because android-studio does not make the test resources available

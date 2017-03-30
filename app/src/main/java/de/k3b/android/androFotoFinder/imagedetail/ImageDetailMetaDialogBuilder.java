@@ -26,14 +26,7 @@ import android.content.ContentValues;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.drew.imaging.ImageMetadataReader;
-import com.drew.imaging.ImageProcessingException;
-import com.drew.metadata.Directory;
-import com.drew.metadata.Metadata;
-import com.drew.metadata.Tag;
-
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,6 +37,7 @@ import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.util.ExifInterfaceEx;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.FileUtils;
+import de.k3b.media.ImageMetaReader;
 import de.k3b.media.XmpSegment;
 
 /**
@@ -144,45 +138,23 @@ public class ImageDetailMetaDialogBuilder {
 
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (ImageProcessingException e) {
-            e.printStackTrace();
         }
     }
 
     private static String line = "------------------";
-    private static void addExif(StringBuilder builder, File file) throws ImageProcessingException, IOException {
+    private static void addExif(StringBuilder builder, File file) throws IOException {
         if (file.exists()) {
             builder.append(NL).append(file).append(NL).append(NL);
 
-            Metadata metadata = ImageMetadataReader.readMetadata(file);
-            for (Directory directory : metadata.getDirectories()) {
-                builder.append(NL).append(directory).append(NL).append(NL);
-
-                for (Tag tag : directory.getTags()) {
-                    String description = tag.getDescription();
-                    if (description == null)
-                        description = "#" + tag.getTagType();
-
-                    builder.append(tag.getTagName()).append(" : ").append(description).append(NL);
-                }
-            /*
-            //
-            // Each Directory may also contain error messages
-            //
-            if (directory.hasErrors()) {
-                for (String error : directory.getErrors()) {
-                    System.err.println("ERROR: " + error);
-                }
-            }
-            */
-                builder.append(NL).append(line).append(NL);
-            }
+            ImageMetaReader meta = new ImageMetaReader().load(file.getAbsolutePath(),null);
+            builder.append(meta.toString());
+            builder.append(NL).append(line).append(NL);
         } else {
             builder.append(NL).append(file).append(" not found.").append(NL);
         }
     }
 
-    private static void addXmp(StringBuilder builder, File file) throws ImageProcessingException, IOException {
+    private static void addXmp(StringBuilder builder, File file) throws IOException {
         if (file.exists()) {
             XmpSegment meta = new XmpSegment();
             meta.load(file);

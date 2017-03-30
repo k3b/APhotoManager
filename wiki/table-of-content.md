@@ -39,6 +39,7 @@
 	* [de.k3b.extra.FILTER string](intentapi#filter)
 	* [de.k3b.extra.SQL string string](intentapi#EXTRA_SQL)
 	* [de.k3b.extra.SELECTED_ITEMS string](intentapi#SelectedItems)
+	* [de.k3b.extra.SELECTED_ITEMS_PATH string](intentapi#SelectedPaths)
 	* [Internal sql format of .query files](intentapi#sql)
 	
 * [Filter-View](https://github.com/k3b/AndroFotoFinder/wiki/Filter-View)
