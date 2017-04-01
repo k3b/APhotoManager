@@ -18,12 +18,16 @@
  */
 package de.k3b.media;
 
-import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.imaging.jpeg.JpegMetadataReader;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
+import com.drew.metadata.exif.ExifDirectoryBase;
+import com.drew.metadata.exif.ExifIFD0Directory;
+import com.drew.metadata.iptc.IptcDirectory;
+import com.drew.metadata.jpeg.JpegCommentDirectory;
+import com.drew.metadata.xmp.XmpDirectory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,19 +39,27 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 
-import de.k3b.FotoLibGlobal;
-import sun.awt.image.JPEGImageDecoder;
-
 /**
  * com.drewnoakes:metadata-extractor based reader for image meta data files
  * Created by k3b on 27.03.2017.
  */
 
 public class ImageMetaReader implements IMetaApi, Closeable {
-    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+    // public: used as log filter for crash report
+    public  static final String LOG_TAG = "";
+
+    // public: can be changed in settings dialog
+    public  static boolean DEBUG = false;
+
+    private static final Logger logger = LoggerFactory.getLogger(LOG_TAG);
 
     private String mFilename = null;
     private Metadata mMetadata = null;
+    private Directory exifDir;
+    private Directory iptcDir;
+    // private Directory fileDir;
+    private Directory commentDir;
+    private Directory xmpDir;
 
     /**
      * Reads Meta data from the specified file.
@@ -81,33 +93,6 @@ public class ImageMetaReader implements IMetaApi, Closeable {
 
     private static final String NL = "\n";
 
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        for (Directory directory : mMetadata.getDirectories()) {
-            String dirName = "";
-            Directory parent = directory;
-            while (parent != null) {
-                dirName = parent.getName() + "." + dirName;
-                parent = null; // directory.getParent(); requires newer version
-            }
-
-            /*
-            builder.append(NL).append(dirName).append(":")
-                    .append(directory.getClass().getSimpleName()).append(NL);
-            */
-            
-            for (Tag tag : directory.getTags()) {
-                String description = tag.getDescription();
-                if (description == null)
-                    description = "";
-
-                builder.append(dirName).append(tag.getTagName())
-                        .append("(").append(tag.getTagType()).append(")=").append(description).append(NL);
-            }
-        }
-        return builder.toString();
-    }
-
     @Override
     public String getPath() {
         return mFilename;
@@ -125,9 +110,6 @@ public class ImageMetaReader implements IMetaApi, Closeable {
     @Override
     public Date getDateTimeTaken() {
         init(); return null;
-    }
-
-    private void init() {
     }
 
     @Override
@@ -162,7 +144,7 @@ public class ImageMetaReader implements IMetaApi, Closeable {
 
     @Override
     public Double getLongitude() {
-        return null;
+        init(); return null;
     }
 
     /**
@@ -170,7 +152,24 @@ public class ImageMetaReader implements IMetaApi, Closeable {
      */
     @Override
     public String getTitle() {
-        return null;
+        String debugContext = "getTitle";
+        init();
+        /*
+        -XMP-dc:Title < EXIF:XPTitle
+-XMP-dc:Title < iptc:Headline
+*/
+
+        String result = null;
+        //!!! not implemented in  com.drewnoakes:metadata-extractor:2.8.1
+        // if (result == null) result = getString(debugContext, xmpDir, XmpDirectory.TAG_TITLE);
+
+        if (result == null) result = getString(debugContext, exifDir, ExifDirectoryBase.TAG_WIN_TITLE);
+        //=> XPTitle
+
+        if (result == null) result = getString(debugContext, iptcDir, IptcDirectory.TAG_HEADLINE);
+        // => Headline
+
+        return result;
     }
 
     @Override
@@ -183,7 +182,28 @@ public class ImageMetaReader implements IMetaApi, Closeable {
      */
     @Override
     public String getDescription() {
-        return null;
+        String debugContext = "getDescription";
+        init();
+        String result = null;
+
+        if (result == null) result = getString(debugContext, exifDir, ExifDirectoryBase.TAG_WIN_COMMENT);
+        // => Comment
+
+        if (result == null) result = getString(debugContext, exifDir, ExifDirectoryBase.TAG_IMAGE_DESCRIPTION);
+        // => ImageDescription
+
+        //!!! not implemented in  com.drewnoakes:metadata-extractor:2.8.1
+        //!!! if (result == null) result = getString(debugContext, xmpDir, XmpDirectory.TAG_DESCRIPTION);
+
+        if (result == null) result = getString(debugContext, iptcDir, IptcDirectory.TAG_CAPTION);
+        // => Caption-Abstract
+
+        if (result == null) result = getString(debugContext, commentDir, JpegCommentDirectory.TAG_COMMENT);
+        // => Comment
+
+        //!!! not implemented in  com.drewnoakes:metadata-extractor:2.8.1
+        // not supported -XMP-dc:Description < File:Comment
+        return result;
     }
 
     @Override
@@ -196,7 +216,7 @@ public class ImageMetaReader implements IMetaApi, Closeable {
      */
     @Override
     public List<String> getTags() {
-        return null;
+        init(); return null;
     }
 
     @Override
@@ -209,7 +229,7 @@ public class ImageMetaReader implements IMetaApi, Closeable {
      */
     @Override
     public Integer getRating() {
-        return null;
+        init(); return null;
     }
 
     @Override
@@ -220,5 +240,70 @@ public class ImageMetaReader implements IMetaApi, Closeable {
     @Override
     public void close() throws IOException {
 
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        for (Directory directory : mMetadata.getDirectories()) {
+            String dirName = "";
+            Directory parent = directory;
+            while (parent != null) {
+                dirName = parent.getName() + "." + dirName;
+                parent = null; // directory.getParent(); requires newer version
+            }
+
+            /*
+            builder.append(NL).append(dirName).append(":")
+                    .append(directory.getClass().getSimpleName()).append(NL);
+            */
+
+            for (Tag tag : directory.getTags()) {
+                int tagType = tag.getTagType();
+                appendValue(builder, directory, dirName, tagType);
+                builder.append(NL);
+            }
+        }
+        return builder.toString();
+    }
+
+    //--------------- local helpers
+
+    private StringBuilder appendValue(StringBuilder result, Directory directory, String dirName, int tagType) {
+        String tagValue = (directory == null) ? null  : directory.getDescription(tagType);
+        String tagName  = (directory == null) ? "???" : directory.getTagName(tagType);
+        if (tagValue == null)
+            tagValue = "";
+
+        result.append(dirName).append(tagName);
+        if (DEBUG) {
+            result.append("(0x").append( Integer.toHexString(tagType)).append(")");
+        }
+        result.append("=").append(tagValue);
+        return result;
+    }
+
+    private void init() {
+        exifDir = this.mMetadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+        iptcDir = this.mMetadata.getFirstDirectoryOfType(IptcDirectory.class);
+        // fileDir = this.mMetadata.getFirstDirectoryOfType(FileDi.class);
+        xmpDir = this.mMetadata.getFirstDirectoryOfType(XmpDirectory.class);
+        commentDir = this.mMetadata.getFirstDirectoryOfType(JpegCommentDirectory.class);
+
+    }
+
+    private String getString(String debugContext, Directory directory, int tagType) {
+        String result = null;
+        if (directory != null) {
+            result = directory.getDescription(tagType);
+            if (DEBUG) {
+                StringBuilder dbg = new StringBuilder();
+                dbg.append(debugContext).append(":");
+                appendValue(dbg, directory, directory.getName() + ".", tagType);
+                logger.info(dbg.toString());
+            }
+        }
+        if ((result != null) && (result.length() == 0)) return null;
+        return result;
     }
 }

@@ -45,7 +45,7 @@ public class MediaXmpTests {
     public void shouldReadExistingXmpFile() throws IOException {
         TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
         MediaXmpSegment sut = new MediaXmpSegment();
-        InputStream fis = getStream("test-WitExtraData.xmp");
+        InputStream fis = getStream("images/test-WitExtraData.xmp");
         sut = new MediaXmpSegment();
         sut.load(fis);
         fis.close();

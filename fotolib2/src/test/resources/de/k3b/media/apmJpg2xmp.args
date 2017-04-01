@@ -13,6 +13,7 @@
 #               2013/06/12 - PH Additions for the Exif 2.3 for XMP spec
 #               2015/01/12 - PH Avoid copying to non-standard namespaces
 #				2016/10/19 - k3b cloned from exif2xmp.args from exiftool 10.30
+#				2017/04/01 - k3b changed processing prio: microsoft exif extensions XP.. before iptc
 #
 # References:   http://www.metadataworkinggroup.org/specs/
 #
@@ -39,9 +40,11 @@
 # title/description from first non empy exif/iptc field
 -XMP-dc:Title < EXIF:XPTitle
 -XMP-dc:Title < iptc:Headline
--XMP-dc:Description < EXIF:ImageDescription
+
 -XMP-dc:Description < EXIF:XPSubject
--XMP-dc:Description < iptc:Caption-Abstract 
+-XMP-dc:Description < EXIF:ImageDescription
+-XMP-dc:Description < iptc:Caption-Abstract
+-XMP-dc:Description < File:Comment
 
 # -XMP-exif:ImageUniqueID < EXIF:ImageUniqueID
 # XMP-xmpMM:DocumentID
