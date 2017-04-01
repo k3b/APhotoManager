@@ -85,10 +85,8 @@ public class TagRepository {
         }
         TagRepository.sInstance = new TagRepository(newFile);
 
-        if (old != null) {
-            if (TagRepository.sInstance.includeChildTags(null, old) > 0) {
-                TagRepository.sInstance.save();
-            }
+        if ((old != null) && (TagRepository.sInstance.includeChildTags(null, old) > 0)) {
+            TagRepository.sInstance.save();
         }
     }
 
@@ -315,8 +313,9 @@ public class TagRepository {
     }
 
     private int findParentIndexByIndent(List<Integer> indents, int index, int indent) {
-        while ((index >= 0) && (indents.get(index) >= indent)) index--;
-        return index;
+        int i = index;
+        while ((i >= 0) && (indents.get(i) >= indent)) i--;
+        return i;
     }
 
     private int getIndent(String rawLine) {

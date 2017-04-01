@@ -38,9 +38,9 @@ public class TransactionLogParser {
     private IMediaTransactionLog lastLog = null;
 
     public static class Status {
-        MediaDTO dto = new MediaDTO();
-        List<String> filenames = new ArrayList<String>();
-        boolean isDelete = false;
+        public MediaDTO dto = new MediaDTO();
+        public List<String> filenames = new ArrayList<String>();
+        public boolean isDelete = false;
         private long lastId=-1;
         private String path;
 

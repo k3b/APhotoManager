@@ -603,10 +603,6 @@ public class LocationMapFragment extends DialogFragment {
     /** all marker clicks will be delegated to LocationMapFragment#onFotoMarkerClicked() */
     private class FotoMarker extends ClickableIconOverlay<Object> {
 
-        public FotoMarker() {
-            super();
-        }
-
         /**
          * @return true if click was handeled.
          */

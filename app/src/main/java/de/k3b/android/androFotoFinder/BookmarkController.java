@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@ package de.k3b.android.androFotoFinder;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -29,7 +31,11 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
+import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
@@ -39,28 +45,78 @@ import de.k3b.io.FileUtils;
  * Created by k3b on 07.10.2015.
  */
 public class BookmarkController {
+    /** #76: used as default for save-as */
+    private static final String STATE_LastBookmarkFileName = "LastBookmarkFileName";
+
+    /** virtual bookmarkfile to reset is sourounden by this. */
+    private static final String RESET_PREFIX = "<< ";
+    private static final String RESET_SUFFIX = " >>";
+
     private QueryParameter mCurrentFilter = null;
+
+    /** #76: used as default for save-as */
+    private String mLastBookmarkFileName = null;
 
     private final Activity mContext;
 
     public interface IQueryConsumer {
-        void setQuery(QueryParameter newQuery);
+        void setQuery(String fileName, QueryParameter newQuery);
     }
 
     public BookmarkController(Activity context) {
-
         mContext = context;
+    }
+
+    public static String getlastBookmarkFileName(Intent intent) {
+        return (intent != null) ? intent.getStringExtra(BookmarkController.STATE_LastBookmarkFileName) : null;
+    }
+
+    public String getlastBookmarkFileName() {return mLastBookmarkFileName;}
+    public void setlastBookmarkFileName(String lastBookmarkFileName) {mLastBookmarkFileName = lastBookmarkFileName;}
+
+    public void saveState(Intent intent, Bundle savedInstanceState) {
+        saveState(getlastBookmarkFileName(), intent, savedInstanceState);
+    }
+
+    public static void saveState(String lastBookmarkFileName, Intent intent, Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            savedInstanceState.putString(BookmarkController.STATE_LastBookmarkFileName, lastBookmarkFileName);
+        } else if (intent != null) {
+            intent.putExtra(BookmarkController.STATE_LastBookmarkFileName, lastBookmarkFileName);
+        }
+    }
+
+    public static boolean isReset(String bookmarkFilname) {
+        return (bookmarkFilname != null) && bookmarkFilname.startsWith(RESET_PREFIX);
+    }
+
+    public static boolean isReset(Intent intent) {
+        return isReset(getlastBookmarkFileName(intent));
+    }
+
+    public void loadState(Intent intent, Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            setlastBookmarkFileName(savedInstanceState.getString(BookmarkController.STATE_LastBookmarkFileName, null));
+        } else if (intent != null) {
+            setlastBookmarkFileName(intent.getStringExtra(BookmarkController.STATE_LastBookmarkFileName));
+        }
     }
 
     public void onSaveAsQuestion(final String name, final QueryParameter currentFilter) {
         mCurrentFilter = currentFilter;
         Dialogs dlg = new Dialogs() {
-            @Override protected void onDialogResult(String fileName, Object[] parameters) {
+            @Override
+            protected void onDialogResult(String fileName, Object[] parameters) {
                 onSaveAsAnswer(fileName, true);
             }
 
         };
-        dlg.editFileName(mContext, mContext.getString(R.string.bookmark_save_as_menu_title), name, 0);
+
+        if (isReset(name)) {
+            dlg.editFileName(mContext, mContext.getString(R.string.bookmark_save_as_menu_title), null, 0);
+        } else {
+            dlg.editFileName(mContext, mContext.getString(R.string.bookmark_save_as_menu_title), name, 0);
+        }
     }
 
     private void onSaveAsAnswer(final String fileName, boolean askToOverwrite) {
@@ -70,8 +126,7 @@ public class BookmarkController {
         }
         if (fileName != null) {
             Global.reportDir.mkdirs();
-            File outFile = new File(Global.reportDir, fileName + Global.reportExt);
-
+            File outFile = getFile(fileName);
             if (askToOverwrite && outFile.exists()) {
                 Dialogs dialog = new Dialogs() {
                     @Override
@@ -103,8 +158,20 @@ public class BookmarkController {
         }
     }
 
+    @NonNull
+    private File getFile(String fileName) {
+        String fileNameWithExt = fileName;
+
+        if (!fileNameWithExt.contains(".")) {
+            fileNameWithExt += Global.reportExt;
+        }
+        return new File(Global.reportDir, fileNameWithExt);
+    }
+
     public void onLoadFromQuestion(final IQueryConsumer consumer, final QueryParameter currentFilter) {
         mCurrentFilter = currentFilter;
+        List<String> fileNamesPlusReset = new ArrayList<String>();
+        fileNamesPlusReset.add(RESET_PREFIX + mContext.getString(R.string.bookmark_reset) + RESET_SUFFIX);
         String[] fileNames = Global.reportDir.list(new FilenameFilter() {
             @Override public boolean accept(File dir, String filename) {
                 return ((filename != null) && (filename.endsWith(Global.reportExt)));
@@ -112,58 +179,61 @@ public class BookmarkController {
         });
 
         if ((fileNames != null) && (fileNames.length > 0)) {
-            Dialogs dlg = new Dialogs() {
-                @Override protected boolean onContextMenuItemClick(int menuItemId, int itemIndex, String[] items) {
-                    return onBookmarkMenuItemClick(menuItemId, itemIndex, items);
-                }
-
-                @Override protected void onDialogResult(String fileName, Object[] parameters) {onLoadFromAnswer(fileName, consumer);}
-            };
-            dlg.pickFromStrings(mContext, mContext.getString(R.string.bookmark_load_from_menu_title), R.menu.menu_bookmark_context, fileNames);
-        } else {
-            Toast.makeText(mContext,
-                    mContext.getString(R.string.bookmark_err_not_found_format, Global.reportDir.getAbsoluteFile() + "/*" + Global.reportExt),
-                    Toast.LENGTH_LONG).show();
+            fileNamesPlusReset.addAll(Arrays.asList(fileNames));
         }
+        Dialogs dlg = new Dialogs() {
+            @Override protected boolean onContextMenuItemClick(int menuItemId, int itemIndex, String[] items) {
+                return onBookmarkMenuItemClick(menuItemId, itemIndex, items);
+            }
+
+            @Override protected void onDialogResult(String fileName, Object[] parameters) {onLoadFromAnswer(fileName, consumer);}
+        };
+        dlg.pickFromStrings(mContext, mContext.getString(R.string.bookmark_load_from_menu_title), R.menu.menu_bookmark_context, fileNamesPlusReset);
     }
 
-    private void onLoadFromAnswer(final String fileName, final IQueryConsumer consumer) {
+    public void onLoadFromAnswer(final String fileName, final IQueryConsumer consumer) {
         if (Global.debugEnabled) {
-            Log.d(Global.LOG_CONTEXT, "onSaveAsAnswer(" + fileName +
-                    ")");
+            Log.d(Global.LOG_CONTEXT, "onLoadFromAnswer(" + fileName + ")");
         }
-        if (fileName != null) {
-            File inFile = new File(Global.reportDir, fileName);
 
-            String sql;
-            try {
-                sql = FileUtils.readFile(inFile);
-                QueryParameter query = QueryParameter.parse(sql);
-                consumer.setQuery(query);
-            } catch (Exception e) {
-                Toast.makeText(mContext,
-                        e.getMessage(),
-                        Toast.LENGTH_LONG).show();
-                Log.e(Global.LOG_CONTEXT, "Error load query file '" + inFile.getAbsolutePath() + "'", e);
-                e.printStackTrace();
+        // #76: used as default for save-as
+        mLastBookmarkFileName = fileName;
+        if (fileName != null) {
+            if (isReset(fileName)) {
+                consumer.setQuery(fileName, new QueryParameter(FotoSql.queryDetail));
+            } else {
+                File inFile = getFile(fileName);
+
+                String sql;
+                try {
+                    sql = FileUtils.readFile(inFile);
+                    QueryParameter query = QueryParameter.parse(sql);
+                    consumer.setQuery(fileName, query);
+                } catch (Exception e) {
+                    Toast.makeText(mContext,
+                            e.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                    Log.e(Global.LOG_CONTEXT, "Error load query file '" + inFile.getAbsolutePath() + "'", e);
+                    e.printStackTrace();
+                }
             }
         }
     }
 
     protected boolean onBookmarkMenuItemClick(int menuItemId, int itemIndex, String[] items) {
-        if ((itemIndex >= 0) && (itemIndex < items.length)) {
+        if ((itemIndex > 0) && (itemIndex < items.length)) {
             switch (menuItemId) {
                 case R.id.action_save_as:
-                    onSaveAsQuestion("", mCurrentFilter); return true;
+                    onSaveAsQuestion(mLastBookmarkFileName, mCurrentFilter); return true;
                 case R.id.action_edit:
-                    return onEdit(new File(Global.reportDir, items[itemIndex]));
+                    return onEdit(getFile(items[itemIndex]));
                 case R.id.menu_item_rename:
                     return onRenameQuestion(items[itemIndex], items[itemIndex]);
                 case R.id.cmd_delete:
                     return onDeleteQuestion(itemIndex, items);
                 default:break;
             }
-        }
+        } // ignore index 0 = reset.
         return false;
     }
 
@@ -196,8 +266,8 @@ public class BookmarkController {
 
     private void onRenameAnswer(String newFileName, String oldName) {
         if ((newFileName != null) || (newFileName.length() > 0)) { //  || (oldName.compareToIgnoreCase(newFileName) == 0)) {
-            File from = new File(Global.reportDir, oldName);
-            File to = new File(Global.reportDir, newFileName + Global.reportExt);
+            File from = getFile(oldName);
+            File to = getFile(newFileName);
 
             if ((from.getAbsolutePath().compareToIgnoreCase(to.getAbsolutePath()) != 0) && !to.exists()) {
                 from.renameTo(to);
@@ -209,7 +279,7 @@ public class BookmarkController {
         Dialogs dlg = new Dialogs() {
             @Override protected void onDialogResult(String result, Object[] parameters) {
                 if (result != null) {
-                    onDeleteAnswer(new File(Global.reportDir, items[itemIndex]), itemIndex, items);
+                    onDeleteAnswer(getFile(items[itemIndex]), itemIndex, items);
                 }
             }
         };

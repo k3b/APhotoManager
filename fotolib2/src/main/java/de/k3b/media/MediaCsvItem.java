@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2016 by k3b.
+ * Copyright (c) 2016 - 2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
     private int colRating;
 
     /** there are cols 0..maxColumnIndex */
-    int maxColumnIndex;
+    public int maxColumnIndex;
 
     @Override
     public void setHeader(List<String> header) {

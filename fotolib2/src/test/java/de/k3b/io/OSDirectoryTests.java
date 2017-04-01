@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ import java.util.ArrayList;
  * Created by k3b on 04.08.2015.
  */
 public class OSDirectoryTests {
-    OSDirectory mRoot;
+    private OSDirectory mRoot;
 
     @Before
     public void setup() {

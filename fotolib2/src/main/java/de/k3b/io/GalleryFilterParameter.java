@@ -49,7 +49,7 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
     private boolean withNoTags = false;
 
     /** one of the VISIBILITY_XXXX values */
-    int visibility = VISIBILITY_DEFAULT;
+    private int visibility = VISIBILITY_DEFAULT;
 
     private int mSortId = SORT_BY_NONE;
     private boolean mSortAscending = false;

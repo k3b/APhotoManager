@@ -44,6 +44,7 @@ import java.util.Map;
 import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.util.DBUtils;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedFiles;
 import de.k3b.database.SelectedItems;
@@ -126,7 +127,7 @@ public class FotoSql extends FotoSqlBase {
     private static final String FILTER_EXPR_DATE_MAX = SQL_COL_DATE_TAKEN + " < ?";
     private static final String FILTER_EXPR_DATE_MIN = SQL_COL_DATE_TAKEN + " >= ?";
     public static final String SQL_COL_PATH = MediaStore.Images.Media.DATA;
-    protected static final String FILTER_EXPR_PATH_LIKE = "(" + SQL_COL_PATH + " like ?) ";
+    protected static final String FILTER_EXPR_PATH_LIKE = "(" + SQL_COL_PATH + " like ?)";
 
     // same format as dir. i.e. description='/2014/12/24/' or '/mnt/sdcard/pictures/'
     public static final String SQL_EXPR_DAY = "strftime('/%Y/%m/%d/', " + SQL_COL_DATE_TAKEN + " /1000, 'unixepoch', 'localtime')";
@@ -140,6 +141,7 @@ public class FotoSql extends FotoSqlBase {
                     "max(" + SQL_COL_GPS + ") AS " + SQL_COL_GPS,
                     "max(" + SQL_COL_PATH + ") AS " + SQL_COL_PATH)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
+            .addWhere(FILTER_EXPR_PRIVATE_PUBLIC)
             .addGroupBy(SQL_EXPR_DAY)
             .addOrderBy(SQL_EXPR_DAY);
 
@@ -154,6 +156,7 @@ public class FotoSql extends FotoSqlBase {
                     // "'(" + SQL_EXPR_FOLDER + " = ''' || " + SQL_EXPR_FOLDER + " || ''')'"
                     "max(" + SQL_COL_GPS + ") AS " + SQL_COL_GPS)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
+            .addWhere(FILTER_EXPR_PRIVATE_PUBLIC)
             .addGroupBy(SQL_EXPR_FOLDER)
             .addOrderBy(SQL_EXPR_FOLDER);
 
@@ -184,7 +187,9 @@ public class FotoSql extends FotoSqlBase {
 
     /* image entries may not have DISPLAY_NAME which is essential for calculating the item-s folder. */
     public static final QueryParameter queryGetMissingDisplayNames = new QueryParameter(queryChangePath)
-            .addWhere(MediaStore.MediaColumns.DISPLAY_NAME + " is null");
+            .addWhere(MediaStore.MediaColumns.DISPLAY_NAME + " is null")
+            .addWhere(FILTER_EXPR_PRIVATE_PUBLIC)
+            ;
 
     // the bigger the smaller the area
     private static final double GROUPFACTOR_FOR_Z0 = 0.025;
@@ -231,6 +236,7 @@ public class FotoSql extends FotoSqlBase {
                         SQL_EXPR_LON + " AS " + SQL_COL_LON,
                         "count(*) AS " + SQL_COL_COUNT)
                 .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
+                .addWhere(FILTER_EXPR_PRIVATE_PUBLIC)
                 .addGroupBy(SQL_EXPR_LAT, SQL_EXPR_LON)
                 .addOrderBy(SQL_EXPR_LAT, SQL_EXPR_LON);
 
@@ -239,7 +245,7 @@ public class FotoSql extends FotoSqlBase {
 
     public static final String[] DEFAULT_GALLERY_COLUMNS = new String[]{SQL_COL_PK,
             SQL_COL_PATH + " AS " + SQL_COL_DISPLAY_TEXT,
-            "0 AS " + SQL_COL_COUNT,
+            // "0 AS " + SQL_COL_COUNT,
             SQL_COL_MAX_WITH + " AS " + SQL_COL_SIZE,
             SQL_COL_GPS,
             SQL_COL_PATH};
@@ -256,7 +262,7 @@ public class FotoSql extends FotoSqlBase {
             .addColumn(
                     SQL_COL_PK,
                     // SQL_COL_PATH + " AS " + SQL_COL_DISPLAY_TEXT,
-                    "0 AS " + SQL_COL_COUNT,
+                    // "0 AS " + SQL_COL_COUNT,
                     SQL_COL_LAT, SQL_COL_LON)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
             ;
@@ -522,7 +528,7 @@ public class FotoSql extends FotoSqlBase {
         try {
             c = createCursorForQuery("execGetFotoPath", context, uriWithID.toString(), null, null, null, FotoSql.SQL_COL_PATH);
             if (c.moveToFirst()) {
-                return c.getString(c.getColumnIndex(FotoSql.SQL_COL_PATH));
+                return DBUtils.getString(c,FotoSql.SQL_COL_PATH, null);
             }
         } catch (Exception ex) {
             Log.e(Global.LOG_CONTEXT, "FotoSql.execGetFotoPath() Cannot get path from " + uriWithID, ex);
@@ -773,6 +779,7 @@ public class FotoSql extends FotoSqlBase {
      */
     public static int deleteMedia(String dbgContext, Context context, String where, String[] selectionArgs, boolean preventDeleteImageFile)
     {
+        String[] lastSelectionArgs = selectionArgs;
         String lastUsedWhereClause = where;
         int delCount = 0;
         try {
@@ -781,33 +788,33 @@ public class FotoSql extends FotoSqlBase {
                 ContentValues values = new ContentValues();
                 values.put(FotoSql.SQL_COL_PATH, DELETED_FILE_MARKER);
                 values.put(FotoSql.SQL_COL_EXT_MEDIA_TYPE, 0); // so it will not be shown as image any more
-                int updateCount = exexUpdateImpl(dbgContext + "-a: FotoSql.deleteMedia: ",
-                        context, values, lastUsedWhereClause, selectionArgs);
+                exexUpdateImpl(dbgContext + "-a: FotoSql.deleteMedia: ",
+                        context, values, lastUsedWhereClause, lastSelectionArgs);
 
                 lastUsedWhereClause = FotoSql.SQL_COL_PATH + " is null";
-                selectionArgs = null;
+                lastSelectionArgs = null;
                 delCount = context.getContentResolver()
-                        .delete(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, lastUsedWhereClause, selectionArgs);
+                        .delete(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, lastUsedWhereClause, lastSelectionArgs);
                 if (Global.debugEnabledSql) {
                     Log.i(Global.LOG_CONTEXT, dbgContext + "-b: FotoSql.deleteMedia delete\n" +
                             QueryParameter.toString(null, null, SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
-                            lastUsedWhereClause, selectionArgs, null, delCount));
+                            lastUsedWhereClause, lastSelectionArgs, null, delCount));
                 }
             } else {
                 delCount = context.getContentResolver()
-                        .delete(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, lastUsedWhereClause, selectionArgs);
+                        .delete(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, lastUsedWhereClause, lastSelectionArgs);
                 if (Global.debugEnabledSql) {
                     Log.i(Global.LOG_CONTEXT, dbgContext +": FotoSql.deleteMedia\ndelete " +
                             QueryParameter.toString(null, null,
                                     SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
-                                    lastUsedWhereClause, selectionArgs, null, delCount));
+                                    lastUsedWhereClause, lastSelectionArgs, null, delCount));
                 }
             }
         } catch (Exception ex) {
             // null pointer exception when delete matches not items??
             final String msg = dbgContext + ": Exception in FotoSql.deleteMedia:\n" +
                     QueryParameter.toString(null, null, SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
-                    lastUsedWhereClause, selectionArgs, null, -1)
+                    lastUsedWhereClause, lastSelectionArgs, null, -1)
                     + " : " + ex.getMessage();
             Log.e(Global.LOG_CONTEXT, msg, ex);
 
@@ -903,7 +910,8 @@ public class FotoSql extends FotoSqlBase {
 
     }
 
-    protected static String getFilterExpressionVisibility(int visibility) {
+    protected static String getFilterExpressionVisibility(int _visibility) {
+        int visibility = _visibility;
         // add visibility column only if not included yet
         if (visibility == IGalleryFilter.VISIBILITY_DEFAULT) {
             visibility = (FotoLibGlobal.visibilityShowPrivateByDefault)
@@ -928,7 +936,7 @@ public class FotoSql extends FotoSqlBase {
             parameters.addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME);
         }
         String sqlWhere = parameters.toAndroidWhere();
-        if ((sqlWhere == null) || !sqlWhere.contains(SQL_COL_EXT_MEDIA_TYPE)) {
+        if ((sqlWhere == null) || (parameters.toFrom().contains(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME) && !sqlWhere.contains(SQL_COL_EXT_MEDIA_TYPE))) {
            parameters.addWhere(getFilterExpressionVisibility(visibility));
         }
 

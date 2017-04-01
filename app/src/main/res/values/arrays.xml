@@ -2,6 +2,7 @@
 <resources>
     <string-array name="pref_locale_names" translatable="false">
         <item>@string/settings_locale_os_language</item>
+        <item>العربية (Arabic)</item> 
         <item>Deutsch (German)</item>
         <item>English</item>
         <item>Espanol (Spanish)</item>
@@ -13,10 +14,12 @@
         <item>Português, Brasil (Portuguese)</item>
         <item>Român (Romanian)</item>
         <item>Русский (Russian)</item>
+		<item>Türk (Turkish)</item>
         <item>(For Translators)</item>
     </string-array>
     <string-array name="pref_locale_values" translatable="false">
         <item></item>
+        <item>ar</item>
         <item>de</item>
         <item>en</item>
         <item>es</item>
@@ -28,6 +31,7 @@
         <item>pt-BR</item>
         <item>ro</item>
         <item>ru</item>
+        <item>tr</item>
         <item>zz</item>
     </string-array>
 </resources>

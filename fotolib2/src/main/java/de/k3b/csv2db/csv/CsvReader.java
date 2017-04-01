@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -40,8 +40,6 @@ public class CsvReader {
 
 	private char fieldDelimiter = 0;
 
-	private char fieldSurrounder = 0; // != 0: look for matching -"- to allow multiline fields
-
 	private Reader reader;
 
 	// csv file source line number for error messages. (lineNumber >  recordNumber) if there is a record with multiline data.
@@ -57,7 +55,9 @@ public class CsvReader {
 	public String[] readLine() {
 		Vector<String> result = new Vector<String>();
 		StringBuffer content = new StringBuffer();
-		this.fieldSurrounder = 0;
+
+		// != 0: look for matching -"- to allow multiline fields
+		int fieldSurrounder = 0;
 		
 		try {
 			// this.reader = new Reader(getClass().getResourceAsStream("/data.csv"));
@@ -66,12 +66,10 @@ public class CsvReader {
 			{
 				if (ch== CsvItem.DEFAULT_CHAR_LINE_DELIMITER) this.lineNumber++;
 				
-				if (this.fieldSurrounder == 0) {
-					if (fieldDelimiter == 0)
-					{
+				if (fieldSurrounder == 0) {
+					if ((fieldDelimiter == 0) && POSSIBLE_DELIMITER_CHARS.indexOf(ch) >= 0) {
 						// fieldDelimiter unknown: infer
-						if (POSSIBLE_DELIMITER_CHARS.indexOf(ch) >= 0)
-							fieldDelimiter = (char) ch;
+ 						fieldDelimiter = (char) ch;
 					}
 					if (ch == fieldDelimiter) {
 						result.addElement(getStringWithoutDelimiters(content));
@@ -85,13 +83,13 @@ public class CsvReader {
 					}
 					
 					if (ch == CsvItem.CHAR_FIELD_SURROUNDER)
-						this.fieldSurrounder = (char) ch; // start -"- area
+						fieldSurrounder = (char) ch; // start -"- area
 				} else {
 					// waiting for end--"-
 					if (ch != CHAR_IGNORE){
 						content.append((char) ch);
-						if (ch == this.fieldSurrounder)
-							this.fieldSurrounder = 0;
+						if (ch == fieldSurrounder)
+							fieldSurrounder = 0;
 					}
 				}
 			}

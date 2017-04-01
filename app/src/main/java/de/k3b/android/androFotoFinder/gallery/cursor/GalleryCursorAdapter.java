@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -33,8 +33,8 @@ import android.widget.TextView;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.Global;
-import de.k3b.android.androFotoFinder.OnGalleryInteractionListener;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.util.DBUtils;
 import de.k3b.database.SelectedItems;
 
 /**
@@ -111,23 +111,27 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
     public void bindView(View view, Context context, Cursor cursor) {
         final GridCellViewHolder holder = (GridCellViewHolder) view.getTag();
 
-        long count = cursor.getLong(cursor.getColumnIndex(FotoSql.SQL_COL_COUNT));
-        boolean gps = !cursor.isNull(cursor.getColumnIndex(FotoSql.SQL_COL_GPS));
+        long count = DBUtils.getLong(cursor, FotoSql.SQL_COL_COUNT, 0);
+        boolean gps = !DBUtils.isNull(cursor,FotoSql.SQL_COL_GPS,true);
 
-        final int columnIndexWhereParam = cursor.getColumnIndex(FotoSql.SQL_COL_WHERE_PARAM);
-        holder.filter =  (columnIndexWhereParam >= 0) ? cursor.getString(columnIndexWhereParam) : null;
+        holder.filter = DBUtils.getString(cursor, FotoSql.SQL_COL_WHERE_PARAM, null);
 
-        String description = cursor.getString(cursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT));
-        String uri = cursor.getString(cursor.getColumnIndex(FotoSql.SQL_COL_PATH));
-        long imageID = cursor.getLong(cursor.getColumnIndex(FotoSql.SQL_COL_PK));
+        String description = DBUtils.getString(cursor, FotoSql.SQL_COL_DISPLAY_TEXT, "");
+        String uri = DBUtils.getString(cursor, FotoSql.SQL_COL_PATH, null);
+        long imageID = DBUtils.getLong(cursor, FotoSql.SQL_COL_PK, 0);
         if (count > 1) description += " (" + count + ")";
         if (gps) description += "#";
         holder.description.setText(description);
         holder.icon.setVisibility(((mSelectedItems != null) && (mSelectedItems.contains(imageID))) ? View.VISIBLE : View.GONE);
         holder.imageID = imageID;
 
-        ThumbNailUtils.getThumb(uri, holder.image);
-        if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, mDebugPrefix + "bindView for " + holder);
+        if (uri != null) {
+            ThumbNailUtils.getThumb(uri, holder.image);
+            if (Global.debugEnabledViewItem)
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "bindView for " + holder);
+        } else {
+            Log.w(Global.LOG_CONTEXT, mDebugPrefix + "bindView for " + holder + ": no uri found in col " + FotoSql.SQL_COL_PATH);
+        }
     }
 
     @Override
@@ -142,6 +146,7 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
 
     /** data belonging to gridview element */
     static class GridCellViewHolder {
+        /** used to create a debug-instance name. +=1 for every new instance */
         private static int lastInstanceNo = 0;
         private final String debugPrefix;
 
@@ -181,10 +186,7 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
 
     public String getFullFilePath(int position) {
         Cursor cursor = getCursorAt(position);
-        if (cursor != null) {
-            return cursor.getString(cursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT));
-        }
-        return null;
+        return DBUtils.getString(cursor,FotoSql.SQL_COL_DISPLAY_TEXT, null);
     }
 
     /** internal helper. return null if position is not available */
@@ -195,10 +197,7 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
     /** translates offset in adapter to id of image */
     public long getImageId(int position) {
         Cursor cursor = getCursorAt(position);
-        if (cursor != null) {
-            return cursor.getLong(cursor.getColumnIndex(FotoSql.SQL_COL_PK));
-        }
-        return 0;
+        return DBUtils.getLong(cursor, FotoSql.SQL_COL_PK, 0);
     }
 
 }

@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -47,9 +47,10 @@ public class SelectedItems extends java.util.TreeSet<Long> implements Set<Long> 
     }
 
     public static <T> String toString(Iterator<T> iter, int intMaxCount) {
+        int i = intMaxCount;
         StringBuilder result = new StringBuilder();
         boolean mustAddDelimiter = false;
-        while(iter.hasNext() && (--intMaxCount >= 0)) {
+        while(iter.hasNext() && (--i >= 0)) {
             if (mustAddDelimiter) {
                 result.append(DELIMITER);
             }

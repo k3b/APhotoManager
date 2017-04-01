@@ -27,7 +27,6 @@
 	<string name="bookmark_delete_answer_format">Bladwijzer %1$s verwijderd.</string>
 	<string name="bookmark_delete_error_format">Kan bladwizer %1$s niet verwijderen.</string>
 	<string name="bookmark_delete_question">Deze bladwijzer verwijderen?</string>
-	<string name="bookmark_err_not_found_format">Geen bladwijzers gevonden in %1$s.</string>
 	<string name="bookmark_file_comment_format">Gegenereerd op %3$s met \'%1$s\' versie %2$s. Meer informatie op https://github.com/k3b/AndroFotoFinder/wiki/intentap#sql</string>
 	<string name="bookmark_load_from_menu_title">Bladwijzer laden uit &#8230;</string>
 	<string name="bookmark_save_as_menu_title">Bladwijzer opslaan als &#8230;</string>

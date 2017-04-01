@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -66,10 +66,8 @@ public class FileCommands implements  Cloneable {
             openLogfile();
             onPreProcess("delete", paths, null, OP_DELETE);
             for (String path : paths) {
-                if (path != null) {
-                    if (deleteFileWithSidecar(new File(path))) {
+                if ((path != null) && deleteFileWithSidecar(new File(path))) {
                         result++;
-                    }
                 }
             }
             onPostProcess("delete", paths, null, result, paths.length, OP_DELETE);
@@ -281,14 +279,13 @@ public class FileCommands implements  Cloneable {
         // #61 cannot move between different mountpoints/devices/partitions. do Copy+Delete instead
         if (source.exists() && source.isFile() && source.canRead()
                 && source.canWrite() // to delete after success
-                && !dest.exists()) {
-            if (osFileCopy(dest, source)) {
-                if (osDeleteFile(source)) {
-                    return true; // move: copy + delete(source) : success
-                } else {
-                    // cannot delete souce: undo copy
-                    osDeleteFile(dest);
-                }
+                && !dest.exists()
+                && osFileCopy(dest, source)) {
+            if (osDeleteFile(source)) {
+                return true; // move: copy + delete(source) : success
+            } else {
+                // cannot delete souce: undo copy
+                osDeleteFile(dest);
             }
         }
         return false;

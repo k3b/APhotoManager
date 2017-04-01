@@ -39,11 +39,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION_1_TransactionLog = 1;
 
     public static final int DATABASE_VERSION = DatabaseHelper.DATABASE_VERSION_1_TransactionLog;
-    private final Context createContext;
 
     public DatabaseHelper(final Context context, final String databaseName) {
         super(context, databaseName, null, DatabaseHelper.DATABASE_VERSION);
-        this.createContext = context;
     }
 
     /**

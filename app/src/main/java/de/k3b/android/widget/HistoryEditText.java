@@ -104,7 +104,7 @@ public class HistoryEditText {
             return asList(history);
         }
 
-        void saveHistory(SharedPreferences sharedPref, SharedPreferences.Editor edit) {
+        protected void saveHistory(SharedPreferences sharedPref, SharedPreferences.Editor edit) {
             List<String> history = getHistory(sharedPref);
             history = include(history, mEditor.getText().toString().trim());
             String result = toString(history);

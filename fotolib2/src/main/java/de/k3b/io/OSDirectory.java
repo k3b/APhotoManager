@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -51,8 +51,8 @@ public class OSDirectory implements IDirectory {
         this(current, parent, null);
     }
 
-    // package constructor to allow unittesting with fake children
-    OSDirectory(File current, OSDirectory parent, List<IDirectory> childen) {
+    // protected constructor to allow unittesting with fake children
+    protected OSDirectory(File current, OSDirectory parent, List<IDirectory> childen) {
         setCurrent(current);
         mParent = parent;
         mChilden = childen;
@@ -125,12 +125,12 @@ public class OSDirectory implements IDirectory {
     }
 
     // package to allow unit testing
-    IDirectory find(OSDirectory root, String path) {
+    protected IDirectory find(OSDirectory root, String path) {
         return find(root, FileUtils.tryGetCanonicalFile(path));
     }
 
-    // package to allow unit testing
-    static IDirectory find(OSDirectory root, File file) {
+    // protected to allow unit testing
+    protected static IDirectory find(OSDirectory root, File file) {
         if (file == null) return null;
         if (root.mCurrent.equals(file)) {
             return root;
@@ -220,7 +220,7 @@ public class OSDirectory implements IDirectory {
     }
 
     /** for unittesting without load on demand */
-    OSDirectory addChildFolder(String newCildFolderName, List<IDirectory> grandChilden) {
+    protected OSDirectory addChildFolder(String newCildFolderName, List<IDirectory> grandChilden) {
         List<IDirectory> children = this.getChildren();
         OSDirectory result = (OSDirectory) findChildByRelPath(children, newCildFolderName);
 

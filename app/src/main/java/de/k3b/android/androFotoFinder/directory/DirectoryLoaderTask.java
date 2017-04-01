@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@ import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.SystemClock;
 import android.util.Log;
 
 import java.util.List;
@@ -62,7 +61,6 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
     private static final int PROGRESS_INCREMENT = 500;
 
     private final Activity context;
-    private final String debugPrefix;
 
     // will receive debug output
     private StringBuffer mStatus = null;
@@ -71,12 +69,12 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
 
     public DirectoryLoaderTask(Activity context, String debugPrefix) {
         this.context = context;
-        this.debugPrefix = debugPrefix;
-        Global.debugMemory(debugPrefix, "ctor");
+        String combinedDebugPrefix = debugPrefix + "-DirectoryLoaderTask";
+        Global.debugMemory(combinedDebugPrefix, "ctor");
 
         if (Global.debugEnabledSql || Global.debugEnabled) {
             mStatus = new StringBuffer();
-            mStatus.append(this.debugPrefix);
+            mStatus.append(combinedDebugPrefix);
         } else {
             mStatus = null;
         }
@@ -107,18 +105,32 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
 
             DirectoryBuilder builder = new DirectoryBuilder();
 
-            int colText = cursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT);
             int colCount = cursor.getColumnIndex(FotoSql.SQL_COL_COUNT);
             int colIconID = cursor.getColumnIndex(FotoSql.SQL_COL_PK);
 
+            int colText = cursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT);
             int colLat = cursor.getColumnIndex(FotoSql.SQL_COL_LAT);
             int colLon = cursor.getColumnIndex(FotoSql.SQL_COL_LON);
 
+            int markerItemCount = 1;
             int increment = PROGRESS_INCREMENT;
+
+            if (colIconID == -1) {
+                throw new IllegalArgumentException("Missing SQL Column " + FotoSql.SQL_COL_PK);
+            }
+
+            if ((colText == -1) && ((colLat == -1) || (colLon == -1))) {
+                throw new IllegalArgumentException("Missing SQL Column. Need either " +
+                        FotoSql.SQL_COL_DISPLAY_TEXT +
+                        " or " + FotoSql.SQL_COL_LAT +
+                                " + " +FotoSql.SQL_COL_LON);
+            }
+
             while (cursor.moveToNext()) {
                 String path = (colText >= 0) ? cursor.getString(colText) : getLatLonPath(cursor.getDouble(colLat), cursor.getDouble(colLon));
                 if (path != null) {
-                    builder.add(path, cursor.getInt(colCount), cursor.getInt(colIconID));
+                    if (colCount != -1) markerItemCount = cursor.getInt(colCount);
+                    builder.add(path, markerItemCount, cursor.getInt(colIconID));
                     itemCount++;
                     if ((--increment) <= 0) {
                         publishProgress(itemCount, expectedCount);
@@ -130,7 +142,7 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
                 }
             }
             if (mStatus != null) {
-                mStatus.append("\n\tfound ").append(cursor.getCount()).append(" db rows");
+                mStatus.append("\n\tfound ").append(itemCount).append(" db rows");
             }
 
             IDirectory result = builder.getRoot();
@@ -178,32 +190,4 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
         // if (result == null) return this.context.getString(R.string.unknown);
         return result;
     }
-
-    /*
-    // This is called each time you call publishProgress()
-    protected void onProgressUpdate(Integer... progress) {
-        setProgressPercent(progress[0]);
-    }
-
-    // This is called when doInBackground() is finished
-    protected void onPostExecute(IDirectory result) {
-        showNotification("Downloaded " + result + " bytes");
-    }
-
-    private static void usageExample(Activity context, QueryParameter parameters, String debugPrefix) {
-        DirectoryLoaderTask loader = new DirectoryLoaderTask(context, debugPrefix) {
-            // This is called when doInBackground() is finished
-            @Override
-            protected void onPostExecute(IDirectory result) {
-                // updateGui(result);
-            }
-            // This is called each time you call publishProgress()
-            protected void onProgressUpdate(Integer... progress) {
-                // setStatus("Loaded " + progress[0] + "/" + progress[1]);
-            }
-
-        };
-        loader.execute(parameters);
-    }
-    */
 }

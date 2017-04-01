@@ -128,9 +128,10 @@ public class PickerLocationMapFragment extends LocationMapFragment {
     }
 
     /** get all important parameters for displaying the map */
-    public void defineNavigation(GalleryFilterParameter rootFilter, IGeoPointInfo currentSelection,
+    public void defineNavigation(GalleryFilterParameter rootFilter, IGeoPointInfo selectedItem,
                                  GeoRectangle rectangle, int zoomlevel,
                                  SelectedItems selectedItems, Uri additionalPointsContentUri) {
+        IGeoPointInfo currentSelection = selectedItem;
         if ((currentSelection == null) && (getCurrentSelectionPosition() == null)) {
             // first call with no geo: take last use from config
             // save as value if picker is called again with no geo-coordinate

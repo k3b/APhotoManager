@@ -78,6 +78,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
 {
     private static final String mDebugPrefix = "GalleryA-";
 
+    private static final String DEFAULT_BOOKMARKNAME_PICK_GEO = "pickGeoFromPhoto";
     /** intent parameters supported by FotoGalleryActivity: EXTRA_... */
 
     private static final String DLG_NAVIGATOR_TAG = "navigator";
@@ -87,6 +88,19 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         @Override
         public void onChange(boolean selfChange) {
             invalidateDirectories(mDebugPrefix + "#onChange from mMediaObserverDirectory");
+        }
+    };
+    private final BookmarkController.IQueryConsumer mLoadBookmarkResultConsumer = new BookmarkController.IQueryConsumer() {
+        @Override
+        public void setQuery(String fileName, QueryParameter newQuery) {
+            final IGalleryFilter whereFilter = TagSql.parseQueryEx(newQuery, true);
+            mGalleryQueryParameter.mGalleryContentQuery = newQuery;
+            mBookmarkController.setlastBookmarkFileName(fileName);
+            String why = "#loadedBookmark " + fileName;
+            onFilterChanged(whereFilter, why);
+            invalidateDirectories(mDebugPrefix + why);
+            mGalleryQueryParameter.setHasUserDefinedQuery(true);
+            reloadGui(why);
         }
     };
 
@@ -237,7 +251,6 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
                 savedInstanceState.putString(STATE_Filter, this.getCurrentFilterSettings().toString());
             }
             savedInstanceState.putInt(STATE_SUB_FILTR_MODE, this.mCurrentSubFilterMode);
-
         }
 
         private void saveSettings(Context context) {
@@ -259,9 +272,12 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
                 if (getCurrentFilterSettings() != null) {
                     edit.putString(STATE_Filter + mStatSuffix, getCurrentFilterSettings().toString());
                 }
-
                 edit.apply();
             }
+        }
+
+        public boolean isGeoPick() {
+            return (mStatSuffix != null) && mStatSuffix.equals(PICK_GEO_SUFFIX);
         }
 
         // load from settings/instanceState
@@ -329,7 +345,6 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
                 filter = savedInstanceState.getString(STATE_Filter);
                 if ((filter != null) && (dbgFilter != null)) dbgFilter.append("filter from savedInstanceState=").append(filter).append("\n");
 
-
                 this.mCurrentSubFilterMode = savedInstanceState.getInt(STATE_SUB_FILTR_MODE, this.mCurrentSubFilterMode);
             }
 
@@ -387,7 +402,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         }
     }
 
-    private BookmarkController bookmarkController = null;
+    private BookmarkController mBookmarkController = null;
 
     public static void showActivity(Activity context, GalleryFilterParameter filter, QueryParameter query, int requestCode) {
         Intent intent = new Intent(context, FotoGalleryActivity.class);
@@ -410,6 +425,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         this.mGalleryQueryParameter.saveInstanceState(this, savedInstanceState);
+        mBookmarkController.saveState(null, savedInstanceState);
         super.onSaveInstanceState(savedInstanceState);
     }
 
@@ -422,13 +438,19 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
             Log.d(Global.LOG_CONTEXT, mDebugPrefix + "onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
         }
 
-        bookmarkController = new BookmarkController(this);
-
         this.getContentResolver().registerContentObserver(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, true, mMediaObserverDirectory);
         this.getContentResolver().registerContentObserver(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, true, mMediaObserverDirectory);
         setContentView(R.layout.activity_gallery); // .gallery_activity);
 
         this.mGalleryQueryParameter.loadSettingsAndInstanceState(this, savedInstanceState);
+
+        mBookmarkController = new BookmarkController(this);
+        mBookmarkController.loadState(intent,savedInstanceState);
+
+        if (this.mGalleryQueryParameter.isGeoPick()) {
+            // #76: load predefined bookmark file
+            this.mBookmarkController.onLoadFromAnswer(DEFAULT_BOOKMARKNAME_PICK_GEO, this.mLoadBookmarkResultConsumer);
+        }
 
         FragmentManager fragmentManager = getFragmentManager();
         mGalleryGui = (Queryable) fragmentManager.findFragmentById(R.id.galleryCursor);
@@ -587,18 +609,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
     }
 
     private void loadBookmark() {
-        bookmarkController.onLoadFromQuestion(new BookmarkController.IQueryConsumer() {
-            @Override
-            public void setQuery(QueryParameter newQuery) {
-                final IGalleryFilter whereFilter = TagSql.parseQueryEx(newQuery, true);
-                mGalleryQueryParameter.mGalleryContentQuery = newQuery;
-                mGalleryQueryParameter.setSortID(IGalleryFilter.SORT_BY_NONE);
-                onFilterChanged(whereFilter, "loadBookmark");
-                invalidateDirectories(mDebugPrefix + "#loaded bookmark");
-                mGalleryQueryParameter.setHasUserDefinedQuery(true);
-                reloadGui("loaded bookmark");
-            }
-        }, this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery());
+        mBookmarkController.onLoadFromQuestion(mLoadBookmarkResultConsumer, this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery());
     }
     /**
      * Call back from sub-activities.<br/>
@@ -612,6 +623,10 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
 
         switch (requestCode) {
             case GalleryFilterActivity.resultID :
+                if (BookmarkController.isReset(intent)) {
+                    mGalleryQueryParameter.mGalleryContentQuery = new QueryParameter(FotoSql.queryDetail);
+                }
+                mBookmarkController.loadState(intent, null);
                 onFilterChanged(GalleryFilterActivity.getFilter(intent), mDebugPrefix + "#onActivityResult from GalleryFilterActivity");
                 break;
             case ImageDetailActivityViewPager.ACTIVITY_ID:
@@ -696,7 +711,8 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         if (mDirectoryRoot == null) {
             // not loaded yet. load directoryRoot in background
             final QueryParameter currentDirContentQuery = new QueryParameter(FotoSql.getQuery(dirQueryID));
-            TagSql.filter2QueryEx(currentDirContentQuery, this.mGalleryQueryParameter.getCurrentFilterSettings(), this.mGalleryQueryParameter.getSortID() != IGalleryFilter.SORT_BY_NONE);
+            TagSql.filter2QueryEx(currentDirContentQuery, this.mGalleryQueryParameter.getCurrentFilterSettings(),
+                    this.mGalleryQueryParameter.getSortID() != IGalleryFilter.SORT_BY_NONE);
 
             this.mGalleryQueryParameter.mDirQueryID = (currentDirContentQuery != null) ? currentDirContentQuery.getID() : FotoSql.QUERY_TYPE_UNDEFINED;
 
@@ -710,7 +726,8 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
                 };
                 loader.execute(currentDirContentQuery);
             } else {
-                Log.e(Global.LOG_CONTEXT, mDebugPrefix + " this.mDirQueryID undefined " + this.mGalleryQueryParameter.mDirQueryID);
+                Log.e(Global.LOG_CONTEXT, mDebugPrefix + " this.mDirQueryID undefined "
+                        + this.mGalleryQueryParameter.mDirQueryID);
             }
         } else {
             this.mMustShowNavigator = false;
@@ -718,7 +735,8 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
             DirectoryPickerFragment dirDialog = new DirectoryPickerFragment(); // (DirectoryPickerFragment) manager.findFragmentByTag(DLG_NAVIGATOR_TAG);
             dirDialog.setContextMenuId(R.menu.menu_context_dirpicker);
 
-            dirDialog.defineDirectoryNavigation(mDirectoryRoot, dirQueryID, this.mGalleryQueryParameter.mCurrentPathFromFolderPicker);
+            dirDialog.defineDirectoryNavigation(mDirectoryRoot, dirQueryID,
+                    this.mGalleryQueryParameter.mCurrentPathFromFolderPicker);
 
             mDirPicker = dirDialog;
             dirDialog.show(manager, DLG_NAVIGATOR_TAG);
@@ -726,7 +744,10 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
     }
 
     private void openFilter() {
-        GalleryFilterActivity.showActivity(this, this.mGalleryQueryParameter.getCurrentFilterSettings(), this.mGalleryQueryParameter.mGalleryContentQuery);
+        GalleryFilterActivity.showActivity(this,
+                this.mGalleryQueryParameter.getCurrentFilterSettings(),
+                this.mGalleryQueryParameter.mGalleryContentQuery,
+                mBookmarkController.getlastBookmarkFileName());
     }
 
     /** called by Fragment: a fragment Item was clicked */

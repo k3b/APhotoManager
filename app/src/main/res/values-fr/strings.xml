@@ -27,7 +27,6 @@
 	<string name="bookmark_delete_answer_format">Supprimer le signet %1$s.</string>
 	<string name="bookmark_delete_error_format">Impossible de supprimer le signet %1$s.</string>
 	<string name="bookmark_delete_question">Supprimer ce signet ?</string>
-	<string name="bookmark_err_not_found_format">Pas de requêtes trouvés dans %1$s.</string>
 	<string name="bookmark_file_comment_format">Générer sur %3$s avec \'%1$s\' Version %2$s. Allez sur https://github.com/k3b/APhotoManager/wiki/intentap#EXTRA_SQL pour plus de détails</string>
 	<string name="bookmark_load_from_menu_title">Charger le Signet de &#8230;</string>
 	<string name="bookmark_save_as_menu_title">Enregistrer le signet sous &#8230;</string>
@@ -147,4 +146,7 @@
 	<string name="geo_picker_from_photo_title">Récupérer les informations de géolocalisation via les photos</string>
 	<string name="geo_picker_from_map_title">Récupérer les informations de géolocalisation via les cartes</string>
 	<string name="folder_hide_images_menu_title">Cacher les images</string>
+	<string name="folder_hide_images_question_message_format">\"Êtes-vous sûr ?\"Vous voulez masquer tous les fichiers multimédia (photo, vidéo, audio) contenu dans    %1$spour la base de données multimédia, l\'application Galerie et le scanner de médias ?  Vous pouvez annuler cette opération en appelant le Scanner de Media depuis le menu Galerie.</string>
+	<string name="filter_path_hint">Partie du nom du fichier ou du dossier. %=Wildcard</string>
+	<string name="lbl_any">Chercher</string>
 </resources>

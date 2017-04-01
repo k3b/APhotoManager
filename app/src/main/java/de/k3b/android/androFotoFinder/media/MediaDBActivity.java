@@ -117,7 +117,7 @@ public class MediaDBActivity extends Activity {
         private int mItemCount = 0;
         private int mUpdateCount = 0;
         private int mProgressCountDown = 0;
-        MediaCsvLoader mLoader = null;
+        protected MediaCsvLoader mLoader = null;
 
         /**
          * Override this method to perform a computation on a background thread. The
@@ -179,7 +179,8 @@ public class MediaDBActivity extends Activity {
             return message;
         }
 
-        private void updateDB(String dbgContext, String path, long xmlLastFileModifyDate, ContentValues dbValues) {
+        private void updateDB(String dbgContext, String _path, long xmlLastFileModifyDate, ContentValues dbValues) {
+            String path = _path;
             if (path != null) {
                 if (!path.contains("%")) {
                     if (MediaUtil.isImage(path, false)) {

@@ -187,10 +187,7 @@ public class FileUtils {
 
     // linux convention: folder names starting with "." are hidden
     public static boolean isHiddenFolder(String path) {
-        if (path.indexOf("/.") >= 0) {
-            return true;
-        }
-        return false;
+        return (path.indexOf("/.") >= 0);
     }
 
 }

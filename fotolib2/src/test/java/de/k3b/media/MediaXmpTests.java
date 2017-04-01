@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2016 by k3b.
+ * Copyright (c) 2016-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -55,14 +55,12 @@ public class MediaXmpTests {
         Assert.assertEquals(sut.toString(), "MediaDTO: path null dateTimeTaken 1962-11-07T09:38:46 title Headline description XPSubject latitude 27.818611 longitude -15.764444 tags Marker1, Marker2", actual.toString());
     }
 
-    private String currentResourceName = null;
-
     private InputStream getStream(String _resourceName) {
-        this.currentResourceName = _resourceName;
+        String currentResourceName = _resourceName;
 
         // this does not work with test-resources :-(
         // or i donot know how to do it with AndroidStudio-1.02/gradle-2.2
-        InputStream result = this.getClass().getResourceAsStream(this.currentResourceName);
+        InputStream result = this.getClass().getResourceAsStream(currentResourceName);
 
         if (result == null) {
             File prjRoot = new File(".").getAbsoluteFile();
@@ -75,9 +73,9 @@ public class MediaXmpTests {
             // .../LocationMapViewer/k3b-geoHelper/src/test/resources/....
             File resourceFile = new File(prjRoot, "build/resources/de/k3b/media/" + _resourceName);
 // D:\prj\eve\android\prj\fotos-android.wrk\FotoGallery\FotoGallery\fotolib2\src\test\resources\de\k3b\media
-            this.currentResourceName = resourceFile.getAbsolutePath(); // . new Path(resourceName).get;
+            currentResourceName = resourceFile.getAbsolutePath(); // . new Path(resourceName).get;
             try {
-                result = new FileInputStream(this.currentResourceName);
+                result = new FileInputStream(currentResourceName);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
                 return null;

@@ -33,7 +33,7 @@ public class DBUtils {
                 result.append("#").append(position);
                 cursor.moveToPosition(position);
                 for (String col : colmnNames) {
-                    result.append(";").append(cursor.getString(cursor.getColumnIndex(col)));
+                    result.append(";").append(DBUtils.getString(cursor,col,"???"));
                 }
                 result.append(delim);
             }
@@ -41,4 +41,18 @@ public class DBUtils {
         return result.toString();
     }
 
+    public static boolean isNull(Cursor cursor, String colId, boolean notFoundValue) {
+        int columnIndex = (cursor == null) ? -1 : cursor.getColumnIndex(colId);
+        return (columnIndex == -1)  ? notFoundValue : cursor.isNull(columnIndex);
+    }
+
+    public static String getString(Cursor cursor, String colId, String notFoundValue) {
+        int columnIndex = (cursor == null) ? -1 : cursor.getColumnIndex(colId);
+        return (columnIndex == -1)  ? notFoundValue : cursor.getString(columnIndex);
+    }
+
+    public static long getLong(Cursor cursor, String colId, long notFoundValue) {
+        int columnIndex = (cursor == null) ? -1 : cursor.getColumnIndex(colId);
+        return (columnIndex == -1)  ? notFoundValue : cursor.getLong(columnIndex);
+    }
 }

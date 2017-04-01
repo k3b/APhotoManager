@@ -60,7 +60,6 @@ import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
-import de.k3b.io.ListUtils;
 import de.k3b.tagDB.Tag;
 
 /**
@@ -84,10 +83,10 @@ public class GalleryFilterActivity extends LocalizedActivity
 
     private FilterValue mFilterValue = null;
     private HistoryEditText mHistory;
-    private BookmarkController bookmarkController = null;
+    private BookmarkController mBookmarkController = null;
     private DialogFragment mDlg;
 
-    public static void showActivity(Activity context, IGalleryFilter filter, QueryParameter rootQuery) {
+    public static void showActivity(Activity context, IGalleryFilter filter, QueryParameter rootQuery, String lastBookmarkFileName) {
         mRootQuery = rootQuery;
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, context.getClass().getSimpleName()
@@ -101,6 +100,7 @@ public class GalleryFilterActivity extends LocalizedActivity
             intent.putExtra(EXTRA_FILTER, filter.toString());
         }
 
+        BookmarkController.saveState(lastBookmarkFileName, intent, null);
         context.startActivityForResult(intent, resultID);
     }
 
@@ -115,6 +115,8 @@ public class GalleryFilterActivity extends LocalizedActivity
     public void onSaveInstanceState(Bundle savedInstanceState) {
         fromGui(mFilter);
         savedInstanceState.putString(FILTER_VALUE, mFilter.toString());
+        mBookmarkController.saveState(null, savedInstanceState);
+
         super.onSaveInstanceState(savedInstanceState);
     }
 
@@ -131,7 +133,7 @@ public class GalleryFilterActivity extends LocalizedActivity
         onCreateButtos();
 
         GalleryFilterParameter filter = (savedInstanceState == null)
-                ? getFilter(this.getIntent())
+                ? getFilter(intent)
                 : GalleryFilterParameter.parse(savedInstanceState.getString(FILTER_VALUE, ""),  new GalleryFilterParameter()) ;
 
         if (filter != null) {
@@ -140,7 +142,8 @@ public class GalleryFilterActivity extends LocalizedActivity
             mFilterValue.showLatLon(filter.isNonGeoOnly());
         }
 
-        bookmarkController = new BookmarkController(this);
+        mBookmarkController = new BookmarkController(this);
+        mBookmarkController.loadState(intent,savedInstanceState);
     }
 
     private void onCreateButtos() {
@@ -210,12 +213,12 @@ public class GalleryFilterActivity extends LocalizedActivity
                 return true;
 
             case R.id.action_save_as:
-                bookmarkController.onSaveAsQuestion("", getAsQuery());
+                mBookmarkController.onSaveAsQuestion(mBookmarkController.getlastBookmarkFileName(), getAsQuery());
                 return true;
             case R.id.action_load_from:
-                bookmarkController.onLoadFromQuestion(new BookmarkController.IQueryConsumer() {
+                mBookmarkController.onLoadFromQuestion(new BookmarkController.IQueryConsumer() {
                     @Override
-                    public void setQuery(QueryParameter newQuery) {
+                    public void setQuery(String fileName, QueryParameter newQuery) {
                         IGalleryFilter filter = TagSql.parseQueryEx(newQuery, false);
                         toGui(filter);
                     }
@@ -380,11 +383,12 @@ public class GalleryFilterActivity extends LocalizedActivity
         }
 
         protected void showVisibility(int visibility) {
-            if (visibility == VISIBILITY_DEFAULT) {
-                visibility = (FotoLibGlobal.visibilityShowPrivateByDefault) ? VISIBILITY_PRIVATE_PUBLIC : VISIBILITY_PUBLIC;
+            int actualVisibility = visibility;
+            if (actualVisibility == VISIBILITY_DEFAULT) {
+                actualVisibility = (FotoLibGlobal.visibilityShowPrivateByDefault) ? VISIBILITY_PRIVATE_PUBLIC : VISIBILITY_PUBLIC;
             }
 
-            switch (visibility) {
+            switch (actualVisibility) {
                 case VISIBILITY_PRIVATE:
                     mPrivate.setChecked(true);
                     mPublic.setChecked(false);
@@ -615,6 +619,9 @@ public class GalleryFilterActivity extends LocalizedActivity
             if (this.mFilter != null) {
                 intent.putExtra(EXTRA_FILTER, this.mFilter.toString());
             }
+
+            mBookmarkController.saveState(intent, null);
+
             this.setResult(resultID, intent);
             finish();
         }

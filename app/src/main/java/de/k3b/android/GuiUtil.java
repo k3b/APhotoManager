@@ -22,8 +22,6 @@ package de.k3b.android;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 
-import de.k3b.android.util.ExifInterfaceEx;
-
 /**
  * gui utils
  */

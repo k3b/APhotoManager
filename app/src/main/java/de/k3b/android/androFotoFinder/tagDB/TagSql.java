@@ -188,7 +188,8 @@ public class TagSql extends FotoSql {
         }
         return index;
     }
-    public static void addWhereTagsIncluded(QueryParameter resultQuery, List<String> includes, boolean withNoTags) {
+    public static void addWhereTagsIncluded(QueryParameter resultQuery, List<String> _includes, boolean withNoTags) {
+        List<String> includes = _includes;
         if ((includes != null) && (includes.size() == 0)) includes = null;
         if (includes != null) {
             String includesWhere = TagConverter.asDbString("%", includes);
@@ -281,11 +282,11 @@ public class TagSql extends FotoSql {
     }
 
     static class TagWorflowItem {
-        final long id;
-        final long xmpLastModifiedDate;
-        final String path;
-        final List<String> tags;
-        boolean xmpMoreRecentThanSql = false;
+        public final long id;
+        public final long xmpLastModifiedDate;
+        public final String path;
+        public final List<String> tags;
+        public boolean xmpMoreRecentThanSql = false;
 
         public TagWorflowItem(long id, String path, List<String> tags, long xmpLastModifiedDate) {
             this.tags = tags;

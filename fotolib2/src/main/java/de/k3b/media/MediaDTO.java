@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2016 by k3b.
+ * Copyright (c) 2016-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -33,9 +33,9 @@ public class MediaDTO implements IMetaApi {
     public Date dateTimeTaken;
     public Double latitude;
     private Double longitude;
-    String title;
-    String description;
-    List<String> tags;
+    private String title;
+    private String description;
+    private List<String> tags;
     private Integer rating;
 
     public MediaDTO() {}

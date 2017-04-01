@@ -61,15 +61,15 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 	}
 
 	private class Holder {
-		Tag currentTag;
-		ImageView bookmarkIcon;
-		ImageView addIcon;
-		ImageView removeIcon;
-		boolean isBookmark = false;
-		boolean isAdd = false;
-		boolean isRemove = false;
-		boolean isAffected = true;
-		TextView name;
+		public Tag currentTag;
+		public ImageView bookmarkIcon;
+		public ImageView addIcon;
+		public ImageView removeIcon;
+		public boolean isBookmark = false;
+		public boolean isAdd = false;
+		public boolean isRemove = false;
+		public boolean isAffected = true;
+		public TextView name;
 
 		public void setBookmark(boolean value) {
 			this.isBookmark = value;
@@ -110,17 +110,13 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 			while (tag != null) {
 				String tagName = tag.getName();
 
-				if (addNames != null) {
-					if (!addNames.contains(tagName)) {
-						addNames.add(tagName);
-						modifyCount++;
-					}
+				if ((addNames != null) && (!addNames.contains(tagName))) {
+					addNames.add(tagName);
+					modifyCount++;
 				}
-				if (removeNames != null) {
-					if (removeNames.contains(tagName)) {
-						removeNames.remove(tagName);
-						modifyCount++;
-					}
+				if ((removeNames != null)  && removeNames.contains(tagName)) {
+					removeNames.remove(tagName);
+					modifyCount++;
 				}
 				tag = tag.getParent();
 			}
@@ -136,8 +132,9 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 	}
 
 	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
+	public View getView(int position, View _convertView, ViewGroup parent) {
 		final Holder holder;
+		View convertView = _convertView;
 		// Check if an existing view is being reused, otherwise inflate the view
 		if (convertView == null) {
 			convertView = LayoutInflater.from(getContext()).inflate(R.layout.list_item_tag_search, parent, false);
