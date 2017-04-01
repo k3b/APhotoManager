@@ -33,11 +33,12 @@ android {
         // 0.5.4.161111 (22)
         // 0.5.4.161112 (23)
         // 0.5.5.161220 (24)    Image Picker
-        // 0.6.0.170309 (25)    Tag support
-        // 0.6.0.170315 (26)    Bugfix for new Tag support
+        // 0.6.0.170309 (25)    Tag support (fdroid build failed)
+        // 0.6.0.170315 (26)    Bugfix for new Tag support (fdroid build failed)
+        // 0.6.0.170402 (27)    language updates. try to fix fdroid build
 
-        versionCode = 26
-        versionName = '0.6.0.170315'
+        versionCode = 27
+        versionName = '0.6.0.170402'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
