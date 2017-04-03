@@ -70,9 +70,9 @@ public interface IMetaApi {
     Date getDateTimeTaken();
     IMetaApi setDateTimeTaken(Date value);
 
-    /** Latitude, in degrees north. */
+    /** Latitude, in degrees north. (-90 .. +90) */
     IMetaApi setLatitude(Double latitude);
-    /** Longitude, in degrees east. */
+    /** Longitude, in degrees east.  (-180 .. + 180) */
     IMetaApi setLongitude(Double longitude);
     Double getLatitude();
     Double getLongitude();

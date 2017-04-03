@@ -20,11 +20,13 @@ package de.k3b.media;
 
 import com.drew.imaging.ImageProcessingException;
 import com.drew.imaging.jpeg.JpegMetadataReader;
+import com.drew.lang.GeoLocation;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
 import com.drew.metadata.exif.ExifDirectoryBase;
 import com.drew.metadata.exif.ExifIFD0Directory;
+import com.drew.metadata.exif.GpsDirectory;
 import com.drew.metadata.iptc.IptcDirectory;
 import com.drew.metadata.jpeg.JpegCommentDirectory;
 import com.drew.metadata.xmp.XmpDirectory;
@@ -39,6 +41,8 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 
+import de.k3b.io.DateUtil;
+
 /**
  * com.drewnoakes:metadata-extractor based reader for image meta data files
  * Created by k3b on 27.03.2017.
@@ -50,24 +54,29 @@ public class ImageMetaReader implements IMetaApi, Closeable {
 
     // public: can be changed in settings dialog
     public  static boolean DEBUG = false;
+    private static final boolean DEBUG_ALWAYS_NULL = false; // debug-time to enfaorce all meta readings
 
     private static final Logger logger = LoggerFactory.getLogger(LOG_TAG);
 
     private String mFilename = null;
+    private IMetaApi mExternalXmpDir;
+    private MediaXmpSegment mInternalXmpDir;
     private Metadata mMetadata = null;
-    private Directory exifDir;
-    private Directory iptcDir;
+    private Directory mExifDir;
+    private GeoLocation mExifGpsDir;
+    private Directory mIptcDir;
     // private Directory fileDir;
-    private Directory commentDir;
-    private Directory xmpDir;
+    private Directory mCommentDir;
 
     /**
      * Reads Meta data from the specified file.
      *
      * @param filename
+     * @param externalXmpContent
      */
-    public ImageMetaReader load(String filename, InputStream inputStream) throws IOException {
+    public ImageMetaReader load(String filename, InputStream inputStream, IMetaApi externalXmpContent) throws IOException {
         mFilename = filename;
+        mExternalXmpDir = externalXmpContent;
 
         Metadata metadata = null;
         File jpegFile = (inputStream == null) ? new File(filename) : null;
@@ -103,13 +112,20 @@ public class ImageMetaReader implements IMetaApi, Closeable {
         throw new UnsupportedOperationException ();
     }
 
-
     /**
      * When the photo was taken (not file create/modify date) in local time or utc
      */
     @Override
     public Date getDateTimeTaken() {
-        init(); return null;
+        // String debugContext = "getDateTimeTaken";
+        init();
+
+        Date result = null;
+        if (isEmpty(result) && (mExifDir != null)) result = mExifDir.getDate(ExifIFD0Directory.TAG_DATETIME_ORIGINAL, DateUtil.UTC);
+
+        if (isEmpty(result) && (mExternalXmpDir != null)) result = mExternalXmpDir.getDateTimeTaken();
+        if (isEmpty(result) && (mInternalXmpDir != null)) result = mInternalXmpDir.getDateTimeTaken();
+        return result;
     }
 
     @Override
@@ -139,12 +155,28 @@ public class ImageMetaReader implements IMetaApi, Closeable {
 
     @Override
     public Double getLatitude() {
-        init(); return null;
+        // String debugContext = "getLatitude";
+        init();
+
+        Double result = null;
+        if (isEmpty(result) && (mExifGpsDir != null)) result = mExifGpsDir.getLatitude();
+
+        if (isEmpty(result) && (mExternalXmpDir != null)) result = mExternalXmpDir.getLatitude();
+        if (isEmpty(result) && (mInternalXmpDir != null)) result = mInternalXmpDir.getLatitude();
+        return result;
     }
 
     @Override
     public Double getLongitude() {
-        init(); return null;
+        // String debugContext = "getLongitude";
+        init();
+
+        Double result = null;
+        if (isEmpty(result) && (mExifGpsDir != null)) result = mExifGpsDir.getLongitude();
+
+        if (isEmpty(result) && (mExternalXmpDir != null)) result = mExternalXmpDir.getLongitude();
+        if (isEmpty(result) && (mInternalXmpDir != null)) result = mInternalXmpDir.getLongitude();
+        return result;
     }
 
     /**
@@ -154,22 +186,25 @@ public class ImageMetaReader implements IMetaApi, Closeable {
     public String getTitle() {
         String debugContext = "getTitle";
         init();
-        /*
-        -XMP-dc:Title < EXIF:XPTitle
--XMP-dc:Title < iptc:Headline
-*/
 
         String result = null;
-        //!!! not implemented in  com.drewnoakes:metadata-extractor:2.8.1
-        // if (result == null) result = getString(debugContext, xmpDir, XmpDirectory.TAG_TITLE);
 
-        if (result == null) result = getString(debugContext, exifDir, ExifDirectoryBase.TAG_WIN_TITLE);
+        if (isEmpty(result) && (mExternalXmpDir != null)) result = mExternalXmpDir.getTitle();
+
+        if (isEmpty(result)) result = getString(debugContext, mExifDir, ExifDirectoryBase.TAG_WIN_TITLE);
         //=> XPTitle
 
-        if (result == null) result = getString(debugContext, iptcDir, IptcDirectory.TAG_HEADLINE);
+        if ((isEmpty(result)) && (mInternalXmpDir != null)) result = mInternalXmpDir.getTitle();
+
+        if (isEmpty(result)) result = getString(debugContext, mIptcDir, IptcDirectory.TAG_HEADLINE);
         // => Headline
 
         return result;
+    }
+
+    private static boolean isEmpty(Object result) {
+        if (DEBUG_ALWAYS_NULL) return true;
+        return result == null;
     }
 
     @Override
@@ -186,19 +221,23 @@ public class ImageMetaReader implements IMetaApi, Closeable {
         init();
         String result = null;
 
-        if (result == null) result = getString(debugContext, exifDir, ExifDirectoryBase.TAG_WIN_COMMENT);
-        // => Comment
-
-        if (result == null) result = getString(debugContext, exifDir, ExifDirectoryBase.TAG_IMAGE_DESCRIPTION);
+        if (isEmpty(result)) result = getString(debugContext, mExifDir, ExifDirectoryBase.TAG_IMAGE_DESCRIPTION);
         // => ImageDescription
 
-        //!!! not implemented in  com.drewnoakes:metadata-extractor:2.8.1
-        //!!! if (result == null) result = getString(debugContext, xmpDir, XmpDirectory.TAG_DESCRIPTION);
+        if ((isEmpty(result)) && (mExternalXmpDir != null)) result = mExternalXmpDir.getDescription();
 
-        if (result == null) result = getString(debugContext, iptcDir, IptcDirectory.TAG_CAPTION);
+        if (isEmpty(result)) result = getString(debugContext, mExifDir, ExifDirectoryBase.TAG_WIN_COMMENT);
+        // => Comment
+
+        if ((isEmpty(result)) && (mInternalXmpDir != null)) result = mInternalXmpDir.getDescription();
+
+        //!!! not implemented in  com.drewnoakes:metadata-extractor:2.8.1
+        //!!! if isEmpty(result) result = getString(debugContext, mInternalXmpDir, XmpDirectory.TAG_DESCRIPTION);
+
+        if (isEmpty(result)) result = getString(debugContext, mIptcDir, IptcDirectory.TAG_CAPTION);
         // => Caption-Abstract
 
-        if (result == null) result = getString(debugContext, commentDir, JpegCommentDirectory.TAG_COMMENT);
+        if (isEmpty(result)) result = getString(debugContext, mCommentDir, JpegCommentDirectory.TAG_COMMENT);
         // => Comment
 
         //!!! not implemented in  com.drewnoakes:metadata-extractor:2.8.1
@@ -264,6 +303,16 @@ public class ImageMetaReader implements IMetaApi, Closeable {
                 builder.append(NL);
             }
         }
+
+        if (mInternalXmpDir == null) {
+            XmpDirectory xmp = this.mMetadata.getFirstDirectoryOfType(XmpDirectory.class);
+            if (xmp != null) {
+                mInternalXmpDir = new MediaXmpSegment();
+                mInternalXmpDir.setXmpMeta(xmp.getXMPMeta());
+                mInternalXmpDir.appendXmp("xmp.", builder);
+            }
+        }
+
         return builder.toString();
     }
 
@@ -284,12 +333,22 @@ public class ImageMetaReader implements IMetaApi, Closeable {
     }
 
     private void init() {
-        exifDir = this.mMetadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
-        iptcDir = this.mMetadata.getFirstDirectoryOfType(IptcDirectory.class);
-        // fileDir = this.mMetadata.getFirstDirectoryOfType(FileDi.class);
-        xmpDir = this.mMetadata.getFirstDirectoryOfType(XmpDirectory.class);
-        commentDir = this.mMetadata.getFirstDirectoryOfType(JpegCommentDirectory.class);
+        mExifDir = this.mMetadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+        mIptcDir = this.mMetadata.getFirstDirectoryOfType(IptcDirectory.class);
+        // fileDir = this.mMetadata.getFirstDirectoryOfType(FileDirec .class); // not implemented
+        mCommentDir = this.mMetadata.getFirstDirectoryOfType(JpegCommentDirectory.class);
 
+        GpsDirectory gps = this.mMetadata.getFirstDirectoryOfType(GpsDirectory.class);
+        if (gps != null) {
+            mExifGpsDir = gps.getGeoLocation();
+            if (mExifGpsDir.isZero()) mExifGpsDir = null;
+        }
+
+        XmpDirectory xmp = this.mMetadata.getFirstDirectoryOfType(XmpDirectory.class);
+        if (xmp != null) {
+            mInternalXmpDir = new MediaXmpSegment();
+            mInternalXmpDir.setXmpMeta(xmp.getXMPMeta());
+        }
     }
 
     private String getString(String debugContext, Directory directory, int tagType) {

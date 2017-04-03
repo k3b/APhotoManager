@@ -146,7 +146,7 @@ public class ImageDetailMetaDialogBuilder {
         if (file.exists()) {
             builder.append(NL).append(file).append(NL).append(NL);
 
-            ImageMetaReader meta = new ImageMetaReader().load(file.getAbsolutePath(),null);
+            ImageMetaReader meta = new ImageMetaReader().load(file.getAbsolutePath(),null, null);
             builder.append(meta.toString());
             builder.append(NL).append(line).append(NL);
         } else {
@@ -159,7 +159,7 @@ public class ImageDetailMetaDialogBuilder {
             XmpSegment meta = new XmpSegment();
             meta.load(file);
             builder.append(NL).append(file).append(NL).append(NL);
-            meta.appendXmp(builder);
+            meta.appendXmp(null, builder);
             builder.append(NL).append(line).append(NL);
         } else {
             builder.append(NL).append(file).append(" not found.").append(NL);

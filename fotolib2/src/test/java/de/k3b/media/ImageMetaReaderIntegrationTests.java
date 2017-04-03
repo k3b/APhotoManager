@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 
+import de.k3b.io.DateUtil;
+
 /**
  * Created by k3b on 28.03.2017.
  */
@@ -33,7 +35,7 @@ public class ImageMetaReaderIntegrationTests {
     @Test
     public void shouldGetDescription() throws IOException
     {
-        Assert.assertEquals("Comment", sut.getDescription());
+        Assert.assertEquals("ImageDescription", sut.getDescription());
     }
 
     @Test
@@ -42,10 +44,36 @@ public class ImageMetaReaderIntegrationTests {
         Assert.assertEquals("XPTitle", sut.getTitle());
     }
 
+    @Test
+    public void shouldGetDateTimeTaken() throws IOException
+    {
+        Assert.assertEquals("1962-11-07T09:38:46", DateUtil.toIsoDateString(sut.getDateTimeTaken()));
+    }
+
+    @Test
+    public void shouldGetLatitude() throws IOException
+    {
+        Assert.assertEquals(27.8186, sut.getLatitude(), 0.01);
+    }
+    @Test
+    public void shouldGetLongitude() throws IOException
+    {
+        Assert.assertEquals(-15.764, sut.getLongitude(), 0.01);
+    }
+
+    //!!!
+    //@Test
+    public void shouldGetTags() throws IOException
+    {
+        Assert.assertEquals("XPTitle", sut.getTags());
+    }
+
+
+
     protected ImageMetaReader getMeta(String fileName) throws IOException {
         InputStream inputStream = ImageMetaReaderIntegrationTests.class.getResourceAsStream("images/" + fileName);
         Assert.assertNotNull("open images/" + fileName, inputStream);
-        ImageMetaReader result = new ImageMetaReader().load(fileName, inputStream);
+        ImageMetaReader result = new ImageMetaReader().load(fileName, inputStream, null);
         return result;
     }
 }

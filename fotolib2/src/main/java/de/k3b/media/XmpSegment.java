@@ -40,7 +40,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -57,7 +56,8 @@ import de.k3b.tagDB.TagConverter;
 public class XmpSegment {
     private static final String dbg_context = "XmpSegment: ";
     private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
-
+    // public: can be changed in settings dialog
+    public  static boolean DEBUG = false;
 
     private XMPMeta xmpMeta = null;
     private static XMPSchemaRegistry registry = XMPMetaFactory.getSchemaRegistry();
@@ -173,8 +173,9 @@ public class XmpSegment {
         return xmpMeta;
     }
 
-    protected void setXmpMeta(XMPMeta xmpMeta) {
+    public XmpSegment setXmpMeta(XMPMeta xmpMeta) {
         this.xmpMeta = xmpMeta;
+        return this;
     }
 
     public XmpSegment load(InputStream is) {
@@ -242,18 +243,18 @@ public class XmpSegment {
 
     public String toString() {
         final StringBuilder result = new StringBuilder();
-        appendXmp(result);
+        appendXmp(null, result);
         if (result.length() > 0) return result.toString();
         return null;
     }
 
-    public void appendXmp(StringBuilder result) {
+    public void appendXmp(String printPrefix, StringBuilder result) {
         XMPMeta meta = getXmpMeta();
         try {
             for (XMPIterator it = meta.iterator(); it.hasNext();)
             {
                 XMPPropertyInfo prop = (XMPPropertyInfo) it.next();
-                appendXmpPropertyInfo(result, prop);
+                appendXmpPropertyInfo(result, printPrefix, prop);
             }
         } catch (XMPException e) {
             result.append(e.toString());
@@ -262,21 +263,26 @@ public class XmpSegment {
     }
 
     /**
+     * @param printPrefix
      * @param prop an <code>XMPPropertyInfo</code> from the <code>XMPIterator</code>.
      */
-    private void appendXmpPropertyInfo(final StringBuilder result, XMPPropertyInfo prop) {
+    private void appendXmpPropertyInfo(final StringBuilder result, String printPrefix, XMPPropertyInfo prop) {
         String path = prop.getPath();
         if (path == null) {
             result.append("\n");
         } else {
+            if (printPrefix != null) result.append(printPrefix);
+
             String namespace = prop.getNamespace();
             String prefix = registry.getNamespacePrefix(namespace);
             if (prefix == null) prefix = namespace;
 
-            result
-                    .append(prefix).append(".").append(path)
-                    .append("=").append(prop.getValue())
-                    .append(" (" + prop.getOptions().getOptionsString() + ")\n");
+            if (prefix != null) result.append(prefix).append(".");
+
+            result  .append(path)
+                    .append("=").append(prop.getValue());
+            if (DEBUG) result  .append(" (").append(prop.getOptions().getOptionsString()).append(")");
+            result  .append("\n");
         }
     }
 }
