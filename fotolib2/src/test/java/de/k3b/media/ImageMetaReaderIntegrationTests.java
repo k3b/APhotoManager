@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import de.k3b.io.DateUtil;
+import de.k3b.io.ListUtils;
 
 /**
  * Created by k3b on 28.03.2017.
@@ -61,14 +62,17 @@ public class ImageMetaReaderIntegrationTests {
         Assert.assertEquals(-15.764, sut.getLongitude(), 0.01);
     }
 
-    //!!!
-    //@Test
+    @Test
     public void shouldGetTags() throws IOException
     {
-        Assert.assertEquals("XPTitle", sut.getTags());
+        Assert.assertEquals("Marker1, Marker2", ListUtils.toString(sut.getTags(),", "));
     }
 
-
+    @Test
+    public void shouldGetRating() throws IOException
+    {
+        Assert.assertEquals(3, sut.getRating().intValue());
+    }
 
     protected ImageMetaReader getMeta(String fileName) throws IOException {
         InputStream inputStream = ImageMetaReaderIntegrationTests.class.getResourceAsStream("images/" + fileName);
