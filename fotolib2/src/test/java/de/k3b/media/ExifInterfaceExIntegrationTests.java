@@ -32,16 +32,16 @@ import de.k3b.io.DateUtil;
 import de.k3b.io.ListUtils;
 
 /**
- * Created by k3b on 28.03.2017.
+ * Created by k3b on 05.04.2017.
  */
 
-public class ImageMetaReaderIntegrationTests {
-    private static final Logger logger = LoggerFactory.getLogger(ImageMetaReaderIntegrationTests.class);
+public class ExifInterfaceExIntegrationTests {
+    private static final Logger logger = LoggerFactory.getLogger(ExifInterfaceExIntegrationTests.class);
 
     private IMetaApi sut = null;
     @Before
     public void setup() throws IOException {
-        ImageMetaReader.DEBUG = true;
+        // ExifInterfaceEx.DEBUG = true;
         sut = getMeta("test-WitExtraData.jpg");
     }
 
@@ -75,6 +75,7 @@ public class ImageMetaReaderIntegrationTests {
     {
         Assert.assertEquals(27.8186, sut.getLatitude(), 0.01);
     }
+
     @Test
     public void shouldGetLongitude() throws IOException
     {
@@ -96,7 +97,7 @@ public class ImageMetaReaderIntegrationTests {
     protected IMetaApi getMeta(String fileName) throws IOException {
         InputStream inputStream = ImageMetaReaderIntegrationTests.class.getResourceAsStream("images/" + fileName);
         Assert.assertNotNull("open images/" + fileName, inputStream);
-        IMetaApi result = new ImageMetaReader().load(fileName, inputStream, null);
+        IMetaApi result = new ExifInterfaceEx(fileName, inputStream, null);
         return result;
     }
 }

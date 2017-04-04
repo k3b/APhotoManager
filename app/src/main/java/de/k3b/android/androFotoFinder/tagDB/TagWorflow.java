@@ -32,7 +32,7 @@ import java.util.List;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.media.MediaContentValues;
 import de.k3b.android.util.AndroidFileCommands;
-import de.k3b.android.util.ExifInterfaceEx;
+import de.k3b.media.ExifInterfaceEx;
 import de.k3b.android.util.MediaScannerEx;
 import de.k3b.database.SelectedFiles;
 import de.k3b.io.FileUtils;
@@ -143,7 +143,7 @@ public class TagWorflow extends TagProcessor {
 
                 ExifInterfaceEx exif = null;
                 try {
-                    exif = new ExifInterfaceEx(tagWorflowItemFromDB.path);
+                    exif = new ExifInterfaceEx(tagWorflowItemFromDB.path, null);
                     MediaUtil.copy(xmp, exif, false, false);
                 } catch (IOException ex) {
                     // exif is null

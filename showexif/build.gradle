@@ -1,0 +1,35 @@
+apply plugin: 'java'
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile project(':fotolib2')
+    compile 'org.slf4j:slf4j-api:1.7.7@jar'
+    compile 'org.slf4j:slf4j-simple:1.7.7'	
+}
+
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
+
+task fatJar(type: Jar, dependsOn: classes) {
+    manifest.attributes['Implementation-Title'] = 'shoexif'
+    manifest.attributes['Implementation-Version'] = '1.0'
+    manifest.attributes(
+            // 'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
+            'Main-Class': 'de.k3b.ShowExif'
+    )
+    classifier = 'jar-with-dependencies'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    exclude 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.SF'
+    with jar
+}
+
+task proguard(type: proguard.gradle.ProGuardTask, dependsOn: fatJar) {
+  configuration 'proguard-rules.pro'
+
+  injars 'build/libs/showexif-jar-with-dependencies.jar'
+  outjars 'build/libs/showexif-jar-with-dependencies-min.jar'
+}
+
+artifacts {
+    archives fatJar
+}

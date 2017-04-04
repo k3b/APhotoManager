@@ -41,10 +41,10 @@
 -XMP-dc:Title < EXIF:XPTitle
 -XMP-dc:Title < iptc:Headline
 
--XMP-dc:Description < EXIF:XPSubject
 -XMP-dc:Description < EXIF:ImageDescription
+-XMP-dc:Description < EXIF:UserComment
+-XMP-dc:Description < EXIF:XPSubject
 -XMP-dc:Description < iptc:Caption-Abstract
--XMP-dc:Description < File:Comment
 
 # -XMP-exif:ImageUniqueID < EXIF:ImageUniqueID
 # XMP-xmpMM:DocumentID

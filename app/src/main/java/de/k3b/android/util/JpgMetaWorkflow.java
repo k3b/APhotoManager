@@ -24,9 +24,9 @@ import android.util.Log;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
-import java.util.Map;
 
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.media.ExifInterfaceEx;
 
 /**
  * Write geo data (lat/lon) to photo
@@ -46,18 +46,6 @@ public class JpgMetaWorkflow {
         return sb;
     }
 
-    public static void addAttributes(StringBuilder sb, Map<String, String> exifAttributes) {
-        for (Map.Entry<String, String> iter : exifAttributes.entrySet()) {
-            String key = iter.getKey();
-            String val = iter.getValue();
-            append(sb, key, val);
-        }
-    }
-
-    private static StringBuilder append(StringBuilder sb, String key, String val) {
-        return sb.append(key).append("='").append(val).append("'\n");
-    }
-
     public static boolean saveLatLon(File filePath, Double latitude, Double longitude, String appName, String appVersion) {
         StringBuilder sb = (Global.debugEnabled)
                 ? sb = createDebugStringBuilder(filePath)
@@ -66,7 +54,7 @@ public class JpgMetaWorkflow {
             ExifInterfaceEx exif = null;
             try {
                 long lastModified = filePath.lastModified();
-                exif = new ExifInterfaceEx(filePath.getAbsolutePath());
+                exif = new ExifInterfaceEx(filePath.getAbsolutePath(), null);
                 debugExif(sb, "old", exif, filePath);
 
                 exif.setLatitude(latitude);
@@ -94,7 +82,7 @@ public class JpgMetaWorkflow {
                 filePath.setLastModified(lastModified);
 
                 if (sb != null) {
-                    exif = new ExifInterfaceEx(filePath.getAbsolutePath());
+                    exif = new ExifInterfaceEx(filePath.getAbsolutePath(), null);
                     debugExif(sb, "new ", exif, filePath);
 
                     Log.d(Global.LOG_CONTEXT, sb.toString());
@@ -147,7 +135,7 @@ public class JpgMetaWorkflow {
      */
     public static int getRotationFromExifOrientation(String fullPathToImageFile) {
         try {
-            ExifInterfaceEx exif = new ExifInterfaceEx(fullPathToImageFile);
+            ExifInterfaceEx exif = new ExifInterfaceEx(fullPathToImageFile, null);
             int orientation = exif.getAttributeInt(ExifInterfaceEx.TAG_ORIENTATION, 0);
             if ((orientation >= 0) && (orientation < exifOrientationCode2RotationDegrees.length))
                 return exifOrientationCode2RotationDegrees[orientation];

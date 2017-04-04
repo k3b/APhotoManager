@@ -34,7 +34,7 @@ import java.util.List;
 
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
-import de.k3b.android.util.ExifInterfaceEx;
+import de.k3b.media.ExifInterfaceEx;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.FileUtils;
 import de.k3b.media.ImageMetaReader;
@@ -167,7 +167,7 @@ public class ImageDetailMetaDialogBuilder {
     }
 
     private static void getExifInfo_android(StringBuilder builder, String filepath) throws IOException {
-        ExifInterfaceEx exif = new ExifInterfaceEx(filepath);
+        ExifInterfaceEx exif = new ExifInterfaceEx(filepath, null);
 
         builder.append(NL).append(line).append(NL);
         builder.append(NL).append(filepath).append(NL).append(NL);

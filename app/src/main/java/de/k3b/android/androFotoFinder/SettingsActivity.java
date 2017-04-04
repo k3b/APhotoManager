@@ -44,6 +44,7 @@ import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.MediaScannerEx;
+import de.k3b.android.util.MediaScannerExifInterface;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.tagDB.TagRepository;
@@ -270,7 +271,7 @@ public class SettingsActivity extends PreferenceActivity {
 
         // true if first run or change
         if ((sOldEnableTagSupport == null) || (sOldEnableTagSupport.booleanValue() != Global.Media.enableNonStandardMediaFields)) {
-            MediaScanner.setInstance((Global.Media.enableNonStandardMediaFields) ? new MediaScannerEx(context) : new MediaScanner(context));
+            MediaScanner.setInstance((Global.Media.enableNonStandardMediaFields) ? new MediaScannerEx(context) : new MediaScannerExifInterface(context));
             sOldEnableTagSupport = Global.Media.enableNonStandardMediaFields;
         }
     }
