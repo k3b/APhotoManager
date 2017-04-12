@@ -50,6 +50,7 @@ import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.io.FileUtils;
 import de.k3b.io.IGalleryFilter;
+import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaUtil;
 
 /**
@@ -61,26 +62,26 @@ import de.k3b.media.MediaUtil;
  *
  * Created by k3b on 14.09.2015.
  */
-public class MediaScanner  {
-    private static final String CONTEXT = "MediaScanner.";
+abstract public class MediaScanner  {
+    protected static final String CONTEXT = "MediaScanner.";
 
     /* the DB_XXXX fields are updated by the scanner via ExifInterfaceEx
-    private static final String DB_DATE_TAKEN = MediaStore.Images.Media.DATE_TAKEN;
-    private static final String DB_LONGITUDE = MediaStore.Images.Media.LONGITUDE;
-    private static final String DB_LATITUDE = MediaStore.Images.Media.LATITUDE;
+    protected static final String DB_DATE_TAKEN = MediaStore.Images.Media.DATE_TAKEN;
+    protected static final String DB_LONGITUDE = MediaStore.Images.Media.LONGITUDE;
+    protected static final String DB_LATITUDE = MediaStore.Images.Media.LATITUDE;
     */
 
     // the DB_XXXX fields are updated directly by the scanner
-    private static final String DB_ORIENTATION = MediaStore.Images.Media.ORIENTATION;
-    private static final String DB_DATE_MODIFIED = MediaStore.MediaColumns.DATE_MODIFIED;
-    private static final String DB_SIZE = MediaStore.MediaColumns.SIZE;
-    private static final String DB_WIDTH = MediaStore.MediaColumns.WIDTH;
-    private static final String DB_HEIGHT = MediaStore.MediaColumns.HEIGHT;
-    private static final String DB_MIME_TYPE = MediaStore.MediaColumns.MIME_TYPE;
-    private static final String DB_TITLE = MediaStore.MediaColumns.TITLE;
-    private static final String DB_DISPLAY_NAME = MediaStore.MediaColumns.DISPLAY_NAME;
-    private static final String DB_DATA = MediaStore.MediaColumns.DATA;
-    private static final String DB_DATE_ADDED = MediaStore.Images.ImageColumns.DATE_ADDED;
+    protected static final String DB_ORIENTATION = MediaStore.Images.Media.ORIENTATION;
+    protected static final String DB_DATE_MODIFIED = MediaStore.MediaColumns.DATE_MODIFIED;
+    protected static final String DB_SIZE = MediaStore.MediaColumns.SIZE;
+    protected static final String DB_WIDTH = MediaStore.MediaColumns.WIDTH;
+    protected static final String DB_HEIGHT = MediaStore.MediaColumns.HEIGHT;
+    protected static final String DB_MIME_TYPE = MediaStore.MediaColumns.MIME_TYPE;
+    protected static final String DB_TITLE = MediaStore.MediaColumns.TITLE;
+    protected static final String DB_DISPLAY_NAME = MediaStore.MediaColumns.DISPLAY_NAME;
+    protected static final String DB_DATA = MediaStore.MediaColumns.DATA;
+    protected static final String DB_DATE_ADDED = MediaStore.Images.ImageColumns.DATE_ADDED;
 
     public static final int DEFAULT_SCAN_DEPTH = 22;
     public static final String MEDIA_IGNORE_FILENAME = FileUtils.MEDIA_IGNORE_FILENAME; //  MediaStore.MEDIA_IGNORE_FILENAME;
@@ -320,65 +321,21 @@ public class MediaScanner  {
         String imageType = options.outMimeType;
         values.put(DB_MIME_TYPE, imageType);
 
-        ExifInterfaceEx exif = null;
-        try {
-            exif = new ExifInterfaceEx(absolutePath);
-        } catch (IOException ex) {
-            // exif is null
-        }
-
-        if (exif != null) {
-            int orientation = exif.getAttributeInt(
-                    ExifInterfaceEx.TAG_ORIENTATION, -1);
-            if (orientation != -1) {
-                // We only recognize a subset of orientation tag values.
-                int degree;
-                switch(orientation) {
-                    case ExifInterfaceEx.ORIENTATION_ROTATE_90:
-                        degree = 90;
-                        break;
-                    case ExifInterfaceEx.ORIENTATION_ROTATE_180:
-                        degree = 180;
-                        break;
-                    case ExifInterfaceEx.ORIENTATION_ROTATE_270:
-                        degree = 270;
-                        break;
-                    default:
-                        degree = 0;
-                        break;
-                }
-                values.put(DB_ORIENTATION, degree);
-            }
-        }
+        IMetaApi src = loadNonMediaValues(values, absolutePath);
 
         MediaContentValues dest = new MediaContentValues().set(values, null);
-        getExifValues(dest, file, exif);
+        getExifValues(dest, file, src);
 
         setPathRelatedFieldsIfNeccessary(values, absolutePath, null);
     }
 
+    abstract protected IMetaApi loadNonMediaValues(ContentValues destinationValues, String absoluteJpgPath);
     /** @return number of copied properties */
-    protected int getExifValues(MediaContentValues dest, File file, ExifInterfaceEx exif) {
-        return MediaUtil.copy(dest, exif, false, true);
+    protected int getExifValues(MediaContentValues dest, File file, IMetaApi src) {
+        return MediaUtil.copy(dest, src, false, true);
     }
 
-    public IGeoPointInfo getPositionFromFile(String absolutePath, String id) {
-        ExifInterfaceEx exif = null;
-        try {
-            exif = new ExifInterfaceEx(absolutePath);
-        } catch (IOException ex) {
-            // exif is null
-        }
-
-        if (exif != null) {
-            Double latitude = exif.getLatitude();
-            if (latitude != null) {
-                return new GeoPointDto(latitude, exif.getLongitude(), GeoPointDto.NO_ZOOM).setId(id);
-            }
-        }
-
-        return null;
-    }
+    abstract public IGeoPointInfo getPositionFromFile(String absolutePath, String id);
     public int updatePathRelatedFields(Context context, Cursor cursor, String newAbsolutePath) {
         int columnIndexPk = cursor.getColumnIndex(FotoSql.SQL_COL_PK);
         int columnIndexPath = cursor.getColumnIndex(FotoSql.SQL_COL_PATH);
@@ -498,7 +455,7 @@ public class MediaScanner  {
 
 
     public static MediaScanner getInstance(Context context) {
-        if (sInstance == null) sInstance = new MediaScanner(context);
+        if (sInstance == null) sInstance = new MediaScannerExifInterface(context);
         return sInstance;
     }
 

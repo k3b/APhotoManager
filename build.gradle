@@ -9,7 +9,7 @@ buildscript {
 		// see https://jcenter.bintray.com/com/android/tools/build/gradle/
         // classpath 'com.android.tools.build:gradle:2.1.2'
         // classpath 'com.android.tools.build:gradle:2.2.0-alpha1'
-        classpath 'com.android.tools.build:gradle:2.2.0'
+        classpath 'com.android.tools.build:gradle:2.3.1'
 
 		// markdown & unl-diagrams in javadoc
 		// https://github.com/Abnaxos/pegdown-doclet

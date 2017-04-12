@@ -24,7 +24,6 @@ import android.content.Context;
 import android.util.Log;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Date;
 
@@ -32,6 +31,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.media.MediaContentValues;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.io.FileUtils;
+import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaUtil;
 import de.k3b.media.MediaXmpSegment;
 import de.k3b.tagDB.Tag;
@@ -43,7 +43,7 @@ import de.k3b.tagDB.TagRepository;
  * Created by k3b on 04.10.2016.
  */
 
-public class MediaScannerEx extends MediaScanner {
+public class MediaScannerEx extends MediaScannerExifInterface {
     private Tag mImportRoot = null;
 
     public MediaScannerEx(Context context) {
@@ -97,7 +97,7 @@ public class MediaScannerEx extends MediaScanner {
      * Override: also get xmp data (i.e. Tags)
      */
     @Override
-    protected int getExifValues(MediaContentValues dest, File file, ExifInterfaceEx exif) {
+    protected int getExifValues(MediaContentValues dest, File file, IMetaApi src) {
         int changes = 0;
         long xmpFileModifyDate = TagSql.EXT_LAST_EXT_SCAN_UNKNOWN;
 
@@ -112,12 +112,12 @@ public class MediaScannerEx extends MediaScanner {
 
         if (Global.Media.xmpOverwritesExif) {
             // xmp overwrites exif so execute first exif then xmp
-            changes += super.getExifValues(dest, file, exif);
+            changes += super.getExifValues(dest, file, src);
             changes += MediaUtil.copy(dest, xmp, false, true);
         } else {
             // exif overwrites xmp so execute first xmp then exif
             changes += MediaUtil.copy(dest, xmp, false, true);
-            changes += super.getExifValues(dest, file, exif);
+            changes += super.getExifValues(dest, file, src);
         }
 
         if (xmpFileModifyDate != TagSql.EXT_LAST_EXT_SCAN_UNKNOWN) {

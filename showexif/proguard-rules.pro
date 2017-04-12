@@ -38,6 +38,7 @@
 # Output a source map file
 -printmapping proguard.map
 
+# j2se main entry method
 -keep public class de.k3b.ShowExif {
     public static void main(java.lang.String[]);
 }
