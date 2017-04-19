@@ -105,6 +105,9 @@
     <string name="settings_debug_sql_summary">settings_debug_sql_summary &#8230; containing executed SQL.</string>
     <string name="settings_debug_view_item_summary">settings_debug_view_item_summary &#8230; containing gridview/listview Items.</string>
     <string name="settings_debug_memory_title">settings_debug_memory_title LogCat memory consumption</string>
+
+    <string name="settings_debug_meta_io">settings_debug_meta_io LogCat jpg/xmp metadata read/write</string>
+
     <string name="settings_debug_libs_summary">settings_debug_libs_summary &#8230; of 3rd party libraries.</string>
     <string name="settings_debug_title">settings_debug_title LogCat misc.</string>
     <string name="settings_debug_summary">settings_debug_summary &#8230; containing other log messages.</string>

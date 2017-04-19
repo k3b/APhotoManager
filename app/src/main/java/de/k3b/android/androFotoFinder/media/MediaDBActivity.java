@@ -216,7 +216,7 @@ public class MediaDBActivity extends Activity {
 
         @Override
         protected void onPostExecute(String errorMessage) {
-            if (Global.Media.enableNonStandardMediaFields) {
+            if (Global.Media.enableNonStandardIptcMediaScanner) {
                 TagRepository.getInstance().save();
             }
 

@@ -85,6 +85,9 @@
         <CheckBoxPreference android:key="debugEnabledMemory"
             android:defaultValue="false"
             android:title="@string/settings_debug_memory_title" />
+        <CheckBoxPreference android:key="debugEnabledJpgMetaIo"
+            android:defaultValue="false"
+            android:title="@string/settings_debug_meta_io" />
         <CheckBoxPreference android:key="debugEnableLibs"
             android:defaultValue="false"
             android:title="@string/settings_debug_libs_title"

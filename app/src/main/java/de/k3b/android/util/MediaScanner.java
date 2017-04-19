@@ -34,6 +34,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -42,6 +43,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.media.MediaContentValues;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
@@ -52,6 +54,7 @@ import de.k3b.io.FileUtils;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaUtil;
+import de.k3b.media.MediaXmpSegment;
 
 /**
  * Android Media Scanner for images/photos/jpg compatible with android-5.0 Media scanner.
@@ -72,12 +75,14 @@ abstract public class MediaScanner  {
     */
 
     // the DB_XXXX fields are updated directly by the scanner
+    // private fields are updated by base scanner
+    private static final String DB_DATE_MODIFIED = MediaStore.MediaColumns.DATE_MODIFIED;
+    private static final String DB_SIZE = MediaStore.MediaColumns.SIZE;
+    private static final String DB_WIDTH = MediaStore.MediaColumns.WIDTH;
+    private static final String DB_HEIGHT = MediaStore.MediaColumns.HEIGHT;
+    private static final String DB_MIME_TYPE = MediaStore.MediaColumns.MIME_TYPE;
+
     protected static final String DB_ORIENTATION = MediaStore.Images.Media.ORIENTATION;
-    protected static final String DB_DATE_MODIFIED = MediaStore.MediaColumns.DATE_MODIFIED;
-    protected static final String DB_SIZE = MediaStore.MediaColumns.SIZE;
-    protected static final String DB_WIDTH = MediaStore.MediaColumns.WIDTH;
-    protected static final String DB_HEIGHT = MediaStore.MediaColumns.HEIGHT;
-    protected static final String DB_MIME_TYPE = MediaStore.MediaColumns.MIME_TYPE;
     protected static final String DB_TITLE = MediaStore.MediaColumns.TITLE;
     protected static final String DB_DISPLAY_NAME = MediaStore.MediaColumns.DISPLAY_NAME;
     protected static final String DB_DATA = MediaStore.MediaColumns.DATA;
@@ -303,15 +308,15 @@ abstract public class MediaScanner  {
     }
 
     /** updates values with current values of file */
-    protected void getExifFromFile(ContentValues values, File file) {
-        String absolutePath = FileUtils.tryGetCanonicalPath(file, file.getAbsolutePath());
+    protected void getExifFromFile(ContentValues values, File jpgFile) {
+        String absoluteJpgPath = FileUtils.tryGetCanonicalPath(jpgFile, jpgFile.getAbsolutePath());
 
-        values.put(DB_DATE_MODIFIED, file.lastModified() / 1000);
-        values.put(DB_SIZE, file.length());
+        values.put(DB_DATE_MODIFIED, jpgFile.lastModified() / 1000);
+        values.put(DB_SIZE, jpgFile.length());
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true; // only need with/height but not content
-        BitmapFactory.decodeFile(absolutePath, options);
+        BitmapFactory.decodeFile(absoluteJpgPath, options);
         int mHeight = options.outHeight;
         int mWidth = options.outWidth;
         if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) && mWidth > 0 && mHeight > 0) {
@@ -321,15 +326,57 @@ abstract public class MediaScanner  {
         String imageType = options.outMimeType;
         values.put(DB_MIME_TYPE, imageType);
 
-        IMetaApi src = loadNonMediaValues(values, absolutePath);
+        MediaXmpSegment xmpContent = loadXmpSidecarContentOrNull(absoluteJpgPath, "getExifFromFile");
+
+        IMetaApi src = loadNonMediaValues(values, absoluteJpgPath, xmpContent);
 
         MediaContentValues dest = new MediaContentValues().set(values, null);
-        getExifValues(dest, file, src);
+        getExifValues(dest, jpgFile, src);
 
-        setPathRelatedFieldsIfNeccessary(values, absolutePath, null);
+        setPathRelatedFieldsIfNeccessary(values, absoluteJpgPath, null);
     }
 
-    abstract protected IMetaApi loadNonMediaValues(ContentValues destinationValues, String absoluteJpgPath);
+
+    protected IGeoPointInfo getPositionFromMeta(String absoluteJpgPath, String id, IMetaApi exif) {
+        if (exif != null) {
+            Double latitude = exif.getLatitude();
+            if (latitude != null) {
+                return new GeoPointDto(latitude, exif.getLongitude(), GeoPointDto.NO_ZOOM).setId(id);
+            }
+            MediaXmpSegment xmpContent = loadXmpSidecarContentOrNull(absoluteJpgPath, "getPositionFromFile");
+            if (xmpContent != null) {
+                latitude = xmpContent.getLatitude();
+                if (latitude != null) {
+                    return new GeoPointDto(latitude, xmpContent.getLongitude(), GeoPointDto.NO_ZOOM).setId(id);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    protected MediaXmpSegment loadXmpSidecarContentOrNull(String absoluteJpgPath, String _dbg_context) {
+        MediaXmpSegment xmpContent = null;
+        File xmpFile = FileUtils.getXmpFile(absoluteJpgPath);
+        String dbg_context = _dbg_context + " MediaScanner:loadXmpSidecarContent(" + xmpFile + "): ";
+        if ((xmpFile != null) && xmpFile.isFile() && xmpFile.exists() && xmpFile.canRead()) {
+            xmpContent = new MediaXmpSegment();
+            try {
+                xmpContent.load(xmpFile, dbg_context);
+            } catch (FileNotFoundException e) {
+                Log.e(Global.LOG_CONTEXT, dbg_context + "failed " + e.getMessage(),e);
+                xmpContent = null;
+            }
+
+        } else if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+            Log.i(Global.LOG_CONTEXT, dbg_context + "file not found");
+        }
+
+        return xmpContent;
+    }
+
+    abstract protected IMetaApi loadNonMediaValues(ContentValues destinationValues, String absoluteJpgPath, IMetaApi xmpContent);
+
     /** @return number of copied properties */
     protected int getExifValues(MediaContentValues dest, File file, IMetaApi src) {
         return MediaUtil.copy(dest, src, false, true);
@@ -455,7 +502,9 @@ abstract public class MediaScanner  {
 
 
     public static MediaScanner getInstance(Context context) {
-        if (sInstance == null) sInstance = new MediaScannerExifInterface(context);
+        if (sInstance == null) {
+            sInstance = new MediaScannerExifInterface(context);
+        }
         return sInstance;
     }
 

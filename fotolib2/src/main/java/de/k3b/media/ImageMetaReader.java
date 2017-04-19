@@ -41,6 +41,7 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.io.DateUtil;
 import de.k3b.io.ListUtils;
 
@@ -51,7 +52,7 @@ import de.k3b.io.ListUtils;
 
 public class ImageMetaReader implements IMetaApi, Closeable {
     // public: used as log filter for crash report
-    public  static final String LOG_TAG = "";
+    public  static final String LOG_TAG = "ImageMetaReader";
 
     private static final Logger logger = LoggerFactory.getLogger(LOG_TAG);
 
@@ -68,16 +69,15 @@ public class ImageMetaReader implements IMetaApi, Closeable {
     private Directory mIptcDir;
     // private Directory fileDir;
     private Directory mCommentDir;
+    private String dbg_context = "";
 
     /**
-     * Reads Meta data from the specified file.
-     *
-     * @param filename
-     * @param externalXmpContent
+     * Reads Meta data from the specified inputStream (if not null) or File(filename).
      */
-    public ImageMetaReader load(String filename, InputStream inputStream, IMetaApi externalXmpContent) throws IOException {
+    public ImageMetaReader load(String filename, InputStream inputStream, IMetaApi externalXmpContent, String _dbg_context) throws IOException {
         mFilename = filename;
         mExternalXmpDir = externalXmpContent;
+        this.dbg_context = _dbg_context + "->ImageMetaReader(" + mFilename+ ") ";
 
         Metadata metadata = null;
         File jpegFile = (inputStream == null) ? new File(filename) : null;
@@ -92,12 +92,25 @@ public class ImageMetaReader implements IMetaApi, Closeable {
             }
             // IptcDirectory.TAG_ARM_VERSION
         } catch (ImageProcessingException e) {
-            logger.error("ImageMetaReader: Error open  " + filename, e);
+            logger.error(dbg_context +" Error open file " + e.getMessage(), e);
 
             metadata = null;
         }
         mMetadata = metadata;
-        if (metadata == null) return null;
+
+        if (metadata == null) {
+            if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+                logger.debug(dbg_context +
+                        "load: file not found ");
+            }
+            return null;
+        }
+
+        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+            logger.debug(dbg_context +
+                    "loaded: " + MediaUtil.toString(this));
+        }
+
         return this;
     }
 
@@ -281,7 +294,7 @@ public class ImageMetaReader implements IMetaApi, Closeable {
             // result = ListUtils.toStringList(mExifDir.getStringValueArray(ExifDirectoryBase.TAG_WIN_KEYWORDS));
             String value = mExifDir.getDescription(ExifDirectoryBase.TAG_WIN_KEYWORDS);
             if (value != null) {
-                result = ListUtils.toStringList(value.split(";"));
+                result = ListUtils.toStringList((String[]) value.split(";"));
             }
         }
 
@@ -316,6 +329,36 @@ public class ImageMetaReader implements IMetaApi, Closeable {
         throw new UnsupportedOperationException ();
     }
 
+    /** return the image orinentation as id (one of the ORIENTATION_ROTATE_XXX constants) */
+    private Integer getOrientationId() {
+        return mExifDir.getInteger(ExifDirectoryBase.TAG_ORIENTATION);
+    }
+
+    private static final int ORIENTATION_ROTATE_180 = 3;
+    private static final int ORIENTATION_ROTATE_90 = 6;  // rotate 90 cw to right it
+    private static final int ORIENTATION_ROTATE_270 = 8;  // rotate 270 to right it
+
+    /** return image orinentation in degrees (0, 90,180,270) or 0 if inknown */
+    public int getOrientationInDegrees() {
+        Integer orientation = getOrientationId();
+        if (orientation != null) {
+            // We only recognize a subset of orientation tag values.
+            int degree;
+            switch (orientation.intValue()) {
+                case ORIENTATION_ROTATE_90:
+                    return 90;
+                case ORIENTATION_ROTATE_180:
+                    return 180;
+                case ORIENTATION_ROTATE_270:
+                    return 270;
+                default:
+            }
+        }
+        return 0;
+    }
+
+
+
     @Override
     public void close() throws IOException {
 
@@ -348,7 +391,7 @@ public class ImageMetaReader implements IMetaApi, Closeable {
             XmpDirectory xmp = this.mMetadata.getFirstDirectoryOfType(XmpDirectory.class);
             if (xmp != null) {
                 mInternalXmpDir = new MediaXmpSegment();
-                mInternalXmpDir.setXmpMeta(xmp.getXMPMeta());
+                mInternalXmpDir.setXmpMeta(xmp.getXMPMeta(), dbg_context + " embedded xml ");
                 mInternalXmpDir.appendXmp("xmp.", builder);
             }
         }
@@ -387,7 +430,7 @@ public class ImageMetaReader implements IMetaApi, Closeable {
         XmpDirectory xmp = this.mMetadata.getFirstDirectoryOfType(XmpDirectory.class);
         if (xmp != null) {
             mInternalXmpDir = new MediaXmpSegment();
-            mInternalXmpDir.setXmpMeta(xmp.getXMPMeta());
+            mInternalXmpDir.setXmpMeta(xmp.getXMPMeta(), dbg_context + " embedded xml ");
         }
     }
 

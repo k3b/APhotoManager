@@ -97,7 +97,7 @@ public class ExifInterfaceExIntegrationTests {
     protected IMetaApi getMeta(String fileName) throws IOException {
         InputStream inputStream = ImageMetaReaderIntegrationTests.class.getResourceAsStream("images/" + fileName);
         Assert.assertNotNull("open images/" + fileName, inputStream);
-        IMetaApi result = new ExifInterfaceEx(fileName, inputStream, null);
+        IMetaApi result = new ExifInterfaceEx(fileName, inputStream, null, "JUnit");
         return result;
     }
 }

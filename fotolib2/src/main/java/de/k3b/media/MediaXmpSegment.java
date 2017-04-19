@@ -19,6 +19,7 @@
 
 package de.k3b.media;
 
+import com.adobe.xmp.XMPMeta;
 import com.adobe.xmp.XMPMetaFactory;
 import com.adobe.xmp.XMPUtils;
 import com.adobe.xmp.impl.XMPDateTimeImpl;
@@ -26,6 +27,7 @@ import com.adobe.xmp.impl.XMPDateTimeImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.OutputStream;
 import java.util.Date;
 import java.util.List;
 
@@ -173,4 +175,25 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
         return this;
     }
 
+    // Override adds logging
+    @Override
+    public XmpSegment setXmpMeta(XMPMeta xmpMeta, String dbg_context) {
+        super.setXmpMeta(xmpMeta, dbg_context);
+        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+            logger.info(dbg_context + " setXmpMeta " +  MediaUtil.toString(this));
+        }
+
+        return this;
+    }
+
+    // Override adds logging
+    @Override
+    public XmpSegment save(OutputStream os, boolean humanReadable, String dbg_context) {
+        super.save(os, humanReadable, dbg_context);
+        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+            logger.info(dbg_context + " save " + MediaUtil.toString(this));
+        }
+
+        return this;
+    }
 }

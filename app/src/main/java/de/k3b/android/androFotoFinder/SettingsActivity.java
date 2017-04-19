@@ -128,6 +128,8 @@ public class SettingsActivity extends PreferenceActivity {
 
         prefs.putBoolean("debugEnabledMemory", Global.debugEnabledMemory);
 
+        prefs.putBoolean("debugEnabledJpgMetaIo", FotoLibGlobal.debugEnabledJpgMetaIo);
+
         // #26
         prefs.putBoolean("initialImageDetailResolutionHigh", Global.initialImageDetailResolutionHigh);
 
@@ -168,6 +170,8 @@ public class SettingsActivity extends PreferenceActivity {
         Global.debugEnabledMap                  = getPref(prefs, "debugEnabledMap", Global.debugEnabledMap);
 
         Global.debugEnabledMemory               = getPref(prefs, "debugEnabledMemory", Global.debugEnabledMemory);
+
+        FotoLibGlobal.debugEnabledJpgMetaIo     = getPref(prefs, "debugEnabledJpgMetaIo", FotoLibGlobal.debugEnabledJpgMetaIo);
 
         // one setting for several 3d party debug-flags
         boolean debug3rdParty                   = getPref(prefs, "debugEnableLibs", PhotoViewAttacher.DEBUG);
@@ -270,9 +274,9 @@ public class SettingsActivity extends PreferenceActivity {
         TagRepository.setInstance(Global.reportDir);
 
         // true if first run or change
-        if ((sOldEnableTagSupport == null) || (sOldEnableTagSupport.booleanValue() != Global.Media.enableNonStandardMediaFields)) {
-            MediaScanner.setInstance((Global.Media.enableNonStandardMediaFields) ? new MediaScannerEx(context) : new MediaScannerExifInterface(context));
-            sOldEnableTagSupport = Global.Media.enableNonStandardMediaFields;
+        if ((sOldEnableTagSupport == null) || (sOldEnableTagSupport.booleanValue() != Global.Media.enableNonStandardIptcMediaScanner)) {
+            MediaScanner.setInstance((Global.Media.enableNonStandardIptcMediaScanner) ? new MediaScannerEx(context) : new MediaScannerExifInterface(context));
+            sOldEnableTagSupport = Global.Media.enableNonStandardIptcMediaScanner;
         }
     }
 

@@ -60,9 +60,9 @@ import java.util.regex.Pattern;
  */
 public class ExifInterface {
     // public to allow error filtering
-    public static final String TAG = "ExifInterface";
+    public static final String LOG_TAG = "ExifInterface";
 
-    private static final Logger logger = LoggerFactory.getLogger(TAG);
+    private static final Logger logger = LoggerFactory.getLogger(LOG_TAG);
 
     private static final boolean DEBUG_INTERNAL = false;
 
@@ -2637,18 +2637,18 @@ public class ExifInterface {
     private static void logWarn(String msg, Throwable e) {
         if (DEBUG) {
             logger.warn(msg, e);
-            // Log.w(TAG, msg, e);
+            // Log.w(LOG_TAG, msg, e);
         }
     }
     private static void logWarn(String msg) {
         if (DEBUG) {
             logger.warn(msg);
-            // Log.w(TAG, msg);
+            // Log.w(LOG_TAG, msg);
         }
     }
     private static void logDebug(String msg) {
         logger.debug(msg);
-        // Log.d(TAG, msg);
+        // Log.d(LOG_TAG, msg);
     }
 
 

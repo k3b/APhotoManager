@@ -47,7 +47,7 @@ public class MediaXmpTests {
         MediaXmpSegment sut = new MediaXmpSegment();
         InputStream fis = getStream("images/test-WitExtraData.xmp");
         sut = new MediaXmpSegment();
-        sut.load(fis);
+        sut.load(fis, "JUnit");
         fis.close();
 
         MediaDTO actual = new MediaDTO(sut);
@@ -106,12 +106,12 @@ public class MediaXmpTests {
         OUTDIR.mkdirs();
         File outFile = new File(OUTDIR, "shouldSaveAsXmp.xmp");
         FileOutputStream fos = new FileOutputStream(outFile);
-        sut.save(fos, true);
+        sut.save(fos, true, "JUnit");
         fos.close();
 
         FileInputStream fis = new FileInputStream(outFile);
         sut = new MediaXmpSegment();
-        sut.load(fis);
+        sut.load(fis, "JUnit");
         fis.close();
 
         MediaDTO actual = new MediaDTO(sut);

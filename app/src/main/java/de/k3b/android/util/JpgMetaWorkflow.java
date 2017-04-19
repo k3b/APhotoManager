@@ -54,7 +54,7 @@ public class JpgMetaWorkflow {
             ExifInterfaceEx exif = null;
             try {
                 long lastModified = filePath.lastModified();
-                exif = new ExifInterfaceEx(filePath.getAbsolutePath(), null);
+                exif = new ExifInterfaceEx(filePath.getAbsolutePath(), null, null, "saveLatLon");
                 debugExif(sb, "old", exif, filePath);
 
                 exif.setLatitude(latitude);
@@ -82,7 +82,7 @@ public class JpgMetaWorkflow {
                 filePath.setLastModified(lastModified);
 
                 if (sb != null) {
-                    exif = new ExifInterfaceEx(filePath.getAbsolutePath(), null);
+                    exif = new ExifInterfaceEx(filePath.getAbsolutePath(), null, null, "dbg in saveLatLon");
                     debugExif(sb, "new ", exif, filePath);
 
                     Log.d(Global.LOG_CONTEXT, sb.toString());
@@ -135,7 +135,7 @@ public class JpgMetaWorkflow {
      */
     public static int getRotationFromExifOrientation(String fullPathToImageFile) {
         try {
-            ExifInterfaceEx exif = new ExifInterfaceEx(fullPathToImageFile, null);
+            ExifInterfaceEx exif = new ExifInterfaceEx(fullPathToImageFile, null, null, "getRotationFromExifOrientation");
             int orientation = exif.getAttributeInt(ExifInterfaceEx.TAG_ORIENTATION, 0);
             if ((orientation >= 0) && (orientation < exifOrientationCode2RotationDegrees.length))
                 return exifOrientationCode2RotationDegrees[orientation];

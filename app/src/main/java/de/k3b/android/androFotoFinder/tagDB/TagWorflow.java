@@ -143,7 +143,7 @@ public class TagWorflow extends TagProcessor {
 
                 ExifInterfaceEx exif = null;
                 try {
-                    exif = new ExifInterfaceEx(tagWorflowItemFromDB.path, null);
+                    exif = new ExifInterfaceEx(tagWorflowItemFromDB.path, null, null, "TagWorflow.updateTags " + dbgSaveReason);
                     MediaUtil.copy(xmp, exif, false, false);
                 } catch (IOException ex) {
                     // exif is null
@@ -153,14 +153,12 @@ public class TagWorflow extends TagProcessor {
             // apply tag changes to xmp
             xmp.setTags(currentItemTags);
 
+            String dbgMsgPrefix = "TagWorflow.saveXmp(" + xmpFile + "): " + dbgSaveReason;
             // update xmp-sidecar-file
             try {
-                xmp.save(xmpFile, Global.saveXmpAsHumanReadable);
-                if (Global.debugEnabledSql) {
-                    Log.d(Global.LOG_CONTEXT,"saveXmp(" + xmpFile + "): " + dbgSaveReason);
-                }
+                xmp.save(xmpFile, Global.saveXmpAsHumanReadable, dbgMsgPrefix);
             } catch (IOException e) {
-                Log.e(Global.LOG_CONTEXT,"error: saveXmp(" + xmpFile + ", " + dbgSaveReason + ") : " + e.getMessage(),e);
+                Log.e(Global.LOG_CONTEXT,dbgMsgPrefix + " error : " + e.getMessage(),e);
             }
 
         // update tag repository
@@ -222,10 +220,7 @@ public class TagWorflow extends TagProcessor {
         if ((xmpFile != null) && (xmpFile.exists())) {
             try {
                 MediaXmpSegment xmp = new MediaXmpSegment();
-                xmp.load(xmpFile);
-                if (Global.debugEnabledSql) {
-                    Log.d(Global.LOG_CONTEXT,"loadXmp(" + xmpFile + ")");
-                }
+                xmp.load(xmpFile, "loadXmp(" + xmpFile + ")");
                 return xmp;
             } catch (IOException e) {
                 Log.e(Global.LOG_CONTEXT,"error: loadXmp(" + xmpFile +  ") : " + e.getMessage(),e);

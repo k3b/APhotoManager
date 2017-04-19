@@ -146,7 +146,7 @@ public class ImageDetailMetaDialogBuilder {
         if (file.exists()) {
             builder.append(NL).append(file).append(NL).append(NL);
 
-            ImageMetaReader meta = new ImageMetaReader().load(file.getAbsolutePath(),null, null);
+            ImageMetaReader meta = new ImageMetaReader().load(file.getAbsolutePath(),null, null, "ImageDetailMetaDialogBuilder");
             builder.append(meta.toString());
             builder.append(NL).append(line).append(NL);
         } else {
@@ -157,7 +157,7 @@ public class ImageDetailMetaDialogBuilder {
     private static void addXmp(StringBuilder builder, File file) throws IOException {
         if (file.exists()) {
             XmpSegment meta = new XmpSegment();
-            meta.load(file);
+            meta.load(file, "ImageDetailMetaDialogBuilder");
             builder.append(NL).append(file).append(NL).append(NL);
             meta.appendXmp(null, builder);
             builder.append(NL).append(line).append(NL);
@@ -167,7 +167,7 @@ public class ImageDetailMetaDialogBuilder {
     }
 
     private static void getExifInfo_android(StringBuilder builder, String filepath) throws IOException {
-        ExifInterfaceEx exif = new ExifInterfaceEx(filepath, null);
+        ExifInterfaceEx exif = new ExifInterfaceEx(filepath, null, null, "ImageDetailMetaDialogBuilder.getExifInfo_android");
 
         builder.append(NL).append(line).append(NL);
         builder.append(NL).append(filepath).append(NL).append(NL);

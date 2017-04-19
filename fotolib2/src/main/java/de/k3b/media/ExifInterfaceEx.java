@@ -21,6 +21,9 @@ package de.k3b.media;
 
 // import android.media.ExifInterface;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParsePosition;
@@ -29,14 +32,19 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.io.ListUtils;
 
 /**
  * Thin Wrapper around Android-s ExifInterface to read/write exif data from jpg file
+ * and also implements IMetaApi
+ *
  * Created by k3b on 08.10.2016.
  */
 
 public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
+    private static final Logger logger = LoggerFactory.getLogger(LOG_TAG);
+
     private static final SimpleDateFormat sExifDateTimeFormatter;
     private static final String LIST_DELIMITER = ";";
 
@@ -45,21 +53,35 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
         sExifDateTimeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
+    private final String dbg_context;
 	/** if not null content of xmp sidecar file */
     private final IMetaApi xmpExtern;
 
     /**
      * Reads Exif tags from the specified JPEG file.
-     *
-     * @param filename
+     *  @param filename
      * @param xmpExtern if not null content of xmp sidecar file
+     * @param dbg_context
      */
-    public ExifInterfaceEx(String filename, InputStream in, IMetaApi xmpExtern) throws IOException {
+    public ExifInterfaceEx(String filename, InputStream in, IMetaApi xmpExtern, String dbg_context) throws IOException {
         super(filename, in);
         this.xmpExtern = xmpExtern;
+        this.dbg_context = dbg_context + "->ExifInterfaceEx(" + filename+ ") ";
+        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+            logger.debug(dbg_context +
+                    " load: " + MediaUtil.toString(this));
+        }
+        // Log.d(LOG_TAG, msg);
+
     }
-    public ExifInterfaceEx(String filename, IMetaApi xmpExtern) throws IOException {
-        this(filename, null, xmpExtern);
+
+    @Override
+    public void saveAttributes() throws IOException {
+        super.saveAttributes();
+        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+            logger.debug(dbg_context +
+                    " saved: " + MediaUtil.toString(this));
+        }
     }
 
     @Override
@@ -260,6 +282,35 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
         setAttribute(TAG_WIN_RATING, (value != null) ? value.toString() : null);
         if (xmpExtern != null) xmpExtern.setRating(value);
         return this;
+    }
+
+    /** return the image orinentation as id (one of the ORIENTATION_ROTATE_XXX constants) */
+    private int getOrientationId() {
+        return getAttributeInt(
+                ExifInterfaceEx.TAG_ORIENTATION, -1);
+    }
+
+    private static final int ORIENTATION_ROTATE_180 = 3;
+    private static final int ORIENTATION_ROTATE_90 = 6;  // rotate 90 cw to right it
+    private static final int ORIENTATION_ROTATE_270 = 8;  // rotate 270 to right it
+
+    /** return image orinentation in degrees (0, 90,180,270) or 0 if inknown */
+    public int getOrientationInDegrees() {
+        int orientation = getOrientationId();
+        if (orientation != -1) {
+            // We only recognize a subset of orientation tag values.
+            int degree;
+            switch (orientation) {
+                case ExifInterfaceEx.ORIENTATION_ROTATE_90:
+                    return 90;
+                case ExifInterfaceEx.ORIENTATION_ROTATE_180:
+                    return 180;
+                case ExifInterfaceEx.ORIENTATION_ROTATE_270:
+                    return 270;
+                default:
+            }
+        }
+        return 0;
     }
 
     protected Date getAttributeDate(String tag) {

@@ -36,9 +36,10 @@ android {
         // 0.6.0.170309 (25)    Tag support (fdroid build failed)
         // 0.6.0.170315 (26)    Bugfix for new Tag support (fdroid build failed)
         // 0.6.0.170402 (27)    language updates. try to fix fdroid build
+        // 0.6.0.170404 (28)    Try to fix fdroid build
 
-        versionCode = 27
-        versionName = '0.6.0.170402'
+        versionCode = 28
+        versionName = '0.6.0.170404'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7

@@ -107,17 +107,17 @@ public class Global {
 
     public static class Media {
         /** Support extra parameters true: experimental. Not fully implemented yet. */
-        public static final boolean enableNonStandardMediaFields = true;
+        public static final boolean enableNonStandardIptcMediaScanner = true;
 
         /** true: experimental. Not fully implemented yet. */
-        public static final boolean enableNonStandardMediaFieldsUpdateLastScanTimestamp = enableNonStandardMediaFields && true;
+        public static final boolean enableNonStandardMediaFieldsUpdateLastScanTimestamp = enableNonStandardIptcMediaScanner && true;
 
         /** true: xmp value is more important than jpg-exif (if both values are present.) */
-        public static final boolean xmpOverwritesExif = enableNonStandardMediaFields && true;
+        public static final boolean xmpOverwritesExif = enableNonStandardIptcMediaScanner && true;
 
         /** true: if there is no xmp-file or entry xmp-entry in csv mark this
          * SQL_COL_EXT_XMP_LAST_MODIFIED_DATE=EXT_LAST_EXT_SCAN_NO_XMP*. */
-        public static final boolean enableXmpNone = enableNonStandardMediaFields && true;
+        public static final boolean enableXmpNone = enableNonStandardIptcMediaScanner && true;
     }
 
     /** #26 which image resolution should the "non zoomed imageView" have? */

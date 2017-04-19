@@ -51,11 +51,11 @@ public class MediaScannerEx extends MediaScannerExifInterface {
     }
 
     @Override
-    protected void getExifFromFile(ContentValues values, File file) {
-        super.getExifFromFile(values, file);
+    protected void getExifFromFile(ContentValues values, File jpgFile) {
+        super.getExifFromFile(values, jpgFile);
 
         // for first tests generate test data
-        if (false && Global.Media.enableNonStandardMediaFields) {
+        if (false && Global.Media.enableNonStandardIptcMediaScanner) {
             addTags(values, null, "test1", "test2");
             TagSql.setDescription(values, null, "test");
             TagSql.setRating(values, null, 3);
@@ -76,7 +76,7 @@ public class MediaScannerEx extends MediaScannerExifInterface {
             xmp = new MediaXmpSegment();
             try {
                 getLastUpdated(mediaContentValuesToReceiveLastUpdated, xmpFileSource);
-                xmp.load(xmpFileSource);
+                xmp.load(xmpFileSource, "MediaScannerEx:loadXmp");
                 TagRepository.getInstance().include(getImportRoot(), xmp.getTags());
             } catch (FileNotFoundException e) {
                 Log.e(Global.LOG_CONTEXT, "MediaScannerEx:loadXmp(xmpFileSource=" + xmpFileSource +") failed " + e.getMessage(),e);
@@ -132,7 +132,7 @@ public class MediaScannerEx extends MediaScannerExifInterface {
     @Override
     public int updateMediaDatabase_Android42(Context context, String[] oldPathNames, String... newPathNames) {
         int result = super.updateMediaDatabase_Android42(context, oldPathNames, newPathNames);
-        if ((result > 0) && (Global.Media.enableNonStandardMediaFields)) {
+        if ((result > 0) && (Global.Media.enableNonStandardIptcMediaScanner)) {
             TagRepository.getInstance().save();
         }
         return result;

@@ -19,7 +19,6 @@
 
 package de.k3b.android.util;
 
-
 import android.content.ContentValues;
 import android.content.Context;
 
@@ -27,26 +26,25 @@ import java.io.IOException;
 
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
-import de.k3b.media.ExifInterfaceEx;
 import de.k3b.media.IMetaApi;
+import de.k3b.media.ImageMetaReader;
 import de.k3b.media.MediaXmpSegment;
 
 /**
- * MediaScanner based on android ExifInterface.
- *
- * Created by k3b on 11.04.2017.
+ * MediaScanner implementation based on Drewnoakes image meta reader.
+ * Created by k3b on 18.04.2017.
  */
 
-public class MediaScannerExifInterface extends MediaScanner {
-    public MediaScannerExifInterface(Context context) {
+public class MediaScannerImageMetaReader extends MediaScanner {
+    public MediaScannerImageMetaReader(Context context) {
         super(context);
     }
 
     @Override
     protected IMetaApi loadNonMediaValues(ContentValues destinationValues, String absoluteJpgPath, IMetaApi xmpContent) {
-        ExifInterfaceEx exif = null;
+        ImageMetaReader exif = null;
         try {
-            exif = new ExifInterfaceEx(absoluteJpgPath, null, xmpContent, "MediaScannerExifInterface.loadNonMediaValues");
+            exif = new ImageMetaReader().load(absoluteJpgPath, null, xmpContent, "MediaScannerImageMetaReader load");
         } catch (IOException ex) {
             // exif is null
         }
@@ -60,13 +58,14 @@ public class MediaScannerExifInterface extends MediaScanner {
 
     @Override
     public IGeoPointInfo getPositionFromFile(String absoluteJpgPath, String id) {
-        ExifInterfaceEx exif = null;
+        ImageMetaReader exif = null;
         try {
-            exif = new ExifInterfaceEx(absoluteJpgPath, null, null, "MediaScannerExifInterface.getPositionFromFile");
+            exif = new ImageMetaReader().load(absoluteJpgPath, null, null, "MediaScannerImageMetaReader getPositionFromFile");
         } catch (IOException ex) {
             // exif is null
         }
 
         return getPositionFromMeta(absoluteJpgPath, id, exif);
     }
+
 }

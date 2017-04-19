@@ -54,7 +54,8 @@ import de.k3b.tagDB.TagConverter;
  */
 
 public class XmpSegment {
-    private static final String dbg_context = "XmpSegment: ";
+    public static final String DBG_PREFIX = "XmpSegment: ";
+    private static String dbg_context = DBG_PREFIX;
     private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
     // public: can be changed in settings dialog
     public  static boolean DEBUG = false;
@@ -164,8 +165,8 @@ public class XmpSegment {
         return null;
     }
 
-    private void onError(String debugContext, Exception e) {
-        logger.error(dbg_context, debugContext, e);
+    private void onError(String message, Exception e) {
+        logger.error(dbg_context + message, e);
     }
 
     protected XMPMeta getXmpMeta() {
@@ -173,36 +174,41 @@ public class XmpSegment {
         return xmpMeta;
     }
 
-    public XmpSegment setXmpMeta(XMPMeta xmpMeta) {
+    public XmpSegment setXmpMeta(XMPMeta xmpMeta, String dbg_context) {
+        if (dbg_context != null) {
+            this.dbg_context = dbg_context + DBG_PREFIX;
+        }
+
         this.xmpMeta = xmpMeta;
+
         return this;
     }
 
-    public XmpSegment load(InputStream is) {
+    public XmpSegment load(InputStream is, String dbg_context) {
         try {
-            setXmpMeta(XMPMetaFactory.parse(is));
+            setXmpMeta(XMPMetaFactory.parse(is), dbg_context);
         } catch (XMPException e) {
-            onError("load", e);
+            onError("->XmpSegment.load", e);
         }
         return this;
     }
 
-    public XmpSegment load(File file) throws FileNotFoundException {
+    public XmpSegment load(File file, String dbg_context) throws FileNotFoundException {
 		FileInputStream stream = null;
         try {
 			stream = new FileInputStream(file);
-            setXmpMeta(XMPMetaFactory.parse(stream));
+            setXmpMeta(XMPMetaFactory.parse(stream), dbg_context + " file:" + file);
         } catch (XMPException e) {
-            onError("load " + file, e);
+            onError("->XmpSegment.load " + file, e);
 			
             // workaround: my android-4.2 tahblet cannot re-read it-s xmp without trailing "\n"
             if (file.exists()) {
                 try {
-                    setXmpMeta(XMPMetaFactory.parse(FileUtils.streamFromStringContent(FileUtils.readFile(file)+"\n")));
+                    setXmpMeta(XMPMetaFactory.parse(FileUtils.streamFromStringContent(FileUtils.readFile(file)+"\n")), this.dbg_context);
                 } catch (IOException e1) {
-                    onError("load-via-string " + file, e);
+                    onError("->XmpSegment.load-via-string " + file, e);
                 } catch (XMPException e1) {
-                    onError("load-via-string " + file, e);
+                    onError("->XmpSegment.load-via-string " + file, e);
                 }
             }
         } finally {
@@ -211,11 +217,11 @@ public class XmpSegment {
         return this;
     }
 
-    public XmpSegment save(File file, boolean humanReadable) throws FileNotFoundException {
+    public XmpSegment save(File file, boolean humanReadable, String dbg_context) throws FileNotFoundException {
         FileOutputStream stream = null;
         try {
             stream = new FileOutputStream(file);
-            save(stream, humanReadable);
+            save(stream, humanReadable, dbg_context + file);
         } finally {
             FileUtils.close(stream, file);
         }
@@ -223,7 +229,11 @@ public class XmpSegment {
 
     }
 
-    public XmpSegment save(OutputStream os, boolean humanReadable) {
+    public XmpSegment save(OutputStream os, boolean humanReadable, String dbg_context) {
+        if (dbg_context != null) {
+            this.dbg_context = dbg_context + DBG_PREFIX;
+        }
+
         // humanReadable = false;
         try {
             SerializeOptions options = new SerializeOptions(0);

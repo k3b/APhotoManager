@@ -133,7 +133,7 @@ public class TagSql extends FotoSql {
     public static void filter2QueryEx(QueryParameter resultQuery, IGalleryFilter filter, boolean clearWhereBefore) {
         if ((resultQuery != null) && (!GalleryFilterParameter.isEmpty(filter))) {
             filter2Query(resultQuery, filter, clearWhereBefore);
-            if (Global.Media.enableNonStandardMediaFields) {
+            if (Global.Media.enableNonStandardIptcMediaScanner) {
                 String any = filter.getInAnyField();
                 if ((any != null) && (any.length() > 0)) {
                     if (!any.contains("%")) {
