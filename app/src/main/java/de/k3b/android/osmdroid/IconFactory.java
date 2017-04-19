@@ -64,11 +64,13 @@ public class IconFactory {
         Bitmap finalIcon = Bitmap.createBitmap(mBackground.getWidth(), mBackground.getHeight(), mBackground.getConfig());
         Canvas iconCanvas = new Canvas(finalIcon);
         iconCanvas.drawBitmap(mBackground, 0, 0, null);
-        int textHeight = (int) (mTextPaint.descent() + mTextPaint.ascent());
-        iconCanvas.drawText(text,
-                mTextAnchorU * finalIcon.getWidth(),
-                mTextAnchorV * finalIcon.getHeight() - textHeight / 2,
-                mTextPaint);
+        if ((text != null) && (text.length() > 0)) {
+            int textHeight = (int) (mTextPaint.descent() + mTextPaint.ascent());
+            iconCanvas.drawText(text,
+                    mTextAnchorU * finalIcon.getWidth(),
+                    mTextAnchorV * finalIcon.getHeight() - textHeight / 2,
+                    mTextPaint);
+        }
         return new BitmapDrawable(resources,  finalIcon);
     }
 }
