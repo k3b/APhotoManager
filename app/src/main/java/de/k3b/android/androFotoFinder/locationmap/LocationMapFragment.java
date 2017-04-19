@@ -1025,7 +1025,7 @@ public class LocationMapFragment extends DialogFragment {
         TagSql.filter2QueryEx(query, filter, false);
         FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
 
-        ImageDetailActivityViewPager.showActivity(this.getActivity(), null, 0, query);
+        ImageDetailActivityViewPager.showActivity(this.getActivity(), null, 0, query, 0);
         return true;
     }
 

@@ -37,10 +37,10 @@ android {
         // 0.6.0.170315 (26)    Bugfix for new Tag support (fdroid build failed)
         // 0.6.0.170402 (27)    language updates. (fdroid build failed)
         // 0.6.0.170404 (28)    same as 0.6.0.170402. try to fix fdroid build
-        // 0.6.0.170420 (29)    bugfix Map
+        // 0.6.0.170421 (29)    bugfix Map
 
         versionCode = 29
-        versionName = '0.6.0.170420'
+        versionName = '0.6.0.170421'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7

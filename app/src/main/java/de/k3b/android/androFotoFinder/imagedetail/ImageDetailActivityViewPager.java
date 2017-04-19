@@ -317,7 +317,16 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     }
 
-    public static void showActivity(Activity context, Uri imageUri, int position, QueryParameter imageDetailQuery) {
+    /**
+     * shows a new instance of ImageDetailActivityViewPager.
+     *
+     * @param context calling activity
+     * @param imageUri if != null initial image to show
+     * @param position offset of image to display in query or current file directory
+     * @param imageDetailQuery if != null set initial filter to new FotoGalleryActivity
+     * @param requestCode if != 0 start for result. else start without result
+     */
+    public static void showActivity(Activity context, Uri imageUri, int position, QueryParameter imageDetailQuery, int requestCode) {
         Intent intent;
         //Create intent
         intent = new Intent(context, ImageDetailActivityViewPager.class);
@@ -328,7 +337,11 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         intent.putExtra(ImageDetailActivityViewPager.EXTRA_POSITION, position);
         intent.setData(imageUri);
 
-        context.startActivityForResult(intent, ACTIVITY_ID);
+        if (requestCode != 0) {
+            context.startActivityForResult(intent, requestCode);
+        } else {
+            context.startActivity(intent);
+        }
     }
 
     @Override
@@ -837,9 +850,9 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                     dirPath = FileUtils.getDir(dirPath).getAbsolutePath();
                     GalleryFilterParameter newFilter = new GalleryFilterParameter();
                     newFilter.setPath(dirPath);
-                    int callBackId = (MediaScanner.isNoMedia(dirPath,MediaScanner.DEFAULT_SCAN_DEPTH)) ? NOMEDIA_GALLERY : 0;
+                    // int callBackId = (MediaScanner.isNoMedia(dirPath,MediaScanner.DEFAULT_SCAN_DEPTH)) ? NOMEDIA_GALLERY : 0;
 
-                    FotoGalleryActivity.showActivity(this, this.mFilter, null, callBackId);
+                    FotoGalleryActivity.showActivity(this, this.mFilter, null, 0);
                 }
                 return true;
             }
@@ -867,7 +880,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
             case R.id.cmd_edit_geo: {
                 SelectedFiles selectedItem = getCurrentFoto();
-                GeoEditActivity.showActivity(this, selectedItem);
+                GeoEditActivity.showActivity(this, selectedItem, GeoEditActivity.RESULT_ID);
                 return true;
             }
             case R.id.cmd_edit_tags: {

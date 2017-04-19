@@ -86,7 +86,8 @@ public class GalleryFilterActivity extends LocalizedActivity
     private BookmarkController mBookmarkController = null;
     private DialogFragment mDlg;
 
-    public static void showActivity(Activity context, IGalleryFilter filter, QueryParameter rootQuery, String lastBookmarkFileName) {
+    public static void showActivity(Activity context, IGalleryFilter filter, QueryParameter rootQuery,
+                                    String lastBookmarkFileName, int requestCode) {
         mRootQuery = rootQuery;
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, context.getClass().getSimpleName()
@@ -101,7 +102,11 @@ public class GalleryFilterActivity extends LocalizedActivity
         }
 
         BookmarkController.saveState(lastBookmarkFileName, intent, null);
-        context.startActivityForResult(intent, resultID);
+        if (requestCode != 0) {
+            context.startActivityForResult(intent, requestCode);
+        } else {
+            context.startActivity(intent);
+        }
     }
 
     public static GalleryFilterParameter getFilter(Intent intent) {
