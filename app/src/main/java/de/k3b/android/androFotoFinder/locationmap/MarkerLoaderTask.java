@@ -119,7 +119,7 @@ public abstract class MarkerLoaderTask<MARKER extends ClickableIconOverlay> exte
                         "," + FotoSql.SQL_COL_LAT +
                         " or " + FotoSql.SQL_COL_PK);
             }
-            String markerItemCount = "1";
+            String markerItemCount = null;
             int increment = PROGRESS_INCREMENT;
             while (cursor.moveToNext()) {
                 int id = cursor.getInt(colIconID);
@@ -131,8 +131,9 @@ public abstract class MarkerLoaderTask<MARKER extends ClickableIconOverlay> exte
                 } else {
                     marker = createMarker();
                     GeoPoint point = new GeoPoint(cursor.getDouble(colLat),cursor.getDouble(colLon));
+
                     if (colCount != -1) markerItemCount = cursor.getString(colCount);
-                    BitmapDrawable icon = (colCount != -1) ? null : createIcon(markerItemCount);
+                    BitmapDrawable icon = createIcon(markerItemCount);
                     marker.set(id, point, icon,null );
                 }
 
