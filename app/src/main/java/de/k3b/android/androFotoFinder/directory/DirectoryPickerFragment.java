@@ -511,7 +511,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             QueryParameter query = new QueryParameter();
             TagSql.filter2QueryEx(query, filter, true);
             FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
-            ImageDetailActivityViewPager.showActivity(this.getActivity(), null, 0, query);
+            ImageDetailActivityViewPager.showActivity(this.getActivity(), null, 0, query, 0);
             return true;
         }
         return false;

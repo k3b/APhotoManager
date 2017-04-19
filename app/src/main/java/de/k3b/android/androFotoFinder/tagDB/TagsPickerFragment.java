@@ -438,7 +438,7 @@ public class TagsPickerFragment  extends DialogFragment  {
     public static boolean handleMenuShow(int menuItemItemId, Tag selectedTag, Activity context, IGalleryFilter parentFilter) {
         switch (menuItemItemId) {
             case R.id.cmd_photo:
-                ImageDetailActivityViewPager.showActivity(context, null, 0, createSubQueryByTag(parentFilter, selectedTag));
+                ImageDetailActivityViewPager.showActivity(context, null, 0, createSubQueryByTag(parentFilter, selectedTag), 0);
                 return true;
             case R.id.cmd_gallery:
                 FotoGalleryActivity.showActivity(context, createSubFilterByTag(parentFilter, selectedTag), null, 0);

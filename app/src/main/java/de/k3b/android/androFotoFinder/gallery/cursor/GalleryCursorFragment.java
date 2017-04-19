@@ -705,7 +705,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             multiSelectionUpdateActionbar("Start multisel");
         } else {
             // in gallery mode long click is view image
-            ImageDetailActivityViewPager.showActivity(this.getActivity(), getUri(holder.imageID), position, getCurrentQuery());
+            ImageDetailActivityViewPager.showActivity(this.getActivity(), getUri(holder.imageID), position, getCurrentQuery(), ImageDetailActivityViewPager.ACTIVITY_ID);
         }
         return true;
     }
@@ -785,7 +785,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 MapGeoPickerActivity.showActivity(this.getActivity(), selectedFiles);
                 return true;
             case R.id.cmd_edit_geo:
-                GeoEditActivity.showActivity(this.getActivity(), selectedFiles);
+                GeoEditActivity.showActivity(this.getActivity(), selectedFiles, GeoEditActivity.RESULT_ID);
                 return true;
             case R.id.cmd_edit_tags: {
                 return tagsShowEditDialog(selectedFiles);

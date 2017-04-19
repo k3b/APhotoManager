@@ -79,7 +79,7 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
     private ProgressBar mProgressBar = null;
     private TextView mLblStatusMessage;
 
-    public static void showActivity(Activity context, SelectedFiles selectedFiles) {
+    public static void showActivity(Activity context, SelectedFiles selectedFiles, int requestCode) {
         Uri initalUri = null;
         final Intent intent = new Intent().setClass(context,
                 GeoEditActivity.class);
@@ -101,7 +101,11 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
                     + " > GeoEditActivity.showActivity@" + initalUri);
         }
 
-        context.startActivityForResult(intent, RESULT_ID);
+        if (requestCode != 0) {
+            context.startActivityForResult(intent, requestCode);
+        } else {
+            context.startActivity(intent);
+        }
     }
 
     @Override
@@ -316,7 +320,7 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
         }
         try {
             // #7: allow choosing geo pick from map or from "photo with geo"
-            this.startActivityForResult(Intent.createChooser(intent, this.getString(R.string.geo_edit_menu_title)), RESULT_ID);
+            this.startActivityForResult(Intent.createChooser(intent, this.getString(R.string.geo_edit_menu_title)), GeoEditActivity.RESULT_ID);
             // this.startActivityForResult(intent, RESULT_ID);
         } catch (ActivityNotFoundException ex) {
             Toast.makeText(this, R.string.geo_picker_err_not_found,Toast.LENGTH_LONG).show();

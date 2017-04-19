@@ -267,7 +267,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
         FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
         FotoSql.addWhereFilterLatLon(query, geoArea);
 
-        ImageDetailActivityViewPager.showActivity(this, null, 0, query);
+        ImageDetailActivityViewPager.showActivity(this, null, 0, query, 0);
         return true;
     }
 
@@ -308,7 +308,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
 
     private void openFilter() {
         GalleryFilterActivity.showActivity(this, this.mFilter, null,
-                mBookmarkController.getlastBookmarkFileName());
+                mBookmarkController.getlastBookmarkFileName(), GalleryFilterActivity.resultID);
     }
 
     private GeoPointDto getGeoPointDtoFromIntent(Intent intent) {
