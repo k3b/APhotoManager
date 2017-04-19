@@ -404,6 +404,14 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
 
     private BookmarkController mBookmarkController = null;
 
+    /**
+     * shows a new instance of FotoGalleryActivity.
+     *
+     * @param context calling activity
+     * @param filter if != null set initial filter to new FotoGalleryActivity
+     * @param query if != null set initial filter to new FotoGalleryActivity
+     * @param requestCode if != 0 start for result. else start without result
+     */
     public static void showActivity(Activity context, GalleryFilterParameter filter, QueryParameter query, int requestCode) {
         Intent intent = new Intent(context, FotoGalleryActivity.class);
 
@@ -747,7 +755,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         GalleryFilterActivity.showActivity(this,
                 this.mGalleryQueryParameter.getCurrentFilterSettings(),
                 this.mGalleryQueryParameter.mGalleryContentQuery,
-                mBookmarkController.getlastBookmarkFileName());
+                mBookmarkController.getlastBookmarkFileName(), GalleryFilterActivity.resultID);
     }
 
     /** called by Fragment: a fragment Item was clicked */
@@ -755,7 +763,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
     public void onGalleryImageClick(long imageId, Uri imageUri, int position) {
         Global.debugMemory(mDebugPrefix, "onGalleryImageClick");
         QueryParameter imageDetailQuery = this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery();
-        ImageDetailActivityViewPager.showActivity(this, imageUri, position, imageDetailQuery);
+        ImageDetailActivityViewPager.showActivity(this, imageUri, position, imageDetailQuery, ImageDetailActivityViewPager.ACTIVITY_ID);
     }
 
     /** GalleryFragment tells the Owning Activity that querying data has finisched */
