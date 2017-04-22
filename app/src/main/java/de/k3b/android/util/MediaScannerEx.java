@@ -53,13 +53,6 @@ public class MediaScannerEx extends MediaScannerExifInterface {
     @Override
     protected void getExifFromFile(ContentValues values, File jpgFile) {
         super.getExifFromFile(values, jpgFile);
-
-        // for first tests generate test data
-        if (false && Global.Media.enableNonStandardIptcMediaScanner) {
-            addTags(values, null, "test1", "test2");
-            TagSql.setDescription(values, null, "test");
-            TagSql.setRating(values, null, 3);
-        }
     }
 
     /**

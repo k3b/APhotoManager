@@ -38,6 +38,56 @@ public class MediaUtilTests {
     }
 
     @Test
+    public void shouldCopyAllFieldsMetaApiWrapper() {
+        MediaDTO expected = TestUtil.createTestMediaDTO(1);
+        MediaDTO actual = new MediaDTO();
+        MetaApiWrapper src = new MetaApiWrapper(expected, null);
+        MetaApiWrapper dest = new MetaApiWrapper(null, actual);
+        MediaUtil.copy(dest, src, true, true);
+        Assert.assertEquals(expected.toString(), actual.toString());
+    }
+
+    @Test
+    public void shouldNotThrowMetaApiWrapperReadNull() {
+        MediaDTO actual = new MediaDTO();
+        MetaApiWrapper src = new MetaApiWrapper(null, null);
+        MediaUtil.copy(actual, src, true, true);
+    }
+
+    @Test
+    public void shouldNotThrowMetaApiWrapperWriteNull() {
+        MediaDTO actual = new MediaDTO();
+        MetaApiWrapper dest = new MetaApiWrapper(null, null);
+        MediaUtil.copy(dest, actual, true, true);
+    }
+
+
+    @Test
+    public void shouldCopyAllFieldsMetaApiChainReaderNull2() {
+        MediaDTO expected = TestUtil.createTestMediaDTO(1);
+        MediaDTO actual = new MediaDTO();
+        MetaApiChainReader src = new MetaApiChainReader(null, expected);
+        MediaUtil.copy(actual, src, true, true);
+        Assert.assertEquals(expected.toString(), actual.toString());
+    }
+
+    @Test
+    public void shouldCopyAllFieldsMetaApiChainReaderEmpty2() {
+        MediaDTO expected = TestUtil.createTestMediaDTO(1);
+        MediaDTO actual = new MediaDTO();
+        MetaApiChainReader src = new MetaApiChainReader(new MediaDTO(), expected);
+        MediaUtil.copy(actual, src, true, true);
+        Assert.assertEquals(expected.toString(), actual.toString());
+    }
+
+    @Test
+    public void shouldNotThrowMetaApiChainReaderNullNull() {
+        MediaDTO actual = new MediaDTO();
+        MetaApiChainReader src = new MetaApiChainReader(null, null);
+        MediaUtil.copy(actual, src, true, true);
+    }
+
+    @Test
     public void shouldCountChanges() {
         MediaDTO expected = TestUtil.createTestMediaDTO(1);
         Assert.assertEquals("all different", 7, MediaUtil.countChangedProperties(expected, TestUtil.createTestMediaDTO(2), false));

@@ -63,6 +63,9 @@ public class XmpSegment {
     private XMPMeta xmpMeta = null;
     private static XMPSchemaRegistry registry = XMPMetaFactory.getSchemaRegistry();
 
+    /** when xmp sidecar file was last modified or 0 */
+    private long filelastModified = 0;
+
     protected String getPropertyAsString(MediaXmpFieldDefinition... definitions) {
         List<String> values = getPropertyArray(definitions);
         if ((values != null) && (values.size() > 0)) {
@@ -194,17 +197,17 @@ public class XmpSegment {
     }
 
     public XmpSegment load(File file, String dbg_context) throws FileNotFoundException {
-		FileInputStream stream = null;
+        FileInputStream stream = null;
         try {
-			stream = new FileInputStream(file);
+            stream = new FileInputStream(file);
             setXmpMeta(XMPMetaFactory.parse(stream), dbg_context + " file:" + file);
         } catch (XMPException e) {
             onError("->XmpSegment.load " + file, e);
-			
+
             // workaround: my android-4.2 tahblet cannot re-read it-s xmp without trailing "\n"
-            if (file.exists()) {
+            if ((file != null) && file.exists()) {
                 try {
-                    setXmpMeta(XMPMetaFactory.parse(FileUtils.streamFromStringContent(FileUtils.readFile(file)+"\n")), this.dbg_context);
+                    setXmpMeta(XMPMetaFactory.parse(FileUtils.streamFromStringContent(FileUtils.readFile(file) + "\n")), this.dbg_context);
                 } catch (IOException e1) {
                     onError("->XmpSegment.load-via-string " + file, e);
                 } catch (XMPException e1) {
@@ -212,8 +215,9 @@ public class XmpSegment {
                 }
             }
         } finally {
-			FileUtils.close(stream, file);
-		}
+            FileUtils.close(stream, file);
+            setFilelastModified(file);
+        }
         return this;
     }
 
@@ -224,6 +228,7 @@ public class XmpSegment {
             save(stream, humanReadable, dbg_context + file);
         } finally {
             FileUtils.close(stream, file);
+            setFilelastModified(file);
         }
         return this;
 
@@ -294,5 +299,15 @@ public class XmpSegment {
             if (DEBUG) result  .append(" (").append(prop.getOptions().getOptionsString()).append(")");
             result  .append("\n");
         }
+    }
+
+    /** when xmp sidecar file was last modified or 0 */
+    public void setFilelastModified(File file) {
+        if (file != null) this.filelastModified = file.lastModified();
+    }
+
+    /** when xmp sidecar file was last modified or 0 */
+    public long getFilelastModified() {
+        return filelastModified;
     }
 }

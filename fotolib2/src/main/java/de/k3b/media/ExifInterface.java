@@ -1147,7 +1147,7 @@ public class ExifInterface {
             }
         }
     }
-    protected String mFilename;
+    protected File mExifFile;
 
     //!!! tagname => tagvalue(with assoziated tagdefinition)
     protected final HashMap<String, ExifAttribute>[] mAttributes = new HashMap[EXIF_TAGS.length];
@@ -1172,8 +1172,8 @@ public class ExifInterface {
         if (filename == null) {
             throw new IllegalArgumentException("filename cannot be null");
         }
-        mFilename = filename;
-        loadAttributes((in == null) ? new FileInputStream(mFilename) : in);
+        mExifFile = (filename != null) ? new File(filename) : null;
+        loadAttributes((in == null) ? new FileInputStream(mExifFile) : in);
     }
     /**
      * Returns the EXIF attribute of the specified tagName or {@code null} if there is no such tagName in
@@ -1517,17 +1517,18 @@ public class ExifInterface {
         mThumbnailBytes = getThumbnail();
         File tempFile = null;
         // Move the original file to temporary file.
-        tempFile = new File(mFilename + ".tmp");
-        File originalFile = new File(mFilename);
+        tempFile = new File(mExifFile.getAbsolutePath() + ".tmp");
+        File originalFile = mExifFile;
         if (!originalFile.renameTo(tempFile)) {
-            throw new IOException("Could'nt rename to " + tempFile.getAbsolutePath());
+            throw new IOException("Could'nt rename from " + mExifFile +
+                    " to " + tempFile.getAbsolutePath());
         }
         FileInputStream in = null;
         FileOutputStream out = null;
         try {
             // Save the new file.
             in = new FileInputStream(tempFile);
-            out = new FileOutputStream(mFilename);
+            out = new FileOutputStream(mExifFile);
             saveJpegAttributes(in, out);
         } finally {
             closeQuietly(in);
@@ -1558,7 +1559,7 @@ public class ExifInterface {
         // Read the thumbnail.
         FileInputStream in = null;
         try {
-            in = new FileInputStream(mFilename);
+            in = new FileInputStream(mExifFile);
             if (in.skip(mThumbnailOffset) != mThumbnailOffset) {
                 throw new IOException("Corrupted image");
             }

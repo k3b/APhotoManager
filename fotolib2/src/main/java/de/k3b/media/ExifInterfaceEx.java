@@ -24,6 +24,7 @@ package de.k3b.media;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParsePosition;
@@ -53,22 +54,28 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
         sExifDateTimeFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    private final String dbg_context;
+
+    /** when xmp sidecar file was last modified or 0 */
+    private long filelastModified = 0;
+
+    private final String mDbg_context;
 	/** if not null content of xmp sidecar file */
     private final IMetaApi xmpExtern;
 
     /**
      * Reads Exif tags from the specified JPEG file.
-     *  @param filename
+     *  @param absoluteJpgPath
      * @param xmpExtern if not null content of xmp sidecar file
      * @param dbg_context
      */
-    public ExifInterfaceEx(String filename, InputStream in, IMetaApi xmpExtern, String dbg_context) throws IOException {
-        super(filename, in);
+    public ExifInterfaceEx(String absoluteJpgPath, InputStream in, IMetaApi xmpExtern, String dbg_context) throws IOException {
+        super(absoluteJpgPath, in);
+        setFilelastModified(mExifFile);
+
         this.xmpExtern = xmpExtern;
-        this.dbg_context = dbg_context + "->ExifInterfaceEx(" + filename+ ") ";
+        this.mDbg_context = dbg_context + "->ExifInterfaceEx(" + absoluteJpgPath+ ") ";
         if (FotoLibGlobal.debugEnabledJpgMetaIo) {
-            logger.debug(dbg_context +
+            logger.debug(this.mDbg_context +
                     " load: " + MediaUtil.toString(this));
         }
         // Log.d(LOG_TAG, msg);
@@ -77,21 +84,29 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
 
     @Override
     public void saveAttributes() throws IOException {
+        fixAttributes();
         super.saveAttributes();
+        setFilelastModified(mExifFile);
         if (FotoLibGlobal.debugEnabledJpgMetaIo) {
-            logger.debug(dbg_context +
+            logger.debug(mDbg_context +
                     " saved: " + MediaUtil.toString(this));
+        }
+    }
+
+    protected void fixAttributes() {
+        if ((mExifFile != null) && (getDateTimeTaken() == null) && (getFilelastModified() != 0)) {
+           setDateTimeTaken(new Date(getFilelastModified()));
         }
     }
 
     @Override
     public String getPath() {
-        return mFilename;
+        return (mExifFile != null) ? mExifFile.getAbsolutePath() : null;
     }
 
     @Override
     public IMetaApi setPath(String filePath) {
-        mFilename = filePath;
+        mExifFile = (filePath != null) ? new File(filePath) : null;
         return this;
     }
 
@@ -338,4 +353,16 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
             mLongitude = Double.valueOf(latlng[1]);
         }
     }
+
+
+    /** when xmp sidecar file was last modified or 0 */
+    public void setFilelastModified(File file) {
+        if (file != null) this.filelastModified = file.lastModified();
+    }
+
+    /** when xmp sidecar file was last modified or 0 */
+    public long getFilelastModified() {
+        return filelastModified;
+    }
+
 }

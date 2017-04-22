@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -43,8 +43,8 @@ import java.io.File;
 import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
 import de.k3b.android.util.MediaScanner;
-import de.k3b.android.util.MediaScannerEx;
 import de.k3b.android.util.MediaScannerExifInterface;
+import de.k3b.android.util.MediaScannerImageMetaReader;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.tagDB.TagRepository;
@@ -275,7 +275,7 @@ public class SettingsActivity extends PreferenceActivity {
 
         // true if first run or change
         if ((sOldEnableTagSupport == null) || (sOldEnableTagSupport.booleanValue() != Global.Media.enableNonStandardIptcMediaScanner)) {
-            MediaScanner.setInstance((Global.Media.enableNonStandardIptcMediaScanner) ? new MediaScannerEx(context) : new MediaScannerExifInterface(context));
+            MediaScanner.setInstance((Global.Media.enableNonStandardIptcMediaScanner) ? new MediaScannerImageMetaReader(context) : new MediaScannerExifInterface(context));
             sOldEnableTagSupport = Global.Media.enableNonStandardIptcMediaScanner;
         }
     }

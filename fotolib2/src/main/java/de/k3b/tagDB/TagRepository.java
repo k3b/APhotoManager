@@ -60,6 +60,9 @@ public class TagRepository {
     /** The items contained in this repository */
     protected List<Tag> mItemList = null;
 
+    /** where new, unknown items are added to */
+    private Tag mImportRoot = null;
+
     /** Connect repository to a {@link File}. */
     public TagRepository(File file) {
         this.mFile = file;
@@ -231,6 +234,7 @@ public class TagRepository {
     public TagRepository delete(Tag item) {
         if ((item != null) && load().remove(item)) {
             save();
+            mImportRoot = null;
         }
 
         return this;
@@ -409,13 +413,15 @@ public class TagRepository {
 
     /** get or create parent-tag where alle imports are appendend as children */
     public Tag getImportRoot() {
-        Tag result = findFirstByName(IMPORT_ROOT);
-        if (result == null) {
-            List<Tag> existingItems = this.load();
-            result = new Tag().setName(IMPORT_ROOT).setParent(null);
-            existingItems.add(result);
+        if (mImportRoot == null) {
+            mImportRoot = findFirstByName(IMPORT_ROOT);
+            if (mImportRoot == null) {
+                List<Tag> existingItems = this.load();
+                mImportRoot = new Tag().setName(IMPORT_ROOT).setParent(null);
+                existingItems.add(mImportRoot);
+            }
         }
-        return result;
+        return mImportRoot;
     }
 
     public int includeIfNotFound(List<String>... lists) {

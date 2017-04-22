@@ -41,12 +41,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.media.MediaContentValues;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.database.QueryParameter;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
@@ -55,6 +57,8 @@ import de.k3b.io.IGalleryFilter;
 import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaUtil;
 import de.k3b.media.MediaXmpSegment;
+import de.k3b.media.MetaApiChainReader;
+import de.k3b.tagDB.TagRepository;
 
 /**
  * Android Media Scanner for images/photos/jpg compatible with android-5.0 Media scanner.
@@ -326,14 +330,39 @@ abstract public class MediaScanner  {
         String imageType = options.outMimeType;
         values.put(DB_MIME_TYPE, imageType);
 
-        MediaXmpSegment xmpContent = loadXmpSidecarContentOrNull(absoluteJpgPath, "getExifFromFile");
+        MediaXmpSegment xmpContent = MediaXmpSegment.loadXmpSidecarContentOrNull(absoluteJpgPath, "getExifFromFile");
+        TagSql.setXmpFileModifyDate(values, getXmpFilelastModified(xmpContent));
 
-        IMetaApi src = loadNonMediaValues(values, absoluteJpgPath, xmpContent);
+        IMetaApi exif = loadNonMediaValues(values, absoluteJpgPath, xmpContent);
 
         MediaContentValues dest = new MediaContentValues().set(values, null);
+
+        // (!writeExif) prefer read from xmp value before exif value
+        IMetaApi src = (FotoLibGlobal.Media.writeExif)
+                ? exif
+                : new MetaApiChainReader(xmpContent, exif);
+
         getExifValues(dest, jpgFile, src);
 
+        updateTagRepository(src.getTags());
+
         setPathRelatedFieldsIfNeccessary(values, absoluteJpgPath, null);
+    }
+
+    private void updateTagRepository(List<String> tags) {
+        TagRepository tagRepository = TagRepository.getInstance();
+        tagRepository.include(tagRepository.getImportRoot(), tags);
+    }
+
+    protected static long getXmpFilelastModified(MediaXmpSegment xmpContent) {
+        long xmpFilelastModified = 0;
+        if (xmpContent != null) {
+            xmpFilelastModified = xmpContent.getFilelastModified();
+        }
+        if (xmpFilelastModified == 0) {
+            xmpFilelastModified = TagSql.EXT_LAST_EXT_SCAN_NO_XMP;
+        }
+        return xmpFilelastModified;
     }
 
 
@@ -343,7 +372,7 @@ abstract public class MediaScanner  {
             if (latitude != null) {
                 return new GeoPointDto(latitude, exif.getLongitude(), GeoPointDto.NO_ZOOM).setId(id);
             }
-            MediaXmpSegment xmpContent = loadXmpSidecarContentOrNull(absoluteJpgPath, "getPositionFromFile");
+            MediaXmpSegment xmpContent = MediaXmpSegment.loadXmpSidecarContentOrNull(absoluteJpgPath, "getPositionFromFile");
             if (xmpContent != null) {
                 latitude = xmpContent.getLatitude();
                 if (latitude != null) {
@@ -353,26 +382,6 @@ abstract public class MediaScanner  {
         }
 
         return null;
-    }
-
-    protected MediaXmpSegment loadXmpSidecarContentOrNull(String absoluteJpgPath, String _dbg_context) {
-        MediaXmpSegment xmpContent = null;
-        File xmpFile = FileUtils.getXmpFile(absoluteJpgPath);
-        String dbg_context = _dbg_context + " MediaScanner:loadXmpSidecarContent(" + xmpFile + "): ";
-        if ((xmpFile != null) && xmpFile.isFile() && xmpFile.exists() && xmpFile.canRead()) {
-            xmpContent = new MediaXmpSegment();
-            try {
-                xmpContent.load(xmpFile, dbg_context);
-            } catch (FileNotFoundException e) {
-                Log.e(Global.LOG_CONTEXT, dbg_context + "failed " + e.getMessage(),e);
-                xmpContent = null;
-            }
-
-        } else if (FotoLibGlobal.debugEnabledJpgMetaIo) {
-            Log.i(Global.LOG_CONTEXT, dbg_context + "file not found");
-        }
-
-        return xmpContent;
     }
 
     abstract protected IMetaApi loadNonMediaValues(ContentValues destinationValues, String absoluteJpgPath, IMetaApi xmpContent);

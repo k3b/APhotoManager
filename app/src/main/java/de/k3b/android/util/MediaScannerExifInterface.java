@@ -51,7 +51,7 @@ public class MediaScannerExifInterface extends MediaScanner {
             // exif is null
         }
 
-        if (exif != null) {
+        if ((exif != null) && (destinationValues != null)) {
             int degree = exif.getOrientationInDegrees();
             destinationValues.put(DB_ORIENTATION, degree);
         }

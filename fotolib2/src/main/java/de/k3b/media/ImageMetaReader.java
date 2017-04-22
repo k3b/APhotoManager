@@ -70,11 +70,13 @@ public class ImageMetaReader implements IMetaApi, Closeable {
     // private Directory fileDir;
     private Directory mCommentDir;
     private String dbg_context = "";
+    private boolean mInitExecuted = false;
 
     /**
      * Reads Meta data from the specified inputStream (if not null) or File(filename).
      */
     public ImageMetaReader load(String filename, InputStream inputStream, IMetaApi externalXmpContent, String _dbg_context) throws IOException {
+        mInitExecuted = false;
         mFilename = filename;
         mExternalXmpDir = externalXmpContent;
         this.dbg_context = _dbg_context + "->ImageMetaReader(" + mFilename+ ") ";
@@ -289,7 +291,6 @@ public class ImageMetaReader implements IMetaApi, Closeable {
 
         if ((isEmpty(result, debugContext, ++i)) && (mExternalXmpDir != null)) result = mExternalXmpDir.getTags();
 
-        mExifDir.getDescription(ExifDirectoryBase.TAG_WIN_KEYWORDS);
         if (isEmpty(result, debugContext, ++i) && (mExifDir != null)) {
             // result = ListUtils.toStringList(mExifDir.getStringValueArray(ExifDirectoryBase.TAG_WIN_KEYWORDS));
             String value = mExifDir.getDescription(ExifDirectoryBase.TAG_WIN_KEYWORDS);
@@ -366,6 +367,7 @@ public class ImageMetaReader implements IMetaApi, Closeable {
 
     @Override
     public String toString() {
+        init();
         StringBuilder builder = new StringBuilder();
         for (Directory directory : mMetadata.getDirectories()) {
             String dirName = "";
@@ -387,16 +389,16 @@ public class ImageMetaReader implements IMetaApi, Closeable {
             }
         }
 
-        if (mInternalXmpDir == null) {
-            XmpDirectory xmp = this.mMetadata.getFirstDirectoryOfType(XmpDirectory.class);
-            if (xmp != null) {
-                mInternalXmpDir = new MediaXmpSegment();
-                mInternalXmpDir.setXmpMeta(xmp.getXMPMeta(), dbg_context + " embedded xml ");
-                mInternalXmpDir.appendXmp("xmp.", builder);
-            }
+        if (mInternalXmpDir != null) {
+            mInternalXmpDir.appendXmp("xmp.", builder);
         }
 
         return builder.toString();
+    }
+
+    public MediaXmpSegment getImternalXmp() {
+        init();
+        return mInternalXmpDir;
     }
 
     //--------------- local helpers
@@ -416,21 +418,26 @@ public class ImageMetaReader implements IMetaApi, Closeable {
     }
 
     private void init() {
-        mExifDir = this.mMetadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
-        mIptcDir = this.mMetadata.getFirstDirectoryOfType(IptcDirectory.class);
-        // fileDir = this.mMetadata.getFirstDirectoryOfType(FileDirec .class); // not implemented
-        mCommentDir = this.mMetadata.getFirstDirectoryOfType(JpegCommentDirectory.class);
+        if (!mInitExecuted) {
+            mInitExecuted = true;
+            mExifDir = this.mMetadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+            mIptcDir = this.mMetadata.getFirstDirectoryOfType(IptcDirectory.class);
+            // fileDir = this.mMetadata.getFirstDirectoryOfType(FileDirec .class); // not implemented
+            mCommentDir = this.mMetadata.getFirstDirectoryOfType(JpegCommentDirectory.class);
 
-        GpsDirectory gps = this.mMetadata.getFirstDirectoryOfType(GpsDirectory.class);
-        if (gps != null) {
-            mExifGpsDir = gps.getGeoLocation();
-            if (mExifGpsDir.isZero()) mExifGpsDir = null;
-        }
+            mExifGpsDir = null;
+            GpsDirectory gps = this.mMetadata.getFirstDirectoryOfType(GpsDirectory.class);
+            if (gps != null) {
+                mExifGpsDir = gps.getGeoLocation();
+                if (mExifGpsDir.isZero()) mExifGpsDir = null;
+            }
 
-        XmpDirectory xmp = this.mMetadata.getFirstDirectoryOfType(XmpDirectory.class);
-        if (xmp != null) {
-            mInternalXmpDir = new MediaXmpSegment();
-            mInternalXmpDir.setXmpMeta(xmp.getXMPMeta(), dbg_context + " embedded xml ");
+            mInternalXmpDir = null;
+            XmpDirectory xmp = this.mMetadata.getFirstDirectoryOfType(XmpDirectory.class);
+            if (xmp != null) {
+                mInternalXmpDir = new MediaXmpSegment();
+                mInternalXmpDir.setXmpMeta(xmp.getXMPMeta(), dbg_context + " embedded xml ");
+            }
         }
     }
 

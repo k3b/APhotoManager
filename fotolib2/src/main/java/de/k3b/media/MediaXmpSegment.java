@@ -27,12 +27,15 @@ import com.adobe.xmp.impl.XMPDateTimeImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.List;
 
 import de.k3b.FotoLibGlobal;
 import de.k3b.io.DateUtil;
+import de.k3b.io.FileUtils;
 import de.k3b.io.GeoUtil;
 
 /**
@@ -196,4 +199,26 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
 
         return this;
     }
+
+    public static MediaXmpSegment loadXmpSidecarContentOrNull(String absoluteJpgPath, String _dbg_context) {
+        MediaXmpSegment xmpContent = null;
+        File xmpFile = FileUtils.getXmpFile(absoluteJpgPath);
+        String dbg_context = _dbg_context + " loadXmpSidecarContent(" + xmpFile + "): ";
+        if ((xmpFile != null) && xmpFile.isFile() && xmpFile.exists() && xmpFile.canRead()) {
+            xmpContent = new MediaXmpSegment();
+            try {
+                xmpContent.load(xmpFile, dbg_context);
+            } catch (FileNotFoundException e) {
+                logger.error(dbg_context + "failed " + e.getMessage(),e);
+                xmpContent = null;
+            }
+
+        } else if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+            logger.error(dbg_context + "file not found");
+        }
+
+        return xmpContent;
+    }
+
+
 }

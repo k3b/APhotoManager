@@ -39,4 +39,11 @@ public class FotoLibGlobal {
     public static final boolean ignoreSymLinks = false;
 
     public static boolean visibilityShowPrivateByDefault = false;
+
+    public static class Media {
+        // global to allow changing these via a settings dialog
+        public static boolean writeExif = true;
+        public static boolean writeXmp = true;
+        public static boolean createXmpIfNotExist = true;
+    }
 }
