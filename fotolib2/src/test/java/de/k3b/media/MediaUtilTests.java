@@ -26,7 +26,7 @@ package de.k3b.media;
 import org.junit.Assert;
 import org.junit.Test;
 
-import de.k3b.csv2db.csv.TestUtil;
+import de.k3b.TestUtil;
 
 public class MediaUtilTests {
     @Test

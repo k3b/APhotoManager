@@ -25,48 +25,46 @@ import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.TimeZone;
 
 import de.k3b.TestUtil;
 import de.k3b.io.DateUtil;
-import de.k3b.io.FileUtils;
 import de.k3b.io.ListUtils;
 
 /**
- * Created by k3b on 28.03.2017.
+ * Created by k3b on 25.04.2017.
  */
 
-public class ImageMetaReaderIntegrationTests {
-    private static final Logger logger = LoggerFactory.getLogger(ImageMetaReaderIntegrationTests.class);
+public class MediaXmpSegmentIntegrationTests {
+    private static final Logger logger = LoggerFactory.getLogger(MediaXmpSegmentIntegrationTests.class);
 
     private IMetaApi sut = null;
     @Before
     public void setup() throws IOException {
-        ImageMetaReader.DEBUG = true;
-        sut = getMeta("test-WitExtraData.jpg");
+        // MediaXmpSegment.DEBUG = true;
+        sut = getMeta("test-WitExtraData.xmp");
+        TimeZone.setDefault(DateUtil.UTC);
     }
 
     @Test
     public void shouldDump() throws IOException
     {
         // System.out.printf(sut.toString());
-        logger.info(sut.toString());
+        logger.info("shouldDump " + sut.toString());
     }
 
     @Test
     public void shouldGetDescription() throws IOException
     {
-        Assert.assertEquals("ImageDescription", sut.getDescription());
+        Assert.assertEquals("XPSubject", sut.getDescription());
     }
 
     @Test
     public void shouldGetTitle() throws IOException
     {
-        Assert.assertEquals("XPTitle", sut.getTitle());
+        Assert.assertEquals("Headline", sut.getTitle());
     }
 
     @Test
@@ -80,6 +78,7 @@ public class ImageMetaReaderIntegrationTests {
     {
         Assert.assertEquals(27.8186, sut.getLatitude(), 0.01);
     }
+
     @Test
     public void shouldGetLongitude() throws IOException
     {
@@ -98,9 +97,37 @@ public class ImageMetaReaderIntegrationTests {
         Assert.assertEquals(3, sut.getRating().intValue());
     }
 
-    public static IMetaApi getMeta(String fileName) throws IOException {
-        InputStream inputStream = TestUtil.getResourceInputStream(fileName);
-        IMetaApi result = new ImageMetaReader().load(fileName, inputStream, null, "JUnit");
-        return result;
+    @Test
+    public void shouldModifyInMemory() throws IOException
+    {
+        MediaDTO expected = TestUtil.createTestMediaDTO(2);
+        MediaUtil.copy(sut, expected, true, true);
+        MediaDTO actual = new MediaDTO();
+        MediaUtil.copy(actual, sut, true, true);
+        Assert.assertEquals(expected.toString(), actual.toString());
+
+        logger.info("shouldModifyInMemory " + sut.toString());
     }
+
+
+    @Test
+    public void shouldClearInMemory() throws IOException
+    {
+        MediaDTO expected = new MediaDTO();
+        MediaUtil.copy(sut, expected, true, true);
+        MediaDTO actual = new MediaDTO();
+        MediaUtil.copy(actual, sut, true, true);
+        actual.setPath(expected.path);
+        Assert.assertEquals(expected.toString(), actual.toString());
+
+        logger.info("shouldClearInMemory " + sut.toString());
+    }
+
+    private static IMetaApi getMeta(String fileName) throws IOException {
+        InputStream inputStream = TestUtil.getResourceInputStream(fileName);
+        MediaXmpSegment xmpContent = new MediaXmpSegment();
+        xmpContent.load(inputStream, "JUnit");
+        return xmpContent;
+    }
+
 }

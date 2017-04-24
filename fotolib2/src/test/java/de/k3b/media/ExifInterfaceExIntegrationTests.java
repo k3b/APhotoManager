@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 
+import de.k3b.TestUtil;
 import de.k3b.io.DateUtil;
 import de.k3b.io.ListUtils;
 
@@ -49,7 +50,7 @@ public class ExifInterfaceExIntegrationTests {
     public void shouldDump() throws IOException
     {
         // System.out.printf(sut.toString());
-        logger.info(sut.toString());
+        logger.info("shouldDump " + sut.toString());
     }
 
     @Test
@@ -94,10 +95,37 @@ public class ExifInterfaceExIntegrationTests {
         Assert.assertEquals(3, sut.getRating().intValue());
     }
 
-    protected IMetaApi getMeta(String fileName) throws IOException {
-        InputStream inputStream = ImageMetaReaderIntegrationTests.class.getResourceAsStream("images/" + fileName);
-        Assert.assertNotNull("open images/" + fileName, inputStream);
+    @Test
+    public void shouldModifyInMemory() throws IOException
+    {
+        MediaDTO expected = TestUtil.createTestMediaDTO(2);
+        MediaUtil.copy(sut, expected, true, true);
+        MediaDTO actual = new MediaDTO();
+        MediaUtil.copy(actual, sut, true, true);
+        actual.setPath(expected.path);
+        Assert.assertEquals(expected.toString(), actual.toString());
+
+        logger.info("shouldModifyInMemory " + sut.toString());
+    }
+
+    @Test
+    public void shouldClearInMemory() throws IOException
+    {
+        MediaDTO expected = new MediaDTO();
+        MediaUtil.copy(sut, expected, true, true);
+        MediaDTO actual = new MediaDTO();
+        MediaUtil.copy(actual, sut, true, true);
+        actual.setPath(expected.path);
+        Assert.assertEquals(expected.toString(), actual.toString());
+
+        logger.info("shouldClearInMemory " + sut.toString());
+    }
+
+
+    public static IMetaApi getMeta(String fileName) throws IOException {
+        InputStream inputStream = TestUtil.getResourceInputStream(fileName);
         IMetaApi result = new ExifInterfaceEx(fileName, inputStream, null, "JUnit");
         return result;
     }
+
 }

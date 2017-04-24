@@ -31,7 +31,7 @@ task clean(type: Delete) {
 
 // download and generate gradlew which is not part of this repository and is required by travis
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.14.1'
+    gradleVersion = '3.3'
 }
 
 

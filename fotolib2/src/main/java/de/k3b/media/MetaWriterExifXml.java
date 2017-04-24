@@ -83,4 +83,14 @@ public class MetaWriterExifXml extends MetaApiWrapper {
         if (exif != null) exif.saveAttributes();
         if (xmp != null) xmp.save(FileUtils.getXmpFile(this.getPath()), true , dbg_context);
     }
+
+    // allow unittests to inspect
+    protected ExifInterfaceEx getExif() {
+        return exif;
+    }
+
+    // allow unittests to inspect
+    protected MediaXmpSegment getXmp() {
+        return xmp;
+    }
 }

@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -17,16 +17,29 @@
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
 
-package de.k3b.csv2db.csv;
+package de.k3b;
 
+import org.junit.Assert;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 
+import de.k3b.csv2db.csv.CsvReader;
 import de.k3b.io.DateUtil;
+import de.k3b.io.FileUtils;
+import de.k3b.media.IMetaApi;
+import de.k3b.media.ImageMetaReader;
+import de.k3b.media.ImageMetaReaderIntegrationTests;
 import de.k3b.media.MediaDTO;
 import de.k3b.tagDB.TagConverter;
 
 public class TestUtil {
-	public static Reader createReader(String csvSrc) {
+    public static final File OUTDIR_ROOT = new File("./build/test-results/metafiles");
+
+    public static Reader createReader(String csvSrc) {
 		return new java.io.StringReader(csvSrc);
 		// return new InputStreamReader(new ByteArrayInputStream(csvSrc.getBytes("UTF-8")));
 	}
@@ -51,5 +64,18 @@ public class TestUtil {
         result.setRating(id % 6);
 
         return result;
+    }
+    public static InputStream getResourceInputStream(String fileName) {
+        InputStream inputStream = ImageMetaReaderIntegrationTests.class.getResourceAsStream("images/" + fileName);
+        Assert.assertNotNull("getResourceInputStream images/" + fileName, inputStream);
+        return inputStream;
+    }
+
+    public static void saveTestResourceAs(String resourceName, File destination) throws IOException {
+        if (destination.exists()) destination.delete();
+        FileOutputStream result = new FileOutputStream(destination);
+        FileUtils.copy(getResourceInputStream(resourceName), result);
+        result.flush();
+        result.close();
     }
 }

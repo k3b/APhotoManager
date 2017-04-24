@@ -79,7 +79,8 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
 
     @Override
     public IMetaApi setDateTimeTaken(Date value) {
-        setProperty(XMPUtils.convertFromDate(new XMPDateTimeImpl(value, DateUtil.UTC)), // DateUtil.toIsoDateString(value),
+        String dateValue = (value == null) ? null : XMPUtils.convertFromDate(new XMPDateTimeImpl(value, DateUtil.UTC));
+        setProperty(dateValue, // DateUtil.toIsoDateString(value),
                 MediaXmpFieldDefinition.CreateDate,   // JPhotoTagger default
                 MediaXmpFieldDefinition.DateCreated,  // exiftool default
                 MediaXmpFieldDefinition.DateTimeOriginal); // EXIF

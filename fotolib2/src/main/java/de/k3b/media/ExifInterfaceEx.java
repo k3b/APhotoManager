@@ -58,6 +58,9 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     /** when xmp sidecar file was last modified or 0 */
     private long filelastModified = 0;
 
+    // false for unittests because UserComment = null is not implemented for COM - Marker
+    protected static boolean useUserComment = true;
+
     private final String mDbg_context;
 	/** if not null content of xmp sidecar file */
     private final IMetaApi xmpExtern;
@@ -94,9 +97,11 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     }
 
     protected void fixAttributes() {
+        /*
         if ((mExifFile != null) && (getDateTimeTaken() == null) && (getFilelastModified() != 0)) {
            setDateTimeTaken(new Date(getFilelastModified()));
         }
+        */
     }
 
     @Override
@@ -107,19 +112,24 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     @Override
     public IMetaApi setPath(String filePath) {
         mExifFile = (filePath != null) ? new File(filePath) : null;
+        if (xmpExtern != null) xmpExtern.setPath(filePath);
         return this;
     }
 
     @Override
     public Date getDateTimeTaken(){
-        Date result = getAttributeDate(ExifInterfaceEx.TAG_DATETIME);
+        Date result = null;
+        if (result == null) result = getAttributeDate(ExifInterfaceEx.TAG_DATETIME_ORIGINAL);
+        if (result == null) getAttributeDate(ExifInterfaceEx.TAG_DATETIME);
         if ((result == null) && (xmpExtern != null)) result = xmpExtern.getDateTimeTaken();
         return result;
     }
 
     @Override
     public ExifInterfaceEx setDateTimeTaken(Date value) {
-        setAttribute(ExifInterfaceEx.TAG_DATETIME, toExifDateTimeString(value));
+        String dateInExifFormat = toExifDateTimeString(value);
+        setAttribute(ExifInterfaceEx.TAG_DATETIME, dateInExifFormat);
+        setAttribute(ExifInterfaceEx.TAG_DATETIME_ORIGINAL, dateInExifFormat);
         if (xmpExtern != null) xmpExtern.setDateTimeTaken(value);
         return this;
     }
@@ -220,8 +230,8 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     @Override
     public String getTitle() {
         String result = null;
-        if ((result == null) && (xmpExtern != null)) result = xmpExtern.getTitle();
-        if (result == null) result = getAttribute(TAG_WIN_TITLE);
+        if ((isEmpty(result)) && (xmpExtern != null)) result = xmpExtern.getTitle();
+        if (isEmpty(result)) result = getAttribute(TAG_WIN_TITLE);
         // iptc:Headline
         return result;
     }
@@ -237,25 +247,37 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     @Override
     public String getDescription() {
         String result = null;
-        if (result == null) result = getAttribute(TAG_IMAGE_DESCRIPTION);
-        if (result == null) result = getAttribute(TAG_USER_COMMENT);
+        if (isEmpty(result)) result = getAttribute(TAG_IMAGE_DESCRIPTION);
+
+        if (isEmpty(result)) result = getAttribute(TAG_WIN_SUBJECT);
 
 		// XMP-dc:Description
-        if ((result == null) && (xmpExtern != null)) result = xmpExtern.getDescription(); 
+        if ((isEmpty(result)) && (xmpExtern != null)) result = xmpExtern.getDescription();
 
-        if (result == null) result = getAttribute(TAG_WIN_COMMENT);
+        if (isEmpty(result)) result = getAttribute(TAG_WIN_COMMENT);
 		// iptc:Caption-Abstract
-		
+
+        // NOTE: write not fully supported for TAG_USER_COMMENT in tiff-com-segment
+        if (useUserComment && isEmpty(result)) result = getAttribute(TAG_USER_COMMENT);
+
         return result;
+    }
+
+    private static boolean isEmpty(String result) {
+        return (result == null); // || (result.length() == 0);
     }
 
     /** not implemented in {@link ExifInterface} */
     @Override
     public IMetaApi setDescription(String value) {
         setAttribute(TAG_IMAGE_DESCRIPTION, value);
-        setAttribute(TAG_USER_COMMENT, value);
-        setAttribute(TAG_WIN_COMMENT, value);
+        setAttribute(TAG_WIN_SUBJECT, value);
+
         if (xmpExtern != null) xmpExtern.setDescription(value);
+        setAttribute(TAG_WIN_COMMENT, value);
+
+        // NOTE: write not fully supported for TAG_USER_COMMENT in tiff-com-segment
+        if (useUserComment) setAttribute(TAG_USER_COMMENT, value);
         return this;
     }
 
@@ -264,7 +286,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     public List<String> getTags() {
         List<String> result = null;
         if ((result == null) && (xmpExtern != null)) result = xmpExtern.getTags();
-        if (result == null) {
+        if ((result == null) || (result.size() == 0)) {
             String s = getAttribute(TAG_WIN_KEYWORDS);
             if (s != null) result = ListUtils.fromString(s, LIST_DELIMITER);
         }
@@ -274,7 +296,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     /** not implemented in {@link ExifInterface} */
     @Override
     public IMetaApi setTags(List<String> value) {
-        setAttribute(TAG_WIN_TITLE, (value == null) ? null : ListUtils.toString(value, LIST_DELIMITER));
+        setAttribute(TAG_WIN_KEYWORDS, (value == null) ? null : ListUtils.toString(value, LIST_DELIMITER));
         if (xmpExtern != null) xmpExtern.setTags(value);
         return this;
     }
@@ -331,7 +353,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     protected Date getAttributeDate(String tag) {
         String dateTimeString =  this.getAttribute(tag);
 
-        if (dateTimeString == null) return null;
+        if (isEmpty(dateTimeString)) return null;
 
         ParsePosition pos = new ParsePosition(0);
         try {

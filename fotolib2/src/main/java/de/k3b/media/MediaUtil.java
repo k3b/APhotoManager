@@ -51,7 +51,7 @@ public class MediaUtil {
     }
 
     /** copy exif-prio content from source to destination. @return number of copied properties */
-    public static int copyExif(IMetaApi destination, IMetaApi source, boolean allowSetNull, boolean overwriteExisting) {
+    private static int copyExif(IMetaApi destination, IMetaApi source, boolean allowSetNull, boolean overwriteExisting) {
         int changes = 0;
 
         if ((destination != null) && (source != null)) {
@@ -80,6 +80,7 @@ public class MediaUtil {
                 destination.setLongitude(doValue);
                 changes++;
             }
+
         }
         return changes;
     }

@@ -326,16 +326,8 @@ public class FileCommands implements  Cloneable {
                 owner.onException(e, "_osFileCopy", sourceFullPath, targetFullPath);
             }
         } finally {
-            if (in != null)
-                try {
-                    in.close();
-                    if (out != null)
-                        out.close();
-                } catch (Exception e) {
-                    if (owner != null) {
-                        owner.onException(e, "osFileCopy-close", sourceFullPath, targetFullPath);
-                    }
-                }
+            FileUtils.close(in,"_osFileCopy-close");
+            FileUtils.close(out,"_osFileCopy-close");
         }
         return result;
     }

@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.TimeZone;
 
-import de.k3b.csv2db.csv.TestUtil;
+import de.k3b.TestUtil;
 
 /**
  * Created by k3b on 24.10.2016.
@@ -40,6 +40,7 @@ public class MediaXmpTests {
     // D:\prj\eve\android\prj\fotos-android.wrk\FotoGallery\FotoGallery\fotolib2\src\test\resources\testdata
     // test-WitExtraData.xmp
     private static final String RESOURCES_ROOT = "testdata/";
+    private static final File OUTDIR = new File(TestUtil.OUTDIR_ROOT, "MediaXmpTests");
 
     @Test
     public void shouldReadExistingXmpFile() throws IOException {
@@ -93,8 +94,6 @@ public class MediaXmpTests {
 
         Assert.assertEquals(expected.toString(), actual.toString());
     }
-
-    private static final File OUTDIR = new File("./build/testresults/MediaXmpTests");
 
     @Test
     public void shouldSaveAndLoadXmp() throws IOException {

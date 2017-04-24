@@ -86,7 +86,7 @@ public class XmpSegment {
     protected Date getPropertyAsDate(MediaXmpFieldDefinition... definitions) {
         try {
             String result = getPropertyAsString(definitions);
-            if (result != null) return XMPUtils.convertToDate(result).getCalendar().getTime();
+            if ((result != null) && (result.length() > 0)) return XMPUtils.convertToDate(result).getCalendar().getTime();
         } catch (XMPException e) {
             onError("getPropertyAsDate", e);
         }
@@ -111,19 +111,37 @@ public class XmpSegment {
         return definitions[0];
     }
 
+    /** sets all existing from definitions or first if not found */
     protected void setProperty(Object value, MediaXmpFieldDefinition... definitions) {
         try {
-            MediaXmpFieldDefinition definition = findFirst(value == null, definitions);
-            if (definition != null) {
-                if (definition.isArray()) {
-                    replacePropertyArray(TagConverter.fromString(value), definition);
-                } else {
-                    getXmpMeta().setProperty(definition.getXmpNamespace().getUriAsString(), definition.getShortName(), value);
+            boolean mustAdd = true;
+            for (MediaXmpFieldDefinition definition: definitions) {
+                XMPProperty result = getXmpMeta().getProperty(definition.getXmpNamespace().getUriAsString(), definition.getShortName());
+                if (result != null) {
+                    setPropertyInternal(value, definition);
+                    mustAdd = false;
                 }
-            } // else both porperty and value do not exist
+            }
+            if (mustAdd) {
+                setPropertyInternal(value, definitions[0]);
+            }
         } catch (XMPException e) {
             onError("setProperty", e);
         }
+    }
+
+    private void setPropertyInternal(Object value, MediaXmpFieldDefinition definition) throws XMPException {
+        if (definition != null) {
+            if (value == null) {
+                // XMPProperty prop = getXmpMeta().getProperty(definition.getXmpNamespace().getUriAsString(), definition.getShortName());
+                // getXmpMeta().setProperty(definition.getXmpNamespace().getUriAsString(), definition.getShortName(), "");
+                getXmpMeta().deleteProperty(definition.getXmpNamespace().getUriAsString(), definition.getShortName());
+            } else if (definition.isArray()) {
+                replacePropertyArray(TagConverter.fromString(value), definition);
+            } else {
+                getXmpMeta().setProperty(definition.getXmpNamespace().getUriAsString(), definition.getShortName(), value);
+            }
+        } // else both porperty and value do not exist
     }
 
     protected void replacePropertyArray(List<String> values, MediaXmpFieldDefinition... definitions) {
@@ -136,9 +154,12 @@ public class XmpSegment {
                     meta.deleteArrayItem(definition.getXmpNamespace().getUriAsString(), definition.getShortName(), i);
                 }
 
-                PropertyOptions option = new PropertyOptions(definition.getArrayOption());
-                for (String value : values) {
-                    meta.appendArrayItem(definition.getXmpNamespace().getUriAsString(), definition.getShortName(), option, value, null);
+                if (values != null) {
+                    PropertyOptions option = new PropertyOptions(definition.getArrayOption());
+                    for (String value : values) {
+                        meta.appendArrayItem(definition.getXmpNamespace().getUriAsString(),
+                                definition.getShortName(), option, value, null);
+                    }
                 }
             }
         } catch (XMPException e) {

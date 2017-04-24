@@ -56,7 +56,7 @@ import java.util.regex.Pattern;
  *
  * Improvements:
  *  * with dependencies to android removed
- *  * added microsoft exiftags: TAG_EIN_xxxxx
+ *  * added microsoft exiftags: TAG_WIN_xxxxx
  */
 public class ExifInterface {
     // public to allow error filtering
@@ -501,25 +501,12 @@ public class ExifInterface {
             return new ExifAttribute(id, IFD_FORMAT_BYTE, bytes.length, bytes);
         }
 
-        private static boolean isAllASCII(String input) {
-            if (input == null) return true;
-            for (int i = 0; i < input.length(); i++) {
-                int c = input.charAt(i);
-                if (c > 0x7F) {
-                    return false;
-                }
-            }
-            return true;
-        }
         public static ExifAttribute createPrefixString(ExifTag id, String value) {
-            boolean allASCII = isAllASCII(value);
-            final byte[] bytes = (value + "\0").getBytes(allASCII ? ASCII : UTF16);
-            final byte[] bytesWithPrefix = new byte[EXIF_UNICODE_PREFIX.length + bytes.length];
-            System.arraycopy(allASCII ? EXIF_ASCII_PREFIX : EXIF_UNICODE_PREFIX, 0, bytesWithPrefix, 0, EXIF_UNICODE_PREFIX.length);
-            System.arraycopy(bytes, 0, bytesWithPrefix, EXIF_UNICODE_PREFIX.length, bytes.length);
+            final byte[] bytesWithPrefix = encodePrefixString(value);
 
             return new ExifAttribute(id, IFD_FORMAT_PREFIX_STRING, bytesWithPrefix.length, bytesWithPrefix);
         }
+
         public static ExifAttribute createUcs2String(ExifTag id, String value) {
             final byte[] bytes = (value + "\0").getBytes(UCS2);
             return new ExifAttribute(id, IFD_FORMAT_UCS2LE_STRING, bytes.length, bytes);
@@ -577,7 +564,7 @@ public class ExifInterface {
                 inputStream.setByteOrder(byteOrder);
                 switch (format) {
                     case IFD_FORMAT_UCS2LE_STRING: {
-                        return getStringValue(bytes.length, bytes, UCS2);
+                        return decodePrefixString(bytes.length, bytes, UCS2);
                     }
                     case IFD_FORMAT_BYTE:
                     case IFD_FORMAT_SBYTE: {
@@ -585,12 +572,12 @@ public class ExifInterface {
                         if (bytes.length == 1 && bytes[0] >= 0 && bytes[0] <= 1) {
                             return new String(new char[] { (char) (bytes[0] + '0') });
                         }
-                        return getStringValue(bytes.length, bytes, ASCII);
+                        return decodePrefixString(bytes.length, bytes, ASCII);
                     }
                     case IFD_FORMAT_UNDEFINED:
                     case IFD_FORMAT_PREFIX_STRING:
                     case IFD_FORMAT_STRING: {
-                        return getStringValue(numberOfComponents, bytes, ASCII);
+                        return decodePrefixString(numberOfComponents, bytes, ASCII);
                     }
                     case IFD_FORMAT_USHORT: {
                         final int[] values = new int[numberOfComponents];
@@ -659,48 +646,6 @@ public class ExifInterface {
                 logWarn( "IOException occurred during reading a value", e);
                 return null;
             }
-        }
-
-        private static String getStringValue(int numberOfComponents, byte[] bytes, Charset defaultCharSet) {
-            String result = getStringValueInternal(numberOfComponents, bytes, defaultCharSet);
-            if (result != null) {
-                int last = result.length() - 1;
-                while ((last > 0) && (result.charAt(last) == 0)) {
-                    last--; // remove "\0" at end
-                }
-                return result.substring(0, last+1);
-            }
-            return null;
-        }
-
-        /** decodes exif usercomment and other strings*/
-        private static String getStringValueInternal(int numberOfComponents, byte[] bytes, Charset defaultCharSet) {
-            try {
-
-                int index = 0;
-                if ((numberOfComponents >= EXIF_ASCII_PREFIX.length) && (bytes[EXIF_ASCII_PREFIX.length-1] == 0)) {
-                    if (startsWith(bytes, EXIF_ASCII_PREFIX)) {
-                        return new String(bytes, 8, numberOfComponents - 8, ASCII);
-                    } else if (startsWith(bytes, EXIF_UNICODE_PREFIX)) {
-                        return new String(bytes, 8, numberOfComponents - 8, UTF16);
-                    } else if (startsWith(bytes, EXIF_JIS_PREFIX)) {
-                        return new String(bytes, 8, numberOfComponents - 8, "EUC-JP");
-                    }
-                }
-                return new String(bytes, 0, numberOfComponents, defaultCharSet);
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-            return "???";
-        }
-
-        private static boolean startsWith(byte[] content, byte[] prefix) {
-            for (int i = 0; i < prefix.length; ++i) {
-                if (content[i] != prefix[i]) {
-                    return false;
-                }
-            }
-            return true;
         }
 
         public double getDoubleValue(ByteOrder byteOrder) {
@@ -1147,7 +1092,8 @@ public class ExifInterface {
             }
         }
     }
-    protected File mExifFile;
+
+    protected File mExifFile = null;
 
     //!!! tagname => tagvalue(with assoziated tagdefinition)
     protected final HashMap<String, ExifAttribute>[] mAttributes = new HashMap[EXIF_TAGS.length];
@@ -1173,7 +1119,18 @@ public class ExifInterface {
             throw new IllegalArgumentException("filename cannot be null");
         }
         mExifFile = (filename != null) ? new File(filename) : null;
-        loadAttributes((in == null) ? new FileInputStream(mExifFile) : in);
+        if (in == null) {
+            FileInputStream fileInputStream = null;
+            try {
+                fileInputStream = new FileInputStream(mExifFile);
+                loadAttributes(fileInputStream);
+            } finally {
+                closeQuietly(fileInputStream);
+            }
+        } else {
+            loadAttributes(in);
+
+        }
     }
     /**
      * Returns the EXIF attribute of the specified tagName or {@code null} if there is no such tagName in
@@ -1202,7 +1159,8 @@ public class ExifInterface {
         ExifAttribute attribute = getExifAttribute(tagName);
         if (attribute != null) {
             if (!sTagSetForCompatibility.contains(tagName)) {
-                return attribute.getStringValue(mExifByteOrder);
+                String result = attribute.getStringValue(mExifByteOrder);
+                return result;
             }
             if (tagName.equals(TAG_GPS_TIMESTAMP)) {
                 // Convert the rational values to the custom formats for backwards compatibility.
@@ -1292,7 +1250,7 @@ public class ExifInterface {
                 }
             }
         }
-        //!!!
+
         for (int subSegment = 0 ; subSegment < EXIF_TAGS.length; ++subSegment) {
             if (subSegment == IFD_THUMBNAIL_HINT && !mHasThumbnail) {
                 continue;
@@ -1802,7 +1760,7 @@ public class ExifInterface {
                     if (getAttribute(TAG_USER_COMMENT) == null) {
                         setAttribute(IFD_EXIF_HINT, TAG_USER_COMMENT,ExifAttribute.createString(
                                 EXIF_TAG_USER_COMMENT,
-                                ExifAttribute.getStringValue(bytes.length, bytes,ASCII)));
+                                decodePrefixString(bytes.length, bytes,ASCII)));
                     }
                     break;
                 }
@@ -2652,5 +2610,63 @@ public class ExifInterface {
         // Log.d(LOG_TAG, msg);
     }
 
+    protected static byte[] encodePrefixString(String value) {
+        boolean allASCII = isAllASCII(value);
+        final byte[] bytes = (value + "\0").getBytes(allASCII ? ASCII : UTF16);
+        final byte[] bytesWithPrefix = new byte[EXIF_UNICODE_PREFIX.length + bytes.length];
+        System.arraycopy(allASCII ? EXIF_ASCII_PREFIX : EXIF_UNICODE_PREFIX, 0, bytesWithPrefix, 0, EXIF_UNICODE_PREFIX.length);
+        System.arraycopy(bytes, 0, bytesWithPrefix, EXIF_UNICODE_PREFIX.length, bytes.length);
+        return bytesWithPrefix;
+    }
 
+    private static boolean isAllASCII(String input) {
+        if (input == null) return true;
+        for (int i = 0; i < input.length(); i++) {
+            int c = input.charAt(i);
+            if (c > 0x7F) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    protected static String decodePrefixString(int numberOfComponents, byte[] bytes, Charset defaultCharSet) {
+        String result = decodePrefixStringInternal(numberOfComponents, bytes, defaultCharSet);
+        if (result != null) {
+            int last = result.length() - 1;
+            while ((last >= 0) && (result.charAt(last) == 0)) {
+                last--; // remove "\0" at end
+            }
+            return result.substring(0, last+1);
+        }
+        return null;
+    }
+
+    /** decodes exif usercomment and other strings*/
+    private static String decodePrefixStringInternal(int numberOfComponents, byte[] bytes, Charset defaultCharSet) {
+        try {
+            if ((numberOfComponents >= EXIF_ASCII_PREFIX.length) && (bytes[EXIF_ASCII_PREFIX.length-1] == 0)) {
+                if (startsWith(bytes, EXIF_ASCII_PREFIX)) {
+                    return new String(bytes, 8, numberOfComponents - 8, ASCII);
+                } else if (startsWith(bytes, EXIF_UNICODE_PREFIX)) {
+                    return new String(bytes, 8, numberOfComponents - 8, UTF16);
+                } else if (startsWith(bytes, EXIF_JIS_PREFIX)) {
+                    return new String(bytes, 8, numberOfComponents - 8, "EUC-JP");
+                }
+            }
+            return new String(bytes, 0, numberOfComponents, defaultCharSet);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return "???";
+    }
+
+    private static boolean startsWith(byte[] content, byte[] prefix) {
+        for (int i = 0; i < prefix.length; ++i) {
+            if (content[i] != prefix[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

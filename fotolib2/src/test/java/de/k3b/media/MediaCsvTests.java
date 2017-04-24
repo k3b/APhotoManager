@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 import de.k3b.csv2db.csv.CsvLoader;
-import de.k3b.csv2db.csv.TestUtil;
+import de.k3b.TestUtil;
 import de.k3b.io.DateUtil;
 
 /**

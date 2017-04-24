@@ -31,6 +31,8 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.k3b.TestUtil;
+
 /**
  * Created by k3b on 04.10.2016.
  */
@@ -38,7 +40,7 @@ import java.util.List;
 public class TagRepositoryTests {
     // Obtain a logger instance
     private static final Logger LOGGER = LoggerFactory.getLogger(TagRepositoryTests.class);
-    private static final File OUTDIR = new File("./build/testresults/TagRepositoryTests");
+    private static final File OUTDIR = new File(TestUtil.OUTDIR_ROOT, "TagRepositoryTests");
     private File repositoryFile = null;
 
     @BeforeClass

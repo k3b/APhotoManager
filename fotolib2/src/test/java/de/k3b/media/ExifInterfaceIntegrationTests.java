@@ -21,6 +21,7 @@ package de.k3b.media;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 
+import de.k3b.TestUtil;
 import de.k3b.io.FileUtils;
 
 /**
@@ -42,16 +44,14 @@ import de.k3b.io.FileUtils;
 public class ExifInterfaceIntegrationTests {
     // Obtain a logger instance
     private static final Logger LOGGER = LoggerFactory.getLogger(ExifInterfaceIntegrationTests.class);
-    private static final File OUTDIR_ROOT = new File("./build/testresults/metadata");
-    private static final File OUTDIR = new File(OUTDIR_ROOT, "ExifInterfaceIntegrationTests").getAbsoluteFile();
+    private static final File OUTDIR = new File(TestUtil.OUTDIR_ROOT, "ExifInterfaceIntegrationTests").getAbsoluteFile();
     private static final HashMap<String, String> testItems = new HashMap<String, String>();
 
 	private static final String specialChars = "\r\n日本人 (Japanese)\n" + 
 												"العربية (Arabic)\n" +
 												"Français (French)\n" +
 												"Русский (Russian)" ;
-    @BeforeClass                                  
-	
+    @BeforeClass
     public static void initDirectories() {
         FileUtils.delete(OUTDIR, null);
         OUTDIR.mkdirs();
@@ -93,7 +93,7 @@ public class ExifInterfaceIntegrationTests {
         String fileNameSrc = "NoExif.jpg";
         String fileNameDest = "shouldWriteExifToNonExif.jpg";
 
-        ExifInterface sutRead = assertUpdateSameAsAfterWrite(fileNameDest, fileNameSrc);
+        ExifInterface sutRead = assertUpdateSameAsAfterWrite(fileNameDest, fileNameSrc, testItems);
         LOGGER.info(sutRead.toString());
 
     }
@@ -104,13 +104,58 @@ public class ExifInterfaceIntegrationTests {
         String fileNameSrc = "test-WitExtraData.jpg";
         String fileNameDest = "shouldUpdateExistingExif.jpg";
 
-        ExifInterface sutRead = assertUpdateSameAsAfterWrite(fileNameDest, fileNameSrc);
+        ExifInterface sutRead = assertUpdateSameAsAfterWrite(fileNameDest, fileNameSrc, testItems);
 
         LOGGER.info(sutRead.toString());
 
     }
 
-    private ExifInterface assertUpdateSameAsAfterWrite(String fileNameDest, String fileNameSrc) throws IOException {
+    @Test
+    @Ignore("Not implemented ExifInterface.UserComment=null for tif-com-segment is not implemented :-(")
+    public void shouldClearUsercommentFromExistingExif() throws IOException
+    {
+        String fileNameSrc = "test-WitExtraData.jpg";
+        String fileNameDest = "shouldClearUsercommentFromExistingExif.jpg";
+
+        HashMap<String, String> testItems = new HashMap<String, String>();
+        testItems.put(ExifInterface.TAG_USER_COMMENT			, null);
+
+        ExifInterface sutRead = assertUpdateSameAsAfterWrite(fileNameDest, fileNameSrc, testItems);
+
+        LOGGER.info(sutRead.toString());
+    }
+
+    @Test
+    public void shouldHandlePrefixStringAscii() {
+        String expected = "Hello ascii";
+
+        byte[] encoded = ExifInterface.encodePrefixString(expected);
+
+        String actual = ExifInterface.decodePrefixString(encoded.length , encoded, null);
+        Assert.assertEquals(expected, actual);
+    }
+
+    @Test
+    public void shouldHandlePrefixStringUtf() {
+        String expected = "Hello world ÄÖÜ";
+
+        byte[] encoded = ExifInterface.encodePrefixString(expected);
+
+        String actual = ExifInterface.decodePrefixString(encoded.length , encoded, null);
+        Assert.assertEquals(expected, actual);
+    }
+
+    @Test
+    public void shouldHanldePrefixStringEmpty() {
+        String expected = "";
+
+        byte[] encoded = ExifInterface.encodePrefixString(expected);
+
+        String actual = ExifInterface.decodePrefixString(encoded.length , encoded, null);
+        Assert.assertEquals(expected, actual);
+    }
+
+    private ExifInterface assertUpdateSameAsAfterWrite(String fileNameDest, String fileNameSrc, HashMap<String, String> testItems) throws IOException {
         InputStream inputStream = ImageMetaReaderIntegrationTests.class.getResourceAsStream("images/" + fileNameSrc);
 
         final File sutFile = new File(OUTDIR, fileNameDest);
@@ -134,5 +179,6 @@ public class ExifInterfaceIntegrationTests {
         Assert.assertEquals(sutWriteText, sutRead.toString());
         return sutRead;
     }
+
 
 }
