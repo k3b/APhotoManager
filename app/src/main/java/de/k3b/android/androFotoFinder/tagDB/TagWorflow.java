@@ -19,7 +19,6 @@
 package de.k3b.android.androFotoFinder.tagDB;
 
 import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -30,15 +29,12 @@ import java.util.Date;
 import java.util.List;
 
 import de.k3b.android.androFotoFinder.Global;
-import de.k3b.android.androFotoFinder.media.MediaContentValues;
 import de.k3b.android.util.AndroidFileCommands;
-import de.k3b.media.ExifInterfaceEx;
-import de.k3b.android.util.MediaScannerEx;
 import de.k3b.database.SelectedFiles;
 import de.k3b.io.FileUtils;
-import de.k3b.io.ListUtils;
 import de.k3b.media.MediaUtil;
 import de.k3b.media.MediaXmpSegment;
+import de.k3b.media.MetaWriterExifXml;
 import de.k3b.tagDB.Tag;
 import de.k3b.tagDB.TagConverter;
 import de.k3b.tagDB.TagProcessor;
@@ -85,12 +81,11 @@ public class TagWorflow extends TagProcessor {
             int progressCountDown = 0;
             int total = items.size();
             for (TagSql.TagWorflowItem item : items) {
-                File xmpFile = updateTags(item, addedTags, removedTags);
-                itemCount++;
+                itemCount+=updateTags(item, addedTags, removedTags);
                 progressCountDown--;
                 if (progressCountDown < 0) {
                     progressCountDown = 10;
-                    onProgress(itemCount, total, xmpFile.toString());
+                    onProgress(itemCount, total, item.path);
                 }
             } // for each image
         }
@@ -99,88 +94,42 @@ public class TagWorflow extends TagProcessor {
     }
 
     /** update one file if tags change or xmp does not exist yet: xmp-sidecar-file, media-db and batch */
-    @NonNull
-    protected File updateTags(TagSql.TagWorflowItem tagWorflowItemFromDB, List<String> addedTags, List<String> removedTags) {
+    protected int updateTags(TagSql.TagWorflowItem tagWorflowItemFromDB, List<String> addedTags, List<String> removedTags) {
+        int result = 0;
         boolean mustSave = tagWorflowItemFromDB.xmpMoreRecentThanSql;
         String dbgSaveReason = (mustSave) ? "xmpMoreRecentThanSql." : "";
-        MediaXmpSegment xmp = null;
 
         List<String> currentItemTags = tagWorflowItemFromDB.tags;
-        File xmpFile = FileUtils.getXmpFile(tagWorflowItemFromDB.path);
-
-        if (xmpFile.exists()) {
-            xmp = new MediaScannerEx(context).loadXmp(null, xmpFile);
-            if (xmp != null) {
-                List<String> currentXmpTags = xmp.getTags();// current tags is all db-tags + xmp-tags or null if no changes
-
-                List<String> xmpTagsFromDbAndXmpModified = this.getUpdated(currentItemTags, currentXmpTags, null);
-                if (xmpTagsFromDbAndXmpModified != null) {
-                    mustSave = true;
-                    dbgSaveReason += "xmp has more tags than sql.";
-                    currentItemTags = xmpTagsFromDbAndXmpModified;
-                } else if (ListUtils.toString(currentItemTags).compareTo(ListUtils.toString(currentXmpTags)) != 0) {
-                    dbgSaveReason += "sql has more tags than xmp.";
-                    mustSave = true;
-                }
-            }
-        } // else xmp-file does not exist yet.
-
-        // apply tag-modifications to currentItemTags or null if no changes
-        List<String> modifiedTags = this.getUpdated(currentItemTags, addedTags, removedTags);
-        if (modifiedTags != null) {
-            // tags have changed.
-            currentItemTags = modifiedTags;
-            mustSave = true;
-            dbgSaveReason += "tags modified.";
-        }
-
-        if (mustSave) {
-            if (xmp == null) {
-        // xmp does not exist yet: add original content from exif to xmp
-
-                xmp = new MediaXmpSegment();
-                xmp.setOriginalFileName(new File(tagWorflowItemFromDB.path).getName());
-
-                ExifInterfaceEx exif = null;
-                try {
-                    exif = new ExifInterfaceEx(tagWorflowItemFromDB.path, null, null, "TagWorflow.updateTags " + dbgSaveReason);
-                    MediaUtil.copy(xmp, exif, false, false);
-                } catch (IOException ex) {
-                    // exif is null
-                }
+        try {
+            MetaWriterExifXml exif = MetaWriterExifXml.create (tagWorflowItemFromDB.path, "saveLatLon: load");
+            List<String> tagsDbPlusFile = this.getUpdated(currentItemTags, exif.getTags(), null);
+            if (tagsDbPlusFile != null) {
+                mustSave = true;
+                dbgSaveReason += "jpg/xmp has more tags than sql.";
+                currentItemTags = tagsDbPlusFile;
             }
 
-            // apply tag changes to xmp
-            xmp.setTags(currentItemTags);
-
-            String dbgMsgPrefix = "TagWorflow.saveXmp(" + xmpFile + "): " + dbgSaveReason;
-            // update xmp-sidecar-file
-            try {
-                xmp.save(xmpFile, Global.saveXmpAsHumanReadable, dbgMsgPrefix);
-            } catch (IOException e) {
-                Log.e(Global.LOG_CONTEXT,dbgMsgPrefix + " error : " + e.getMessage(),e);
+            List<String> modifiedTags = this.getUpdated(currentItemTags, addedTags, removedTags);
+            if (modifiedTags != null) {
+                // tags have changed.
+                currentItemTags = modifiedTags;
+                mustSave = true;
+                dbgSaveReason += "tags modified.";
             }
 
-        // update tag repository
-            TagRepository.getInstance().include(TagRepository.getInstance().getImportRoot(), currentItemTags);
+            dbgSaveReason = "TagWorflow.updateTags(" + tagWorflowItemFromDB.path + "): " + dbgSaveReason;
 
-        // update media database
-            ContentValues dbValues = new ContentValues();
-            MediaContentValues mediaContentValues = new MediaContentValues().set(dbValues, null);
+            if (mustSave) {
+                exif.setTags(currentItemTags);
+                exif.save(dbgSaveReason);
+                TagSql.updateDB(dbgSaveReason, this.context, tagWorflowItemFromDB.path, exif, MediaUtil.FieldID.tags);
 
-            // #77: does only copy non-null values
-            MediaUtil.copyXmp(mediaContentValues, xmp,false, true);
+                // update tag repository
+                TagRepository.getInstance().include(TagRepository.getInstance().getImportRoot(), currentItemTags);
+                result = 1;
+            }
 
-            // #77: fix make shure that tags might be set to null
-            mediaContentValues.setTags(currentItemTags);
-
-            // #77: make shure that db-date is newer than xmp-file-date
-            TagSql.setXmpFileModifyDate(dbValues, new Date(xmpFile.lastModified() +1));
-
-
-            TagSql.execUpdate("updateTags " + dbgSaveReason, this.context, tagWorflowItemFromDB.id, dbValues);
-
-        // update batch
+            // update batch
             long now = new Date().getTime();
             String tagsString = TagConverter.asBatString(removedTags);
             AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(context);
@@ -198,12 +147,14 @@ public class TagWorflow extends TagProcessor {
             }
 
             cmd.addTransactionLog(tagWorflowItemFromDB.id, tagWorflowItemFromDB.path, now,
-                    MediaTransactionLogEntryType.TAGS, TagConverter.asBatString(xmp.getTags()));
+                    MediaTransactionLogEntryType.TAGS, TagConverter.asBatString(exif.getTags()));
 
             cmd.closeLogFile();
-        }
 
-        return xmpFile;
+        } catch (IOException e) {
+            Log.e(Global.LOG_CONTEXT,dbgSaveReason + " error : " + e.getMessage(),e);
+        }
+        return result;
     }
 
     /** periodically called while work in progress. can be overwritten to supply feedback to user */

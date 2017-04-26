@@ -20,6 +20,7 @@
 package de.k3b.media;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -32,88 +33,125 @@ import de.k3b.tagDB.TagConverter;
  */
 
 public class MediaUtil {
+    /**
+     * used to identify a member of IMetaApi
+     */
+    public static enum FieldID {
+        path,
+        dateTimeTaken,
+        title,
+        description,
+        latitude,
+        longitude,
+        rating,
+        tags,
+        clasz,
+    }
+
+    ;
 
     public static String toString(IMetaApi item) {
+        return toString(item, true);
+    }
+
+    public static String toString(IMetaApi item, boolean includeEmpty, FieldID... _excludes) {
         if (item == null) return "";
-        return item.getClass().getSimpleName() + ":" +
-                " path " + item.getPath() +
-                " dateTimeTaken " + DateUtil.toIsoDateString(item.getDateTimeTaken()) +
-                " title " + item.getTitle() +
-                " description " + item.getDescription() +
-                " latitude " + GeoUtil.toCsvStringLatLon(item.getLatitude()) +
-                " longitude " + GeoUtil.toCsvStringLatLon(item.getLongitude()) +
-                " tags " + TagConverter.asDbString(null, item.getTags());
+        List<FieldID> excludes = ((_excludes == null) || (_excludes.length == 0)) ? null : Arrays.asList(_excludes);
+        StringBuilder result = new StringBuilder();
+        add(result, includeEmpty, excludes, FieldID.clasz, item.getClass().getSimpleName(), ":");
+        add(result, includeEmpty, excludes, FieldID.path, " path ", item.getPath());
+        add(result, includeEmpty, excludes, FieldID.dateTimeTaken, " dateTimeTaken ", DateUtil.toIsoDateString(item.getDateTimeTaken()));
+        add(result, includeEmpty, excludes, FieldID.title, " title ", item.getTitle());
+        add(result, includeEmpty, excludes, FieldID.description, " description ", item.getDescription());
+        add(result, includeEmpty, excludes, FieldID.latitude, " latitude ", GeoUtil.toCsvStringLatLon(item.getLatitude()));
+        add(result, includeEmpty, excludes, FieldID.longitude, " longitude ", GeoUtil.toCsvStringLatLon(item.getLongitude()));
+        add(result, includeEmpty, excludes, FieldID.rating, " rating ", item.getRating());
+        add(result, includeEmpty, excludes, FieldID.tags, " tags ", TagConverter.asDbString(null, item.getTags()));
+        return result.toString();
+    }
+
+    private static void add(StringBuilder result, boolean includeEmpty,
+                            List<FieldID> excludes, FieldID item, String name, Object value) {
+        if ((includeEmpty) || (value != null)) {
+            if ((excludes == null) || (!excludes.contains(item))) {
+                result.append(name).append(value);
+            }
+        }
     }
 
     /** copy content from source to destination. @return number of copied properties */
-    public static int copy(IMetaApi destination, IMetaApi source, boolean allowSetNull, boolean overwriteExisting) {
-        return copyExif(destination, source, allowSetNull, overwriteExisting) + copyXmp(destination, source, allowSetNull, overwriteExisting);
+    public static int copy(IMetaApi destination, IMetaApi source,
+                           boolean allowSetNull, boolean overwriteExisting) {
+        return copyImpl(destination, source, allowSetNull, overwriteExisting, null);
     }
 
-    /** copy exif-prio content from source to destination. @return number of copied properties */
-    private static int copyExif(IMetaApi destination, IMetaApi source, boolean allowSetNull, boolean overwriteExisting) {
+    /**
+     * Copies non null properties of source to destination.
+     *
+     * @param _allowSetNulls     if one of these columns are null, the set null is copied, too
+     * @return number of copied properties
+     */
+    public static int copyNonEmpty(IMetaApi destination, IMetaApi source, FieldID... _allowSetNulls) {
+        return copyImpl(destination, source, false, true, _allowSetNulls);
+    }
+
+    /** copy content from source to destination. @return number of copied properties */
+    private static int copyImpl(IMetaApi destination, IMetaApi source,
+                           boolean allowSetNull, boolean overwriteExisting,
+                           FieldID[] _allowSetNulls) {
         int changes = 0;
 
         if ((destination != null) && (source != null)) {
+            List<FieldID>  allowSetNulls = ((_allowSetNulls == null) || (_allowSetNulls.length == 0)) ? null : Arrays.asList(_allowSetNulls);
             String sValue;
 
             sValue = source.getPath();
-            if (allowed(allowSetNull, sValue, overwriteExisting, destination.getPath())) {
+            if (allowed(allowSetNull, sValue, overwriteExisting, destination.getPath(), allowSetNulls, FieldID.path)) {
                 destination.setPath(sValue);
                 changes++;
             }
 
             Date dValue = source.getDateTimeTaken();
-            if (allowed(allowSetNull, dValue, overwriteExisting, destination.getDateTimeTaken())) {
+            if (allowed(allowSetNull, dValue, overwriteExisting, destination.getDateTimeTaken(), allowSetNulls, FieldID.dateTimeTaken)) {
                 destination.setDateTimeTaken(dValue);
                 changes++;
             }
 
             Double doValue = source.getLatitude();
-            if (allowed(allowSetNull, doValue, overwriteExisting, destination.getLatitude())) {
+            if (allowed(allowSetNull, doValue, overwriteExisting, destination.getLatitude(), allowSetNulls, FieldID.latitude)) {
                 destination.setLatitude(doValue);
                 changes++;
             }
 
             doValue = source.getLongitude();
-            if (allowed(allowSetNull, doValue, overwriteExisting, destination.getLongitude())) {
+            if (allowed(allowSetNull, doValue, overwriteExisting, destination.getLongitude(), allowSetNulls, FieldID.longitude)) {
                 destination.setLongitude(doValue);
                 changes++;
             }
-
-        }
-        return changes;
-    }
-
-    /** copy xmp-priority content from source to destination. @return number of copied properties */
-    public static int copyXmp(IMetaApi destination, IMetaApi source, boolean allowSetNull, boolean overwriteExisting) {
-        int changes = 0;
-        if ((destination != null) && (source != null)) {
-
-            String sValue;// xmp-only attributes
             sValue = source.getTitle();
-            if (allowed(allowSetNull, sValue, overwriteExisting, destination.getTitle())) {
+            if (allowed(allowSetNull, sValue, overwriteExisting, destination.getTitle(), allowSetNulls, FieldID.title)) {
                 destination.setTitle(sValue);
                 changes++;
             }
 
             sValue = source.getDescription();
-            if (allowed(allowSetNull, sValue, overwriteExisting, destination.getDescription())) {
+            if (allowed(allowSetNull, sValue, overwriteExisting, destination.getDescription(), allowSetNulls, FieldID.description)) {
                 destination.setDescription(sValue);
                 changes++;
             }
 
             List<String> tValue = source.getTags();
-            if (allowed(allowSetNull, tValue, overwriteExisting, destination.getTags())) {
+            if (allowed(allowSetNull, tValue, overwriteExisting, destination.getTags(), allowSetNulls, FieldID.tags)) {
                 destination.setTags(tValue);
                 changes++;
             }
 
             Integer iValue = source.getRating();
-            if (allowed(allowSetNull, iValue, overwriteExisting, destination.getDateTimeTaken())) {
+            if (allowed(allowSetNull, iValue, overwriteExisting, destination.getDateTimeTaken(), allowSetNulls, FieldID.rating)) {
                 destination.setRating(iValue);
                 changes++;
             }
+
         }
         return changes;
     }
@@ -182,7 +220,8 @@ public class MediaUtil {
     }
 
     private static boolean allowed(boolean allowSetNull, Object newValue,
-                                   boolean overwriteExisting, Object oldValue) {
+                                   boolean overwriteExisting, Object oldValue, List<FieldID> allowSetNulls, FieldID item) {
+        if ((allowSetNulls != null) && (allowSetNulls.contains(item))) return true;
         if ((!overwriteExisting) && (oldValue != null)) return false;
         return ((newValue != null) || allowSetNull);
     }

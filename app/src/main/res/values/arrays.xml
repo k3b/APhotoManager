@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- where to write media data changes to ? -->
+    <string-array name="pref_media_update_strategy_names" translatable="false">
+        <item>@string/settings_media_update_strategy_jpg_xmp_create</item>
+        <item>@string/settings_media_update_strategy_jpg_xmp_update</item>
+        <item>@string/settings_media_update_strategy_jpg</item>
+        <item>@string/settings_media_update_strategy_xmp</item>
+    </string-array>
+    <!-- encoded J=jpeg; X=xmp; C=create; _=false -->
+    <string-array name="pref_media_update_strategy_values" translatable="false">
+        <item>JXC</item>
+        <item>JX</item>
+        <item>J</item>
+        <item>XC</item>
+    </string-array>
+
+    <!-- which gui language to use ? -->
     <string-array name="pref_locale_names" translatable="false">
         <item>@string/settings_locale_os_language</item>
         <item>العربية (Arabic)</item> 

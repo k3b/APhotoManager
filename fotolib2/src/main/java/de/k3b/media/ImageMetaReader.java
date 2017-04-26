@@ -110,7 +110,7 @@ public class ImageMetaReader implements IMetaApi, Closeable {
 
         if (FotoLibGlobal.debugEnabledJpgMetaIo) {
             logger.debug(dbg_context +
-                    "loaded: " + MediaUtil.toString(this));
+                    "loaded: " + MediaUtil.toString(this, false, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
         }
 
         return this;
@@ -332,7 +332,8 @@ public class ImageMetaReader implements IMetaApi, Closeable {
 
     /** return the image orinentation as id (one of the ORIENTATION_ROTATE_XXX constants) */
     private Integer getOrientationId() {
-        return mExifDir.getInteger(ExifDirectoryBase.TAG_ORIENTATION);
+        init();
+        return (mExifDir == null) ? 0 : mExifDir.getInteger(ExifDirectoryBase.TAG_ORIENTATION);
     }
 
     private static final int ORIENTATION_ROTATE_180 = 3;
@@ -429,7 +430,7 @@ public class ImageMetaReader implements IMetaApi, Closeable {
             GpsDirectory gps = this.mMetadata.getFirstDirectoryOfType(GpsDirectory.class);
             if (gps != null) {
                 mExifGpsDir = gps.getGeoLocation();
-                if (mExifGpsDir.isZero()) mExifGpsDir = null;
+                if ((mExifGpsDir != null) && mExifGpsDir.isZero()) mExifGpsDir = null;
             }
 
             mInternalXmpDir = null;

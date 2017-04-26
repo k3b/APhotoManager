@@ -35,6 +35,7 @@ public enum MediaXmpFieldDefinition {
     DateCreated(XmpNamespace.PHOTOSHOP),  // exiftool default
 
     OriginalFileName(XmpNamespace.APM), // apm specific: the original file name of the image file
+    AppVersion(XmpNamespace.APM),       // apm specific: creating app/version
 
     DateTimeOriginal(XmpNamespace.EXIF),
     GPSLatitude(XmpNamespace.EXIF),

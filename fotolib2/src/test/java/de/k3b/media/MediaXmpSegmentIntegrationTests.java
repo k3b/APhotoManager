@@ -20,6 +20,7 @@
 package de.k3b.media;
 
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Before;
 import org.slf4j.Logger;
@@ -29,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.TimeZone;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.TestUtil;
 import de.k3b.io.DateUtil;
 import de.k3b.io.ListUtils;
@@ -41,6 +43,12 @@ public class MediaXmpSegmentIntegrationTests {
     private static final Logger logger = LoggerFactory.getLogger(MediaXmpSegmentIntegrationTests.class);
 
     private IMetaApi sut = null;
+    @BeforeClass
+    public static void initDirectories() {
+        FotoLibGlobal.appName = "JUnit";
+        FotoLibGlobal.appVersion = "MediaXmpSegmentIntegrationTests";
+    }
+
     @Before
     public void setup() throws IOException {
         // MediaXmpSegment.DEBUG = true;

@@ -137,8 +137,12 @@ abstract public class MediaScanner  {
         return FileUtils.isNoMedia(path,maxLevel);
     }
 
+    public static boolean isNoMedia(String path) {
+        return FileUtils.isNoMedia(path,MediaScanner.DEFAULT_SCAN_DEPTH);
+    }
+
     public static boolean canHideFolderMedia(String absoluteSelectedPath) {
-        return !MediaScanner.isNoMedia(absoluteSelectedPath, MediaScanner.DEFAULT_SCAN_DEPTH);
+        return !isNoMedia(absoluteSelectedPath);
     }
 
     public static int hideFolderMedia(Activity context, String path) {
@@ -338,7 +342,7 @@ abstract public class MediaScanner  {
         MediaContentValues dest = new MediaContentValues().set(values, null);
 
         // (!writeExif) prefer read from xmp value before exif value
-        IMetaApi src = (FotoLibGlobal.Media.writeExif)
+        IMetaApi src = (FotoLibGlobal.mediaUpdateStrategy.contains("J"))
                 ? exif
                 : new MetaApiChainReader(xmpContent, exif);
 
@@ -388,7 +392,7 @@ abstract public class MediaScanner  {
 
     /** @return number of copied properties */
     protected int getExifValues(MediaContentValues dest, File file, IMetaApi src) {
-        return MediaUtil.copy(dest, src, false, true);
+        return MediaUtil.copyNonEmpty(dest, src);
     }
 
     abstract public IGeoPointInfo getPositionFromFile(String absolutePath, String id);

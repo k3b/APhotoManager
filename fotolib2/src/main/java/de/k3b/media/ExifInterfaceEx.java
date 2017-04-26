@@ -79,7 +79,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
         this.mDbg_context = dbg_context + "->ExifInterfaceEx(" + absoluteJpgPath+ ") ";
         if (FotoLibGlobal.debugEnabledJpgMetaIo) {
             logger.debug(this.mDbg_context +
-                    " load: " + MediaUtil.toString(this));
+                    " load: " + MediaUtil.toString(this, false, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
         }
         // Log.d(LOG_TAG, msg);
 
@@ -87,21 +87,32 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
 
     @Override
     public void saveAttributes() throws IOException {
-        fixAttributes();
         super.saveAttributes();
         setFilelastModified(mExifFile);
         if (FotoLibGlobal.debugEnabledJpgMetaIo) {
             logger.debug(mDbg_context +
-                    " saved: " + MediaUtil.toString(this));
+                    " saved: " + MediaUtil.toString(this, false, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
         }
     }
 
+    @Override
     protected void fixAttributes() {
-        /*
-        if ((mExifFile != null) && (getDateTimeTaken() == null) && (getFilelastModified() != 0)) {
-           setDateTimeTaken(new Date(getFilelastModified()));
+        if (ExifInterfaceEx.fixDateOnSave) {
+            long lastModified = mExifFile.lastModified();
+            // #29 set data if not in exif: date, make model
+            if ((lastModified != 0) && (null == getDateTimeTaken())) {
+                setDateTimeTaken(new Date(lastModified));
+            }
         }
-        */
+
+        if ((FotoLibGlobal.appName != null) && (null == getAttribute(ExifInterfaceEx.TAG_MAKE))) {
+            setAttribute(ExifInterfaceEx.TAG_MAKE, FotoLibGlobal.appName);
+        }
+
+        if ((FotoLibGlobal.appVersion != null) && (null == getAttribute(ExifInterfaceEx.TAG_MODEL))) {
+            setAttribute(ExifInterfaceEx.TAG_MODEL, FotoLibGlobal.appVersion);
+        }
+        super.fixAttributes();
     }
 
     @Override

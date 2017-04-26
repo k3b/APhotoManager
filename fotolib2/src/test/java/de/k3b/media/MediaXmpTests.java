@@ -20,6 +20,7 @@
 package de.k3b.media;
 
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
@@ -30,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.TimeZone;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.TestUtil;
 
 /**
@@ -42,6 +44,12 @@ public class MediaXmpTests {
     private static final String RESOURCES_ROOT = "testdata/";
     private static final File OUTDIR = new File(TestUtil.OUTDIR_ROOT, "MediaXmpTests");
 
+    @BeforeClass
+    public static void initDirectories() {
+        FotoLibGlobal.appName = "JUnit";
+        FotoLibGlobal.appVersion = "MediaXmpTests";
+    }
+
     @Test
     public void shouldReadExistingXmpFile() throws IOException {
         TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
@@ -53,7 +61,7 @@ public class MediaXmpTests {
 
         MediaDTO actual = new MediaDTO(sut);
 
-        Assert.assertEquals(sut.toString(), "MediaDTO: path null dateTimeTaken 1962-11-07T09:38:46 title Headline description XPSubject latitude 27.818611 longitude -15.764444 tags Marker1, Marker2", actual.toString());
+        Assert.assertEquals(sut.toString(), "MediaDTO: path null dateTimeTaken 1962-11-07T09:38:46 title Headline description XPSubject latitude 27.818611 longitude -15.764444 rating 3 tags Marker1, Marker2", actual.toString());
     }
 
     private InputStream getStream(String _resourceName) {

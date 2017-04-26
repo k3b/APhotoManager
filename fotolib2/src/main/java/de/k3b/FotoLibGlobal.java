@@ -40,10 +40,11 @@ public class FotoLibGlobal {
 
     public static boolean visibilityShowPrivateByDefault = false;
 
-    public static class Media {
-        // global to allow changing these via a settings dialog
-        public static boolean writeExif = true;
-        public static boolean writeXmp = true;
-        public static boolean createXmpIfNotExist = true;
-    }
+    // (J)pg, (X)mp, (C)reate: global to allow changing these via a settings dialog
+    public static String mediaUpdateStrategy = "JXC";
+
+    // will be written into exif/xmp if not already set.
+    // Overwritten by android Application.onCreate()
+    public static String appName = null;
+    public static String appVersion = null;
 }

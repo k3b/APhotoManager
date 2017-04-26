@@ -69,6 +69,8 @@ public class ExifInterface {
     // public to allow global settings to enable/disable
     public static boolean DEBUG = false;
 
+    // false for unittests because UserComment = null is not implemented for COM - Marker
+    protected static boolean fixDateOnSave = true;
 
     // The Exif tag names
     /** Type is String. */
@@ -1418,7 +1420,6 @@ public class ExifInterface {
             // ExifInterface.
             logWarn( "Invalid image.", e);
         } finally {
-            addDefaultValuesForCompatibility();
             if (DEBUG_INTERNAL) {
                 logDebug(this.toString());
             }
@@ -1471,6 +1472,8 @@ public class ExifInterface {
      * and make a single call rather than multiple calls for each attribute.
      */
     public void saveAttributes() throws IOException {
+        fixAttributes();
+
         // Keep the thumbnail in memory
         mThumbnailBytes = getThumbnail();
         File tempFile = null;
@@ -1496,6 +1499,48 @@ public class ExifInterface {
         // Discard the thumbnail in memory
         mThumbnailBytes = null;
     }
+
+    /** repairs wrong/missing attributes */
+    protected void fixAttributes() {
+        if (ExifInterface.fixDateOnSave) {
+            // The value of DATETIME tag has the same value of DATETIME_ORIGINAL tag.
+            String valueOfDateTimeOriginal = getAttribute(TAG_DATETIME_ORIGINAL);
+            if (valueOfDateTimeOriginal != null) {
+                setAttribute(IFD_TIFF_HINT, TAG_DATETIME,
+                        ExifAttribute.createString(EXIF_TAG_DATETIME, valueOfDateTimeOriginal));
+            }
+        }
+
+        if (getExifAttribute(TAG_IMAGE_WIDTH) == null) {
+            setAttribute(IFD_TIFF_HINT,TAG_IMAGE_WIDTH,
+                    ExifAttribute.createULong(EXIF_TAG_IMAGE_WIDTH, 0, mExifByteOrder));
+        }
+        if (getExifAttribute(TAG_IMAGE_LENGTH) == null) {
+            setAttribute(IFD_TIFF_HINT,TAG_IMAGE_LENGTH,
+                    ExifAttribute.createULong(EXIF_TAG_IMAGE_LENGTH, 0, mExifByteOrder));
+        }
+        if (getExifAttribute(TAG_ORIENTATION) == null) {
+            setAttribute(IFD_TIFF_HINT,TAG_ORIENTATION,
+                    ExifAttribute.createULong(EXIF_TAG_ORIENTATION, 0, mExifByteOrder));
+        }
+        if (getExifAttribute(TAG_LIGHT_SOURCE) == null) {
+            setAttribute(IFD_EXIF_HINT, TAG_LIGHT_SOURCE,
+                    ExifAttribute.createULong(EXIF_TAG_LIGHT_SOURCE, 0, mExifByteOrder));
+        }
+
+        // add missing TAG_GPS_VERSION_ID if there is gps info included
+        if ((getExifAttribute(TAG_GPS_LATITUDE) != null) && (getExifAttribute(TAG_GPS_VERSION_ID) == null)) {
+            /* from http://www.exiv2.org/tags.html
+
+                Indicates the version of <GPSInfoIFD>. The version is given as 2.0.0.0.
+                This tag is mandatory when <GPSInfo> tag is present. (Note: The <GPSVersionID> tag
+                is given in bytes, unlike the <ExifVersion> tag. When the version is 2.0.0.0,
+                the tag value is 02000000.H).*/
+            setAttribute(IFD_GPS_HINT,TAG_GPS_VERSION_ID,
+                    new ExifAttribute(EXIF_TAG_GPS_VERSION_ID, IFD_FORMAT_BYTE, GPS_VERSION_DEFAULT.length, GPS_VERSION_DEFAULT));
+        }
+    }
+
     /**
      * Returns true if the image file has a thumbnail.
      */
@@ -1967,36 +2012,7 @@ public class ExifInterface {
             }
         }
     }
-    private void addDefaultValuesForCompatibility() {
-        // The value of DATETIME tag has the same value of DATETIME_ORIGINAL tag.
-        String valueOfDateTimeOriginal = getAttribute(TAG_DATETIME_ORIGINAL);
-        if (valueOfDateTimeOriginal != null) {
-            setAttribute(IFD_TIFF_HINT,TAG_DATETIME,
-                    ExifAttribute.createString(EXIF_TAG_DATETIME, valueOfDateTimeOriginal));
-        }
-        // Add the default value.
-        if (getAttribute(TAG_IMAGE_WIDTH) == null) {
-            setAttribute(IFD_TIFF_HINT,TAG_IMAGE_WIDTH,
-                    ExifAttribute.createULong(EXIF_TAG_IMAGE_WIDTH, 0, mExifByteOrder));
-        }
-        if (getAttribute(TAG_IMAGE_LENGTH) == null) {
-            setAttribute(IFD_TIFF_HINT,TAG_IMAGE_LENGTH,
-                    ExifAttribute.createULong(EXIF_TAG_IMAGE_LENGTH, 0, mExifByteOrder));
-        }
-        if (getAttribute(TAG_ORIENTATION) == null) {
-            setAttribute(IFD_TIFF_HINT,TAG_ORIENTATION,
-                    ExifAttribute.createULong(EXIF_TAG_ORIENTATION, 0, mExifByteOrder));
-        }
-        if (getAttribute(TAG_LIGHT_SOURCE) == null) {
-            setAttribute(IFD_EXIF_HINT, TAG_LIGHT_SOURCE,
-                    ExifAttribute.createULong(EXIF_TAG_LIGHT_SOURCE, 0, mExifByteOrder));
-        }
 
-        if ((getAttribute(TAG_GPS_LATITUDE) != null) && (getAttribute(TAG_GPS_VERSION_ID) == null)) {
-            setAttribute(IFD_GPS_HINT,TAG_GPS_VERSION_ID,
-                    new ExifAttribute(EXIF_TAG_GPS_VERSION_ID, IFD_FORMAT_BYTE, GPS_VERSION_DEFAULT.length, GPS_VERSION_DEFAULT));
-        }
-    }
     // Reads image file directory, which is a tag group in EXIF.
     private void readImageFileDirectory(ByteOrderAwarenessDataInputStream dataInputStream, int hint)
             throws IOException {

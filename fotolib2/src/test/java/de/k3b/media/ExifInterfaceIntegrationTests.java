@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.TestUtil;
 import de.k3b.io.FileUtils;
 
@@ -53,6 +54,9 @@ public class ExifInterfaceIntegrationTests {
 												"Русский (Russian)" ;
     @BeforeClass
     public static void initDirectories() {
+        FotoLibGlobal.appName = "JUnit";
+        FotoLibGlobal.appVersion = "ExifInterfaceIntegrationTests";
+
         FileUtils.delete(OUTDIR, null);
         OUTDIR.mkdirs();
 

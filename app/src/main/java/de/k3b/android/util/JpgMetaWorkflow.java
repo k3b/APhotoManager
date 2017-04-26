@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -23,10 +23,11 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.media.ExifInterfaceEx;
+import de.k3b.media.MediaUtil;
+import de.k3b.media.MetaWriterExifXml;
 
 /**
  * Write geo data (lat/lon) to photo
@@ -35,26 +36,30 @@ import de.k3b.media.ExifInterfaceEx;
  * Created by k3b on 25.08.2015.
  */
 public class JpgMetaWorkflow {
-    private static StringBuilder debugExif(StringBuilder sb, String context, ExifInterfaceEx exif, File filePath) {
+    private static StringBuilder debugExif(StringBuilder sb, String context, MetaWriterExifXml exif, File filePath) {
         if (sb != null) {
             sb.append("\n\t").append(context).append("\t: ");
 
             if (exif != null) {
-                sb.append(exif.getDebugString(" "));
+                if (exif.getExif() != null) {
+                    sb.append(exif.getExif().getDebugString(" "));
+                } else {
+                    sb.append(MediaUtil.toString(exif, false, MediaUtil.FieldID.path));
+                }
             }
         }
         return sb;
     }
 
-    public static boolean saveLatLon(File filePath, Double latitude, Double longitude, String appName, String appVersion) {
+    public static MetaWriterExifXml saveLatLon(File filePath, Double latitude, Double longitude) {
         StringBuilder sb = (Global.debugEnabled)
                 ? sb = createDebugStringBuilder(filePath)
                 : null;
         if (filePath.canWrite()) {
-            ExifInterfaceEx exif = null;
+            MetaWriterExifXml exif = null;
             try {
                 long lastModified = filePath.lastModified();
-                exif = new ExifInterfaceEx(filePath.getAbsolutePath(), null, null, "saveLatLon");
+                exif = MetaWriterExifXml.create (filePath.getAbsolutePath(), "saveLatLon: load");
                 debugExif(sb, "old", exif, filePath);
 
                 exif.setLatitude(latitude);
@@ -62,32 +67,21 @@ public class JpgMetaWorkflow {
                 // exif.setAttribute(ExifInterfaceEx.TAG_GPS_ALTITUDE, convert(0));
                 // exif.setAttribute(ExifInterfaceEx.TAG_GPS_ALTITUDE_REF, longitudeRef(0));
 
-                // #29 set data if not in exif: date, make model
-                if ((lastModified != 0) && (null == exif.getDateTimeTaken())) {
-                    exif.setDateTimeTaken(new Date(lastModified));
-                }
-
-                if ((appName != null) && (null == exif.getAttribute(ExifInterfaceEx.TAG_MAKE))) {
-                    exif.setAttribute(ExifInterfaceEx.TAG_MAKE, appName);
-                }
-
-                if ((appVersion != null) && (null == exif.getAttribute(ExifInterfaceEx.TAG_MODEL))) {
-                    exif.setAttribute(ExifInterfaceEx.TAG_MODEL, appVersion);
-                }
                 debugExif(sb, "assign ", exif, filePath);
 
-                exif.saveAttributes();
+                exif.save("saveLatLon save");
 
                 // preseve file modification date
                 filePath.setLastModified(lastModified);
 
                 if (sb != null) {
-                    exif = new ExifInterfaceEx(filePath.getAbsolutePath(), null, null, "dbg in saveLatLon");
-                    debugExif(sb, "new ", exif, filePath);
+                    MetaWriterExifXml exifVerify = MetaWriterExifXml.create (filePath.getAbsolutePath(),
+                            "dbg in saveLatLon", true, true, false);
+                    debugExif(sb, "new ", exifVerify, filePath);
 
                     Log.d(Global.LOG_CONTEXT, sb.toString());
                 }
-                return true;
+                return exif;
             } catch (IOException e) {
                 if (sb == null) {
                     sb = createDebugStringBuilder(filePath);
@@ -96,7 +90,7 @@ public class JpgMetaWorkflow {
 
                 sb.append("error='").append(e.getMessage()).append("' ");
                 Log.e(Global.LOG_CONTEXT, sb.toString(), e);
-                return false;
+                return null;
             }
         } else {
             if (sb == null) {
@@ -105,7 +99,7 @@ public class JpgMetaWorkflow {
 
             sb.append("error='file is write protected' ");
             Log.e(Global.LOG_CONTEXT, sb.toString());
-            return false;
+            return null;
         }
     }
 

@@ -32,6 +32,9 @@ public class MetaApiWrapper implements IMetaApi {
     protected final IMetaApi readChild;
     protected final IMetaApi writeChild;
 
+    /** count the non path write calls */
+    private int modifyCount = 0;
+
     public MetaApiWrapper(IMetaApi child) {
         this(child, child);
     }
@@ -48,18 +51,21 @@ public class MetaApiWrapper implements IMetaApi {
 
     @Override
     public MetaApiWrapper setDateTimeTaken(Date value) {
+        modifyCount++;
         if (writeChild != null) writeChild.setDateTimeTaken(value);
         return this;
     }
 
     @Override
     public MetaApiWrapper setLatitude(Double latitude) {
+        modifyCount++;
         if (writeChild != null) writeChild.setLatitude(latitude);
         return this;
     }
 
     @Override
     public MetaApiWrapper setLongitude(Double longitude) {
+        modifyCount++;
         if (writeChild != null) writeChild.setLongitude(longitude);
         return this;
     }
@@ -79,6 +85,7 @@ public class MetaApiWrapper implements IMetaApi {
     }
 
     public MetaApiWrapper setTitle(String title) {
+        modifyCount++;
         if (writeChild != null) writeChild.setTitle(title);
         return this;
     }
@@ -88,6 +95,7 @@ public class MetaApiWrapper implements IMetaApi {
     }
 
     public MetaApiWrapper setDescription(String description) {
+        modifyCount++;
         if (writeChild != null) writeChild.setDescription(description);
         return this;
     }
@@ -97,6 +105,7 @@ public class MetaApiWrapper implements IMetaApi {
     }
 
     public MetaApiWrapper setTags(List<String> tags) {
+        modifyCount++;
         if (writeChild != null) writeChild.setTags(tags);
         return this;
     }
@@ -111,6 +120,7 @@ public class MetaApiWrapper implements IMetaApi {
 
     @Override
     public IMetaApi setRating(Integer value) {
+        modifyCount++;
         if (writeChild != null) writeChild.setRating(value);
         return this;
     }

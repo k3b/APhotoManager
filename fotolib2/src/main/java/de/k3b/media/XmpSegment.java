@@ -189,7 +189,7 @@ public class XmpSegment {
         return null;
     }
 
-    private void onError(String message, Exception e) {
+    protected void onError(String message, Exception e) {
         logger.error(dbg_context + message, e);
     }
 

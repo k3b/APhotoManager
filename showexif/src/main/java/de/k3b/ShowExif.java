@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import de.k3b.media.ExifInterface;
 import de.k3b.media.ExifInterfaceEx;
+import de.k3b.media.IMetaApi;
 import de.k3b.media.ImageMetaReader;
 import de.k3b.media.MediaUtil;
 import de.k3b.media.MediaXmpSegment;
@@ -39,16 +40,20 @@ public class ShowExif {
 
             ExifInterfaceEx exif = new ExifInterfaceEx(fileName, null, xmp, dbg_context);
             ImageMetaReader jpg = new ImageMetaReader().load(fileName, null, xmp, dbg_context);
-            System.out.println(MediaUtil.toString(jpg));
-            if (debug) System.out.println(jpg.toString() + "\n\n");
-            System.out.println(MediaUtil.toString(exif));
-            if (debug) System.out.println(exif.toString() + "\n\n");
-            System.out.println(MediaUtil.toString(xmp));
-            if (debug && xmp != null) System.out.println(xmp.toString() + "\n\n");
+            show(jpg, debug);
+            show(exif, debug);
+            show(xmp, debug);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+    }
+
+    private static void show(IMetaApi item, boolean debug) {
+        if (item != null) {
+            System.out.println(MediaUtil.toString(item, false, MediaUtil.FieldID.path));
+            if (debug) System.out.println(item.toString() + "\n\n");
+        }
     }
 }

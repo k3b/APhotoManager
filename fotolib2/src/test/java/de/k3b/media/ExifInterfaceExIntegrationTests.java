@@ -20,6 +20,7 @@
 package de.k3b.media;
 
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.Before;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.TestUtil;
 import de.k3b.io.DateUtil;
 import de.k3b.io.ListUtils;
@@ -40,6 +42,13 @@ public class ExifInterfaceExIntegrationTests {
     private static final Logger logger = LoggerFactory.getLogger(ExifInterfaceExIntegrationTests.class);
 
     private IMetaApi sut = null;
+
+    @BeforeClass
+    public static void initDirectories() {
+        FotoLibGlobal.appName = "JUnit";
+        FotoLibGlobal.appVersion = "ExifInterfaceExIntegrationTests";
+    }
+
     @Before
     public void setup() throws IOException {
         // ExifInterfaceEx.DEBUG = true;

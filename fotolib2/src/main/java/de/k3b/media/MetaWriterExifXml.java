@@ -37,16 +37,13 @@ public class MetaWriterExifXml extends MetaApiWrapper {
 
     public static MetaWriterExifXml create(String absoluteJpgPath, String dbg_context) throws IOException {
         return create(absoluteJpgPath, dbg_context,
-                FotoLibGlobal.Media.writeExif, FotoLibGlobal.Media.writeXmp,
-                FotoLibGlobal.Media.createXmpIfNotExist);
+                FotoLibGlobal.mediaUpdateStrategy.contains("J"),
+                FotoLibGlobal.mediaUpdateStrategy.contains("X"),
+                FotoLibGlobal.mediaUpdateStrategy.contains("C"));
     }
 
-
     public static MetaWriterExifXml create(String absoluteJpgPath, String dbg_context
-                    ,boolean writeExif, boolean writeXmp, boolean createXmpIfNotExist) throws IOException {
-        // fix illegal combinations
-        if (!writeXmp) writeExif = true;
-
+                    ,boolean writeJpg, boolean writeXmp, boolean createXmpIfNotExist) throws IOException {
         MediaXmpSegment xmp = MediaXmpSegment.loadXmpSidecarContentOrNull(absoluteJpgPath, dbg_context);
         if ((createXmpIfNotExist) && (xmp == null)) {
             ImageMetaReader jpg = new ImageMetaReader().load(absoluteJpgPath,null,null,
@@ -58,15 +55,15 @@ public class MetaWriterExifXml extends MetaApiWrapper {
             if (xmp == null) xmp = new MediaXmpSegment();
 
             // xmp should have the same data as exif/iptc
-            MediaUtil.copy(xmp, jpg, false, true);
+            MediaUtil.copyNonEmpty(xmp, jpg);
         }
         ExifInterfaceEx exif = new ExifInterfaceEx(absoluteJpgPath, null, xmp, dbg_context);
         exif.setPath(absoluteJpgPath);
 
         MetaWriterExifXml result = new MetaWriterExifXml(
-                (writeExif) ? exif : new MetaApiChainReader(xmp, exif), //  (!writeExif) prefer read from xmp value before exif value
-                (writeExif) ? exif : xmp ,  //  (!writeExif) modify xmp value only
-                (writeExif) ? exif : null,  //  (!writeExif) do not safe changes to jpg exif file
+                (writeJpg) ? exif : new MetaApiChainReader(xmp, exif), //  (!writeJpg) prefer read from xmp value before exif value
+                (writeJpg) ? exif : xmp ,  //  (!writeJpg) modify xmp value only
+                (writeJpg) ? exif : null,  //  (!writeJpg) do not safe changes to jpg exif file
                 (writeXmp) ? xmp : null);   //  (!writeXmp) do not safe changes to xmp-sidecar file
 
         return result;
@@ -84,13 +81,11 @@ public class MetaWriterExifXml extends MetaApiWrapper {
         if (xmp != null) xmp.save(FileUtils.getXmpFile(this.getPath()), true , dbg_context);
     }
 
-    // allow unittests to inspect
-    protected ExifInterfaceEx getExif() {
+    public ExifInterfaceEx getExif() {
         return exif;
     }
 
-    // allow unittests to inspect
-    protected MediaXmpSegment getXmp() {
+    public MediaXmpSegment getXmp() {
         return xmp;
     }
 }

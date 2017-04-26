@@ -32,10 +32,15 @@ import java.util.Date;
 import java.util.List;
 
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.media.MediaContentValues;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.util.MediaScanner;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.database.QueryParameter;
+import de.k3b.media.MediaUtil;
+import de.k3b.media.MediaXmpSegment;
+import de.k3b.media.MetaWriterExifXml;
 import de.k3b.tagDB.Tag;
 import de.k3b.tagDB.TagConverter;
 
@@ -133,7 +138,7 @@ public class TagSql extends FotoSql {
     public static void filter2QueryEx(QueryParameter resultQuery, IGalleryFilter filter, boolean clearWhereBefore) {
         if ((resultQuery != null) && (!GalleryFilterParameter.isEmpty(filter))) {
             filter2Query(resultQuery, filter, clearWhereBefore);
-            if (Global.Media.enableNonStandardIptcMediaScanner) {
+            if (Global.Media.enableIptcMediaScanner) {
                 String any = filter.getInAnyField();
                 if ((any != null) && (any.length() > 0)) {
                     if (!any.contains("%")) {
@@ -229,8 +234,7 @@ public class TagSql extends FotoSql {
 
     public static void setXmpFileModifyDate(ContentValues values, long xmpFileModifyDateMilliSecs) {
         if ((values != null)
-                && (xmpFileModifyDateMilliSecs != EXT_LAST_EXT_SCAN_UNKNOWN)
-                && Global.Media.enableNonStandardMediaFieldsUpdateLastScanTimestamp) {
+                && (xmpFileModifyDateMilliSecs != EXT_LAST_EXT_SCAN_UNKNOWN)) {
             values.put(SQL_COL_EXT_XMP_LAST_MODIFIED_DATE, xmpFileModifyDateMilliSecs);
         }
     }
@@ -253,6 +257,36 @@ public class TagSql extends FotoSql {
         }
         return null;
     }
+
+    /**
+     * Copies non null content of jpg to existing media database item.
+     *
+     * @param dbgContext debug message
+     * @param allowSetNulls     if one of these columns are null, the set null is copied, too
+     * @return number of changed db items
+     */
+    public static int updateDB(String dbgContext, Context context, String path,
+                               MetaWriterExifXml jpg, MediaUtil.FieldID... allowSetNulls) {
+        if ((jpg != null) && (!MediaScanner.isNoMedia(path))) {
+            ContentValues dbValues = new ContentValues();
+            MediaContentValues mediaValueAdapter = new MediaContentValues();
+
+            // dbValues.clear();
+            if (MediaUtil.copyNonEmpty(mediaValueAdapter.set(dbValues, null), jpg, allowSetNulls) >= 1) {
+                mediaValueAdapter.setPath(path);
+                MediaXmpSegment xmp = jpg.getXmp();
+                long xmpFilelastModified = (xmp != null) ? xmp.getFilelastModified() : 0;
+                if (xmpFilelastModified == 0) xmpFilelastModified = TagSql.EXT_LAST_EXT_SCAN_NO_XMP;
+                TagSql.setXmpFileModifyDate(dbValues, xmpFilelastModified);
+                return TagSql.execUpdate(dbgContext, context, path,
+                        TagSql.EXT_LAST_EXT_SCAN_UNKNOWN, dbValues, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+            }
+
+
+        }
+        return 0;
+    }
+
 
     public static int execUpdate(String dbgContext, Context context, String path, long xmpFileDate, ContentValues values, int visibility) {
         if ((!Global.Media.enableXmpNone) || (xmpFileDate == EXT_LAST_EXT_SCAN_UNKNOWN)) {

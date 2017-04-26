@@ -22,7 +22,6 @@ package de.k3b.media;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +30,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.TestUtil;
 import de.k3b.io.FileUtils;
 
@@ -44,16 +44,17 @@ public class MetaWriterExifXmlIntegrationTests {
 
     @BeforeClass
     public static void initDirectories() {
-        OUTDIR.mkdirs();
-    }
+        FotoLibGlobal.appName = "JUnit";
+        FotoLibGlobal.appVersion = "MetaWriterExifXmlIntegrationTests";
 
-    @Before
-    public void setup() throws IOException {
+        OUTDIR.mkdirs();
     }
 
     @Test
     public void emptyWriteEmptyExifXmpCreate() throws IOException
     {
+        ExifInterfaceEx.fixDateOnSave = false;
+
         File out = new File(OUTDIR,"emptyWriteEmptyExifXmpCreate.jpg");
         TestUtil.saveTestResourceAs("NoExif.jpg", out);
 
@@ -70,15 +71,18 @@ public class MetaWriterExifXmlIntegrationTests {
         assertEqual(out, empty, empty, sut);
         // System.out.printf(sut.toString());
         // logger.info(sut.toString());
+
+        ExifInterfaceEx.fixDateOnSave = true;
     }
 
     @Test
-    public void existingWriteEmptyExifXmpCreate() throws IOException
+    public void existingWriteEmptyExifXmp() throws IOException
     {
         // workaround UserComment=null is not implemented
         ExifInterfaceEx.useUserComment = false;
+        ExifInterfaceEx.fixDateOnSave = false;
 
-        File out = new File(OUTDIR,"existingWriteEmptyExifXmpCreate.jpg");
+        File out = new File(OUTDIR,"existingWriteEmptyExifXmp.jpg");
         TestUtil.saveTestResourceAs("test-WitExtraData.jpg", out);
         TestUtil.saveTestResourceAs("test-WitExtraData.xmp", FileUtils.getXmpFile(out.getAbsolutePath()));
 
@@ -98,22 +102,105 @@ public class MetaWriterExifXmlIntegrationTests {
         sut.save("JUnit");
         assertEqual(out, empty, empty, sut);
         ExifInterfaceEx.useUserComment = true;
+        ExifInterfaceEx.fixDateOnSave = true;
+    }
+
+    @Test
+    public void existingWriteValueExifXmpCreate() throws IOException
+    {
+        File out = new File(OUTDIR,"existingWriteValueExifXmpCreate.jpg");
+        TestUtil.saveTestResourceAs("test-WitExtraData.jpg", out);
+
+        MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(),"JUnit"
+                , true, true, true); //exif, xmp, create
+        MediaDTO value = TestUtil.createTestMediaDTO(2);
+        MediaUtil.copy(sut, value, true, true);
+
+//        System.out.printf("exif " + MediaUtil.toString(sut.getExif()));
+        String xmpContent = "xmp " + MediaUtil.toString(sut.getXmp());
+        System.out.printf(xmpContent);
+
+
+        // was overwritten by copy
+        sut.setPath(out.getAbsolutePath());
+
+        sut.save("JUnit");
+        assertEqual(out, value, value, sut);
+    }
+
+
+    @Test
+    public void emptyWriteValuesXmpCreate() throws IOException
+    {
+        File out = new File(OUTDIR,"emptyWriteValuesXmpCreate.jpg");
+        TestUtil.saveTestResourceAs("NoExif.jpg", out);
+
+        MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(),"JUnit"
+                , false, true, true); //exif, xmp, create
+        MediaDTO values = TestUtil.createTestMediaDTO(2);
+        MediaUtil.copy(sut, values, true, true);
+
+        // was overwritten by copy
+        sut.setPath(out.getAbsolutePath());
+
+        sut.save("JUnit");
+
+        assertEqual(out, null, values, sut);
+        // System.out.printf(sut.toString());
+        // logger.info(sut.toString());
+    }
+
+    @Test
+    public void emptyWriteValuesExifOnly() throws IOException
+    {
+        File out = new File(OUTDIR,"emptyWriteValuesExifOnly.jpg");
+        TestUtil.saveTestResourceAs("NoExif.jpg", out);
+
+        MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(),"JUnit"
+                , true, false, false); //exif, xmp, create
+        MediaDTO values = TestUtil.createTestMediaDTO(2);
+        MediaUtil.copy(sut, values, true, true);
+
+        // was overwritten by copy
+        sut.setPath(out.getAbsolutePath());
+
+        sut.save("JUnit");
+
+        assertEqual(out, null, values, sut);
+        // System.out.printf(sut.toString());
+        // logger.info(sut.toString());
     }
 
     private void assertEqual(File file, MediaDTO expectedExif, MediaDTO expectedXmp, MetaWriterExifXml oldSut) throws IOException {
+        MetaWriterExifXml sut = MetaWriterExifXml.create(file.getAbsolutePath(),"JUnit-check"
+                , true, true, false); //exif, xmp, create
 
         if (oldSut != null) {
             Writer out = null;
             try {
                 out = new FileWriter(new File(file.getAbsolutePath()+ ".log"), false);
+
                 IMetaApi exif = oldSut.getExif();
                 if (exif != null) {
                     out.write("old exif " + MediaUtil.toString(exif) + "\n");
                     out.write(exif.toString() + "\n");
                 }
+
                 exif = oldSut.getXmp();
                 if (exif != null) {
                     out.write("old xmp " + MediaUtil.toString(exif) + "\n");
+                    out.write(exif.toString() + "\n");
+                }
+
+                exif = sut.getExif();
+                if (exif != null) {
+                    out.write("new exif " + MediaUtil.toString(exif) + "\n");
+                    out.write(exif.toString() + "\n");
+                }
+
+                exif = sut.getXmp();
+                if (exif != null) {
+                    out.write("new xmp " + MediaUtil.toString(exif) + "\n");
                     out.write(exif.toString() + "\n");
                 }
             } catch (IOException e) {
@@ -123,9 +210,6 @@ public class MetaWriterExifXmlIntegrationTests {
             }
         }
 
-
-        MetaWriterExifXml sut = MetaWriterExifXml.create(file.getAbsolutePath(),"JUnit-check"
-                , true, true, true); //exif, xmp, create
         if (expectedExif != null) Assert.assertEquals("exif "
                 , getMediaString(expectedExif), getMediaString(sut.getExif()));
         if (expectedXmp != null) Assert.assertEquals("xmp ",
@@ -133,9 +217,9 @@ public class MetaWriterExifXmlIntegrationTests {
     }
 
     private String getMediaString(IMetaApi media) {
-        String result = MediaUtil.toString(media);
+        String result = MediaUtil.toString(media, false, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz);
         // ignore runtime type and path
-        return result.substring(result.indexOf("dateTimeTaken"));
+        return result; // .substring(result.indexOf("dateTimeTaken"));
     }
 }
 

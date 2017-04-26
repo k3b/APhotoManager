@@ -193,4 +193,12 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
     <string name="tags_update_result_format">Updated tags of %1$d photos</string>
     <string name="tags_hint">Long-Tap on tagname opens menu</string>
     <string name="tags_defaults">Activities,People,Places,Themes,Projects</string>
+
+    <string name="settings_media_update_strategy_title">Write changes to</string>
+
+    <string name="settings_media_update_strategy_jpg_xmp_create">jpg and xmp (Create if not found)</string>
+    <string name="settings_media_update_strategy_jpg_xmp_update">jpg (and xmp if exists)</string>
+    <string name="settings_media_update_strategy_jpg">jpg file only</string>
+    <string name="settings_media_update_strategy_xmp">xmp file only</string>
+
 </resources>

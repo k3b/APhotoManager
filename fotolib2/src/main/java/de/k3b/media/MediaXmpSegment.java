@@ -20,7 +20,6 @@
 package de.k3b.media;
 
 import com.adobe.xmp.XMPMeta;
-import com.adobe.xmp.XMPMetaFactory;
 import com.adobe.xmp.XMPUtils;
 import com.adobe.xmp.impl.XMPDateTimeImpl;
 
@@ -61,11 +60,6 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
     @Override
     public IMetaApi setPath(String filePath) {
         this.path = filePath;
-        return this;
-    }
-
-    public IMetaApi setOriginalFileName(String filePath) {
-        setProperty(filePath, MediaXmpFieldDefinition.OriginalFileName);
         return this;
     }
 
@@ -184,10 +178,25 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
     public XmpSegment setXmpMeta(XMPMeta xmpMeta, String dbg_context) {
         super.setXmpMeta(xmpMeta, dbg_context);
         if (FotoLibGlobal.debugEnabledJpgMetaIo) {
-            logger.info(dbg_context + " setXmpMeta " +  MediaUtil.toString(this));
+            logger.info(dbg_context + " setXmpMeta " +  MediaUtil.toString(this, false, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
         }
 
         return this;
+    }
+
+    @Override
+    public XmpSegment save(File file, boolean humanReadable, String dbg_context) throws FileNotFoundException {
+        fixAttributes(file);
+        return super.save(file, humanReadable, dbg_context);
+    }
+
+    private void fixAttributes(File file) {
+        if (getPropertyAsString(MediaXmpFieldDefinition.OriginalFileName) == null) {
+            setProperty(file.getName(), MediaXmpFieldDefinition.OriginalFileName);
+        }
+        if (getPropertyAsString(MediaXmpFieldDefinition.AppVersion) == null) {
+            setProperty(FotoLibGlobal.appName + "-" + FotoLibGlobal.appVersion, MediaXmpFieldDefinition.AppVersion);
+        }
     }
 
     // Override adds logging
@@ -195,7 +204,7 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
     public XmpSegment save(OutputStream os, boolean humanReadable, String dbg_context) {
         super.save(os, humanReadable, dbg_context);
         if (FotoLibGlobal.debugEnabledJpgMetaIo) {
-            logger.info(dbg_context + " save " + MediaUtil.toString(this));
+            logger.info(dbg_context + " save " + MediaUtil.toString(this, false, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
         }
 
         return this;

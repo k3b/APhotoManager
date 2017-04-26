@@ -53,9 +53,10 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 import uk.co.senab.photoview.log.LogManager;
 
 public class SettingsActivity extends PreferenceActivity {
-    private static Boolean sOldEnableTagSupport = null;
+    private static Boolean sOldEnableNonStandardIptcMediaScanner = null;
     private SharedPreferences prefsInstance = null;
     private ListPreference defaultLocalePreference;
+    private ListPreference mediaUpdateStrategyPreference;
 
     private int INSTALL_REQUEST_CODE = 1927;
 
@@ -72,6 +73,7 @@ public class SettingsActivity extends PreferenceActivity {
         prefsInstance = PreferenceManager
                 .getDefaultSharedPreferences(this);
         global2Prefs(this.getApplication());
+
         defaultLocalePreference =
                 (ListPreference) findPreference(Global.PREF_KEY_USER_LOCALE);
 
@@ -83,6 +85,18 @@ public class SettingsActivity extends PreferenceActivity {
                 return true; // change is allowed
             }
         });
+
+        mediaUpdateStrategyPreference =
+                (ListPreference) findPreference("mediaUpdateStrategy");
+        mediaUpdateStrategyPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                FotoLibGlobal.mediaUpdateStrategy = (String) newValue;
+                setPref(FotoLibGlobal.mediaUpdateStrategy, mediaUpdateStrategyPreference, R.array.pref_media_update_strategy_names);
+                return true;
+            }
+        });
+        setPref(FotoLibGlobal.mediaUpdateStrategy, mediaUpdateStrategyPreference, R.array.pref_media_update_strategy_names);
 
         findPreference("debugClearLog").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -151,6 +165,8 @@ public class SettingsActivity extends PreferenceActivity {
 
         prefs.putString("pickHistoryFile", (Global.pickHistoryFile != null) ? Global.pickHistoryFile.getAbsolutePath() : null);
 
+        prefs.putString("mediaUpdateStrategy", FotoLibGlobal.mediaUpdateStrategy);
+
         prefs.apply();
 
     }
@@ -210,6 +226,8 @@ public class SettingsActivity extends PreferenceActivity {
         Global.mapsForgeDir                     = getPref(prefs, "mapsForgeDir", Global.mapsForgeDir);
 
         Global.pickHistoryFile                  = getPref(prefs, "pickHistoryFile", Global.pickHistoryFile);
+
+        FotoLibGlobal.mediaUpdateStrategy       = getPref(prefs, "mediaUpdateStrategy", FotoLibGlobal.mediaUpdateStrategy);
 
         /*
         // bool
@@ -274,9 +292,9 @@ public class SettingsActivity extends PreferenceActivity {
         TagRepository.setInstance(Global.reportDir);
 
         // true if first run or change
-        if ((sOldEnableTagSupport == null) || (sOldEnableTagSupport.booleanValue() != Global.Media.enableNonStandardIptcMediaScanner)) {
-            MediaScanner.setInstance((Global.Media.enableNonStandardIptcMediaScanner) ? new MediaScannerImageMetaReader(context) : new MediaScannerExifInterface(context));
-            sOldEnableTagSupport = Global.Media.enableNonStandardIptcMediaScanner;
+        if ((sOldEnableNonStandardIptcMediaScanner == null) || (sOldEnableNonStandardIptcMediaScanner.booleanValue() != Global.Media.enableIptcMediaScanner)) {
+            MediaScanner.setInstance((Global.Media.enableIptcMediaScanner) ? new MediaScannerImageMetaReader(context) : new MediaScannerExifInterface(context));
+            sOldEnableNonStandardIptcMediaScanner = Global.Media.enableIptcMediaScanner;
         }
     }
 
@@ -298,6 +316,11 @@ public class SettingsActivity extends PreferenceActivity {
 
         if ((def == null) || (def.trim().length() == 0)) return null;
         return new File(value);
+    }
+
+    /** load value from SharedPreferences */
+    private static String getPref(SharedPreferences prefs, String key, String defaultValue) {
+        return  prefs.getString(key, defaultValue);
     }
 
     /** load value from SharedPreferences */
@@ -345,16 +368,21 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     private void setLanguage(String languageKey) {
-        int index = defaultLocalePreference.findIndexOfValue(languageKey);
+        setPref(languageKey, defaultLocalePreference, R.array.pref_locale_names);
+    }
+
+    private void setPref(String key, ListPreference listPreference, int arrayResourceId) {
+        int index = listPreference.findIndexOfValue(key);
         String summary = "";
 
         if (index >= 0) {
-            String[] names = this.getResources().getStringArray(R.array.pref_locale_names);
+            String[] names = this.getResources().getStringArray(arrayResourceId);
             if (index < names.length) {
                 summary = names[index];
             }
         }
-        defaultLocalePreference.setSummary(summary);
+        listPreference.setSummary(summary);
+
     }
 
     private void onDebugClearLogCat() {
