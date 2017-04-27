@@ -562,22 +562,6 @@ public class FotoSql extends FotoSqlBase {
         return result;
     }
 
-    /**
-     * Write geo data (lat/lon) media database.<br/>
-     */
-    public static int execUpdateGeo(final Context context, double latitude, double longitude, SelectedFiles selectedItems) {
-        QueryParameter where = new QueryParameter();
-        setWhereSelectionPaths(where, selectedItems);
-		setWhereVisibility(where, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
-
-        ContentValues values = new ContentValues(2);
-        values.put(SQL_COL_LAT, DirectoryFormatter.parseLatLon(latitude));
-        values.put(SQL_COL_LON, DirectoryFormatter.parseLatLon(longitude));
-        ContentResolver resolver = context.getContentResolver();
-
-        return exexUpdateImpl("execUpdateGeo", context, values, where.toAndroidWhere(), where.toAndroidParameters());
-    }
-	
     public static Cursor createCursorForQuery(String dbgContext, final Context context, QueryParameter parameters, int visibility) {
         setWhereVisibility(parameters, visibility);
         return createCursorForQuery(dbgContext, context, parameters.toFrom(), parameters.toAndroidWhere(),
@@ -774,6 +758,20 @@ public class FotoSql extends FotoSqlBase {
         return delCount;
     }
 
+    public static int deleteMediaWithNullPuath(Context context) {
+        /// delete where SQL_COL_PATH + " is null" throws null pointer exception
+        QueryParameter wherePathIsNull = new QueryParameter();
+        wherePathIsNull.addWhere(SQL_COL_PATH + " is null");
+        wherePathIsNull.addWhere(FILTER_EXPR_PRIVATE_PUBLIC);
+
+        // return deleteMedia("delete without path (_data = null)", context, wherePathIsNull.toAndroidWhere(), null, false);
+
+        SelectedFiles filesWitoutPath = getSelectedfiles(context, wherePathIsNull);
+        QueryParameter whereInIds = new QueryParameter();
+        FotoSql.setWhereSelectionPks (whereInIds, filesWitoutPath.toIdString());
+
+        return deleteMedia("delete without path (_data = null)", context, whereInIds.toAndroidWhere(), null, true);
+    }
     /**
      * Deletes media items specified by where with the option to prevent cascade delete of the image.
      */

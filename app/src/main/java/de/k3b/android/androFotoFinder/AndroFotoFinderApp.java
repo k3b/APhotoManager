@@ -73,6 +73,9 @@ public class AndroFotoFinderApp extends Application {
 
         super.onCreate();
 
+        FotoLibGlobal.appName = getString(R.string.app_name);
+        FotoLibGlobal.appVersion = GuiUtil.getAppVersionName(this);
+
         Global.pickHistoryFile = getDatabasePath("pickHistory.geouri.txt");
         SettingsActivity.prefs2Global(this);
 
@@ -99,6 +102,8 @@ public class AndroFotoFinderApp extends Application {
 
         // #60: configure some of the mapsforge settings first
         MapsForgeSupport.createInstance(this);
+
+        FotoSql.deleteMediaWithNullPuath(this);
 
         Log.i(Global.LOG_CONTEXT, getAppId() + " created");
     }
