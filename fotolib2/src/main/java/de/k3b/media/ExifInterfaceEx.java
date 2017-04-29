@@ -85,6 +85,8 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
 
     }
 
+    protected ExifInterfaceEx() {super();xmpExtern=null; mDbg_context = "";}
+
     @Override
     public void saveAttributes() throws IOException {
         super.saveAttributes();
@@ -129,10 +131,13 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
 
     @Override
     public Date getDateTimeTaken(){
+        int i=0;String debugContext = "getDateTimeTaken";
+
         Date result = null;
-        if (result == null) result = getAttributeDate(ExifInterfaceEx.TAG_DATETIME_ORIGINAL);
-        if (result == null) getAttributeDate(ExifInterfaceEx.TAG_DATETIME);
-        if ((result == null) && (xmpExtern != null)) result = xmpExtern.getDateTimeTaken();
+        if (isEmpty(result, ++i, debugContext, "Exif.DATETIME_ORIGINAL")) result = getAttributeDate(ExifInterfaceEx.TAG_DATETIME_ORIGINAL);
+        if (isEmpty(result, ++i, debugContext, "Exif.DATETIME")) getAttributeDate(ExifInterfaceEx.TAG_DATETIME);
+        if ((isEmpty(result, ++i, debugContext, "xmp.DateTimeTaken")) && (xmpExtern != null)) result = xmpExtern.getDateTimeTaken();
+        isEmpty(result, ++i, null, null);
         return result;
     }
 
@@ -218,32 +223,44 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
 
     @Override
     public Double getLatitude() {
-        if (mLatitude == null) {
+        int i=0;String debugContext = "getLatitude";
+
+        Double result = null;
+        if (isEmpty(result, ++i, debugContext, "Exif.Latitude")) {
             loadLatLon();
+            result = this.mLatitude;
         }
 
-        if ((mLatitude == null) && (xmpExtern != null)) return xmpExtern.getLatitude();
+        if ((isEmpty(result, ++i, debugContext, "xmp.Latitude")) && (xmpExtern != null)) return xmpExtern.getLatitude();
 
-        return mLatitude;
+        isEmpty(result, ++i, null, null);
+        return result;
     }
 
     @Override
     public Double getLongitude() {
-        if (mLongitude == null) {
+        int i=0;String debugContext = "getLongitude";
+        Double result = null;
+        if (isEmpty(result, ++i, debugContext, "Exif.Longitude")) {
             loadLatLon();
+            result = this.mLongitude;
         }
 
-        if ((mLongitude == null) && (xmpExtern != null)) return xmpExtern.getLongitude();
+        if ((isEmpty(result, ++i, debugContext, "xmp.Longitude")) && (xmpExtern != null)) return xmpExtern.getLongitude();
 
-        return mLongitude;
+        isEmpty(result, ++i, null, null);
+        return result;
     }
 
     @Override
     public String getTitle() {
+        int i=0;String debugContext = "getTitle";
+
         String result = null;
-        if ((isEmpty(result)) && (xmpExtern != null)) result = xmpExtern.getTitle();
-        if (isEmpty(result)) result = getAttribute(TAG_WIN_TITLE);
+        if ((isEmpty(result, ++i, debugContext, "xmp.Title")) && (xmpExtern != null)) result = xmpExtern.getTitle();
+        if (isEmpty(result, ++i, debugContext, "Exif.XPTITLE")) result = getAttribute(TAG_WIN_TITLE);
         // iptc:Headline
+        isEmpty(result, ++i, null, null);
         return result;
     }
 
@@ -257,24 +274,28 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     /** not implemented in {@link ExifInterface} */
     @Override
     public String getDescription() {
+        int i=0;String debugContext = "getDescription";
+
         String result = null;
-        if (isEmpty(result)) result = getAttribute(TAG_IMAGE_DESCRIPTION);
+        if (isEmpty(result, ++i, debugContext, "Exif.IMAGE_DESCRIPTION")) result = getAttribute(TAG_IMAGE_DESCRIPTION);
 
-        if (isEmpty(result)) result = getAttribute(TAG_WIN_SUBJECT);
+        // XMP-dc:Description
+        if (isEmpty(result, ++i, debugContext, "xmp.Description") && (xmpExtern != null)) result = xmpExtern.getDescription();
 
-		// XMP-dc:Description
-        if ((isEmpty(result)) && (xmpExtern != null)) result = xmpExtern.getDescription();
+        if (isEmpty(result, ++i, debugContext, "Exif.XPSUBJECT")) result = getAttribute(TAG_WIN_SUBJECT);
 
-        if (isEmpty(result)) result = getAttribute(TAG_WIN_COMMENT);
-		// iptc:Caption-Abstract
+        if (isEmpty(result, ++i, debugContext, "Exif.XPCOMMENT")) result = getAttribute(TAG_WIN_COMMENT);
 
         // NOTE: write not fully supported for TAG_USER_COMMENT in tiff-com-segment
-        if (useUserComment && isEmpty(result)) result = getAttribute(TAG_USER_COMMENT);
+        if (useUserComment && isEmpty(result, ++i, debugContext, "Exif.USER_COMMENT")) result = getAttribute(TAG_USER_COMMENT);
 
+        // iptc:Caption-Abstract
+
+        isEmpty(result, ++i, null, null);
         return result;
     }
 
-    private static boolean isEmpty(String result) {
+    protected boolean isEmpty(Object result, int tryNumber, String debugContext, String debugFieldName) {
         return (result == null); // || (result.length() == 0);
     }
 
@@ -295,12 +316,15 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     /** not implemented in {@link ExifInterface} */
     @Override
     public List<String> getTags() {
+        int i=0;String debugContext = "getTags";
+
         List<String> result = null;
-        if ((result == null) && (xmpExtern != null)) result = xmpExtern.getTags();
-        if ((result == null) || (result.size() == 0)) {
+        if (isEmpty(result, ++i, debugContext, "xmp.Tags") && (xmpExtern != null)) result = xmpExtern.getTags();
+        if (isEmpty(result, ++i, debugContext, "Exif.XPKEYWORDS") || (result.size() == 0)) {
             String s = getAttribute(TAG_WIN_KEYWORDS);
             if (s != null) result = ListUtils.fromString(s, LIST_DELIMITER);
         }
+        isEmpty(result, ++i, null, null);
         return result;
     }
 
@@ -315,12 +339,14 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     /** not implemented in {@link ExifInterface} */
     @Override
     public Integer getRating() {
+        int i=0;String debugContext = "getRating";
         Integer result = null;
-        if ((result == null) && (xmpExtern != null)) result = xmpExtern.getRating();
-        if (result == null) {
+        if (isEmpty(result, ++i, debugContext, "xmp.Rating") && (xmpExtern != null)) result = xmpExtern.getRating();
+        if (isEmpty(result, ++i, debugContext, "Exif.XPRATING")) {
             int r = getAttributeInt(TAG_WIN_RATING, -1);
             if (r != -1) result = Integer.valueOf(r);
         }
+        isEmpty(result, ++i, null, null);
         return result;
     }
 
@@ -364,7 +390,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     protected Date getAttributeDate(String tag) {
         String dateTimeString =  this.getAttribute(tag);
 
-        if (isEmpty(dateTimeString)) return null;
+        if (dateTimeString == null) return null;
 
         ParsePosition pos = new ParsePosition(0);
         try {

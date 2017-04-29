@@ -66,7 +66,7 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
     @Override
     public Date getDateTimeTaken() {
         return getPropertyAsDate(
-                MediaXmpFieldDefinition.CreateDate,   // JPhotoTagger default
+                "getDateTimeTaken", MediaXmpFieldDefinition.CreateDate,   // JPhotoTagger default
                 MediaXmpFieldDefinition.DateCreated,  // exiftool default
                 MediaXmpFieldDefinition.DateTimeOriginal);
     }
@@ -107,17 +107,17 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
 
     @Override
     public Double getLatitude() {
-        return GeoUtil.parse(getPropertyAsString(MediaXmpFieldDefinition.GPSLatitude),"NS");
+        return GeoUtil.parse(getPropertyAsString("getLatitude", MediaXmpFieldDefinition.GPSLatitude),"NS");
     }
 
     @Override
     public Double getLongitude() {
-        return GeoUtil.parse(getPropertyAsString(MediaXmpFieldDefinition.GPSLongitude),"EW");
+        return GeoUtil.parse(getPropertyAsString("getLongitude", MediaXmpFieldDefinition.GPSLongitude),"EW");
     }
 
     @Override
     public String getTitle() {
-        return getPropertyAsString(MediaXmpFieldDefinition.title);
+        return getPropertyAsString("getTitle", MediaXmpFieldDefinition.title);
     }
 
     @Override
@@ -129,7 +129,7 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
 
     @Override
     public String getDescription() {
-        return getPropertyAsString(MediaXmpFieldDefinition.description);
+        return getPropertyAsString("getDescription", MediaXmpFieldDefinition.description);
     }
 
     @Override
@@ -141,7 +141,7 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
 
     @Override
     public List<String> getTags() {
-        return getPropertyArray(MediaXmpFieldDefinition.subject);
+        return getPropertyArray("getTags", MediaXmpFieldDefinition.subject);
     }
 
     @Override
@@ -155,7 +155,7 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
      */
     @Override
     public Integer getRating() {
-        String result = getPropertyAsString(MediaXmpFieldDefinition.Rating);
+        String result = getPropertyAsString("getRating", MediaXmpFieldDefinition.Rating);
         if ((result != null) && (result.length() > 0)){
             try {
                 return Integer.parseInt(result);
@@ -191,10 +191,10 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
     }
 
     private void fixAttributes(File file) {
-        if (getPropertyAsString(MediaXmpFieldDefinition.OriginalFileName) == null) {
+        if (getPropertyAsString("   fixAttributes OriginalFileName", MediaXmpFieldDefinition.OriginalFileName) == null) {
             setProperty(file.getName(), MediaXmpFieldDefinition.OriginalFileName);
         }
-        if (getPropertyAsString(MediaXmpFieldDefinition.AppVersion) == null) {
+        if (getPropertyAsString("   fixAttributes AppVersion", MediaXmpFieldDefinition.AppVersion) == null) {
             setProperty(FotoLibGlobal.appName + "-" + FotoLibGlobal.appVersion, MediaXmpFieldDefinition.AppVersion);
         }
     }

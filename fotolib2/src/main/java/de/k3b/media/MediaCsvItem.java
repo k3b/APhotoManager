@@ -66,10 +66,15 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
         for (String lc: header) {
             lcHeader.add(lc.toLowerCase());
         }
+        initFieldDefinitions(lcHeader);
 
+
+    }
+
+    protected void initFieldDefinitions(List<String> lcHeader) {
         // import specific
         colFilePath         = getColumnIndex(lcHeader, MediaXmpFieldDefinition.SourceFile);
-        colFileModifyDate = getColumnIndex(lcHeader, MediaXmpFieldDefinition.FileModifyDate);
+        colFileModifyDate   = getColumnIndex(lcHeader, MediaXmpFieldDefinition.FileModifyDate);
 
         colDateTimeTaken    = getColumnIndex(lcHeader, MediaXmpFieldDefinition.DateTimeOriginal);
         colDateCreated      = getColumnIndex(lcHeader, MediaXmpFieldDefinition.DateCreated);
@@ -84,7 +89,7 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
 
     @Override
     public String getPath() {
-        return getString(colFilePath);
+        return getString("getFilePath", colFilePath);
     }
 
     @Override
@@ -94,12 +99,12 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
     }
 
     public Date getFileModifyDate() {
-        return getDate(colFileModifyDate);
+        return getDate("getFileModifyDate", colFileModifyDate);
     }
 
     @Override
     public Date getDateTimeTaken() {
-        return getDate(colDateTimeTaken, colDateCreated, colCreateDate);
+        return getDate("getDateTimeTaken", colDateTimeTaken, colDateCreated, colCreateDate);
     }
 
     @Override
@@ -122,17 +127,17 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
 
     @Override
     public Double getLatitude() {
-        return GeoUtil.parse(getString(colLatitude),"NS");
+        return GeoUtil.parse(getString("getLatitude", colLatitude),"NS");
     }
 
     @Override
     public Double getLongitude() {
-        return GeoUtil.parse(getString(colLongitude),"EW");
+        return GeoUtil.parse(getString("getLongitude", colLongitude),"EW");
     }
 
     @Override
     public String getTitle() {
-        return getString(colTitle);
+        return getString("getTitle", colTitle);
     }
 
     @Override
@@ -143,7 +148,7 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
 
     @Override
     public String getDescription() {
-        return getString(colDescription);
+        return getString("getDescription", colDescription);
     }
 
     @Override
@@ -154,7 +159,7 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
 
     @Override
     public List<String> getTags() {
-        String tags = getString(colTags);
+        String tags = getString("getTags", colTags);
         return TagConverter.fromString(tags);
     }
 
@@ -167,7 +172,7 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
 
     @Override
     public Integer getRating() {
-        return getInteger(colRating);
+        return getInteger("getRating", colRating);
     }
 
     @Override

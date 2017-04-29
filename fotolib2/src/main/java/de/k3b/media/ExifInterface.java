@@ -241,7 +241,7 @@ public class ExifInterface {
     public static final String TAG_SUBJECT_DISTANCE_RANGE = "SubjectDistanceRange";
     /** Type is int. @hide */
     public static final String TAG_SUBJECT_LOCATION = "SubjectLocation";
-    /** Type is String. */
+    /** Type is String. r/w mExifDir[TAG_USER_COMMENT] else ro from mCommentDir[TAG_COMMENT] */
     public static final String TAG_USER_COMMENT = "UserComment";
     /** Type is int. */
     public static final String TAG_WHITE_BALANCE = "WhiteBalance";
@@ -1134,19 +1134,24 @@ public class ExifInterface {
 
         }
     }
+
+    protected ExifInterface() {}
+
     /**
-     * Returns the EXIF attribute of the specified tagName or {@code null} if there is no such tagName in
-     * the image file.
-     *
-     * @param tagName the name of the tagName.
-     */
+         * Returns the EXIF attribute of the specified tagName or {@code null} if there is no such tagName in
+         * the image file.
+         *
+         * @param tagName the name of the tagName.
+         */
     private ExifAttribute getExifAttribute(String tagName) {
-        // Retrieves all tagName groups. The value from primary image tagName group has a higher priority
-        // than the value from the thumbnail tagName group if there are more than one candidates.
-        for (int subSegment = 0; subSegment < EXIF_TAGS.length; ++subSegment) {
-            ExifAttribute value = mAttributes[subSegment].get(tagName);
-            if (value != null) {
-                return value;
+        if (mAttributes[0] != null) {
+            // Retrieves all tagName groups. The value from primary image tagName group has a higher priority
+            // than the value from the thumbnail tagName group if there are more than one candidates.
+            for (int subSegment = 0; subSegment < EXIF_TAGS.length; ++subSegment) {
+                ExifAttribute value = mAttributes[subSegment].get(tagName);
+                if (value != null) {
+                    return value;
+                }
             }
         }
         return null;

@@ -66,8 +66,8 @@ public class XmpSegment {
     /** when xmp sidecar file was last modified or 0 */
     private long filelastModified = 0;
 
-    protected String getPropertyAsString(MediaXmpFieldDefinition... definitions) {
-        List<String> values = getPropertyArray(definitions);
+    protected String getPropertyAsString(String debugContext, MediaXmpFieldDefinition... definitions) {
+        List<String> values = getPropertyArray("", definitions);
         if ((values != null) && (values.size() > 0)) {
             return TagConverter.asDbString(null, values);
         }
@@ -83,9 +83,9 @@ public class XmpSegment {
         return null;
     }
 
-    protected Date getPropertyAsDate(MediaXmpFieldDefinition... definitions) {
+    protected Date getPropertyAsDate(String debugContext, MediaXmpFieldDefinition... definitions) {
         try {
-            String result = getPropertyAsString(definitions);
+            String result = getPropertyAsString(debugContext, definitions);
             if ((result != null) && (result.length() > 0)) return XMPUtils.convertToDate(result).getCalendar().getTime();
         } catch (XMPException e) {
             onError("getPropertyAsDate", e);
@@ -167,7 +167,7 @@ public class XmpSegment {
         }
     }
 
-    protected List<String>  getPropertyArray(MediaXmpFieldDefinition... definitions) {
+    protected List<String>  getPropertyArray(String debugContext, MediaXmpFieldDefinition... definitions) {
         try {
             XMPMeta meta = getXmpMeta();
             for (MediaXmpFieldDefinition definition : definitions) {
