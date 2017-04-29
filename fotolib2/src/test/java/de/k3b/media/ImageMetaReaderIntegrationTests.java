@@ -19,6 +19,9 @@
 
 package de.k3b.media;
 
+import com.drew.metadata.exif.ExifDirectoryBase;
+import com.drew.metadata.iptc.IptcDirectory;
+
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -31,6 +34,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import de.k3b.FotoLibGlobal;
 import de.k3b.TestUtil;
@@ -45,7 +49,7 @@ import de.k3b.io.ListUtils;
 public class ImageMetaReaderIntegrationTests {
     private static final Logger logger = LoggerFactory.getLogger(ImageMetaReaderIntegrationTests.class);
 
-    private IMetaApi sut = null;
+    private ImageMetaReader sut = null;
     @BeforeClass
     public static void initDirectories() {
         FotoLibGlobal.appName = "JUnit";
@@ -106,9 +110,36 @@ public class ImageMetaReaderIntegrationTests {
         Assert.assertEquals(3, sut.getRating().intValue());
     }
 
-    public static IMetaApi getMeta(String fileName) throws IOException {
+    // low levelt implementaion detail test
+    @Test
+    public void shouldGetExifList()
+    {
+        List<String> expected = ListUtils.toStringList("Marker1","Marker2");
+        sut.init();
+        List<String> result = sut.getStringList("JUnit", sut.mExifDir, ExifDirectoryBase.TAG_WIN_KEYWORDS);
+        assertEquals("", expected, result);
+    }
+
+    // low levelt implementaion detail test
+    @Test
+    public void shouldIptcList() throws IOException
+    {
+        List<String> expected = ListUtils.toStringList("Marker1","Marker2");
+        sut.init();
+        List<String> result = sut.getStringList("JUnit", sut.mIptcDir, IptcDirectory.TAG_KEYWORDS);
+        assertEquals("", expected, result);
+    }
+
+
+    public static ImageMetaReader getMeta(String fileName) throws IOException {
         InputStream inputStream = TestUtil.getResourceInputStream(fileName);
-        IMetaApi result = new ImageMetaReader().load(fileName, inputStream, null, "JUnit");
+        ImageMetaReader result = new ImageMetaReader().load(fileName, inputStream, null, "JUnit");
         return result;
+    }
+
+    protected void assertEquals(String msg, List<String> expected, List<String> actual) {
+        String expectedString = (expected == null) ? null : ListUtils.toString(expected, "|");
+        String actualString = (actual == null) ? null : ListUtils.toString(actual, "|");
+        Assert.assertEquals(msg + ":" + expectedString + " != " + actualString, expectedString, actualString);
     }
 }
