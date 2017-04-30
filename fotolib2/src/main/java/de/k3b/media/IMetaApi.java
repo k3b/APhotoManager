@@ -27,6 +27,60 @@ This is sourcecode of uml diagrams using
 http://plantuml.com/
 notation
 
+metadata.png
+@startuml
+    title Meta Data
+	package "Jpg file" {
+	    package "file" {
+            [Path]
+            [lastModified]
+	    }
+		[lastModified]-[hidden]-[Jpg.Description]
+    	package "Exif-Extended (A Photo Manager read/write)" {
+			package "Exif (Android Stock Media Scanner)" {
+				[Jpg.Description]-[hidden]-[DateTimeTaken(1)]
+				[Jpg.Description]-[hidden]-[Latitude Longitude(1)]
+			}
+			[DateTimeTaken(1)]-[hidden]-[Title(2)]
+			[DateTimeTaken(1)]-[hidden]-[Description(1)]
+            [DateTimeTaken(1)]-[hidden]-[Tags(2)]
+            [DateTimeTaken(1)]-[hidden]-[Rating(2)]
+		}
+		package "Iptc (A Photo Manager read only)" {
+		    ' appendend one blank
+			[Description(1)]-[hidden]-[Title(3)]
+			[Description(1)]-[hidden]-[Description(3)]
+			[Description(1)]-[hidden]-[Tags(3)]
+		}
+		package "Xmp in jpg (A Photo Manager read only)" {
+		    ' appendend two blanks
+			[Description(3)]-[hidden]-[DateTimeTaken(3)]
+			[Description(3)]-[hidden]-[Latitude Longitude(3)]
+			[DateTimeTaken(3)]-[hidden]-[Title(4)]
+			[DateTimeTaken(3)]-[hidden]-[Description(4)]
+			[DateTimeTaken(3)]-[hidden]-[Tags(4)]
+			[DateTimeTaken(3)]-[hidden]-[Rating(3)]
+		}
+	}
+	package "Xmp file(external)" {
+	    ' appendend two blanks
+        [Description(4)]-[hidden]-[file.Path   ]
+		package "Xmp (A Photo Manager read/write)" {
+			[file.Path   ]-[hidden]-[DateTimeTaken(2)]
+			[file.Path   ]-[hidden]-[Latitude Longitude(2)]
+			[DateTimeTaken(2)]-[hidden]-[Title(1)]
+			[DateTimeTaken(2)]-[hidden]-[Description(2)]
+			[DateTimeTaken(2)]-[hidden]-[Tags(1)]
+			[DateTimeTaken(2)]-[hidden]-[Rating(1)]
+		}
+	}
+@enduml
+
+
+
+
+
+
 pc2android.png
 @startuml
     title IMetaApi implementation
