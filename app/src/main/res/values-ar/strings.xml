@@ -27,7 +27,6 @@
   <string name="bookmark_delete_answer_format">%1$s علامات مرجعية تمت إزالتها</string>
   <string name="bookmark_delete_error_format">%1$s لا يمكن إزالة العلامة المرجعية </string>
   <string name="bookmark_delete_question">هل تريد إزالة هذه العلامة المرجعية؟</string>
-  <string name="bookmark_err_not_found_format">%1$s لا يوجد علامات في </string>
   <string name="bookmark_load_from_menu_title">تحميل العلامات المرجعية من&#8230;</string>
   <string name="bookmark_save_as_menu_title">حفظ العلامة المرجعية كـ &#8230;</string>
   <string name="btn_cancel">إلغاء</string>
