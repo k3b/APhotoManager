@@ -171,7 +171,7 @@
         </activity>
         <activity
             android:name=".GalleryFilterActivity"
-            android:icon="@android:drawable/ic_menu_search"
+            android:icon="@drawable/ic_action_search"
             android:label="@string/filter_menu_title" />
         <activity
             android:name=".locationmap.GeoEditActivity"
