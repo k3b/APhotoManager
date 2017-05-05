@@ -352,7 +352,7 @@ public class ImageMetaReader implements IMetaApi, Closeable {
     /** return the image orinentation as id (one of the ORIENTATION_ROTATE_XXX constants) */
     private Integer getOrientationId() {
         init();
-        return (mExifDir == null) ? 0 : mExifDir.getInteger(ExifDirectoryBase.TAG_ORIENTATION);
+        return (mExifDir == null) ? null : mExifDir.getInteger(ExifDirectoryBase.TAG_ORIENTATION);
     }
 
     private static final int ORIENTATION_ROTATE_180 = 3;

@@ -758,7 +758,7 @@ public class FotoSql extends FotoSqlBase {
         return delCount;
     }
 
-    public static int deleteMediaWithNullPuath(Context context) {
+    public static int deleteMediaWithNullPath(Context context) {
         /// delete where SQL_COL_PATH + " is null" throws null pointer exception
         QueryParameter wherePathIsNull = new QueryParameter();
         wherePathIsNull.addWhere(SQL_COL_PATH + " is null");
@@ -767,10 +767,14 @@ public class FotoSql extends FotoSqlBase {
         // return deleteMedia("delete without path (_data = null)", context, wherePathIsNull.toAndroidWhere(), null, false);
 
         SelectedFiles filesWitoutPath = getSelectedfiles(context, wherePathIsNull);
-        QueryParameter whereInIds = new QueryParameter();
-        FotoSql.setWhereSelectionPks (whereInIds, filesWitoutPath.toIdString());
+        String pksAsString = filesWitoutPath.toIdString();
+        if ((pksAsString != null) && (pksAsString.length() > 0)) {
+            QueryParameter whereInIds = new QueryParameter();
+            FotoSql.setWhereSelectionPks(whereInIds, pksAsString);
 
-        return deleteMedia("delete without path (_data = null)", context, whereInIds.toAndroidWhere(), null, true);
+            return deleteMedia("delete without path (_data = null)", context, whereInIds.toAndroidWhere(), null, true);
+        }
+        return 0;
     }
     /**
      * Deletes media items specified by where with the option to prevent cascade delete of the image.

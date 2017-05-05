@@ -103,7 +103,7 @@ public class AndroFotoFinderApp extends Application {
         // #60: configure some of the mapsforge settings first
         MapsForgeSupport.createInstance(this);
 
-        FotoSql.deleteMediaWithNullPuath(this);
+        FotoSql.deleteMediaWithNullPath(this);
 
         Log.i(Global.LOG_CONTEXT, getAppId() + " created");
     }
