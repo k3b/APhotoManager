@@ -57,7 +57,7 @@ public class Global {
     /** The maximum number of **Blue selection markers** in the [Geographic-Map](geographic-map). */
     public static int maxSelectionMarkersInMap = 255;
 
-    /** if image-width-height is bigger than this show thumbnail in image detail view.
+    /** #53, #83 if image-width-height is bigger than this show thumbnail in image detail view.
      * (memoryefficient, fast, but low-quality). -1: default to screenresolution */
     public static int imageDetailThumbnailIfBiggerThan = -1;
 
