@@ -31,6 +31,7 @@ import java.util.Date;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.media.MediaContentValues;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
+import de.k3b.io.FileCommands;
 import de.k3b.io.FileUtils;
 import de.k3b.media.MediaUtil;
 import de.k3b.media.MediaXmpSegment;
@@ -101,7 +102,8 @@ public class MediaScannerEx extends MediaScanner {
         int changes = 0;
         long xmpFileModifyDate = TagSql.EXT_LAST_EXT_SCAN_UNKNOWN;
 
-        File xmpFile = FileUtils.getXmpFile(file.getAbsolutePath());
+        File xmpFile = FileCommands.getExistingSidecarOrNull(file.getAbsolutePath());
+        
         MediaXmpSegment xmp = loadXmp(dest, xmpFile);
 
         if (xmp != null) {

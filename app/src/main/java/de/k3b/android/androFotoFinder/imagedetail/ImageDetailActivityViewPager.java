@@ -987,17 +987,24 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     private void onRenameSubDirAnswer(final long fotoId, final String fotoSourcePath, String newFileName) {
         File src = new File(fotoSourcePath);
-        File srcXmp = mFileCommands.getSidecar(src);
-        boolean hasSideCar = ((srcXmp != null) && (mFileCommands.osFileExists(srcXmp)));
-
         File dest = new File(src.getParentFile(), newFileName);
-        File destXmp = mFileCommands.getSidecar(dest);
+
+        File srcXmpShort = mFileCommands.getSidecar(src, false);
+        boolean hasSideCarShort = ((srcXmpShort != null) && (mFileCommands.osFileExists(srcXmpShort)));
+        File srcXmpLong = mFileCommands.getSidecar(src, true);
+        boolean hasSideCarLong = ((srcXmpLong != null) && (mFileCommands.osFileExists(srcXmpLong)));
+
+        File destXmpShort = mFileCommands.getSidecar(dest, false);
+        File destXmpLong = mFileCommands.getSidecar(dest, true);
 
         if (src.equals(dest)) return; // new name == old name ==> nothing to do
 
         String errorMessage = null;
-        if (hasSideCar && mFileCommands.osFileExists(destXmp)) {
-            errorMessage = getString(R.string.image_err_file_exists_format, destXmp.getAbsoluteFile());
+        if (hasSideCarShort && mFileCommands.osFileExists(destXmpShort)) {
+            errorMessage = getString(R.string.image_err_file_exists_format, destXmpShort.getAbsoluteFile());
+        }
+        if (hasSideCarLong && mFileCommands.osFileExists(destXmpLong)) {
+            errorMessage = getString(R.string.image_err_file_exists_format, destXmpLong.getAbsoluteFile());
         }
         if (mFileCommands.osFileExists(dest)) {
             errorMessage = getString(R.string.image_err_file_exists_format, dest.getAbsoluteFile());

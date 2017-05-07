@@ -29,13 +29,14 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.media.MediaContentValues;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.ExifInterfaceEx;
 import de.k3b.android.util.MediaScannerEx;
 import de.k3b.database.SelectedFiles;
-import de.k3b.io.FileUtils;
+import de.k3b.io.FileCommands;
 import de.k3b.io.ListUtils;
 import de.k3b.media.MediaUtil;
 import de.k3b.media.MediaXmpSegment;
@@ -65,7 +66,7 @@ public class TagWorflow extends TagProcessor {
         this.items = loadTagWorflowItems(context, (selectedItems == null) ? null : selectedItems.toIdString(), anyOfTags);
         for (TagSql.TagWorflowItem item : items) {
             List<String> tags = item.tags;
-            File xmpFile = FileUtils.getXmpFile(item.path);
+            File xmpFile = FileCommands.getExistingSidecarOrNull(item.path);
             if (xmpFile.exists() && (item.xmpLastModifiedDate < xmpFile.lastModified())){ // || (tags == null) || (tags.size() == 0)) {
                 // xmp has been updated since last db update.
                 tags = loadTags(xmpFile);
@@ -106,9 +107,9 @@ public class TagWorflow extends TagProcessor {
         MediaXmpSegment xmp = null;
 
         List<String> currentItemTags = tagWorflowItemFromDB.tags;
-        File xmpFile = FileUtils.getXmpFile(tagWorflowItemFromDB.path);
+        File xmpFile = FileCommands.getExistingSidecarOrNull(tagWorflowItemFromDB.path);
 
-        if (xmpFile.exists()) {
+        if ((xmpFile != null) && xmpFile.exists()) {
             xmp = new MediaScannerEx(context).loadXmp(null, xmpFile);
             if (xmp != null) {
                 List<String> currentXmpTags = xmp.getTags();// current tags is all db-tags + xmp-tags or null if no changes
@@ -155,6 +156,8 @@ public class TagWorflow extends TagProcessor {
 
             // update xmp-sidecar-file
             try {
+                if (xmpFile == null) xmpFile = FileCommands.getSidecar(tagWorflowItemFromDB.path, FotoLibGlobal.preferLongXmpFormat);
+
                 xmp.save(xmpFile, Global.saveXmpAsHumanReadable);
                 if (Global.debugEnabledSql) {
                     Log.d(Global.LOG_CONTEXT,"saveXmp(" + xmpFile + "): " + dbgSaveReason);

@@ -33,7 +33,6 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,7 +42,7 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.util.ExifInterfaceEx;
 import de.k3b.database.QueryParameter;
-import de.k3b.io.FileUtils;
+import de.k3b.io.FileCommands;
 import de.k3b.media.XmpSegment;
 
 /**
@@ -119,8 +118,9 @@ public class ImageDetailMetaDialogBuilder {
             File jpegFile = new File(filepath);
             addExif(result, jpegFile);
 
-            File xmpFile = FileUtils.getXmpFile(filepath);
-            addXmp(result, xmpFile);
+            // #84 show long and short xmp file
+            addXmp(result, FileCommands.getSidecar(filepath, true));
+            addXmp(result, FileCommands.getSidecar(filepath, false));
 
             if (currentImageId != 0) {
 

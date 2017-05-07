@@ -35,5 +35,8 @@ public class FotoLibGlobal {
     /** false do not follow symlinks when scanning Directories.  */
     public static final boolean ignoreSymLinks = false;
 
+    /** #84 true: file.jpg.xmp; false: file.xmp.  */
+    public static final boolean preferLongXmpFormat = false;
+
     public static boolean visibilityShowPrivateByDefault = false;
 }

@@ -39,7 +39,6 @@ import de.k3b.FotoLibGlobal;
 public class FileUtils {
     private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
     public static final String MEDIA_IGNORE_FILENAME = ".nomedia"; // MediaStore.MEDIA_IGNORE_FILENAME;
-    public static final String EXT_SIDECAR = ".xmp";
 
     public static InputStream streamFromStringContent(String data) {
         ByteArrayInputStream s = new ByteArrayInputStream(data.getBytes());
@@ -136,15 +135,6 @@ public class FileUtils {
                 .append(" : ").append(file.getAbsolutePath()
         );
         return result.toString();
-    }
-
-    public static File getXmpFile(String filepath) {
-        if (filepath != null) {
-            String xmpFilePath = replaceExtension(filepath, EXT_SIDECAR);
-            File xmpFile = new File(xmpFilePath);
-            return xmpFile;
-        }
-        return null;
     }
 
     public static String replaceExtension(String path, String extension) {
