@@ -500,7 +500,7 @@ public class FotoSql extends FotoSqlBase {
     public static boolean set(GalleryFilterParameter dest, String selectedAbsolutePath, int queryTypeId) {
         switch (queryTypeId) {
             case FotoSql.QUERY_TYPE_GROUP_ALBUM:
-                dest.setPath(selectedAbsolutePath + "%");
+                dest.setPath(selectedAbsolutePath + "/%");
                 return true;
             case FotoSql.QUERY_TYPE_GROUP_DATE:
                 Date from = new Date();

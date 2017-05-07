@@ -30,7 +30,10 @@ import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
+
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
+import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
@@ -54,6 +57,8 @@ import de.k3b.database.SelectedItems;
  * Created by k3b on 02.06.2015.
  */
 public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItems.Id2FileNameConverter  {
+    private static final int MAX_IMAGE_DIMENSION = HugeImageLoader.getMaxTextureSize();
+
     // Identifies a particular Loader or a LoaderManager being used in this component
     protected final Activity mContext;
     protected final SelectedItems mSelectedItems;
@@ -114,6 +119,8 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
         long count = DBUtils.getLong(cursor, FotoSql.SQL_COL_COUNT, 0);
         boolean gps = !DBUtils.isNull(cursor,FotoSql.SQL_COL_GPS,true);
 
+        long imageSize = DBUtils.getLong(cursor, FotoSql.SQL_COL_SIZE, 0);
+
         holder.filter = DBUtils.getString(cursor, FotoSql.SQL_COL_WHERE_PARAM, null);
 
         String description = DBUtils.getString(cursor, FotoSql.SQL_COL_DISPLAY_TEXT, "");
@@ -126,7 +133,17 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
         holder.imageID = imageID;
 
         if (uri != null) {
-            ThumbNailUtils.getThumb(uri, holder.image);
+            if ((imageSize > 0) && (imageSize <= Global.imageDetailThumbnailIfBiggerThan)) {
+                try {
+                    // #53, #83 Optimisation: no need for thumbnail - saves cache memory but may throw OutOfMemoryError
+                    holder.image.setImageBitmap(HugeImageLoader.loadImage(new File(uri), MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION));
+                } catch (OutOfMemoryError err) {
+                    ThumbNailUtils.getThumb(uri, holder.image);
+                }
+
+            } else {
+                ThumbNailUtils.getThumb(uri, holder.image);
+            }
             if (Global.debugEnabledViewItem)
                 Log.i(Global.LOG_CONTEXT, mDebugPrefix + "bindView for " + holder);
         } else {

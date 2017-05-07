@@ -311,10 +311,9 @@ public class SettingsActivity extends PreferenceActivity {
 
     /** load File preference from SharedPreferences */
     private static File getPref(SharedPreferences prefs, String key, File defaultValue) {
-        String def = (defaultValue != null) ? defaultValue.getAbsolutePath() : null;
-        String value         = prefs.getString(key, def);
+        String value         = prefs.getString(key, null);
+        if ((value == null) || (value.trim().length() == 0)) return defaultValue;
 
-        if ((def == null) || (def.trim().length() == 0)) return null;
         return new File(value);
     }
 
@@ -325,18 +324,16 @@ public class SettingsActivity extends PreferenceActivity {
 
     /** load value from SharedPreferences */
     private static int getPref(SharedPreferences prefs, String key, int defaultValue) {
-        String def = "" + defaultValue ;
-        String value         = prefs.getString(key, def);
+        String value         = prefs.getString(key, null);
+        if ((value == null) || (value.trim().length() == 0)) return defaultValue;
 
-        if ((def != null) && (def.trim().length() > 0)) {
-            // #73 fix NumberFormatException
-            try {
-                return Integer.valueOf(value);
-            } catch (Exception ex) {
-                Log.i(Global.LOG_CONTEXT, "SettingsActivity.getPref(key=" + key
-                        +"): " + value+
-                        " => " + ex.getMessage(),ex);
-            }
+        // #73 fix NumberFormatException
+        try {
+            return Integer.valueOf(value);
+        } catch (Exception ex) {
+            Log.i(Global.LOG_CONTEXT, "SettingsActivity.getPref(key=" + key
+                    +"): " + value+
+                    " => " + ex.getMessage(),ex);
         }
         return defaultValue;
     }
@@ -344,14 +341,6 @@ public class SettingsActivity extends PreferenceActivity {
     /** load value from SharedPreferences */
     private static boolean getPref(SharedPreferences prefs, String key, boolean defaultValue) {
         return prefs.getBoolean(key, defaultValue);
-
-        /*
-        String def = "" + defaultValue ;
-        String value         = prefs.getString(key, def);
-
-        if ((def == null) || (def.trim().length() == 0)) return defaultValue;
-        return Boolean.valueOf(value);
-        */
     }
 
     public static void show(Activity parent) {

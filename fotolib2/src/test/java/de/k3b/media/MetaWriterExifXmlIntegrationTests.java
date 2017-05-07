@@ -32,6 +32,7 @@ import java.io.Writer;
 
 import de.k3b.FotoLibGlobal;
 import de.k3b.TestUtil;
+import de.k3b.io.FileCommands;
 import de.k3b.io.FileUtils;
 
 /**
@@ -84,7 +85,7 @@ public class MetaWriterExifXmlIntegrationTests {
 
         File out = new File(OUTDIR,"existingWriteEmptyExifXmp.jpg");
         TestUtil.saveTestResourceAs("test-WitExtraData.jpg", out);
-        TestUtil.saveTestResourceAs("test-WitExtraData.xmp", FileUtils.getXmpFile(out.getAbsolutePath()));
+        TestUtil.saveTestResourceAs("test-WitExtraData.xmp", FileCommands.getSidecar(out.getAbsolutePath(), false));
 
         MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(),"JUnit"
                 , true, true, true); //exif, xmp, create

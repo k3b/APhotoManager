@@ -34,6 +34,7 @@ import java.util.List;
 
 import de.k3b.FotoLibGlobal;
 import de.k3b.io.DateUtil;
+import de.k3b.io.FileCommands;
 import de.k3b.io.FileUtils;
 import de.k3b.io.GeoUtil;
 
@@ -212,7 +213,7 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
 
     public static MediaXmpSegment loadXmpSidecarContentOrNull(String absoluteJpgPath, String _dbg_context) {
         MediaXmpSegment xmpContent = null;
-        File xmpFile = FileUtils.getXmpFile(absoluteJpgPath);
+        File xmpFile = FileCommands.getExistingSidecarOrNull(absoluteJpgPath);
         String dbg_context = _dbg_context + " loadXmpSidecarContent(" + xmpFile + "): ";
         if ((xmpFile != null) && xmpFile.isFile() && xmpFile.exists() && xmpFile.canRead()) {
             xmpContent = new MediaXmpSegment();

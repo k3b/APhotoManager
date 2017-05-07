@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 
 import de.k3b.FotoLibGlobal;
+import de.k3b.io.FileCommands;
 import de.k3b.io.FileUtils;
 
 /**
@@ -78,7 +79,9 @@ public class MetaWriterExifXml extends MetaApiWrapper {
 
     public void save(String dbg_context)  throws IOException {
         if (exif != null) exif.saveAttributes();
-        if (xmp != null) xmp.save(FileUtils.getXmpFile(this.getPath()), true , dbg_context);
+        File xmpFile = FileCommands.getExistingSidecarOrNull(this.getPath());
+        if (xmpFile == null) xmpFile = FileCommands.getSidecar(this.getPath(), FotoLibGlobal.preferLongXmpFormat);
+        if (xmp != null) xmp.save(xmpFile, true , dbg_context);
     }
 
     public ExifInterfaceEx getExif() {

@@ -28,10 +28,12 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.database.SelectedFiles;
-import de.k3b.io.FileUtils;
+import de.k3b.io.FileCommands;
+import de.k3b.io.ListUtils;
 import de.k3b.media.MediaUtil;
 import de.k3b.media.MediaXmpSegment;
 import de.k3b.media.MetaWriterExifXml;
@@ -61,7 +63,7 @@ public class TagWorflow extends TagProcessor {
         this.items = loadTagWorflowItems(context, (selectedItems == null) ? null : selectedItems.toIdString(), anyOfTags);
         for (TagSql.TagWorflowItem item : items) {
             List<String> tags = item.tags;
-            File xmpFile = FileUtils.getXmpFile(item.path);
+            File xmpFile = FileCommands.getExistingSidecarOrNull(item.path);
             if (xmpFile.exists() && (item.xmpLastModifiedDate < xmpFile.lastModified())){ // || (tags == null) || (tags.size() == 0)) {
                 // xmp has been updated since last db update.
                 tags = loadTags(xmpFile);
