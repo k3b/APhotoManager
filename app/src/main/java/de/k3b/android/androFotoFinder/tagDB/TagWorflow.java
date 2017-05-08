@@ -64,7 +64,7 @@ public class TagWorflow extends TagProcessor {
         for (TagSql.TagWorflowItem item : items) {
             List<String> tags = item.tags;
             File xmpFile = FileCommands.getExistingSidecarOrNull(item.path);
-            if (xmpFile.exists() && (item.xmpLastModifiedDate < xmpFile.lastModified())){ // || (tags == null) || (tags.size() == 0)) {
+            if ((xmpFile != null) && xmpFile.exists() && (item.xmpLastModifiedDate < xmpFile.lastModified())){ // || (tags == null) || (tags.size() == 0)) {
                 // xmp has been updated since last db update.
                 tags = loadTags(xmpFile);
                 item.xmpMoreRecentThanSql = true;

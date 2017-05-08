@@ -39,7 +39,7 @@ public class FotoLibGlobal {
     public static final boolean ignoreSymLinks = false;
 
     /** #84 true: file.jpg.xmp; false: file.xmp.  */
-    public static final boolean preferLongXmpFormat = false;
+    public static boolean preferLongXmpFormat = false;
 
     public static boolean visibilityShowPrivateByDefault = false;
 

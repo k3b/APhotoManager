@@ -43,6 +43,10 @@
             android:key="thumbCacheRoot"
             android:title="@string/settings_image_thumb_dir_title" />
 
+        <de.k3b.android.widgets.EditTextPreferenceWithSummary
+            android:key="reportDir"
+            android:title="@string/settings_bookmark_dir_title" />
+
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/geo_show_menu_title"
@@ -71,15 +75,15 @@
             android:entryValues="@array/pref_media_update_strategy_values"
             android:negativeButtonText="@null"
             android:positiveButtonText="@null" />
+        <CheckBoxPreference android:key="xmp_file_schema_long"
+            android:defaultValue="false"
+            android:title="@string/settings_xmp_file_schema_title"
+            android:summary="@string/settings_xmp_file_schema_summary" />
 
         <CheckBoxPreference android:key="clearSelectionAfterCommand"
             android:defaultValue="true"
             android:title="@string/settings_multisel_clear_title"
             android:summary="@string/settings_multisel_clear_summary" />
-
-        <de.k3b.android.widgets.EditTextPreferenceWithSummary
-            android:key="reportDir"
-            android:title="@string/settings_bookmark_dir_title" />
 
         <de.k3b.android.widgets.EditTextPreferenceWithSummary
             android:key="pickHistoryMax"

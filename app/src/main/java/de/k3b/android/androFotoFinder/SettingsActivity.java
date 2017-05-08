@@ -150,6 +150,8 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putBoolean("debugEnableLibs", PhotoViewAttacher.DEBUG);
 
         prefs.putBoolean("clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
+        prefs.putBoolean("xmp_file_schema_long", FotoLibGlobal.preferLongXmpFormat);
+
         prefs.putBoolean("mapsForgeEnabled", Global.mapsForgeEnabled);
 
         prefs.putString("imageDetailThumbnailIfBiggerThan", "" + Global.imageDetailThumbnailIfBiggerThan);
@@ -207,6 +209,7 @@ public class SettingsActivity extends PreferenceActivity {
         Global.initialImageDetailResolutionHigh = getPref(prefs, "initialImageDetailResolutionHigh", Global.initialImageDetailResolutionHigh);
 
         Global.clearSelectionAfterCommand       = getPref(prefs, "clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
+        FotoLibGlobal.preferLongXmpFormat       = getPref(prefs, "xmp_file_schema_long", FotoLibGlobal.preferLongXmpFormat);
 
         Global.mapsForgeEnabled                 = getPref(prefs, "mapsForgeEnabled", Global.mapsForgeEnabled);
 

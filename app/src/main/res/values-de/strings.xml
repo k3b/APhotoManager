@@ -193,4 +193,14 @@ Verstecken kann über das 'Media-Scanner' Gallery-Menü rückgängig gemacht wer
   <string name="tags_hint">Long-Tap tagname öffnet das Menu</string>
   <string name="tags_defaults">Aktivitäten,Menschen,Orte,Themen,Projekte</string>
 
+  <string name="settings_media_update_strategy_title">Änderungen speichern in</string>
+
+  <string name="settings_media_update_strategy_jpg_xmp_create">jpg und xmp (ggf neu erzeugen)</string>
+  <string name="settings_media_update_strategy_jpg_xmp_update">jpg (und xmp falls vorhanden)</string>
+  <string name="settings_media_update_strategy_jpg">nur im jpg</string>
+  <string name="settings_media_update_strategy_xmp">nur im xmp</string>
+
+  <string name="settings_xmp_file_schema_title">Langer Xmp Dateiname?</string>
+  <string name="settings_xmp_file_schema_summary">Lang: file.jpg.xmp; kurz: file.xmp</string>
+
 </resources>
