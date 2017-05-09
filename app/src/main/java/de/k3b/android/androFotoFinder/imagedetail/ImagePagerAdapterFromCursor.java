@@ -26,6 +26,7 @@ import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -226,7 +227,22 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
     @NonNull
     protected View createViewWithContent(int position, ViewGroup container, String fullPhotoPath, String debugContext, int size) {
         final Context context = container.getContext();
-        PhotoViewEx photoView = new PhotoViewEx(context);
+        final boolean useLayout=true;
+
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(context.LAYOUT_INFLATER_SERVICE);
+
+        PhotoViewEx photoView;
+        View root;
+
+        if (useLayout) {
+            root = inflater.inflate(R.layout.pager_item_image, container, false);
+
+            photoView = (PhotoViewEx) root.findViewById(R.id.image);
+        } else {
+            photoView = new PhotoViewEx(context);
+            root = photoView;
+        }
+
         photoView.setMaximumScale(20);
         photoView.setMediumScale(5);
 
@@ -255,8 +271,8 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
                     + loadType + ") => " + fullPhotoPath + " => " + photoView);
         }
 
-        container.addView(photoView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        return photoView;
+        container.addView(root, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        return root;
     }
 
     private void setImageFromThumbnail(PhotoViewEx photoView, File imageFile) {
