@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.ArrayAdapterEx;
 import de.k3b.tagDB.Tag;
 
@@ -99,7 +100,7 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 						onNames.add(name);
 					if (!onOffValue && onNames.contains(name))
 						onNames.remove(name);
-					icon.setImageDrawable(getContext().getResources().getDrawable((onOffValue) ? id_drawable_on : id_drawable_off));
+					icon.setImageDrawable(ResourceUtils.getDrawable(getContext(),(onOffValue) ? id_drawable_on : id_drawable_off));
 				}
 			}
 		}

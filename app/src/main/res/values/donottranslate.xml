@@ -32,6 +32,21 @@ this program. If not, see <http://www.gnu.org/licenses/>
 
 	<string name="settings_debug_view_item_title" translatable="false">LogCat gridview/listview</string>
 
+	<!-- #70: header for new generated properties file .../sqldir/ImageExtraDetailSqlDef.properties -->
+	<string name="image_context_properties_header" translatable="false"><![CDATA["#
+# Generated with \'%1$s\' Version %2$s.
+#
+# This properties file contain sqlite sql formulas for the context data in the image view in the format
+# name=sql expression.
+#
+# name is the menu title where the sql belongs to.
+#
+# for all available columns see the "Details" label
+#
+# '|' will be replaced by newline '\\n'
+#
+  "]]></string>
+
 	<!-- version_postfix="" for fdroid-release and version_postfix=" (dev)" for development branch-->
 	<string name="about_content" translatable="false"><![CDATA["  <a href="https://github.com/k3b/APhotoManager/wiki">
     <b>A Photo Manager</b>

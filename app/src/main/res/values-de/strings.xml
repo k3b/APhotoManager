@@ -203,4 +203,7 @@ Verstecken kann über das 'Media-Scanner' Gallery-Menü rückgängig gemacht wer
   <string name="settings_xmp_file_schema_title">Langer Xmp Dateiname?</string>
   <string name="settings_xmp_file_schema_summary">Lang: file.jpg.xmp; kurz: file.xmp</string>
 
+  <!-- #70: manually select sql column defintition for extra detail display in image detail view  -->
+  <string name="view_context_menu_title">Lade Kontext ...</string>
+
 </resources>

@@ -42,7 +42,7 @@ public class ListUtils {
         return toString(list, DEFAULT_LIST_ELEMENT_DELIMITER);
     }
 
-    public static List<String> toStringList(List<?> list) {
+    public static List<String> toStringList(Iterable<?> list) {
         ArrayList<String> result = new ArrayList<String>();
         for(Object item : list) {
             if (item != null) result.add(item.toString());
@@ -80,5 +80,4 @@ public class ListUtils {
         String[] tagsArray = tags.toArray(new String[tags.size()]);
         return tagsArray;
     }
-
 }

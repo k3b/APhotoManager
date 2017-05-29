@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2017 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -17,19 +16,10 @@
  *
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>
- */
- -->
+-->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/cmd_mk_dir"
-        android:title="@string/mk_dir_menu_title"
-        android:visible="true"
-        android:orderInCategory="10"
-        android:showAsAction="never" />
-    <item android:id="@+id/cmd_photo" android:title="@string/show_photo"
-        android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
-    <item android:id="@+id/cmd_gallery" android:title="@string/show_in_gallery_menu_title"
-        android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
+    <item android:id="@+id/action_edit" android:title="@string/edit_menu_title"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:orderInCategory="20" android:showAsAction="ifRoom" />
 
-    <item android:id="@+id/action_details" android:title="@string/details_menu_title"
-        android:orderInCategory="900" android:showAsAction="never" />
 </menu>

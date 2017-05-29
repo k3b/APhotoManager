@@ -33,6 +33,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import java.util.Arrays;
 import java.util.List;
 
 import de.k3b.android.androFotoFinder.R;
@@ -47,19 +48,20 @@ import static android.view.MenuItem.SHOW_AS_ACTION_IF_ROOM;
  */
 public abstract class Dialogs {
 	// showStringPicker(this, "Open query", "FileName1.query", "FileName2.query");
-	public void pickFromStrings(final Activity parent, String title, final int idContextMenu, List<String> strings) {
-		pickFromStrings(parent, title, idContextMenu, strings.toArray(new String[strings.size()]));
+	public void pickFromStrings(final Activity parent, String title, final int idContextMenu, List<String> names) {
+		pickFromStrings(parent, title, idContextMenu, names.toArray(new String[names.size()]));
 	}
 	// showStringPicker(this, "Open query", "FileName1.query", "FileName2.query");
-	public void pickFromStrings(final Activity parent, String title, final int idContextMenu, final String... strings) {
+	public void pickFromStrings(final Activity parent, String title, final int idContextMenu, final String... names) {
+		Arrays.sort(names);
 		AlertDialog.Builder builder = new AlertDialog.Builder(parent);
 		builder.setTitle(title);
 
-		builder.setItems(strings, new DialogInterface.OnClickListener() {
+		builder.setItems(names, new DialogInterface.OnClickListener() {
 	        // when an item is clicked, notify our interface "onDialogResult"
 	    	public void onClick(DialogInterface d, int position) {
 				d.dismiss();
-				onDialogResult(strings[position],(Object[]) strings);
+				onDialogResult(names[position],(Object[]) names);
 			}
 		});
 
@@ -86,7 +88,7 @@ public abstract class Dialogs {
 					menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
 						@Override
 						public boolean onMenuItemClick(MenuItem item) {
-							final boolean result = onContextMenuItemClick(item.getItemId(), position, strings);
+							final boolean result = onContextMenuItemClick(item.getItemId(), position, names);
 							dialog.dismiss();
 							return result;
 						}
@@ -169,7 +171,7 @@ public abstract class Dialogs {
 	}
 
 	/** must be overwritten to implement dialog result. null==canceled */
-	abstract protected void onDialogResult(String result, Object... parameters);
+    abstract protected void onDialogResult(String clickedName, Object... parameters);
 
     public void yesNoQuestion(Activity parent, final String title, String question, final Object... parameters) {
         AlertDialog.Builder builder = new AlertDialog.Builder(parent);

@@ -40,6 +40,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.osmdroid.IconOverlay;
+import de.k3b.android.util.ResourceUtils;
 import de.k3b.database.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
@@ -101,10 +102,10 @@ public class PickerLocationMapFragment extends LocationMapFragment {
 
     protected IconOverlay createSelectedItemOverlay() {
         if (mUsePicker) {
-            Drawable currrentSelectionIcon = getActivity().getResources().getDrawable(R.drawable.marker_red);
+            Drawable currrentSelectionIcon = ResourceUtils.getDrawable(getActivity(), R.drawable.marker_red);
             return new CurrentSelectionMarker(null, currrentSelectionIcon);
         } else {
-            Drawable currrentSelectionIcon = getActivity().getResources().getDrawable(R.drawable.marker_red);
+            Drawable currrentSelectionIcon = ResourceUtils.getDrawable(getActivity(), R.drawable.marker_red);
             // fixed positon, not updated on pick
             return new IconOverlay(null, currrentSelectionIcon);
         }

@@ -55,6 +55,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.GalleryFilterParameter;
@@ -281,10 +282,10 @@ public class TagsPickerFragment  extends DialogFragment  {
 
     private void setFilterMode(boolean newValue) {
         mIsFilterMode = newValue;
-        this.mBookmarkMode.setImageDrawable(getActivity().getResources().getDrawable(
+        this.mBookmarkMode.setImageDrawable(ResourceUtils.getDrawable(getActivity(),
                 !mIsFilterMode ? android.R.drawable.btn_star_big_on : android.R.drawable.btn_star_big_off));
 
-        this.mFilterMode.setImageDrawable(getActivity().getResources().getDrawable(
+        this.mFilterMode.setImageDrawable(ResourceUtils.getDrawable(getActivity(),
                 mIsFilterMode ? R.drawable.ic_btn_search_blue : R.drawable.ic_btn_search));
 
         // drawable.setColorFilter(0x00ff0000, PorterDuff.Mode.ADD);

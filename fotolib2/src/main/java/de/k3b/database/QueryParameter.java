@@ -90,6 +90,24 @@ public class QueryParameter {
         return Helper.toList(mColumns);
     }
 
+    public String removeFirstColumnThatContains(String namePart) {
+        return removeFirstThatContains(this.mColumns, namePart);
+    }
+
+    private static String removeFirstThatContains(List<String> items, String namePart) {
+        String found;
+        if (items != null) {
+            for(int index = items.size() -1; index >= 0; index--) {
+                found = items.get(index);
+                if ((found != null) && (found.contains(namePart))) {
+                    items.remove(index);
+                    return found;
+                }
+            }
+        }
+        return null;
+    }
+
     public QueryParameter addFrom(String... froms) {
         return addToList(mFrom, false, froms);
     }

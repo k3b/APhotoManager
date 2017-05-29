@@ -60,7 +60,7 @@ public class TagSql extends FotoSql {
 
     /** The date & time when last non standard media-scan took place
      *  <P>Type: INTEGER (long) as milliseconds since jan 1, 1970</P> */
-    private static final String SQL_COL_EXT_XMP_LAST_MODIFIED_DATE = MediaStore.Video.Media.DURATION;
+    public static final String SQL_COL_EXT_XMP_LAST_MODIFIED_DATE = MediaStore.Video.Media.DURATION;
 
     public static final int EXT_LAST_EXT_SCAN_UNKNOWN = 0;
     public static final int EXT_LAST_EXT_SCAN_NO_XMP_IN_CSV = 5;

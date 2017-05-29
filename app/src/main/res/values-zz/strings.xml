@@ -203,5 +203,6 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
 
     <string name="settings_xmp_file_schema_title">settings_xmp_file_schema_title: Long Xmp Sidecar File Name?</string>
     <string name="settings_xmp_file_schema_summary">settings_xmp_file_schema_summary: Long: file.jpg.xmp; Short: file.xmp</string>
+    <string name="view_context_menu_title">view_context_menu_title: Load Context ...</string>
 
 </resources>

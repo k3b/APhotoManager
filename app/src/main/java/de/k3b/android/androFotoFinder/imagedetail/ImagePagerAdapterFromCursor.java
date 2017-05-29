@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -23,12 +23,18 @@ import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -42,6 +48,8 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.DBUtils;
 import de.k3b.android.util.GarbageCollector;
 import de.k3b.android.util.JpgMetaWorkflow;
+import de.k3b.android.util.MenuUtils;
+import de.k3b.android.util.ResourceUtils;
 import de.k3b.database.SelectedItems;
 
 /**
@@ -52,6 +60,10 @@ import de.k3b.database.SelectedItems;
  */
 public class ImagePagerAdapterFromCursor extends PagerAdapter implements SelectedItems.Id2FileNameConverter {
     private static final int MAX_IMAGE_DIMENSION = HugeImageLoader.getMaxTextureSize();
+
+    /** colum alias for optinal sql expression to show ContextDetails */
+    public static final String CONTEXT_COLUMN_FIELD = "ContextDetails";
+
     // debug support
     private static int id = 0;
     protected final String mDebugPrefix;
@@ -63,6 +75,9 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
     private Cursor mCursor = null; // the content of the page
 
     protected DisplayImageOptions mDisplayImageOptions;
+    private Menu mMenu = null;
+
+    private ImageButtonControllerImpl mImageButtonController = null;
 
     public ImagePagerAdapterFromCursor(final Activity context, String name) {
         mActivity = context;
@@ -70,6 +85,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
         Global.debugMemory(mDebugPrefix, "ctor");
         mMaxTitleLength = context.getResources().getInteger(R.integer.title_length_in_chars);
 
+        mImageButtonController = new ImageButtonControllerImpl();
         mDisplayImageOptions = new DisplayImageOptions.Builder()
                 .showImageOnLoading(R.drawable.image_loading)
                 .showImageForEmptyUri(R.drawable.image_loading)
@@ -83,6 +99,10 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + "()");
         }
+    }
+
+    public void setMenu(Menu menu) {
+        mMenu = menu;
     }
 
     /**
@@ -227,20 +247,36 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
     @NonNull
     protected View createViewWithContent(int position, ViewGroup container, String fullPhotoPath, String debugContext, int size) {
         final Context context = container.getContext();
+
         final boolean useLayout=true;
 
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(context.LAYOUT_INFLATER_SERVICE);
 
         PhotoViewEx photoView;
         View root;
+        TextView contextTextView = null;
 
         if (useLayout) {
             root = inflater.inflate(R.layout.pager_item_image, container, false);
 
             photoView = (PhotoViewEx) root.findViewById(R.id.image);
+            mImageButtonController.create((ImageButton) root.findViewById(R.id.cmd_any));
+            contextTextView = (TextView) root.findViewById(R.id.text);
+
         } else {
             photoView = new PhotoViewEx(context);
             root = photoView;
+        }
+
+        if (contextTextView != null) {
+            String contextText = DBUtils.getString(getCursorAt(position), CONTEXT_COLUMN_FIELD, null);
+
+            if ((contextText != null) && (contextText.length() > 0)) {
+                contextTextView.setVisibility(View.VISIBLE);
+                contextTextView.setText(ImageContextController.sqlFormat(contextText));
+            } else {
+                contextTextView.setVisibility(View.INVISIBLE);
+            }
         }
 
         photoView.setMaximumScale(20);
@@ -329,11 +365,89 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
     public void setPrimaryItem(ViewGroup container, int position, Object object) {
         super.setPrimaryItem(container, position, object);
         this.mActivity.setTitle(this.getPageTitle(position));
+        if (object != null) {
+            mImageButtonController.create((ImageButton) ((View) object).findViewById(R.id.cmd_any));
+        }
     }
 
     /** SelectedItems.Id2FileNameConverter: converts items.id-s to string array of filenNames via media database. */
     @Override
     public String[] getFileNames(SelectedItems items) {
         return FotoSql.getFileNames(mActivity, items);
+    }
+
+    public void setIconResourceName(String name) {
+        mImageButtonController.setContext(name);
+    }
+
+    private class ImageButtonControllerImpl {
+        private MenuItem mMenuItem = null ;
+        private View.OnClickListener mClickListener;
+        private final View.OnLongClickListener mLongClickListener;
+
+        public ImageButtonControllerImpl() {
+            mClickListener = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if ((mMenuItem != null) && (mMenu != null)) {
+                        mMenu.performIdentifierAction(mMenuItem.getItemId(), Menu.FLAG_ALWAYS_PERFORM_CLOSE);
+                    }
+                }
+            };
+            mLongClickListener = new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    if ((mActivity != null) && (mMenuItem != null)) {
+                        Toast.makeText(mActivity, mMenuItem.getTitle(), Toast.LENGTH_SHORT).show();
+                    }
+                    return true;
+                }
+            };
+        }
+
+        public void create(ImageButton btn) {
+            if (btn != null) {
+                Drawable icon = null;
+
+                // only even orderIDs will become a button
+                // to allow hiding items
+                if ((mMenuItem != null) && (mMenuItem.getOrder() % 2 == 0)) {
+                    icon = mMenuItem.getIcon();
+                    if ((icon == null) && (mMenuItem.getItemId() == R.id.action_details)) {
+                        icon = ResourceUtils.getDrawable(mActivity, android.R.drawable.ic_dialog_info);
+                    }
+                }
+
+                if (icon != null) {
+                    btn.setImageDrawable(icon);
+                    btn.setVisibility(View.VISIBLE);
+                } else {
+                    btn.setVisibility(View.INVISIBLE);
+                }
+                btn.setOnClickListener(mClickListener);
+                btn.setOnLongClickListener(mLongClickListener);
+            }
+        }
+
+        public void setContext(MenuItem context) {
+            this.mMenuItem = context;
+        }
+        public void setContext(String name) {
+            setContext(MenuUtils.findByTitle(mMenu, name, 2));
+        }
+        public String getContext() {
+            CharSequence icon = (mMenuItem == null) ? null : mMenuItem.getTitle();
+            if (icon == null) return null;
+            return icon.toString();
+        }
+        public int getMenuId() {
+            return (mMenuItem == null) ? 0 : mMenuItem.getItemId();
+        }
+    }
+    public int getMenuId() {
+        return (mImageButtonController == null) ? 0 : mImageButtonController.getMenuId();
+    }
+    public void setContext(MenuItem context) {
+        if (mImageButtonController != null) mImageButtonController.setContext(context);
     }
 }

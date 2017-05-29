@@ -22,6 +22,7 @@
 <!-- commands that can be applied to one or more images -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".GalleryActivity">
+    <!-- note: items with odd orderInCategory will not go to quick button  -->
 
     <item android:id="@+id/cmd_copy"
         android:title="@string/copy_menu_title"
@@ -41,15 +42,14 @@
         android:title="@string/delete_menu_title"
         android:icon="@android:drawable/ic_menu_delete"
         android:visible="true"
-        android:orderInCategory="40"
+        android:orderInCategory="41"
         android:showAsAction="ifRoom" />
 
     <item android:id="@+id/cmd_gallery" android:title="@string/show_in_gallery_menu_title"
-        android:orderInCategory="190" android:showAsAction="never" android:visible="true" />
+        android:orderInCategory="189" android:showAsAction="never" android:visible="true" />
 
     <item android:id="@+id/cmd_show_geo"
         android:title="@string/geo_show_menu_title"
-        android:icon="@android:drawable/ic_dialog_map"
         android:visible="true"
         android:orderInCategory="195"
         android:showAsAction="never" />
