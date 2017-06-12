@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -47,6 +48,7 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.Dialogs;
+import de.k3b.database.SqlTemplateEngine;
 import de.k3b.io.FileUtils;
 
 /**
@@ -82,7 +84,7 @@ public abstract class ImageContextController {
             @Override protected boolean onContextMenuItemClick(int menuItemId, int itemIndex, String[] items) {
                 if ((items != null) && (itemIndex >= 0) && (itemIndex < items.length)) {
                     String key = items[itemIndex];
-                    String value = properties.getProperty(key);
+                    String value = SqlTemplateEngine.toSql(properties.getProperty(key));
                     switch (menuItemId) {
                         case R.id.action_edit:
                             return onEdit(key, value, getPropertiesFile());
@@ -96,7 +98,7 @@ public abstract class ImageContextController {
 
             @Override protected void onDialogResult(String name, Object[] parameters) {
                 if (name != null) {
-                    onListItemClick(name, properties.getProperty(name));
+                    onListItemClick(name, SqlTemplateEngine.toSql(properties.getProperty(name)));
                 }
             }
         };
@@ -176,6 +178,7 @@ public abstract class ImageContextController {
 
 
         StringBuilder sqlAllFields = new StringBuilder();
+        /*
         createString(sqlAllFields, "'#'" ,TagSql.SQL_COL_PK ,"' '" , TagSql.SQL_COL_PATH, nl);
         expr(sqlAllFields, TagSql.SQL_COL_EXT_TITLE);
         expr(sqlAllFields, TagSql.SQL_COL_EXT_DESCRIPTION);
@@ -185,6 +188,17 @@ public abstract class ImageContextController {
         expr(sqlAllFields, EXPR_TAGS);
         expr(sqlAllFields, EXPR_LAT_LON);
         expr(sqlAllFields, EXPR_RATING);
+        */
+        sqlAllFields.append("#${").append(TagSql.SQL_COL_PK).append(
+                "} ${").append(TagSql.SQL_COL_PATH).append("}|");
+        sqlAllFields.append("${").append(TagSql.SQL_COL_EXT_TITLE).append("|}");
+        sqlAllFields.append("${").append(TagSql.SQL_COL_EXT_DESCRIPTION).append("|}");
+        sqlAllFields.append("${").append(EXPR_DATE_TAKEN).append("|}");
+        sqlAllFields.append("${").append(EXPR_DATE_MODIFIED).append("|}");
+        sqlAllFields.append("${").append(EXPR_XMP_LAST_MODIFIED_DATE).append("|}");
+        sqlAllFields.append("${").append(EXPR_TAGS).append("|}");
+        sqlAllFields.append("${").append(EXPR_LAT_LON).append("|}");
+        sqlAllFields.append("${").append(EXPR_RATING).append("|}");
 
         include(properties,R.id.menu_item_rename, TagSql.SQL_COL_PATH);
         include(properties,R.id.cmd_move, TagSql.SQL_COL_PATH);
@@ -194,7 +208,7 @@ public abstract class ImageContextController {
         include(properties,R.id.cmd_edit_geo, EXPR_LAT_LON);
         include(properties,R.id.cmd_show_geo_as, EXPR_LAT_LON);
         include(properties,R.id.cmd_edit_tags, EXPR_TAGS);
-        // include(properties,"html-test", "'hello <b><font color=''red''>' || " + TagSql.SQL_COL_PATH + "|| '</font></b>'");
+        include(properties,"html-test", "hello <b><font color='red'>${" + TagSql.SQL_COL_PATH + "}</font></b>");
     }
 
     private void include(Properties properties, int menuId, String value) {
@@ -213,9 +227,10 @@ public abstract class ImageContextController {
         }
     }
 
-    /** in display the "|" will be replaced by "\n" */
-    public static String sqlFormat(String detailsText) {
-        return detailsText.replace('|','\n');
+    /** in display the "|" will be replaced by "\n" and html be expanded. */
+    public static CharSequence sqlFormat(String detailsText) {
+		String textWithNewLine = detailsText.replace ("|","<br/>");
+        return Html.fromHtml(textWithNewLine, null, null);
     }
 
     private static String expr(StringBuilder result, String expr) {
@@ -246,7 +261,7 @@ public abstract class ImageContextController {
     public String getPropertyValue(String name) {
         final Properties properties = loadFromFile();
         if (properties != null) {
-            return properties.getProperty(name);
+            return SqlTemplateEngine.toSql(properties.getProperty(name));
         }
         return null;
     }
