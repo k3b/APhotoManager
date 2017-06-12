@@ -74,6 +74,7 @@ import de.k3b.android.osmdroid.MarkerEx;
 import de.k3b.android.osmdroid.OsmdroidUtil;
 import de.k3b.android.osmdroid.forge.MapsForgeSupport;
 import de.k3b.android.util.IntentUtil;
+import de.k3b.android.util.ResourceUtils;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
@@ -369,7 +370,7 @@ public class LocationMapFragment extends DialogFragment {
 
         this.mCurrrentSelectionRedMarker = createSelectedItemOverlay();
 
-        mSelectedItemsHandler.mBlueMarker = getActivity().getResources().getDrawable(R.drawable.marker_blue);
+        mSelectedItemsHandler.mBlueMarker = ResourceUtils.getDrawable(getActivity(),R.drawable.marker_blue);
         mFolderOverlayGreenPhotoMarker = createFolderOverlay(overlays);
 
         mFolderOverlayBlueSelectionMarker = createFolderOverlay(overlays);
@@ -380,7 +381,7 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     protected IconOverlay createSelectedItemOverlay() {
-        Drawable currrentSelectionIcon = getActivity().getResources().getDrawable(R.drawable.marker_red);
+        Drawable currrentSelectionIcon = ResourceUtils.getDrawable(getActivity(), R.drawable.marker_red);
         // fixed positon, not updated on pick
         return new IconOverlay(null, currrentSelectionIcon);
     }
@@ -1071,6 +1072,7 @@ public class LocationMapFragment extends DialogFragment {
         double delta = getMarkerDelta();
 
         GalleryFilterParameter result = new GalleryFilterParameter().get(mRootFilter);
+        result.setNonGeoOnly(false);
         result.setLatitude(geoPosition.getLatitude() - delta, geoPosition.getLatitude() + delta);
         result.setLogitude(geoPosition.getLongitude() - delta, geoPosition.getLongitude() + delta);
 
