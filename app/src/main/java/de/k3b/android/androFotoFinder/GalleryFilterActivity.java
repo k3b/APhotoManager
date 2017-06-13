@@ -20,7 +20,6 @@
 package de.k3b.android.androFotoFinder;
 
 import android.app.Activity;
-import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -52,8 +51,8 @@ import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.osmdroid.OsmdroidUtil;
 import de.k3b.android.widget.AboutDialogPreference;
+import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.HistoryEditText;
-import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GalleryFilterParameter;
@@ -65,7 +64,7 @@ import de.k3b.tagDB.Tag;
 /**
  * Defines a gui for global foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.
  */
-public class GalleryFilterActivity extends LocalizedActivity
+public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         implements Common, DirectoryPickerFragment.OnDirectoryInteractionListener,
         LocationMapFragment.OnDirectoryInteractionListener,
         TagsPickerFragment.ITagsPicker
@@ -84,7 +83,6 @@ public class GalleryFilterActivity extends LocalizedActivity
     private FilterValue mFilterValue = null;
     private HistoryEditText mHistory;
     private BookmarkController mBookmarkController = null;
-    private DialogFragment mDlg;
 
     public static void showActivity(Activity context, IGalleryFilter filter, QueryParameter rootQuery,
                                     String lastBookmarkFileName, int requestCode) {
@@ -187,6 +185,7 @@ public class GalleryFilterActivity extends LocalizedActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_edit_common, menu);
         getMenuInflater().inflate(R.menu.menu_gallery_filter, menu);
         AboutDialogPreference.onPrepareOptionsMenu(this, menu);
 
@@ -246,10 +245,6 @@ public class GalleryFilterActivity extends LocalizedActivity
     protected void onPause () {
         Global.debugMemory(mDebugPrefix, "onPause");
         saveLastFilter();
-        if ((mDlg != null) && (mDlg.isVisible()) ){
-            mDlg.dismiss();
-        }
-        mDlg = null;
         super.onPause();
     }
 
@@ -304,7 +299,6 @@ public class GalleryFilterActivity extends LocalizedActivity
             dirInfos = null;
         }
 
-        System.gc();
         Global.debugMemory(mDebugPrefix, "onDestroy end");
         // RefWatcher refWatcher = AndroFotoFinderApp.getRefWatcher(this);
         // refWatcher.watch(this);
@@ -660,14 +654,14 @@ public class GalleryFilterActivity extends LocalizedActivity
             dlg.setAddNames(mFilter.getTagsAllIncluded());
             dlg.setRemoveNames(mFilter.getTagsAllExcluded());
             dlg.show(manager, DLG_NAVIGATOR_TAG);
-            mDlg = dlg;
+            setAutoClose(dlg, null);
         }
     }
 
     /** called by {@link TagsPickerFragment} */
     @Override
     public boolean onCancel(String msg) {
-        mDlg = null;
+        setAutoClose(null, null);
         return true;
     }
 
@@ -677,7 +671,7 @@ public class GalleryFilterActivity extends LocalizedActivity
         mFilter.setTagsAllIncluded(addNames);
         mFilter.setTagsAllExcluded(removeNames);
         toGui(mFilter);
-        mDlg = null;
+        setAutoClose(null, null);
         return true;
     }
 
@@ -694,7 +688,7 @@ public class GalleryFilterActivity extends LocalizedActivity
             dlg.defineNavigation(null, mFilter, OsmdroidUtil.NO_ZOOM, null, null);
 
             dlg.show(manager, DLG_NAVIGATOR_TAG);
-            mDlg = dlg;
+            setAutoClose(dlg, null);
         }
     }
 
@@ -728,8 +722,7 @@ public class GalleryFilterActivity extends LocalizedActivity
             dlg.defineDirectoryNavigation(dirInfo.directoryRoot, dirInfo.queryId, dirInfo.currentPath);
 
             dlg.show(manager, DLG_NAVIGATOR_TAG);
-            mDlg = dlg;
-
+            setAutoClose(dlg, null);
         }
     }
 

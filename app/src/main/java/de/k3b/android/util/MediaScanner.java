@@ -316,7 +316,12 @@ abstract public class MediaScanner  {
     }
 
     /** updates values with current values of file */
-    protected void getExifFromFile(ContentValues values, File jpgFile) {
+    public MediaContentValues getExifFromFile(File jpgFile) {
+        return getExifFromFile(new ContentValues(), jpgFile);
+    }
+
+    /** updates values with current values of file. */
+    protected MediaContentValues getExifFromFile(ContentValues values, File jpgFile) {
         String absoluteJpgPath = FileUtils.tryGetCanonicalPath(jpgFile, jpgFile.getAbsolutePath());
 
         values.put(DB_DATE_MODIFIED, jpgFile.lastModified() / 1000);
@@ -351,6 +356,8 @@ abstract public class MediaScanner  {
         updateTagRepository(src.getTags());
 
         setPathRelatedFieldsIfNeccessary(values, absoluteJpgPath, null);
+
+        return dest;
     }
 
     private void updateTagRepository(List<String> tags) {

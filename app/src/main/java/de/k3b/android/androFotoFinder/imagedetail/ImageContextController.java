@@ -208,6 +208,7 @@ public abstract class ImageContextController {
         include(properties,R.id.cmd_edit_geo, EXPR_LAT_LON);
         include(properties,R.id.cmd_show_geo_as, EXPR_LAT_LON);
         include(properties,R.id.cmd_edit_tags, EXPR_TAGS);
+        include(properties,R.id.menu_exif, sqlAllFields.toString());
         include(properties,"html-test", "hello <b><font color='red'>${" + TagSql.SQL_COL_PATH + "}</font></b>");
     }
 

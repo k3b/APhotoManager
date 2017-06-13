@@ -207,5 +207,9 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
     <!-- #70: manually select sql column defintition for extra detail display in image detail view  -->
     <string name="view_context_menu_title">Load Context ...</string>
 
-
+    <!-- #87: edit-exif: image title, description, rating -->
+    <string name="exif_menu_title">Edit Exif</string>
+    <string name="lbl_title">Title</string>
+    <string name="lbl_description">Description</string>
+    <string name="lbl_rating">Rating</string>
 </resources>

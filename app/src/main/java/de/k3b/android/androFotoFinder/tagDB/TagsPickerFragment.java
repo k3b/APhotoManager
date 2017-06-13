@@ -206,9 +206,13 @@ public class TagsPickerFragment  extends DialogFragment  {
             mBookMarkNames.addAll(ListUtils.fromString(lastBookMarkNames));
         }
 
-        TagRepository.getInstance().includeIfNotFound(mAddNames, mRemoveNames, mAffectedNames, mBookMarkNames);
+        List<Tag> existingTags = loadTagRepositoryItems(true);
+        TagRepository tagRepository = TagRepository.getInstance();
+        if (tagRepository.includeIfNotFound(mAddNames, mRemoveNames, mAffectedNames, mBookMarkNames) > 0) {
+            tagRepository.save();
+        }
         this.mDataAdapter = new TagListArrayAdapter(this.getActivity(),
-                loadTagRepositoryItems(true),
+                existingTags,
                 mAddNames, mRemoveNames, mAffectedNames, mBookMarkNames
         );
 

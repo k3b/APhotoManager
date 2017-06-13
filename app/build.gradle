@@ -103,6 +103,8 @@ dependencies {
 	// compile 'com.adobe.xmp:xmpcore:6.1.10' // update for drewnoakes:metadata-extractor requires java-8 compiler does not run on my android-4.4.
 	compile 'com.adobe.xmp:xmpcore:5.1.2' // current version for drewnoakes:metadata-extractor
 
+    // compile 'com.github.k3b:slideDateTimePicker:v1.0.5' // via jitpack.io
+
     // compile 'org.apache.commons:commons-configuration2:2.1.1'
 
     // this is osmdroid

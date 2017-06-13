@@ -19,6 +19,8 @@
 
 package de.k3b.csv2db.csv;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.io.Reader;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -44,7 +46,7 @@ abstract public class CsvLoader<T extends CsvItem> {
         mNotCanceled = false;
     }
 
-    protected class CsvItemIterator<T extends CsvItem> implements Iterator<T> {
+    protected class CsvItemIterator<T extends CsvItem> implements Iterator<T>, Closeable {
         private final T mItem;
         private final CsvReader mCsvReader;
         private boolean isEOF = false;
@@ -55,6 +57,10 @@ abstract public class CsvLoader<T extends CsvItem> {
             mItem = item;
             mItem.setHeader(header);
             mItem.setFieldDelimiter("" + mCsvReader.getFieldDelimiter());
+        }
+
+        public void close() throws IOException {
+            if (mCsvReader != null) mCsvReader.close();
         }
 
         private String[] readLine() {

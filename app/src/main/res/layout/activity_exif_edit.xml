@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright (c) 2015-2017 by k3b.
+ *
+ * This file is part of AndroFotoFinder / #APhotoManager.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
+ -->
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent" android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        tools:context="de.k3b.android.androFotoFinder.GalleryFilterActivity">
+
+        <TextView android:id="@+id/lbl_title"
+            android:text="@string/lbl_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            />
+
+        <!-- -->
+        <ImageButton android:id="@+id/cmd_title_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/ic_menu_more"
+            android:layout_below="@+id/lbl_title"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+        <EditText android:id="@+id/edit_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:nestedScrollingEnabled="false"
+            android:inputType="text"
+            android:singleLine="true"
+            android:lines="1"
+            android:maxLines="1"
+            tools:ignore="UnusedAttribute"
+            android:layout_below="@+id/lbl_title"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_toLeftOf="@+id/cmd_title_history"
+            android:layout_toStartOf="@+id/cmd_title_history" />
+
+        <View android:id="@+id/line_title"
+            android:layout_height="2dp"
+            android:layout_width="fill_parent"
+            android:background="#c0c0c0"
+            android:layout_below="@+id/edit_title"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            />
+        <!-- -->
+        <TextView android:id="@+id/lbl_description"
+            android:text="@string/lbl_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/line_title"
+            />
+
+        <!-- -->
+        <ImageButton android:id="@+id/cmd_description_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/ic_menu_more"
+            android:layout_below="@+id/lbl_description"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            />
+
+        <EditText
+            android:id="@+id/edit_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/lbl_description"
+            android:layout_toLeftOf="@+id/cmd_description_history"
+            android:layout_toStartOf="@+id/cmd_description_history"
+            android:ellipsize="end"
+            android:ems="10"
+            android:inputType="textMultiLine"
+            android:lines="4"
+            android:maxLines="4"
+            android:nestedScrollingEnabled="false"
+            android:singleLine="false"
+            tools:ignore="UnusedAttribute" />
+
+        <View android:id="@+id/line_description"
+            android:layout_height="2dp"
+            android:layout_width="fill_parent"
+            android:background="#c0c0c0"
+            android:layout_below="@+id/edit_description"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            />
+        <!-- -->
+        <TextView android:id="@+id/lbl_rating"
+            android:text="@string/lbl_rating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/line_description"
+            />
+
+        <RatingBar
+            android:id="@+id/ratingBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/line_description"
+            android:elevation="1dp"
+            android:isIndicator="false"
+            android:max="5" />
+
+        <View android:id="@+id/line_rating"
+            android:layout_height="2dp"
+            android:layout_width="fill_parent"
+            android:background="#c0c0c0"
+            android:layout_below="@+id/ratingBar"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            />
+        <!-- -->
+        <TextView android:id="@+id/lbl_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/lbl_date"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignBaseline="@+id/cmd_date"
+
+            android:layout_below="@+id/line_rating" />
+
+        <Button android:id="@+id/cmd_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_popup"
+            android:layout_below="@+id/line_rating"
+
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+
+        <Button
+            android:id="@+id/cmd_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/line_rating"
+
+            android:layout_toLeftOf="@+id/cmd_time"
+            android:text="@string/btn_popup"
+
+            />
+
+        <!-- -->
+        <ImageButton android:id="@+id/cmd_date_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/ic_menu_more"
+            android:layout_below="@+id/cmd_date"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+        />
+
+        <EditText android:id="@+id/edit_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="date"
+            android:ems="10"
+
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+
+            android:layout_toLeftOf="@+id/cmd_date_history"
+            android:layout_below="@+id/cmd_date"
+            />
+
+        <View android:id="@+id/line_date"
+            android:layout_height="2dp"
+            android:layout_width="fill_parent"
+            android:background="#c0c0c0"
+            android:layout_below="@+id/edit_date"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            />
+        <!-- -->
+        <TextView android:id="@+id/lbl_tags_include"
+            android:text="@string/lbl_tags_include"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+
+            android:layout_below="@+id/line_date"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignBaseline="@+id/cmd_tags_include"
+            />
+        <Button android:id="@+id/cmd_tags_include"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_popup"
+            android:layout_below="@+id/line_date"
+            android:layout_toLeftOf="@+id/lbl_tags_include"
+            android:layout_toStartOf="@+id/lbl_tags_include"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            />
+
+        <!-- -->
+        <ImageButton android:id="@+id/cmd_tags_include_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/ic_menu_more"
+            android:layout_below="@+id/cmd_tags_include"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+            />
+        <EditText android:id="@+id/edit_tags_include"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:ems="10"
+            android:inputType="textMultiLine"
+            android:singleLine="false"
+            android:lines="2"
+            android:maxLines="2"
+            tools:ignore="UnusedAttribute"
+
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+
+            android:layout_toLeftOf="@+id/cmd_tags_include_history"
+            android:layout_below="@+id/cmd_tags_include" />
+
+
+        <!-- -->
+        <View android:id="@+id/line_tags"
+            android:layout_height="2dp"
+            android:layout_width="fill_parent"
+            android:background="#c0c0c0"
+            android:layout_below="@+id/edit_tags_include"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            />
+
+        <Button android:id="@+id/cmd_select_lat_lon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_popup"
+            android:layout_below="@+id/line_tags"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            />
+        <TextView android:id="@+id/lbl_latitude"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/lbl_latitude_short"
+            android:layout_below="@+id/line_tags"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignBaseline="@+id/cmd_select_lat_lon" />
+        <ImageButton android:id="@+id/cmd_lat_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/ic_menu_more"
+
+            android:layout_alignBottom="@+id/cmd_select_lat_lon"
+            android:layout_toLeftOf="@+id/cmd_select_lat_lon"
+            android:layout_toStartOf="@+id/cmd_select_lat_lon" />
+        <EditText android:id="@+id/edit_latitude"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal|numberSigned"
+            android:ems="10"
+            android:layout_alignBottom="@+id/cmd_select_lat_lon"
+            android:layout_alignBaseline="@+id/lbl_latitude"
+            android:layout_toLeftOf="@+id/cmd_lat_history"
+            android:layout_toRightOf="@id/lbl_latitude"
+            android:layout_alignLeft="@+id/edit_tags_exclude"
+            android:layout_alignStart="@+id/edit_tags_exclude"
+            />
+
+        <!-- -->
+        <TextView android:id="@+id/lbl_longitude"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/lbl_longitude_short"
+            android:layout_below="@+id/edit_latitude"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+        <ImageButton android:id="@+id/cmd_lon_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/ic_menu_more"
+            android:layout_below="@+id/edit_latitude"
+            android:layout_toRightOf="@+id/edit_latitude"
+            android:layout_toEndOf="@+id/edit_latitude" />
+        <EditText android:id="@+id/edit_longitude"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal|numberSigned"
+            android:ems="10"
+            android:layout_below="@+id/edit_latitude"
+            android:layout_alignBaseline="@+id/lbl_longitude"
+            android:layout_toLeftOf="@+id/cmd_lon_history"
+            android:layout_toRightOf="@id/lbl_longitude"
+            android:layout_alignLeft="@+id/edit_tags_exclude"
+            android:layout_alignStart="@+id/edit_tags_exclude"
+            />
+    </RelativeLayout>
+</ScrollView>

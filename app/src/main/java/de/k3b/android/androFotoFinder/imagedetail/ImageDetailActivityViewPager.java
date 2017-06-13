@@ -50,6 +50,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.k3b.android.androFotoFinder.Common;
+import de.k3b.android.androFotoFinder.ExifEditActivity;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
@@ -587,24 +588,9 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
         if (mGalleryContentQuery == null) {
             this.mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
-            Uri uri = IntentUtil.getUri(intent);
-            if (uri != null) {
-                String scheme = uri.getScheme();
-                if ((scheme == null) || ("file".equals(scheme))) {
-                    setFilter(getParameterFromPath(uri.getPath())); // including path and index
-                } else if ("content".equals(scheme)) {
-                    String path = FotoSql.execGetFotoPath(this, uri);
-                    if (path != null) {
-                        setFilter(getParameterFromPath(path));
-                        if (Global.debugEnabled) {
-                            Log.i(Global.LOG_CONTEXT, "Translate from '" + uri +
-                                    "' to '" + path + "'");
-                        }
-                    } else {
-                        Log.i(Global.LOG_CONTEXT, "Cannot translate from '" + uri +
-                                "' to local file");
-                    }
-                }
+            String path = IntentUtil.getFilePath(this, IntentUtil.getUri(intent));
+            if (path != null) {
+                setFilter(getParameterFromPath(path));
             }
         }
 
@@ -897,6 +883,9 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                 case R.id.menu_item_rename:
                     result =  onRenameDirQueston(getCurrentImageId(), getCurrentFilePath(), null);
                     break;
+                case R.id.menu_exif:
+                    result =  onEditExif(getCurrentImageId(), getCurrentFilePath());
+                    break;
 
                 case R.id.cmd_gallery: {
                     reloadContext = false;
@@ -1029,6 +1018,10 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         return false;
     }
 
+    private boolean onEditExif(final long fotoId, final String fotoPath) {
+        ExifEditActivity.showActivity(this, fotoPath,0);
+        return true;
+    }
     private boolean onRenameDirQueston(final long fotoId, final String fotoPath, final String _newName) {
         if (AndroidFileCommands.canProcessFile(this)) {
             final String newName = (_newName == null)

@@ -133,4 +133,9 @@ public class MetaApiWrapper implements IMetaApi {
         if (writeChild != null) writeChild.setPath(filePath);
         return this;
     }
+
+    @Override
+    public String toString() {
+        return MediaUtil.toString(this);
+    }
 }

@@ -21,6 +21,7 @@ package de.k3b.android.util;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -33,6 +34,7 @@ import java.io.File;
 
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.queries.FotoSql;
 
 /**
  * Created by k3b on 09.09.2015.
@@ -44,6 +46,30 @@ public class IntentUtil implements Common {
             return intent.setDataAndTypeAndNormalize(data, type);
         }
         return intent.setDataAndType(data, type);
+    }
+
+    /** either file: or content-uri. If content-uri translate to file uri */
+    public static String getFilePath(Context context, Uri uri) {
+        // Uri uri = IntentUtil.getUri(intent);
+        String path = null;
+        if (uri != null) {
+            String scheme = uri.getScheme();
+            if ((scheme == null) || ("file".equals(scheme))) {
+                path = uri.getPath();
+            } else if ("content".equals(scheme)) {
+                path = FotoSql.execGetFotoPath(context, uri);
+                if (path != null) {
+                    if (Global.debugEnabled) {
+                        Log.i(Global.LOG_CONTEXT, "Translate from '" + uri +
+                                "' to '" + path + "'");
+                    }
+                } else {
+                    Log.i(Global.LOG_CONTEXT, "Cannot translate from '" + uri +
+                            "' to local file");
+                }
+            }
+        }
+        return path;
     }
 
     /** get uri from data. if there is no data from EXTRA_STREAM */

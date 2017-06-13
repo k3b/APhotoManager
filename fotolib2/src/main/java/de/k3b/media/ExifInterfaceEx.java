@@ -424,4 +424,9 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
         return filelastModified;
     }
 
+    @Override
+    public String toString() {
+        return MediaUtil.toString(this);
+    }
+
 }

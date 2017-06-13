@@ -232,4 +232,9 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
     }
 
 
+    @Override
+    public String toString() {
+        return MediaUtil.toString(this);
+    }
+
 }
