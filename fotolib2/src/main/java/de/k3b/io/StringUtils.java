@@ -29,4 +29,9 @@ public class StringUtils {
         return (rhs == null) ? 0 : -1;
     }
 
+    public static boolean equals(Object lhs, Object rhs) {
+        if (lhs != null) return (rhs != null) ? lhs.equals(rhs) : false;
+        return (rhs == null);
+    }
+
 }

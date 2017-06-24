@@ -22,7 +22,8 @@ package de.k3b.media;
 import com.adobe.xmp.options.PropertyOptions;
 
 /**
- * Supported predefined Xmp-Fileds
+ * Supported predefined Xmp-Fileds for {@MediaXmpSegment}.
+ *
  * Created by k3b on 10.10.2016.
  */
 
@@ -33,6 +34,8 @@ public enum MediaXmpFieldDefinition {
     CreateDate(XmpNamespace.XAP),          // JPhotoTagger default
 
     DateCreated(XmpNamespace.PHOTOSHOP),  // exiftool default
+
+    DateAcquired(XmpNamespace.MICROSOFT_PHOTO),
 
     OriginalFileName(XmpNamespace.APM), // apm specific: the original file name of the image file
     AppVersion(XmpNamespace.APM),       // apm specific: creating app/version
@@ -48,7 +51,12 @@ public enum MediaXmpFieldDefinition {
             PropertyOptions.ARRAY_ALT_TEXT | PropertyOptions.ARRAY |
                     PropertyOptions.ARRAY_ORDERED | PropertyOptions.ARRAY_ALTERNATE),
     Rating(XmpNamespace.XAP),
-    subject(XmpNamespace.DC, PropertyOptions.ARRAY);
+
+    subject(XmpNamespace.DC, PropertyOptions.ARRAY),        // xmp dc standard for keywords
+    LastKeywordIPTC(XmpNamespace.MICROSOFT_PHOTO, PropertyOptions.ARRAY),   // used by microsoft for subject
+    LastKeywordXMP(XmpNamespace.MICROSOFT_PHOTO, PropertyOptions.ARRAY)     // used by microsoft for subject
+
+    ;
 
     private final XmpNamespace xmpNamespace;
     private final int arrayOption;

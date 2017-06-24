@@ -32,8 +32,8 @@ public enum XmpNamespace {
     XAP("XMP-xmp","http://ns.adobe.com/xap/1.0/"),
     DC("XMP-dc", "http://purl.org/dc/elements/1.1/"),
     APM("apm", "https://github.com/k3b/APhotoManager/wiki/spec"),
-    PHOTOSHOP("photoshop","http://ns.adobe.com/photoshop/1.0/");
-
+    PHOTOSHOP("photoshop","http://ns.adobe.com/photoshop/1.0/"),
+    MICROSOFT_PHOTO("MicrosoftPhoto", "http://ns.microsoft.com/photo/1.0");
 
     private final String prefix;
     private final String uri;

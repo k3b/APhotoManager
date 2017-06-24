@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2016 by k3b.
+ * Copyright (c) 2016-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -26,7 +26,10 @@ package de.k3b.media;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.List;
+
 import de.k3b.TestUtil;
+import de.k3b.io.ListUtils;
 
 public class MediaUtilTests {
     @Test
@@ -36,6 +39,18 @@ public class MediaUtilTests {
         MediaUtil.copy(actual, expected, true, true);
         Assert.assertEquals(expected.toString(), actual.toString());
     }
+
+    @Test
+    public void shouldDeserializeAllFields() {
+        MediaDTO expected = TestUtil.createTestMediaDTO(1);
+        MediaAsString src = new MediaAsString().setData(expected);
+        String serial = src.toString();
+        MediaAsString dest = new MediaAsString().setData(serial);
+
+        MediaDTO actual = new MediaDTO(dest);
+        Assert.assertEquals(expected.toString(), actual.toString());
+    }
+
 
     @Test
     public void shouldCopyAllFieldsMetaApiWrapper() {
@@ -88,10 +103,21 @@ public class MediaUtilTests {
     }
 
     @Test
-    public void shouldCountChanges() {
-        MediaDTO expected = TestUtil.createTestMediaDTO(1);
-        Assert.assertEquals("all different", 7, MediaUtil.countChangedProperties(expected, TestUtil.createTestMediaDTO(2), false));
-        Assert.assertEquals("all same", 0, MediaUtil.countChangedProperties(expected, TestUtil.createTestMediaDTO(1), false));
+    public void shouldFindChanges() {
+        IMetaApi item1 = TestUtil.createTestMediaDTO(3);
+        IMetaApi item2 = TestUtil.createTestMediaDTO(3);
+
+        // 3 changes
+        item1.setTitle("other title");
+        item1.setLongitude(null);
+        item2.setDateTimeTaken(null);
+
+        // no change
+        item1.setDescription(null);
+        item2.setDescription(null);
+
+        List<MediaUtil.FieldID> result = MediaUtil.getChanges(item1, item2);
+        Assert.assertEquals(ListUtils.toString(result), 3, result.size());
     }
 
     @Test
@@ -115,11 +141,12 @@ public class MediaUtilTests {
         check(null, "dest", true, false, "dest");
     }
 
-    private void check(String initalSrcValue, String initialDestValue, boolean allowSetNull, boolean overwriteExisting, String expected) {
+    private void check(String initalSrcValue, String initialDestValue,
+                       boolean allowSetNull, boolean overwriteExisting, String expected) {
         IMetaApi src = new MediaDTO().setTitle(initalSrcValue);
         IMetaApi dest = new MediaDTO().setTitle(initialDestValue);
 
-        MediaUtil.copy(dest, src, allowSetNull, overwriteExisting);
+        MediaUtil.copy(dest, src, overwriteExisting, allowSetNull);
         Assert.assertEquals("(" + initalSrcValue +
                 "," + initialDestValue +
                 ")=>" +expected, expected, dest.getTitle());

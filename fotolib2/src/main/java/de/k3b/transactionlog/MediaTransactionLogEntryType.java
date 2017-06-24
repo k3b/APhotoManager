@@ -15,7 +15,8 @@ public enum MediaTransactionLogEntryType {
     TAGSREMOVE("T-"),
     TAGS("T"),
     DESCRIPTION("d"),
-    HEADER("h"),;
+    HEADER("h"),
+    RATING("r");
 
     private final String id;
 

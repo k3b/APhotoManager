@@ -26,6 +26,7 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
 import com.drew.metadata.exif.ExifDirectoryBase;
 import com.drew.metadata.exif.ExifIFD0Directory;
+import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.exif.GpsDirectory;
 import com.drew.metadata.iptc.IptcDirectory;
 import com.drew.metadata.jpeg.JpegCommentDirectory;
@@ -65,6 +66,7 @@ public class ImageMetaReader implements IMetaApi, Closeable {
     private MediaXmpSegment mInternalXmpDir;
     private Metadata mMetadata = null;
     protected Directory mExifDir;
+    protected Directory mExifSubDir;
     private GeoLocation mExifGpsDir;
     protected Directory mIptcDir;
     // private Directory fileDir;
@@ -139,7 +141,7 @@ public class ImageMetaReader implements IMetaApi, Closeable {
         init();
 
         Date result = null;
-        if (isEmpty(result, ++i, debugContext, "ExifIFD0.DATETIME_ORIGINAL") && (mExifDir != null)) result = mExifDir.getDate(ExifIFD0Directory.TAG_DATETIME_ORIGINAL, DateUtil.UTC);
+        if (isEmpty(result, ++i, debugContext, "ExifSubIFD.DATETIME_ORIGINAL") && (mExifSubDir != null)) result = mExifSubDir.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL, DateUtil.UTC);
 
         if (isEmpty(result, ++i, debugContext, "ExternalXmp.DateTimeTaken") && (mExternalXmpDir != null)) result = mExternalXmpDir.getDateTimeTaken();
         if (isEmpty(result, ++i, debugContext, "InternalXmp.DateTimeTaken") && (mInternalXmpDir != null)) result = mInternalXmpDir.getDateTimeTaken();
@@ -442,9 +444,13 @@ public class ImageMetaReader implements IMetaApi, Closeable {
         if (!mInitExecuted && (mMetadata != null)) {
             mInitExecuted = true;
             mExifDir = this.mMetadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+            mExifSubDir = this.mMetadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
+
             mIptcDir = this.mMetadata.getFirstDirectoryOfType(IptcDirectory.class);
             // fileDir = this.mMetadata.getFirstDirectoryOfType(FileDirec .class); // not implemented
             mCommentDir = this.mMetadata.getFirstDirectoryOfType(JpegCommentDirectory.class);
+
+
 
             mExifGpsDir = null;
             GpsDirectory gps = this.mMetadata.getFirstDirectoryOfType(GpsDirectory.class);
@@ -480,7 +486,7 @@ public class ImageMetaReader implements IMetaApi, Closeable {
     protected List<String> getStringList(String debugContext, Directory directory, int tag) {
         String value = getString(debugContext, directory, tag);
         if (value != null) {
-            String[] split = value.split(";");
+            Object[] split = value.split(";");
             return ListUtils.toStringList(split);
         }
         return null;

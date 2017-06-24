@@ -77,7 +77,7 @@ public class TagProcessor {
     }
 
     /** calculate the new tags out of added and removed tags. returns null if there is no change neccessary */
-    public List<String> getUpdated(List<String> originalCurrentTags, List<String> addedTags, List<String> removedTags) {
+    public static List<String> getUpdated(List<String> originalCurrentTags, List<String> addedTags, List<String> removedTags) {
         ArrayList<String> currentTags = (originalCurrentTags == null) ? new ArrayList<String>() : new ArrayList<String>(originalCurrentTags);
         int modifyCount = 0;
         if (addedTags != null) {
@@ -100,5 +100,27 @@ public class TagProcessor {
 
         }
         return (modifyCount > 0) ? currentTags : null;
+    }
+
+    /** caclulates the difference between original and changed into addedTags and removedTags and returns the number of changes. */
+    public static int getDiff(List<String> original, List<String> changed, List<String> addedTags, List<String> removedTags) {
+        int modifyCount = 0;
+        if (addedTags != null) {
+            for (String tag : changed) {
+                if (!original.contains(tag) && !addedTags.contains(tag)) {
+                    addedTags.add(tag);
+                    modifyCount++;
+                }
+            }
+        }
+        if (removedTags != null) {
+            for (String tag : original) {
+                if (!changed.contains(tag) && !removedTags.contains(tag)) {
+                    removedTags.add(tag);
+                    modifyCount++;
+                }
+            }
+        }
+        return modifyCount;
     }
 }

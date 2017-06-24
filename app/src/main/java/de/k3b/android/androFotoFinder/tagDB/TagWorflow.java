@@ -53,7 +53,8 @@ public class TagWorflow extends TagProcessor {
     private List<TagSql.TagWorflowItem> items = null;
     private Activity context;
 
-    /** Get current assigned tags from selectedItemPks and/or anyOfTags
+    /** Get current assigned tags from selectedItemPks
+     * and/or any image that has one or more tag of anyOfTags.
      * @param context
      * @param selectedItems if not null list of comma seperated item-pks
      * @param anyOfTags if not null list of tag-s where at least one oft the tag must be in the photo.
@@ -103,7 +104,7 @@ public class TagWorflow extends TagProcessor {
 
         List<String> currentItemTags = tagWorflowItemFromDB.tags;
         try {
-            MetaWriterExifXml exif = MetaWriterExifXml.create (tagWorflowItemFromDB.path, "saveLatLon: load");
+            MetaWriterExifXml exif = MetaWriterExifXml.create (tagWorflowItemFromDB.path, "updateTags: load");
             List<String> tagsDbPlusFile = this.getUpdated(currentItemTags, exif.getTags(), null);
             if (tagsDbPlusFile != null) {
                 mustSave = true;

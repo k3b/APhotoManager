@@ -17,25 +17,25 @@
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
 
-package de.k3b.android.util;
+package de.k3b.media;
 
-import android.util.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.EnumSet;
 
-import de.k3b.android.androFotoFinder.Global;
-import de.k3b.media.ExifInterfaceEx;
-import de.k3b.media.MediaUtil;
-import de.k3b.media.MetaWriterExifXml;
+import de.k3b.FotoLibGlobal;
 
 /**
- * Write geo data (lat/lon) to photo
- * Based on http://stackoverflow.com/questions/5280479/how-to-save-gps-coordinates-in-exif-data-on-android
+ * apply meta data changes to jpg and/or xmp file.
  *
  * Created by k3b on 25.08.2015.
  */
 public class JpgMetaWorkflow {
+    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+
     private static StringBuilder debugExif(StringBuilder sb, String context, MetaWriterExifXml exif, File filePath) {
         if (sb != null) {
             sb.append("\n\t").append(context).append("\t: ");
@@ -52,34 +52,46 @@ public class JpgMetaWorkflow {
     }
 
     public static MetaWriterExifXml saveLatLon(File filePath, Double latitude, Double longitude) {
-        StringBuilder sb = (Global.debugEnabled)
+        MediaDTO changedData = new MediaDTO();
+        changedData.setLatitude(latitude).setLongitude(longitude);
+        EnumSet<MediaUtil.FieldID> changedFields = EnumSet.of(MediaUtil.FieldID.latitude, MediaUtil.FieldID.longitude);
+        return applyChanges(filePath, changedData, changedFields);
+    }
+
+    public static MetaWriterExifXml applyChanges(File filePath, IMetaApi changes, EnumSet<MediaUtil.FieldID> _affectedFields) {
+        StringBuilder sb = (FotoLibGlobal.debugEnabled)
                 ? sb = createDebugStringBuilder(filePath)
                 : null;
         if (filePath.canWrite()) {
             MetaWriterExifXml exif = null;
             try {
                 long lastModified = filePath.lastModified();
-                exif = MetaWriterExifXml.create (filePath.getAbsolutePath(), "saveLatLon: load");
+                exif = MetaWriterExifXml.create (filePath.getAbsolutePath(), "MetaWriterExifXml: load");
                 debugExif(sb, "old", exif, filePath);
 
-                exif.setLatitude(latitude);
-                exif.setLongitude(longitude);
-                // exif.setAttribute(ExifInterfaceEx.TAG_GPS_ALTITUDE, convert(0));
-                // exif.setAttribute(ExifInterfaceEx.TAG_GPS_ALTITUDE_REF, longitudeRef(0));
+                EnumSet<MediaUtil.FieldID> affectedFields = _affectedFields;
+                if (affectedFields == null) {
+                    // do not rename
+                    affectedFields = EnumSet.allOf(MediaUtil.FieldID.class);
+                    affectedFields.remove(MediaUtil.FieldID.path);
+                }
+                MediaUtil.copySpecificProperties(exif, changes, affectedFields);
 
                 debugExif(sb, "assign ", exif, filePath);
 
-                exif.save("saveLatLon save");
+                exif.save("MetaWriterExifXml save");
 
-                // preseve file modification date
-                filePath.setLastModified(lastModified);
+                if (FotoLibGlobal.preserveJpgFileModificationDate) {
+                    // preseve file modification date
+                    filePath.setLastModified(lastModified);
+                }
 
                 if (sb != null) {
                     MetaWriterExifXml exifVerify = MetaWriterExifXml.create (filePath.getAbsolutePath(),
-                            "dbg in saveLatLon", true, true, false);
+                            "dbg in MetaWriterExifXml", true, true, false);
                     debugExif(sb, "new ", exifVerify, filePath);
 
-                    Log.d(Global.LOG_CONTEXT, sb.toString());
+                    logger.info(sb.toString());
                 }
                 return exif;
             } catch (IOException e) {
@@ -89,7 +101,7 @@ public class JpgMetaWorkflow {
                 }
 
                 sb.append("error='").append(e.getMessage()).append("' ");
-                Log.e(Global.LOG_CONTEXT, sb.toString(), e);
+                logger.error(sb.toString(), e);
                 return null;
             }
         } else {
@@ -98,7 +110,7 @@ public class JpgMetaWorkflow {
             }
 
             sb.append("error='file is write protected' ");
-            Log.e(Global.LOG_CONTEXT, sb.toString());
+            logger.error(sb.toString());
             return null;
         }
     }

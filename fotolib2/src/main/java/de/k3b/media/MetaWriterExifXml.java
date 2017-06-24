@@ -38,9 +38,9 @@ public class MetaWriterExifXml extends MetaApiWrapper {
 
     public static MetaWriterExifXml create(String absoluteJpgPath, String dbg_context) throws IOException {
         return create(absoluteJpgPath, dbg_context,
-                FotoLibGlobal.mediaUpdateStrategy.contains("J"),
-                FotoLibGlobal.mediaUpdateStrategy.contains("X"),
-                FotoLibGlobal.mediaUpdateStrategy.contains("C"));
+                FotoLibGlobal.mediaUpdateStrategy.contains("J"),    // write jpg file
+                FotoLibGlobal.mediaUpdateStrategy.contains("X"),    // write xmp file
+                FotoLibGlobal.mediaUpdateStrategy.contains("C"));   // create xmp if it does not exist
     }
 
     public static MetaWriterExifXml create(String absoluteJpgPath, String dbg_context

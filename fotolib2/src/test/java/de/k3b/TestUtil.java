@@ -61,7 +61,7 @@ public class TestUtil {
         result.setLatitude(50 + id + (0.01 * id));
         result.setLongitude(10 + id + (0.01 * id));
         result.setTags(TagConverter.fromString("tagA" + id + TagConverter.TAG_DB_DELIMITER + "tagB" + id));
-        result.setRating(id % 6);
+        result.setRating(Integer.valueOf(id % 6));
 
         return result;
     }
@@ -72,10 +72,14 @@ public class TestUtil {
     }
 
     public static void saveTestResourceAs(String resourceName, File destination) throws IOException {
+        InputStream sourceStream = getResourceInputStream(resourceName);
+
         if (destination.exists()) destination.delete();
         FileOutputStream result = new FileOutputStream(destination);
-        FileUtils.copy(getResourceInputStream(resourceName), result);
+        FileUtils.copy(sourceStream, result);
         result.flush();
-        result.close();
+        FileUtils.close(result,destination);
+        FileUtils.close(sourceStream,resourceName);
+        destination.setLastModified(DateUtil.parseIsoDate("1972-03-04T05:06:07").getTime());
     }
 }

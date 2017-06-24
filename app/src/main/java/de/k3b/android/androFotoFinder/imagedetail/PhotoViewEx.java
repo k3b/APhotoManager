@@ -7,7 +7,7 @@ import android.widget.ImageView;
 
 import java.io.File;
 
-import de.k3b.android.util.JpgMetaWorkflow;
+import de.k3b.media.JpgMetaWorkflow;
 import uk.co.senab.photoview.PhotoView;
 import uk.co.senab.photoview.PhotoViewAttacher;
 import uk.co.senab.photoview.log.LogManager;

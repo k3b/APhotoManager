@@ -69,7 +69,8 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
         return getPropertyAsDate(
                 "getDateTimeTaken", MediaXmpFieldDefinition.CreateDate,   // JPhotoTagger default
                 MediaXmpFieldDefinition.DateCreated,  // exiftool default
-                MediaXmpFieldDefinition.DateTimeOriginal);
+                MediaXmpFieldDefinition.DateTimeOriginal,
+                MediaXmpFieldDefinition.DateAcquired);
     }
 
     @Override
@@ -78,7 +79,8 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
         setProperty(dateValue, // DateUtil.toIsoDateString(value),
                 MediaXmpFieldDefinition.CreateDate,   // JPhotoTagger default
                 MediaXmpFieldDefinition.DateCreated,  // exiftool default
-                MediaXmpFieldDefinition.DateTimeOriginal); // EXIF
+                MediaXmpFieldDefinition.DateTimeOriginal, // EXIF
+                MediaXmpFieldDefinition.DateAcquired);
         return this;
     }
 
@@ -142,12 +144,18 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
 
     @Override
     public List<String> getTags() {
-        return getPropertyArray("getTags", MediaXmpFieldDefinition.subject);
+        return getPropertyArray("getTags",
+                MediaXmpFieldDefinition.subject,
+                MediaXmpFieldDefinition.LastKeywordXMP,
+                MediaXmpFieldDefinition.LastKeywordIPTC);
     }
 
     @Override
     public IMetaApi setTags(List<String> tags) {
         replacePropertyArray(tags, MediaXmpFieldDefinition.subject);
+        replacePropertyArray(tags, MediaXmpFieldDefinition.LastKeywordXMP);
+        replacePropertyArray(tags, MediaXmpFieldDefinition.LastKeywordIPTC);
+
         return this;
     }
 

@@ -43,11 +43,14 @@ public class FotoLibGlobal {
 
     public static boolean visibilityShowPrivateByDefault = false;
 
-    // (J)pg, (X)mp, (C)reate: global to allow changing these via a settings dialog
-    public static String mediaUpdateStrategy = "JXC";
+    /** strategy config how to read/write meta data: (J)pg, (X)mp, (C)reate. Global to allow changing these via a settings dialog */
+    public static String mediaUpdateStrategy = "JX";
 
     // will be written into exif/xmp if not already set.
     // Overwritten by android Application.onCreate()
     public static String appName = null;
     public static String appVersion = null;
+
+    /** true: update jpg-exif does not change file.lastModifiedDate */
+    public static boolean preserveJpgFileModificationDate = true;
 }

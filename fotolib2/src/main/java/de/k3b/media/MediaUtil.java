@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2016 by k3b.
+ * Copyright (c) 2016-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -20,12 +20,15 @@
 package de.k3b.media;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 
 import de.k3b.io.DateUtil;
 import de.k3b.io.GeoUtil;
+import de.k3b.io.StringUtils;
 import de.k3b.tagDB.TagConverter;
 
 /**
@@ -46,9 +49,7 @@ public class MediaUtil {
         rating,
         tags,
         clasz,
-    }
-
-    ;
+    };
 
     public static String toString(IMetaApi item) {
         return toString(item, true);
@@ -56,7 +57,7 @@ public class MediaUtil {
 
     public static String toString(IMetaApi item, boolean includeEmpty, FieldID... _excludes) {
         if (item == null) return "";
-        List<FieldID> excludes = ((_excludes == null) || (_excludes.length == 0)) ? null : Arrays.asList(_excludes);
+        final EnumSet<FieldID> excludes = toEnumSet(_excludes);
         StringBuilder result = new StringBuilder();
         add(result, includeEmpty, excludes, FieldID.clasz, item.getClass().getSimpleName(), ":");
         add(result, includeEmpty, excludes, FieldID.path, " path ", item.getPath());
@@ -70,8 +71,12 @@ public class MediaUtil {
         return result.toString();
     }
 
+    public static EnumSet<FieldID> toEnumSet(FieldID... _excludes) {
+        return ((_excludes == null) || (_excludes.length == 0)) ? null : EnumSet.copyOf(Arrays.asList(_excludes));
+    }
+
     private static void add(StringBuilder result, boolean includeEmpty,
-                            List<FieldID> excludes, FieldID item, String name, Object value) {
+                            final EnumSet<FieldID> excludes, FieldID item, String name, Object value) {
         if ((includeEmpty) || (value != null)) {
             if ((excludes == null) || (!excludes.contains(item))) {
                 result.append(name).append(value);
@@ -81,8 +86,8 @@ public class MediaUtil {
 
     /** copy content from source to destination. @return number of copied properties */
     public static int copy(IMetaApi destination, IMetaApi source,
-                           boolean allowSetNull, boolean overwriteExisting) {
-        return copyImpl(destination, source, allowSetNull, overwriteExisting, null);
+                           boolean overwriteExisting, boolean allowSetNull) {
+        return copyImpl(destination, source, overwriteExisting, allowSetNull, null, null, (FieldID[]) null);
     }
 
     /**
@@ -92,138 +97,121 @@ public class MediaUtil {
      * @return number of copied properties
      */
     public static int copyNonEmpty(IMetaApi destination, IMetaApi source, FieldID... _allowSetNulls) {
-        return copyImpl(destination, source, false, true, _allowSetNulls);
+        return copyImpl(destination, source, true, false, null, null, _allowSetNulls);
     }
 
-    /** copy content from source to destination. @return number of copied properties */
+    /**
+     * Copies properties of source to destination when included in fields2copy.
+     *
+     * @return number of copied properties
+     */
+    public static int copySpecificProperties(IMetaApi destination, IMetaApi source, final EnumSet<FieldID> fields2copy) {
+        return copyImpl(destination, source, true, true, fields2copy, null, (FieldID[]) null);
+    }
+
+    public static List<FieldID> getChanges(IMetaApi destination, IMetaApi source) {
+        List<FieldID> collectedChanges = new ArrayList<FieldID>();
+        if (0 == copyImpl(destination, source, true, true, null, collectedChanges, (FieldID[]) null)) {
+            return null;
+        }
+        return collectedChanges;
+    }
+
+    /**
+     * copy content from source to destination. @return number of copied properties
+     *
+     * @param destination where fields are copied to.
+     * @param source where data is copied from.
+     * @param overwriteExisting false: write only if destinatin field is null before.
+     * @param allowSetNull if true for all fields setNull is possible.
+     *                     Else only those containted in _allowSetNulls is allowed to set null.
+     * @param fields2copy null: all fields will be copied. else only the fields contained are copied.
+     * @param collectedChanges if not null: do not copy but collect the FieldID-s that
+     *                         would be copied in this list.
+     * @param _allowSetNulls if not null: for these fields setNull is allowed
+     * @return number of changed fields
+     */
     private static int copyImpl(IMetaApi destination, IMetaApi source,
-                           boolean allowSetNull, boolean overwriteExisting,
-                           FieldID[] _allowSetNulls) {
+                                boolean overwriteExisting, boolean allowSetNull,
+                                final EnumSet<FieldID> fields2copy,
+                                List<FieldID> collectedChanges,
+                                FieldID... _allowSetNulls) {
         int changes = 0;
 
         if ((destination != null) && (source != null)) {
-            List<FieldID>  allowSetNulls = ((_allowSetNulls == null) || (_allowSetNulls.length == 0)) ? null : Arrays.asList(_allowSetNulls);
+            final EnumSet<FieldID>  allowSetNulls = toEnumSet(_allowSetNulls);
             String sValue;
 
             sValue = source.getPath();
-            if (allowed(allowSetNull, sValue, overwriteExisting, destination.getPath(), allowSetNulls, FieldID.path)) {
+            if (allowed(sValue, destination.getPath(), fields2copy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.path, collectedChanges)) {
                 destination.setPath(sValue);
                 changes++;
             }
 
             Date dValue = source.getDateTimeTaken();
-            if (allowed(allowSetNull, dValue, overwriteExisting, destination.getDateTimeTaken(), allowSetNulls, FieldID.dateTimeTaken)) {
+            if (allowed(dValue, destination.getDateTimeTaken(), fields2copy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.dateTimeTaken, collectedChanges)) {
                 destination.setDateTimeTaken(dValue);
                 changes++;
             }
 
             Double doValue = source.getLatitude();
-            if (allowed(allowSetNull, doValue, overwriteExisting, destination.getLatitude(), allowSetNulls, FieldID.latitude)) {
+            if (allowed(doValue, destination.getLatitude(), fields2copy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.latitude, collectedChanges)) {
                 destination.setLatitude(doValue);
                 changes++;
             }
 
             doValue = source.getLongitude();
-            if (allowed(allowSetNull, doValue, overwriteExisting, destination.getLongitude(), allowSetNulls, FieldID.longitude)) {
+            if (allowed(doValue, destination.getLongitude(), fields2copy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.longitude, collectedChanges)) {
                 destination.setLongitude(doValue);
                 changes++;
             }
             sValue = source.getTitle();
-            if (allowed(allowSetNull, sValue, overwriteExisting, destination.getTitle(), allowSetNulls, FieldID.title)) {
+            if (allowed(sValue, destination.getTitle(), fields2copy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.title, collectedChanges)) {
                 destination.setTitle(sValue);
                 changes++;
             }
 
             sValue = source.getDescription();
-            if (allowed(allowSetNull, sValue, overwriteExisting, destination.getDescription(), allowSetNulls, FieldID.description)) {
+            if (allowed(sValue, destination.getDescription(), fields2copy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.description, collectedChanges)) {
                 destination.setDescription(sValue);
                 changes++;
             }
 
             List<String> tValue = source.getTags();
-            if (allowed(allowSetNull, tValue, overwriteExisting, destination.getTags(), allowSetNulls, FieldID.tags)) {
+            if (allowed(tValue, destination.getTags(), fields2copy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.tags, collectedChanges)) {
                 destination.setTags(tValue);
                 changes++;
             }
 
             Integer iValue = source.getRating();
-            if (allowed(allowSetNull, iValue, overwriteExisting, destination.getDateTimeTaken(), allowSetNulls, FieldID.rating)) {
+            if (allowed(iValue, destination.getRating(), fields2copy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.rating, collectedChanges)) {
                 destination.setRating(iValue);
                 changes++;
             }
 
         }
+
+        if (collectedChanges != null) return collectedChanges.size();
         return changes;
     }
 
-    /**
-     * Calculate the number of properties that are different between destination and other.
-     * Used to skip "save" if there are no changes.
-     *
-     * @param setIdenticalPropsToNull If true set all properties of destination to null
-     *                                that are identical to the properties of "other".
-     **/
-    public static int countChangedProperties(IMetaApi destination, IMetaApi other,
-                                             boolean setIdenticalPropsToNull) {
-        int differentCount = 0;
-        if (isSameOrNull(other.getDescription(), destination.getDescription())) {
-            if (setIdenticalPropsToNull) destination.setDescription(null);
-        } else {
-            differentCount++;
-        }
+    private static boolean allowed(Object newValue, Object oldValue, EnumSet<FieldID> fields2copy, boolean overwriteExisting, boolean allowSetNull,
+                                   final EnumSet<FieldID> allowSetNulls, FieldID item, List<FieldID> collectedChanges) {
+        if ((fields2copy != null) && (!fields2copy.contains(item))) return false;    // not in fields2copy
 
-        if (isSameOrNull(other.getPath(), destination.getPath())) {
-            if (setIdenticalPropsToNull) destination.setPath(null);
-        } else {
-            differentCount++;
-        }
+        if ((!overwriteExisting) && (oldValue != null)) return false;   // already has an old value
 
-        if (isSameOrNull(other.getTitle(), destination.getTitle())) {
-            if (setIdenticalPropsToNull) destination.setTitle(null);
-        } else {
-            differentCount++;
-        }
+        boolean sameValue = StringUtils.equals(newValue, oldValue);
+        if ((allowSetNulls != null) && (allowSetNulls.contains(item))) return true;  // null doesn-t matter
 
-        if (isSameOrNull(other.getDateTimeTaken(), destination.getDateTimeTaken())) {
-            if (setIdenticalPropsToNull) destination.setDateTimeTaken(null);
-        } else {
-            differentCount++;
+        boolean result = ((newValue != null) || allowSetNull) ;
+        if (collectedChanges != null) {
+            if (result && !sameValue) {
+                collectedChanges.add(item);
+            }
+            return false;
         }
-
-        if (isSameOrNull(other.getLatitude(), destination.getLatitude())) {
-            if (setIdenticalPropsToNull) destination.setLatitude(null);
-        } else {
-            differentCount++;
-        }
-
-        if (isSameOrNull(other.getLongitude(), destination.getLongitude())) {
-            if (setIdenticalPropsToNull) destination.setLongitude(null);
-        } else {
-            differentCount++;
-        }
-
-        List<String> tValue = other.getTags();
-        if (isSameOrNull(TagConverter.asDbString(null, other.getTags()), TagConverter.asDbString(null, destination.getTags()))) {
-            if (setIdenticalPropsToNull) destination.setTags(tValue);
-        } else {
-            differentCount++;
-        }
-        return differentCount;
-    }
-
-    private static boolean isSameOrNull(Object me, Object other) {
-        if (me == null) return true;
-        if (other != null) {
-            return me.equals(other);
-        }
-        return false;
-    }
-
-    private static boolean allowed(boolean allowSetNull, Object newValue,
-                                   boolean overwriteExisting, Object oldValue, List<FieldID> allowSetNulls, FieldID item) {
-        if ((allowSetNulls != null) && (allowSetNulls.contains(item))) return true;
-        if ((!overwriteExisting) && (oldValue != null)) return false;
-        return ((newValue != null) || allowSetNull);
+        return result;
     }
 
     /** return true if path is "*.jp(e)g" */

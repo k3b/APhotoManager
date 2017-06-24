@@ -33,4 +33,12 @@ public class StringUtilsTests {
         Assert.assertEquals(+1, StringUtils.compare("", null));
         Assert.assertEquals(-1, StringUtils.compare("a", "b"));
     }
+    @Test
+    public void shoudEqual() {
+        Assert.assertEquals(true, StringUtils.equals(null, null));
+        Assert.assertEquals(true, StringUtils.equals("ab", "a" + "b"));
+        Assert.assertEquals(false, StringUtils.equals(null, ""));
+        Assert.assertEquals(false, StringUtils.equals("", null));
+        Assert.assertEquals(false, StringUtils.equals("a", "b"));
+    }
 }

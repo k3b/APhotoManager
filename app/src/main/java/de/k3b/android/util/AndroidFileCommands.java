@@ -50,6 +50,7 @@ import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
+import de.k3b.media.JpgMetaWorkflow;
 import de.k3b.media.MediaUtil;
 import de.k3b.media.MetaWriterExifXml;
 import de.k3b.transactionlog.MediaTransactionLogEntryType;
