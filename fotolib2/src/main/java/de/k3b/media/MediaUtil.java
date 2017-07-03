@@ -214,6 +214,34 @@ public class MediaUtil {
         return result;
     }
 
+    /*
+    public static String get(IMetaApi data, FieldID field) {
+        switch (field) {
+            case path:
+                return data.getPath();
+            case dateTimeTaken:
+                return DateUtil.toIsoDateString(data.getDateTimeTaken());
+            case title:
+                return data.getTitle();
+            case description:
+                return data.getDescription();
+            case latitude:
+                return GeoUtil.toCsvStringLatLon(data.getLatitude());
+            case longitude:
+                return GeoUtil.toCsvStringLatLon(data.getLongitude());
+            case rating:
+                Integer rating = data.getRating();
+                return (rating == null) ? "0" : rating.toString();
+            case tags:
+                return TagConverter.asDbString(null, data.getTags());
+            case clasz:
+                return data.getClass().getSimpleName();
+            default:
+                return null;
+        }
+    }
+    */
+
     /** return true if path is "*.jp(e)g" */
     public static boolean isImage(File path, boolean jpgOnly) {
         if (path == null) return false;

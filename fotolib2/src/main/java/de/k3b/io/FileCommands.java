@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import de.k3b.FotoLibGlobal;
+import de.k3b.media.MediaUtil;
 import de.k3b.transactionlog.MediaTransactionLogDto;
 import de.k3b.transactionlog.MediaTransactionLogEntryType;
 
@@ -107,7 +108,7 @@ public class FileCommands implements  Cloneable {
                 result = true; // it is gone
             }
         }
-        log("call apmDelete.cmd ", getFilenameForLog(file));
+        log(MediaTransactionLogEntryType.DELETE.getCommand(file.getAbsolutePath(),""));
         return result;
     }
 
@@ -150,7 +151,7 @@ public class FileCommands implements  Cloneable {
         int pos = 0;
         int fileCount = destFiles.length;
         long now = new Date().getTime();
-        String dosCommand = (move) ? "call apmMove.cmd " : "call apmCopy.cmd ";
+        MediaTransactionLogEntryType command = (move) ? MediaTransactionLogEntryType.MOVE : MediaTransactionLogEntryType.COPY;
         MediaTransactionLogEntryType transaction = (move) ? MediaTransactionLogEntryType.MOVE : MediaTransactionLogEntryType.COPY;
 
         while (pos < fileCount) {
@@ -160,7 +161,7 @@ public class FileCommands implements  Cloneable {
 
             File destRenamed = renameDuplicate(destFile);
             if (osFileMoveOrCopy(move, destRenamed, sourceFile)) itemCount++;
-            log(dosCommand, getFilenameForLog(sourceFile), " " , getFilenameForLog(destRenamed));
+            log(command.getCommand(sourceFile.getAbsolutePath() , getFilenameForLog(destRenamed)));
 
             File sourceSidecar = getSidecar(sourceFile, false);
             if (osFileExists(sourceSidecar)) {
@@ -455,4 +456,13 @@ public class FileCommands implements  Cloneable {
 
     }
 
+    public String getDefaultLogFile() {
+        return "apmLog.log";
+    }
+
+    public FileCommands createFileCommand() {
+        setLogFilePath(getDefaultLogFile());
+        openLogfile();
+        return this;
+    }
 }

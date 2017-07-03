@@ -20,6 +20,12 @@ set xmpSrc="%~dpn1.xmp"
 set xmpDst="%~dpn2.xmp"
 
 if EXIST %xmpSrc% move %xmpSrc% %xmpDst% > nul
+
+set xmpSrc="%~dpnx1.xmp"
+set xmpDst="%~dpnx2.xmp"
+
+if EXIST %xmpSrc% move %xmpSrc% %xmpDst% > nul
+
 echo moved %2
 goto end
 

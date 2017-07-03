@@ -28,12 +28,10 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
-import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.database.SelectedFiles;
 import de.k3b.io.FileCommands;
-import de.k3b.io.ListUtils;
 import de.k3b.media.MediaUtil;
 import de.k3b.media.MediaXmpSegment;
 import de.k3b.media.MetaWriterExifXml;
@@ -137,14 +135,14 @@ public class TagWorflow extends TagProcessor {
             String tagsString = TagConverter.asBatString(removedTags);
             AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(context);
             if (tagsString != null) {
-                cmd.log("call apmTagsRemove.cmd \"", tagWorflowItemFromDB.path, "\" ", tagsString);
+                cmd.log(MediaTransactionLogEntryType.TAGSREMOVE.getCommand(tagWorflowItemFromDB.path, tagsString));
                 cmd.addTransactionLog(tagWorflowItemFromDB.id, tagWorflowItemFromDB.path, now,
                         MediaTransactionLogEntryType.TAGSREMOVE, tagsString);
             }
 
             tagsString = TagConverter.asBatString(addedTags);
             if (tagsString != null) {
-                cmd.log("call apmTagsAdd.cmd \"", tagWorflowItemFromDB.path, "\" ", tagsString);
+                cmd.log(MediaTransactionLogEntryType.TAGSADD.getCommand(tagWorflowItemFromDB.path, tagsString));
                 cmd.addTransactionLog(tagWorflowItemFromDB.id, tagWorflowItemFromDB.path, now,
                         MediaTransactionLogEntryType.TAGSADD, tagsString);
             }

@@ -7,24 +7,27 @@ import java.util.HashMap;
  */
 
 public enum MediaTransactionLogEntryType {
-    DELETE("F-"),
-    MOVE("Fm"),
-    COPY("F+"),
-    GPS("g"),
-    TAGSADD("T+"),
-    TAGSREMOVE("T-"),
-    TAGS("T"),
-    DESCRIPTION("d"),
-    HEADER("h"),
-    RATING("r");
+    DELETE("F-", "apmDelete"),
+    MOVE("Fm", "apmMove"),
+    COPY("F+", "apmCopy"),
+    GPS("g", "apmGps"),
+    TAGSADD("T+", "apmTagsAdd"),
+    TAGSREMOVE("T-", "apmTagsRemove"),
+    TAGS("T", ""),
+    DESCRIPTION("d", "apmDescription"),
+    HEADER("h", "apmTitle"),
+    RATING("r", "apmRating"),
+    DATE("dm", "apmDateTimeOriginal");
 
     private final String id;
+    private final String batCommand;
 
     public String getId() {return id;}
 
     private static HashMap<String,MediaTransactionLogEntryType> ids = null;
-    MediaTransactionLogEntryType(String id) {
+    MediaTransactionLogEntryType(String id, String batCommand) {
         this.id = id;
+        this.batCommand = batCommand;
     }
 
     public static MediaTransactionLogEntryType get(String id) {
@@ -39,5 +42,19 @@ public enum MediaTransactionLogEntryType {
         if (result == null) throw new IllegalArgumentException("MediaTransactionLogEntryType.get('" +
                 id + "')");
         return result;
+    }
+
+    public Object[] getCommand(String path, String parameter) {
+        Object r[] = new Object[6];
+        int i =0;
+
+        if ((batCommand == null) || (batCommand.length() == 0)) throw new IllegalArgumentException(this +":"+id + " has no batCommand assigned");
+        r[i++] = "call ";
+        r[i++] = batCommand;
+        r[i++] = ".cmd \"";
+        r[i++] = path;
+        r[i++] = "\" ";
+        r[i++] = parameter;
+        return r;
     }
 }

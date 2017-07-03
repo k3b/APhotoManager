@@ -24,6 +24,12 @@ set xmpSrc="%~dpn1.xmp"
 set xmpDst="%~dpn2.xmp"
 
 if EXIST %xmpSrc% copy /Y %xmpSrc% %xmpDst% > nul
+
+set xmpSrc="%~dpnx1.xmp"
+set xmpDst="%~dpnx2.xmp"
+
+if EXIST %xmpSrc% copy /Y %xmpSrc% %xmpDst% > nul
+
 echo copied %2
 goto end
 

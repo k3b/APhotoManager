@@ -81,6 +81,8 @@ public class AndroidFileCommands extends FileCommands {
             mActiveAlert = null;
         }
     }
+
+    @Override
     public String getDefaultLogFile() {
         Boolean isSDPresent = true; // Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED);
 
@@ -417,8 +419,7 @@ public class AndroidFileCommands extends FileCommands {
                     MetaWriterExifXml jpg = JpgMetaWorkflow.saveLatLon(file, latitude, longitude);
                     resultFile += TagSql.updateDB(dbgContext, applicationContext, file.getAbsolutePath(), jpg, MediaUtil.FieldID.latitude, MediaUtil.FieldID.longitude);
                     itemcount++;
-                    log("CALL apmGps.cmd ", getFilenameForLog(file),
-                            " ", latLong);
+                    log(MediaTransactionLogEntryType.GPS.getCommand(file.getAbsolutePath(), latLong));
                 }
                 onProgress(itemcount, maxCount);
 
@@ -454,6 +455,7 @@ public class AndroidFileCommands extends FileCommands {
     @NonNull
     public static AndroidFileCommands createFileCommand(Activity context) {
         AndroidFileCommands cmd = new AndroidFileCommands().setContext(context);
+        cmd.createFileCommand();
         cmd.setLogFilePath(cmd.getDefaultLogFile());
         cmd.openLogfile();
         return cmd;

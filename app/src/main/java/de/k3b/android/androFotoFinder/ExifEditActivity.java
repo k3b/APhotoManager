@@ -25,6 +25,8 @@ import android.app.Dialog;
 import android.app.FragmentManager;
 import android.app.TimePickerDialog;
 import android.content.ActivityNotFoundException;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -43,10 +45,13 @@ import android.widget.Toast;
 import java.io.File;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 import de.k3b.android.androFotoFinder.media.MediaContentValues;
+import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
@@ -56,8 +61,11 @@ import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
 import de.k3b.io.DateUtil;
+import de.k3b.io.FileUtils;
 import de.k3b.io.GeoUtil;
+import de.k3b.io.IGalleryFilter;
 import de.k3b.media.IMetaApi;
+import de.k3b.media.JpgMetaWorkflow;
 import de.k3b.media.MediaAsString;
 import de.k3b.media.MediaUtil;
 import de.k3b.tagDB.Tag;
@@ -524,15 +532,41 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
 
     /** save exif changes back to image and database */
     private void onOk() {
+        Activity ctx = this;
         saveGuiToExif();
         Intent intent = getIntent();
         String path = IntentUtil.getFilePath(this, IntentUtil.getUri(intent));
         if (path != null) {
             File file = new File(path);
             if (file.exists()) {
-                MediaContentValues oldData = MediaScanner.getInstance(this).getExifFromFile(file);
+                MediaContentValues oldData = MediaScanner.getInstance(ctx).getExifFromFile(file);
+                List<MediaUtil.FieldID> differences = MediaUtil.getChanges(oldData, mData);
 
-                // mData with new data
+                if (differences != null) {
+                    List<String> oldTags = oldData.getTags();
+                    EnumSet<MediaUtil.FieldID> diffSet = EnumSet.copyOf(differences);
+                    diffSet.remove(MediaUtil.FieldID.path);
+
+                    // save changes to jpg/xmp
+                    JpgMetaWorkflow.applyChanges(file, mData, diffSet);
+
+                    // save changes to database
+                    int changes = MediaUtil.copySpecificProperties(oldData, mData, diffSet);
+                    if (changes > 0) {
+                        ContentValues dbValues = oldData.getContentValues();
+                        FotoSql.execUpdate(mDebugPrefix, ctx, path, dbValues, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                    }
+
+                    Map<String, Long> idMap = FotoSql.execGetPathIdMap(ctx, path);
+                    long now = new Date().getTime();
+                    long id = (idMap != null) ? idMap.get(path) : 0;
+
+                    TransactionLogger logger = new TransactionLogger(ctx, id, path, now, null);
+                    logger.addChanges(mData,diffSet, oldTags);
+                    FileUtils.close(logger,mDebugPrefix);
+                    // if (diffSet.contains(MediaUtil.FieldID.dateTimeTaken))
+                    // save changes to log
+                }
             }
         }
 

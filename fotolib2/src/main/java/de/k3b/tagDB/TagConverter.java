@@ -33,6 +33,7 @@ public class TagConverter {
     public static final String TAG_DB_DELIMITER = ";";
 
     public static String asDbString(String wildcard, List<String> tags) {
+        if (tags == null) return null;
         String[] tagsArray = ListUtils.asStringArray(tags);
         if (tagsArray == null) return null;
         if (wildcard == null)
