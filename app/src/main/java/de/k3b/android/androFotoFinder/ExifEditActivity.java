@@ -514,13 +514,13 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
          */
         @Override
         public Integer getRating() {
-            int numStars = rating.getNumStars();
+            int numStars = (int) rating.getRating();
             return (numStars == 0) ? null : numStars;
         }
 
         @Override
         public IMetaApi setRating(Integer value) {
-            rating.setNumStars((value == null) ? 0 : value.intValue());
+            rating.setRating((value == null) ? 0 : value.intValue());
             return this;
         }
 

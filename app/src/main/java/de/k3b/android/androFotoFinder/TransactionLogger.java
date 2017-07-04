@@ -64,15 +64,15 @@ public class TransactionLogger implements Closeable {
 
     public void addChanges(MediaAsString newData, EnumSet<MediaUtil.FieldID> changes, List<String> oldTags) {
         if (changes.contains(FieldID.dateTimeTaken))  addChangesDateTaken(newData.getDateTimeTaken());
-        if (changes.contains(FieldID.latitude))  addChanges(MediaTransactionLogEntryType.GPS, DirectoryFormatter.parseLatLon(newData.getLatitude()) + " " + DirectoryFormatter.parseLatLon(newData.getLongitude()));
-        if (changes.contains(FieldID.description))  addChanges(MediaTransactionLogEntryType.DESCRIPTION, newData.getDescription());
-        if (changes.contains(FieldID.title))  addChanges(MediaTransactionLogEntryType.HEADER, newData.getTitle());
-        if (changes.contains(FieldID.rating)) addChanges(MediaTransactionLogEntryType.RATING, (newData.getRating() != null) ? newData.getRating().toString(): "0");
+        if (changes.contains(FieldID.latitude))  addChanges(MediaTransactionLogEntryType.GPS, DirectoryFormatter.parseLatLon(newData.getLatitude()) + " " + DirectoryFormatter.parseLatLon(newData.getLongitude()), false);
+        if (changes.contains(FieldID.description))  addChanges(MediaTransactionLogEntryType.DESCRIPTION, newData.getDescription(), true);
+        if (changes.contains(FieldID.title))  addChanges(MediaTransactionLogEntryType.HEADER, newData.getTitle(), true);
+        if (changes.contains(FieldID.rating)) addChanges(MediaTransactionLogEntryType.RATING, (newData.getRating() != null) ? newData.getRating().toString(): "0", false);
         if (changes.contains(FieldID.tags)) addChangesTags(oldTags, newData.getTags());
     }
 
     protected void addChangesDateTaken(Date newData) {
-        addChanges(MediaTransactionLogEntryType.DATE, DateUtil.toIsoDateString(newData));
+        addChanges(MediaTransactionLogEntryType.DATE, DateUtil.toIsoDateString(newData), false);
     }
 
     protected void addChangesTags(List<String> oldTags, List<String> newTags) {
@@ -80,15 +80,15 @@ public class TransactionLogger implements Closeable {
         List<String> removedTags = new ArrayList<String>();
         TagProcessor.getDiff(oldTags, newTags, addedTags, removedTags);
         if (addedTags.size() > 0) {
-            addChanges(MediaTransactionLogEntryType.TAGSADD, TagConverter.asBatString(addedTags));
+            addChanges(MediaTransactionLogEntryType.TAGSADD, TagConverter.asBatString(addedTags), false);
         }
         if (removedTags.size() > 0) {
-            addChanges(MediaTransactionLogEntryType.TAGSREMOVE, TagConverter.asBatString(removedTags));
+            addChanges(MediaTransactionLogEntryType.TAGSREMOVE, TagConverter.asBatString(removedTags), false);
         }
     }
 
-    private void addChanges(MediaTransactionLogEntryType command, String parameter) {
-        execLog.log(command.getCommand(path,parameter));
+    private void addChanges(MediaTransactionLogEntryType command, String parameter, boolean quoteParam) {
+        execLog.log(command.getCommand(path,parameter, quoteParam));
         execLog.addTransactionLog(id, path, now, command, parameter);
     }
 

@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import de.k3b.FotoLibGlobal;
-import de.k3b.media.MediaUtil;
 import de.k3b.transactionlog.MediaTransactionLogDto;
 import de.k3b.transactionlog.MediaTransactionLogEntryType;
 
@@ -99,27 +98,17 @@ public class FileCommands implements  Cloneable {
 
             if (osFileExists(file)) {
                 if (!osDeleteFile(file)) {
-                    log("rem file exists. delete failed : ", getFilenameForLog(file));
+                    log("rem file exists. delete failed : ", file.getAbsolutePath());
                 } else {
                     result = true; // was deleted
                 }
             } else {
-                log("rem file ", getFilenameForLog(file), " does not exist");
+                log("rem file '", file.getAbsolutePath(), "' does not exist");
                 result = true; // it is gone
             }
+            log(MediaTransactionLogEntryType.DELETE.getCommand(file.getAbsolutePath(),"", false));
         }
-        log(MediaTransactionLogEntryType.DELETE.getCommand(file.getAbsolutePath(),""));
         return result;
-    }
-
-    public static String getFilenameForLog(File file) {
-        if (file == null) return "";
-        return getFilenameForLog(file.getAbsolutePath());
-    }
-
-    public static String getFilenameForLog(String absolutePath) {
-        if (absolutePath == null) return "";
-        return "\"" + absolutePath.replace("/", "\\") + "\"";
     }
 
     public int moveOrCopyFilesTo(boolean move, File destDirFolder, Long[] ids, File... sourceFiles) {
@@ -131,7 +120,7 @@ public class FileCommands implements  Cloneable {
                 result = moveOrCopyFiles(move, (move ? "mov" : "copy"), ids, destFiles, sourceFiles);
 
             } else {
-                log("rem Target dir ", getFilenameForLog(destDirFolder), " cannot be created");
+                log("rem Target dir '", destDirFolder, "' cannot be created");
             }
         }
         return result;
@@ -157,24 +146,26 @@ public class FileCommands implements  Cloneable {
         while (pos < fileCount) {
             File sourceFile = sourceFiles[pos];
             File destFile = destFiles[pos];
-            Long id = ids[pos];
+            if ((sourceFile != null) && (destFile != null)) {
+                Long id = ids[pos];
 
-            File destRenamed = renameDuplicate(destFile);
-            if (osFileMoveOrCopy(move, destRenamed, sourceFile)) itemCount++;
-            log(command.getCommand(sourceFile.getAbsolutePath() , getFilenameForLog(destRenamed)));
+                File destRenamed = renameDuplicate(destFile);
+                if (osFileMoveOrCopy(move, destRenamed, sourceFile)) itemCount++;
+                log(command.getCommand(sourceFile.getAbsolutePath(), destRenamed.getAbsolutePath(), true));
 
-            File sourceSidecar = getSidecar(sourceFile, false);
-            if (osFileExists(sourceSidecar)) {
-                File destSidecar = getSidecar(destRenamed, false);
-                if (osFileMoveOrCopy(move, destSidecar, sourceSidecar)) itemCount++;
+                File sourceSidecar = getSidecar(sourceFile, false);
+                if (osFileExists(sourceSidecar)) {
+                    File destSidecar = getSidecar(destRenamed, false);
+                    if (osFileMoveOrCopy(move, destSidecar, sourceSidecar)) itemCount++;
+                }
+
+                sourceSidecar = getSidecar(sourceFile, true);
+                if (osFileExists(sourceSidecar)) {
+                    File destSidecar = getSidecar(destRenamed, true);
+                    if (osFileMoveOrCopy(move, destSidecar, sourceSidecar)) itemCount++;
+                }
+                addTransactionLog(id, sourceFile.getPath(), now, transaction, destFile.getPath());
             }
-
-            sourceSidecar = getSidecar(sourceFile, true);
-            if (osFileExists(sourceSidecar)) {
-                File destSidecar = getSidecar(destRenamed, true);
-                if (osFileMoveOrCopy(move, destSidecar, sourceSidecar)) itemCount++;
-            }
-            addTransactionLog(id, sourceFile.getPath(), now, transaction, destFile.getPath());
             pos++;
         }
         int modifyCount = mModifiedDestFiles.size();
@@ -263,7 +254,7 @@ public class FileCommands implements  Cloneable {
             String candidatePath = filename + id + extension;
             File candidate = new File(candidatePath);
             if (!fileOrSidecarExists(candidate)) {
-                log("rem renamed from ", getFilenameForLog(file), " to ", getFilenameForLog(candidatePath));
+                log("rem renamed from '", filename, "' to '", candidatePath,"'");
                 return candidate;
             }
 

@@ -44,8 +44,8 @@ public enum MediaTransactionLogEntryType {
         return result;
     }
 
-    public Object[] getCommand(String path, String parameter) {
-        Object r[] = new Object[6];
+    public Object[] getCommand(String path, String parameter, boolean quoteParam) {
+        Object r[] = new Object[8];
         int i =0;
 
         if ((batCommand == null) || (batCommand.length() == 0)) throw new IllegalArgumentException(this +":"+id + " has no batCommand assigned");
@@ -54,7 +54,9 @@ public enum MediaTransactionLogEntryType {
         r[i++] = ".cmd \"";
         r[i++] = path;
         r[i++] = "\" ";
+        r[i++] = quoteParam ? "\"" : "";
         r[i++] = parameter;
+        r[i++] = quoteParam ? "\"" : "";
         return r;
     }
 }

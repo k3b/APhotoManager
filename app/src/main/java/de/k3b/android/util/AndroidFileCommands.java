@@ -419,7 +419,7 @@ public class AndroidFileCommands extends FileCommands {
                     MetaWriterExifXml jpg = JpgMetaWorkflow.saveLatLon(file, latitude, longitude);
                     resultFile += TagSql.updateDB(dbgContext, applicationContext, file.getAbsolutePath(), jpg, MediaUtil.FieldID.latitude, MediaUtil.FieldID.longitude);
                     itemcount++;
-                    log(MediaTransactionLogEntryType.GPS.getCommand(file.getAbsolutePath(), latLong));
+                    log(MediaTransactionLogEntryType.GPS.getCommand(file.getAbsolutePath(), latLong, false));
                 }
                 onProgress(itemcount, maxCount);
 

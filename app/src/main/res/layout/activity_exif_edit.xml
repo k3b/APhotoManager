@@ -138,7 +138,10 @@
             android:layout_below="@+id/line_description"
             android:elevation="1dp"
             android:isIndicator="false"
-            android:max="5" />
+            android:max="5"
+            android:numStars="5"
+            android:stepSize="1.0"
+            android:rating="0.0"/>
 
         <View android:id="@+id/line_rating"
             android:layout_height="2dp"
