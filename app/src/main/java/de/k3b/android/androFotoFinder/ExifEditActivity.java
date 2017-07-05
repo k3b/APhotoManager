@@ -26,7 +26,6 @@ import android.app.FragmentManager;
 import android.app.TimePickerDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -43,6 +42,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.EnumSet;
@@ -57,6 +57,7 @@ import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
+import de.k3b.android.widget.HistoryEditText;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
@@ -82,17 +83,20 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
     private static final int GEO_RESULT_ID = 572;
 
     private static final String SETTINGS_KEY = "ExifEditActivity-";
+    private static final String SETTINGS_KEY_INITIAL = "ExifEditActivityInitial-";
     private static final GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
 
-    private MediaAsString  mData;
+    private MediaAsString mCurrentData;
+    private MediaAsString mInitialData;
     private EditText edTitle;
     private EditText edDescription;
     private EditText edDate;
     private EditText edTagsInclude;
-    private EditText edTagsExclude;
     private EditText edLatitude;
     private EditText edLongitude;
     private RatingBar   rating;
+
+    private HistoryEditText mHistory;
 
 
     public static void showActivity(Activity context, String url, int requestCode) {
@@ -119,12 +123,14 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         saveGuiToExif();
-        String guiDataAsString = mData.toString();
+        String guiDataAsString = mCurrentData.toString();
         if (Global.debugEnabled){
             Log.d(Global.LOG_CONTEXT, mDebugPrefix + "onSaveInstanceState " +
                     SETTINGS_KEY + "=" + guiDataAsString);
         }
         savedInstanceState.putString(SETTINGS_KEY, guiDataAsString);
+        savedInstanceState.putString(SETTINGS_KEY_INITIAL, mInitialData.toString());
+
         super.onSaveInstanceState(savedInstanceState);
     }
 
@@ -139,25 +145,28 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
 
         edDate          = (EditText) findViewById(R.id.edit_date);
         edTagsInclude   = (EditText) findViewById(R.id.edit_tags_include);
-        edTagsExclude   = (EditText) findViewById(R.id.edit_tags_exclude);
         edLatitude      = (EditText) findViewById(R.id.edit_latitude);
         edLongitude     = (EditText) findViewById(R.id.edit_longitude);
         rating = (RatingBar)  findViewById(R.id.ratingBar);
 
         onCreateButtos();
 
-        mData = new MediaAsString();
+        mCurrentData = new MediaAsString();
+        mInitialData = new MediaAsString();
 
         if (savedInstanceState != null) {
             String data = savedInstanceState.getString(SETTINGS_KEY, null);
             if (data != null) {
-                mData.setData(data);
+                mCurrentData.setData(data);
                 if (Global.debugEnabled){
                     Log.d(Global.LOG_CONTEXT, mDebugPrefix + "onCreate " +
                             SETTINGS_KEY + "=" + data);
                 }
             }
-
+            data = savedInstanceState.getString(SETTINGS_KEY_INITIAL, null);
+            if (data != null) {
+                mInitialData.setData(data);
+            }
         } else {
             Intent intent = getIntent();
             String path = IntentUtil.getFilePath(this, IntentUtil.getUri(intent));
@@ -165,7 +174,8 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
                 File file = new File(path);
                 if (file.exists()) {
                     IMetaApi currentData = MediaScanner.getInstance(this).getExifFromFile(file);
-                    mData.setData(currentData);
+                    mCurrentData.setData(currentData);
+                    mInitialData.setData(currentData);
                 }
             }
 
@@ -176,14 +186,29 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
 
         // load gui from exif
         loadGuiFromExif();
+
+        mHistory = new HistoryEditText(this, new int[] {
+                R.id.cmd_title_history                     ,
+                R.id.cmd_description_history               ,
+                R.id.cmd_date_history                      ,
+                R.id.cmd_tags_include_history              ,
+                R.id.cmd_lat_history                  ,
+                R.id.cmd_lon_history                  },
+                edTitle                     ,
+                edDescription               ,
+                edDate                      ,
+                edTagsInclude               ,
+                edLatitude                  ,
+                edLongitude                 );
+
     }
 
     private void loadGuiFromExif() {
-        MediaUtil.copy(mActivityData, mData, true, true);
+        MediaUtil.copy(mActivityData, mCurrentData, true, true);
     }
 
     private void saveGuiToExif() {
-        MediaUtil.copy(mData, mActivityData, true, true);
+        MediaUtil.copy(mCurrentData, mActivityData, true, true);
     }
 
     private void onCreateButtos() {
@@ -281,8 +306,8 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
     public void showGeoPicker() {
         GeoPointDto geo = new GeoPointDto();
 
-        geo.setLatitude(mData.getLatitude());
-        geo.setLongitude(mData.getLongitude());
+        geo.setLatitude(mCurrentData.getLatitude());
+        geo.setLongitude(mCurrentData.getLongitude());
 
         String geoUri = PARSER.toUriString(geo);
         final Intent intent = new Intent();
@@ -303,7 +328,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
     private void onGeoChanged(Uri data) {
         IGeoPointInfo geo = (data == null) ? null : PARSER.fromUri(data.toString());
         if (geo != null) {
-            mData.setLatitude(geo.getLatitude()).setLongitude(geo.getLongitude());
+            mCurrentData.setLatitude(geo.getLatitude()).setLongitude(geo.getLongitude());
             loadGuiFromExif();
         }
     }
@@ -328,7 +353,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
             final Calendar c = getDateTimeTakenAsCalendar();
             c.set(Calendar.HOUR_OF_DAY, hourOfDay);
             c.set(Calendar.MINUTE, minute);
-            mData.setDateTimeTaken(c.getTime());
+            mCurrentData.setDateTimeTaken(c.getTime());
             loadGuiFromExif();
         }
 
@@ -349,14 +374,14 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
             c.set(Calendar.YEAR, year);
             c.set(Calendar.MONTH, month);
             c.set(Calendar.DAY_OF_MONTH, day);
-            mData.setDateTimeTaken(c.getTime());
+            mCurrentData.setDateTimeTaken(c.getTime());
             loadGuiFromExif();
         }
 
         private Calendar getDateTimeTakenAsCalendar() {
             final Calendar c = Calendar.getInstance();
             c.setTimeZone(TimeZone.getTimeZone("gmt"));
-            Date dateTimeTaken = mData.getDateTimeTaken();
+            Date dateTimeTaken = mCurrentData.getDateTimeTaken();
             if (dateTimeTaken != null) {
                 c.setTimeInMillis(dateTimeTaken.getTime());
             }
@@ -373,8 +398,10 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
             dlg.setFragmentOnwner(mTagsApi);
             dlg.setTitleId(idTitle);
             // dlg.setAddNames(mFilter.getTagsAllIncluded());
-            dlg.setAddNames(mData.getTags());
-            dlg.setAffectedNames(mData.getTags());
+            List<String> tags = mCurrentData.getTags();
+            if (tags == null) tags = new ArrayList<String>();
+            dlg.setAddNames(tags);
+            dlg.setAffectedNames(tags);
             dlg.show(manager, DLG_NAVIGATOR_TAG);
             setAutoClose(dlg, null);
         }
@@ -393,7 +420,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
          */
         @Override
         public boolean onOk(List<String> addNames, List<String> removeNames) {
-            mData.setTags(addNames);
+            mCurrentData.setTags(addNames);
             loadGuiFromExif();
             setAutoClose(null, null);
             return true;
@@ -534,13 +561,15 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
     private void onOk() {
         Activity ctx = this;
         saveGuiToExif();
+        mHistory.saveHistory();
+
         Intent intent = getIntent();
         String path = IntentUtil.getFilePath(this, IntentUtil.getUri(intent));
         if (path != null) {
             File file = new File(path);
             if (file.exists()) {
                 MediaContentValues oldData = MediaScanner.getInstance(ctx).getExifFromFile(file);
-                List<MediaUtil.FieldID> differences = MediaUtil.getChanges(oldData, mData);
+                List<MediaUtil.FieldID> differences = MediaUtil.getChanges(oldData, mCurrentData);
 
                 if (differences != null) {
                     List<String> oldTags = oldData.getTags();
@@ -548,10 +577,10 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
                     diffSet.remove(MediaUtil.FieldID.path);
 
                     // save changes to jpg/xmp
-                    JpgMetaWorkflow.applyChanges(file, mData, diffSet);
+                    JpgMetaWorkflow.applyChanges(file, mCurrentData, diffSet);
 
                     // save changes to database
-                    int changes = MediaUtil.copySpecificProperties(oldData, mData, diffSet);
+                    int changes = MediaUtil.copySpecificProperties(oldData, mCurrentData, diffSet);
                     if (changes > 0) {
                         ContentValues dbValues = oldData.getContentValues();
                         FotoSql.execUpdate(mDebugPrefix, ctx, path, dbValues, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
@@ -562,7 +591,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
                     long id = (idMap != null) ? idMap.get(path) : 0;
 
                     TransactionLogger logger = new TransactionLogger(ctx, id, path, now, null);
-                    logger.addChanges(mData,diffSet, oldTags);
+                    logger.addChanges(mCurrentData,diffSet, oldTags);
                     FileUtils.close(logger,mDebugPrefix);
                     // if (diffSet.contains(MediaUtil.FieldID.dateTimeTaken))
                     // save changes to log

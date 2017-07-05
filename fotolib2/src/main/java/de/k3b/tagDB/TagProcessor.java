@@ -27,6 +27,7 @@ import java.util.List;
  */
 
 public class TagProcessor {
+    private static final ArrayList<String> EMPTY_STRING_LIST = new ArrayList<>();
     /** all tags that occoured at least once in {@link #registerExistingTags(List)} call. */
     private List<String> affected = null;
 
@@ -78,7 +79,7 @@ public class TagProcessor {
 
     /** calculate the new tags out of added and removed tags. returns null if there is no change neccessary */
     public static List<String> getUpdated(List<String> originalCurrentTags, List<String> addedTags, List<String> removedTags) {
-        ArrayList<String> currentTags = (originalCurrentTags == null) ? new ArrayList<String>() : new ArrayList<String>(originalCurrentTags);
+        ArrayList<String> currentTags = (originalCurrentTags == null) ? EMPTY_STRING_LIST : new ArrayList<String>(originalCurrentTags);
         int modifyCount = 0;
         if (addedTags != null) {
             for (String tag : addedTags) {
@@ -103,7 +104,9 @@ public class TagProcessor {
     }
 
     /** caclulates the difference between original and changed into addedTags and removedTags and returns the number of changes. */
-    public static int getDiff(List<String> original, List<String> changed, List<String> addedTags, List<String> removedTags) {
+    public static int getDiff(List<String> _original, List<String> _changed, List<String> addedTags, List<String> removedTags) {
+        List<String> original = (_original != null) ? _original : EMPTY_STRING_LIST;
+        List<String> changed = (_changed != null) ? _changed : EMPTY_STRING_LIST;
         int modifyCount = 0;
         if (addedTags != null) {
             for (String tag : changed) {
