@@ -51,13 +51,15 @@ public class TestUtil {
 	public static MediaDTO createTestMediaDTO(int id) {
         MediaDTO result = new MediaDTO();
 
-
         result.setPath("Path" + id);
         result.setTitle("Title" + id);
         result.setDescription("Description" + id);
-        String month = ("" + (((id -1) % 12) +101)).substring(1);
-        String day = ("" + (((id -1) % 30) +101)).substring(1);
-        result.setDateTimeTaken(DateUtil.parseIsoDate("" + (2000+ id) + "-" + month + "-" + day));
+        String month = get2DigitString(id, 12);
+        String day = get2DigitString(id, 30);
+        String hour = get2DigitString(id, 24);
+        String minute = get2DigitString(id, 60);
+        result.setDateTimeTaken(DateUtil.parseIsoDate("" + (2000+ id) + "-" + month + "-" + day
+                + "T" + hour + ":" + minute + ":" + minute));
         result.setLatitude(50 + id + (0.01 * id));
         result.setLongitude(10 + id + (0.01 * id));
         result.setTags(TagConverter.fromString("tagA" + id + TagConverter.TAG_DB_DELIMITER + "tagB" + id));
@@ -65,6 +67,11 @@ public class TestUtil {
 
         return result;
     }
+
+    private static String get2DigitString(int value, int div) {
+        return ("" + (((value -1) % div) +101)).substring(1);
+    }
+
     public static InputStream getResourceInputStream(String fileName) {
         InputStream inputStream = ImageMetaReaderIntegrationTests.class.getResourceAsStream("images/" + fileName);
         Assert.assertNotNull("getResourceInputStream images/" + fileName, inputStream);

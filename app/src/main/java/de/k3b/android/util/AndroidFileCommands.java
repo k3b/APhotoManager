@@ -64,7 +64,7 @@ import de.k3b.transactionlog.MediaTransactionLogEntryType;
 public class AndroidFileCommands extends FileCommands {
     private static final String SETTINGS_KEY_LAST_COPY_TO_PATH = "last_copy_to_path";
     private static final String mDebugPrefix = "AndroidFileCommands.";
-    protected Activity mContext;
+    protected Activity mContext; // must be activity because of fragmentManager
     private AlertDialog mActiveAlert = null;
     private boolean mHasNoMedia = false;
     private MediaScanner mScanner = null;

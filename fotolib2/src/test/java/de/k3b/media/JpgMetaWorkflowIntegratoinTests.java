@@ -6,10 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.util.EnumSet;
 
 import de.k3b.FotoLibGlobal;
 import de.k3b.TestUtil;
@@ -72,7 +70,8 @@ public class JpgMetaWorkflowIntegratoinTests {
         File testJpg = copy(fileNameSrc, fileNameDest);
 
         MediaDTO testData = TestUtil.createTestMediaDTO(4);
-        JpgMetaWorkflow.applyChanges(testJpg, testData, null);
+        JpgMetaWorkflow.applyChanges(testJpg,
+                new MediaDiffCopy().setDiff(testData, EnumSet.allOf(MediaUtil.FieldID.class)), null);
 
         // LOGGER.info(sutRead.toString());
 

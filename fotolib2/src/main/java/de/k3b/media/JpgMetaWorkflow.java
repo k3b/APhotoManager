@@ -25,8 +25,10 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.EnumSet;
+import java.util.List;
 
 import de.k3b.FotoLibGlobal;
+import de.k3b.transactionlog.TransactionLoggerBase;
 
 /**
  * apply meta data changes to jpg and/or xmp file.
@@ -52,15 +54,20 @@ public class JpgMetaWorkflow {
     }
 
     public static MetaWriterExifXml saveLatLon(File filePath, Double latitude, Double longitude) {
-        MediaDTO changedData = new MediaDTO();
-        changedData.setLatitude(latitude).setLongitude(longitude);
-        EnumSet<MediaUtil.FieldID> changedFields = EnumSet.of(MediaUtil.FieldID.latitude, MediaUtil.FieldID.longitude);
-        return applyChanges(filePath, changedData, changedFields);
+        IMetaApi changedData = new MediaDTO().setLatitude(latitude).setLongitude(longitude);
+        MediaDiffCopy metaDiffCopy = new MediaDiffCopy()
+                .setDiff(changedData, MediaUtil.FieldID.latitude, MediaUtil.FieldID.longitude);
+        MetaWriterExifXml exif = applyChanges(filePath, metaDiffCopy, null);
+        metaDiffCopy.close();
+        return exif;
     }
 
-    public static MetaWriterExifXml applyChanges(File filePath, IMetaApi changes, EnumSet<MediaUtil.FieldID> _affectedFields) {
+    /** writes either (changes + _affectedFields) or metaDiffCopy to jpg/xmp-filePath.
+     * Returns new values or null if no change. */
+    public static MetaWriterExifXml applyChanges(File filePath,
+                                                 MediaDiffCopy metaDiffCopy, TransactionLoggerBase logger) {
         StringBuilder sb = (FotoLibGlobal.debugEnabled)
-                ? sb = createDebugStringBuilder(filePath)
+                ? createDebugStringBuilder(filePath)
                 : null;
         if (filePath.canWrite()) {
             MetaWriterExifXml exif = null;
@@ -68,30 +75,35 @@ public class JpgMetaWorkflow {
                 long lastModified = filePath.lastModified();
                 exif = MetaWriterExifXml.create (filePath.getAbsolutePath(), "MetaWriterExifXml: load");
                 debugExif(sb, "old", exif, filePath);
+                List<String> oldTags = exif.getTags();
 
-                EnumSet<MediaUtil.FieldID> affectedFields = _affectedFields;
-                if (affectedFields == null) {
-                    // do not rename
-                    affectedFields = EnumSet.allOf(MediaUtil.FieldID.class);
-                    affectedFields.remove(MediaUtil.FieldID.path);
-                }
-                MediaUtil.copySpecificProperties(exif, changes, affectedFields);
+                List<MediaUtil.FieldID> changed = metaDiffCopy.applyChanges(exif);
 
-                debugExif(sb, "assign ", exif, filePath);
+                if (changed != null) {
+                    debugExif(sb, "assign ", exif, filePath);
 
-                exif.save("MetaWriterExifXml save");
+                    exif.save("MetaWriterExifXml save");
 
-                if (FotoLibGlobal.preserveJpgFileModificationDate) {
-                    // preseve file modification date
-                    filePath.setLastModified(lastModified);
+                    if (FotoLibGlobal.preserveJpgFileModificationDate) {
+                        // preseve file modification date
+                        filePath.setLastModified(lastModified);
+                    }
+                    if (sb != null) {
+                        MetaWriterExifXml exifVerify = MetaWriterExifXml.create (filePath.getAbsolutePath(),
+                                "dbg in MetaWriterExifXml", true, true, false);
+                        debugExif(sb, "new ", exifVerify, filePath);
+                    }
+
+                    if(logger != null) {
+                        logger.addChanges(exif, EnumSet.copyOf(changed), oldTags);
+                    }
+                } else {
+                    if (sb != null) sb.append("no changes ");
+                    exif = null;
                 }
 
                 if (sb != null) {
-                    MetaWriterExifXml exifVerify = MetaWriterExifXml.create (filePath.getAbsolutePath(),
-                            "dbg in MetaWriterExifXml", true, true, false);
-                    debugExif(sb, "new ", exifVerify, filePath);
-
-                    logger.info(sb.toString());
+                    JpgMetaWorkflow.logger.info(sb.toString());
                 }
                 return exif;
             } catch (IOException e) {
@@ -101,7 +113,7 @@ public class JpgMetaWorkflow {
                 }
 
                 sb.append("error='").append(e.getMessage()).append("' ");
-                logger.error(sb.toString(), e);
+                JpgMetaWorkflow.logger.error(sb.toString(), e);
                 return null;
             }
         } else {
@@ -110,7 +122,7 @@ public class JpgMetaWorkflow {
             }
 
             sb.append("error='file is write protected' ");
-            logger.error(sb.toString());
+            JpgMetaWorkflow.logger.error(sb.toString());
             return null;
         }
     }

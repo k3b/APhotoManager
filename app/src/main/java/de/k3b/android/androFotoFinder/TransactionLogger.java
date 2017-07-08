@@ -24,70 +24,32 @@ import android.content.Context;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.List;
 
 import de.k3b.android.util.AndroidFileCommands;
-import de.k3b.io.DateUtil;
-import de.k3b.io.DirectoryFormatter;
-import de.k3b.media.MediaAsString;
-import de.k3b.media.MediaUtil;
-import de.k3b.media.MediaUtil.FieldID;
-import de.k3b.tagDB.TagConverter;
-import de.k3b.tagDB.TagProcessor;
 import de.k3b.transactionlog.MediaTransactionLogEntryType;
+import de.k3b.transactionlog.TransactionLoggerBase;
 
 /**
+ * Android specific implementation: Writes change infos into log (bat-file and database).
+ *
  * Created by k3b on 02.07.2017.
  */
 
-public class TransactionLogger implements Closeable {
+public class TransactionLogger extends TransactionLoggerBase implements Closeable {
     private Context ctx;
-    private final long id;
-    private final String path;
-    private final long now;
     private AndroidFileCommands execLog;
     boolean mustCloseLog;
 
-    public TransactionLogger(Activity ctx, long id, String path, long now, AndroidFileCommands execLog) {
-        this.ctx = ctx;
-        this.id = id;
-        this.path = path;
-        this.now = now;
+    public TransactionLogger(Activity ctx, long now, AndroidFileCommands execLog) {
+        super(now);
+        this.ctx = ctx.getApplicationContext(); // to avoid memory leaks
 
         mustCloseLog = (execLog == null);
         this.execLog = mustCloseLog ? AndroidFileCommands.createFileCommand(ctx) : execLog;
-
     }
 
-    public void addChanges(MediaAsString newData, EnumSet<MediaUtil.FieldID> changes, List<String> oldTags) {
-        if (changes.contains(FieldID.dateTimeTaken))  addChangesDateTaken(newData.getDateTimeTaken());
-        if (changes.contains(FieldID.latitude))  addChanges(MediaTransactionLogEntryType.GPS, DirectoryFormatter.parseLatLon(newData.getLatitude()) + " " + DirectoryFormatter.parseLatLon(newData.getLongitude()), false);
-        if (changes.contains(FieldID.description))  addChanges(MediaTransactionLogEntryType.DESCRIPTION, newData.getDescription(), true);
-        if (changes.contains(FieldID.title))  addChanges(MediaTransactionLogEntryType.HEADER, newData.getTitle(), true);
-        if (changes.contains(FieldID.rating)) addChanges(MediaTransactionLogEntryType.RATING, (newData.getRating() != null) ? newData.getRating().toString(): "0", false);
-        if (changes.contains(FieldID.tags)) addChangesTags(oldTags, newData.getTags());
-    }
-
-    protected void addChangesDateTaken(Date newData) {
-        addChanges(MediaTransactionLogEntryType.DATE, DateUtil.toIsoDateString(newData), false);
-    }
-
-    protected void addChangesTags(List<String> oldTags, List<String> newTags) {
-        List<String> addedTags = new ArrayList<String>();
-        List<String> removedTags = new ArrayList<String>();
-        TagProcessor.getDiff(oldTags, newTags, addedTags, removedTags);
-        if (addedTags.size() > 0) {
-            addChanges(MediaTransactionLogEntryType.TAGSADD, TagConverter.asBatString(addedTags), false);
-        }
-        if (removedTags.size() > 0) {
-            addChanges(MediaTransactionLogEntryType.TAGSREMOVE, TagConverter.asBatString(removedTags), false);
-        }
-    }
-
-    private void addChanges(MediaTransactionLogEntryType command, String parameter, boolean quoteParam) {
+    @Override
+    protected void addChanges(MediaTransactionLogEntryType command, String parameter, boolean quoteParam) {
         execLog.log(command.getCommand(path,parameter, quoteParam));
         execLog.addTransactionLog(id, path, now, command, parameter);
     }

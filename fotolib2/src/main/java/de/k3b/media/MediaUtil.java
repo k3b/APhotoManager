@@ -56,8 +56,11 @@ public class MediaUtil {
     }
 
     public static String toString(IMetaApi item, boolean includeEmpty, FieldID... _excludes) {
+        return toString(item, includeEmpty, toEnumSet(_excludes));
+    }
+
+    public static String toString(IMetaApi item, boolean includeEmpty, EnumSet<FieldID> excludes) {
         if (item == null) return "";
-        final EnumSet<FieldID> excludes = toEnumSet(_excludes);
         StringBuilder result = new StringBuilder();
         add(result, includeEmpty, excludes, FieldID.clasz, item.getClass().getSimpleName(), ":");
         add(result, includeEmpty, excludes, FieldID.path, " path ", item.getPath());
@@ -87,7 +90,7 @@ public class MediaUtil {
     /** copy content from source to destination. @return number of copied properties */
     public static int copy(IMetaApi destination, IMetaApi source,
                            boolean overwriteExisting, boolean allowSetNull) {
-        return copyImpl(destination, source, overwriteExisting, allowSetNull, null, null, (FieldID[]) null);
+        return copyImpl(destination, source, false, overwriteExisting, allowSetNull, null, null, (FieldID[]) null);
     }
 
     /**
@@ -97,24 +100,31 @@ public class MediaUtil {
      * @return number of copied properties
      */
     public static int copyNonEmpty(IMetaApi destination, IMetaApi source, FieldID... _allowSetNulls) {
-        return copyImpl(destination, source, true, false, null, null, _allowSetNulls);
+        return copyImpl(destination, source, false, true, false, null, null, _allowSetNulls);
     }
 
     /**
      * Copies properties of source to destination when included in fields2copy.
      *
-     * @return number of copied properties
+     * @return possible empy list of FieldID-s of modified properties
      */
-    public static int copySpecificProperties(IMetaApi destination, IMetaApi source, final EnumSet<FieldID> fields2copy) {
-        return copyImpl(destination, source, true, true, fields2copy, null, (FieldID[]) null);
+    public static List<FieldID>  copySpecificProperties(IMetaApi destination, IMetaApi source, final EnumSet<FieldID> fields2copy) {
+        List<FieldID> collectedChanges = new ArrayList<FieldID>();
+        copyImpl(destination, source, false, true, true, fields2copy, collectedChanges, (FieldID[]) null);
+        return collectedChanges;
     }
 
     public static List<FieldID> getChanges(IMetaApi destination, IMetaApi source) {
         List<FieldID> collectedChanges = new ArrayList<FieldID>();
-        if (0 == copyImpl(destination, source, true, true, null, collectedChanges, (FieldID[]) null)) {
+        if (0 == copyImpl(destination, source, true, true, true, null, collectedChanges, (FieldID[]) null)) {
             return null;
         }
         return collectedChanges;
+    }
+
+    public static EnumSet<FieldID> getChangesAsDiffsetOrNull(IMetaApi destination, IMetaApi source) {
+        List<FieldID> differences = getChanges(destination, source);
+        return (differences != null) ? EnumSet.copyOf(differences) : null;
     }
 
     /**
@@ -122,17 +132,17 @@ public class MediaUtil {
      *
      * @param destination where fields are copied to.
      * @param source where data is copied from.
-     * @param overwriteExisting false: write only if destinatin field is null before.
+     * @param simulateDoNotCopy
+     *@param overwriteExisting false: write only if destinatin field is null before.
      * @param allowSetNull if true for all fields setNull is possible.
-     *                     Else only those containted in _allowSetNulls is allowed to set null.
+ *                     Else only those containted in _allowSetNulls is allowed to set null.
      * @param fields2copy null: all fields will be copied. else only the fields contained are copied.
      * @param collectedChanges if not null: do not copy but collect the FieldID-s that
-     *                         would be copied in this list.
-     * @param _allowSetNulls if not null: for these fields setNull is allowed
-     * @return number of changed fields
+*                         would be copied in this list.
+     * @param _allowSetNulls if not null: for these fields setNull is allowed      @return number of changed fields
      */
     private static int copyImpl(IMetaApi destination, IMetaApi source,
-                                boolean overwriteExisting, boolean allowSetNull,
+                                boolean simulateDoNotCopy, boolean overwriteExisting, boolean allowSetNull,
                                 final EnumSet<FieldID> fields2copy,
                                 List<FieldID> collectedChanges,
                                 FieldID... _allowSetNulls) {
@@ -143,48 +153,48 @@ public class MediaUtil {
             String sValue;
 
             sValue = source.getPath();
-            if (allowed(sValue, destination.getPath(), fields2copy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.path, collectedChanges)) {
+            if (allowed(sValue, destination.getPath(), fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.path, collectedChanges)) {
                 destination.setPath(sValue);
                 changes++;
             }
 
             Date dValue = source.getDateTimeTaken();
-            if (allowed(dValue, destination.getDateTimeTaken(), fields2copy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.dateTimeTaken, collectedChanges)) {
+            if (allowed(dValue, destination.getDateTimeTaken(), fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.dateTimeTaken, collectedChanges)) {
                 destination.setDateTimeTaken(dValue);
                 changes++;
             }
 
             Double doValue = source.getLatitude();
-            if (allowed(doValue, destination.getLatitude(), fields2copy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.latitude, collectedChanges)) {
+            if (allowed(doValue, destination.getLatitude(), fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.latitude, collectedChanges)) {
                 destination.setLatitude(doValue);
                 changes++;
             }
 
             doValue = source.getLongitude();
-            if (allowed(doValue, destination.getLongitude(), fields2copy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.longitude, collectedChanges)) {
+            if (allowed(doValue, destination.getLongitude(), fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.longitude, collectedChanges)) {
                 destination.setLongitude(doValue);
                 changes++;
             }
             sValue = source.getTitle();
-            if (allowed(sValue, destination.getTitle(), fields2copy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.title, collectedChanges)) {
+            if (allowed(sValue, destination.getTitle(), fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.title, collectedChanges)) {
                 destination.setTitle(sValue);
                 changes++;
             }
 
             sValue = source.getDescription();
-            if (allowed(sValue, destination.getDescription(), fields2copy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.description, collectedChanges)) {
+            if (allowed(sValue, destination.getDescription(), fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.description, collectedChanges)) {
                 destination.setDescription(sValue);
                 changes++;
             }
 
             List<String> tValue = source.getTags();
-            if (allowed(tValue, destination.getTags(), fields2copy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.tags, collectedChanges)) {
+            if (allowed(tValue, destination.getTags(), fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.tags, collectedChanges)) {
                 destination.setTags(tValue);
                 changes++;
             }
 
             Integer iValue = source.getRating();
-            if (allowed(iValue, destination.getRating(), fields2copy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.rating, collectedChanges)) {
+            if (allowed(iValue, destination.getRating(), fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.rating, collectedChanges)) {
                 destination.setRating(iValue);
                 changes++;
             }
@@ -195,23 +205,22 @@ public class MediaUtil {
         return changes;
     }
 
-    private static boolean allowed(Object newValue, Object oldValue, EnumSet<FieldID> fields2copy, boolean overwriteExisting, boolean allowSetNull,
+    private static boolean allowed(Object newValue, Object oldValue, EnumSet<FieldID> fields2copy, boolean simulateDoNotCopy, boolean overwriteExisting, boolean allowSetNull,
                                    final EnumSet<FieldID> allowSetNulls, FieldID item, List<FieldID> collectedChanges) {
+        // in simulate mode return false as success; in non-simulate return true
+        boolean success = !simulateDoNotCopy;
+
+        if (StringUtils.equals(newValue, oldValue)) return false; // both are the same, no need to write again
+
         if ((fields2copy != null) && (!fields2copy.contains(item))) return false;    // not in fields2copy
 
         if ((!overwriteExisting) && (oldValue != null)) return false;   // already has an old value
 
-        boolean sameValue = StringUtils.equals(newValue, oldValue);
-        if ((allowSetNulls != null) && (allowSetNulls.contains(item))) return true;  // null doesn-t matter
+        boolean allowSetNull2 = allowSetNull || ((allowSetNulls != null) && (allowSetNulls.contains(item)));
+        if (!allowSetNull2 && (newValue == null)) return false; // null not allowed
 
-        boolean result = ((newValue != null) || allowSetNull) ;
-        if (collectedChanges != null) {
-            if (result && !sameValue) {
-                collectedChanges.add(item);
-            }
-            return false;
-        }
-        return result;
+        if (collectedChanges != null) collectedChanges.add(item);
+        return success; // overwrite existing value with null
     }
 
     /*

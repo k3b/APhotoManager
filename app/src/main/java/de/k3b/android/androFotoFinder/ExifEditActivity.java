@@ -45,7 +45,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -58,6 +57,7 @@ import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.HistoryEditText;
+import de.k3b.database.SelectedFiles;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
@@ -68,9 +68,12 @@ import de.k3b.io.IGalleryFilter;
 import de.k3b.media.IMetaApi;
 import de.k3b.media.JpgMetaWorkflow;
 import de.k3b.media.MediaAsString;
+import de.k3b.media.MediaDiffCopy;
 import de.k3b.media.MediaUtil;
+import de.k3b.media.MetaWriterExifXml;
 import de.k3b.tagDB.Tag;
 import de.k3b.tagDB.TagConverter;
+import de.k3b.transactionlog.TransactionLoggerBase;
 
 /**
  * Defines a gui for global foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.
@@ -168,19 +171,13 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
                 mInitialData.setData(data);
             }
         } else {
-            Intent intent = getIntent();
-            String path = IntentUtil.getFilePath(this, IntentUtil.getUri(intent));
-            if (path != null) {
-                File file = new File(path);
-                if (file.exists()) {
-                    IMetaApi currentData = MediaScanner.getInstance(this).getExifFromFile(file);
-                    mCurrentData.setData(currentData);
-                    mInitialData.setData(currentData);
-                }
-            }
+            SelectedFiles items = getSelectedFiles("onCreate ", getIntent(), false);
+            File first = (items != null) ? items.getFile(0) : null;
 
-            if (Global.debugEnabled && (intent != null)){
-                Log.d(Global.LOG_CONTEXT, mDebugPrefix + "onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
+            if ((first != null) && (first.exists())) {
+                IMetaApi currentData = MediaScanner.getInstance(this).getExifFromFile(first);
+                mCurrentData.setData(currentData);
+                mInitialData.setData(currentData);
             }
         }
 
@@ -201,6 +198,35 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
                 edLatitude                  ,
                 edLongitude                 );
 
+    }
+
+    private SelectedFiles getSelectedFiles(String dbgContext, Intent intent, boolean mustLoadIDs) {
+        SelectedFiles result = null;
+
+        String path = IntentUtil.getFilePath(this, IntentUtil.getUri(intent));
+        String fileNames[] = SelectedFiles.getFileNameList(path);
+        Long[] ids = null;
+        int itemCount = (fileNames != null) ? fileNames.length : 0;
+
+        if (itemCount > 0) {
+            if ((mustLoadIDs) && (ids == null) ) {
+                ids = new Long[itemCount];
+                Map<String, Long> idMap = FotoSql.execGetPathIdMap(this, fileNames);
+
+                for (int i = 0; i < itemCount; i++) {
+                    ids[i] = idMap.get(fileNames[i]);
+                }
+            }
+
+            result = new SelectedFiles(fileNames, ids);
+        }
+
+
+        if (Global.debugEnabled && (intent != null)){
+            Log.d(Global.LOG_CONTEXT, mDebugPrefix + dbgContext + intent.toUri(Intent.URI_INTENT_SCHEME));
+        }
+
+        return result;
     }
 
     private void loadGuiFromExif() {
@@ -306,9 +332,12 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
     public void showGeoPicker() {
         GeoPointDto geo = new GeoPointDto();
 
-        geo.setLatitude(mCurrentData.getLatitude());
-        geo.setLongitude(mCurrentData.getLongitude());
-
+        Double latitude = mCurrentData.getLatitude();
+        Double longitude = mCurrentData.getLongitude();
+        if ((latitude != null) && (longitude != null)) {
+            geo.setLatitude(latitude);
+            geo.setLongitude(longitude);
+        }
         String geoUri = PARSER.toUriString(geo);
         final Intent intent = new Intent();
         intent.setAction(Intent.ACTION_PICK);
@@ -560,47 +589,49 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
     /** save exif changes back to image and database */
     private void onOk() {
         Activity ctx = this;
+        Intent intent = getIntent();
         saveGuiToExif();
         mHistory.saveHistory();
+        MediaDiffCopy mediaDiffCopy = new MediaDiffCopy().setDiff(mInitialData, mCurrentData);
 
-        Intent intent = getIntent();
-        String path = IntentUtil.getFilePath(this, IntentUtil.getUri(intent));
-        if (path != null) {
-            File file = new File(path);
-            if (file.exists()) {
-                MediaContentValues oldData = MediaScanner.getInstance(ctx).getExifFromFile(file);
-                List<MediaUtil.FieldID> differences = MediaUtil.getChanges(oldData, mCurrentData);
+        if (mediaDiffCopy != null) {
 
-                if (differences != null) {
-                    List<String> oldTags = oldData.getTags();
-                    EnumSet<MediaUtil.FieldID> diffSet = EnumSet.copyOf(differences);
-                    diffSet.remove(MediaUtil.FieldID.path);
+            SelectedFiles items = getSelectedFiles("onOk ", getIntent(), true);
+            int size = (items != null) ? items.size() : 0;
+            long now = new Date().getTime();
+            TransactionLogger logger = new TransactionLogger(ctx, now, null);
 
-                    // save changes to jpg/xmp
-                    JpgMetaWorkflow.applyChanges(file, mCurrentData, diffSet);
-
-                    // save changes to database
-                    int changes = MediaUtil.copySpecificProperties(oldData, mCurrentData, diffSet);
-                    if (changes > 0) {
-                        ContentValues dbValues = oldData.getContentValues();
-                        FotoSql.execUpdate(mDebugPrefix, ctx, path, dbValues, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
-                    }
-
-                    Map<String, Long> idMap = FotoSql.execGetPathIdMap(ctx, path);
-                    long now = new Date().getTime();
-                    long id = (idMap != null) ? idMap.get(path) : 0;
-
-                    TransactionLogger logger = new TransactionLogger(ctx, id, path, now, null);
-                    logger.addChanges(mCurrentData,diffSet, oldTags);
-                    FileUtils.close(logger,mDebugPrefix);
-                    // if (diffSet.contains(MediaUtil.FieldID.dateTimeTaken))
-                    // save changes to log
-                }
+            for(int i=0; i < size; i++) {
+                applyChanges(ctx, items.getFile(i), items.getId(i), mediaDiffCopy , logger);
             }
+            mediaDiffCopy.close();
+            FileUtils.close(logger, mDebugPrefix);
         }
 
         this.setResult(resultID, intent);
         finish();
+    }
+
+    private void applyChanges(Activity ctx,
+                              File file, long id,
+                              MediaDiffCopy mediaDiffCopy, TransactionLoggerBase logger) {
+        if ((file != null) && file.exists()) {
+            // save changes to jpg/xmp
+            logger.set(id, file.getAbsolutePath());
+
+            // change jpg/xmp + log changes
+            MetaWriterExifXml exifFile = JpgMetaWorkflow.applyChanges(file, mediaDiffCopy, logger);
+
+            // trigge jpg/xmp rescan to database
+            if (exifFile != null) {
+                MediaContentValues oldData = MediaScanner.getInstance(ctx).getExifFromFile(file);
+
+                ContentValues dbValues = oldData.getContentValues();
+                FotoSql.execUpdate(mDebugPrefix, ctx, file.getAbsolutePath(), dbValues, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+
+            }
+
+        }
     }
 
 

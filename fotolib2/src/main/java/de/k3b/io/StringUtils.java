@@ -29,6 +29,7 @@ public class StringUtils {
         return (rhs == null) ? 0 : -1;
     }
 
+    /** null save function: return if both are null or both non-null are the same */
     public static boolean equals(Object lhs, Object rhs) {
         if (lhs != null) return (rhs != null) ? lhs.equals(rhs) : false;
         return (rhs == null);

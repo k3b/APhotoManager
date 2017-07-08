@@ -32,8 +32,12 @@ public class SelectedFiles  {
     private final String[] mFileNames;
     private final Long[] mIds;
 
+    public static String[] getFileNameList(String fileNameListAsString) {
+        return (fileNameListAsString != null) ? fileNameListAsString.split(DELIMITER) : null;
+    }
+
     public SelectedFiles(String fileNameListAsString, String idListAsString) {
-        this((fileNameListAsString != null) ? fileNameListAsString.split(DELIMITER) : null, idListAsString);
+        this(getFileNameList(fileNameListAsString), idListAsString);
     }
 
     public SelectedFiles(String[] fileNameList, String idListAsString) {
@@ -137,6 +141,11 @@ public class SelectedFiles  {
 
     public String getFileName(int i) {
         if ((mFileNames != null) && (i >= 0) && (i < mFileNames.length)) return mFileNames[i];
+        return null;
+    }
+    public File getFile(int i) {
+        String name = getFileName(i);
+        if (name != null) return new File(name);
         return null;
     }
 
