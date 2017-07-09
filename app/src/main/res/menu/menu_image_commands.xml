@@ -67,6 +67,12 @@
         android:visible="true"
         android:orderInCategory="200"
         android:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menu_exif"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:orderInCategory="200"
+        android:showAsAction="never"
+        android:title="@string/exif_menu_title" />
 
     <item android:id="@+id/cmd_show_geo_as"
         android:title="@string/geo_show_as_menu_title"

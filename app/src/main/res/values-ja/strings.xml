@@ -164,7 +164,6 @@
 	<string name="tags_add_default">新規_タグ</string>
 	<string name="tags_delete_children_title">子を削除</string>
 	<string name="tags_update_photos">影響を受けた写真のタグを更新</string>
-	<string name="tags_update_result_format">%1$d 写真のタグを更新しました</string>
 	<string name="tags_hint">タグ名を長押しするとメニューが開きます</string>
 	<string name="tags_defaults">アクティビティ, 人, 場所, テーマ, プロジェクト</string>
 </resources>

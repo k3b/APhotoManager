@@ -137,6 +137,7 @@ public class MediaDiffCopy {
             this.newData = newData;
             return this;
         }
+        close();
         return null;
     }
 

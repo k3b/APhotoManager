@@ -164,7 +164,6 @@
 	<string name="tags_add_default">yeni_etiket</string>
 	<string name="tags_delete_children_title">Altındakileri sil</string>
 	<string name="tags_update_photos">Etkilenen fotoğrafların etiketlerini güncelle</string>
-	<string name="tags_update_result_format">%1$d fotoğrafın etiketleri güncellendi</string>
 	<string name="tags_hint">Etiket adına uzun basılması menü açar</string>
 	<string name="tags_defaults">Etkinlikler, Kişiler, Konumlar, Konular, Projeler</string>
 	<string name="settings_media_update_strategy_title">Değişiklikleri şuraya yaz</string>

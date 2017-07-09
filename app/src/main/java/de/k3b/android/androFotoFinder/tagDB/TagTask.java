@@ -19,76 +19,33 @@
 package de.k3b.android.androFotoFinder.tagDB;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.os.AsyncTask;
-import android.widget.Toast;
 
-import java.util.List;
-
-import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.widget.AsyncTaskWithProgressDialog;
 
 /**
- * An {@link AsyncTask} that handles {@link TagWorflow} a {@link android.app.ProgressDialog}.
+ * An AsyncTask that handles {@link TagWorflow} with a {@link android.app.ProgressDialog}.
  *
  * Created by k3b on 30.01.2017.
  */
 
-public abstract class TagTask<param> extends AsyncTask<param, String, Integer> {
-    private Activity parent;
-    private ProgressDialog dlg = null;
+public abstract class TagTask<param> extends AsyncTaskWithProgressDialog<param> {
     private TagWorflow workflow;
 
     public TagTask(Activity parent, int idResourceTitle) {
-        this.parent = parent;
+        super(parent,idResourceTitle);
         this.workflow = new TagWorflow() {
             @Override
             protected void onProgress(int itemCount, int total, String message) {
-                StringBuilder msg = new StringBuilder();
-                if (itemCount > 0) {
-                    msg.append("(").append(itemCount);
-                    if (total > 0) {
-                        msg.append("/").append(total);
-                    }
-                    msg.append(") ");
-                }
-                msg.append(message);
-                publishProgress(msg.toString());
+                TagTask.this.publishProgress(itemCount, total, message);
             }
 
         };
-        dlg = new ProgressDialog(parent);
-        dlg.setTitle(idResourceTitle);
-    }
-
-    protected void onProgressUpdate(String... values) {
-        if (dlg != null) {
-            if (!dlg.isShowing()) dlg.show();
-            dlg.setMessage(values[0]);
-        }
     }
 
     @Override
-    protected void onPostExecute(Integer itemCount) {
-        super.onPostExecute(itemCount);
-        String message = parent.getString(R.string.tags_update_result_format, itemCount);
-        Toast.makeText(parent, message, Toast.LENGTH_LONG).show();
-
-        destroy();
-    }
-
-    @Override
-    protected void onCancelled(Integer result) {
-        super.onCancelled(result);
-        destroy();
-    }
-
     public void destroy() {
         workflow = null;
-        if ((dlg != null) && dlg.isShowing()) {
-            dlg.dismiss();
-        }
-        dlg = null;
-        parent = null;
+        super.destroy();
     }
 
     public TagWorflow getWorkflow() {

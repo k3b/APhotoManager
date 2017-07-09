@@ -654,14 +654,14 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             dlg.setAddNames(mFilter.getTagsAllIncluded());
             dlg.setRemoveNames(mFilter.getTagsAllExcluded());
             dlg.show(manager, DLG_NAVIGATOR_TAG);
-            setAutoClose(dlg, null);
+            setAutoClose(dlg, null, null);
         }
     }
 
     /** called by {@link TagsPickerFragment} */
     @Override
     public boolean onCancel(String msg) {
-        setAutoClose(null, null);
+        setAutoClose(null, null, null);
         return true;
     }
 
@@ -671,7 +671,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         mFilter.setTagsAllIncluded(addNames);
         mFilter.setTagsAllExcluded(removeNames);
         toGui(mFilter);
-        setAutoClose(null, null);
+        setAutoClose(null, null, null);
         return true;
     }
 
@@ -688,7 +688,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             dlg.defineNavigation(null, mFilter, OsmdroidUtil.NO_ZOOM, null, null);
 
             dlg.show(manager, DLG_NAVIGATOR_TAG);
-            setAutoClose(dlg, null);
+            setAutoClose(dlg, null, null);
         }
     }
 
@@ -722,7 +722,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             dlg.defineDirectoryNavigation(dirInfo.directoryRoot, dirInfo.queryId, dirInfo.currentPath);
 
             dlg.show(manager, DLG_NAVIGATOR_TAG);
-            setAutoClose(dlg, null);
+            setAutoClose(dlg, null, null);
         }
     }
 

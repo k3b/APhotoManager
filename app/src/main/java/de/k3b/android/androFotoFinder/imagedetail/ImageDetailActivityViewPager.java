@@ -1019,7 +1019,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     }
 
     private boolean onEditExif(final long fotoId, final String fotoPath) {
-        ExifEditActivity.showActivity(this, fotoPath,0);
+        ExifEditActivity.showActivity(this, fotoPath, null, 0);
         return true;
     }
     private boolean onRenameDirQueston(final long fotoId, final String fotoPath, final String _newName) {
