@@ -41,4 +41,15 @@ public class StringUtilsTests {
         Assert.assertEquals(false, StringUtils.equals("", null));
         Assert.assertEquals(false, StringUtils.equals("a", "b"));
     }
+    @Test
+    public void shoudGetTag() {
+        //             012345678901234567890123456789
+        String text = "#Crete #Hab#our at #Night2";
+        Assert.assertEquals("0", null, StringUtils.getTag(text, 0));
+        Assert.assertEquals("3", "#Crete", StringUtils.getTag(text, 3));
+        Assert.assertEquals("6", "#Crete", StringUtils.getTag(text, 6));
+
+        Assert.assertEquals("9 #Hab#our is not a tag", null, StringUtils.getTag(text, 9));
+        Assert.assertEquals("16 at is not a tag", null, StringUtils.getTag(text, 16));
+    }
 }

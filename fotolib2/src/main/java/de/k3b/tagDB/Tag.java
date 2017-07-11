@@ -91,11 +91,11 @@ public class Tag{
     public boolean equals(Object o) {
         if (name == null) return false;
         if (o instanceof String) {
-            return name.equals((String)o);
+            return name.equalsIgnoreCase((String)o);
         }
         if (!(o instanceof Tag)) return false;
         Tag other = (Tag) o;
-        if (name.equals(other.name)) {
+        if (name.equalsIgnoreCase(other.name)) {
             if (this.parent == null) return other.parent == null;
             return parent.equals(other.parent);
         }

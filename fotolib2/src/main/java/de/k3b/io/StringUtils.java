@@ -35,4 +35,33 @@ public class StringUtils {
         return (rhs == null);
     }
 
+    public static int getTagStart(CharSequence s, int start) {
+        if (start <= s.length()) {
+            int i = start -1;
+            while ((i>=0) && (isTagChar(s.charAt(i)))) i--;
+            if ((i < 0) || (s.charAt(i) != '#')) return -1;  // begin of string  or not starting with '#'
+            if ((i == 0) || Character.isSpaceChar(s.charAt(i - 1))) return i; // blank before hash or start of string
+        }
+        return -1;
+    }
+    public static int getTagEnd(CharSequence s, int start) {
+        int len = s.length();
+        int i = start;
+        while ((i<len) && (isTagChar(s.charAt(i)))) i++;
+        if ((i >= len) || Character.isSpaceChar(s.charAt(i))) return i; // blank after end of string
+        return -1;
+    }
+
+    private static boolean isTagChar(char c) {
+        return Character.isJavaIdentifierPart(c) || (c == '-');
+    }
+    /** words surrounded by blank and starting with '#' */
+    public static CharSequence getTag(CharSequence s, int start) {
+        int tagStart = getTagStart(s,start);
+        int tagEnd = getTagEnd(s,start);
+        if ((tagStart >= 0) && (tagEnd > tagStart)) {
+            return s.subSequence(tagStart,tagEnd);
+        }
+        return null;
+    }
 }

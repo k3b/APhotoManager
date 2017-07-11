@@ -78,7 +78,13 @@ public class TagsPickerFragment  extends DialogFragment  {
     private boolean mIsFilterMode = true;
     private ImageView mFilterMode;
     private ImageView mBookmarkMode;
+    private CharSequence mFilterValue = null;
+    private int mFilterSelection = -1;
+    private ITagsSelector mSelector = null;
 
+    public interface ITagsSelector {
+        void onSelect(CharSequence tag);
+    }
     /** Owning Activity must implement this if it wants to handle the result of ok and cancel */
     public interface ITagsPicker {
         /** tag-dialog cancel pressed */
@@ -218,6 +224,21 @@ public class TagsPickerFragment  extends DialogFragment  {
 
         final ListView list = (ListView)view.findViewById(R.id.list);
         list.setAdapter(mDataAdapter);
+        if (mSelector != null) {
+            list.setFocusable(true);
+            list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                    Object item = mDataAdapter.getItem(position);
+                    if ((item != null) && (mSelector != null)) {
+                        mSelector.onSelect(item.toString());
+                        saveSettings();
+                        dismiss();
+                    }
+                }
+            });
+        }
 
         if (mContextMenueId != 0)
 
@@ -266,9 +287,13 @@ public class TagsPickerFragment  extends DialogFragment  {
         });
 
         // load/save filter/bookmarks
-        String lastTagFilter = prefs.getString(PREFS_LAST_TAG_FILTER, null);
+        CharSequence lastTagFilter = (this.mFilterValue != null) ? this.mFilterValue : prefs.getString(PREFS_LAST_TAG_FILTER, null);
         if (lastTagFilter != null) {
             mFilterEdit.setText(lastTagFilter);
+            if ((mFilterSelection >= 0) && (mFilterSelection <= mFilterValue.length())) {
+                mFilterEdit.setSelection(mFilterSelection, mFilterSelection);
+                ResourceUtils.setFocusWithKeyboard(mFilterEdit);
+            }
             refershResultList();
         }
 
@@ -304,7 +329,10 @@ public class TagsPickerFragment  extends DialogFragment  {
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
             SharedPreferences.Editor edit = sharedPref.edit();
 
-            edit.putString(PREFS_LAST_TAG_FILTER, mFilterEdit.getText().toString());
+            if (mFilterValue == null) {
+                edit.putString(PREFS_LAST_TAG_FILTER, mFilterEdit.getText().toString());
+            }
+
             edit.putString(PREFS_LAST_TAG_BOOKMARKS, ListUtils.toString(mBookMarkNames));
             edit.apply();
         }
@@ -359,6 +387,20 @@ public class TagsPickerFragment  extends DialogFragment  {
     public boolean onOk(List<String> addNames,
                         List<String> removeNames) {
         Log.d(Global.LOG_CONTEXT, debugPrefix + "onOk: " + mCurrentMenuSelection);
+
+        if (mSelector != null) {
+            String newTagName = mFilterEdit.getText().toString();
+            Tag existingTag = TagRepository.getInstance().findFirstByName(newTagName);
+            if (existingTag != null) {
+                mSelector.onSelect(existingTag.getName());
+            } else {
+                mSelector.onSelect(newTagName);
+            }
+            saveSettings();
+            dismiss();
+
+            return true;
+        }
 
         if ((mFragmentOnwner != null) && (!mFragmentOnwner.onOk(addNames, removeNames))) return false;
 
@@ -696,6 +738,14 @@ public class TagsPickerFragment  extends DialogFragment  {
         return changes;
     }
 
+    public void setFilter(CharSequence filterValue, int selection) {
+        this.mFilterValue = filterValue;
+        this.mFilterSelection = selection;
+    }
+
+    public void setTagSelector(ITagsSelector selector) {
+        mSelector = selector;
+    }
     private void tagAdd(Tag parent, String itemExpression) {
         List<Tag> existingItems = loadTagRepositoryItems(false);
         int changeCount = TagRepository.include(existingItems, parent, null, itemExpression);

@@ -209,6 +209,7 @@ public class TagRepositoryTests {
 
         Assert.assertEquals("Name2", true, items.contains("Name2"));
         Assert.assertEquals("Name5", false, items.contains("Name5"));
+        Assert.assertEquals("naMe2 case in sentive", true, items.contains("naMe2"));
     }
 
     @Test

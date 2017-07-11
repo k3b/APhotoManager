@@ -29,6 +29,8 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Menu;
@@ -54,6 +56,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
+import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.AsyncTaskWithProgressDialog;
@@ -66,6 +69,7 @@ import de.k3b.io.DateUtil;
 import de.k3b.io.FileUtils;
 import de.k3b.io.GeoUtil;
 import de.k3b.io.IGalleryFilter;
+import de.k3b.io.StringUtils;
 import de.k3b.media.IMetaApi;
 import de.k3b.media.JpgMetaWorkflow;
 import de.k3b.media.MediaAsString;
@@ -103,7 +107,6 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
 
     private HistoryEditText mHistory;
     private UpdateTask exifUpdate;
-
 
     public static void showActivity(Activity context, String url,
                                     SelectedFiles selectedFiles, int requestCode) {
@@ -209,6 +212,8 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
                 edLatitude                  ,
                 edLongitude                 );
 
+        new HashTagEditWatcher(this, edTitle);
+        new HashTagEditWatcher(this, edDescription);
     }
 
     private SelectedFiles getSelectedFiles(String dbgContext, Intent intent, boolean mustLoadIDs) {
@@ -284,7 +289,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
         cmd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mTagsApi.showTagPicker(R.string.tags_activity_title);
+                mTagsApi.showTagPicker(null, -1, null);
             }
         });
     }
@@ -439,17 +444,21 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
 
     private final TagsApi mTagsApi = new TagsApi();
     private class TagsApi implements TagsPickerFragment.ITagsPicker {
-        private void showTagPicker(int idTitle) {
+        private void showTagPicker(CharSequence filterValue, int selection, TagsPickerFragment.ITagsSelector selector) {
             saveGuiToExif();
             final FragmentManager manager = getFragmentManager();
             TagsPickerFragment dlg = new TagsPickerFragment();
             dlg.setFragmentOnwner(mTagsApi);
-            dlg.setTitleId(idTitle);
+            dlg.setTitleId(R.string.tags_activity_title);
+            dlg.setTagSelector(selector);
             // dlg.setAddNames(mFilter.getTagsAllIncluded());
             List<String> tags = mCurrentData.getTags();
             if (tags == null) tags = new ArrayList<String>();
             dlg.setAddNames(tags);
             dlg.setAffectedNames(tags);
+            if (filterValue != null) {
+                dlg.setFilter(filterValue, selection);
+            }
             dlg.show(manager, DLG_NAVIGATOR_TAG);
             setAutoClose(dlg, null, null);
         }
@@ -482,6 +491,79 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
             return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, ExifEditActivity.this, null);
         }
     };
+
+    private static class HashTagEditWatcher implements TextWatcher {
+        private boolean enabled = true;
+        private EditText mEditView = null;
+        private ExifEditActivity mActivity  = null;
+
+        HashTagEditWatcher(ExifEditActivity activity, EditText editView) {
+            this.mEditView = editView;
+            this.mActivity = activity;
+            editView.setTag(this);
+            editView.addTextChangedListener(this);
+        }
+
+        public static void close(EditText editView) {
+            HashTagEditWatcher watcher = getWatcher(editView);
+            if (watcher != null) {
+                editView.setTag(null);
+                editView.removeTextChangedListener(watcher);
+                watcher.mEditView = null;
+                watcher.mActivity = null;
+            }
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            if ((enabled) && (before == 0) && (count == 1)) {
+                int after = start - before + count;
+                int tagStart = StringUtils.getTagStart(s, after);
+                final int tagEnd = StringUtils.getTagEnd(s, after);
+                if ((tagStart >= 0) && (tagEnd > tagStart)) {
+                    final int contentStart = tagStart + 1;
+                    mActivity.mTagsApi.showTagPicker(s.subSequence(contentStart, tagEnd), start - tagStart, new TagsPickerFragment.ITagsSelector() {
+                        @Override
+                        public void onSelect(CharSequence tag) {
+                            StringBuilder content = new StringBuilder(mEditView.getText());
+                            content.delete(contentStart, tagEnd);
+                            content.insert(contentStart, tag + " ");
+                            enabled = false;
+                            mEditView.setText(content);
+                            int newSelPos = contentStart + tag.length() + 1;
+                            mEditView.setSelection(newSelPos, newSelPos);
+                            enabled = true;
+                            ResourceUtils.setFocusWithKeyboard(mEditView);
+                            mActivity.saveGuiToExif();
+                            List<String> tags = mActivity.mCurrentData.getTags();
+                            if (!tags.contains(tag)) {
+                                tags.add(tag.toString());
+                                mActivity.mCurrentData.setTags(tags);
+                                mActivity.loadGuiFromExif();
+
+                            }
+                        }
+                    });
+                }
+            }
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+        }
+
+        public static HashTagEditWatcher getWatcher(EditText editView) {
+            if (editView != null) {
+                return (HashTagEditWatcher) editView.getTag();
+            }
+            return null;
+        }
+    }
 
     private final IMetaApi mActivityData = new ActivityData();
     private class ActivityData implements IMetaApi {
@@ -741,6 +823,10 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
 
     @Override
     protected void onDestroy() {
+        // avoid memory leaks through cyclic dependencies
+        HashTagEditWatcher.close(edTitle);
+        HashTagEditWatcher.close(edDescription);
+
         if (exifUpdate != null)
             exifUpdate.destroy();
         exifUpdate = null;

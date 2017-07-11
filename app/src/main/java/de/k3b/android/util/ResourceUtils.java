@@ -21,6 +21,8 @@ package de.k3b.android.util;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 
 /**
  * Created by k3b on 08.06.2017.
@@ -32,5 +34,16 @@ public class ResourceUtils {
             return context.getDrawable(resID);
         }
         return context.getResources().getDrawable(resID);
+    }
+
+    public static void setFocusWithKeyboard(final EditText textView) {
+        textView.requestFocus();
+        textView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                InputMethodManager imm = (InputMethodManager) textView.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(textView, InputMethodManager.SHOW_IMPLICIT);
+            }
+        }, 200);
     }
 }

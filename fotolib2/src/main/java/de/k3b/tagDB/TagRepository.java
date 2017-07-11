@@ -405,7 +405,7 @@ public class TagRepository {
     public static Tag findFirstByName(List<Tag> items, String name) {
         if (items != null) {
             for (Tag item : items) {
-                if (name.equals(item.getName())) return item;
+                if (name.equalsIgnoreCase(item.getName())) return item;
             }
         }
         return null;
