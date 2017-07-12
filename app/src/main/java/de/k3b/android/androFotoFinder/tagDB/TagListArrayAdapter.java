@@ -43,6 +43,9 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 	private final List<String> mRemoveNames;
 	private String mLastFilterParam = null;
 
+	/** mImageButtonLongClicked workaround imagebutton-long-click prevent list-itemclick. */
+	public boolean mImageButtonLongClicked = false;
+
 	public TagListArrayAdapter(final Context ctx,
 							   List<Tag> existingTags,
 							   List<String> addNames,
@@ -155,6 +158,7 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 				holder.bookmarkIcon.setOnLongClickListener(new View.OnLongClickListener() {
 					@Override
 					public boolean onLongClick(View v) {
+						mImageButtonLongClicked = true;
 						holder.includeTagParents(mBookMarkNames, null);
 						return true;
 					}
@@ -174,6 +178,7 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 			holder.addIcon.setOnLongClickListener(new View.OnLongClickListener() {
 				@Override
 				public boolean onLongClick(View v) {
+					mImageButtonLongClicked = true;
 					holder.includeTagParents(mAddNames, mRemoveNames);
 					return true;
 				}
@@ -191,6 +196,7 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 				holder.removeIcon.setOnLongClickListener(new View.OnLongClickListener() {
 					@Override
 					public boolean onLongClick(View v) {
+						mImageButtonLongClicked = true;
 						holder.includeTagParents(mRemoveNames, mAddNames);
 						return true;
 					}

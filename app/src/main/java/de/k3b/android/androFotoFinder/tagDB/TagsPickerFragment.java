@@ -83,7 +83,7 @@ public class TagsPickerFragment  extends DialogFragment  {
     private ITagsSelector mSelector = null;
 
     public interface ITagsSelector {
-        void onSelect(CharSequence tag);
+        void onSelect(CharSequence tag, List<String> addNames);
     }
     /** Owning Activity must implement this if it wants to handle the result of ok and cancel */
     public interface ITagsPicker {
@@ -227,15 +227,19 @@ public class TagsPickerFragment  extends DialogFragment  {
         if (mSelector != null) {
             list.setFocusable(true);
             list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                /** list item click. In tag pick mode: return filter-value and close */
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                    Object item = mDataAdapter.getItem(position);
-                    if ((item != null) && (mSelector != null)) {
-                        mSelector.onSelect(item.toString());
-                        saveSettings();
-                        dismiss();
+                    // mImageButtonLongClicked workaround imagebutton-long-click prevent list-itemclick.
+                    if (!mDataAdapter.mImageButtonLongClicked) {
+                        Object item = mDataAdapter.getItem(position);
+                        if ((item != null) && (mSelector != null)) {
+                            saveSettings();
+                            mSelector.onSelect(item.toString(), mAddNames);
+                            dismiss();
+                        }
                     }
+                    mDataAdapter.mImageButtonLongClicked = false; // next listitem-click is allowed
                 }
             });
         }
@@ -384,6 +388,7 @@ public class TagsPickerFragment  extends DialogFragment  {
         return true;
     }
 
+    /** ok button clicked to transfer changes and close dlg */
     public boolean onOk(List<String> addNames,
                         List<String> removeNames) {
         Log.d(Global.LOG_CONTEXT, debugPrefix + "onOk: " + mCurrentMenuSelection);
@@ -392,17 +397,13 @@ public class TagsPickerFragment  extends DialogFragment  {
             String newTagName = mFilterEdit.getText().toString();
             Tag existingTag = TagRepository.getInstance().findFirstByName(newTagName);
             if (existingTag != null) {
-                mSelector.onSelect(existingTag.getName());
+                mSelector.onSelect(existingTag.getName(), mAddNames);
             } else {
-                mSelector.onSelect(newTagName);
+                mSelector.onSelect(newTagName, mAddNames);
             }
-            saveSettings();
-            dismiss();
-
-            return true;
+        } else {
+            if ((mFragmentOnwner != null) && (!mFragmentOnwner.onOk(addNames, removeNames))) return false;
         }
-
-        if ((mFragmentOnwner != null) && (!mFragmentOnwner.onOk(addNames, removeNames))) return false;
 
         saveSettings();
         dismiss();

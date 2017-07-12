@@ -528,7 +528,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
                     final int contentStart = tagStart + 1;
                     mActivity.mTagsApi.showTagPicker(s.subSequence(contentStart, tagEnd), start - tagStart, new TagsPickerFragment.ITagsSelector() {
                         @Override
-                        public void onSelect(CharSequence tag) {
+                        public void onSelect(CharSequence tag, List<String> addNames) {
                             StringBuilder content = new StringBuilder(mEditView.getText());
                             content.delete(contentStart, tagEnd);
                             content.insert(contentStart, tag + " ");
@@ -538,14 +538,18 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
                             mEditView.setSelection(newSelPos, newSelPos);
                             enabled = true;
                             ResourceUtils.setFocusWithKeyboard(mEditView);
+
+                            // content of edit title/description => model
                             mActivity.saveGuiToExif();
-                            List<String> tags = mActivity.mCurrentData.getTags();
+
+                            List<String> tags = addNames;
+                            if (tags == null) tags = new ArrayList<String>();
                             if (!tags.contains(tag)) {
                                 tags.add(tag.toString());
-                                mActivity.mCurrentData.setTags(tags);
-                                mActivity.loadGuiFromExif();
-
                             }
+                            mActivity.mCurrentData.setTags(tags);
+                            mActivity.loadGuiFromExif();
+                            mActivity.setAutoClose(null, null, null);
                         }
                     });
                 }
