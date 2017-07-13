@@ -701,7 +701,6 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
         long now = new Date().getTime();
         TransactionLogger logger = new TransactionLogger(ctx, now, null);
 
-
         if (!SYNC_UPDATE_EXIF) {
             this.exifUpdate = new UpdateTask(ctx,logger, mInitialData, mCurrentData, now);
             if (exifUpdate.isEmpty()) {
@@ -756,6 +755,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
                     }
                 }
                 publishProgress(total, total, file);
+                mediaDiffCopy.fixTagRepository();
 
                 return total;
             }
@@ -798,8 +798,10 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
             for(int i=0; i < size; i++) {
                 applyChanges(ctx, items.getFile(i), items.getId(i), mediaDiffCopy , logger);
             }
+            mediaDiffCopy.fixTagRepository();
+            mediaDiffCopy.close();
         }
-        mediaDiffCopy.close();
+
         FileUtils.close(logger, mDebugPrefix);
     }
 

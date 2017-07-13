@@ -73,15 +73,6 @@ import de.k3b.tagDB.TagRepository;
  */
 
 public class TagsPickerFragment  extends DialogFragment  {
-
-    private ITagsPicker mFragmentOnwner = null;
-    private boolean mIsFilterMode = true;
-    private ImageView mFilterMode;
-    private ImageView mBookmarkMode;
-    private CharSequence mFilterValue = null;
-    private int mFilterSelection = -1;
-    private ITagsSelector mSelector = null;
-
     public interface ITagsSelector {
         void onSelect(CharSequence tag, List<String> addNames);
     }
@@ -96,6 +87,14 @@ public class TagsPickerFragment  extends DialogFragment  {
 
         boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag);
     };
+
+    private ITagsPicker mFragmentOnwner = null;
+    private boolean mIsFilterMode = true;
+    private ImageView mFilterMode;
+    private ImageView mBookmarkMode;
+    private CharSequence mFilterValue = null;
+    private int mFilterSelection = -1;
+    private ITagsSelector mSelector = null;
 
     public static final int ACTIVITY_ID = 78921;
 
@@ -231,7 +230,7 @@ public class TagsPickerFragment  extends DialogFragment  {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     // mImageButtonLongClicked workaround imagebutton-long-click prevent list-itemclick.
-                    if (!mDataAdapter.mImageButtonLongClicked) {
+                    if (!mDataAdapter.isImageButtonLongClicked()) {
                         Object item = mDataAdapter.getItem(position);
                         if ((item != null) && (mSelector != null)) {
                             saveSettings();
@@ -239,7 +238,7 @@ public class TagsPickerFragment  extends DialogFragment  {
                             dismiss();
                         }
                     }
-                    mDataAdapter.mImageButtonLongClicked = false; // next listitem-click is allowed
+                    mDataAdapter.setImageButtonLongClicked(false); // next listitem-click is allowed
                 }
             });
         }

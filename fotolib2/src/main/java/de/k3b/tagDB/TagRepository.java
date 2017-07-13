@@ -425,17 +425,19 @@ public class TagRepository {
     }
 
     public int includeIfNotFound(List<String>... lists) {
-        List<Tag> allTags = load();
         int modified = 0;
-        Tag root = null;
-        for (List<String> list : lists) {
-            if (list != null) {
-                for(String item : list) {
-                    if ((item != null) && (item.length() > 0) && (null == findFirstByName(allTags, item))) {
-                        if (root == null) root = getImportRoot();
+        if ((lists != null) && (lists.length > 0)) {
+            List<Tag> allTags = load();
+            Tag root = null;
+            for (List<String> list : lists) {
+                if (list != null) {
+                    for (String item : list) {
+                        if ((item != null) && (item.length() > 0) && (null == findFirstByName(allTags, item))) {
+                            if (root == null) root = getImportRoot();
 
-                        allTags.add(new Tag().setName(item).setParent(root));
-                        modified++;
+                            allTags.add(new Tag().setName(item).setParent(root));
+                            modified++;
+                        }
                     }
                 }
             }

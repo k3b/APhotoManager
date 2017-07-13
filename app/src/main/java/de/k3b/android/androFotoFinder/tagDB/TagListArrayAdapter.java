@@ -44,7 +44,7 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 	private String mLastFilterParam = null;
 
 	/** mImageButtonLongClicked workaround imagebutton-long-click prevent list-itemclick. */
-	public boolean mImageButtonLongClicked = false;
+	private boolean mImageButtonLongClicked = false;
 
 	public TagListArrayAdapter(final Context ctx,
 							   List<Tag> existingTags,
@@ -62,6 +62,15 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 	public void setFilterParam(String filterParam) {
 		this.mLastFilterParam = filterParam;
 		getFilter().filter(filterParam);
+	}
+
+	/** mImageButtonLongClicked workaround imagebutton-long-click prevent list-itemclick. */
+	public boolean isImageButtonLongClicked() {
+		return mImageButtonLongClicked;
+	}
+
+	public void setImageButtonLongClicked(boolean mImageButtonLongClicked) {
+		this.mImageButtonLongClicked = mImageButtonLongClicked;
 	}
 
 	private class Holder {
@@ -158,7 +167,7 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 				holder.bookmarkIcon.setOnLongClickListener(new View.OnLongClickListener() {
 					@Override
 					public boolean onLongClick(View v) {
-						mImageButtonLongClicked = true;
+						setImageButtonLongClicked(true);
 						holder.includeTagParents(mBookMarkNames, null);
 						return true;
 					}
@@ -178,7 +187,7 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 			holder.addIcon.setOnLongClickListener(new View.OnLongClickListener() {
 				@Override
 				public boolean onLongClick(View v) {
-					mImageButtonLongClicked = true;
+					setImageButtonLongClicked(true);
 					holder.includeTagParents(mAddNames, mRemoveNames);
 					return true;
 				}
@@ -196,7 +205,7 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 				holder.removeIcon.setOnLongClickListener(new View.OnLongClickListener() {
 					@Override
 					public boolean onLongClick(View v) {
-						mImageButtonLongClicked = true;
+						setImageButtonLongClicked(true);
 						holder.includeTagParents(mRemoveNames, mAddNames);
 						return true;
 					}

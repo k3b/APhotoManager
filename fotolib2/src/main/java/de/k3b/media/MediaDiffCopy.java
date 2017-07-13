@@ -28,6 +28,7 @@ import de.k3b.io.ListUtils;
 import de.k3b.media.MediaUtil.FieldID;
 
 import de.k3b.tagDB.TagProcessor;
+import de.k3b.tagDB.TagRepository;
 
 /**
  * Copy delta between to {@link IMetaApi} items.
@@ -88,6 +89,14 @@ public class MediaDiffCopy {
             return this;
         }
         return null;
+    }
+
+    public void fixTagRepository() {
+        if ((this.addedTags != null) && (this.addedTags.size() > 0)) {
+            TagRepository tagRepository = TagRepository.getInstance();
+            tagRepository.includeIfNotFound(this.addedTags);
+            tagRepository.save();
+        }
     }
 
     /** Initialisation to define the difference. return null if there is no diff between them */
