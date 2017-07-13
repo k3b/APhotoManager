@@ -72,6 +72,9 @@ public class FotoSql extends FotoSqlBase {
     public static final int SORT_BY_LOCATION = 'l';
     public static final int SORT_BY_NAME_LEN = 's'; // size
 
+    public static final int SORT_BY_RATING = 'r';
+    public static final int SORT_BY_MODIFICATION = 'm';
+
     public static final int SORT_BY_DEFAULT = SORT_BY_DATE;
 
     public static final int QUERY_TYPE_UNDEFINED = 0;
@@ -119,6 +122,8 @@ public class FotoSql extends FotoSqlBase {
     private static final String FILTER_EXPR_NO_GPS = SQL_COL_LAT + " is null AND " + SQL_COL_LON + " is null";
     private static final String FILTER_EXPR_LON_MAX = SQL_COL_LON + " < ?";
     private static final String FILTER_EXPR_LON_MIN = SQL_COL_LON + " >= ?";
+
+    public static final String SQL_COL_LAST_MODIFIED = MediaStore.MediaColumns.DATE_MODIFIED;
     public static final String SQL_COL_GPS = MediaStore.Images.Media.LONGITUDE;
     public static final String SQL_COL_COUNT = "count";
     public static final String SQL_COL_WHERE_PARAM = "where_param";
@@ -128,6 +133,8 @@ public class FotoSql extends FotoSqlBase {
     private static final String FILTER_EXPR_DATE_MIN = SQL_COL_DATE_TAKEN + " >= ?";
     public static final String SQL_COL_PATH = MediaStore.Images.Media.DATA;
     protected static final String FILTER_EXPR_PATH_LIKE = "(" + SQL_COL_PATH + " like ?)";
+
+    public static final String SQL_COL_EXT_RATING = MediaStore.Video.Media.BOOKMARK;
 
     // same format as dir. i.e. description='/2014/12/24/' or '/mnt/sdcard/pictures/'
     public static final String SQL_EXPR_DAY = "strftime('/%Y/%m/%d/', " + SQL_COL_DATE_TAKEN + " /1000, 'unixepoch', 'localtime')";
@@ -458,10 +465,16 @@ public class FotoSql extends FotoSqlBase {
             case SORT_BY_NAME_LEN:
                 return context.getString(R.string.sort_by_name_len);
 
+            case SORT_BY_RATING:
+                return context.getString(R.string.sort_by_rating);
+            case SORT_BY_MODIFICATION:
+                return context.getString(R.string.sort_by_modification);
+
             case QUERY_TYPE_GALLERY:
                 return context.getString(R.string.gallery_title);
             case QUERY_TYPE_GROUP_DATE:
                 return context.getString(R.string.sort_by_date);
+
             case QUERY_TYPE_GROUP_ALBUM:
                 return context.getString(R.string.sort_by_folder);
             case QUERY_TYPE_GROUP_PLACE:
@@ -484,6 +497,12 @@ public class FotoSql extends FotoSqlBase {
             case SORT_BY_DATE_OLD:
             case SORT_BY_DATE:
                 return result.replaceOrderBy(SQL_COL_DATE_TAKEN + asc);
+
+            case SORT_BY_RATING:
+                return result.replaceOrderBy(SQL_COL_EXT_RATING  + asc, SQL_COL_DATE_TAKEN + asc);
+            case SORT_BY_MODIFICATION:
+                return result.replaceOrderBy(SQL_COL_LAST_MODIFIED + asc);
+
             case SORT_BY_NAME_OLD:
             case SORT_BY_NAME:
                 return result.replaceOrderBy(SQL_COL_PATH + asc);
@@ -492,7 +511,7 @@ public class FotoSql extends FotoSqlBase {
                 return result.replaceOrderBy(SQL_COL_GPS + asc, MediaStore.Images.Media.LATITUDE + asc);
             case SORT_BY_NAME_LEN_OLD:
             case SORT_BY_NAME_LEN:
-                return result.replaceOrderBy("length(" + SQL_COL_PATH + ")"+asc);
+                return result.replaceOrderBy("length(" + SQL_COL_PATH + ")" + asc, SQL_COL_PATH + asc);
             default: return  result;
         }
     }

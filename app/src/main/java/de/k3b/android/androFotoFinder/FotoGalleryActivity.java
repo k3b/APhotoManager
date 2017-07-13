@@ -596,6 +596,18 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
                 this.mGalleryQueryParameter.setSortID(FotoSql.SORT_BY_LOCATION);
                 reloadGui("sort geo");
                 return true;
+
+            case R.id.cmd_sort_rating:
+                this.mGalleryQueryParameter.setSortID(FotoSql.SORT_BY_RATING);
+                reloadGui("sort rating");
+                return true;
+
+            case R.id.cmd_sort_modification:
+                this.mGalleryQueryParameter.setSortID(FotoSql.SORT_BY_MODIFICATION);
+                reloadGui("sort modification");
+                return true;
+
+
             case R.id.cmd_settings:
                 SettingsActivity.show(this);
                 return true;

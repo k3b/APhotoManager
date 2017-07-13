@@ -56,7 +56,6 @@ public class TagSql extends FotoSql {
 
     public static final String SQL_COL_EXT_DESCRIPTION = MediaStore.Images.Media.DESCRIPTION;
     public static final String SQL_COL_EXT_TITLE = MediaStore.Images.Media.TITLE;
-    public static final String SQL_COL_EXT_RATING = MediaStore.Video.Media.BOOKMARK;
 
     /** The date & time when last non standard media-scan took place
      *  <P>Type: INTEGER (long) as milliseconds since jan 1, 1970</P> */
