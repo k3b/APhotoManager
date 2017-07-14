@@ -35,20 +35,20 @@ import static org.junit.Assert.*;
 public class TagSqlQueryParserTests {
     @Test
     public void shouldParseFull() throws Exception {
-        String FILTER_STRING = "1.23,2.34;3.45,4.56;2001-02-03,2005-12-31;/some/path/;q,^;%filter%;tag1,tag2,tag3;utag1,utag2,utag3;notags;3;";
+        String FILTER_STRING = "1.23,2.34;3.45,4.56;2001-02-03,2005-12-31;/some/path/;q,^;%filter%;tag1,tag2,tag3;utag1,utag2,utag3;notags;3;4";
         assertFilterQueryFilter(FILTER_STRING);
     }
 
     @Test
     public void shouldTagsWithWildcards() throws Exception {
-        String FILTER_STRING = ";;;;;;%tag%;%utag%;;3;";
+        String FILTER_STRING = ";;;;;;%tag%;%utag%;;3";
         assertFilterQueryFilter(FILTER_STRING);
     }
 
 
     @Test
     public void shouldParseNoGeo() throws Exception {
-        String FILTER_STRING = "noGeoInfo;;;;;;;;;3;";
+        String FILTER_STRING = "noGeoInfo;;;;;;;;;3";
         assertFilterQueryFilter(FILTER_STRING);
     }
 
@@ -69,14 +69,14 @@ public class TagSqlQueryParserTests {
 
     @Test
     public void shouldEmptyBeDefault() throws Exception {
-        String FILTER_STRING = ";;;;;;;;;;";
+        String FILTER_STRING = "";
         GalleryFilterParameter parsedFilter = assertFilterQueryFilter(FILTER_STRING);
         assertEquals(IGalleryFilter.VISIBILITY_DEFAULT, parsedFilter.getVisibility());
     }
 
     // assert that input-string==output-string in  input-string -> filter -> query -> filter -> output-string
     private GalleryFilterParameter assertFilterQueryFilter(int visibility) {
-        String FILTER_STRING = ";;;;;;;;;" + visibility + ";";
+        String FILTER_STRING = ";;;;;;;;;" + visibility;
         return assertFilterQueryFilter(FILTER_STRING);
     }
 

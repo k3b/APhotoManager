@@ -98,6 +98,17 @@ public class FotoSql extends FotoSqlBase {
     public static final String SQL_COL_LON = MediaStore.Images.Media.LONGITUDE;
     public static final String SQL_COL_SIZE = MediaStore.Images.Media.SIZE;
 
+    // other colums
+    public static final String SQL_COL_LAST_MODIFIED = MediaStore.MediaColumns.DATE_MODIFIED;
+    public static final String SQL_COL_GPS = MediaStore.Images.Media.LONGITUDE;
+    public static final String SQL_COL_COUNT = "count";
+    public static final String SQL_COL_WHERE_PARAM = "where_param";
+
+    public static final String SQL_COL_DATE_TAKEN = MediaStore.Images.Media.DATE_TAKEN;
+    public static final String SQL_COL_EXT_RATING = MediaStore.Video.Media.BOOKMARK;
+    public static final String SQL_COL_PATH = MediaStore.Images.Media.DATA;
+
+
     // only works with api >= 16
     public static final String SQL_COL_MAX_WITH =
             (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
@@ -122,19 +133,11 @@ public class FotoSql extends FotoSqlBase {
     private static final String FILTER_EXPR_NO_GPS = SQL_COL_LAT + " is null AND " + SQL_COL_LON + " is null";
     private static final String FILTER_EXPR_LON_MAX = SQL_COL_LON + " < ?";
     private static final String FILTER_EXPR_LON_MIN = SQL_COL_LON + " >= ?";
+    protected static final String FILTER_EXPR_RATING_MIN = SQL_COL_EXT_RATING + " >= ?";
 
-    public static final String SQL_COL_LAST_MODIFIED = MediaStore.MediaColumns.DATE_MODIFIED;
-    public static final String SQL_COL_GPS = MediaStore.Images.Media.LONGITUDE;
-    public static final String SQL_COL_COUNT = "count";
-    public static final String SQL_COL_WHERE_PARAM = "where_param";
-
-    public static final String SQL_COL_DATE_TAKEN = MediaStore.Images.Media.DATE_TAKEN;
     private static final String FILTER_EXPR_DATE_MAX = SQL_COL_DATE_TAKEN + " < ?";
     private static final String FILTER_EXPR_DATE_MIN = SQL_COL_DATE_TAKEN + " >= ?";
-    public static final String SQL_COL_PATH = MediaStore.Images.Media.DATA;
     protected static final String FILTER_EXPR_PATH_LIKE = "(" + SQL_COL_PATH + " like ?)";
-
-    public static final String SQL_COL_EXT_RATING = MediaStore.Video.Media.BOOKMARK;
 
     // same format as dir. i.e. description='/2014/12/24/' or '/mnt/sdcard/pictures/'
     public static final String SQL_EXPR_DAY = "strftime('/%Y/%m/%d/', " + SQL_COL_DATE_TAKEN + " /1000, 'unixepoch', 'localtime')";
@@ -305,7 +308,8 @@ public class FotoSql extends FotoSqlBase {
                 filter.setLatitude(getParam(query, FILTER_EXPR_LAT_MIN, remove), getParam(query, FILTER_EXPR_LAT_MAX, remove));
             }
 
-	        filter.setDate(getParam(query, FILTER_EXPR_DATE_MIN, remove), getParam(query, FILTER_EXPR_DATE_MAX, remove));
+            filter.setRatingMin(GalleryFilterParameter.parseRating(getParam(query, FILTER_EXPR_RATING_MIN, remove)));
+            filter.setDate(getParam(query, FILTER_EXPR_DATE_MIN, remove), getParam(query, FILTER_EXPR_DATE_MAX, remove));
             filter.setPath(getParam(query, FILTER_EXPR_PATH_LIKE, remove));
 
             return filter;

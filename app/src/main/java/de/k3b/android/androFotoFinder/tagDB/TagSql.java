@@ -159,7 +159,7 @@ public class TagSql extends FotoSql {
                 }
                 int ratingMin = filter.getRatingMin();
                 if (ratingMin > 0) {
-                    resultQuery.addWhere(SQL_COL_EXT_RATING + " >= ?", ""+ratingMin);
+                    resultQuery.addWhere(FILTER_EXPR_RATING_MIN, ""+ratingMin);
 
                 }
 

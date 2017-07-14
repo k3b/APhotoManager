@@ -329,7 +329,7 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
         }
     }
 
-    private static int parseRating(String value) {
+    public static int parseRating(String value) {
         if ((value != null) && (value.length() > 0)) {
             return Integer.parseInt(value);
         }
