@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import de.k3b.FotoLibGlobal;
 import de.k3b.database.SelectedItems;
 
 /**
@@ -53,6 +52,7 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
 
     private int mSortId = SORT_BY_NONE;
     private boolean mSortAscending = false;
+    private int ratingMin;
 
     public GalleryFilterParameter get(IGalleryFilter src) {
         super.get(src);
@@ -64,10 +64,11 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
             this.setWithNoTags(src.isWithNoTags());
             this.setVisibility(src.getVisibility());
 
-            this.setSort(src.getSortID(),src.isSortAscending());
+            this.setSort(src.getSortID(), src.isSortAscending());
             this.setTagsAllIncluded(src.getTagsAllIncluded());
             this.setTagsAllExcluded(src.getTagsAllExcluded());
             this.setInAnyField(src.getInAnyField());
+            this.setRatingMin(src.getRatingMin());
         }
         return this;
     }
@@ -206,8 +207,10 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
     }
 
     /********************* string conversion support ***************/
+    /** implementation detail of toString() to be overwritten by subclasses.
+     * parse() can read this back to a GallerFilterParameter */
     @Override
-    public StringBuilder toStringBuilder() {
+    protected StringBuilder toStringBuilder() {
         StringBuilder result = null;
         if (isNonGeoOnly()) {
             result = new StringBuilder();
@@ -230,6 +233,7 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
 
         appendSubFields(result, (getVisibility() != VISIBILITY_DEFAULT) ? (""+getVisibility()):"");
 
+        appendSubFields(result, (getRatingMin() > 0) ? (""+getRatingMin()) : "");
         return result;
     }
 
@@ -318,11 +322,21 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
             case 9 :
                 setVisibility(convertVisibility(value));
                 break;
+            case 10 :
+                setRatingMin(parseRating(value));
+                break;
             default:break;
         }
     }
 
-    private boolean isNonGeoOnly(String value) {
+    private static int parseRating(String value) {
+        if ((value != null) && (value.length() > 0)) {
+            return Integer.parseInt(value);
+        }
+        return 0;
+    }
+
+    private static boolean isNonGeoOnly(String value) {
         return (value != null) && (value.toLowerCase().startsWith(NON_GEO_ONLY_FIND));
     }
 
@@ -346,6 +360,7 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
                 && (filter.getDateMax() == 0)
                 && (!filter.isNonGeoOnly())
                 && (!filter.isWithNoTags())
+                && (filter.getRatingMin() <= 0)
                 && (filter.getPath()==null)
                 && (filter.getInAnyField()==null)
                 && (filter.getTagsAllIncluded()==null)
@@ -384,4 +399,12 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
         return VISIBILITY_DEFAULT;
     }
 
+    public void setRatingMin(int ratingMin) {
+        this.ratingMin = ratingMin;
+    }
+
+    @Override
+    public int getRatingMin() {
+        return ratingMin;
+    }
 }

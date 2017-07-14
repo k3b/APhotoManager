@@ -54,6 +54,8 @@ public interface IGalleryFilter extends IGeoRectangle {
 
     boolean isWithNoTags();
 
+    int getRatingMin();
+
     /** All Tags/Keywords/Categories/VirtualAlbum that the image must contain. ("AND") */
     List<String> getTagsAllIncluded();
 

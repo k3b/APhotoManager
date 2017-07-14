@@ -32,9 +32,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.RatingBar;
 import android.widget.Toast;
-
-// import com.squareup.leakcanary.RefWatcher;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -319,6 +318,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         private EditText mLatitudeFrom;
         private CheckBox mWithNoGeoInfo;
         private CheckBox mWithNoTags;
+        private RatingBar mRatingBar;
         private CheckBox mPublic        ;
         private CheckBox mPrivate       ;
         private EditText mAny            ;
@@ -339,7 +339,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             this.mLongitudeTo = (EditText) findViewById(R.id.edit_longitude_to);
             this.mWithNoGeoInfo = (CheckBox) findViewById(R.id.chk_with_no_geo);
             this.mWithNoTags = (CheckBox) findViewById(R.id.chk_with_no_tags);
-
+            this.mRatingBar = (RatingBar ) findViewById(R.id.ratingBar);
             this.mPublic        = (CheckBox) findViewById(R.id.chk_public);
             this.mPrivate       = (CheckBox) findViewById(R.id.chk_private);
 
@@ -498,6 +498,11 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         }
 
         @Override
+        public int getRatingMin() {
+            return (int) mRatingBar.getRating();
+        }
+
+        @Override
         public int getVisibility() {
             return mVisibility;
         }
@@ -530,6 +535,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                 mDateTo.setText(convertDate(src.getDateMax()));
                 mWithNoGeoInfo.setChecked(src.isNonGeoOnly());
                 mWithNoTags.setChecked(src.isWithNoTags());
+                mRatingBar.setRating(src.getRatingMin());
                 mVisibility = src.getVisibility();
 
                 showVisibility(mVisibility);
@@ -594,6 +600,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             }
             return true;
         } catch (RuntimeException ex) {
+            Log.e(Global.LOG_CONTEXT, mDebugPrefix + ex.getMessage(), ex);
             Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
             return false;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -25,7 +25,8 @@ package de.k3b.io;
  */
 public class GeoRectangle implements IGeoRectangle {
     public static final String DELIM_SUB_FIELD = ",";
-    public static final String DELIM_FIELD = ";";
+    private static final char DELIM_FIELD_CHAR = ';';
+    public static final String DELIM_FIELD = "" + DELIM_FIELD_CHAR;
 
     private double latitudeMin = Double.NaN;
     private double latitudeMax = Double.NaN;
@@ -150,15 +151,25 @@ public class GeoRectangle implements IGeoRectangle {
     /********************* string conversion support ***************/
     @Override
     public String toString() {
-
-        return toStringBuilder().toString();
+        StringBuilder result = toStringBuilder();
+        removeTrailingDelimiters(result);
+        return result.toString().trim();
     }
 
+    /** implementation detail of toString() to be overwritten by subclasses */
     protected StringBuilder toStringBuilder() {
         StringBuilder result = new StringBuilder();
         appendLatLon(result, getLatitudeMin(), getLogituedMin());
         appendLatLon(result, getLatitudeMax(), getLogituedMax());
         return result;
+    }
+
+    private static void removeTrailingDelimiters(StringBuilder result) {
+        int len = result.length();
+        while ((len > 0) && (result.charAt(len - 1) == DELIM_FIELD_CHAR)) {
+            len--;
+        }
+        if (len < result.length()) result.setLength(len);
     }
 
     protected static StringBuilder appendLatLon(StringBuilder result, double lat, double lon) {
