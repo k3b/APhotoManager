@@ -38,6 +38,7 @@ import de.k3b.android.util.MediaScanner;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.ListUtils;
 import de.k3b.media.MediaUtil;
 import de.k3b.media.MediaXmpSegment;
 import de.k3b.media.MetaWriterExifXml;
@@ -70,25 +71,30 @@ public class TagSql extends FotoSql {
             + SQL_COL_EXT_XMP_LAST_MODIFIED_DATE + " is null or "
             + SQL_COL_EXT_XMP_LAST_MODIFIED_DATE + " < ?) ";
 
-    protected static final String FILTER_EXPR_ANY_LIKE = "((" + SQL_COL_PATH + " like ?) OR  (" + SQL_COL_EXT_DESCRIPTION
-            + " like ?) OR  (" + SQL_COL_EXT_TAGS + " like ?) OR  (" + SQL_COL_EXT_TITLE + " like ?))";
-
-    protected static final String FILTER_EXPR_TAGS_NONE_OR_LIST = "((" + SQL_COL_EXT_TAGS
-            + " is null) or (" + SQL_COL_EXT_TAGS +" like ?))";
-    protected static final String FILTER_EXPR_TAGS_LIST         = "(" + SQL_COL_EXT_TAGS + " like ?)";
     protected static final String FILTER_EXPR_TAGS_NONE         = "(" + SQL_COL_EXT_TAGS + " is null)";
-    protected static final String FILTER_EXPR_NO_TAG            = "(" + SQL_COL_EXT_TAGS + " not like ?)";
+    protected static final String FILTER_EXPR_TAGS_INCLUDED = "(" + SQL_COL_EXT_TAGS + " like ?)";
+    protected static final String FILTER_EXPR_TAGS_NONE_OR_INCLUDED = "(" + FILTER_EXPR_TAGS_NONE
+            + " or " + FILTER_EXPR_TAGS_INCLUDED +")";
+    protected static final String FILTER_EXPR_TAG_EXCLUDED = "(" + SQL_COL_EXT_TAGS + " not like ?)";
+    protected static final String FILTER_EXPR_TAG_NONE_OR_EXCLUDED = "(" + FILTER_EXPR_TAGS_NONE
+            + " OR " + FILTER_EXPR_TAG_EXCLUDED + ")";
+
+    protected static final String FILTER_EXPR_ANY_LIKE = "((" + SQL_COL_PATH + " like ?) OR  (" + SQL_COL_EXT_DESCRIPTION
+            + " like ?) OR " + FILTER_EXPR_TAGS_INCLUDED + " OR  (" + SQL_COL_EXT_TITLE + " like ?))";
+
 
     /** translates a query back to filter */
     public static IGalleryFilter parseQueryEx(QueryParameter query, boolean remove) {
         if (query != null) {
             GalleryFilterParameter resultFilter = (GalleryFilterParameter) parseQuery(query,remove);
-            parseTagsFromQuery(query, remove, resultFilter);
 
+            // from more complex to less complex
             String[] params;
             if ((params = getParams(query, FILTER_EXPR_ANY_LIKE, remove)) != null) {
                 resultFilter.setInAnyField(params[0]);
             }
+
+            parseTagsFromQuery(query, remove, resultFilter);
 
             if (getParams(query, FILTER_EXPR_PRIVATE_PUBLIC, remove) != null) {
                 resultFilter.setVisibility(IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
@@ -107,31 +113,39 @@ public class TagSql extends FotoSql {
 
     private static void parseTagsFromQuery(QueryParameter query, boolean remove, GalleryFilterParameter resultFilter) {
         // 0..n times for excluded expressions
-        String param = getParam(query, FILTER_EXPR_NO_TAG, remove);
+        String param;
+
+        resultFilter.setWithNoTags(false);
+
+     // FILTER_EXPR_TAG_NONE_OR_EXCLUDED or FILTER_EXPR_TAG_EXCLUDED
+        String filter = FILTER_EXPR_TAG_NONE_OR_EXCLUDED;
+        param = getParam(query, filter, remove);
         if (param != null) {
-            resultFilter.setTagsAllExcluded(null);
-            List<String> excluded = resultFilter.getTagsAllExcluded();
+            resultFilter.setWithNoTags(true);
+        } else {
+            filter = FILTER_EXPR_TAG_EXCLUDED;
+            param = getParam(query, filter, remove);
+        }
+        if (param != null) {
+            ArrayList<String> excluded = new ArrayList<String>();
             do {
                 if ((param.startsWith("%;") && (param.endsWith(";%")))) param = param.substring(2, param.length() -2);
                 excluded.add(param);
-                param = getParam(query, FILTER_EXPR_NO_TAG, remove);
+                param = getParam(query, filter, remove);
             } while (remove && (param != null));
+            resultFilter.setTagsAllExcluded(excluded);
         }
 
         // different possible combinations of "tags is null" and "tag list"
-        String[] params;
-        if (getParams(query, FILTER_EXPR_TAGS_NONE, remove) != null) {
-            resultFilter.setWithNoTags(true).setTagsAllIncluded(null);
-        }
-
-
-        if ((param = getParam(query, FILTER_EXPR_TAGS_NONE_OR_LIST, remove)) != null) {
+        if ((param = getParam(query, FILTER_EXPR_TAGS_NONE_OR_INCLUDED, remove)) != null) {
             resultFilter.setWithNoTags(true).setTagsAllIncluded(TagConverter.fromString(param));
+        } else if ((param = getParam(query, FILTER_EXPR_TAGS_INCLUDED, remove)) != null) {
+            resultFilter.setTagsAllIncluded(TagConverter.fromString(param));
+        } else if (getParams(query, FILTER_EXPR_TAGS_NONE, remove) != null) {
+            resultFilter.setWithNoTags(true).setTagsAllIncluded(null).setTagsAllExcluded(null);
         }
 
-        if ((param = getParam(query, FILTER_EXPR_TAGS_LIST, remove)) != null) {
-            resultFilter.setWithNoTags(false).setTagsAllIncluded(TagConverter.fromString(param));
-        }
+
     }
 
     public static void filter2QueryEx(QueryParameter resultQuery, IGalleryFilter filter, boolean clearWhereBefore) {
@@ -146,14 +160,21 @@ public class TagSql extends FotoSql {
                     resultQuery.addWhere(FILTER_EXPR_ANY_LIKE, any, any, any, any);
                 }
 
-                List<String> includes = filter.getTagsAllIncluded();
+
+                List<String> includes = ListUtils.emptyAsNull(filter.getTagsAllIncluded());
+                List<String> excludes = ListUtils.emptyAsNull(filter.getTagsAllExcluded());
                 boolean withNoTags = filter.isWithNoTags();
-                addWhereTagsIncluded(resultQuery, includes, withNoTags);
-                List<String> excludes = filter.getTagsAllExcluded();
-                if (excludes != null) {
-                    for (String tag : excludes) {
-                        if ((tag != null) && (tag.length() > 0)) {
-                            resultQuery.addWhere(FILTER_EXPR_NO_TAG, "%;" + tag + ";%");
+
+                if ((includes == null) && (excludes == null) && withNoTags) {
+                    resultQuery.addWhere(FILTER_EXPR_TAGS_NONE);
+                } else {
+                    addWhereTagsIncluded(resultQuery, includes, withNoTags);
+
+                    if (excludes != null) {
+                        for (String tag : excludes) {
+                            if ((tag != null) && (tag.length() > 0)) {
+                                addWhereTagExcluded(resultQuery, tag, withNoTags);
+                            }
                         }
                     }
                 }
@@ -166,6 +187,10 @@ public class TagSql extends FotoSql {
                 setWhereVisibility(resultQuery, filter.getVisibility());
             }
         }
+    }
+
+    private static QueryParameter addWhereTagExcluded(QueryParameter resultQuery, String tag, boolean withNoTags) {
+        return resultQuery.addWhere((withNoTags) ? FILTER_EXPR_TAG_NONE_OR_EXCLUDED : FILTER_EXPR_TAG_EXCLUDED, "%;" + tag + ";%");
     }
 
     /** return number of applied tags */
@@ -197,20 +222,16 @@ public class TagSql extends FotoSql {
         }
         return index;
     }
-    public static void addWhereTagsIncluded(QueryParameter resultQuery, List<String> _includes, boolean withNoTags) {
-        List<String> includes = _includes;
-        if ((includes != null) && (includes.size() == 0)) includes = null;
+    public static void addWhereTagsIncluded(QueryParameter resultQuery, List<String> includes, boolean withNoTags) {
         if (includes != null) {
             String includesWhere = TagConverter.asDbString("%", includes);
             if (includesWhere != null) {
                 if (withNoTags) {
-                    resultQuery.addWhere(FILTER_EXPR_TAGS_NONE_OR_LIST, includesWhere);
+                    resultQuery.addWhere(FILTER_EXPR_TAGS_NONE_OR_INCLUDED, includesWhere);
                 } else {
-                    resultQuery.addWhere(FILTER_EXPR_TAGS_LIST, includesWhere);
+                    resultQuery.addWhere(FILTER_EXPR_TAGS_INCLUDED, includesWhere);
                 }
             }
-        } else if (withNoTags) {
-            resultQuery.addWhere(FILTER_EXPR_TAGS_NONE);
         }
     }
 

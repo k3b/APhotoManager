@@ -44,7 +44,7 @@ public class ListUtils {
 
     public static List<String> toStringList(Iterable<?> list) {
         ArrayList<String> result = new ArrayList<String>();
-        for(Object item : list) {
+        for (Object item : list) {
             if (item != null) result.add(item.toString());
         }
         return result;
@@ -52,7 +52,7 @@ public class ListUtils {
 
     public static List<String> toStringList(Object... list) {
         ArrayList<String> result = new ArrayList<String>();
-        for(Object item : list) {
+        for (Object item : list) {
             if (item != null) result.add(item.toString());
         }
         return result;
@@ -79,5 +79,11 @@ public class ListUtils {
         if ((tags == null) || (tags.size() == 0)) return null;
         String[] tagsArray = tags.toArray(new String[tags.size()]);
         return tagsArray;
+    }
+
+    /** return null if list has no elements */
+    public static <T> List<T> emptyAsNull(List<T> list) {
+        if ((list != null) && (list.size() > 0)) return list;
+        return null;
     }
 }
