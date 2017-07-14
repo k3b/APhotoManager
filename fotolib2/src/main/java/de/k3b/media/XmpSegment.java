@@ -72,13 +72,9 @@ public class XmpSegment {
             return TagConverter.asDbString(null, values);
         }
 
-        try {
-            XMPProperty result = getProperty(definitions);
-            if (result != null) {
-                return result.getValue();
-            }
-        } catch (XMPException e) {
-            onError("getPropertyAsString", e);
+        XMPProperty result = getProperty(definitions);
+        if (result != null) {
+            return result.getValue();
         }
         return null;
     }
@@ -93,19 +89,31 @@ public class XmpSegment {
         return null;
     }
 
-    protected XMPProperty getProperty(MediaXmpFieldDefinition... definitions) throws XMPException {
+    protected XMPProperty getProperty(MediaXmpFieldDefinition... definitions) {
         for (MediaXmpFieldDefinition definition: definitions) {
             if (!definition.isArray()) {
-                XMPProperty result = getXmpMeta().getProperty(definition.getXmpNamespace().getUriAsString(), definition.getShortName());
+                XMPProperty result = null;
+                try {
+                    result = getXmpMeta().getProperty(definition.getXmpNamespace().getUriAsString(), definition.getShortName());
+                } catch (XMPException e) {
+                    onError("getProperty(" + definition + ")", e);
+                    result = null;
+                }
                 if (result != null) return result;
             }
         }
         return null;
     }
 
-    protected MediaXmpFieldDefinition findFirst(boolean returnNullIfNotFound, MediaXmpFieldDefinition... definitions) throws XMPException {
+    protected MediaXmpFieldDefinition findFirst(boolean returnNullIfNotFound, MediaXmpFieldDefinition... definitions)  {
         for (MediaXmpFieldDefinition definition: definitions) {
-            XMPProperty result = getXmpMeta().getProperty(definition.getXmpNamespace().getUriAsString(), definition.getShortName());
+            XMPProperty result = null;
+            try {
+                result = getXmpMeta().getProperty(definition.getXmpNamespace().getUriAsString(), definition.getShortName());
+            } catch (XMPException e) {
+                onError("findFirst(" + definition + ")", e);
+                result = null;
+            }
             if (result != null) return definition;
         }
         return definitions[0];

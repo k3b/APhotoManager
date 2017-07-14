@@ -35,7 +35,6 @@ import java.util.List;
 import de.k3b.FotoLibGlobal;
 import de.k3b.io.DateUtil;
 import de.k3b.io.FileCommands;
-import de.k3b.io.FileUtils;
 import de.k3b.io.GeoUtil;
 
 /**
