@@ -94,7 +94,7 @@ public class MediaDiffCopy {
     public void fixTagRepository() {
         if ((this.addedTags != null) && (this.addedTags.size() > 0)) {
             TagRepository tagRepository = TagRepository.getInstance();
-            tagRepository.includeIfNotFound(this.addedTags);
+            tagRepository.includeTagNamesIfNotFound(this.addedTags);
             tagRepository.save();
         }
     }

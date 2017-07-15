@@ -213,7 +213,7 @@ public class TagsPickerFragment  extends DialogFragment  {
 
         List<Tag> existingTags = loadTagRepositoryItems(true);
         TagRepository tagRepository = TagRepository.getInstance();
-        if (tagRepository.includeIfNotFound(mAddNames, mRemoveNames, mAffectedNames, mBookMarkNames) > 0) {
+        if (tagRepository.includeTagNamesIfNotFound(mAddNames, mRemoveNames, mAffectedNames, mBookMarkNames) > 0) {
             tagRepository.save();
         }
         this.mDataAdapter = new TagListArrayAdapter(this.getActivity(),
@@ -575,7 +575,7 @@ public class TagsPickerFragment  extends DialogFragment  {
     private List<Tag> loadTagRepositoryItems(boolean reload) {
         List<Tag> result = reload ? TagRepository.getInstance().reload() : TagRepository.getInstance().load();
         if (result.size() == 0) {
-            TagRepository.include(result,null,null,getString(R.string.tags_defaults));
+            TagRepository.includePaths(result,null,null,getString(R.string.tags_defaults));
         }
         return result;
     }
@@ -748,7 +748,7 @@ public class TagsPickerFragment  extends DialogFragment  {
     }
     private void tagAdd(Tag parent, String itemExpression) {
         List<Tag> existingItems = loadTagRepositoryItems(false);
-        int changeCount = TagRepository.include(existingItems, parent, null, itemExpression);
+        int changeCount = TagRepository.includePaths(existingItems, parent, null, itemExpression);
 
         if (changeCount > 0) {
 

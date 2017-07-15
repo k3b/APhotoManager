@@ -190,7 +190,7 @@ Verstecken kann über das 'Media-Scanner' Gallery-Menü rückgängig gemacht wer
   <string name="tags_delete_children_title">Unter-Tags löschen</string>
   <string name="tags_update_photos">Tags in betroffenen photos aktualisieren</string>
   <string name="tags_hint">Long-Tap tagname öffnet das Menu</string>
-  <string name="tags_defaults">Aktivitäten,Menschen,Orte,Themen,Projekte</string>
+  <string name="tags_defaults">Aktivitaeten,Menschen,Orte,Themen,Projekte</string>
 
   <string name="settings_media_update_strategy_title">Änderungen speichern in</string>
 

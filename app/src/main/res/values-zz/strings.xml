@@ -191,7 +191,7 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
     <string name="tags_delete_children_title">tags_delete_children_title Delete children</string>
     <string name="tags_update_photos">tags_update_photos Update tags in affected photos</string>
     <string name="tags_hint">tags_hint Long-Tap on tagname opens menu</string>
-    <string name="tags_defaults">tags_defaults:Activities,People,Places,Themes,Projects</string>
+    <string name="tags_defaults">tags_defaults,Activities,People,Places,Themes,Projects</string>
 
     <string name="settings_media_update_strategy_title">settings_media_update_strategy_title:Write changes to</string>
 

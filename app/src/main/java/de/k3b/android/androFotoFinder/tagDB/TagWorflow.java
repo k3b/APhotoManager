@@ -126,7 +126,7 @@ public class TagWorflow extends TagProcessor {
                 TagSql.updateDB(dbgSaveReason, this.context, tagWorflowItemFromDB.path, exif, MediaUtil.FieldID.tags);
 
                 // update tag repository
-                TagRepository.getInstance().include(TagRepository.getInstance().getImportRoot(), currentItemTags);
+                TagRepository.getInstance().includeTagNamesIfNotFound(currentItemTags);
                 result = 1;
             }
 

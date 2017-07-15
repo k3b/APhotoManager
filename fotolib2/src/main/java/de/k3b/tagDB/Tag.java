@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 by k3b.
+ * Copyright (c) 2016-2017 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -101,18 +101,6 @@ public class Tag{
         }
         return false;
         // return name.equals(((Tag)o).name);
-    }
-
-    public static List<Tag> toList(String... items) {
-        if ((items != null) && (items.length > 0)) {
-            List<Tag> result = new ArrayList<>();
-
-            for (String oldItem : items) {
-                result.add(new Tag().setName(oldItem));
-            }
-            return result;
-        }
-        return null;
     }
 
     /** return item as path where parents are appended.

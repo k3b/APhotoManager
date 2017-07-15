@@ -362,7 +362,7 @@ abstract public class MediaScanner  {
 
     private void updateTagRepository(List<String> tags) {
         TagRepository tagRepository = TagRepository.getInstance();
-        tagRepository.include(tagRepository.getImportRoot(), tags);
+        tagRepository.includeTagNamesIfNotFound(tags);
     }
 
     protected static long getXmpFilelastModified(MediaXmpSegment xmpContent) {
