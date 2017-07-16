@@ -675,27 +675,30 @@ public class TagsPickerFragment  extends DialogFragment  {
     }
 
     private class TagRenameWithDbUpdateTask extends TagTask<Object> {
-        private final Tag oldTag;
-        private final String newName;
+        private final Tag mOldTag;
+        private final String mNewName;
 
-        TagRenameWithDbUpdateTask(Tag oldTag, String newName) {
+        TagRenameWithDbUpdateTask(String oldName, String newName) {
             super(getActivity(), R.string.rename_menu_title);
-            this.oldTag = oldTag;
-            this.newName = newName;
+            this.mOldTag = new Tag().setName(oldName);
+            this.mNewName = newName;
         }
 
         @Override
         protected Integer doInBackground(Object... params) {
-            List<Tag> affectedTags = new ArrayList<Tag>();
-            affectedTags.add(oldTag);
+            List<Tag> removedTags = new ArrayList<Tag>();
+            removedTags.add(mOldTag);
             publishProgress("...");
-            getWorkflow().init(getActivity(), null, affectedTags);
-            return getWorkflow().updateTags(ListUtils.toStringList(newName), ListUtils.toStringList(affectedTags));
+            getWorkflow().init(getActivity(), null, removedTags);
+
+            TagRepository.getInstance().renameTags(mOldTag.getName(), mNewName);
+
+            return getWorkflow().updateTags(ListUtils.toStringList(mNewName), ListUtils.toStringList(removedTags));
         }
 
         @Override
         protected void onPostExecute(Integer result) {
-            tagRename(oldTag, newName, false, true);
+            tagRename(mOldTag, mNewName, false, true);
             super.onPostExecute(result);
         }
     }
@@ -705,13 +708,12 @@ public class TagsPickerFragment  extends DialogFragment  {
 
         if ((newName != null) && (newName.compareTo(oldName) != 0)) {
             if (updateDatabase) {
-                new TagRenameWithDbUpdateTask(oldTag, newName).execute();
+                new TagRenameWithDbUpdateTask(oldName, newName).execute();
                 return;
             }
             updateKnownLists(newName, oldName, updateAffected);
             mDataAdapter.remove(oldTag);
-            oldTag.setName(newName);
-            mDataAdapter.add(oldTag);
+            // mDataAdapter.add();
             mDataAdapter.reloadList();
         }
     }

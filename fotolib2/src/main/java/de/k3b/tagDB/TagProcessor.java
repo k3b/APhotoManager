@@ -29,28 +29,28 @@ import java.util.List;
 public class TagProcessor {
     private static final ArrayList<String> EMPTY_STRING_LIST = new ArrayList<>();
     /** all tags that occoured at least once in {@link #registerExistingTags(List)} call. */
-    private List<String> affected = null;
+    private List<String> mAffected = null;
 
     /** all tags that occured in all {@link #registerExistingTags(List)} calls */
-    private List<String> allSet = null;
+    private List<String> mAllSet = null;
 
     /** Remember tags for later processing.
      * Called for every selected image. */
     public void registerExistingTags(List<String> tags) {
         if ((tags != null) && (tags.size() > 0)) {
-            if (allSet == null) {
-                affected = new ArrayList<String>(tags);
-                allSet = new ArrayList<String>(tags);
+            if (mAllSet == null) {
+                mAffected = new ArrayList<String>(tags);
+                mAllSet = new ArrayList<String>(tags);
             } else {
                 for (String tag : tags) {
-                    if (!affected.contains(tag)) {
-                        affected.add(tag);
+                    if (!mAffected.contains(tag)) {
+                        mAffected.add(tag);
                     }
                 }
-                for (int i = allSet.size() - 1; i >= 0; i--) {
-                    String tag = allSet.get(i);
+                for (int i = mAllSet.size() - 1; i >= 0; i--) {
+                    String tag = mAllSet.get(i);
                     if (!tags.contains(tag)) {
-                        allSet.remove(i);
+                        mAllSet.remove(i);
                     }
                 }
             }
@@ -59,22 +59,22 @@ public class TagProcessor {
 
     /** all tags that occoured at least once in {@link #registerExistingTags(List)} call. */
     public List<String> getAffected() {
-        return affected;
+        return mAffected;
     }
 
     /** all tags that occoured at least once in {@link #registerExistingTags(List)} call. */
     private void setAffected(List<String> affected) {
-        this.affected = affected;
+        this.mAffected = affected;
     }
 
     /** all tags that occured in all {@link #registerExistingTags(List)} calls */
     public List<String> getAllSet() {
-        return allSet;
+        return mAllSet;
     }
 
     /** all tags that occured in all {@link #registerExistingTags(List)} calls */
     private void setAllSet(List<String> allSet) {
-        this.allSet = allSet;
+        this.mAllSet = allSet;
     }
 
     /** calculate the new tags out of added and removed tags. returns null if there is no change neccessary */

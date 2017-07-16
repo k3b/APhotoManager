@@ -147,9 +147,9 @@ public class TagRepositoryTests {
     }
 
     @Test
-    public void shouldRenameSimple() throws Exception {
+    public void shouldIncludePathsSimple() throws Exception {
         // Name1
-        TagRepository repo = createUnsavedRepo("shouldAddExpression", 0);
+        TagRepository repo = createUnsavedRepo("shouldIncludePathsSimple", 0);
         List<Tag> items = repo.load();
         TagRepository.includePaths(items, null, null, "/c/c1/c11");
         Tag c1 = repo.findFirstByName("c1");
@@ -167,9 +167,9 @@ public class TagRepositoryTests {
     }
 
     @Test
-    public void shouldRenameRoot() throws Exception {
+    public void shouldIncludePathRoot() throws Exception {
         // Name1
-        TagRepository repo = createUnsavedRepo("shouldAddExpression", 0);
+        TagRepository repo = createUnsavedRepo("shouldIncludePathRoot", 0);
         List<Tag> items = repo.load();
         TagRepository.includePaths(items, null, null, "/c/c1/c11");
         Tag c1 = repo.findFirstByName("c1");
@@ -187,9 +187,9 @@ public class TagRepositoryTests {
     }
 
     @Test
-    public void shouldRenameWithInsert() throws Exception {
+    public void shouldIncludePathsWithInsert() throws Exception {
         // Name1
-        TagRepository repo = createUnsavedRepo("shouldAddExpression", 0);
+        TagRepository repo = createUnsavedRepo("shouldIncludePathsWithInsert", 0);
         List<Tag> items = repo.load();
         TagRepository.includePaths(items, null, null, "/c/c1/c11");
         Tag c1 = repo.findFirstByName("c1");
@@ -328,5 +328,15 @@ public class TagRepositoryTests {
         int changes = sut.includeTagNamesIfNotFound(ListUtils.fromString("c,b,q"));
         sut.save();
         Assert.assertEquals(1, changes);
+    }
+
+    @Test
+    public void shouldRenameInHierachy() throws Exception {
+        TagRepository sut = createUnsavedRepo("shouldRenameInHierachy", "a/b/old/c,x/old/y");
+        int changes = sut.renameTags("old","new");
+        sut.save();
+        Assert.assertEquals("/a/b/new/c", sut.findFirstByName("c").getPath());
+        Assert.assertEquals("/x/new/y", sut.findFirstByName("y").getPath());
+        Assert.assertEquals("num changes 2", 2, changes);
     }
 }

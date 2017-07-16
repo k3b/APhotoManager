@@ -465,4 +465,22 @@ public class TagRepository {
         allTags.add(newTag);
         return newTag;
     }
+
+    public int renameTags(String oldTagName, String newTagName) {
+        if ((oldTagName == null) || (newTagName == null)) {
+            throw new IllegalArgumentException("renameTags(null,null) not allowed");
+        }
+
+        int changes = 0;
+        if (oldTagName.compareTo(newTagName) != 0) {
+            List<Tag> items = load();
+            for (Tag t : items) {
+                if (oldTagName.compareTo(t.getName()) == 0) {
+                    t.setName(newTagName);
+                    changes++;
+                }
+            }
+        }
+        return changes;
+    }
 }
