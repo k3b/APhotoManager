@@ -374,10 +374,10 @@ public class FotoSql extends FotoSqlBase {
     }
 
     public static void addWhereFilterLatLon(QueryParameter query, double latitudeMin, double latitudeMax, double logituedMin, double logituedMax) {
-        if (!Double.isNaN(latitudeMin)) query.addWhere(FILTER_EXPR_LAT_MIN, DirectoryFormatter.parseLatLon(latitudeMin));
-        if (!Double.isNaN(latitudeMax)) query.addWhere(FILTER_EXPR_LAT_MAX, DirectoryFormatter.parseLatLon(latitudeMax));
-        if (!Double.isNaN(logituedMin)) query.addWhere(FILTER_EXPR_LON_MIN, DirectoryFormatter.parseLatLon(logituedMin));
-        if (!Double.isNaN(logituedMax)) query.addWhere(FILTER_EXPR_LON_MAX, DirectoryFormatter.parseLatLon(logituedMax));
+        if (!Double.isNaN(latitudeMin)) query.addWhere(FILTER_EXPR_LAT_MIN, DirectoryFormatter.formatLatLon(latitudeMin));
+        if (!Double.isNaN(latitudeMax)) query.addWhere(FILTER_EXPR_LAT_MAX, DirectoryFormatter.formatLatLon(latitudeMax));
+        if (!Double.isNaN(logituedMin)) query.addWhere(FILTER_EXPR_LON_MIN, DirectoryFormatter.formatLatLon(logituedMin));
+        if (!Double.isNaN(logituedMax)) query.addWhere(FILTER_EXPR_LON_MAX, DirectoryFormatter.formatLatLon(logituedMax));
     }
 
     public static void addPathWhere(QueryParameter newQuery, String selectedAbsolutePath, int dirQueryID) {

@@ -73,4 +73,11 @@ public class DirectoryFormatterTests {
         IGeoRectangle result = DirectoryFormatter.parseLatLon("130.00,12.00");
         Assert.assertEquals("130.0,12.0;130.01,12.01", result.toString());
     }
+
+    // DirectoryFormatter.formatLatLon
+    @Test
+    public void shoudFormatLatLon0() {
+        Assert.assertEquals("123.000000", DirectoryFormatter.formatLatLon(123));
+        Assert.assertEquals("0", DirectoryFormatter.formatLatLon(0));
+    }
 }

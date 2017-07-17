@@ -52,7 +52,7 @@ public abstract class TransactionLoggerBase  {
 
     public void addChanges(IMetaApi newData, EnumSet<MediaUtil.FieldID> changes, List<String> oldTags) {
         if (changes.contains(MediaUtil.FieldID.dateTimeTaken))  addChangesDateTaken(newData.getDateTimeTaken());
-        if (changes.contains(MediaUtil.FieldID.latitude))  addChanges(MediaTransactionLogEntryType.GPS, DirectoryFormatter.parseLatLon(newData.getLatitude()) + " " + DirectoryFormatter.parseLatLon(newData.getLongitude()), false);
+        if (changes.contains(MediaUtil.FieldID.latitude))  addChanges(MediaTransactionLogEntryType.GPS, DirectoryFormatter.formatLatLon(newData.getLatitude()) + " " + DirectoryFormatter.formatLatLon(newData.getLongitude()), false);
         if (changes.contains(MediaUtil.FieldID.description))  addChanges(MediaTransactionLogEntryType.DESCRIPTION, newData.getDescription(), true);
         if (changes.contains(MediaUtil.FieldID.title))  addChanges(MediaTransactionLogEntryType.HEADER, newData.getTitle(), true);
         if (changes.contains(MediaUtil.FieldID.rating)) addChanges(MediaTransactionLogEntryType.RATING, (newData.getRating() != null) ? newData.getRating().toString(): "0", false);

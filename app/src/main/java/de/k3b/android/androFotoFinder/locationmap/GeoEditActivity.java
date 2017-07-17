@@ -280,7 +280,7 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
     /************* local helper *****************/
     private String convertLL(double latLon) {
         if (Double.isNaN(latLon)) return "";
-        return DirectoryFormatter.parseLatLon(latLon);
+        return DirectoryFormatter.formatLatLon(latLon);
     }
 
     private double convertLL(String string) throws RuntimeException {

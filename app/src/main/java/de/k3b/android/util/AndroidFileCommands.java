@@ -409,7 +409,7 @@ public class AndroidFileCommands extends FileCommands {
                 openLogfile();
                 int resultFile = 0;
 
-                String latLong = DirectoryFormatter.parseLatLon(latitude) + " " + DirectoryFormatter.parseLatLon(longitude);
+                String latLong = DirectoryFormatter.formatLatLon(latitude) + " " + DirectoryFormatter.formatLatLon(longitude);
                 for (File file : files) {
                     countdown--;
                     if (countdown <= 0) {
