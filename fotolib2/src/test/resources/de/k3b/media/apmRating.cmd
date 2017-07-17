@@ -18,6 +18,10 @@ set xmp="%~dpn1.xmp"
 if NOT EXIST %xmp% set xmp=
 if "%~x1"==".xmp" set xmp=
 
+set xmp2="%~dpnx1.xmp"
+if NOT EXIST %xmp2% set xmp2=
+if "%~x1"==".xmp" set xmp2=
+
 if "%1" == "" goto usage
 
 if NOT EXIST %image% goto notFound
@@ -25,12 +29,12 @@ if NOT EXIST %image% goto notFound
 if "%newValue%"=="" goto show
 
 :apmRating
-%exe% -MWG:Rating=%newValue% %image% %xmp%
+%exe% -MWG:Rating=%newValue% %image% %xmp% %xmp2% > nul 2> nul
 goto end
 
 :show
 echo %image% 
-%exe% -MWG:Rating %image% %xmp%
+%exe% -MWG:Rating %image% %xmp% %xmp2%
 
 goto end
 

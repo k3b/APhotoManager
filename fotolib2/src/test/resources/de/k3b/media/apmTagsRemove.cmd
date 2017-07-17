@@ -1,6 +1,4 @@
 @echo off
-echo %0 %*
-
 rem apmTagsRemove.cmd
 rem ms-windows batch to Remove tags from jpg (IPTC:Keywords) and xmp (XMP-dc:Subject)
 

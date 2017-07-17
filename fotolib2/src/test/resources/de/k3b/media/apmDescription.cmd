@@ -16,7 +16,6 @@ rem if NOT EXIST %xmp% set xmp=
 rem if "%~x1"==".xmp" set xmp=
 set xmp2="%~dpnx1.xmp"
 if NOT EXIST %xmp2% set xmp2=
-if "%~x1"==".xmp" set xmp2=
 
 if "%1" == "" goto usage
 
@@ -34,10 +33,11 @@ rem -tagsFromFile may have failed, if jpg has no matching meta inside: copy empt
 if NOT EXIST %xmp% copy "%bindir%empty.xmp" %xmp% > nul 2> nul
 
 
-%exe% "-MWG:Description=%newValue%" "-Comment=%newValue%" "-XPComment=%newValue%" %image% %xmp% %xmp2%
+%exe% "-MWG:Description=%newValue%" "-Comment=%newValue%" "-XPComment=%newValue%" %image% %xmp% %xmp2% > nul 2> nul
 goto end
 
 :show
+if NOT EXIST %xmp% set xmp=
 echo %image% 
 %exe% -MWG:Description -Comment -XPComment %image% %xmp% %xmp2%
 

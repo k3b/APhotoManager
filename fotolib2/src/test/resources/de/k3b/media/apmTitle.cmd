@@ -30,10 +30,11 @@ rem -tagsFromFile may have failed, if jpg has no matching meta inside: copy empt
 if NOT EXIST %xmp% copy "%bindir%empty.xmp" %xmp% > nul 2> nul
 
 
-%exe% "-XPTitle=%newValue%"  "-Headline=%newValue%" "-Title=%newValue%" %image% %xmp% %xmp2%
+%exe% "-XPTitle=%newValue%"  "-Headline=%newValue%" "-Title=%newValue%" %image% %xmp% %xmp2%  > nul 2> nul
 goto end
 
 :show
+if NOT EXIST %xmp% set xmp=
 echo %image% 
 %exe% -XPTitle -Headline -Title %image% %xmp% %xmp2%
 

@@ -1,5 +1,4 @@
 @echo off
-echo %0 %*
 rem apmTagsAdd.cmd
 rem ms-windows batch to add tags to jpg (IPTC:Keywords) and xmp (XMP-dc:Subject)
 

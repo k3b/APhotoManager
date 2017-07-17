@@ -22,6 +22,8 @@ set xmp2="%~dpnx1.xmp"
 if NOT EXIST %xmp2% set xmp2=
 if "%~x1"==".xmp" set xmp2=
 
+IF "%lon:~0,1%"=="0" IF "%lat:~0,1%"=="0" goto removegps 
+
 rem lat/lon starts with "-"
 IF "%lat:~0,1%"=="-" (SET latPrefix=S) ELSE (SET latPrefix=N)
 IF "%lon:~0,1%"=="-" (SET lonPrefix=W) ELSE (SET lonPrefix=E)
@@ -42,7 +44,11 @@ if NOT EXIST %xmp% %exe% %xmp% -tagsFromFile %image% -@ "%bindir%apmJpg2xmp.args
 rem -tagsFromFile may have failed, if jpg has no matching meta inside: copy empty xmp
 if NOT EXIST %xmp% copy "%bindir%empty.xmp" %xmp% > nul 2> nul
 
-%exe% -c "%%+.6f" -GPSLatitude=%lat% -GPSLatitudeRef=%latPrefix%  -GPSLongitude=%lon% -GPSlongitudeRef=%lonPrefix% %image% %xmp% %xmp2%
+%exe% -c "%%+.6f" -GPSLatitude=%lat% -GPSLatitudeRef=%latPrefix%  -GPSLongitude=%lon% -GPSlongitudeRef=%lonPrefix% %image% %xmp% %xmp2% > nul 2> nul
+goto end
+
+:removegps
+%exe%  -gps:all=   %image% %xmp% %xmp2%  > nul 2> nul
 goto end
 
 :show
@@ -50,6 +56,7 @@ echo %image%
 %exe% -c "%%+.6f" -GPSPosition %image% %xmp% %xmp2%
 
 goto end
+
 
 
 :notFound

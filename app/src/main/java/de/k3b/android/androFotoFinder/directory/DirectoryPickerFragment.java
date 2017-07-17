@@ -415,7 +415,8 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
 
             int msgId;
             if (newChild.osMkDirs()) {
-                AndroidFileCommands.createFileCommand(getActivity()).log("mkdirs \"", newPathAbsolute, "\"").closeLogFile();
+                // apmMove.cmd and apmCopy.cmd create dir on demand
+                AndroidFileCommands.createFileCommand(getActivity()).log("rem mkdir \"", newPathAbsolute, "\"").closeLogFile();
                 msgId = R.string.mk_success_format;
                 reloadTreeViewIfAvailable();
                 onParentPathBarButtonClick(newChild);
