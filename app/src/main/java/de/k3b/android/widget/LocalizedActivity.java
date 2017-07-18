@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder and of ToGoZip.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -19,12 +19,13 @@
 
 package de.k3b.android.widget;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 
@@ -39,7 +40,6 @@ import de.k3b.android.androFotoFinder.Global;
  *
  * Created by k3b on 07.01.2016.
  */
-
 public abstract class LocalizedActivity extends Activity {
     /** if myLocale != Locale.Default : activity must be recreated in on resume */
     private Locale myLocale = null;
@@ -57,7 +57,7 @@ public abstract class LocalizedActivity extends Activity {
         // Locale has changed by other Activity ?
         if ((myLocale != null) && (myLocale.getLanguage() != Locale.getDefault().getLanguage())) {
             myLocale = null;
-            recreate();
+            recreate(LocalizedActivity.this);
         }
     }
 
@@ -71,7 +71,7 @@ public abstract class LocalizedActivity extends Activity {
                 .getDefaultSharedPreferences(context);
         String language = prefs.getString(Global.PREF_KEY_USER_LOCALE, "");
         Locale locale = Global.systemLocale; // in case that setting=="use android-locale"
-        if ((language != null) && (!language.isEmpty())) {
+        if ((language != null) && (language.length() > 0)) {
             locale = new Locale(language); // overwrite "use android-locale"
         }
 
@@ -93,9 +93,15 @@ public abstract class LocalizedActivity extends Activity {
     public static void recreate(Activity child) {
         Activity context = child;
         while (context != null) {
-            context.recreate();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                context.recreate();
+            } else {
+                // https://stackoverflow.com/questions/11495130/android-recreate-functions-in-api-7
+                context.startActivity(new Intent(context, context.getClass()));
+                context.finish();
+            }
             context = context.getParent();
         }
-
     }
+
 }

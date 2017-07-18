@@ -15,7 +15,7 @@
         <item>XC</item>
     </string-array>
 
-    <!-- which gui language to use ? -->
+    <!-- #21: which gui language to use ? pref_locale_names must correspond with pref_locale_values -->
     <string-array name="pref_locale_names" translatable="false">
         <item>@string/settings_locale_os_language</item>
         <item>العربية (Arabic)</item> 

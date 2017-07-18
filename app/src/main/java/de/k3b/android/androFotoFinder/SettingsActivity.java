@@ -55,14 +55,14 @@ import uk.co.senab.photoview.log.LogManager;
 public class SettingsActivity extends PreferenceActivity {
     private static Boolean sOldEnableNonStandardIptcMediaScanner = null;
     private SharedPreferences prefsInstance = null;
-    private ListPreference defaultLocalePreference;
+    private ListPreference defaultLocalePreference;  // #21: Support to change locale at runtime
     private ListPreference mediaUpdateStrategyPreference;
 
     private int INSTALL_REQUEST_CODE = 1927;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
-        LocalizedActivity.fixLocale(this);
+        LocalizedActivity.fixLocale(this);	// #21: Support to change locale at runtime
         super.onCreate(savedInstanceState);
         final Intent intent = getIntent();
         if (Global.debugEnabled && (intent != null)){
@@ -74,9 +74,9 @@ public class SettingsActivity extends PreferenceActivity {
                 .getDefaultSharedPreferences(this);
         global2Prefs(this.getApplication());
 
+		// #21: Support to change locale at runtime
         defaultLocalePreference =
                 (ListPreference) findPreference(Global.PREF_KEY_USER_LOCALE);
-
         defaultLocalePreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -119,6 +119,8 @@ public class SettingsActivity extends PreferenceActivity {
                 return false; // donot close
             }
         });
+		
+		// #21: Support to change locale at runtime
         updateSummary();
     }
 
@@ -350,6 +352,8 @@ public class SettingsActivity extends PreferenceActivity {
         Intent intent = new Intent(parent, SettingsActivity.class);
         parent.startActivity(intent);
     }
+	
+	// #21: Support to change locale at runtime
     // This is used to show the status of some preference in the description
     private void updateSummary() {
         final String languageKey = prefsInstance.getString(Global.PREF_KEY_USER_LOCALE, "");
@@ -359,6 +363,7 @@ public class SettingsActivity extends PreferenceActivity {
         about.setTitle(AboutDialogPreference.getAboutTitle(this));
     }
 
+	// #21: Support to change locale at runtime
     private void setLanguage(String languageKey) {
         setPref(languageKey, defaultLocalePreference, R.array.pref_locale_names);
     }

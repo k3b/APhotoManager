@@ -5,6 +5,7 @@
 		android:title="@string/settings_title"
 		android:key="pref_category_first">
 
+        <!-- #21: Support to change locale at runtime -->
         <ListPreference
             android:key="user_locale"
             android:title="@string/settings_locale_title"

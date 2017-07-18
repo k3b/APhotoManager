@@ -40,6 +40,7 @@ public class Global {
     /** LOG_CONTEXT is used as logging source for filtering logging messages that belong to this */
     public static final String LOG_CONTEXT = "k3bFoto";
 
+    /** local settings: which language should the gui use */
     public static final String PREF_KEY_USER_LOCALE = "user_locale";
 
     /**
@@ -133,6 +134,7 @@ public class Global {
         }
     }
 
+    /** Remember ininial language settings. This allows setting "switch back to device language" after changing app locale */
     public static Locale systemLocale = Locale.getDefault();
 
     /** move some pre-defined menu-actions into the "more..." submenue */
