@@ -72,7 +72,9 @@ public abstract class LocalizedActivity extends Activity {
         String language = prefs.getString(Global.PREF_KEY_USER_LOCALE, "");
         Locale locale = Global.systemLocale; // in case that setting=="use android-locale"
         if ((language != null) && (language.length() > 0)) {
-            locale = new Locale(language); // overwrite "use android-locale"
+            // i.e. "de" for german or "pt-BR" for portogeese in brasilia
+            String[] languageParts = language.split("-");
+            locale = (languageParts.length == 1) ? new Locale(language) : new Locale(languageParts[0], languageParts[1]); // overwrite "use android-locale"
         }
 
         if (locale != null) {
