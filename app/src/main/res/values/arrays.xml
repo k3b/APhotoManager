@@ -19,6 +19,8 @@
     <string-array name="pref_locale_names" translatable="false">
         <item>@string/settings_locale_os_language</item>
         <item>العربية (Arabic)</item> 
+		<item>简体中文 (Chinese simplified)</item>
+		<item>中國傳統的 (Chinese traditional)</item>
         <item>Deutsch (German)</item>
         <item>English</item>
         <item>Espanol (Spanish)</item>
@@ -36,6 +38,8 @@
     <string-array name="pref_locale_values" translatable="false">
         <item></item>
         <item>ar</item>
+		<item>zh-CN</item>
+		<item>zh-TW</item>
         <item>de</item>
         <item>en</item>
         <item>es</item>
