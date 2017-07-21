@@ -204,4 +204,15 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
     <string name="settings_xmp_file_schema_summary">settings_xmp_file_schema_summary: Long: file.jpg.xmp; Short: file.xmp</string>
     <string name="view_context_menu_title">view_context_menu_title: Load Context ...</string>
 
+
+    <!-- #87: edit-exif: image title, description, rating -->
+    <string name="exif_menu_title">exif_menu_title:Edit Exif</string>
+    <string name="lbl_title">lbl_title:Title</string>
+    <string name="lbl_description">lbl_description:Description</string>
+    <string name="lbl_rating">lbl_rating:Rating</string>
+
+    <!-- #90 add: sort by Rating, Date-Last-modified -->
+    <string name="sort_by_rating">sort_by_rating:Rating</string>
+    <string name="sort_by_modification">sort_by_modification:Last Modified</string>
+
 </resources>

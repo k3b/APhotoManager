@@ -7,8 +7,8 @@ find, sort, view, copy, delete, set gps exif data, send, ... .
 
 * sizeof com.PlayZone.quickimagegallery.apk version 0.5.5: 2.7 MB
 * sizeof de.k3b.android.androFotoFinder.apk version 0.5.5: 1.7 MB 
-
-
+* sizeof de.k3b.android.androFotoFinder.apk version 0.6.0: 1.1 MB (better compression)
+* sizeof de.k3b.android.androFotoFinder.apk version 0.6.0: 1.3 MB (more translations)
 
 ## Features
 
@@ -16,7 +16,7 @@ find, sort, view, copy, delete, set gps exif data, send, ... .
 * Geotagging: Shows photos in a [geographic map](https://github.com/k3b/APhotoManager/wiki/geographic-map) from [openstreetmap](http://www.openstreetmap.org)
 * Buildin file manager for photos: find, sort, view, copy, delete, Show in map, set gps exif data, send, ... .
 * Fast [find](https://github.com/k3b/APhotoManager/wiki/Filter-View) local photos by (sub-)folder, date, [geographic map](https://github.com/k3b/APhotoManager/wiki/geographic-map)or [tags (keywords)](https://github.com/k3b/APhotoManager/wiki/Tags).
-* [Translations](https://crowdin.com/project/AndroFotoFinder): &nbsp;ar,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/de-home">de</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/home"   >en</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/it-home">it</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja</a>,&nbsp;nl,&nbsp;pl,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro</a>,&nbsp;ru&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/tr-home">tr</a>
+* [Translations](https://crowdin.com/project/AndroFotoFinder): &nbsp;ar,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/de-home">de</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/home"   >en</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/it-home">it</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja</a>,&nbsp;nl,&nbsp;pl,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro</a>,&nbsp;ru&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/tr-home">tr</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/zh-CN-home">zh-CN</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/zh-TW-home">zh-TW</a>
 	* [![Crowdin](https://d322cqt584bo4o.cloudfront.net/androFotoFinder/localized.svg)](https://crowdin.com/project/androFotoFinder)<a href="https://github.com/k3b/APhotoManager/issues/21">Help us to translate into other languages.</a>
 	
 ---
@@ -44,6 +44,7 @@ find, sort, view, copy, delete, set gps exif data, send, ... .
 * [Gallery-View](https://github.com/k3b/APhotoManager/wiki/Gallery-View)
 * [Geographic-Map](https://github.com/k3b/APhotoManager/wiki/geographic-map)
 * [Image-View](https://github.com/k3b/APhotoManager/wiki/Image-View)
+* [Edit Exif infos](Exif-Edit) of photo(s)
 * [Filter-View](https://github.com/k3b/APhotoManager/wiki/Filter-View)
 * [tags (keywords)](https://github.com/k3b/APhotoManager/wiki/Tags)
 * [Bookmarks](https://github.com/k3b/APhotoManager/wiki/Bookmarks)

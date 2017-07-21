@@ -205,4 +205,14 @@ Verstecken kann über das 'Media-Scanner' Gallery-Menü rückgängig gemacht wer
   <!-- #70: manually select sql column defintition for extra detail display in image detail view  -->
   <string name="view_context_menu_title">Lade Kontext ...</string>
 
+  <!-- #87: edit-exif: image title, description, rating -->
+  <string name="exif_menu_title">Exif Metadataen bearbeiten</string>
+  <string name="lbl_title">Titel</string>
+  <string name="lbl_description">Beschreibung</string>
+  <string name="lbl_rating">Bewertung</string>
+
+  <!-- #90 add: sort by Rating, Date-Last-modified -->
+  <string name="sort_by_rating">Bewertung</string>
+  <string name="sort_by_modification">letzte Änderung</string>
+
 </resources>
