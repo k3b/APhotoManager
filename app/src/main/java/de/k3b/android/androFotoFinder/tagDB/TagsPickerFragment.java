@@ -748,6 +748,7 @@ public class TagsPickerFragment  extends DialogFragment  {
     public void setTagSelector(ITagsSelector selector) {
         mSelector = selector;
     }
+
     private void tagAdd(Tag parent, String itemExpression) {
         List<Tag> existingItems = loadTagRepositoryItems(false);
         int changeCount = TagRepository.includePaths(existingItems, parent, null, itemExpression);
@@ -756,12 +757,18 @@ public class TagsPickerFragment  extends DialogFragment  {
 
             int len = existingItems.size();
 
+            // assume that new tags are appended.
+            // iteraterate over all appended tags
             for (int i = len - changeCount; i < len; i++) {
                 Tag t = existingItems.get(i);
                 // existingItems.add(t);
                 mDataAdapter.add(t);
-            }
 
+                // new added tags will be automatically bookmarked
+                if ((mBookMarkNames != null) && !mBookMarkNames.contains(t.getName())) {
+                    mBookMarkNames.add(t.getName());
+                }
+            }
             mDataAdapter.notifyDataSetInvalidated();
             mDataAdapter.notifyDataSetChanged();
             mDataAdapter.reloadList();
