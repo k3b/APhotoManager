@@ -67,4 +67,8 @@ public class StringUtils {
         }
         return null;
     }
+
+    public static int length(String str) {
+        return (str != null) ? str.length() : 0;
+    }
 }

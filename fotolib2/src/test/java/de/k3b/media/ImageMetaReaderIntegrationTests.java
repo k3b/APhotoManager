@@ -29,9 +29,6 @@ import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -39,7 +36,6 @@ import java.util.List;
 import de.k3b.FotoLibGlobal;
 import de.k3b.TestUtil;
 import de.k3b.io.DateUtil;
-import de.k3b.io.FileUtils;
 import de.k3b.io.ListUtils;
 
 /**
@@ -101,7 +97,7 @@ public class ImageMetaReaderIntegrationTests {
     @Test
     public void shouldGetTags() throws IOException
     {
-        Assert.assertEquals("Marker1, Marker2", ListUtils.toString(sut.getTags(),", "));
+        Assert.assertEquals("Marker1, Marker2", ListUtils.toString(", ", sut.getTags()));
     }
 
     @Test
@@ -138,8 +134,8 @@ public class ImageMetaReaderIntegrationTests {
     }
 
     protected void assertEquals(String msg, List<String> expected, List<String> actual) {
-        String expectedString = (expected == null) ? null : ListUtils.toString(expected, "|");
-        String actualString = (actual == null) ? null : ListUtils.toString(actual, "|");
+        String expectedString = (expected == null) ? null : ListUtils.toString("|", expected);
+        String actualString = (actual == null) ? null : ListUtils.toString("|", actual);
         Assert.assertEquals(msg + ":" + expectedString + " != " + actualString, expectedString, actualString);
     }
 }

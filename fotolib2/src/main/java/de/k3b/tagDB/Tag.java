@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import de.k3b.io.StringUtils;
+
 /**
  * Represents a possible tag or keyword that can be attached to an image.
  *
@@ -171,7 +173,29 @@ public class Tag{
         return null;
     }
 
-	
+    public static Tag findByPath(List<Tag> all, Tag parent, String path) {
+        return findByPathElements(all, parent, TagExpression.getPathElemens(path));
+    }
+
+    public static Tag findByPathElements(List<Tag> all, Tag parent, String... pathElements) {
+        if (pathElements != null) {
+            boolean isRoot = (pathElements.length > 0) && (StringUtils.length(pathElements[0]) == 0);
+            Tag currentTagParent = isRoot ? null : parent;
+            for (String pathElement : pathElements) {
+                if (pathElement != null) {
+                    pathElement = pathElement.trim();
+                    if (pathElement.length() > 0) {
+                        Tag tag = Tag.findFirstChildByName(all, currentTagParent, pathElement);
+                        if (tag == null) return null;
+                        currentTagParent = tag;
+                    }
+                }
+            }
+            return currentTagParent;
+        }
+        return null;
+    }
+
     public int delete(List<Tag> all, boolean recursive) {
         int result = 0;
         if (all != null) {

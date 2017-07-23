@@ -96,7 +96,7 @@ public class MediaXmpSegmentIntegrationTests {
     @Test
     public void shouldGetTags() throws IOException
     {
-        Assert.assertEquals("Marker1, Marker2", ListUtils.toString(sut.getTags(),", "));
+        Assert.assertEquals("Marker1, Marker2", ListUtils.toString(", ", sut.getTags()));
     }
 
     @Test

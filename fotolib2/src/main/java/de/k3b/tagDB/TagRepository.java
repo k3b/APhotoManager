@@ -131,8 +131,8 @@ public class TagRepository {
         int changes = 0;
 
         Tag firstTarget = outInsertedFoundTag;
-		if (childNameExpression != null) {
-			String[] newSubPathExpression = childNameExpression.split("[,;:|]+");
+        String[] newSubPathExpression = TagExpression.getSubExpressions(childNameExpression);
+		if (newSubPathExpression != null) {
 			for(String newChild : newSubPathExpression) {
 				changes += includePath(all, parent, firstTarget, newChild);
                 firstTarget = null;
@@ -142,7 +142,7 @@ public class TagRepository {
 		return changes;
 	}
 
-	/**
+    /**
      * make shure that pathToBeIncluded is included in all below _parent.
      * Inserts if neccessary.
      * May add duplicates under different paths.
@@ -165,24 +165,26 @@ public class TagRepository {
                 parent = null;
             }
 
-            Tag currentTagParent = parent;
-            String[] pathElements = pathToBeIncluded.split("[\\/]+");
+            String[] pathElements = TagExpression.getPathElemens(pathToBeIncluded);
 
-            for(String pathElement : pathElements) {
-				if (pathElement != null) {
-					pathElement = pathElement.trim();
-					if (pathElement.length() > 0) {
-						Tag tag = Tag.findFirstChildByName(all, currentTagParent, pathElement);
-						if (tag == null) {
-							// there is no currentTagParent with name=pathName yet: insert
-							tag = new Tag().setName(pathElement);
-							tag.setParent(currentTagParent);
-							all.add(tag);
-							changes++;						
-						} // else already existing
-						currentTagParent = tag;
-					}
-				}
+            Tag currentTagParent = parent;
+            if (pathElements != null) {
+                for (String pathElement : pathElements) {
+                    if (pathElement != null) {
+                        pathElement = pathElement.trim();
+                        if (pathElement.length() > 0) {
+                            Tag tag = Tag.findFirstChildByName(all, currentTagParent, pathElement);
+                            if (tag == null) {
+                                // there is no currentTagParent with name=pathName yet: insert
+                                tag = new Tag().setName(pathElement);
+                                tag.setParent(currentTagParent);
+                                all.add(tag);
+                                changes++;
+                            } // else already existing
+                            currentTagParent = tag;
+                        }
+                    }
+                }
             }
 
             if ((outInsertedFoundTag != null) && (currentTagParent != null)) {
@@ -194,7 +196,7 @@ public class TagRepository {
         }
 		return changes;
     }
-    
+
     /** Load from repository-file to memory.
      *
      * @return data loaded

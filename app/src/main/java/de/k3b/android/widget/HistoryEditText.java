@@ -139,7 +139,7 @@ public class HistoryEditText {
         }
 
         private String toString(List<String> list) {
-            return ListUtils.toString(list, mDelimiter);
+            return ListUtils.toString(mDelimiter, list);
         }
 
         private List<String>  include(List<String>  history_, String newValue) {

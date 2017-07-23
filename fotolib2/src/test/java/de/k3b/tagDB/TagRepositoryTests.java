@@ -339,4 +339,35 @@ public class TagRepositoryTests {
         Assert.assertEquals("/x/new/y", sut.findFirstByName("y").getPath());
         Assert.assertEquals("num changes 2", 2, changes);
     }
+
+    @Test
+    public void shouldFindByPath() throws Exception {
+        List<Tag> sut = createUnsavedRepo("shouldFindByPath", "a/b/c,x/y/z").load();
+        Tag root = Tag.findByPath(sut, null, "x/y");
+
+        Tag found = Tag.findByPath(sut, null, "a/b/c");
+        Assert.assertEquals("/a/b/c", found.getPath());
+
+        found = Tag.findByPath(sut, root, "/a/b/c");
+        Assert.assertEquals("/a/b/c", found.getPath());
+    }
+
+    @Test
+    public void shouldNotFindByPath() throws Exception {
+        List<Tag> sut = createUnsavedRepo("shouldFindByPath", "a/b/c,x/y/z").load();
+        Tag root = Tag.findByPath(sut, null, "x/y");
+
+        Tag found = Tag.findByPath(sut, root, "a/q/c");
+        Assert.assertEquals("no a/q", null, found);
+
+        found = Tag.findByPath(sut, root, "a/b/c");
+        Assert.assertEquals("wrong root", null, found);
+    }
+
+    @Test
+    public void shouldGetPathElements() throws Exception {
+        String[] pathElemens = TagExpression.getPathElemens("/a");
+        Assert.assertEquals(2, pathElemens.length);
+        Assert.assertEquals("", pathElemens[0]);
+    }
 }

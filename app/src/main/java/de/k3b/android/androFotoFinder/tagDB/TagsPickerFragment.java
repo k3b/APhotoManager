@@ -61,7 +61,9 @@ import de.k3b.database.QueryParameter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.ListUtils;
+import de.k3b.io.StringUtils;
 import de.k3b.tagDB.Tag;
+import de.k3b.tagDB.TagExpression;
 import de.k3b.tagDB.TagRepository;
 
 /**
@@ -703,18 +705,36 @@ public class TagsPickerFragment  extends DialogFragment  {
         }
     }
 
-    private void tagRename(Tag oldTag, String newName, boolean updateDatabase, boolean updateAffected) {
-        String oldName = oldTag.getName();
+    private void tagRename(Tag oldTag, String newPath, boolean updateDatabase, boolean updateAffected) {
+        String[] pathElements = TagExpression.getPathElemensFromLastExpr(newPath);
 
-        if ((newName != null) && (newName.compareTo(oldName) != 0)) {
-            if (updateDatabase) {
-                new TagRenameWithDbUpdateTask(oldName, newName).execute();
-                return;
+        if (pathElements != null) {
+            boolean mustReload = false;
+            String oldName = oldTag.getName();
+            String newName = pathElements[pathElements.length - 1];
+
+            if ((StringUtils.length(newName) > 0) && (newName.compareTo(oldName) != 0)) {
+                if (updateDatabase) {
+                    new TagRenameWithDbUpdateTask(oldName, newName).execute();
+                    return;
+                }
+                updateKnownLists(newName, oldName, updateAffected);
+                mDataAdapter.remove(oldTag);
+                // mDataAdapter.add();
+                mustReload = true;
             }
-            updateKnownLists(newName, oldName, updateAffected);
-            mDataAdapter.remove(oldTag);
-            // mDataAdapter.add();
-            mDataAdapter.reloadList();
+
+            if (pathElements.length > 1) {
+                // move to different path
+                mDataAdapter.remove(oldTag);
+                if (tagAdd(oldTag.getParent(), newPath) > 0) {
+                    mustReload = true;
+                }
+            }
+
+            if (mustReload) {
+                mDataAdapter.reloadList();
+            }
         }
     }
 
@@ -749,7 +769,7 @@ public class TagsPickerFragment  extends DialogFragment  {
         mSelector = selector;
     }
 
-    private void tagAdd(Tag parent, String itemExpression) {
+    private int tagAdd(Tag parent, String itemExpression) {
         List<Tag> existingItems = loadTagRepositoryItems(false);
         int changeCount = TagRepository.includePaths(existingItems, parent, null, itemExpression);
 
@@ -775,6 +795,7 @@ public class TagsPickerFragment  extends DialogFragment  {
             TagRepository.getInstance().save();
             mDataAdapter.notifyDataSetChanged();
         }
+        return changeCount;
     }
 
     private void tagChange(Tag tag, Tag parent) {

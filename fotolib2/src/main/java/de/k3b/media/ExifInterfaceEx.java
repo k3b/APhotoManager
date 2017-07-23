@@ -331,7 +331,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     /** not implemented in {@link ExifInterface} */
     @Override
     public IMetaApi setTags(List<String> value) {
-        setAttribute(TAG_WIN_KEYWORDS, (value == null) ? null : ListUtils.toString(value, LIST_DELIMITER));
+        setAttribute(TAG_WIN_KEYWORDS, (value == null) ? null : ListUtils.toString(LIST_DELIMITER, value));
         if (xmpExtern != null) xmpExtern.setTags(value);
         return this;
     }
