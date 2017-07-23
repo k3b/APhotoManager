@@ -27,7 +27,6 @@
   <string name="bookmark_delete_answer_format">刪除書簽 %1$s。</string>
   <string name="bookmark_delete_error_format">不能刪除書簽 %1$s。</string>
   <string name="bookmark_delete_question">刪除此書簽嗎？</string>
-  <string name="bookmark_err_not_found_format">在 %1$s 中沒有找到查詢條件。</string>
   <string name="bookmark_file_comment_format">
 使用\'%1$s\'（%2$s版）基於%3$s 生成。詳情參見https://github.com/k3b/APhotoManager/wiki/intentap#EXTRA_SQL
 </string>
@@ -182,7 +181,6 @@
   <string name="tags_add_default">新標簽</string>
   <string name="tags_delete_children_title">刪除子級</string>
   <string name="tags_update_photos">更新受影響的照片中的標簽</string>
-  <string name="tags_update_result_format">已經更新 %1$d 照片的標簽</string>
   <string name="tags_hint">在標簽名上長按打開菜單</string>
   <string name="tags_defaults">活動、人們、地點、主題、項目</string>
 </resources>

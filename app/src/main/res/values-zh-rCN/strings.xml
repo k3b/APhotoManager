@@ -27,7 +27,6 @@
   <string name="bookmark_delete_answer_format">删除书签 %1$s。</string>
   <string name="bookmark_delete_error_format">不能删除书签 %1$s。</string>
   <string name="bookmark_delete_question">删除此书签吗？</string>
-  <string name="bookmark_err_not_found_format">在 %1$s 中没有找到查询条件。</string>
   <string name="bookmark_file_comment_format">使用\'%1$s\'（%2$s版）基于%3$s 生成。详情参见https://github.com/k3b/APhotoManager/wiki/intentap#EXTRA_SQL</string>
   <string name="bookmark_load_from_menu_title">加载书签&#8230;</string>
   <string name="bookmark_save_as_menu_title">书签另存为...</string>
@@ -174,7 +173,6 @@
   <string name="tags_add_default">新标签</string>
   <string name="tags_delete_children_title">删除子级</string>
   <string name="tags_update_photos">更新受影响的照片中的标签</string>
-  <string name="tags_update_result_format">已经更新 %1$d 照片的标签</string>
   <string name="tags_hint">在标签名上长按打开菜单</string>
   <string name="tags_defaults">活动、人们、地点、主题、项目</string>
 </resources>
