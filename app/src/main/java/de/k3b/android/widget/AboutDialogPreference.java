@@ -89,6 +89,8 @@ public class AboutDialogPreference extends DialogPreference {
             html = html.replace("$versionName$", versionName);
         }
 
+        html = html.replace("$translate$",
+                context.getText(R.string.about_translate));
         html = html.replace("$about$",
                 context.getText(R.string.about_content_about));
 

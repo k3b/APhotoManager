@@ -25,31 +25,6 @@
 <h1>A Photo Manager</h1>ve &#39;A Photo Map&#39; &#39;AndroFotoFinder&#39; içerisinde
   <br />Özellikler:
   <ul>
-  <li>Uygulama ve internet sayfası şu dillerde mevcuttur:<ul>
-		<li>  <a href="https://github.com/k3b/APhotoManager/wiki/de-home">de</a>,&nbsp;
-  <a href="https://github.com/k3b/APhotoManager/wiki/home">en</a>,&nbsp;
-  <a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr</a>,&nbsp;
-  <a href="https://github.com/k3b/APhotoManager/wiki/it-home">it</a>,&nbsp;
-  <a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja</a>,&nbsp;nl,&nbsp;pl,&nbsp;
-  <a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro</a>
-  ,&nbsp;ru,
-  &nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/tr-home">tr</a>,
-&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/zh-CN-home">zh-CN</a>,
-&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/zh-TW-home">zh-TW</a>
-
-</li>
-      <li>
-        <b>Bu uygulamayı diğer dillere çevirmemize yardımcı olun:</b>
-		<ul>
-		  <li>Klavyesi ve internet erişimi olan bir bilgisayarda
-			<a href="https://github.com/k3b/APhotoManager/issues/21">crowdin.com ağ sayfası aracılığıyla.</a>
-		  </li>
-		  <li>Android üzerinde "A Photo Manager" <b>Ayarlar/Çevir</b> menüsünden stringlate uygulamasını kullanarak.
-		  </li>
-		</ul>
-      </li>
-		</ul>
-	</li>
     <li>Büyük görüntü yığınlarının üstesinden gelebilir (1000+ dizinde 15000+ görüntü)</li>
     <li>Android&#39;in görüntü içerik sağlayıcısını kullanır. Önden görüntü taramaya gerek yoktur.</li>
     <li>

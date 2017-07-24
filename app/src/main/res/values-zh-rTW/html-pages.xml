@@ -25,29 +25,6 @@
   <h1>照片管理器</h1>&#39; 集成照片地圖功能 &#39; 在 &#39; AndroFotoFinder &#39;
   <br />特點：
   <ul>
-    <li>應用程序和網頁支持以下語言：
-    <ul>
-      <li>
-      <a href="https://github.com/k3b/APhotoManager/wiki/de-home">德語</a>，
-      <a href="https://github.com/k3b/APhotoManager/wiki/home">英語</a>，
-      <a href="https://github.com/k3b/APhotoManager/wiki/fr-home">法語</a>，
-      <a href="https://github.com/k3b/APhotoManager/wiki/it-home">意大利語</a>，
-      <a href="https://github.com/k3b/APhotoManager/wiki/ja-home">日語</a>、 nl、 pl，
-      <a href="https://github.com/k3b/APhotoManager/wiki/ro-home">羅馬尼亞語</a>，俄語,
-	  &nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/tr-home">tr</a>,
-&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/zh-CN-home">zh-CN</a>,
-&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/zh-TW-home">zh-TW</a>
-</li>
-      <li>
-        <b>幫助我們把這個應用程序翻譯成其他語言：</b>
-        <ul>
-          <li>使用具備互聯網連接的電腦，請訪問 
-          <a href="https://github.com/k3b/APhotoManager/issues/21">crowdin.com 網站。</a></li>
-          <li>通過&quot;照片管理器&quot;菜單 
-          <b>設置/翻譯</b> 使用安卓版 stringlate 應用程序。</li>
-        </ul>
-      </li>
-    </ul></li>
     <li>可以處理大量圖片 （超過1000 文件夾中的超過15000 張圖片）</li>
     <li>使用 Android &#39; s 標準圖像服務，無需進行初始圖片掃描。</li>
     <li style="list-style: none">通過
