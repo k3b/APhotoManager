@@ -69,4 +69,4 @@ echo example %0 "/path/to/image.jpg" job "conference"
 :end
 rem echo %exe%  %all% -Keywords -Subject
 rem %exe%  %all%  -Keywords -Subject
-echo .
+
