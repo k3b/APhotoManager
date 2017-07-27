@@ -50,8 +50,8 @@ public class ExifInterfaceIntegrationTests {
 
 	private static final String specialChars = "\r\n日本人 (Japanese)\n" + 
 												"العربية (Arabic)\n" +
-												"简体中文 (Chinese simplified)\n" +
-												"中國傳統的 (Chinese traditional)\n" +
+												"简体中文 (simplified Chinese)\n" +
+												"繁体中文 (traditional Chinese)\n" +
 												"Français (French)\n" +
 												"Русский (Russian)" ;
     @BeforeClass

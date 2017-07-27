@@ -19,8 +19,8 @@
     <string-array name="pref_locale_names" translatable="false">
         <item>@string/settings_locale_os_language</item>
         <item>العربية (Arabic)</item> 
-		<item>简体中文 (Chinese simplified)</item>
-		<item>中國傳統的 (Chinese traditional)</item>
+		<item>简体中文 (simplified Chinese)</item>
+		<item>繁体中文 (traditional Chinese)</item>
         <item>Deutsch (German)</item>
         <item>English</item>
         <item>Espanol (Spanish)</item>
