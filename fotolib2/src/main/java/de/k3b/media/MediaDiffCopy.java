@@ -31,7 +31,7 @@ import de.k3b.tagDB.TagProcessor;
 import de.k3b.tagDB.TagRepository;
 
 /**
- * Copy delta between to {@link IMetaApi} items.
+ * Copy delta between two {@link IMetaApi} items.
  * Used for multiselection Exif update.
  *
  * Created by k3b on 07.07.2017.
@@ -193,6 +193,7 @@ public class MediaDiffCopy {
         return null;
     }
 
+    /** method to append text to title or description */
     private String getAppended(String oldValue, String append) {
         if (append != null) {
             String value = oldValue;

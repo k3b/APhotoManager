@@ -292,9 +292,11 @@ public class TagRepository {
             if ((line.length() > 0) && (!line.startsWith(COMMENT))) {
                 Tag item = loadItem(line);
                 final boolean valid = isValid(item);
+                /*  // to much log output
                 if (FotoLibGlobal.debugEnabled) {
                     logger.debug(dbg_context + "load(" + line + "): " + ((valid) ? "loaded" : "ignored"));
                 }
+                */
 
                 if (valid) {
                     result.add((Tag) item);
@@ -386,9 +388,11 @@ public class TagRepository {
             writer.write(line);
             writer.write("\n");
         }
+        /* // to much log output
         if (FotoLibGlobal.debugEnabled) {
             logger.debug(dbg_context + "save(" + line + "): " + ((valid) ? "saved" : "ignored" ));
         }
+        */
         return valid;
     }
 
