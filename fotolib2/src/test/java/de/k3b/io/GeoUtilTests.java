@@ -22,6 +22,8 @@ package de.k3b.io;
 import org.junit.Assert;
 import org.junit.Test;
 
+import de.k3b.geo.api.IGeoPointInfo;
+
 /**
  * Created by k3b on 19.10.2016.
  */
@@ -75,6 +77,9 @@ public class GeoUtilTests {
         assertParse(50.5, "50, 30N","NS");
         assertParse(-50.5, "50, 30S","NS");
         assertParse(-50.5, "S 50'30''0.00","NS");
+        assertParse(IGeoPointInfo.NO_LAT_LON, "0","NS");
+        assertParse(IGeoPointInfo.NO_LAT_LON, "","NS");
+        assertParse(IGeoPointInfo.NO_LAT_LON, null,"NS");
     }
 
     private void assertParse(double expected, String actual, String plusMinusns) {

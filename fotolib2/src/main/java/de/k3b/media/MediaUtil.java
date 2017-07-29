@@ -205,6 +205,14 @@ public class MediaUtil {
         return changes;
     }
 
+    /** #91: Fix Photo without geo may have different representations values for no-value */
+    private static boolean allowed(Double newValue, Double oldValue, EnumSet<FieldID> fields2copy, boolean simulateDoNotCopy, boolean overwriteExisting, boolean allowSetNull,
+                                   final EnumSet<FieldID> allowSetNulls, FieldID item, List<FieldID> collectedChanges) {
+        if (GeoUtil.equals(newValue, oldValue))  return false;  // both are the same, no need to write again
+        return allowed((Object) newValue, (Object) oldValue, fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull,
+                                            allowSetNulls, item, collectedChanges);
+    }
+
     private static boolean allowed(Object newValue, Object oldValue, EnumSet<FieldID> fields2copy, boolean simulateDoNotCopy, boolean overwriteExisting, boolean allowSetNull,
                                    final EnumSet<FieldID> allowSetNulls, FieldID item, List<FieldID> collectedChanges) {
         // in simulate mode return false as success; in non-simulate return true

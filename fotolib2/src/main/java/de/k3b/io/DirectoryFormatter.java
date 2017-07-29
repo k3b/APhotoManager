@@ -99,6 +99,12 @@ public class DirectoryFormatter {
         return result.toString();
     }
 
+    public static String formatLatLon(Double latOrLon) {
+        if (latOrLon == null) return "0";
+        return formatLatLon(latOrLon.doubleValue());
+    }
+
+
     public static String formatLatLon(double latOrLon) {
         if ((latOrLon <= 0.0000005) && (latOrLon >= -0.0000005)) return "0";
         return latLonFormatter6.format(latOrLon);

@@ -89,6 +89,14 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
 
     @Override
     public void saveAttributes() throws IOException {
+        loadLatLon();
+        if ((this.mLatitude != null) &&
+                (this.mLongitude != null) &&
+                (this.mLatitude.doubleValue() == 0) &&
+                (this.mLongitude.doubleValue() == 0)) {
+            setLatitude(null);
+            setLongitude(null);
+        }
         super.saveAttributes();
         setFilelastModified(mExifFile);
         if (FotoLibGlobal.debugEnabledJpgMetaIo) {
@@ -406,13 +414,14 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     }
 
     private void loadLatLon() {
-        float[] latlng = new float[2];
-        if (getLatLong(latlng)) {
-            mLatitude = Double.valueOf(latlng[0]);
-            mLongitude = Double.valueOf(latlng[1]);
+        if ((this.mLatitude == null) || (this.mLongitude == null)) {
+            float[] latlng = new float[2];
+            if (getLatLong(latlng)) {
+                mLatitude = Double.valueOf(latlng[0]);
+                mLongitude = Double.valueOf(latlng[1]);
+            }
         }
     }
-
 
     /** when xmp sidecar file was last modified or 0 */
     public void setFilelastModified(File file) {

@@ -1403,7 +1403,7 @@ public class ExifInterface {
      *
      * @param tag the name of the tag.
      */
-    private void removeAttribute(String tag) {
+    public void removeAttribute(String tag) {
         for (int i = 0 ; i < EXIF_TAGS.length; ++i) {
             mAttributes[i].remove(tag);
         }

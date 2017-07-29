@@ -23,6 +23,9 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
+import de.k3b.geo.api.GeoPointDto;
+import de.k3b.geo.api.IGeoPointInfo;
+
 /**
  * Formatting and parsing of different latitude/longitude formats.
  *
@@ -36,6 +39,12 @@ public class GeoUtil {
     private static DecimalFormat doubleFormatter = new DecimalFormat("#.######", new DecimalFormatSymbols(Locale.US));
 
     public static Double parse(String degreeString, String plusMinus) {
+        if ((degreeString == null) ||
+                (degreeString.length() == 0)  ||
+                (degreeString.compareTo("0") == 0)) {
+            return IGeoPointInfo.NO_LAT_LON;
+        }
+
         if (degreeString != null) {
             double result = 0;
             boolean isNegativ = false;
@@ -95,7 +104,7 @@ public class GeoUtil {
      * @return null if latLon is null.
      */
     public static String toString(final Double latLon, int digits, String sperator, String plusMinus) {
-        if (latLon == null) return null;
+        if (GeoUtil.getValue(latLon) == IGeoPointInfo.NO_LAT_LON) return null;
 
         StringBuilder result = new StringBuilder();
         double remaining = latLon;
@@ -145,5 +154,22 @@ public class GeoUtil {
         }
         return -1;
     }
+
+    /** null save function: return if both are null or both non-null are the same.
+     * special logig also obeying NaN */
+    public static boolean equals(Double lhs, Double rhs) {
+        return getValue(lhs) == getValue(rhs);
+    }
+
+    /** normalized getGeoValue with null or NaN are translated to IGeoPointInfo.NO_LAT_LON.
+     *  #91: Fix Photo without geo may have different representations values for no-value
+     */
+    public static double getValue(Double value) {
+        if (value == null) return IGeoPointInfo.NO_LAT_LON;
+        double result = value.doubleValue();
+        if (Double.isNaN(result)) return IGeoPointInfo.NO_LAT_LON;
+        return result;
+    }
+
 }
         

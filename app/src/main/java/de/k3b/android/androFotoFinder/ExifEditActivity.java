@@ -655,7 +655,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
 
         @Override
         public String getTitle() {
-            return edTitle.getText().toString();
+            return edTitle.getText().toString().trim();
         }
 
         /**
@@ -663,7 +663,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
          */
         @Override
         public String getDescription() {
-            return edDescription.getText().toString();
+            return edDescription.getText().toString().trim();
         }
 
         @Override

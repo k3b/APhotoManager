@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.List;
 
 import de.k3b.TestUtil;
+import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.io.DateUtil;
 import de.k3b.io.ListUtils;
 
@@ -38,6 +39,16 @@ public class MediaDiffCopyTests {
     public void shouldHandleNoChanges() {
         IMetaApi initialData = TestUtil.createTestMediaDTO(1);
         IMetaApi modifiedData = TestUtil.createTestMediaDTO(1);
+        MediaDiffCopy sut = new MediaDiffCopy().setDiff(initialData, modifiedData);
+
+        Assert.assertEquals("null means no changes: " + sut, null, sut);
+    }
+
+    // #91: Fix Photo without geo may have different representations values
+    @Test
+    public void shouldHandleGpsNanNullNoValue() {
+        IMetaApi initialData = TestUtil.createTestMediaDTO(1).setLatitude(Double.NaN).setLongitude(Double.NaN);
+        IMetaApi modifiedData = TestUtil.createTestMediaDTO(1).setLatitude(null).setLongitude(IGeoPointInfo.NO_LAT_LON);
         MediaDiffCopy sut = new MediaDiffCopy().setDiff(initialData, modifiedData);
 
         Assert.assertEquals("null means no changes: " + sut, null, sut);
