@@ -54,9 +54,9 @@ public class JpgMetaWorkflow {
     }
 
     public static MetaWriterExifXml saveLatLon(File filePath, Double latitude, Double longitude) {
-        IMetaApi changedData = new MediaDTO().setLatitude(latitude).setLongitude(longitude);
+        IMetaApi changedData = new MediaDTO().setLatitudeLongitude(latitude, longitude);
         MediaDiffCopy metaDiffCopy = new MediaDiffCopy()
-                .setDiff(changedData, MediaUtil.FieldID.latitude, MediaUtil.FieldID.longitude);
+                .setDiff(changedData, MediaUtil.FieldID.latitude_longitude);
         MetaWriterExifXml exif = applyChanges(filePath, metaDiffCopy, null);
         metaDiffCopy.close();
         return exif;

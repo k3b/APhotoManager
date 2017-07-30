@@ -41,7 +41,7 @@ public class GeoUtilTests {
         assertFormat("0.00001",0.00001);
         assertFormat("0.000001",0.000001);
         assertFormat("0"       ,0.0000001);
-        assertFormat("0"       ,0);
+        assertFormat(null       ,0);
         assertFormat("-0.000001",-0.000001);
         assertFormat("50.12345W",-50.12345,1,"EW");
         assertFormat("50.12345E",50.12345,1,"EW");
@@ -77,13 +77,17 @@ public class GeoUtilTests {
         assertParse(50.5, "50, 30N","NS");
         assertParse(-50.5, "50, 30S","NS");
         assertParse(-50.5, "S 50'30''0.00","NS");
-        assertParse(IGeoPointInfo.NO_LAT_LON, "0","NS");
-        assertParse(IGeoPointInfo.NO_LAT_LON, "","NS");
-        assertParse(IGeoPointInfo.NO_LAT_LON, null,"NS");
+        assertParse(GeoUtil.NO_LAT_LON, "0","NS");
+        assertParse(GeoUtil.NO_LAT_LON, "","NS");
+        assertParse(null, null,"NS");
     }
 
-    private void assertParse(double expected, String actual, String plusMinusns) {
-        Assert.assertEquals(actual, expected, GeoUtil.parse(actual, plusMinusns), 0.00001);
+    private void assertParse(Double expected, String actual, String plusMinusns) {
+        if (expected != null) {
+            Assert.assertEquals(actual, expected, GeoUtil.parse(actual, plusMinusns), 0.00001);
+        } else {
+            Assert.assertEquals(actual, expected, GeoUtil.parse(actual, plusMinusns));
+        }
     }
 
     @Test

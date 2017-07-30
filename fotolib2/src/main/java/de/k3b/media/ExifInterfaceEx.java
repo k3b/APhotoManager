@@ -89,14 +89,6 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
 
     @Override
     public void saveAttributes() throws IOException {
-        loadLatLon();
-        if ((this.mLatitude != null) &&
-                (this.mLongitude != null) &&
-                (this.mLatitude.doubleValue() == 0) &&
-                (this.mLongitude.doubleValue() == 0)) {
-            setLatitude(null);
-            setLongitude(null);
-        }
         super.saveAttributes();
         setFilelastModified(mExifFile);
         if (FotoLibGlobal.debugEnabledJpgMetaIo) {
@@ -168,7 +160,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     }
 
     /**
-     * returns ref for latitude which is S or N.
+     * returns ref for longitude which is W or E.
      * @return W or E
      */
     private String longitudeRef(Double longitude) {
@@ -177,7 +169,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     }
 
     /**
-     * convert latitude into DMS (degree minute second) format. For instance<br/>
+     * convert latitude_longitude into DMS (degree minute second) format. For instance<br/>
      * -79.948862 becomes<br/>
      * -79 degrees, 56 minutes, 55903 millisecs (equals 55.903 seconds)
      *  79/1,56/1,55903/1000<br/>
@@ -207,24 +199,17 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
 
     private Double mLatitude = null;
     private Double mLongitude = null;
-    @Override
-    public ExifInterfaceEx setLatitude(Double value) {
-        setAttribute(ExifInterfaceEx.TAG_GPS_LATITUDE, convert(value));
-        setAttribute(ExifInterfaceEx.TAG_GPS_LATITUDE_REF, latitudeRef(value));
-        mLatitude = value;
+    /** latitude, in degrees north. (-90 .. +90); longitude, in degrees east.  (-180 .. + 180)    */
+    @Override public IMetaApi setLatitudeLongitude(Double latitude, Double longitude) {
+        setAttribute(ExifInterfaceEx.TAG_GPS_LATITUDE, convert(latitude));
+        setAttribute(ExifInterfaceEx.TAG_GPS_LATITUDE_REF, latitudeRef(latitude));
+        mLatitude = latitude;
 
-        if (xmpExtern != null) xmpExtern.setLatitude(value);
+        setAttribute(ExifInterfaceEx.TAG_GPS_LONGITUDE, convert(longitude));
+        setAttribute(ExifInterfaceEx.TAG_GPS_LONGITUDE_REF, longitudeRef(longitude));
+        mLongitude = longitude;
 
-        return this;
-    }
-
-    @Override
-    public ExifInterfaceEx setLongitude(Double value) {
-        setAttribute(ExifInterfaceEx.TAG_GPS_LONGITUDE, convert(value));
-        setAttribute(ExifInterfaceEx.TAG_GPS_LONGITUDE_REF, longitudeRef(value));
-        mLongitude = value;
-
-        if (xmpExtern != null) xmpExtern.setLongitude(value);
+        if (xmpExtern != null) xmpExtern.setLatitudeLongitude(latitude, longitude);
 
         return this;
     }

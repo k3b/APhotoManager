@@ -56,17 +56,9 @@ public class MetaApiWrapper implements IMetaApi {
         return this;
     }
 
-    @Override
-    public MetaApiWrapper setLatitude(Double latitude) {
+    @Override public IMetaApi setLatitudeLongitude(Double latitude, Double longitude) {
         modifyCount++;
-        if (writeChild != null) writeChild.setLatitude(latitude);
-        return this;
-    }
-
-    @Override
-    public MetaApiWrapper setLongitude(Double longitude) {
-        modifyCount++;
-        if (writeChild != null) writeChild.setLongitude(longitude);
+        if (writeChild != null) writeChild.setLatitudeLongitude(latitude, longitude);
         return this;
     }
 

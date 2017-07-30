@@ -44,8 +44,7 @@ public class MediaUtil {
         dateTimeTaken,
         title,
         description,
-        latitude,
-        longitude,
+        latitude_longitude,
         rating,
         tags,
         clasz,
@@ -67,8 +66,8 @@ public class MediaUtil {
         add(result, includeEmpty, excludes, FieldID.dateTimeTaken, " dateTimeTaken ", DateUtil.toIsoDateString(item.getDateTimeTaken()));
         add(result, includeEmpty, excludes, FieldID.title, " title ", item.getTitle());
         add(result, includeEmpty, excludes, FieldID.description, " description ", item.getDescription());
-        add(result, includeEmpty, excludes, FieldID.latitude, " latitude ", GeoUtil.toCsvStringLatLon(item.getLatitude()));
-        add(result, includeEmpty, excludes, FieldID.longitude, " longitude ", GeoUtil.toCsvStringLatLon(item.getLongitude()));
+        add(result, includeEmpty, excludes, FieldID.latitude_longitude, " latitude ", GeoUtil.toCsvStringLatLon(item.getLatitude()));
+        add(result, includeEmpty, excludes, FieldID.latitude_longitude, " longitude ", GeoUtil.toCsvStringLatLon(item.getLongitude()));
         add(result, includeEmpty, excludes, FieldID.rating, " rating ", item.getRating());
         add(result, includeEmpty, excludes, FieldID.tags, " tags ", TagConverter.asDbString(null, item.getTags()));
         return result.toString();
@@ -164,17 +163,14 @@ public class MediaUtil {
                 changes++;
             }
 
-            Double doValue = source.getLatitude();
-            if (allowed(doValue, destination.getLatitude(), fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.latitude, collectedChanges)) {
-                destination.setLatitude(doValue);
+            Double latitude = source.getLatitude();
+            Double longitude = source.getLongitude();
+            if (allowed(latitude, destination.getLatitude(), fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.latitude_longitude, collectedChanges) ||
+                allowed(longitude, destination.getLongitude(), fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.latitude_longitude, collectedChanges)) {
+                setLatitudeLongitude(destination, latitude, longitude);
                 changes++;
             }
 
-            doValue = source.getLongitude();
-            if (allowed(doValue, destination.getLongitude(), fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.longitude, collectedChanges)) {
-                destination.setLongitude(doValue);
-                changes++;
-            }
             sValue = source.getTitle();
             if (allowed(sValue, destination.getTitle(), fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls, FieldID.title, collectedChanges)) {
                 destination.setTitle(sValue);
@@ -203,6 +199,18 @@ public class MediaUtil {
 
         if (collectedChanges != null) return collectedChanges.size();
         return changes;
+    }
+
+    public static void setLatitudeLongitude(IMetaApi destination, Double _latitude, Double _longitude) {
+        if (destination != null) {
+            double latitude     = GeoUtil.getValue(_latitude);
+            double longitude    = GeoUtil.getValue(_longitude);
+            if ((latitude == 0.0) && (longitude == 0.0)) {
+                destination.setLatitudeLongitude(null, null);
+            } else {
+                destination.setLatitudeLongitude(latitude, longitude);
+            }
+        }
     }
 
     /** #91: Fix Photo without geo may have different representations values for no-value */
@@ -242,7 +250,7 @@ public class MediaUtil {
                 return data.getTitle();
             case description:
                 return data.getDescription();
-            case latitude:
+            case latitude_longitude:
                 return GeoUtil.toCsvStringLatLon(data.getLatitude());
             case longitude:
                 return GeoUtil.toCsvStringLatLon(data.getLongitude());

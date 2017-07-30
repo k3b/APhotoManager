@@ -35,16 +35,12 @@ import de.k3b.geo.api.IGeoPointInfo;
  */
 
 public class GeoUtil {
+    public static final double NO_LAT_LON = 0;
+
     // ###### maximum 6 digits after "."
     private static DecimalFormat doubleFormatter = new DecimalFormat("#.######", new DecimalFormatSymbols(Locale.US));
 
     public static Double parse(String degreeString, String plusMinus) {
-        if ((degreeString == null) ||
-                (degreeString.length() == 0)  ||
-                (degreeString.compareTo("0") == 0)) {
-            return IGeoPointInfo.NO_LAT_LON;
-        }
-
         if (degreeString != null) {
             double result = 0;
             boolean isNegativ = false;
@@ -92,7 +88,7 @@ public class GeoUtil {
     }
 
     /**
-     * convert latitude into DMS (degree minute second) format. For instance<br/>
+     * convert latitude_longitude into DMS (degree minute second) format. For instance<br/>
      * toString(-79.948862,3,",","EW") becomes<br/>
      * 79 degrees, 56 minutes, 55.903 seconds) West
      *  79,56,55.903W<br/>
@@ -104,7 +100,7 @@ public class GeoUtil {
      * @return null if latLon is null.
      */
     public static String toString(final Double latLon, int digits, String sperator, String plusMinus) {
-        if (GeoUtil.getValue(latLon) == IGeoPointInfo.NO_LAT_LON) return null;
+        if (GeoUtil.getValue(latLon) == NO_LAT_LON) return null;
 
         StringBuilder result = new StringBuilder();
         double remaining = latLon;
@@ -165,9 +161,9 @@ public class GeoUtil {
      *  #91: Fix Photo without geo may have different representations values for no-value
      */
     public static double getValue(Double value) {
-        if (value == null) return IGeoPointInfo.NO_LAT_LON;
+        if (value == null) return NO_LAT_LON;
         double result = value.doubleValue();
-        if (Double.isNaN(result)) return IGeoPointInfo.NO_LAT_LON;
+        if (Double.isNaN(result) || result == IGeoPointInfo.NO_LAT_LON) return NO_LAT_LON;
         return result;
     }
 

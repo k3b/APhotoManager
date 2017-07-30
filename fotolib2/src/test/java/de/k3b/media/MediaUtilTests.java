@@ -109,7 +109,7 @@ public class MediaUtilTests {
 
         // 3 changes
         item1.setTitle("other title");
-        item1.setLongitude(null);
+        item1.setLatitudeLongitude(null,99.0);
         item2.setDateTimeTaken(null);
 
         // no change
@@ -117,7 +117,7 @@ public class MediaUtilTests {
         item2.setDescription(null);
 
         List<MediaUtil.FieldID> result = MediaUtil.getChanges(item1, item2);
-        Assert.assertEquals(ListUtils.toString(result), 3, result.size());
+        Assert.assertEquals(ListUtils.toString(result), 4, result.size());
     }
 
     @Test

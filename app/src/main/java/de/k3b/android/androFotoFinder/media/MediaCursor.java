@@ -140,13 +140,7 @@ public class MediaCursor implements IMetaApi {
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public IMetaApi setLatitude(Double latitude) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public IMetaApi setLongitude(Double longitude) {
+    @Override public IMetaApi setLatitudeLongitude(Double latitude, Double longitude) {
         throw new UnsupportedOperationException();
     }
 

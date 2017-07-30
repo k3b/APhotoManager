@@ -396,7 +396,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
         if ((geo != null) && (!GeoPointDto.isEmpty(geo))) {
             if ((geo.getLatitude() != 0) || (geo.getLongitude() != 0)) {
                 // bugfix #92:
-                mCurrentData.setLatitude(geo.getLatitude()).setLongitude(geo.getLongitude());
+                mCurrentData.setLatitudeLongitude(geo.getLatitude(), geo.getLongitude());
                 loadGuiFromExif("onGeoChanged");
             } // ignore (0,0)
         }
@@ -615,24 +615,9 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
             return this;
         }
 
-        /**
-         * Latitude, in degrees north. (-90 .. +90)
-         *
-         * @param latitude
-         */
-        @Override
-        public IMetaApi setLatitude(Double latitude) {
+        /** latitude, in degrees north. (-90 .. +90); longitude, in degrees east.  (-180 .. + 180)    */
+        @Override public IMetaApi setLatitudeLongitude(Double latitude, Double longitude) {
             edLatitude.setText(GeoUtil.toCsvStringLatLon(latitude));
-            return this;
-        }
-
-        /**
-         * Longitude, in degrees east.  (-180 .. + 180)
-         *
-         * @param longitude
-         */
-        @Override
-        public IMetaApi setLongitude(Double longitude) {
             edLongitude.setText(GeoUtil.toCsvStringLatLon(longitude));
             return this;
         }

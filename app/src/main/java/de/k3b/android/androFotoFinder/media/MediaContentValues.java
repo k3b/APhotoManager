@@ -91,14 +91,8 @@ public class MediaContentValues implements IMetaApi {
         return this;
     }
 
-    @Override
-    public IMetaApi setLatitude(Double latitude) {
+    @Override public IMetaApi setLatitudeLongitude(Double latitude, Double longitude) {
         mData.put(FotoSql.SQL_COL_LAT, latitude);
-        return this;
-    }
-
-    @Override
-    public IMetaApi setLongitude(Double longitude) {
         mData.put(FotoSql.SQL_COL_LON, longitude);
         return this;
     }

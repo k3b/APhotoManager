@@ -83,25 +83,10 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
         return this;
     }
 
-    /**
-     * latitude, in degrees north.
-     *
-     * @param latitude
-     */
-    @Override
-    public IMetaApi setLatitude(Double latitude) {
+    /** latitude, in degrees north. (-90 .. +90); longitude, in degrees east.  (-180 .. + 180)    */
+    @Override public IMetaApi setLatitudeLongitude(Double latitude, Double longitude) {
         setProperty(GeoUtil.toXmpStringLatNorth(latitude),
                 MediaXmpFieldDefinition.GPSLatitude);
-        return this;
-    }
-
-    /**
-     * longitude, in degrees east.
-     *
-     * @param longitude
-     */
-    @Override
-    public IMetaApi setLongitude(Double longitude) {
         setProperty(GeoUtil.toXmpStringLonEast(longitude),
                 MediaXmpFieldDefinition.GPSLongitude);
         return this;

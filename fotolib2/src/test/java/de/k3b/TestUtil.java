@@ -60,8 +60,7 @@ public class TestUtil {
         String minute = get2DigitString(id, 60);
         result.setDateTimeTaken(DateUtil.parseIsoDate("" + (2000+ id) + "-" + month + "-" + day
                 + "T" + hour + ":" + minute + ":" + minute));
-        result.setLatitude(50 + id + (0.01 * id));
-        result.setLongitude(10 + id + (0.01 * id));
+        result.setLatitudeLongitude(50 + id + (0.01 * id), 10 + id + (0.01 * id));
         result.setTags(TagConverter.fromString("tagA" + id + TagConverter.TAG_DB_DELIMITER + "tagB" + id));
         result.setRating(Integer.valueOf(id % 6));
 

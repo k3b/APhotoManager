@@ -47,8 +47,8 @@ public class MediaDiffCopyTests {
     // #91: Fix Photo without geo may have different representations values
     @Test
     public void shouldHandleGpsNanNullNoValue() {
-        IMetaApi initialData = TestUtil.createTestMediaDTO(1).setLatitude(Double.NaN).setLongitude(Double.NaN);
-        IMetaApi modifiedData = TestUtil.createTestMediaDTO(1).setLatitude(null).setLongitude(IGeoPointInfo.NO_LAT_LON);
+        IMetaApi initialData = TestUtil.createTestMediaDTO(1).setLatitudeLongitude(Double.NaN, Double.NaN);
+        IMetaApi modifiedData = TestUtil.createTestMediaDTO(1).setLatitudeLongitude(null, IGeoPointInfo.NO_LAT_LON);
         MediaDiffCopy sut = new MediaDiffCopy().setDiff(initialData, modifiedData);
 
         Assert.assertEquals("null means no changes: " + sut, null, sut);

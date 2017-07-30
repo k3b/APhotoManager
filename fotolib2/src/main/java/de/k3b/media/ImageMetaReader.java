@@ -154,23 +154,8 @@ public class ImageMetaReader implements IMetaApi, Closeable {
         throw new UnsupportedOperationException ();
     }
 
-    /**
-     * Latitude, in degrees north.
-     *
-     * @param latitude
-     */
-    @Override
-    public IMetaApi setLatitude(Double latitude) {
-        throw new UnsupportedOperationException ();
-    }
-
-    /**
-     * Longitude, in degrees east.
-     *
-     * @param longitude
-     */
-    @Override
-    public IMetaApi setLongitude(Double longitude) {
+    /** latitude, in degrees north. (-90 .. +90); longitude, in degrees east.  (-180 .. + 180)    */
+    @Override public IMetaApi setLatitudeLongitude(Double latitude, Double longitude) {
         throw new UnsupportedOperationException ();
     }
 
