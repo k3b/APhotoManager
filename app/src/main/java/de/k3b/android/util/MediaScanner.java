@@ -317,7 +317,7 @@ abstract public class MediaScanner  {
 
     /** updates values with current values of file */
     public MediaContentValues getExifFromFile(File jpgFile) {
-        return getExifFromFile(new ContentValues(), jpgFile);
+        return getExifFromFile(createDefaultContentValues(), jpgFile);
     }
 
     /** updates values with current values of file. */
@@ -435,16 +435,29 @@ abstract public class MediaScanner  {
 
     private int update_Android42(String dbgContext, Context context, long id, File file) {
         if ((file != null) && file.exists() && file.canRead()) {
-            ContentValues values = new ContentValues();
+            ContentValues values = createDefaultContentValues();
             getExifFromFile(values, file);
             return FotoSql.execUpdate(dbgContext, context, id, values);
         }
 		return 0;
     }
 
+    protected ContentValues createDefaultContentValues() {
+        ContentValues contentValues = new ContentValues();
+
+        // to allow set null becyuse copy does not setNull if already has null (not found)
+        contentValues.putNull(DB_TITLE);
+        contentValues.putNull(FotoSql.SQL_COL_LON);
+        contentValues.putNull(FotoSql.SQL_COL_LAT);
+        contentValues.putNull(TagSql.SQL_COL_EXT_DESCRIPTION);
+        contentValues.putNull(TagSql.SQL_COL_EXT_TAGS);
+        contentValues.putNull(TagSql.SQL_COL_EXT_RATING);
+        return contentValues;
+    }
+
     private int insert_Android42(String dbgContext, Context context, File file) {
         if ((file != null) && file.exists() && file.canRead()) {
-            ContentValues values = new ContentValues();
+            ContentValues values = createDefaultContentValues();
             long now = new Date().getTime();
             values.put(DB_DATE_ADDED, now / 1000);//sec
 
