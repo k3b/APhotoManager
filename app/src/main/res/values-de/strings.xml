@@ -102,6 +102,9 @@
   <string name="settings_bookmark_dir_title">Ordner für Lesezeichen</string>
   <string name="settings_debug_libs_summary">&#8230; Fremdkomponenten.</string>
   <string name="settings_debug_memory_title">LogCat Speicherverbrauch</string>
+
+  <string name="settings_debug_meta_io">LogCat jpg/xmp metadata read/write</string>
+
   <string name="settings_debug_sql_summary">... ausgeführtes SQL.</string>
   <string name="settings_debug_summary">... mit anderen Log-Nachrichten.</string>
   <string name="settings_debug_title">LogCat Sonstiges.</string>
@@ -186,8 +189,30 @@ Verstecken kann über das 'Media-Scanner' Gallery-Menü rückgängig gemacht wer
   <string name="tags_add_default">neues_tag</string>
   <string name="tags_delete_children_title">Unter-Tags löschen</string>
   <string name="tags_update_photos">Tags in betroffenen photos aktualisieren</string>
-  <string name="tags_update_result_format">Tags von %1$d Photos aktualisiert</string>
   <string name="tags_hint">Long-Tap tagname öffnet das Menu</string>
-  <string name="tags_defaults">Aktivitäten,Menschen,Orte,Themen,Projekte</string>
+  <string name="tags_defaults">Aktivitaeten,Menschen,Orte,Themen,Projekte</string>
+
+  <string name="settings_media_update_strategy_title">Änderungen speichern in</string>
+
+  <string name="settings_media_update_strategy_jpg_xmp_create">jpg und xmp (ggf neu erzeugen)</string>
+  <string name="settings_media_update_strategy_jpg_xmp_update">jpg (und xmp falls vorhanden)</string>
+  <string name="settings_media_update_strategy_jpg">nur im jpg</string>
+  <string name="settings_media_update_strategy_xmp">nur im xmp</string>
+
+  <string name="settings_xmp_file_schema_title">Langer Xmp Dateiname?</string>
+  <string name="settings_xmp_file_schema_summary">Lang: file.jpg.xmp; kurz: file.xmp</string>
+
+  <!-- #70: manually select sql column defintition for extra detail display in image detail view  -->
+  <string name="view_context_menu_title">Lade Kontext ...</string>
+
+  <!-- #87: edit-exif: image title, description, rating -->
+  <string name="exif_menu_title">Exif Metadataen bearbeiten</string>
+  <string name="lbl_title">Titel</string>
+  <string name="lbl_description">Beschreibung</string>
+  <string name="lbl_rating">Bewertung</string>
+
+  <!-- #90 add: sort by Rating, Date-Last-modified -->
+  <string name="sort_by_rating">Bewertung</string>
+  <string name="sort_by_modification">letzte Änderung</string>
 
 </resources>

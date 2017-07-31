@@ -1,8 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- where to write media data changes to ? -->
+    <string-array name="pref_media_update_strategy_names" translatable="false">
+        <item>@string/settings_media_update_strategy_jpg_xmp_create</item>
+        <item>@string/settings_media_update_strategy_jpg_xmp_update</item>
+        <item>@string/settings_media_update_strategy_jpg</item>
+        <item>@string/settings_media_update_strategy_xmp</item>
+    </string-array>
+    <!-- encoded J=jpeg; X=xmp; C=create; _=false -->
+    <string-array name="pref_media_update_strategy_values" translatable="false">
+        <item>JXC</item>
+        <item>JX</item>
+        <item>J</item>
+        <item>XC</item>
+    </string-array>
+
+    <!-- #21: which gui language to use ? pref_locale_names must correspond with pref_locale_values -->
     <string-array name="pref_locale_names" translatable="false">
         <item>@string/settings_locale_os_language</item>
         <item>العربية (Arabic)</item> 
+		<item>简体中文 (simplified Chinese)</item>
+		<item>繁体中文 (traditional Chinese)</item>
         <item>Deutsch (German)</item>
         <item>English</item>
         <item>Espanol (Spanish)</item>
@@ -20,6 +38,8 @@
     <string-array name="pref_locale_values" translatable="false">
         <item></item>
         <item>ar</item>
+		<item>zh-CN</item>
+		<item>zh-TW</item>
         <item>de</item>
         <item>en</item>
         <item>es</item>

@@ -27,6 +27,7 @@ import java.util.List;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.media.IMetaApi;
+import de.k3b.media.MediaUtil;
 import de.k3b.tagDB.TagConverter;
 
 /**
@@ -77,26 +78,21 @@ public class MediaContentValues implements IMetaApi {
 
     @Override
     public Date getDateTimeTaken() {
-        Integer milliSecsOrNull = mData.getAsInteger(FotoSql.SQL_COL_DATE_TAKEN);
-        int milliSecs = (milliSecsOrNull == null) ? 0 : milliSecsOrNull.intValue();
+        Long milliSecsOrNull = mData.getAsLong(FotoSql.SQL_COL_DATE_TAKEN);
+        long milliSecs = (milliSecsOrNull == null) ? 0 : milliSecsOrNull.longValue();
         if (milliSecs == 0) return null;
         return new Date(milliSecs);
     }
 
     @Override
     public IMetaApi setDateTimeTaken(Date value) {
-        mData.put(FotoSql.SQL_COL_PATH, (value != null) ? value.getTime() : null);
+        Long milliSecs = (value != null) ? value.getTime() : null;
+        mData.put(FotoSql.SQL_COL_DATE_TAKEN, milliSecs);
         return this;
     }
 
-    @Override
-    public IMetaApi setLatitude(Double latitude) {
+    @Override public IMetaApi setLatitudeLongitude(Double latitude, Double longitude) {
         mData.put(FotoSql.SQL_COL_LAT, latitude);
-        return this;
-    }
-
-    @Override
-    public IMetaApi setLongitude(Double longitude) {
         mData.put(FotoSql.SQL_COL_LON, longitude);
         return this;
     }
@@ -164,5 +160,10 @@ public class MediaContentValues implements IMetaApi {
         if (mXmpFileModifyDate != null) {
             TagSql.setXmpFileModifyDate(mData, mXmpFileModifyDate);
         }
+    }
+
+    @Override
+    public String toString() {
+        return MediaUtil.toString(this);
     }
 }

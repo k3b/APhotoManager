@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.ArrayAdapterEx;
 import de.k3b.tagDB.Tag;
 
@@ -41,6 +42,9 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 	private List<String> mAddNames;
 	private final List<String> mRemoveNames;
 	private String mLastFilterParam = null;
+
+	/** mImageButtonLongClicked workaround imagebutton-long-click prevent list-itemclick. */
+	private boolean mImageButtonLongClicked = false;
 
 	public TagListArrayAdapter(final Context ctx,
 							   List<Tag> existingTags,
@@ -58,6 +62,15 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 	public void setFilterParam(String filterParam) {
 		this.mLastFilterParam = filterParam;
 		getFilter().filter(filterParam);
+	}
+
+	/** mImageButtonLongClicked workaround imagebutton-long-click prevent list-itemclick. */
+	public boolean isImageButtonLongClicked() {
+		return mImageButtonLongClicked;
+	}
+
+	public void setImageButtonLongClicked(boolean mImageButtonLongClicked) {
+		this.mImageButtonLongClicked = mImageButtonLongClicked;
 	}
 
 	private class Holder {
@@ -99,7 +112,7 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 						onNames.add(name);
 					if (!onOffValue && onNames.contains(name))
 						onNames.remove(name);
-					icon.setImageDrawable(getContext().getResources().getDrawable((onOffValue) ? id_drawable_on : id_drawable_off));
+					icon.setImageDrawable(ResourceUtils.getDrawable(getContext(),(onOffValue) ? id_drawable_on : id_drawable_off));
 				}
 			}
 		}
@@ -154,6 +167,7 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 				holder.bookmarkIcon.setOnLongClickListener(new View.OnLongClickListener() {
 					@Override
 					public boolean onLongClick(View v) {
+						setImageButtonLongClicked(true);
 						holder.includeTagParents(mBookMarkNames, null);
 						return true;
 					}
@@ -173,6 +187,7 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 			holder.addIcon.setOnLongClickListener(new View.OnLongClickListener() {
 				@Override
 				public boolean onLongClick(View v) {
+					setImageButtonLongClicked(true);
 					holder.includeTagParents(mAddNames, mRemoveNames);
 					return true;
 				}
@@ -190,6 +205,7 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 				holder.removeIcon.setOnLongClickListener(new View.OnLongClickListener() {
 					@Override
 					public boolean onLongClick(View v) {
+						setImageButtonLongClicked(true);
 						holder.includeTagParents(mRemoveNames, mAddNames);
 						return true;
 					}

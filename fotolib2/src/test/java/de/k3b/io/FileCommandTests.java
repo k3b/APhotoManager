@@ -79,11 +79,12 @@ public class FileCommandTests {
 
     @Test
     public void shouldDeleteExistingWithXmp() {
-        registerFakeFiles(sut, "a.jpg", "a.xmp");
+        registerFakeFiles(sut, "a.jpg", "a.xmp", "a.jpg.xmp");
         sut.deleteFiles(createTestFile(X_FAKE_OUTPUT_DIR, "a.jpg").getAbsolutePath());
 
         verify(sut).osDeleteFile(createTestFile(X_FAKE_OUTPUT_DIR, "a.jpg"));
         verify(sut).osDeleteFile(createTestFile(X_FAKE_OUTPUT_DIR, "a.xmp"));
+        verify(sut).osDeleteFile(createTestFile(X_FAKE_OUTPUT_DIR, "a.jpg.xmp"));
     }
 
     /** these files exist in source-dir and in dest-dir */

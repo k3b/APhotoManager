@@ -19,18 +19,22 @@
 
 package de.k3b.media;
 
-import com.adobe.xmp.XMPMetaFactory;
+import com.adobe.xmp.XMPMeta;
 import com.adobe.xmp.XMPUtils;
 import com.adobe.xmp.impl.XMPDateTimeImpl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.OutputStream;
 import java.util.Date;
 import java.util.List;
 
 import de.k3b.FotoLibGlobal;
 import de.k3b.io.DateUtil;
+import de.k3b.io.FileCommands;
 import de.k3b.io.GeoUtil;
 
 /**
@@ -59,47 +63,30 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
         return this;
     }
 
-    public IMetaApi setOriginalFileName(String filePath) {
-        setProperty(filePath, MediaXmpFieldDefinition.OriginalFileName);
-        return this;
-    }
-
     @Override
     public Date getDateTimeTaken() {
         return getPropertyAsDate(
-                MediaXmpFieldDefinition.CreateDate,   // JPhotoTagger default
+                "getDateTimeTaken", MediaXmpFieldDefinition.CreateDate,   // JPhotoTagger default
                 MediaXmpFieldDefinition.DateCreated,  // exiftool default
-                MediaXmpFieldDefinition.DateTimeOriginal);
+                MediaXmpFieldDefinition.DateTimeOriginal,
+                MediaXmpFieldDefinition.DateAcquired);
     }
 
     @Override
     public IMetaApi setDateTimeTaken(Date value) {
-        setProperty(XMPUtils.convertFromDate(new XMPDateTimeImpl(value, DateUtil.UTC)), // DateUtil.toIsoDateString(value),
+        String dateValue = (value == null) ? null : XMPUtils.convertFromDate(new XMPDateTimeImpl(value, DateUtil.UTC));
+        setProperty(dateValue, // DateUtil.toIsoDateString(value),
                 MediaXmpFieldDefinition.CreateDate,   // JPhotoTagger default
                 MediaXmpFieldDefinition.DateCreated,  // exiftool default
-                MediaXmpFieldDefinition.DateTimeOriginal); // EXIF
+                MediaXmpFieldDefinition.DateTimeOriginal, // EXIF
+                MediaXmpFieldDefinition.DateAcquired);
         return this;
     }
 
-    /**
-     * latitude, in degrees north.
-     *
-     * @param latitude
-     */
-    @Override
-    public IMetaApi setLatitude(Double latitude) {
+    /** latitude, in degrees north. (-90 .. +90); longitude, in degrees east.  (-180 .. + 180)    */
+    @Override public IMetaApi setLatitudeLongitude(Double latitude, Double longitude) {
         setProperty(GeoUtil.toXmpStringLatNorth(latitude),
                 MediaXmpFieldDefinition.GPSLatitude);
-        return this;
-    }
-
-    /**
-     * longitude, in degrees east.
-     *
-     * @param longitude
-     */
-    @Override
-    public IMetaApi setLongitude(Double longitude) {
         setProperty(GeoUtil.toXmpStringLonEast(longitude),
                 MediaXmpFieldDefinition.GPSLongitude);
         return this;
@@ -107,17 +94,17 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
 
     @Override
     public Double getLatitude() {
-        return GeoUtil.parse(getPropertyAsString(MediaXmpFieldDefinition.GPSLatitude),"NS");
+        return GeoUtil.parse(getPropertyAsString("getLatitude", MediaXmpFieldDefinition.GPSLatitude),"NS");
     }
 
     @Override
     public Double getLongitude() {
-        return GeoUtil.parse(getPropertyAsString(MediaXmpFieldDefinition.GPSLongitude),"EW");
+        return GeoUtil.parse(getPropertyAsString("getLongitude", MediaXmpFieldDefinition.GPSLongitude),"EW");
     }
 
     @Override
     public String getTitle() {
-        return getPropertyAsString(MediaXmpFieldDefinition.title);
+        return getPropertyAsString("getTitle", MediaXmpFieldDefinition.title);
     }
 
     @Override
@@ -129,7 +116,7 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
 
     @Override
     public String getDescription() {
-        return getPropertyAsString(MediaXmpFieldDefinition.description);
+        return getPropertyAsString("getDescription", MediaXmpFieldDefinition.description);
     }
 
     @Override
@@ -141,12 +128,18 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
 
     @Override
     public List<String> getTags() {
-        return getPropertyArray(MediaXmpFieldDefinition.subject);
+        return getPropertyArray("getTags",
+                MediaXmpFieldDefinition.subject,
+                MediaXmpFieldDefinition.LastKeywordXMP,
+                MediaXmpFieldDefinition.LastKeywordIPTC);
     }
 
     @Override
     public IMetaApi setTags(List<String> tags) {
         replacePropertyArray(tags, MediaXmpFieldDefinition.subject);
+        replacePropertyArray(tags, MediaXmpFieldDefinition.LastKeywordXMP);
+        replacePropertyArray(tags, MediaXmpFieldDefinition.LastKeywordIPTC);
+
         return this;
     }
 
@@ -155,7 +148,7 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
      */
     @Override
     public Integer getRating() {
-        String result = getPropertyAsString(MediaXmpFieldDefinition.Rating);
+        String result = getPropertyAsString("getRating", MediaXmpFieldDefinition.Rating);
         if ((result != null) && (result.length() > 0)){
             try {
                 return Integer.parseInt(result);
@@ -171,6 +164,69 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
         setProperty(value,
                 MediaXmpFieldDefinition.Rating);
         return this;
+    }
+
+    // Override adds logging
+    @Override
+    public XmpSegment setXmpMeta(XMPMeta xmpMeta, String dbg_context) {
+        super.setXmpMeta(xmpMeta, dbg_context);
+        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+            logger.info(dbg_context + " setXmpMeta " +  MediaUtil.toString(this, false, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
+        }
+
+        return this;
+    }
+
+    @Override
+    public XmpSegment save(File file, boolean humanReadable, String dbg_context) throws FileNotFoundException {
+        fixAttributes(file);
+        return super.save(file, humanReadable, dbg_context);
+    }
+
+    private void fixAttributes(File file) {
+        if (getPropertyAsString("   fixAttributes OriginalFileName", MediaXmpFieldDefinition.OriginalFileName) == null) {
+            setProperty(file.getName(), MediaXmpFieldDefinition.OriginalFileName);
+        }
+        if (getPropertyAsString("   fixAttributes AppVersion", MediaXmpFieldDefinition.AppVersion) == null) {
+            setProperty(FotoLibGlobal.appName + "-" + FotoLibGlobal.appVersion, MediaXmpFieldDefinition.AppVersion);
+        }
+    }
+
+    // Override adds logging
+    @Override
+    public XmpSegment save(OutputStream os, boolean humanReadable, String dbg_context) {
+        super.save(os, humanReadable, dbg_context);
+        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+            logger.info(dbg_context + " save " + MediaUtil.toString(this, false, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
+        }
+
+        return this;
+    }
+
+    public static MediaXmpSegment loadXmpSidecarContentOrNull(String absoluteJpgPath, String _dbg_context) {
+        MediaXmpSegment xmpContent = null;
+        File xmpFile = FileCommands.getExistingSidecarOrNull(absoluteJpgPath);
+        String dbg_context = _dbg_context + " loadXmpSidecarContent(" + xmpFile + "): ";
+        if ((xmpFile != null) && xmpFile.isFile() && xmpFile.exists() && xmpFile.canRead()) {
+            xmpContent = new MediaXmpSegment();
+            try {
+                xmpContent.load(xmpFile, dbg_context);
+            } catch (FileNotFoundException e) {
+                logger.error(dbg_context + "failed " + e.getMessage(),e);
+                xmpContent = null;
+            }
+
+        } else if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+            logger.error(dbg_context + "file not found");
+        }
+
+        return xmpContent;
+    }
+
+
+    @Override
+    public String toString() {
+        return MediaUtil.toString(this);
     }
 
 }

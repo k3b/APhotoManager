@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
  */
 public class GalleryFilterParameterTest {
 
-    public static final String FILTER_STRING_FULL_EXAMPLE = "1.23,2.34;3.45,4.56;2001-02-03,2005-12-31;/some/path/;q,^;filter;tag1,tag2,tag3;utag1,utag2,utag3;notags;3;";
+    public static final String FILTER_STRING_FULL_EXAMPLE = "1.23,2.34;3.45,4.56;2001-02-03,2005-12-31;/some/path/;q,^;filter;tag1,tag2,tag3;utag1,utag2,utag3;notags;3;4";
 
     @Test
     public void toStringFullTest() {
@@ -45,6 +45,7 @@ public class GalleryFilterParameterTest {
         sut.setTagsAllExcluded(GalleryFilterParameter.convertList("utag1,utag2 utag3"));
         sut.setVisibility(IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
         sut.setWithNoTags(true);
+        sut.setRatingMin(4);
 
         assertEquals(FILTER_STRING_FULL_EXAMPLE, sut.toString());
         assertEquals("not empty", false,  GalleryFilterParameter.isEmpty(sut));
@@ -53,7 +54,7 @@ public class GalleryFilterParameterTest {
     @Test
     public void toStringEmptyTest() {
         GalleryFilterParameter sut = new GalleryFilterParameter();
-        assertEquals(";;;;;;;;;;", sut.toString());
+        assertEquals("", sut.toString());
         assertEquals("empty", true,  GalleryFilterParameter.isEmpty(sut));
     }
 
@@ -68,8 +69,8 @@ public class GalleryFilterParameterTest {
 
     @Test
     public void shouldParseFullNoGeo() {
-        GalleryFilterParameter sutParsed = GalleryFilterParameter.parse("n;;2001-02-03,2005-12-31;/some/path/;q,^;a;b;c;notags;3;", new GalleryFilterParameter());
+        GalleryFilterParameter sutParsed = GalleryFilterParameter.parse("n;;2001-02-03,2005-12-31;/some/path/;q,^;a;b;c;notags;3", new GalleryFilterParameter());
         GalleryFilterParameter sut = new GalleryFilterParameter().get(sutParsed);
-        assertEquals("noGeoInfo;;2001-02-03,2005-12-31;/some/path/;q,^;a;b;c;notags;3;", sut.toString());
+        assertEquals("noGeoInfo;;2001-02-03,2005-12-31;/some/path/;q,^;a;b;c;notags;3", sut.toString());
     }
 }

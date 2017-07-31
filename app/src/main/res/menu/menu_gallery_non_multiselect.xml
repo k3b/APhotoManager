@@ -48,6 +48,14 @@
                 android:title="@string/sort_by_place"
                 android:visible="true"
                 android:orderInCategory="5" />
+            <item android:id="@+id/cmd_sort_rating"
+                android:title="@string/sort_by_rating"
+                android:visible="true"
+                android:orderInCategory="5" />
+            <item android:id="@+id/cmd_sort_modification"
+                android:title="@string/sort_by_modification"
+                android:visible="true"
+                android:orderInCategory="5" />
             <item android:id="@+id/cmd_sort_len"
                 android:title="@string/sort_by_name_len"
                 android:visible="true"

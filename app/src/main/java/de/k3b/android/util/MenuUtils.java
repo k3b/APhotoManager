@@ -48,6 +48,7 @@ public class MenuUtils {
                     MenuItem newMenuItem = subMenu.add(oldMenuItem.getGroupId(), oldMenuItem.getItemId(), oldMenuItem.getOrder(),oldMenuItem.getTitle());
                     newMenuItem.setCheckable(oldMenuItem.isCheckable());
                     newMenuItem.setVisible(oldMenuItem.isVisible());
+                    newMenuItem.setIcon(oldMenuItem.getIcon());
                 }
             }
         }
@@ -110,5 +111,29 @@ public class MenuUtils {
 
     }
 
+    public static MenuItem findByTitle(Menu menu, String title, int maxDepth) {
+        if ((menu != null) && (title != null) && (title.length() > 0)) {
+            int size = menu.size();
 
+            MenuItem item;
+            for (int i = 0; i < size; i++) {
+                item = menu.getItem(i);
+                if ((item != null) && (title.compareTo(item.getTitle().toString()) == 0))
+                    return item;
+            }
+
+            if (maxDepth > 0) {
+                int childDepth = maxDepth - 1;
+                MenuItem subItem;
+                for (int i = 0; i < size; i++) {
+                    item = menu.getItem(i);
+                    if ((item != null) && (item.hasSubMenu())) {
+                        subItem = findByTitle(item.getSubMenu(), title, childDepth);
+                        if (subItem != null) return subItem;
+                    }
+                }
+            }
+        }
+        return null;
+    }
 }

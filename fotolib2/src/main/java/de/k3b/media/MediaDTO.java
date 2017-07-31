@@ -78,14 +78,9 @@ public class MediaDTO implements IMetaApi {
         return this;
     }
 
-    @Override
-    public IMetaApi setLatitude(Double latitude) {
+    /** latitude, in degrees north. (-90 .. +90); longitude, in degrees east.  (-180 .. + 180)    */
+    @Override public IMetaApi setLatitudeLongitude(Double latitude, Double longitude) {
         this.latitude = latitude;
-        return this;
-    }
-
-    @Override
-    public IMetaApi setLongitude(Double longitude) {
         this.longitude = longitude;
         return this;
     }

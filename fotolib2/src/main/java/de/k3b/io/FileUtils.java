@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +40,6 @@ import de.k3b.FotoLibGlobal;
 public class FileUtils {
     private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
     public static final String MEDIA_IGNORE_FILENAME = ".nomedia"; // MediaStore.MEDIA_IGNORE_FILENAME;
-    public static final String EXT_SIDECAR = ".xmp";
 
     public static InputStream streamFromStringContent(String data) {
         ByteArrayInputStream s = new ByteArrayInputStream(data.getBytes());
@@ -138,15 +138,6 @@ public class FileUtils {
         return result.toString();
     }
 
-    public static File getXmpFile(String filepath) {
-        if (filepath != null) {
-            String xmpFilePath = replaceExtension(filepath, EXT_SIDECAR);
-            File xmpFile = new File(xmpFilePath);
-            return xmpFile;
-        }
-        return null;
-    }
-
     public static String replaceExtension(String path, String extension) {
         if (path == null) return null;
         int ext = path.lastIndexOf(".");
@@ -189,5 +180,51 @@ public class FileUtils {
     public static boolean isHiddenFolder(String path) {
         return (path.indexOf("/.") >= 0);
     }
+
+    public static void delete(String fileName) {
+        delete(fileName, "");
+    }
+
+    public static void delete(String fileName, String fileExt) {
+        File file = new File(fileName);
+        delete(file, fileExt);
+    }
+
+    // Delete the file or if it's a directory, all files in the directory
+    public static void delete(File file, final String fileExt) {
+        if (file.exists()) {
+            //check if the file is a directory
+            if (file.isDirectory()) {
+                File[] files = file.listFiles();
+                for(File f:files){
+                    //call deletion of file individually
+                    delete(f, fileExt);
+                }
+            } else {
+                String path = file.getAbsolutePath();
+                if(fileExt == null || path.endsWith(fileExt)) {
+                    boolean result = file.delete();
+                    // test if delete of file is success or not
+                    if (result) {
+                        logger.info("File {} deleted", file.getAbsolutePath());
+                    } else {
+                        logger.info("File {} was not deleted, unknown reason", file.getAbsolutePath());
+                    }
+                }
+            }
+        } else {
+            logger.info("File {} doesn't exist", file.getAbsolutePath());
+        }
+    }
+
+    public static void copy(InputStream is, OutputStream os) throws IOException {
+        byte[] buffer = new byte[10240]; // 10k buffer
+        int bytesRead = -1;
+
+        while((bytesRead = is.read(buffer)) != -1) {
+            os.write(buffer, 0, bytesRead);
+        }
+    }
+
 
 }

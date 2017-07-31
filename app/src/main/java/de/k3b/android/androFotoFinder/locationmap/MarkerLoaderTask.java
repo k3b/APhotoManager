@@ -24,7 +24,6 @@ import android.database.Cursor;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.SystemClock;
 import android.util.Log;
 
 import org.osmdroid.util.GeoPoint;
@@ -38,6 +37,7 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.osmdroid.IconFactory;
 import de.k3b.android.osmdroid.ClickableIconOverlay;
+import de.k3b.android.util.ResourceUtils;
 import de.k3b.database.QueryParameter;
 
 /**
@@ -83,7 +83,7 @@ public abstract class MarkerLoaderTask<MARKER extends ClickableIconOverlay> exte
         this.mContext = context;
         this.mDebugPrefix = debugPrefix;
         mOldItems = oldItems;
-        mIconFactory = new IconFactory(context.getResources(), context.getResources().getDrawable(R.drawable.marker_green));
+        mIconFactory = new IconFactory(context.getResources(), ResourceUtils.getDrawable(context, R.drawable.marker_green));
     }
 
     protected abstract MARKER createMarker();

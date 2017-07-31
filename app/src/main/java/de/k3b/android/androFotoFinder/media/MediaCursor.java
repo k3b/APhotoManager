@@ -26,6 +26,7 @@ import java.util.List;
 
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.media.IMetaApi;
+import de.k3b.media.MediaUtil;
 import de.k3b.tagDB.TagConverter;
 
 /**
@@ -139,13 +140,7 @@ public class MediaCursor implements IMetaApi {
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public IMetaApi setLatitude(Double latitude) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public IMetaApi setLongitude(Double longitude) {
+    @Override public IMetaApi setLatitudeLongitude(Double latitude, Double longitude) {
         throw new UnsupportedOperationException();
     }
 
@@ -167,5 +162,10 @@ public class MediaCursor implements IMetaApi {
     @Override
     public IMetaApi setRating(Integer value) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String toString() {
+        return MediaUtil.toString(this);
     }
 }

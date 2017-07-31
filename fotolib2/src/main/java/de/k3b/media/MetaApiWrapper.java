@@ -23,75 +23,82 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * (Default) Implementation of {@link IMetaApi} to forward all methods to an inner {@link IMetaApi}.
+ * (Default) Implementation of {@link IMetaApi} to forward all methods to an inner child {@link IMetaApi}.
  *
  * Created by k3b on 09.10.2016.
  */
 
 public class MetaApiWrapper implements IMetaApi {
-    private final IMetaApi child;
+    protected final IMetaApi readChild;
+    protected final IMetaApi writeChild;
+
+    /** count the non path write calls */
+    private int modifyCount = 0;
 
     public MetaApiWrapper(IMetaApi child) {
+        this(child, child);
+    }
 
-        this.child = child;
+    public MetaApiWrapper(IMetaApi readChild, IMetaApi writeChild) {
+
+        this.readChild = readChild;
+        this.writeChild = writeChild;
     }
     @Override
     public Date getDateTimeTaken() {
-        return child.getDateTimeTaken();
+        return (readChild == null) ? null : readChild.getDateTimeTaken();
     }
 
     @Override
     public MetaApiWrapper setDateTimeTaken(Date value) {
-        child.setDateTimeTaken(value);
+        modifyCount++;
+        if (writeChild != null) writeChild.setDateTimeTaken(value);
         return this;
     }
 
-    @Override
-    public MetaApiWrapper setLatitude(Double latitude) {
-        child.setLatitude(latitude);
-        return this;
-    }
-
-    @Override
-    public MetaApiWrapper setLongitude(Double longitude) {
-        child.setLongitude(longitude);
+    @Override public IMetaApi setLatitudeLongitude(Double latitude, Double longitude) {
+        modifyCount++;
+        if (writeChild != null) writeChild.setLatitudeLongitude(latitude, longitude);
         return this;
     }
 
     @Override
     public Double getLatitude() {
-        return child.getLatitude();
+        return (readChild == null) ? null : readChild.getLatitude();
     }
 
     @Override
     public Double getLongitude() {
-        return child.getLongitude();
+        return (readChild == null) ? null : readChild.getLongitude();
     }
 
     public String getTitle() {
-        return child.getTitle();
+        return (readChild == null) ? null : readChild.getTitle();
     }
 
     public MetaApiWrapper setTitle(String title) {
-        child.setTitle(title);
+        modifyCount++;
+        if (writeChild != null) writeChild.setTitle(title);
         return this;
     }
 
     public String getDescription() {
-        return child.getDescription();
+        return (readChild == null) ? null : readChild.getDescription();
     }
 
     public MetaApiWrapper setDescription(String description) {
-        child.setDescription(description);
+        modifyCount++;
+        if (writeChild != null) writeChild.setDescription(description);
         return this;
     }
 
     public List<String> getTags() {
-        return child.getTags();
+        return (readChild == null) ? null : readChild.getTags();
     }
 
     public MetaApiWrapper setTags(List<String> tags) {
-        child.setTags(tags);
+        modifyCount++;
+        if (writeChild != null) writeChild.setTags(tags);
         return this;
     }
 
@@ -100,21 +107,27 @@ public class MetaApiWrapper implements IMetaApi {
      */
     @Override
     public Integer getRating() {
-        return child.getRating();
+        return (readChild == null) ? null : readChild.getRating();
     }
 
     @Override
     public IMetaApi setRating(Integer value) {
-        child.setRating(value);
+        modifyCount++;
+        if (writeChild != null) writeChild.setRating(value);
         return this;
     }
 
     public String getPath() {
-        return child.getPath();
+        return (readChild == null) ? null : readChild.getPath();
     }
 
     public MetaApiWrapper setPath(String filePath) {
-        child.setPath(filePath);
+        if (writeChild != null) writeChild.setPath(filePath);
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return MediaUtil.toString(this);
     }
 }

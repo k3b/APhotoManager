@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2016 by k3b.
+ * Copyright (c) 2016-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -26,7 +26,10 @@ package de.k3b.media;
 import org.junit.Assert;
 import org.junit.Test;
 
-import de.k3b.csv2db.csv.TestUtil;
+import java.util.List;
+
+import de.k3b.TestUtil;
+import de.k3b.io.ListUtils;
 
 public class MediaUtilTests {
     @Test
@@ -38,10 +41,83 @@ public class MediaUtilTests {
     }
 
     @Test
-    public void shouldCountChanges() {
+    public void shouldDeserializeAllFields() {
         MediaDTO expected = TestUtil.createTestMediaDTO(1);
-        Assert.assertEquals("all different", 7, MediaUtil.countChangedProperties(expected, TestUtil.createTestMediaDTO(2), false));
-        Assert.assertEquals("all same", 0, MediaUtil.countChangedProperties(expected, TestUtil.createTestMediaDTO(1), false));
+        MediaAsString src = new MediaAsString().setData(expected);
+        String serial = src.toString();
+        MediaAsString dest = new MediaAsString().setData(serial);
+
+        MediaDTO actual = new MediaDTO(dest);
+        Assert.assertEquals(expected.toString(), actual.toString());
+    }
+
+
+    @Test
+    public void shouldCopyAllFieldsMetaApiWrapper() {
+        MediaDTO expected = TestUtil.createTestMediaDTO(1);
+        MediaDTO actual = new MediaDTO();
+        MetaApiWrapper src = new MetaApiWrapper(expected, null);
+        MetaApiWrapper dest = new MetaApiWrapper(null, actual);
+        MediaUtil.copy(dest, src, true, true);
+        Assert.assertEquals(expected.toString(), actual.toString());
+    }
+
+    @Test
+    public void shouldNotThrowMetaApiWrapperReadNull() {
+        MediaDTO actual = new MediaDTO();
+        MetaApiWrapper src = new MetaApiWrapper(null, null);
+        MediaUtil.copy(actual, src, true, true);
+    }
+
+    @Test
+    public void shouldNotThrowMetaApiWrapperWriteNull() {
+        MediaDTO actual = new MediaDTO();
+        MetaApiWrapper dest = new MetaApiWrapper(null, null);
+        MediaUtil.copy(dest, actual, true, true);
+    }
+
+
+    @Test
+    public void shouldCopyAllFieldsMetaApiChainReaderNull2() {
+        MediaDTO expected = TestUtil.createTestMediaDTO(1);
+        MediaDTO actual = new MediaDTO();
+        MetaApiChainReader src = new MetaApiChainReader(null, expected);
+        MediaUtil.copy(actual, src, true, true);
+        Assert.assertEquals(expected.toString(), actual.toString());
+    }
+
+    @Test
+    public void shouldCopyAllFieldsMetaApiChainReaderEmpty2() {
+        MediaDTO expected = TestUtil.createTestMediaDTO(1);
+        MediaDTO actual = new MediaDTO();
+        MetaApiChainReader src = new MetaApiChainReader(new MediaDTO(), expected);
+        MediaUtil.copy(actual, src, true, true);
+        Assert.assertEquals(expected.toString(), actual.toString());
+    }
+
+    @Test
+    public void shouldNotThrowMetaApiChainReaderNullNull() {
+        MediaDTO actual = new MediaDTO();
+        MetaApiChainReader src = new MetaApiChainReader(null, null);
+        MediaUtil.copy(actual, src, true, true);
+    }
+
+    @Test
+    public void shouldFindChanges() {
+        IMetaApi item1 = TestUtil.createTestMediaDTO(3);
+        IMetaApi item2 = TestUtil.createTestMediaDTO(3);
+
+        // 3 changes
+        item1.setTitle("other title");
+        item1.setLatitudeLongitude(null,99.0);
+        item2.setDateTimeTaken(null);
+
+        // no change
+        item1.setDescription(null);
+        item2.setDescription(null);
+
+        List<MediaUtil.FieldID> result = MediaUtil.getChanges(item1, item2);
+        Assert.assertEquals(ListUtils.toString(result), 4, result.size());
     }
 
     @Test
@@ -65,11 +141,12 @@ public class MediaUtilTests {
         check(null, "dest", true, false, "dest");
     }
 
-    private void check(String initalSrcValue, String initialDestValue, boolean allowSetNull, boolean overwriteExisting, String expected) {
+    private void check(String initalSrcValue, String initialDestValue,
+                       boolean allowSetNull, boolean overwriteExisting, String expected) {
         IMetaApi src = new MediaDTO().setTitle(initalSrcValue);
         IMetaApi dest = new MediaDTO().setTitle(initialDestValue);
 
-        MediaUtil.copy(dest, src, allowSetNull, overwriteExisting);
+        MediaUtil.copy(dest, src, overwriteExisting, allowSetNull);
         Assert.assertEquals("(" + initalSrcValue +
                 "," + initialDestValue +
                 ")=>" +expected, expected, dest.getTitle());

@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -43,7 +43,8 @@ import java.io.File;
 import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
 import de.k3b.android.util.MediaScanner;
-import de.k3b.android.util.MediaScannerEx;
+import de.k3b.android.util.MediaScannerExifInterface;
+import de.k3b.android.util.MediaScannerImageMetaReader;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.tagDB.TagRepository;
@@ -52,15 +53,16 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 import uk.co.senab.photoview.log.LogManager;
 
 public class SettingsActivity extends PreferenceActivity {
-    private static Boolean sOldEnableTagSupport = null;
+    private static Boolean sOldEnableNonStandardIptcMediaScanner = null;
     private SharedPreferences prefsInstance = null;
-    private ListPreference defaultLocalePreference;
+    private ListPreference defaultLocalePreference;  // #21: Support to change locale at runtime
+    private ListPreference mediaUpdateStrategyPreference;
 
     private int INSTALL_REQUEST_CODE = 1927;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
-        LocalizedActivity.fixLocale(this);
+        LocalizedActivity.fixLocale(this);	// #21: Support to change locale at runtime
         super.onCreate(savedInstanceState);
         final Intent intent = getIntent();
         if (Global.debugEnabled && (intent != null)){
@@ -71,9 +73,10 @@ public class SettingsActivity extends PreferenceActivity {
         prefsInstance = PreferenceManager
                 .getDefaultSharedPreferences(this);
         global2Prefs(this.getApplication());
+
+		// #21: Support to change locale at runtime
         defaultLocalePreference =
                 (ListPreference) findPreference(Global.PREF_KEY_USER_LOCALE);
-
         defaultLocalePreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -82,6 +85,18 @@ public class SettingsActivity extends PreferenceActivity {
                 return true; // change is allowed
             }
         });
+
+        mediaUpdateStrategyPreference =
+                (ListPreference) findPreference("mediaUpdateStrategy");
+        mediaUpdateStrategyPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                FotoLibGlobal.mediaUpdateStrategy = (String) newValue;
+                setPref(FotoLibGlobal.mediaUpdateStrategy, mediaUpdateStrategyPreference, R.array.pref_media_update_strategy_names);
+                return true;
+            }
+        });
+        setPref(FotoLibGlobal.mediaUpdateStrategy, mediaUpdateStrategyPreference, R.array.pref_media_update_strategy_names);
 
         findPreference("debugClearLog").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -104,6 +119,8 @@ public class SettingsActivity extends PreferenceActivity {
                 return false; // donot close
             }
         });
+		
+		// #21: Support to change locale at runtime
         updateSummary();
     }
 
@@ -127,12 +144,16 @@ public class SettingsActivity extends PreferenceActivity {
 
         prefs.putBoolean("debugEnabledMemory", Global.debugEnabledMemory);
 
+        prefs.putBoolean("debugEnabledJpgMetaIo", FotoLibGlobal.debugEnabledJpgMetaIo);
+
         // #26
         prefs.putBoolean("initialImageDetailResolutionHigh", Global.initialImageDetailResolutionHigh);
 
         prefs.putBoolean("debugEnableLibs", PhotoViewAttacher.DEBUG);
 
         prefs.putBoolean("clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
+        prefs.putBoolean("xmp_file_schema_long", FotoLibGlobal.preferLongXmpFormat);
+
         prefs.putBoolean("mapsForgeEnabled", Global.mapsForgeEnabled);
 
         prefs.putString("imageDetailThumbnailIfBiggerThan", "" + Global.imageDetailThumbnailIfBiggerThan);
@@ -147,6 +168,8 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putString("mapsForgeDir", (Global.mapsForgeDir != null) ? Global.mapsForgeDir.getAbsolutePath() : null);
 
         prefs.putString("pickHistoryFile", (Global.pickHistoryFile != null) ? Global.pickHistoryFile.getAbsolutePath() : null);
+
+        prefs.putString("mediaUpdateStrategy", FotoLibGlobal.mediaUpdateStrategy);
 
         prefs.apply();
 
@@ -168,6 +191,8 @@ public class SettingsActivity extends PreferenceActivity {
 
         Global.debugEnabledMemory               = getPref(prefs, "debugEnabledMemory", Global.debugEnabledMemory);
 
+        FotoLibGlobal.debugEnabledJpgMetaIo     = getPref(prefs, "debugEnabledJpgMetaIo", FotoLibGlobal.debugEnabledJpgMetaIo);
+
         // one setting for several 3d party debug-flags
         boolean debug3rdParty                   = getPref(prefs, "debugEnableLibs", PhotoViewAttacher.DEBUG);
 
@@ -186,6 +211,7 @@ public class SettingsActivity extends PreferenceActivity {
         Global.initialImageDetailResolutionHigh = getPref(prefs, "initialImageDetailResolutionHigh", Global.initialImageDetailResolutionHigh);
 
         Global.clearSelectionAfterCommand       = getPref(prefs, "clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
+        FotoLibGlobal.preferLongXmpFormat       = getPref(prefs, "xmp_file_schema_long", FotoLibGlobal.preferLongXmpFormat);
 
         Global.mapsForgeEnabled                 = getPref(prefs, "mapsForgeEnabled", Global.mapsForgeEnabled);
 
@@ -205,6 +231,8 @@ public class SettingsActivity extends PreferenceActivity {
         Global.mapsForgeDir                     = getPref(prefs, "mapsForgeDir", Global.mapsForgeDir);
 
         Global.pickHistoryFile                  = getPref(prefs, "pickHistoryFile", Global.pickHistoryFile);
+
+        FotoLibGlobal.mediaUpdateStrategy       = getPref(prefs, "mediaUpdateStrategy", FotoLibGlobal.mediaUpdateStrategy);
 
         /*
         // bool
@@ -269,9 +297,9 @@ public class SettingsActivity extends PreferenceActivity {
         TagRepository.setInstance(Global.reportDir);
 
         // true if first run or change
-        if ((sOldEnableTagSupport == null) || (sOldEnableTagSupport.booleanValue() != Global.Media.enableNonStandardMediaFields)) {
-            MediaScanner.setInstance((Global.Media.enableNonStandardMediaFields) ? new MediaScannerEx(context) : new MediaScanner(context));
-            sOldEnableTagSupport = Global.Media.enableNonStandardMediaFields;
+        if ((sOldEnableNonStandardIptcMediaScanner == null) || (sOldEnableNonStandardIptcMediaScanner.booleanValue() != Global.Media.enableIptcMediaScanner)) {
+            MediaScanner.setInstance((Global.Media.enableIptcMediaScanner) ? new MediaScannerImageMetaReader(context) : new MediaScannerExifInterface(context));
+            sOldEnableNonStandardIptcMediaScanner = Global.Media.enableIptcMediaScanner;
         }
     }
 
@@ -288,27 +316,29 @@ public class SettingsActivity extends PreferenceActivity {
 
     /** load File preference from SharedPreferences */
     private static File getPref(SharedPreferences prefs, String key, File defaultValue) {
-        String def = (defaultValue != null) ? defaultValue.getAbsolutePath() : null;
-        String value         = prefs.getString(key, def);
+        String value         = prefs.getString(key, null);
+        if ((value == null) || (value.trim().length() == 0)) return defaultValue;
 
-        if ((def == null) || (def.trim().length() == 0)) return null;
         return new File(value);
     }
 
     /** load value from SharedPreferences */
-    private static int getPref(SharedPreferences prefs, String key, int defaultValue) {
-        String def = "" + defaultValue ;
-        String value         = prefs.getString(key, def);
+    private static String getPref(SharedPreferences prefs, String key, String defaultValue) {
+        return  prefs.getString(key, defaultValue);
+    }
 
-        if ((def != null) && (def.trim().length() > 0)) {
-            // #73 fix NumberFormatException
-            try {
-                return Integer.valueOf(value);
-            } catch (Exception ex) {
-                Log.i(Global.LOG_CONTEXT, "SettingsActivity.getPref(key=" + key
-                        +"): " + value+
-                        " => " + ex.getMessage(),ex);
-            }
+    /** load value from SharedPreferences */
+    private static int getPref(SharedPreferences prefs, String key, int defaultValue) {
+        String value         = prefs.getString(key, null);
+        if ((value == null) || (value.trim().length() == 0)) return defaultValue;
+
+        // #73 fix NumberFormatException
+        try {
+            return Integer.valueOf(value);
+        } catch (Exception ex) {
+            Log.i(Global.LOG_CONTEXT, "SettingsActivity.getPref(key=" + key
+                    +"): " + value+
+                    " => " + ex.getMessage(),ex);
         }
         return defaultValue;
     }
@@ -316,20 +346,14 @@ public class SettingsActivity extends PreferenceActivity {
     /** load value from SharedPreferences */
     private static boolean getPref(SharedPreferences prefs, String key, boolean defaultValue) {
         return prefs.getBoolean(key, defaultValue);
-
-        /*
-        String def = "" + defaultValue ;
-        String value         = prefs.getString(key, def);
-
-        if ((def == null) || (def.trim().length() == 0)) return defaultValue;
-        return Boolean.valueOf(value);
-        */
     }
 
     public static void show(Activity parent) {
         Intent intent = new Intent(parent, SettingsActivity.class);
         parent.startActivity(intent);
     }
+	
+	// #21: Support to change locale at runtime
     // This is used to show the status of some preference in the description
     private void updateSummary() {
         final String languageKey = prefsInstance.getString(Global.PREF_KEY_USER_LOCALE, "");
@@ -339,17 +363,23 @@ public class SettingsActivity extends PreferenceActivity {
         about.setTitle(AboutDialogPreference.getAboutTitle(this));
     }
 
+	// #21: Support to change locale at runtime
     private void setLanguage(String languageKey) {
-        int index = defaultLocalePreference.findIndexOfValue(languageKey);
+        setPref(languageKey, defaultLocalePreference, R.array.pref_locale_names);
+    }
+
+    private void setPref(String key, ListPreference listPreference, int arrayResourceId) {
+        int index = listPreference.findIndexOfValue(key);
         String summary = "";
 
         if (index >= 0) {
-            String[] names = this.getResources().getStringArray(R.array.pref_locale_names);
+            String[] names = this.getResources().getStringArray(arrayResourceId);
             if (index < names.length) {
                 summary = names[index];
             }
         }
-        defaultLocalePreference.setSummary(summary);
+        listPreference.setSummary(summary);
+
     }
 
     private void onDebugClearLogCat() {

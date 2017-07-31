@@ -38,6 +38,8 @@ import de.k3b.android.androFotoFinder.queries.FotoSqlBase;
 import de.k3b.android.osmdroid.forge.MapsForgeSupport;
 import de.k3b.android.util.LogCat;
 import de.k3b.database.QueryParameter;
+import de.k3b.media.ExifInterface;
+import de.k3b.media.ImageMetaReader;
 import uk.co.senab.photoview.PhotoViewAttacher;
 import uk.co.senab.photoview.gestures.CupcakeGestureDetector;
 
@@ -71,6 +73,9 @@ public class AndroFotoFinderApp extends Application {
 
         super.onCreate();
 
+        FotoLibGlobal.appName = getString(R.string.app_name);
+        FotoLibGlobal.appVersion = GuiUtil.getAppVersionName(this);
+
         Global.pickHistoryFile = getDatabasePath("pickHistory.geouri.txt");
         SettingsActivity.prefs2Global(this);
 
@@ -86,7 +91,8 @@ public class AndroFotoFinderApp extends Application {
         Collections.addAll(QueryParameter.sParserDefaultSelect, FotoSql.DEFAULT_GALLERY_COLUMNS);
         mCrashSaveToFile = new LogCat(this, Global.LOG_CONTEXT, HugeImageLoader.LOG_TAG,
                 PhotoViewAttacher.LOG_TAG, CupcakeGestureDetector.LOG_TAG,
-                FotoLibGlobal.LOG_TAG, ThumbNailUtils.LOG_TAG, IMapView.LOGTAG);
+                FotoLibGlobal.LOG_TAG, ThumbNailUtils.LOG_TAG, IMapView.LOGTAG,
+                ExifInterface.LOG_TAG, ImageMetaReader.LOG_TAG);
 
         ThumbNailUtils.init(this, null);
 
@@ -96,6 +102,8 @@ public class AndroFotoFinderApp extends Application {
 
         // #60: configure some of the mapsforge settings first
         MapsForgeSupport.createInstance(this);
+
+        FotoSql.deleteMediaWithNullPath(this);
 
         Log.i(Global.LOG_CONTEXT, getAppId() + " created");
     }

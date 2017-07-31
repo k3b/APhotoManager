@@ -19,6 +19,7 @@
 
 package de.k3b.csv2db.csv;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.Vector;
@@ -31,7 +32,7 @@ import java.util.Vector;
  * @author EVE
  *
  */
-public class CsvReader {
+public class CsvReader implements Closeable {
 	/** the first occurence in the first line of one othe these chars will become the {@link #fieldDelimiter} */
 	private static final String POSSIBLE_DELIMITER_CHARS = ",;\t";
 
@@ -52,6 +53,10 @@ public class CsvReader {
 		this.reader = reader;
 	}
 
+	public void close() throws IOException {
+		if (reader != null) reader.close();
+		reader = null;
+	}
 	public String[] readLine() {
 		Vector<String> result = new Vector<String>();
 		StringBuffer content = new StringBuffer();

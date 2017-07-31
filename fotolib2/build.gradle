@@ -2,6 +2,7 @@ apply plugin: 'java'
 // markdown in javadoc
 // https://github.com/Abnaxos/pegdown-doclet
 apply plugin: 'ch.raffael.pegdown-doclet'
+apply plugin: 'jacoco'
 
 
 sourceCompatibility = 1.7
@@ -10,11 +11,18 @@ targetCompatibility = 1.7
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'org.slf4j:slf4j-api:1.7.7@jar'
+    testCompile 'org.slf4j:slf4j-simple:1.7.7'
 
     testCompile 'junit:junit:4.11'
     testCompile "org.mockito:mockito-core:1.9.5"
     compile 'com.github.k3b:k3b-geoHelper:1.1.5'
-    compile 'com.adobe.xmp:xmpcore:5.1.2'
+
+    // compile 'com.adobe.xmp:xmpcore:6.1.10' // update for drewnoakes:metadata-extractor requires java-8 compiler does not run on my android-4.4.
+    compile 'com.adobe.xmp:xmpcore:5.1.2' // current version for drewnoakes:metadata-extractor
+
+    // https://github.com/drewnoakes/metadata-extractor/wiki/GettingStarted licence: http://www.apache.org/licenses/LICENSE-2.0
+    // 2.10.1 includes more recent xmpcore that generates java-8 bytecode not supported by android yet
+    compile ('com.drewnoakes:metadata-extractor:2.10.1') { transitive = false; } // 2.8.1
 }
 
 // workaround because android-studio does not make the test resources available

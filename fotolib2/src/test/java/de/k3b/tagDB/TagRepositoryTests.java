@@ -31,6 +31,9 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.k3b.TestUtil;
+import de.k3b.io.ListUtils;
+
 /**
  * Created by k3b on 04.10.2016.
  */
@@ -38,7 +41,7 @@ import java.util.List;
 public class TagRepositoryTests {
     // Obtain a logger instance
     private static final Logger LOGGER = LoggerFactory.getLogger(TagRepositoryTests.class);
-    private static final File OUTDIR = new File("./build/testresults/TagRepositoryTests");
+    private static final File OUTDIR = new File(TestUtil.OUTDIR_ROOT, "TagRepositoryTests");
     private File repositoryFile = null;
 
     @BeforeClass
@@ -63,6 +66,12 @@ public class TagRepositoryTests {
         for (int i=1; i <= numberOfItems; i++) {
             items.add(createItem(i));
         }
+        return result;
+    }
+
+    private TagRepository createUnsavedRepo(String name, String paths) {
+        TagRepository result = createUnsavedRepo(name, 0);
+        result.includePaths(null, paths);
         return result;
     }
 
@@ -102,21 +111,20 @@ public class TagRepositoryTests {
     }
 
     @Test
-    public void shouldIncludeItem() throws Exception {
+    public void shouldMerge() throws Exception {
         // 1,2,3
-        TagRepository originalItems = createUnsavedRepo("shouldIncludeItem123", 3)
-                .save();
+        TagRepository originalItems = createUnsavedRepo("shouldIncludeItemB12", "a/b1/c,a/b2");
+        originalItems .save();
 
         // 1,2,7
-        List<Tag> additionalItems = createUnsavedRepo("shouldIncludeItem127", 2).load();
-        Tag added = createItem(7);
-        additionalItems.add(added);
+        List<Tag> additionalItems = createUnsavedRepo("shouldIncludeItemB3", "a/b1/c,a/b3,c").load();
 
         // 7,1,2,3
-        int changes = originalItems.includeChildTags(null, additionalItems);
+        int changes = originalItems.merge(additionalItems);
+        originalItems.save();
         List<Tag> items = originalItems.load();
-        Assert.assertEquals(added + "added 1", 1, changes);
-        Assert.assertEquals(4, items.size());
+        Assert.assertEquals("added 1", 2, changes);
+        Assert.assertEquals(6, items.size());
     }
 
     @Test
@@ -124,7 +132,7 @@ public class TagRepositoryTests {
         // Name1
         TagRepository repo = createUnsavedRepo("shouldAddExpression", 1);
         List<Tag> items = repo.load();
-        TagRepository.include(items, items.get(0), null, "/a,b,c/c1/c11");
+        TagRepository.includePaths(items, items.get(0), null, "/a,b,c/c1/c11");
         StringWriter wr = new StringWriter();
         repo.save(items, wr, " ");
 
@@ -139,14 +147,14 @@ public class TagRepositoryTests {
     }
 
     @Test
-    public void shouldRenameSimple() throws Exception {
+    public void shouldIncludePathsSimple() throws Exception {
         // Name1
-        TagRepository repo = createUnsavedRepo("shouldAddExpression", 0);
+        TagRepository repo = createUnsavedRepo("shouldIncludePathsSimple", 0);
         List<Tag> items = repo.load();
-        TagRepository.include(items, null, null, "/c/c1/c11");
+        TagRepository.includePaths(items, null, null, "/c/c1/c11");
         Tag c1 = repo.findFirstByName("c1");
 
-        TagRepository.include(items, c1.getParent(), c1, "c1New");
+        TagRepository.includePaths(items, c1.getParent(), c1, "c1New");
 
         StringWriter wr = new StringWriter();
         repo.save(items, wr, " ");
@@ -159,14 +167,14 @@ public class TagRepositoryTests {
     }
 
     @Test
-    public void shouldRenameRoot() throws Exception {
+    public void shouldIncludePathRoot() throws Exception {
         // Name1
-        TagRepository repo = createUnsavedRepo("shouldAddExpression", 0);
+        TagRepository repo = createUnsavedRepo("shouldIncludePathRoot", 0);
         List<Tag> items = repo.load();
-        TagRepository.include(items, null, null, "/c/c1/c11");
+        TagRepository.includePaths(items, null, null, "/c/c1/c11");
         Tag c1 = repo.findFirstByName("c1");
 
-        TagRepository.include(items, c1.getParent(), c1, "/c1AsRoot");
+        TagRepository.includePaths(items, c1.getParent(), c1, "/c1AsRoot");
 
         StringWriter wr = new StringWriter();
         repo.save(items, wr, " ");
@@ -179,14 +187,14 @@ public class TagRepositoryTests {
     }
 
     @Test
-    public void shouldRenameWithInsert() throws Exception {
+    public void shouldIncludePathsWithInsert() throws Exception {
         // Name1
-        TagRepository repo = createUnsavedRepo("shouldAddExpression", 0);
+        TagRepository repo = createUnsavedRepo("shouldIncludePathsWithInsert", 0);
         List<Tag> items = repo.load();
-        TagRepository.include(items, null, null, "/c/c1/c11");
+        TagRepository.includePaths(items, null, null, "/c/c1/c11");
         Tag c1 = repo.findFirstByName("c1");
 
-        TagRepository.include(items, c1.getParent(), c1, "c1a/c1b");
+        TagRepository.includePaths(items, c1.getParent(), c1, "c1a/c1b");
 
         StringWriter wr = new StringWriter();
         repo.save(items, wr, " ");
@@ -207,6 +215,7 @@ public class TagRepositoryTests {
 
         Assert.assertEquals("Name2", true, items.contains("Name2"));
         Assert.assertEquals("Name5", false, items.contains("Name5"));
+        Assert.assertEquals("naMe2 case in sentive", true, items.contains("naMe2"));
     }
 
     @Test
@@ -305,4 +314,60 @@ public class TagRepositoryTests {
         Assert.assertEquals("delCount", 4, delCount);
     }
 
+    @Test
+    public void shouldInsertHierarchy() throws Exception {
+        TagRepository sut = createUnsavedRepo("shouldInsertHierarchy", 0);
+        int changes = sut.includePaths(null,"a/b/c1,a/b/c2");
+        sut.save();
+        Assert.assertEquals(4, changes);
+    }
+
+    @Test
+    public void shouldInsertIfNotFound() throws Exception {
+        TagRepository sut = createUnsavedRepo("shouldInsertIfNotFound", "a/b/c");
+        int changes = sut.includeTagNamesIfNotFound(ListUtils.fromString("c,b,q"));
+        sut.save();
+        Assert.assertEquals(1, changes);
+    }
+
+    @Test
+    public void shouldRenameInHierachy() throws Exception {
+        TagRepository sut = createUnsavedRepo("shouldRenameInHierachy", "a/b/old/c,x/old/y");
+        int changes = sut.renameTags("old","new");
+        sut.save();
+        Assert.assertEquals("/a/b/new/c", sut.findFirstByName("c").getPath());
+        Assert.assertEquals("/x/new/y", sut.findFirstByName("y").getPath());
+        Assert.assertEquals("num changes 2", 2, changes);
+    }
+
+    @Test
+    public void shouldFindByPath() throws Exception {
+        List<Tag> sut = createUnsavedRepo("shouldFindByPath", "a/b/c,x/y/z").load();
+        Tag root = Tag.findByPath(sut, null, "x/y");
+
+        Tag found = Tag.findByPath(sut, null, "a/b/c");
+        Assert.assertEquals("/a/b/c", found.getPath());
+
+        found = Tag.findByPath(sut, root, "/a/b/c");
+        Assert.assertEquals("/a/b/c", found.getPath());
+    }
+
+    @Test
+    public void shouldNotFindByPath() throws Exception {
+        List<Tag> sut = createUnsavedRepo("shouldFindByPath", "a/b/c,x/y/z").load();
+        Tag root = Tag.findByPath(sut, null, "x/y");
+
+        Tag found = Tag.findByPath(sut, root, "a/q/c");
+        Assert.assertEquals("no a/q", null, found);
+
+        found = Tag.findByPath(sut, root, "a/b/c");
+        Assert.assertEquals("wrong root", null, found);
+    }
+
+    @Test
+    public void shouldGetPathElements() throws Exception {
+        String[] pathElemens = TagExpression.getPathElemens("/a");
+        Assert.assertEquals(2, pathElemens.length);
+        Assert.assertEquals("", pathElemens[0]);
+    }
 }

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright (c) 2017 by k3b.
+ *
+ * This file is part of AndroFotoFinder / #APhotoManager.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
+ -->
+
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/grid_color_selector"
+    android:orientation="vertical"
+    android:padding="@dimen/grid_cell_margin">
+
+    <de.k3b.android.androFotoFinder.imagedetail.PhotoViewEx
+        android:id="@+id/image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/grid_cell_margin"
+        android:gravity="bottom|start"
+        android:textSize="14sp"
+        android:text="hello line 1\nline2\nline3"
+        android:layout_gravity="bottom|start"
+        android:background="@color/image_label_background" />
+    <ImageButton
+        android:id="@+id/cmd_any"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="bottom|end"
+        android:visibility="invisible"
+        android:src="@drawable/ic_action_tag"
+        android:layout_gravity="bottom|end"
+        android:background="@android:color/black"
+         />
+
+</FrameLayout>

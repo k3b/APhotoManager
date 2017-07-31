@@ -14,6 +14,10 @@ set xmpSrc="%~dpn1.xmp"
 
 if EXIST %xmpSrc% del %xmpSrc% > nul
 
+set xmpSrc="%~dpnx1.xmp"
+
+if EXIST %xmpSrc% del %xmpSrc% > nul
+
 echo deleted %1
 goto end
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -19,9 +19,12 @@
 
 package de.k3b.android.widget;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -40,8 +43,10 @@ import de.k3b.io.ListUtils;
  * invoke via Clipboard ContextActionBar: star (history) to open a popupmenu with previous values.
  * Long-Press if no selection => popup with previous values.
  *
+ * Popup-menu requires at least api 11 (HONEYCOMB)
  * Created by k3b on 26.08.2015.
  */
+@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class HistoryEditText {
     private static final int NO_ID = -1;
     private final Activity mContext;
@@ -65,6 +70,7 @@ public class HistoryEditText {
                 mEditor.setOnLongClickListener(this);
             } else {
                 mCmd.setOnClickListener(this);
+                mCmd.setVisibility(View.VISIBLE);
             }
         }
 
@@ -73,10 +79,10 @@ public class HistoryEditText {
         }
 
         protected void showHistory() {
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
-            List<String> items = getHistory(sharedPref);
+            List<String> items = getHistoryItems();
 
-            PopupMenu popup = new PopupMenu(mContext, mEditor);
+            PopupMenu popup = null;
+            popup = new PopupMenu(mContext, mEditor);
             Menu root = popup.getMenu();
             int len = items.size();
             if (len > 10) len = 10;
@@ -84,14 +90,16 @@ public class HistoryEditText {
                 String text = items.get(i).trim();
 
                 if ((text != null) && (text.length() > 0)) {
-                    root.add(text);
+                    root.add(Menu.NONE, i + 10,Menu.NONE , getCondensed(text));
                 }
             }
 
             popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
-                    mEditor.setText(item.getTitle());
+                    // String text = item.getTitle();
+                    String text = getHistoryItems().get(item.getItemId() - 10);
+                    mEditor.setText(text);
                     mEditor.setSelection(0, mEditor.length());
                     return true;
                 }
@@ -99,6 +107,20 @@ public class HistoryEditText {
             popup.show();
         }
 
+        @NonNull
+        private List<String> getHistoryItems() {
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
+            return getHistory(sharedPref);
+        }
+
+        private CharSequence getCondensed(String text) {
+            int tlen = text.length();
+            if (tlen > 32) {
+                return text.substring(0, 5) + "..." + text.subSequence(tlen - 29, tlen);
+
+            }
+            return text;
+        }
         private List<String> getHistory(SharedPreferences sharedPref) {
             String history = sharedPref.getString(mId, "");
             return asList(history);
@@ -117,7 +139,7 @@ public class HistoryEditText {
         }
 
         private String toString(List<String> list) {
-            return ListUtils.toString(list, mDelimiter);
+            return ListUtils.toString(mDelimiter, list);
         }
 
         private List<String>  include(List<String>  history_, String newValue) {

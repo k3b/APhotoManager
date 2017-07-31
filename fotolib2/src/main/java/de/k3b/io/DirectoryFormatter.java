@@ -79,7 +79,7 @@ public class DirectoryFormatter {
         }
     }
 
-    private static DecimalFormat latLonFormatter6 = new DecimalFormat("#.000000", new DecimalFormatSymbols(Locale.US));
+    private static DecimalFormat latLonFormatter6 = new DecimalFormat("0.000000", new DecimalFormatSymbols(Locale.US));
 
     public static String getLatLonPath(double latitude, double longitude) {
         if ((latitude == 0) && (longitude == 0)) return null;
@@ -99,7 +99,14 @@ public class DirectoryFormatter {
         return result.toString();
     }
 
-    public static String parseLatLon(double latOrLon) {
+    public static String formatLatLon(Double latOrLon) {
+        if (latOrLon == null) return "0";
+        return formatLatLon(latOrLon.doubleValue());
+    }
+
+
+    public static String formatLatLon(double latOrLon) {
+        if ((latOrLon <= 0.0000005) && (latOrLon >= -0.0000005)) return "0";
         return latLonFormatter6.format(latOrLon);
     }
 

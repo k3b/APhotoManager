@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -24,7 +24,7 @@ import android.app.Activity;
 import de.k3b.database.QueryParameter;
 
 /**
- * An Api that clients to getFrom the content of of it-s fragment(s) and/or adapter(s).
+ * An Api for clients of fragment(s) and/or adapter(s) to get filtered content.
  *
  * Created by k3b on 04.06.2015.
  */

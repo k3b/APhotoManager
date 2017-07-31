@@ -37,12 +37,12 @@ import android.widget.Toast;
 import java.io.File;
 import java.util.Date;
 
-import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.queries.DatabaseHelper;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.transactionlog.TransactionLogSql;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedFiles;
@@ -50,6 +50,9 @@ import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
+import de.k3b.media.JpgMetaWorkflow;
+import de.k3b.media.MediaUtil;
+import de.k3b.media.MetaWriterExifXml;
 import de.k3b.transactionlog.MediaTransactionLogEntryType;
 
 /**
@@ -61,7 +64,7 @@ import de.k3b.transactionlog.MediaTransactionLogEntryType;
 public class AndroidFileCommands extends FileCommands {
     private static final String SETTINGS_KEY_LAST_COPY_TO_PATH = "last_copy_to_path";
     private static final String mDebugPrefix = "AndroidFileCommands.";
-    protected Activity mContext;
+    protected Activity mContext; // must be activity because of fragmentManager
     private AlertDialog mActiveAlert = null;
     private boolean mHasNoMedia = false;
     private MediaScanner mScanner = null;
@@ -78,6 +81,8 @@ public class AndroidFileCommands extends FileCommands {
             mActiveAlert = null;
         }
     }
+
+    @Override
     public String getDefaultLogFile() {
         Boolean isSDPresent = true; // Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED);
 
@@ -388,6 +393,7 @@ public class AndroidFileCommands extends FileCommands {
      * Write geo data (lat/lon) to photo, media database and log.
      */
     public int setGeo(double latitude, double longitude, SelectedFiles selectedItems, int itemsPerProgress) {
+        String dbgContext = "setGeo";
         if (!Double.isNaN(latitude) && !Double.isNaN(longitude) && (selectedItems != null) && (selectedItems.size() > 0)) {
             // in case that current activity is destroyed while running async, applicationContext will allow to finish database operation
             int itemcount = 0;
@@ -403,24 +409,23 @@ public class AndroidFileCommands extends FileCommands {
                 openLogfile();
                 int resultFile = 0;
 
-                String latLong = DirectoryFormatter.parseLatLon(latitude) + " " + DirectoryFormatter.parseLatLon(longitude);
+                String latLong = DirectoryFormatter.formatLatLon(latitude) + " " + DirectoryFormatter.formatLatLon(longitude);
                 for (File file : files) {
                     countdown--;
                     if (countdown <= 0) {
                         countdown = itemsPerProgress;
                         onProgress(itemcount, maxCount);
                     }
-                    if (JpgMetaWorkflow.saveLatLon(file, latitude, longitude, mContext.getString(R.string.app_name), GuiUtil.getAppVersionName(mContext))) {
-                        resultFile++;
-                    }
+                    MetaWriterExifXml jpg = JpgMetaWorkflow.saveLatLon(file, latitude, longitude);
+                    resultFile += TagSql.updateDB(dbgContext, applicationContext,
+                            file.getAbsolutePath(), jpg, MediaUtil.FieldID.latitude_longitude);
                     itemcount++;
-                    log("CALL apmGps.cmd ", getFilenameForLog(file),
-                            " ", latLong);
+                    log(MediaTransactionLogEntryType.GPS.getCommand(file.getAbsolutePath(), latLong, false));
                 }
                 onProgress(itemcount, maxCount);
-                int resultSql = FotoSql.execUpdateGeo(applicationContext, latitude, longitude, selectedItems);
 
                 long now = new Date().getTime();
+
                 for(int i = 0; i < selectedItems.size(); i++) {
                     addTransactionLog(selectedItems.getId(i), selectedItems.getFileName(i), now, MediaTransactionLogEntryType.GPS, latLong);
                 }
@@ -428,7 +433,7 @@ public class AndroidFileCommands extends FileCommands {
                 closeLogFile();
                 onProgress(++itemcount, maxCount);
 
-                return Math.max(resultFile,resultSql);
+                return resultFile;
             }
         }
         return 0;
@@ -451,6 +456,7 @@ public class AndroidFileCommands extends FileCommands {
     @NonNull
     public static AndroidFileCommands createFileCommand(Activity context) {
         AndroidFileCommands cmd = new AndroidFileCommands().setContext(context);
+        cmd.createFileCommand();
         cmd.setLogFilePath(cmd.getDefaultLogFile());
         cmd.openLogfile();
         return cmd;

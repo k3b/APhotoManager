@@ -60,6 +60,9 @@ public class TagRepository {
     /** The items contained in this repository */
     protected List<Tag> mItemList = null;
 
+    /** where new, unknown items are added to */
+    private Tag mImportRoot = null;
+
     /** Connect repository to a {@link File}. */
     public TagRepository(File file) {
         this.mFile = file;
@@ -73,6 +76,7 @@ public class TagRepository {
         TagRepository.sInstance = instance;
     }
 
+    /** move repository to different file/directory. Merge old with existing new. */
     public static void setInstance(File parentDir) {
         if (parentDir == null) throw new IllegalArgumentException("TagRepository.setInstance(null)");
 
@@ -85,32 +89,17 @@ public class TagRepository {
         }
         TagRepository.sInstance = new TagRepository(newFile);
 
-        if ((old != null) && (TagRepository.sInstance.includeChildTags(null, old) > 0)) {
+        if ((old != null) && (TagRepository.sInstance.merge(old) > 0)) {
             TagRepository.sInstance.save();
         }
     }
 
-    public int includeChildTags(Tag parent, List<Tag> newItems) {
+    public int merge(List<Tag> newItems) {
         int changes = 0;
         if ((newItems != null) && (newItems.size() > 0)) {
             List<Tag> existingItems = this.load();
             for (Tag newItem : newItems) {
-                if (!existingItems.contains(newItem)) {
-                    if (parent != null) newItem.setParent(parent);
-                    existingItems.add(newItem);
-                    changes++;
-                }
-            }
-        }
-        return changes;
-    }
-
-    public int include(Tag parent, List<String> children) {
-        int changes = 0;
-        if ((children != null) && (children.size() > 0)) {
-            List<Tag> existingItems = this.load();
-            for (String newItem : children) {
-                changes += include(existingItems, parent, null, newItem);
+                if (newItem != null) changes += includePaths(null, newItem.getPath());
             }
         }
         return changes;
@@ -119,19 +108,33 @@ public class TagRepository {
     /**
      * make shure that newSubItemsExpression is included in all below parent. Inserts if neccessary.
      *
+     * @param parent where relative items are added to. if null relative items go to root.
+     * @param childNameExpression i.e. /d,a,b,c/c1/c11 adds d to root, a,b,c as children to parent and c gets child c1 and c1 gets child c11.  @return number of (sub-)tags that where inserted
+     * @return number of (sub-)tags that where inserted
+     */
+    public int includePaths(Tag parent, String childNameExpression) {
+        List<Tag> existingItems = this.load();
+        return includePaths(existingItems, parent, null, childNameExpression);
+    }
+
+    /**
+     * make shure that newSubItemsExpression is included in all below parent. Inserts if neccessary.
+     * May add duplicates under different paths.
+     *
      * @param all contain all items
      * @param parent where relative items are added to. if null relative items go to root.
-     * @param target if not null this tag should get the name of newSubItemsExpression
-     *@param childNameExpression i.e. /d,a,b,c/c1/c11 adds d to root, a,b,c as children to parent and c gets child c1 and c1 gets child c11.  @return number of (sub-)tags that where inserted
+     * @param outInsertedFoundTag if not null: return last found/inserted child.
+     * @param childNameExpression i.e. /d,a,b,c/c1/c11 adds d to root, a,b,c as children to parent and c gets child c1 and c1 gets child c11.  @return number of (sub-)tags that where inserted
+     * @return number of (sub-)tags that where inserted
      */
-    public static int include(List<Tag> all, Tag parent, Tag target, String childNameExpression) {
+    public static int includePaths(List<Tag> all, Tag parent, Tag outInsertedFoundTag, String childNameExpression) {
         int changes = 0;
 
-        Tag firstTarget = target;
-		if (childNameExpression != null) {
-			String[] newSubPathExpression = childNameExpression.split("[,;:|]+");
+        Tag firstTarget = outInsertedFoundTag;
+        String[] newSubPathExpression = TagExpression.getSubExpressions(childNameExpression);
+		if (newSubPathExpression != null) {
 			for(String newChild : newSubPathExpression) {
-				changes += includeTagChildren(all, parent, firstTarget, newChild);
+				changes += includePath(all, parent, firstTarget, newChild);
                 firstTarget = null;
 			}
 		}
@@ -139,49 +142,61 @@ public class TagRepository {
 		return changes;
 	}
 
-	/** make shure that newSubPathExpression is included in all below parent. Inserts if neccessary.
-	  * newSubPathExpression i.e. c/c1/c11 adds c as child to parent and c gets child c1 and c1 gets child c11.
-	  * @return number of (sub-)tags that where inserted */
-    private static int includeTagChildren(List<Tag> all, Tag tagParent, Tag target, String newSubPathExpression) {
+    /**
+     * make shure that pathToBeIncluded is included in all below _parent.
+     * Inserts if neccessary.
+     * May add duplicates under different paths.
+     *
+     * @param all where all tags live in
+     * @param _parent pathToBeIncluded will be added below this parent. null means below root.
+     * @param outInsertedFoundTag if not null: return last found/inserted child.
+     * @param pathToBeIncluded i.e. c/c1/c11 adds c as child to _parent and c gets child c1
+     *                              and c1 gets child c11.
+	 * @return number of (sub-)tags that where inserted
+     **/
+    private static int includePath(List<Tag> all, Tag _parent,
+                                   Tag outInsertedFoundTag, String pathToBeIncluded) {
         int changes = 0;
 		
-        if (newSubPathExpression != null) {
-            Tag tagRoot = tagParent;
-            if (newSubPathExpression.startsWith("/") || newSubPathExpression.startsWith("\\")) {
+        if (pathToBeIncluded != null) {
+            Tag parent = _parent;
+            if (pathToBeIncluded.startsWith("/") || pathToBeIncluded.startsWith("\\")) {
                 // add to root
-                tagRoot = null;
+                parent = null;
             }
 
-            Tag currentTagParent = tagRoot;
-            String[] newPathNames = newSubPathExpression.split("[\\/]+");
+            String[] pathElements = TagExpression.getPathElemens(pathToBeIncluded);
 
-            for(String pathName : newPathNames) {
-				if (pathName != null) { 
-					pathName = pathName.trim();
-					if (pathName.length() > 0) {
-						Tag tag = Tag.findFirstChildByName(all, currentTagParent, pathName);
-						if (tag == null) {
-							// there is no currentTagParent with name=pathName yet: insert
-							tag = new Tag().setName(pathName);
-							tag.setParent(currentTagParent);
-							all.add(tag);
-							changes++;						
-						} // else already existing
-						currentTagParent = tag;
-					}
-				}
+            Tag currentTagParent = parent;
+            if (pathElements != null) {
+                for (String pathElement : pathElements) {
+                    if (pathElement != null) {
+                        pathElement = pathElement.trim();
+                        if (pathElement.length() > 0) {
+                            Tag tag = Tag.findFirstChildByName(all, currentTagParent, pathElement);
+                            if (tag == null) {
+                                // there is no currentTagParent with name=pathName yet: insert
+                                tag = new Tag().setName(pathElement);
+                                tag.setParent(currentTagParent);
+                                all.add(tag);
+                                changes++;
+                            } // else already existing
+                            currentTagParent = tag;
+                        }
+                    }
+                }
             }
 
-            if ((target != null) && (currentTagParent != null)) {
-                target.setName(currentTagParent.getName());
-                target.setParent(currentTagParent.getParent());
+            if ((outInsertedFoundTag != null) && (currentTagParent != null)) {
+                outInsertedFoundTag.setName(currentTagParent.getName());
+                outInsertedFoundTag.setParent(currentTagParent.getParent());
                 all.remove(currentTagParent);
             }
 
         }
 		return changes;
     }
-    
+
     /** Load from repository-file to memory.
      *
      * @return data loaded
@@ -193,7 +208,7 @@ public class TagRepository {
                 try {
                     load(mItemList, new FileReader(this.mFile));
 
-                    sortByNameIgnoreCase();
+                    sortByFullPathIgnoreCase();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -207,7 +222,11 @@ public class TagRepository {
         return mItemList;
     }
 
-    public void sortByNameIgnoreCase() {
+    public void sortByFullPathIgnoreCase() {
+        sortByFullPathIgnoreCase(mItemList);
+    }
+
+    private static void sortByFullPathIgnoreCase(List<Tag> mItemList) {
         Collections.sort(mItemList, Tag.COMPARATOR_HIERARCHY);
     }
 
@@ -231,6 +250,7 @@ public class TagRepository {
     public TagRepository delete(Tag item) {
         if ((item != null) && load().remove(item)) {
             save();
+            mImportRoot = null;
         }
 
         return this;
@@ -272,9 +292,11 @@ public class TagRepository {
             if ((line.length() > 0) && (!line.startsWith(COMMENT))) {
                 Tag item = loadItem(line);
                 final boolean valid = isValid(item);
+                /*  // to much log output
                 if (FotoLibGlobal.debugEnabled) {
                     logger.debug(dbg_context + "load(" + line + "): " + ((valid) ? "loaded" : "ignored"));
                 }
+                */
 
                 if (valid) {
                     result.add((Tag) item);
@@ -366,9 +388,11 @@ public class TagRepository {
             writer.write(line);
             writer.write("\n");
         }
+        /* // to much log output
         if (FotoLibGlobal.debugEnabled) {
             logger.debug(dbg_context + "save(" + line + "): " + ((valid) ? "saved" : "ignored" ));
         }
+        */
         return valid;
     }
 
@@ -401,39 +425,68 @@ public class TagRepository {
     public static Tag findFirstByName(List<Tag> items, String name) {
         if (items != null) {
             for (Tag item : items) {
-                if (name.equals(item.getName())) return item;
+                if (name.equalsIgnoreCase(item.getName())) return item;
             }
         }
         return null;
     }
 
-    /** get or create parent-tag where alle imports are appendend as children */
+    /** get or create parent-tag where alle import are appendend as children
+     * if they are not contained yet */
     public Tag getImportRoot() {
-        Tag result = findFirstByName(IMPORT_ROOT);
-        if (result == null) {
-            List<Tag> existingItems = this.load();
-            result = new Tag().setName(IMPORT_ROOT).setParent(null);
-            existingItems.add(result);
+        if (mImportRoot == null) {
+            mImportRoot = findFirstByName(IMPORT_ROOT);
+            if (mImportRoot == null) {
+                List<Tag> existingItems = this.load();
+                mImportRoot = new Tag().setName(IMPORT_ROOT).setParent(null);
+                existingItems.add(mImportRoot);
+            }
         }
-        return result;
+        return mImportRoot;
     }
 
-    public int includeIfNotFound(List<String>... lists) {
-        List<Tag> allTags = load();
+    public int includeTagNamesIfNotFound(List<String>... lists) {
         int modified = 0;
-        Tag root = null;
-        for (List<String> list : lists) {
-            if (list != null) {
-                for(String item : list) {
-                    if ((item != null) && (item.length() > 0) && (null == findFirstByName(allTags, item))) {
-                        if (root == null) root = getImportRoot();
+        if ((lists != null) && (lists.length > 0)) {
+            List<Tag> allTags = load();
+            Tag root = null;
+            for (List<String> list : lists) {
+                if (list != null) {
+                    for (String item : list) {
+                        if ((item != null) && (item.length() > 0) && (null == findFirstByName(allTags, item))) {
+                            if (root == null) root = getImportRoot();
 
-                        allTags.add(new Tag().setName(item).setParent(root));
-                        modified++;
+                            add(allTags, root, item);
+                            modified++;
+                        }
                     }
                 }
             }
         }
         return modified;
+    }
+
+    public static Tag add(List<Tag> allTags, Tag parent, String newItemName) {
+        Tag newTag = new Tag().setName(newItemName).setParent(parent);
+        allTags.add(newTag);
+        return newTag;
+    }
+
+    public int renameTags(String oldTagName, String newTagName) {
+        if ((oldTagName == null) || (newTagName == null)) {
+            throw new IllegalArgumentException("renameTags(null,null) not allowed");
+        }
+
+        int changes = 0;
+        if (oldTagName.compareTo(newTagName) != 0) {
+            List<Tag> items = load();
+            for (Tag t : items) {
+                if (oldTagName.compareTo(t.getName()) == 0) {
+                    t.setName(newTagName);
+                    changes++;
+                }
+            }
+        }
+        return changes;
     }
 }

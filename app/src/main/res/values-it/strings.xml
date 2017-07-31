@@ -163,7 +163,6 @@
 	<string name="tags_add_default">nuovo_tag</string>
 	<string name="tags_delete_children_title">Eliminazione dei contenuti</string>
 	<string name="tags_update_photos">Aggiorna i tag nelle foto coinvolte</string>
-	<string name="tags_update_result_format">Aggiornati i tag di %1$d foto</string>
 	<string name="tags_hint">Premendo a lungo il nome del tag apre il menu</string>
 	<string name="tags_defaults">Attività,Persone,Luoghi,Temi,Progetti</string>
 </resources>

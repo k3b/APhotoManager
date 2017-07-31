@@ -55,12 +55,15 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.ListUtils;
+import de.k3b.io.StringUtils;
 import de.k3b.tagDB.Tag;
+import de.k3b.tagDB.TagExpression;
 import de.k3b.tagDB.TagRepository;
 
 /**
@@ -72,12 +75,9 @@ import de.k3b.tagDB.TagRepository;
  */
 
 public class TagsPickerFragment  extends DialogFragment  {
-
-    private ITagsPicker mFragmentOnwner = null;
-    private boolean mIsFilterMode = true;
-    private ImageView mFilterMode;
-    private ImageView mBookmarkMode;
-
+    public interface ITagsSelector {
+        void onSelect(CharSequence tag, List<String> addNames);
+    }
     /** Owning Activity must implement this if it wants to handle the result of ok and cancel */
     public interface ITagsPicker {
         /** tag-dialog cancel pressed */
@@ -89,6 +89,14 @@ public class TagsPickerFragment  extends DialogFragment  {
 
         boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag);
     };
+
+    private ITagsPicker mFragmentOnwner = null;
+    private boolean mIsFilterMode = true;
+    private ImageView mFilterMode;
+    private ImageView mBookmarkMode;
+    private CharSequence mFilterValue = null;
+    private int mFilterSelection = -1;
+    private ITagsSelector mSelector = null;
 
     public static final int ACTIVITY_ID = 78921;
 
@@ -205,14 +213,37 @@ public class TagsPickerFragment  extends DialogFragment  {
             mBookMarkNames.addAll(ListUtils.fromString(lastBookMarkNames));
         }
 
-        TagRepository.getInstance().includeIfNotFound(mAddNames, mRemoveNames, mAffectedNames, mBookMarkNames);
+        List<Tag> existingTags = loadTagRepositoryItems(true);
+        TagRepository tagRepository = TagRepository.getInstance();
+        if (tagRepository.includeTagNamesIfNotFound(mAddNames, mRemoveNames, mAffectedNames, mBookMarkNames) > 0) {
+            tagRepository.save();
+        }
         this.mDataAdapter = new TagListArrayAdapter(this.getActivity(),
-                loadTagRepositoryItems(true),
+                existingTags,
                 mAddNames, mRemoveNames, mAffectedNames, mBookMarkNames
         );
 
         final ListView list = (ListView)view.findViewById(R.id.list);
         list.setAdapter(mDataAdapter);
+        if (mSelector != null) {
+            list.setFocusable(true);
+            list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                /** list item click. In tag pick mode: return filter-value and close */
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    // mImageButtonLongClicked workaround imagebutton-long-click prevent list-itemclick.
+                    if (!mDataAdapter.isImageButtonLongClicked()) {
+                        Object item = mDataAdapter.getItem(position);
+                        if ((item != null) && (mSelector != null)) {
+                            saveSettings();
+                            mSelector.onSelect(item.toString(), mAddNames);
+                            dismiss();
+                        }
+                    }
+                    mDataAdapter.setImageButtonLongClicked(false); // next listitem-click is allowed
+                }
+            });
+        }
 
         if (mContextMenueId != 0)
 
@@ -261,9 +292,13 @@ public class TagsPickerFragment  extends DialogFragment  {
         });
 
         // load/save filter/bookmarks
-        String lastTagFilter = prefs.getString(PREFS_LAST_TAG_FILTER, null);
+        CharSequence lastTagFilter = (this.mFilterValue != null) ? this.mFilterValue : prefs.getString(PREFS_LAST_TAG_FILTER, null);
         if (lastTagFilter != null) {
             mFilterEdit.setText(lastTagFilter);
+            if ((mFilterSelection >= 0) && (mFilterSelection <= mFilterValue.length())) {
+                mFilterEdit.setSelection(mFilterSelection, mFilterSelection);
+                ResourceUtils.setFocusWithKeyboard(mFilterEdit);
+            }
             refershResultList();
         }
 
@@ -281,10 +316,10 @@ public class TagsPickerFragment  extends DialogFragment  {
 
     private void setFilterMode(boolean newValue) {
         mIsFilterMode = newValue;
-        this.mBookmarkMode.setImageDrawable(getActivity().getResources().getDrawable(
+        this.mBookmarkMode.setImageDrawable(ResourceUtils.getDrawable(getActivity(),
                 !mIsFilterMode ? android.R.drawable.btn_star_big_on : android.R.drawable.btn_star_big_off));
 
-        this.mFilterMode.setImageDrawable(getActivity().getResources().getDrawable(
+        this.mFilterMode.setImageDrawable(ResourceUtils.getDrawable(getActivity(),
                 mIsFilterMode ? R.drawable.ic_btn_search_blue : R.drawable.ic_btn_search));
 
         // drawable.setColorFilter(0x00ff0000, PorterDuff.Mode.ADD);
@@ -299,7 +334,10 @@ public class TagsPickerFragment  extends DialogFragment  {
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this.getActivity());
             SharedPreferences.Editor edit = sharedPref.edit();
 
-            edit.putString(PREFS_LAST_TAG_FILTER, mFilterEdit.getText().toString());
+            if (mFilterValue == null) {
+                edit.putString(PREFS_LAST_TAG_FILTER, mFilterEdit.getText().toString());
+            }
+
             edit.putString(PREFS_LAST_TAG_BOOKMARKS, ListUtils.toString(mBookMarkNames));
             edit.apply();
         }
@@ -351,11 +389,22 @@ public class TagsPickerFragment  extends DialogFragment  {
         return true;
     }
 
+    /** ok button clicked to transfer changes and close dlg */
     public boolean onOk(List<String> addNames,
                         List<String> removeNames) {
         Log.d(Global.LOG_CONTEXT, debugPrefix + "onOk: " + mCurrentMenuSelection);
 
-        if ((mFragmentOnwner != null) && (!mFragmentOnwner.onOk(addNames, removeNames))) return false;
+        if (mSelector != null) {
+            String newTagName = mFilterEdit.getText().toString();
+            Tag existingTag = TagRepository.getInstance().findFirstByName(newTagName);
+            if (existingTag != null) {
+                mSelector.onSelect(existingTag.getName(), mAddNames);
+            } else {
+                mSelector.onSelect(newTagName, mAddNames);
+            }
+        } else {
+            if ((mFragmentOnwner != null) && (!mFragmentOnwner.onOk(addNames, removeNames))) return false;
+        }
 
         saveSettings();
         dismiss();
@@ -528,7 +577,7 @@ public class TagsPickerFragment  extends DialogFragment  {
     private List<Tag> loadTagRepositoryItems(boolean reload) {
         List<Tag> result = reload ? TagRepository.getInstance().reload() : TagRepository.getInstance().load();
         if (result.size() == 0) {
-            TagRepository.include(result,null,null,getString(R.string.tags_defaults));
+            TagRepository.includePaths(result,null,null,getString(R.string.tags_defaults));
         }
         return result;
     }
@@ -628,44 +677,64 @@ public class TagsPickerFragment  extends DialogFragment  {
     }
 
     private class TagRenameWithDbUpdateTask extends TagTask<Object> {
-        private final Tag oldTag;
-        private final String newName;
+        private final Tag mOldTag;
+        private final String mNewName;
 
-        TagRenameWithDbUpdateTask(Tag oldTag, String newName) {
+        TagRenameWithDbUpdateTask(String oldName, String newName) {
             super(getActivity(), R.string.rename_menu_title);
-            this.oldTag = oldTag;
-            this.newName = newName;
+            this.mOldTag = new Tag().setName(oldName);
+            this.mNewName = newName;
         }
 
         @Override
         protected Integer doInBackground(Object... params) {
-            List<Tag> affectedTags = new ArrayList<Tag>();
-            affectedTags.add(oldTag);
+            List<Tag> removedTags = new ArrayList<Tag>();
+            removedTags.add(mOldTag);
             publishProgress("...");
-            getWorkflow().init(getActivity(), null, affectedTags);
-            return getWorkflow().updateTags(ListUtils.toStringList(newName), ListUtils.toStringList(affectedTags));
+            getWorkflow().init(getActivity(), null, removedTags);
+
+            TagRepository.getInstance().renameTags(mOldTag.getName(), mNewName);
+
+            return getWorkflow().updateTags(ListUtils.toStringList(mNewName), ListUtils.toStringList(removedTags));
         }
 
         @Override
         protected void onPostExecute(Integer result) {
-            tagRename(oldTag, newName, false, true);
+            tagRename(mOldTag, mNewName, false, true);
             super.onPostExecute(result);
         }
     }
 
-    private void tagRename(Tag oldTag, String newName, boolean updateDatabase, boolean updateAffected) {
-        String oldName = oldTag.getName();
+    private void tagRename(Tag oldTag, String newPath, boolean updateDatabase, boolean updateAffected) {
+        String[] pathElements = TagExpression.getPathElemensFromLastExpr(newPath);
 
-        if ((newName != null) && (newName.compareTo(oldName) != 0)) {
-            if (updateDatabase) {
-                new TagRenameWithDbUpdateTask(oldTag, newName).execute();
-                return;
+        if (pathElements != null) {
+            boolean mustReload = false;
+            String oldName = oldTag.getName();
+            String newName = pathElements[pathElements.length - 1];
+
+            if ((StringUtils.length(newName) > 0) && (newName.compareTo(oldName) != 0)) {
+                if (updateDatabase) {
+                    new TagRenameWithDbUpdateTask(oldName, newName).execute();
+                    return;
+                }
+                updateKnownLists(newName, oldName, updateAffected);
+                mDataAdapter.remove(oldTag);
+                // mDataAdapter.add();
+                mustReload = true;
             }
-            updateKnownLists(newName, oldName, updateAffected);
-            mDataAdapter.remove(oldTag);
-            oldTag.setName(newName);
-            mDataAdapter.add(oldTag);
-            mDataAdapter.reloadList();
+
+            if (pathElements.length > 1) {
+                // move to different path
+                mDataAdapter.remove(oldTag);
+                if (tagAdd(oldTag.getParent(), newPath) > 0) {
+                    mustReload = true;
+                }
+            }
+
+            if (mustReload) {
+                mDataAdapter.reloadList();
+            }
         }
     }
 
@@ -691,26 +760,42 @@ public class TagsPickerFragment  extends DialogFragment  {
         return changes;
     }
 
-    private void tagAdd(Tag parent, String itemExpression) {
+    public void setFilter(CharSequence filterValue, int selection) {
+        this.mFilterValue = filterValue;
+        this.mFilterSelection = selection;
+    }
+
+    public void setTagSelector(ITagsSelector selector) {
+        mSelector = selector;
+    }
+
+    private int tagAdd(Tag parent, String itemExpression) {
         List<Tag> existingItems = loadTagRepositoryItems(false);
-        int changeCount = TagRepository.include(existingItems, parent, null, itemExpression);
+        int changeCount = TagRepository.includePaths(existingItems, parent, null, itemExpression);
 
         if (changeCount > 0) {
 
             int len = existingItems.size();
 
+            // assume that new tags are appended.
+            // iteraterate over all appended tags
             for (int i = len - changeCount; i < len; i++) {
                 Tag t = existingItems.get(i);
                 // existingItems.add(t);
                 mDataAdapter.add(t);
-            }
 
+                // new added tags will be automatically bookmarked
+                if ((mBookMarkNames != null) && !mBookMarkNames.contains(t.getName())) {
+                    mBookMarkNames.add(t.getName());
+                }
+            }
             mDataAdapter.notifyDataSetInvalidated();
             mDataAdapter.notifyDataSetChanged();
             mDataAdapter.reloadList();
             TagRepository.getInstance().save();
             mDataAdapter.notifyDataSetChanged();
         }
+        return changeCount;
     }
 
     private void tagChange(Tag tag, Tag parent) {

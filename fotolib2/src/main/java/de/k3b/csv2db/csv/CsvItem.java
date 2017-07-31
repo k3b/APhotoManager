@@ -53,7 +53,7 @@ abstract public class CsvItem {
         return -1 == getLastNonEmptyIndex();
     }
 
-    protected String getString(int columnNumber) {
+    protected String getString(String debugContext, int columnNumber) {
         if (isInvalidIndex(columnNumber)) {
             return null;
         }
@@ -70,8 +70,8 @@ abstract public class CsvItem {
         return (columnNumber < 0) || (mCurrentLineFields == null) || (columnNumber >= mCurrentLineFields.length);
     }
 
-    protected Integer getInteger(int columnNumber) {
-        String stringValue = getString(columnNumber);
+    protected Integer getInteger(String debugContext, int columnNumber) {
+        String stringValue = getString(debugContext, columnNumber);
         if ((stringValue != null) && (stringValue.length() > 0)) {
             try {
                 return Integer.valueOf(stringValue);
@@ -90,18 +90,18 @@ abstract public class CsvItem {
     }
 
     // first wins
-    protected Date getDate(int... columnNumbers) {
+    protected Date getDate(String debugContext, int... columnNumbers) {
         Date result = null;
 
         for (int columnNumber : columnNumbers) {
             if (columnNumber >= 0) {
                 // if date as string
-                String stringValue = getString(columnNumber);
+                String stringValue = getString(null, columnNumber);
                 result = DateUtil.parseIsoDate(stringValue);
 
                 if (result == null) {
                     // if date as integer
-                    Integer intValue = getInteger(columnNumber);
+                    Integer intValue = getInteger(null, columnNumber);
                     if ((intValue != null) && (intValue.intValue() != 0)) {
                         try {
                             result = new Date(Long.valueOf(intValue));

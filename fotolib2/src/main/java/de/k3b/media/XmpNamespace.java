@@ -21,6 +21,12 @@ package de.k3b.media;
 
 import com.adobe.xmp.XMPException;
 import com.adobe.xmp.XMPMetaFactory;
+import com.adobe.xmp.XMPSchemaRegistry;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.k3b.FotoLibGlobal;
 
 /**
  * Created by k3b on 10.10.2016.
@@ -32,8 +38,11 @@ public enum XmpNamespace {
     XAP("XMP-xmp","http://ns.adobe.com/xap/1.0/"),
     DC("XMP-dc", "http://purl.org/dc/elements/1.1/"),
     APM("apm", "https://github.com/k3b/APhotoManager/wiki/spec"),
-    PHOTOSHOP("photoshop","http://ns.adobe.com/photoshop/1.0/");
+    PHOTOSHOP("photoshop","http://ns.adobe.com/photoshop/1.0/"),
+    MICROSOFT_PHOTO("MicrosoftPhoto", "http://ns.microsoft.com/photo/1.0");
 
+    private static final String dbg_context = XmpNamespace.class.getSimpleName();
+    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
 
     private final String prefix;
     private final String uri;
@@ -59,9 +68,12 @@ public enum XmpNamespace {
 
     static {
         try {
-            XMPMetaFactory.getSchemaRegistry().registerNamespace(APM.getUriAsString(), APM.getPrefix());
+            XMPSchemaRegistry schemaRegistry = XMPMetaFactory.getSchemaRegistry();
+            schemaRegistry.registerNamespace(APM.getUriAsString(), APM.getPrefix());
+            schemaRegistry.registerNamespace(MICROSOFT_PHOTO.getUriAsString(), MICROSOFT_PHOTO.getPrefix());
+            schemaRegistry.registerNamespace(PHOTOSHOP.getUriAsString(), PHOTOSHOP.getPrefix());
         } catch (XMPException e) {
-            e.printStackTrace();
+            logger.error(dbg_context, "registerNamespace", e);
         }
     }
 

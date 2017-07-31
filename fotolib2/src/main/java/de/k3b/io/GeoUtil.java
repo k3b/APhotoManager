@@ -23,6 +23,9 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
+import de.k3b.geo.api.GeoPointDto;
+import de.k3b.geo.api.IGeoPointInfo;
+
 /**
  * Formatting and parsing of different latitude/longitude formats.
  *
@@ -32,6 +35,8 @@ import java.util.Locale;
  */
 
 public class GeoUtil {
+    public static final Double NO_LAT_LON = Double.valueOf(0.0);
+
     // ###### maximum 6 digits after "."
     private static DecimalFormat doubleFormatter = new DecimalFormat("#.######", new DecimalFormatSymbols(Locale.US));
 
@@ -83,7 +88,7 @@ public class GeoUtil {
     }
 
     /**
-     * convert latitude into DMS (degree minute second) format. For instance<br/>
+     * convert latitude_longitude into DMS (degree minute second) format. For instance<br/>
      * toString(-79.948862,3,",","EW") becomes<br/>
      * 79 degrees, 56 minutes, 55.903 seconds) West
      *  79,56,55.903W<br/>
@@ -95,7 +100,7 @@ public class GeoUtil {
      * @return null if latLon is null.
      */
     public static String toString(final Double latLon, int digits, String sperator, String plusMinus) {
-        if (latLon == null) return null;
+        if (GeoUtil.getValue(latLon) == NO_LAT_LON) return null;
 
         StringBuilder result = new StringBuilder();
         double remaining = latLon;
@@ -145,5 +150,23 @@ public class GeoUtil {
         }
         return -1;
     }
+
+    /** null save function: return if both are null or both non-null are the same.
+     * special logig also obeying NaN */
+    public static boolean equals(Double lhs, Double rhs) {
+        return getValue(lhs).equals(getValue(rhs));
+    }
+
+    /** normalized getGeoValue with null or NaN are translated to NO_LAT_LON.
+     *  #91: Fix Photo without geo may have different representations values for no-value
+     *  @return always != null: either GeoUtil.NO_LAT_LON if null, empty, unknown or value
+     */
+    public static Double getValue(Double value) {
+        if (value == null) return GeoUtil.NO_LAT_LON;
+        double result = value.doubleValue();
+        if (Double.isNaN(result) || (result == IGeoPointInfo.NO_LAT_LON)) return GeoUtil.NO_LAT_LON;
+        return value;
+    }
+
 }
         

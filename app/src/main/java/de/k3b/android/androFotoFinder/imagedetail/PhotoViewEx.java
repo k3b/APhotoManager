@@ -2,11 +2,12 @@ package de.k3b.android.androFotoFinder.imagedetail;
 
 import android.content.Context;
 import android.os.Build;
+import android.util.AttributeSet;
 import android.widget.ImageView;
 
 import java.io.File;
 
-import de.k3b.android.util.JpgMetaWorkflow;
+import de.k3b.media.JpgMetaWorkflow;
 import uk.co.senab.photoview.PhotoView;
 import uk.co.senab.photoview.PhotoViewAttacher;
 import uk.co.senab.photoview.log.LogManager;
@@ -25,7 +26,15 @@ public class PhotoViewEx extends PhotoView {
     private PhotoViewAttacherEx mAttacher;
 
     public PhotoViewEx(Context context) {
-        super(context);
+        this(context, null);
+    }
+
+    public PhotoViewEx(Context context, AttributeSet attr) {
+        this(context, attr, 0);
+    }
+
+    public PhotoViewEx(Context context, AttributeSet attr, int defStyle) {
+        super(context, attr, defStyle);
     }
 
     /** Required to have my own enhanced attacher that contains the additional functionality */

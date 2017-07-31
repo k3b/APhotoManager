@@ -105,6 +105,9 @@
     <string name="settings_debug_sql_summary">&#8230; containing executed SQL.</string>
     <string name="settings_debug_view_item_summary">&#8230; containing gridview/listview Items.</string>
     <string name="settings_debug_memory_title">LogCat memory consumption</string>
+
+    <string name="settings_debug_meta_io">LogCat jpg/xmp metadata read/write</string>
+
     <string name="settings_debug_libs_summary">&#8230; of 3rd party libraries.</string>
     <string name="settings_debug_title">LogCat misc.</string>
     <string name="settings_debug_summary">&#8230; containing other log messages.</string>
@@ -136,6 +139,7 @@
     <string name="sort_by_name_len">File path length</string>
     <string name="sort_by_none">Unsorted</string>
     <string name="sort_by_place">Place</string>
+
     <string name="sort_menu_title">Sort</string>
     <string name="update_result_format">Updated %1$d/%2$d files</string>
 
@@ -187,7 +191,31 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
     <string name="tags_add_default">new_tag</string>
     <string name="tags_delete_children_title">Delete children</string>
     <string name="tags_update_photos">Update tags in affected photos</string>
-    <string name="tags_update_result_format">Updated tags of %1$d photos</string>
     <string name="tags_hint">Long-Tap on tagname opens menu</string>
     <string name="tags_defaults">Activities,People,Places,Themes,Projects</string>
+
+    <string name="settings_media_update_strategy_title">Write changes to</string>
+
+    <string name="settings_media_update_strategy_jpg_xmp_create">jpg and xmp (Create if not found)</string>
+    <string name="settings_media_update_strategy_jpg_xmp_update">jpg (and xmp if exists)</string>
+    <string name="settings_media_update_strategy_jpg">jpg file only</string>
+    <string name="settings_media_update_strategy_xmp">xmp file only</string>
+
+    <string name="settings_xmp_file_schema_title">Long Xmp Sidecar File Name?</string>
+    <string name="settings_xmp_file_schema_summary">Long: file.jpg.xmp; Short: file.xmp</string>
+
+    <!-- #70: manually select sql column defintition for extra detail display in image detail view  -->
+    <string name="view_context_menu_title">Load Context ...</string>
+
+    <!-- #87: edit-exif: image title, description, rating -->
+    <string name="exif_menu_title">Edit Exif</string>
+    <string name="lbl_title">Title</string>
+    <string name="lbl_description">Description</string>
+    <string name="lbl_rating">Rating</string>
+
+    <!-- #90 add: sort by Rating, Date-Last-modified -->
+    <string name="sort_by_rating">Rating</string>
+    <string name="sort_by_modification">Last Modified</string>
+
+    <!--  depricated tags_update_result_format use image_success_update_format instead -->
 </resources>

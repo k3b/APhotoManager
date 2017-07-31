@@ -40,6 +40,7 @@ public class Global {
     /** LOG_CONTEXT is used as logging source for filtering logging messages that belong to this */
     public static final String LOG_CONTEXT = "k3bFoto";
 
+    /** local settings: which language should the gui use */
     public static final String PREF_KEY_USER_LOCALE = "user_locale";
 
     /**
@@ -57,7 +58,7 @@ public class Global {
     /** The maximum number of **Blue selection markers** in the [Geographic-Map](geographic-map). */
     public static int maxSelectionMarkersInMap = 255;
 
-    /** if image-width-height is bigger than this show thumbnail in image detail view.
+    /** #53, #83 if image-width-height is bigger than this show thumbnail in image detail view.
      * (memoryefficient, fast, but low-quality). -1: default to screenresolution */
     public static int imageDetailThumbnailIfBiggerThan = -1;
 
@@ -107,17 +108,11 @@ public class Global {
 
     public static class Media {
         /** Support extra parameters true: experimental. Not fully implemented yet. */
-        public static final boolean enableNonStandardMediaFields = true;
-
-        /** true: experimental. Not fully implemented yet. */
-        public static final boolean enableNonStandardMediaFieldsUpdateLastScanTimestamp = enableNonStandardMediaFields && true;
-
-        /** true: xmp value is more important than jpg-exif (if both values are present.) */
-        public static final boolean xmpOverwritesExif = enableNonStandardMediaFields && true;
+        public static final boolean enableIptcMediaScanner = true;
 
         /** true: if there is no xmp-file or entry xmp-entry in csv mark this
          * SQL_COL_EXT_XMP_LAST_MODIFIED_DATE=EXT_LAST_EXT_SCAN_NO_XMP*. */
-        public static final boolean enableXmpNone = enableNonStandardMediaFields && true;
+        public static final boolean enableXmpNone = enableIptcMediaScanner && true;
     }
 
     /** #26 which image resolution should the "non zoomed imageView" have? */
@@ -139,6 +134,7 @@ public class Global {
         }
     }
 
+    /** Remember ininial language settings. This allows setting "switch back to device language" after changing app locale */
     public static Locale systemLocale = Locale.getDefault();
 
     /** move some pre-defined menu-actions into the "more..." submenue */
@@ -146,6 +142,7 @@ public class Global {
         MenuUtils.mov2SubMenu(menu, context.getString(R.string.more_menu_title),
                 R.id.action_details,
                 R.id.action_slideshow,
+                R.id.action_view_context_mode,
                 // R.id.cmd_settings,
                 R.id.cmd_selection_add_all,
                 R.id.cmd_selection_remove_all,

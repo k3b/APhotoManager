@@ -40,8 +40,8 @@ android {
         // 0.6.0.170421 (29)    bugfix Map
         // 0.6.0.170502 (30)    workaround "android stock icon as activity icon breaks aapt check in frdoid build"
 
-        versionCode = 30
-        versionName = '0.6.0.170502'
+        versionCode = 31
+        versionName = '0.6.1.170803'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -97,10 +97,15 @@ dependencies {
     // compile 'com.android.support:appcompat-v7:21.0.2'
     // exif support
     // https://github.com/drewnoakes/metadata-extractor/wiki/GettingStarted licence: http://www.apache.org/licenses/LICENSE-2.0
-    compile 'com.drewnoakes:metadata-extractor:2.8.1'
+    // 2.10.1 includes more recent xmpcore that generates java-8 bytecode not supported by android yet
+    compile ('com.drewnoakes:metadata-extractor:2.10.1') { transitive = false; } // 2.8.1
 	
 	// compile 'com.adobe.xmp:xmpcore:6.1.10' // update for drewnoakes:metadata-extractor requires java-8 compiler does not run on my android-4.4.
 	compile 'com.adobe.xmp:xmpcore:5.1.2' // current version for drewnoakes:metadata-extractor
+
+    // compile 'com.github.k3b:slideDateTimePicker:v1.0.5' // via jitpack.io
+
+    // compile 'org.apache.commons:commons-configuration2:2.1.1'
 
     // this is osmdroid
     compile 'org.osmdroid:osmdroid-android:5.4:release@aar'

@@ -48,7 +48,7 @@ public class FileCommands implements  Cloneable {
     public static final int OP_DELETE = 3;
     public static final int OP_RENAME = 4;
     public static final int OP_UPDATE = 5;
-    private static final String EXT_SIDECAR = FileUtils.EXT_SIDECAR;
+    private static final String EXT_SIDECAR = ".xmp";
 
     protected String mLogFilePath;
     // private static final String LOG_FILE_ENCODING = "UTF-8";
@@ -87,34 +87,28 @@ public class FileCommands implements  Cloneable {
         boolean result = false;
 
         if (file != null) {
-            File sidecar = getSidecar(file);
+            File sidecar = getSidecar(file, false);
+            if (osFileExists(sidecar)) {
+                osDeleteFile(sidecar); // dont care if delete was successfull
+            }
+            sidecar = getSidecar(file, true);
             if (osFileExists(sidecar)) {
                 osDeleteFile(sidecar); // dont care if delete was successfull
             }
 
             if (osFileExists(file)) {
                 if (!osDeleteFile(file)) {
-                    log("rem file exists. delete failed : ", getFilenameForLog(file));
+                    log("rem file exists. delete failed : ", file.getAbsolutePath());
                 } else {
                     result = true; // was deleted
                 }
             } else {
-                log("rem file ", getFilenameForLog(file), " does not exist");
+                log("rem file '", file.getAbsolutePath(), "' does not exist");
                 result = true; // it is gone
             }
+            log(MediaTransactionLogEntryType.DELETE.getCommand(file.getAbsolutePath(),"", false));
         }
-        log("call apmDelete.cmd ", getFilenameForLog(file));
         return result;
-    }
-
-    public static String getFilenameForLog(File file) {
-        if (file == null) return "";
-        return getFilenameForLog(file.getAbsolutePath());
-    }
-
-    public static String getFilenameForLog(String absolutePath) {
-        if (absolutePath == null) return "";
-        return "\"" + absolutePath.replace("/", "\\") + "\"";
     }
 
     public int moveOrCopyFilesTo(boolean move, File destDirFolder, Long[] ids, File... sourceFiles) {
@@ -126,7 +120,7 @@ public class FileCommands implements  Cloneable {
                 result = moveOrCopyFiles(move, (move ? "mov" : "copy"), ids, destFiles, sourceFiles);
 
             } else {
-                log("rem Target dir ", getFilenameForLog(destDirFolder), " cannot be created");
+                log("rem Target dir '", destDirFolder, "' cannot be created");
             }
         }
         return result;
@@ -146,24 +140,32 @@ public class FileCommands implements  Cloneable {
         int pos = 0;
         int fileCount = destFiles.length;
         long now = new Date().getTime();
-        String dosCommand = (move) ? "call apmMove.cmd " : "call apmCopy.cmd ";
+        MediaTransactionLogEntryType command = (move) ? MediaTransactionLogEntryType.MOVE : MediaTransactionLogEntryType.COPY;
         MediaTransactionLogEntryType transaction = (move) ? MediaTransactionLogEntryType.MOVE : MediaTransactionLogEntryType.COPY;
 
         while (pos < fileCount) {
             File sourceFile = sourceFiles[pos];
             File destFile = destFiles[pos];
-            Long id = ids[pos];
+            if ((sourceFile != null) && (destFile != null)) {
+                Long id = ids[pos];
 
-            File destRenamed = renameDuplicate(destFile);
-            if (osFileMoveOrCopy(move, destRenamed, sourceFile)) itemCount++;
-            log(dosCommand, getFilenameForLog(sourceFile), " " , getFilenameForLog(destRenamed));
+                File destRenamed = renameDuplicate(destFile);
+                if (osFileMoveOrCopy(move, destRenamed, sourceFile)) itemCount++;
+                log(command.getCommand(sourceFile.getAbsolutePath(), destRenamed.getAbsolutePath(), true));
 
-            File sourceSidecar = getSidecar(sourceFile);
-            if (osFileExists(sourceSidecar)) {
-                File destSidecar = getSidecar(destRenamed);
-                if (osFileMoveOrCopy(move, destSidecar, sourceSidecar)) itemCount++;
+                File sourceSidecar = getSidecar(sourceFile, false);
+                if (osFileExists(sourceSidecar)) {
+                    File destSidecar = getSidecar(destRenamed, false);
+                    if (osFileMoveOrCopy(move, destSidecar, sourceSidecar)) itemCount++;
+                }
+
+                sourceSidecar = getSidecar(sourceFile, true);
+                if (osFileExists(sourceSidecar)) {
+                    File destSidecar = getSidecar(destRenamed, true);
+                    if (osFileMoveOrCopy(move, destSidecar, sourceSidecar)) itemCount++;
+                }
+                addTransactionLog(id, sourceFile.getPath(), now, transaction, destFile.getPath());
             }
-            addTransactionLog(id, sourceFile.getPath(), now, transaction, destFile.getPath());
             pos++;
         }
         int modifyCount = mModifiedDestFiles.size();
@@ -190,7 +192,7 @@ public class FileCommands implements  Cloneable {
     protected boolean fileOrSidecarExists(File file) {
         if (file == null) return false;
 
-        return osFileExists(file) || osFileExists(getSidecar(file));
+        return osFileExists(file) || osFileExists(getSidecar(file, false))  || osFileExists(getSidecar(file, true));
     }
 
     public static boolean isSidecar(File file) {
@@ -203,19 +205,31 @@ public class FileCommands implements  Cloneable {
         return name.toLowerCase().endsWith(EXT_SIDECAR);
     }
 
-    public File getSidecar(File file) {
+    public static File getSidecar(File file, boolean longFormat) {
         if (file == null) return null;
-        return getSidecar(file.getAbsolutePath());
+        return getSidecar(file.getAbsolutePath(), longFormat);
     }
 
-    public File getSidecar(String absolutePath) {
-        if (absolutePath == null) return null;
-
-        int suffix = absolutePath.lastIndexOf(".");
-
-        String pathWitoutSuffix = (suffix >= 0) ?absolutePath.substring(0, suffix) : absolutePath ;
-        return new File(pathWitoutSuffix + EXT_SIDECAR);
+    public static File getSidecar(String absolutePath, boolean longFormat) {
+        File result;
+        if (longFormat) {
+            result = new File(absolutePath + EXT_SIDECAR);
+        } else {
+            result = new File(FileUtils.replaceExtension(absolutePath, EXT_SIDECAR));
+        }
+        return result;
     }
+
+    public static File getExistingSidecarOrNull(String absolutePath) {
+        File result = null;
+        if (absolutePath != null) {
+            result = getSidecar(absolutePath, true);
+            if ((result == null) || !result.exists() || !result.isFile()) result = getSidecar(absolutePath, false);
+            if ((result == null) || !result.exists() || !result.isFile()) result = null;
+        }
+        return result;
+    }
+
 
     /**
      * @return file if rename is not neccessary else File with new name
@@ -240,7 +254,7 @@ public class FileCommands implements  Cloneable {
             String candidatePath = filename + id + extension;
             File candidate = new File(candidatePath);
             if (!fileOrSidecarExists(candidate)) {
-                log("rem renamed from ", getFilenameForLog(file), " to ", getFilenameForLog(candidatePath));
+                log("rem renamed from '", filename, "' to '", candidatePath,"'");
                 return candidate;
             }
 
@@ -326,16 +340,8 @@ public class FileCommands implements  Cloneable {
                 owner.onException(e, "_osFileCopy", sourceFullPath, targetFullPath);
             }
         } finally {
-            if (in != null)
-                try {
-                    in.close();
-                    if (out != null)
-                        out.close();
-                } catch (Exception e) {
-                    if (owner != null) {
-                        owner.onException(e, "osFileCopy-close", sourceFullPath, targetFullPath);
-                    }
-                }
+            FileUtils.close(in,"_osFileCopy-close");
+            FileUtils.close(out,"_osFileCopy-close");
         }
         return result;
     }
@@ -441,4 +447,13 @@ public class FileCommands implements  Cloneable {
 
     }
 
+    public String getDefaultLogFile() {
+        return "apmLog.log";
+    }
+
+    public FileCommands createFileCommand() {
+        setLogFilePath(getDefaultLogFile());
+        openLogfile();
+        return this;
+    }
 }

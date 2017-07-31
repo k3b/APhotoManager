@@ -72,6 +72,9 @@ public class FotoSql extends FotoSqlBase {
     public static final int SORT_BY_LOCATION = 'l';
     public static final int SORT_BY_NAME_LEN = 's'; // size
 
+    public static final int SORT_BY_RATING = 'r';
+    public static final int SORT_BY_MODIFICATION = 'm';
+
     public static final int SORT_BY_DEFAULT = SORT_BY_DATE;
 
     public static final int QUERY_TYPE_UNDEFINED = 0;
@@ -94,6 +97,17 @@ public class FotoSql extends FotoSqlBase {
     public static final String SQL_COL_LAT = MediaStore.Images.Media.LATITUDE;
     public static final String SQL_COL_LON = MediaStore.Images.Media.LONGITUDE;
     public static final String SQL_COL_SIZE = MediaStore.Images.Media.SIZE;
+
+    // other colums
+    public static final String SQL_COL_LAST_MODIFIED = MediaStore.MediaColumns.DATE_MODIFIED;
+    public static final String SQL_COL_GPS = MediaStore.Images.Media.LONGITUDE;
+    public static final String SQL_COL_COUNT = "count";
+    public static final String SQL_COL_WHERE_PARAM = "where_param";
+
+    public static final String SQL_COL_DATE_TAKEN = MediaStore.Images.Media.DATE_TAKEN;
+    public static final String SQL_COL_EXT_RATING = MediaStore.Video.Media.BOOKMARK;
+    public static final String SQL_COL_PATH = MediaStore.Images.Media.DATA;
+
 
     // only works with api >= 16
     public static final String SQL_COL_MAX_WITH =
@@ -119,14 +133,10 @@ public class FotoSql extends FotoSqlBase {
     private static final String FILTER_EXPR_NO_GPS = SQL_COL_LAT + " is null AND " + SQL_COL_LON + " is null";
     private static final String FILTER_EXPR_LON_MAX = SQL_COL_LON + " < ?";
     private static final String FILTER_EXPR_LON_MIN = SQL_COL_LON + " >= ?";
-    public static final String SQL_COL_GPS = MediaStore.Images.Media.LONGITUDE;
-    public static final String SQL_COL_COUNT = "count";
-    public static final String SQL_COL_WHERE_PARAM = "where_param";
+    protected static final String FILTER_EXPR_RATING_MIN = SQL_COL_EXT_RATING + " >= ?";
 
-    public static final String SQL_COL_DATE_TAKEN = MediaStore.Images.Media.DATE_TAKEN;
     private static final String FILTER_EXPR_DATE_MAX = SQL_COL_DATE_TAKEN + " < ?";
     private static final String FILTER_EXPR_DATE_MIN = SQL_COL_DATE_TAKEN + " >= ?";
-    public static final String SQL_COL_PATH = MediaStore.Images.Media.DATA;
     protected static final String FILTER_EXPR_PATH_LIKE = "(" + SQL_COL_PATH + " like ?)";
 
     // same format as dir. i.e. description='/2014/12/24/' or '/mnt/sdcard/pictures/'
@@ -298,7 +308,8 @@ public class FotoSql extends FotoSqlBase {
                 filter.setLatitude(getParam(query, FILTER_EXPR_LAT_MIN, remove), getParam(query, FILTER_EXPR_LAT_MAX, remove));
             }
 
-	        filter.setDate(getParam(query, FILTER_EXPR_DATE_MIN, remove), getParam(query, FILTER_EXPR_DATE_MAX, remove));
+            filter.setRatingMin(GalleryFilterParameter.parseRating(getParam(query, FILTER_EXPR_RATING_MIN, remove)));
+            filter.setDate(getParam(query, FILTER_EXPR_DATE_MIN, remove), getParam(query, FILTER_EXPR_DATE_MAX, remove));
             filter.setPath(getParam(query, FILTER_EXPR_PATH_LIKE, remove));
 
             return filter;
@@ -363,10 +374,10 @@ public class FotoSql extends FotoSqlBase {
     }
 
     public static void addWhereFilterLatLon(QueryParameter query, double latitudeMin, double latitudeMax, double logituedMin, double logituedMax) {
-        if (!Double.isNaN(latitudeMin)) query.addWhere(FILTER_EXPR_LAT_MIN, DirectoryFormatter.parseLatLon(latitudeMin));
-        if (!Double.isNaN(latitudeMax)) query.addWhere(FILTER_EXPR_LAT_MAX, DirectoryFormatter.parseLatLon(latitudeMax));
-        if (!Double.isNaN(logituedMin)) query.addWhere(FILTER_EXPR_LON_MIN, DirectoryFormatter.parseLatLon(logituedMin));
-        if (!Double.isNaN(logituedMax)) query.addWhere(FILTER_EXPR_LON_MAX, DirectoryFormatter.parseLatLon(logituedMax));
+        if (!Double.isNaN(latitudeMin)) query.addWhere(FILTER_EXPR_LAT_MIN, DirectoryFormatter.formatLatLon(latitudeMin));
+        if (!Double.isNaN(latitudeMax)) query.addWhere(FILTER_EXPR_LAT_MAX, DirectoryFormatter.formatLatLon(latitudeMax));
+        if (!Double.isNaN(logituedMin)) query.addWhere(FILTER_EXPR_LON_MIN, DirectoryFormatter.formatLatLon(logituedMin));
+        if (!Double.isNaN(logituedMax)) query.addWhere(FILTER_EXPR_LON_MAX, DirectoryFormatter.formatLatLon(logituedMax));
     }
 
     public static void addPathWhere(QueryParameter newQuery, String selectedAbsolutePath, int dirQueryID) {
@@ -458,10 +469,16 @@ public class FotoSql extends FotoSqlBase {
             case SORT_BY_NAME_LEN:
                 return context.getString(R.string.sort_by_name_len);
 
+            case SORT_BY_RATING:
+                return context.getString(R.string.sort_by_rating);
+            case SORT_BY_MODIFICATION:
+                return context.getString(R.string.sort_by_modification);
+
             case QUERY_TYPE_GALLERY:
                 return context.getString(R.string.gallery_title);
             case QUERY_TYPE_GROUP_DATE:
                 return context.getString(R.string.sort_by_date);
+
             case QUERY_TYPE_GROUP_ALBUM:
                 return context.getString(R.string.sort_by_folder);
             case QUERY_TYPE_GROUP_PLACE:
@@ -484,6 +501,12 @@ public class FotoSql extends FotoSqlBase {
             case SORT_BY_DATE_OLD:
             case SORT_BY_DATE:
                 return result.replaceOrderBy(SQL_COL_DATE_TAKEN + asc);
+
+            case SORT_BY_RATING:
+                return result.replaceOrderBy(SQL_COL_EXT_RATING  + asc, SQL_COL_DATE_TAKEN + asc);
+            case SORT_BY_MODIFICATION:
+                return result.replaceOrderBy(SQL_COL_LAST_MODIFIED + asc);
+
             case SORT_BY_NAME_OLD:
             case SORT_BY_NAME:
                 return result.replaceOrderBy(SQL_COL_PATH + asc);
@@ -492,7 +515,7 @@ public class FotoSql extends FotoSqlBase {
                 return result.replaceOrderBy(SQL_COL_GPS + asc, MediaStore.Images.Media.LATITUDE + asc);
             case SORT_BY_NAME_LEN_OLD:
             case SORT_BY_NAME_LEN:
-                return result.replaceOrderBy("length(" + SQL_COL_PATH + ")"+asc);
+                return result.replaceOrderBy("length(" + SQL_COL_PATH + ")" + asc, SQL_COL_PATH + asc);
             default: return  result;
         }
     }
@@ -500,7 +523,7 @@ public class FotoSql extends FotoSqlBase {
     public static boolean set(GalleryFilterParameter dest, String selectedAbsolutePath, int queryTypeId) {
         switch (queryTypeId) {
             case FotoSql.QUERY_TYPE_GROUP_ALBUM:
-                dest.setPath(selectedAbsolutePath + "%");
+                dest.setPath(selectedAbsolutePath + "/%");
                 return true;
             case FotoSql.QUERY_TYPE_GROUP_DATE:
                 Date from = new Date();
@@ -562,22 +585,6 @@ public class FotoSql extends FotoSqlBase {
         return result;
     }
 
-    /**
-     * Write geo data (lat/lon) media database.<br/>
-     */
-    public static int execUpdateGeo(final Context context, double latitude, double longitude, SelectedFiles selectedItems) {
-        QueryParameter where = new QueryParameter();
-        setWhereSelectionPaths(where, selectedItems);
-		setWhereVisibility(where, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
-
-        ContentValues values = new ContentValues(2);
-        values.put(SQL_COL_LAT, DirectoryFormatter.parseLatLon(latitude));
-        values.put(SQL_COL_LON, DirectoryFormatter.parseLatLon(longitude));
-        ContentResolver resolver = context.getContentResolver();
-
-        return exexUpdateImpl("execUpdateGeo", context, values, where.toAndroidWhere(), where.toAndroidParameters());
-    }
-	
     public static Cursor createCursorForQuery(String dbgContext, final Context context, QueryParameter parameters, int visibility) {
         setWhereVisibility(parameters, visibility);
         return createCursorForQuery(dbgContext, context, parameters.toFrom(), parameters.toAndroidWhere(),
@@ -774,6 +781,24 @@ public class FotoSql extends FotoSqlBase {
         return delCount;
     }
 
+    public static int deleteMediaWithNullPath(Context context) {
+        /// delete where SQL_COL_PATH + " is null" throws null pointer exception
+        QueryParameter wherePathIsNull = new QueryParameter();
+        wherePathIsNull.addWhere(SQL_COL_PATH + " is null");
+        wherePathIsNull.addWhere(FILTER_EXPR_PRIVATE_PUBLIC);
+
+        // return deleteMedia("delete without path (_data = null)", context, wherePathIsNull.toAndroidWhere(), null, false);
+
+        SelectedFiles filesWitoutPath = getSelectedfiles(context, wherePathIsNull);
+        String pksAsString = filesWitoutPath.toIdString();
+        if ((pksAsString != null) && (pksAsString.length() > 0)) {
+            QueryParameter whereInIds = new QueryParameter();
+            FotoSql.setWhereSelectionPks(whereInIds, pksAsString);
+
+            return deleteMedia("delete without path (_data = null)", context, whereInIds.toAndroidWhere(), null, true);
+        }
+        return 0;
+    }
     /**
      * Deletes media items specified by where with the option to prevent cascade delete of the image.
      */

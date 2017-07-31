@@ -22,6 +22,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -67,6 +68,18 @@ public class TagProcessorTests {
     public void shouldGetUpdatedRemoved() throws Exception {
         List<String> updated = sut.getUpdated(Arrays.asList("all", "single1"), Arrays.asList("all"), Arrays.asList("single1"));
         Assert.assertEquals(ListUtils.toString(updated), 1, updated.size());
+    }
+
+    @Test
+    public void shouldCalculateDiff() throws Exception {
+        List<String> addedTags = new ArrayList<String>();
+        List<String> removedTags = new ArrayList<String>();
+
+        int changes = sut.getDiff(Arrays.asList("a", "b"), Arrays.asList("a","c"), addedTags, removedTags);
+
+        Assert.assertEquals("removed", ListUtils.toString(Arrays.asList("b")), ListUtils.toString(removedTags) );
+        Assert.assertEquals("added", ListUtils.toString(Arrays.asList("c")), ListUtils.toString(addedTags));
+        Assert.assertEquals("# changes", 2, changes);
     }
 
     @Test

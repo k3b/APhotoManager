@@ -57,7 +57,13 @@ public class ThumbNailUtils {
         final Md5FileNameGenerator fileNameGenerator = new Md5FileNameGenerator();
         config.diskCacheFileNameGenerator(fileNameGenerator);
         config.diskCacheSize(50 * 1024 * 1024); // 50 MiB
+        config.diskCacheFileCount(160);
         config.tasksProcessingOrder(QueueProcessingType.LIFO);
+
+        // #83 this should make the cache-items smaller but it makes gallery scrolling much slower on my android-4.4.
+        // config.diskCacheExtraOptions(Global.imageDetailThumbnailIfBiggerThan, Global.imageDetailThumbnailIfBiggerThan, null);
+
+
         // Initialize ImageLoader with configuration.
         ImageLoader.getInstance().init(config.build());
     }

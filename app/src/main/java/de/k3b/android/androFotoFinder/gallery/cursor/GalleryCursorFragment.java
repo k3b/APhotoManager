@@ -51,6 +51,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import de.k3b.android.androFotoFinder.Common;
+import de.k3b.android.androFotoFinder.ExifEditActivity;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.directory.DirectoryGui;
@@ -790,6 +791,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             case R.id.cmd_edit_tags: {
                 return tagsShowEditDialog(selectedFiles);
             }
+            case R.id.menu_exif:
+                return onEditExif(selectedFiles);
             case R.id.cmd_selection_add_all:
                 addAllToSelection();
                 return true;
@@ -836,6 +839,12 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         }
 
     }
+
+    private boolean onEditExif(SelectedFiles fotos) {
+        ExifEditActivity.showActivity(getActivity(), null, fotos, 0);
+        return true;
+    }
+
     private boolean tagsShowEditDialog(SelectedFiles fotos) {
         mTagWorflow = new TagUpdateTask(fotos);
         TagsPickerFragment dlg = new TagsPickerFragment();

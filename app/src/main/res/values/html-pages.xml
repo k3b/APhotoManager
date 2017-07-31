@@ -24,31 +24,6 @@
 <h1>A Photo Manager</h1>with &#39;A Photo Map&#39; in &#39;AndroFotoFinder&#39;
   <br />Features:
   <ul>
-  <li>App and internet homepage available in these languages:<ul>
-		<li>
-  ar,&nbsp;
-  <a href="https://github.com/k3b/APhotoManager/wiki/de-home">de</a>,&nbsp;
-  <a href="https://github.com/k3b/APhotoManager/wiki/home">en</a>,&nbsp;
-  <a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr</a>,&nbsp;
-  <a href="https://github.com/k3b/APhotoManager/wiki/it-home">it</a>,&nbsp;
-  <a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja</a>,&nbsp;
-  nl,&nbsp;pl,&nbsp;
-  <a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro</a>
-  ,&nbsp;ru
-  <a href="https://github.com/k3b/APhotoManager/wiki/tr-home">tr</a>
-</li>
-      <li>
-        <b>Help us to translate this app into other languages:</b>
-		<ul>
-		  <li>On a pc with keyboard and internet access through the
-			<a href="https://github.com/k3b/APhotoManager/issues/21">crowdin.com website.</a>
-		  </li>
-		  <li>On android through the "A Photo Manager" menu <b>Settings/Translate</b> using the stringlate app.
-		  </li>
-		</ul>
-      </li>
-		</ul>
-	</li>
     <li>Can handle big image collections (15000+ images in 1000+ folders)</li>
     <li>Uses Android&#39;s image content provider. No initial image scan necessary.</li>
     <li>

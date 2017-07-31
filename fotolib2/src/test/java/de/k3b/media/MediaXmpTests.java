@@ -20,6 +20,7 @@
 package de.k3b.media;
 
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
@@ -30,7 +31,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.TimeZone;
 
-import de.k3b.csv2db.csv.TestUtil;
+import de.k3b.FotoLibGlobal;
+import de.k3b.TestUtil;
 
 /**
  * Created by k3b on 24.10.2016.
@@ -40,19 +42,26 @@ public class MediaXmpTests {
     // D:\prj\eve\android\prj\fotos-android.wrk\FotoGallery\FotoGallery\fotolib2\src\test\resources\testdata
     // test-WitExtraData.xmp
     private static final String RESOURCES_ROOT = "testdata/";
+    private static final File OUTDIR = new File(TestUtil.OUTDIR_ROOT, "MediaXmpTests");
+
+    @BeforeClass
+    public static void initDirectories() {
+        FotoLibGlobal.appName = "JUnit";
+        FotoLibGlobal.appVersion = "MediaXmpTests";
+    }
 
     @Test
     public void shouldReadExistingXmpFile() throws IOException {
         TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
         MediaXmpSegment sut = new MediaXmpSegment();
-        InputStream fis = getStream("test-WitExtraData.xmp");
+        InputStream fis = getStream("images/test-WitExtraData.xmp");
         sut = new MediaXmpSegment();
-        sut.load(fis);
+        sut.load(fis, "JUnit");
         fis.close();
 
         MediaDTO actual = new MediaDTO(sut);
 
-        Assert.assertEquals(sut.toString(), "MediaDTO: path null dateTimeTaken 1962-11-07T09:38:46 title Headline description XPSubject latitude 27.818611 longitude -15.764444 tags Marker1, Marker2", actual.toString());
+        Assert.assertEquals(sut.toString(), "MediaDTO: path null dateTimeTaken 1962-11-07T09:38:46 title Headline description XPSubject latitude 27.818611 longitude -15.764444 rating 3 tags Marker1, Marker2", actual.toString());
     }
 
     private InputStream getStream(String _resourceName) {
@@ -94,8 +103,6 @@ public class MediaXmpTests {
         Assert.assertEquals(expected.toString(), actual.toString());
     }
 
-    private static final File OUTDIR = new File("./build/testresults/MediaXmpTests");
-
     @Test
     public void shouldSaveAndLoadXmp() throws IOException {
         MediaDTO content = TestUtil.createTestMediaDTO(1);
@@ -106,12 +113,12 @@ public class MediaXmpTests {
         OUTDIR.mkdirs();
         File outFile = new File(OUTDIR, "shouldSaveAsXmp.xmp");
         FileOutputStream fos = new FileOutputStream(outFile);
-        sut.save(fos, true);
+        sut.save(fos, true, "JUnit");
         fos.close();
 
         FileInputStream fis = new FileInputStream(outFile);
         sut = new MediaXmpSegment();
-        sut.load(fis);
+        sut.load(fis, "JUnit");
         fis.close();
 
         MediaDTO actual = new MediaDTO(sut);

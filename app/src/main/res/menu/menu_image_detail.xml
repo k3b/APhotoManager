@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -22,12 +22,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".imagedetail.ImageDetailActivityViewPager">
+    <!-- note: items with odd orderInCategory will not go to quick button  -->
     <item
         android:id="@+id/menu_item_share"
         android:showAsAction="always"
         android:icon="@android:drawable/ic_menu_share"
         android:title="@string/share_menu_title"
-        android:orderInCategory="2" />
+        android:orderInCategory="3" />
 
     <item android:id="@+id/action_edit" android:title="@string/edit_menu_title"
         android:icon="@android:drawable/ic_menu_edit"
@@ -35,28 +36,29 @@
 
     <item
         android:id="@+id/menu_item_rename"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:orderInCategory="50"
         android:showAsAction="ifRoom"
-        android:title="@string/rename_menu_title"
-        android:orderInCategory="50" />
+        android:title="@string/rename_menu_title" />
 
     <item android:id="@+id/action_details" android:title="@string/details_menu_title"
-        android:icon="@android:drawable/ic_menu_preferences"
-        android:orderInCategory="900" android:showAsAction="ifRoom" />
-    <item android:id="@+id/action_slideshow" android:title="@string/slideshow_menu_title"
-        android:icon="@android:drawable/ic_media_play"
-        android:checkable="true"
         android:orderInCategory="900" android:showAsAction="never" />
+    <item android:id="@+id/action_view_context_mode" android:title="@string/view_context_menu_title"
+        android:orderInCategory="899" android:showAsAction="never" />
+    <item android:id="@+id/action_slideshow" android:title="@string/slideshow_menu_title"
+        android:checkable="true"
+        android:orderInCategory="901" android:showAsAction="never" />
 
     <item android:id="@+id/cmd_settings"
         android:title="@string/settings_title"
         android:icon="@android:drawable/ic_menu_preferences"
         android:visible="true"
-        android:orderInCategory="1000"
+        android:orderInCategory="1001"
         android:showAsAction="never" />
     <item android:id="@+id/cmd_about"
         android:title="@string/about_summary"
         android:visible="true"
-        android:orderInCategory="10000"
+        android:orderInCategory="10001"
         android:showAsAction="never" />
     <item android:id="@+id/cmd_more"
         android:title="@string/more_menu_title"

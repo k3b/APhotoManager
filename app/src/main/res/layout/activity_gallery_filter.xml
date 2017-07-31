@@ -119,6 +119,10 @@
         android:layout_toStartOf="@+id/cmd_path_history"
         android:layout_below="@+id/edit_any"
         />
+
+
+
+
 <!-- -->
     <Button android:id="@+id/cmd_date"
         android:layout_width="wrap_content"
@@ -299,12 +303,36 @@
         />
 
     <!-- -->
+    <TextView android:id="@+id/lbl_rating"
+        android:text="@string/lbl_rating"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/edit_tags_exclude"
+        />
+
+    <RatingBar
+        android:id="@+id/ratingBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/edit_tags_exclude"
+        android:elevation="1dp"
+        android:isIndicator="false"
+        android:max="5"
+        android:numStars="5"
+        android:stepSize="1.0"
+        android:rating="0.0"/>
+
+    <!-- -->
 
     <CheckBox android:id="@+id/chk_with_no_geo"
         android:text="@string/lbl_with_no_geo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/edit_tags_exclude"
+        android:layout_below="@+id/ratingBar"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         />
@@ -323,7 +351,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/lbl_latitude_short"
-        android:layout_below="@+id/edit_tags_exclude"
+        android:layout_below="@+id/ratingBar"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignBaseline="@+id/cmd_select_lat_lon" />

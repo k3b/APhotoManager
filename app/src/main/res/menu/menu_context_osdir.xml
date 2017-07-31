@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -31,6 +31,5 @@
         android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
 
     <item android:id="@+id/action_details" android:title="@string/details_menu_title"
-        android:icon="@android:drawable/ic_menu_preferences"
-        android:orderInCategory="900" android:showAsAction="ifRoom" />
+        android:orderInCategory="900" android:showAsAction="never" />
 </menu>

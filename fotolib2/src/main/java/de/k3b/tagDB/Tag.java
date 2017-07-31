@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 by k3b.
+ * Copyright (c) 2016-2017 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -22,6 +22,8 @@ package de.k3b.tagDB;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
+import de.k3b.io.StringUtils;
 
 /**
  * Represents a possible tag or keyword that can be attached to an image.
@@ -91,28 +93,16 @@ public class Tag{
     public boolean equals(Object o) {
         if (name == null) return false;
         if (o instanceof String) {
-            return name.equals((String)o);
+            return name.equalsIgnoreCase((String)o);
         }
         if (!(o instanceof Tag)) return false;
         Tag other = (Tag) o;
-        if (name.equals(other.name)) {
+        if (name.equalsIgnoreCase(other.name)) {
             if (this.parent == null) return other.parent == null;
             return parent.equals(other.parent);
         }
         return false;
         // return name.equals(((Tag)o).name);
-    }
-
-    public static List<Tag> toList(String... items) {
-        if ((items != null) && (items.length > 0)) {
-            List<Tag> result = new ArrayList<>();
-
-            for (String oldItem : items) {
-                result.add(new Tag().setName(oldItem));
-            }
-            return result;
-        }
-        return null;
     }
 
     /** return item as path where parents are appended.
@@ -183,7 +173,29 @@ public class Tag{
         return null;
     }
 
-	
+    public static Tag findByPath(List<Tag> all, Tag parent, String path) {
+        return findByPathElements(all, parent, TagExpression.getPathElemens(path));
+    }
+
+    public static Tag findByPathElements(List<Tag> all, Tag parent, String... pathElements) {
+        if (pathElements != null) {
+            boolean isRoot = (pathElements.length > 0) && (StringUtils.length(pathElements[0]) == 0);
+            Tag currentTagParent = isRoot ? null : parent;
+            for (String pathElement : pathElements) {
+                if (pathElement != null) {
+                    pathElement = pathElement.trim();
+                    if (pathElement.length() > 0) {
+                        Tag tag = Tag.findFirstChildByName(all, currentTagParent, pathElement);
+                        if (tag == null) return null;
+                        currentTagParent = tag;
+                    }
+                }
+            }
+            return currentTagParent;
+        }
+        return null;
+    }
+
     public int delete(List<Tag> all, boolean recursive) {
         int result = 0;
         if (all != null) {

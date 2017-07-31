@@ -32,8 +32,25 @@ public class FotoLibGlobal {
      */
     public static boolean debugEnabled = false;
 
+    /** if debugEnabledJpgMetaIo debug read/write jpg/exif/iptc/xmp io */
+    public static boolean debugEnabledJpgMetaIo = false;
+
     /** false do not follow symlinks when scanning Directories.  */
     public static final boolean ignoreSymLinks = false;
 
+    /** #84 true: file.jpg.xmp; false: file.xmp.  */
+    public static boolean preferLongXmpFormat = false;
+
     public static boolean visibilityShowPrivateByDefault = false;
+
+    /** strategy config how to read/write meta data: (J)pg, (X)mp, (C)reate. Global to allow changing these via a settings dialog */
+    public static String mediaUpdateStrategy = "JX";
+
+    // will be written into exif/xmp if not already set.
+    // Overwritten by android Application.onCreate()
+    public static String appName = null;
+    public static String appVersion = null;
+
+    /** true: update jpg-exif does not change file.lastModifiedDate */
+    public static boolean preserveJpgFileModificationDate = true;
 }
