@@ -35,7 +35,7 @@ import de.k3b.geo.api.IGeoPointInfo;
  */
 
 public class GeoUtil {
-    public static final double NO_LAT_LON = 0;
+    public static final Double NO_LAT_LON = Double.valueOf(0.0);
 
     // ###### maximum 6 digits after "."
     private static DecimalFormat doubleFormatter = new DecimalFormat("#.######", new DecimalFormatSymbols(Locale.US));
@@ -154,17 +154,18 @@ public class GeoUtil {
     /** null save function: return if both are null or both non-null are the same.
      * special logig also obeying NaN */
     public static boolean equals(Double lhs, Double rhs) {
-        return getValue(lhs) == getValue(rhs);
+        return getValue(lhs).equals(getValue(rhs));
     }
 
-    /** normalized getGeoValue with null or NaN are translated to IGeoPointInfo.NO_LAT_LON.
+    /** normalized getGeoValue with null or NaN are translated to NO_LAT_LON.
      *  #91: Fix Photo without geo may have different representations values for no-value
+     *  @return always != null: either GeoUtil.NO_LAT_LON if null, empty, unknown or value
      */
-    public static double getValue(Double value) {
-        if (value == null) return NO_LAT_LON;
+    public static Double getValue(Double value) {
+        if (value == null) return GeoUtil.NO_LAT_LON;
         double result = value.doubleValue();
-        if (Double.isNaN(result) || result == IGeoPointInfo.NO_LAT_LON) return NO_LAT_LON;
-        return result;
+        if (Double.isNaN(result) || (result == IGeoPointInfo.NO_LAT_LON)) return GeoUtil.NO_LAT_LON;
+        return value;
     }
 
 }

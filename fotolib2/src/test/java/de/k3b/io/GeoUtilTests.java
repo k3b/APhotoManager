@@ -41,7 +41,7 @@ public class GeoUtilTests {
         assertFormat("0.00001",0.00001);
         assertFormat("0.000001",0.000001);
         assertFormat("0"       ,0.0000001);
-        assertFormat(null       ,0);
+        assertFormat("0"       ,0);
         assertFormat("-0.000001",-0.000001);
         assertFormat("50.12345W",-50.12345,1,"EW");
         assertFormat("50.12345E",50.12345,1,"EW");

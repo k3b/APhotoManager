@@ -203,10 +203,10 @@ public class MediaUtil {
 
     public static void setLatitudeLongitude(IMetaApi destination, Double _latitude, Double _longitude) {
         if (destination != null) {
-            double latitude     = GeoUtil.getValue(_latitude);
-            double longitude    = GeoUtil.getValue(_longitude);
-            if ((latitude == 0.0) && (longitude == 0.0)) {
-                destination.setLatitudeLongitude(null, null);
+            Double latitude     = GeoUtil.getValue(_latitude);
+            Double longitude    = GeoUtil.getValue(_longitude);
+            if (GeoUtil.NO_LAT_LON.equals(latitude) && GeoUtil.NO_LAT_LON.equals(longitude)) {
+                destination.setLatitudeLongitude(null, null); // (0,0) ==> no-geo
             } else {
                 destination.setLatitudeLongitude(latitude, longitude);
             }

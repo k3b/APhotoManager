@@ -8,7 +8,7 @@ find, sort, view, copy, delete, set gps exif data, send, ... .
 * sizeof com.PlayZone.quickimagegallery.apk version 0.5.5: 2.7 MB
 * sizeof de.k3b.android.androFotoFinder.apk version 0.5.5: 1.7 MB 
 * sizeof de.k3b.android.androFotoFinder.apk version 0.6.0: 1.1 MB (better compression)
-* sizeof de.k3b.android.androFotoFinder.apk version 0.6.0: 1.3 MB (more translations)
+* sizeof de.k3b.android.androFotoFinder.apk version 0.6.1: 1.3 MB (more translations)
 
 ## Features
 
