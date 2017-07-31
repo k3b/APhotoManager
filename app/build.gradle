@@ -41,7 +41,7 @@ android {
         // 0.6.0.170502 (30)    workaround "android stock icon as activity icon breaks aapt check in frdoid build"
 
         versionCode = 31
-        versionName = '0.6.1.170508'
+        versionName = '0.6.1.170803'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
