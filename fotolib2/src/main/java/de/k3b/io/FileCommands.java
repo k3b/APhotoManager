@@ -40,7 +40,7 @@ import de.k3b.transactionlog.MediaTransactionLogEntryType;
 /**
  * Created by k3b on 03.08.2015.
  */
-public class FileCommands implements  Cloneable {
+public class FileCommands extends FileProcessor implements  Cloneable {
     private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
 
     public static final int OP_COPY = 1;
@@ -48,7 +48,6 @@ public class FileCommands implements  Cloneable {
     public static final int OP_DELETE = 3;
     public static final int OP_RENAME = 4;
     public static final int OP_UPDATE = 5;
-    private static final String EXT_SIDECAR = ".xmp";
 
     protected String mLogFilePath;
     // private static final String LOG_FILE_ENCODING = "UTF-8";
@@ -189,48 +188,6 @@ public class FileCommands implements  Cloneable {
         return result;
     }
 
-    protected boolean fileOrSidecarExists(File file) {
-        if (file == null) return false;
-
-        return osFileExists(file) || osFileExists(getSidecar(file, false))  || osFileExists(getSidecar(file, true));
-    }
-
-    public static boolean isSidecar(File file) {
-        if (file == null) return false;
-        return isSidecar(file.getAbsolutePath());
-    }
-
-    public static boolean isSidecar(String name) {
-        if (name == null) return false;
-        return name.toLowerCase().endsWith(EXT_SIDECAR);
-    }
-
-    public static File getSidecar(File file, boolean longFormat) {
-        if (file == null) return null;
-        return getSidecar(file.getAbsolutePath(), longFormat);
-    }
-
-    public static File getSidecar(String absolutePath, boolean longFormat) {
-        File result;
-        if (longFormat) {
-            result = new File(absolutePath + EXT_SIDECAR);
-        } else {
-            result = new File(FileUtils.replaceExtension(absolutePath, EXT_SIDECAR));
-        }
-        return result;
-    }
-
-    public static File getExistingSidecarOrNull(String absolutePath) {
-        File result = null;
-        if (absolutePath != null) {
-            result = getSidecar(absolutePath, true);
-            if ((result == null) || !result.exists() || !result.isFile()) result = getSidecar(absolutePath, false);
-            if ((result == null) || !result.exists() || !result.isFile()) result = null;
-        }
-        return result;
-    }
-
-
     /**
      * @return file if rename is not neccessary else File with new name
      */
@@ -291,9 +248,9 @@ public class FileCommands implements  Cloneable {
         }
 
         // #61 cannot move between different mountpoints/devices/partitions. do Copy+Delete instead
-        if (source.exists() && source.isFile() && source.canRead()
+        if (osFileExists(source) && source.isFile() && source.canRead()
                 && source.canWrite() // to delete after success
-                && !dest.exists()
+                && !osFileExists(dest)
                 && osFileCopy(dest, source)) {
             if (osDeleteFile(source)) {
                 return true; // move: copy + delete(source) : success
@@ -361,11 +318,6 @@ public class FileCommands implements  Cloneable {
     /** to be replaced by mock/stub in unittests */
     protected boolean osCreateDirIfNeccessary(File destDirFolder) {
         return destDirFolder.mkdirs() || destDirFolder.isDirectory();
-    }
-
-    /** can be replaced by mock/stub in unittests */
-    public boolean osFileExists(File file) {
-        return file.exists();
     }
 
     /** called before copy/move/rename/delete */

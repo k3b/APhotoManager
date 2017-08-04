@@ -144,6 +144,13 @@ public class FileUtils {
         return ((ext >= 0) ? path.substring(0, ext) : path) + extension;
     }
 
+    public static String getExtension(String path) {
+        if (path == null) return null;
+        int ext = path.lastIndexOf(".");
+        if (ext >= 0) return path.substring(ext);
+        return null;
+    }
+
     /** return parent of path if path is not a dir. else return path */
     public static File getDir(String path) {
         if ((path == null) || (path.length() == 0)) return null;

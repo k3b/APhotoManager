@@ -71,6 +71,8 @@ public class OSDirectory implements IDirectory {
                 setDirFlags(DIR_FLAG_NOMEDIA_ROOT);
             } else if (FileUtils.isHiddenFolder(current.getAbsolutePath())) {
                 setDirFlags(DIR_FLAG_NOMEDIA);
+            } else if (new File(current, FileNameProcessor.APM_FILE_NAME).exists()) {
+                setDirFlags(DIR_FLAG_APM_DIR);
             }
         }
         return this;
