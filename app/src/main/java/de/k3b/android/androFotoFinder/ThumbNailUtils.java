@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -24,6 +24,7 @@ import android.graphics.Bitmap;
 import android.widget.ImageView;
 
 import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiskCache;
+import com.nostra13.universalimageloader.cache.disc.impl.ext.LruDiskCache;
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -32,20 +33,29 @@ import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 import com.nostra13.universalimageloader.core.display.SimpleBitmapDisplayer;
 
 import java.io.File;
+import java.io.IOException;
 
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 
 /**
+ * Service facade hiding com.nostra13.universalimageloader
+ * from the rest of the app.
+ *
  * Created by k3b on 02.07.2016.
  */
 public class ThumbNailUtils {
     public static final String LOG_TAG = "ImageLoader";
+    public static final int MAX_CACHE_SIZE_50MB = 50 * 1024 * 1024;
+    public static final int MAX_FILE_COUNT = 1024;
     public static boolean DEBUG = false;
 
     public static void init(Context context, File previousCacheRoot) {
+
+        // if chache dir has just changed (in SettingsActivity) clear old cache.
         if ((previousCacheRoot != null) && (!previousCacheRoot.equals(Global.thumbCacheRoot))) {
             ImageLoader.getInstance().clearDiskCache();
         }
+
         // This configuration tuning is custom. You can tune every option, you may tune some of them,
         // or you can create default configuration by
         //  ImageLoaderConfiguration.createDefault(this);
@@ -53,12 +63,22 @@ public class ThumbNailUtils {
         ImageLoaderConfiguration.Builder config = new ImageLoaderConfiguration.Builder(context);
         config.threadPriority(Thread.NORM_PRIORITY - 2);
         config.denyCacheImageMultipleSizesInMemory();
-        config.diskCache(new UnlimitedDiskCache(Global.thumbCacheRoot));
         final Md5FileNameGenerator fileNameGenerator = new Md5FileNameGenerator();
         config.diskCacheFileNameGenerator(fileNameGenerator);
-        config.diskCacheSize(50 * 1024 * 1024); // 50 MiB
-        config.diskCacheFileCount(160);
+        config.diskCacheSize(MAX_CACHE_SIZE_50MB); // 50 MiB
+        config.diskCacheFileCount(MAX_FILE_COUNT);
         config.tasksProcessingOrder(QueueProcessingType.LIFO);
+
+        // config.diskCache(new LimitedAgeDiskCache(Global.thumbCacheRoot, 60 * 60 * 24)); // lifetime 1 day
+        // config.diskCache(new UnlimitedDiskCache(Global.thumbCacheRoot));
+
+        try {
+            // #83: limit size of cache. default factory has no parameter for cache-dir so do it manually.
+            config.diskCache(new LruDiskCache(Global.thumbCacheRoot, null, fileNameGenerator, MAX_CACHE_SIZE_50MB, MAX_FILE_COUNT));
+        } catch (IOException e) {
+            // does not obey the config limits diskCacheSize/diskCacheFileCount
+            config.diskCache(new UnlimitedDiskCache(Global.thumbCacheRoot));
+        }
 
         // #83 this should make the cache-items smaller but it makes gallery scrolling much slower on my android-4.4.
         // config.diskCacheExtraOptions(Global.imageDetailThumbnailIfBiggerThan, Global.imageDetailThumbnailIfBiggerThan, null);
