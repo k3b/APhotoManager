@@ -174,11 +174,11 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
         if (savedInstanceState != null) {
             String data = savedInstanceState.getString(SETTINGS_KEY, null);
             if (data != null) {
-                mCurrentData.setData(data);
+                mCurrentData.fromString(data);
             }
             data = savedInstanceState.getString(SETTINGS_KEY_INITIAL, null);
             if (data != null) {
-                mInitialData.setData(data);
+                mInitialData.fromString(data);
             }
         } else {
             SelectedFiles items = getSelectedFiles("onCreate ", getIntent(), false);

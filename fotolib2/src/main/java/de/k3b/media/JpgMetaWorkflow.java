@@ -46,7 +46,7 @@ public class JpgMetaWorkflow {
                 if (exif.getExif() != null) {
                     sb.append(exif.getExif().getDebugString(" "));
                 } else {
-                    sb.append(MediaUtil.toString(exif, false, MediaUtil.FieldID.path));
+                    sb.append(MediaUtil.toString(exif, false, null, MediaUtil.FieldID.path));
                 }
             }
         }

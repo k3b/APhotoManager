@@ -79,7 +79,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
         this.mDbg_context = dbg_context + "->ExifInterfaceEx(" + absoluteJpgPath+ ") ";
         if (FotoLibGlobal.debugEnabledJpgMetaIo) {
             logger.debug(this.mDbg_context +
-                    " load: " + MediaUtil.toString(this, false, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
+                    " load: " + MediaUtil.toString(this, false, null, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
         }
         // Log.d(LOG_TAG, msg);
 
@@ -93,7 +93,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
         setFilelastModified(mExifFile);
         if (FotoLibGlobal.debugEnabledJpgMetaIo) {
             logger.debug(mDbg_context +
-                    " saved: " + MediaUtil.toString(this, false, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
+                    " saved: " + MediaUtil.toString(this, false, null, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
         }
     }
 

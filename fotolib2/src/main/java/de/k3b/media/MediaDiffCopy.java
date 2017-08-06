@@ -216,7 +216,7 @@ public class MediaDiffCopy {
         StringBuilder result = new StringBuilder();
         result.append(this.getClass().getSimpleName()).append(":");
         if (this.numberOfChangedFields > 0) {
-            result.append(MediaUtil.toString(this.newData,true, EnumSet.complementOf(this.diffSet)));
+            result.append(MediaUtil.toString(this.newData,true, null, EnumSet.complementOf(this.diffSet)));
 
             if (this.titleAppend != null) result.append(" title+=").append(this.titleAppend);
             if (this.descriptionAppend != null) result.append(" description+=").append(this.descriptionAppend);

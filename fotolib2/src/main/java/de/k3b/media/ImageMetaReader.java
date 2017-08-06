@@ -112,7 +112,7 @@ public class ImageMetaReader implements IMetaApi, Closeable {
 
         if (FotoLibGlobal.debugEnabledJpgMetaIo) {
             logger.debug(dbg_context +
-                    "loaded: " + MediaUtil.toString(this, false, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
+                    "loaded: " + MediaUtil.toString(this, false, null, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
         }
 
         return this;

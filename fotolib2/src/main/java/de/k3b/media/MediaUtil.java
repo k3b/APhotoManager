@@ -50,26 +50,40 @@ public class MediaUtil {
         clasz,
     };
 
+    public interface ILabelGenerator {
+        String get(FieldID id);
+    }
+
+    private static final ILabelGenerator defaultLabeler = new ILabelGenerator() {
+        @Override
+        public String get(FieldID id) {
+            return " " + id + " ";
+        }
+    };
+
     public static String toString(IMetaApi item) {
-        return toString(item, true);
+        return toString(item, true, null, (EnumSet<FieldID>) null);
     }
 
-    public static String toString(IMetaApi item, boolean includeEmpty, FieldID... _excludes) {
-        return toString(item, includeEmpty, toEnumSet(_excludes));
+    public static String toString(IMetaApi item, boolean includeEmpty, ILabelGenerator labeler, FieldID... _excludes) {
+        return toString(item, includeEmpty, labeler, toEnumSet(_excludes));
     }
 
-    public static String toString(IMetaApi item, boolean includeEmpty, EnumSet<FieldID> excludes) {
+    public static String toString(IMetaApi item, boolean includeEmpty, ILabelGenerator _labeler, EnumSet<FieldID> excludes) {
         if (item == null) return "";
+
+        ILabelGenerator labeler = (_labeler == null) ? defaultLabeler : _labeler;
         StringBuilder result = new StringBuilder();
         add(result, includeEmpty, excludes, FieldID.clasz, item.getClass().getSimpleName(), ":");
-        add(result, includeEmpty, excludes, FieldID.path, " path ", item.getPath());
-        add(result, includeEmpty, excludes, FieldID.dateTimeTaken, " dateTimeTaken ", DateUtil.toIsoDateString(item.getDateTimeTaken()));
-        add(result, includeEmpty, excludes, FieldID.title, " title ", item.getTitle());
-        add(result, includeEmpty, excludes, FieldID.description, " description ", item.getDescription());
-        add(result, includeEmpty, excludes, FieldID.latitude_longitude, " latitude ", GeoUtil.toCsvStringLatLon(item.getLatitude()));
-        add(result, includeEmpty, excludes, FieldID.latitude_longitude, " longitude ", GeoUtil.toCsvStringLatLon(item.getLongitude()));
-        add(result, includeEmpty, excludes, FieldID.rating, " rating ", item.getRating());
-        add(result, includeEmpty, excludes, FieldID.tags, " tags ", TagConverter.asDbString(null, item.getTags()));
+        add(result, includeEmpty, excludes, FieldID.path, labeler, item.getPath());
+        add(result, includeEmpty, excludes, FieldID.dateTimeTaken, labeler, DateUtil.toIsoDateString(item.getDateTimeTaken()));
+        add(result, includeEmpty, excludes, FieldID.title, labeler, item.getTitle());
+        add(result, includeEmpty, excludes, FieldID.description, labeler, item.getDescription());
+        add(result, includeEmpty, excludes, FieldID.latitude_longitude, labeler, GeoUtil.toCsvStringLatLon(item.getLatitude()));
+        // longitude used same flag as latitude but no label of it-s own
+        add(result, includeEmpty, excludes, FieldID.latitude_longitude, ", ", GeoUtil.toCsvStringLatLon(item.getLongitude()));
+        add(result, includeEmpty, excludes, FieldID.rating, labeler, item.getRating());
+        add(result, includeEmpty, excludes, FieldID.tags, labeler, TagConverter.asDbString(null, item.getTags()));
         return result.toString();
     }
 
@@ -78,10 +92,18 @@ public class MediaUtil {
     }
 
     private static void add(StringBuilder result, boolean includeEmpty,
+                            final EnumSet<FieldID> excludes, FieldID item,
+                            ILabelGenerator labeler, Object value) {
+        add(result, includeEmpty, excludes, item, labeler.get(item), value);
+    }
+
+    private static void add(StringBuilder result, boolean includeEmpty,
                             final EnumSet<FieldID> excludes, FieldID item, String name, Object value) {
-        if ((includeEmpty) || (value != null)) {
-            if ((excludes == null) || (!excludes.contains(item))) {
-                result.append(name).append(value);
+        if (name != null) {
+            if ((includeEmpty) || (value != null)) {
+                if ((excludes == null) || (!excludes.contains(item))) {
+                    result.append(name).append(value);
+                }
             }
         }
     }

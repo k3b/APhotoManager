@@ -69,7 +69,7 @@ public class ShowExif {
     private static void show(IMetaApi item, boolean debug) {
         if (item != null) {
             if (debug) System.out.println("######## " + item.getClass().getName() + " #########");
-            System.out.println(MediaUtil.toString(item, false, MediaUtil.FieldID.path));
+            System.out.println(MediaUtil.toString(item, false, null, MediaUtil.FieldID.path));
             if (debug) System.out.println(item.toString());
         }
     }

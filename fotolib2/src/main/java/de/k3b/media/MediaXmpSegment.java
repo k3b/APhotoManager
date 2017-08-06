@@ -171,7 +171,7 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
     public XmpSegment setXmpMeta(XMPMeta xmpMeta, String dbg_context) {
         super.setXmpMeta(xmpMeta, dbg_context);
         if (FotoLibGlobal.debugEnabledJpgMetaIo) {
-            logger.info(dbg_context + " setXmpMeta " +  MediaUtil.toString(this, false, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
+            logger.info(dbg_context + " setXmpMeta " +  MediaUtil.toString(this, false, null, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
         }
 
         return this;
@@ -197,7 +197,7 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
     public XmpSegment save(OutputStream os, boolean humanReadable, String dbg_context) {
         super.save(os, humanReadable, dbg_context);
         if (FotoLibGlobal.debugEnabledJpgMetaIo) {
-            logger.info(dbg_context + " save " + MediaUtil.toString(this, false, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
+            logger.info(dbg_context + " save " + MediaUtil.toString(this, false, null, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
         }
 
         return this;

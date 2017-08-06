@@ -45,7 +45,7 @@ public class MediaUtilTests {
         MediaDTO expected = TestUtil.createTestMediaDTO(1);
         MediaAsString src = new MediaAsString().setData(expected);
         String serial = src.toString();
-        MediaAsString dest = new MediaAsString().setData(serial);
+        MediaAsString dest = new MediaAsString().fromString(serial);
 
         MediaDTO actual = new MediaDTO(dest);
         Assert.assertEquals(expected.toString(), actual.toString());

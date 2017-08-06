@@ -26,6 +26,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import de.k3b.media.IMetaApi;
+import de.k3b.media.MediaAsString;
+
 /**
  * Created by k3b on 04.08.2017.
  */
@@ -34,6 +37,7 @@ public class FileProcessorDto {
     private static final String KEY_DATE_FORMAT = "DateFormat";
     private static final String KEY_NAME = "Name";
     private static final String KEY_NUMBER_FORMAT = "NumberFormat";
+    private static final String KEY_MEDIA_DEFAULTS = "MediaDefaults";
 
     private final Properties properties;
     private File outDir;
@@ -101,5 +105,18 @@ public class FileProcessorDto {
 
     public File getOutDir() {
         return outDir;
+    }
+
+    public IMetaApi getMediaDefaults() {
+        String mediaDefaultString = properties.getProperty(KEY_MEDIA_DEFAULTS);
+        return (mediaDefaultString == null) ? null : new MediaAsString().fromString(mediaDefaultString);
+    }
+
+    public void setMediaDefaults(IMetaApi mediaDefaults) {
+        String mediaDefaultString = null;
+        if (mediaDefaults != null) {
+            mediaDefaultString = new MediaAsString().setData(mediaDefaults).toString();
+        }
+        properties.setProperty(KEY_MEDIA_DEFAULTS,mediaDefaultString);
     }
 }

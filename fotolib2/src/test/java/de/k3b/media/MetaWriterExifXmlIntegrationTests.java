@@ -218,7 +218,7 @@ public class MetaWriterExifXmlIntegrationTests {
     }
 
     private String getMediaString(IMetaApi media) {
-        String result = MediaUtil.toString(media, false, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz);
+        String result = MediaUtil.toString(media, false, null, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz);
         // ignore runtime type and path
         return result; // .substring(result.indexOf("dateTimeTaken"));
     }
