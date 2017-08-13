@@ -10,7 +10,7 @@
 
 * Android Version (i.e. 5.1):
   * ...
-* [A Photo Manager Version](https://github.com/k3b/APhotoManager/releases) (i.e. 0.4.6.160304) :
+* [A Photo Manager Version](https://github.com/k3b/APhotoManager/releases) (i.e. 0.6.1.170803) :
   * ...
 * Affected Module:
 	* [ ] [Gallery-View](https://github.com/k3b/APhotoManager/wiki/Gallery-View)
@@ -29,5 +29,6 @@ When APhotoManager crashes it tries to write a crash log file
 
 * [ExternalStorageDirectory]/copy/log/androFotofinder.logcat-2017....txt
   * i.e. /storage/sdcard0/copy/log/androFotofinder.logcat-20170728-135704.txt
-    * crash data from 2017-07-28 13:57(for the used crash log path on your device see APhotoManager-Settings-Diagnostics- **Error Log Folder** )
+    * crash data from 2017-07-28 13:57
     
+(for the used crash log path on your device see APhotoManager-Settings-Diagnostics- **Error Log Folder** )
