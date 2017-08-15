@@ -39,9 +39,11 @@ android {
         // 0.6.0.170404 (28)    same as 0.6.0.170402. try to fix fdroid build
         // 0.6.0.170421 (29)    bugfix Map
         // 0.6.0.170502 (30)    workaround "android stock icon as activity icon breaks aapt check in frdoid build"
+        // 0.6.1.170803 (31)    edit exif; enhanced media scanner
+        // 0.6.1.170816 (32)    Bugfix crash android-7.1
 
-        versionCode = 31
-        versionName = '0.6.1.170803'
+        versionCode = 32
+        versionName = '0.6.1.170816'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7

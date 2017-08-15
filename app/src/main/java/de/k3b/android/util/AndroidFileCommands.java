@@ -115,8 +115,8 @@ public class AndroidFileCommands extends FileCommands {
         }
         super.onPostProcess(what, oldPathNames, newPathNames, modifyCount, itemCount, opCode);
 
-        int resId = getResourceId(opCode);
-        String message = mContext.getString(resId, Integer.valueOf(modifyCount), Integer.valueOf(itemCount));
+        Context context = this.mContext;
+        String message = getModifyMessage(context, opCode, modifyCount, itemCount);
         if ((itemCount > 0) && (mScanner != null)) {
             MediaScannerAsyncTask.updateMediaDBInBackground(mScanner, mContext, message, oldPathNames, newPathNames);
         }
@@ -127,6 +127,11 @@ public class AndroidFileCommands extends FileCommands {
             this.mHasNoMedia = false;
         }
         Toast.makeText(mContext, message, Toast.LENGTH_LONG).show();
+    }
+
+    public static String getModifyMessage(Context context, int opCode, int modifyCount, int itemCount) {
+        int resId = getResourceId(opCode);
+        return context.getString(resId, Integer.valueOf(modifyCount), Integer.valueOf(itemCount));
     }
 
     /** called for every cath(Exception...). Version with Android specific logging */
@@ -145,7 +150,7 @@ public class AndroidFileCommands extends FileCommands {
         // e.printStackTrace();
     }
 
-    private int getResourceId(int opCode) {
+    private static int getResourceId(int opCode) {
         switch (opCode) {
             case OP_COPY: return R.string.copy_result_format;
             case OP_MOVE: return R.string.move_result_format;
