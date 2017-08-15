@@ -130,8 +130,9 @@ public class DirectoryFormatter {
      * Format "lat,lon" or "lat,lon-lat,lon"
      */
     public static IGeoRectangle parseLatLon(String path) {
-        if (path != null) {
-            String[] minMax = getLastPath(path).split(GeoRectangle.DELIM_FIELD);
+        String lastPath = getLastPath(path);
+        if (lastPath != null) {
+            String[] minMax = lastPath.split(GeoRectangle.DELIM_FIELD);
             if ((minMax == null) || (minMax.length == 0)) return null;
 
             String[] elements = minMax[0].split(GeoRectangle.DELIM_SUB_FIELD);
