@@ -24,9 +24,12 @@
   <string name="about_summary">\"A Photo Manager%1$s\" الم</string>
   <string name="area_menu_title">مرشح الخريطة</string>
   <string name="background">الخلفية</string>
-  <string name="bookmark_delete_answer_format">%1$s علامات مرجعية تمت إزالتها</string>
-  <string name="bookmark_delete_error_format">%1$s لا يمكن إزالة العلامة المرجعية </string>
+  <string name="bookmark_delete_answer_format">علامات مرجعية تمت إزالتها %1$s.</string>
+  <string name="bookmark_delete_error_format">لا يمكن إزالة العلامة المرجعية %s$1.</string>
   <string name="bookmark_delete_question">هل تريد إزالة هذه العلامة المرجعية؟</string>
+  <string name="bookmark_err_not_found_format">لا يوجد علامات في %1$s</string>
+  <string name="bookmark_file_comment_format">تم توليده في %3$s بـ %1$s إصدار %2$s شاهد
+https://github.com/k3b/APhotoManager/wiki/intentap#EXTRA_SQL لمزيد من التفاصيل</string>
   <string name="bookmark_load_from_menu_title">تحميل العلامات المرجعية من&#8230;</string>
   <string name="bookmark_save_as_menu_title">حفظ العلامة المرجعية كـ &#8230;</string>
   <string name="btn_cancel">إلغاء</string>
@@ -36,20 +39,26 @@
   <string name="btn_ok">حسنًا</string>
   <string name="btn_pause">ايقاف مؤقت</string>
   <string name="copy_menu_title">نسخ</string>
-  
+  <string name="copy_result_format">تم نسخ %1$d من %2$d ملفات</string>
   <string name="delete_menu_title">إزالة</string>
   <string name="delete_question_message_format">"هل أنت متأكد من أنك تود إزالة هذه الملفات كليًا؟
 %1$s"</string>
   <string name="delete_question_title">إزالة صورة(صور)؟</string>
+  <string name="delete_result_format">إزالة %1$d من %2$d ملفات</string>
   <string name="destination_copy">نسخ المكان المقصود</string>
   <string name="destination_move">تحريك المكان المقصود</string>
   <string name="details_menu_title">التفاصيل</string>
   <string name="edit_chooser_title">اختيار محرر الصور</string>
   <string name="edit_err_editor_not_found">لم نجد محرر الصور</string>
   <string name="edit_menu_title">تحرير</string>
-  <string name="filter_err_invalid_date_format">\'%1$s\' ليست بيانات صالحة.</string>
-  <string name="filter_err_invalid_location_format">\'%1$s\' ليست بتنسيق صالح.</string>
+  <string name="file_err_writeprotected">"محمي ضد الكتابة %1$s
+  
+  %2$s غير ممكن"</string>
+  <string name="filter_err_invalid_date_format">%1$s ليست بيانات صالحة.</string>
+  <string name="filter_err_invalid_location_format">%1$s ليست بتنسيق صالح.</string>
   <string name="filter_menu_title">المرشح</string>
+  <string name="folder_dialog_title_format">اختيار %1$s</string>
+  <string name="folder_err_load_failed_format">فشل تحميل الملف %1$s</string>
   <string name="folder_menu_title">مرشح الملف</string>
   <string name="gallery_title">الصور</string>
   <string name="geo_show_menu_title">اظهر في الخريطة</string>
@@ -58,9 +67,15 @@
   <string name="geo_edit_update_in_progress">تغير المعلومات الجغرافية للصور المختارة</string>
   <string name="geo_picker_err_not_found">لم يتم إيجاد المنتقي الجغرافي</string>
   <string name="geo_picker_title">اختيار جغرافي جديد للصور</string>
-  <string name="global_err_sql_message_format">خطأ SQL \'%1$s\'\n\n%2$s</string>
+  <string name="global_err_sql_message_format">"خطأ SQL %1$s\n\n%2$s"</string>
   <string name="global_err_sql_title_reload">Sql غير صالح. إعادة تحميل الافتراضي</string>
   <string name="global_err_system">خطأ في النظام. موجود</string>
+  <string name="image_err_file_exists_format">الملف %1$s موجود بالفعل. .\n هل بالفعل تريد استبداله؟</string>
+  <string name="image_err_file_rename_format">لا يمكن اعادة تسمية الملف %1$s.</string>
+  <string name="image_err_not_found_format">لا توجد صور لـ %1$s.</string>
+  <string name="image_err_not_in_db_format">الصور لا توجد في قاعدة البيانات %1$s بعد. البحث في %2$d ملفات جديدة. الصور الناقصة ستكون متاحة قريبًا.</string>
+  <string name="image_loading_at_position_format">"تحميل (%1$d) …"</string>
+  <string name="image_success_update_format">صور %1$d المحدثة.</string>
   <string name="lbl_date">التاريخ</string>
   <string name="lbl_latitude_short">لات</string>
   <string name="lbl_longitude_short">لون</string>
@@ -68,14 +83,20 @@
   <string name="lbl_with_no_geo">بدون معلومات جيو</string>
   <string name="mk_dir_default">مجلد_جديد</string>
   <string name="mk_dir_menu_title">إنشاء مجلد</string>
+  <string name="mk_err_failed_format">لا يمكن إنشاء %1$s</string>
+  <string name="mk_success_format">تم إنشاء %1$s</string>
   <string name="more_menu_title">المزيد &#8230;</string>
   <string name="move_menu_title">تحريك</string>
+  <string name="move_result_format">تحريك ملفات %1$d من %2$d</string>
   <string name="osm_cright_title">ملفات خريطة © المساهمين <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a></string>
   <string name="overwrite_question_title">الكتابة على الملف؟</string>
   <string name="rename_menu_title">إعادة تسمية</string>
+  <string name="rename_result_format">إعادة تسمية ملفات %1$d من %2$d</string>
   <string name="scanner_dir_question">أين تبدأ الفحص؟</string>
   <string name="scanner_err_busy">لا نستطيع معالجة ملفات الصور حينما يكون ماسح وسائط الأندرويد مشغول. حاول مرة أخرى لاحقًا.</string>
   <string name="scanner_menu_title">ماسح الوسائط</string>
+  <string name="scanner_update_result_format">تم تحديث عناصر قاعدة بيانات الوسائط %1$d</string>
+  <string name="selection_status_format">تم اختيار %1$d</string>
   <string name="selection_none_hint">تم اختيار مجلد الصور لتفعيله</string>
   <string name="selected_only_menu_title">المختارة فقط</string>
   <string name="selection_add_all_menu_title">الاختيار: أضف كل المرئي</string>
@@ -114,6 +135,7 @@
   <string name="sort_by_none">غير مصنف</string>
   <string name="sort_by_place">المكان</string>
   <string name="sort_menu_title">التصنيف</string>
+  <string name="update_result_format">تحديث ملفات %1$d من %2$d</string>
   <string name="zoom_to_fit_menu_title">التكبير ليناسب الحجم</string>
   <string name="settings_image_thumb_if_bigger_than_title">عرض صور مصغرة للصور الكبيرة</string>
   <string name="settings_image_thumb_if_bigger_than_summary">عرض صور مصغرة في عرض تفاصيل الصورة إذا كان عرض او ارتفاع الصورة أكبر من هذه القيمة (بيكسيل).
@@ -149,6 +171,7 @@
   <string name="tags_add_default">وسم_جديد</string>
   <string name="tags_delete_children_title">ازالة الاطفال</string>
   <string name="tags_update_photos">تحديث الوسوم في الصور المتأثرة</string>
+  <string name="tags_update_result_format">تحديث وسوم صور %1$d</string>
   <string name="tags_hint">الشريط-الطويل في قائمة فتح اسماء الوسوم</string>
   <string name="tags_defaults">النشاطات، الاشخاص، الاماكن، الموضوعات، المشروعات</string>
 </resources>

@@ -20,6 +20,7 @@
 package de.k3b.android.androFotoFinder;
 
 import android.app.Application;
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -80,10 +81,7 @@ public class AndroFotoFinderApp extends Application {
         SettingsActivity.prefs2Global(this);
 
         // create sensible defaults for domain-independant QueryParameter parsing
-        QueryParameter.sParserComment = getString(R.string.bookmark_file_comment_format,
-                getString(R.string.app_name),
-                GuiUtil.getAppVersionName(this),
-                new Date().toString());
+        QueryParameter.sParserComment = getBookMarkComment(this);
 
         QueryParameter.sParserDefaultFrom = FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE.toString();
         QueryParameter.sParserDefaultQueryTypeId = FotoSql.QUERY_TYPE_DEFAULT;
@@ -106,6 +104,13 @@ public class AndroFotoFinderApp extends Application {
         FotoSql.deleteMediaWithNullPath(this);
 
         Log.i(Global.LOG_CONTEXT, getAppId() + " created");
+    }
+
+    public static String getBookMarkComment(Context context) {
+        return context.getString(R.string.bookmark_file_comment_format,
+                context.getString(R.string.app_name),
+                GuiUtil.getAppVersionName(context),
+                new Date().toString());
     }
 
     @NonNull

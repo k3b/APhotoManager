@@ -64,6 +64,12 @@ public class SettingsActivity extends PreferenceActivity {
     protected void onCreate(final Bundle savedInstanceState) {
         LocalizedActivity.fixLocale(this);	// #21: Support to change locale at runtime
         super.onCreate(savedInstanceState);
+
+        if (Global.debugEnabled) {
+            // todo create junit integration tests with arabic locale from this.
+            StringFormatResourceTests.test(this);
+        }
+
         final Intent intent = getIntent();
         if (Global.debugEnabled && (intent != null)){
             Log.d(Global.LOG_CONTEXT, "SettingsActivity onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
