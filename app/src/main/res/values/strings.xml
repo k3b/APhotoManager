@@ -217,5 +217,18 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
     <string name="sort_by_rating">Rating</string>
     <string name="sort_by_modification">Last Modified</string>
 
+    <!-- #93: edit-exif: image title, description, rating -->
+    <string name="photo_workflow_menu_title">Edit Photo Workflow</string>
+    <string name="lbl_file_name_pattern">Filename Pattern</string>
+    <string name="lbl_exif">Exif</string>
+
+    <!-- i.e.
+            Copy 5 Photos
+				hello.jpg (2017-08-02), ...
+			To .../path/toFile/
+				1708NewName0001.jpg -->
+    <string name="preview_message_format">"%1$s %2$d Photos\n\t%3$s (%4$s), ...\nTo %5$s\n\t%6$s"</string>
+
+
     <!--  depricated tags_update_result_format use image_success_update_format instead -->
 </resources>

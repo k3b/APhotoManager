@@ -21,9 +21,9 @@ package de.k3b.io;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Properties;
 
 import de.k3b.media.IMetaApi;
@@ -33,50 +33,73 @@ import de.k3b.media.MediaAsString;
  * Created by k3b on 04.08.2017.
  */
 
-public class FileProcessorDto {
-    private static final String KEY_DATE_FORMAT = "DateFormat";
-    private static final String KEY_NAME = "Name";
-    private static final String KEY_NUMBER_FORMAT = "NumberFormat";
-    private static final String KEY_MEDIA_DEFAULTS = "MediaDefaults";
+public class PhotoWorkFlowDto {
+    private static final String KEY_DATE_FORMAT     = "DateFormat";
+    private static final String KEY_NAME            = "Name";
+    private static final String KEY_NUMBER_FORMAT   = "NumberFormat";
+    private static final String KEY_EXIF            = "Exif";
+    private static final String KEY_OUT_DIR         = "outDir";
 
     private final Properties properties;
     private File outDir;
 
-    public FileProcessorDto() {
+    public PhotoWorkFlowDto() {
         this(null, new Properties());
     }
 
-    public void load(File outDir) throws IOException {
+    protected PhotoWorkFlowDto(File outDir, Properties properties) {
         this.outDir = outDir;
-        File apm = new File(outDir, FileNameProcessor.APM_FILE_NAME);
+        this.properties = properties;
+    }
+
+    public PhotoWorkFlowDto load(File outDir) throws IOException {
+        this.outDir = outDir;
+        File apm = getApmFile();
         properties.clear();
         if (apm.exists() && apm.isFile() && apm.canRead()) {
             FileInputStream inputStream = null;
             try {
                 inputStream = new FileInputStream(apm);
                 properties.load(inputStream);
+                return this;
             } finally {
-                FileUtils.close(inputStream,"FileProcessorDto.load(" + apm + ")");
+                FileUtils.close(inputStream,"PhotoWorkFlowDto.load(" + apm + ")");
             }
         }
+        return null;
+    }
+
+    private File getApmFile() {
+        return new File(this.outDir, FileNameProcessor.APM_FILE_NAME);
     }
 
     public void save() throws IOException {
-        File apm = new File(outDir, FileNameProcessor.APM_FILE_NAME);
+        File apm = getApmFile();
         if (apm.exists() && apm.isFile() && apm.canRead()) {
             FileOutputStream inputStream = null;
             try {
                 inputStream = new FileOutputStream(apm);
                 properties.store(inputStream, "");
             } finally {
-                FileUtils.close(inputStream,"FileProcessorDto.load(" + apm + ")");
+                FileUtils.close(inputStream,"PhotoWorkFlowDto.load(" + apm + ")");
             }
         }
     }
 
-    protected FileProcessorDto(File outDir, Properties properties) {
-        this.outDir = outDir;
-        this.properties = properties;
+    public static PhotoWorkFlowDto load(Serializable content) {
+        Properties properties = (Properties) content;
+        if (properties != null) {
+            String outDir = properties.getProperty(KEY_OUT_DIR);
+            return new PhotoWorkFlowDto((outDir != null) ? new File(outDir) : null, properties);
+        }
+        return null;
+    }
+
+    public Serializable toSerializable() {
+        if (this.properties != null) {
+            this.properties.put(KEY_OUT_DIR, (this.outDir == null) ? null : this.outDir.toString());
+        }
+        return this.properties;
     }
 
     public String getDateFormat() {
@@ -108,7 +131,7 @@ public class FileProcessorDto {
     }
 
     public IMetaApi getMediaDefaults() {
-        String mediaDefaultString = properties.getProperty(KEY_MEDIA_DEFAULTS);
+        String mediaDefaultString = properties.getProperty(KEY_EXIF);
         return (mediaDefaultString == null) ? null : new MediaAsString().fromString(mediaDefaultString);
     }
 
@@ -117,6 +140,6 @@ public class FileProcessorDto {
         if (mediaDefaults != null) {
             mediaDefaultString = new MediaAsString().setData(mediaDefaults).toString();
         }
-        properties.setProperty(KEY_MEDIA_DEFAULTS,mediaDefaultString);
+        properties.setProperty(KEY_EXIF,mediaDefaultString);
     }
 }

@@ -4,6 +4,8 @@
 /*
  * Translation to arabic 2017 by medowill.
  *
+ * how to edit mixed rtl with ltr placeholders see https://stackoverflow.com/a/11562796/519334
+ *
  * This file is part of "A Photo Manager" (A(ndro)FotoFinder).
  *
  * This program is free software: you can redistribute it and/or modify it

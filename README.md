@@ -3,16 +3,21 @@
 Enhanced Android [Gallery App](https://github.com/k3b/APhotoManager/wiki/Gallery-View) to manage local photos: [geotagging with map](https://github.com/k3b/APhotoManager/wiki/geographic-map), [tags (keywords)](https://github.com/k3b/APhotoManager/wiki/Tags),
 find, sort, view, copy, delete, set gps exif data, send, ... .
 
-**DISCLAIMER Be cautious if you download "A Photo Manager" where the apk size is bigger than my builds**: 
+---
+
+**DISCLAIMER Be cautious if you download "A Photo Manager" where the apk size is bigger than my builds**:
+
 It is likely that these versions contain unwanted code (maleware or adware).
 I (k3b) have nothing to do with these clones and i cannot garantee that the clones has no unwanted buildin code.
 
-* sizeof de.k3b.android.androFotoFinder.apk version 0.5.5: 1.7 MB my official version on http://a-photo-manager.en.uptodown.com/android and https://f-droid.org/wiki/page/de.k3b.android.androFotoFinder
-* sizeof de.k3b.android.androFotoFinder.apk version 0.5.5: 3MB found on https://m.allfreeapk.com/a-photo-manager,12132282/
-* sizeof com.PlayZone.quickimagegallery.apk version 0.5.5: 2.7 MB found at 9apps.com/android-apps/Photo-Manager/ 
+* sizeof de.k3b.android.androFotoFinder.apk version **0.5.5: 1.7 MB my official version** on [uptodown.com](http://a-photo-manager.en.uptodown.com/android) and [f-droid](https://f-droid.org/wiki/page/de.k3b.android.androFotoFinder)
+* sizeof de.k3b.android.androFotoFinder.apk version **0.5.5: 3 MB found on [allfreeapk.com](https://m.allfreeapk.com/a-photo-manager,12132282/)**
+* sizeof com.PlayZone.quickimagegallery.apk version **0.5.5: 2.7 MB found at [9apps.com](9apps.com/android-apps/Photo-Manager/)**
 * .
-* sizeof de.k3b.android.androFotoFinder.apk version 0.6.0: 1.1 MB (better compression)  my official version on http://a-photo-manager.en.uptodown.com/android and https://f-droid.org/wiki/page/de.k3b.android.androFotoFinder
-* sizeof de.k3b.android.androFotoFinder.apk version 0.6.1: 1.2 MB (more features, additional translations)  my official version on http://a-photo-manager.en.uptodown.com/android and https://f-droid.org/wiki/page/de.k3b.android.androFotoFinder
+* sizeof de.k3b.android.androFotoFinder.apk version **0.6.0: 1.1 MB** (better compression)  my official version on [uptodown.com](http://a-photo-manager.en.uptodown.com/android) and [f-droid](https://f-droid.org/wiki/page/de.k3b.android.androFotoFinder)
+* sizeof de.k3b.android.androFotoFinder.apk version **0.6.1: 1.2 MB** (more features, additional translations)  my official version on [uptodown.com](http://a-photo-manager.en.uptodown.com/android) and [f-droid](https://f-droid.org/wiki/page/de.k3b.android.androFotoFinder)
+
+---
 
 ## Features
 
