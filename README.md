@@ -11,11 +11,14 @@ It is likely that these versions contain unwanted code (maleware or adware).
 I (k3b) have nothing to do with these clones and i cannot garantee that the clones has no unwanted buildin code.
 
 * sizeof de.k3b.android.androFotoFinder.apk version **0.5.5: 1.7 MB my official version** on [uptodown.com](http://a-photo-manager.en.uptodown.com/android) and [f-droid](https://f-droid.org/wiki/page/de.k3b.android.androFotoFinder)
-* sizeof de.k3b.android.androFotoFinder.apk version **0.5.5: 3 MB found on [allfreeapk.com](https://m.allfreeapk.com/a-photo-manager,12132282/)**
-* sizeof com.PlayZone.quickimagegallery.apk version **0.5.5: 2.7 MB found at [9apps.com](9apps.com/android-apps/Photo-Manager/)**
+  * Same version 0.5.5: **3 MB** found on **[allfreeapk.com](https://m.allfreeapk.com/a-photo-manager,12132282/)**
+  * Same version 0.5.5: **2.7 MB** found at **[9apps.com](9apps.com/android-apps/Photo-Manager/)**
 * .
 * sizeof de.k3b.android.androFotoFinder.apk version **0.6.0: 1.1 MB** (better compression)  my official version on [uptodown.com](http://a-photo-manager.en.uptodown.com/android) and [f-droid](https://f-droid.org/wiki/page/de.k3b.android.androFotoFinder)
 * sizeof de.k3b.android.androFotoFinder.apk version **0.6.1: 1.2 MB** (more features, additional translations)  my official version on [uptodown.com](http://a-photo-manager.en.uptodown.com/android) and [f-droid](https://f-droid.org/wiki/page/de.k3b.android.androFotoFinder)
+  * same version 0.6.1 but bigger apk file sites **1.6 MB**, **2.2MB** or **3.0MB** on [de.downloadatoz.com](https://de.downloadatoz.com/de-k3b-android-androfotofinder/de.k3b.android.androFotoFinder/), 
+[www.apkherunterladen.com](https://www.apkherunterladen.com/de-k3b-android-androfotofinder/de.k3b.android.androFotoFinder/downloading.html), 
+[www.androidapkdescargar.com](https://www.androidapkdescargar.com/a-photo-manager/de.k3b.android.androFotoFinder/)
 
 ---
 
