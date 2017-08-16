@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright (c) 2015-2017 by k3b.
+ *
+ * This file is part of AndroFotoFinder / #APhotoManager.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
+ -->
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent" android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        tools:context="de.k3b.android.androFotoFinder.GalleryFilterActivity">
+        <TextView android:id="@+id/lbl_preview"
+            android:text="@string/preview_message_format"
+            android:lines="5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_marginStart="@dimen/value_indent"
+            android:layout_marginLeft="@dimen/value_indent"
+            android:layout_marginRight="@dimen/value_indent"
+            android:layout_marginEnd="@dimen/value_indent"
+            />
+        <View android:id="@+id/line_preview"
+            android:layout_height="2dp"
+            android:layout_width="match_parent"
+            android:background="#c0c0c0"
+            android:layout_below="@+id/lbl_preview"
+            android:layout_marginBottom="@dimen/line_margin"
+            android:layout_marginTop="@dimen/line_margin"
+            />
+        <!-- -->
+        <TextView android:id="@+id/lbl_file_name_pattern"
+            android:text="@string/lbl_file_name_pattern"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_below="@+id/line_preview"
+            />
+
+        <Spinner android:id="@+id/sp_date_pattern"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/lbl_file_name_pattern"
+            android:layout_marginStart="@dimen/value_indent"
+            android:layout_marginLeft="@dimen/value_indent"
+            android:layout_marginRight="@dimen/value_indent"
+            android:layout_marginEnd="@dimen/value_indent"
+            />
+        <EditText android:id="@+id/edit_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:lines="1"
+            android:maxLines="1"
+            android:layout_below="@+id/sp_date_pattern"
+            android:layout_marginStart="@dimen/value_indent"
+            android:layout_marginLeft="@dimen/value_indent"
+            android:layout_marginRight="@dimen/value_indent"
+            android:layout_marginEnd="@dimen/value_indent"
+            />
+        <Spinner android:id="@+id/sp_number_pattern"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/edit_name"
+            android:layout_marginStart="@dimen/value_indent"
+            android:layout_marginLeft="@dimen/value_indent"
+            android:layout_marginRight="@dimen/value_indent"
+            android:layout_marginEnd="@dimen/value_indent"
+            />
+        <View android:id="@+id/line_file_name_pattern"
+            android:layout_height="2dp"
+            android:layout_width="match_parent"
+            android:background="#c0c0c0"
+            android:layout_below="@+id/sp_number_pattern"
+            android:layout_marginBottom="@dimen/line_margin"
+            android:layout_marginTop="@dimen/line_margin"
+            />
+        <!-- -->
+        <TextView android:id="@+id/lbl_exif"
+            android:text="@string/lbl_exif"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_below="@+id/line_file_name_pattern"
+            />
+        <Button android:id="@+id/cmd_pick_exif"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_popup"
+            android:layout_below="@+id/line_file_name_pattern"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            />
+
+        <TextView android:id="@+id/lbl_exif_changes"
+            android:text="@string/preview_message_format"
+            android:lines="5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_marginStart="@dimen/value_indent"
+            android:layout_marginLeft="@dimen/value_indent"
+            android:layout_marginRight="@dimen/value_indent"
+            android:layout_marginEnd="@dimen/value_indent"
+            android:layout_below="@+id/lbl_exif"
+            />
+
+    </RelativeLayout>
+</ScrollView>

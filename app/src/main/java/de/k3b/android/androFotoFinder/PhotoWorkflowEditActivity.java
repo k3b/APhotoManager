@@ -118,9 +118,9 @@ public class PhotoWorkflowEditActivity extends ActivityWithAutoCloseDialogs impl
         setContentView(R.layout.activity_photo_workflow_edit);
 
         preview		 	= (TextView ) findViewById(R.id.lbl_preview);
-        spinnerPrefix	= (Spinner  ) findViewById(R.id.spinner_prefix);
+        spinnerPrefix	= (Spinner  ) findViewById(R.id.sp_date_pattern);
         editName		= (EditText ) findViewById(R.id.edit_name);
-        spinnerSuffix	= (Spinner  ) findViewById(R.id.spinner_suffix);
+        spinnerSuffix	= (Spinner  ) findViewById(R.id.sp_number_pattern);
         exifChanges	 	= (TextView ) findViewById(R.id.lbl_exif_changes);
 
         Button cmd = (Button ) findViewById(R.id.cmd_pick_exif);
