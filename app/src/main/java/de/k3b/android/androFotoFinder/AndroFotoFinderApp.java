@@ -39,6 +39,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSqlBase;
 import de.k3b.android.osmdroid.forge.MapsForgeSupport;
 import de.k3b.android.util.LogCat;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.PhotoWorkFlowDto;
 import de.k3b.media.ExifInterface;
 import de.k3b.media.ImageMetaReader;
 import uk.co.senab.photoview.PhotoViewAttacher;
@@ -80,8 +81,9 @@ public class AndroFotoFinderApp extends Application {
         Global.pickHistoryFile = getDatabasePath("pickHistory.geouri.txt");
         SettingsActivity.prefs2Global(this);
 
-        // create sensible defaults for domain-independant QueryParameter parsing
-        QueryParameter.sParserComment = getBookMarkComment(this);
+        // create sensible defaults for andorid-independant files from android string resources
+        QueryParameter.sFileComment = getBookMarkComment(this);
+        PhotoWorkFlowDto.sFileComment = getBookMarkComment(this);
 
         QueryParameter.sParserDefaultFrom = FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE.toString();
         QueryParameter.sParserDefaultQueryTypeId = FotoSql.QUERY_TYPE_DEFAULT;

@@ -46,6 +46,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
+import de.k3b.android.androFotoFinder.PhotoAutoprocessingEditActivity;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailMetaDialogBuilder;
@@ -66,6 +67,7 @@ import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
+import de.k3b.io.StringUtils;
 
 import java.io.File;
 import java.util.HashMap;
@@ -357,6 +359,8 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         switch (menuItem.getItemId()) {
             case R.id.cmd_mk_dir:
                 return onCreateSubDirQuestion(mPopUpSelection);
+            case R.id.cmd_apm_edit:
+                return onEditApm(mPopUpSelection);
             case R.id.cmd_photo:
                 return showPhoto(mPopUpSelection);
             case R.id.cmd_gallery:
@@ -369,6 +373,15 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                 onHideFolderMediaQuestion(mPopUpSelection.getAbsolute());
                 return true;
             default:break;
+        }
+        return false;
+    }
+
+    private boolean onEditApm(IDirectory mPopUpSelection) {
+        String path = (mPopUpSelection == null) ? null : mPopUpSelection.getAbsolute();
+        if (!StringUtils.isNullOrEmpty(path)) {
+            PhotoAutoprocessingEditActivity.showActivity(getActivity(), null, path, null, 0);
+            return true;
         }
         return false;
     }

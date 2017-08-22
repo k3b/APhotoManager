@@ -79,6 +79,22 @@ public class FileNameProcessorTests {
     }
 
     @Test
+    public void shouldGetNextFreeFileEmpty() {
+        FileNameProcessor sut = spy(new FileNameProcessor(null, null, null, X_FAKE_OUTPUT_DIR));
+        registerFakeFiles(sut, "Hello.jpg");
+        File outFile = sut.getNextFile(new File(X_FAKE_INPUT_DIR, "originalName.jpg"),null,0);
+        Assert.assertEquals("originalName.jpg", outFile.getName());
+    }
+
+    @Test
+    public void shouldGetNextFreeFileEmptyExisting() {
+        FileNameProcessor sut = spy(new FileNameProcessor(null, null, null, X_FAKE_OUTPUT_DIR));
+        registerFakeFiles(sut, "originalName.jpg");
+        File outFile = sut.getNextFile(new File(X_FAKE_INPUT_DIR, "originalName.jpg"),null,0);
+        Assert.assertEquals("originalName(1).jpg", outFile.getName());
+    }
+
+    @Test
     public void shouldGetNextFreeFileSequenceWithDifferentDates() {
         FileNameProcessor sut = spy(new FileNameProcessor("yy", "Hello", null, X_FAKE_OUTPUT_DIR));
         registerFakeFiles(sut, "16Hello.jpg", "16Hello1.jpg", "17Hello.jpg");

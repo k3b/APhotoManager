@@ -34,7 +34,7 @@ import java.util.List;
  */
 public class QueryParameter {
     /** added to every serialized item if != null. Example "Generated on 2015-10-19 with myApp Version 0815." */
-    public static String sParserComment = null;
+    public static String sFileComment = null;
 
     /** added to parsed Query if it does not contain table-uris belonging to the "FROM"  keyword */
     public static String sParserDefaultFrom = null;
@@ -258,7 +258,7 @@ public class QueryParameter {
     /************************** end properties *********************/
     public String toReParseableString() {
         StringBuilder result = new StringBuilder();
-        if (sParserComment != null) result.append("# ").append(sParserComment).append("\n");
+        if (sFileComment != null) result.append("# ").append(sFileComment).append("\n");
         Helper.append(result, "\nFROM ", mFrom, "", "\n\t", "");
         if (mID != 0) result.append("\n\tQUERY-TYPE-ID\n\t\t").append(mID);
         Helper.append(result, "\nSELECT ", mColumns, "", "\n\t", "");

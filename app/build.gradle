@@ -1,3 +1,5 @@
+
+
 apply plugin: 'com.android.application'
 apply plugin: 'maven'
 // markdown in javadoc
@@ -73,6 +75,19 @@ android {
 
         abortOnError false
     }
+}
+
+// task from https://stackoverflow.com/questions/45848521/how-to-sync-android-project-by-gradle-task/45856729#45856729
+import java.util.regex.Pattern
+task('increaseVersionCode') << {
+    def buildFile = file("build.gradle")
+    def pattern = Pattern.compile("versionCode\\s+(\\d+)")
+    def manifestText = buildFile.getText()
+    def matcher = pattern.matcher(manifestText)
+    matcher.find()
+    def versionCode = Integer.parseInt(matcher.group(1))
+    def manifestContent = matcher.replaceAll("versionCode " + ++versionCode)
+    buildFile.write(manifestContent)
 }
 
 dependencies {

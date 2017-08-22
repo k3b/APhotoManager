@@ -73,33 +73,6 @@ public class MediaDiffCopy {
     }
 
     /** Initialisation to define the difference. return null if there is no diff between them */
-    public MediaDiffCopy setDiff(IMetaApi newData, FieldID fieldId, FieldID... fieldIds) {
-        return setDiff(newData, EnumSet.of(fieldId, fieldIds));
-    }
-
-    /** Initialisation to define the difference. return null if there is no diff between them */
-    public MediaDiffCopy setDiff(IMetaApi newData, EnumSet<FieldID> diffSet) {
-        close();
-        this.diffSet = diffSet;
-        this.diffSet.remove(FieldID.path);
-        this.numberOfChangedFields = this.diffSet.size();
-
-        if (this.numberOfChangedFields > 0) {
-            this.newData = newData;
-            return this;
-        }
-        return null;
-    }
-
-    public void fixTagRepository() {
-        if ((this.addedTags != null) && (this.addedTags.size() > 0)) {
-            TagRepository tagRepository = TagRepository.getInstance();
-            tagRepository.includeTagNamesIfNotFound(this.addedTags);
-            tagRepository.save();
-        }
-    }
-
-    /** Initialisation to define the difference. return null if there is no diff between them */
     public MediaDiffCopy setDiff(IMetaApi initialData, IMetaApi newData) {
         close();
         this.diffSet = MediaUtil.getChangesAsDiffsetOrNull(initialData, newData);
@@ -148,6 +121,33 @@ public class MediaDiffCopy {
         }
         close();
         return null;
+    }
+
+    /** Initialisation to define the difference. return null if there is no diff between them */
+    public MediaDiffCopy setDiff(IMetaApi newData, FieldID fieldId, FieldID... fieldIds) {
+        return setDiff(newData, EnumSet.of(fieldId, fieldIds));
+    }
+
+    /** Initialisation to define the difference. return null if there is no diff between them */
+    public MediaDiffCopy setDiff(IMetaApi newData, EnumSet<FieldID> diffSet) {
+        close();
+        this.diffSet = diffSet;
+        this.diffSet.remove(FieldID.path);
+        this.numberOfChangedFields = this.diffSet.size();
+
+        if (this.numberOfChangedFields > 0) {
+            this.newData = newData;
+            return this;
+        }
+        return null;
+    }
+
+    public void fixTagRepository() {
+        if ((this.addedTags != null) && (this.addedTags.size() > 0)) {
+            TagRepository tagRepository = TagRepository.getInstance();
+            tagRepository.includeTagNamesIfNotFound(this.addedTags);
+            tagRepository.save();
+        }
     }
 
     /** Similar to {@link MediaUtil#copySpecificProperties(IMetaApi, IMetaApi, EnumSet)} but with special diff handling. */

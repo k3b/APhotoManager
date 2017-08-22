@@ -98,13 +98,6 @@ abstract public class MediaScanner  {
     /** singelton */
     private static MediaScanner sInstance = null;
 
-    public static final FilenameFilter JPG_FILENAME_FILTER = new FilenameFilter() {
-        @Override
-        public boolean accept(File dir, String filename) {
-            return MediaUtil.isImage(filename, false);
-        }
-    };
-
     public final Context mContext;
 
     public MediaScanner(Context context) {

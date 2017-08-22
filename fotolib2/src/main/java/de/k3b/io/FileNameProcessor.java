@@ -34,15 +34,25 @@ import java.util.Date;
 public class FileNameProcessor extends FileProcessor {
     public static final String APM_FILE_NAME = ".apm";
     /** i.e "yyMM" for year and month each with 2 digits */
-    private final SimpleDateFormat dateFormatter;
-    private final String name;
-    private final DecimalFormat numberFormatter;
-    private final File outDir;
+    private final SimpleDateFormat mDateFormatter = new SimpleDateFormat();
+    private String mName;
+    private final DecimalFormat mNumberFormatter = new DecimalFormat();
+    private final File mOutDir;
 
     // optimisationn as long as lastDateFormatted does not changed nextFileInstanceNumber is recycled
-    private String lastDateFormatted = null;
-    private int nextFileInstanceNumber = 0;
+    private String mLastDateFormatted = null;
+    private int mNextFileInstanceNumber = 0;
+    private String mDateFormat;
+    private String mNumberFormat;
+    private static final File sSomeExampleSourceFile = new File("/a/Xxxxxxxx.jpg");
 
+    /**
+     * filename = outDir+dateFormat+name+numberFormat+fileExtension.
+     * @param outDir
+     */
+    public FileNameProcessor(File outDir) {
+        this.mOutDir = outDir;
+    }
     /**
      * filename = outDir+dateFormat+name+numberFormat+fileExtension.
      *  @param dateFormat null or dateformat
@@ -54,26 +64,52 @@ public class FileNameProcessor extends FileProcessor {
      * @param outDir
      */
     public FileNameProcessor(String dateFormat, String name, String numberFormat, File outDir) {
-        this.dateFormatter = (dateFormat == null) ? null : new SimpleDateFormat(dateFormat);
-        this.name = name;
-        this.numberFormatter = (numberFormat == null) ? null : new DecimalFormat(numberFormat);
+        this(outDir);
+        set(dateFormat, name, numberFormat);
+    }
 
-        this.outDir = outDir;
+    /**
+     * filename = outDir+dateFormat+name+numberFormat+fileExtension.
+     *  @param dateFormat null or dateformat
+     *                    (see https://docs.oracle.com/javase/6/docs/api/java/text/SimpleDateFormat.html)
+     *                    Example "yyMM" for two digit year plus two digit month
+     * @param name          fix part of filename
+     * @param numberFormat null or numberformat.
+     *                      Example "000" always at least 3 digits
+     */
+    public void set(String dateFormat, String name, String numberFormat) {
+        if (StringUtils.isNullOrEmpty(dateFormat)) {
+            this.mDateFormat = null;
+        } else {
+            this.mDateFormat = dateFormat;
+            this.mDateFormatter.applyPattern(dateFormat);
+        }
+
+        this.mName = name;
+
+        if (StringUtils.isNullOrEmpty(numberFormat)) {
+            this.mNumberFormat = null;
+        } else {
+            this.mNumberFormat = numberFormat;
+            this.mNumberFormatter.applyPattern(numberFormat);
+        }
+
+        this.mNextFileInstanceNumber = 0;
     }
 
     protected String generateFileName(Date date, int instanceNumber, String fileExtension) {
         return generateFileName(getDateFormat(date), instanceNumber, fileExtension);
     }
 
-    protected String generateFileName(String date, int instanceNumber, String fileExtension) {
+    protected String generateFileName(String datePrefix, int instanceNumber, String fileExtension) {
 
         StringBuilder result = new StringBuilder();
-        result.append(date);
-        if (this.name != null) result.append(this.name);
+        if (datePrefix != null) result.append(datePrefix);
+        if (this.mName != null) result.append(this.mName);
 
-        if (this.numberFormatter != null) {
-            result.append(this.numberFormatter.format(instanceNumber));
-        } else if (instanceNumber > 0) {
+        if (this.mNumberFormat != null) {
+            result.append(this.mNumberFormatter.format(instanceNumber));
+        } else if ((result.length() == 0) || (instanceNumber > 0)) {
             result.append(instanceNumber);
         }
         if (fileExtension != null) result.append(fileExtension);
@@ -81,35 +117,53 @@ public class FileNameProcessor extends FileProcessor {
     }
 
     private String getDateFormat(Date date) {
-        return (this.dateFormatter != null) ? this.dateFormatter.format(date) : "";
+        return (this.mDateFormat != null) ? this.mDateFormatter.format((date == null) ? sSomeExampleSourceFile : date) : null;
     }
 
     protected boolean mustRename(String filenameWithoutPath) {
-        return (filenameWithoutPath.indexOf(this.name) < 0);
+        boolean nameEmpty = StringUtils.isNullOrEmpty(this.mName);
+        if ((mDateFormat == null) && (mNumberFormat == null) && nameEmpty) {
+			// no rename parameters defined: do not rename
+			return false;
+		}
+
+		if (nameEmpty) return true; // at least date or number is set
+
+        return (filenameWithoutPath.indexOf(this.mName) < 0);
     }
 
     public File getNextFile(File file, Date date, int firstFileInstanceNumber) {
-        String name = file.getName();
-        if (!mustRename(name)) return new File(this.outDir, name);
-
+        String name = getFile(file).getName();
+        if (!mustRename(name)) {
+			// no rename rule or file already matches rules
+			File result = new File(this.mOutDir, name);
+			
+			// change file name if result already exists
+			return renameDuplicate(result);
+		}
+		
         final String dateFormatted = getDateFormat(date);
         final String fileExtension = FileUtils.getExtension(name);
-        if (StringUtils.compare(dateFormatted, lastDateFormatted) != 0) {
+        if ((mNextFileInstanceNumber < firstFileInstanceNumber) || (StringUtils.compare(dateFormatted, mLastDateFormatted) != 0)) {
             // date pattern has changed. must restart fileInstanceNumber from beginning
-            nextFileInstanceNumber = firstFileInstanceNumber;
+            mNextFileInstanceNumber = firstFileInstanceNumber;
         }
-        // else reuse nextFileInstanceNumber for the same date
-        lastDateFormatted = dateFormatted;
+        // else reuse mNextFileInstanceNumber for the same date
+        mLastDateFormatted = dateFormatted;
         File result = null;
         int tryCount = 0;
         do {
-            result = new File(this.outDir, generateFileName(dateFormatted, nextFileInstanceNumber, fileExtension));
-            nextFileInstanceNumber++;
+            result = new File(this.mOutDir, generateFileName(dateFormatted, mNextFileInstanceNumber, fileExtension));
+            mNextFileInstanceNumber++;
             if (!fileOrSidecarExists(result)) return result; // filename not in use yet
             tryCount++;
         } while (tryCount < 32000);
 
         // give up after a lot of tries.
         throw new IllegalArgumentException("Cannot generate new unused Filename " + result);
+    }
+
+    public static File getFile(File _file) {
+        return (_file != null) ? _file : sSomeExampleSourceFile;
     }
 }

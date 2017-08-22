@@ -90,7 +90,7 @@ abstract public class CsvItem {
     // last wins
     protected void setDate(Date value, int... columnNumbers) {
         for (int columnNumber : columnNumbers) {
-            setString(DateUtil.toIsoDateString(value), columnNumber);
+            setString(DateUtil.toIsoDateTimeString(value), columnNumber);
         }
     }
 
@@ -141,6 +141,7 @@ abstract public class CsvItem {
 
     /** places quote around fieldValue if necessary */
     protected String quouteIfNecessary(String fieldValue) {
+        if (fieldValue == null) return "";
         if (mustQuote(fieldValue)) {
             return CHAR_FIELD_SURROUNDER + fieldValue.replace(""+CHAR_FIELD_SURROUNDER, "'") + CHAR_FIELD_SURROUNDER;
         }

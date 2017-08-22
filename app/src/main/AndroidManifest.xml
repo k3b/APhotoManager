@@ -193,9 +193,9 @@
 
 
         <activity
-            android:name=".PhotoWorkflowEditActivity"
+            android:name=".PhotoAutoprocessingEditActivity"
             android:icon="@drawable/exif_edit"
-            android:label="@string/photo_workflow_menu_title">
+            android:label="@string/photo_autoprocessing_edit_menu_title">
             <!-- ImageDetail edit schema=file with mime=image/* -->
             <intent-filter>
                 <action android:name="android.intent.action.EDIT" />

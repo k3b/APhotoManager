@@ -34,6 +34,9 @@ import de.k3b.media.MediaAsString;
  */
 
 public class PhotoWorkFlowDto {
+    /** added to every serialized item if != null. Example "Generated on 2015-10-19 with myApp Version 0815." */
+    public static String sFileComment = "";
+
     private static final String KEY_DATE_FORMAT     = "DateFormat";
     private static final String KEY_NAME            = "Name";
     private static final String KEY_NUMBER_FORMAT   = "NumberFormat";
@@ -75,14 +78,12 @@ public class PhotoWorkFlowDto {
 
     public void save() throws IOException {
         File apm = getApmFile();
-        if (apm.exists() && apm.isFile() && apm.canRead()) {
-            FileOutputStream inputStream = null;
-            try {
-                inputStream = new FileOutputStream(apm);
-                properties.store(inputStream, "");
-            } finally {
-                FileUtils.close(inputStream,"PhotoWorkFlowDto.load(" + apm + ")");
-            }
+        FileOutputStream inputStream = null;
+        try {
+            inputStream = new FileOutputStream(apm);
+            properties.store(inputStream, PhotoWorkFlowDto.sFileComment);
+        } finally {
+            FileUtils.close(inputStream,"PhotoWorkFlowDto.load(" + apm + ")");
         }
     }
 
@@ -128,6 +129,9 @@ public class PhotoWorkFlowDto {
 
     public File getOutDir() {
         return outDir;
+    }
+    public void setOutDir(File outDir) {
+        this.outDir = outDir;
     }
 
     public IMetaApi getMediaDefaults() {

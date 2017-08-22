@@ -33,7 +33,7 @@
         tools:context="de.k3b.android.androFotoFinder.GalleryFilterActivity">
         <TextView android:id="@+id/lbl_preview"
             android:text="@string/preview_message_format"
-            android:lines="5"
+            android:lines="6"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
@@ -116,7 +116,7 @@
 
         <TextView android:id="@+id/lbl_exif_changes"
             android:text="@string/preview_message_format"
-            android:lines="5"
+            android:lines="10"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"

@@ -48,8 +48,13 @@ public class DateUtil {
         return result;
     }
 
-    public static String toIsoDateString(Date date) {
+    public static String toIsoDateTimeString(Date date) {
         if (date == null) return null;
         return IsoDateTimeFormat.format(date);
+    }
+
+    public static String toIsoDateString(Date date) {
+        if (date == null) return null;
+        return IsoDateFormat.format(date);
     }
 }

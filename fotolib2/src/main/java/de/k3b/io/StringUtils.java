@@ -71,4 +71,8 @@ public class StringUtils {
     public static int length(String str) {
         return (str != null) ? str.length() : 0;
     }
+
+    public static boolean isNullOrEmpty(String str) {
+        return (0 == length(str));
+    }
 }

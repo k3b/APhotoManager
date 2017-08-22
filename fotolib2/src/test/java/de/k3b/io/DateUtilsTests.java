@@ -33,7 +33,7 @@ public class DateUtilsTests {
     public void shoudParseFormatOldDate() {
         String dateString = "1954-12-14T19:32:56";
         Date sut = DateUtil.parseIsoDate(dateString);
-        String sutAsString = DateUtil.toIsoDateString(sut);
+        String sutAsString = DateUtil.toIsoDateTimeString(sut);
         Assert.assertEquals(dateString, sutAsString);
     }
 }

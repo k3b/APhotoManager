@@ -841,7 +841,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     private boolean onEditExif(SelectedFiles fotos) {
-        ExifEditActivity.showActivity(getActivity(), null, fotos, 0);
+        ExifEditActivity.showActivity(getActivity(), null, null, fotos, 0);
         return true;
     }
 

@@ -23,7 +23,6 @@ import java.util.Comparator;
 import java.util.Date;
 
 import de.k3b.io.DateUtil;
-import de.k3b.tagDB.Tag;
 
 /**
  * Records media changes to be reapplied on a different system so that media-metha-data keeps in sync.
@@ -180,7 +179,7 @@ public class MediaTransactionLogDto implements IMediaTransactionLog {
             sb
                     .append(log.getClass().getSimpleName())
                     .append("#")
-                    .append(DateUtil.toIsoDateString(new Date(log.getModificationDate())))
+                    .append(DateUtil.toIsoDateTimeString(new Date(log.getModificationDate())))
                     .append(" ")
                     .append(log.getMediaID())
                     .append("@")

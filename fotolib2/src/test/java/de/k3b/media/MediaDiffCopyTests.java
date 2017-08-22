@@ -90,19 +90,19 @@ public class MediaDiffCopyTests {
         // example date1
         IMetaApi destintaion = new MediaDTO().setDateTimeTaken(DateUtil.parseIsoDate("2001-01-03T08:06:05:52"));
         int numberofChanges = sut.applyChanges(destintaion).size();
-        Assert.assertEquals("#changed date1" + sut, "2017-07-05T18:17:05", DateUtil.toIsoDateString(destintaion.getDateTimeTaken()));
+        Assert.assertEquals("#changed date1" + sut, "2017-07-05T18:17:05", DateUtil.toIsoDateTimeString(destintaion.getDateTimeTaken()));
         Assert.assertEquals("#changes1 " + sut, 1, numberofChanges);
 
         // example date2
         destintaion = new MediaDTO().setDateTimeTaken(DateUtil.parseIsoDate("2001-01-04T09:12:08"));
         numberofChanges = sut.applyChanges(destintaion).size();
-        Assert.assertEquals("#changed date2" + sut, "2017-07-06T19:23:08", DateUtil.toIsoDateString(destintaion.getDateTimeTaken()));
+        Assert.assertEquals("#changed date2" + sut, "2017-07-06T19:23:08", DateUtil.toIsoDateTimeString(destintaion.getDateTimeTaken()));
         Assert.assertEquals("#changes2 " + sut, 1, numberofChanges);
 
         // special use case overwrite null in shift mode
         destintaion = new MediaDTO().setDateTimeTaken(null);
         numberofChanges = sut.applyChanges(destintaion).size();
-        Assert.assertEquals("#changed verwrite null in shift mode" + sut, "2017-07-03T14:22:52", DateUtil.toIsoDateString(destintaion.getDateTimeTaken()));
+        Assert.assertEquals("#changed verwrite null in shift mode" + sut, "2017-07-03T14:22:52", DateUtil.toIsoDateTimeString(destintaion.getDateTimeTaken()));
         Assert.assertEquals("#changes3 " + sut, 1, numberofChanges);
 
     }

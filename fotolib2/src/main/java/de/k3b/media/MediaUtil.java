@@ -20,6 +20,7 @@
 package de.k3b.media;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -76,7 +77,7 @@ public class MediaUtil {
         StringBuilder result = new StringBuilder();
         add(result, includeEmpty, excludes, FieldID.clasz, item.getClass().getSimpleName(), ":");
         add(result, includeEmpty, excludes, FieldID.path, labeler, item.getPath());
-        add(result, includeEmpty, excludes, FieldID.dateTimeTaken, labeler, DateUtil.toIsoDateString(item.getDateTimeTaken()));
+        add(result, includeEmpty, excludes, FieldID.dateTimeTaken, labeler, DateUtil.toIsoDateTimeString(item.getDateTimeTaken()));
         add(result, includeEmpty, excludes, FieldID.title, labeler, item.getTitle());
         add(result, includeEmpty, excludes, FieldID.description, labeler, item.getDescription());
         add(result, includeEmpty, excludes, FieldID.latitude_longitude, labeler, GeoUtil.toCsvStringLatLon(item.getLatitude()));
@@ -267,7 +268,7 @@ public class MediaUtil {
             case path:
                 return data.getPath();
             case dateTimeTaken:
-                return DateUtil.toIsoDateString(data.getDateTimeTaken());
+                return DateUtil.toIsoDateTimeString(data.getDateTimeTaken());
             case title:
                 return data.getTitle();
             case description:
@@ -305,4 +306,12 @@ public class MediaUtil {
         }
         return lcPath.endsWith(".jpg") || lcPath.endsWith(".jpeg");
     }
+
+    public static final FilenameFilter JPG_FILENAME_FILTER = new FilenameFilter() {
+        @Override
+        public boolean accept(File dir, String filename) {
+            return MediaUtil.isImage(filename, false);
+        }
+    };
+
 }

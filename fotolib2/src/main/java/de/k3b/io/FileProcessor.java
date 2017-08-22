@@ -20,6 +20,11 @@
 package de.k3b.io;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.util.Date;
 
 /**
  * Created by k3b on 03.08.2017.
@@ -27,6 +32,9 @@ import java.io.File;
 
 public class FileProcessor {
     private static final String EXT_SIDECAR = ".xmp";
+    protected String mLogFilePath;
+    // private static final String LOG_FILE_ENCODING = "UTF-8";
+    protected PrintWriter mLogFile;
 
     /** can be replaced by mock/stub in unittests */
     public boolean osFileExists(File file) {
@@ -71,5 +79,94 @@ public class FileProcessor {
             if ((result == null) || !result.exists() || !result.isFile()) result = null;
         }
         return result;
+    }
+	
+    /**
+     * @return file if rename is not neccessary else File with new name
+     */
+    public File renameDuplicate(File file) {
+        if (!fileOrSidecarExists(file)) {
+            // rename is not neccessary
+            return file;
+        }
+
+
+        String filename = file.getAbsolutePath();
+        String extension = ")";
+        int extensionPosition = filename.lastIndexOf(".");
+        if (extensionPosition >= 0) {
+            extension = ")" + filename.substring(extensionPosition);
+            filename = filename.substring(0, extensionPosition) + "(";
+        }
+        int id = 0;
+        while (true) {
+            id++;
+            String candidatePath = filename + id + extension;
+            File candidate = new File(candidatePath);
+            if (!fileOrSidecarExists(candidate)) {
+                log("rem renamed from '", filename, "' to '", candidatePath,"'");
+                return candidate;
+            }
+
+        }
+    }
+
+    /** called for every cath(Exception...) */
+    protected void onException(final Throwable e, Object... context) {
+        if (e != null) {
+            e.printStackTrace();
+        }
+    }
+
+    public void openLogfile() {
+        closeLogFile();
+        if (mLogFilePath != null) {
+            OutputStream stream = null;
+            try {
+                File logFile = new File(mLogFilePath);
+                if (osFileExists(logFile)) {
+                    // open existing in append mode
+                    long ageInHours = (new Date().getTime() - logFile.lastModified()) / (1000 * 60 * 60);
+                    stream = new FileOutputStream(logFile, true);
+                    mLogFile = new PrintWriter(stream, true);
+
+                    if (ageInHours > 15) {
+                        log();
+                        log("rem ", new Date());
+                    }
+                } else {
+                    // create new
+                    mLogFile = new PrintWriter(logFile, "UTF-8");
+                    log("rem " , new Date());
+                }
+            } catch (Throwable e) {
+                onException(e, "openLogfile", mLogFilePath);
+                if (stream != null) {
+                    try {
+                        stream.close();
+                    } catch (IOException e1) {
+                        onException(e1, "openLogfile-close", mLogFilePath);
+                    }
+                }
+            }
+        }
+    }
+
+    public void closeLogFile() {
+        if (mLogFile != null) {
+            mLogFile.close();
+            mLogFile = null;
+        }
+    }
+
+    public FileProcessor log(Object... messages) {
+        if (mLogFile != null) {
+            for(Object message : messages) {
+                mLogFile.print(message);
+            }
+            mLogFile.println();
+            mLogFile.flush();
+        }
+        return this;
     }
 }

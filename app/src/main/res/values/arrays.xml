@@ -54,4 +54,24 @@
         <item>tr</item>
         <item>zz</item>
     </string-array>
+
+    <string-array name="date_patterns" translatable="false">
+        <item></item>
+        <item>yy</item>
+        <item>yyMM</item>
+        <item>yyMMdd</item>
+        <item>yyyy</item>
+        <item>yyyyMM</item>
+        <item>yyyyMMdd</item>
+    </string-array>
+
+    <string-array name="number_patterns" translatable="false">
+        <item></item>
+        <item>0</item>
+        <item>00</item>
+        <item>000</item>
+        <item>0000</item>
+        <item>00000</item>
+    </string-array>
+
 </resources>

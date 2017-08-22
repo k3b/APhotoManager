@@ -179,7 +179,7 @@ public class Tag{
 
     public static Tag findByPathElements(List<Tag> all, Tag parent, String... pathElements) {
         if (pathElements != null) {
-            boolean isRoot = (pathElements.length > 0) && (StringUtils.length(pathElements[0]) == 0);
+            boolean isRoot = (pathElements.length > 0) && (StringUtils.isNullOrEmpty(pathElements[0]));
             Tag currentTagParent = isRoot ? null : parent;
             for (String pathElement : pathElements) {
                 if (pathElement != null) {

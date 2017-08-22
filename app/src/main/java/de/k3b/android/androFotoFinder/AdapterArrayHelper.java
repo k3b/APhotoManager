@@ -30,6 +30,7 @@ import de.k3b.android.util.MediaScanner;
 import de.k3b.database.SelectedItems;
 import de.k3b.io.FileUtils;
 import de.k3b.io.IGalleryFilter;
+import de.k3b.media.MediaUtil;
 
 /**
  * Implements the array sepecific stuff that hopefully can be reused in other adapters, too
@@ -53,7 +54,7 @@ public class AdapterArrayHelper {
 
     /** refreshLocal files from inital path */
     public void reload(String why) {
-        mFullPhotoPaths = mRootDir.list(MediaScanner.JPG_FILENAME_FILTER);
+        mFullPhotoPaths = mRootDir.list(MediaUtil.JPG_FILENAME_FILTER);
         if ((mFullPhotoPaths != null) && (mFullPhotoPaths.length == 0)) {
             mFullPhotoPaths = null;
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + why + "AdapterArrayHelper.refreshLocal(" + mRootDir +") " + 0);

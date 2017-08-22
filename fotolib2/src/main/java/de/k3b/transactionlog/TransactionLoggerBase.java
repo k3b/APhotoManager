@@ -60,7 +60,7 @@ public abstract class TransactionLoggerBase  {
     }
 
     protected void addChangesDateTaken(Date newData) {
-        addChanges(MediaTransactionLogEntryType.DATE, DateUtil.toIsoDateString(newData), false);
+        addChanges(MediaTransactionLogEntryType.DATE, DateUtil.toIsoDateTimeString(newData), false);
     }
 
     protected void addChangesTags(List<String> oldTags, List<String> newTags) {

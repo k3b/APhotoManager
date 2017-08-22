@@ -35,6 +35,7 @@ import java.io.File;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.io.StringUtils;
 
 /**
  * Created by k3b on 09.09.2015.
@@ -98,7 +99,9 @@ public class IntentUtil implements Common {
     }
 
     public static boolean isFileUri(Uri uri) {
-        return (uri != null) && ("file".equals(uri.getScheme()));
+        if (uri == null) return false;
+        String scheme = uri.getScheme();
+        return StringUtils.isNullOrEmpty(scheme) || (0 == "file".compareTo(scheme));
     }
 
     public static boolean isFileUri(String initalFileUrl) {
