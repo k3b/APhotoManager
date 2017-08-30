@@ -17,7 +17,8 @@ I (k3b) have nothing to do with these clones and i cannot garantee that the clon
   * same version 0.6.1 but bigger apk file sites **1.6 MB**, **2.2MB** or **3.0MB** on [de.downloadatoz.com](https://de.downloadatoz.com/de-k3b-android-androfotofinder/de.k3b.android.androFotoFinder/), 
 [www.apkherunterladen.com](https://www.apkherunterladen.com/de-k3b-android-androfotofinder/de.k3b.android.androFotoFinder/downloading.html), 
 [www.androidapkdescargar.com](https://www.androidapkdescargar.com/a-photo-manager/de.k3b.android.androFotoFinder/)
-
+  * [co.mau photo manager on google play store](https://play.google.com/store/apps/details?id=co.mau&hl=en) and [co.mau photo manager on appbrain](https://www.appbrain.com/app/mau-photo-manager/co.mau) file size **2.81 MB** is APhotoManager with different icons, advertising (and may be other unwanted code) but without providing the sourcecode of the changes and therefore violating the gpl-license.
+  
 ## Features
 
 * Free, opensource, no adds, no user tracking, available on [f-droid](https://f-droid.org/)
