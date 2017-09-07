@@ -18,11 +18,15 @@
  */
 package de.k3b.android.util;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 
 /**
  * Created by k3b on 08.06.2017.
@@ -45,5 +49,34 @@ public class ResourceUtils {
                 imm.showSoftInput(textView, InputMethodManager.SHOW_IMPLICIT);
             }
         }, 200);
+    }
+
+    public interface IFilter {
+
+        boolean match(View t);
+    }
+
+    // owner.getRootView()
+    public static View findLast(View owner, IFilter filter) {
+        if (owner == null) return null;
+        if (filter.match(owner)) return owner;
+        if (owner instanceof ViewGroup) {
+            ViewGroup parent = (ViewGroup) owner;
+            for (int i = parent.getChildCount() - 1; i >= 0; i--) {
+                View child = findLast(parent.getChildAt(i), filter);
+                if (child != null) return child;
+            }
+        }
+        return null;
+    }
+
+    public static View findLast(View owner, final String id) {
+        final String search = "." + id + ".";
+        return findLast(owner, new IFilter() {
+            @Override
+            public boolean match(View t) {
+                return t.getClass().getName().contains(search);
+            }
+        });
     }
 }
