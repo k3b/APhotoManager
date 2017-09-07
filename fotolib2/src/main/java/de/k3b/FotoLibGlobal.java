@@ -46,6 +46,8 @@ public class FotoLibGlobal {
     /** strategy config how to read/write meta data: (J)pg, (X)mp, (C)reate. Global to allow changing these via a settings dialog */
     public static String mediaUpdateStrategy = "JX";
 
+    public static boolean itpcWriteSupport = false;
+
     // will be written into exif/xmp if not already set.
     // Overwritten by android Application.onCreate()
     public static String appName = null;
@@ -53,4 +55,5 @@ public class FotoLibGlobal {
 
     /** true: update jpg-exif does not change file.lastModifiedDate */
     public static boolean preserveJpgFileModificationDate = true;
+
 }

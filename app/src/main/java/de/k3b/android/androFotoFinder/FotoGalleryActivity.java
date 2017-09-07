@@ -42,6 +42,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.directory.DirectoryGui;
 import de.k3b.android.androFotoFinder.directory.DirectoryLoaderTask;
 import de.k3b.android.androFotoFinder.gallery.cursor.GalleryCursorFragment;
@@ -442,6 +443,11 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         Global.debugMemory(mDebugPrefix, "onCreate");
         super.onCreate(savedInstanceState);
         final Intent intent = getIntent();
+
+        if (BuildConfig.DEBUG) {
+            // not implemented yet
+            FotoLibGlobal.itpcWriteSupport = false;
+        }
         if (Global.debugEnabled && (intent != null)){
             Log.d(Global.LOG_CONTEXT, mDebugPrefix + "onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
         }
