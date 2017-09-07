@@ -25,6 +25,12 @@
    android:layout_height="match_parent"
    android:orientation="vertical">
   <!--
+  <de.k3b.android.androFotoFinder.ads.IptcView android:id="@+id/iptc"
+      android:text="iptc goes here"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      />
+
     [HorizontalScrollView-parent_scroller[parent_owner[[parentButton] [parentButton] [parentButton] ...]]]
     [HorizontalScrollView-child_scroller [child_owner [[childButton ] [childButton ] [childButton ] ...]]]
     [GridView-gridView]
@@ -156,4 +162,5 @@
     android:horizontalSpacing="@dimen/grid_cell_margin"
     android:focusable="true"
     android:clickable="true"/>
+
 </LinearLayout>

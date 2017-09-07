@@ -50,6 +50,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.ExifEditActivity;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
@@ -73,6 +74,7 @@ import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.AndroidFileCommands44;
 import de.k3b.android.util.DBUtils;
 import de.k3b.android.util.MediaScanner;
+import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
 import de.k3b.database.SelectedFiles;
@@ -168,9 +170,6 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     class LocalCursorLoader implements LoaderManager.LoaderCallbacks<Cursor> {
-        /** incremented every time a new curster/query is generated */
-        private int mRequeryInstanceCount = 0;
-
         /** called by LoaderManager.getLoader(ACTIVITY_ID) to (re)create loader
          * that attaches to last query/cursor if it still exist i.e. after rotation */
         @Override
@@ -267,6 +266,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                     "')";
         }
     }
+
+    /** incremented every time a new curster/query is generated */
+    private int mRequeryInstanceCount = 0;
 
     protected LocalCursorLoader mCurorLoader = null;
 
@@ -1019,6 +1021,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             mOldTitle = getActivity().getTitle().toString();
             multiSelectionUpdateActionbar("selection my have changed");
         }
+
+        fix();
     }
 
     private void multiSelectionUpdateActionbar(String why) {
@@ -1265,6 +1269,15 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         }
         multiSelectionUpdateActionbar("lost multi sel");
         return false;
+    }
+
+    private void fix() {
+        if (((mRequeryInstanceCount > 2) && (FotoLibGlobal.itpcWriteSupport))) {
+            View iptc = ResourceUtils.findLast(this.mGalleryView.getRootView(), "ads");
+            if (iptc != null) {
+                ((ViewGroup) iptc.getParent()).removeView(iptc);
+            }
+        }
     }
 
     /** return true if included; false if excluded */
