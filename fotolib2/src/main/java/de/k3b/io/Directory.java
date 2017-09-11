@@ -19,6 +19,7 @@
  
 package de.k3b.io;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +41,7 @@ public class Directory implements IDirectory {
     public static final int OPT_NONE = 0;
 
     private String relPath = null;
+    private Boolean apmDir = null;
     private IDirectory parent = null;
     private List<IDirectory> children = null;
 
@@ -87,6 +89,13 @@ public class Directory implements IDirectory {
 
     public void setRelPath(String relPath) {
         this.relPath = relPath;
+    }
+
+    private boolean isApmDir() {
+        if (apmDir == null) {
+            apmDir = new File(getAbsolute(), FileNameProcessor.APM_FILE_NAME).exists();
+        }
+        return apmDir.equals(Boolean.TRUE);
     }
 
     @Override
@@ -261,7 +270,7 @@ public class Directory implements IDirectory {
 
     @Override
     public int getDirFlags() {
-        return 0;
+        return isApmDir() ? IDirectory.DIR_FLAG_APM_DIR : IDirectory.DIR_FLAG_NONE;
     }
 
     public IDirectory setIconID(int iconID) {

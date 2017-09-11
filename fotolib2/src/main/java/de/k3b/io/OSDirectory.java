@@ -58,7 +58,8 @@ public class OSDirectory implements IDirectory {
         mChilden = childen;
         if ((getDirFlags() == DIR_FLAG_NONE)
                 && (mParent != null)
-                && (mParent.getDirFlags() != DIR_FLAG_NONE)) {
+                && mParent.isDirFlagsNomedia()) {
+            // inherit nomedia from parent
             setDirFlags(DIR_FLAG_NOMEDIA);
         }
     }
@@ -253,4 +254,8 @@ public class OSDirectory implements IDirectory {
     public void setDirFlags(int dirFlags) {
         this.mDirFlags = dirFlags;
     }
+
+    public boolean isDirFlagsNomedia() {
+        return  (this.getDirFlags() & (DIR_FLAG_NOMEDIA | DIR_FLAG_NOMEDIA_ROOT))  != DIR_FLAG_NONE;
+     }
 }
