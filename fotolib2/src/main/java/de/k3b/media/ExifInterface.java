@@ -1477,29 +1477,42 @@ public class ExifInterface {
      * and make a single call rather than multiple calls for each attribute.
      */
     public void saveAttributes() throws IOException {
+        saveAttributes(mExifFile, mExifFile, true);
+    }
+
+    public void saveAttributes(File inFile, File outFile, boolean deleteInFileOnFinish) throws IOException {
         fixAttributes();
 
         // Keep the thumbnail in memory
-        mThumbnailBytes = getThumbnail();
-        File tempFile = null;
-        // Move the original file to temporary file.
-        tempFile = new File(mExifFile.getAbsolutePath() + ".tmp");
-        File originalFile = mExifFile;
-        if (!originalFile.renameTo(tempFile)) {
-            throw new IOException("Could'nt rename from " + mExifFile +
-                    " to " + tempFile.getAbsolutePath());
+        mThumbnailBytes = getThumbnail(inFile);
+        File renamedInFile = inFile;
+
+        boolean overwriteOriginal = inFile.equals(outFile);
+
+        if (overwriteOriginal) {
+            // Move the original file to temporary file.
+            renamedInFile = new File(inFile.getAbsolutePath() + ".tmp");
+            File originalInFile = inFile;
+            if (!originalInFile.renameTo(renamedInFile)) {
+                throw new IOException("Could'nt rename sourcefile from " + inFile +
+                        " to " + renamedInFile.getAbsolutePath());
+            }
         }
         FileInputStream in = null;
         FileOutputStream out = null;
         try {
             // Save the new file.
-            in = new FileInputStream(tempFile);
-            out = new FileOutputStream(mExifFile);
-            saveJpegAttributes(in, out);
+            in = new FileInputStream(renamedInFile);
+            out = new FileOutputStream(outFile);
+
+            saveJpegAttributes(in, out, mThumbnailBytes);
         } finally {
             closeQuietly(in);
             closeQuietly(out);
-            tempFile.delete();
+
+            if (deleteInFileOnFinish || overwriteOriginal) {
+                renamedInFile.delete();
+            }
         }
         // Discard the thumbnail in memory
         mThumbnailBytes = null;
@@ -1558,6 +1571,10 @@ public class ExifInterface {
      * android.graphics.BitmapFactory#decodeByteArray(byte[],int,int)
      */
     public byte[] getThumbnail() {
+        return getThumbnail(mExifFile);
+    }
+
+    public byte[] getThumbnail(File inFile) {
         if (!mHasThumbnail) {
             return null;
         }
@@ -1567,21 +1584,32 @@ public class ExifInterface {
         // Read the thumbnail.
         FileInputStream in = null;
         try {
-            in = new FileInputStream(mExifFile);
-            if (in.skip(mThumbnailOffset) != mThumbnailOffset) {
-                throw new IOException("Corrupted image");
-            }
-            byte[] buffer = new byte[mThumbnailLength];
-            if (in.read(buffer) != mThumbnailLength) {
-                throw new IOException("Corrupted image");
-            }
-            return buffer;
+            in = new FileInputStream(inFile);
+            return getThumbnail(in);
         } catch (IOException e) {
             // Couldn't get a thumbnail image.
         } finally {
             closeQuietly(in);
         }
         return null;
+    }
+
+    public byte[] getThumbnail(InputStream in) throws IOException {
+        if (!mHasThumbnail) {
+            return null;
+        }
+        if (mThumbnailBytes != null) {
+            return mThumbnailBytes;
+        }
+        if (in.skip(mThumbnailOffset) != mThumbnailOffset) {
+            throw new IOException("Corrupted image");
+        }
+        byte[] buffer = new byte[mThumbnailLength];
+        if (in.read(buffer) != mThumbnailLength) {
+            throw new IOException("Corrupted image");
+        }
+        mThumbnailBytes = buffer;
+        return buffer;
     }
 
     private void closeQuietly(Closeable in) {
@@ -1851,7 +1879,7 @@ public class ExifInterface {
         }
     }
     // Stores a new JPEG image with EXIF attributes into a given output stream.
-    protected void saveJpegAttributes(InputStream inputStream, OutputStream outputStream)
+    public void saveJpegAttributes(InputStream inputStream, OutputStream outputStream, byte[] thumbnail)
             throws IOException {
         // See JPEG File Interchange Format Specification page 5.
         if (DEBUG_INTERNAL) {
@@ -1872,7 +1900,8 @@ public class ExifInterface {
         // Write EXIF APP1 segment
         dataOutputStream.writeByte(MARKER);
         dataOutputStream.writeByte(MARKER_APP1);
-        writeExifSegment(dataOutputStream, 6);
+
+        writeExifSegment(dataOutputStream, 6, thumbnail);
         byte[] bytes = new byte[4096];
         while (true) {
             byte marker = dataInputStream.readByte();
@@ -2175,7 +2204,7 @@ public class ExifInterface {
     }
     // Writes an Exif segment into the given output stream.
     private int writeExifSegment(ByteOrderAwarenessDataOutputStream dataOutputStream,
-            int exifOffsetFromBeginning) throws IOException {
+            int exifOffsetFromBeginning, byte[] thumbnail) throws IOException {
         // The following variables are for calculating each IFD tag group size in bytes.
         int[] ifdOffsets = new int[EXIF_TAGS.length];
         int[] ifdDataSizes = new int[EXIF_TAGS.length];
@@ -2330,10 +2359,11 @@ public class ExifInterface {
                 }
             }
         }
-        // Write thumbnail
-        if (mHasThumbnail) {
-            dataOutputStream.write(getThumbnail());
+
+        if (thumbnail != null) {
+            dataOutputStream.write(thumbnail);
         }
+
         // Reset the byte order to big endian in order to write remaining parts of the JPEG file.
         dataOutputStream.setByteOrder(ByteOrder.BIG_ENDIAN);
         return totalSize;

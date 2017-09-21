@@ -88,24 +88,30 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     protected ExifInterfaceEx() {super();xmpExtern=null; mDbg_context = "";}
 
     @Override
-    public void saveAttributes() throws IOException {
-        super.saveAttributes();
-        setFilelastModified(mExifFile);
+    public void saveAttributes(File inFile, File outFile, boolean deleteInFileOnFinish) throws IOException {
+        fixDateTakenIfNeccessary(inFile);
+        super.saveAttributes(inFile, outFile, deleteInFileOnFinish);
+        setFilelastModified(outFile);
         if (FotoLibGlobal.debugEnabledJpgMetaIo) {
             logger.debug(mDbg_context +
                     " saved: " + MediaUtil.toString(this, false, null, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
         }
     }
 
-    @Override
-    protected void fixAttributes() {
-        if (ExifInterfaceEx.fixDateOnSave) {
-            long lastModified = mExifFile.lastModified();
+    private void fixDateTakenIfNeccessary(File inFile) {
+        // donot fix in unittests
+        if (ExifInterfaceEx.fixDateOnSave && (null == getDateTimeTaken()) && (inFile != null)) {
+            long lastModified = inFile.lastModified();
             // #29 set data if not in exif: date, make model
-            if ((lastModified != 0) && (null == getDateTimeTaken())) {
+            if (lastModified != 0) {
                 setDateTimeTaken(new Date(lastModified));
             }
         }
+    }
+
+    @Override
+    protected void fixAttributes() {
+        fixDateTakenIfNeccessary(mExifFile);
 
         if ((FotoLibGlobal.appName != null) && (null == getAttribute(ExifInterfaceEx.TAG_MAKE))) {
             setAttribute(ExifInterfaceEx.TAG_MAKE, FotoLibGlobal.appName);
