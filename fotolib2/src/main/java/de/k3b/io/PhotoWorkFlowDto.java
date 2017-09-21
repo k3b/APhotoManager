@@ -144,6 +144,11 @@ public class PhotoWorkFlowDto {
         if (mediaDefaults != null) {
             mediaDefaultString = new MediaAsString().setData(mediaDefaults).toString();
         }
-        properties.setProperty(KEY_EXIF,mediaDefaultString);
+
+        if (mediaDefaultString != null) {
+            properties.setProperty(KEY_EXIF, mediaDefaultString);
+        } else {
+            properties.remove(KEY_EXIF);
+        }
     }
 }
