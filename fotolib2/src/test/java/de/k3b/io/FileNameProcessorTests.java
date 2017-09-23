@@ -65,7 +65,7 @@ public class FileNameProcessorTests {
 
     @Test
     public void shouldGetNextFreeFileWithoutRename() {
-        FileNameProcessor sut = spy(new FileNameProcessor(null, "Hello", null, X_FAKE_OUTPUT_DIR));
+        IFileNameProcessor sut = spy(new FileNameProcessor(null, "Hello", null, X_FAKE_OUTPUT_DIR));
         File outFile = sut.getNextFile(new File(X_FAKE_INPUT_DIR, "171224Hello1234.jpg"),null,0);
         Assert.assertEquals("171224Hello1234.jpg", outFile.getName());
     }

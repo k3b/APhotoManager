@@ -81,6 +81,7 @@ public class TestUtil {
         InputStream sourceStream = getResourceInputStream(resourceName);
 
         if (destination.exists()) destination.delete();
+        destination.getParentFile().mkdirs();
         FileOutputStream result = new FileOutputStream(destination);
         FileUtils.copy(sourceStream, result);
         result.flush();

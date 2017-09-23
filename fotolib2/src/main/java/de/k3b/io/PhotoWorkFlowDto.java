@@ -30,6 +30,8 @@ import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaAsString;
 
 /**
+ * Persistable data for autoproccessing images (auto-rename, auto-add-exif)
+ *
  * Created by k3b on 04.08.2017.
  */
 
@@ -87,6 +89,7 @@ public class PhotoWorkFlowDto {
         }
     }
 
+    /** Android support: to persist state and to transfer activites via intent */
     public static PhotoWorkFlowDto load(Serializable content) {
         Properties properties = (Properties) content;
         if (properties != null) {
@@ -96,6 +99,7 @@ public class PhotoWorkFlowDto {
         return null;
     }
 
+    /** Android support: to persist state and to transfer activites via intent */
     public Serializable toSerializable() {
         if (this.properties != null) {
             this.properties.put(KEY_OUT_DIR, (this.outDir == null) ? null : this.outDir.toString());
@@ -103,26 +107,32 @@ public class PhotoWorkFlowDto {
         return this.properties;
     }
 
+    /** DateFormat part for {@link FileNameProcessor} */
     public String getDateFormat() {
         return properties.getProperty(KEY_DATE_FORMAT);
     }
 
+    /** DateFormat part for {@link FileNameProcessor} */
     public void setDateFormat(String dateFormat) {
         properties.setProperty(KEY_DATE_FORMAT,dateFormat);
     }
 
+    /**  fixed-Name part for {@link FileNameProcessor} */
     public String getName() {
         return properties.getProperty(KEY_NAME);
     }
 
+    /**  fixed-Name part for {@link FileNameProcessor} */
     public void setName(String Name) {
         properties.setProperty(KEY_NAME,Name);
     }
 
+    /**  NumberFormat part for {@link FileNameProcessor} */
     public String getNumberFormat() {
         return properties.getProperty(KEY_NUMBER_FORMAT);
     }
 
+    /**  NumberFormat part for {@link FileNameProcessor} */
     public void setNumberFormat(String NumberFormat) {
         properties.setProperty(KEY_NUMBER_FORMAT,NumberFormat);
     }
@@ -132,6 +142,10 @@ public class PhotoWorkFlowDto {
     }
     public void setOutDir(File outDir) {
         this.outDir = outDir;
+    }
+
+    public IFileNameProcessor createFileNameProcessor() {
+        return new FileNameProcessor(getDateFormat(), getName(), getNumberFormat(), getOutDir());
     }
 
     public IMetaApi getMediaDefaults() {

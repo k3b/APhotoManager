@@ -31,7 +31,7 @@ import java.util.Date;
  * Created by k3b on 03.08.2017.
  */
 
-public class FileNameProcessor extends FileProcessor {
+public class FileNameProcessor extends FileProcessor implements IFileNameProcessor {
     public static final String APM_FILE_NAME = ".apm";
     /** i.e "yyMM" for year and month each with 2 digits */
     private final SimpleDateFormat mDateFormatter = new SimpleDateFormat();
@@ -89,12 +89,13 @@ public class FileNameProcessor extends FileProcessor {
 
         if (StringUtils.isNullOrEmpty(numberFormat)) {
             this.mNumberFormat = null;
+            this.mNextFileInstanceNumber = 0;
         } else {
             this.mNumberFormat = numberFormat;
             this.mNumberFormatter.applyPattern(numberFormat);
+            this.mNextFileInstanceNumber = 1;
         }
 
-        this.mNextFileInstanceNumber = 0;
     }
 
     protected String generateFileName(Date date, int instanceNumber, String fileExtension) {
@@ -132,8 +133,15 @@ public class FileNameProcessor extends FileProcessor {
         return (filenameWithoutPath.indexOf(this.mName) < 0);
     }
 
-    public File getNextFile(File file, Date date, int firstFileInstanceNumber) {
-        String name = getFile(file).getName();
+    /**
+     * Calculate next free file name for sourceFile. Sourcefiles should be ordered asc by sourceFileDate
+     *
+     * @param firstFileInstanceNumber  number where numbering starts with. -1 : auto
+     * @return next absoulte renamed file.
+     */
+    @Override
+    public File getNextFile(File sourceFile, Date sourceFileDate, int firstFileInstanceNumber) {
+        String name = getFile(sourceFile).getName();
         if (!mustRename(name)) {
 			// no rename rule or file already matches rules
 			File result = new File(this.mOutDir, name);
@@ -141,8 +149,11 @@ public class FileNameProcessor extends FileProcessor {
 			// change file name if result already exists
 			return renameDuplicate(result);
 		}
-		
-        final String dateFormatted = getDateFormat(date);
+
+		if (firstFileInstanceNumber < 0) {
+            firstFileInstanceNumber = StringUtils.isNullOrEmpty(mNumberFormat) ? 0 : 1;
+        }
+        final String dateFormatted = getDateFormat(sourceFileDate);
         final String fileExtension = FileUtils.getExtension(name);
         if ((mNextFileInstanceNumber < firstFileInstanceNumber) || (StringUtils.compare(dateFormatted, mLastDateFormatted) != 0)) {
             // date pattern has changed. must restart fileInstanceNumber from beginning

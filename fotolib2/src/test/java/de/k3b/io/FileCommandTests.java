@@ -44,7 +44,7 @@ public class FileCommandTests {
     @Test
     public void shouldCopy() {
         registerFakeFiles(sut);
-        sut.moveOrCopyFilesTo(false, X_FAKE_OUTPUT_DIR, createIds(1), createTestFiles(X_FAKE_OUTPUT_DIR, "a.jpg"));
+        sut.moveOrCopyFilesTo(false, null, null, X_FAKE_OUTPUT_DIR, createIds(1), createTestFiles(X_FAKE_OUTPUT_DIR, "a.jpg"));
 
         verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a.jpg"), createTestFile(X_FAKE_OUTPUT_DIR, "a.jpg"));
 
@@ -53,7 +53,7 @@ public class FileCommandTests {
     @Test
     public void shouldCopyWitRenameExistingMultiple() {
         registerFakeFiles(sut, "a.jpg", "b.png", "b(1).png");
-        sut.moveOrCopyFilesTo(false, X_FAKE_OUTPUT_DIR, createIds(2), createTestFiles(X_FAKE_INPUT_DIR, "a.jpg", "b.png"));
+        sut.moveOrCopyFilesTo(false, null, null, X_FAKE_OUTPUT_DIR, createIds(2), createTestFiles(X_FAKE_INPUT_DIR, "a.jpg", "b.png"));
 
         verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(1).jpg"), createTestFile(X_FAKE_INPUT_DIR, "a.jpg"));
         verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "b(2).png"), createTestFile(X_FAKE_INPUT_DIR, "b.png"));
@@ -63,7 +63,7 @@ public class FileCommandTests {
     public void shouldCopyRenameExistingWithXmp() {
         registerFakeFiles(sut, "a.jpg", "a.xmp", "a(1).xmp", "a(2).jpg"); // a(3) is next possible
 
-        sut.moveOrCopyFilesTo(false, X_FAKE_OUTPUT_DIR, createIds(1), createTestFiles(X_FAKE_INPUT_DIR, "a.jpg"));
+        sut.moveOrCopyFilesTo(false, null, null, X_FAKE_OUTPUT_DIR, createIds(1), createTestFiles(X_FAKE_INPUT_DIR, "a.jpg"));
 
         verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(3).jpg"), createTestFile(X_FAKE_INPUT_DIR, "a.jpg"));
         verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(3).xmp"), createTestFile(X_FAKE_INPUT_DIR, "a.xmp"));
@@ -88,7 +88,7 @@ public class FileCommandTests {
     }
 
     /** these files exist in source-dir and in dest-dir */
-    private static void registerFakeFiles(FileCommands sut, String... filenames) {
+    private static void registerFakeFiles(FileProcessor sut, String... filenames) {
         if (filenames.length == 0) {
             doReturn(false).when(sut).osFileExists(any(File.class));
         } else {

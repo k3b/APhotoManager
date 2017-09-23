@@ -195,7 +195,7 @@ public class AndroidFileCommands extends FileCommands {
     }
 
     public boolean rename(Long fileId, File dest, File src) {
-        int result = moveOrCopyFiles(true, "rename", new Long[]{fileId}, new File[]{dest}, new File[]{src});
+        int result = moveOrCopyFiles(true, "rename", null, new Long[]{fileId}, new File[]{dest}, new File[]{src});
         return (result != 0);
     }
 
