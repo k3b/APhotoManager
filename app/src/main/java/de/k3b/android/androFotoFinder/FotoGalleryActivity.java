@@ -62,7 +62,7 @@ import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
-import de.k3b.database.SelectedItems;
+import de.k3b.io.collections.SelectedItems;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GalleryFilterParameter;

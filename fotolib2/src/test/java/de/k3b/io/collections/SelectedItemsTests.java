@@ -17,10 +17,13 @@
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
 
-package de.k3b.database;
+package de.k3b.io.collections;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import de.k3b.io.collections.SelectedFiles;
+import de.k3b.io.collections.SelectedItems;
 
 /**
  * Created by k3b on 01.08.2015.

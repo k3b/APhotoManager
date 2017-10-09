@@ -50,7 +50,7 @@ import de.k3b.android.util.GarbageCollector;
 import de.k3b.media.JpgMetaWorkflow;
 import de.k3b.android.util.MenuUtils;
 import de.k3b.android.util.ResourceUtils;
-import de.k3b.database.SelectedItems;
+import de.k3b.io.collections.SelectedItems;
 
 /**
  * Adapter for android.support.v4.view.ViewPager that allows swiping next/previous image.<br>

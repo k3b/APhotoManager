@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import de.k3b.database.SelectedItems;
+import de.k3b.io.collections.SelectedItems;
 
 /**
  * parameter for foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.

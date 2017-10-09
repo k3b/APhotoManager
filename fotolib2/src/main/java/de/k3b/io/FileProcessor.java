@@ -20,22 +20,18 @@
 package de.k3b.io;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.util.Date;
 
 /**
  * Created by k3b on 03.08.2017.
  */
 
-public class FileProcessor {
+public class FileProcessor extends FileCommandLogger implements IFileCommandLogger {
     private static final String EXT_SIDECAR = ".xmp";
-    protected String mLogFilePath;
-    // private static final String LOG_FILE_ENCODING = "UTF-8";
-    protected PrintWriter mLogFile;
 
+    /** if not null: all logging goes through this */
+    private IFileCommandLogger internalLogger = null;
+
+    // private static final String LOG_FILE_ENCODING = "UTF-8";
     /** can be replaced by mock/stub in unittests */
     public boolean osFileExists(File file) {
         return file.exists();
@@ -61,26 +57,62 @@ public class FileProcessor {
         return getSidecar(file.getAbsolutePath(), longFormat);
     }
 
-    public static File getSidecar(String absolutePath, boolean longFormat) {
-        File result;
+    public static XmpFile getSidecar(String absolutePath, boolean longFormat) {
+        XmpFile result;
         if (longFormat) {
-            result = new File(absolutePath + EXT_SIDECAR);
+            result = new XmpFile(absolutePath + EXT_SIDECAR, longFormat);
         } else {
-            result = new File(FileUtils.replaceExtension(absolutePath, EXT_SIDECAR));
+            result = new XmpFile(FileUtils.replaceExtension(absolutePath, EXT_SIDECAR), longFormat);
         }
         return result;
     }
 
-    public static File getExistingSidecarOrNull(String absolutePath) {
-        File result = null;
+    public static class XmpFile extends File {
+        /** true: file.jpg.xmp; false: file.xmp */
+        private final boolean longFormat;
+        private boolean hasAlsoOtherFormat = false;
+
+        public XmpFile(String absolutePath, boolean longFormat) {
+            super(absolutePath);
+            this.longFormat = longFormat;
+        }
+
+        /** true: file.jpg.xmp; false: file.xmp */
+        public boolean isLongFormat() {
+            return longFormat;
+        }
+
+        public boolean isHasAlsoOtherFormat() {
+            return hasAlsoOtherFormat;
+        }
+
+        public void setHasAlsoOtherFormat(boolean hasAlsoOtherFormat) {
+            this.hasAlsoOtherFormat = hasAlsoOtherFormat;
+        }
+    }
+
+    public static XmpFile getExistingSidecarOrNull(String absolutePath) {
+        XmpFile result = null;
         if (absolutePath != null) {
-            result = getSidecar(absolutePath, true);
-            if ((result == null) || !result.exists() || !result.isFile()) result = getSidecar(absolutePath, false);
-            if ((result == null) || !result.exists() || !result.isFile()) result = null;
+            XmpFile resultLong = getExistingSidecarOrNull(absolutePath, true);
+            XmpFile resultShort = getExistingSidecarOrNull(absolutePath, false);
+
+            if (resultLong != null) {
+                result = resultLong;
+                result.setHasAlsoOtherFormat(resultShort != null);
+            } else {
+                result = resultShort;
+            }
         }
         return result;
     }
-	
+
+    public static XmpFile getExistingSidecarOrNull(String absolutePath, boolean longFormat) {
+        XmpFile result = getSidecar(absolutePath, longFormat);
+        if ((result == null) || !result.exists() || !result.isFile()) return null;
+        return result;
+    }
+
     /**
      * @return file if rename is not neccessary else File with new name
      */
@@ -111,62 +143,23 @@ public class FileProcessor {
         }
     }
 
-    /** called for every cath(Exception...) */
-    protected void onException(final Throwable e, Object... context) {
-        if (e != null) {
-            e.printStackTrace();
-        }
+    /** if not null: all logging goes through this */
+    public IFileCommandLogger getInternalLogger() {
+        return internalLogger;
     }
 
-    public void openLogfile() {
-        closeLogFile();
-        if (mLogFilePath != null) {
-            OutputStream stream = null;
-            try {
-                File logFile = new File(mLogFilePath);
-                if (osFileExists(logFile)) {
-                    // open existing in append mode
-                    long ageInHours = (new Date().getTime() - logFile.lastModified()) / (1000 * 60 * 60);
-                    stream = new FileOutputStream(logFile, true);
-                    mLogFile = new PrintWriter(stream, true);
-
-                    if (ageInHours > 15) {
-                        log();
-                        log("rem ", new Date());
-                    }
-                } else {
-                    // create new
-                    mLogFile = new PrintWriter(logFile, "UTF-8");
-                    log("rem " , new Date());
-                }
-            } catch (Throwable e) {
-                onException(e, "openLogfile", mLogFilePath);
-                if (stream != null) {
-                    try {
-                        stream.close();
-                    } catch (IOException e1) {
-                        onException(e1, "openLogfile-close", mLogFilePath);
-                    }
-                }
-            }
-        }
+    public void setInternalLogger(IFileCommandLogger internalLogger) {
+        this.internalLogger = internalLogger;
     }
 
-    public void closeLogFile() {
-        if (mLogFile != null) {
-            mLogFile.close();
-            mLogFile = null;
-        }
-    }
-
-    public FileProcessor log(Object... messages) {
-        if (mLogFile != null) {
-            for(Object message : messages) {
-                mLogFile.print(message);
-            }
-            mLogFile.println();
-            mLogFile.flush();
+    @Override
+    public IFileCommandLogger log(Object... messages) {
+        if ((internalLogger != null) && (internalLogger != this)) {
+            internalLogger.log(messages);
+        } else {
+            super.log(messages);
         }
         return this;
     }
+
 }

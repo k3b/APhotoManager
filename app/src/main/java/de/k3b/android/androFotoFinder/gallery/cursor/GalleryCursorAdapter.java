@@ -38,7 +38,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.DBUtils;
-import de.k3b.database.SelectedItems;
+import de.k3b.io.collections.SelectedItems;
 
 /**
  * CursorAdapter that queries MediaStore.Images.Media.EXTERNAL_CONTENT_URI

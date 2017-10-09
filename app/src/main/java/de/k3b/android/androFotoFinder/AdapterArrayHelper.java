@@ -26,8 +26,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.util.MediaScanner;
-import de.k3b.database.SelectedItems;
+import de.k3b.io.collections.SelectedItems;
 import de.k3b.io.FileUtils;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.media.MediaUtil;

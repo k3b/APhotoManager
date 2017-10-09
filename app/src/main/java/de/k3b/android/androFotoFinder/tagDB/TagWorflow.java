@@ -30,7 +30,7 @@ import java.util.List;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.util.AndroidFileCommands;
-import de.k3b.database.SelectedFiles;
+import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.FileCommands;
 import de.k3b.media.MediaUtil;
 import de.k3b.media.MediaXmpSegment;
@@ -102,7 +102,7 @@ public class TagWorflow extends TagProcessor {
 
         List<String> currentItemTags = tagWorflowItemFromDB.tags;
         try {
-            MetaWriterExifXml exif = MetaWriterExifXml.create (tagWorflowItemFromDB.path, "updateTags: load");
+            MetaWriterExifXml exif = MetaWriterExifXml.create (tagWorflowItemFromDB.path, null, false, "updateTags: load");
             List<String> tagsDbPlusFile = this.getUpdated(currentItemTags, exif.getTags(), null);
             if (tagsDbPlusFile != null) {
                 mustSave = true;

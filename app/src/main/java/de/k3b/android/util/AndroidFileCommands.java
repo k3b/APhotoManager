@@ -45,7 +45,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.transactionlog.TransactionLogSql;
 import de.k3b.database.QueryParameter;
-import de.k3b.database.SelectedFiles;
+import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
 import de.k3b.io.IDirectory;
@@ -75,7 +75,7 @@ public class AndroidFileCommands extends FileCommands {
     }
 
     public void closeAll() {
-        closeLogFile();
+        super.closeAll();
         if (mActiveAlert != null) {
             mActiveAlert.dismiss();
             mActiveAlert = null;

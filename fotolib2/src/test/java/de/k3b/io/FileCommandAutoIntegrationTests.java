@@ -32,19 +32,25 @@ import java.io.IOException;
 import de.k3b.FotoLibGlobal;
 import de.k3b.TestUtil;
 import de.k3b.media.ExifInterface;
-import de.k3b.media.MediaUtil;
+import de.k3b.media.IMetaApi;
+import de.k3b.media.MediaDTO;
 
 /**
  * check autoprocessing workflow (#93:)
- * 
+ *
  * Created by k3b on 23.09.2017.
  */
 
-public class FileCommandIntegrationTests {
+public class FileCommandAutoIntegrationTests {
     // Obtain a logger instance
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileCommandIntegrationTests.class);
-    private static final File OUTDIR = new File(TestUtil.OUTDIR_ROOT, "FileCommandIntegrationTests/out").getAbsoluteFile();
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileCommandAutoIntegrationTests.class);
+    public static final String TEST_CLASS_NAME = FileCommandAutoIntegrationTests.class.getSimpleName();
+    public static final Long[] FAKE_IDS = {1l};
+
+    private static final File OUTDIR = new File(TestUtil.OUTDIR_ROOT, TEST_CLASS_NAME + "/out").getAbsoluteFile();
     private static final File INJPG = new File(OUTDIR.getParentFile(), "in/myTestSource.jpg").getAbsoluteFile();
+
+    private static final IMetaApi addExif = new MediaDTO().setTitle("title added by " + TEST_CLASS_NAME);
 
     @BeforeClass
     public static void setUpClass() throws IOException {
@@ -58,27 +64,36 @@ public class FileCommandIntegrationTests {
     @Before
     public void setUp() throws IOException {
         FotoLibGlobal.appName = "JUnit";
-        FotoLibGlobal.appVersion = "FileCommandIntegrationTests";
+        FotoLibGlobal.appVersion = TEST_CLASS_NAME;
 
         ExifInterface.DEBUG = true;
 
     }
 
     @Test
-    public void shouldCopyWithRenameProcessor() {
+    public void shouldCopy() {
         FileCommands sut = new FileCommands();
         String outFileBaseName = "shouldCopyWithRenameProcessor";
         FileNameProcessor rename = new FileNameProcessor(null, outFileBaseName, null, OUTDIR);
-        sut.moveOrCopyFilesTo(false, rename, null, OUTDIR, new Long[]{1l}, INJPG);
+        sut.moveOrCopyFilesTo(false, rename, null, OUTDIR, FAKE_IDS, INJPG);
         assertFilesExist(true, outFileBaseName);
     }
 
     @Test
-    public void shouldCopyWithRenameProcessor_noRename() {
+    public void shouldCopyExif() {
+        FileCommands sut = new FileCommands();
+        String outFileBaseName = "shouldCopyWithRenameProcessor";
+        FileNameProcessor rename = new FileNameProcessor(null, outFileBaseName, null, OUTDIR);
+        sut.moveOrCopyFilesTo(false, rename, addExif, OUTDIR, FAKE_IDS, INJPG);
+        assertFilesExist(true, outFileBaseName);
+    }
+
+    @Test
+    public void shouldCopyNoRename() {
         FileCommands sut = new FileCommands();
         String outFileBaseName = "Test";
         FileNameProcessor rename = new FileNameProcessor(null, outFileBaseName, null, OUTDIR);
-        sut.moveOrCopyFilesTo(false, rename, null, OUTDIR, new Long[]{1l}, INJPG);
+        sut.moveOrCopyFilesTo(false, rename, null, OUTDIR, FAKE_IDS, INJPG);
         assertFilesExist(true, "myTestSource"); // do not rename
     }
 
@@ -89,6 +104,6 @@ public class FileCommandIntegrationTests {
     }
     private void assertFileExist(boolean expected, String outFileName) {
         File f = new File(OUTDIR, outFileName);
-        Assert.assertEquals(outFileName, expected, f.exists());
+        Assert.assertEquals(f.toString(), expected, f.exists());
     }
 }

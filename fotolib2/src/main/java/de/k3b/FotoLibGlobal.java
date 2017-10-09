@@ -49,9 +49,6 @@ public class FotoLibGlobal {
     // false while iptc write support is not implemented yet
     public static boolean itpcWriteSupport = false;
 
-    // false while auto apply exif (#93:) is not implemented yet
-    public static final boolean autoExifEnabled = false;
-
     // will be written into exif/xmp if not already set.
     // Overwritten by android Application.onCreate()
     public static String appName = null;

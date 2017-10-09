@@ -17,7 +17,7 @@
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
 
-package de.k3b.database;
+package de.k3b.io.collections;
 
 import java.util.Iterator;
 import java.util.Set;

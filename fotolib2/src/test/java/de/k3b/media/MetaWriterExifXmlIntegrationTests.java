@@ -59,7 +59,7 @@ public class MetaWriterExifXmlIntegrationTests {
         File out = new File(OUTDIR,"emptyWriteEmptyExifXmpCreate.jpg");
         TestUtil.saveTestResourceAs("NoExif.jpg", out);
 
-        MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(),"JUnit"
+        MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(), null, false, "JUnit"
                 , true, true, true); //exif, xmp, create
         MediaDTO empty = new MediaDTO();
         MediaUtil.copy(sut, empty, true, true);
@@ -87,7 +87,7 @@ public class MetaWriterExifXmlIntegrationTests {
         TestUtil.saveTestResourceAs("test-WitExtraData.jpg", out);
         TestUtil.saveTestResourceAs("test-WitExtraData.xmp", FileCommands.getSidecar(out.getAbsolutePath(), false));
 
-        MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(),"JUnit"
+        MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(), null, false, "JUnit"
                 , true, true, true); //exif, xmp, create
         MediaDTO empty = new MediaDTO();
         MediaUtil.copy(sut, empty, true, true);
@@ -112,7 +112,7 @@ public class MetaWriterExifXmlIntegrationTests {
         File out = new File(OUTDIR,"existingWriteValueExifXmpCreate.jpg");
         TestUtil.saveTestResourceAs("test-WitExtraData.jpg", out);
 
-        MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(),"JUnit"
+        MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(), null, false, "JUnit"
                 , true, true, true); //exif, xmp, create
         MediaDTO value = TestUtil.createTestMediaDTO(2);
         MediaUtil.copy(sut, value, true, true);
@@ -136,7 +136,7 @@ public class MetaWriterExifXmlIntegrationTests {
         File out = new File(OUTDIR,"emptyWriteValuesXmpCreate.jpg");
         TestUtil.saveTestResourceAs("NoExif.jpg", out);
 
-        MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(),"JUnit"
+        MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(), null, false, "JUnit"
                 , false, true, true); //exif, xmp, create
         MediaDTO values = TestUtil.createTestMediaDTO(2);
         MediaUtil.copy(sut, values, true, true);
@@ -157,7 +157,7 @@ public class MetaWriterExifXmlIntegrationTests {
         File out = new File(OUTDIR,"emptyWriteValuesExifOnly.jpg");
         TestUtil.saveTestResourceAs("NoExif.jpg", out);
 
-        MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(),"JUnit"
+        MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(), null, false, "JUnit"
                 , true, false, false); //exif, xmp, create
         MediaDTO values = TestUtil.createTestMediaDTO(2);
         MediaUtil.copy(sut, values, true, true);
@@ -173,7 +173,7 @@ public class MetaWriterExifXmlIntegrationTests {
     }
 
     private void assertEqual(File file, MediaDTO expectedExif, MediaDTO expectedXmp, MetaWriterExifXml oldSut) throws IOException {
-        MetaWriterExifXml sut = MetaWriterExifXml.create(file.getAbsolutePath(),"JUnit-check"
+        MetaWriterExifXml sut = MetaWriterExifXml.create(file.getAbsolutePath(), null, false, "JUnit-check"
                 , true, true, false); //exif, xmp, create
 
         if (oldSut != null) {

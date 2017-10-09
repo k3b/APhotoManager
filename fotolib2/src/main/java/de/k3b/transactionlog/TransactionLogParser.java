@@ -33,9 +33,9 @@ import de.k3b.media.MediaDTO;
  */
 
 public class TransactionLogParser {
-    private final Iterator<IMediaTransactionLog> sortedTransactions;
+    private final Iterator<IMediaTransactionLogEntry> sortedTransactions;
     private final BufferedWriter fileUpdateBatch;
-    private IMediaTransactionLog lastLog = null;
+    private IMediaTransactionLogEntry lastLog = null;
 
     public static class Status {
         public MediaDTO dto = new MediaDTO();
@@ -44,7 +44,7 @@ public class TransactionLogParser {
         private long lastId=-1;
         private String path;
 
-        public Status(IMediaTransactionLog log) {
+        public Status(IMediaTransactionLogEntry log) {
             lastId = log.getMediaID();
         }
 
@@ -73,14 +73,14 @@ public class TransactionLogParser {
         }
     }
 
-    public TransactionLogParser(Iterator<IMediaTransactionLog> sortedTransactions, BufferedWriter fileUpdateBatch) {
+    public TransactionLogParser(Iterator<IMediaTransactionLogEntry> sortedTransactions, BufferedWriter fileUpdateBatch) {
 
         this.sortedTransactions = sortedTransactions;
         this.fileUpdateBatch = fileUpdateBatch;
     }
 
-    protected IMediaTransactionLog getNextLog() {
-        IMediaTransactionLog result = this.lastLog;
+    protected IMediaTransactionLogEntry getNextLog() {
+        IMediaTransactionLogEntry result = this.lastLog;
         this.lastLog = null;
         if((result == null) && sortedTransactions.hasNext()) {
             result = sortedTransactions.next();
@@ -88,7 +88,7 @@ public class TransactionLogParser {
         return result;
     }
     public Status getNext()  throws IOException {
-        IMediaTransactionLog log = getNextLog();
+        IMediaTransactionLogEntry log = getNextLog();
 
         if (log != null) {
             Status status = createMedia(log);
@@ -107,7 +107,7 @@ public class TransactionLogParser {
         return null;
     }
 
-    private Status createMedia(IMediaTransactionLog log) throws IOException {
+    private Status createMedia(IMediaTransactionLogEntry log) throws IOException {
         if (log != null) {
             Status dto = new Status(log);
             return process(dto, log);
@@ -116,7 +116,7 @@ public class TransactionLogParser {
     }
 
     /** @return null if status processing is completed */
-    private Status process(Status status, IMediaTransactionLog log) throws IOException {
+    private Status process(Status status, IMediaTransactionLogEntry log) throws IOException {
         if (log.getMediaID() != status.lastId) return null;
 
         MediaTransactionLogEntryType command = log.getCommand();

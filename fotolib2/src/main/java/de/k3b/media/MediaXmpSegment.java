@@ -50,6 +50,10 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
     /** the full path of the image where this xmp-file belongs to */
     private String path = null;
 
+    /** true: file.jpg.xmp; false: file.xmp; null: unknown */
+    private Boolean longFormat = false;
+    private boolean hasAlsoOtherFormat;
+
     /** the full path of the image where this xmp-file belongs to */
     @Override
     public String getPath() {
@@ -205,14 +209,16 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
 
     public static MediaXmpSegment loadXmpSidecarContentOrNull(String absoluteJpgPath, String _dbg_context) {
         MediaXmpSegment xmpContent = null;
-        File xmpFile = FileCommands.getExistingSidecarOrNull(absoluteJpgPath);
+        FileCommands.XmpFile xmpFile = FileCommands.getExistingSidecarOrNull(absoluteJpgPath);
         String dbg_context = _dbg_context + " loadXmpSidecarContent(" + xmpFile + "): ";
         if ((xmpFile != null) && xmpFile.isFile() && xmpFile.exists() && xmpFile.canRead()) {
             xmpContent = new MediaXmpSegment();
             try {
                 xmpContent.load(xmpFile, dbg_context);
+                xmpContent.setLongFormat(xmpFile.isLongFormat());
+                xmpContent.setHasAlsoOtherFormat(xmpFile.isHasAlsoOtherFormat());
             } catch (FileNotFoundException e) {
-                logger.error(dbg_context + "failed " + e.getMessage(),e);
+                logger.error(dbg_context + "failed " + e.getMessage(), e);
                 xmpContent = null;
             }
 
@@ -229,4 +235,21 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
         return MediaUtil.toString(this);
     }
 
+    /** true: file.jpg.xmp; false: file.xmp */
+    public void setLongFormat(Boolean longFormat) {
+        this.longFormat = longFormat;
+    }
+
+    /** true: file.jpg.xmp; false: file.xmp */
+    public Boolean isLongFormat() {
+        return longFormat;
+    }
+
+    public void setHasAlsoOtherFormat(boolean hasAlsoOtherFormat) {
+        this.hasAlsoOtherFormat = hasAlsoOtherFormat;
+    }
+
+    public boolean isHasAlsoOtherFormat() {
+        return hasAlsoOtherFormat;
+    }
 }

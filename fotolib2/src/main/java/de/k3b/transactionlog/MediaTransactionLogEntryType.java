@@ -7,9 +7,11 @@ import java.util.HashMap;
  */
 
 public enum MediaTransactionLogEntryType {
+// file operations affects path
     DELETE("F-", "apmDelete"),
     MOVE("Fm", "apmMove"),
     COPY("F+", "apmCopy"),
+// IMetaApi
     GPS("g", "apmGps"),
     TAGSADD("T+", "apmTagsAdd"),
     TAGSREMOVE("T-", "apmTagsRemove"),
@@ -19,6 +21,7 @@ public enum MediaTransactionLogEntryType {
     RATING("r", "apmRating"),
     DATE("dm", "apmDateTimeOriginal");
 
+// implementaion
     private final String id;
     private final String batCommand;
 

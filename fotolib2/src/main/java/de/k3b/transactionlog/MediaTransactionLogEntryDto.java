@@ -30,11 +30,11 @@ import de.k3b.io.DateUtil;
  * Created by k3b on 21.02.2017.
  */
 
-public class MediaTransactionLogDto implements IMediaTransactionLog {
+public class MediaTransactionLogEntryDto implements IMediaTransactionLogEntry {
 
-    public static final Comparator<IMediaTransactionLog> COMPARATOR = new Comparator<IMediaTransactionLog>() {
+    public static final Comparator<IMediaTransactionLogEntry> COMPARATOR = new Comparator<IMediaTransactionLogEntry>() {
         @Override
-        public int compare(IMediaTransactionLog lhs, IMediaTransactionLog rhs) {
+        public int compare(IMediaTransactionLogEntry lhs, IMediaTransactionLogEntry rhs) {
             long diff = lhs.getMediaID() - rhs.getMediaID();
             if (diff == 0) {
                 diff = lhs.getModificationDate() - rhs.getModificationDate();
@@ -77,9 +77,9 @@ public class MediaTransactionLogDto implements IMediaTransactionLog {
      */
     private String commandData;
 
-    public MediaTransactionLogDto(){}
+    public MediaTransactionLogEntryDto(){}
 
-    public MediaTransactionLogDto(long currentMediaID, String fileFullPath, long modificationDate, MediaTransactionLogEntryType mediaTransactionLogEntryType, String commandData) {
+    public MediaTransactionLogEntryDto(long currentMediaID, String fileFullPath, long modificationDate, MediaTransactionLogEntryType mediaTransactionLogEntryType, String commandData) {
         setMediaID(currentMediaID);
         setFullPath(fileFullPath);
         setModificationDate(modificationDate);
@@ -87,7 +87,7 @@ public class MediaTransactionLogDto implements IMediaTransactionLog {
         setCommandData(commandData);
     }
 
-    public MediaTransactionLogDto get(IMediaTransactionLog src) {
+    public MediaTransactionLogEntryDto get(IMediaTransactionLogEntry src) {
         this.setCommand(src.getCommand());
         this.setCommandData(src.getCommandData());
         this.setFullPath(src.getFullPath());
@@ -106,7 +106,7 @@ public class MediaTransactionLogDto implements IMediaTransactionLog {
     }
 
 
-    public MediaTransactionLogDto setMediaID(long mediaID) {
+    public MediaTransactionLogEntryDto setMediaID(long mediaID) {
         this.mediaID = mediaID;
         return this;
     }
@@ -121,7 +121,7 @@ public class MediaTransactionLogDto implements IMediaTransactionLog {
     }
 
 
-    public MediaTransactionLogDto setFullPath(String fullPath) {
+    public MediaTransactionLogEntryDto setFullPath(String fullPath) {
         this.fullPath = fullPath;
         return this;
     }
@@ -136,7 +136,7 @@ public class MediaTransactionLogDto implements IMediaTransactionLog {
         return modificationDate;
     }
 
-    public MediaTransactionLogDto setModificationDate(long modificationDate) {
+    public MediaTransactionLogEntryDto setModificationDate(long modificationDate) {
         this.modificationDate = modificationDate;
         return this;
     }
@@ -150,7 +150,7 @@ public class MediaTransactionLogDto implements IMediaTransactionLog {
         return command;
     }
 
-    public MediaTransactionLogDto setCommand(MediaTransactionLogEntryType command) {
+    public MediaTransactionLogEntryDto setCommand(MediaTransactionLogEntryType command) {
         this.command = command;
         return this;
     }
@@ -163,7 +163,7 @@ public class MediaTransactionLogDto implements IMediaTransactionLog {
         return commandData;
     }
 
-    public MediaTransactionLogDto setCommandData(String commandData) {
+    public MediaTransactionLogEntryDto setCommandData(String commandData) {
         this.commandData = commandData;
         return this;
     }
@@ -173,7 +173,7 @@ public class MediaTransactionLogDto implements IMediaTransactionLog {
         return toString(this);
     }
 
-    public static String toString(IMediaTransactionLog log) {
+    public static String toString(IMediaTransactionLogEntry log) {
         if (log != null) {
             StringBuilder sb = new StringBuilder();
             sb

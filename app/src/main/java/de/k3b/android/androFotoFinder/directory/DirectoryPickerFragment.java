@@ -60,7 +60,7 @@ import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
-import de.k3b.database.SelectedFiles;
+import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryNavigator;
 import de.k3b.io.FileUtils;
@@ -429,7 +429,9 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             int msgId;
             if (newChild.osMkDirs()) {
                 // apmMove.cmd and apmCopy.cmd create dir on demand
-                AndroidFileCommands.createFileCommand(getActivity()).log("rem mkdir \"", newPathAbsolute, "\"").closeLogFile();
+                AndroidFileCommands logger = AndroidFileCommands.createFileCommand(getActivity());
+                logger.log("rem mkdir \"", newPathAbsolute, "\"");
+                logger.closeLogFile();
                 msgId = R.string.mk_success_format;
                 reloadTreeViewIfAvailable();
                 onParentPathBarButtonClick(newChild);

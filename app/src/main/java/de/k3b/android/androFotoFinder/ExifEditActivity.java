@@ -62,7 +62,7 @@ import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.AsyncTaskWithProgressDialog;
 import de.k3b.android.widget.HistoryEditText;
-import de.k3b.database.SelectedFiles;
+import de.k3b.io.collections.SelectedFiles;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
@@ -742,7 +742,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
             // modify jpg files and return
             SelectedFiles items = getSelectedFiles("onOk ", getIntent(), true);
             long now = new Date().getTime();
-            TransactionLogger logger = new TransactionLogger(ctx, now, null);
+            AndroidTransactionLogger logger = new AndroidTransactionLogger(ctx, now);
 
             if (!SYNC_UPDATE_EXIF) {
                 this.exifUpdate = new UpdateTask(ctx, logger, mInitialData, mCurrentData, now);
@@ -764,10 +764,10 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
     /** update exif changes in asynch task mit chow dialog */
     private static class UpdateTask extends AsyncTaskWithProgressDialog<SelectedFiles> {
         private MediaDiffCopy mediaDiffCopy;
-        private TransactionLogger logger;
+        private AndroidTransactionLogger logger;
         private final long now;
 
-        UpdateTask(Activity ctx, TransactionLogger logger, MediaAsString unmodifiedData, MediaAsString modifiedData, long now) {
+        UpdateTask(Activity ctx, AndroidTransactionLogger logger, MediaAsString unmodifiedData, MediaAsString modifiedData, long now) {
             super(ctx, R.string.exif_menu_title);
             this.mediaDiffCopy = new MediaDiffCopy();
             this.logger = logger;
@@ -833,7 +833,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
 
 
     private static void applyChangesSynchrounus(Activity ctx, SelectedFiles items,
-                           TransactionLogger logger,
+                           AndroidTransactionLogger logger,
                            MediaAsString unmodifiedData, MediaAsString modifiedData, long now) {
         MediaDiffCopy mediaDiffCopy = new MediaDiffCopy().setDiff(unmodifiedData, modifiedData);
 
