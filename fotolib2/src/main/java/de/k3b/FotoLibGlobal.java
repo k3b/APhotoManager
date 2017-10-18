@@ -57,4 +57,6 @@ public class FotoLibGlobal {
     /** true: update jpg-exif does not change file.lastModifiedDate */
     public static boolean preserveJpgFileModificationDate = true;
 
+    /** progressbar advances after processing x photos */
+    public static final int itemsPerProgress = 10;
 }

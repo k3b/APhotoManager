@@ -75,7 +75,7 @@ public class PhotoWorkFlowDto {
     }
 
     private File getApmFile() {
-        return new File(this.outDir, FileNameProcessor.APM_FILE_NAME);
+        return new File(this.outDir, RuleFileNameProcessor.APM_FILE_NAME);
     }
 
     public void save() throws IOException {
@@ -107,32 +107,32 @@ public class PhotoWorkFlowDto {
         return this.properties;
     }
 
-    /** DateFormat part for {@link FileNameProcessor} */
+    /** DateFormat part for {@link RuleFileNameProcessor} */
     public String getDateFormat() {
         return properties.getProperty(KEY_DATE_FORMAT);
     }
 
-    /** DateFormat part for {@link FileNameProcessor} */
+    /** DateFormat part for {@link RuleFileNameProcessor} */
     public void setDateFormat(String dateFormat) {
         properties.setProperty(KEY_DATE_FORMAT,dateFormat);
     }
 
-    /**  fixed-Name part for {@link FileNameProcessor} */
+    /**  fixed-Name part for {@link RuleFileNameProcessor} */
     public String getName() {
         return properties.getProperty(KEY_NAME);
     }
 
-    /**  fixed-Name part for {@link FileNameProcessor} */
+    /**  fixed-Name part for {@link RuleFileNameProcessor} */
     public void setName(String Name) {
         properties.setProperty(KEY_NAME,Name);
     }
 
-    /**  NumberFormat part for {@link FileNameProcessor} */
+    /**  NumberFormat part for {@link RuleFileNameProcessor} */
     public String getNumberFormat() {
         return properties.getProperty(KEY_NUMBER_FORMAT);
     }
 
-    /**  NumberFormat part for {@link FileNameProcessor} */
+    /**  NumberFormat part for {@link RuleFileNameProcessor} */
     public void setNumberFormat(String NumberFormat) {
         properties.setProperty(KEY_NUMBER_FORMAT,NumberFormat);
     }
@@ -145,7 +145,7 @@ public class PhotoWorkFlowDto {
     }
 
     public IFileNameProcessor createFileNameProcessor() {
-        return new FileNameProcessor(getDateFormat(), getName(), getNumberFormat(), getOutDir());
+        return new RuleFileNameProcessor(getDateFormat(), getName(), getNumberFormat(), getOutDir());
     }
 
     public IMetaApi getMediaDefaults() {

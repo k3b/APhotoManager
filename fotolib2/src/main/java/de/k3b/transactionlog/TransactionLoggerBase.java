@@ -28,7 +28,6 @@ import java.util.List;
 
 import de.k3b.io.DateUtil;
 import de.k3b.io.DirectoryFormatter;
-import de.k3b.io.FileCommands;
 import de.k3b.io.FileProcessor;
 import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaUtil;
@@ -96,8 +95,9 @@ public class TransactionLoggerBase implements Closeable {
         addChanges(move ? MediaTransactionLogEntryType.MOVE : MediaTransactionLogEntryType.COPY,
                 newFullPath, true);
     }
-    /** todo implement android specific logging here */
+
+    /** android specific logging is implemented in AndroidTransactionLogger in Override */
     protected void addChanges(MediaTransactionLogEntryType command, String parameter, boolean quoteParam) {
-        execLog.log(command.getCommand(path,parameter, quoteParam));
+        execLog.log(command.getCommand(path,parameter));
     }
 }

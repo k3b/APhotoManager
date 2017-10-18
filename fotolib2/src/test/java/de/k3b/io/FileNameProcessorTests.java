@@ -37,27 +37,27 @@ public class FileNameProcessorTests {
     @Test
     public void shouldExpandDateTimeInfo() {
         Date date = DateUtil.parseIsoDate("20171224");
-        FileNameProcessor sut = new FileNameProcessor("yyMM", "Hello", null, X_FAKE_OUTPUT_DIR);
+        RuleFileNameProcessor sut = new RuleFileNameProcessor("yyMM", "Hello", null, X_FAKE_OUTPUT_DIR);
         Assert.assertEquals("1712Hello.jpg", sut.generateFileName(date, 0,".jpg"));
     }
 
     @Test
     public void shouldAddNumber() {
-        FileNameProcessor sut = new FileNameProcessor(null, "Hello", null, X_FAKE_OUTPUT_DIR);
+        RuleFileNameProcessor sut = new RuleFileNameProcessor(null, "Hello", null, X_FAKE_OUTPUT_DIR);
         Assert.assertEquals("Hello1.jpg", sut.generateFileName((Date) null, 1,".jpg"));
         Assert.assertEquals("Hello.jpg", sut.generateFileName((Date) null, 0,".jpg"));
     }
 
     @Test
     public void shouldAddNumberWithFormat() {
-        FileNameProcessor sut = new FileNameProcessor(null, "Hello", "000", X_FAKE_OUTPUT_DIR);
+        RuleFileNameProcessor sut = new RuleFileNameProcessor(null, "Hello", "000", X_FAKE_OUTPUT_DIR);
         Assert.assertEquals("Hello001.jpg", sut.generateFileName((Date) null, 1,".jpg"));
         Assert.assertEquals("Hello1001.jpg", sut.generateFileName((Date) null, 1001,".jpg"));
     }
 
     @Test
     public void shouldHandleMustRename() {
-        FileNameProcessor sut = new FileNameProcessor(null, "Hello", "000", X_FAKE_OUTPUT_DIR);
+        RuleFileNameProcessor sut = new RuleFileNameProcessor(null, "Hello", "000", X_FAKE_OUTPUT_DIR);
         Assert.assertEquals(false, sut.mustRename("171224Hello123.jpg"));
         Assert.assertEquals(true, sut.mustRename("171224Something123.jpg"));
     }
@@ -65,14 +65,14 @@ public class FileNameProcessorTests {
 
     @Test
     public void shouldGetNextFreeFileWithoutRename() {
-        IFileNameProcessor sut = spy(new FileNameProcessor(null, "Hello", null, X_FAKE_OUTPUT_DIR));
+        IFileNameProcessor sut = spy(new RuleFileNameProcessor(null, "Hello", null, X_FAKE_OUTPUT_DIR));
         File outFile = sut.getNextFile(new File(X_FAKE_INPUT_DIR, "171224Hello1234.jpg"),null,0);
         Assert.assertEquals("171224Hello1234.jpg", outFile.getName());
     }
 
     @Test
     public void shouldGetNextFreeFile() {
-        FileNameProcessor sut = spy(new FileNameProcessor(null, "Hello", null, X_FAKE_OUTPUT_DIR));
+        RuleFileNameProcessor sut = spy(new RuleFileNameProcessor(null, "Hello", null, X_FAKE_OUTPUT_DIR));
         registerFakeFiles(sut, "Hello.jpg", "Hello1.jpg", "Hello2.jpg.xmp", "Hello3.xmp");
         File outFile = sut.getNextFile(new File(X_FAKE_INPUT_DIR, "1234.jpg"),null,0);
         Assert.assertEquals("Hello4.jpg", outFile.getName());
@@ -80,7 +80,7 @@ public class FileNameProcessorTests {
 
     @Test
     public void shouldGetNextFreeFileEmpty() {
-        FileNameProcessor sut = spy(new FileNameProcessor(null, null, null, X_FAKE_OUTPUT_DIR));
+        RuleFileNameProcessor sut = spy(new RuleFileNameProcessor(null, null, null, X_FAKE_OUTPUT_DIR));
         registerFakeFiles(sut, "Hello.jpg");
         File outFile = sut.getNextFile(new File(X_FAKE_INPUT_DIR, "originalName.jpg"),null,0);
         Assert.assertEquals("originalName.jpg", outFile.getName());
@@ -88,7 +88,7 @@ public class FileNameProcessorTests {
 
     @Test
     public void shouldGetNextFreeFileEmptyExisting() {
-        FileNameProcessor sut = spy(new FileNameProcessor(null, null, null, X_FAKE_OUTPUT_DIR));
+        RuleFileNameProcessor sut = spy(new RuleFileNameProcessor(null, null, null, X_FAKE_OUTPUT_DIR));
         registerFakeFiles(sut, "originalName.jpg");
         File outFile = sut.getNextFile(new File(X_FAKE_INPUT_DIR, "originalName.jpg"),null,0);
         Assert.assertEquals("originalName(1).jpg", outFile.getName());
@@ -96,7 +96,7 @@ public class FileNameProcessorTests {
 
     @Test
     public void shouldGetNextFreeFileSequenceWithDifferentDates() {
-        FileNameProcessor sut = spy(new FileNameProcessor("yy", "Hello", null, X_FAKE_OUTPUT_DIR));
+        RuleFileNameProcessor sut = spy(new RuleFileNameProcessor("yy", "Hello", null, X_FAKE_OUTPUT_DIR));
         registerFakeFiles(sut, "16Hello.jpg", "16Hello1.jpg", "17Hello.jpg");
 
         File someInputFile = new File(X_FAKE_INPUT_DIR, "1234.jpg");
@@ -122,7 +122,7 @@ public class FileNameProcessorTests {
     }
 
     /** these files exist in source-dir and in dest-dir */
-    private static void registerFakeFiles(FileNameProcessor sut, String... filenames) {
+    private static void registerFakeFiles(RuleFileNameProcessor sut, String... filenames) {
         if (filenames.length == 0) {
             doReturn(false).when(sut).osFileExists(any(File.class));
         } else {

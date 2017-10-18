@@ -28,13 +28,19 @@ import de.k3b.io.FileProcessor;
 import de.k3b.io.FileUtils;
 
 /**
- * xmp/exif split handling.
- * Depending on the global settings write MetaApi data to exif or xmp or both for IMetaApi.
+ * Represents content of exactly one jpg-exif-file with corresponding xmp-file that can be modified
+ * via {@link IMetaApi} and {@link #save(String)}.
+ *
+ * Depending on the global settings handles updating/creating jpg-exif and/or xmp-file.
+ * Also handles jpg/xmp file move/copy.
+ * Transactionlog and database update is handled by caller
+ *
+ * Android free implementation.
  *
  * Created by k3b on 21.04.2017.
  */
 
-public class MetaWriterExifXml extends MetaApiWrapper {
+public class MetaWriterExifXml extends MetaApiWrapper  implements IMetaApi {
     private ExifInterfaceEx exif;   // not null if exif changes are written to jpg file
     private MediaXmpSegment xmp;    // not null if exif changes are written to xmp sidecar file.
     private String absoluteJpgInPath; // where changes are read from.

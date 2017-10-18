@@ -16,22 +16,35 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
-package de.k3b.io;
+
+package de.k3b.io.collections;
 
 import java.io.File;
 import java.util.Date;
 
+import de.k3b.io.FileProcessor;
+import de.k3b.io.IFileNameProcessor;
+
 /**
- * #93: rule based file renaming for same target directory.
- *
- * Created by k3b on 22.09.2017.
+ * Created by k3b on 17.10.2017.
  */
-public interface IFileNameProcessor {
+
+public class DestDirFileNameProcessor  extends FileProcessor implements IFileNameProcessor {
+    private final File destDirFolder;
+    public DestDirFileNameProcessor(File destDirFolder) {
+        this.destDirFolder = destDirFolder;
+    }
+
     /**
      * Calculate next free file name for sourceFile. Sourcefiles should be ordered asc by sourceFileDate
      *
-     * @param firstFileInstanceNumber  number where numbering starts with. -1 : auto
-     * @return next absoulte renamed file.
+     * @param sourceFile
+     * @param sourceFileDate
+     * @param firstFileInstanceNumber number where numbering starts with. -1 : auto  @return next absoulte renamed file.
      */
-    File getNextFile(File sourceFile, Date sourceFileDate, int firstFileInstanceNumber);
+    @Override
+    public File getNextFile(File sourceFile, Date sourceFileDate, int firstFileInstanceNumber) {
+        File dest = renameDuplicate(new File(this.destDirFolder, sourceFile.getName()));
+        return dest;
+    }
 }

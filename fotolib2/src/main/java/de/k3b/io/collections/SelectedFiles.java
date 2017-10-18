@@ -20,7 +20,6 @@
 package de.k3b.io.collections;
 
 import java.io.File;
-import java.util.Iterator;
 
 /**
  * Unmodifyable list of file names and optional their IDs.
@@ -159,47 +158,4 @@ public class SelectedFiles  {
         return mIds;
     }
 
-    public Iterator<IMediaFileSource> iter() {
-        return new SelectedFilesIterable();
-    }
-    private class SelectedFilesIterable implements Iterator<IMediaFileSource>, IMediaFileSource {
-        private int nextOffset = 0;
-
-        // Iterator api
-        @Override
-        public boolean hasNext() {
-            return nextOffset < size();
-        }
-
-        // Iterator api
-        @Override
-        public IMediaFileSource next() {
-            nextOffset++;
-            return this;
-        }
-
-        // Iterator api
-        @Override
-        public void remove() {
-            throw new IllegalArgumentException("SelectedFilesIterable.remove not implemented");
-        }
-
-        /**
-         * Databse key of jpg. 0 == unknown
-         */
-        @Override
-        public long getID() {
-            if ((nextOffset < 0) || (nextOffset > mIds.length)) return 0;
-            return mIds[nextOffset - 1];
-        }
-
-        /**
-         * Normalized absolute path to jpg file
-         */
-        @Override
-        public String getFullJpgSourcePath() {
-            if ((nextOffset < 0) || (nextOffset > mFileNames.length)) return null;
-            return mFileNames[nextOffset - 1];
-        }
-    }
 }

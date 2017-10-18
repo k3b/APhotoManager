@@ -31,7 +31,7 @@ import java.util.Date;
  * Created by k3b on 03.08.2017.
  */
 
-public class FileNameProcessor extends FileProcessor implements IFileNameProcessor {
+public class RuleFileNameProcessor extends FileProcessor implements IFileNameProcessor {
     public static final String APM_FILE_NAME = ".apm";
     /** i.e "yyMM" for year and month each with 2 digits */
     private final SimpleDateFormat mDateFormatter = new SimpleDateFormat();
@@ -50,7 +50,7 @@ public class FileNameProcessor extends FileProcessor implements IFileNameProcess
      * filename = outDir+dateFormat+name+numberFormat+fileExtension.
      * @param outDir
      */
-    public FileNameProcessor(File outDir) {
+    public RuleFileNameProcessor(File outDir) {
         this.mOutDir = outDir;
     }
     /**
@@ -63,7 +63,7 @@ public class FileNameProcessor extends FileProcessor implements IFileNameProcess
  *                      Example "000" always at least 3 digits
      * @param outDir
      */
-    public FileNameProcessor(String dateFormat, String name, String numberFormat, File outDir) {
+    public RuleFileNameProcessor(String dateFormat, String name, String numberFormat, File outDir) {
         this(outDir);
         set(dateFormat, name, numberFormat);
     }

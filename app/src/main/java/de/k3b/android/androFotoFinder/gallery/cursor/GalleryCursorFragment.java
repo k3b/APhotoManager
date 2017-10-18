@@ -275,13 +275,13 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     protected class LocalFileCommands extends AndroidFileCommands44 {
 
         @Override
-        protected void onPostProcess(String what, String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
+        protected void onPostProcess(String what, int opCode, SelectedFiles selectedFiles, int modifyCount, int itemCount, String[] oldPathNames, String[] newPathNames) {
             if (Global.clearSelectionAfterCommand || (opCode == OP_DELETE) || (opCode == OP_MOVE)) {
                 mShowSelectedOnly = true;
                 multiSelectionCancel();
             }
 
-            super.onPostProcess(what, oldPathNames, newPathNames, modifyCount, itemCount, opCode);
+            super.onPostProcess(what, opCode, selectedFiles, modifyCount, itemCount, oldPathNames, newPathNames);
 
             if ((mAdapter.isInArrayMode()) && ((opCode == OP_RENAME) || (opCode == OP_MOVE) || (opCode == OP_DELETE))) {
                 mAdapter.refreshLocal();
@@ -891,7 +891,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     public static class MoveOrCopyDestDirPicker extends DirectoryPickerFragment {
         protected static AndroidFileCommands sFileCommands = null;
 
-        public static MoveOrCopyDestDirPicker newInstance(boolean move, SelectedFiles srcFotos) {
+        public static MoveOrCopyDestDirPicker newInstance(boolean move, final SelectedFiles srcFotos) {
             MoveOrCopyDestDirPicker f = new MoveOrCopyDestDirPicker();
 
             // Supply index input as an argument.
@@ -926,7 +926,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         @Override
         protected void onDirectoryPick(IDirectory selection) {
             // super.onDirectoryPick(selection);
-            sFileCommands.onMoveOrCopyDirectoryPick(getMove(), selection, getSrcFotos());
+            sFileCommands.onMoveOrCopyDirectoryPick(getMove(), getSrcFotos(), selection);
             dismiss();
         }
     };

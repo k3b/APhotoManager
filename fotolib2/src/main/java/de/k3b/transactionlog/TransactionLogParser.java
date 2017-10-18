@@ -29,7 +29,7 @@ import de.k3b.media.MediaDTO;
 /**
  * Analyses TransactionLog to generate move/copy/delete script and update-dtos.
  *
- * Created by EVE on 21.02.2017.
+ * Created by k3b on 21.02.2017.
  */
 
 public class TransactionLogParser {

@@ -18,8 +18,8 @@ what can be done
 			DATE
 
 
-AndrodTransactionlog (+=database-log)
-	TransactionLog (per MediaOperations)
+depricated AndroidTransactionLogger (+=database-log)
+	TransactionLog (per MediaOperations) todo rename MediaChangeTransactionLogger
 		FileLogging => *.log (txt file)
 AndroidMediaOperations		
 	MediaOperations 
@@ -33,7 +33,7 @@ gui
 			=> MediaFileIterator implements Iterator<IMediaFile>
 				=> Iterator<IMediaFileSource> iter()
 				=> IPathProcessor(convert source path to dest path)
-!!!todo				FileNameProcessor extends FileProcessor implements IFileNameProcessor
+				FileNameProcessor extends FileProcessor implements IFileNameProcessor
 		IMetaApi (meta data changes/content for one or more photos)
 			MetaWriterExifXml ... implements IMetaApi (combine ExifInterfaceEx and MediaXmpSegment)
 				ExifInterfaceEx extends ExifInterface implements IMetaApi

@@ -19,10 +19,15 @@
 
 package de.k3b.io;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.io.File;
+
+import de.k3b.io.collections.SelectedFiles;
+import de.k3b.transactionlog.MediaTransactionLogEntryType;
 
 import static org.mockito.Mockito.*;
 /**
@@ -33,55 +38,73 @@ public class FileCommandTests {
     private static final File X_FAKE_INPUT_DIR = new File("/fakeInputDir").getAbsoluteFile();
     private FileCommands sut;
 
+    MediaTransactionLogEntryType lastMediaTransactionLogEntryType;
+    class FileCommandsWithFakeTransactionLog extends FileCommands {
+        @Override public void addTransactionLog(
+                long currentMediaID, String fileFullPath, long modificationDate,
+                MediaTransactionLogEntryType mediaTransactionLogEntryType, String commandData) {
+            lastMediaTransactionLogEntryType = mediaTransactionLogEntryType;
+        }
+    }
     @Before
     public void setUp() {
-        sut = spy(new FileCommands());
+        sut = spy(new FileCommandsWithFakeTransactionLog());
         doReturn(true).when(sut).osCreateDirIfNeccessary(any(File.class));
         doReturn(true).when(sut).osFileMoveOrCopy(anyBoolean(), any(File.class), any(File.class));
         doReturn(true).when(sut).osDeleteFile(any(File.class));
+        lastMediaTransactionLogEntryType = null;
     }
 
     @Test
     public void shouldCopy() {
         registerFakeFiles(sut);
-        sut.moveOrCopyFilesTo(false, null, null, X_FAKE_OUTPUT_DIR, createIds(1), createTestFiles(X_FAKE_OUTPUT_DIR, "a.jpg"));
+        SelectedFiles selectedFiles = createTestSelectedFiles(X_FAKE_OUTPUT_DIR, "a.jpg");
 
+        sut.moveOrCopyFilesTo(false, selectedFiles, X_FAKE_OUTPUT_DIR);
+
+        Assert.assertEquals("MediaTransactionLogEntryType", MediaTransactionLogEntryType.COPY, lastMediaTransactionLogEntryType);
         verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a.jpg"), createTestFile(X_FAKE_OUTPUT_DIR, "a.jpg"));
-
     }
 
     @Test
     public void shouldCopyWitRenameExistingMultiple() {
         registerFakeFiles(sut, "a.jpg", "b.png", "b(1).png");
-        sut.moveOrCopyFilesTo(false, null, null, X_FAKE_OUTPUT_DIR, createIds(2), createTestFiles(X_FAKE_INPUT_DIR, "a.jpg", "b.png"));
+        SelectedFiles selectedFiles = createTestSelectedFiles(X_FAKE_INPUT_DIR, "a.jpg", "b.png");
 
+        sut.moveOrCopyFilesTo(false, selectedFiles, X_FAKE_OUTPUT_DIR);
+
+        Assert.assertEquals("MediaTransactionLogEntryType", MediaTransactionLogEntryType.COPY, lastMediaTransactionLogEntryType);
         verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(1).jpg"), createTestFile(X_FAKE_INPUT_DIR, "a.jpg"));
         verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "b(2).png"), createTestFile(X_FAKE_INPUT_DIR, "b.png"));
     }
 
     @Test
-    public void shouldCopyRenameExistingWithXmp() {
-        registerFakeFiles(sut, "a.jpg", "a.xmp", "a(1).xmp", "a(2).jpg"); // a(3) is next possible
+    public void shouldMoveExistingWithXmp() {
+        registerFakeFiles(sut, "a.jpg", "a.xmp", "a.jpg.xmp"); // a(3) is next possible
 
-        sut.moveOrCopyFilesTo(false, null, null, X_FAKE_OUTPUT_DIR, createIds(1), createTestFiles(X_FAKE_INPUT_DIR, "a.jpg"));
+        File destFile = new File(X_FAKE_OUTPUT_DIR, "a.jpg");
 
-        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(3).jpg"), createTestFile(X_FAKE_INPUT_DIR, "a.jpg"));
-        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(3).xmp"), createTestFile(X_FAKE_INPUT_DIR, "a.xmp"));
-    }
+        // do not rename duplicate
+        Mockito.doReturn(destFile).when(sut).renameDuplicate(destFile);
 
-    private Long[] createIds(int count) {
-        Long[] result = new Long[count];
-        for (int i = 0; i < count; i++) {
-            result[i]= Long.valueOf(i+1);
-        }
-        return result;
+        SelectedFiles selectedFiles = createTestSelectedFiles(X_FAKE_INPUT_DIR, "a.jpg");
+
+        sut.moveOrCopyFilesTo(true, selectedFiles, X_FAKE_OUTPUT_DIR);
+
+        Assert.assertEquals("MediaTransactionLogEntryType", MediaTransactionLogEntryType.MOVE, lastMediaTransactionLogEntryType);
+        verify(sut).osFileMoveOrCopy(true, new File(X_FAKE_OUTPUT_DIR, "a.jpg"), createTestFile(X_FAKE_INPUT_DIR, "a.jpg"));
+        verify(sut).osFileMoveOrCopy(true, new File(X_FAKE_OUTPUT_DIR, "a.xmp"), createTestFile(X_FAKE_INPUT_DIR, "a.xmp"));
+        verify(sut).osFileMoveOrCopy(true, new File(X_FAKE_OUTPUT_DIR, "a.jpg.xmp"), createTestFile(X_FAKE_INPUT_DIR, "a.jpg.xmp"));
     }
 
     @Test
     public void shouldDeleteExistingWithXmp() {
         registerFakeFiles(sut, "a.jpg", "a.xmp", "a.jpg.xmp");
-        sut.deleteFiles(createTestFile(X_FAKE_OUTPUT_DIR, "a.jpg").getAbsolutePath());
+        SelectedFiles selectedFiles = createTestSelectedFiles(X_FAKE_OUTPUT_DIR, "a.jpg");
 
+        sut.deleteFiles(selectedFiles);
+
+        Assert.assertEquals("MediaTransactionLogEntryType", MediaTransactionLogEntryType.DELETE, lastMediaTransactionLogEntryType);
         verify(sut).osDeleteFile(createTestFile(X_FAKE_OUTPUT_DIR, "a.jpg"));
         verify(sut).osDeleteFile(createTestFile(X_FAKE_OUTPUT_DIR, "a.xmp"));
         verify(sut).osDeleteFile(createTestFile(X_FAKE_OUTPUT_DIR, "a.jpg.xmp"));
@@ -101,16 +124,20 @@ public class FileCommandTests {
         }
     }
 
-    private static File[] createTestFiles(File destDir, String... files) {
-        File[] result = new File[files.length];
-        int pos = 0;
-        for (String file : files) {
-            result[pos++] = createTestFile(destDir, file);
-        }
-        return result;
-    }
-
     private static File createTestFile(File destDir, String name) {
         return new File(destDir, name);
     }
+
+    private SelectedFiles createTestSelectedFiles(File destDir, String... fileNames) {
+        String[] paths = new String[fileNames.length];
+        Long[] ids = new Long[fileNames.length];
+        int pos = 0;
+        for (String file : fileNames) {
+            ids[pos] = Long.valueOf(pos+1);
+            paths[pos++] = createTestFile(destDir, file).getAbsolutePath();
+        }
+        return new SelectedFiles(paths, ids);
+    }
+
+
 }

@@ -31,14 +31,15 @@ import de.k3b.FotoLibGlobal;
 import de.k3b.transactionlog.TransactionLoggerBase;
 
 /**
- * apply meta data changes to jpg and/or xmp file.
+ * apply meta data changes to jpg and/or xmp file and log.
  *
  * Created by k3b on 25.08.2015.
  */
 public class JpgMetaWorkflow {
     private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+    private final TransactionLoggerBase transactionLogger;
 
-    private static StringBuilder debugExif(StringBuilder sb, String context, MetaWriterExifXml exif, File filePath) {
+    private StringBuilder debugExif(StringBuilder sb, String context, MetaWriterExifXml exif, File filePath) {
         if (sb != null) {
             sb.append("\n\t").append(context).append("\t: ");
 
@@ -53,33 +54,39 @@ public class JpgMetaWorkflow {
         return sb;
     }
 
-    public static MetaWriterExifXml saveLatLon(File filePath, Double latitude, Double longitude) {
+    public JpgMetaWorkflow(TransactionLoggerBase transactionLogger) {
+
+        this.transactionLogger = transactionLogger;
+    }
+    public MetaWriterExifXml saveLatLon(File filePath, Double latitude, Double longitude) {
         IMetaApi changedData = new MediaDTO().setLatitudeLongitude(latitude, longitude);
         MediaDiffCopy metaDiffCopy = new MediaDiffCopy()
                 .setDiff(changedData, MediaUtil.FieldID.latitude_longitude);
-        MetaWriterExifXml exif = applyChanges(filePath, metaDiffCopy, null);
+        MetaWriterExifXml exif = applyChanges(filePath, null, 0, false, metaDiffCopy);
         metaDiffCopy.close();
         return exif;
     }
 
     /** writes either (changes + _affectedFields) or metaDiffCopy to jpg/xmp-filePath.
      * Returns new values or null if no change. */
-    public static MetaWriterExifXml applyChanges(File inFilePath,
-                                                 MediaDiffCopy metaDiffCopy, TransactionLoggerBase logger) {
+    public MetaWriterExifXml applyChanges(File inFilePath, String outFilePath,
+                                          long id, boolean deleteOriginalWhenFinished, MediaDiffCopy metaDiffCopy) {
         StringBuilder sb = (FotoLibGlobal.debugEnabled)
                 ? createDebugStringBuilder(inFilePath)
                 : null;
-        if (inFilePath.canWrite()) {
+        File outFile = (outFilePath != null) ? new File(outFilePath) : inFilePath;
+        if (outFile.getParentFile().canWrite()) {
             MetaWriterExifXml exif = null;
+            boolean sameFile = (outFile.equals(inFilePath));
             try {
                 long lastModified = inFilePath.lastModified();
-                exif = MetaWriterExifXml.create (inFilePath.getAbsolutePath(), null, false, "MetaWriterExifXml: load");
+                exif = MetaWriterExifXml.create (inFilePath.getAbsolutePath(), outFilePath, false, "MetaWriterExifXml: load");
                 debugExif(sb, "old", exif, inFilePath);
                 List<String> oldTags = exif.getTags();
 
                 List<MediaUtil.FieldID> changed = metaDiffCopy.applyChanges(exif);
 
-                if (changed != null) {
+                if (!sameFile || (changed != null)) {
                     debugExif(sb, "assign ", exif, inFilePath);
 
                     exif.save("MetaWriterExifXml save");
@@ -88,14 +95,18 @@ public class JpgMetaWorkflow {
                         // preseve file modification date
                         inFilePath.setLastModified(lastModified);
                     }
+
+                    id = updateMediaDB(id, exif, metaDiffCopy, !sameFile && !deleteOriginalWhenFinished);
+
                     if (sb != null) {
                         MetaWriterExifXml exifVerify = MetaWriterExifXml.create (inFilePath.getAbsolutePath(),
                                 null, false, "dbg in MetaWriterExifXml", true, true, false);
                         debugExif(sb, "new ", exifVerify, inFilePath);
                     }
 
-                    if(logger != null) {
-                        logger.addChanges(exif, EnumSet.copyOf(changed), oldTags);
+                    if(transactionLogger != null) {
+                        transactionLogger.set(id, outFilePath);
+                        transactionLogger.addChanges(exif, EnumSet.copyOf(changed), oldTags);
                     }
                 } else {
                     if (sb != null) sb.append("no changes ");
@@ -127,7 +138,12 @@ public class JpgMetaWorkflow {
         }
     }
 
-    private static StringBuilder createDebugStringBuilder(File filePath) {
+    /** todo overwrite in android class to implement update media db */
+    protected long updateMediaDB(long id, IMetaApi exif, MediaDiffCopy metaDiffCopy, boolean mustCreateClone) {
+        return id;
+    }
+
+    private StringBuilder createDebugStringBuilder(File filePath) {
         return new StringBuilder("Set Exif to file='").append(filePath.getAbsolutePath()).append("'\n\t");
     }
 

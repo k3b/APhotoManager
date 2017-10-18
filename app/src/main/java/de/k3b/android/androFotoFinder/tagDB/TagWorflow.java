@@ -135,14 +135,12 @@ public class TagWorflow extends TagProcessor {
             String tagsString = TagConverter.asBatString(removedTags);
             AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(context);
             if (tagsString != null) {
-                cmd.log(MediaTransactionLogEntryType.TAGSREMOVE.getCommand(tagWorflowItemFromDB.path, tagsString, false));
                 cmd.addTransactionLog(tagWorflowItemFromDB.id, tagWorflowItemFromDB.path, now,
                         MediaTransactionLogEntryType.TAGSREMOVE, tagsString);
             }
 
             tagsString = TagConverter.asBatString(addedTags);
             if (tagsString != null) {
-                cmd.log(MediaTransactionLogEntryType.TAGSADD.getCommand(tagWorflowItemFromDB.path, tagsString, false));
                 cmd.addTransactionLog(tagWorflowItemFromDB.id, tagWorflowItemFromDB.path, now,
                         MediaTransactionLogEntryType.TAGSADD, tagsString);
             }

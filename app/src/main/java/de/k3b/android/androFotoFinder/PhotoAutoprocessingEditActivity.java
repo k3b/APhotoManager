@@ -54,7 +54,7 @@ import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.DateUtil;
-import de.k3b.io.FileNameProcessor;
+import de.k3b.io.RuleFileNameProcessor;
 import de.k3b.io.PhotoWorkFlowDto;
 import de.k3b.io.StringUtils;
 import de.k3b.media.IMetaApi;
@@ -78,7 +78,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     private PhotoWorkFlowDto mCurrentData;
     private SelectedFiles mSelectedFiles;
 
-    private FileNameProcessor mProcessor;
+    private RuleFileNameProcessor mProcessor;
 
     private TextView mPreview;
     private Spinner mSpinnerDatePattern;
@@ -155,7 +155,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
         }
 
         mCurrentData.setOutDir(currentOutDir);
-        mProcessor = new FileNameProcessor(currentOutDir);
+        mProcessor = new RuleFileNameProcessor(currentOutDir);
 
         if (mCurrentData.getMediaDefaults() == null) {
             File first = mSelectedFiles.getFile(0);

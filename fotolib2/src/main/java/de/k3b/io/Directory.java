@@ -93,7 +93,7 @@ public class Directory implements IDirectory {
 
     private boolean isApmDir() {
         if (apmDir == null) {
-            apmDir = new File(getAbsolute(), FileNameProcessor.APM_FILE_NAME).exists();
+            apmDir = new File(getAbsolute(), RuleFileNameProcessor.APM_FILE_NAME).exists();
         }
         return apmDir.equals(Boolean.TRUE);
     }

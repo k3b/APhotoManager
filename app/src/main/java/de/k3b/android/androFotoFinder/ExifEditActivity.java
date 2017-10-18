@@ -859,7 +859,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
             logger.set(id, file.getAbsolutePath());
 
             // change jpg/xmp + log changes
-            MetaWriterExifXml exifFile = JpgMetaWorkflow.applyChanges(file, mediaDiffCopy, logger);
+            MetaWriterExifXml exifFile = new JpgMetaWorkflow(logger).applyChanges(file, null, id, false, mediaDiffCopy);
 
             // trigge jpg/xmp rescan to database
             if (exifFile != null) {

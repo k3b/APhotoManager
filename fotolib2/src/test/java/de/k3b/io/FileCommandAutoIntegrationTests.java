@@ -31,6 +31,7 @@ import java.io.IOException;
 
 import de.k3b.FotoLibGlobal;
 import de.k3b.TestUtil;
+import de.k3b.io.collections.SelectedFiles;
 import de.k3b.media.ExifInterface;
 import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaDTO;
@@ -49,6 +50,8 @@ public class FileCommandAutoIntegrationTests {
 
     private static final File OUTDIR = new File(TestUtil.OUTDIR_ROOT, TEST_CLASS_NAME + "/out").getAbsoluteFile();
     private static final File INJPG = new File(OUTDIR.getParentFile(), "in/myTestSource.jpg").getAbsoluteFile();
+    public static final String[] FAKE_INJPG = {INJPG.getAbsolutePath()};
+    public static final SelectedFiles FAKE_SELECTED_FILES = new SelectedFiles(FAKE_INJPG, FAKE_IDS);
 
     private static final IMetaApi addExif = new MediaDTO().setTitle("title added by " + TEST_CLASS_NAME);
 
@@ -72,28 +75,34 @@ public class FileCommandAutoIntegrationTests {
 
     @Test
     public void shouldCopy() {
-        FileCommands sut = new FileCommands();
-        String outFileBaseName = "shouldCopyWithRenameProcessor";
-        FileNameProcessor rename = new FileNameProcessor(null, outFileBaseName, null, OUTDIR);
-        sut.moveOrCopyFilesTo(false, rename, null, OUTDIR, FAKE_IDS, INJPG);
+        String outFileBaseName = "shouldCopy";
+        FileCommands sut = createFileCommands(outFileBaseName);
+        RuleFileNameProcessor rename = new RuleFileNameProcessor(null, outFileBaseName, null, OUTDIR);
+        sut.moveOrCopyFilesTo(false, FAKE_SELECTED_FILES, rename, null, OUTDIR);
         assertFilesExist(true, outFileBaseName);
     }
 
     @Test
     public void shouldCopyExif() {
-        FileCommands sut = new FileCommands();
-        String outFileBaseName = "shouldCopyWithRenameProcessor";
-        FileNameProcessor rename = new FileNameProcessor(null, outFileBaseName, null, OUTDIR);
-        sut.moveOrCopyFilesTo(false, rename, addExif, OUTDIR, FAKE_IDS, INJPG);
+        String outFileBaseName = "shouldCopyExif";
+        FileCommands sut = createFileCommands(outFileBaseName);
+        RuleFileNameProcessor rename = new RuleFileNameProcessor(null, outFileBaseName, null, OUTDIR);
+        sut.moveOrCopyFilesTo(false, FAKE_SELECTED_FILES, rename, addExif, OUTDIR);
         assertFilesExist(true, outFileBaseName);
+    }
+
+    public FileCommands createFileCommands(String outFileBaseName) {
+        FileCommands result = new FileCommands();
+        result.setLogFilePath(new File(OUTDIR, outFileBaseName + ".log").getAbsolutePath());
+        return result;
     }
 
     @Test
     public void shouldCopyNoRename() {
-        FileCommands sut = new FileCommands();
         String outFileBaseName = "Test";
-        FileNameProcessor rename = new FileNameProcessor(null, outFileBaseName, null, OUTDIR);
-        sut.moveOrCopyFilesTo(false, rename, null, OUTDIR, FAKE_IDS, INJPG);
+        FileCommands sut = createFileCommands(outFileBaseName);
+        RuleFileNameProcessor rename = new RuleFileNameProcessor(null, outFileBaseName, null, OUTDIR);
+        sut.moveOrCopyFilesTo(false, FAKE_SELECTED_FILES, rename, null, OUTDIR);
         assertFilesExist(true, "myTestSource"); // do not rename
     }
 

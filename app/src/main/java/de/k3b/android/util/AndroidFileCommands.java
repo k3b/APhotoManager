@@ -96,24 +96,24 @@ public class AndroidFileCommands extends FileCommands {
 
     /** called before copy/move/rename/delete */
     @Override
-    protected void onPreProcess(String what, String[] oldPathNames, String[] newPathNames, int opCode) {
+    protected void onPreProcess(String what, int opCode, SelectedFiles selectedFiles, String[] oldPathNames, String[] newPathNames) {
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + "onPreProcess('" + what + "')");
         }
 
         // a nomedia file is affected => must update gui
         this.mHasNoMedia = mScanner.isNoMedia(22, oldPathNames) || MediaScanner.isNoMedia(22, newPathNames);
-        super.onPreProcess(what, oldPathNames, newPathNames, opCode);
+        super.onPreProcess(what, opCode, selectedFiles, oldPathNames, newPathNames);
     }
 
     /** called for each modified/deleted file */
     @Override
-    protected void onPostProcess(String what, String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
+    protected void onPostProcess(String what, int opCode, SelectedFiles selectedFiles, int modifyCount, int itemCount, String[] oldPathNames, String[] newPathNames) {
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix
                     + "onPostProcess('" + what + "') => " + modifyCount + "/" + itemCount);
         }
-        super.onPostProcess(what, oldPathNames, newPathNames, modifyCount, itemCount, opCode);
+        super.onPostProcess(what, opCode, selectedFiles, modifyCount, itemCount, oldPathNames, newPathNames);
 
         Context context = this.mContext;
         String message = getModifyMessage(context, opCode, modifyCount, itemCount);
@@ -194,20 +194,19 @@ public class AndroidFileCommands extends FileCommands {
         return null;
     }
 
-    public boolean rename(Long fileId, File dest, File src) {
-        int result = moveOrCopyFiles(true, "rename", null, new Long[]{fileId}, new File[]{dest}, new File[]{src});
+    public boolean rename(SelectedFiles selectedFiles, File dest) {
+        int result = moveOrCopyFiles(true, "rename", selectedFiles, null, new File[]{dest});
         return (result != 0);
     }
 
-    public void onMoveOrCopyDirectoryPick(boolean move, IDirectory destFolder, SelectedFiles srcFotos) {
+    public void onMoveOrCopyDirectoryPick(boolean move, SelectedFiles selectedFiles, IDirectory destFolder) {
         if (destFolder != null) {
             String copyToPath = destFolder.getAbsolute();
             File destDirFolder = new File(copyToPath);
 
             setLastCopyToPath(copyToPath);
 
-            String[] selectedFileNames = srcFotos.getFileNames();
-            moveOrCopyFilesTo(move, destDirFolder, srcFotos.getIds(), SelectedFiles.getFiles(selectedFileNames));
+            moveOrCopyFilesTo(move, selectedFiles, destDirFolder);
         }
     }
 
@@ -275,17 +274,10 @@ public class AndroidFileCommands extends FileCommands {
         return true;
     }
 
-    private int deleteFiles(SelectedFiles fotos) {
+    @Override
+    public int deleteFiles(SelectedFiles fotos) {
         int nameCount = fotos.getNonEmptyNameCount();
-        int deleteCount = 0;
-        if (nameCount > 0) {
-            String[] fileNames = fotos.getFileNames();
-            deleteCount = super.deleteFiles(fileNames);
-            long now = new Date().getTime();
-            for(int i = 0; i < nameCount; i++) {
-                addTransactionLog(fotos.getId(i), fotos.getFileName(i), now, MediaTransactionLogEntryType.DELETE, null);
-            }
-        }
+        int deleteCount = super.deleteFiles(fotos);
 
         if ((nameCount == 0) || (nameCount == deleteCount)) {
             // no delete file error so also delete media-items
@@ -401,8 +393,6 @@ public class AndroidFileCommands extends FileCommands {
         String dbgContext = "setGeo";
         if (!Double.isNaN(latitude) && !Double.isNaN(longitude) && (selectedItems != null) && (selectedItems.size() > 0)) {
             // in case that current activity is destroyed while running async, applicationContext will allow to finish database operation
-            int itemcount = 0;
-            int countdown = 0;
             File[] files = SelectedFiles.getFiles(selectedItems.getFileNames());
             String errorMessage = checkWriteProtected(R.string.geo_edit_menu_title, files);
 
@@ -410,30 +400,29 @@ public class AndroidFileCommands extends FileCommands {
                 Toast.makeText(this.mContext, errorMessage, Toast.LENGTH_LONG).show();
             } else if (files != null) {
                 Context applicationContext = this.mContext.getApplicationContext();
+                int itemcount = 0;
+                int countdown = 0;
                 int maxCount = files.length+1;
                 openLogfile();
                 int resultFile = 0;
+                long now = new Date().getTime();
 
                 String latLong = DirectoryFormatter.formatLatLon(latitude) + " " + DirectoryFormatter.formatLatLon(longitude);
-                for (File file : files) {
+                for (int i=0; i < files.length;i++) {
                     countdown--;
                     if (countdown <= 0) {
                         countdown = itemsPerProgress;
                         onProgress(itemcount, maxCount);
                     }
-                    MetaWriterExifXml jpg = JpgMetaWorkflow.saveLatLon(file, latitude, longitude);
+                    File file = files[i];
+                    MetaWriterExifXml jpg = new JpgMetaWorkflow(null).saveLatLon(file, latitude, longitude);
                     resultFile += TagSql.updateDB(dbgContext, applicationContext,
                             file.getAbsolutePath(), jpg, MediaUtil.FieldID.latitude_longitude);
                     itemcount++;
-                    log(MediaTransactionLogEntryType.GPS.getCommand(file.getAbsolutePath(), latLong, false));
+                    addTransactionLog(selectedItems.getId(i), file.getAbsolutePath(), now, MediaTransactionLogEntryType.GPS, latLong);
+                    log(MediaTransactionLogEntryType.GPS.getCommand(file.getAbsolutePath(), latLong));
                 }
                 onProgress(itemcount, maxCount);
-
-                long now = new Date().getTime();
-
-                for(int i = 0; i < selectedItems.size(); i++) {
-                    addTransactionLog(selectedItems.getId(i), selectedItems.getFileName(i), now, MediaTransactionLogEntryType.GPS, latLong);
-                }
 
                 closeLogFile();
                 onProgress(++itemcount, maxCount);
@@ -442,10 +431,6 @@ public class AndroidFileCommands extends FileCommands {
             }
         }
         return 0;
-    }
-
-    /** called every time when command makes some little progress. Can be mapped to async progress-bar */
-    protected void onProgress(int itemcount, int size) {
     }
 
     public AndroidFileCommands setContext(Activity mContext) {
@@ -497,6 +482,7 @@ public class AndroidFileCommands extends FileCommands {
         return result.toString();
     }
 
+    /** adds android database specific logging to base implementation */
     @Override
     public void addTransactionLog(
             long currentMediaID, String fileFullPath, long modificationDate,
@@ -504,10 +490,13 @@ public class AndroidFileCommands extends FileCommands {
         if (fileFullPath != null) {
             super.addTransactionLog(currentMediaID, fileFullPath, modificationDate,
                     mediaTransactionLogEntryType, commandData);
-            SQLiteDatabase db = DatabaseHelper.getWritableDatabase(mContext);
-            ContentValues values = TransactionLogSql.set(null, currentMediaID, fileFullPath, modificationDate,
-                    mediaTransactionLogEntryType, commandData);
-            db.insert(TransactionLogSql.TABLE, null, values);
+            if (mediaTransactionLogEntryType.getId() != null) {
+                // not a comment
+                SQLiteDatabase db = DatabaseHelper.getWritableDatabase(mContext);
+                ContentValues values = TransactionLogSql.set(null, currentMediaID, fileFullPath, modificationDate,
+                        mediaTransactionLogEntryType, commandData);
+                db.insert(TransactionLogSql.TABLE, null, values);
+            }
         }
     }
 }
