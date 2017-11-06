@@ -121,6 +121,18 @@ public class MediaUtilTests {
     }
 
     @Test
+    public void shouldFindNonEmpty() {
+        IMetaApi item1 = new MediaDTO();
+
+        // 3 changes
+        item1.setTitle("some title");
+        item1.setLatitudeLongitude(99.0,99.0);
+
+        List<MediaUtil.FieldID> result = MediaUtil.getChanges(null, item1);
+        Assert.assertEquals(ListUtils.toString(result), 3, result.size());
+    }
+
+    @Test
     public void shouldCopyAlways() {
         check("src", "dest", true, true, "src");
         check("src", null, true, true, "src");

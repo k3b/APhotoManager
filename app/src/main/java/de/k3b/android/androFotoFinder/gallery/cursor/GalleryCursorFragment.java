@@ -71,7 +71,6 @@ import de.k3b.android.androFotoFinder.tagDB.TagTask;
 import de.k3b.android.androFotoFinder.tagDB.TagWorflow;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.util.AndroidFileCommands;
-import de.k3b.android.util.AndroidFileCommands44;
 import de.k3b.android.util.DBUtils;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.ResourceUtils;
@@ -272,7 +271,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     protected LocalCursorLoader mCurorLoader = null;
 
-    protected class LocalFileCommands extends AndroidFileCommands44 {
+    protected class LocalFileCommands extends AndroidFileCommands {
 
         @Override
         protected void onPostProcess(String what, int opCode, SelectedFiles selectedFiles, int modifyCount, int itemCount, String[] oldPathNames, String[] newPathNames) {

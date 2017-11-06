@@ -60,7 +60,7 @@ public class FileCommandTests {
         registerFakeFiles(sut);
         SelectedFiles selectedFiles = createTestSelectedFiles(X_FAKE_OUTPUT_DIR, "a.jpg");
 
-        sut.moveOrCopyFilesTo(false, selectedFiles, X_FAKE_OUTPUT_DIR);
+        sut.moveOrCopyFilesTo(false, selectedFiles, X_FAKE_OUTPUT_DIR, null);
 
         Assert.assertEquals("MediaTransactionLogEntryType", MediaTransactionLogEntryType.COPY, lastMediaTransactionLogEntryType);
         verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a.jpg"), createTestFile(X_FAKE_OUTPUT_DIR, "a.jpg"));
@@ -71,7 +71,7 @@ public class FileCommandTests {
         registerFakeFiles(sut, "a.jpg", "b.png", "b(1).png");
         SelectedFiles selectedFiles = createTestSelectedFiles(X_FAKE_INPUT_DIR, "a.jpg", "b.png");
 
-        sut.moveOrCopyFilesTo(false, selectedFiles, X_FAKE_OUTPUT_DIR);
+        sut.moveOrCopyFilesTo(false, selectedFiles, X_FAKE_OUTPUT_DIR, null);
 
         Assert.assertEquals("MediaTransactionLogEntryType", MediaTransactionLogEntryType.COPY, lastMediaTransactionLogEntryType);
         verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(1).jpg"), createTestFile(X_FAKE_INPUT_DIR, "a.jpg"));
@@ -89,7 +89,7 @@ public class FileCommandTests {
 
         SelectedFiles selectedFiles = createTestSelectedFiles(X_FAKE_INPUT_DIR, "a.jpg");
 
-        sut.moveOrCopyFilesTo(true, selectedFiles, X_FAKE_OUTPUT_DIR);
+        sut.moveOrCopyFilesTo(true, selectedFiles, X_FAKE_OUTPUT_DIR, null);
 
         Assert.assertEquals("MediaTransactionLogEntryType", MediaTransactionLogEntryType.MOVE, lastMediaTransactionLogEntryType);
         verify(sut).osFileMoveOrCopy(true, new File(X_FAKE_OUTPUT_DIR, "a.jpg"), createTestFile(X_FAKE_INPUT_DIR, "a.jpg"));
@@ -102,7 +102,7 @@ public class FileCommandTests {
         registerFakeFiles(sut, "a.jpg", "a.xmp", "a.jpg.xmp");
         SelectedFiles selectedFiles = createTestSelectedFiles(X_FAKE_OUTPUT_DIR, "a.jpg");
 
-        sut.deleteFiles(selectedFiles);
+        sut.deleteFiles(selectedFiles, null);
 
         Assert.assertEquals("MediaTransactionLogEntryType", MediaTransactionLogEntryType.DELETE, lastMediaTransactionLogEntryType);
         verify(sut).osDeleteFile(createTestFile(X_FAKE_OUTPUT_DIR, "a.jpg"));

@@ -40,11 +40,13 @@ import java.util.Date;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
+import de.k3b.android.androFotoFinder.media.AndroidJpgMetaWorkflow;
 import de.k3b.android.androFotoFinder.queries.DatabaseHelper;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.transactionlog.TransactionLogSql;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.IProgessListener;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
@@ -54,6 +56,7 @@ import de.k3b.media.JpgMetaWorkflow;
 import de.k3b.media.MediaUtil;
 import de.k3b.media.MetaWriterExifXml;
 import de.k3b.transactionlog.MediaTransactionLogEntryType;
+import de.k3b.transactionlog.TransactionLoggerBase;
 
 /**
  * Api to manipulate files/photos.
@@ -194,8 +197,8 @@ public class AndroidFileCommands extends FileCommands {
         return null;
     }
 
-    public boolean rename(SelectedFiles selectedFiles, File dest) {
-        int result = moveOrCopyFiles(true, "rename", selectedFiles, null, new File[]{dest});
+    public boolean rename(SelectedFiles selectedFiles, File dest, IProgessListener progessListener) {
+        int result = moveOrCopyFiles(true, "rename", null, selectedFiles, new File[]{dest}, progessListener);
         return (result != 0);
     }
 
@@ -206,7 +209,7 @@ public class AndroidFileCommands extends FileCommands {
 
             setLastCopyToPath(copyToPath);
 
-            moveOrCopyFilesTo(move, selectedFiles, destDirFolder);
+            moveOrCopyFilesTo(move, selectedFiles, destDirFolder, null);
         }
     }
 
@@ -251,7 +254,7 @@ public class AndroidFileCommands extends FileCommands {
                                         final DialogInterface dialog,
                                         final int id) {
                                     mActiveAlert = null;
-                                    deleteFiles(fotos);
+                                    deleteFiles(fotos, null);
                                 }
                             }
                     )
@@ -275,9 +278,9 @@ public class AndroidFileCommands extends FileCommands {
     }
 
     @Override
-    public int deleteFiles(SelectedFiles fotos) {
+    public int deleteFiles(SelectedFiles fotos, IProgessListener progessListener) {
         int nameCount = fotos.getNonEmptyNameCount();
-        int deleteCount = super.deleteFiles(fotos);
+        int deleteCount = super.deleteFiles(fotos, progessListener);
 
         if ((nameCount == 0) || (nameCount == deleteCount)) {
             // no delete file error so also delete media-items
@@ -412,20 +415,20 @@ public class AndroidFileCommands extends FileCommands {
                     countdown--;
                     if (countdown <= 0) {
                         countdown = itemsPerProgress;
-                        onProgress(itemcount, maxCount);
+                        if (!onProgress(itemcount, maxCount, null)) break;
                     }
                     File file = files[i];
-                    MetaWriterExifXml jpg = new JpgMetaWorkflow(null).saveLatLon(file, latitude, longitude);
+                    MetaWriterExifXml jpg = createWorkflow(null, dbgContext).saveLatLon(file, latitude, longitude);
                     resultFile += TagSql.updateDB(dbgContext, applicationContext,
                             file.getAbsolutePath(), jpg, MediaUtil.FieldID.latitude_longitude);
                     itemcount++;
                     addTransactionLog(selectedItems.getId(i), file.getAbsolutePath(), now, MediaTransactionLogEntryType.GPS, latLong);
                     log(MediaTransactionLogEntryType.GPS.getCommand(file.getAbsolutePath(), latLong));
                 }
-                onProgress(itemcount, maxCount);
+                onProgress(itemcount, maxCount, null);
 
                 closeLogFile();
-                onProgress(++itemcount, maxCount);
+                onProgress(++itemcount, maxCount, null);
 
                 return resultFile;
             }
@@ -481,6 +484,13 @@ public class AndroidFileCommands extends FileCommands {
         result.append(mDebugPrefix);
         return result.toString();
     }
+
+    /** overwrite to create a android specific Workflow */
+    @Override
+    public JpgMetaWorkflow createWorkflow(TransactionLoggerBase logger, String dbgContext) {
+        return new AndroidJpgMetaWorkflow(mContext, logger, dbgContext);
+    }
+
 
     /** adds android database specific logging to base implementation */
     @Override

@@ -95,6 +95,11 @@ public class FileUtils {
     }
 
     /** tryGetCanonicalFile without exception */
+    public static File tryGetCanonicalFile(File file) {
+        return tryGetCanonicalFile(file, file);
+    }
+
+    /** tryGetCanonicalFile without exception */
     public static String tryGetCanonicalPath(File file, String errorValue) {
         if (file == null) return null;
 

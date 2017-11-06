@@ -35,8 +35,9 @@ public abstract class TagTask<param> extends AsyncTaskWithProgressDialog<param> 
         super(parent,idResourceTitle);
         this.workflow = new TagWorflow() {
             @Override
-            protected void onProgress(int itemCount, int total, String message) {
+            public boolean onProgress(int itemCount, int total, String message) {
                 TagTask.this.publishProgress(itemCount, total, message);
+                return true;
             }
 
         };

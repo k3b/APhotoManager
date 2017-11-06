@@ -54,13 +54,14 @@ public class JpgMetaWorkflow {
         return sb;
     }
 
+    /** overwrite to create a android specific Workflow */
     public JpgMetaWorkflow(TransactionLoggerBase transactionLogger) {
 
         this.transactionLogger = transactionLogger;
     }
     public MetaWriterExifXml saveLatLon(File filePath, Double latitude, Double longitude) {
         IMetaApi changedData = new MediaDTO().setLatitudeLongitude(latitude, longitude);
-        MediaDiffCopy metaDiffCopy = new MediaDiffCopy()
+        MediaDiffCopy metaDiffCopy = new MediaDiffCopy(true)
                 .setDiff(changedData, MediaUtil.FieldID.latitude_longitude);
         MetaWriterExifXml exif = applyChanges(filePath, null, 0, false, metaDiffCopy);
         metaDiffCopy.close();
@@ -75,7 +76,7 @@ public class JpgMetaWorkflow {
                 ? createDebugStringBuilder(inFilePath)
                 : null;
         File outFile = (outFilePath != null) ? new File(outFilePath) : inFilePath;
-        if (outFile.getParentFile().canWrite()) {
+        if ((inFilePath != null) && outFile.getParentFile().canWrite()) {
             MetaWriterExifXml exif = null;
             boolean sameFile = (outFile.equals(inFilePath));
             try {
@@ -96,7 +97,7 @@ public class JpgMetaWorkflow {
                         inFilePath.setLastModified(lastModified);
                     }
 
-                    id = updateMediaDB(id, exif, metaDiffCopy, !sameFile && !deleteOriginalWhenFinished);
+                    id = updateMediaDB(id, inFilePath.getAbsolutePath(), outFile);
 
                     if (sb != null) {
                         MetaWriterExifXml exifVerify = MetaWriterExifXml.create (inFilePath.getAbsolutePath(),
@@ -139,12 +140,15 @@ public class JpgMetaWorkflow {
     }
 
     /** todo overwrite in android class to implement update media db */
-    protected long updateMediaDB(long id, IMetaApi exif, MediaDiffCopy metaDiffCopy, boolean mustCreateClone) {
+    protected long updateMediaDB(long id, String oldJpgAbsolutePath, File newJpgFile) {
         return id;
     }
 
     private StringBuilder createDebugStringBuilder(File filePath) {
-        return new StringBuilder("Set Exif to file='").append(filePath.getAbsolutePath()).append("'\n\t");
+        if(filePath != null) {
+            return new StringBuilder("Set Exif to file='").append(filePath.getAbsolutePath()).append("'\n\t");
+        }
+        return new StringBuilder();
     }
 
 

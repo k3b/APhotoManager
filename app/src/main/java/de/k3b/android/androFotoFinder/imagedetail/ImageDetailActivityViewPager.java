@@ -63,7 +63,6 @@ import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagTask;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.util.AndroidFileCommands;
-import de.k3b.android.util.AndroidFileCommands44;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.MediaScannerAsyncTask;
@@ -230,7 +229,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         }
     }
 
-    class LocalFileCommands extends AndroidFileCommands44 {
+    class LocalFileCommands extends AndroidFileCommands {
         @Override
         protected void onPostProcess(String what, int opCode, SelectedFiles selectedFiles, int modifyCount, int itemCount, String[] oldPathNames, String[] newPathNames) {
             mInitialFilePath = null;
@@ -1071,7 +1070,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             // dest-file already exists
             Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
             onRenameDirQueston(currentFoto, fotoId, fotoSourcePath, newFileName);
-        } else if (mFileCommands.rename(currentFoto, dest)) {
+        } else if (mFileCommands.rename(currentFoto, dest, null)) {
             mModifyCount++;
         } else {
             // rename failed

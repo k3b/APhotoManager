@@ -35,6 +35,7 @@ import de.k3b.io.collections.SelectedFiles;
 import de.k3b.media.ExifInterface;
 import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaDTO;
+import de.k3b.media.MediaDiffCopy;
 
 /**
  * check autoprocessing workflow (#93:)
@@ -52,8 +53,6 @@ public class FileCommandAutoIntegrationTests {
     private static final File INJPG = new File(OUTDIR.getParentFile(), "in/myTestSource.jpg").getAbsoluteFile();
     public static final String[] FAKE_INJPG = {INJPG.getAbsolutePath()};
     public static final SelectedFiles FAKE_SELECTED_FILES = new SelectedFiles(FAKE_INJPG, FAKE_IDS);
-
-    private static final IMetaApi addExif = new MediaDTO().setTitle("title added by " + TEST_CLASS_NAME);
 
     @BeforeClass
     public static void setUpClass() throws IOException {
@@ -73,21 +72,38 @@ public class FileCommandAutoIntegrationTests {
 
     }
 
+    /// TODO: move to seperate class FileCommandsIntegrationTests
+    @Test
+    public void shouldApplyExifChange() throws IOException {
+        String outFileBaseName = "shouldApplyExifChange";
+        FileCommands sut = createFileCommands(outFileBaseName);
+        final File testJpg = new File(OUTDIR, outFileBaseName + ".jpg");
+        TestUtil.saveTestResourceAs("NoExif.jpg", testJpg);
+
+        MediaDiffCopy addExif = new MediaDiffCopy(new MediaDTO().setTitle("title added by " + TEST_CLASS_NAME));
+
+        int changes = sut.applyExifChanges(addExif,new SelectedFiles(testJpg.toString(), "1"), null);
+
+        Assert.assertEquals(1, changes);
+    }
+
     @Test
     public void shouldCopy() {
         String outFileBaseName = "shouldCopy";
         FileCommands sut = createFileCommands(outFileBaseName);
         RuleFileNameProcessor rename = new RuleFileNameProcessor(null, outFileBaseName, null, OUTDIR);
-        sut.moveOrCopyFilesTo(false, FAKE_SELECTED_FILES, rename, null, OUTDIR);
+        sut.moveOrCopyFilesTo(false, null, FAKE_SELECTED_FILES, rename, OUTDIR, null);
         assertFilesExist(true, outFileBaseName);
     }
 
     @Test
     public void shouldCopyExif() {
         String outFileBaseName = "shouldCopyExif";
+        MediaDiffCopy addExif = new MediaDiffCopy(new MediaDTO().setTitle("title added by " + TEST_CLASS_NAME));
+
         FileCommands sut = createFileCommands(outFileBaseName);
         RuleFileNameProcessor rename = new RuleFileNameProcessor(null, outFileBaseName, null, OUTDIR);
-        sut.moveOrCopyFilesTo(false, FAKE_SELECTED_FILES, rename, addExif, OUTDIR);
+        sut.moveOrCopyFilesTo(false, addExif, FAKE_SELECTED_FILES, rename, OUTDIR, null);
         assertFilesExist(true, outFileBaseName);
     }
 
@@ -102,7 +118,7 @@ public class FileCommandAutoIntegrationTests {
         String outFileBaseName = "Test";
         FileCommands sut = createFileCommands(outFileBaseName);
         RuleFileNameProcessor rename = new RuleFileNameProcessor(null, outFileBaseName, null, OUTDIR);
-        sut.moveOrCopyFilesTo(false, FAKE_SELECTED_FILES, rename, null, OUTDIR);
+        sut.moveOrCopyFilesTo(false, null, FAKE_SELECTED_FILES, rename, OUTDIR, null);
         assertFilesExist(true, "myTestSource"); // do not rename
     }
 

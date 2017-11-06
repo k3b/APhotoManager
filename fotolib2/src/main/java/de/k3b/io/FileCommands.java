@@ -34,9 +34,7 @@ import java.util.Date;
 import de.k3b.FotoLibGlobal;
 import de.k3b.io.collections.DestDirFileNameProcessor;
 import de.k3b.io.collections.SelectedFiles;
-import de.k3b.media.IMetaApi;
 import de.k3b.media.JpgMetaWorkflow;
-import de.k3b.media.MediaDTO;
 import de.k3b.media.MediaDiffCopy;
 import de.k3b.media.MetaWriterExifXml;
 import de.k3b.transactionlog.MediaTransactionLogEntryDto;
@@ -52,7 +50,7 @@ import de.k3b.transactionlog.TransactionLoggerBase;
  *
  * Created by k3b on 03.08.2015.
  */
-public class FileCommands extends FileProcessor implements  Cloneable {
+public class FileCommands extends FileProcessor implements  Cloneable, IProgessListener {
     private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
 
     public static final int OP_COPY = 1;
@@ -64,41 +62,50 @@ public class FileCommands extends FileProcessor implements  Cloneable {
     protected ArrayList<String> mModifiedDestFiles;
     protected ArrayList<String> mModifiedSrcFiles;
 
+    // may be set while looping over items to inform client over progress
+    private IProgessListener progessListener;
+
     public FileCommands() {
         setLogFilePath(null);
     }
 
-    public int deleteFiles(SelectedFiles fotos) {
+    public int deleteFiles(SelectedFiles fotos, IProgessListener progessListener) {
         final String dbgContext = "delete";
         int nameCount = fotos.getNonEmptyNameCount();
         int deleteCount = 0;
         if ((nameCount > 0) && canProcessFile(OP_DELETE)) {
-            String[] fileNames = fotos.getFileNames();
-            long now = new Date().getTime();
+            IProgessListener progessListenerOld = this.progessListener;
+            this.progessListener = progessListener;
+            try {
+                String[] fileNames = fotos.getFileNames();
+                long now = new Date().getTime();
 
-            int itemsPerProgress = FotoLibGlobal.itemsPerProgress;
-            int itemcount = 0;
-            int countdown = 0;
-            int maxCount = fotos.size();
+                int itemsPerProgress = FotoLibGlobal.itemsPerProgress;
+                int itemcount = 0;
+                int countdown = 0;
+                int maxCount = fotos.size();
 
-            openLogfile();
-            onPreProcess(dbgContext, OP_DELETE, fotos, fileNames, null);
-            for (int i=0; i < maxCount; i++) {
-                countdown--;
-                if (countdown <= 0) {
-                    countdown = itemsPerProgress;
-                    onProgress(itemcount, maxCount);
+                openLogfile();
+                onPreProcess(dbgContext, OP_DELETE, fotos, fileNames, null);
+                for (int i = 0; i < maxCount; i++) {
+                    countdown--;
+                    if (countdown <= 0) {
+                        countdown = itemsPerProgress;
+                        if (!onProgress(itemcount, maxCount, null)) break;
+                    }
+
+                    File file = fotos.getFile(i);
+                    if ((file != null) && deleteFileWithSidecar(file)) {
+                        deleteCount++;
+                        addTransactionLog(fotos.getId(i), file.getAbsolutePath(), now, MediaTransactionLogEntryType.DELETE, null);
+                    }
                 }
-
-                File file = fotos.getFile(i);
-                if ((file != null) && deleteFileWithSidecar(file)) {
-                    deleteCount++;
-                    addTransactionLog(fotos.getId(i), file.getAbsolutePath(), now, MediaTransactionLogEntryType.DELETE, null);
-                }
+                onPostProcess(dbgContext, OP_DELETE, fotos, deleteCount, fileNames.length, fileNames, null);
+                onProgress(itemcount, maxCount, null);
+            } finally {
+                closeLogFile();
+                this.progessListener = progessListenerOld;
             }
-            onPostProcess(dbgContext, OP_DELETE, fotos, deleteCount, fileNames.length, fileNames, null);
-            onProgress(itemcount, maxCount);
-            closeLogFile();
         }
         return deleteCount;
     }
@@ -142,42 +149,52 @@ public class FileCommands extends FileProcessor implements  Cloneable {
      * move (or copy) sourcefiles (with their xmp-sidecar-files) to destdirfolder.
      * Executes autoprocessing (#91: rename, add exif) if destdirfolder
      * contains ".apm"  (autoprocessing data file)
-     *  @param move false: copy
+     * @param move false: copy
      * @param selectedFiles
      * @param destDirFolder where files are moved/copied to
-     * */
-    public int moveOrCopyFilesTo(boolean move, SelectedFiles selectedFiles, File destDirFolder) {
+     * @param progessListener  */
+    public int moveOrCopyFilesTo(boolean move, SelectedFiles selectedFiles, File destDirFolder, IProgessListener progessListener) {
         IFileNameProcessor renameProcessor = null;
-        IMetaApi exifChanges = null;
+        MediaDiffCopy exifChanges = null;
 
         PhotoWorkFlowDto autoProccessData = getPhotoWorkFlowDto(destDirFolder);
         if (autoProccessData != null) {
             renameProcessor = autoProccessData.createFileNameProcessor();
-            exifChanges = autoProccessData.getMediaDefaults();
+            exifChanges = new MediaDiffCopy(autoProccessData.getMediaDefaults());
         } else {
             renameProcessor = new DestDirFileNameProcessor(destDirFolder);
         }
 
-        return moveOrCopyFilesTo(move, selectedFiles, renameProcessor, exifChanges, destDirFolder);
+        return moveOrCopyFilesTo(move, exifChanges, selectedFiles, renameProcessor, destDirFolder, progessListener);
+    }
+
+    /**
+     * apply changes in exifChanges to all images in selectedFiles.
+     * @return number of changed files.
+     */
+    public int applyExifChanges(MediaDiffCopy exifChanges, SelectedFiles selectedFiles, IProgessListener progessListener) {
+        // source files are the same as dest files.
+        final File[] destFiles = SelectedFiles.getFiles(selectedFiles.getFileNames());
+        return moveOrCopyFiles(false, "change_exif", exifChanges, selectedFiles, destFiles, progessListener);
     }
 
     /**
      * For junit integration test: special internal version with explicit dependencies.
-     *  @param move false: copy
+     * @param move false: copy
+     * @param exifChanges
      * @param selectedFiles
      * @param renameProcessor
-     * @param exifChanges
      * @param destDirFolder where files are moved/copied to
-     * */
+     * @param progessListener        */
     int moveOrCopyFilesTo(boolean move,
-                                 SelectedFiles selectedFiles, IFileNameProcessor renameProcessor, IMetaApi exifChanges,
-                                 File destDirFolder) {
+                          MediaDiffCopy exifChanges, SelectedFiles selectedFiles, IFileNameProcessor renameProcessor,
+                          File destDirFolder, IProgessListener progessListener) {
         int result = 0;
         if (canProcessFile(move ? OP_MOVE : OP_COPY)) {
             if (osCreateDirIfNeccessary(destDirFolder)) {
                 File[] destFiles = createDestFiles(renameProcessor, destDirFolder, SelectedFiles.getFiles(selectedFiles.getFileNames()));
 
-                result = moveOrCopyFiles(move, (move ? "mov" : "copy"), selectedFiles, exifChanges, destFiles);
+                result = moveOrCopyFiles(move, (move ? "mov" : "copy"), exifChanges, selectedFiles, destFiles, progessListener);
 
             } else {
                 log("rem Target dir '", destDirFolder, "' cannot be created");
@@ -198,105 +215,126 @@ public class FileCommands extends FileProcessor implements  Cloneable {
     }
 
     /** does the copying and/or apply exif changes. also used by unittesting */
-    protected int moveOrCopyFiles(boolean move, String what, SelectedFiles fotos, IMetaApi exifChanges, File[] destFiles) {
+    protected int moveOrCopyFiles(boolean move, String what, MediaDiffCopy exifChanges,
+                                  SelectedFiles fotos, File[] destFiles,
+                                  IProgessListener progessListener) {
         int itemCount = 0;
         int nameCount = fotos.getNonEmptyNameCount();
         int opCode = (move) ? OP_MOVE : OP_COPY;
         if ((nameCount > 0) && canProcessFile(opCode) && ((exifChanges == null) || canProcessFile(OP_UPDATE))) {
+            IProgessListener progessListenerOld = this.progessListener;
+            this.progessListener = progessListener;
+            try {
 
-            int fileCount = destFiles.length;
+                int fileCount = destFiles.length;
 
-            Long[] ids = fotos.getIds();
-            File[] sourceFiles = SelectedFiles.getFiles(fotos.getFileNames());
+                Long[] ids = fotos.getIds();
+                File[] sourceFiles = SelectedFiles.getFiles(fotos.getFileNames());
 
-            mModifiedSrcFiles = (move) ? new ArrayList<String>() : null;
-            mModifiedDestFiles = new ArrayList<String>();
+                mModifiedSrcFiles = (move) ? new ArrayList<String>() : null;
+                mModifiedDestFiles = new ArrayList<String>();
 
-            int itemsPerProgress = FotoLibGlobal.itemsPerProgress;
-            int itemcount = 0;
-            int countdown = 0;
-            int maxCount = fotos.size();
+                int itemsPerProgress = FotoLibGlobal.itemsPerProgress;
+                int itemcount = 0;
+                int countdown = 0;
+                int maxCount = fotos.size();
 
-            openLogfile();
-            // onPreProcess(what, sourceFiles, destFiles, opCode);
-            onPreProcess(what, opCode, fotos, null, null);
-            int pos = 0;
-            long now = new Date().getTime();
-            MediaTransactionLogEntryType moveOrCopyCommand = (move) ? MediaTransactionLogEntryType.MOVE : MediaTransactionLogEntryType.COPY;
-            TransactionLoggerBase logger = (exifChanges == null) ? null : new TransactionLoggerBase(this, now);
+                openLogfile();
+                // onPreProcess(what, sourceFiles, destFiles, opCode);
+                onPreProcess(what, opCode, fotos, null, null);
+                int pos = 0;
+                long now = new Date().getTime();
+                MediaTransactionLogEntryType moveOrCopyCommand = (move) ? MediaTransactionLogEntryType.MOVE : MediaTransactionLogEntryType.COPY;
+                TransactionLoggerBase logger = (exifChanges == null) ? null : new TransactionLoggerBase(this, now);
 
-            while (pos < fileCount) {
-                countdown--;
-                if (countdown <= 0) {
-                    countdown = itemsPerProgress;
-                    onProgress(itemcount, maxCount);
-                }
-
-                File sourceFile = sourceFiles[pos];
-                File destFile = destFiles[pos];
-                Long id = ids[pos];
-                File destRenamed;
-                if ((exifChanges != null) && (sourceFile.equals(destFile))) {
-                    // copy/move with exif changes ==> exif changes only
-                    destRenamed = destFile;
-                    move = false; // do not delete original file(s)
-                } else {
-                    destRenamed = renameDuplicate(destFile);
-                }
-
-                final String sourcePath = FileUtils.tryGetCanonicalPath(sourceFile, null);
-                final String destPath = FileUtils.tryGetCanonicalPath(destRenamed, null);
-                if ((sourcePath != null) && (destPath != null)) {
-
-                    if (exifChanges == null) {
-                        // old style move/copy image with sidecarfile(s)
-                        if (osFileMoveOrCopy(move, destRenamed, sourceFile)) itemCount++;
-
-
-                        File sourceSidecar = getSidecar(sourceFile, false);
-                        if (osFileExists(sourceSidecar)) {
-                            File destSidecar = getSidecar(destRenamed, false);
-                            if (osFileMoveOrCopy(move, destSidecar, sourceSidecar)) itemCount++;
-                        }
-
-                        sourceSidecar = getSidecar(sourceFile, true);
-                        if (osFileExists(sourceSidecar)) {
-                            File destSidecar = getSidecar(destRenamed, true);
-                            if (osFileMoveOrCopy(move, destSidecar, sourceSidecar)) itemCount++;
-                        }
-                        addTransactionLog(id, sourceFile.getPath(), now, moveOrCopyCommand, destFile.getPath());
-                    } else {
-                        MediaDiffCopy mediaDiffCopy = new MediaDiffCopy().setDiff(new MediaDTO(), exifChanges);
-                        // new style move/copy image with sidecarfile(s) with exif autoprocessing
-
-                        // first log copy/move. copy  may change databaseID
-                        addTransactionLog(id, sourcePath, now-1, moveOrCopyCommand, destPath);
-
-                        // for the log the file has already been copied/moved
-                        logger.set(id, destPath);
-                        MetaWriterExifXml exifProcessor = new JpgMetaWorkflow(logger).applyChanges(sourceFile, destPath, id, move, mediaDiffCopy);
-
-                        if (exifProcessor == null) break; // error
-
-                        // !!! apply exif; add changes to log and transactionlog
-                        // should havebeen done by applyChanges
-                        // exifProcessor.save("FileCommands-moveOrCopyFiles-with-exif");
-
-                        addProcessedFiles(move, destFile, sourceFile);
+                while (pos < fileCount) {
+                    countdown--;
+                    if (countdown <= 0) {
+                        countdown = itemsPerProgress;
+                        if (!onProgress(itemcount, maxCount, null)) break;
                     }
+
+                    File sourceFile = FileUtils.tryGetCanonicalFile(sourceFiles[pos]);
+                    File destFile = FileUtils.tryGetCanonicalFile(destFiles[pos]);
+                    Long id = ids[pos];
+                    File destRenamed;
+                    final boolean sameFile = (sourceFile != null) && sourceFile.equals(destFile);
+                    if ((exifChanges != null) && sameFile) {
+                        // copy/move with exif changes ==> exif changes only
+                        destRenamed = destFile;
+                        move = false; // do not delete original file(s)
+                    } else {
+                        destRenamed = renameDuplicate(destFile);
+                    }
+
+                    final String sourcePath = FileUtils.tryGetCanonicalPath(sourceFile, null);
+                    final String destPath = FileUtils.tryGetCanonicalPath(destRenamed, null);
+                    if ((sourcePath != null) && (destPath != null)) {
+
+                        if (exifChanges == null) {
+                            // old style move/copy image with sidecarfile(s)
+                            if (osFileMoveOrCopy(move, destRenamed, sourceFile)) itemCount++;
+
+
+                            File sourceSidecar = getSidecar(sourceFile, false);
+                            if (osFileExists(sourceSidecar)) {
+                                File destSidecar = getSidecar(destRenamed, false);
+                                if (osFileMoveOrCopy(move, destSidecar, sourceSidecar)) itemCount++;
+                            }
+
+                            sourceSidecar = getSidecar(sourceFile, true);
+                            if (osFileExists(sourceSidecar)) {
+                                File destSidecar = getSidecar(destRenamed, true);
+                                if (osFileMoveOrCopy(move, destSidecar, sourceSidecar)) itemCount++;
+                            }
+                            addTransactionLog(id, sourceFile.getPath(), now, moveOrCopyCommand, destFile.getPath());
+                        } else {
+                            MediaDiffCopy mediaDiffCopy = exifChanges;
+                            // new style move/copy image with sidecarfile(s) with exif autoprocessing
+
+                            if (!sameFile) {
+                                // first log copy/move. copy  may change databaseID
+                                addTransactionLog(id, sourcePath, now - 1, moveOrCopyCommand, destPath);
+                            }
+
+                            // for the log the file has already been copied/moved
+                            logger.set(id, destPath);
+                            MetaWriterExifXml exifProcessor = createWorkflow(logger, what).applyChanges(sourceFile, destPath, id, move, mediaDiffCopy);
+
+                            if (exifProcessor == null) break; // error
+
+                            itemCount++;
+                            // !!! apply exif; add changes to log and transactionlog
+                            // should havebeen done by applyChanges
+                            // exifProcessor.save("FileCommands-moveOrCopyFiles-with-exif");
+
+                            addProcessedFiles(move, destFile, sourceFile);
+                        }
+                    }
+                    pos++;
                 }
-                pos++;
+                int modifyCount = mModifiedDestFiles.size();
+
+                String[] modifiedSourceFiles = ((mModifiedSrcFiles != null) && (mModifiedSrcFiles.size() > 0)) ? mModifiedSrcFiles.toArray(new String[modifyCount]) : null;
+
+                String[] modifiedDestFiles = (modifyCount > 0) ? mModifiedDestFiles.toArray(new String[modifyCount]) : null;
+                onPostProcess(what, opCode, fotos, itemCount, sourceFiles.length, modifiedSourceFiles, modifiedDestFiles);
+
+            } finally {
+
+                if (exifChanges != null) {
+                    exifChanges.fixTagRepository();
+                    exifChanges.close();
+                }
+                closeLogFile();
+                this.progessListener = progessListenerOld;
             }
-            int modifyCount = mModifiedDestFiles.size();
-
-            String[] modifiedSourceFiles = ((mModifiedSrcFiles != null) && (mModifiedSrcFiles.size() > 0)) ? mModifiedSrcFiles.toArray(new String[modifyCount]) : null;
-
-            String[] modifiedDestFiles = (modifyCount > 0) ? mModifiedDestFiles.toArray(new String[modifyCount]) : null;
-            onPostProcess(what, opCode, fotos, itemCount, sourceFiles.length, modifiedSourceFiles, modifiedDestFiles);
-
-            closeLogFile();
         }
         return itemCount;
+    }
+
+    public JpgMetaWorkflow createWorkflow(TransactionLoggerBase logger, String dbgContext) {
+        return new JpgMetaWorkflow(logger);
     }
 
     private File[] createDestFiles(IFileNameProcessor renameProcessor, File destDirFolder, File... sourceFiles) {
@@ -452,10 +490,12 @@ public class FileCommands extends FileProcessor implements  Cloneable {
         return this;
     }
 
-
     /** called every time when command makes some little progress. Can be mapped to async progress-bar */
-    protected void onProgress(int itemcount, int size) {
+    public boolean onProgress(int itemcount, int size, String message) {
+        boolean result = true;
+        if (progessListener != null) {
+            result = progessListener.onProgress(itemcount, size, message);
+        }
+        return result;
     }
-
-
 }

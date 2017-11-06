@@ -25,7 +25,7 @@ import android.app.Dialog;
 import android.app.FragmentManager;
 import android.app.TimePickerDialog;
 import android.content.ActivityNotFoundException;
-import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -52,9 +52,9 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import de.k3b.FotoLibGlobal;
-import de.k3b.android.androFotoFinder.media.MediaContentValues;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
+import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.ResourceUtils;
@@ -62,24 +62,20 @@ import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.AsyncTaskWithProgressDialog;
 import de.k3b.android.widget.HistoryEditText;
+import de.k3b.io.IProgessListener;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
 import de.k3b.io.DateUtil;
-import de.k3b.io.FileUtils;
 import de.k3b.io.GeoUtil;
-import de.k3b.io.IGalleryFilter;
 import de.k3b.io.StringUtils;
 import de.k3b.media.IMetaApi;
-import de.k3b.media.JpgMetaWorkflow;
 import de.k3b.media.MediaAsString;
 import de.k3b.media.MediaDiffCopy;
 import de.k3b.media.MediaUtil;
-import de.k3b.media.MetaWriterExifXml;
 import de.k3b.tagDB.Tag;
 import de.k3b.tagDB.TagConverter;
-import de.k3b.transactionlog.TransactionLoggerBase;
 
 /**
  * Defines a gui to edit Exif content.
@@ -205,7 +201,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
 
             if (null == currentData) {
                 // there is no ExifParam : infer exif from jpg file
-                SelectedFiles items = getSelectedFiles("onCreate ", intent, false);
+                SelectedFiles items = getSelectedFiles("onCreate ", this, intent, false);
                 File first = (items != null) ? items.getFile(0) : null;
 
                 if ((first != null) && (first.exists())) {
@@ -243,7 +239,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
         return null;
     }
 
-    private SelectedFiles getSelectedFiles(String dbgContext, Intent intent, boolean mustLoadIDs) {
+    private static SelectedFiles getSelectedFiles(String dbgContext, Context ctx, Intent intent, boolean mustLoadIDs) {
         if (intent == null) return null;
 
         SelectedFiles result = null;
@@ -254,7 +250,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
         if ((selectedIDs != null) && (selectedFiles != null)) {
             result = new SelectedFiles(selectedFiles, selectedIDs);
         } else {
-            String path = IntentUtil.getFilePath(this, IntentUtil.getUri(intent));
+            String path = IntentUtil.getFilePath(ctx, IntentUtil.getUri(intent));
             String fileNames[] = SelectedFiles.getFileNameList(path);
             Long[] ids = null;
             int itemCount = (fileNames != null) ? fileNames.length : 0;
@@ -262,7 +258,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
             if (itemCount > 0) {
                 if ((mustLoadIDs) && (ids == null)) {
                     ids = new Long[itemCount];
-                    Map<String, Long> idMap = FotoSql.execGetPathIdMap(this, fileNames);
+                    Map<String, Long> idMap = FotoSql.execGetPathIdMap(ctx, fileNames);
 
                     for (int i = 0; i < itemCount; i++) {
                         ids[i] = idMap.get(fileNames[i]);
@@ -293,7 +289,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
     // used to analyse error #91:.
     private void debugChanges(String function) {
         if (FotoLibGlobal.debugEnabledJpgMetaIo){
-            MediaDiffCopy diff = new MediaDiffCopy();
+            MediaDiffCopy diff = new MediaDiffCopy(true);
             diff.setDiff(mInitialData, mCurrentData);
             Log.d(FotoLibGlobal.LOG_TAG, mDebugPrefix + " "
                     + function + "\n\t"
@@ -740,68 +736,49 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
             finish();
         } else {
             // modify jpg files and return
-            SelectedFiles items = getSelectedFiles("onOk ", getIntent(), true);
-            long now = new Date().getTime();
-            AndroidTransactionLogger logger = new AndroidTransactionLogger(ctx, now);
+            SelectedFiles items = getSelectedFiles("onOk ", this, getIntent(), true);
+            AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(this);
 
-            if (!SYNC_UPDATE_EXIF) {
-                this.exifUpdate = new UpdateTask(ctx, logger, mInitialData, mCurrentData, now);
-                if (exifUpdate.isEmpty()) {
+            MediaDiffCopy exifChanges = new MediaDiffCopy(true).setDiff(mInitialData, mCurrentData);
+
+            if (exifChanges != null) {
+                if (!SYNC_UPDATE_EXIF) {
+                    this.exifUpdate = new UpdateTask(ctx, cmd, exifChanges);
+                    exifUpdate.execute(items);
+                } else {
+                    // for debugging: sync debugging is easier
+                    cmd.applyExifChanges(exifChanges, items, null);
+
+                    this.setResult(EXIF_RESULT_ID, intent);
                     finish();
-                    return;
                 }
-                exifUpdate.execute(items);
             } else {
-                // for debugging: sync debugging is easier
-                applyChangesSynchrounus(ctx, items, logger, mInitialData, mCurrentData, now);
-
-                this.setResult(EXIF_RESULT_ID, intent);
-                finish();
+                finish(); // no changes, nothing to do
             }
         }
     }
 
     /** update exif changes in asynch task mit chow dialog */
-    private static class UpdateTask extends AsyncTaskWithProgressDialog<SelectedFiles> {
-        private MediaDiffCopy mediaDiffCopy;
-        private AndroidTransactionLogger logger;
-        private final long now;
+    private static class UpdateTask extends AsyncTaskWithProgressDialog<SelectedFiles> implements IProgessListener {
+        private MediaDiffCopy exifChanges;
+        private final AndroidFileCommands cmd;
 
-        UpdateTask(Activity ctx, AndroidTransactionLogger logger, MediaAsString unmodifiedData, MediaAsString modifiedData, long now) {
+        UpdateTask(Activity ctx, AndroidFileCommands cmd,
+                   MediaDiffCopy exifChanges) {
             super(ctx, R.string.exif_menu_title);
-            this.mediaDiffCopy = new MediaDiffCopy();
-            this.logger = logger;
-            this.now = now;
-            if (this.mediaDiffCopy.setDiff(unmodifiedData, modifiedData) == null) {
-                destroy();
-            }
+            this.exifChanges = exifChanges;
+            this.cmd = cmd;
         }
 
         @Override
         protected Integer doInBackground(SelectedFiles... params) {
             publishProgress("...");
-            if (mediaDiffCopy != null) {
+
+            if (exifChanges != null) {
                 SelectedFiles items = params[0];
-                int total = (items != null) ? items.size() : 0;
-                int progressCountDown = 0;
 
-                File file = null;
-                for(int itemCount=0; itemCount < total; itemCount++) {
-                    file = items.getFile(itemCount);
-                    applyChanges(parent, file, items.getId(itemCount), mediaDiffCopy , logger);
-                    progressCountDown--;
-                    if (isCancelled()) {
-                        break;
-                    }
-                    if (progressCountDown < 0) {
-                        progressCountDown = 10;
-                        publishProgress(itemCount, total, file);
-                    }
-                }
-                publishProgress(total, total, file);
-                mediaDiffCopy.fixTagRepository();
+                return cmd.applyExifChanges(exifChanges, items, null);
 
-                return total;
             }
             return 0;
         }
@@ -819,57 +796,26 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
 
         @Override
         public void destroy() {
-            if (mediaDiffCopy != null) mediaDiffCopy.close();
-            mediaDiffCopy = null;
-            FileUtils.close(logger, mDebugPrefix);
-            logger = null;
+            if (exifChanges != null) exifChanges.close();
+            exifChanges = null;
             super.destroy();
         }
 
         public boolean isEmpty() {
-            return (mediaDiffCopy == null);
-        }
-    }
-
-
-    private static void applyChangesSynchrounus(Activity ctx, SelectedFiles items,
-                           AndroidTransactionLogger logger,
-                           MediaAsString unmodifiedData, MediaAsString modifiedData, long now) {
-        MediaDiffCopy mediaDiffCopy = new MediaDiffCopy().setDiff(unmodifiedData, modifiedData);
-
-        if (mediaDiffCopy != null) {
-
-            int size = (items != null) ? items.size() : 0;
-
-            for(int i=0; i < size; i++) {
-                applyChanges(ctx, items.getFile(i), items.getId(i), mediaDiffCopy , logger);
-            }
-            mediaDiffCopy.fixTagRepository();
-            mediaDiffCopy.close();
+            return (exifChanges == null);
         }
 
-        FileUtils.close(logger, mDebugPrefix);
-    }
-
-    private static void applyChanges(Activity ctx,
-                              File file, long id,
-                              MediaDiffCopy mediaDiffCopy, TransactionLoggerBase logger) {
-        if ((file != null) && file.exists()) {
-            // save changes to jpg/xmp
-            logger.set(id, file.getAbsolutePath());
-
-            // change jpg/xmp + log changes
-            MetaWriterExifXml exifFile = new JpgMetaWorkflow(logger).applyChanges(file, null, id, false, mediaDiffCopy);
-
-            // trigge jpg/xmp rescan to database
-            if (exifFile != null) {
-                MediaContentValues oldData = MediaScanner.getInstance(ctx).getExifFromFile(file);
-
-                ContentValues dbValues = oldData.getContentValues();
-                FotoSql.execUpdate(mDebugPrefix, ctx, file.getAbsolutePath(), dbValues, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
-
-            }
-
+        /**
+         * called every time when command makes some little progress. Can be mapped to async progress-bar
+         *
+         * @param itemcount
+         * @param total
+         * @param message
+         */
+        @Override
+        public boolean onProgress(int itemcount, int total, String message) {
+            publishProgress(itemcount, total, message);
+            return !isCancelled();
         }
     }
 

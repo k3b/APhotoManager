@@ -71,7 +71,7 @@ public class JpgMetaWorkflowIntegratoinTests {
 
         MediaDTO testData = TestUtil.createTestMediaDTO(4);
         new JpgMetaWorkflow(null).applyChanges(testJpg,
-                null, 0, false, new MediaDiffCopy().setDiff(testData, EnumSet.allOf(MediaUtil.FieldID.class)));
+                null, 0, false, new MediaDiffCopy(true).setDiff(testData, EnumSet.allOf(MediaUtil.FieldID.class)));
 
         // LOGGER.info(sutRead.toString());
 

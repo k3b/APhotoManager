@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -42,7 +42,6 @@ import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.AndroidFileCommands;
-import de.k3b.android.util.AndroidFileCommands44;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.android.widget.LocalizedActivity;
@@ -397,10 +396,11 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
         AsyncTask<Object, Integer, Integer> task = new AsyncTask<Object, Integer, Integer>() {
             private AndroidFileCommands engine;
             @Override protected void onPreExecute() {
-                engine = new AndroidFileCommands44() {
+                engine = new AndroidFileCommands() {
                     /** map AndroidFileCommands-progress to AsyncTask-progress */
-                    @Override protected void onProgress(int itemcount, int size) {
+                    @Override public boolean onProgress(int itemcount, int size, String message) {
                         publishProgress(itemcount, size);
+                        return !isCancelled();
                     }
                 };
                 engine.setContext(GeoEditActivity.this);
