@@ -737,7 +737,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
         } else {
             // modify jpg files and return
             SelectedFiles items = getSelectedFiles("onOk ", this, getIntent(), true);
-            AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(this);
+            AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(this, true);
 
             MediaDiffCopy exifChanges = new MediaDiffCopy(true).setDiff(mInitialData, mCurrentData);
 

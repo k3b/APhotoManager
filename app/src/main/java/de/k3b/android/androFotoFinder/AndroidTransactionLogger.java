@@ -39,10 +39,6 @@ public class AndroidTransactionLogger extends TransactionLoggerBase implements C
     private Context ctx;
     private AndroidFileCommands execLog;
 
-    public AndroidTransactionLogger(Activity ctx, long now) {
-        this(ctx, now, AndroidFileCommands.createFileCommand(ctx));
-        mustCloseLog = true;
-    }
     public AndroidTransactionLogger(Activity ctx, long now, AndroidFileCommands execLog) {
         super(execLog, now);
         this.ctx = ctx.getApplicationContext(); // to avoid memory leaks

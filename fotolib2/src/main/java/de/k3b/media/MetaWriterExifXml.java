@@ -19,8 +19,12 @@
 
 package de.k3b.media;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 
 import de.k3b.FotoLibGlobal;
 import de.k3b.io.FileCommands;
@@ -41,11 +45,14 @@ import de.k3b.io.FileUtils;
  */
 
 public class MetaWriterExifXml extends MetaApiWrapper  implements IMetaApi {
+    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+
     private ExifInterfaceEx exif;   // not null if exif changes are written to jpg file
     private MediaXmpSegment xmp;    // not null if exif changes are written to xmp sidecar file.
     private String absoluteJpgInPath; // where changes are read from.
     private String absoluteJpgOutPath; // where changes are written to. Null meanst same as input
     private boolean deleteOriginalAfterFinish; // true: after save original jpg/mxp are deleted (move instead of copy)
+    private long    dbgLoadEndTimestamp;
 
     /**
      * public api: Factory to create MetaWriterExifXml. Settings/ Internal state determine
@@ -87,6 +94,10 @@ public class MetaWriterExifXml extends MetaApiWrapper  implements IMetaApi {
                                            boolean deleteOriginalAfterFinish, String dbg_context,
                                            boolean writeJpg, boolean writeXmp, boolean createXmpIfNotExist)
             throws IOException {
+        long    startTimestamp = 0;
+        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+            startTimestamp = new Date().getTime();
+        }
         MediaXmpSegment xmp = MediaXmpSegment.loadXmpSidecarContentOrNull(absoluteJpgInPath, dbg_context);
         if ((createXmpIfNotExist) && (xmp == null)) {
             ImageMetaReader jpg = new ImageMetaReader().load(absoluteJpgInPath,null,null,
@@ -111,6 +122,10 @@ public class MetaWriterExifXml extends MetaApiWrapper  implements IMetaApi {
         result.absoluteJpgOutPath = (absoluteJpgOutPath != null) ? absoluteJpgOutPath : absoluteJpgInPath;
         result.absoluteJpgInPath = absoluteJpgInPath;
         result.deleteOriginalAfterFinish = deleteOriginalAfterFinish;
+        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+            result.dbgLoadEndTimestamp = new Date().getTime();
+            logger.debug(dbg_context + " load[msec]:" + (result.dbgLoadEndTimestamp - startTimestamp));
+        }
 
         return result;
     }
@@ -123,8 +138,23 @@ public class MetaWriterExifXml extends MetaApiWrapper  implements IMetaApi {
     }
 
     public int save(String dbg_context)  throws IOException {
-        return transferExif(dbg_context)
+        long    startTimestamp = 0;
+        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+            startTimestamp = new Date().getTime();
+        }
+
+        final int result = transferExif(dbg_context)
                 + transferXmp(dbg_context);
+
+        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+            long    endTimestamp = new Date().getTime();
+            logger.debug(dbg_context
+                    + " process[msec]:" + (startTimestamp - this.dbgLoadEndTimestamp)
+                    + ",save[msec]:" + (endTimestamp - startTimestamp)
+            );
+        }
+
+        return result;
     }
 
     private int transferXmp(String dbg_context) throws IOException {

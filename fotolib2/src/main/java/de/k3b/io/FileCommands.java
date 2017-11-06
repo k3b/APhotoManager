@@ -77,6 +77,11 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
             IProgessListener progessListenerOld = this.progessListener;
             this.progessListener = progessListener;
             try {
+                long    startTimestamp = 0;
+                if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+                    startTimestamp = new Date().getTime();
+                }
+
                 String[] fileNames = fotos.getFileNames();
                 long now = new Date().getTime();
 
@@ -88,19 +93,26 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                 openLogfile();
                 onPreProcess(dbgContext, OP_DELETE, fotos, fileNames, null);
                 for (int i = 0; i < maxCount; i++) {
+                    File file = fotos.getFile(i);
                     countdown--;
                     if (countdown <= 0) {
                         countdown = itemsPerProgress;
-                        if (!onProgress(itemcount, maxCount, null)) break;
+                        if (!onProgress(itemcount, maxCount, (file == null) ? null : file.getAbsolutePath())) break;
                     }
 
-                    File file = fotos.getFile(i);
                     if ((file != null) && deleteFileWithSidecar(file)) {
                         deleteCount++;
                         addTransactionLog(fotos.getId(i), file.getAbsolutePath(), now, MediaTransactionLogEntryType.DELETE, null);
                     }
                 }
                 onPostProcess(dbgContext, OP_DELETE, fotos, deleteCount, fileNames.length, fileNames, null);
+                if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+                    long dbgLoadEndTimestamp = new Date().getTime();
+
+                    FileCommands.logger.debug(dbgContext + " process items:" + deleteCount
+                            + ", msecs:" + (dbgLoadEndTimestamp - startTimestamp));
+                }
+
                 onProgress(itemcount, maxCount, null);
             } finally {
                 closeLogFile();
@@ -218,6 +230,11 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
     protected int moveOrCopyFiles(boolean move, String what, MediaDiffCopy exifChanges,
                                   SelectedFiles fotos, File[] destFiles,
                                   IProgessListener progessListener) {
+        long    startTimestamp = 0;
+        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+            startTimestamp = new Date().getTime();
+        }
+
         int itemCount = 0;
         int nameCount = fotos.getNonEmptyNameCount();
         int opCode = (move) ? OP_MOVE : OP_COPY;
@@ -248,15 +265,16 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                 TransactionLoggerBase logger = (exifChanges == null) ? null : new TransactionLoggerBase(this, now);
 
                 while (pos < fileCount) {
-                    countdown--;
-                    if (countdown <= 0) {
-                        countdown = itemsPerProgress;
-                        if (!onProgress(itemcount, maxCount, null)) break;
-                    }
-
                     File sourceFile = FileUtils.tryGetCanonicalFile(sourceFiles[pos]);
                     File destFile = FileUtils.tryGetCanonicalFile(destFiles[pos]);
                     Long id = ids[pos];
+
+                    countdown--;
+                    if (countdown <= 0) {
+                        countdown = itemsPerProgress;
+                        if (!onProgress(itemcount, maxCount, (sourceFile == null) ? null : sourceFile.toString())) break;
+                    }
+
                     File destRenamed;
                     final boolean sameFile = (sourceFile != null) && sourceFile.equals(destFile);
                     if ((exifChanges != null) && sameFile) {
@@ -319,6 +337,12 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
 
                 String[] modifiedDestFiles = (modifyCount > 0) ? mModifiedDestFiles.toArray(new String[modifyCount]) : null;
                 onPostProcess(what, opCode, fotos, itemCount, sourceFiles.length, modifiedSourceFiles, modifiedDestFiles);
+                if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+                    long dbgLoadEndTimestamp = new Date().getTime();
+
+                    FileCommands.logger.debug(what + " process items:" + itemCount
+                            + ",msecs:" + (dbgLoadEndTimestamp - startTimestamp));
+                }
 
             } finally {
 

@@ -81,7 +81,7 @@ public class JpgMetaWorkflow {
             boolean sameFile = (outFile.equals(inFilePath));
             try {
                 long lastModified = inFilePath.lastModified();
-                exif = MetaWriterExifXml.create (inFilePath.getAbsolutePath(), outFilePath, false, "MetaWriterExifXml: load");
+                exif = MetaWriterExifXml.create (inFilePath.getAbsolutePath(), outFilePath, false, "MetaWriterExifXml:");
                 debugExif(sb, "old", exif, inFilePath);
                 List<String> oldTags = exif.getTags();
 

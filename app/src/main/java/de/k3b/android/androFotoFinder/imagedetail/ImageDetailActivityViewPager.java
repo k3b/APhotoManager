@@ -1005,7 +1005,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     }
 
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
-        if (AndroidFileCommands.canProcessFile(this)) {
+        if (AndroidFileCommands.canProcessFile(this, false)) {
             MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
             destDir.defineDirectoryNavigation(new OSDirectory("/", null),
@@ -1022,7 +1022,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         return true;
     }
     private boolean onRenameDirQueston(final SelectedFiles currentFoto, final long fotoId, final String fotoPath, final String _newName) {
-        if (AndroidFileCommands.canProcessFile(this)) {
+        if (AndroidFileCommands.canProcessFile(this, false)) {
             final String newName = (_newName == null)
                     ? new File(getCurrentFilePath()).getName()
                     : _newName;

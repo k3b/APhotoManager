@@ -97,7 +97,7 @@ public class MediaDBActivity extends Activity {
     }
 
     private void startScanner(Uri uri) {
-        if ((AndroidFileCommands.canProcessFile(this)) && (uri != null)) {
+        if ((AndroidFileCommands.canProcessFile(this, false)) && (uri != null)) {
             mTask = new TaskLoadMediaDB();
             mTask.execute(uri);
 

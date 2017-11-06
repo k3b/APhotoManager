@@ -103,7 +103,7 @@ public class TagWorflow extends TagProcessor implements IProgessListener {
 
         List<String> currentItemTags = tagWorflowItemFromDB.tags;
         try {
-            MetaWriterExifXml exif = MetaWriterExifXml.create (tagWorflowItemFromDB.path, null, false, "updateTags: load");
+            MetaWriterExifXml exif = MetaWriterExifXml.create (tagWorflowItemFromDB.path, null, false, "updateTags:");
             List<String> tagsDbPlusFile = this.getUpdated(currentItemTags, exif.getTags(), null);
             if (tagsDbPlusFile != null) {
                 mustSave = true;
@@ -134,7 +134,7 @@ public class TagWorflow extends TagProcessor implements IProgessListener {
             // update batch
             long now = new Date().getTime();
             String tagsString = TagConverter.asBatString(removedTags);
-            AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(context);
+            AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(context, false);
             if (tagsString != null) {
                 cmd.addTransactionLog(tagWorflowItemFromDB.id, tagWorflowItemFromDB.path, now,
                         MediaTransactionLogEntryType.TAGSREMOVE, tagsString);

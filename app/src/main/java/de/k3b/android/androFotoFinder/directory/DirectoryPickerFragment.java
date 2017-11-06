@@ -387,7 +387,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     }
 
     private boolean onHideFolderMediaQuestion(final String path) {
-        if (AndroidFileCommands.canProcessFile(mContext)) {
+        if (AndroidFileCommands.canProcessFile(mContext, false)) {
             Dialogs dlg = new Dialogs() {
                 @Override
                 protected void onDialogResult(String result, Object[] parameters) {
@@ -429,7 +429,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             int msgId;
             if (newChild.osMkDirs()) {
                 // apmMove.cmd and apmCopy.cmd create dir on demand
-                AndroidFileCommands logger = AndroidFileCommands.createFileCommand(getActivity());
+                AndroidFileCommands logger = AndroidFileCommands.createFileCommand(getActivity(), false);
                 logger.log("rem mkdir \"", newPathAbsolute, "\"");
                 logger.closeLogFile();
                 msgId = R.string.mk_success_format;

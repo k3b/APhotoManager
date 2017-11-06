@@ -67,6 +67,7 @@ import de.k3b.transactionlog.TransactionLoggerBase;
 public class AndroidFileCommands extends FileCommands {
     private static final String SETTINGS_KEY_LAST_COPY_TO_PATH = "last_copy_to_path";
     private static final String mDebugPrefix = "AndroidFileCommands.";
+    private boolean isInBackground = false;
     protected Activity mContext; // must be activity because of fragmentManager
     private AlertDialog mActiveAlert = null;
     private boolean mHasNoMedia = false;
@@ -129,7 +130,10 @@ public class AndroidFileCommands extends FileCommands {
             this.mContext.getContentResolver().notifyChange(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, null, false);
             this.mHasNoMedia = false;
         }
-        Toast.makeText(mContext, message, Toast.LENGTH_LONG).show();
+
+        if (!isInBackground) {
+            Toast.makeText(mContext, message, Toast.LENGTH_LONG).show();
+        }
     }
 
     public static String getModifyMessage(Context context, int opCode, int modifyCount, int itemCount) {
@@ -231,7 +235,9 @@ public class AndroidFileCommands extends FileCommands {
         String errorMessage = checkWriteProtected(R.string.delete_menu_title, SelectedFiles.getFiles(pathNames));
 
         if (errorMessage != null) {
-            Toast.makeText(this.mContext, errorMessage, Toast.LENGTH_LONG).show();
+            if (!isInBackground) {
+                Toast.makeText(this.mContext, errorMessage, Toast.LENGTH_LONG).show();
+            }
         } else {
             StringBuffer names = new StringBuffer();
             for (String name : pathNames) {
@@ -314,7 +320,7 @@ public class AndroidFileCommands extends FileCommands {
             scanner.resumeIfNeccessary(); // if paused resume it.
             showMediaScannerStatus(scanner);
             return true;
-        } else if (AndroidFileCommands.canProcessFile(mContext)) {
+        } else if (AndroidFileCommands.canProcessFile(mContext, this.isInBackground)) {
             // show dialog to get start parameter
             DirectoryPickerFragment destDir = new MediaScannerDirectoryPickerFragment() {
                 /** do not use activity callback */
@@ -354,7 +360,7 @@ public class AndroidFileCommands extends FileCommands {
 
     /** answer from "which directory to start scanner from"? */
     private void onMediaScannerAnswer(String scanRootDir) {
-        if  ((AndroidFileCommands.canProcessFile(mContext)) || (RecursiveMediaScannerAsyncTask.sScanner == null)){
+        if  ((AndroidFileCommands.canProcessFile(mContext, this.isInBackground)) || (RecursiveMediaScannerAsyncTask.sScanner == null)){
 
             // remove ".nomedia" file from scan root
             File nomedia = new File(scanRootDir, MediaScanner.MEDIA_IGNORE_FILENAME);
@@ -400,7 +406,9 @@ public class AndroidFileCommands extends FileCommands {
             String errorMessage = checkWriteProtected(R.string.geo_edit_menu_title, files);
 
             if (errorMessage != null) {
-                Toast.makeText(this.mContext, errorMessage, Toast.LENGTH_LONG).show();
+                if (!isInBackground) {
+                    Toast.makeText(this.mContext, errorMessage, Toast.LENGTH_LONG).show();
+                }
             } else if (files != null) {
                 Context applicationContext = this.mContext.getApplicationContext();
                 int itemcount = 0;
@@ -447,27 +455,34 @@ public class AndroidFileCommands extends FileCommands {
     }
 
     @NonNull
-    public static AndroidFileCommands createFileCommand(Activity context) {
-        AndroidFileCommands cmd = new AndroidFileCommands().setContext(context);
+    public static AndroidFileCommands createFileCommand(Activity context, boolean isInBackground) {
+        AndroidFileCommands cmd = new AndroidFileCommands().setContext(context).setInBackground(isInBackground);
         cmd.createFileCommand();
         cmd.setLogFilePath(cmd.getDefaultLogFile());
         cmd.openLogfile();
         return cmd;
     }
 
+    private AndroidFileCommands setInBackground(boolean isInBackground) {
+        this.isInBackground = isInBackground;
+        return this;
+    }
+
     @Override
     protected boolean canProcessFile(int opCode) {
         if (opCode != OP_UPDATE) {
-            return AndroidFileCommands.canProcessFile(this.mContext);
+            return AndroidFileCommands.canProcessFile(this.mContext, this.isInBackground);
         }
         return true;
     }
 
-    public static boolean canProcessFile(Context context) {
+    public static boolean canProcessFile(Context context, boolean isInBackground) {
         if (!Global.mustCheckMediaScannerRunning) return true; // always allowed. DANGEROUS !!!
 
         if (MediaScanner.isScannerActive(context.getContentResolver())) {
-            Toast.makeText(context, R.string.scanner_err_busy, Toast.LENGTH_LONG).show();
+            if (!isInBackground) {
+                Toast.makeText(context, R.string.scanner_err_busy, Toast.LENGTH_LONG).show();
+            }
             return false;
         }
 

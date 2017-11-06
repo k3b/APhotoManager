@@ -931,7 +931,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     };
 
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
-        if (AndroidFileCommands.canProcessFile(this.getActivity())) {
+        if (AndroidFileCommands.canProcessFile(this.getActivity(), false)) {
             MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
             destDir.defineDirectoryNavigation(new OSDirectory("/", null),
