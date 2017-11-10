@@ -73,6 +73,7 @@ import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.DBUtils;
 import de.k3b.android.util.MediaScanner;
+import de.k3b.android.util.OsUtils;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
@@ -934,7 +935,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         if (AndroidFileCommands.canProcessFile(this.getActivity(), false)) {
             MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
-            destDir.defineDirectoryNavigation(new OSDirectory("/", null),
+            destDir.defineDirectoryNavigation(OsUtils.getRootOSDirectory(),
                     (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
                     lastCopyToPath);
             destDir.setContextMenuId(R.menu.menu_context_osdir);

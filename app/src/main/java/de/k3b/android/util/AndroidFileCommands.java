@@ -347,7 +347,7 @@ public class AndroidFileCommands extends FileCommands {
             };
 
             destDir.setTitleId(R.string.scanner_dir_question);
-            destDir.defineDirectoryNavigation(new OSDirectory("/", null),
+            destDir.defineDirectoryNavigation(OsUtils.getRootOSDirectory(),
                     FotoSql.QUERY_TYPE_UNDEFINED,
                     getLastCopyToPath());
             destDir.setContextMenuId(R.menu.menu_context_osdir);

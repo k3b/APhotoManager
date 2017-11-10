@@ -47,7 +47,7 @@ public class OSDirectory implements IDirectory {
         this(FileUtils.tryGetCanonicalFile(current), parent);
     }
 
-    public OSDirectory(File current, OSDirectory parent) {
+    protected OSDirectory(File current, OSDirectory parent) {
         this(current, parent, null);
     }
 
