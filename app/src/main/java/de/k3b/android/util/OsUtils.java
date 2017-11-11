@@ -61,7 +61,7 @@ public class OsUtils {
     }
 
     public static OSDirectory getRootOSDirectory() {
-        // #20: bugfix
+        // #103: bugfix
         // this works for android-4.4 an earlier and on rooted devices
         OSDirectory root = new OSDirectory("/", null);
         if (root.getChildren().size() == 0) {
