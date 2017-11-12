@@ -30,7 +30,7 @@
   <string name="bookmark_delete_error_format">لا يمكن إزالة العلامة المرجعية %s$1.</string>
   <string name="bookmark_delete_question">هل تريد إزالة هذه العلامة المرجعية؟</string>
   <string name="bookmark_file_comment_format">تم توليده في %3$s بـ %1$s إصدار %2$s شاهد
-https://github.com/k3b/APhotoManager/wiki/intentap#EXTRA_SQL لمزيد من التفاصيل</string>
+https://github.com/k3b/APhotoManager/wiki/intentapi#sql لمزيد من التفاصيل</string>
   <string name="bookmark_load_from_menu_title">تحميل العلامات المرجعية من&#8230;</string>
   <string name="bookmark_save_as_menu_title">حفظ العلامة المرجعية كـ &#8230;</string>
   <string name="btn_cancel">إلغاء</string>

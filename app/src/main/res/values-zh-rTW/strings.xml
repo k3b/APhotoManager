@@ -27,7 +27,7 @@
 	<string name="bookmark_delete_answer_format">刪除書簽 %1$s。</string>
 	<string name="bookmark_delete_error_format">不能刪除書簽 %1$s。</string>
 	<string name="bookmark_delete_question">刪除此書簽嗎？</string>
-	<string name="bookmark_file_comment_format">使用\'%1$s\'（%2$s版）基於%3$s 生成。詳情參見https://github.com/k3b/APhotoManager/wiki/intentap#EXTRA_SQL</string>
+	<string name="bookmark_file_comment_format">使用\'%1$s\'（%2$s版）基於%3$s 生成。詳情參見https://github.com/k3b/APhotoManager/wiki/intentapi#sql</string>
 	<string name="bookmark_load_from_menu_title">加載書簽&#8230;</string>
 	<string name="bookmark_save_as_menu_title">書簽另存為...</string>
 	<string name="btn_cancel">取消</string>

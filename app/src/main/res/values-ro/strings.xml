@@ -28,7 +28,7 @@
   <string name="bookmark_delete_error_format">Nu pot sterge marcajul%1$s. Nu poti sterge marcaju.</string>
   <string name="bookmark_delete_question">Sterg acest marcaj?</string>
   <string name="bookmark_file_comment_format">Obtinut %3$s cu \'%1$s\' Versiunea%2$s. Pentru detalii vezi
-https://github.com/k3b/APhotoManager/wiki/intentap#EXTRA_SQL</string>
+https://github.com/k3b/APhotoManager/wiki/intentapi#sql</string>
   <string name="bookmark_load_from_menu_title">Incarca marcaj de la &#8230;</string>
   <string name="bookmark_save_as_menu_title">Salveaza Marcajul ca &#8230;</string>
   <string name="btn_cancel">Anuleaza</string>

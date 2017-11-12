@@ -25,7 +25,7 @@
     <string name="bookmark_delete_answer_format">bookmark_delete_answer_format Deleted bookmark %1$s.</string>
     <string name="bookmark_delete_error_format">bookmark_delete_error_format Cannot delete bookmark %1$s.</string>
     <string name="bookmark_delete_question">bookmark_delete_question Delete this bookmark?</string>
-    <string name="bookmark_file_comment_format">bookmark_file_comment_format Generated on %3$s with \'%1$s\' Version %2$s. See https://github.com/k3b/APhotoManager/wiki/intentap#EXTRA_SQL for details</string>
+    <string name="bookmark_file_comment_format">bookmark_file_comment_format Generated on %3$s with \'%1$s\' Version %2$s. See https://github.com/k3b/APhotoManager/wiki/intentapi#sql for details</string>
     <string name="bookmark_load_from_menu_title">bookmark_load_from_menu_title Load bookmark from &#8230;</string>
     <string name="bookmark_save_as_menu_title">bookmark_save_as_menu_title Save bookmark as &#8230;</string>
     <string name="btn_cancel">btn_cancel Cancel</string>
