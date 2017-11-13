@@ -43,9 +43,10 @@ android {
         // 0.6.0.170502 (30)    workaround "android stock icon as activity icon breaks aapt check in frdoid build"
         // 0.6.1.170803 (31)    edit exif; enhanced media scanner
         // 0.6.1.170816 (32)    Bugfix crash android-7.1
+        // 0.6.2.171114 (33)    Bugfix: non-root android-5 (or newer) direcotry picker not working because of permissions. Necessary for copy/move file commands.
 
-        versionCode = 32
-        versionName = '0.6.1.170816'
+        versionCode = 33
+        versionName = '0.6.2.171114'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
