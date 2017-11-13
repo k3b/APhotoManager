@@ -80,6 +80,9 @@ public class Global {
     /** true every time a .nomedia dir/file is opend remeove items from db.  */
     public static final boolean mustRemoveNOMEDIAfromDB = true;
 
+    /** #93 false: implementation not finished yet. intermediate release for hotfix. */
+    public static final boolean apmEnabled = false;
+
     private static final File externalStorageDirectory = Environment.getExternalStorageDirectory();
 
     /** defines the filesystem's directory where [Bookmark files](Bookmarks) are stored and loaded from. */

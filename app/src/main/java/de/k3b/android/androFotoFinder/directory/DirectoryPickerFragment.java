@@ -343,6 +343,12 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                 menuItem.setVisible(true);
             }
 
+            if (!Global.apmEnabled) {
+                menuItem = popup.getMenu().findItem(R.id.cmd_apm_edit);
+                if (menuItem != null) {
+                    menuItem.setVisible(false);
+                }
+            }
         }
         return popup;
     }
