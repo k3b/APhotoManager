@@ -25,24 +25,25 @@
   <br />Features:
   <ul>
     <li>Can handle big image collections (15000+ images in 1000+ folders)</li>
-    <li>Uses Android&#39;s image content provider. No initial image scan necessary.</li>
+    <li>Uses Android&#39;s image content provider. App is usabla without initial image scan.</li>
     <li>
     <a href="https://github.com/k3b/APhotoManager/wiki/Filter-View">Find images</a> via
     <ul>
-      <li>Quicksearch in Folder, Filename, Imagetitle, Imagedescription, Tags(Keywords) with wildcards (new in version 0.6.0)</li>
+      <li>Quicksearch in Folder, Filename, Imagetitle, Imagedescription, Tags(Keywords) with wildcards</li>
       <li>folder (with hierarchical
       <a href="https://github.com/k3b/APhotoManager/wiki/Folder-Picker">folder picker</a>)</li>
       <li>wildcards that match folder/filename</li>
       <li>date</li>
-	  <li>Included/Excluded Tags(Keywords) with wildcards (new in version 0.6.0)</li>
+	  <li>Included/Excluded Tags(Keywords) with wildcards</li>
       <li>area in
       <a href="https://github.com/k3b/APhotoManager/wiki/geographic-map">geographic map</a> (if image has GPS Exif info)</li>
+      <li>rating</li>
     </ul></li>
     <li>Shows result in a scrollable
     <a href="https://github.com/k3b/APhotoManager/wiki/Gallery-View">gallery view</a> with
     <ul>
       <li>support for multiple photo selection</li>
-      <li>file operations Copy, Move, Delete, Share, Set Geo, Set Tags</li>
+      <li>file operations Copy, Move, Delete, Share, Set Geo, Set Tags, Edit Exif</li>
     </ul></li>
     <li>
     <a href="https://github.com/k3b/APhotoManager/wiki/Image-View">Photo-detail-view</a> with
@@ -50,13 +51,13 @@
       <li>image zoom</li>
       <li>swipe to go to next/previous image</li>
       <li>shows extended image info (Exif, IPTC, XMP, ICC)</li>
-      <li>file operations Copy, Move, Delete, Rename, Share, Set Geo, Set Tags</li>
+      <li>file operations Copy, Move, Delete, Rename, Share, Set Geo, Set Tags, Edit Exif</li>
     </ul></li>
     <li>The
     <a href="https://github.com/k3b/APhotoManager/wiki/geographic-map">geographic map</a> shows markers at places where photos
     were taken</li>
     <li>Changes in Photo-Metadata (Exif-Geo, Tags(Keywords), Path, Filename, ...) can be
-    <a href="https://github.com/k3b/APhotoManager/wiki/sync">Synced between Android and MS Windows PC</a>.(new in version 0.6.0)</li>
+    <a href="https://github.com/k3b/APhotoManager/wiki/sync">Synced between Android and MS Windows PC</a>.</li>
     <li>File operations
       <ul>
         <li>will also update Android&#39;s image content provider database</li>
