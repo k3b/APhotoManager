@@ -6,7 +6,7 @@ Enhanced Android [Gallery App](https://github.com/k3b/APhotoManager/wiki/Gallery
 find, sort, view, copy, delete, set gps exif data, set tags(Keywords), send, edit exif, ... .
 
 ---<br/>
-[<img src="uptodown.png" alt="available on upToDown store" height="82" width="324">](https://a-photo-manager.en.uptodown.com/android) [<img src="fdroid.png" alt="available on F-Droid app store" height="82" width="324">](https://f-droid.org/app/de.k3b.android.androFotoFinder)<br/>
+[<img src="https://github.com/k3b/APhotoManager/wiki/uptodown.png" alt="available on upToDown store" height="82" width="324">](https://a-photo-manager.en.uptodown.com/android) [<img src="https://github.com/k3b/APhotoManager/wiki/fdroid.png" alt="available on F-Droid app store" height="82" width="324">](https://f-droid.org/app/de.k3b.android.androFotoFinder)<br/>
 [Downloads](https://github.com/k3b/APhotoManager/wiki/Download)<br/>
 **[DISCLAIMER Be cautious if you download "A Photo Manager" where the apk size is bigger than 1.5 Megabytes](https://github.com/k3b/APhotoManager/wiki/Download)**:<br/>
 ---<br/>
@@ -30,7 +30,7 @@ find, sort, view, copy, delete, set gps exif data, set tags(Keywords), send, edi
 
 * Current release
   * <img src="https://img.shields.io/github/release/k3b/APhotoManager.svg?maxAge=3600" />
-  * [<img src="uptodown.png" alt="available on upToDown store" height="82" width="324">](https://a-photo-manager.en.uptodown.com/android) [<img src="fdroid.png" alt="available on F-Droid app store" height="82" width="324">](https://f-droid.org/app/de.k3b.android.androFotoFinder) 
+  * [<img src="https://github.com/k3b/APhotoManager/wiki/uptodown.png" alt="available on upToDown store" height="82" width="324">](https://a-photo-manager.en.uptodown.com/android) [<img src="https://github.com/k3b/APhotoManager/wiki/fdroid.png" alt="available on F-Droid app store" height="82" width="324">](https://f-droid.org/app/de.k3b.android.androFotoFinder) 
   * [<img src="https://img.shields.io/github/license/k3b/APhotoManager.svg"></img>](https://github.com/k3b/APhotoManager/blob/master/LICENSE) or later.
   * Code Quality [![Codacy Badge](https://api.codacy.com/project/badge/Grade/df65509fc428454791603de5f3bb7707)](https://www.codacy.com/app/klaus3b-github/APhotoManager?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=k3b/APhotoManager&amp;utm_campaign=Badge_Grade)
   * Source code [branch FDroid <img src="https://travis-ci.org/k3b/APhotoManager.svg?branch=FDroid" alt="link to buldserver"  />](https://travis-ci.org/k3b/APhotoManager)
