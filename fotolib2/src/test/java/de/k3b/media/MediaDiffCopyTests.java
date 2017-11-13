@@ -39,7 +39,7 @@ public class MediaDiffCopyTests {
     public void shouldHandleNoChanges() {
         IMetaApi initialData = TestUtil.createTestMediaDTO(1);
         IMetaApi modifiedData = TestUtil.createTestMediaDTO(1);
-        MediaDiffCopy sut = new MediaDiffCopy().setDiff(initialData, modifiedData);
+        MediaDiffCopy sut = new MediaDiffCopy(true).setDiff(initialData, modifiedData);
 
         Assert.assertEquals("null means no changes: " + sut, null, sut);
     }
@@ -49,7 +49,7 @@ public class MediaDiffCopyTests {
     public void shouldHandleGpsNanNullNoValue() {
         IMetaApi initialData = TestUtil.createTestMediaDTO(1).setLatitudeLongitude(Double.NaN, Double.NaN);
         IMetaApi modifiedData = TestUtil.createTestMediaDTO(1).setLatitudeLongitude(null, IGeoPointInfo.NO_LAT_LON);
-        MediaDiffCopy sut = new MediaDiffCopy().setDiff(initialData, modifiedData);
+        MediaDiffCopy sut = new MediaDiffCopy(true).setDiff(initialData, modifiedData);
 
         Assert.assertEquals("null means no changes: " + sut, null, sut);
     }
@@ -58,7 +58,7 @@ public class MediaDiffCopyTests {
     public void shouldOverwriteNullDate() {
         IMetaApi initialData = TestUtil.createTestMediaDTO(1).setDateTimeTaken(null);
         IMetaApi modifiedData = TestUtil.createTestMediaDTO(1);
-        MediaDiffCopy sut = new MediaDiffCopy().setDiff(initialData, modifiedData);
+        MediaDiffCopy sut = new MediaDiffCopy(true).setDiff(initialData, modifiedData);
 
         IMetaApi destintaion = new MediaDTO().setDateTimeTaken(new Date());
         int numberofChanges = sut.applyChanges(destintaion).size();
@@ -70,7 +70,7 @@ public class MediaDiffCopyTests {
     public void shouldSetDateNull() {
         IMetaApi initialData = TestUtil.createTestMediaDTO(1);
         IMetaApi modifiedData = TestUtil.createTestMediaDTO(1).setDateTimeTaken(null);
-        MediaDiffCopy sut = new MediaDiffCopy().setDiff(initialData, modifiedData);
+        MediaDiffCopy sut = new MediaDiffCopy(true).setDiff(initialData, modifiedData);
 
         IMetaApi destintaion = new MediaDTO().setDateTimeTaken(new Date());
         int numberofChanges = sut.applyChanges(destintaion).size();
@@ -85,24 +85,24 @@ public class MediaDiffCopyTests {
         IMetaApi initialData  = TestUtil.createTestMediaDTO(1).setDateTimeTaken(DateUtil.parseIsoDate("2001-01-01T04:11:52"));
         IMetaApi modifiedData = TestUtil.createTestMediaDTO(1).setDateTimeTaken(DateUtil.parseIsoDate("2017-07-03T14:22:52"));
         // Added 16 years 6 months 2 days 10 hours and 11 minutes.
-        MediaDiffCopy sut = new MediaDiffCopy().setDiff(initialData, modifiedData);
+        MediaDiffCopy sut = new MediaDiffCopy(true).setDiff(initialData, modifiedData);
 
         // example date1
         IMetaApi destintaion = new MediaDTO().setDateTimeTaken(DateUtil.parseIsoDate("2001-01-03T08:06:05:52"));
         int numberofChanges = sut.applyChanges(destintaion).size();
-        Assert.assertEquals("#changed date1" + sut, "2017-07-05T18:17:05", DateUtil.toIsoDateString(destintaion.getDateTimeTaken()));
+        Assert.assertEquals("#changed date1" + sut, "2017-07-05T18:17:05", DateUtil.toIsoDateTimeString(destintaion.getDateTimeTaken()));
         Assert.assertEquals("#changes1 " + sut, 1, numberofChanges);
 
         // example date2
         destintaion = new MediaDTO().setDateTimeTaken(DateUtil.parseIsoDate("2001-01-04T09:12:08"));
         numberofChanges = sut.applyChanges(destintaion).size();
-        Assert.assertEquals("#changed date2" + sut, "2017-07-06T19:23:08", DateUtil.toIsoDateString(destintaion.getDateTimeTaken()));
+        Assert.assertEquals("#changed date2" + sut, "2017-07-06T19:23:08", DateUtil.toIsoDateTimeString(destintaion.getDateTimeTaken()));
         Assert.assertEquals("#changes2 " + sut, 1, numberofChanges);
 
         // special use case overwrite null in shift mode
         destintaion = new MediaDTO().setDateTimeTaken(null);
         numberofChanges = sut.applyChanges(destintaion).size();
-        Assert.assertEquals("#changed verwrite null in shift mode" + sut, "2017-07-03T14:22:52", DateUtil.toIsoDateString(destintaion.getDateTimeTaken()));
+        Assert.assertEquals("#changed verwrite null in shift mode" + sut, "2017-07-03T14:22:52", DateUtil.toIsoDateTimeString(destintaion.getDateTimeTaken()));
         Assert.assertEquals("#changes3 " + sut, 1, numberofChanges);
 
     }
@@ -114,7 +114,7 @@ public class MediaDiffCopyTests {
 
         IMetaApi initialData  = TestUtil.createTestMediaDTO(1); initialData.getTags().add(removed);
         IMetaApi modifiedData = TestUtil.createTestMediaDTO(1); modifiedData.getTags().add(added);
-        MediaDiffCopy sut = new MediaDiffCopy().setDiff(initialData, modifiedData);
+        MediaDiffCopy sut = new MediaDiffCopy(true).setDiff(initialData, modifiedData);
 
         IMetaApi destintaion = new MediaDTO();
         List<String> tagsUnderTest = TestUtil.createTestMediaDTO(2).getTags();
@@ -132,7 +132,7 @@ public class MediaDiffCopyTests {
     public void shouldApplyTitleDelta() {
         IMetaApi initialData  = TestUtil.createTestMediaDTO(1).setTitle("Hello world");
         IMetaApi modifiedData = TestUtil.createTestMediaDTO(1).setTitle("+ appended");
-        MediaDiffCopy sut = new MediaDiffCopy().setDiff(initialData, modifiedData);
+        MediaDiffCopy sut = new MediaDiffCopy(true).setDiff(initialData, modifiedData);
 
         IMetaApi destintaion = new MediaDTO().setTitle("some title");
         int numberofChanges = sut.applyChanges(destintaion).size();
@@ -157,7 +157,7 @@ public class MediaDiffCopyTests {
     public void shouldApplyDescriptionDelta() {
         IMetaApi initialData  = TestUtil.createTestMediaDTO(1).setDescription("Hello world");
         IMetaApi modifiedData = TestUtil.createTestMediaDTO(1).setDescription("+ appended");
-        MediaDiffCopy sut = new MediaDiffCopy().setDiff(initialData, modifiedData);
+        MediaDiffCopy sut = new MediaDiffCopy(true).setDiff(initialData, modifiedData);
 
         IMetaApi destintaion = new MediaDTO().setDescription("some Description");
         int numberofChanges = sut.applyChanges(destintaion).size();
@@ -170,7 +170,7 @@ public class MediaDiffCopyTests {
     public void shouldToString() {
         IMetaApi initialData = TestUtil.createTestMediaDTO(1);
         IMetaApi modifiedData = TestUtil.createTestMediaDTO(2);
-        MediaDiffCopy sut = new MediaDiffCopy().setDiff(initialData, modifiedData);
+        MediaDiffCopy sut = new MediaDiffCopy(true).setDiff(initialData, modifiedData);
 
         Assert.assertNotNull(sut.toString(), sut.toString());
     }

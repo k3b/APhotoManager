@@ -34,12 +34,9 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,20 +87,12 @@ abstract public class MediaScanner  {
     protected static final String DB_TITLE = MediaStore.MediaColumns.TITLE;
     protected static final String DB_DISPLAY_NAME = MediaStore.MediaColumns.DISPLAY_NAME;
     protected static final String DB_DATA = MediaStore.MediaColumns.DATA;
-    protected static final String DB_DATE_ADDED = MediaStore.Images.ImageColumns.DATE_ADDED;
 
     public static final int DEFAULT_SCAN_DEPTH = 22;
     public static final String MEDIA_IGNORE_FILENAME = FileUtils.MEDIA_IGNORE_FILENAME; //  MediaStore.MEDIA_IGNORE_FILENAME;
 
     /** singelton */
     private static MediaScanner sInstance = null;
-
-    public static final FilenameFilter JPG_FILENAME_FILTER = new FilenameFilter() {
-        @Override
-        public boolean accept(File dir, String filename) {
-            return MediaUtil.isImage(filename, false);
-        }
-    };
 
     public final Context mContext;
 
@@ -226,7 +215,8 @@ abstract public class MediaScanner  {
                     Long id = inMediaDb.get(fileName);
                     if (id != null) {
                         // already exists
-                        modifyCount += update_Android42("MediaScanner.insertIntoMediaDatabase already existing ", context, id, new File(fileName));
+                        modifyCount += update_Android42("MediaScanner.insertIntoMediaDatabase already existing "
+                                , context, id, new File(fileName));
                     } else {
                         modifyCount += insert_Android42("MediaScanner.insertIntoMediaDatabase new item ", context, new File(fileName));
                     }
@@ -234,6 +224,20 @@ abstract public class MediaScanner  {
             }
         }
         return modifyCount;
+    }
+
+    /**  */
+    public Long insertOrUpdateMediaDatabase(String dbgContext, Context context,
+                                            String dbUpdateFilterJpgFullPathName, File currentJpgFile,
+                                            Long updateSuccessValue) {
+        if ((currentJpgFile != null) && currentJpgFile.exists() && currentJpgFile.canRead()) {
+            ContentValues values = createDefaultContentValues();
+            getExifFromFile(values, currentJpgFile);
+            Long result = FotoSql.insertOrUpdateMediaDatabase(dbgContext, context, dbUpdateFilterJpgFullPathName, values, updateSuccessValue);
+
+            return result;
+        }
+        return null;
     }
 
     /** delete oldPathNames from media database */
@@ -324,23 +328,26 @@ abstract public class MediaScanner  {
     protected MediaContentValues getExifFromFile(ContentValues values, File jpgFile) {
         String absoluteJpgPath = FileUtils.tryGetCanonicalPath(jpgFile, jpgFile.getAbsolutePath());
 
-        values.put(DB_DATE_MODIFIED, jpgFile.lastModified() / 1000);
-        values.put(DB_SIZE, jpgFile.length());
-
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true; // only need with/height but not content
         BitmapFactory.decodeFile(absoluteJpgPath, options);
         int mHeight = options.outHeight;
         int mWidth = options.outWidth;
+        String imageType = options.outMimeType;
+
+        MediaXmpSegment xmpContent = MediaXmpSegment.loadXmpSidecarContentOrNull(absoluteJpgPath, "getExifFromFile");
+        final long xmpFilelastModified = getXmpFilelastModified(xmpContent);
+
+        values.put(DB_DATE_MODIFIED, jpgFile.lastModified() / 1000);
+        values.put(DB_SIZE, jpgFile.length());
+
         if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) && mWidth > 0 && mHeight > 0) {
             values.put(DB_WIDTH, mWidth);
             values.put(DB_HEIGHT, mHeight);
         }
-        String imageType = options.outMimeType;
         values.put(DB_MIME_TYPE, imageType);
 
-        MediaXmpSegment xmpContent = MediaXmpSegment.loadXmpSidecarContentOrNull(absoluteJpgPath, "getExifFromFile");
-        TagSql.setXmpFileModifyDate(values, getXmpFilelastModified(xmpContent));
+        TagSql.setXmpFileModifyDate(values, xmpFilelastModified);
 
         IMetaApi exif = loadNonMediaValues(values, absoluteJpgPath, xmpContent);
 
@@ -458,8 +465,7 @@ abstract public class MediaScanner  {
     private int insert_Android42(String dbgContext, Context context, File file) {
         if ((file != null) && file.exists() && file.canRead()) {
             ContentValues values = createDefaultContentValues();
-            long now = new Date().getTime();
-            values.put(DB_DATE_ADDED, now / 1000);//sec
+            FotoSql.addDateAdded(values);
 
             getExifFromFile(values, file);
             return (null != FotoSql.execInsert(dbgContext, context, values)) ? 1 : 0;

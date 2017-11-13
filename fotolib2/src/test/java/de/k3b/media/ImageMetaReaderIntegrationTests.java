@@ -80,7 +80,7 @@ public class ImageMetaReaderIntegrationTests {
     @Test
     public void shouldGetDateTimeTaken() throws IOException
     {
-        Assert.assertEquals("1962-11-07T09:38:46", DateUtil.toIsoDateString(sut.getDateTimeTaken()));
+        Assert.assertEquals("1962-11-07T09:38:46", DateUtil.toIsoDateTimeString(sut.getDateTimeTaken()));
     }
 
     @Test

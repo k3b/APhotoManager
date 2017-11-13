@@ -30,7 +30,8 @@ import java.util.List;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.util.AndroidFileCommands;
-import de.k3b.database.SelectedFiles;
+import de.k3b.io.IProgessListener;
+import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.FileCommands;
 import de.k3b.media.MediaUtil;
 import de.k3b.media.MediaXmpSegment;
@@ -47,7 +48,7 @@ import de.k3b.transactionlog.MediaTransactionLogEntryType;
  * Created by k3b on 09.01.2017.
  */
 
-public class TagWorflow extends TagProcessor {
+public class TagWorflow extends TagProcessor implements IProgessListener {
     private List<TagSql.TagWorflowItem> items = null;
     private Activity context;
 
@@ -86,7 +87,7 @@ public class TagWorflow extends TagProcessor {
                 progressCountDown--;
                 if (progressCountDown < 0) {
                     progressCountDown = 10;
-                    onProgress(itemCount, total, item.path);
+                    if (!onProgress(itemCount, total, item.path)) break;
                 }
             } // for each image
         }
@@ -102,7 +103,7 @@ public class TagWorflow extends TagProcessor {
 
         List<String> currentItemTags = tagWorflowItemFromDB.tags;
         try {
-            MetaWriterExifXml exif = MetaWriterExifXml.create (tagWorflowItemFromDB.path, "updateTags: load");
+            MetaWriterExifXml exif = MetaWriterExifXml.create (tagWorflowItemFromDB.path, null, false, "updateTags:");
             List<String> tagsDbPlusFile = this.getUpdated(currentItemTags, exif.getTags(), null);
             if (tagsDbPlusFile != null) {
                 mustSave = true;
@@ -133,16 +134,14 @@ public class TagWorflow extends TagProcessor {
             // update batch
             long now = new Date().getTime();
             String tagsString = TagConverter.asBatString(removedTags);
-            AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(context);
+            AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(context, false);
             if (tagsString != null) {
-                cmd.log(MediaTransactionLogEntryType.TAGSREMOVE.getCommand(tagWorflowItemFromDB.path, tagsString, false));
                 cmd.addTransactionLog(tagWorflowItemFromDB.id, tagWorflowItemFromDB.path, now,
                         MediaTransactionLogEntryType.TAGSREMOVE, tagsString);
             }
 
             tagsString = TagConverter.asBatString(addedTags);
             if (tagsString != null) {
-                cmd.log(MediaTransactionLogEntryType.TAGSADD.getCommand(tagWorflowItemFromDB.path, tagsString, false));
                 cmd.addTransactionLog(tagWorflowItemFromDB.id, tagWorflowItemFromDB.path, now,
                         MediaTransactionLogEntryType.TAGSADD, tagsString);
             }
@@ -159,7 +158,8 @@ public class TagWorflow extends TagProcessor {
     }
 
     /** periodically called while work in progress. can be overwritten to supply feedback to user */
-    protected void onProgress(int itemCount, int total, String message) {
+    public boolean onProgress(int itemCount, int total, String message) {
+        return true;
     }
 
     private List<String> loadTags(File xmpFile) {

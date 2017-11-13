@@ -41,8 +41,8 @@ import de.k3b.io.IExpandableListViewNavigation;
  */
 
 public class DirectoryListAdapter extends BaseExpandableListAdapter implements IExpandableListViewNavigation<Object, Object> {
- 
- 
+
+
     private LayoutInflater inflater;
     private IExpandableListViewNavigation<IDirectory,IDirectory> mParent;
     private ExpandableListView accordion;
@@ -182,6 +182,9 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
             case IDirectory.DIR_FLAG_NOMEDIA_ROOT:
                 formatPrefix = "*[";
                 formatSuffix = "]";
+                break;
+            case IDirectory.DIR_FLAG_APM_DIR:
+                formatPrefix = IDirectory.APM_DIR_PREFIX;
                 break;
             case IDirectory.DIR_FLAG_NONE:
                 if ((options & Directory.OPT_AS_HTML) != 0) {

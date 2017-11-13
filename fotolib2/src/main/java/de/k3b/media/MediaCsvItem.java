@@ -28,6 +28,8 @@ import de.k3b.io.GeoUtil;
 import de.k3b.tagDB.TagConverter;
 
 /**
+ * csv storage for IMetaApi items
+ *
  * Created by k3b on 10.10.2016.
  */
 

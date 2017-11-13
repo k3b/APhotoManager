@@ -33,7 +33,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
 import de.k3b.android.util.MediaScanner;
-import de.k3b.database.SelectedItems;
+import de.k3b.io.collections.SelectedItems;
 
 /**
  * Created by k3b on 30.05.2016.

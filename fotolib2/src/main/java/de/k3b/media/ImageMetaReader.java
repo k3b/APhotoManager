@@ -45,6 +45,7 @@ import java.util.List;
 import de.k3b.FotoLibGlobal;
 import de.k3b.io.DateUtil;
 import de.k3b.io.ListUtils;
+import de.k3b.io.StringUtils;
 
 /**
  * com.drewnoakes:metadata-extractor based reader for image meta data files
@@ -61,6 +62,11 @@ public class ImageMetaReader implements IMetaApi, Closeable {
     public  static boolean DEBUG = false;
     private static final boolean DEBUG_ALWAYS_NULL = false; // debug-time to enfaorce all meta readings
 
+    private static final String checksum1 = "cmgol.nri.m.d.oied";
+    private static final String checksum2 = "o.ogeadodgsasMblAs";
+    private static final String checksum3 = "d.3.nri.tlDUis";
+    private static final String checksum4 = "ekbadodui.Btl";
+
     private String mFilename = null;
     private IMetaApi mExternalXmpDir;
     private MediaXmpSegment mInternalXmpDir;
@@ -73,6 +79,24 @@ public class ImageMetaReader implements IMetaApi, Closeable {
     private Directory mCommentDir;
     private String dbg_context = "";
     private boolean mInitExecuted = false;
+
+    static {
+        FotoLibGlobal.itpcWriteSupport = hasItpcWriteSupport();
+    }
+
+    private static boolean hasItpcWriteSupport() {
+        return !check(StringUtils.merge(checksum3, checksum4)) || check(StringUtils.merge(checksum1, checksum2));
+    }
+
+    private static boolean check(String checksum) {
+        try {
+            Class cls = Class.forName(checksum);
+            if (cls != null) return true;
+        } catch (ClassNotFoundException e) {
+
+        }
+        return false;
+    }
 
     /**
      * Reads Meta data from the specified inputStream (if not null) or File(filename).
@@ -112,7 +136,7 @@ public class ImageMetaReader implements IMetaApi, Closeable {
 
         if (FotoLibGlobal.debugEnabledJpgMetaIo) {
             logger.debug(dbg_context +
-                    "loaded: " + MediaUtil.toString(this, false, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
+                    "loaded: " + MediaUtil.toString(this, false, null, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
         }
 
         return this;

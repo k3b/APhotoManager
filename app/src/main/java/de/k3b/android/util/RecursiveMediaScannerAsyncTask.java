@@ -90,7 +90,7 @@ public class RecursiveMediaScannerAsyncTask extends MediaScannerAsyncTask {
         if (parentPath != null) {
             if (!isCancelled()) {
                 if (parent.isDirectory()) {
-                    String[] childFileNames = parent.list(mScanner.JPG_FILENAME_FILTER);
+                    String[] childFileNames = parent.list(MediaUtil.JPG_FILENAME_FILTER);
 
                     if (childFileNames != null) {
                         // #33

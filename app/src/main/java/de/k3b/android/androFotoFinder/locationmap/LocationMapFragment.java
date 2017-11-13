@@ -76,7 +76,7 @@ import de.k3b.android.osmdroid.forge.MapsForgeSupport;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.database.QueryParameter;
-import de.k3b.database.SelectedItems;
+import de.k3b.io.collections.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoInfoHandler;
 import de.k3b.geo.api.IGeoPointInfo;

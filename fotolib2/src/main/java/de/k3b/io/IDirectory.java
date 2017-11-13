@@ -31,6 +31,9 @@ public interface IDirectory {
     public static final int DIR_FLAG_NOMEDIA        = 1; // below linux hidden dir ".*" or below DIR_FLAG_NOMEDIA_ROOT
     public static final int DIR_FLAG_NOMEDIA_ROOT   = 2; // containing ".nomedia"
 
+    public static final int DIR_FLAG_APM_DIR        = 8; // containing ".apm"
+    String APM_DIR_PREFIX = "§ ";
+
     String getRelPath();
     String getAbsolute();
 

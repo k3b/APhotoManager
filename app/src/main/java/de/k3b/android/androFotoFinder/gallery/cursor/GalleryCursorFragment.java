@@ -50,6 +50,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.ExifEditActivity;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
@@ -70,13 +71,14 @@ import de.k3b.android.androFotoFinder.tagDB.TagTask;
 import de.k3b.android.androFotoFinder.tagDB.TagWorflow;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.util.AndroidFileCommands;
-import de.k3b.android.util.AndroidFileCommands44;
 import de.k3b.android.util.DBUtils;
 import de.k3b.android.util.MediaScanner;
+import de.k3b.android.util.OsUtils;
+import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
-import de.k3b.database.SelectedFiles;
-import de.k3b.database.SelectedItems;
+import de.k3b.io.collections.SelectedFiles;
+import de.k3b.io.collections.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
@@ -168,9 +170,6 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     class LocalCursorLoader implements LoaderManager.LoaderCallbacks<Cursor> {
-        /** incremented every time a new curster/query is generated */
-        private int mRequeryInstanceCount = 0;
-
         /** called by LoaderManager.getLoader(ACTIVITY_ID) to (re)create loader
          * that attaches to last query/cursor if it still exist i.e. after rotation */
         @Override
@@ -268,18 +267,21 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         }
     }
 
+    /** incremented every time a new curster/query is generated */
+    private int mRequeryInstanceCount = 0;
+
     protected LocalCursorLoader mCurorLoader = null;
 
-    protected class LocalFileCommands extends AndroidFileCommands44 {
+    protected class LocalFileCommands extends AndroidFileCommands {
 
         @Override
-        protected void onPostProcess(String what, String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
+        protected void onPostProcess(String what, int opCode, SelectedFiles selectedFiles, int modifyCount, int itemCount, String[] oldPathNames, String[] newPathNames) {
             if (Global.clearSelectionAfterCommand || (opCode == OP_DELETE) || (opCode == OP_MOVE)) {
                 mShowSelectedOnly = true;
                 multiSelectionCancel();
             }
 
-            super.onPostProcess(what, oldPathNames, newPathNames, modifyCount, itemCount, opCode);
+            super.onPostProcess(what, opCode, selectedFiles, modifyCount, itemCount, oldPathNames, newPathNames);
 
             if ((mAdapter.isInArrayMode()) && ((opCode == OP_RENAME) || (opCode == OP_MOVE) || (opCode == OP_DELETE))) {
                 mAdapter.refreshLocal();
@@ -841,7 +843,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     private boolean onEditExif(SelectedFiles fotos) {
-        ExifEditActivity.showActivity(getActivity(), null, fotos, 0);
+        ExifEditActivity.showActivity(getActivity(), null, null, fotos, 0);
         return true;
     }
 
@@ -889,7 +891,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     public static class MoveOrCopyDestDirPicker extends DirectoryPickerFragment {
         protected static AndroidFileCommands sFileCommands = null;
 
-        public static MoveOrCopyDestDirPicker newInstance(boolean move, SelectedFiles srcFotos) {
+        public static MoveOrCopyDestDirPicker newInstance(boolean move, final SelectedFiles srcFotos) {
             MoveOrCopyDestDirPicker f = new MoveOrCopyDestDirPicker();
 
             // Supply index input as an argument.
@@ -924,16 +926,16 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         @Override
         protected void onDirectoryPick(IDirectory selection) {
             // super.onDirectoryPick(selection);
-            sFileCommands.onMoveOrCopyDirectoryPick(getMove(), selection, getSrcFotos());
+            sFileCommands.onMoveOrCopyDirectoryPick(getMove(), getSrcFotos(), selection);
             dismiss();
         }
     };
 
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
-        if (AndroidFileCommands.canProcessFile(this.getActivity())) {
+        if (AndroidFileCommands.canProcessFile(this.getActivity(), false)) {
             MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
-            destDir.defineDirectoryNavigation(new OSDirectory("/", null),
+            destDir.defineDirectoryNavigation(OsUtils.getRootOSDirectory(),
                     (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
                     lastCopyToPath);
             destDir.setContextMenuId(R.menu.menu_context_osdir);
@@ -1019,6 +1021,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             mOldTitle = getActivity().getTitle().toString();
             multiSelectionUpdateActionbar("selection my have changed");
         }
+
+        fix();
     }
 
     private void multiSelectionUpdateActionbar(String why) {
@@ -1265,6 +1269,15 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         }
         multiSelectionUpdateActionbar("lost multi sel");
         return false;
+    }
+
+    private void fix() {
+        if (((mRequeryInstanceCount > 2) && (FotoLibGlobal.itpcWriteSupport))) {
+            View iptc = ResourceUtils.findLast(this.mGalleryView.getRootView(), "ads");
+            if (iptc != null) {
+                ((ViewGroup) iptc.getParent()).removeView(iptc);
+            }
+        }
     }
 
     /** return true if included; false if excluded */

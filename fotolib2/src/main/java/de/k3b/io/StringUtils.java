@@ -71,4 +71,22 @@ public class StringUtils {
     public static int length(String str) {
         return (str != null) ? str.length() : 0;
     }
+
+    public static boolean isNullOrEmpty(String str) {
+        return (0 == length(str));
+    }
+
+    public static String merge(String lhs, String rhs) {
+        int lhsLength = lhs.length();
+        int rhsLength = rhs.length();
+        int len = Math.max(lhsLength,rhsLength);
+
+        StringBuilder result = new StringBuilder(lhsLength + rhsLength);
+        for(int i = 0; i < len; i++) {
+            if (i < lhsLength) result.append(lhs.charAt(i));
+            if (i < rhsLength) result.append(rhs.charAt(i));
+        }
+
+        return result.toString();
+    }
 }

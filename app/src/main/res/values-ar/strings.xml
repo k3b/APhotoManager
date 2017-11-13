@@ -4,6 +4,8 @@
 /*
  * Translation to arabic 2017 by medowill.
  *
+ * how to edit mixed rtl with ltr placeholders see https://stackoverflow.com/a/11562796/519334
+ *
  * This file is part of "A Photo Manager" (A(ndro)FotoFinder).
  *
  * This program is free software: you can redistribute it and/or modify it
@@ -27,9 +29,8 @@
   <string name="bookmark_delete_answer_format">علامات مرجعية تمت إزالتها %1$s.</string>
   <string name="bookmark_delete_error_format">لا يمكن إزالة العلامة المرجعية %s$1.</string>
   <string name="bookmark_delete_question">هل تريد إزالة هذه العلامة المرجعية؟</string>
-  <string name="bookmark_err_not_found_format">لا يوجد علامات في %1$s</string>
   <string name="bookmark_file_comment_format">تم توليده في %3$s بـ %1$s إصدار %2$s شاهد
-https://github.com/k3b/APhotoManager/wiki/intentap#EXTRA_SQL لمزيد من التفاصيل</string>
+https://github.com/k3b/APhotoManager/wiki/intentapi#sql لمزيد من التفاصيل</string>
   <string name="bookmark_load_from_menu_title">تحميل العلامات المرجعية من&#8230;</string>
   <string name="bookmark_save_as_menu_title">حفظ العلامة المرجعية كـ &#8230;</string>
   <string name="btn_cancel">إلغاء</string>
@@ -171,7 +172,6 @@ https://github.com/k3b/APhotoManager/wiki/intentap#EXTRA_SQL لمزيد من ا�
   <string name="tags_add_default">وسم_جديد</string>
   <string name="tags_delete_children_title">ازالة الاطفال</string>
   <string name="tags_update_photos">تحديث الوسوم في الصور المتأثرة</string>
-  <string name="tags_update_result_format">تحديث وسوم صور %1$d</string>
   <string name="tags_hint">الشريط-الطويل في قائمة فتح اسماء الوسوم</string>
   <string name="tags_defaults">النشاطات، الاشخاص، الاماكن، الموضوعات، المشروعات</string>
 </resources>

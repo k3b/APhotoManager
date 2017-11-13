@@ -25,7 +25,7 @@
     <string name="bookmark_delete_answer_format">Deleted bookmark %1$s.</string>
     <string name="bookmark_delete_error_format">Cannot delete bookmark %1$s.</string>
     <string name="bookmark_delete_question">Delete this bookmark?</string>
-    <string name="bookmark_file_comment_format">Generated on %3$s with \'%1$s\' Version %2$s. See https://github.com/k3b/APhotoManager/wiki/intentap#EXTRA_SQL for details</string>
+    <string name="bookmark_file_comment_format">Generated on %3$s with \'%1$s\' Version %2$s. See https://github.com/k3b/APhotoManager/wiki/intentapi#sql for details</string>
     <string name="bookmark_load_from_menu_title">Load bookmark from &#8230;</string>
     <string name="bookmark_save_as_menu_title">Save bookmark as &#8230;</string>
     <string name="btn_cancel">Cancel</string>
@@ -218,6 +218,19 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
     <!-- #90 add: sort by Rating, Date-Last-modified -->
     <string name="sort_by_rating">Rating</string>
     <string name="sort_by_modification">Last Modified</string>
+
+    <!-- #93: edit-exif: image title, description, rating -->
+    <string name="photo_autoprocessing_edit_menu_title">Edit Photo Autoprocessing</string>
+    <string name="lbl_file_name_pattern">Filename Pattern</string>
+    <string name="lbl_exif">Exif</string>
+
+    <!-- i.e.
+            Copy 5 Photos
+				hello.jpg (2017-08-02), ...
+			To .../path/toFile/
+				1708NewName0001.jpg -->
+    <string name="preview_message_format">"%1$s %2$d Photos\n\t%3$s (%4$s), &#8230;\nTo %5$s\n\t%6$s"</string>
+
 
     <!--  depricated tags_update_result_format use image_success_update_format instead -->
 </resources>

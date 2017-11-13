@@ -1,4 +1,4 @@
-package de.k3b.database;
+package de.k3b.io.collections;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -16,5 +16,4 @@ public class SelectedFilesTests {
         Assert.assertEquals("names", names, sut.toString());
         Assert.assertEquals("ids", ids, sut.toIdString());
     }
-
 }

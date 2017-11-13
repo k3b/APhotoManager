@@ -45,7 +45,7 @@ public class MediaUtilTests {
         MediaDTO expected = TestUtil.createTestMediaDTO(1);
         MediaAsString src = new MediaAsString().setData(expected);
         String serial = src.toString();
-        MediaAsString dest = new MediaAsString().setData(serial);
+        MediaAsString dest = new MediaAsString().fromString(serial);
 
         MediaDTO actual = new MediaDTO(dest);
         Assert.assertEquals(expected.toString(), actual.toString());
@@ -118,6 +118,18 @@ public class MediaUtilTests {
 
         List<MediaUtil.FieldID> result = MediaUtil.getChanges(item1, item2);
         Assert.assertEquals(ListUtils.toString(result), 4, result.size());
+    }
+
+    @Test
+    public void shouldFindNonEmpty() {
+        IMetaApi item1 = new MediaDTO();
+
+        // 3 changes
+        item1.setTitle("some title");
+        item1.setLatitudeLongitude(99.0,99.0);
+
+        List<MediaUtil.FieldID> result = MediaUtil.getChanges(null, item1);
+        Assert.assertEquals(ListUtils.toString(result), 3, result.size());
     }
 
     @Test

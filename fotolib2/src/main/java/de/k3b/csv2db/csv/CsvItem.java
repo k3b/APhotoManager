@@ -25,13 +25,18 @@ import java.util.List;
 import de.k3b.io.DateUtil;
 
 /**
+ * FieldVales from a/for a csv line (csv= comma seperated values)
  * Created by k3b on 17.10.2016.
  */
 abstract public class CsvItem {
     public static final char DEFAULT_CHAR_LINE_DELIMITER = '\n';
     public static final String DEFAULT_CSV_FIELD_DELIMITER = ",";
     public static final char CHAR_FIELD_SURROUNDER = '\"';
-    private String[] mCurrentLineFields = null;
+
+    /** values of the current csv file line: header.get(i)=mCurrentLineFieldValues[i]  */
+    private String[] mCurrentLineFieldValues = null;
+
+    /** header.get(i)=mCurrentLineFieldValues[i] */
     protected List<String> header;
 
     private String mFieldDelimiter = DEFAULT_CSV_FIELD_DELIMITER;
@@ -42,9 +47,9 @@ abstract public class CsvItem {
     }
 
     public void clear() {
-        if (mCurrentLineFields != null) {
-            for (int i = 0; i < mCurrentLineFields.length; i++) {
-                mCurrentLineFields[i] = null;
+        if (mCurrentLineFieldValues != null) {
+            for (int i = 0; i < mCurrentLineFieldValues.length; i++) {
+                mCurrentLineFieldValues[i] = null;
             }
         }
     }
@@ -57,17 +62,17 @@ abstract public class CsvItem {
         if (isInvalidIndex(columnNumber)) {
             return null;
         }
-        return mCurrentLineFields[columnNumber];
+        return mCurrentLineFieldValues[columnNumber];
     }
 
     protected void setString(Object value, int columnNumber) {
         if (!isInvalidIndex(columnNumber)) {
-            mCurrentLineFields[columnNumber] = (value != null) ? value.toString() : null;
+            mCurrentLineFieldValues[columnNumber] = (value != null) ? value.toString() : null;
         }
     }
 
     private boolean isInvalidIndex(int columnNumber) {
-        return (columnNumber < 0) || (mCurrentLineFields == null) || (columnNumber >= mCurrentLineFields.length);
+        return (columnNumber < 0) || (mCurrentLineFieldValues == null) || (columnNumber >= mCurrentLineFieldValues.length);
     }
 
     protected Integer getInteger(String debugContext, int columnNumber) {
@@ -85,7 +90,7 @@ abstract public class CsvItem {
     // last wins
     protected void setDate(Date value, int... columnNumbers) {
         for (int columnNumber : columnNumbers) {
-            setString(DateUtil.toIsoDateString(value), columnNumber);
+            setString(DateUtil.toIsoDateTimeString(value), columnNumber);
         }
     }
 
@@ -117,7 +122,7 @@ abstract public class CsvItem {
     }
 
     public void setData(String[] line) {
-        mCurrentLineFields = line;
+        mCurrentLineFieldValues = line;
     }
 
     @Override
@@ -125,17 +130,18 @@ abstract public class CsvItem {
         int last = getLastNonEmptyIndex();
         if (last < 0) return null;
         StringBuilder result = new StringBuilder();
-        result.append(quouteIfNecessary(mCurrentLineFields[0]));
+        result.append(quouteIfNecessary(mCurrentLineFieldValues[0]));
         for (int i = 1; i <= last; i++) {
             result
                     .append(getFieldDelimiter())
-                    .append(quouteIfNecessary(mCurrentLineFields[i]));
+                    .append(quouteIfNecessary(mCurrentLineFieldValues[i]));
         }
         return result.toString();
     }
 
     /** places quote around fieldValue if necessary */
     protected String quouteIfNecessary(String fieldValue) {
+        if (fieldValue == null) return "";
         if (mustQuote(fieldValue)) {
             return CHAR_FIELD_SURROUNDER + fieldValue.replace(""+CHAR_FIELD_SURROUNDER, "'") + CHAR_FIELD_SURROUNDER;
         }
@@ -152,9 +158,9 @@ abstract public class CsvItem {
     }
 
     protected int getLastNonEmptyIndex() {
-        if (mCurrentLineFields != null) {
-            for (int i = this.mCurrentLineFields.length - 1; i >= 0; i--) {
-                if (this.mCurrentLineFields[i] != null) return i;
+        if (mCurrentLineFieldValues != null) {
+            for (int i = this.mCurrentLineFieldValues.length - 1; i >= 0; i--) {
+                if (this.mCurrentLineFieldValues[i] != null) return i;
             }
         }
         return -1;

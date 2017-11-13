@@ -50,6 +50,10 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
     /** the full path of the image where this xmp-file belongs to */
     private String path = null;
 
+    /** true: file.jpg.xmp; false: file.xmp; null: unknown */
+    private Boolean longFormat = false;
+    private boolean hasAlsoOtherFormat;
+
     /** the full path of the image where this xmp-file belongs to */
     @Override
     public String getPath() {
@@ -75,7 +79,7 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
     @Override
     public IMetaApi setDateTimeTaken(Date value) {
         String dateValue = (value == null) ? null : XMPUtils.convertFromDate(new XMPDateTimeImpl(value, DateUtil.UTC));
-        setProperty(dateValue, // DateUtil.toIsoDateString(value),
+        setProperty(dateValue, // DateUtil.toIsoDateTimeString(value),
                 MediaXmpFieldDefinition.CreateDate,   // JPhotoTagger default
                 MediaXmpFieldDefinition.DateCreated,  // exiftool default
                 MediaXmpFieldDefinition.DateTimeOriginal, // EXIF
@@ -171,7 +175,7 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
     public XmpSegment setXmpMeta(XMPMeta xmpMeta, String dbg_context) {
         super.setXmpMeta(xmpMeta, dbg_context);
         if (FotoLibGlobal.debugEnabledJpgMetaIo) {
-            logger.info(dbg_context + " setXmpMeta " +  MediaUtil.toString(this, false, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
+            logger.info(dbg_context + " setXmpMeta " +  MediaUtil.toString(this, false, null, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
         }
 
         return this;
@@ -197,7 +201,7 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
     public XmpSegment save(OutputStream os, boolean humanReadable, String dbg_context) {
         super.save(os, humanReadable, dbg_context);
         if (FotoLibGlobal.debugEnabledJpgMetaIo) {
-            logger.info(dbg_context + " save " + MediaUtil.toString(this, false, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
+            logger.info(dbg_context + " save " + MediaUtil.toString(this, false, null, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
         }
 
         return this;
@@ -205,14 +209,16 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
 
     public static MediaXmpSegment loadXmpSidecarContentOrNull(String absoluteJpgPath, String _dbg_context) {
         MediaXmpSegment xmpContent = null;
-        File xmpFile = FileCommands.getExistingSidecarOrNull(absoluteJpgPath);
+        FileCommands.XmpFile xmpFile = FileCommands.getExistingSidecarOrNull(absoluteJpgPath);
         String dbg_context = _dbg_context + " loadXmpSidecarContent(" + xmpFile + "): ";
         if ((xmpFile != null) && xmpFile.isFile() && xmpFile.exists() && xmpFile.canRead()) {
             xmpContent = new MediaXmpSegment();
             try {
                 xmpContent.load(xmpFile, dbg_context);
+                xmpContent.setLongFormat(xmpFile.isLongFormat());
+                xmpContent.setHasAlsoOtherFormat(xmpFile.isHasAlsoOtherFormat());
             } catch (FileNotFoundException e) {
-                logger.error(dbg_context + "failed " + e.getMessage(),e);
+                logger.error(dbg_context + "failed " + e.getMessage(), e);
                 xmpContent = null;
             }
 
@@ -229,4 +235,21 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
         return MediaUtil.toString(this);
     }
 
+    /** true: file.jpg.xmp; false: file.xmp */
+    public void setLongFormat(Boolean longFormat) {
+        this.longFormat = longFormat;
+    }
+
+    /** true: file.jpg.xmp; false: file.xmp */
+    public Boolean isLongFormat() {
+        return longFormat;
+    }
+
+    public void setHasAlsoOtherFormat(boolean hasAlsoOtherFormat) {
+        this.hasAlsoOtherFormat = hasAlsoOtherFormat;
+    }
+
+    public boolean isHasAlsoOtherFormat() {
+        return hasAlsoOtherFormat;
+    }
 }

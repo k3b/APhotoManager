@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import de.k3b.android.androFotoFinder.AdapterArrayHelper;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.util.MediaScanner;
-import de.k3b.database.SelectedItems;
+import de.k3b.io.collections.SelectedItems;
 
 /**
  * Purpose: allow viewing images from ".nomedia" folders where no data is available in mediadb/cursor.

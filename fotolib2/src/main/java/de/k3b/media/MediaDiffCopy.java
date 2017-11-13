@@ -31,13 +31,18 @@ import de.k3b.tagDB.TagProcessor;
 import de.k3b.tagDB.TagRepository;
 
 /**
- * Copy delta between two {@link IMetaApi} items.
+ * Define and copy delta between two {@link IMetaApi} items.
  * Used for multiselection Exif update.
+ *
+ * Workflow: setDiff(...); applyChanges(...); .. applyChanges(...); close();
  *
  * Created by k3b on 07.07.2017.
  */
 
 public class MediaDiffCopy {
+    /** true: do not copy file path */
+    private final boolean excludePath;
+
     private int numberOfChangedFields = 0;
 
     /** where modification data comes from */
@@ -60,59 +65,41 @@ public class MediaDiffCopy {
     private String titleAppend = null;
     private String descriptionAppend = null;
 
-    /** resets to: no special processing required.  */
-    public void close() {
-        this.diffSet = null;
-        this.timeAdded = 0;
-        this.numberOfChangedFields = 0;
-        this.addedTags.clear();
-        this.removedTags.clear();
-        this.titleAppend = null;
-        this.descriptionAppend = null;
-        this.newData = null;
+    /**
+     * @param excludePath true: do not copy file path
+     */
+    public MediaDiffCopy(boolean excludePath) {
+        this.excludePath = excludePath;
     }
 
-    /** Initialisation to define the difference. return null if there is no diff between them */
-    public MediaDiffCopy setDiff(IMetaApi newData, FieldID fieldId, FieldID... fieldIds) {
-        return setDiff(newData, EnumSet.of(fieldId, fieldIds));
-    }
-
-    /** Initialisation to define the difference. return null if there is no diff between them */
-    public MediaDiffCopy setDiff(IMetaApi newData, EnumSet<FieldID> diffSet) {
-        close();
-        this.diffSet = diffSet;
-        this.diffSet.remove(FieldID.path);
-        this.numberOfChangedFields = this.diffSet.size();
-
-        if (this.numberOfChangedFields > 0) {
-            this.newData = newData;
-            return this;
-        }
-        return null;
-    }
-
-    public void fixTagRepository() {
-        if ((this.addedTags != null) && (this.addedTags.size() > 0)) {
-            TagRepository tagRepository = TagRepository.getInstance();
-            tagRepository.includeTagNamesIfNotFound(this.addedTags);
-            tagRepository.save();
+    public MediaDiffCopy(IMetaApi newData) {
+        this(true);
+        if (newData != null) {
+            setDiff(null, newData);
         }
     }
 
-    /** Initialisation to define the difference. return null if there is no diff between them */
+    /*
+     * Initialisation to define the difference.
+     *
+     * @param initialData data before change
+     *                      or null if non empty in newData should be copied
+     * @param newData data after change
+     * @return null if there is no diff between them
+     */
     public MediaDiffCopy setDiff(IMetaApi initialData, IMetaApi newData) {
         close();
         this.diffSet = MediaUtil.getChangesAsDiffsetOrNull(initialData, newData);
 
         if (this.diffSet != null) {
             // in gui data was changed
-            this.diffSet.remove(FieldID.path);
+            fix(this.diffSet);
 
             this.numberOfChangedFields = this.diffSet.size();
 
             if (this.diffSet.contains(FieldID.dateTimeTaken)) {
                 Date currentDateTimeTaken = newData.getDateTimeTaken();
-                Date initialDateTimeTaken = initialData.getDateTimeTaken();
+                Date initialDateTimeTaken = (initialData == null) ? null : initialData.getDateTimeTaken();
 
                 if ((initialDateTimeTaken != null) && (currentDateTimeTaken != null)) {
                     this.timeAdded = currentDateTimeTaken.getTime() - initialDateTimeTaken.getTime();
@@ -121,7 +108,8 @@ public class MediaDiffCopy {
             }
 
             if (this.diffSet.contains(FieldID.tags)) {
-                TagProcessor.getDiff(initialData.getTags(), newData.getTags(), this.addedTags, this.removedTags);
+                TagProcessor.getDiff((initialData == null) ? null : initialData.getTags(),
+                        newData.getTags(), this.addedTags, this.removedTags);
                 this.diffSet.remove(FieldID.tags);
             }
 
@@ -146,7 +134,28 @@ public class MediaDiffCopy {
             this.newData = newData;
             return this;
         }
+
+        // else this.numberOfChangedFields == 0
         close();
+        return null;
+    }
+
+    /** Initialisation to define the difference. return null if there is no diff between them */
+    public MediaDiffCopy setDiff(IMetaApi newData, FieldID fieldId, FieldID... fieldIds) {
+        return setDiff(newData, EnumSet.of(fieldId, fieldIds));
+    }
+
+    /** Initialisation to define the difference. return null if there is no diff between them */
+    public MediaDiffCopy setDiff(IMetaApi newData, EnumSet<FieldID> diffSet) {
+        close();
+        this.diffSet = diffSet;
+        fix(this.diffSet);
+        this.numberOfChangedFields = this.diffSet.size();
+
+        if (this.numberOfChangedFields > 0) {
+            this.newData = newData;
+            return this;
+        }
         return null;
     }
 
@@ -193,7 +202,29 @@ public class MediaDiffCopy {
         return null;
     }
 
-    /** method to append text to title or description */
+    /** after all changes where applied: save remembererd new tags to tags db */
+    public void fixTagRepository() {
+        if ((this.addedTags != null) && (this.addedTags.size() > 0)) {
+            TagRepository tagRepository = TagRepository.getInstance();
+            tagRepository.includeTagNamesIfNotFound(this.addedTags);
+            tagRepository.save();
+        }
+    }
+
+    /** resets to: no special processing required.  */
+    public void close() {
+        this.diffSet = null;
+        this.timeAdded = 0;
+        this.numberOfChangedFields = 0;
+        this.addedTags.clear();
+        this.removedTags.clear();
+        this.titleAppend = null;
+        this.descriptionAppend = null;
+        this.newData = null;
+    }
+
+    /** method to append text to title or description
+     * @return oldValue + append or null if no change is neccessary. */
     private String getAppended(String oldValue, String append) {
         if (append != null) {
             String value = oldValue;
@@ -211,17 +242,23 @@ public class MediaDiffCopy {
         return null;
     }
 
+    private void fix(EnumSet<FieldID> diffSet) {
+        if (this.excludePath) {
+            diffSet.remove(FieldID.path);
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
         result.append(this.getClass().getSimpleName()).append(":");
         if (this.numberOfChangedFields > 0) {
-            result.append(MediaUtil.toString(this.newData,true, EnumSet.complementOf(this.diffSet)));
+            result.append(MediaUtil.toString(this.newData,true, null, EnumSet.complementOf(this.diffSet)));
 
             if (this.titleAppend != null) result.append(" title+=").append(this.titleAppend);
             if (this.descriptionAppend != null) result.append(" description+=").append(this.descriptionAppend);
 
-            if (this.timeAdded != 0) result.append(" date+=").append(toString(this.timeAdded, 1000, 60, 60, 24, 30, 12 ,365));
+            if (this.timeAdded != 0) result.append(" date+=").append(formatTimeDifference(this.timeAdded));
 
             if (this.removedTags.size() > 0) result.append(" tags-=").append(ListUtils.toString(this.removedTags));
             if (this.addedTags.size() > 0) result.append(" tags+=").append(ListUtils.toString(this.addedTags));
@@ -229,8 +266,12 @@ public class MediaDiffCopy {
         return result.toString();
     }
 
-    /** inacurate converseion to y m d h m s */
-    private String toString(long timeAdded, int... divisors) {
+    /** (debug output only) inacurate converseion
+     * from time-difference in milliseconds
+     * to y m d h m s.
+     * (inacurate: all months assumed to have 30 days) */
+    private String formatTimeDifference(long timeAdded) {
+        int divisors[] = {1000, 60, 60, 24, 30, 12 ,365};
         long remaining = timeAdded;
         StringBuilder result = new StringBuilder();
         for (int divisor : divisors) {

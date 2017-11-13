@@ -27,7 +27,7 @@
 	<string name="bookmark_delete_answer_format">Segnalibro eliminato %1$s.</string>
 	<string name="bookmark_delete_error_format">Impossibile eliminare il segnalibro %1$s.</string>
 	<string name="bookmark_delete_question">Eliminare questo segnalibro?</string>
-	<string name="bookmark_file_comment_format">Generato su %3$s con \'%1$s\' Versione %2$s. Vedi https://github.com/k3b/APhotoManager/wiki/intentap#EXTRA_SQL per dettagli</string>
+	<string name="bookmark_file_comment_format">Generato su %3$s con \'%1$s\' Versione %2$s. Vedi https://github.com/k3b/APhotoManager/wiki/intentapi#sql per dettagli</string>
 	<string name="bookmark_load_from_menu_title">Carica segnalibro da &#8230;</string>
 	<string name="bookmark_save_as_menu_title">Salva segnalibro come &#8230;</string>
 	<string name="btn_cancel">Annulla</string>

@@ -63,15 +63,15 @@ import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagTask;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.util.AndroidFileCommands;
-import de.k3b.android.util.AndroidFileCommands44;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.MediaScannerAsyncTask;
+import de.k3b.android.util.OsUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
-import de.k3b.database.SelectedFiles;
+import de.k3b.io.collections.SelectedFiles;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.io.GeoUri;
 import de.k3b.io.FileUtils;
@@ -230,9 +230,9 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         }
     }
 
-    class LocalFileCommands extends AndroidFileCommands44 {
+    class LocalFileCommands extends AndroidFileCommands {
         @Override
-        protected void onPostProcess(String what, String[] oldPathNames, String[] newPathNames, int modifyCount, int itemCount, int opCode) {
+        protected void onPostProcess(String what, int opCode, SelectedFiles selectedFiles, int modifyCount, int itemCount, String[] oldPathNames, String[] newPathNames) {
             mInitialFilePath = null;
             switch (opCode) {
                 case OP_MOVE:
@@ -251,7 +251,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                 default:break;
             }
 
-            super.onPostProcess(what, oldPathNames, newPathNames, modifyCount, itemCount, opCode);
+            super.onPostProcess(what, opCode, selectedFiles, modifyCount, itemCount, oldPathNames, newPathNames);
 
             if ((opCode == OP_RENAME) || (opCode == OP_MOVE) || (opCode == OP_DELETE)) {
                 refreshIfNecessary();
@@ -263,7 +263,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     public static class MoveOrCopyDestDirPicker extends DirectoryPickerFragment {
         protected static AndroidFileCommands sFileCommands = null;
 
-        public static MoveOrCopyDestDirPicker newInstance(boolean move, SelectedFiles srcFotos) {
+        public static MoveOrCopyDestDirPicker newInstance(boolean move, final SelectedFiles srcFotos) {
             MoveOrCopyDestDirPicker f = new MoveOrCopyDestDirPicker();
 
             // Supply index input as an argument.
@@ -315,7 +315,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             mModifyCount++; // copy or move initiated
             getActivity().setResult((mModifyCount == 0) ? RESULT_NOCHANGE : RESULT_CHANGE);
 
-            sFileCommands.onMoveOrCopyDirectoryPick(getMove(), selection, getSrcFotos());
+            sFileCommands.onMoveOrCopyDirectoryPick(getMove(), getSrcFotos(), selection);
             dismiss();
         }
     };
@@ -881,10 +881,10 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                     result =  cmdMoveOrCopyWithDestDirPicker(true, mFileCommands.getLastCopyToPath(), getCurrentFoto());
                     break;
                 case R.id.menu_item_rename:
-                    result =  onRenameDirQueston(getCurrentImageId(), getCurrentFilePath(), null);
+                    result =  onRenameDirQueston(getCurrentFoto(), getCurrentImageId(), getCurrentFilePath(), null);
                     break;
                 case R.id.menu_exif:
-                    result =  onEditExif(getCurrentImageId(), getCurrentFilePath());
+                    result =  onEditExif(getCurrentFoto(), getCurrentImageId(), getCurrentFilePath());
                     break;
 
                 case R.id.cmd_gallery: {
@@ -1006,10 +1006,10 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     }
 
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
-        if (AndroidFileCommands.canProcessFile(this)) {
+        if (AndroidFileCommands.canProcessFile(this, false)) {
             MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
-            destDir.defineDirectoryNavigation(new OSDirectory("/", null),
+            destDir.defineDirectoryNavigation(OsUtils.getRootOSDirectory(),
                     (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
                     lastCopyToPath);
             destDir.setContextMenuId(R.menu.menu_context_osdir);
@@ -1018,12 +1018,12 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         return false;
     }
 
-    private boolean onEditExif(final long fotoId, final String fotoPath) {
-        ExifEditActivity.showActivity(this, fotoPath, null, 0);
+    private boolean onEditExif(SelectedFiles currentFoto, final long fotoId, final String fotoPath) {
+        ExifEditActivity.showActivity(this, null, fotoPath, currentFoto, 0);
         return true;
     }
-    private boolean onRenameDirQueston(final long fotoId, final String fotoPath, final String _newName) {
-        if (AndroidFileCommands.canProcessFile(this)) {
+    private boolean onRenameDirQueston(final SelectedFiles currentFoto, final long fotoId, final String fotoPath, final String _newName) {
+        if (AndroidFileCommands.canProcessFile(this, false)) {
             final String newName = (_newName == null)
                     ? new File(getCurrentFilePath()).getName()
                     : _newName;
@@ -1033,7 +1033,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                 @Override
                 protected void onDialogResult(String newFileName, Object... parameters) {
                     if (newFileName != null) {
-                        onRenameSubDirAnswer((Long) parameters[0], (String) parameters[1], newFileName);
+                        onRenameSubDirAnswer(currentFoto, (Long) parameters[0], (String) parameters[1], newFileName);
                     }
                 }
             };
@@ -1042,7 +1042,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         return true;
     }
 
-    private void onRenameSubDirAnswer(final long fotoId, final String fotoSourcePath, String newFileName) {
+    private void onRenameSubDirAnswer(SelectedFiles currentFoto, final long fotoId, final String fotoSourcePath, String newFileName) {
         File src = new File(fotoSourcePath);
         File dest = new File(src.getParentFile(), newFileName);
 
@@ -1070,8 +1070,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         if (errorMessage != null) {
             // dest-file already exists
             Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
-            onRenameDirQueston(fotoId, fotoSourcePath, newFileName);
-        } else if (mFileCommands.rename(fotoId, dest, src)) {
+            onRenameDirQueston(currentFoto, fotoId, fotoSourcePath, newFileName);
+        } else if (mFileCommands.rename(currentFoto, dest, null)) {
             mModifyCount++;
         } else {
             // rename failed

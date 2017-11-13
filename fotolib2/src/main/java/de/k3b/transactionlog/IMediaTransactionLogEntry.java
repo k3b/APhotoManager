@@ -23,7 +23,7 @@ package de.k3b.transactionlog;
  *
  * Created by k3b on 21.02.2017.
  */
-public interface IMediaTransactionLog {
+public interface IMediaTransactionLogEntry {
     /**
      * The foreign key to media_ID.
      * <P>Type: INTEGER (long)</P>

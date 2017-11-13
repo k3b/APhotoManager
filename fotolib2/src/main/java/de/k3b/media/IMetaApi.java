@@ -111,7 +111,8 @@ pc2android.png
  */
 
 /**
- * All Properties that are supported by "A Photo Manager".
+ * All Photo-Properties that are supported by "A Photo Manager".
+ * Different implementaions for jpg-exif-file, xmp-file, MediaDB-io, csv-io
  *
  * Created by k3b on 09.10.2016.
  */

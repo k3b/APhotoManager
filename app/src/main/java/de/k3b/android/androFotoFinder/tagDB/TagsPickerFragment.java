@@ -713,7 +713,7 @@ public class TagsPickerFragment  extends DialogFragment  {
             String oldName = oldTag.getName();
             String newName = pathElements[pathElements.length - 1];
 
-            if ((StringUtils.length(newName) > 0) && (newName.compareTo(oldName) != 0)) {
+            if ((!StringUtils.isNullOrEmpty(newName)) && (newName.compareTo(oldName) != 0)) {
                 if (updateDatabase) {
                     new TagRenameWithDbUpdateTask(oldName, newName).execute();
                     return;

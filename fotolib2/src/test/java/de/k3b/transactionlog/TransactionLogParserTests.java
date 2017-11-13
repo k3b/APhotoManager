@@ -25,10 +25,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
-
-import de.k3b.media.IMetaApi;
 
 /**
  * Analyses TransactionLog to generate move/copy/delete script and update-dtos.
@@ -39,7 +36,7 @@ import de.k3b.media.IMetaApi;
 public class TransactionLogParserTests {
     @Test
     public void shouldFindDeleted() throws IOException {
-        ArrayList<IMediaTransactionLog> items = new ArrayList<IMediaTransactionLog>();
+        ArrayList<IMediaTransactionLogEntry> items = new ArrayList<IMediaTransactionLogEntry>();
         addItems(items, "a.jpg"
                 , MediaTransactionLogEntryType.GPS.toString(),"gps"
                 , MediaTransactionLogEntryType.DELETE.toString(),null);
@@ -54,16 +51,16 @@ public class TransactionLogParserTests {
     }
 
     private long currentMediaID = 0;
-    private void addItems(ArrayList<IMediaTransactionLog> items, String initialFileName, String... data) {
+    private void addItems(ArrayList<IMediaTransactionLogEntry> items, String initialFileName, String... data) {
         String fileFullPath = initialFileName;
         currentMediaID++;
         int i = 0;
-        IMediaTransactionLog dto;
+        IMediaTransactionLogEntry dto;
         while (i < data.length) {
             int modificationDate = i;
             MediaTransactionLogEntryType mediaTransactionLogEntryType = MediaTransactionLogEntryType.get(data[i++]);
             String commandData = data[i++];
-            dto = new MediaTransactionLogDto(currentMediaID, fileFullPath, modificationDate, mediaTransactionLogEntryType, commandData);
+            dto = new MediaTransactionLogEntryDto(currentMediaID, fileFullPath, modificationDate, mediaTransactionLogEntryType, commandData);
             items.add(dto);
             if (dto.getCommand().compareTo(MediaTransactionLogEntryType.MOVE) == 0) {
                 fileFullPath = dto.getCommandData();

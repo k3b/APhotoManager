@@ -47,7 +47,7 @@ public class OSDirectory implements IDirectory {
         this(FileUtils.tryGetCanonicalFile(current), parent);
     }
 
-    public OSDirectory(File current, OSDirectory parent) {
+    protected OSDirectory(File current, OSDirectory parent) {
         this(current, parent, null);
     }
 
@@ -58,7 +58,8 @@ public class OSDirectory implements IDirectory {
         mChilden = childen;
         if ((getDirFlags() == DIR_FLAG_NONE)
                 && (mParent != null)
-                && (mParent.getDirFlags() != DIR_FLAG_NONE)) {
+                && mParent.isDirFlagsNomedia()) {
+            // inherit nomedia from parent
             setDirFlags(DIR_FLAG_NOMEDIA);
         }
     }
@@ -71,6 +72,8 @@ public class OSDirectory implements IDirectory {
                 setDirFlags(DIR_FLAG_NOMEDIA_ROOT);
             } else if (FileUtils.isHiddenFolder(current.getAbsolutePath())) {
                 setDirFlags(DIR_FLAG_NOMEDIA);
+            } else if (new File(current, RuleFileNameProcessor.APM_FILE_NAME).exists()) {
+                setDirFlags(DIR_FLAG_APM_DIR);
             }
         }
         return this;
@@ -251,4 +254,8 @@ public class OSDirectory implements IDirectory {
     public void setDirFlags(int dirFlags) {
         this.mDirFlags = dirFlags;
     }
+
+    public boolean isDirFlagsNomedia() {
+        return  (this.getDirFlags() & (DIR_FLAG_NOMEDIA | DIR_FLAG_NOMEDIA_ROOT))  != DIR_FLAG_NONE;
+     }
 }

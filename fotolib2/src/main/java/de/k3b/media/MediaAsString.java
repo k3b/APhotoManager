@@ -25,9 +25,10 @@ import java.util.Arrays;
 
 import de.k3b.csv2db.csv.CsvItem;
 import de.k3b.csv2db.csv.CsvReader;
+import de.k3b.io.FileUtils;
 
 /**
- * A IMetaApi that can be converted to/from string.
+ * A IMetaApi that can be converted to/from string using toString() and fromString().
  *
  * Created by k3b on 14.06.2017.
  */
@@ -45,16 +46,15 @@ public class MediaAsString extends MediaCsvItem implements IMetaApi {
         setData(new String[size]);
     }
 
-    public MediaAsString setData(String serializedContent) {
+    /** convert serializedContent back to IMetaApi if serializedContent was generated
+     * by MediaAsString.toString() */
+    public MediaAsString fromString(String serializedContent) {
         CsvReader reader = new CsvReader(new StringReader(serializedContent));
         setData(reader.readLine());
-        try {
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        FileUtils.close(reader,"MediaAsString.fromString");
         return this;
     }
+
     public MediaAsString setData(IMetaApi data) {
         this.clear();
         if (data != null) {

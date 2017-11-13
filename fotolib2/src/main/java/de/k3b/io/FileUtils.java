@@ -23,6 +23,8 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -93,6 +95,11 @@ public class FileUtils {
     }
 
     /** tryGetCanonicalFile without exception */
+    public static File tryGetCanonicalFile(File file) {
+        return tryGetCanonicalFile(file, file);
+    }
+
+    /** tryGetCanonicalFile without exception */
     public static String tryGetCanonicalPath(File file, String errorValue) {
         if (file == null) return null;
 
@@ -142,6 +149,13 @@ public class FileUtils {
         if (path == null) return null;
         int ext = path.lastIndexOf(".");
         return ((ext >= 0) ? path.substring(0, ext) : path) + extension;
+    }
+
+    public static String getExtension(String path) {
+        if (path == null) return null;
+        int ext = path.lastIndexOf(".");
+        if (ext >= 0) return path.substring(ext);
+        return null;
     }
 
     /** return parent of path if path is not a dir. else return path */
@@ -215,6 +229,37 @@ public class FileUtils {
         } else {
             logger.info("File {} doesn't exist", file.getAbsolutePath());
         }
+    }
+
+    /** overwrites existing file */
+    public static void copyReplace(String sourcePath, String destinationPath,
+                                   boolean deleteOriginalAfterFinish, String what) throws IOException {
+        copyReplace(new File(sourcePath), new File(destinationPath), deleteOriginalAfterFinish, what);
+    }
+
+    public static void copyReplace(File inFile, File outFile, boolean deleteOriginalAfterFinish, String what) throws IOException {
+        if (logger.isDebugEnabled()) {
+            logger.debug(what + (deleteOriginalAfterFinish ? "-move" : "-copy") + ": " + inFile +
+                    " ==> " + outFile);
+        }
+        InputStream sourceStream = null;
+        try {
+            sourceStream = new FileInputStream(inFile);
+            copyReplace(sourceStream, outFile);
+
+            if(deleteOriginalAfterFinish && inFile.exists()) inFile.delete();
+        } finally {
+            close(sourceStream, what);
+        }
+    }
+
+    public static void copyReplace(InputStream sourceStream, File destinationFile) throws IOException {
+        if (destinationFile.exists()) destinationFile.delete();
+        destinationFile.getParentFile().mkdirs();
+        FileOutputStream result = new FileOutputStream(destinationFile);
+        FileUtils.copy(sourceStream, result);
+        result.flush();
+        FileUtils.close(result, destinationFile);
     }
 
     public static void copy(InputStream is, OutputStream os) throws IOException {

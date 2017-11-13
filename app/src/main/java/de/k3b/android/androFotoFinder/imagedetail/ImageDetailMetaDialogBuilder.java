@@ -148,7 +148,7 @@ public class ImageDetailMetaDialogBuilder {
             builder.append(NL).append(file).append(NL).append(NL);
 
             ImageMetaReader meta = new ImageMetaReader().load(file.getAbsolutePath(),null, null, "ImageDetailMetaDialogBuilder");
-            builder.append(meta.toString());
+            if (meta != null) builder.append(meta.toString());
             builder.append(NL).append(line).append(NL);
         } else {
             builder.append(NL).append(file).append(" not found.").append(NL);

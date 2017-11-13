@@ -17,7 +17,7 @@
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
 
-package de.k3b.database;
+package de.k3b.io.collections;
 
 import java.io.File;
 
@@ -157,4 +157,5 @@ public class SelectedFiles  {
     public Long[] getIds() {
         return mIds;
     }
+
 }

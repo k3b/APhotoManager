@@ -191,6 +191,26 @@
             </intent-filter>
         </activity>
 
+
+        <activity
+            android:name=".PhotoAutoprocessingEditActivity"
+            android:icon="@drawable/exif_edit"
+            android:label="@string/photo_autoprocessing_edit_menu_title">
+            <!-- ImageDetail edit schema=file with mime=image/* -->
+            <intent-filter>
+                <action android:name="android.intent.action.EDIT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!-- file must have mimeType to match -->
+                <data android:mimeType="*/*" />
+                <data android:scheme="file" />
+                <data android:host="*" />
+                <data android:pathPattern="\\.apm" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".locationmap.GeoEditActivity"
             android:icon="@drawable/ic_geo_edit"

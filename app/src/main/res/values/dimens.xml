@@ -27,7 +27,8 @@
     <dimen name="grid_cell_icon_width">45dp</dimen>
     <dimen name="grid_cell_icon_height">45dp</dimen>
     <dimen name="grid_cell_margin">5dp</dimen>
-
+    <dimen name="line_margin">5dp</dimen>
+    <dimen name="value_indent">20dp</dimen>
     <!-- used to manually calculate setEllipsize(TextUtils.TruncateAt.MIDDLE) for title -->
     <integer name="title_length_in_chars">20</integer>
 </resources>

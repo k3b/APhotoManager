@@ -175,8 +175,9 @@ public class ExifInterfaceIntegrationTests {
         String sutWriteText = sutWrite.toString();
 
         FileUtils.close(inputStream, fileNameSrc);
+
         inputStream = ImageMetaReaderIntegrationTests.class.getResourceAsStream("images/" + fileNameSrc);
-        sutWrite.saveJpegAttributes(inputStream, outputStream);
+        sutWrite.saveJpegAttributes(inputStream, outputStream, null);
 
         FileUtils.close(outputStream, sutFile);
 

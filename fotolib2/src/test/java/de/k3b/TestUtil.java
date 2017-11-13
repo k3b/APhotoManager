@@ -22,7 +22,6 @@ package de.k3b;
 import org.junit.Assert;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -30,8 +29,6 @@ import java.io.Reader;
 import de.k3b.csv2db.csv.CsvReader;
 import de.k3b.io.DateUtil;
 import de.k3b.io.FileUtils;
-import de.k3b.media.IMetaApi;
-import de.k3b.media.ImageMetaReader;
 import de.k3b.media.ImageMetaReaderIntegrationTests;
 import de.k3b.media.MediaDTO;
 import de.k3b.tagDB.TagConverter;
@@ -80,12 +77,9 @@ public class TestUtil {
     public static void saveTestResourceAs(String resourceName, File destination) throws IOException {
         InputStream sourceStream = getResourceInputStream(resourceName);
 
-        if (destination.exists()) destination.delete();
-        FileOutputStream result = new FileOutputStream(destination);
-        FileUtils.copy(sourceStream, result);
-        result.flush();
-        FileUtils.close(result,destination);
+        FileUtils.copyReplace(sourceStream, destination);
         FileUtils.close(sourceStream,resourceName);
         destination.setLastModified(DateUtil.parseIsoDate("1972-03-04T05:06:07").getTime());
     }
+
 }

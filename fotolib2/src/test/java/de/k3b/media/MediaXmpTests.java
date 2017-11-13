@@ -61,7 +61,7 @@ public class MediaXmpTests {
 
         MediaDTO actual = new MediaDTO(sut);
 
-        Assert.assertEquals(sut.toString(), "MediaDTO: path null dateTimeTaken 1962-11-07T09:38:46 title Headline description XPSubject latitude 27.818611 longitude -15.764444 rating 3 tags Marker1, Marker2", actual.toString());
+        Assert.assertEquals(sut.toString(), "MediaDTO: path null dateTimeTaken 1962-11-07T09:38:46 title Headline description XPSubject latitude_longitude 27.818611, -15.764444 rating 3 tags Marker1, Marker2", actual.toString());
     }
 
     private InputStream getStream(String _resourceName) {

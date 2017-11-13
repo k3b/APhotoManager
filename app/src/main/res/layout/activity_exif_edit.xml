@@ -70,8 +70,8 @@
             android:layout_width="fill_parent"
             android:background="#c0c0c0"
             android:layout_below="@+id/edit_title"
-            android:layout_marginBottom="5dp"
-            android:layout_marginTop="5dp"
+            android:layout_marginBottom="@dimen/line_margin"
+            android:layout_marginTop="@dimen/line_margin"
             />
         <!-- -->
         <TextView android:id="@+id/lbl_description"
@@ -116,8 +116,8 @@
             android:layout_width="fill_parent"
             android:background="#c0c0c0"
             android:layout_below="@+id/edit_description"
-            android:layout_marginBottom="5dp"
-            android:layout_marginTop="5dp"
+            android:layout_marginBottom="@dimen/line_margin"
+            android:layout_marginTop="@dimen/line_margin"
             />
         <!-- -->
         <TextView android:id="@+id/lbl_rating"
@@ -148,8 +148,8 @@
             android:layout_width="fill_parent"
             android:background="#c0c0c0"
             android:layout_below="@+id/ratingBar"
-            android:layout_marginBottom="5dp"
-            android:layout_marginTop="5dp"
+            android:layout_marginBottom="@dimen/line_margin"
+            android:layout_marginTop="@dimen/line_margin"
             />
         <!-- -->
         <TextView android:id="@+id/lbl_date"
@@ -211,8 +211,8 @@
             android:layout_width="fill_parent"
             android:background="#c0c0c0"
             android:layout_below="@+id/edit_date"
-            android:layout_marginBottom="5dp"
-            android:layout_marginTop="5dp"
+            android:layout_marginBottom="@dimen/line_margin"
+            android:layout_marginTop="@dimen/line_margin"
             />
         <!-- -->
         <TextView android:id="@+id/lbl_tags_include"
@@ -270,8 +270,8 @@
             android:layout_width="fill_parent"
             android:background="#c0c0c0"
             android:layout_below="@+id/edit_tags_include"
-            android:layout_marginBottom="5dp"
-            android:layout_marginTop="5dp"
+            android:layout_marginBottom="@dimen/line_margin"
+            android:layout_marginTop="@dimen/line_margin"
             />
 
         <Button android:id="@+id/cmd_select_lat_lon"

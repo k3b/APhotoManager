@@ -41,7 +41,7 @@ public class GeoUtil {
     private static DecimalFormat doubleFormatter = new DecimalFormat("#.######", new DecimalFormatSymbols(Locale.US));
 
     public static Double parse(String degreeString, String plusMinus) {
-        if (degreeString != null) {
+        if (!StringUtils.isNullOrEmpty(degreeString)) {
             double result = 0;
             boolean isNegativ = false;
             int factor = 1;

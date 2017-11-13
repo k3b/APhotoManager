@@ -46,8 +46,8 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.DBUtils;
 import de.k3b.database.QueryParameter;
-import de.k3b.database.SelectedFiles;
-import de.k3b.database.SelectedItems;
+import de.k3b.io.collections.SelectedFiles;
+import de.k3b.io.collections.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
 import de.k3b.io.GalleryFilterParameter;
@@ -97,6 +97,8 @@ public class FotoSql extends FotoSqlBase {
     public static final String SQL_COL_LAT = MediaStore.Images.Media.LATITUDE;
     public static final String SQL_COL_LON = MediaStore.Images.Media.LONGITUDE;
     public static final String SQL_COL_SIZE = MediaStore.Images.Media.SIZE;
+
+    private static final String SQL_COL_DATE_ADDED = MediaStore.Images.ImageColumns.DATE_ADDED;
 
     // other colums
     public static final String SQL_COL_LAST_MODIFIED = MediaStore.MediaColumns.DATE_MODIFIED;
@@ -759,6 +761,24 @@ public class FotoSql extends FotoSqlBase {
         return FotoSql.FILTER_EXPR_PATH_LIKE + " AND " + getFilterExpressionVisibility(visibility);
     }
 
+    public static Long insertOrUpdateMediaDatabase(String dbgContext, Context context,
+                                                   String dbUpdateFilterJpgFullPathName,
+                                                   ContentValues values, Long updateSuccessValue) {
+        Long result = updateSuccessValue;
+
+        int modifyCount =  FotoSql.execUpdate(dbgContext, context, dbUpdateFilterJpgFullPathName,
+                values, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+
+        if (modifyCount == 0) {
+            // update failed (probably becauce oldFullPathName not found. try insert it.
+            FotoSql.addDateAdded(values);
+
+            Uri uriWithId =  FotoSql.execInsert(dbgContext, context, values);
+            result = getId(uriWithId);
+        }
+        return result;
+    }
+
     /** every database insert should go through this. adds logging if enabled */
     public static Uri execInsert(String dbgContext, Context context, ContentValues values) {
         Uri result = context.getContentResolver().insert(SQL_TABLE_EXTERNAL_CONTENT_URI, values);
@@ -851,6 +871,25 @@ public class FotoSql extends FotoSqlBase {
     public static Uri getUri(long imageID) {
         return Uri.parse(
                 getUriString(imageID));
+    }
+
+    /** get imageID from content-url or null if not found */
+    public static Long getId(Uri uriWithId) {
+        Long imageID = null;
+        String idString = (uriWithId == null) ? null : uriWithId.getLastPathSegment();
+        if (idString != null) {
+            try {
+                imageID = (idString == null) ? null : Long.valueOf(idString);
+            } catch (NumberFormatException e) {
+                Log.e(Global.LOG_CONTEXT, "FotoSql.getId(" + uriWithId + ") => " + e.getMessage());
+            }
+        }
+        return imageID;
+    }
+
+    public static void addDateAdded(ContentValues values) {
+        long now = new Date().getTime();
+        values.put(SQL_COL_DATE_ADDED, now / 1000);//sec
     }
 
     @NonNull

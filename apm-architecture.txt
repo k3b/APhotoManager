@@ -1,0 +1,60 @@
+apm-architecture.txt
+
+
+what can be done
+	MediaTransactionLogEntryType {
+		file
+			DELETE("F-", "apmDelete"),
+			MOVE("Fm", "apmMove"),
+			COPY("F+", "apmCopy"),
+		IMetaApi
+			GPS("g", "apmGps"),
+			TAGSADD("T+", "apmTagsAdd"),
+			TAGSREMOVE("T-", "apmTagsRemove"),
+			TAGS("T", ""),
+			DESCRIPTION("d", "apmDescription"),
+			HEADER("h", "apmTitle"),
+			RATING("r", "apmRating"),
+			DATE
+
+
+depricated AndroidTransactionLogger (+=database-log)
+	TransactionLog (per MediaOperations) todo rename MediaChangeTransactionLogger
+		FileLogging => *.log (txt file)
+AndroidMediaOperations		
+	MediaOperations 
+		FileOperations (copy, move, delete)
+
+	MetaWriterExifXml xmp/exif split handling for IMetaApi
+	
+gui
+	photo(s)
+		SelectedFiles (which photo-files to modify)
+			=> MediaFileIterator implements Iterator<IMediaFile>
+				=> Iterator<IMediaFileSource> iter()
+				=> IPathProcessor(convert source path to dest path)
+				FileNameProcessor extends FileProcessor implements IFileNameProcessor
+		IMetaApi (meta data changes/content for one or more photos)
+			MetaWriterExifXml ... implements IMetaApi (combine ExifInterfaceEx and MediaXmpSegment)
+				ExifInterfaceEx extends ExifInterface implements IMetaApi
+				MediaXmpSegment extends XmpSegment implements IMetaApi
+			MediaAsString extends MediaCsvItem extends CsvItem implements IMetaApi (save/load IMetaApi via file/intent/instance-state)
+		FileCommands: operations(Iterator<IMediaFile> or SelectedFiles) + parameters(IMetaApi)
+			=> AndroidFileCommands extends FileCommands (add db support for media, log)
+			=> MetaWriterExifXml
+				=> modified jpg/xmp
+				=> move/copy/delete jpg/xmp 
+				=> updated mediaDB
+			=> FileCommands.addTransactionLog() => TransactionLoggerBase added Log (file, db)
+				=> AndroidTransactionLogger (db log) extends TransactionLoggerBase
+			
+-------
+
+ist
+	gui
+		? MetaWriterExifXml
+			
+		FileCommands.moveOrCopyFiles
+			!? log(command.getCommand(sourceFile.getAbsolutePath(), destRenamed.getAbsolutePath(), true));
+			!? addTransactionLog(id, sourceFile.getPath(), now, command, destFile.getPath());
+			calls MetaWriterExifXml

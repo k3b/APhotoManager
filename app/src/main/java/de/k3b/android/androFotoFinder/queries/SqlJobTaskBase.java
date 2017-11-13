@@ -27,7 +27,7 @@ import android.util.Log;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.database.QueryParameter;
-import de.k3b.database.SelectedItems;
+import de.k3b.io.collections.SelectedItems;
 
 /**
  * process item-ids from sql-query in background task

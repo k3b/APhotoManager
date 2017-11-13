@@ -78,7 +78,7 @@ public class GeoUtilTests {
         assertParse(-50.5, "50, 30S","NS");
         assertParse(-50.5, "S 50'30''0.00","NS");
         assertParse(GeoUtil.NO_LAT_LON, "0","NS");
-        assertParse(GeoUtil.NO_LAT_LON, "","NS");
+        assertParse(null, "","NS");
         assertParse(null, null,"NS");
     }
 

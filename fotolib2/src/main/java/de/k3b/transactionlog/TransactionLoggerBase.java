@@ -19,6 +19,8 @@
 
 package de.k3b.transactionlog;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumSet;
@@ -26,22 +28,29 @@ import java.util.List;
 
 import de.k3b.io.DateUtil;
 import de.k3b.io.DirectoryFormatter;
+import de.k3b.io.FileProcessor;
 import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaUtil;
 import de.k3b.tagDB.TagConverter;
 import de.k3b.tagDB.TagProcessor;
 
 /**
- * Android independant base class to writes change infos into log (bat-file and database).
+ * Android independant base class to writes change infos into log (bat-file).
  *
  * Created by k3b on 08.07.2017.
  */
-public abstract class TransactionLoggerBase  {
+public class TransactionLoggerBase implements Closeable {
+    private FileProcessor execLog;
+
+    // true if this/super created the logger.
+    protected boolean mustCloseLog = false;
+
     protected long id;
     protected String path;
     protected final long now;
 
-    public TransactionLoggerBase(long now) {
+    public TransactionLoggerBase(FileProcessor execLog, long now) {
+        this.execLog = execLog;
         this.now = now;
     }
     public TransactionLoggerBase set(long id, String path) {
@@ -50,6 +59,13 @@ public abstract class TransactionLoggerBase  {
         return this;
     }
 
+    @Override
+    public void close() throws IOException {
+        if (mustCloseLog) {
+            execLog.closeAll();
+        }
+        execLog = null;
+    }
     public void addChanges(IMetaApi newData, EnumSet<MediaUtil.FieldID> changes, List<String> oldTags) {
         if (changes.contains(MediaUtil.FieldID.dateTimeTaken))  addChangesDateTaken(newData.getDateTimeTaken());
         if (changes.contains(MediaUtil.FieldID.latitude_longitude)) addChanges(MediaTransactionLogEntryType.GPS, DirectoryFormatter.formatLatLon(newData.getLatitude()) + " " + DirectoryFormatter.formatLatLon(newData.getLongitude()), false);
@@ -60,7 +76,7 @@ public abstract class TransactionLoggerBase  {
     }
 
     protected void addChangesDateTaken(Date newData) {
-        addChanges(MediaTransactionLogEntryType.DATE, DateUtil.toIsoDateString(newData), false);
+        addChanges(MediaTransactionLogEntryType.DATE, DateUtil.toIsoDateTimeString(newData), false);
     }
 
     protected void addChangesTags(List<String> oldTags, List<String> newTags) {
@@ -75,6 +91,13 @@ public abstract class TransactionLoggerBase  {
         }
     }
 
-    /** todo implement android specific logging here */
-    abstract protected void addChanges(MediaTransactionLogEntryType command, String parameter, boolean quoteParam);
+    public void addChangesCopyMove(boolean move, String newFullPath) {
+        addChanges(move ? MediaTransactionLogEntryType.MOVE : MediaTransactionLogEntryType.COPY,
+                newFullPath, true);
+    }
+
+    /** android specific logging is implemented in AndroidTransactionLogger in Override */
+    protected void addChanges(MediaTransactionLogEntryType command, String parameter, boolean quoteParam) {
+        execLog.log(command.getCommand(path,parameter));
+    }
 }

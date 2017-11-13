@@ -35,30 +35,26 @@ import de.k3b.transactionlog.TransactionLoggerBase;
  * Created by k3b on 02.07.2017.
  */
 
-public class TransactionLogger extends TransactionLoggerBase implements Closeable {
+public class AndroidTransactionLogger extends TransactionLoggerBase implements Closeable {
     private Context ctx;
     private AndroidFileCommands execLog;
-    boolean mustCloseLog;
 
-    public TransactionLogger(Activity ctx, long now, AndroidFileCommands execLog) {
-        super(now);
+    public AndroidTransactionLogger(Activity ctx, long now, AndroidFileCommands execLog) {
+        super(execLog, now);
         this.ctx = ctx.getApplicationContext(); // to avoid memory leaks
 
-        mustCloseLog = (execLog == null);
-        this.execLog = mustCloseLog ? AndroidFileCommands.createFileCommand(ctx) : execLog;
+        this.execLog = execLog;
     }
 
     @Override
     protected void addChanges(MediaTransactionLogEntryType command, String parameter, boolean quoteParam) {
-        execLog.log(command.getCommand(path,parameter, quoteParam));
+        super.addChanges(command, parameter, quoteParam);
         execLog.addTransactionLog(id, path, now, command, parameter);
     }
 
     @Override
     public void close() throws IOException {
-        if (mustCloseLog) {
-            execLog.closeAll();
-        }
+        super.close();
         execLog = null;
         ctx = null;
     }

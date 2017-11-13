@@ -19,35 +19,88 @@
 
 package de.k3b.media;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 
 import de.k3b.FotoLibGlobal;
 import de.k3b.io.FileCommands;
+import de.k3b.io.FileProcessor;
 import de.k3b.io.FileUtils;
 
 /**
- * Depending on the global settings write MetaApi data to exif or xmp or both
+ * Represents content of exactly one jpg-exif-file with corresponding xmp-file that can be modified
+ * via {@link IMetaApi} and {@link #save(String)}.
+ *
+ * Depending on the global settings handles updating/creating jpg-exif and/or xmp-file.
+ * Also handles jpg/xmp file move/copy.
+ * Transactionlog and database update is handled by caller
+ *
+ * Android free implementation.
  *
  * Created by k3b on 21.04.2017.
  */
 
-public class MetaWriterExifXml extends MetaApiWrapper {
-    private ExifInterfaceEx exif;
-    private MediaXmpSegment xmp;
+public class MetaWriterExifXml extends MetaApiWrapper  implements IMetaApi {
+    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
 
-    public static MetaWriterExifXml create(String absoluteJpgPath, String dbg_context) throws IOException {
-        return create(absoluteJpgPath, dbg_context,
+    private ExifInterfaceEx exif;   // not null if exif changes are written to jpg file
+    private MediaXmpSegment xmp;    // not null if exif changes are written to xmp sidecar file.
+    private String absoluteJpgInPath; // where changes are read from.
+    private String absoluteJpgOutPath; // where changes are written to. Null meanst same as input
+    private boolean deleteOriginalAfterFinish; // true: after save original jpg/mxp are deleted (move instead of copy)
+    private long    dbgLoadEndTimestamp;
+
+    /**
+     * public api: Factory to create MetaWriterExifXml. Settings/ Internal state determine
+     * configuration for MetaWriterExifXml.
+     *
+     *
+     * @param absoluteJpgInPath     where data is read from
+     * @param absoluteJpgOutPath    where data changes are written to. Null means same as absoluteJpgInPath.
+     * @param deleteOriginalAfterFinish true: after save original jpg/mxp are deleted (move instead of copy)
+     * @param dbg_context           for debug log: who called this
+     * @return                      new loaded instance
+     * @throws IOException
+     */
+    public static MetaWriterExifXml create(String absoluteJpgInPath, String absoluteJpgOutPath,
+                                           boolean deleteOriginalAfterFinish, String dbg_context)
+            throws IOException {
+        return create(absoluteJpgInPath, absoluteJpgOutPath, deleteOriginalAfterFinish, dbg_context,
                 FotoLibGlobal.mediaUpdateStrategy.contains("J"),    // write jpg file
                 FotoLibGlobal.mediaUpdateStrategy.contains("X"),    // write xmp file
-                FotoLibGlobal.mediaUpdateStrategy.contains("C"));   // create xmp if it does not exist
+                FotoLibGlobal.mediaUpdateStrategy.contains("C")    // create xmp if it does not exist
+        );
     }
 
-    public static MetaWriterExifXml create(String absoluteJpgPath, String dbg_context
-                    ,boolean writeJpg, boolean writeXmp, boolean createXmpIfNotExist) throws IOException {
-        MediaXmpSegment xmp = MediaXmpSegment.loadXmpSidecarContentOrNull(absoluteJpgPath, dbg_context);
+    /**
+     * Used by junit tests with no dependency to internal state: factory to create MetaWriterExifXml.
+     *
+     *
+     * @param absoluteJpgInPath     where data is read from
+     * @param absoluteJpgOutPath    where data changes are written to. Null means same as absoluteJpgInPath.
+     * @param deleteOriginalAfterFinish true: after save original jpg/mxp are deleted (move instead of copy)
+     * @param dbg_context           for debug log: who called this
+     * @param writeJpg              true: exif changes go into jpg
+     * @param writeXmp              true: exif changes go into xmp
+     * @param createXmpIfNotExist   true: create xmp sidecar file if it does not exist yet
+     * @return                      new loaded instance
+     * @throws IOException
+     */
+    public static MetaWriterExifXml create(String absoluteJpgInPath, String absoluteJpgOutPath,
+                                           boolean deleteOriginalAfterFinish, String dbg_context,
+                                           boolean writeJpg, boolean writeXmp, boolean createXmpIfNotExist)
+            throws IOException {
+        long    startTimestamp = 0;
+        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+            startTimestamp = new Date().getTime();
+        }
+        MediaXmpSegment xmp = MediaXmpSegment.loadXmpSidecarContentOrNull(absoluteJpgInPath, dbg_context);
         if ((createXmpIfNotExist) && (xmp == null)) {
-            ImageMetaReader jpg = new ImageMetaReader().load(absoluteJpgPath,null,null,
+            ImageMetaReader jpg = new ImageMetaReader().load(absoluteJpgInPath,null,null,
                     dbg_context + " xmp-file not found. create/extract from jpg ");
 
             xmp = jpg.getImternalXmp();
@@ -58,14 +111,21 @@ public class MetaWriterExifXml extends MetaApiWrapper {
             // xmp should have the same data as exif/iptc
             MediaUtil.copyNonEmpty(xmp, jpg);
         }
-        ExifInterfaceEx exif = new ExifInterfaceEx(absoluteJpgPath, null, xmp, dbg_context);
-        exif.setPath(absoluteJpgPath);
+        ExifInterfaceEx exif = new ExifInterfaceEx(absoluteJpgInPath, null, xmp, dbg_context);
+        exif.setPath(absoluteJpgInPath);
 
         MetaWriterExifXml result = new MetaWriterExifXml(
                 (writeJpg) ? exif : new MetaApiChainReader(xmp, exif), //  (!writeJpg) prefer read from xmp value before exif value
                 (writeJpg) ? exif : xmp ,  //  (!writeJpg) modify xmp value only
                 (writeJpg) ? exif : null,  //  (!writeJpg) do not safe changes to jpg exif file
                 (writeXmp) ? xmp : null);   //  (!writeXmp) do not safe changes to xmp-sidecar file
+        result.absoluteJpgOutPath = (absoluteJpgOutPath != null) ? absoluteJpgOutPath : absoluteJpgInPath;
+        result.absoluteJpgInPath = absoluteJpgInPath;
+        result.deleteOriginalAfterFinish = deleteOriginalAfterFinish;
+        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+            result.dbgLoadEndTimestamp = new Date().getTime();
+            logger.debug(dbg_context + " load[msec]:" + (result.dbgLoadEndTimestamp - startTimestamp));
+        }
 
         return result;
     }
@@ -77,11 +137,99 @@ public class MetaWriterExifXml extends MetaApiWrapper {
         this.xmp = xmp;
     }
 
-    public void save(String dbg_context)  throws IOException {
-        if (exif != null) exif.saveAttributes();
-        File xmpFile = FileCommands.getExistingSidecarOrNull(this.getPath());
-        if (xmpFile == null) xmpFile = FileCommands.getSidecar(this.getPath(), FotoLibGlobal.preferLongXmpFormat);
-        if (xmp != null) xmp.save(xmpFile, true , dbg_context);
+    public int save(String dbg_context)  throws IOException {
+        long    startTimestamp = 0;
+        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+            startTimestamp = new Date().getTime();
+        }
+
+        final int result = transferExif(dbg_context)
+                + transferXmp(dbg_context);
+
+        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+            long    endTimestamp = new Date().getTime();
+            logger.debug(dbg_context
+                    + " process[msec]:" + (startTimestamp - this.dbgLoadEndTimestamp)
+                    + ",save[msec]:" + (endTimestamp - startTimestamp)
+            );
+        }
+
+        return result;
+    }
+
+    private int transferXmp(String dbg_context) throws IOException {
+        int changedFiles = 0;
+        String inJpgFullPath = this.getPath();
+        String outJpgFullPath = (absoluteJpgOutPath == null) ? inJpgFullPath : absoluteJpgOutPath;
+        boolean isSameFile = outJpgFullPath.compareTo(inJpgFullPath) == 0;
+
+        if (xmp != null) {
+            // copy/move via modifying xmp(s)
+            Boolean xmpLongFormat = xmp.isLongFormat();
+            boolean isLongFormat = (xmpLongFormat != null)
+                    ? xmpLongFormat.booleanValue()
+                    : FotoLibGlobal.preferLongXmpFormat;
+
+            changedFiles += saveXmp(xmp, outJpgFullPath, isLongFormat, dbg_context);
+
+            if (xmp.isHasAlsoOtherFormat()) {
+                changedFiles += saveXmp(xmp, outJpgFullPath, !isLongFormat, dbg_context);
+                if (!isSameFile && this.deleteOriginalAfterFinish) FileProcessor.getSidecar(inJpgFullPath, !isLongFormat).delete();
+            }
+
+            if (this.deleteOriginalAfterFinish && !isSameFile) {
+                // if xmp-file does not exist, nothing happens :-)
+                FileProcessor.getSidecar(inJpgFullPath, isLongFormat).delete();
+            }
+        } else {
+            if (!isSameFile) {
+                // copy/move via file copy and remove original if neccessary
+                changedFiles += copyReplaceIfExist(inJpgFullPath, outJpgFullPath, true, dbg_context);
+                changedFiles += copyReplaceIfExist(inJpgFullPath, outJpgFullPath, false, dbg_context);
+            }
+        }
+        return changedFiles;
+    }
+
+    private int copyReplaceIfExist(String absoluteJpgInPath, String outJpgFullPath, boolean longFormat, String dbg_context) throws IOException {
+        int changedFiles = 0;
+        File xmpInFile = FileCommands.getExistingSidecarOrNull(absoluteJpgInPath, longFormat);
+        if (xmpInFile != null) {
+            FileUtils.copyReplace(
+                    xmpInFile, FileCommands.getSidecar(outJpgFullPath, longFormat),
+                    this.deleteOriginalAfterFinish, dbg_context);
+            changedFiles++;
+        }
+        return changedFiles;
+    }
+
+    private int saveXmp(MediaXmpSegment xmp,
+                        String outFullJpgPath,
+                        boolean isLongFileName, String dbg_context) throws IOException {
+        File xmpOutFile = FileCommands.getSidecar(outFullJpgPath, isLongFileName);
+        xmp.save(xmpOutFile, FotoLibGlobal.debugEnabledJpgMetaIo, dbg_context);
+        return 1;
+    }
+
+    private int transferExif(String dbg_context) throws IOException {
+        String inJpgFullPath = this.getPath();
+        String outJpgFullPath = (absoluteJpgOutPath == null) ? inJpgFullPath : absoluteJpgOutPath;
+        boolean isSameFile = outJpgFullPath.compareTo(inJpgFullPath) == 0;
+
+        if (exif != null) {
+            if (!isSameFile) {
+                exif.saveAttributes(new File(inJpgFullPath), new File(outJpgFullPath),
+                        this.deleteOriginalAfterFinish);
+            } else {
+                exif.saveAttributes();
+            }
+        } else if (!isSameFile) {
+            // changes are NOT written to exif. Do File copy instead.
+            FileUtils.copyReplace(absoluteJpgInPath, absoluteJpgOutPath, this.deleteOriginalAfterFinish, dbg_context + "-transferExif");
+        } else {// same file, no exif changes: nothing to do
+            return 0;
+        }
+        return 1;
     }
 
     public ExifInterfaceEx getExif() {

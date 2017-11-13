@@ -23,6 +23,8 @@ import android.os.Environment;
 
 import java.io.File;
 
+import de.k3b.io.OSDirectory;
+
 /**
  * Created by k3b on 22.06.2016.
  */
@@ -57,4 +59,21 @@ public class OsUtils {
         }
         return cur;
     }
+
+    public static OSDirectory getRootOSDirectory() {
+        // #103: bugfix
+        // this works for android-4.4 an earlier and on rooted devices
+        OSDirectory root = new OSDirectory("/", null);
+        if (root.getChildren().size() == 0) {
+            // on android-5.0 an newer root access is not allowed.
+            // i.e. /storage/emulated/0
+            File externalRoot = Environment.getExternalStorageDirectory();
+            if (externalRoot != null) {
+                root = new OSDirectory(externalRoot.getAbsolutePath(), null);
+            }
+        }
+        return root;
+    }
+
+
 }

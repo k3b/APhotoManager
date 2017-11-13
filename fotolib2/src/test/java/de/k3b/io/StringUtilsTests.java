@@ -52,4 +52,9 @@ public class StringUtilsTests {
         Assert.assertEquals("9 #Hab#our is not a tag", null, StringUtils.getTag(text, 9));
         Assert.assertEquals("16 at is not a tag", null, StringUtils.getTag(text, 16));
     }
+
+    @Test
+    public void shoudMerge() {
+        Assert.assertEquals("12345", StringUtils.merge("135", "24"));
+    }
 }
