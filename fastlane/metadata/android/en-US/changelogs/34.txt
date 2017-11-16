@@ -1,2 +1,2 @@
-* Added missing Dutch translations (by ookikgavertalen).
-* Major Bugfix for non-root android-5.0ff: Destination-Directory picker for copy/move/mediascanner not working. 
+* Folder-rule based autoprocessing for copy/move photo(s): rename-file-pattern, auto-apply userdefined exif 
+* Added missing Japanese translations (by naofum" via crowdin.com).
