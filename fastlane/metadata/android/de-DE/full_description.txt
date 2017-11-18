@@ -1,8 +1,8 @@
-Photo Verwaltung: Suchen, Sortieren, Anzeigen, Kopieren, Löschen, Exif bearbeiten...
+Verwalte lokale Photos: Suchen/Kopieren/Exif bearbeiten/Gallerie/Landkarte.
 
 Merkmale:
 
-* Schnelle Suche per Datei(unter)ordner, Datum, Tags(Suchbegriffe), Geo-Daten ...
+* Schnelle Suche per Tags(Suchbegriffe), Datei(unter)ordner, Datum, Geo-Daten ...
 * Anzeige in Gallerie oder Landkarte (Openstreetmap)
 * Photoansicht mit stufenloser Vergrößerung (Zoom), links/rechts wischen für nächstes/vorheriges Bild.
 * Eingebaute Dateiverwaltung für Bilder: Suchen, Sorieren, Kopieren, Löschen, Teilen/Senden, ... .

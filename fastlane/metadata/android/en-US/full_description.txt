@@ -1,4 +1,4 @@
-Manage photos in local media store: find, sort, view, copy, delete, edit exif.
+Manage local photos: Find/Copy/Edit-Exif and show in Gallery or Map.
 
 Features:
 

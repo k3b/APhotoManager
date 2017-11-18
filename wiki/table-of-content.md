@@ -47,3 +47,5 @@
 * [Settings](https://github.com/k3b/AndroFotoFinder/wiki/settings)
 * [pc android meta sync](https://github.com/k3b/AndroFotoFinder/wiki/sync)
 * [Metadata](https://github.com/k3b/AndroFotoFinder/wiki/Metadata)
+
+<a href="https://github.com/k3b/AndroFotoFinder/wiki/Exif-Edit">

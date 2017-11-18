@@ -22,49 +22,51 @@
 <resources>
   <string name="about_content_about"><![CDATA["
 <h1>A Photo Manager</h1>mit &#39;A Photo Map&#39; und &#39;AndroFotoFinder&#39;
-  <br />Merkmale:
-  <ul>
-    <li>verwaltet große Bildersammlungen (15000+ Bilder in 1000+ Ordnern)</li>
-    <li>verwendet Androids interne Mediendatenbank. Die App kann ohne initialem Bild-Scan verwendet werden.</li>
-    <li>
-    <a href="https://github.com/k3b/APhotoManager/wiki/Filter-View">Bilder finden</a>, per
-    <ul>
-      <li>Schnellsuche in Dateipfad, Dateiname, Bildtitel, Bildbeschreibung, Tags(Suchbegriffe) mit Platzhaltern </li>
-      <li>Ordner (mit hirachischer
-      <a href="https://github.com/k3b/APhotoManager/wiki/Folder-Picker">Ordnerauswahl</a>)</li>
-      <li>Ordner/Dateinamen mit Platzhaltern</li>
-      <li>Datum</li>
-      <li>Bewertung (Rating)</li>
-      <li>Enthaltene/nicht enthaltene Tags(Suchbegriffe) mit Platzhaltern </li>
-      <li>Gebiet auf einer
-      <a href="https://github.com/k3b/APhotoManager/wiki/geographic-map">Landkarte</a> (für Bilder mit Gps-Exif-Infos)</li>
-    </ul></li>
-    <li>Ergebnisanzeige in
-    <a href="https://github.com/k3b/APhotoManager/wiki/Gallery-View">Galerie-Ansicht</a>
-    <ul>
-      <li>Unterstützung für Mehrfach-Auswahl</li>
-      <li>Dateiverarbeitung zum Kopieren, Verschieben, Löschen, Senden, Exif-Geo-Tags ändern, Suchbegriffe/Schlüsselworte ändern</li>
-    </ul></li>
-    <li>
-    <a href="https://github.com/k3b/APhotoManager/wiki/Image-View">Foto-Ansicht</a> mit
-    <ul>
-      <li>stufenloser Vergrößerung (Zoom)</li>
-      <li>links/rechts wischen für nächstes/vorheriges Bild</li>
-      <li>Anzeige für erweiterte Bildinformationen (Exif, IPTC, XMP, ICC)</li>
-      <li>zum Kopieren, Verschieben, Löschen, Umbenennen, Teilen/Senden von Bildern, Exif-Geo-Tags ändern, Suchbegriffe/Schlüsselworte ändern</li>
-    </ul></li>
-    <li>Die
-    <a href="https://github.com/k3b/APhotoManager/wiki/geographic-map">geografische Karte</a> zeigt Marker an den Orten, an denen
-    Fotos aufgenommen wurden</li>
-    <li>Änderungen an den Photo-Metadaten (Exif-Geo, Tags(Suchbegriffe), Pfad, Dateiname, ...) können
-    zwischen MS-Windows-Pc und Android übertragen werden .
-    Details siehe <a href="https://github.com/k3b/APhotoManager/wiki/sync">Sync between Android and PC</a>.</li>
-    <li>Alle Dateioperationen
-    <ul>
-      <li>aktualisieren auch die Android-Mediendatenbank</li>
-      <li>aktualisiert auch Xmp-Filialdateien</li>
-    </ul></li>
-    </ul>
+  <br />
+<!-- this will also become translation 'short_description.txt' in fdroid -->
+<h2>
+Verwalte lokale Photos: Suchen/Kopieren/Exif bearbeiten/Gallerie/Landkarte.
+</h2>
+
+<!-- this (without the links) will also become translation 'full_description.txt' in fdroid and part of github-wiki -->
+
+Merkmale:
+
+<ul>
+     <li> <a href='https://github.com/k3b/APhotoManager/wiki/Filter-View'>
+		Schnelle Suche</a> per
+		<a href='https://github.com/k3b/APhotoManager/wiki/Tags'>
+		Tags(Suchbegriffe)</a>,
+		<a href='https://github.com/k3b/APhotoManager/wiki/Folder-Picker'>
+		Datei(unter)ordner</a>, Datum,
+		<a href='https://github.com/k3b/APhotoManager/wiki/geographic-map'>
+		Geo-Daten</a>, Titel, Bewertung, ...
+</li><li>Anzeige in
+		<a href='https://github.com/k3b/APhotoManager/wiki/Gallery-View'>
+		Gallerie</a> oder
+		<a href='https://github.com/k3b/APhotoManager/wiki/geographic-map'>
+		Landkarte</a> (Openstreetmap)
+</li><li><a href='https://github.com/k3b/APhotoManager/wiki/Image-View'>
+		Photoansicht</a> mit stufenloser Vergrößerung (Zoom), links/rechts wischen für nächstes/vorheriges Bild.
+</li><li>Eingebaute Dateiverwaltung für Bilder: Suchen, Sorieren, Kopieren, Löschen, Teilen/Senden, ... .
+</li><li><a href='https://github.com/k3b/AndroFotoFinder/wiki/Exif-Edit'>
+		Exif-Daten bearbeiten</a>: Datum, Titel, Beschreibung,
+		<a href='https://github.com/k3b/APhotoManager/wiki/Tags'>
+		Tags(Suchbegriffe)</a>,
+		Geo, Bewerung, ....
+</li><li>Verwaltet große Bildersammlungen (15000+ Bilder in 1000+ Ordnern)
+</li><li>Funktioniert auch ohne vorherigem Media-Scan (Android native media content-provider).
+</li><li>Erweiterter Media-Scanner für Bilder: Exif, IPTC, XMP.
+</li></ul>
+
+Android Berechtigungen: :
+
+<ul>
+     <li>INTERNET: Download Landkarten von Openstreetmap.
+</li><li>ACCESS_NETWORK_STATE und ACCESS_WIFI_STATE: Feststellen ob wifi/internet verfügbar ist für Landkarten download.
+</li><li>WRITE_EXTERNAL_STORAGE Zwichenspeichern von Landkarten und Dateioperationen mit Bildern.
+</li><li>READ_LOGS Speichere Programmabsturz-Infos in lokaler Textdatei.
+</li></ul>
   <br />
   "]]></string>
 </resources>

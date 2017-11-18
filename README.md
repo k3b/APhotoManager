@@ -1,9 +1,6 @@
 # ![](https://raw.githubusercontent.com/k3b/APhotoManager/master/app/src/main/res/drawable-hdpi/foto_gallery.png) "A Photo Manager" with "A Photo Map", AndroFotoFinder
 
-Enhanced Android [Gallery App](https://github.com/k3b/APhotoManager/wiki/Gallery-View) to manage local photos: 
-[geotagging with map](https://github.com/k3b/APhotoManager/wiki/geographic-map), 
-[tags (keywords)](https://github.com/k3b/APhotoManager/wiki/Tags),
-find, sort, view, copy, delete, set gps exif data, set tags(Keywords), send, edit exif, ... .
+Manage local photos: Find/Copy/Edit-Exif and show in Gallery or Map.
 
 ---<br/>
 [<img src="https://github.com/k3b/APhotoManager/wiki/uptodown.png" alt="available on upToDown store" height="82" width="324">](https://a-photo-manager.en.uptodown.com/android) [<img src="https://github.com/k3b/APhotoManager/wiki/fdroid.png" alt="available on F-Droid app store" height="82" width="324">](https://f-droid.org/app/de.k3b.android.androFotoFinder)<br/>
@@ -13,13 +10,26 @@ find, sort, view, copy, delete, set gps exif data, set tags(Keywords), send, edi
 
 ## Features
 
-* Free, opensource, no adds, no user tracking, available on [f-droid](https://f-droid.org/)
-* Geotagging: Shows photos in a [geographic map](https://github.com/k3b/APhotoManager/wiki/geographic-map) from [openstreetmap](http://www.openstreetmap.org)
-* Buildin file manager for photos: find, sort, view, copy, delete, Show in map, set gps exif data, send, edit exif, ... .
-* Fast [find](https://github.com/k3b/APhotoManager/wiki/Filter-View) local photos by (sub-)folder, date, [geographic map](https://github.com/k3b/APhotoManager/wiki/geographic-map)or [tags (keywords)](https://github.com/k3b/APhotoManager/wiki/Tags).
+* Fast find photos by tags(keywords), (sub-)folder, date, geo , title, ...
+* Display result in gallery or geographic map from openstreetmap.
+* Detail view features zooming, swiping for next/previous image.
+* Buildin file manager for photos: find, sort, view, copy, delete, send, ... .
+* Edit exif metadata: date, title, description, tags(keywords), geo, rating, ....
+* Can handle big image collections (20000+ images in 1000+ folders).
+* Uses Android's image content-provider. No initial image scan neccessary.
+* Extended photo media scanner for Exif, IPTC, XMP
 * [Translations](https://crowdin.com/project/AndroFotoFinder): &nbsp;ar,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/de-home">de</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/home"   >en</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/it-home">it</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja</a>,&nbsp;nl,&nbsp;pl,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro</a>,&nbsp;ru&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/tr-home">tr</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/zh-CN-home">zh-CN</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/zh-TW-home">zh-TW</a>
 	* [![Crowdin](https://d322cqt584bo4o.cloudfront.net/androFotoFinder/localized.svg)](https://crowdin.com/project/androFotoFinder)<a href="https://github.com/k3b/APhotoManager/issues/21">Help us to translate into other languages.</a>
 	
+---
+
+## Required Android Permissions:
+
+* INTERNET: to download map data from Open Streetmap Server
+* ACCESS_NETWORK_STATE and ACCESS_WIFI_STATE: to find out if wifi/internet is online to start downloaded geodata
+* WRITE_EXTERNAL_STORAGE to cache downloaded map data in local file system and to do file operations with the photos
+* READ_LOGS to read and save potential crash-logs to a textfile.
+
 ---
 
 [... features more detailed](https://github.com/k3b/APhotoManager/wiki/features)
