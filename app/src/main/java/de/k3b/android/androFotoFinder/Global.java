@@ -81,7 +81,7 @@ public class Global {
     public static final boolean mustRemoveNOMEDIAfromDB = true;
 
     /** #93 false: implementation not finished yet. intermediate release for hotfix. */
-    public static final boolean apmEnabled = false;
+    public static final boolean apmEnabled = true;
 
     private static final File externalStorageDirectory = Environment.getExternalStorageDirectory();
 
