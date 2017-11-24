@@ -45,6 +45,7 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.PhotoAutoprocessingEditActivity;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
@@ -343,7 +344,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                 menuItem.setVisible(true);
             }
 
-            if (!Global.apmEnabled) {
+            if (!FotoLibGlobal.apmEnabled) {
                 menuItem = popup.getMenu().findItem(R.id.cmd_apm_edit);
                 if (menuItem != null) {
                     menuItem.setVisible(false);

@@ -158,6 +158,16 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
     }
 
     /**
+     * apply changes in exifChanges to all images in selectedFiles.
+     * @return number of changed files.
+     */
+    public int applyExifChanges(MediaDiffCopy exifChanges, SelectedFiles selectedFiles, IProgessListener progessListener) {
+        // source files are the same as dest files.
+        final File[] destFiles = SelectedFiles.getFiles(selectedFiles.getFileNames());
+        return moveOrCopyFiles(false, "change_exif", exifChanges, selectedFiles, destFiles, progessListener);
+    }
+
+    /**
      * move (or copy) sourcefiles (with their xmp-sidecar-files) to destdirfolder.
      * Executes autoprocessing (#91: rename, add exif) if destdirfolder
      * contains ".apm"  (autoprocessing data file)
@@ -169,7 +179,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
         IFileNameProcessor renameProcessor = null;
         MediaDiffCopy exifChanges = null;
 
-        PhotoWorkFlowDto autoProccessData = getPhotoWorkFlowDto(destDirFolder);
+        PhotoWorkFlowDto autoProccessData = (!FotoLibGlobal.apmEnabled) ? null : getPhotoWorkFlowDto(destDirFolder);
         if (autoProccessData != null) {
             renameProcessor = autoProccessData.createFileNameProcessor();
             exifChanges = new MediaDiffCopy(autoProccessData.getMediaDefaults());
@@ -181,23 +191,14 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
     }
 
     /**
-     * apply changes in exifChanges to all images in selectedFiles.
-     * @return number of changed files.
-     */
-    public int applyExifChanges(MediaDiffCopy exifChanges, SelectedFiles selectedFiles, IProgessListener progessListener) {
-        // source files are the same as dest files.
-        final File[] destFiles = SelectedFiles.getFiles(selectedFiles.getFileNames());
-        return moveOrCopyFiles(false, "change_exif", exifChanges, selectedFiles, destFiles, progessListener);
-    }
-
-    /**
      * For junit integration test: special internal version with explicit dependencies.
      * @param move false: copy
-     * @param exifChanges
+     * @param exifChanges not null: update exif while copying
      * @param selectedFiles
-     * @param renameProcessor
+     * @param renameProcessor not null: handles destination filename
      * @param destDirFolder where files are moved/copied to
-     * @param progessListener        */
+     * @param progessListener   not null: to show in gui what is happening
+     */
     int moveOrCopyFilesTo(boolean move,
                           MediaDiffCopy exifChanges, SelectedFiles selectedFiles, IFileNameProcessor renameProcessor,
                           File destDirFolder, IProgessListener progessListener) {
@@ -213,17 +214,6 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
             }
         }
         return result;
-    }
-
-    private PhotoWorkFlowDto getPhotoWorkFlowDto(File destDirFolder) {
-        PhotoWorkFlowDto autoProccessData = null;
-        try {
-            autoProccessData = new PhotoWorkFlowDto().load(destDirFolder);
-        } catch (IOException e) {
-            log("cannot load .apm file for '", destDirFolder, "'. ", e.getMessage());
-            autoProccessData = null;
-        }
-        return autoProccessData;
     }
 
     /** does the copying and/or apply exif changes. also used by unittesting */
@@ -355,6 +345,17 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
             }
         }
         return itemCount;
+    }
+    
+    private PhotoWorkFlowDto getPhotoWorkFlowDto(File destDirFolder) {
+        PhotoWorkFlowDto autoProccessData = null;
+        try {
+            autoProccessData = new PhotoWorkFlowDto().load(destDirFolder);
+        } catch (IOException e) {
+            log("cannot load .apm file for '", destDirFolder, "'. ", e.getMessage());
+            autoProccessData = null;
+        }
+        return autoProccessData;
     }
 
     public JpgMetaWorkflow createWorkflow(TransactionLoggerBase logger, String dbgContext) {

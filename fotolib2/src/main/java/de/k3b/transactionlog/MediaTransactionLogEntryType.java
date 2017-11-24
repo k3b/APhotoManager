@@ -36,7 +36,7 @@ public enum MediaTransactionLogEntryType {
     GPS("g", "apmGps"),
     TAGSADD("T+", "apmTagsAdd"),
     TAGSREMOVE("T-", "apmTagsRemove"),
-    TAGS("T", ""),
+    TAGS("T", "rem apmTagsSet"),
     DESCRIPTION("d", "apmDescription",true),
     HEADER("h", "apmTitle",true),
     RATING("r", "apmRating"),

@@ -1,2 +1,7 @@
-* Folder-rule based autoprocessing for copy/move photo(s): rename-file-pattern, auto-apply userdefined exif 
-* Translations via crowdin.com: New Indonesian by "isaideureka". Update Japanese by "naofum", Chinese Liu Feng (pitumaomao).
+Changes from 0.6.1.170816 (32) to 0.6.2.171126 (34)
+
+* Hotfix : app crash in "Set Tags" (introduced in 0.6.2.171114 (33))
+* Major Bugfix for non-root android-5.0ff: Destination-Directory picker for copy/move/mediascanner not working. 
+* Translations via crowdin.com: New Indonesian (isaideureka). Update Japanese (naofum), Chinese (Liu Feng/pitumaomao), Dutch (ookikgavertalen).
+* Prepare for localized app description in f_droid (en-US, de-DE, zh-CN, zh-TW) via https://crowdin.com/project/androFotoFinder/ 
+
