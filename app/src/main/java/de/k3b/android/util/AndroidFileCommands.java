@@ -206,12 +206,15 @@ public class AndroidFileCommands extends FileCommands {
         return (result != 0);
     }
 
+    /** implement copy/move called after dest-dir-pick  */
     public void onMoveOrCopyDirectoryPick(boolean move, SelectedFiles selectedFiles, IDirectory destFolder) {
         if (destFolder != null) {
             String copyToPath = destFolder.getAbsolute();
             File destDirFolder = new File(copyToPath);
 
             setLastCopyToPath(copyToPath);
+
+            //     public int moveOrCopyFilesTo(boolean move, SelectedFiles selectedFiles, File destDirFolder, IProgessListener progessListener) {
 
             moveOrCopyFilesTo(move, selectedFiles, destDirFolder, null);
         }
