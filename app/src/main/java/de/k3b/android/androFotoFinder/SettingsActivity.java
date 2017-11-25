@@ -323,20 +323,22 @@ public class SettingsActivity extends PreferenceActivity {
     /** load File preference from SharedPreferences */
     private static File getPref(SharedPreferences prefs, String key, File defaultValue) {
         String value         = prefs.getString(key, null);
-        if ((value == null) || (value.trim().length() == 0)) return defaultValue;
+        if (isNullOrEmpty(value)) return defaultValue;
 
         return new File(value);
     }
 
     /** load value from SharedPreferences */
     private static String getPref(SharedPreferences prefs, String key, String defaultValue) {
-        return  prefs.getString(key, defaultValue);
+        String value = prefs.getString(key, defaultValue);
+        if (isNullOrEmpty(value)) return defaultValue;
+        return value;
     }
 
     /** load value from SharedPreferences */
     private static int getPref(SharedPreferences prefs, String key, int defaultValue) {
         String value         = prefs.getString(key, null);
-        if ((value == null) || (value.trim().length() == 0)) return defaultValue;
+        if (isNullOrEmpty(value)) return defaultValue;
 
         // #73 fix NumberFormatException
         try {
@@ -347,6 +349,10 @@ public class SettingsActivity extends PreferenceActivity {
                     " => " + ex.getMessage(),ex);
         }
         return defaultValue;
+    }
+
+    private static boolean isNullOrEmpty(String value) {
+        return (value == null) || (value.trim().length() == 0);
     }
 
     /** load value from SharedPreferences */

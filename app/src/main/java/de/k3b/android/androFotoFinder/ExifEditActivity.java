@@ -60,9 +60,8 @@ import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
-import de.k3b.android.widget.AsyncTaskWithProgressDialog;
+import de.k3b.android.widget.UpdateTask;
 import de.k3b.android.widget.HistoryEditText;
-import de.k3b.io.IProgessListener;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
@@ -88,7 +87,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
     private static final String mDebugPrefix = "ExifEdit-";
     private static final String DLG_NAVIGATOR_TAG = mDebugPrefix;
 
-    public static final int EXIF_RESULT_ID = 522;
+    public static final int EXIF_RESULT_ID = UpdateTask.EXIF_RESULT_ID;
     private static final int GEO_RESULT_ID = 572;
 
     /** detail,gallery:  sql where ... order by ... group by ... */
@@ -737,6 +736,8 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
         } else {
             // modify jpg files and return
             SelectedFiles items = getSelectedFiles("onOk ", this, getIntent(), true);
+
+            //!!! todo #93: this code also in
             AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(this, true);
 
             MediaDiffCopy exifChanges = new MediaDiffCopy(true).setDiff(mInitialData, mCurrentData);
@@ -755,67 +756,6 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
             } else {
                 finish(); // no changes, nothing to do
             }
-        }
-    }
-
-    /** update exif changes in asynch task mit chow dialog */
-    private static class UpdateTask extends AsyncTaskWithProgressDialog<SelectedFiles> implements IProgessListener {
-        private MediaDiffCopy exifChanges;
-        private final AndroidFileCommands cmd;
-
-        UpdateTask(Activity ctx, AndroidFileCommands cmd,
-                   MediaDiffCopy exifChanges) {
-            super(ctx, R.string.exif_menu_title);
-            this.exifChanges = exifChanges;
-            this.cmd = cmd;
-        }
-
-        @Override
-        protected Integer doInBackground(SelectedFiles... params) {
-            publishProgress("...");
-
-            if (exifChanges != null) {
-                SelectedFiles items = params[0];
-
-                return cmd.applyExifChanges(exifChanges, items, null);
-
-            }
-            return 0;
-        }
-
-        @Override
-        protected void onPostExecute(Integer itemCount) {
-            if (Global.debugEnabled) {
-                Log.d(Global.LOG_CONTEXT, mDebugPrefix + " onPostExecute " + itemCount);
-            }
-            Activity parent = this.parent;
-            super.onPostExecute(itemCount);
-            parent.setResult(EXIF_RESULT_ID, parent.getIntent());
-            parent.finish();
-        }
-
-        @Override
-        public void destroy() {
-            if (exifChanges != null) exifChanges.close();
-            exifChanges = null;
-            super.destroy();
-        }
-
-        public boolean isEmpty() {
-            return (exifChanges == null);
-        }
-
-        /**
-         * called every time when command makes some little progress. Can be mapped to async progress-bar
-         *
-         * @param itemcount
-         * @param total
-         * @param message
-         */
-        @Override
-        public boolean onProgress(int itemcount, int total, String message) {
-            publishProgress(itemcount, total, message);
-            return !isCancelled();
         }
     }
 

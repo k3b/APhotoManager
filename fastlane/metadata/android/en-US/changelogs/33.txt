@@ -1,0 +1,2 @@
+* Added missing Dutch translations (by ookikgavertalen).
+* Major Bugfix for non-root android-5.0ff: Destination-Directory picker for copy/move/mediascanner not working. 

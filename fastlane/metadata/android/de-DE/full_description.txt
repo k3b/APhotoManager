@@ -1,0 +1,20 @@
+Verwalte lokale Photos: Suchen/Kopieren/Exif bearbeiten/Gallerie/Landkarte.
+
+Merkmale:
+
+* Schnelle Suche per Tags(Suchbegriffe), Datei(unter)ordner, Datum, Geo-Daten ...
+* Anzeige in Gallerie oder Landkarte (Openstreetmap)
+* Photoansicht mit stufenloser Vergrößerung (Zoom), links/rechts wischen für nächstes/vorheriges Bild.
+* Eingebaute Dateiverwaltung für Bilder: Suchen, Sorieren, Kopieren, Löschen, Teilen/Senden, ... .
+* Exif-Daten bearbeiten: Datum, Titel, Beschreibung, Tags(Suchbegriffe), Geo, Bewerung, ....
+* Verwaltet große Bildersammlungen (15000+ Bilder in 1000+ Ordnern)
+* Funktioniert auch ohne vorherigem media scan (Android native media content-provider).
+* Erweiterter Media-Scanner für Bilder: Exif, IPTC, XMP.
+
+Android Berechtigungen: :
+
+* INTERNET: Download Landkarten von Openstreetmap.
+* ACCESS_NETWORK_STATE und ACCESS_WIFI_STATE: Feststellen ob wifi/internet verfügbar ist für Landkarten download.
+* WRITE_EXTERNAL_STORAGE Zwichenspeichern von Landkarten und Dateioperationen mit Bildern.
+* READ_LOGS Speichere Programmabsturz-Infos in lokaler Textdatei.
+.

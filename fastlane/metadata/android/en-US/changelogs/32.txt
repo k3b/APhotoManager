@@ -1,0 +1,4 @@
+* Added missing arabic translations with placeholders.
+* Bugfix: possible app crash on android-7.1 
+* Bugfix: Limit Thumbnails to 1024 entries/50 megabyte
+		
