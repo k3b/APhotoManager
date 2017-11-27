@@ -1,0 +1,1 @@
+* Folder-rule based autoprocessing for copy/move photo(s): rename-file-pattern, auto-apply userdefined exif 

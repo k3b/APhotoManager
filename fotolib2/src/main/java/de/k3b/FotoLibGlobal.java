@@ -58,7 +58,7 @@ public class FotoLibGlobal {
     public static boolean preserveJpgFileModificationDate = true;
 
     /** #93 false: implementation not finished yet. intermediate release for hotfix. */
-    public static final boolean apmEnabled = false;
+    public static final boolean apmEnabled = true;
 
     /** progressbar advances after processing x photos */
     public static final int itemsPerProgress = 10;
