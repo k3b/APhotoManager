@@ -81,7 +81,9 @@ public enum MediaTransactionLogEntryType {
         int i =0;
 
         if ((batCommand == null) || (batCommand.length() == 0)) throw new IllegalArgumentException(this +":"+id + " has no batCommand assigned");
-        r[i++] = "call ";
+        if (!isComment(this)) {
+            r[i++] = "call ";
+        }
         r[i++] = batCommand;
         r[i++] = ".cmd \"";
         r[i++] = path;
@@ -90,5 +92,14 @@ public enum MediaTransactionLogEntryType {
         r[i++] = parameter;
         r[i++] = mustQuoteParam ? "\"" : "";
         return r;
+    }
+
+    public static boolean isComment(MediaTransactionLogEntryType item) {
+        return ((item == null) || isComment(item.batCommand));
+    }
+
+    private static boolean isComment(String batCommand) {
+        return ((batCommand == null)
+                || (batCommand.toLowerCase().startsWith(COMMENT.batCommand.toLowerCase())));
     }
 }

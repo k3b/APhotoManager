@@ -434,7 +434,6 @@ public class AndroidFileCommands extends FileCommands {
                             file.getAbsolutePath(), jpg, MediaUtil.FieldID.latitude_longitude);
                     itemcount++;
                     addTransactionLog(selectedItems.getId(i), file.getAbsolutePath(), now, MediaTransactionLogEntryType.GPS, latLong);
-                    log(MediaTransactionLogEntryType.GPS.getCommand(file.getAbsolutePath(), latLong));
                 }
                 onProgress(itemcount, maxCount, null);
 

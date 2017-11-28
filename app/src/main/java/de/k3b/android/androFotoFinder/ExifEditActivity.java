@@ -288,7 +288,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
     // used to analyse error #91:.
     private void debugChanges(String function) {
         if (FotoLibGlobal.debugEnabledJpgMetaIo){
-            MediaDiffCopy diff = new MediaDiffCopy(true);
+            MediaDiffCopy diff = new MediaDiffCopy(true, true);
             diff.setDiff(mInitialData, mCurrentData);
             Log.d(FotoLibGlobal.LOG_TAG, mDebugPrefix + " "
                     + function + "\n\t"
@@ -740,7 +740,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
             //!!! todo #93: this code also in
             AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(this, true);
 
-            MediaDiffCopy exifChanges = new MediaDiffCopy(true).setDiff(mInitialData, mCurrentData);
+            MediaDiffCopy exifChanges = new MediaDiffCopy(true, true).setDiff(mInitialData, mCurrentData);
 
             if (exifChanges != null) {
                 if (!SYNC_UPDATE_EXIF) {

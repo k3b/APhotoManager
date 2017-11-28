@@ -182,7 +182,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
         PhotoWorkFlowDto autoProccessData = (!FotoLibGlobal.apmEnabled) ? null : getPhotoWorkFlowDto(destDirFolder);
         if (autoProccessData != null) {
             renameProcessor = autoProccessData.createFileNameProcessor();
-            exifChanges = new MediaDiffCopy(autoProccessData.getMediaDefaults());
+            exifChanges = new MediaDiffCopy(autoProccessData.getMediaDefaults(), false);
         } else {
             renameProcessor = new DestDirFileNameProcessor(destDirFolder);
         }

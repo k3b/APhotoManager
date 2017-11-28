@@ -61,7 +61,7 @@ public class JpgMetaWorkflow {
     }
     public MetaWriterExifXml saveLatLon(File filePath, Double latitude, Double longitude) {
         IMetaApi changedData = new MediaDTO().setLatitudeLongitude(latitude, longitude);
-        MediaDiffCopy metaDiffCopy = new MediaDiffCopy(true)
+        MediaDiffCopy metaDiffCopy = new MediaDiffCopy(true, true)
                 .setDiff(changedData, MediaUtil.FieldID.latitude_longitude);
         MetaWriterExifXml exif = applyChanges(filePath, null, 0, false, metaDiffCopy);
         metaDiffCopy.close();
@@ -107,7 +107,9 @@ public class JpgMetaWorkflow {
 
                     if(transactionLogger != null) {
                         transactionLogger.set(id, outFilePath);
-                        transactionLogger.addChanges(exif, EnumSet.copyOf(changed), oldTags);
+                        if ((changed != null) && (changed.size() > 0)) {
+                            transactionLogger.addChanges(exif, EnumSet.copyOf(changed), oldTags);
+                        }
                     }
                 } else {
                     if (sb != null) sb.append("no changes ");

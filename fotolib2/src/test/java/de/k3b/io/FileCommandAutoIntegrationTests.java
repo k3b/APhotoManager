@@ -33,7 +33,6 @@ import de.k3b.FotoLibGlobal;
 import de.k3b.TestUtil;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.media.ExifInterface;
-import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaDTO;
 import de.k3b.media.MediaDiffCopy;
 
@@ -80,7 +79,7 @@ public class FileCommandAutoIntegrationTests {
         final File testJpg = new File(OUTDIR, outFileBaseName + ".jpg");
         TestUtil.saveTestResourceAs("NoExif.jpg", testJpg);
 
-        MediaDiffCopy addExif = new MediaDiffCopy(new MediaDTO().setTitle("title added by " + TEST_CLASS_NAME));
+        MediaDiffCopy addExif = new MediaDiffCopy(new MediaDTO().setTitle("title added by " + TEST_CLASS_NAME), true);
 
         int changes = sut.applyExifChanges(addExif,new SelectedFiles(testJpg.toString(), "1"), null);
 
@@ -99,7 +98,7 @@ public class FileCommandAutoIntegrationTests {
     @Test
     public void shouldCopyExif() {
         String outFileBaseName = "shouldCopyExif";
-        MediaDiffCopy addExif = new MediaDiffCopy(new MediaDTO().setTitle("title added by " + TEST_CLASS_NAME));
+        MediaDiffCopy addExif = new MediaDiffCopy(new MediaDTO().setTitle("title added by " + TEST_CLASS_NAME), true);
 
         FileCommands sut = createFileCommands(outFileBaseName);
         RuleFileNameProcessor rename = new RuleFileNameProcessor(null, outFileBaseName, null, OUTDIR);

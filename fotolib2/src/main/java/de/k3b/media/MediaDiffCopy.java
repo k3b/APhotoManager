@@ -42,6 +42,7 @@ import de.k3b.tagDB.TagRepository;
 public class MediaDiffCopy {
     /** true: do not copy file path */
     private final boolean excludePath;
+    private final boolean overwriteExisting;
 
     private int numberOfChangedFields = 0;
 
@@ -67,13 +68,15 @@ public class MediaDiffCopy {
 
     /**
      * @param excludePath true: do not copy file path
+     * @param overwriteExisting
      */
-    public MediaDiffCopy(boolean excludePath) {
+    public MediaDiffCopy(boolean excludePath, boolean overwriteExisting) {
         this.excludePath = excludePath;
+        this.overwriteExisting = overwriteExisting;
     }
 
-    public MediaDiffCopy(IMetaApi newData) {
-        this(true);
+    public MediaDiffCopy(IMetaApi newData, boolean overwriteExisting) {
+        this(true, overwriteExisting);
         if (newData != null) {
             setDiff(null, newData);
         }
@@ -159,11 +162,13 @@ public class MediaDiffCopy {
         return null;
     }
 
-    /** Similar to {@link MediaUtil#copySpecificProperties(IMetaApi, IMetaApi, EnumSet)} but with special diff handling. */
+    /** Similar to {@link MediaUtil#copySpecificProperties(IMetaApi, IMetaApi, boolean, EnumSet)} but with special diff handling. */
     public List<FieldID> applyChanges(IMetaApi destination) {
         if (this.numberOfChangedFields > 0) {
             // note: special processing was excluded from this.diffSet
-            List<FieldID> collectedChanges = MediaUtil.copySpecificProperties(destination, newData, this.diffSet);
+
+            List<FieldID> collectedChanges = MediaUtil.copySpecificProperties(destination, newData,
+                    this.overwriteExisting, this.diffSet);
 
             if (this.timeAdded != 0) {
                 Date oldDate = destination.getDateTimeTaken();

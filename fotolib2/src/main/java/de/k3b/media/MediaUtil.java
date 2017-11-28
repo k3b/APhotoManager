@@ -130,9 +130,11 @@ public class MediaUtil {
      *
      * @return possible empy list of FieldID-s of modified properties
      */
-    public static List<FieldID>  copySpecificProperties(IMetaApi destination, IMetaApi source, final EnumSet<FieldID> fields2copy) {
+    public static List<FieldID>  copySpecificProperties(IMetaApi destination, IMetaApi source,
+                                    boolean overwriteExisting, final EnumSet<FieldID> fields2copy) {
         List<FieldID> collectedChanges = new ArrayList<FieldID>();
-        copyImpl(destination, source, false, true, true, fields2copy, collectedChanges, (FieldID[]) null);
+
+        copyImpl(destination, source, false, overwriteExisting, overwriteExisting, fields2copy, collectedChanges, (FieldID[]) null);
         return collectedChanges;
     }
 
