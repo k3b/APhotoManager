@@ -231,6 +231,9 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
 				1708NewName0001.jpg -->
     <string name="preview_message_format">"%1$s %2$d Photos\n\t%3$s (%4$s), &#8230;\nTo %5$s\n\t%6$s"</string>
 
+    <!-- new in 0.6.3 -->
+    <string name="sort_by_file_size">Size</string>
+    <string name="sort_by_width">Width</string>
 
     <!--  depricated tags_update_result_format use image_success_update_format instead -->
 </resources>

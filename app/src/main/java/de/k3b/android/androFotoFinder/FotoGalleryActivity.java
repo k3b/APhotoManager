@@ -594,10 +594,20 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
                 this.mGalleryQueryParameter.setSortID(FotoSql.SORT_BY_NAME);
                 reloadGui("sort dir");
                 return true;
-            case R.id.cmd_sort_len:
+            case R.id.cmd_sort_path_len:
                 this.mGalleryQueryParameter.setSortID(FotoSql.SORT_BY_NAME_LEN);
                 reloadGui("sort len");
                 return true;
+            case R.id.cmd_sort_file_len:
+                this.mGalleryQueryParameter.setSortID(FotoSql.SORT_BY_FILE_LEN);
+                reloadGui("sort size");
+                return true;
+
+            case R.id.cmd_sort_width:
+                this.mGalleryQueryParameter.setSortID(FotoSql.SORT_BY_WIDTH);
+                reloadGui("sort width");
+                return true;
+
             case R.id.cmd_sort_location:
                 this.mGalleryQueryParameter.setSortID(FotoSql.SORT_BY_LOCATION);
                 reloadGui("sort geo");

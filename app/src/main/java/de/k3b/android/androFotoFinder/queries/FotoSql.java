@@ -72,6 +72,9 @@ public class FotoSql extends FotoSqlBase {
     public static final int SORT_BY_LOCATION = 'l';
     public static final int SORT_BY_NAME_LEN = 's'; // size
 
+    public static final int SORT_BY_FILE_LEN = 'f'; // file-size
+    public static final int SORT_BY_WIDTH = 'w'; // width of image
+
     public static final int SORT_BY_RATING = 'r';
     public static final int SORT_BY_MODIFICATION = 'm';
 
@@ -96,6 +99,10 @@ public class FotoSql extends FotoSqlBase {
     public static final String SQL_COL_DISPLAY_TEXT = "disp_txt";
     public static final String SQL_COL_LAT = MediaStore.Images.Media.LATITUDE;
     public static final String SQL_COL_LON = MediaStore.Images.Media.LONGITUDE;
+
+    // new col id for with since ver 0.6.3
+    public static final String SQL_COL_WIDTH = "col_width";
+    // since ver 0.6.3: file size. old col id for image-with before ver 0.6.3
     public static final String SQL_COL_SIZE = MediaStore.Images.Media.SIZE;
 
     private static final String SQL_COL_DATE_ADDED = MediaStore.Images.ImageColumns.DATE_ADDED;
@@ -258,7 +265,7 @@ public class FotoSql extends FotoSqlBase {
     public static final String[] DEFAULT_GALLERY_COLUMNS = new String[]{SQL_COL_PK,
             SQL_COL_PATH + " AS " + SQL_COL_DISPLAY_TEXT,
             // "0 AS " + SQL_COL_COUNT,
-            SQL_COL_MAX_WITH + " AS " + SQL_COL_SIZE,
+            SQL_COL_MAX_WITH + " AS " + SQL_COL_WIDTH,
             SQL_COL_GPS,
             SQL_COL_PATH};
 
@@ -467,6 +474,12 @@ public class FotoSql extends FotoSqlBase {
             case SORT_BY_LOCATION_OLD:
             case SORT_BY_LOCATION:
                 return context.getString(R.string.sort_by_place);
+            case SORT_BY_FILE_LEN:
+                return context.getString(R.string.sort_by_file_size);
+
+            case SORT_BY_WIDTH:
+                return context.getString(R.string.sort_by_width);
+
             case SORT_BY_NAME_LEN_OLD:
             case SORT_BY_NAME_LEN:
                 return context.getString(R.string.sort_by_name_len);
@@ -504,14 +517,22 @@ public class FotoSql extends FotoSqlBase {
             case SORT_BY_DATE:
                 return result.replaceOrderBy(SQL_COL_DATE_TAKEN + asc);
 
-            case SORT_BY_RATING:
-                return result.replaceOrderBy(SQL_COL_EXT_RATING  + asc, SQL_COL_DATE_TAKEN + asc);
             case SORT_BY_MODIFICATION:
                 return result.replaceOrderBy(SQL_COL_LAST_MODIFIED + asc);
 
             case SORT_BY_NAME_OLD:
             case SORT_BY_NAME:
                 return result.replaceOrderBy(SQL_COL_PATH + asc);
+
+            case SORT_BY_RATING:
+                return result.replaceOrderBy(SQL_COL_EXT_RATING  + asc, SQL_COL_DATE_TAKEN + asc);
+
+            case SORT_BY_FILE_LEN:
+                return result.replaceOrderBy(SQL_COL_SIZE + asc);
+
+            case SORT_BY_WIDTH:
+                return result.replaceOrderBy(SQL_COL_MAX_WITH + asc);
+
             case SORT_BY_LOCATION_OLD:
             case SORT_BY_LOCATION:
                 return result.replaceOrderBy(SQL_COL_GPS + asc, MediaStore.Images.Media.LATITUDE + asc);

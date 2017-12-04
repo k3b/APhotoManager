@@ -119,7 +119,12 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
         long count = DBUtils.getLong(cursor, FotoSql.SQL_COL_COUNT, 0);
         boolean gps = !DBUtils.isNull(cursor,FotoSql.SQL_COL_GPS,true);
 
-        long imageSize = DBUtils.getLong(cursor, FotoSql.SQL_COL_SIZE, 0);
+        // new col id for with since ver 0.6.3
+        long imageSize = DBUtils.getLong(cursor, FotoSql.SQL_COL_WIDTH, 0);
+        if (imageSize == 0) {
+            // backward compatibility old col id for with before ver 0.6.3
+            imageSize = DBUtils.getLong(cursor, FotoSql.SQL_COL_SIZE, 0);
+        }
 
         holder.filter = DBUtils.getString(cursor, FotoSql.SQL_COL_WHERE_PARAM, null);
 

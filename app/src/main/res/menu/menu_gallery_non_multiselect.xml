@@ -56,10 +56,20 @@
                 android:title="@string/sort_by_modification"
                 android:visible="true"
                 android:orderInCategory="5" />
-            <item android:id="@+id/cmd_sort_len"
+            <item android:id="@+id/cmd_sort_width"
+                android:title="@string/sort_by_width"
+                android:visible="true"
+                android:orderInCategory="5" />
+            <item android:id="@+id/cmd_sort_file_len"
+                android:title="@string/sort_by_file_size"
+                android:visible="true"
+                android:orderInCategory="5" />
+
+            <item android:id="@+id/cmd_sort_path_len"
                 android:title="@string/sort_by_name_len"
                 android:visible="true"
                 android:orderInCategory="5" />
+
         </menu>
     </item>
 

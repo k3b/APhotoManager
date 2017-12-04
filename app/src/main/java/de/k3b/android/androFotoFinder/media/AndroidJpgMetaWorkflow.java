@@ -19,14 +19,12 @@
 
 package de.k3b.android.androFotoFinder.media;
 
-import android.content.ContentValues;
 import android.content.Context;
 
 import java.io.File;
 
-import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.MediaScanner;
-import de.k3b.io.IGalleryFilter;
+import de.k3b.media.IMetaApi;
 import de.k3b.media.JpgMetaWorkflow;
 import de.k3b.transactionlog.TransactionLoggerBase;
 
@@ -49,7 +47,8 @@ public class AndroidJpgMetaWorkflow extends JpgMetaWorkflow {
     }
 
     /** todo overwrite in android class to implement update media db */
-    protected long updateMediaDB(long id, String oldJpgAbsolutePath, File newJpgFile) {
+    protected long updateMediaDB(long id, IMetaApi newExif, String oldJpgAbsolutePath, File newJpgFile) {
+        // let media scanner re-scan exif data
         Long affectedId = MediaScanner.getInstance(this.ctx).insertOrUpdateMediaDatabase(this.dbgContext, this.ctx, oldJpgAbsolutePath, newJpgFile, null);
 
         return  (affectedId != null) ? affectedId.longValue() : id;
