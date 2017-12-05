@@ -47,8 +47,8 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
     private boolean nonGeoOnly = false;
     private boolean withNoTags = false;
 
-    /** one of the VISIBILITY_XXXX values */
-    private int visibility = VISIBILITY_DEFAULT;
+    /** one of the VISIBILITY_.XXXX values */
+    private VISIBILITY visibility = VISIBILITY.DEFAULT;
 
     private int mSortId = SORT_BY_NONE;
     private boolean mSortAscending = false;
@@ -163,13 +163,13 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
         return this;
     }
 
-    /** one of the VISIBILITY_XXXX values */
-    public int getVisibility() {return visibility;}
-    public GalleryFilterParameter setVisibility(int value) {
-        if ((value >= VISIBILITY_DEFAULT) && (value <= VISIBILITY_PRIVATE_PUBLIC)) {
+    /** one of the VISIBILITY_.XXXX values */
+    public VISIBILITY getVisibility() {return visibility;}
+    public GalleryFilterParameter setVisibility(VISIBILITY value) {
+        if ((value.value >= VISIBILITY.DEFAULT.value) && (value.value <= VISIBILITY.PRIVATE_PUBLIC.value)) {
             visibility = value;
         } else {
-            visibility = VISIBILITY_DEFAULT;
+            visibility = VISIBILITY.DEFAULT;
         }
         return this;
     }
@@ -231,7 +231,7 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
         appendSubFields(result, convertList(getTagsAllExcluded()));
         appendSubFields(result, (isWithNoTags()) ? "notags" : "");
 
-        appendSubFields(result, (getVisibility() != VISIBILITY_DEFAULT) ? (""+getVisibility()):"");
+        appendSubFields(result, (getVisibility() != VISIBILITY.DEFAULT) ? (""+getVisibility().value):"");
 
         appendSubFields(result, (getRatingMin() > 0) ? (""+getRatingMin()) : "");
         return result;
@@ -320,7 +320,7 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
                 setWithNoTags(((value!=null) && (value.length() > 0)));
                 break;
             case 9 :
-                setVisibility(convertVisibility(value));
+                setVisibility(VISIBILITY.fromString(value));
                 break;
             case 10 :
                 setRatingMin(parseRating(value));
@@ -365,7 +365,7 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
                 && (filter.getInAnyField()==null)
                 && (filter.getTagsAllIncluded()==null)
                 && (filter.getTagsAllExcluded()==null)
-                && (filter.getVisibility()==VISIBILITY_DEFAULT)
+                && (filter.getVisibility()== VISIBILITY.DEFAULT)
         );
     }
 
@@ -387,16 +387,6 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
     public static String convertList(List<String> strings) {
         if (strings == null) return "";
         return SelectedItems.toString(strings.iterator());
-    }
-
-    public static int convertVisibility(String value) {
-        if ((value != null) && (value.length() > 0)) {
-            try {
-                return Integer.parseInt(value, 10);
-            } catch (Exception ex) {
-            }
-        }
-        return VISIBILITY_DEFAULT;
     }
 
     public void setRatingMin(int ratingMin) {

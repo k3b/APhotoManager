@@ -24,6 +24,7 @@ import org.junit.Test;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IGalleryFilter;
+import de.k3b.io.VISIBILITY;
 
 import static org.junit.Assert.*;
 
@@ -53,21 +54,21 @@ public class TagSqlQueryParserTests {
 
     @Test
     public void shouldParsePrivate() throws Exception {
-        assertFilterQueryFilter(IGalleryFilter.VISIBILITY_PRIVATE);
+        assertFilterQueryFilter(VISIBILITY.PRIVATE);
     }
 
     @Test
     public void shouldParsePrivatePublic() throws Exception {
-        assertFilterQueryFilter(IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+        assertFilterQueryFilter(VISIBILITY.PRIVATE_PUBLIC);
     }
 
     @Test
     public void shouldParsePublic() throws Exception {
-        assertFilterQueryFilter(IGalleryFilter.VISIBILITY_PUBLIC);
+        assertFilterQueryFilter(VISIBILITY.PUBLIC);
     }
 
     // assert that input-string==output-string in  input-string -> filter -> query -> filter -> output-string
-    private QueryParameter assertFilterQueryFilter(int visibility) {
+    private QueryParameter assertFilterQueryFilter(VISIBILITY visibility) {
         String FILTER_STRING = ";;;;;;;;;" + visibility;
         return assertFilterQueryFilter(FILTER_STRING);
     }
@@ -94,8 +95,8 @@ public class TagSqlQueryParserTests {
         parsedFilter.setSort(initialFilter.getSortID(), initialFilter.isSortAscending());
 
         // compensate that query might automatically add visibility
-        if (initialFilter.getVisibility() == GalleryFilterParameter.VISIBILITY_DEFAULT) {
-            parsedFilter.setVisibility(GalleryFilterParameter.VISIBILITY_DEFAULT);
+        if (initialFilter.getVisibility() == VISIBILITY.DEFAULT) {
+            parsedFilter.setVisibility(VISIBILITY.DEFAULT);
         }
 
         assertEquals(filterString, parsedFilter.toString());

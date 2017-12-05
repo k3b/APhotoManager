@@ -44,6 +44,7 @@ import de.k3b.android.util.IntentUtil;
 import de.k3b.csv2db.csv.CsvLoader;
 import de.k3b.io.FileUtils;
 import de.k3b.io.IGalleryFilter;
+import de.k3b.io.VISIBILITY;
 import de.k3b.media.MediaCsvItem;
 import de.k3b.media.MediaUtil;
 import de.k3b.tagDB.Tag;
@@ -204,7 +205,7 @@ public class MediaDBActivity extends Activity {
                 if (xmlLastFileModifyDate != TagSql.EXT_LAST_EXT_SCAN_UNKNOWN) {
                     TagSql.setXmpFileModifyDate(dbValues, xmlLastFileModifyDate);
                 }
-                mUpdateCount += TagSql.execUpdate(dbgContext, MediaDBActivity.this, path, xmlLastFileModifyDate, dbValues, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                mUpdateCount += TagSql.execUpdate(dbgContext, MediaDBActivity.this, path, xmlLastFileModifyDate, dbValues, VISIBILITY.PRIVATE_PUBLIC);
                 mItemCount++;
             }
         }

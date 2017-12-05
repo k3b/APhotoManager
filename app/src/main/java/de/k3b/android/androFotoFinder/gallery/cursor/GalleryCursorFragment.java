@@ -77,6 +77,7 @@ import de.k3b.android.util.OsUtils;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
@@ -86,7 +87,6 @@ import de.k3b.io.Directory;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
-import de.k3b.io.OSDirectory;
 import de.k3b.tagDB.Tag;
 
 /**
@@ -531,7 +531,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     public void requery(Activity context, QueryParameter parameters, String why) {
         this.mGalleryContentQuery = parameters;
 
-        FotoSql.setWhereVisibility(this.mGalleryContentQuery,IGalleryFilter.VISIBILITY_DEFAULT);
+        FotoSql.setWhereVisibility(this.mGalleryContentQuery, VISIBILITY.DEFAULT);
         requery(why);
     }
 
@@ -1100,7 +1100,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             }
         };
         QueryParameter query = getCurrentQuery();
-        FotoSql.setWhereVisibility(query, IGalleryFilter.VISIBILITY_DEFAULT);
+        FotoSql.setWhereVisibility(query, VISIBILITY.DEFAULT);
         task.execute(query);
     }
 
@@ -1117,7 +1117,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             }
         };
         QueryParameter query = getCurrentQuery();
-        FotoSql.setWhereVisibility(query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+        FotoSql.setWhereVisibility(query, VISIBILITY.PRIVATE_PUBLIC);
         task.execute(query);
     }
 
@@ -1170,7 +1170,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             }
         };
         QueryParameter query = FotoSql.queryGetMissingDisplayNames;
-        FotoSql.setWhereVisibility(query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+        FotoSql.setWhereVisibility(query, VISIBILITY.PRIVATE_PUBLIC);
         task.execute(query);
     }
 
@@ -1215,7 +1215,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             }
         };
         QueryParameter query = FotoSql.queryGetDuplicates;
-        FotoSql.setWhereVisibility(query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+        FotoSql.setWhereVisibility(query, VISIBILITY.PRIVATE_PUBLIC);
         task.execute(query);
     }
 

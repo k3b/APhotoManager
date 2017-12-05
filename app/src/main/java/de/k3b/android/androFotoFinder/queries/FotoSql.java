@@ -46,6 +46,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.DBUtils;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
@@ -608,7 +609,7 @@ public class FotoSql extends FotoSqlBase {
         return result;
     }
 
-    public static Cursor createCursorForQuery(String dbgContext, final Context context, QueryParameter parameters, int visibility) {
+    public static Cursor createCursorForQuery(String dbgContext, final Context context, QueryParameter parameters, VISIBILITY visibility) {
         setWhereVisibility(parameters, visibility);
         return createCursorForQuery(dbgContext, context, parameters.toFrom(), parameters.toAndroidWhere(),
                 parameters.toAndroidParameters(), parameters.toOrderBy(),
@@ -655,7 +656,7 @@ public class FotoSql extends FotoSqlBase {
 
         Cursor c = null;
         try {
-            c = createCursorForQuery("execGetGeoRectangle", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+            c = createCursorForQuery("execGetGeoRectangle", context, query, VISIBILITY.PRIVATE_PUBLIC);
             if (c.moveToFirst()) {
                 GeoRectangle result = new GeoRectangle();
                 result.setLatitude(c.getDouble(0), c.getDouble(1));
@@ -693,7 +694,7 @@ public class FotoSql extends FotoSqlBase {
 
         Cursor c = null;
         try {
-            c = createCursorForQuery("execGetPosition", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+            c = createCursorForQuery("execGetPosition", context, query, VISIBILITY.PRIVATE_PUBLIC);
             if (c.moveToFirst()) {
                 GeoPoint result = new GeoPoint(c.getDouble(0),c.getDouble(1));
                 return result;
@@ -722,7 +723,7 @@ public class FotoSql extends FotoSqlBase {
 
             Cursor c = null;
             try {
-                c = createCursorForQuery("execGetPathIdMap", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                c = createCursorForQuery("execGetPathIdMap", context, query, VISIBILITY.PRIVATE_PUBLIC);
                 while (c.moveToNext()) {
                     result.put(c.getString(1),c.getLong(0));
                 }
@@ -760,7 +761,7 @@ public class FotoSql extends FotoSqlBase {
         return exexUpdateImpl(dbgContext, context, values, FILTER_COL_PK, new String[]{Long.toString(id)});
     }
 
-    public static int execUpdate(String dbgContext, Context context, String path, ContentValues values, int visibility) {
+    public static int execUpdate(String dbgContext, Context context, String path, ContentValues values, VISIBILITY visibility) {
         return exexUpdateImpl(dbgContext, context, values, getFilterExprPathLikeWithVisibility(visibility), new String[]{path});
     }
 
@@ -777,8 +778,8 @@ public class FotoSql extends FotoSqlBase {
         return result;
     }
 
-    protected static String getFilterExprPathLikeWithVisibility(int visibility) {
-        // visibility IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC
+    protected static String getFilterExprPathLikeWithVisibility(VISIBILITY visibility) {
+        // visibility VISIBILITY.PRIVATE_PUBLIC
         return FotoSql.FILTER_EXPR_PATH_LIKE + " AND " + getFilterExpressionVisibility(visibility);
     }
 
@@ -788,7 +789,7 @@ public class FotoSql extends FotoSqlBase {
         Long result = updateSuccessValue;
 
         int modifyCount =  FotoSql.execUpdate(dbgContext, context, dbUpdateFilterJpgFullPathName,
-                values, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                values, VISIBILITY.PRIVATE_PUBLIC);
 
         if (modifyCount == 0) {
             // update failed (probably becauce oldFullPathName not found. try insert it.
@@ -812,12 +813,12 @@ public class FotoSql extends FotoSqlBase {
 
     @NonNull
     public static CursorLoader createCursorLoader(Context context, final QueryParameter query) {
-        FotoSql.setWhereVisibility(query, IGalleryFilter.VISIBILITY_DEFAULT);
+        FotoSql.setWhereVisibility(query, VISIBILITY.DEFAULT);
         final CursorLoader loader = new CursorLoaderWithException(context, query);
         return loader;
     }
 
-    public static int execDeleteByPath(String dbgContext, Activity context, String parentDirString, int visibility) {
+    public static int execDeleteByPath(String dbgContext, Activity context, String parentDirString, VISIBILITY visibility) {
         int delCount = FotoSql.deleteMedia(dbgContext, context, getFilterExprPathLikeWithVisibility(visibility), new String[] {parentDirString + "/%"}, true);
         return delCount;
     }
@@ -933,7 +934,7 @@ public class FotoSql extends FotoSqlBase {
         Cursor c = null;
 
         try {
-            c = FotoSql.createCursorForQuery("getSelectedfiles", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+            c = FotoSql.createCursorForQuery("getSelectedfiles", context, query, VISIBILITY.PRIVATE_PUBLIC);
             int len = c.getCount();
             Long[] ids = new Long[len];
             String[] paths = new String[len];
@@ -971,7 +972,7 @@ public class FotoSql extends FotoSqlBase {
             Cursor cursor = null;
 
             try {
-                cursor = createCursorForQuery("getFileNames", context, parameters, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                cursor = createCursorForQuery("getFileNames", context, parameters, VISIBILITY.PRIVATE_PUBLIC);
 
                 int colPath = cursor.getColumnIndex(SQL_COL_DISPLAY_TEXT);
                 while (cursor.moveToNext()) {
@@ -995,28 +996,28 @@ public class FotoSql extends FotoSqlBase {
 
     }
 
-    protected static String getFilterExpressionVisibility(int _visibility) {
-        int visibility = _visibility;
+    protected static String getFilterExpressionVisibility(VISIBILITY _visibility) {
+        VISIBILITY visibility = _visibility;
         // add visibility column only if not included yet
-        if (visibility == IGalleryFilter.VISIBILITY_DEFAULT) {
+        if (visibility == VISIBILITY.DEFAULT) {
             visibility = (FotoLibGlobal.visibilityShowPrivateByDefault)
-                    ? IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC
-                    : IGalleryFilter.VISIBILITY_PUBLIC;
+                    ? VISIBILITY.PRIVATE_PUBLIC
+                    : VISIBILITY.PUBLIC;
         }
 
         switch (visibility) {
-            case IGalleryFilter.VISIBILITY_PRIVATE:
+            case PRIVATE:
                 return FILTER_EXPR_PRIVATE;
-            case IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC:
+            case PRIVATE_PUBLIC:
                 return FILTER_EXPR_PRIVATE_PUBLIC;
-            case IGalleryFilter.VISIBILITY_PUBLIC:
+            case PUBLIC:
             default:
                 return FILTER_EXPR_PUBLIC;
         }
     }
 
     /** adds visibility to sql of parameters, if not set yet */
-    public static QueryParameter setWhereVisibility(QueryParameter parameters, int visibility) {
+    public static QueryParameter setWhereVisibility(QueryParameter parameters, VISIBILITY visibility) {
         if (parameters.toFrom() == null) {
             parameters.addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME);
         }

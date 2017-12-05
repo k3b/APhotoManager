@@ -52,6 +52,7 @@ import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
+import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.DateUtil;
 import de.k3b.io.RuleFileNameProcessor;
@@ -160,11 +161,13 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
         if (mCurrentData.getMediaDefaults() == null) {
             File first = mSelectedFiles.getFile(0);
 
-            IMetaApi exampleExif = null;
+            MediaAsString exampleExif = new MediaAsString();
             if ((first != null) && (first.exists())) {
-                exampleExif = MediaScanner.getInstance(this).getExifFromFile(first);
+                IMetaApi example = MediaScanner.getInstance(this).getExifFromFile(first);
+                if (example != null) {
+                    exampleExif.setData(example);
+                }
             }
-            if (exampleExif == null) exampleExif = new MediaAsString();
             exampleExif.setDateTimeTaken(null);
             exampleExif.setPath(null);
             mCurrentData.setMediaDefaults(exampleExif);
@@ -231,8 +234,16 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
                 DateUtil.toIsoDateString(exampleDate),
                 mCurrentData.getOutDir(), exampleResultFile.getName()));
 
-        IMetaApi mediaChanges = mCurrentData.getMediaDefaults();
-        String exifChange = (mediaChanges == null) ? null : MediaUtil.toString(mediaChanges, false, mLabelGenerator, MediaUtil.FieldID.clasz);
+        MediaAsString mediaChanges = mCurrentData.getMediaDefaults();
+        String exifChange = null;
+        if (mediaChanges != null) {
+            exifChange = MediaUtil.toString(mediaChanges, false, mLabelGenerator, MediaUtil.FieldID.clasz);
+
+            VISIBILITY extra = mediaChanges.getVisibility();
+            if (extra != null) {
+                exifChange += "\nVisibility " + extra;
+            }
+        }
         mExifChanges.setText(exifChange);
     }
 
@@ -397,7 +408,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     /**
      * exif editor result
      */
-    private void onExifChanged(IMetaApi modifiedExif) {
+    private void onExifChanged(MediaAsString modifiedExif) {
         if (modifiedExif != null) {
             mCurrentData.setMediaDefaults(modifiedExif);
             toGui();

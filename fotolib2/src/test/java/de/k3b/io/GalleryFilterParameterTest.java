@@ -43,7 +43,7 @@ public class GalleryFilterParameterTest {
         sut.setInAnyField("filter");
         sut.setTagsAllIncluded(GalleryFilterParameter.convertList("tag1,tag2,tag3"));
         sut.setTagsAllExcluded(GalleryFilterParameter.convertList("utag1,utag2 utag3"));
-        sut.setVisibility(IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+        sut.setVisibility(VISIBILITY.PRIVATE_PUBLIC);
         sut.setWithNoTags(true);
         sut.setRatingMin(4);
 

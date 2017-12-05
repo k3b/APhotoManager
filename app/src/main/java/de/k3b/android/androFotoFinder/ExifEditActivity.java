@@ -37,6 +37,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RatingBar;
@@ -62,6 +64,7 @@ import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.UpdateTask;
 import de.k3b.android.widget.HistoryEditText;
+import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
@@ -110,6 +113,11 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
     private EditText edLongitude;
     private RatingBar   rating;
 
+    // prevents event handling while programatically changes checkboxes
+    private boolean checkActive = false;
+    private CheckBox    chkPrivate;
+    private CheckBox    chkPublic;
+
     private HistoryEditText mHistory;
     private UpdateTask exifUpdate;
 
@@ -136,7 +144,10 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
         intent.setAction(Intent.ACTION_EDIT);
 
         if (exifDataToEdit != null) {
-            intent.putExtra(EXTRA_EXIF_DATA, new MediaAsString().setData(exifDataToEdit).toString());
+            final String exifAsString = (exifDataToEdit instanceof MediaAsString)
+                    ? exifDataToEdit.toString()
+                    : new MediaAsString().setData(exifDataToEdit).toString();
+            intent.putExtra(EXTRA_EXIF_DATA, exifAsString);
         } else {
             if (url != null) {
                 intent.setData(Uri.parse(url));
@@ -180,20 +191,40 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
         edLongitude     = (EditText) findViewById(R.id.edit_longitude);
         rating = (RatingBar)  findViewById(R.id.ratingBar);
 
+        chkPrivate = (CheckBox) findViewById(R.id.chk_private);
+        chkPrivate.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                onCheckPrivateChanged(chkPrivate);
+            }
+        });
+        chkPublic = (CheckBox) findViewById(R.id.chk_public);
+        chkPublic.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                onCheckPrivateChanged(chkPublic);
+            }
+        });
+
         onCreateButtos();
 
         mCurrentData = new MediaAsString();
         mInitialData = new MediaAsString();
 
         if (savedInstanceState != null) {
-            String data = savedInstanceState.getString(SETTINGS_KEY, null);
-            if (data != null) {
-                mCurrentData.fromString(data);
-            }
+            VISIBILITY priv = null;
+            String data;
             data = savedInstanceState.getString(SETTINGS_KEY_INITIAL, null);
             if (data != null) {
                 mInitialData.fromString(data);
+                priv = mInitialData.getVisibility();
             }
+            data = savedInstanceState.getString(SETTINGS_KEY, null);
+            if (data != null) {
+                mCurrentData.fromString(data);
+                priv = mCurrentData.getVisibility();
+            }
+            setVisibility(priv);
         } else {
             Intent intent = getIntent();
             IMetaApi currentData = getExifParam(intent);
@@ -209,6 +240,10 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
             }
             mCurrentData.setData(currentData);
             mInitialData.setData(currentData);
+
+            final VISIBILITY priv = getVisibility();
+            mCurrentData.setVisibility(priv);
+            mInitialData.setVisibility(priv);
         }
         loadGuiFromExif(((savedInstanceState != null) ? "on(re)Create" : "onCreate"));
 
@@ -230,7 +265,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
         new HashTagEditWatcher(this, edDescription);
     }
 
-    public static IMetaApi getExifParam(Intent intent) {
+    public static MediaAsString getExifParam(Intent intent) {
         String exifAsString = intent.getStringExtra(EXTRA_EXIF_DATA);
         if (!StringUtils.isNullOrEmpty(exifAsString)) {
             return new MediaAsString().fromString(exifAsString);
@@ -719,6 +754,42 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
             return MediaUtil.toString(this);
         }
     };
+
+
+    private VISIBILITY getVisibility() {
+        if (chkPrivate.isChecked()) return VISIBILITY.PRIVATE;
+        if (chkPublic.isChecked()) return VISIBILITY.PUBLIC;
+        return null;
+    }
+
+    private void setVisibility(VISIBILITY priv) {
+        checkActive = true;
+        chkPrivate.setChecked(false);
+        chkPublic.setChecked(false);
+        if ((priv != null) && (priv != VISIBILITY.DEFAULT) && (priv != VISIBILITY.PRIVATE_PUBLIC)) {
+            if (priv == VISIBILITY.PRIVATE) {
+                chkPrivate.setChecked(true);
+            } else {
+                chkPublic.setChecked(true);
+            }
+        }
+        checkActive = false;
+    }
+
+    private void onCheckPrivateChanged(CheckBox chk) {
+        if (!checkActive && (chk != null)) {
+            VISIBILITY priv;
+            if (!chk.isChecked()) {
+                priv = null;
+            } else if (chk == chkPrivate) {
+                priv = VISIBILITY.PRIVATE;
+            } else {
+                priv = VISIBILITY.PUBLIC;
+            }
+            setVisibility(priv);
+            mCurrentData.setVisibility(priv);
+        }
+    }
 
     /** save exif changes back to image and database */
     private void onOk() {

@@ -172,8 +172,8 @@ Verstecken kann über das 'Media-Scanner' Gallery-Menü rückgängig gemacht wer
   <string name="lbl_any">Suche</string>
   <string name="filter_any_hint">in Tags, Title, Beschreibung oder Pfad</string>
 
-  <string name="lbl_images_public">Öffentliche Bilder</string>
-  <string name="lbl_images_private">Private Bilder</string>
+  <string name="lbl_images_public">Öffentliches Bild</string>
+  <string name="lbl_images_private">Privates Bild</string>
 
   <string name="lbl_with_no_tags">Ohne Tags</string>
   <string name="lbl_tags_include">+Tags</string>

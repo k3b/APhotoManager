@@ -106,6 +106,14 @@ public class MediaCsvTests {
 
     }
 
+
+    @Test
+    public void shouldSaveLoadExtra() {
+        String data = new MediaAsString().setExtra("some extra").toString();
+        MediaAsString sut = new MediaAsString().fromString(data);
+        Assert.assertEquals("some extra", sut.getExtra());
+    }
+
     @Test
     public void shouldCreateCsv() {
         String csv = createTestCsv(1,2);

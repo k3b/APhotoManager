@@ -215,13 +215,51 @@
             android:layout_marginTop="@dimen/line_margin"
             />
         <!-- -->
+        <TextView android:id="@+id/lbl_security"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/lbl_security"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/line_date"
+            />
+
+
+        <CheckBox android:id="@+id/chk_public"
+            android:text="@string/lbl_images_public"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/lbl_security"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            />
+
+        <CheckBox android:id="@+id/chk_private"
+            android:text="@string/lbl_images_private"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/lbl_security"
+            android:layout_toRightOf="@+id/chk_public"
+            />
+
+        <View android:id="@+id/line_public"
+            android:layout_height="2dp"
+            android:layout_width="fill_parent"
+            android:background="#c0c0c0"
+            android:layout_below="@+id/chk_public"
+            android:layout_marginBottom="@dimen/line_margin"
+            android:layout_marginTop="@dimen/line_margin"
+            />
+        <!-- -->
+
         <TextView android:id="@+id/lbl_tags_include"
             android:text="@string/lbl_tags_include"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
 
-            android:layout_below="@+id/line_date"
+            android:layout_below="@+id/line_public"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_alignBaseline="@+id/cmd_tags_include"
@@ -230,7 +268,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/btn_popup"
-            android:layout_below="@+id/line_date"
+            android:layout_below="@+id/line_public"
             android:layout_toLeftOf="@+id/lbl_tags_include"
             android:layout_toStartOf="@+id/lbl_tags_include"
             android:layout_alignParentRight="true"

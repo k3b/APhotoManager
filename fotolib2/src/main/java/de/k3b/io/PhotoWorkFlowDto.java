@@ -148,15 +148,15 @@ public class PhotoWorkFlowDto {
         return new RuleFileNameProcessor(getDateFormat(), getName(), getNumberFormat(), getOutDir());
     }
 
-    public IMetaApi getMediaDefaults() {
+    public MediaAsString getMediaDefaults() {
         String mediaDefaultString = properties.getProperty(KEY_EXIF);
         return (mediaDefaultString == null) ? null : new MediaAsString().fromString(mediaDefaultString);
     }
 
-    public void setMediaDefaults(IMetaApi mediaDefaults) {
+    public void setMediaDefaults(MediaAsString mediaDefaults) {
         String mediaDefaultString = null;
         if (mediaDefaults != null) {
-            mediaDefaultString = new MediaAsString().setData(mediaDefaults).toString();
+            mediaDefaultString = mediaDefaults.toString();
         }
 
         if (mediaDefaultString != null) {

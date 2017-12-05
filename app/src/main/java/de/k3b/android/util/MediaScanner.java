@@ -51,6 +51,7 @@ import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.io.FileUtils;
 import de.k3b.io.IGalleryFilter;
+import de.k3b.io.VISIBILITY;
 import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaUtil;
 import de.k3b.media.MediaXmpSegment;
@@ -152,7 +153,7 @@ abstract public class MediaScanner  {
                 if (Global.debugEnabled) {
                     Log.i(Global.LOG_CONTEXT, CONTEXT + " hideFolderMedia: delete from media db " + path + "/**");
                 }
-                result = FotoSql.execDeleteByPath(CONTEXT + " hideFolderMedia", context, path, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                result = FotoSql.execDeleteByPath(CONTEXT + " hideFolderMedia", context, path, VISIBILITY.PRIVATE_PUBLIC);
                 if (result > 0) {
                     MediaScanner.notifyChanges(context, "hide " + path + "/**");
                 }
@@ -299,7 +300,7 @@ abstract public class MediaScanner  {
 
             Cursor c = null;
             try {
-                c = FotoSql.createCursorForQuery("renameInMediaDatabase", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                c = FotoSql.createCursorForQuery("renameInMediaDatabase", context, query, VISIBILITY.PRIVATE_PUBLIC);
                 int pkColNo = c.getColumnIndex(FotoSql.SQL_COL_PK);
                 int pathColNo = c.getColumnIndex(FotoSql.SQL_COL_PATH);
                 while (c.moveToNext()) {

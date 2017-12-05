@@ -39,6 +39,7 @@ import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.ListUtils;
+import de.k3b.io.VISIBILITY;
 import de.k3b.media.MediaUtil;
 import de.k3b.media.MediaXmpSegment;
 import de.k3b.media.MetaWriterExifXml;
@@ -97,13 +98,13 @@ public class TagSql extends FotoSql {
             parseTagsFromQuery(query, remove, resultFilter);
 
             if (getParams(query, FILTER_EXPR_PRIVATE_PUBLIC, remove) != null) {
-                resultFilter.setVisibility(IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                resultFilter.setVisibility(VISIBILITY.PRIVATE_PUBLIC);
             }
             if (getParams(query, FILTER_EXPR_PRIVATE, remove) != null) {
-                resultFilter.setVisibility(IGalleryFilter.VISIBILITY_PRIVATE);
+                resultFilter.setVisibility(VISIBILITY.PRIVATE);
             }
             if (getParams(query, FILTER_EXPR_PUBLIC, remove) != null) {
-                resultFilter.setVisibility(IGalleryFilter.VISIBILITY_PUBLIC);
+                resultFilter.setVisibility(VISIBILITY.PUBLIC);
             }
 
             return resultFilter;
@@ -304,7 +305,7 @@ public class TagSql extends FotoSql {
                 if (xmpFilelastModified == 0) xmpFilelastModified = TagSql.EXT_LAST_EXT_SCAN_NO_XMP;
                 TagSql.setXmpFileModifyDate(dbValues, xmpFilelastModified);
                 return TagSql.execUpdate(dbgContext, context, path,
-                        TagSql.EXT_LAST_EXT_SCAN_UNKNOWN, dbValues, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                        TagSql.EXT_LAST_EXT_SCAN_UNKNOWN, dbValues, VISIBILITY.PRIVATE_PUBLIC);
             }
 
 
@@ -313,7 +314,7 @@ public class TagSql extends FotoSql {
     }
 
 
-    public static int execUpdate(String dbgContext, Context context, String path, long xmpFileDate, ContentValues values, int visibility) {
+    public static int execUpdate(String dbgContext, Context context, String path, long xmpFileDate, ContentValues values, VISIBILITY visibility) {
         if ((!Global.Media.enableXmpNone) || (xmpFileDate == EXT_LAST_EXT_SCAN_UNKNOWN)) {
             return execUpdate(dbgContext, context, path, values, visibility);
         }
@@ -327,7 +328,7 @@ public class TagSql extends FotoSql {
         if (addWhereAnyOfTags(query, tags) > 0) {
             Cursor c = null;
             try {
-                c = createCursorForQuery("getTagRefCount", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                c = createCursorForQuery("getTagRefCount", context, query, VISIBILITY.PRIVATE_PUBLIC);
                 if (c.moveToFirst()) {
                     return c.getInt(0);
                 }
@@ -381,7 +382,7 @@ public class TagSql extends FotoSql {
 
         if (filterCount > 0) {
             try {
-                c = createCursorForQuery("loadTagWorflowItems", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                c = createCursorForQuery("loadTagWorflowItems", context, query, VISIBILITY.PRIVATE_PUBLIC);
                 if (c.moveToFirst()) {
                     do {
                         result.add(new TagWorflowItem(c.getLong(0), c.getString(1), TagConverter.fromString(c.getString(2)),
