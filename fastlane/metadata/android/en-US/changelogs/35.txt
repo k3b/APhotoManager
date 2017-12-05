@@ -1,1 +1,2 @@
+* Gallery view: Added sort by (image-)width, (file-)size			
 * Folder-rule based autoprocessing for copy/move photo(s): rename-file-pattern, auto-apply userdefined exif 
