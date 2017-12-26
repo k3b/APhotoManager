@@ -234,7 +234,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
                 DateUtil.toIsoDateString(exampleDate),
                 mCurrentData.getOutDir(), exampleResultFile.getName()));
 
-        MediaAsString mediaChanges = mCurrentData.getMediaDefaults();
+        IMetaApi mediaChanges = mCurrentData.getMediaDefaults();
         String exifChange = null;
         if (mediaChanges != null) {
             exifChange = MediaUtil.toString(mediaChanges, false, mLabelGenerator, MediaUtil.FieldID.clasz);
@@ -408,7 +408,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     /**
      * exif editor result
      */
-    private void onExifChanged(MediaAsString modifiedExif) {
+    private void onExifChanged(IMetaApi modifiedExif) {
         if (modifiedExif != null) {
             mCurrentData.setMediaDefaults(modifiedExif);
             toGui();
@@ -566,6 +566,8 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
                     return getString2(R.string.lbl_latitude_short) + "/" + getString(R.string.lbl_longitude_short) + " ";
                 case rating:
                     return getString2(R.string.lbl_rating);
+                case visibility:
+                    return getString2(R.string.lbl_security);
                 case tags:
                     return getString2(R.string.lbl_tag);
                 case path:

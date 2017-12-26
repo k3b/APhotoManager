@@ -166,7 +166,7 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
     /** one of the VISIBILITY_.XXXX values */
     public VISIBILITY getVisibility() {return visibility;}
     public GalleryFilterParameter setVisibility(VISIBILITY value) {
-        if ((value.value >= VISIBILITY.DEFAULT.value) && (value.value <= VISIBILITY.PRIVATE_PUBLIC.value)) {
+        if ((value.value >= VISIBILITY.DEFAULT.value) && (value.value <= VISIBILITY.MAX.value)) {
             visibility = value;
         } else {
             visibility = VISIBILITY.DEFAULT;

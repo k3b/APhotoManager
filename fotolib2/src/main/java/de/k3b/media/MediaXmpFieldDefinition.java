@@ -39,6 +39,7 @@ public enum MediaXmpFieldDefinition {
 
     OriginalFileName(XmpNamespace.APM), // apm specific: the original file name of the image file
     AppVersion(XmpNamespace.APM),       // apm specific: creating app/version
+    Visibility(XmpNamespace.APM),       // apm specific: Private/Public/....
 
     DateTimeOriginal(XmpNamespace.EXIF),
     GPSLatitude(XmpNamespace.EXIF),

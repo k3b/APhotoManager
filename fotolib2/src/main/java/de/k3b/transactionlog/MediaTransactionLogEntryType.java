@@ -40,6 +40,7 @@ public enum MediaTransactionLogEntryType {
     DESCRIPTION("d", "apmDescription",true),
     HEADER("h", "apmTitle",true),
     RATING("r", "apmRating"),
+    VISIBILITY("s","apmSecurity"),
     DATE("dm", "apmDateTimeOriginal"),
     COMMENT(null, "rem");
 

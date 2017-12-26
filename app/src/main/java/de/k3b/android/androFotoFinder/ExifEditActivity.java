@@ -224,7 +224,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
                 mCurrentData.fromString(data);
                 priv = mCurrentData.getVisibility();
             }
-            setVisibility(priv);
+            mActivityData.setVisibility(priv);
         } else {
             Intent intent = getIntent();
             IMetaApi currentData = getExifParam(intent);
@@ -241,7 +241,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
             mCurrentData.setData(currentData);
             mInitialData.setData(currentData);
 
-            final VISIBILITY priv = getVisibility();
+            final VISIBILITY priv = mActivityData.getVisibility();
             mCurrentData.setVisibility(priv);
             mInitialData.setVisibility(priv);
         }
@@ -265,7 +265,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
         new HashTagEditWatcher(this, edDescription);
     }
 
-    public static MediaAsString getExifParam(Intent intent) {
+    public static IMetaApi getExifParam(Intent intent) {
         String exifAsString = intent.getStringExtra(EXTRA_EXIF_DATA);
         if (!StringUtils.isNullOrEmpty(exifAsString)) {
             return new MediaAsString().fromString(exifAsString);
@@ -750,31 +750,33 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
         }
 
         @Override
+        public VISIBILITY getVisibility() {
+            if (chkPrivate.isChecked()) return VISIBILITY.PRIVATE;
+            if (chkPublic.isChecked()) return VISIBILITY.PUBLIC;
+            return null;
+        }
+
+        @Override
+        public IMetaApi setVisibility(VISIBILITY priv) {
+            checkActive = true;
+            chkPrivate.setChecked(false);
+            chkPublic.setChecked(false);
+            if ((priv != null) && (priv != VISIBILITY.DEFAULT) && (priv != VISIBILITY.PRIVATE_PUBLIC)) {
+                if (priv == VISIBILITY.PRIVATE) {
+                    chkPrivate.setChecked(true);
+                } else {
+                    chkPublic.setChecked(true);
+                }
+            }
+            checkActive = false;
+            return this;
+        }
+
+        @Override
         public String toString() {
             return MediaUtil.toString(this);
         }
     };
-
-
-    private VISIBILITY getVisibility() {
-        if (chkPrivate.isChecked()) return VISIBILITY.PRIVATE;
-        if (chkPublic.isChecked()) return VISIBILITY.PUBLIC;
-        return null;
-    }
-
-    private void setVisibility(VISIBILITY priv) {
-        checkActive = true;
-        chkPrivate.setChecked(false);
-        chkPublic.setChecked(false);
-        if ((priv != null) && (priv != VISIBILITY.DEFAULT) && (priv != VISIBILITY.PRIVATE_PUBLIC)) {
-            if (priv == VISIBILITY.PRIVATE) {
-                chkPrivate.setChecked(true);
-            } else {
-                chkPublic.setChecked(true);
-            }
-        }
-        checkActive = false;
-    }
 
     private void onCheckPrivateChanged(CheckBox chk) {
         if (!checkActive && (chk != null)) {
@@ -786,7 +788,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
             } else {
                 priv = VISIBILITY.PUBLIC;
             }
-            setVisibility(priv);
+            mActivityData.setVisibility(priv);
             mCurrentData.setVisibility(priv);
         }
     }

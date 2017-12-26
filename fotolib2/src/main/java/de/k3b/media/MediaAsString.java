@@ -35,7 +35,6 @@ import de.k3b.io.VISIBILITY;
  */
 
 public class MediaAsString extends MediaCsvItem implements IMetaApi {
-    private int colVisibility;
     private int colExtra;
 
     public MediaAsString() {
@@ -43,7 +42,6 @@ public class MediaAsString extends MediaCsvItem implements IMetaApi {
         String[] fields = MEDIA_CSV_STANDARD_HEADER.split(CsvItem.DEFAULT_CSV_FIELD_DELIMITER);
         this.setHeader(Arrays.asList(fields));
         int size = this.header.size();
-        colVisibility = size++;
         colExtra = size++;
 
         setData(new String[size]);
@@ -77,20 +75,5 @@ public class MediaAsString extends MediaCsvItem implements IMetaApi {
         setString(title, colExtra);
         return this;
     }
-
-    public void setVisibility(VISIBILITY value) {
-        if (value == null) {
-            this.setString(null, colVisibility);
-        } else {
-            this.setString(value.value, colVisibility);
-        }
-    }
-
-    public VISIBILITY getVisibility() {
-        Integer extra = this.getInteger("Visibility", colVisibility);
-        if (extra != null) return VISIBILITY.fromInt(extra.intValue());
-        return null;
-    }
-
 
 }

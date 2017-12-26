@@ -35,6 +35,7 @@ import java.util.TimeZone;
 
 import de.k3b.FotoLibGlobal;
 import de.k3b.io.ListUtils;
+import de.k3b.io.VISIBILITY;
 
 /**
  * Thin Wrapper around Android-s ExifInterface to read/write exif data from jpg file
@@ -423,6 +424,20 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     public long getFilelastModified() {
         return filelastModified;
     }
+
+    public VISIBILITY getVisibility() {
+        // exif does not support Visibility itseltf
+        if (this.xmpExtern != null) this.xmpExtern.getVisibility();
+
+        return null;
+    }
+
+    public IMetaApi setVisibility(VISIBILITY visibility) {
+        // exif does not support Visibility itseltf
+        if (this.xmpExtern != null) this.xmpExtern.setVisibility(visibility);
+        return this;
+    }
+
 
     @Override
     public String toString() {

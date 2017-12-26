@@ -21,6 +21,8 @@ package de.k3b.media;
 import java.util.Date;
 import java.util.List;
 
+import de.k3b.io.VISIBILITY;
+
 /**
  * Read data from 1st child and if empty from 2nd.
  * Used to implemt setting "prefer xmp over exif" strategy
@@ -106,6 +108,13 @@ public class MetaApiChainReader extends MetaApiWrapper {
     public Integer getRating() {
         Integer result = super.getRating();
         if ((readChild2 != null) && (result == null)) result = readChild2.getRating();
+        return result;
+    }
+
+    @Override
+    public VISIBILITY getVisibility() {
+        VISIBILITY result = super.getVisibility();
+        if ((readChild2 != null) && (result == null)) result = readChild2.getVisibility();
         return result;
     }
 }

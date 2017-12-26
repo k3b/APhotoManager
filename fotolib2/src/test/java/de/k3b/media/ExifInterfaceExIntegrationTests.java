@@ -108,6 +108,7 @@ public class ExifInterfaceExIntegrationTests {
     public void shouldModifyInMemory() throws IOException
     {
         MediaDTO expected = TestUtil.createTestMediaDTO(2);
+        expected.setVisibility(null);
         MediaUtil.copy(sut, expected, true, true);
         MediaDTO actual = new MediaDTO();
         MediaUtil.copy(actual, sut, true, true);

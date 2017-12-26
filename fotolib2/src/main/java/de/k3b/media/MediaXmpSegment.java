@@ -36,6 +36,7 @@ import de.k3b.FotoLibGlobal;
 import de.k3b.io.DateUtil;
 import de.k3b.io.FileCommands;
 import de.k3b.io.GeoUtil;
+import de.k3b.io.VISIBILITY;
 
 /**
  * {@link XmpSegment} that implements {@link IMetaApi} to read/write xmp.
@@ -167,6 +168,20 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
     public IMetaApi setRating(Integer value) {
         setProperty(value,
                 MediaXmpFieldDefinition.Rating);
+        return this;
+    }
+
+    @Override
+    public VISIBILITY getVisibility() {
+        String sValue = getPropertyAsString("getVisibility", MediaXmpFieldDefinition.Visibility);
+        return VISIBILITY.fromString(sValue);
+    }
+
+    @Override
+    public IMetaApi setVisibility(VISIBILITY value) {
+        String sValue = VISIBILITY.isChangingValue(value) ? value.toString() : null;
+        setProperty(value,
+                MediaXmpFieldDefinition.Visibility);
         return this;
     }
 

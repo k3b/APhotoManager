@@ -29,6 +29,7 @@ import java.util.List;
 import de.k3b.io.DateUtil;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileProcessor;
+import de.k3b.io.VISIBILITY;
 import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaUtil;
 import de.k3b.tagDB.TagConverter;
@@ -72,6 +73,11 @@ public class TransactionLoggerBase implements Closeable {
         if (changes.contains(MediaUtil.FieldID.description))  addChanges(MediaTransactionLogEntryType.DESCRIPTION, newData.getDescription(), true);
         if (changes.contains(MediaUtil.FieldID.title))  addChanges(MediaTransactionLogEntryType.HEADER, newData.getTitle(), true);
         if (changes.contains(MediaUtil.FieldID.rating)) addChanges(MediaTransactionLogEntryType.RATING, (newData.getRating() != null) ? newData.getRating().toString(): "0", false);
+
+        if (changes.contains(MediaUtil.FieldID.visibility) && VISIBILITY.isChangingValue(newData.getVisibility())) {
+            addChanges(MediaTransactionLogEntryType.VISIBILITY, (VISIBILITY.PRIVATE.equals(newData.getVisibility())) ? "1": "0", false);
+        }
+
         if (changes.contains(MediaUtil.FieldID.tags)) addChangesTags(oldTags, newData.getTags());
     }
 

@@ -30,6 +30,7 @@ import java.util.List;
 import de.k3b.io.DateUtil;
 import de.k3b.io.GeoUtil;
 import de.k3b.io.StringUtils;
+import de.k3b.io.VISIBILITY;
 import de.k3b.tagDB.TagConverter;
 
 /**
@@ -49,6 +50,7 @@ public class MediaUtil {
         rating,
         tags,
         clasz,
+        visibility,
     };
 
     public interface ILabelGenerator {
@@ -84,6 +86,7 @@ public class MediaUtil {
         // longitude used same flag as latitude but no label of it-s own
         add(result, includeEmpty, excludes, FieldID.latitude_longitude, ", ", GeoUtil.toCsvStringLatLon(item.getLongitude()));
         add(result, includeEmpty, excludes, FieldID.rating, labeler, item.getRating());
+        add(result, includeEmpty, excludes, FieldID.visibility, labeler, item.getVisibility());
         add(result, includeEmpty, excludes, FieldID.tags, labeler, TagConverter.asDbString(null, item.getTags()));
         return result.toString();
     }
@@ -237,6 +240,13 @@ public class MediaUtil {
                 changes++;
             }
 
+            VISIBILITY vValue = source.getVisibility();
+            if (allowed(vValue, (destination == null) ? null : destination.getVisibility()
+                    , fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls
+                    , FieldID.visibility, collectedChanges)) {
+                destination.setVisibility(vValue);
+                changes++;
+            }
         }
 
         if (collectedChanges != null) return collectedChanges.size();
