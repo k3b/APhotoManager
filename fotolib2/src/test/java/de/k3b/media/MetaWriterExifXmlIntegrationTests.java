@@ -63,6 +63,8 @@ public class MetaWriterExifXmlIntegrationTests {
         MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(), null, false, "JUnit"
                 , true, true, true); //exif, xmp, create
         MediaDTO empty = new MediaDTO();
+        empty.setVisibility(VISIBILITY.PUBLIC); // not complete empty since it is public visible
+
         MediaUtil.copy(sut, empty, true, true);
 
         // was overwritten by copy
@@ -91,6 +93,7 @@ public class MetaWriterExifXmlIntegrationTests {
         MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(), null, false, "JUnit"
                 , true, true, true); //exif, xmp, create
         MediaDTO empty = new MediaDTO();
+        empty.setVisibility(VISIBILITY.PUBLIC); // not complete empty since it is public visible
         MediaUtil.copy(sut, empty, true, true);
 
 //        System.out.printf("exif " + MediaUtil.toString(sut.getExif()));
@@ -132,7 +135,7 @@ public class MetaWriterExifXmlIntegrationTests {
 
     private static MediaDTO createTestValue() {
         final MediaDTO testMediaDTO = TestUtil.createTestMediaDTO(2);
-        testMediaDTO.setVisibility(null);
+        testMediaDTO.setVisibility(VISIBILITY.PUBLIC);
         return testMediaDTO;
     }
 

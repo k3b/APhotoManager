@@ -148,6 +148,7 @@ public interface IMetaApi {
     Integer getRating();
     IMetaApi setRating(Integer value);
 
+    /** real photo-files and database entries have either visiblity PUBLIC or PRIVATE (if it has a tag PRIVATE)  */
     VISIBILITY getVisibility();
     IMetaApi setVisibility(VISIBILITY visibility);
 

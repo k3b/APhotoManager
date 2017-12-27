@@ -368,8 +368,12 @@ public class ImageMetaReader implements IMetaApi, Closeable {
         init();
 
         VISIBILITY result = null;
-        if (isEmpty(result, ++i, debugContext, "ExternalXmp.Visibility") && (mExternalXmpDir != null)) result = mExternalXmpDir.getVisibility();
-        if (isEmpty(result, ++i, debugContext, "InternalXmp.Visibility") && (mInternalXmpDir != null)) result = mInternalXmpDir.getVisibility();
+        if (isEmpty(result, ++i, debugContext, "Exif.XPKEYWORDS(PRIVATE)") && (mExifDir != null)) {
+            List<String> list = getStringList(debugContext, this.mExifDir, ExifDirectoryBase.TAG_WIN_KEYWORDS);
+            result = ExifInterfaceEx.getVisibility(list);
+        }
+        if (isEmpty(result, ++i, debugContext, "ExternalXmp.apm.Visibility") && (mExternalXmpDir != null)) result = mExternalXmpDir.getVisibility();
+        if (isEmpty(result, ++i, debugContext, "InternalXmp.apm.Visibility") && (mInternalXmpDir != null)) result = mInternalXmpDir.getVisibility();
 
         isEmpty(result, ++i, null, null);
         return result;
