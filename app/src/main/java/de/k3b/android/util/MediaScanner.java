@@ -165,15 +165,17 @@ abstract public class MediaScanner  {
     public int updateMediaDatabase_Android42(Context context, String[] oldPathNames, String... newPathNames) {
         final boolean hasNew = excludeNomediaFiles(newPathNames) > 0;
         final boolean hasOld = excludeNomediaFiles(oldPathNames) > 0;
+        int result = 0;
 
         if (hasNew && hasOld) {
-            return renameInMediaDatabase(context, oldPathNames, newPathNames);
+            result = renameInMediaDatabase(context, oldPathNames, newPathNames);
         } else if (hasOld) {
-            return deleteInMediaDatabase(context, oldPathNames);
+            result = deleteInMediaDatabase(context, oldPathNames);
         } if (hasNew) {
-            return insertIntoMediaDatabase(context, newPathNames);
+            result = insertIntoMediaDatabase(context, newPathNames);
         }
-        return 0;
+        TagSql.fixPrivate(context);
+        return result;
     }
 
     /**

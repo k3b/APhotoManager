@@ -53,7 +53,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     private static final String LIST_DELIMITER = ";";
 
     // if photo has this tag it has visibility PRIVATE
-    private static final String TAG_PRIVATE = "PRIVATE";
+    public static final String TAG_PRIVATE = "PRIVATE";
 
     static {
         sExifDateTimeFormatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");

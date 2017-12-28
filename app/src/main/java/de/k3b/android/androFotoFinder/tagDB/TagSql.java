@@ -40,6 +40,7 @@ import de.k3b.io.IGalleryFilter;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
+import de.k3b.media.ExifInterfaceEx;
 import de.k3b.media.MediaUtil;
 import de.k3b.media.MediaXmpSegment;
 import de.k3b.media.MetaWriterExifXml;
@@ -236,6 +237,15 @@ public class TagSql extends FotoSql {
         }
     }
 
+    public static int fixPrivate(Context context) {
+        // update ... set media_type=1001 where media_type=1 and tags like '%;PRIVATE;%'
+        ContentValues values = new ContentValues();
+        values.put(SQL_COL_EXT_MEDIA_TYPE, MEDIA_TYPE_IMAGE_PRIVATE);
+        String where = TagSql.FILTER_EXPR_PUBLIC + " AND " + TagSql.FILTER_EXPR_TAGS_INCLUDED;
+        return exexUpdateImpl("Fix visibility private", context, values, where, new String[] {"%;" + ExifInterfaceEx.TAG_PRIVATE +
+                ";%"});
+    }
+
     public static void setTags(ContentValues values, Date xmpFileModifyDate, String... tags) {
         values.put(SQL_COL_EXT_TAGS, TagConverter.asDbString("", tags));
         setXmpFileModifyDate(values, xmpFileModifyDate);
@@ -333,7 +343,7 @@ public class TagSql extends FotoSql {
                     return c.getInt(0);
                 }
             } catch (Exception ex) {
-                Log.e(Global.LOG_CONTEXT, "FotoSql.execGetGeoRectangle(): error executing " + query, ex);
+                Log.e(Global.LOG_CONTEXT, "FotoSql.getTagRefCount(): error executing " + query, ex);
             } finally {
                 if (c != null) c.close();
             }

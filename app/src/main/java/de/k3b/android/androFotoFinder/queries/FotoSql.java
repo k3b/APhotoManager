@@ -803,7 +803,10 @@ public class FotoSql extends FotoSqlBase {
 
     /** every database insert should go through this. adds logging if enabled */
     public static Uri execInsert(String dbgContext, Context context, ContentValues values) {
-        Uri result = context.getContentResolver().insert(SQL_TABLE_EXTERNAL_CONTENT_URI, values);
+        Uri providerUri = (null != values.get(SQL_COL_EXT_MEDIA_TYPE)) ? SQL_TABLE_EXTERNAL_CONTENT_URI_FILE : SQL_TABLE_EXTERNAL_CONTENT_URI;
+
+        // on my android-4.4 insert with media_type=1001 (private) does insert with media_type=1 (image)
+        Uri result = context.getContentResolver().insert(providerUri, values);
         if (Global.debugEnabledSql) {
             Log.i(Global.LOG_CONTEXT, dbgContext + ":FotoSql.execInsert" +
                     values.toString() + " => " + result);
