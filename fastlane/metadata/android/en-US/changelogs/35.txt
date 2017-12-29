@@ -1,2 +1,3 @@
+* Folder-rule-based autoprocessing for copy/move photo(s) with rename-file-pattern and auto-apply userdefined exif. Example: If you move IMG_20171221_085715.jpg to folder .../holiday/2017krete/ it will be automatically renamed to 17krete022.jpg and gets tags holiday, greece, krete if you define a rule for that folder.
+* Mark images as "PRIVATE" and allow filtering include/exclude "PRIVATE"
 * Gallery view: Added sort by (image-)width, (file-)size			
-* Folder-rule based autoprocessing for copy/move photo(s): rename-file-pattern, auto-apply userdefined exif 

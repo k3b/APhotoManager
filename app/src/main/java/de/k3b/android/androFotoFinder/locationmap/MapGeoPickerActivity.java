@@ -40,6 +40,7 @@ import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.GalleryFilterActivity;
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.LockScreen;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.SettingsActivity;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
@@ -197,7 +198,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_map_geo_picker, menu);
+        getMenuInflater().inflate(Global.locked ? R.menu.menu_map_context_locked :  R.menu.menu_map_geo_picker, menu);
         AboutDialogPreference.onPrepareOptionsMenu(this, menu);
 
         return true;
@@ -241,11 +242,14 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (LockScreen.onOptionsItemSelected(this, item))
+            return true;
         // Handle presses on the action bar items
         switch (item.getItemId()) {
             case R.id.cmd_filter:
                 openFilter();
                 return true;
+            //cmd_lock
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
                 return true;

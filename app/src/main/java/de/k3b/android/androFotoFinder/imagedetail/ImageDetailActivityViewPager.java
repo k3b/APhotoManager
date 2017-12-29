@@ -53,6 +53,7 @@ import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.ExifEditActivity;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.LockScreen;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.SettingsActivity;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
@@ -152,6 +153,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     /** #70: optinal sql expression to be shown in detailview */
     private String mContextColumnExpression = null; // sql field expression. Result will be displayed in ImageView Context area
     private String mContextName;                    // name of current ImageView Context persisted in bundle
+    private boolean mMustReplaceMenue       = false;
 
     /** executes sql to load image detail data in a background task that may survive
      * conriguration change (i.e. device rotation) */
@@ -803,19 +805,34 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_image_detail, menu);
-        getMenuInflater().inflate(R.menu.menu_image_commands, menu);
-        Global.fixMenu(this, menu);
-        mMenuSlideshow = menu.findItem(R.id.action_slideshow);
-        if (mAdapter != null) mAdapter.setMenu(menu);
+        defineMenu(menu);
 
         boolean result = super.onCreateOptionsMenu(menu);
-        getOrCreateContextTextController().setMenu(menu);
         return result;
+    }
+
+    private void defineMenu(Menu menu) {
+        if (Global.locked) {
+            getMenuInflater().inflate(R.menu.menu_image_detail_locked, menu);
+        } else {
+            getMenuInflater().inflate(R.menu.menu_image_detail, menu);
+            getMenuInflater().inflate(R.menu.menu_image_commands, menu);
+            Global.fixMenu(this, menu);
+        }
+        mMenuSlideshow = menu.findItem(R.id.action_slideshow);
+        if (mAdapter != null) mAdapter.setMenu(menu);
+        getOrCreateContextTextController().setMenu(menu);
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        if (mMustReplaceMenue) {
+
+            mMustReplaceMenue = false;
+            menu.clear();
+            defineMenu(menu);
+        }
+
         // have more time to find and press the menu
         unhideActionBar(Global.actionBarHideTimeInMilliSecs * 3, "onPrepareOptionsMenu");
         AboutDialogPreference.onPrepareOptionsMenu(this, menu);
@@ -843,6 +860,11 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         boolean slideShowStarted = mSlideShowStarted;
 
         onGuiTouched();
+        if (LockScreen.onOptionsItemSelected(this, item)) {
+            mMustReplaceMenue       = true;
+            this.invalidateOptionsMenu();
+            return true;
+        }
         if (mFileCommands.onOptionsItemSelected(item, getCurrentFoto())) {
             mModifyCount++;
         } else {
@@ -1012,7 +1034,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             destDir.defineDirectoryNavigation(OsUtils.getRootOSDirectory(),
                     (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
                     lastCopyToPath);
-            destDir.setContextMenuId(R.menu.menu_context_osdir);
+            destDir.setContextMenuId(Global.locked ? R.menu.menu_context_dir_locked :  R.menu.menu_context_osdir);
             destDir.show(this.getFragmentManager(), "osdirimage");
         }
         return false;

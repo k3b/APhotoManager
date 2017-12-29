@@ -725,7 +725,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             dirInfo.directoryRoot = directoryRoot;
             final FragmentManager manager = getFragmentManager();
             DirectoryPickerFragment dlg = new DirectoryPickerFragment();
-            dlg.setContextMenuId(R.menu.menu_context_dirpicker);
+            dlg.setContextMenuId(Global.locked ? R.menu.menu_context_dir_locked :  R.menu.menu_context_dirpicker);
 
             dlg.defineDirectoryNavigation(dirInfo.directoryRoot, dirInfo.queryId, dirInfo.currentPath);
 

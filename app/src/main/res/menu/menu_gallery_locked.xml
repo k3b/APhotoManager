@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2017 by k3b.
  *
- * This file is part of AndroFotoFinder.
+ * This file is part of AndroFotoFinder / #APhotoManager.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -19,18 +19,40 @@
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
  -->
-<!-- menue of gallery activity/fragment if gallery is NOT in multiselection mode -->
+<!-- menue of gallery activity/fragment common for non multiselection mode and for multiselection mode with disabled selected-only -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".GalleryActivity">
 
-    <item android:id="@+id/cmd_filter"
-        android:title="@string/filter_menu_title"
-        android:icon="@android:drawable/ic_menu_search"
+    <item android:id="@+id/cmd_unlock"
+        android:title="@string/menu_title_unlock"
+        android:icon="@android:drawable/ic_lock_lock"
         android:visible="true"
-        android:orderInCategory="10"
+        android:orderInCategory="1"
+        android:showAsAction="always" />
+
+    <item android:id="@+id/cmd_select_folder"
+        android:title="@string/folder_menu_title"
+        android:icon="@drawable/ic_action_holo_dark_folder"
+        android:visible="true"
+        android:orderInCategory="2"
         android:showAsAction="ifRoom" />
 
-    <item android:id="@+id/cmd_sort"
+    <item android:id="@+id/cmd_select_lat_lon"
+        android:title="@string/area_menu_title"
+        android:icon="@android:drawable/ic_dialog_map"
+        android:visible="true"
+        android:orderInCategory="2"
+        android:showAsAction="ifRoom" />
+
+
+    <item android:id="@+id/cmd_select_tag"
+        android:title="@string/tags_activity_title"
+        android:icon="@drawable/ic_action_tag"
+        android:visible="true"
+        android:orderInCategory="2"
+        android:showAsAction="ifRoom" />
+
+	<item android:id="@+id/cmd_sort"
         android:title="@string/sort_menu_title"
         android:visible="true"
         android:orderInCategory="15"
@@ -73,38 +95,9 @@
         </menu>
     </item>
 
-    <item android:id="@+id/cmd_load_bookmark"
-        android:title="@string/bookmark_load_from_menu_title"
-        android:icon="@android:drawable/ic_menu_myplaces"
-        android:visible="true"
-        android:orderInCategory="18"
-        android:showAsAction="never" />
-
-    <item android:id="@+id/cmd_settings"
-        android:title="@string/settings_title"
-        android:icon="@android:drawable/ic_menu_preferences"
-        android:visible="true"
-        android:orderInCategory="1000"
-        android:showAsAction="ifRoom" />
-
-    <item android:id="@+id/cmd_scan" android:title="@string/scanner_menu_title" android:orderInCategory="110"
-        android:showAsAction="never" android:visible="true"/>
-
-    <item android:id="@+id/cmd_lock"
-        android:title="@string/menu_title_lock"
-        android:visible="true"
-        android:orderInCategory="9999"
-        android:showAsAction="never" />
-
     <item android:id="@+id/cmd_about"
         android:title="@string/about_summary"
         android:visible="true"
         android:orderInCategory="10000"
         android:showAsAction="never" />
-    <item android:id="@+id/cmd_more"
-        android:title="@string/more_menu_title"
-        android:visible="true"
-        android:orderInCategory="32700"
-        android:showAsAction="never" />
-
 </menu>

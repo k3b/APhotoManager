@@ -975,7 +975,7 @@ public class LocationMapFragment extends DialogFragment {
         mTempPopupMenuParentView = OsmdroidUtil.openMapPopupView(mMapView, 0, new GeoPoint(geoPosition.getLatitude(), geoPosition.getLongitude()));
         PopupMenu menu = new PopupMenu(getActivity(), mTempPopupMenuParentView);
 
-        inflater.inflate(R.menu.menu_map_context, menu.getMenu());
+        inflater.inflate(Global.locked ? R.menu.menu_map_context_locked :  R.menu.menu_map_context, menu.getMenu());
 
         menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override

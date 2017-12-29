@@ -54,6 +54,8 @@ public class Global {
     public static boolean debugEnabledSql = false;
     public static boolean debugEnabledMap = false;
     public static boolean debugEnabledMemory = false;
+    public static boolean locked = false; // true: modification is password-locked
+    public static String passwordHash = ""; // password to unlock
 
     /** The maximum number of **Blue selection markers** in the [Geographic-Map](geographic-map). */
     public static int maxSelectionMarkersInMap = 255;

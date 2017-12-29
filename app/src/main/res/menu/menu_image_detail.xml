@@ -55,6 +55,13 @@
         android:visible="true"
         android:orderInCategory="1001"
         android:showAsAction="never" />
+
+    <item android:id="@+id/cmd_lock"
+        android:title="@string/menu_title_lock"
+        android:visible="true"
+        android:orderInCategory="9999"
+        android:showAsAction="never" />
+
     <item android:id="@+id/cmd_about"
         android:title="@string/about_summary"
         android:visible="true"

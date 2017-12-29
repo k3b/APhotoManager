@@ -769,7 +769,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
             this.mMustShowNavigator = false;
             final FragmentManager manager = getFragmentManager();
             DirectoryPickerFragment dirDialog = new DirectoryPickerFragment(); // (DirectoryPickerFragment) manager.findFragmentByTag(DLG_NAVIGATOR_TAG);
-            dirDialog.setContextMenuId(R.menu.menu_context_dirpicker);
+            dirDialog.setContextMenuId(Global.locked ? R.menu.menu_context_dir_locked :  R.menu.menu_context_dirpicker);
 
             dirDialog.defineDirectoryNavigation(mDirectoryRoot, dirQueryID,
                     this.mGalleryQueryParameter.mCurrentPathFromFolderPicker);

@@ -162,6 +162,9 @@ public class SettingsActivity extends PreferenceActivity {
 
         prefs.putBoolean("mapsForgeEnabled", Global.mapsForgeEnabled);
 
+        prefs.putBoolean("locked", Global.locked);
+        prefs.putString("passwordHash", Global.passwordHash);
+
         prefs.putString("imageDetailThumbnailIfBiggerThan", "" + Global.imageDetailThumbnailIfBiggerThan);
         prefs.putString("maxSelectionMarkersInMap", "" + Global.maxSelectionMarkersInMap);
         prefs.putString("slideshowIntervalInMilliSecs", "" + Global.slideshowIntervalInMilliSecs);
@@ -196,6 +199,9 @@ public class SettingsActivity extends PreferenceActivity {
         Global.debugEnabledMap                  = getPref(prefs, "debugEnabledMap", Global.debugEnabledMap);
 
         Global.debugEnabledMemory               = getPref(prefs, "debugEnabledMemory", Global.debugEnabledMemory);
+
+        Global.locked                           = getPref(prefs, "locked", Global.locked);
+        Global.passwordHash                     = getPref(prefs, "passwordHash", Global.passwordHash);
 
         FotoLibGlobal.debugEnabledJpgMetaIo     = getPref(prefs, "debugEnabledJpgMetaIo", FotoLibGlobal.debugEnabledJpgMetaIo);
 
