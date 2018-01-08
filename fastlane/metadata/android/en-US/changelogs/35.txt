@@ -1,3 +1,5 @@
-* Folder-rule-based autoprocessing for copy/move photo(s) with rename-file-pattern and auto-apply userdefined exif. Example: If you move IMG_20171221_085715.jpg to folder .../holiday/2017krete/ it will be automatically renamed to 17krete022.jpg and gets tags holiday, greece, krete if you define a rule for that folder.
-* Mark images as "PRIVATE" and allow filtering include/exclude "PRIVATE"
-* Gallery view: Added sort by (image-)width, (file-)size			
+* NEW: Protect-mode (Extended App Pinning): Allow to savley hand over your phone to someone else and allow him/her only to view those images that you have chosen before. Dangerous commands (edit, copy, delete, rootfilter, settings, ...) are not available while "App Pinning" is active.
+* NEW: Folder-rule-based autoprocessing for copy/move photo(s) with rename-file-pattern and auto-apply userdefined exif. Example: If you move IMG_20171221_085715.jpg to folder .../holiday/2017krete/ it will be automatically renamed to 17krete022.jpg and gets tags holiday, greece, krete if you define a rule for that folder.
+* NEW: Mark images as "PRIVATE" and allow filtering include/exclude "PRIVATE"
+* Gallery view: Added sort by (image-)width, (file-)size
+* Translations and Translationupdates: French by Poussinou; Indonesian by riesky and isaideureka; Hindi by jznsamuel (jasonsamuel88); Japanese by naofum; Chinese Simplified and Chinese Traditional by Liu Feng (pitumaomao)

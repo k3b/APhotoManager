@@ -60,6 +60,7 @@ import java.util.Stack;
 
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.LockScreen;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
@@ -975,7 +976,7 @@ public class LocationMapFragment extends DialogFragment {
         mTempPopupMenuParentView = OsmdroidUtil.openMapPopupView(mMapView, 0, new GeoPoint(geoPosition.getLatitude(), geoPosition.getLongitude()));
         PopupMenu menu = new PopupMenu(getActivity(), mTempPopupMenuParentView);
 
-        inflater.inflate(Global.locked ? R.menu.menu_map_context_locked :  R.menu.menu_map_context, menu.getMenu());
+        inflater.inflate(LockScreen.isLocked(this.getActivity()) ? R.menu.menu_map_context_locked :  R.menu.menu_map_context, menu.getMenu());
 
         menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override

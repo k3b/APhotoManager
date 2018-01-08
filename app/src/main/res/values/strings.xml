@@ -237,10 +237,10 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
 
     <!-- privacy modus -->
     <string name="lbl_security">Security</string>
-    <string name="menu_title_lock">Lock</string>
-    <string name="menu_title_unlock">Unlock</string>
-    <string name="lbl_password">Password</string>
-    <string name="lbl_password_retype">Password (retype)</string>
+
+    <!-- #105 Appplication-pinning, aka "Kiosk Mode", "LockTask": disable dangerous menu-items -->
+    <string name="menu_title_lock">Protect (App Pinning)</string>
+    <string name="menu_title_unlock">Unprotect (unpin app)</string>
 
     <!--  depricated tags_update_result_format use image_success_update_format instead -->
 </resources>

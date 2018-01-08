@@ -154,6 +154,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     private String mContextColumnExpression = null; // sql field expression. Result will be displayed in ImageView Context area
     private String mContextName;                    // name of current ImageView Context persisted in bundle
     private boolean mMustReplaceMenue       = false;
+    private boolean locked = false; // if != Global.locked : must update menu
 
     /** executes sql to load image detail data in a background task that may survive
      * conriguration change (i.e. device rotation) */
@@ -536,6 +537,13 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                                     final int resultCode, final Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
+        final boolean locked = LockScreen.isLocked(this);
+        if (this.locked != locked) {
+            this.locked = locked;
+            mMustReplaceMenue = true;
+            invalidateOptionsMenu();
+        }
+
         if (requestCode == ACTION_RESULT_FORWARD) {
             // forward result from child-activity to parent-activity
             setResult(resultCode, intent);
@@ -647,6 +655,14 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         unhideActionBar(Global.actionBarHideTimeInMilliSecs, "onResume");
         Global.debugMemory(mDebugPrefix, "onResume");
         super.onResume();
+
+        final boolean locked = LockScreen.isLocked(this);
+        if (this.locked != locked) {
+            this.locked = locked;
+            mMustReplaceMenue = true;
+            invalidateOptionsMenu();
+        }
+
         if (Global.debugEnabledMemory) {
             Log.d(Global.LOG_CONTEXT, mDebugPrefix + " - onResume cmd (" +
                     MoveOrCopyDestDirPicker.sFileCommands + ") => (" + mFileCommands +
@@ -812,8 +828,10 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     }
 
     private void defineMenu(Menu menu) {
-        if (Global.locked) {
+        if (LockScreen.isLocked(this)) {
             getMenuInflater().inflate(R.menu.menu_image_detail_locked, menu);
+            LockScreen.fixMenu(menu);
+
         } else {
             getMenuInflater().inflate(R.menu.menu_image_detail, menu);
             getMenuInflater().inflate(R.menu.menu_image_commands, menu);
@@ -826,7 +844,9 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        if (mMustReplaceMenue) {
+        final boolean locked = LockScreen.isLocked(this);
+        if (mMustReplaceMenue || (locked != this.locked)) {
+            this.locked = locked;
 
             mMustReplaceMenue = false;
             menu.clear();
@@ -1034,7 +1054,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             destDir.defineDirectoryNavigation(OsUtils.getRootOSDirectory(),
                     (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
                     lastCopyToPath);
-            destDir.setContextMenuId(Global.locked ? R.menu.menu_context_dir_locked :  R.menu.menu_context_osdir);
+            destDir.setContextMenuId(LockScreen.isLocked(this) ? R.menu.menu_context_dir_locked :  R.menu.menu_context_osdir);
             destDir.show(this.getFragmentManager(), "osdirimage");
         }
         return false;

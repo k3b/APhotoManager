@@ -198,7 +198,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(Global.locked ? R.menu.menu_map_context_locked :  R.menu.menu_map_geo_picker, menu);
+        getMenuInflater().inflate(LockScreen.isLocked(this) ? R.menu.menu_map_context_locked :  R.menu.menu_map_geo_picker, menu);
         AboutDialogPreference.onPrepareOptionsMenu(this, menu);
 
         return true;

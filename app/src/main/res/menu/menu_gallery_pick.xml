@@ -27,58 +27,7 @@
     <item android:id="@+id/cmd_cancel_pick" android:title="@string/btn_cancel"
         android:icon="@drawable/ic_action_cancel"
         android:orderInCategory="1" android:showAsAction="always" android:visible="true" />
-    <item android:id="@+id/cmd_filter"
-        android:title="@string/filter_menu_title"
-        android:icon="@android:drawable/ic_menu_search"
-        android:visible="true"
-        android:orderInCategory="10"
-        android:showAsAction="always" />
 
-    <item android:id="@+id/cmd_sort"
-        android:title="@string/sort_menu_title"
-        android:visible="true"
-        android:orderInCategory="15"
-        android:showAsAction="never" >
-        <menu>
-            <item android:id="@+id/cmd_sort_directory"
-                android:title="@string/sort_by_name"
-                android:visible="true"
-                android:orderInCategory="5" />
-            <item android:id="@+id/cmd_sort_date"
-                android:title="@string/sort_by_date"
-                android:visible="true"
-                android:orderInCategory="5"/>
-            <item android:id="@+id/cmd_sort_location"
-                android:title="@string/sort_by_place"
-                android:visible="true"
-                android:orderInCategory="5" />
-            <item android:id="@+id/cmd_sort_width"
-                android:title="@string/sort_by_width"
-                android:visible="true"
-                android:orderInCategory="5" />
-            <item android:id="@+id/cmd_sort_file_len"
-                android:title="@string/sort_by_file_size"
-                android:visible="true"
-                android:orderInCategory="5" />
-            <item android:id="@+id/cmd_sort_path_len"
-                android:title="@string/sort_by_name_len"
-                android:visible="true"
-                android:orderInCategory="5" />
-        </menu>
-    </item>
-
-    <item android:id="@+id/cmd_settings"
-        android:title="@string/settings_title"
-        android:icon="@android:drawable/ic_menu_preferences"
-        android:visible="true"
-        android:orderInCategory="1000"
-        android:showAsAction="ifRoom" />
-
-    <item android:id="@+id/cmd_about"
-        android:title="@string/about_summary"
-        android:visible="true"
-        android:orderInCategory="10000"
-        android:showAsAction="never" />
 <!--
     <item android:id="@+id/cmd_more"
         android:title="@string/more_menu_title"

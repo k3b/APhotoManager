@@ -97,6 +97,9 @@ import de.k3b.tagDB.Tag;
  * to handle interaction events.
  * Use the {@link GalleryCursorFragment#newInstance} factory method to
  * create an instance of this fragment.
+ *
+ * States view-locked <=> view <=> view-multiselect
+ *             pick-single, pick-multible, pick-locked
  */
 public class GalleryCursorFragment extends Fragment  implements Queryable, DirectoryGui,Common, TagsPickerFragment.ITagsPicker {
     private static final String INSTANCE_STATE_LAST_VISIBLE_POSITION = "lastVisiblePosition";
@@ -111,6 +114,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     private static int nextLoaderID = 100;
     private int loaderID = -1;
+    private boolean locked = false; // if != Global.locked : must update menu
 
     private HorizontalScrollView mParentPathBarScroller;
     private LinearLayout mParentPathBar;
@@ -452,7 +456,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         Global.debugMemory(mDebugPrefix, "onResume");
         super.onResume(); // this may destroy an other instance of gallery(fragment)
 
-        if (Global.locked) {
+        final boolean locked = LockScreen.isLocked(this.getActivity());
+        if (this.locked != locked) {
+            this.locked = locked;
             mMustReplaceMenue = true;
             getActivity().invalidateOptionsMenu();
         }
@@ -468,6 +474,24 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         // this makes shure that the visible fragment has commands
         MoveOrCopyDestDirPicker.sFileCommands = mFileCommands;
 
+    }
+
+    /**
+     * Call back from sub-activities.<br/>
+     * Process Change StartTime (longpress start), Select StopTime before stop
+     * (longpress stop) or filter change for detailReport
+     */
+    @Override
+    public void onActivityResult(final int requestCode,
+                                    final int resultCode, final Intent intent) {
+        super.onActivityResult(requestCode,resultCode,intent);
+
+        final boolean locked = LockScreen.isLocked(this.getActivity());
+        if (this.locked != locked) {
+            this.locked = locked;
+            mMustReplaceMenue = true;
+            getActivity().invalidateOptionsMenu();
+        }
     }
 
     @Override
@@ -575,7 +599,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         return mDebugPrefix + this.mAdapter;
     }
 
-    /*********************** local helper *******************************************/
+    /* --********************** local helper ****************************************** - */
     /** an Image in the FotoGallery was clicked */
     private void onGalleryImageClick(final GalleryCursorAdapter.GridCellViewHolder holder, int position) {
         if ((!multiSelectionHandleClick(holder)) && (mGalleryListener != null)) {
@@ -706,7 +730,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     /** starts mutliselection */
     private boolean onGalleryLongImageClick(final GalleryCursorAdapter.GridCellViewHolder holder, int position) {
-        if (!Global.locked) {
+        if (!LockScreen.isLocked(this.getActivity())) {
             if (!isMultiSelectionActive()) {
                 startMultiSelectionMode();
 
@@ -717,10 +741,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 // in gallery mode long click is view image
                 ImageDetailActivityViewPager.showActivity(this.getActivity(), getUri(holder.imageID), position, getCurrentQuery(), ImageDetailActivityViewPager.ACTIVITY_ID);
             }
-        } if (isMultiSelectionActive()) {
-            mSelectedItems.clear();
+            return true;
         }
-        return true;
+        return false; // no multi-selection in lock mode
     }
 
     private void startMultiSelectionMode() {
@@ -734,36 +757,53 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        MenuInflater inflater = getActivity().getMenuInflater();
-        if (mMustReplaceMenue) {
+        final boolean locked = LockScreen.isLocked(this.getActivity());
+        if (mMustReplaceMenue || (locked != this.locked)) {
+            MenuInflater inflater = getActivity().getMenuInflater();
 
+            this.locked = locked;
             mMustReplaceMenue = false;
             menu.clear();
-            if (Global.locked) {
-                inflater.inflate(R.menu.menu_gallery_locked, menu);
-            } else if (mode == MODE_VIEW) {
-                inflater.inflate(R.menu.menu_gallery_multiselect_mode_all, menu);
-                mShareOnlyToggle = menu.findItem(R.id.cmd_selected_only);
-                if (mShowSelectedOnly) {
-                    mShareOnlyToggle.setIcon(android.R.drawable.checkbox_on_background);
-                    mShareOnlyToggle.setChecked(true);
-                } else { // if (mode != MODE_VIEW) {
-                    inflater.inflate(R.menu.menu_gallery_non_selected_only, menu);
-                }
-                MenuItem shareItem = menu.findItem(R.id.menu_item_share);
-                shareItem.setActionProvider(mShareActionProvider);
-                // multiSelectionUpdateShareIntent();
-                inflater.inflate(R.menu.menu_image_commands, menu);
+            mMenuRemoveAllSelected = null;
+            if (mode == MODE_VIEW) {
+                if (locked) { // view-locked
+                    mSelectedItems.clear();
+                    inflater.inflate(R.menu.menu_gallery_locked, menu);
+                    LockScreen.fixMenu(menu);
+                } else if (isMultiSelectionActive()) { // view-multiselect
+                    inflater.inflate(R.menu.menu_gallery_multiselect_mode_all, menu);
 
-                multiSelectionUpdateShareIntent();
-                Global.fixMenu(getActivity(), menu);
+                    mShareOnlyToggle = menu.findItem(R.id.cmd_selected_only);
+                    if (mShowSelectedOnly && (mShareOnlyToggle != null)) {
+                        mShareOnlyToggle.setIcon(android.R.drawable.checkbox_on_background);
+                        mShareOnlyToggle.setChecked(true);
+                    }
+                    MenuItem shareItem = menu.findItem(R.id.menu_item_share);
+                    shareItem.setActionProvider(mShareActionProvider);
+                    // multiSelectionUpdateShareIntent();
+                    inflater.inflate(R.menu.menu_image_commands, menu);
+                    multiSelectionUpdateShareIntent();
+                    Global.fixMenu(getActivity(), menu);
+
+                } else { // view-non-select
+                    inflater.inflate(R.menu.menu_gallery_non_selected_only, menu);
+                    inflater.inflate(R.menu.menu_gallery_non_multiselect, menu);
+                    Global.fixMenu(getActivity(), menu);
+                }
+
 
             } else {
                 inflater.inflate(R.menu.menu_gallery_pick, menu);
+                if (locked) { // pick-locked
+                    mSelectedItems.clear();
+                    inflater.inflate(R.menu.menu_gallery_locked, menu);
+                } else { // pick-single/multible
+                    inflater.inflate(R.menu.menu_gallery_non_multiselect, menu);
+                }
             }
+            mMenuRemoveAllSelected = menu.findItem(R.id.cmd_selection_remove_all);
         }
 
-        mMenuRemoveAllSelected = menu.findItem(R.id.cmd_selection_remove_all);
 
         updateSelectionCount();
     }
@@ -960,7 +1000,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             destDir.defineDirectoryNavigation(OsUtils.getRootOSDirectory(),
                     (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
                     lastCopyToPath);
-            destDir.setContextMenuId(Global.locked ? R.menu.menu_context_dir_locked :  R.menu.menu_context_osdir);
+            destDir.setContextMenuId(LockScreen.isLocked(this.getActivity()) ? R.menu.menu_context_dir_locked :  R.menu.menu_context_osdir);
             destDir.show(getActivity().getFragmentManager(), "osdir");
         }
         return false;

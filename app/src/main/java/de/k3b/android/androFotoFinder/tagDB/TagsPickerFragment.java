@@ -52,6 +52,7 @@ import java.util.List;
 
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.LockScreen;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
@@ -115,7 +116,7 @@ public class TagsPickerFragment  extends DialogFragment  {
     private AlertDialog mSubDialog = null;
 
 
-    private int mContextMenueId = Global.locked ? R.menu.menu_map_context_locked :  R.menu.menu_tags_context;
+    private int mContextMenueId = LockScreen.isLocked(this.getActivity()) ? R.menu.menu_context_dir_locked :  R.menu.menu_tags_context;
     private int mTitleId = 0;
 
     // local data
@@ -419,7 +420,7 @@ public class TagsPickerFragment  extends DialogFragment  {
         // without mClipboardItem paste is not possible
         if (mClipboardItem == null) {
             MenuItem menuItem = popup.getMenu().findItem(android.R.id.paste);
-            menuItem.setVisible(false);
+            if (menuItem != null) menuItem.setVisible(false);
         }
 
         if (popup != null) {

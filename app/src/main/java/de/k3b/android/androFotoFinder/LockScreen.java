@@ -19,25 +19,63 @@
 
 package de.k3b.android.androFotoFinder;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.content.Context;
+import android.os.Build;
+import android.view.Menu;
 import android.view.MenuItem;
 
 /**
+ * Management of app locking (aka Android "Screen"-pinning, "Kiosk Mode", "LockTask").
+ *
+ * Encapsulates special handling for android-4.0-4.4; 5.0; 6.0ff
+ *
  * Created by k3b on 28.12.2017.
  */
-
+@TargetApi(Build.VERSION_CODES.M)
 public class LockScreen {
+    private static boolean OS_APPLOCK_ENABLED = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP);
+
     public static boolean onOptionsItemSelected(Activity parent, MenuItem item) {
         switch (item.getItemId()) {
             case R.id.cmd_lock:
-                Global.locked = true;
-                SettingsActivity.global2Prefs(parent.getApplication());
+                if (!isLocked(parent)) {
+                    if (OS_APPLOCK_ENABLED) {
+                        parent.startLockTask();
+                    } else {
+                        Global.locked = true;
+                        SettingsActivity.global2Prefs(parent.getApplication());
+                    }
+                }
                 return true;
-            case R.id.cmd_unlock:
+            case R.id.cmd_unlock2:
+                // only for old android (< 5.0). Else use app-pinning-end
                 Global.locked = false;
                 SettingsActivity.global2Prefs(parent.getApplication());
                 return true;
         }
         return false;
+    }
+
+    public static boolean isLocked(Context ctx) {
+        if (OS_APPLOCK_ENABLED) {
+            ActivityManager activityManager = (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                return activityManager.getLockTaskModeState() != ActivityManager.LOCK_TASK_MODE_NONE;
+            }
+
+            // deprecated
+            return activityManager.isInLockTaskMode();
+        }
+        return Global.locked;
+    }
+
+    public static void fixMenu(Menu menu) {
+        if ((menu != null) && OS_APPLOCK_ENABLED) {
+            MenuItem unlock = menu.findItem(R.id.cmd_unlock2);
+            if (unlock != null) menu.removeItem(R.id.cmd_unlock2);
+        }
     }
 }

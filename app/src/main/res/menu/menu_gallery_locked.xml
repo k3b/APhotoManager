@@ -95,6 +95,13 @@
         </menu>
     </item>
 
+    <item android:id="@+id/cmd_unlock2"
+        android:title="@string/menu_title_unlock"
+        android:icon="@android:drawable/ic_lock_lock"
+        android:visible="true"
+        android:orderInCategory="9998"
+        android:showAsAction="never" />
+
     <item android:id="@+id/cmd_about"
         android:title="@string/about_summary"
         android:visible="true"

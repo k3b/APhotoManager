@@ -153,6 +153,8 @@ public class Global {
                 R.id.cmd_more,
                 R.id.cmd_show_geo,
                 R.id.cmd_gallery,
+                R.id.cmd_unlock2,
+                R.id.cmd_lock,
                 R.id.cmd_show_geo_as
         );
     }
