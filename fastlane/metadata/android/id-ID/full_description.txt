@@ -1,0 +1,20 @@
+Mengelola foto lokal: Temukan / Copy / Edit-Exif dan tampilkan di Galeri atau Peta.
+
+Fitur:
+
+* Cepat cari foto dengan tag (kata kunci), (sub-) folder, tanggal, geo, judul, ...
+* Menampilkan hasil di galeri atau peta geografis dari openstreetmap.
+* Detail melihat fitur zooming, gesek untuk gambar berikutnya / sebelumnya.
+* Buildin file manager untuk foto: temukan, sort, view, copy, delete, send, ....
+* Edit exif metadata: tanggal, judul, deskripsi, tag (kata kunci), geo, rating, ....
+* Dapat menangani koleksi gambar besar (20000+ gambar dalam 1000+ folder).
+* Menggunakan penyedia konten gambar Android. Tidak ada pemindaian gambar awal yang diperlukan.
+* Extended photo media scanner untuk Exif, IPTC, XMP
+
+Izin Android yang Diperlukan:
+
+* INTERNET: untuk mendownload data peta dari Open Streetmap Server
+* ACCESS_NETWORK_STATE dan ACCESS_WIFI_STATE: untuk mengetahui apakah wifi / internet online untuk memulai geodata yang telah didownload
+* WRITE_EXTERNAL_STORAGE untuk menyimpan data peta yang diunduh di sistem file lokal dan melakukan operasi file dengan foto
+* READ_LOGS untuk membaca dan menyimpan potensi crash-log ke textfile.
+.
