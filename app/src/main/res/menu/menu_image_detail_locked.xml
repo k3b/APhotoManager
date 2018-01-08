@@ -24,8 +24,8 @@
     tools:context=".imagedetail.ImageDetailActivityViewPager">
     <!-- note: items with odd orderInCategory will not go to quick button  -->
 
-    <item android:id="@+id/cmd_unlock"
-        android:title="@string/menu_title_unlock"
+    <item android:id="@+id/cmd_app_unpin"
+        android:title="@string/menu_title_app_unpinnend"
         android:icon="@android:drawable/ic_lock_lock"
         android:visible="true"
         android:orderInCategory="1"
@@ -35,8 +35,8 @@
         android:checkable="true"
         android:orderInCategory="901" android:showAsAction="never" />
 
-    <item android:id="@+id/cmd_unlock2"
-        android:title="@string/menu_title_unlock"
+    <item android:id="@+id/cmd_app_unpin2"
+        android:title="@string/menu_title_app_unpinnend"
         android:icon="@android:drawable/ic_lock_lock"
         android:visible="true"
         android:orderInCategory="9999"

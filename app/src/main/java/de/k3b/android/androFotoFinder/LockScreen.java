@@ -40,7 +40,7 @@ public class LockScreen {
 
     public static boolean onOptionsItemSelected(Activity parent, MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.cmd_lock:
+            case R.id.cmd_app_pin:
                 if (!isLocked(parent)) {
                     if (OS_APPLOCK_ENABLED) {
                         parent.startLockTask();
@@ -50,7 +50,7 @@ public class LockScreen {
                     }
                 }
                 return true;
-            case R.id.cmd_unlock2:
+            case R.id.cmd_app_unpin2:
                 // only for old android (< 5.0). Else use app-pinning-end
                 Global.locked = false;
                 SettingsActivity.global2Prefs(parent.getApplication());
@@ -74,8 +74,8 @@ public class LockScreen {
 
     public static void fixMenu(Menu menu) {
         if ((menu != null) && OS_APPLOCK_ENABLED) {
-            MenuItem unlock = menu.findItem(R.id.cmd_unlock2);
-            if (unlock != null) menu.removeItem(R.id.cmd_unlock2);
+            MenuItem unlock = menu.findItem(R.id.cmd_app_unpin2);
+            if (unlock != null) menu.removeItem(R.id.cmd_app_unpin2);
         }
     }
 }

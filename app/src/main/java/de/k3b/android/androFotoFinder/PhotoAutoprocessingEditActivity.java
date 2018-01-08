@@ -567,7 +567,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
                 case rating:
                     return getString2(R.string.lbl_rating);
                 case visibility:
-                    return getString2(R.string.lbl_security);
+                    return getString2(R.string.lbl_image_visibility);
                 case tags:
                     return getString2(R.string.lbl_tag);
                 case path:

@@ -19,16 +19,20 @@
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
  -->
-<!-- menue of gallery activity/fragment if gallery is NOT in multiselection mode -->
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" tools:context=".GalleryActivity">
-
-    <item android:id="@+id/cmd_filter"
-        android:title="@string/filter_menu_title"
-        android:icon="@android:drawable/ic_menu_search"
+<!-- menue of gallery for modus pick/getContent -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/cmd_app_unpin"
+        android:title="@string/menu_title_app_unpinnend"
+        android:icon="@android:drawable/ic_lock_lock"
         android:visible="true"
-        android:orderInCategory="10"
-        android:showAsAction="ifRoom" />
+        android:orderInCategory="1"
+        android:showAsAction="always" />
+    <item android:id="@+id/cmd_ok" android:title="@string/btn_ok"
+        android:icon="@drawable/ic_action_accept"
+        android:orderInCategory="1" android:showAsAction="always" android:visible="true" />
+    <item android:id="@+id/cmd_cancel_pick" android:title="@string/btn_cancel"
+        android:icon="@drawable/ic_action_cancel"
+        android:orderInCategory="1" android:showAsAction="always" android:visible="true" />
 
     <item android:id="@+id/cmd_sort"
         android:title="@string/sort_menu_title"
@@ -48,14 +52,6 @@
                 android:title="@string/sort_by_place"
                 android:visible="true"
                 android:orderInCategory="5" />
-            <item android:id="@+id/cmd_sort_rating"
-                android:title="@string/sort_by_rating"
-                android:visible="true"
-                android:orderInCategory="5" />
-            <item android:id="@+id/cmd_sort_modification"
-                android:title="@string/sort_by_modification"
-                android:visible="true"
-                android:orderInCategory="5" />
             <item android:id="@+id/cmd_sort_width"
                 android:title="@string/sort_by_width"
                 android:visible="true"
@@ -64,34 +60,16 @@
                 android:title="@string/sort_by_file_size"
                 android:visible="true"
                 android:orderInCategory="5" />
-
             <item android:id="@+id/cmd_sort_path_len"
                 android:title="@string/sort_by_name_len"
                 android:visible="true"
                 android:orderInCategory="5" />
-
         </menu>
     </item>
 
-    <item android:id="@+id/cmd_load_bookmark"
-        android:title="@string/bookmark_load_from_menu_title"
-        android:icon="@android:drawable/ic_menu_myplaces"
-        android:visible="true"
-        android:orderInCategory="18"
-        android:showAsAction="never" />
-
-    <item android:id="@+id/cmd_settings"
-        android:title="@string/settings_title"
-        android:icon="@android:drawable/ic_menu_preferences"
-        android:visible="true"
-        android:orderInCategory="1000"
-        android:showAsAction="ifRoom" />
-
-    <item android:id="@+id/cmd_scan" android:title="@string/scanner_menu_title" android:orderInCategory="110"
-        android:showAsAction="never" android:visible="true"/>
-
-    <item android:id="@+id/cmd_app_pin"
-        android:title="@string/menu_title_app_pinnend"
+    <item android:id="@+id/cmd_app_unpin2"
+        android:title="@string/menu_title_app_unpinnend"
+        android:icon="@android:drawable/ic_lock_lock"
         android:visible="true"
         android:orderInCategory="9999"
         android:showAsAction="never" />
@@ -101,10 +79,11 @@
         android:visible="true"
         android:orderInCategory="10000"
         android:showAsAction="never" />
+<!--
     <item android:id="@+id/cmd_more"
         android:title="@string/more_menu_title"
         android:visible="true"
         android:orderInCategory="32700"
         android:showAsAction="never" />
-
+-->
 </menu>
