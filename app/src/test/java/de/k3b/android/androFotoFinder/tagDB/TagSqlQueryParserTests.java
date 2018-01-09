@@ -69,7 +69,7 @@ public class TagSqlQueryParserTests {
 
     // assert that input-string==output-string in  input-string -> filter -> query -> filter -> output-string
     private QueryParameter assertFilterQueryFilter(VISIBILITY visibility) {
-        String FILTER_STRING = ";;;;;;;;;" + visibility;
+        String FILTER_STRING = ";;;;;;;;;" + visibility.value;
         return assertFilterQueryFilter(FILTER_STRING);
     }
 
