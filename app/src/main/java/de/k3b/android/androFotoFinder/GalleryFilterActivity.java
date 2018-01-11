@@ -45,6 +45,7 @@ import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.directory.DirectoryLoaderTask;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.locationmap.LocationMapFragment;
+import de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
@@ -216,6 +217,15 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                 SettingsActivity.show(this);
                 return true;
 
+            case R.id.cmd_gallery:
+                FotoGalleryActivity.showActivity(this, getAsGalleryFilter(), null, 0);
+                return true;
+            case R.id.cmd_show_geo: {
+                MapGeoPickerActivity.showActivity(this, null, getAsGalleryFilter());
+                return true;
+            }
+
+
             case R.id.action_save_as:
                 mBookmarkController.onSaveAsQuestion(mBookmarkController.getlastBookmarkFileName(), getAsQuery());
                 return true;
@@ -231,6 +241,12 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private GalleryFilterParameter getAsGalleryFilter() {
+        GalleryFilterParameter filter = new GalleryFilterParameter();
+        fromGui(filter);
+        return filter;
     }
 
     private QueryParameter getAsQuery() {

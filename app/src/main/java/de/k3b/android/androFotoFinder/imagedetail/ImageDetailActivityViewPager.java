@@ -78,7 +78,6 @@ import de.k3b.geo.io.GeoUri;
 import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
-import de.k3b.io.OSDirectory;
 import de.k3b.io.StringUtils;
 import de.k3b.media.MediaUtil;
 import de.k3b.tagDB.Tag;
@@ -944,7 +943,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                 }
 
                 case R.id.cmd_show_geo:
-                    MapGeoPickerActivity.showActivity(this, getCurrentFoto());
+                    MapGeoPickerActivity.showActivity(this, getCurrentFoto(), null);
                     break;
 
                 case R.id.cmd_show_geo_as: {

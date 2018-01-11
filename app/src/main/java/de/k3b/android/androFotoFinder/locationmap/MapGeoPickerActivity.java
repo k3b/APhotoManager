@@ -74,10 +74,16 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
 
     private BookmarkController mBookmarkController = null;
 
-    public static void showActivity(Activity context, SelectedFiles selectedItems) {
+    public static void showActivity(Activity context, SelectedFiles selectedItems, GalleryFilterParameter filter) {
         Uri initalUri = null;
         final Intent intent = new Intent().setClass(context,
                 MapGeoPickerActivity.class);
+
+        GalleryFilterParameter localFilter = new GalleryFilterParameter();
+
+        if (filter != null) {
+            localFilter.get(filter);
+        }
 
         if ((selectedItems != null) && (selectedItems.size() > 0)) {
             intent.putExtra(EXTRA_SELECTED_ITEM_PATHS, selectedItems.toString());
@@ -90,10 +96,10 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
                 initalUri = Uri.parse(PARSER.toUriString(new GeoPointDto(initialPoint.getLatitude(),initialPoint.getLongitude(), IGeoPointInfo.NO_ZOOM)));
                 intent.setData(initalUri);
             }
-            GalleryFilterParameter filter = new GalleryFilterParameter();
-            filter.setNonGeoOnly(true);
-            intent.putExtra(EXTRA_FILTER, filter.toString());
         }
+
+        localFilter.setNonGeoOnly(false);
+        intent.putExtra(EXTRA_FILTER, localFilter.toString());
 
         intent.setAction(Intent.ACTION_VIEW);
         if (Global.debugEnabled) {
@@ -304,7 +310,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
     }
 
     private void onFilterChanged(GalleryFilterParameter filter) {
-        if (filter != null) {
+        if ((mMap != null) && (filter != null)) {
             this.mFilter = filter;
             mMap.defineNavigation(this.mFilter, null, OsmdroidUtil.NO_ZOOM, null, null);
         }
