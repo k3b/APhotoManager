@@ -116,7 +116,7 @@ public class TagsPickerFragment  extends DialogFragment  {
     private AlertDialog mSubDialog = null;
 
 
-    private int mContextMenueId = LockScreen.isLocked(this.getActivity()) ? R.menu.menu_context_dir_locked :  R.menu.menu_tags_context;
+    private int mContextMenueId = LockScreen.isLocked(this.getActivity()) ? 0 :  R.menu.menu_tags_context;
     private int mTitleId = 0;
 
     // local data
