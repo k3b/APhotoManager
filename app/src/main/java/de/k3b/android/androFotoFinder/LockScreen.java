@@ -28,7 +28,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 /**
- * Management of app locking (aka Android "Screen"-pinning, "Kiosk Mode", "LockTask").
+ * #105: Management of app locking (aka Android "Screen"-pinning, "Kiosk Mode", "LockTask")
+ * https://developer.android.com/about/versions/android-5.0.html#ScreenPinning.
  *
  * Encapsulates special handling for android-4.0-4.4; 5.0; 6.0ff
  *
@@ -44,6 +45,7 @@ public class LockScreen {
                 if (!isLocked(parent)) {
                     if (OS_APPLOCK_ENABLED) {
                         parent.startLockTask();
+                        parent.invalidateOptionsMenu();
                     } else {
                         Global.locked = true;
                         SettingsActivity.global2Prefs(parent.getApplication());
@@ -54,13 +56,14 @@ public class LockScreen {
                 // only for old android (< 5.0). Else use app-pinning-end
                 Global.locked = false;
                 SettingsActivity.global2Prefs(parent.getApplication());
+                parent.invalidateOptionsMenu();
                 return true;
         }
         return false;
     }
 
     public static boolean isLocked(Context ctx) {
-        if (OS_APPLOCK_ENABLED) {
+        if (OS_APPLOCK_ENABLED && (ctx != null)) {
             ActivityManager activityManager = (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 return activityManager.getLockTaskModeState() != ActivityManager.LOCK_TASK_MODE_NONE;

@@ -52,7 +52,6 @@ import java.util.List;
 
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
-import de.k3b.android.androFotoFinder.LockScreen;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
@@ -116,7 +115,7 @@ public class TagsPickerFragment  extends DialogFragment  {
     private AlertDialog mSubDialog = null;
 
 
-    private int mContextMenueId = LockScreen.isLocked(this.getActivity()) ? 0 :  R.menu.menu_tags_context;
+    private int mContextMenueId = R.menu.menu_tags_context;
     private int mTitleId = 0;
 
     // local data
