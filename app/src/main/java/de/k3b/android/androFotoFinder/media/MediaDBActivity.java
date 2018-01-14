@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 by k3b.
+ * Copyright (c) 2016-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -205,6 +205,9 @@ public class MediaDBActivity extends Activity {
                 if (xmlLastFileModifyDate != TagSql.EXT_LAST_EXT_SCAN_UNKNOWN) {
                     TagSql.setXmpFileModifyDate(dbValues, xmlLastFileModifyDate);
                 }
+
+                TagSql.setFileModifyDate(dbValues, new Date().getTime() / 1000);
+
                 mUpdateCount += TagSql.execUpdate(dbgContext, MediaDBActivity.this, path, xmlLastFileModifyDate, dbValues, VISIBILITY.PRIVATE_PUBLIC);
                 mItemCount++;
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -375,6 +375,7 @@ abstract public class MediaScanner  {
         tagRepository.includeTagNamesIfNotFound(tags);
     }
 
+    /** in secs since 1970 */
     protected static long getXmpFilelastModified(MediaXmpSegment xmpContent) {
         long xmpFilelastModified = 0;
         if (xmpContent != null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 by k3b.
+ * Copyright (c) 2016-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -63,7 +63,7 @@ public class XmpSegment {
     private XMPMeta xmpMeta = null;
     private static XMPSchemaRegistry registry = XMPMetaFactory.getSchemaRegistry();
 
-    /** when xmp sidecar file was last modified or 0 */
+    /** when xmp sidecar file was last modified (in secs 1970) or 0 */
     private long filelastModified = 0;
 
     protected String getPropertyAsString(String debugContext, MediaXmpFieldDefinition... definitions) {
@@ -332,10 +332,10 @@ public class XmpSegment {
 
     /** when xmp sidecar file was last modified or 0 */
     public void setFilelastModified(File file) {
-        if (file != null) this.filelastModified = file.lastModified();
+        if (file != null) this.filelastModified = file.lastModified() / 1000; // File/Date has millisecs
     }
 
-    /** when xmp sidecar file was last modified or 0 */
+    /** when xmp sidecar file was last modified in secs since 1970 or 0 */
     public long getFilelastModified() {
         return filelastModified;
     }

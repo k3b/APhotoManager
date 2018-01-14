@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 by k3b.
+ * Copyright (c) 2016-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -27,6 +27,7 @@ import android.database.DatabaseUtils;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -263,15 +264,33 @@ public class TagSql extends FotoSql {
 
     public static void setXmpFileModifyDate(ContentValues values, Date xmpFileModifyDate) {
         long lastScan = (xmpFileModifyDate != null)
-                ? xmpFileModifyDate.getTime() // millisec since 1970-01-01
+                ? xmpFileModifyDate.getTime()/1000 // secs since 1970-01-01
                 : EXT_LAST_EXT_SCAN_UNKNOWN;
         setXmpFileModifyDate(values, lastScan);
     }
 
-    public static void setXmpFileModifyDate(ContentValues values, long xmpFileModifyDateMilliSecs) {
+    public static void setXmpFileModifyDate(ContentValues values, long xmpFileModifyDateSecs) {
         if ((values != null)
-                && (xmpFileModifyDateMilliSecs != EXT_LAST_EXT_SCAN_UNKNOWN)) {
-            values.put(SQL_COL_EXT_XMP_LAST_MODIFIED_DATE, xmpFileModifyDateMilliSecs);
+                && (xmpFileModifyDateSecs != EXT_LAST_EXT_SCAN_UNKNOWN)) {
+            values.put(SQL_COL_EXT_XMP_LAST_MODIFIED_DATE, xmpFileModifyDateSecs);
+        }
+    }
+
+    public static void setFileModifyDate(ContentValues values, String path) {
+        File f = new File(path);
+
+        if ((values != null)
+                && (f != null)) {
+            long millisecs = f.lastModified();
+            if (millisecs != 0) {
+                setFileModifyDate(values, millisecs / 1000);
+            }
+        }
+    }
+
+    public static void setFileModifyDate(ContentValues values, long fileModifyDateSecs) {
+        if (fileModifyDateSecs != 0) {
+            values.put(SQL_COL_LAST_MODIFIED, fileModifyDateSecs);
         }
     }
 
@@ -308,12 +327,15 @@ public class TagSql extends FotoSql {
             MediaContentValues mediaValueAdapter = new MediaContentValues();
 
             // dbValues.clear();
-            if (MediaUtil.copyNonEmpty(mediaValueAdapter.set(dbValues, null), jpg, allowSetNulls) >= 1) {
+            final int modifiedColumCout = MediaUtil.copyNonEmpty(mediaValueAdapter.set(dbValues, null), jpg, allowSetNulls);
+            if (modifiedColumCout >= 1) {
                 mediaValueAdapter.setPath(path);
                 MediaXmpSegment xmp = jpg.getXmp();
                 long xmpFilelastModified = (xmp != null) ? xmp.getFilelastModified() : 0;
                 if (xmpFilelastModified == 0) xmpFilelastModified = TagSql.EXT_LAST_EXT_SCAN_NO_XMP;
                 TagSql.setXmpFileModifyDate(dbValues, xmpFilelastModified);
+                TagSql.setFileModifyDate(dbValues, path);
+
                 return TagSql.execUpdate(dbgContext, context, path,
                         TagSql.EXT_LAST_EXT_SCAN_UNKNOWN, dbValues, VISIBILITY.PRIVATE_PUBLIC);
             }

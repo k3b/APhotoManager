@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -63,8 +63,8 @@ public abstract class ImageContextController {
     public static final String DEFINITION_FILE = "ImageContextSqlDef.properties";
 
     private static final String EXPR_DATE_TAKEN = "datetime(" + TagSql.SQL_COL_DATE_TAKEN + " /1000, 'unixepoch', 'localtime')";
-    private static final String EXPR_DATE_MODIFIED = "datetime(" + MediaStore.Images.Media.DATE_MODIFIED + " /1000, 'unixepoch', 'localtime')";
-    private static final String EXPR_XMP_LAST_MODIFIED_DATE = "datetime(" + TagSql.SQL_COL_EXT_XMP_LAST_MODIFIED_DATE + " /1000, 'unixepoch', 'localtime')";
+    private static final String EXPR_DATE_MODIFIED = "datetime(" + TagSql.SQL_COL_LAST_MODIFIED + ", 'unixepoch', 'localtime')";
+    private static final String EXPR_XMP_LAST_MODIFIED_DATE = "datetime(" + TagSql.SQL_COL_EXT_XMP_LAST_MODIFIED_DATE + ", 'unixepoch', 'localtime')";
     private static final String EXPR_RATING = "substr('*****',1," + TagSql.SQL_COL_EXT_RATING + ")";
     private static final String EXPR_TAGS = "replace(" + TagSql.SQL_COL_EXT_TAGS + ",';;', '; ')";
     private static final String EXPR_LAT_LON = TagSql.SQL_COL_LAT + " || ',' || " + TagSql.SQL_COL_LON;
