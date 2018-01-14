@@ -106,14 +106,18 @@ public class FotoSql extends FotoSqlBase {
     // since ver 0.6.3: file size. old col id for image-with before ver 0.6.3
     public static final String SQL_COL_SIZE = MediaStore.Images.Media.SIZE;
 
-    private static final String SQL_COL_DATE_ADDED = MediaStore.Images.ImageColumns.DATE_ADDED;
+    // in seconds since 1970
+    public static final String SQL_COL_DATE_ADDED = MediaStore.Images.ImageColumns.DATE_ADDED;
 
     // other colums
+    // in seconds since 1970
     public static final String SQL_COL_LAST_MODIFIED = MediaStore.MediaColumns.DATE_MODIFIED;
+
     public static final String SQL_COL_GPS = MediaStore.Images.Media.LONGITUDE;
     public static final String SQL_COL_COUNT = "count";
     public static final String SQL_COL_WHERE_PARAM = "where_param";
 
+    // in milli-seconds since 1970
     public static final String SQL_COL_DATE_TAKEN = MediaStore.Images.Media.DATE_TAKEN;
     public static final String SQL_COL_EXT_RATING = MediaStore.Video.Media.BOOKMARK;
     public static final String SQL_COL_PATH = MediaStore.Images.Media.DATA;
