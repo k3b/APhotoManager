@@ -23,8 +23,9 @@
  -->
 <resources>
 
-    <!-- This becomes .../fastlane/metadata/android/title.txt.
-    See https://f-droid.org/docs/Build_Metadata_Reference/#Name -->
+    <!-- Optional: This becomes .../fastlane/metadata/android/title.txt.
+      See https://f-droid.org/docs/Build_Metadata_Reference/#Name
+      Example: If spanish title="Manejador de fotos" then the App name/title in F-Droid-store becomes "A Photo Manager (Manejador de fotos)" -->
     <string name="title">A Photo Manager</string>
 
     <!-- This becomes .../fastlane/metadata/android/short_description.txt.

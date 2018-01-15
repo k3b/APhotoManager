@@ -1,0 +1,1 @@
+Gestiona fotos locales: Encontrar/Copiar/Editar-Exif y mostrar en Galería o Mapa.

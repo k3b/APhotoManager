@@ -3,3 +3,4 @@
 * NEW: Mark images as "PRIVATE" and allow filtering include/exclude "PRIVATE"
 * Gallery view: Added sort by (image-)width, (file-)size
 * Translations and Translationupdates: French by Poussinou; Indonesian by riesky and isaideureka; Hindi by jznsamuel (jasonsamuel88); Japanese by naofum; Chinese Simplified and Chinese Traditional by Liu Feng (pitumaomao)
+* Fix update tags/geo also update lastModified in mediadb always in format secs since 1970. Else "sort by last modified" does not work.

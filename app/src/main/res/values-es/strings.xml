@@ -21,11 +21,13 @@
  */
  -->
 <resources>
-  <string name="about_summary">"Sobre \'A Photo Manager%1$s\'"</string>
+  <string name="about_summary">Sobre \"A Photo Manager%1$s\"</string>
+  <string name="area_menu_title">Filtro de Área del Mapa</string>
   <string name="background">Fondo</string>
   <string name="bookmark_delete_answer_format">Borrar marcador %1$s.</string>
   <string name="bookmark_delete_error_format">No puedo borrar marcador %1$s.</string>
   <string name="bookmark_delete_question">Borrar este marcador?</string>
+  <string name="bookmark_file_comment_format">Generado en %3$s con \'%1$s\' Versión %2$s. Visitar https://github.com/k3b/APhotoManager/wiki/intentapi#sql para detalles</string>
   <string name="bookmark_load_from_menu_title">Cargar marcador desde &#8230;</string>
   <string name="bookmark_save_as_menu_title">Guardar marcador como &#8230;</string>
   <string name="btn_cancel">Cancelar</string>
@@ -35,25 +37,181 @@
   <string name="btn_ok">Ok</string>
   <string name="btn_pause">Pausa</string>
   <string name="copy_menu_title">Copiar</string>
+  <string name="copy_result_format">Copiados %1$d/%2$d archivos</string>
   <string name="delete_menu_title">Borrar</string>
+  <string name="delete_question_message_format">"¿Está seguro que desea eliminar estos archivos permanentemente?
+	%1$s
+	
+	Esta operación no puede deshacerse."</string>
+  <string name="delete_question_title">¿Borrar Foto(s)?</string>
+  <string name="delete_result_format">Borrados %1$d/%2$d archivos</string>
+  <string name="destination_copy">Destino de la copia</string>
+  <string name="destination_move">Destino de la mudanza</string>
   <string name="details_menu_title">Detalles</string>
+  <string name="edit_chooser_title">Elija el editor de fotos</string>
+  <string name="edit_err_editor_not_found">No se consiguió un editor de fotos</string>
   <string name="edit_menu_title">Modificar</string>
+  <string name="file_err_writeprotected">"Protegido contra escritura \'%1$s\'.
+
+\'%2$s\' no es posible."</string>
+  <string name="filter_err_invalid_date_format">\'%1$s\' no es una fecha válida.</string>
+  <string name="filter_err_invalid_location_format">\'%1$s\' no es una coordenada válida.</string>
   <string name="filter_menu_title">Filtro</string>
+  <string name="folder_dialog_title_format">Seleccione %1$s</string>
+  <string name="folder_err_load_failed_format">Falló la carga de la carpeta %1$s</string>
+  <string name="folder_menu_title">Filtro de Carpeta</string>
   <string name="gallery_title">Fotos</string>
   <string name="geo_show_menu_title">Mostrar en mapa</string>
+  <string name="geo_show_as_menu_title">Ver en una aplicación geo externa</string>
+  <string name="geo_edit_menu_title">Establecer geo</string>
+  <string name="geo_edit_update_in_progress">Cambiando la información geo en las fotos seleccionadas</string>
+  <string name="geo_picker_err_not_found">No se encontró un recolector de geo</string>
+  <string name="geo_picker_title">Seleccione un nuevo geo para la foto</string>
+  <string name="global_err_sql_message_format">Error del SQL \'%1$s\'\n\n%2$s</string>
+  <string name="global_err_sql_title_reload">SQL inválido. Cargando por defecto</string>
+  <string name="global_err_system">Error del sistema. Saliendo</string>
+  <string name="image_err_file_exists_format">El archivo \'%1$s\' ya existe.\n ¿Realmente quieres reemplazarlo?</string>
+  <string name="image_err_file_rename_format">No se puede renombrar el archivo \'%1$s\'.</string>
+  <string name="image_err_not_found_format">No se encontraron fotos para %1$s.</string>
+  <string name="image_err_not_in_db_format">Foto todavía no encontrada en la base de datos multimedia%1$s. Escaneando nuevos archivos en %2$d. La foto perdida estará disponible pronto.</string>
+  <string name="image_loading_at_position_format">"Cargando (%1$d) …"</string>
+  <string name="image_success_update_format">Actualizadas %1$d fotos.</string>
   <string name="lbl_date">Fecha</string>
+  <string name="lbl_latitude_short">Lat</string>
+  <string name="lbl_longitude_short">Lon</string>
+  <string name="lbl_path">Camino</string>
+  <string name="lbl_with_no_geo">Sin información geo</string>
+  <string name="mk_dir_default">nueva_carpeta</string>
+  <string name="mk_dir_menu_title">Crear Carpeta</string>
+  <string name="mk_err_failed_format">%1$s No puede ser creado</string>
+  <string name="mk_success_format">%1$s fue creado</string>
+  <string name="more_menu_title">Mas &#8230;</string>
+  <string name="move_menu_title">Mover</string>
+  <string name="move_result_format">%1$d/%2$d Archivos movidos</string>
+  <string name="osm_cright_title">Contribuyentes Map Tiles © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a></string>
+  <string name="overwrite_question_title">¿Reemplazar?</string>
+  <string name="rename_menu_title">Renombrar</string>
+  <string name="rename_result_format">%1$d/%2$d Archivos renombrados</string>
+  <string name="scanner_dir_question">¿Por dónde comenzar el escaneo?</string>
+  <string name="scanner_err_busy">No se pueden procesar las fotos mientras el escáner multimedia de Android-s está ocupado. Intente de nuevo más tarde.</string>
+  <string name="scanner_menu_title">Escáner multimedia</string>
+  <string name="scanner_update_result_format">Actualizados archivos de la base de datos multimedia %1$d</string>
   <string name="selection_status_format">%1$d seleccionados</string>
+  <string name="selection_none_hint">Seleccione una carpeta con imágenes para habilitar OK</string>
   <string name="selected_only_menu_title">Solo seleccionado</string>
+  <string name="selection_add_all_menu_title">Selección: Agregar todo lo visible</string>
+  <string name="selection_remove_menu_title">Selección: Remover todo lo visible</string>
+  <string name="settings_bookmark_dir_title">Carpeta de marcadores</string>
   <string name="settings_group_debug_title">Diagnóstico</string>
+  <string name="settings_debug_sql_summary">&#8230; conteniendo SQL ejecutado.</string>
+  <string name="settings_debug_view_item_summary">&#8230; conteniendo artículos de vista de cuadrícula/lista.</string>
+  <string name="settings_debug_memory_title">Consumo de memoria LogCat</string>
+  <string name="settings_debug_meta_io">Lectura/Escritura de metadata jpg/xmp LogCat</string>
+  <string name="settings_debug_libs_summary">&#8230; of 3rd party libraries.</string>
+  <string name="settings_debug_title">Misceláneos LogCat.</string>
+  <string name="settings_debug_summary">&#8230; conteniendo otros mensajes del registro.</string>
+  <string name="settings_debug_clear_title">Borrar LogCat</string>
+  <string name="settings_debug_save_title">Guardar LogCat en archivo</string>
+  <string name="settings_log_folder_title">Carpeta de registro de errores</string>
+  <string name="settings_image_hide_time_title">Ocultar automáticamente la barra de acciones después de milisegundos</string>
+  <string name="settings_image_initialImageDetailResolutionHigh_summary">Foto-vista inicial en mejor calidad (lenta, necesita más memoria)</string>
+  <string name="settings_image_initialImageDetailResolutionHigh_title">Mejorar la calidad del foto-vista inicial</string>
+  <string name="settings_image_slideshow_intervall_title">Intervalo de diapositivas en milisegundos</string>
   <string name="settings_locale_title">Idioma</string>
-  <string name="settings_locale_os_language">(Idioma aparato)</string>
+  <string name="settings_locale_os_language">Por defecto del sistema</string>
+  <string name="settings_map_selmarker_max_title">Max. marcadores seleccionados en mapa</string>
+  <string name="settings_geo_history_max_title">Establecer conteo de la historia geo</string>
+  <string name="settings_geo_history_file_title">Establecer archivo de la geo historia</string>
+  <string name="settings_multisel_clear_title">Limpiar la selección múltiple después de la acción</string>
+  <string name="settings_multisel_clear_summary">Copiar, mover, renombrar, etc.</string>
   <string name="settings_title">Opciones</string>
-  <string name="share_menu_title">Mandar</string>
+  <string name="share_err_not_found">No se encontró proveedor para compartir/enviar</string>
+  <string name="share_err_to_many">Demasiados artículos seleccionados para compartir a la vez</string>
+  <string name="share_menu_title">Compartir/Enviar</string>
+  <string name="show_in_gallery_menu_title">Mostrar en nueva galería</string>
   <string name="slideshow_menu_title">Presentación</string>
   <string name="sort_by_date">Fecha</string>
   <string name="sort_by_folder">Carpeta</string>
   <string name="sort_by_name">Nombre</string>
+  <string name="sort_by_name_len">Longitud de documento de camino</string>
   <string name="sort_by_none">Sin clasificar</string>
   <string name="sort_by_place">Lugar</string>
   <string name="sort_menu_title">Clasificar</string>
+  <string name="update_result_format">Actualizados %1$d/%2$d archivos</string>
+  <string name="zoom_to_fit_menu_title">Zoom para encajar</string>
+  <string name="settings_image_thumb_if_bigger_than_title">Mostrar miniatura para imágenes grandes</string>
+  <string name="settings_image_thumb_if_bigger_than_summary">Mostrar miniatura en la vista detallada de la imagen si la anchura o altura es mayor a este valor (pixeles). Memoria eficiente, rápida, pero de baja calidad.</string>
+  <string name="settings_image_thumb_dir_title">Carpeta de miniaturas</string>
+  <string name="settings_maps_forge_enable_tile">Usar mapa sin conexión de Mapsforge</string>
+  <string name="settings_maps_forge_enable_summary">... el cual descargó manualmente vía pc</string>
+  <string name="settings_maps_forge_dir_title">Carpeta sin conexión de Mapsforge</string>
+  <string name="show_photo">Mostrar Foto(s)</string>
+  <string name="fix_link_menu_title">Reparar duplicados</string>
+  <string name="geo_picker_from_photo_title">Seleccionar Geo desde Foto</string>
+  <string name="geo_picker_from_map_title">Seleccionar Geo desde Mapa</string>
+  <string name="folder_hide_images_menu_title">Esconder Imágenes</string>
+  <string name="folder_hide_images_question_message_format">“¿Está seguro?
+
+¿Desea que todos sus archivos multimedia (foto, video, audio) debajo sean
+
+    %1$s
+
+invisibles para la base de datos multimedia, aplicaciones de galería y el escáner multimedia?
+
+Usted puede hacerlos visibles de nuevo llamando al escáner multimedia desde el menú de la galería.”</string>
+  <string name="filter_path_hint">Parte de la Carpeta o del Nombre del archivo. %=Comodín</string>
+  <string name="lbl_any">Buscar</string>
+  <string name="filter_any_hint">Parte de las Etiquetas, Título, Descripción o Camino</string>
+  <string name="lbl_images_public">Imagen Pública</string>
+  <string name="lbl_images_private">Imagen Privada</string>
+  <string name="lbl_with_no_tags">Sin ninguna Etiqueta</string>
+  <string name="lbl_tags_include">+Etiquetas</string>
+  <string name="lbl_tags_exclude">-Etiquetas</string>
+  <string name="lbl_tag">Etiqueta</string>
+  <string name="tags_activity_title">Filtro de Etiquetas</string>
+  <string name="tags_search_hint">Escriba aquí para filtrar ...</string>
+  <string name="tags_search_no_matching_items_found">No se encontró ninguna etiqueta que coincida</string>
+  <string name="tags_edit_menu_title">Establecer Etiquetas</string>
+  <string name="tags_add_menu_title">Crear Etiqueta nueva</string>
+  <string name="tags_add_default">nueva_etiqueta</string>
+  <string name="tags_delete_children_title">Eliminar niños</string>
+  <string name="tags_update_photos">Actualizar etiquetas en fotos afectadas</string>
+  <string name="tags_hint">Toque largo en el nombre de la etiqueta abre el menú</string>
+  <string name="tags_defaults">Actividades,Personas,Lugares,Temas,Proyectos</string>
+  <string name="settings_media_update_strategy_title">Escribir cambios a</string>
+  <string name="settings_media_update_strategy_jpg_xmp_create">jpg y xmp (Crear si no se encuentra)</string>
+  <string name="settings_media_update_strategy_jpg_xmp_update">jpg (y xmp si existe)</string>
+  <string name="settings_media_update_strategy_jpg">sólo archivo jpg</string>
+  <string name="settings_media_update_strategy_xmp">sólo archivo xmp</string>
+  <string name="settings_xmp_file_schema_title">¿Nombre de archivo sidecar Xmp largo?</string>
+  <string name="settings_xmp_file_schema_summary">Largo: archivo.jpg.xmp; Corto: archivo.xmp</string>
+  <!-- #70: manually select sql column defintition for extra detail display in image detail view  -->
+  <string name="view_context_menu_title">Cargando Contexto ...</string>
+  <!-- #87: edit-exif: image title, description, rating -->
+  <string name="exif_menu_title">Editar Exif</string>
+  <string name="lbl_title">Título</string>
+  <string name="lbl_description">Descripción</string>
+  <string name="lbl_rating">Valoración</string>
+  <!-- #90 add: sort by Rating, Date-Last-modified -->
+  <string name="sort_by_rating">Valoración</string>
+  <string name="sort_by_modification">Última modificación</string>
+  <!-- #93: edit-exif: image title, description, rating -->
+  <string name="photo_autoprocessing_edit_menu_title">Editar Autoprocesamiento de Foto</string>
+  <string name="lbl_file_name_pattern">Patrón de Nombre de archivo</string>
+  <string name="lbl_exif">Exif</string>
+  <!-- i.e.
+            Copy 5 Photos
+				hello.jpg (2017-08-02), ...
+			To .../path/toFile/
+				1708NewName0001.jpg -->
+  <string name="preview_message_format">"%1$s %2$d Fotos\n\t%3$s (%4$s), …\nPara %5$s\n\t%6$s"</string>
+  <!-- new in 0.6.3 additional sorting options -->
+  <string name="sort_by_file_size">Tamaño</string>
+  <string name="sort_by_width">Anchura</string>
+  <!-- new in 0.6.3 edit exif images can have visibility private or public -->
+  <string name="lbl_image_visibility">Visibilidad</string>
+  <!-- #105 Appplication-pinning, aka "Kiosk Mode", "LockTask": disable dangerous menu-items -->
+  <string name="menu_title_app_pinnend">Aplicación protegida/marcada</string>
+  <string name="menu_title_app_unpinnend">Aplicación desprotegida/desmarcada</string>
+  <!--  depricated tags_update_result_format use image_success_update_format instead -->
 </resources>
