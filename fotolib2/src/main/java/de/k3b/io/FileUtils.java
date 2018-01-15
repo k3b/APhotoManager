@@ -26,9 +26,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -171,6 +173,17 @@ public class FileUtils {
     /** return parent of file if path is not a dir. else return file */
     private static File getDir(File file) {
         return ((file != null) && (!file.isDirectory())) ? file.getParentFile() : file;
+    }
+
+    /** find cildren by regular expression */
+    public static File[] listFiles(File parent, final Pattern fileOrDirThatMustBeInTheRoot) {
+        return parent.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File owner, String fileName) {
+                final boolean found = fileOrDirThatMustBeInTheRoot.matcher(fileName).matches();
+                return found;
+            }
+        });
     }
 
     /** return true, if file is in a ".nomedia" dir */
