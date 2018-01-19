@@ -214,45 +214,52 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
         mCurrentData.setNumberFormat(getSelectedPattern(mSpinnerNumberPattern));
     }
 
+    /** to avoid endless recursion toGui() ... TextView.setText ... afterTextChanged ... toGui() */
+    private int inToGuiCount = 0;
     private void toGui() {
-        mEditName.setText(mCurrentData.getName());
-        select(mSpinnerDatePattern, mCurrentData.getDateFormat());
-        String numberFormat = mCurrentData.getNumberFormat();
-        select(mSpinnerNumberPattern, numberFormat);
-        mProcessor.set(mCurrentData.getDateFormat(), mCurrentData.getName(), numberFormat);
+        inToGuiCount++;
+        try {
+            mEditName.setText(mCurrentData.getName());
+            select(mSpinnerDatePattern, mCurrentData.getDateFormat());
+            String numberFormat = mCurrentData.getNumberFormat();
+            select(mSpinnerNumberPattern, numberFormat);
+            mProcessor.set(mCurrentData.getDateFormat(), mCurrentData.getName(), numberFormat);
 
-        File exampleSrcfile = mProcessor.getFile(mSelectedFiles.getFile(0));
-        Date exampleDate = getExampleDate(exampleSrcfile);
-        File exampleResultFile = mProcessor.getNextFile(exampleSrcfile, exampleDate, StringUtils.isNullOrEmpty(numberFormat) ? 0 : 1);
+            File exampleSrcfile = mProcessor.getFile(mSelectedFiles.getFile(0));
+            Date exampleDate = getExampleDate(exampleSrcfile);
+            File exampleResultFile = mProcessor.getNextFile(exampleSrcfile, exampleDate, StringUtils.isNullOrEmpty(numberFormat) ? 0 : 1);
 
-        // !!! where to get "copy"/"move" from?
-        String photoOperation = ""; // getString(R.string.move_menu_title);
+            // !!! where to get "copy"/"move" from?
+            String photoOperation = ""; // getString(R.string.move_menu_title);
 
-        // %1$s %2$d Photos\n\t%3$s (%4$s), ...\nTo %5$s\n\t%6$s
+            // %1$s %2$d Photos\n\t%3$s (%4$s), ...\nTo %5$s\n\t%6$s
         /*
             Copy 5 Photos
 				hello.jpg (2017-08-02), ...
 			To .../path/toFile/
 				1708NewName0001.jpg
         */
-        mPreview.setText(getString(R.string.preview_message_format,
-                photoOperation,
-                mSelectedFiles.size(),
-                (exampleSrcfile == null) ? null : exampleSrcfile.getName(),
-                DateUtil.toIsoDateString(exampleDate),
-                mCurrentData.getOutDir(), exampleResultFile.getName()));
+            mPreview.setText(getString(R.string.preview_message_format,
+                    photoOperation,
+                    mSelectedFiles.size(),
+                    (exampleSrcfile == null) ? null : exampleSrcfile.getName(),
+                    DateUtil.toIsoDateString(exampleDate),
+                    mCurrentData.getOutDir(), exampleResultFile.getName()));
 
-        IMetaApi mediaChanges = mCurrentData.getMediaDefaults();
-        String exifChange = null;
-        if (mediaChanges != null) {
-            exifChange = MediaUtil.toString(mediaChanges, false, mLabelGenerator, MediaUtil.FieldID.clasz);
+            IMetaApi mediaChanges = mCurrentData.getMediaDefaults();
+            String exifChange = null;
+            if (mediaChanges != null) {
+                exifChange = MediaUtil.toString(mediaChanges, false, mLabelGenerator, MediaUtil.FieldID.clasz);
 
-            VISIBILITY extra = mediaChanges.getVisibility();
-            if (extra != null) {
-                exifChange += "\nVisibility " + extra;
+                VISIBILITY extra = mediaChanges.getVisibility();
+                if (extra != null) {
+                    exifChange += "\nVisibility " + extra;
+                }
             }
+            mExifChanges.setText(exifChange);
+        } finally {
+            inToGuiCount--;
         }
-        mExifChanges.setText(exifChange);
     }
 
     private void select(Spinner spinner, String selectedFormat) {
@@ -320,14 +327,17 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
 
             @Override
             public void afterTextChanged(Editable s) {
-                String newValue = s.toString();
-                if (0 != StringUtils.compare(newValue, mCurrentData.getName())) {
-                    int start = mEditName.getSelectionStart();
-                    int end = mEditName.getSelectionEnd();
-                    // prevent stackoverflow
-                    mCurrentData.setName(newValue);
-                    toGui();
-                    mEditName.setSelection(start, end); // prevent cursor from jumping
+                // to avoid endless recursion toGui() ... TextView.setText ... afterTextChanged ... toGui()
+                if (inToGuiCount == 0) {
+                    String newValue = s.toString();
+                    if (0 != StringUtils.compare(newValue, mCurrentData.getName())) {
+                        int start = mEditName.getSelectionStart();
+                        int end = mEditName.getSelectionEnd();
+                        // prevent stackoverflow
+                        mCurrentData.setName(newValue);
+                        toGui();
+                        mEditName.setSelection(start, end); // prevent cursor from jumping
+                    }
                 }
             }
         });
