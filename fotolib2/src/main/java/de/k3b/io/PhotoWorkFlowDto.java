@@ -19,6 +19,9 @@
 
 package de.k3b.io;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -26,6 +29,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Properties;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaAsString;
 
@@ -36,6 +40,8 @@ import de.k3b.media.MediaAsString;
  */
 
 public class PhotoWorkFlowDto {
+    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+
     /** added to every serialized item if != null. Example "Generated on 2015-10-19 with myApp Version 0815." */
     public static String sFileComment = "";
 
@@ -66,6 +72,9 @@ public class PhotoWorkFlowDto {
             try {
                 inputStream = new FileInputStream(apm);
                 properties.load(inputStream);
+                if (FotoLibGlobal.debugEnabled) {
+                    logger.debug(this.getClass().getSimpleName() + ": loaded from " + apm + ":" + this);
+                }
                 return this;
             } finally {
                 FileUtils.close(inputStream,"PhotoWorkFlowDto.load(" + apm + ")");
@@ -78,25 +87,40 @@ public class PhotoWorkFlowDto {
         return new File(this.outDir, RuleFileNameProcessor.APM_FILE_NAME);
     }
 
+    /** if has no data the file is deleted */
     public void save() throws IOException {
         File apm = getApmFile();
-        FileOutputStream inputStream = null;
-        try {
-            inputStream = new FileOutputStream(apm);
-            properties.store(inputStream, PhotoWorkFlowDto.sFileComment);
-        } finally {
-            FileUtils.close(inputStream,"PhotoWorkFlowDto.load(" + apm + ")");
+        FileOutputStream stream = null;
+        if (isEmpty()) {
+            if (FotoLibGlobal.debugEnabled) {
+                logger.debug(this.getClass().getSimpleName() + ": save delete empty " + apm + ":" + this);
+            }
+            apm.delete();
+        } else {
+            try {
+                if (FotoLibGlobal.debugEnabled) {
+                    logger.debug(this.getClass().getSimpleName() + ": save to " + apm + ":" + this);
+                }
+                stream = new FileOutputStream(apm);
+                properties.store(stream, PhotoWorkFlowDto.sFileComment);
+            } finally {
+                FileUtils.close(stream, "PhotoWorkFlowDto.load(" + apm + ")");
+            }
         }
     }
 
-    /** Android support: to persist state and to transfer activites via intent */
+    /** Android support: to persist state and to transfer activites via intent.  */
     public static PhotoWorkFlowDto load(Serializable content) {
+        PhotoWorkFlowDto photoWorkFlowDto = null;
         Properties properties = (Properties) content;
         if (properties != null) {
             String outDir = properties.getProperty(KEY_OUT_DIR);
-            return new PhotoWorkFlowDto((outDir != null) ? new File(outDir) : null, properties);
+            photoWorkFlowDto = new PhotoWorkFlowDto((outDir != null) ? new File(outDir) : null, properties);
         }
-        return null;
+        if (FotoLibGlobal.debugEnabled) {
+            logger.debug(PhotoWorkFlowDto.class.getSimpleName() + ": load De-Serialize:" + photoWorkFlowDto);
+        }
+        return photoWorkFlowDto;
     }
 
     /** Android support: to persist state and to transfer activites via intent */
@@ -109,32 +133,32 @@ public class PhotoWorkFlowDto {
 
     /** DateFormat part for {@link RuleFileNameProcessor} */
     public String getDateFormat() {
-        return properties.getProperty(KEY_DATE_FORMAT);
+        return getProperty(KEY_DATE_FORMAT);
     }
 
     /** DateFormat part for {@link RuleFileNameProcessor} */
     public void setDateFormat(String dateFormat) {
-        properties.setProperty(KEY_DATE_FORMAT,dateFormat);
+        setProperty(KEY_DATE_FORMAT,dateFormat);
     }
 
     /**  fixed-Name part for {@link RuleFileNameProcessor} */
     public String getName() {
-        return properties.getProperty(KEY_NAME);
+        return getProperty(KEY_NAME);
     }
 
     /**  fixed-Name part for {@link RuleFileNameProcessor} */
     public void setName(String Name) {
-        properties.setProperty(KEY_NAME,Name);
+        setProperty(KEY_NAME,Name);
     }
 
     /**  NumberFormat part for {@link RuleFileNameProcessor} */
     public String getNumberFormat() {
-        return properties.getProperty(KEY_NUMBER_FORMAT);
+        return getProperty(KEY_NUMBER_FORMAT);
     }
 
     /**  NumberFormat part for {@link RuleFileNameProcessor} */
     public void setNumberFormat(String NumberFormat) {
-        properties.setProperty(KEY_NUMBER_FORMAT,NumberFormat);
+        setProperty(KEY_NUMBER_FORMAT,NumberFormat);
     }
 
     public File getOutDir() {
@@ -149,7 +173,7 @@ public class PhotoWorkFlowDto {
     }
 
     public IMetaApi getMediaDefaults() {
-        String mediaDefaultString = properties.getProperty(KEY_EXIF);
+        String mediaDefaultString = getProperty(KEY_EXIF);
         return (mediaDefaultString == null) ? null : new MediaAsString().fromString(mediaDefaultString);
     }
 
@@ -159,10 +183,31 @@ public class PhotoWorkFlowDto {
             mediaDefaultString = mediaDefaults.toString();
         }
 
-        if (mediaDefaultString != null) {
-            properties.setProperty(KEY_EXIF, mediaDefaultString);
-        } else {
-            properties.remove(KEY_EXIF);
-        }
+        setProperty(KEY_EXIF, mediaDefaultString);
+    }
+
+    public boolean isEmpty() {
+        return ((getMediaDefaults() == null) && (getNumberFormat() == null)
+                && (getDateFormat() == null) && (getName() == null));
+    }
+
+    private String getProperty(String key) {
+        String value = properties.getProperty(key);
+        if (StringUtils.isNullOrEmpty(value)) return null;
+        return value;
+    }
+
+    private Object setProperty(String key, String value) {
+        toString();
+        if (StringUtils.isNullOrEmpty(value))
+            return properties.remove(key);
+        else
+            return properties.put(key, value);
+    }
+
+    @Override
+    public String toString() {
+        return ListUtils.toString(" ", this.getClass().getSimpleName(),
+                getDateFormat(), getName(), getNumberFormat(), getMediaDefaults());
     }
 }

@@ -52,6 +52,7 @@ import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
+import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.DateUtil;
@@ -126,9 +127,6 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
-        if (Global.debugEnabled) {
-            Log.d(Global.LOG_CONTEXT, mDebugPrefix + " onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME) + "\n" + savedInstanceState);
-        }
         mSelectedFiles = getSelectedFiles("onCreate ", intent, false);
 
         // Edit dir or edit ".apm"
@@ -147,6 +145,15 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
                 onFatalError(mDebugPrefix + "Cannot load .apm from " + mCurrentData, e);
                 return;
             }
+        }
+
+        if (Global.debugEnabled) {
+            final String nl = "\n\t.";
+            Log.d(Global.LOG_CONTEXT, ListUtils.toString(" ", mDebugPrefix,
+                    "onCreate",intent.toUri(Intent.URI_INTENT_SCHEME),
+                    nl,currentOutDir,
+                    nl,"savedInstanceState",savedInstanceState,
+                    nl,mCurrentData));
         }
 
         if ((currentOutDir == null) || (mCurrentData == null)) {
@@ -179,6 +186,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     private void onFatalError(String msg, Exception exception) {
         Log.e(Global.LOG_CONTEXT, msg, exception);
         Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+        setResult(Activity.RESULT_CANCELED, null);
         finish();
     }
 
@@ -492,6 +500,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
 
         switch (id) {
             case R.id.cmd_cancel:
+                setResult(Activity.RESULT_CANCELED, null);
                 finish();
                 return true;
             case R.id.cmd_ok:
@@ -543,6 +552,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
         fromGui();
         try {
             mCurrentData.save();
+            setResult(Activity.RESULT_OK, null);
         } catch (IOException e) {
             onFatalError("onOk()-save()", e);
         }

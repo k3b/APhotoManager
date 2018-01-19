@@ -67,16 +67,31 @@ public class OSDirectory implements IDirectory {
     public OSDirectory setCurrent(File current) {
         destroy();
         mCurrent = current;
-        if (mCurrent != null) {
-            if (new File(current, FileUtils.MEDIA_IGNORE_FILENAME).exists()) {
-                setDirFlags(DIR_FLAG_NOMEDIA_ROOT);
-            } else if (FileUtils.isHiddenFolder(current.getAbsolutePath())) {
-                setDirFlags(DIR_FLAG_NOMEDIA);
-            } else if (new File(current, RuleFileNameProcessor.APM_FILE_NAME).exists()) {
-                setDirFlags(DIR_FLAG_APM_DIR);
+        setDirFlags(getCalculateFlags(mCurrent));
+        return this;
+    }
+
+    private int getCalculateFlags(File directory) {
+        int result = 0;
+        if ((directory != null) && (directory.isDirectory())) {
+            if (new File(directory, FileUtils.MEDIA_IGNORE_FILENAME).exists()) {
+                result = DIR_FLAG_NOMEDIA_ROOT;
+            } else if (FileUtils.isHiddenFolder(directory.getAbsolutePath())) {
+                result = DIR_FLAG_NOMEDIA;
+            }
+
+            if (new File(directory, RuleFileNameProcessor.APM_FILE_NAME).exists()) {
+                result |= DIR_FLAG_APM_DIR;
             }
         }
-        return this;
+
+        return result;
+    }
+
+    /** reloads entry where dirFlag is one of the DIR_FLAG_... values */
+    @Override
+    public void refresh() {
+        setDirFlags(getCalculateFlags(mCurrent));
     }
 
     @Override

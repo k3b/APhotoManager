@@ -384,10 +384,17 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         return false;
     }
 
-    private boolean onEditApm(IDirectory mPopUpSelection) {
-        String path = (mPopUpSelection == null) ? null : mPopUpSelection.getAbsolute();
+    @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if ((requestCode == R.id.cmd_apm_edit) && (resultCode == Activity.RESULT_OK) && (mPopUpSelection != null)) {
+            mPopUpSelection.refresh();
+        }
+    }
+
+    private boolean onEditApm(IDirectory selection) {
+        String path = (selection == null) ? null : selection.getAbsolute();
         if (!StringUtils.isNullOrEmpty(path)) {
-            PhotoAutoprocessingEditActivity.showActivity(getActivity(), null, path, null, 0);
+            PhotoAutoprocessingEditActivity.showActivity(getActivity(), null, path, null, R.id.cmd_apm_edit);
             return true;
         }
         return false;
