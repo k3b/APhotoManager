@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -34,6 +34,7 @@ import java.util.Date;
 import de.k3b.FotoLibGlobal;
 import de.k3b.io.collections.DestDirFileNameProcessor;
 import de.k3b.io.collections.SelectedFiles;
+import de.k3b.media.IMetaApi;
 import de.k3b.media.JpgMetaWorkflow;
 import de.k3b.media.MediaDiffCopy;
 import de.k3b.media.MetaWriterExifXml;
@@ -169,21 +170,40 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
 
     /**
      * move (or copy) sourcefiles (with their xmp-sidecar-files) to destdirfolder.
-     * Executes autoprocessing (#91: rename, add exif) if destdirfolder
+     * Executes autoprocessing (#93: rename, add exif) if destdirfolder
      * contains ".apm"  (autoprocessing data file)
      * @param move false: copy
      * @param selectedFiles
      * @param destDirFolder where files are moved/copied to
      * @param progessListener  */
     public int moveOrCopyFilesTo(boolean move, SelectedFiles selectedFiles, File destDirFolder, IProgessListener progessListener) {
+        PhotoWorkFlowDto autoProccessData = (!FotoLibGlobal.apmEnabled) ? null : getPhotoWorkFlowDto(destDirFolder);
+
+        return moveOrCopyFilesTo(move, selectedFiles, destDirFolder, autoProccessData, progessListener);
+    }
+
+    /**
+     * For junit integration test: special internal version with explicit dependencies.
+     * move (or copy) sourcefiles (with their xmp-sidecar-files) to destdirfolder.
+     * Executes autoprocessing (#91: rename, add exif) if destdirfolder
+     * contains ".apm"  (autoprocessing data file)
+     * @param move false: copy
+     * @param selectedFiles
+     * @param destDirFolder where files are moved/copied to
+     * @param autoProccessData null or data for auto rename/exif data
+     * @param progessListener  */
+    int moveOrCopyFilesTo(boolean move, SelectedFiles selectedFiles, File destDirFolder,
+                          PhotoWorkFlowDto autoProccessData, IProgessListener progessListener) {
         IFileNameProcessor renameProcessor = null;
         MediaDiffCopy exifChanges = null;
 
-        PhotoWorkFlowDto autoProccessData = (!FotoLibGlobal.apmEnabled) ? null : getPhotoWorkFlowDto(destDirFolder);
-        if (autoProccessData != null) {
-            renameProcessor = autoProccessData.createFileNameProcessor();
-            exifChanges = new MediaDiffCopy(autoProccessData.getMediaDefaults(), false);
-        } else {
+        if ((autoProccessData != null) && (!autoProccessData.isEmpty())) {
+            if (!autoProccessData.isRenameEmpty()) renameProcessor = autoProccessData.createFileNameProcessor();
+            final IMetaApi mediaDefaults = autoProccessData.getMediaDefaults();
+            if (mediaDefaults != null) exifChanges = new MediaDiffCopy(mediaDefaults, false);
+        }
+
+        if (renameProcessor == null){
             renameProcessor = new DestDirFileNameProcessor(destDirFolder);
         }
 

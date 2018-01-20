@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -28,7 +28,8 @@ import de.k3b.io.VISIBILITY;
 import static org.junit.Assert.*;
 
 /**
- * TagSql unittests with dependencies to android, which will execute on the development machine (host).
+ * TagSql unittests with dependencies to android (android database field names),
+ * which will execute on the development machine (host).
  *
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */

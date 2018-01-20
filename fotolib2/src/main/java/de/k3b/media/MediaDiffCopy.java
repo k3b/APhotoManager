@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-18 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -211,8 +211,10 @@ public class MediaDiffCopy {
     public void fixTagRepository() {
         if ((this.addedTags != null) && (this.addedTags.size() > 0)) {
             TagRepository tagRepository = TagRepository.getInstance();
-            tagRepository.includeTagNamesIfNotFound(this.addedTags);
-            tagRepository.save();
+            if (tagRepository != null) {
+                tagRepository.includeTagNamesIfNotFound(this.addedTags);
+                tagRepository.save();
+            }
         }
     }
 

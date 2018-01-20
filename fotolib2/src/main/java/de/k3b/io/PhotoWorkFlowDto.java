@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-18 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -34,7 +34,7 @@ import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaAsString;
 
 /**
- * Persistable data for autoproccessing images (auto-rename, auto-add-exif)
+ * #93: Persistable data for autoproccessing images (auto-rename, auto-add-exif)
  *
  * Created by k3b on 04.08.2017.
  */
@@ -137,8 +137,9 @@ public class PhotoWorkFlowDto {
     }
 
     /** DateFormat part for {@link RuleFileNameProcessor} */
-    public void setDateFormat(String dateFormat) {
+    public PhotoWorkFlowDto setDateFormat(String dateFormat) {
         setProperty(KEY_DATE_FORMAT,dateFormat);
+        return this;
     }
 
     /**  fixed-Name part for {@link RuleFileNameProcessor} */
@@ -147,8 +148,9 @@ public class PhotoWorkFlowDto {
     }
 
     /**  fixed-Name part for {@link RuleFileNameProcessor} */
-    public void setName(String Name) {
+    public PhotoWorkFlowDto setName(String Name) {
         setProperty(KEY_NAME,Name);
+        return this;
     }
 
     /**  NumberFormat part for {@link RuleFileNameProcessor} */
@@ -157,15 +159,17 @@ public class PhotoWorkFlowDto {
     }
 
     /**  NumberFormat part for {@link RuleFileNameProcessor} */
-    public void setNumberFormat(String NumberFormat) {
+    public PhotoWorkFlowDto setNumberFormat(String NumberFormat) {
         setProperty(KEY_NUMBER_FORMAT,NumberFormat);
+        return this;
     }
 
     public File getOutDir() {
         return outDir;
     }
-    public void setOutDir(File outDir) {
+    public PhotoWorkFlowDto setOutDir(File outDir) {
         this.outDir = outDir;
+        return this;
     }
 
     public IFileNameProcessor createFileNameProcessor() {
@@ -177,18 +181,25 @@ public class PhotoWorkFlowDto {
         return (mediaDefaultString == null) ? null : new MediaAsString().fromString(mediaDefaultString);
     }
 
-    public void setMediaDefaults(IMetaApi mediaDefaults) {
+    public PhotoWorkFlowDto setMediaDefaults(IMetaApi mediaDefaults) {
         String mediaDefaultString = null;
         if (mediaDefaults != null) {
-            mediaDefaultString = mediaDefaults.toString();
+            mediaDefaultString = (mediaDefaults instanceof MediaAsString)
+               ? mediaDefaults.toString()
+               : new MediaAsString().setData(mediaDefaults).toString();
         }
 
         setProperty(KEY_EXIF, mediaDefaultString);
+        return this;
     }
 
     public boolean isEmpty() {
-        return ((getMediaDefaults() == null) && (getNumberFormat() == null)
-                && (getDateFormat() == null) && (getName() == null));
+        return ((getMediaDefaults() == null) && isRenameEmpty());
+    }
+
+    public boolean isRenameEmpty() {
+        return (getNumberFormat() == null)
+                && (getDateFormat() == null) && (getName() == null);
     }
 
     private String getProperty(String key) {

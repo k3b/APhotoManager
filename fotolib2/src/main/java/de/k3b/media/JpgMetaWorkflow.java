@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -28,6 +28,8 @@ import java.util.EnumSet;
 import java.util.List;
 
 import de.k3b.FotoLibGlobal;
+import de.k3b.io.FileCommands;
+import de.k3b.io.FileProcessor;
 import de.k3b.transactionlog.TransactionLoggerBase;
 
 /**
@@ -110,6 +112,17 @@ public class JpgMetaWorkflow {
                         if ((changed != null) && (changed.size() > 0)) {
                             transactionLogger.addChanges(exif, EnumSet.copyOf(changed), oldTags);
                         }
+                    }
+
+                    if (!sameFile && deleteOriginalWhenFinished) {
+                        File delete = FileProcessor.getSidecar(inFilePath, false);
+                        if (delete != null) delete.delete();
+
+                        delete = FileProcessor.getSidecar(inFilePath, true);
+                        if (delete != null) delete.delete();
+
+                        delete = inFilePath;
+                        if (delete != null) delete.delete();
                     }
                 } else {
                     if (sb != null) sb.append("no changes ");

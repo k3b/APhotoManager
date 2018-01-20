@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-18 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -28,13 +28,17 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Properties;
 
 import de.k3b.FotoLibGlobal;
 import de.k3b.TestUtil;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.media.ExifInterface;
+import de.k3b.media.ExifInterfaceEx;
+import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaDTO;
 import de.k3b.media.MediaDiffCopy;
+import de.k3b.media.MediaUtil;
 
 /**
  * check autoprocessing workflow (#93:)
@@ -46,12 +50,10 @@ public class FileCommandAutoIntegrationTests {
     // Obtain a logger instance
     private static final Logger LOGGER = LoggerFactory.getLogger(FileCommandAutoIntegrationTests.class);
     public static final String TEST_CLASS_NAME = FileCommandAutoIntegrationTests.class.getSimpleName();
-    public static final Long[] FAKE_IDS = {1l};
 
     private static final File OUTDIR = new File(TestUtil.OUTDIR_ROOT, TEST_CLASS_NAME + "/out").getAbsoluteFile();
     private static final File INJPG = new File(OUTDIR.getParentFile(), "in/myTestSource.jpg").getAbsoluteFile();
-    public static final String[] FAKE_INJPG = {INJPG.getAbsolutePath()};
-    public static final SelectedFiles FAKE_SELECTED_FILES = new SelectedFiles(FAKE_INJPG, FAKE_IDS);
+    public static final SelectedFiles FAKE_SELECTED_FILES = new SelectedFiles(INJPG.getAbsolutePath(), "1");
 
     @BeforeClass
     public static void setUpClass() throws IOException {
@@ -106,19 +108,51 @@ public class FileCommandAutoIntegrationTests {
         assertFilesExist(true, outFileBaseName);
     }
 
-    public FileCommands createFileCommands(String outFileBaseName) {
-        FileCommands result = new FileCommands();
-        result.setLogFilePath(new File(OUTDIR, outFileBaseName + ".log").getAbsolutePath());
-        return result;
+    @Test
+    public void shouldCopyNoRename() {
+        String outFileBaseName = "shouldCopyNoRename";
+        FileCommands sut = createFileCommands(outFileBaseName);
+        RuleFileNameProcessor rename = new RuleFileNameProcessor(null, "Test", null, OUTDIR);
+        sut.moveOrCopyFilesTo(false, null, FAKE_SELECTED_FILES, rename, OUTDIR, null);
+        assertFilesExist(true, "myTestSource"); // has still old name. Not Renamed
     }
 
     @Test
-    public void shouldCopyNoRename() {
-        String outFileBaseName = "Test";
+    public void shouldMoveRename() throws IOException {
+        String outFileBaseName = "shouldMoveRename";
+        final String originalName = outFileBaseName + "-old";
+        File inFile = new File(OUTDIR, originalName + ".jpg");
+
+        TestUtil.saveTestResourceAs("NoExif.jpg", inFile);
+
         FileCommands sut = createFileCommands(outFileBaseName);
-        RuleFileNameProcessor rename = new RuleFileNameProcessor(null, outFileBaseName, null, OUTDIR);
-        sut.moveOrCopyFilesTo(false, null, FAKE_SELECTED_FILES, rename, OUTDIR, null);
-        assertFilesExist(true, "myTestSource"); // do not rename
+
+        final String newName = outFileBaseName + "-new";
+        SelectedFiles selectedFiles = new SelectedFiles(inFile.getAbsolutePath(), "1");
+
+        // 0 avoid rounding of lat/lon; visibility not supported is only public
+        final IMetaApi exifChanges = TestUtil.createTestMediaDTO(0).setVisibility(VISIBILITY.PUBLIC);
+        PhotoWorkFlowDto autoProccessData = new PhotoWorkFlowDto(OUTDIR, new Properties())
+                .setName(newName).setMediaDefaults(exifChanges);
+
+        int changes = sut.moveOrCopyFilesTo(true, selectedFiles, OUTDIR,
+                autoProccessData, null);
+
+        assertFileExist(true, newName + ".jpg");
+        assertFileExist(false, originalName + ".jpg"); // do not rename
+
+        ExifInterfaceEx result = new ExifInterfaceEx(new File(OUTDIR, newName + ".jpg").getAbsolutePath(), null, null, "");
+
+        String exprected = MediaUtil.toString(exifChanges, false, null, MediaUtil.FieldID.clasz, MediaUtil.FieldID.path);
+        String current = MediaUtil.toString(result, false, null, MediaUtil.FieldID.clasz, MediaUtil.FieldID.path);
+        Assert.assertEquals(exprected, current);
+
+    }
+
+    private FileCommands createFileCommands(String outFileBaseName) {
+        FileCommands result = new FileCommands();
+        result.setLogFilePath(new File(OUTDIR, outFileBaseName + ".log").getAbsolutePath());
+        return result;
     }
 
     private void assertFilesExist(boolean expected, String outFileBaseName) {
