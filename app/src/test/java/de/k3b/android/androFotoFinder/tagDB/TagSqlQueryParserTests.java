@@ -23,7 +23,6 @@ import org.junit.Test;
 
 import de.k3b.database.QueryParameter;
 import de.k3b.io.GalleryFilterParameter;
-import de.k3b.io.IGalleryFilter;
 import de.k3b.io.VISIBILITY;
 
 import static org.junit.Assert.*;
