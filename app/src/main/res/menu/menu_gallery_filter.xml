@@ -23,10 +23,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="de.k3b.android.androFotoFinder.GalleryFilterActivity">
 
-    <item android:id="@+id/cmd_clear" android:title="@string/delete_menu_title"
-        android:icon="@drawable/ic_action_undo"
-        android:orderInCategory="5" android:showAsAction="always" android:visible="true" />
-
     <item android:id="@+id/action_save_as" android:title="@string/bookmark_save_as_menu_title"
         android:orderInCategory="200" android:showAsAction="never" android:visible="true" />
     <item android:id="@+id/action_load_from" android:title="@string/bookmark_load_from_menu_title"

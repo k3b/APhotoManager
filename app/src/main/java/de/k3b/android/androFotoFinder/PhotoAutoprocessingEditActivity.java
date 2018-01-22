@@ -257,13 +257,14 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
         }
     }
 
-    private void select(Spinner spinner, String selectedFormat) {
+    private void select(Spinner spinner, String selectedValueOrNull) {
         ArrayAdapter<Pattern> adapter = (ArrayAdapter<Pattern>) spinner.getAdapter();
         int count = adapter.getCount();
+        String selectedValue = selectedValueOrNull == null ? "" : selectedValueOrNull;
 
         for (int i = 0; i < count; i++) {
             Pattern p = adapter.getItem(i);
-            if (StringUtils.compare(p.pattern, selectedFormat) == 0) {
+            if (StringUtils.compare(p.pattern, selectedValue) == 0) {
                 spinner.setSelection(i);
             }
         }
@@ -511,6 +512,9 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
             case R.id.cmd_ok:
                 onOk();
                 return true;
+            case R.id.cmd_clear:
+                clearFilter();
+                return true;
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
                 return true;
@@ -562,6 +566,11 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
             onFatalError("onOk()-save()", e);
         }
         finish();
+    }
+
+    private void clearFilter() {
+        mCurrentData.clear();
+        toGui();
     }
 
     /**

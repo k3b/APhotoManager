@@ -221,4 +221,8 @@ public class PhotoWorkFlowDto {
         return ListUtils.toString(" ", this.getClass().getSimpleName(),
                 getDateFormat(), getName(), getNumberFormat(), getMediaDefaults());
     }
+
+    public void clear() {
+        properties.clear();
+    }
 }

@@ -390,6 +390,9 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
             case R.id.cmd_ok:
                 onOk();
                 return true;
+            case R.id.cmd_clear:
+                clearFilter();
+                return true;
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
                 return true;
@@ -791,6 +794,11 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
             mActivityData.setVisibility(priv);
             mCurrentData.setVisibility(priv);
         }
+    }
+
+    private void clearFilter() {
+        mCurrentData.clear();
+        loadGuiFromExif("clearFilter");
     }
 
     /** save exif changes back to image and database */
