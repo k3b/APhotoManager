@@ -160,10 +160,14 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
     @Override
     public File getNextFile(File sourceFile, Date sourceFileDate, int firstFileInstanceNumber) {
         String name = getFile(sourceFile).getName();
+
         if (!mustRename(name)) {
 			// no rename rule or file already matches rules
 			File result = new File(this.mOutDir, name);
-			
+
+            // usecase: apply auto where inFile is already in outdir: no modification
+            if (sourceFile.equals(result)) return result;
+
 			// change file name if result already exists
 			return renameDuplicate(result);
 		}

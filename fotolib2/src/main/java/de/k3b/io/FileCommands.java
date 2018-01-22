@@ -194,17 +194,19 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
      * @param progessListener  */
     int moveOrCopyFilesTo(boolean move, SelectedFiles selectedFiles, File destDirFolder,
                           PhotoWorkFlowDto autoProccessData, IProgessListener progessListener) {
+        boolean doNotRenameIfSourceInDestFolder = false;
         IFileNameProcessor renameProcessor = null;
         MediaDiffCopy exifChanges = null;
 
         if ((autoProccessData != null) && (!autoProccessData.isEmpty())) {
+            doNotRenameIfSourceInDestFolder = true;
             if (!autoProccessData.isRenameEmpty()) renameProcessor = autoProccessData.createFileNameProcessor();
             final IMetaApi mediaDefaults = autoProccessData.getMediaDefaults();
             if (mediaDefaults != null) exifChanges = new MediaDiffCopy(mediaDefaults, false);
         }
 
         if (renameProcessor == null){
-            renameProcessor = new DestDirFileNameProcessor(destDirFolder);
+            renameProcessor = new DestDirFileNameProcessor(destDirFolder, doNotRenameIfSourceInDestFolder);
         }
 
         return moveOrCopyFilesTo(move, exifChanges, selectedFiles, renameProcessor, destDirFolder, progessListener);

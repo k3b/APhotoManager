@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Properties;
 
 import de.k3b.FotoLibGlobal;
@@ -118,7 +119,82 @@ public class FileCommandAutoIntegrationTests {
     }
 
     @Test
-    public void shouldMoveRename() throws IOException {
+    public void autoShouldAddTagSameFileNoRenameRule() throws IOException {
+        final String outFileBaseName = "autoShouldAddTagSameFileNoRenameRule";
+        final String tagAdded = outFileBaseName + "_" + (DateUtil.toIsoDateTimeString(new Date()).replace(":","_") );
+        final File inFile = new File(OUTDIR, outFileBaseName + ".jpg");
+
+        TestUtil.saveTestResourceAs("test-WitExtraData.jpg", inFile);
+
+        FileCommands sut = createFileCommands(outFileBaseName);
+        SelectedFiles selectedFiles = new SelectedFiles(inFile.getAbsolutePath(), "1");
+        final IMetaApi exifChanges = new MediaDTO();
+        exifChanges.setTags(ListUtils.fromString(tagAdded));
+
+        PhotoWorkFlowDto autoProccessData = new PhotoWorkFlowDto(OUTDIR, new Properties())
+                .setMediaDefaults(exifChanges);
+
+        int changes = sut.moveOrCopyFilesTo(true, selectedFiles, OUTDIR,
+                autoProccessData, null);
+
+        ExifInterfaceEx result = new ExifInterfaceEx(inFile.getAbsolutePath(), null, null, "");
+
+        Assert.assertEquals(tagAdded, true, result.getTags().contains(tagAdded));
+
+    }
+
+    @Test
+    public void autoShouldAddTagSameFileRenameRuleMatching() throws IOException {
+        final String outFileBaseName = "autoShouldAddTagSameFileRenameRuleMatching";
+        final String tagAdded = outFileBaseName + "_" + (DateUtil.toIsoDateTimeString(new Date()).replace(":","_") );
+        final File inFile = new File(OUTDIR, outFileBaseName + ".jpg");
+
+        TestUtil.saveTestResourceAs("test-WitExtraData.jpg", inFile);
+
+        FileCommands sut = createFileCommands(outFileBaseName);
+        SelectedFiles selectedFiles = new SelectedFiles(inFile.getAbsolutePath(), "1");
+        final IMetaApi exifChanges = new MediaDTO();
+        exifChanges.setTags(ListUtils.fromString(tagAdded));
+
+        PhotoWorkFlowDto autoProccessData = new PhotoWorkFlowDto(OUTDIR, new Properties())
+                .setMediaDefaults(exifChanges).setName("ShouldAddTagSameFile");
+
+        int changes = sut.moveOrCopyFilesTo(true, selectedFiles, OUTDIR,
+                autoProccessData, null);
+
+        ExifInterfaceEx result = new ExifInterfaceEx(inFile.getAbsolutePath(), null, null, "");
+
+        Assert.assertEquals(tagAdded, true, result.getTags().contains(tagAdded));
+
+    }
+
+    @Test
+    public void autoShouldAddTagWithRename() throws IOException {
+        final String outFileBaseName = "autoShouldAddTagWithRename";
+        final String tagAdded = outFileBaseName + "_" + (DateUtil.toIsoDateTimeString(new Date()).replace(":","_") );
+        final File inFile = new File(OUTDIR, outFileBaseName + "-old.jpg");
+
+        TestUtil.saveTestResourceAs("test-WitExtraData.jpg", inFile);
+
+        FileCommands sut = createFileCommands(outFileBaseName);
+        SelectedFiles selectedFiles = new SelectedFiles(inFile.getAbsolutePath(), "1");
+        final IMetaApi exifChanges = new MediaDTO();
+        exifChanges.setTags(ListUtils.fromString(tagAdded));
+
+        PhotoWorkFlowDto autoProccessData = new PhotoWorkFlowDto(OUTDIR, new Properties())
+                .setMediaDefaults(exifChanges).setName(outFileBaseName + "-new");
+
+        int changes = sut.moveOrCopyFilesTo(true, selectedFiles, OUTDIR,
+                autoProccessData, null);
+
+        Assert.assertEquals(false, inFile.exists());
+
+    }
+
+
+
+    @Test
+    public void shouldMoveRenameAutoSameDir() throws IOException {
         String outFileBaseName = "shouldMoveRename";
         final String originalName = outFileBaseName + "-old";
         File inFile = new File(OUTDIR, originalName + ".jpg");
