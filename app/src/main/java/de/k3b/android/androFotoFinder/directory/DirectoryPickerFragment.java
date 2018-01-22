@@ -387,7 +387,9 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if ((requestCode == R.id.cmd_apm_edit) && (resultCode == Activity.RESULT_OK) && (mPopUpSelection != null)) {
+            // autoprocessing status may have changed: refresh data and gui
             mPopUpSelection.refresh();
+            this.mAdapter.notifyDataSetChanged();
         }
     }
 

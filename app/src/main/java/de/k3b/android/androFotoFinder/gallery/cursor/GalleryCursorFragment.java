@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -153,9 +153,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     /** true pick geo; false pick image */
     private boolean mGetGeo = false;
 
-    private int mode = MODE_VIEW;
+    private int mMode = MODE_VIEW;
 
-    private MoveOrCopyDestDirPicker destDirPicker = null;
+    private MoveOrCopyDestDirPicker mDestDirPicker = null;
     /**************** construction ******************/
     /**
      * Use this factory method to create a new instance of
@@ -366,7 +366,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         String action = (intent != null) ? intent.getAction() : null;
 
         if ((action != null) && ((Intent.ACTION_PICK.compareTo(action) == 0) || (Intent.ACTION_GET_CONTENT.compareTo(action) == 0))) {
-            this.mode = (intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE,false)) ? MODE_PICK_MULTIBLE : MODE_PICK_SINGLE;
+            this.mMode = (intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE,false)) ? MODE_PICK_MULTIBLE : MODE_PICK_SINGLE;
             mMustReplaceMenue = true;
             String schema = intent.getScheme();
             mGetGeo = ((schema != null) && ("geo".compareTo(schema) == 0));
@@ -487,7 +487,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                                     final int resultCode, final Intent intent) {
         super.onActivityResult(requestCode,resultCode,intent);
 
-        if (destDirPicker != null) destDirPicker.onActivityResult(requestCode,resultCode,intent);
+        if (mDestDirPicker != null) mDestDirPicker.onActivityResult(requestCode,resultCode,intent);
 
         final boolean locked = LockScreen.isLocked(this.getActivity());
         if (this.locked != locked) {
@@ -530,6 +530,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     public void onDestroy() {
         Global.debugMemory(mDebugPrefix, "before onDestroy");
 
+        mDestDirPicker = null;
         destroyLoaderIfFinishing("onDestroy");
 
         mFileCommands.closeLogFile();
@@ -768,7 +769,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             mMustReplaceMenue = false;
             menu.clear();
             mMenuRemoveAllSelected = null;
-            if (mode == MODE_VIEW) {
+            if (mMode == MODE_VIEW) {
                 if (locked) { // view-locked
                     mSelectedItems.clear();
                     inflater.inflate(R.menu.menu_gallery_locked, menu);
@@ -999,19 +1000,19 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
         if (AndroidFileCommands.canProcessFile(this.getActivity(), false)) {
-            destDirPicker = MoveOrCopyDestDirPicker.newInstance(move, fotos);
+            mDestDirPicker = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
-            destDirPicker.defineDirectoryNavigation(OsUtils.getRootOSDirectory(),
+            mDestDirPicker.defineDirectoryNavigation(OsUtils.getRootOSDirectory(),
                     (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
                     lastCopyToPath);
-            destDirPicker.setContextMenuId(LockScreen.isLocked(this.getActivity()) ? 0 :  R.menu.menu_context_osdir);
-            destDirPicker.show(getActivity().getFragmentManager(), "osdir");
+            mDestDirPicker.setContextMenuId(LockScreen.isLocked(this.getActivity()) ? 0 :  R.menu.menu_context_osdir);
+            mDestDirPicker.show(getActivity().getFragmentManager(), "osdir");
         }
         return false;
     }
 
     private boolean onPickOk() {
-        destDirPicker = null;
+        mDestDirPicker = null;
         Activity parent = getActivity();
         Uri resultUri = getSelectedUri(parent);
 
@@ -1322,7 +1323,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     private boolean isMultiSelectionActive() {
-        if (mode != MODE_VIEW) return true;
+        if (mMode != MODE_VIEW) return true;
         return !mSelectedItems.isEmpty();
     }
 
@@ -1350,7 +1351,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     /** return true if included; false if excluded */
     private boolean toggleSelection(long imageID) {
         boolean contains = mSelectedItems.contains(imageID);
-        if (mode == MODE_PICK_SINGLE) {
+        if (mMode == MODE_PICK_SINGLE) {
             clearSelections();
         }
         if (contains) {

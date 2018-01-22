@@ -250,11 +250,6 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
             String exifChange = null;
             if (mediaChanges != null) {
                 exifChange = MediaUtil.toString(mediaChanges, false, mLabelGenerator, MediaUtil.FieldID.clasz);
-
-                VISIBILITY extra = mediaChanges.getVisibility();
-                if (extra != null) {
-                    exifChange += "\nVisibility " + extra;
-                }
             }
             mExifChanges.setText(exifChange);
         } finally {

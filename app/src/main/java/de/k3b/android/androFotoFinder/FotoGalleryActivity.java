@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -656,6 +656,9 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
     protected void onActivityResult(final int requestCode,
                                     final int resultCode, final Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
+        if (mGalleryGui instanceof Fragment) {
+            ((Fragment) mGalleryGui).onActivityResult(requestCode, resultCode, intent);
+        }
 
         switch (requestCode) {
             case GalleryFilterActivity.resultID :
