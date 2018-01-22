@@ -155,6 +155,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     private int mode = MODE_VIEW;
 
+    private MoveOrCopyDestDirPicker destDirPicker = null;
     /**************** construction ******************/
     /**
      * Use this factory method to create a new instance of
@@ -485,6 +486,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     public void onActivityResult(final int requestCode,
                                     final int resultCode, final Intent intent) {
         super.onActivityResult(requestCode,resultCode,intent);
+
+        if (destDirPicker != null) destDirPicker.onActivityResult(requestCode,resultCode,intent);
 
         final boolean locked = LockScreen.isLocked(this.getActivity());
         if (this.locked != locked) {
@@ -976,7 +979,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             return getArguments().getBoolean("move", false);
         }
 
-        public SelectedFiles getSrcFotos() {
+        /** overwritten by dialog host to get selected photos for edit autoprocessing mode */
+        @Override public SelectedFiles getSrcFotos() {
             String selectedIDs = (String) getArguments().getSerializable(EXTRA_SELECTED_ITEM_IDS);
             String selectedFiles = (String) getArguments().getSerializable(EXTRA_SELECTED_ITEM_PATHS);
 
@@ -995,18 +999,19 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
         if (AndroidFileCommands.canProcessFile(this.getActivity(), false)) {
-            MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
+            destDirPicker = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
-            destDir.defineDirectoryNavigation(OsUtils.getRootOSDirectory(),
+            destDirPicker.defineDirectoryNavigation(OsUtils.getRootOSDirectory(),
                     (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
                     lastCopyToPath);
-            destDir.setContextMenuId(LockScreen.isLocked(this.getActivity()) ? 0 :  R.menu.menu_context_osdir);
-            destDir.show(getActivity().getFragmentManager(), "osdir");
+            destDirPicker.setContextMenuId(LockScreen.isLocked(this.getActivity()) ? 0 :  R.menu.menu_context_osdir);
+            destDirPicker.show(getActivity().getFragmentManager(), "osdir");
         }
         return false;
     }
 
     private boolean onPickOk() {
+        destDirPicker = null;
         Activity parent = getActivity();
         Uri resultUri = getSelectedUri(parent);
 

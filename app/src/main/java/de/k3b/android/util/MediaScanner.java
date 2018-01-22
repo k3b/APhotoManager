@@ -361,9 +361,12 @@ abstract public class MediaScanner  {
                 ? exif
                 : new MetaApiChainReader(xmpContent, exif);
 
-        getExifValues(dest, jpgFile, src);
+        if (src != null) {
+            // image has valid exif
+            getExifValues(dest, jpgFile, src);
 
-        updateTagRepository(src.getTags());
+            updateTagRepository(src.getTags());
+        }
 
         setPathRelatedFieldsIfNeccessary(values, absoluteJpgPath, null);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -394,7 +394,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     private boolean onEditApm(IDirectory selection) {
         String path = (selection == null) ? null : selection.getAbsolute();
         if (!StringUtils.isNullOrEmpty(path)) {
-            PhotoAutoprocessingEditActivity.showActivity(getActivity(), null, path, null, R.id.cmd_apm_edit);
+            PhotoAutoprocessingEditActivity.showActivity(getActivity(), null, path, this.getSrcFotos(), R.id.cmd_apm_edit);
             return true;
         }
         return false;
@@ -854,16 +854,21 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         return false;
     }
 
+    /** overwritten by dialog host to get selected photos for edit autoprocessing mode */
+    public SelectedFiles getSrcFotos() {
+        return null;
+    }
+
     /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
+         * This interface must be implemented by activities that contain this
+         * fragment to allow an interaction in this fragment to be communicated
+         * to the activity and potentially other fragments contained in that
+         * activity.
+         * <p/>
+         * See the Android Training lesson <a href=
+         * "http://developer.android.com/training/basics/fragments/communicating.html"
+         * >Communicating with Other Fragments</a> for more information.
+         */
     public interface OnDirectoryInteractionListener {
         /** called when user picks a new directory */
         void onDirectoryPick(String selectedAbsolutePath, int queryTypeId);
