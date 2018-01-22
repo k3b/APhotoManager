@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright 2011, 2012 Chris Banes.
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -119,6 +119,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     private boolean mWaitingForMediaScannerResult = false;
 
+	MoveOrCopyDestDirPicker mDestDirPicker = null;
+	
     private LocalCursorLoader mCurorLoader;
 
     // private static final String ISLOCKED_ARG = "isLocked";
@@ -535,6 +537,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     protected void onActivityResult(final int requestCode,
                                     final int resultCode, final Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
+        if (mDestDirPicker != null) mDestDirPicker.onActivityResult(requestCode,resultCode,intent);
 
         final boolean locked = LockScreen.isLocked(this);
         if (this.locked != locked) {
@@ -677,6 +680,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     @Override
     protected void onDestroy() {
         Global.debugMemory(mDebugPrefix, "onDestroy");
+		mDestDirPicker = null;
 
         unhideActionBar(DISABLE_HIDE_ACTIONBAR, "onDestroy");
 
@@ -1048,13 +1052,13 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
         if (AndroidFileCommands.canProcessFile(this, false)) {
-            MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
+            mDestDirPicker = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
-            destDir.defineDirectoryNavigation(OsUtils.getRootOSDirectory(),
+            mDestDirPicker.defineDirectoryNavigation(OsUtils.getRootOSDirectory(),
                     (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
                     lastCopyToPath);
-            destDir.setContextMenuId(LockScreen.isLocked(this) ? 0 :  R.menu.menu_context_osdir);
-            destDir.show(this.getFragmentManager(), "osdirimage");
+            mDestDirPicker.setContextMenuId(LockScreen.isLocked(this) ? 0 :  R.menu.menu_context_osdir);
+            mDestDirPicker.show(this.getFragmentManager(), "osdirimage");
         }
         return false;
     }
