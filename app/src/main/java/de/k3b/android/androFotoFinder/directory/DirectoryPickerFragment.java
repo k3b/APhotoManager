@@ -358,26 +358,26 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     private final PopupMenu.OnMenuItemClickListener popUpListener = new PopupMenu.OnMenuItemClickListener() {
         @Override
         public boolean onMenuItemClick(MenuItem menuItem) {
-            return onPopUpClick(menuItem);
+            return onPopUpClick(menuItem, mPopUpSelection);
         }
     };
 
-    private boolean onPopUpClick(MenuItem menuItem) {
+    protected boolean onPopUpClick(MenuItem menuItem, IDirectory popUpSelection) {
         switch (menuItem.getItemId()) {
             case R.id.cmd_mk_dir:
-                return onCreateSubDirQuestion(mPopUpSelection);
+                return onCreateSubDirQuestion(popUpSelection);
             case R.id.cmd_apm_edit:
-                return onEditApm(mPopUpSelection);
+                return onEditApm(popUpSelection);
             case R.id.cmd_photo:
-                return showPhoto(mPopUpSelection);
+                return showPhoto(popUpSelection);
             case R.id.cmd_gallery:
-                return showGallery(mPopUpSelection);
+                return showGallery(popUpSelection);
             case R.id.action_details:
-                return showDirInfo(mPopUpSelection);
+                return showDirInfo(popUpSelection);
             case R.id.cmd_fix_link:
-                return fixLinks(mPopUpSelection);
+                return fixLinks(popUpSelection);
             case R.id.cmd_folder_hide_images:
-                onHideFolderMediaQuestion(mPopUpSelection.getAbsolute());
+                onHideFolderMediaQuestion(popUpSelection.getAbsolute());
                 return true;
             default:break;
         }

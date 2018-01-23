@@ -116,6 +116,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
 
     private boolean mHasEmbeddedDirPicker = false;
     private DirectoryGui mDirGui;
+    private IDirectory mPopUpSelection = null;
 
     private String mTitleResultCount = "";
 
@@ -517,7 +518,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         Global.debugMemory(mDebugPrefix, "onDestroy start");
         super.onDestroy();
         this.getContentResolver().unregisterContentObserver(mMediaObserverDirectory);
-
+        mPopUpSelection = null;
         // to avoid memory leaks
         GarbageCollector.freeMemory(findViewById(R.id.root_view));
 
@@ -660,6 +661,12 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
             ((Fragment) mGalleryGui).onActivityResult(requestCode, resultCode, intent);
         }
 
+        if (mDirPicker instanceof Fragment) {
+            ((Fragment) mDirPicker).onActivityResult(requestCode, resultCode, intent);
+        }
+
+        if (mPopUpSelection != null) mPopUpSelection.refresh();
+
         switch (requestCode) {
             case GalleryFilterActivity.resultID :
                 if (BookmarkController.isReset(intent)) {
@@ -771,7 +778,14 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         } else {
             this.mMustShowNavigator = false;
             final FragmentManager manager = getFragmentManager();
-            DirectoryPickerFragment dirDialog = new DirectoryPickerFragment(); // (DirectoryPickerFragment) manager.findFragmentByTag(DLG_NAVIGATOR_TAG);
+            DirectoryPickerFragment dirDialog =new DirectoryPickerFragment() {
+                protected boolean onPopUpClick(MenuItem menuItem, IDirectory popUpSelection) {
+                    mPopUpSelection = popUpSelection;
+                    return super.onPopUpClick(menuItem, popUpSelection);
+                }
+            };
+
+            // (DirectoryPickerFragment) manager.findFragmentByTag(DLG_NAVIGATOR_TAG);
             dirDialog.setContextMenuId(LockScreen.isLocked(this) ? 0 :  R.menu.menu_context_dirpicker);
 
             dirDialog.defineDirectoryNavigation(mDirectoryRoot, dirQueryID,

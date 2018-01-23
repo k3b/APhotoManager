@@ -22,6 +22,7 @@ package de.k3b.android.widget;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 
 import java.io.Closeable;
 
@@ -58,7 +59,7 @@ public class ActivityWithAutoCloseDialogs extends LocalizedActivity {
     }
 
     @Override
-    protected void onPause () {
+    protected void onPause() {
         closeDialogIfNeeded();
 
         super.onPause();
@@ -72,4 +73,16 @@ public class ActivityWithAutoCloseDialogs extends LocalizedActivity {
         System.gc();
     }
 
+    /**
+     * Call back from sub-activities.<br/>
+     * Process Change StartTime (longpress start), Select StopTime before stop
+     * (longpress stop) or filter change for detailReport
+     */
+    @Override
+    protected void onActivityResult(final int requestCode,
+                                    final int resultCode, final Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+
+        if (mDlg != null) mDlg.onActivityResult(requestCode, resultCode, intent);
+    }
 }

@@ -275,6 +275,7 @@ public class Directory implements IDirectory {
 
     @Override
     public void refresh() {
+        apmDir = null;
     }
 
     public IDirectory setIconID(int iconID) {

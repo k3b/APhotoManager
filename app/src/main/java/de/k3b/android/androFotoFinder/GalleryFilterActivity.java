@@ -84,6 +84,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
     private FilterValue mFilterValue = null;
     private HistoryEditText mHistory;
     private BookmarkController mBookmarkController = null;
+    private IDirectory mPopUpSelection = null;
 
     public static void showActivity(Activity context, IGalleryFilter filter, QueryParameter rootQuery,
                                     String lastBookmarkFileName, int requestCode) {
@@ -243,6 +244,19 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         }
     }
 
+    /**
+     * Call back from sub-activities.<br/>
+     * Process Change StartTime (longpress start), Select StopTime before stop
+     * (longpress stop) or filter change for detailReport
+     */
+    @Override
+    protected void onActivityResult(final int requestCode,
+                                    final int resultCode, final Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+
+        if (mPopUpSelection != null) mPopUpSelection.refresh();
+    }
+
     private GalleryFilterParameter getAsGalleryFilter() {
         GalleryFilterParameter filter = new GalleryFilterParameter();
         fromGui(filter);
@@ -304,6 +318,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         Global.debugMemory(mDebugPrefix, "onDestroy start");
         super.onDestroy();
 
+        mPopUpSelection = null;
         if (dirInfos != null)
         {
             for(Integer id : dirInfos.keySet()) {
@@ -740,8 +755,18 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             DirInfo dirInfo = getOrCreateDirInfo(queryId);
             dirInfo.directoryRoot = directoryRoot;
             final FragmentManager manager = getFragmentManager();
-            DirectoryPickerFragment dlg = new DirectoryPickerFragment();
-            dlg.setContextMenuId(LockScreen.isLocked(this) ? 0 :  R.menu.menu_context_dirpicker);
+            DirectoryPickerFragment dlg = new DirectoryPickerFragment() {
+                protected boolean onPopUpClick(MenuItem menuItem, IDirectory popUpSelection) {
+                    mPopUpSelection = popUpSelection;
+                    return super.onPopUpClick(menuItem, popUpSelection);
+                }
+            };
+
+            int menuResId = 0; // no menu in app lock mode
+            if (!LockScreen.isLocked(this)) {
+                menuResId = (queryId == FotoSql.QUERY_TYPE_GROUP_DATE) ? R.menu.menu_context_datepicker :  R.menu.menu_context_dirpicker;
+            }
+            dlg.setContextMenuId(menuResId);
 
             dlg.defineDirectoryNavigation(dirInfo.directoryRoot, dirInfo.queryId, dirInfo.currentPath);
 
