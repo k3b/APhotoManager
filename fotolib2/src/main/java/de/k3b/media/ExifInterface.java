@@ -1095,6 +1095,8 @@ public class ExifInterface {
         }
     }
 
+    private boolean validJpgExifFormat = true;
+
     protected File mExifFile = null;
 
     //!!! tagname => tagvalue(with assoziated tagdefinition)
@@ -1136,6 +1138,9 @@ public class ExifInterface {
     }
 
     protected ExifInterface() {}
+
+    /** false means this is no valid jpg format */
+    public boolean isValidJpgExifFormat() {return validJpgExifFormat;}
 
     /**
          * Returns the EXIF attribute of the specified tagName or {@code null} if there is no such tagName in
@@ -1424,6 +1429,7 @@ public class ExifInterface {
             // Ignore exceptions in order to keep the compatibility with the old versions of
             // ExifInterface.
             logWarn( "Invalid image.", e);
+            validJpgExifFormat = false;
         } finally {
             if (DEBUG_INTERNAL) {
                 logDebug(this.toString());

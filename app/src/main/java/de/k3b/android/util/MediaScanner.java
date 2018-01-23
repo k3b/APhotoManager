@@ -354,12 +354,16 @@ abstract public class MediaScanner  {
 
         IMetaApi exif = loadNonMediaValues(values, absoluteJpgPath, xmpContent);
 
+        IMetaApi src = null;
+        if (exif == null) {
+            src = xmpContent;
+        } else {
+            // (!writeExif) prefer read from xmp value before exif value
+            src = (FotoLibGlobal.mediaUpdateStrategy.contains("J"))
+                    ? exif
+                    : new MetaApiChainReader(xmpContent, exif);
+        }
         MediaContentValues dest = new MediaContentValues().set(values, null);
-
-        // (!writeExif) prefer read from xmp value before exif value
-        IMetaApi src = (FotoLibGlobal.mediaUpdateStrategy.contains("J"))
-                ? exif
-                : new MetaApiChainReader(xmpContent, exif);
 
         if (src != null) {
             // image has valid exif

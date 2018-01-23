@@ -202,7 +202,7 @@ public class ImageDetailMetaDialogBuilder {
 
         builder.append(NL).append(line).append(NL);
         builder.append(NL).append(filepath).append(NL).append(NL);
-        builder.append(exif.getDebugString(NL));
+        if (exif.isValidJpgExifFormat()) builder.append(exif.getDebugString(NL));
 
         builder.append(NL).append(line).append(NL);
     }

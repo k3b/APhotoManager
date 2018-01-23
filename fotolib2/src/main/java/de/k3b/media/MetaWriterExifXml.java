@@ -112,13 +112,28 @@ public class MetaWriterExifXml extends MetaApiWrapper  implements IMetaApi {
             MediaUtil.copyNonEmpty(xmp, jpg);
         }
         ExifInterfaceEx exif = new ExifInterfaceEx(absoluteJpgInPath, null, xmp, dbg_context);
-        exif.setPath(absoluteJpgInPath);
+        if (exif.isValidJpgExifFormat()) {
+            exif.setPath(absoluteJpgInPath);
+        } else {
+            exif = null;
 
-        MetaWriterExifXml result = new MetaWriterExifXml(
-                (writeJpg) ? exif : new MetaApiChainReader(xmp, exif), //  (!writeJpg) prefer read from xmp value before exif value
-                (writeJpg) ? exif : xmp ,  //  (!writeJpg) modify xmp value only
-                (writeJpg) ? exif : null,  //  (!writeJpg) do not safe changes to jpg exif file
-                (writeXmp) ? xmp : null);   //  (!writeXmp) do not safe changes to xmp-sidecar file
+            // if no exif (i.e. png file) always use xmp instead. create xmp if neccessary
+            if (xmp == null) xmp = new MediaXmpSegment();
+        }
+
+        MetaWriterExifXml result;
+
+        if (exif != null) {
+            result = new MetaWriterExifXml(
+                    (writeJpg) ? exif : new MetaApiChainReader(xmp, exif), //  (!writeJpg) prefer read from xmp value before exif value
+                    (writeJpg) ? exif : xmp,  //  (!writeJpg) modify xmp value only
+                    (writeJpg) ? exif : null,  //  (!writeJpg) do not safe changes to jpg exif file
+                    (writeXmp) ? xmp : null);   //  (!writeXmp) do not safe changes to xmp-sidecar file
+        } else {
+            // if no exif (i.e. png file) always use xmp instead
+            result = new MetaWriterExifXml(xmp, xmp, null, xmp);
+
+        }
         result.absoluteJpgOutPath = (absoluteJpgOutPath != null) ? absoluteJpgOutPath : absoluteJpgInPath;
         result.absoluteJpgInPath = absoluteJpgInPath;
         result.deleteOriginalAfterFinish = deleteOriginalAfterFinish;
@@ -159,9 +174,11 @@ public class MetaWriterExifXml extends MetaApiWrapper  implements IMetaApi {
 
     private int transferXmp(String dbg_context) throws IOException {
         int changedFiles = 0;
+
         String inJpgFullPath = this.getPath();
-        String outJpgFullPath = (absoluteJpgOutPath == null) ? inJpgFullPath : absoluteJpgOutPath;
-        boolean isSameFile = outJpgFullPath.compareTo(inJpgFullPath) == 0;
+        if (inJpgFullPath == null) inJpgFullPath = this.absoluteJpgInPath;
+        String outJpgFullPath = (this.absoluteJpgOutPath == null) ? inJpgFullPath : this.absoluteJpgOutPath;
+        boolean isSameFile = (outJpgFullPath.compareTo(inJpgFullPath) == 0);
 
         if (xmp != null) {
             // copy/move via modifying xmp(s)
@@ -213,8 +230,9 @@ public class MetaWriterExifXml extends MetaApiWrapper  implements IMetaApi {
 
     private int transferExif(String dbg_context) throws IOException {
         String inJpgFullPath = this.getPath();
-        String outJpgFullPath = (absoluteJpgOutPath == null) ? inJpgFullPath : absoluteJpgOutPath;
-        boolean isSameFile = outJpgFullPath.compareTo(inJpgFullPath) == 0;
+        if (inJpgFullPath == null) inJpgFullPath = this.absoluteJpgInPath;
+        String outJpgFullPath = (this.absoluteJpgOutPath == null) ? inJpgFullPath : this.absoluteJpgOutPath;
+        boolean isSameFile = (outJpgFullPath.compareTo(inJpgFullPath) == 0);
 
         if (exif != null) {
             if (!isSameFile) {
@@ -225,7 +243,7 @@ public class MetaWriterExifXml extends MetaApiWrapper  implements IMetaApi {
             }
         } else if (!isSameFile) {
             // changes are NOT written to exif. Do File copy instead.
-            FileUtils.copyReplace(absoluteJpgInPath, absoluteJpgOutPath, this.deleteOriginalAfterFinish, dbg_context + "-transferExif");
+            FileUtils.copyReplace(inJpgFullPath, outJpgFullPath, this.deleteOriginalAfterFinish, dbg_context + "-transferExif");
         } else {// same file, no exif changes: nothing to do
             return 0;
         }

@@ -189,9 +189,11 @@ public class JpgMetaWorkflow {
     public static int getRotationFromExifOrientation(String fullPathToImageFile) {
         try {
             ExifInterfaceEx exif = new ExifInterfaceEx(fullPathToImageFile, null, null, "getRotationFromExifOrientation");
-            int orientation = exif.getAttributeInt(ExifInterfaceEx.TAG_ORIENTATION, 0);
-            if ((orientation >= 0) && (orientation < exifOrientationCode2RotationDegrees.length))
-                return exifOrientationCode2RotationDegrees[orientation];
+            if (exif.isValidJpgExifFormat()) {
+                int orientation = exif.getAttributeInt(ExifInterfaceEx.TAG_ORIENTATION, 0);
+                if ((orientation >= 0) && (orientation < exifOrientationCode2RotationDegrees.length))
+                    return exifOrientationCode2RotationDegrees[orientation];
+            }
         }
         catch (Exception e) {
         }

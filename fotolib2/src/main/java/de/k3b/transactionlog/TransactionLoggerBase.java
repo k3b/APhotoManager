@@ -95,7 +95,7 @@ public class TransactionLoggerBase implements Closeable {
         if (removedTags.size() > 0) {
             addChanges(MediaTransactionLogEntryType.TAGSREMOVE, TagConverter.asBatString(removedTags), false);
         }
-        if (newTags.size() > 0) {
+        if ((newTags != null) && (newTags.size() > 0)) {
             addChanges(MediaTransactionLogEntryType.TAGS, TagConverter.asBatString(newTags), false);
         }
     }
