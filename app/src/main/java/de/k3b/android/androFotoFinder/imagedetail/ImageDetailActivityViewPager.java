@@ -800,7 +800,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         if (existing != null) {
             for (File file : existing) {
                 String found = file.getAbsolutePath();
-                if (MediaUtil.isImage(found, false) && !known.contains(found)) {
+                if (MediaUtil.isImage(found, MediaUtil.IMG_TYPE_ALL) && !known.contains(found)) {
                     missing.add(found);
                 }
             }

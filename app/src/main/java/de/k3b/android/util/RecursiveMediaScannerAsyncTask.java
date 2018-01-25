@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -116,7 +116,7 @@ public class RecursiveMediaScannerAsyncTask extends MediaScannerAsyncTask {
                             }
                         }
                     }
-                } else if (MediaUtil.isImage(parent.getName(), true)) {
+                } else if (MediaUtil.isImage(parent.getName(), MediaUtil.IMG_TYPE_JPG | MediaUtil.IMG_TYPE_PRIVATE)) {
                     resultCount += runScanner(parentPath, parentPath);
                 }
             } else if (mPaused != null) {

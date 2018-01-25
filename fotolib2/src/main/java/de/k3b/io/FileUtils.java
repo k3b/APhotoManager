@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -145,6 +145,7 @@ public class FileUtils {
         return result.toString();
     }
 
+    /** replaceExtension("/path/to/image.jpg", ".xmp") becomes "/path/to/image.xmp" */
     public static String replaceExtension(String path, String extension) {
         if (path == null) return null;
         int ext = path.lastIndexOf(".");

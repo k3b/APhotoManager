@@ -50,7 +50,6 @@ import de.k3b.database.QueryParameter;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.io.FileUtils;
-import de.k3b.io.IGalleryFilter;
 import de.k3b.io.VISIBILITY;
 import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaUtil;
@@ -191,7 +190,7 @@ abstract public class MediaScanner  {
             for (int i = 0; i < fullPathNames.length; i++) {
                 String fullPathName = fullPathNames[i];
                 if (fullPathName != null) {
-                    if (!MediaUtil.isImage(fullPathName, false) || isNoMedia(fullPathName, 22)) {
+                    if (!MediaUtil.isImage(fullPathName, MediaUtil.IMG_TYPE_ALL) || isNoMedia(fullPathName, 22)) {
                         fullPathNames[i] = null;
                     } else {
                         itemsLeft++;

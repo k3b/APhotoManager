@@ -43,7 +43,6 @@ import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.csv2db.csv.CsvLoader;
 import de.k3b.io.FileUtils;
-import de.k3b.io.IGalleryFilter;
 import de.k3b.io.VISIBILITY;
 import de.k3b.media.MediaCsvItem;
 import de.k3b.media.MediaUtil;
@@ -184,7 +183,7 @@ public class MediaDBActivity extends Activity {
             String path = _path;
             if (path != null) {
                 if (!path.contains("%")) {
-                    if (MediaUtil.isImage(path, false)) {
+                    if (MediaUtil.isImage(path, MediaUtil.IMG_TYPE_ALL)) {
                         // non xmp-file: do not update file modify date
                         xmlLastFileModifyDate = (Global.Media.enableXmpNone)
                                 ? TagSql.EXT_LAST_EXT_SCAN_NO_XMP_IN_CSV

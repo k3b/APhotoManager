@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 by k3b.
+ * Copyright (c) 2016-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -28,6 +28,7 @@ import java.util.EnumSet;
 import java.util.List;
 
 import de.k3b.io.DateUtil;
+import de.k3b.io.FileUtils;
 import de.k3b.io.GeoUtil;
 import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
@@ -38,6 +39,21 @@ import de.k3b.tagDB.TagConverter;
  */
 
 public class MediaUtil {
+
+    /** image will get this fileextension if updated from private image to public image. */
+    private static final String EXT_JPG = ".jpg";
+
+    /** image will get this fileextension if updated from public image to private image.
+     * since other gallery-apps/image-pickers do not know this extension, they will not show images
+     * with this extension. */
+    private static final String EXT_JPG_PRIVATE = ".jpg-p";
+
+    /** types of images currently supported */
+    public static final int IMG_TYPE_ALL        = 0xffff;
+    public static final int IMG_TYPE_JPG        = 0x0001; // jp(e)g
+    public static final int IMG_TYPE_NON_JPG    = 0x0010; // png, gif, ...
+    public static final int IMG_TYPE_PRIVATE    = 0x1000; // jpg-p
+
     /**
      * used to identify a member of IMetaApi
      */
@@ -53,6 +69,7 @@ public class MediaUtil {
         visibility,
     };
 
+    /** translates FieldID to text. In android this is implemented via resource id  */
     public interface ILabelGenerator {
         String get(FieldID id);
     }
@@ -322,26 +339,57 @@ public class MediaUtil {
     */
 
     /** return true if path is "*.jp(e)g" */
-    public static boolean isImage(File path, boolean jpgOnly) {
-        if (path == null) return false;
-        return isImage(path.getName(), jpgOnly);
-    }
-
-    /** return true if path is "*.jp(e)g" */
-    public static boolean isImage(String path, boolean jpgOnly) {
+    public static boolean isImage(String path, int imageTypeFlags) {
         if (path == null) return false;
         String lcPath = path.toLowerCase();
 
-        if ((!jpgOnly) && (lcPath.endsWith(".gif") || lcPath.endsWith(".png") || lcPath.endsWith(".tiff") || lcPath.endsWith(".bmp"))) {
+        if ((IMG_TYPE_JPG == (imageTypeFlags & IMG_TYPE_JPG)) &&
+            (lcPath.endsWith(EXT_JPG) || lcPath.endsWith(".jpeg"))) {
             return true;
         }
-        return lcPath.endsWith(".jpg") || lcPath.endsWith(".jpeg");
+
+        if ((IMG_TYPE_NON_JPG == (imageTypeFlags & IMG_TYPE_NON_JPG)) &&
+                (lcPath.endsWith(".gif") || lcPath.endsWith(".png") || lcPath.endsWith(".tiff") || lcPath.endsWith(".bmp"))) {
+            return true;
+        }
+
+        if ((IMG_TYPE_PRIVATE == (imageTypeFlags & IMG_TYPE_PRIVATE)) &&
+                (lcPath.endsWith(EXT_JPG_PRIVATE))) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /** returns the full path that item should get or null if path is already ok */
+    public static String getModifiedPath(IMetaApi item) {
+        if (item != null) {
+            return getModifiedPath(item.getPath(), item.getVisibility());
+        }
+        return null;
+    }
+
+    /** unittest friedly version: returns the full path that item should get or null if path is already ok */
+    static String getModifiedPath(String currentPath, VISIBILITY visibility) {
+        if (currentPath != null) {
+            switch (visibility) {
+                case PRIVATE:
+                    if (isImage(currentPath, IMG_TYPE_JPG))
+                        return FileUtils.replaceExtension(currentPath, EXT_JPG_PRIVATE);
+                    break;
+                case PUBLIC:
+                    if (isImage(currentPath, IMG_TYPE_PRIVATE))
+                        return FileUtils.replaceExtension(currentPath, EXT_JPG);
+                    break;
+            }
+        }
+        return null;
     }
 
     public static final FilenameFilter JPG_FILENAME_FILTER = new FilenameFilter() {
         @Override
         public boolean accept(File dir, String filename) {
-            return MediaUtil.isImage(filename, false);
+            return MediaUtil.isImage(filename, MediaUtil.IMG_TYPE_ALL);
         }
     };
 
