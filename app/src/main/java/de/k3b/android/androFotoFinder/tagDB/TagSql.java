@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.media.MediaContentValues;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
@@ -41,7 +42,6 @@ import de.k3b.io.IGalleryFilter;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
-import de.k3b.media.ExifInterfaceEx;
 import de.k3b.media.MediaUtil;
 import de.k3b.media.MediaXmpSegment;
 import de.k3b.media.MetaWriterExifXml;
@@ -76,6 +76,7 @@ public class TagSql extends FotoSql {
 
     protected static final String FILTER_EXPR_TAGS_NONE         = "(" + SQL_COL_EXT_TAGS + " is null)";
     protected static final String FILTER_EXPR_TAGS_INCLUDED = "(" + SQL_COL_EXT_TAGS + " like ?)";
+
     protected static final String FILTER_EXPR_TAGS_NONE_OR_INCLUDED = "(" + FILTER_EXPR_TAGS_NONE
             + " or " + FILTER_EXPR_TAGS_INCLUDED +")";
     protected static final String FILTER_EXPR_TAG_EXCLUDED = "(" + SQL_COL_EXT_TAGS + " not like ?)";
@@ -242,8 +243,18 @@ public class TagSql extends FotoSql {
         // update ... set media_type=1001 where media_type=1 and tags like '%;PRIVATE;%'
         ContentValues values = new ContentValues();
         values.put(SQL_COL_EXT_MEDIA_TYPE, MEDIA_TYPE_IMAGE_PRIVATE);
-        String where = TagSql.FILTER_EXPR_PUBLIC + " AND " + TagSql.FILTER_EXPR_TAGS_INCLUDED;
-        return exexUpdateImpl("Fix visibility private", context, values, where, new String[] {"%;" + ExifInterfaceEx.TAG_PRIVATE +
+        StringBuilder where = new StringBuilder();
+        where
+            .append(TagSql.FILTER_EXPR_PUBLIC)
+            .append(" AND (")
+            .append(TagSql.FILTER_EXPR_TAGS_INCLUDED);
+        if (FotoLibGlobal.renamePrivateJpg) {
+            where.append(" OR ").append(TagSql.FILTER_EXPR_PATH_LIKE.replace("?","'%" +
+                            MediaUtil.IMG_TYPE_PRIVATE + "'"));
+        }
+        where.append(")");
+        return exexUpdateImpl("Fix visibility private", context,
+                values, where.toString(), new String[] {"%;" + VISIBILITY.TAG_PRIVATE +
                 ";%"});
     }
 
@@ -320,23 +331,33 @@ public class TagSql extends FotoSql {
      * @param allowSetNulls     if one of these columns are null, the set null is copied, too
      * @return number of changed db items
      */
-    public static int updateDB(String dbgContext, Context context, String path,
+    public static int updateDB(String dbgContext, Context context, String oldFullJpgFilePath,
                                MetaWriterExifXml jpg, MediaUtil.FieldID... allowSetNulls) {
-        if ((jpg != null) && (!MediaScanner.isNoMedia(path))) {
+        if ((jpg != null) && (!MediaScanner.isNoMedia(oldFullJpgFilePath))) {
             ContentValues dbValues = new ContentValues();
             MediaContentValues mediaValueAdapter = new MediaContentValues();
 
             // dbValues.clear();
             final int modifiedColumCout = MediaUtil.copyNonEmpty(mediaValueAdapter.set(dbValues, null), jpg, allowSetNulls);
             if (modifiedColumCout >= 1) {
-                mediaValueAdapter.setPath(path);
+                String newFullJpgFilePath = null;
+                if (FotoLibGlobal.renamePrivateJpg) {
+                    newFullJpgFilePath = MediaUtil.getModifiedPath(jpg);
+                }
+
+                if (newFullJpgFilePath == null) {
+                    newFullJpgFilePath = oldFullJpgFilePath;
+                }
+
+                mediaValueAdapter.setPath(newFullJpgFilePath);
+
                 MediaXmpSegment xmp = jpg.getXmp();
                 long xmpFilelastModified = (xmp != null) ? xmp.getFilelastModified() : 0;
                 if (xmpFilelastModified == 0) xmpFilelastModified = TagSql.EXT_LAST_EXT_SCAN_NO_XMP;
                 TagSql.setXmpFileModifyDate(dbValues, xmpFilelastModified);
-                TagSql.setFileModifyDate(dbValues, path);
+                TagSql.setFileModifyDate(dbValues, newFullJpgFilePath);
 
-                return TagSql.execUpdate(dbgContext, context, path,
+                return TagSql.execUpdate(dbgContext, context, oldFullJpgFilePath,
                         TagSql.EXT_LAST_EXT_SCAN_UNKNOWN, dbValues, VISIBILITY.PRIVATE_PUBLIC);
             }
 

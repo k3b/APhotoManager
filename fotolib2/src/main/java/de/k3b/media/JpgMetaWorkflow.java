@@ -28,8 +28,8 @@ import java.util.EnumSet;
 import java.util.List;
 
 import de.k3b.FotoLibGlobal;
-import de.k3b.io.FileCommands;
 import de.k3b.io.FileProcessor;
+import de.k3b.io.VISIBILITY;
 import de.k3b.transactionlog.TransactionLoggerBase;
 
 /**
@@ -80,12 +80,23 @@ public class JpgMetaWorkflow {
         File outFile = (outFilePath != null) ? new File(outFilePath) : inFilePath;
         if ((inFilePath != null) && outFile.getParentFile().canWrite()) {
             MetaWriterExifXml exif = null;
-            boolean sameFile = (outFile.equals(inFilePath));
             try {
                 long lastModified = inFilePath.lastModified();
                 exif = MetaWriterExifXml.create (inFilePath.getAbsolutePath(), outFilePath, false, "MetaWriterExifXml:");
                 debugExif(sb, "old", exif, inFilePath);
                 List<String> oldTags = exif.getTags();
+
+                boolean sameFile = (outFile.equals(inFilePath));
+
+                File newOutFile = handleVisibility(metaDiffCopy.getVisibility(), outFile, exif);
+                if (newOutFile != null) {
+                    outFile = newOutFile;
+                    outFilePath = outFile.getAbsolutePath();
+                    if (sameFile) {
+                        sameFile = false;
+                        deleteOriginalWhenFinished = true;
+                    }
+                }
 
                 List<MediaUtil.FieldID> changed = metaDiffCopy.applyChanges(exif);
 
@@ -152,6 +163,25 @@ public class JpgMetaWorkflow {
             JpgMetaWorkflow.logger.error(sb.toString());
             return null;
         }
+    }
+
+    /** return modified out file or null if filename must not change due to visibility rule */
+    protected File handleVisibility(VISIBILITY newVisibility, File outFile, MetaWriterExifXml exif) {
+        if (FotoLibGlobal.renamePrivateJpg) {
+            final String oldAbsoluteOutPath = (outFile == null) ? null : outFile.getAbsolutePath();
+            String newAbsoluteOutPath = MediaUtil.getModifiedPath(oldAbsoluteOutPath, newVisibility);
+
+            if (newAbsoluteOutPath != null) {
+                String sourcePath = exif.getPath();
+                if ((sourcePath != null) && (sourcePath.compareTo(oldAbsoluteOutPath) == 0)) {
+                    // original intend was "change in same file" so add to log that filename has changed (rename/move)
+                    transactionLogger.addChangesCopyMove(true, newAbsoluteOutPath);
+                }
+                exif.setAbsoluteJpgOutPath(newAbsoluteOutPath);
+                return new File(newAbsoluteOutPath);
+            }
+        }
+        return null;
     }
 
     /** todo overwrite in android class to implement update media db */

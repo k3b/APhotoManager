@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-18 by k3b.
+ * Copyright (c) 2017-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -25,6 +25,7 @@ import java.util.EnumSet;
 import java.util.List;
 
 import de.k3b.io.ListUtils;
+import de.k3b.io.VISIBILITY;
 import de.k3b.media.MediaUtil.FieldID;
 
 import de.k3b.tagDB.TagProcessor;
@@ -182,6 +183,9 @@ public class MediaDiffCopy {
                 collectedChanges.add(FieldID.dateTimeTaken);
             }
 
+            VISIBILITY vValue = newData.getVisibility();
+            final VISIBILITY oldVisibility = (destination == null) ? null : destination.getVisibility();
+
             if ((this.addedTags.size() > 0) || (this.removedTags.size() > 0)) {
                 List<String> updated = TagProcessor.getUpdated(destination.getTags(), this.addedTags, this.removedTags);
                 if (updated != null) {
@@ -190,6 +194,14 @@ public class MediaDiffCopy {
                 }
             }
 
+            // visibility need special handling because visibility public should be overweritten by private and vice versa
+            if (!collectedChanges.contains(FieldID.visibility)) {
+                if (VISIBILITY.isChangingValue(vValue) &&
+                        (oldVisibility != vValue)) {
+                    collectedChanges.add(FieldID.visibility);
+                    destination.setVisibility(vValue);
+                }
+            }
             String modifiedValue = getAppended(destination.getTitle(), this.titleAppend);
             if (modifiedValue != null) {
                 destination.setTitle(modifiedValue);
@@ -253,6 +265,10 @@ public class MediaDiffCopy {
         if (this.excludePath) {
             diffSet.remove(FieldID.path);
         }
+    }
+
+    public VISIBILITY getVisibility() {
+        return (newData == null) ? null : newData.getVisibility();
     }
 
     @Override

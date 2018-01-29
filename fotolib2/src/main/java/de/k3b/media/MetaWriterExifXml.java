@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -134,6 +134,7 @@ public class MetaWriterExifXml extends MetaApiWrapper  implements IMetaApi {
             result = new MetaWriterExifXml(xmp, xmp, null, xmp);
 
         }
+
         result.absoluteJpgOutPath = (absoluteJpgOutPath != null) ? absoluteJpgOutPath : absoluteJpgInPath;
         result.absoluteJpgInPath = absoluteJpgInPath;
         result.deleteOriginalAfterFinish = deleteOriginalAfterFinish;
@@ -150,6 +151,10 @@ public class MetaWriterExifXml extends MetaApiWrapper  implements IMetaApi {
         super(readChild, writeChild);
         this.exif = exif;
         this.xmp = xmp;
+    }
+
+    public void setAbsoluteJpgOutPath(String absoluteJpgOutPath) {
+        this.absoluteJpgOutPath = absoluteJpgOutPath;
     }
 
     public int save(String dbg_context)  throws IOException {

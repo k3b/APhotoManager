@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -370,7 +370,7 @@ public class ImageMetaReader implements IMetaApi, Closeable {
         VISIBILITY result = null;
         if (isEmpty(result, ++i, debugContext, "Exif.XPKEYWORDS(PRIVATE)") && (mExifDir != null)) {
             List<String> list = getStringList(debugContext, this.mExifDir, ExifDirectoryBase.TAG_WIN_KEYWORDS);
-            result = ExifInterfaceEx.getVisibility(list);
+            result = VISIBILITY.getVisibility(list);
         }
         if (isEmpty(result, ++i, debugContext, "ExternalXmp.apm.Visibility") && (mExternalXmpDir != null)) result = mExternalXmpDir.getVisibility();
         if (isEmpty(result, ++i, debugContext, "InternalXmp.apm.Visibility") && (mInternalXmpDir != null)) result = mInternalXmpDir.getVisibility();

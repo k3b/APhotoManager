@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -40,7 +40,7 @@ public enum MediaTransactionLogEntryType {
     DESCRIPTION("d", "apmDescription",true),
     HEADER("h", "apmTitle",true),
     RATING("r", "apmRating"),
-    VISIBILITY("s","apmSecurity"),
+    VISIBILITY("s","rem apmSecurity"),
     DATE("dm", "apmDateTimeOriginal"),
     COMMENT(null, "rem");
 
@@ -78,15 +78,20 @@ public enum MediaTransactionLogEntryType {
     }
 
     public Object[] getCommand(String path, String parameter) {
-        Object r[] = new Object[8];
+        Object r[] = new Object[10];
         int i =0;
 
         if ((batCommand == null) || (batCommand.length() == 0)) throw new IllegalArgumentException(this +":"+id + " has no batCommand assigned");
+
         if (!isComment(this)) {
             r[i++] = "call ";
         }
         r[i++] = batCommand;
-        r[i++] = ".cmd \"";
+        if (!isComment(this)) {
+            r[i++] = ".cmd";
+        }
+
+        r[i++] = " \"";
         r[i++] = path;
         r[i++] = "\" ";
         r[i++] = mustQuoteParam ? "\"" : "";

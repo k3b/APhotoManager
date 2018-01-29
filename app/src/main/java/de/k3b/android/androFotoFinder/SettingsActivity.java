@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -152,6 +152,9 @@ public class SettingsActivity extends PreferenceActivity {
 
         prefs.putBoolean("debugEnabledJpgMetaIo", FotoLibGlobal.debugEnabledJpgMetaIo);
 
+        /** #100: true: private images get the extension ".jpg-p" which hides them from other gallery-apps and image pickers.  */
+        prefs.putBoolean("renamePrivateJpg", FotoLibGlobal.renamePrivateJpg);
+
         // #26
         prefs.putBoolean("initialImageDetailResolutionHigh", Global.initialImageDetailResolutionHigh);
 
@@ -204,6 +207,9 @@ public class SettingsActivity extends PreferenceActivity {
         Global.passwordHash                     = getPref(prefs, "passwordHash", Global.passwordHash);
 
         FotoLibGlobal.debugEnabledJpgMetaIo     = getPref(prefs, "debugEnabledJpgMetaIo", FotoLibGlobal.debugEnabledJpgMetaIo);
+
+        /** #100: true: private images get the extension ".jpg-p" which hides them from other gallery-apps and image pickers.  */
+        FotoLibGlobal.renamePrivateJpg          = getPref(prefs, "renamePrivateJpg", FotoLibGlobal.renamePrivateJpg);
 
         // one setting for several 3d party debug-flags
         boolean debug3rdParty                   = getPref(prefs, "debugEnableLibs", PhotoViewAttacher.DEBUG);

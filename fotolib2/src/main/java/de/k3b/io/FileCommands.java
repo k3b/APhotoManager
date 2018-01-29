@@ -318,7 +318,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                                 if (osFileMoveOrCopy(move, destSidecar, sourceSidecar)) itemCount++;
                             }
                             addTransactionLog(id, sourceFile.getPath(), now, moveOrCopyCommand, destFile.getPath());
-                        } else {
+                        } else { // else move/copy with simultanious exif changes
                             MediaDiffCopy mediaDiffCopy = exifChanges;
                             // new style move/copy image with sidecarfile(s) with exif autoprocessing
 
@@ -329,12 +329,13 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
 
                             // for the log the file has already been copied/moved
                             logger.set(id, destPath);
+
                             MetaWriterExifXml exifProcessor = createWorkflow(logger, what).applyChanges(sourceFile, destPath, id, move, mediaDiffCopy);
 
                             if (exifProcessor == null) break; // error
 
                             itemCount++;
-                            // !!! apply exif; add changes to log and transactionlog
+                            // apply exif; add changes to log and transactionlog
                             // should havebeen done by applyChanges
                             // exifProcessor.save("FileCommands-moveOrCopyFiles-with-exif");
 
@@ -342,7 +343,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                         }
                     }
                     pos++;
-                }
+                } // foreach selected file
                 int modifyCount = mModifiedDestFiles.size();
 
                 String[] modifiedSourceFiles = ((mModifiedSrcFiles != null) && (mModifiedSrcFiles.size() > 0)) ? mModifiedSrcFiles.toArray(new String[modifyCount]) : null;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -62,7 +62,7 @@ public class TestUtil {
         result.setTags(TagConverter.fromString("tagA" + id + TagConverter.TAG_DB_DELIMITER + "tagB" + id));
         result.setRating(Integer.valueOf(id % 6));
 
-        result.setVisibility(VISIBILITY.fromInt(id % (1 + VISIBILITY.MAX.value)));
+        result.setVisibility(VISIBILITY.PUBLIC);
         return result;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 - 2017 by k3b.
+ * Copyright (c) 2016 - 2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -30,7 +30,6 @@ import java.io.InputStream;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -51,9 +50,6 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
 
     private static final SimpleDateFormat sExifDateTimeFormatter;
     private static final String LIST_DELIMITER = ";";
-
-    // if photo has this tag it has visibility PRIVATE
-    public static final String TAG_PRIVATE = "PRIVATE";
 
     static {
         sExifDateTimeFormatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
@@ -438,7 +434,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     public VISIBILITY getVisibility() {
         int i=0;String debugContext = "getVisibility";
         VISIBILITY result = null;
-        if (isEmpty(result, ++i, debugContext, "Exif.XPKEYWORDS(PRIVATE)")) result = getVisibility(getTagsInternal());
+        if (isEmpty(result, ++i, debugContext, "Exif.XPKEYWORDS(PRIVATE)")) result = VISIBILITY.getVisibility(getTagsInternal());
         if (isEmpty(result, ++i, debugContext, "xmp.apm.visibility") && (this.xmpExtern != null)) result = this.xmpExtern.getVisibility();
         return result;
     }
@@ -447,33 +443,10 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
         // exif does not support Visibility itseltf
         if (this.xmpExtern != null) this.xmpExtern.setVisibility(visibility);
         if (VISIBILITY.isChangingValue(visibility)) {
-            List<String> tags = getTags();
-            int existing = (tags == null) ? -1 : tags.indexOf(TAG_PRIVATE);
-            if (visibility == VISIBILITY.PRIVATE) {
-                if (existing < 0 ) {
-                    tags = (tags == null) ? new ArrayList<String>() : new ArrayList<String>(tags);
-                    tags.add(TAG_PRIVATE);
-                    setTags(tags);
-                }
-            } else { // PUBLIC
-                if (existing >= 0) {
-                    // now it is public so remove PRIVATE tag
-                    tags = new ArrayList<String>(tags);
-                    tags.remove(existing);
-                    setTags(tags);
-                }
-            }
+            List<String> tags = VISIBILITY.setPrivate(getTags(), visibility);
+            if (tags != null) setTags(tags);
         }
         return this;
-    }
-
-    private static boolean hasPrivate(List<String> tags) {
-        int existing = (tags == null) ? -1 : tags.indexOf(TAG_PRIVATE);
-        return (existing >= 0);
-    }
-
-    public static VISIBILITY getVisibility(List<String> tags) {
-        return hasPrivate(tags) ? VISIBILITY.PRIVATE : VISIBILITY.PUBLIC;
     }
 
     @Override

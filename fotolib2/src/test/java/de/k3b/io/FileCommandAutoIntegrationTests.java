@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-18 by k3b.
+ * Copyright (c) 2017-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -191,8 +191,6 @@ public class FileCommandAutoIntegrationTests {
 
     }
 
-
-
     @Test
     public void shouldMoveRenameAutoSameDir() throws IOException {
         String outFileBaseName = "shouldMoveRename";
@@ -223,6 +221,31 @@ public class FileCommandAutoIntegrationTests {
         String current = MediaUtil.toString(result, false, null, MediaUtil.FieldID.clasz, MediaUtil.FieldID.path);
         Assert.assertEquals(exprected, current);
 
+    }
+
+    @Test
+    public void shouldChangeFileNameOnVisibilityPrivate() throws IOException {
+        String outFileBaseName = "shouldChangeFileNameOnVisibilityPrivate";
+        File inFile = new File(OUTDIR, outFileBaseName + ".jpg");
+
+        TestUtil.saveTestResourceAs("NoExif.jpg", inFile);
+
+        FileCommands sut = createFileCommands(outFileBaseName);
+
+        final String newName = outFileBaseName + "-new";
+        SelectedFiles selectedFiles = new SelectedFiles(inFile.getAbsolutePath(), "1");
+
+        //  final IMetaApi exifChanges = new MediaDTO().setVisibility(VISIBILITY.PUBLIC).setRating(3);
+        final IMetaApi exifChanges = new MediaDTO().setVisibility(VISIBILITY.PRIVATE);
+
+        PhotoWorkFlowDto autoProccessData = new PhotoWorkFlowDto(OUTDIR, new Properties())
+                .setMediaDefaults(exifChanges);
+
+        int changes = sut.moveOrCopyFilesTo(true, selectedFiles, OUTDIR,
+                autoProccessData, null);
+
+        assertFileExist(true, outFileBaseName + ".jpg-p");
+        assertFileExist(false, outFileBaseName + ".jpg");
     }
 
     private FileCommands createFileCommands(String outFileBaseName) {

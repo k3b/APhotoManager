@@ -46,7 +46,7 @@ public class MediaUtil {
     /** image will get this fileextension if updated from public image to private image.
      * since other gallery-apps/image-pickers do not know this extension, they will not show images
      * with this extension. */
-    private static final String EXT_JPG_PRIVATE = ".jpg-p";
+    public static final String EXT_JPG_PRIVATE = ".jpg-p";
 
     /** types of images currently supported */
     public static final int IMG_TYPE_ALL        = 0xffff;
@@ -241,11 +241,26 @@ public class MediaUtil {
                 changes++;
             }
 
-            List<String> tValue = source.getTags();
-            if (allowed(tValue, (destination == null) ? null : destination.getTags()
+            // tags are also used for visibility
+            List<String> tValueNewTags = source.getTags();
+
+            VISIBILITY vValue = source.getVisibility();
+            final VISIBILITY oldVisibility = (destination == null) ? null : destination.getVisibility();
+
+            if (VISIBILITY.isChangingValue(vValue) &&
+                allowed(vValue, oldVisibility
+                    , fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls
+                    , FieldID.visibility, collectedChanges)) {
+                destination.setVisibility(vValue);
+                changes++;
+                List<String> tValueModifiedNewTags = VISIBILITY.setPrivate(tValueNewTags, vValue);
+                if (tValueModifiedNewTags != null) tValueNewTags = tValueModifiedNewTags;
+            }
+
+            if (allowed(tValueNewTags, (destination == null) ? null : destination.getTags()
                     , fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls
                     , FieldID.tags, collectedChanges)) {
-                destination.setTags(tValue);
+                destination.setTags(tValueNewTags);
                 changes++;
             }
 
@@ -254,14 +269,6 @@ public class MediaUtil {
                     , fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls
                     , FieldID.rating, collectedChanges)) {
                 destination.setRating(iValue);
-                changes++;
-            }
-
-            VISIBILITY vValue = source.getVisibility();
-            if (allowed(vValue, (destination == null) ? null : destination.getVisibility()
-                    , fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls
-                    , FieldID.visibility, collectedChanges)) {
-                destination.setVisibility(vValue);
                 changes++;
             }
         }
@@ -371,7 +378,7 @@ public class MediaUtil {
 
     /** unittest friedly version: returns the full path that item should get or null if path is already ok */
     static String getModifiedPath(String currentPath, VISIBILITY visibility) {
-        if (currentPath != null) {
+        if ((visibility != null) && (currentPath != null)) {
             switch (visibility) {
                 case PRIVATE:
                     if (isImage(currentPath, IMG_TYPE_JPG))

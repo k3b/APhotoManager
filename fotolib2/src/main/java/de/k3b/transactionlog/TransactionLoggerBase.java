@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -74,11 +74,13 @@ public class TransactionLoggerBase implements Closeable {
         if (changes.contains(MediaUtil.FieldID.title))  addChanges(MediaTransactionLogEntryType.HEADER, newData.getTitle(), true);
         if (changes.contains(MediaUtil.FieldID.rating)) addChanges(MediaTransactionLogEntryType.RATING, (newData.getRating() != null) ? newData.getRating().toString(): "0", false);
 
-        if (changes.contains(MediaUtil.FieldID.visibility) && VISIBILITY.isChangingValue(newData.getVisibility())) {
-            addChanges(MediaTransactionLogEntryType.VISIBILITY, (VISIBILITY.PRIVATE.equals(newData.getVisibility())) ? "1": "0", false);
+        if (changes.contains(MediaUtil.FieldID.tags)) addChangesTags(oldTags, newData.getTags());
+
+        final VISIBILITY visibility = newData.getVisibility();
+        if (changes.contains(MediaUtil.FieldID.visibility) && VISIBILITY.isChangingValue(visibility)) {
+            addChanges(MediaTransactionLogEntryType.VISIBILITY, ((VISIBILITY.PRIVATE.equals(visibility)) ? "1": "0") + " " + visibility, false);
         }
 
-        if (changes.contains(MediaUtil.FieldID.tags)) addChangesTags(oldTags, newData.getTags());
     }
 
     protected void addChangesDateTaken(Date newData) {
@@ -103,6 +105,12 @@ public class TransactionLoggerBase implements Closeable {
     public void addChangesCopyMove(boolean move, String newFullPath) {
         addChanges(move ? MediaTransactionLogEntryType.MOVE : MediaTransactionLogEntryType.COPY,
                 newFullPath, true);
+        if (move) {
+            String oldPath = this.path;
+            // id remains the same but path has changed
+            set(this.id, newFullPath);
+            addChanges(MediaTransactionLogEntryType.COMMENT, " image #" + this.id + " was renamed from " + oldPath, true);
+        }
     }
 
     /** android specific logging is implemented in AndroidTransactionLogger in Override */
