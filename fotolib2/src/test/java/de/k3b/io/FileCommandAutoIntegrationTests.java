@@ -84,7 +84,8 @@ public class FileCommandAutoIntegrationTests {
 
         MediaDiffCopy addExif = new MediaDiffCopy(new MediaDTO().setTitle("title added by " + TEST_CLASS_NAME), true);
 
-        int changes = sut.applyExifChanges(addExif,new SelectedFiles(testJpg.toString(), "1"), null);
+        // false do not delete source file
+        int changes = sut.applyExifChanges(false, addExif,new SelectedFiles(testJpg.toString(), "1"), null);
 
         Assert.assertEquals(1, changes);
     }

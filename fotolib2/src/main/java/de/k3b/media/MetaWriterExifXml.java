@@ -157,6 +157,10 @@ public class MetaWriterExifXml extends MetaApiWrapper  implements IMetaApi {
         this.absoluteJpgOutPath = absoluteJpgOutPath;
     }
 
+    public String getAbsoluteJpgOutPath() {
+        return this.absoluteJpgOutPath;
+    }
+
     public int save(String dbg_context)  throws IOException {
         long    startTimestamp = 0;
         if (FotoLibGlobal.debugEnabledJpgMetaIo) {

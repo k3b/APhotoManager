@@ -36,7 +36,7 @@ public class UpdateTask extends AsyncTaskWithProgressDialog<SelectedFiles> imple
         if (exifChanges != null) {
             SelectedFiles items = params[0];
 
-            return cmd.applyExifChanges(exifChanges, items, null);
+            return cmd.applyExifChanges(true, exifChanges, items, null);
 
         }
         return 0;

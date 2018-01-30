@@ -162,10 +162,10 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
      * apply changes in exifChanges to all images in selectedFiles.
      * @return number of changed files.
      */
-    public int applyExifChanges(MediaDiffCopy exifChanges, SelectedFiles selectedFiles, IProgessListener progessListener) {
+    public int applyExifChanges(boolean move, MediaDiffCopy exifChanges, SelectedFiles selectedFiles, IProgessListener progessListener) {
         // source files are the same as dest files.
         final File[] destFiles = SelectedFiles.getFiles(selectedFiles.getFileNames());
-        return moveOrCopyFiles(false, "change_exif", exifChanges, selectedFiles, destFiles, progessListener);
+        return moveOrCopyFiles(move, "change_exif", exifChanges, selectedFiles, destFiles, progessListener);
     }
 
     /**
@@ -239,7 +239,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
     }
 
     /** does the copying and/or apply exif changes. also used by unittesting */
-    protected int moveOrCopyFiles(boolean move, String what, MediaDiffCopy exifChanges,
+    protected int moveOrCopyFiles(final boolean move, String what, MediaDiffCopy exifChanges,
                                   SelectedFiles fotos, File[] destFiles,
                                   IProgessListener progessListener) {
         long    startTimestamp = 0;
@@ -275,12 +275,14 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                 long now = new Date().getTime();
                 MediaTransactionLogEntryType moveOrCopyCommand = (move) ? MediaTransactionLogEntryType.MOVE : MediaTransactionLogEntryType.COPY;
                 TransactionLoggerBase logger = (exifChanges == null) ? null : new TransactionLoggerBase(this, now);
+                boolean sameFile;
 
                 while (pos < fileCount) {
                     File sourceFile = FileUtils.tryGetCanonicalFile(sourceFiles[pos]);
                     File destFile = FileUtils.tryGetCanonicalFile(destFiles[pos]);
                     Long id = ids[pos];
 
+                    boolean deleteOriginalAfterFinish = move;
                     countdown--;
                     if (countdown <= 0) {
                         countdown = itemsPerProgress;
@@ -288,11 +290,10 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                     }
 
                     File destRenamed;
-                    final boolean sameFile = (sourceFile != null) && sourceFile.equals(destFile);
+                    sameFile = (sourceFile != null) && sourceFile.equals(destFile);
                     if ((exifChanges != null) && sameFile) {
                         // copy/move with exif changes ==> exif changes only
                         destRenamed = destFile;
-                        move = false; // do not delete original file(s)
                     } else {
                         destRenamed = renameDuplicate(destFile);
                     }
@@ -339,6 +340,13 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                             // should havebeen done by applyChanges
                             // exifProcessor.save("FileCommands-moveOrCopyFiles-with-exif");
 
+                            String modifiedOutPath = exifProcessor.getAbsoluteJpgOutPath();
+                            if (null != modifiedOutPath) {
+                                // destFile might have renamed it-s extension for private images
+                                destFile = new File(modifiedOutPath);
+                                sameFile = (sourceFile != null) && sourceFile.equals(destFile);
+                            }
+
                             addProcessedFiles(move, destFile, sourceFile);
                         }
                     }
@@ -369,7 +377,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
         }
         return itemCount;
     }
-    
+
     private PhotoWorkFlowDto getPhotoWorkFlowDto(File destDirFolder) {
         PhotoWorkFlowDto autoProccessData = null;
         try {

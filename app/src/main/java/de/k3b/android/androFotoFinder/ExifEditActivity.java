@@ -829,7 +829,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
                     exifUpdate.execute(items);
                 } else {
                     // for debugging: sync debugging is easier
-                    cmd.applyExifChanges(exifChanges, items, null);
+                    cmd.applyExifChanges(true, exifChanges, items, null);
 
                     this.setResult(EXIF_RESULT_ID, intent);
                     finish();

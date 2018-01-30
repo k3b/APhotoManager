@@ -48,6 +48,7 @@ import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.transactionlog.TransactionLogSql;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.IProgessListener;
+import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
