@@ -37,9 +37,11 @@ import de.k3b.io.collections.SelectedFiles;
 import de.k3b.media.ExifInterface;
 import de.k3b.media.ExifInterfaceEx;
 import de.k3b.media.IMetaApi;
+import de.k3b.media.JpgMetaWorkflow;
 import de.k3b.media.MediaDTO;
 import de.k3b.media.MediaDiffCopy;
 import de.k3b.media.MediaUtil;
+import de.k3b.transactionlog.TransactionLoggerBase;
 
 /**
  * check autoprocessing workflow (#93:)
@@ -53,7 +55,8 @@ public class FileCommandAutoIntegrationTests {
     public static final String TEST_CLASS_NAME = FileCommandAutoIntegrationTests.class.getSimpleName();
 
     private static final File OUTDIR = new File(TestUtil.OUTDIR_ROOT, TEST_CLASS_NAME + "/out").getAbsoluteFile();
-    private static final File INJPG = new File(OUTDIR.getParentFile(), "in/myTestSource.jpg").getAbsoluteFile();
+    private static final File INDIR = new File(TestUtil.OUTDIR_ROOT, TEST_CLASS_NAME + "/in").getAbsoluteFile();
+    private static final File INJPG = new File(INDIR, "myTestSource.jpg").getAbsoluteFile();
     public static final SelectedFiles FAKE_SELECTED_FILES = new SelectedFiles(INJPG.getAbsolutePath(), "1");
 
     @BeforeClass
@@ -64,6 +67,8 @@ public class FileCommandAutoIntegrationTests {
         TestUtil.saveTestResourceAs("test-WitExtraData.jpg", INJPG);
         TestUtil.saveTestResourceAs("test-WitExtraData.xmp", FileProcessor.getSidecar(INJPG, true));
         TestUtil.saveTestResourceAs("test-WitExtraData.xmp", FileProcessor.getSidecar(INJPG, false));
+
+        LOGGER.info(" outdir:" + OUTDIR.getAbsolutePath());
     }
     @Before
     public void setUp() throws IOException {
@@ -71,7 +76,7 @@ public class FileCommandAutoIntegrationTests {
         FotoLibGlobal.appVersion = TEST_CLASS_NAME;
 
         ExifInterface.DEBUG = true;
-
+        FotoLibGlobal.debugEnabledJpgMetaIo = true;
     }
 
     /// TODO: move to seperate class FileCommandsIntegrationTests
@@ -145,6 +150,41 @@ public class FileCommandAutoIntegrationTests {
     }
 
     @Test
+    public void shouldCopyAutoPrivate() throws IOException {
+        checkMoveCopyWithAutoPrivate("shouldCopyAutoPrivate", false);
+    }
+
+    @Test
+    public void shouldMoveAutoPrivate() throws IOException {
+        checkMoveCopyWithAutoPrivate("shouldMoveAutoPrivate", true);
+    }
+
+    protected void checkMoveCopyWithAutoPrivate(final String outFileBaseName, boolean move) throws IOException {
+
+        final File inFile = new File(INDIR, outFileBaseName + ".jpg");
+        final File outFileExpexted = new File(OUTDIR, outFileBaseName + ".jpg-p");
+        final File outFileNotExpexted = new File(OUTDIR, outFileBaseName + ".jpg");
+
+        TestUtil.saveTestResourceAs("test-WitExtraData.jpg", inFile);
+
+        FileCommands sut = createFileCommands(outFileBaseName);
+        SelectedFiles selectedFiles = new SelectedFiles(inFile.getAbsolutePath(), "1");
+        final IMetaApi exifChanges = new MediaDTO();
+        exifChanges.setVisibility(VISIBILITY.PRIVATE);
+
+        PhotoWorkFlowDto autoProccessData = new PhotoWorkFlowDto(OUTDIR, new Properties())
+                .setMediaDefaults(exifChanges);
+
+        sut.moveOrCopyFilesTo(move, selectedFiles, OUTDIR,
+                autoProccessData, null);
+
+        Assert.assertEquals("Src Exists " + inFile.getName(), !move, inFile.exists());
+        Assert.assertEquals("Dest Exists " + outFileExpexted.getName(), true, outFileExpexted.exists());
+        Assert.assertEquals("Dest Not Exists " + outFileNotExpexted.getName(), false, outFileNotExpexted.exists());
+    }
+
+
+    @Test
     public void autoShouldAddTagSameFileRenameRuleMatching() throws IOException {
         final String outFileBaseName = "autoShouldAddTagSameFileRenameRuleMatching";
         final String tagAdded = outFileBaseName + "_" + (DateUtil.toIsoDateTimeString(new Date()).replace(":","_") );
@@ -193,8 +233,8 @@ public class FileCommandAutoIntegrationTests {
     }
 
     @Test
-    public void shouldMoveRenameAutoSameDir() throws IOException {
-        String outFileBaseName = "shouldMoveRename";
+    public void shouldMoveRenameAutoExifSameDir() throws IOException {
+        String outFileBaseName = "shouldMoveRenameAutoExifSameDir";
         final String originalName = outFileBaseName + "-old";
         File inFile = new File(OUTDIR, originalName + ".jpg");
 
@@ -250,7 +290,17 @@ public class FileCommandAutoIntegrationTests {
     }
 
     private FileCommands createFileCommands(String outFileBaseName) {
-        FileCommands result = new FileCommands();
+        FileCommands result = new FileCommands() {
+            public JpgMetaWorkflow createWorkflow(TransactionLoggerBase logger, String dbgContext) {
+                return new JpgMetaWorkflow(logger) {
+                    protected long updateMediaDB(long id, String oldJpgAbsolutePath, File newJpgFile) {
+                        // to verify that id has been updated
+                        return id + 1;
+                    }
+                };
+            }
+
+        };
         result.setLogFilePath(new File(OUTDIR, outFileBaseName + ".log").getAbsolutePath());
         return result;
     }

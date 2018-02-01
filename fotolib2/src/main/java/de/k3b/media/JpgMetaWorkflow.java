@@ -118,7 +118,12 @@ public class JpgMetaWorkflow {
                         debugExif(sb, "new ", exifVerify, inFilePath);
                     }
 
+                    // add applied meta changes to transactionlog
                     if(transactionLogger != null) {
+                        if (!sameFile) {
+                            // first log copy/move. copy  may change databaseID
+                            transactionLogger.addChangesCopyMove(deleteOriginalWhenFinished, outFilePath, "applyChanges");
+                        }
                         transactionLogger.set(id, outFilePath);
                         if ((changed != null) && (changed.size() > 0)) {
                             transactionLogger.addChanges(exif, EnumSet.copyOf(changed), oldTags);
@@ -175,7 +180,7 @@ public class JpgMetaWorkflow {
                 String sourcePath = exif.getPath();
                 if ((sourcePath != null) && (sourcePath.compareTo(oldAbsoluteOutPath) == 0)) {
                     // original intend was "change in same file" so add to log that filename has changed (rename/move)
-                    transactionLogger.addChangesCopyMove(true, newAbsoluteOutPath);
+                    transactionLogger.addChangesCopyMove(true, newAbsoluteOutPath, "handleVisibility");
                 }
                 exif.setAbsoluteJpgOutPath(newAbsoluteOutPath);
                 return new File(newAbsoluteOutPath);

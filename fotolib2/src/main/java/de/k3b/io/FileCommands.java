@@ -323,11 +323,6 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                             MediaDiffCopy mediaDiffCopy = exifChanges;
                             // new style move/copy image with sidecarfile(s) with exif autoprocessing
 
-                            if (!sameFile) {
-                                // first log copy/move. copy  may change databaseID
-                                addTransactionLog(id, sourcePath, now - 1, moveOrCopyCommand, destPath);
-                            }
-
                             // for the log the file has already been copied/moved
                             logger.set(id, destPath);
 

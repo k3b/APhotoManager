@@ -26,9 +26,11 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.io.DateUtil;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileProcessor;
+import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaUtil;
@@ -68,6 +70,8 @@ public class TransactionLoggerBase implements Closeable {
         execLog = null;
     }
     public void addChanges(IMetaApi newData, EnumSet<MediaUtil.FieldID> changes, List<String> oldTags) {
+        addComment("apply changes image#",id);
+
         if (changes.contains(MediaUtil.FieldID.dateTimeTaken))  addChangesDateTaken(newData.getDateTimeTaken());
         if (changes.contains(MediaUtil.FieldID.latitude_longitude)) addChanges(MediaTransactionLogEntryType.GPS, DirectoryFormatter.formatLatLon(newData.getLatitude()) + " " + DirectoryFormatter.formatLatLon(newData.getLongitude()), false);
         if (changes.contains(MediaUtil.FieldID.description))  addChanges(MediaTransactionLogEntryType.DESCRIPTION, newData.getDescription(), true);
@@ -102,14 +106,26 @@ public class TransactionLoggerBase implements Closeable {
         }
     }
 
-    public void addChangesCopyMove(boolean move, String newFullPath) {
-        addChanges(move ? MediaTransactionLogEntryType.MOVE : MediaTransactionLogEntryType.COPY,
-                newFullPath, true);
-        if (move) {
-            String oldPath = this.path;
-            // id remains the same but path has changed
-            set(this.id, newFullPath);
-            addChanges(MediaTransactionLogEntryType.COMMENT, " image #" + this.id + " was renamed from " + oldPath, true);
+    public void addChangesCopyMove(boolean move, String newFullPath, String debugContext) {
+        if (this.path.compareToIgnoreCase(newFullPath) != 0) {
+            if (!move) {
+                addComment(debugContext, "copy image #", this.id);
+            }
+
+            addChanges(move ? MediaTransactionLogEntryType.MOVE : MediaTransactionLogEntryType.COPY,
+                    newFullPath, true);
+            if (move) {
+                String oldPath = this.path;
+                // id remains the same but path has changed
+                set(this.id, newFullPath);
+                addComment(debugContext, "image #", this.id, " was renamed from ", oldPath);
+            }
+        }
+    }
+
+    public void addComment(Object... comment) {
+        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+            addChanges(MediaTransactionLogEntryType.COMMENT, ListUtils.toString(" ", comment), true);
         }
     }
 
