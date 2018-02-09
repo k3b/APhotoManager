@@ -81,7 +81,7 @@ public class ListUtils {
             String nextDelim = "";
             for (Object instance : list) {
                 if (instance != null) {
-                    String instanceString = instance.toString().trim();
+                    CharSequence instanceString = (instance instanceof CharSequence) ? ((CharSequence) instance) : instance.toString();
                     if (instanceString.length() > 0) {
                         result.append(nextDelim).append(instanceString);
                         nextDelim = elementDelimiter;

@@ -46,7 +46,7 @@ public class MediaMappingTests {
     public static void initDirectories() {
         System.out.printf("Generated on " + new Date() +
                 " with fotolib2/src/tests/" +
-                MediaMappingTests.class.getName() + "\n");
+                MediaMappingTests.class.getName() + "\n\n\n");
 
     }
 

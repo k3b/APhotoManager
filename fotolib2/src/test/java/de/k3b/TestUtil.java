@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -29,6 +29,7 @@ import java.io.Reader;
 import de.k3b.csv2db.csv.CsvReader;
 import de.k3b.io.DateUtil;
 import de.k3b.io.FileUtils;
+import de.k3b.io.VISIBILITY;
 import de.k3b.media.ImageMetaReaderIntegrationTests;
 import de.k3b.media.MediaDTO;
 import de.k3b.tagDB.TagConverter;
@@ -61,6 +62,7 @@ public class TestUtil {
         result.setTags(TagConverter.fromString("tagA" + id + TagConverter.TAG_DB_DELIMITER + "tagB" + id));
         result.setRating(Integer.valueOf(id % 6));
 
+        result.setVisibility(VISIBILITY.PUBLIC);
         return result;
     }
 

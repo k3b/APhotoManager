@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -37,6 +37,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RatingBar;
@@ -62,6 +64,7 @@ import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.UpdateTask;
 import de.k3b.android.widget.HistoryEditText;
+import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
@@ -110,6 +113,11 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
     private EditText edLongitude;
     private RatingBar   rating;
 
+    // prevents event handling while programatically changes checkboxes
+    private boolean checkActive = false;
+    private CheckBox    chkPrivate;
+    private CheckBox    chkPublic;
+
     private HistoryEditText mHistory;
     private UpdateTask exifUpdate;
 
@@ -136,7 +144,10 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
         intent.setAction(Intent.ACTION_EDIT);
 
         if (exifDataToEdit != null) {
-            intent.putExtra(EXTRA_EXIF_DATA, new MediaAsString().setData(exifDataToEdit).toString());
+            final String exifAsString = (exifDataToEdit instanceof MediaAsString)
+                    ? exifDataToEdit.toString()
+                    : new MediaAsString().setData(exifDataToEdit).toString();
+            intent.putExtra(EXTRA_EXIF_DATA, exifAsString);
         } else {
             if (url != null) {
                 intent.setData(Uri.parse(url));
@@ -180,20 +191,40 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
         edLongitude     = (EditText) findViewById(R.id.edit_longitude);
         rating = (RatingBar)  findViewById(R.id.ratingBar);
 
+        chkPrivate = (CheckBox) findViewById(R.id.chk_private);
+        chkPrivate.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                onCheckPrivateChanged(chkPrivate);
+            }
+        });
+        chkPublic = (CheckBox) findViewById(R.id.chk_public);
+        chkPublic.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                onCheckPrivateChanged(chkPublic);
+            }
+        });
+
         onCreateButtos();
 
         mCurrentData = new MediaAsString();
         mInitialData = new MediaAsString();
 
         if (savedInstanceState != null) {
-            String data = savedInstanceState.getString(SETTINGS_KEY, null);
-            if (data != null) {
-                mCurrentData.fromString(data);
-            }
+            VISIBILITY priv = null;
+            String data;
             data = savedInstanceState.getString(SETTINGS_KEY_INITIAL, null);
             if (data != null) {
                 mInitialData.fromString(data);
+                priv = mInitialData.getVisibility();
             }
+            data = savedInstanceState.getString(SETTINGS_KEY, null);
+            if (data != null) {
+                mCurrentData.fromString(data);
+                priv = mCurrentData.getVisibility();
+            }
+            mActivityData.setVisibility(priv);
         } else {
             Intent intent = getIntent();
             IMetaApi currentData = getExifParam(intent);
@@ -209,6 +240,10 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
             }
             mCurrentData.setData(currentData);
             mInitialData.setData(currentData);
+
+            final VISIBILITY priv = mActivityData.getVisibility();
+            mCurrentData.setVisibility(priv);
+            mInitialData.setVisibility(priv);
         }
         loadGuiFromExif(((savedInstanceState != null) ? "on(re)Create" : "onCreate"));
 
@@ -288,7 +323,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
     // used to analyse error #91:.
     private void debugChanges(String function) {
         if (FotoLibGlobal.debugEnabledJpgMetaIo){
-            MediaDiffCopy diff = new MediaDiffCopy(true);
+            MediaDiffCopy diff = new MediaDiffCopy(true, true);
             diff.setDiff(mInitialData, mCurrentData);
             Log.d(FotoLibGlobal.LOG_TAG, mDebugPrefix + " "
                     + function + "\n\t"
@@ -354,6 +389,9 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
                 return true;
             case R.id.cmd_ok:
                 onOk();
+                return true;
+            case R.id.cmd_clear:
+                clearFilter();
                 return true;
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
@@ -715,10 +753,53 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
         }
 
         @Override
+        public VISIBILITY getVisibility() {
+            if (chkPrivate.isChecked()) return VISIBILITY.PRIVATE;
+            if (chkPublic.isChecked()) return VISIBILITY.PUBLIC;
+            return null;
+        }
+
+        @Override
+        public IMetaApi setVisibility(VISIBILITY priv) {
+            checkActive = true;
+            chkPrivate.setChecked(false);
+            chkPublic.setChecked(false);
+            if ((priv != null) && (priv != VISIBILITY.DEFAULT) && (priv != VISIBILITY.PRIVATE_PUBLIC)) {
+                if (priv == VISIBILITY.PRIVATE) {
+                    chkPrivate.setChecked(true);
+                } else {
+                    chkPublic.setChecked(true);
+                }
+            }
+            checkActive = false;
+            return this;
+        }
+
+        @Override
         public String toString() {
             return MediaUtil.toString(this);
         }
     };
+
+    private void onCheckPrivateChanged(CheckBox chk) {
+        if (!checkActive && (chk != null)) {
+            VISIBILITY priv;
+            if (!chk.isChecked()) {
+                priv = null;
+            } else if (chk == chkPrivate) {
+                priv = VISIBILITY.PRIVATE;
+            } else {
+                priv = VISIBILITY.PUBLIC;
+            }
+            mActivityData.setVisibility(priv);
+            mCurrentData.setVisibility(priv);
+        }
+    }
+
+    private void clearFilter() {
+        mCurrentData.clear();
+        loadGuiFromExif("clearFilter");
+    }
 
     /** save exif changes back to image and database */
     private void onOk() {
@@ -740,7 +821,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
             //!!! todo #93: this code also in
             AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(this, true);
 
-            MediaDiffCopy exifChanges = new MediaDiffCopy(true).setDiff(mInitialData, mCurrentData);
+            MediaDiffCopy exifChanges = new MediaDiffCopy(true, true).setDiff(mInitialData, mCurrentData);
 
             if (exifChanges != null) {
                 if (!SYNC_UPDATE_EXIF) {
@@ -748,7 +829,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
                     exifUpdate.execute(items);
                 } else {
                     // for debugging: sync debugging is easier
-                    cmd.applyExifChanges(exifChanges, items, null);
+                    cmd.applyExifChanges(true, exifChanges, items, null);
 
                     this.setResult(EXIF_RESULT_ID, intent);
                     finish();

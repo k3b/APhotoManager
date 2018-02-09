@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright (c) 2015-2017 by k3b.
+ *
+ * This file is part of AndroFotoFinder / #APhotoManager.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
+ -->
+<!-- menue of gallery activity/fragment common for non multiselection mode and for multiselection mode with disabled selected-only -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" tools:context=".GalleryActivity">
+
+    <item android:id="@+id/cmd_app_unpin"
+        android:title="@string/menu_title_app_unpinnend"
+        android:icon="@android:drawable/ic_lock_lock"
+        android:visible="true"
+        android:orderInCategory="1"
+        android:showAsAction="always" />
+
+    <item android:id="@+id/cmd_select_folder"
+        android:title="@string/folder_menu_title"
+        android:icon="@drawable/ic_action_holo_dark_folder"
+        android:visible="true"
+        android:orderInCategory="2"
+        android:showAsAction="ifRoom" />
+
+    <item android:id="@+id/cmd_select_lat_lon"
+        android:title="@string/area_menu_title"
+        android:icon="@android:drawable/ic_dialog_map"
+        android:visible="true"
+        android:orderInCategory="2"
+        android:showAsAction="ifRoom" />
+
+	<item android:id="@+id/cmd_sort"
+        android:title="@string/sort_menu_title"
+        android:visible="true"
+        android:orderInCategory="15"
+        android:showAsAction="never" >
+        <menu>
+            <item android:id="@+id/cmd_sort_directory"
+                android:title="@string/sort_by_name"
+                android:visible="true"
+                android:orderInCategory="5" />
+            <item android:id="@+id/cmd_sort_date"
+                android:title="@string/sort_by_date"
+                android:visible="true"
+                android:orderInCategory="5"/>
+            <item android:id="@+id/cmd_sort_location"
+                android:title="@string/sort_by_place"
+                android:visible="true"
+                android:orderInCategory="5" />
+            <item android:id="@+id/cmd_sort_rating"
+                android:title="@string/sort_by_rating"
+                android:visible="true"
+                android:orderInCategory="5" />
+            <item android:id="@+id/cmd_sort_modification"
+                android:title="@string/sort_by_modification"
+                android:visible="true"
+                android:orderInCategory="5" />
+            <item android:id="@+id/cmd_sort_width"
+                android:title="@string/sort_by_width"
+                android:visible="true"
+                android:orderInCategory="5" />
+            <item android:id="@+id/cmd_sort_file_len"
+                android:title="@string/sort_by_file_size"
+                android:visible="true"
+                android:orderInCategory="5" />
+
+            <item android:id="@+id/cmd_sort_path_len"
+                android:title="@string/sort_by_name_len"
+                android:visible="true"
+                android:orderInCategory="5" />
+
+        </menu>
+    </item>
+
+    <item android:id="@+id/cmd_app_unpin2"
+        android:title="@string/menu_title_app_unpinnend"
+        android:icon="@android:drawable/ic_lock_lock"
+        android:visible="true"
+        android:orderInCategory="9998"
+        android:showAsAction="never" />
+
+    <item android:id="@+id/cmd_about"
+        android:title="@string/about_summary"
+        android:visible="true"
+        android:orderInCategory="10000"
+        android:showAsAction="never" />
+</menu>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 - 2017 by k3b.
+ * Copyright (c) 2016 - 2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -29,12 +29,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
 import de.k3b.FotoLibGlobal;
 import de.k3b.io.ListUtils;
+import de.k3b.io.VISIBILITY;
 
 /**
  * Thin Wrapper around Android-s ExifInterface to read/write exif data from jpg file
@@ -320,11 +322,16 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
         List<String> result = null;
         if (isEmpty(result, ++i, debugContext, "xmp.Tags") && (xmpExtern != null)) result = xmpExtern.getTags();
         if (isEmpty(result, ++i, debugContext, "Exif.XPKEYWORDS") || (result.size() == 0)) {
-            String s = getAttribute(TAG_WIN_KEYWORDS);
-            if (s != null) result = ListUtils.fromString(s, LIST_DELIMITER);
+            result = getTagsInternal();
         }
         isEmpty(result, ++i, null, null);
         return result;
+    }
+
+    private List<String> getTagsInternal() {
+        String s = getAttribute(TAG_WIN_KEYWORDS);
+        if (s != null) return ListUtils.fromString(s, LIST_DELIMITER);
+        return null;
     }
 
     /** not implemented in {@link ExifInterface} */
@@ -422,6 +429,24 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     /** when xmp sidecar file was last modified or 0 */
     public long getFilelastModified() {
         return filelastModified;
+    }
+
+    public VISIBILITY getVisibility() {
+        int i=0;String debugContext = "getVisibility";
+        VISIBILITY result = null;
+        if (isEmpty(result, ++i, debugContext, "Exif.XPKEYWORDS(PRIVATE)")) result = VISIBILITY.getVisibility(getTagsInternal());
+        if (isEmpty(result, ++i, debugContext, "xmp.apm.visibility") && (this.xmpExtern != null)) result = this.xmpExtern.getVisibility();
+        return result;
+    }
+
+    public IMetaApi setVisibility(VISIBILITY visibility) {
+        // exif does not support Visibility itseltf
+        if (this.xmpExtern != null) this.xmpExtern.setVisibility(visibility);
+        if (VISIBILITY.isChangingValue(visibility)) {
+            List<String> tags = VISIBILITY.setPrivate(getTags(), visibility);
+            if (tags != null) setTags(tags);
+        }
+        return this;
     }
 
     @Override

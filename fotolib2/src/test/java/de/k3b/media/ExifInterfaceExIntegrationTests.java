@@ -33,6 +33,7 @@ import de.k3b.FotoLibGlobal;
 import de.k3b.TestUtil;
 import de.k3b.io.DateUtil;
 import de.k3b.io.ListUtils;
+import de.k3b.io.VISIBILITY;
 
 /**
  * Created by k3b on 05.04.2017.
@@ -108,6 +109,7 @@ public class ExifInterfaceExIntegrationTests {
     public void shouldModifyInMemory() throws IOException
     {
         MediaDTO expected = TestUtil.createTestMediaDTO(2);
+        expected.setVisibility(VISIBILITY.PUBLIC);
         MediaUtil.copy(sut, expected, true, true);
         MediaDTO actual = new MediaDTO();
         MediaUtil.copy(actual, sut, true, true);
@@ -117,10 +119,26 @@ public class ExifInterfaceExIntegrationTests {
         logger.info("shouldModifyInMemory " + sut.toString());
     }
 
+
+    @Test
+    public void shouldPreservePrivate() throws IOException
+    {
+        MediaDTO expected = TestUtil.createTestMediaDTO(2);
+        expected.setVisibility(VISIBILITY.PRIVATE);
+        MediaUtil.copy(sut, expected, true, true);
+        MediaDTO actual = new MediaDTO();
+        MediaUtil.copy(actual, sut, true, true);
+        actual.setPath(expected.path);
+        Assert.assertEquals(VISIBILITY.PRIVATE, actual.getVisibility());
+
+        logger.info("shouldModifyInMemory " + sut.toString());
+    }
+
     @Test
     public void shouldClearInMemory() throws IOException
     {
         MediaDTO expected = new MediaDTO();
+        expected.setVisibility(VISIBILITY.PUBLIC);
         MediaUtil.copy(sut, expected, true, true);
         MediaDTO actual = new MediaDTO();
         MediaUtil.copy(actual, sut, true, true);

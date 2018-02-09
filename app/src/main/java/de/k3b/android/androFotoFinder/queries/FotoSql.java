@@ -46,6 +46,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.DBUtils;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
@@ -72,6 +73,9 @@ public class FotoSql extends FotoSqlBase {
     public static final int SORT_BY_LOCATION = 'l';
     public static final int SORT_BY_NAME_LEN = 's'; // size
 
+    public static final int SORT_BY_FILE_LEN = 'f'; // file-size
+    public static final int SORT_BY_WIDTH = 'w'; // width of image
+
     public static final int SORT_BY_RATING = 'r';
     public static final int SORT_BY_MODIFICATION = 'm';
 
@@ -96,16 +100,24 @@ public class FotoSql extends FotoSqlBase {
     public static final String SQL_COL_DISPLAY_TEXT = "disp_txt";
     public static final String SQL_COL_LAT = MediaStore.Images.Media.LATITUDE;
     public static final String SQL_COL_LON = MediaStore.Images.Media.LONGITUDE;
+
+    // new col id for with since ver 0.6.3
+    public static final String SQL_COL_WIDTH = "col_width";
+    // since ver 0.6.3: file size. old col id for image-with before ver 0.6.3
     public static final String SQL_COL_SIZE = MediaStore.Images.Media.SIZE;
 
-    private static final String SQL_COL_DATE_ADDED = MediaStore.Images.ImageColumns.DATE_ADDED;
+    // in seconds since 1970
+    public static final String SQL_COL_DATE_ADDED = MediaStore.Images.ImageColumns.DATE_ADDED;
 
     // other colums
+    // in seconds since 1970
     public static final String SQL_COL_LAST_MODIFIED = MediaStore.MediaColumns.DATE_MODIFIED;
+
     public static final String SQL_COL_GPS = MediaStore.Images.Media.LONGITUDE;
     public static final String SQL_COL_COUNT = "count";
     public static final String SQL_COL_WHERE_PARAM = "where_param";
 
+    // in milli-seconds since 1970
     public static final String SQL_COL_DATE_TAKEN = MediaStore.Images.Media.DATE_TAKEN;
     public static final String SQL_COL_EXT_RATING = MediaStore.Video.Media.BOOKMARK;
     public static final String SQL_COL_PATH = MediaStore.Images.Media.DATA;
@@ -258,7 +270,7 @@ public class FotoSql extends FotoSqlBase {
     public static final String[] DEFAULT_GALLERY_COLUMNS = new String[]{SQL_COL_PK,
             SQL_COL_PATH + " AS " + SQL_COL_DISPLAY_TEXT,
             // "0 AS " + SQL_COL_COUNT,
-            SQL_COL_MAX_WITH + " AS " + SQL_COL_SIZE,
+            SQL_COL_MAX_WITH + " AS " + SQL_COL_WIDTH,
             SQL_COL_GPS,
             SQL_COL_PATH};
 
@@ -467,6 +479,12 @@ public class FotoSql extends FotoSqlBase {
             case SORT_BY_LOCATION_OLD:
             case SORT_BY_LOCATION:
                 return context.getString(R.string.sort_by_place);
+            case SORT_BY_FILE_LEN:
+                return context.getString(R.string.sort_by_file_size);
+
+            case SORT_BY_WIDTH:
+                return context.getString(R.string.sort_by_width);
+
             case SORT_BY_NAME_LEN_OLD:
             case SORT_BY_NAME_LEN:
                 return context.getString(R.string.sort_by_name_len);
@@ -504,14 +522,22 @@ public class FotoSql extends FotoSqlBase {
             case SORT_BY_DATE:
                 return result.replaceOrderBy(SQL_COL_DATE_TAKEN + asc);
 
-            case SORT_BY_RATING:
-                return result.replaceOrderBy(SQL_COL_EXT_RATING  + asc, SQL_COL_DATE_TAKEN + asc);
             case SORT_BY_MODIFICATION:
                 return result.replaceOrderBy(SQL_COL_LAST_MODIFIED + asc);
 
             case SORT_BY_NAME_OLD:
             case SORT_BY_NAME:
                 return result.replaceOrderBy(SQL_COL_PATH + asc);
+
+            case SORT_BY_RATING:
+                return result.replaceOrderBy(SQL_COL_EXT_RATING  + asc, SQL_COL_DATE_TAKEN + asc);
+
+            case SORT_BY_FILE_LEN:
+                return result.replaceOrderBy(SQL_COL_SIZE + asc);
+
+            case SORT_BY_WIDTH:
+                return result.replaceOrderBy(SQL_COL_MAX_WITH + asc);
+
             case SORT_BY_LOCATION_OLD:
             case SORT_BY_LOCATION:
                 return result.replaceOrderBy(SQL_COL_GPS + asc, MediaStore.Images.Media.LATITUDE + asc);
@@ -587,7 +613,7 @@ public class FotoSql extends FotoSqlBase {
         return result;
     }
 
-    public static Cursor createCursorForQuery(String dbgContext, final Context context, QueryParameter parameters, int visibility) {
+    public static Cursor createCursorForQuery(String dbgContext, final Context context, QueryParameter parameters, VISIBILITY visibility) {
         setWhereVisibility(parameters, visibility);
         return createCursorForQuery(dbgContext, context, parameters.toFrom(), parameters.toAndroidWhere(),
                 parameters.toAndroidParameters(), parameters.toOrderBy(),
@@ -634,7 +660,7 @@ public class FotoSql extends FotoSqlBase {
 
         Cursor c = null;
         try {
-            c = createCursorForQuery("execGetGeoRectangle", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+            c = createCursorForQuery("execGetGeoRectangle", context, query, VISIBILITY.PRIVATE_PUBLIC);
             if (c.moveToFirst()) {
                 GeoRectangle result = new GeoRectangle();
                 result.setLatitude(c.getDouble(0), c.getDouble(1));
@@ -672,7 +698,7 @@ public class FotoSql extends FotoSqlBase {
 
         Cursor c = null;
         try {
-            c = createCursorForQuery("execGetPosition", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+            c = createCursorForQuery("execGetPosition", context, query, VISIBILITY.PRIVATE_PUBLIC);
             if (c.moveToFirst()) {
                 GeoPoint result = new GeoPoint(c.getDouble(0),c.getDouble(1));
                 return result;
@@ -701,7 +727,7 @@ public class FotoSql extends FotoSqlBase {
 
             Cursor c = null;
             try {
-                c = createCursorForQuery("execGetPathIdMap", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                c = createCursorForQuery("execGetPathIdMap", context, query, VISIBILITY.PRIVATE_PUBLIC);
                 while (c.moveToNext()) {
                     result.put(c.getString(1),c.getLong(0));
                 }
@@ -739,7 +765,7 @@ public class FotoSql extends FotoSqlBase {
         return exexUpdateImpl(dbgContext, context, values, FILTER_COL_PK, new String[]{Long.toString(id)});
     }
 
-    public static int execUpdate(String dbgContext, Context context, String path, ContentValues values, int visibility) {
+    public static int execUpdate(String dbgContext, Context context, String path, ContentValues values, VISIBILITY visibility) {
         return exexUpdateImpl(dbgContext, context, values, getFilterExprPathLikeWithVisibility(visibility), new String[]{path});
     }
 
@@ -756,8 +782,8 @@ public class FotoSql extends FotoSqlBase {
         return result;
     }
 
-    protected static String getFilterExprPathLikeWithVisibility(int visibility) {
-        // visibility IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC
+    protected static String getFilterExprPathLikeWithVisibility(VISIBILITY visibility) {
+        // visibility VISIBILITY.PRIVATE_PUBLIC
         return FotoSql.FILTER_EXPR_PATH_LIKE + " AND " + getFilterExpressionVisibility(visibility);
     }
 
@@ -767,7 +793,7 @@ public class FotoSql extends FotoSqlBase {
         Long result = updateSuccessValue;
 
         int modifyCount =  FotoSql.execUpdate(dbgContext, context, dbUpdateFilterJpgFullPathName,
-                values, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                values, VISIBILITY.PRIVATE_PUBLIC);
 
         if (modifyCount == 0) {
             // update failed (probably becauce oldFullPathName not found. try insert it.
@@ -781,7 +807,10 @@ public class FotoSql extends FotoSqlBase {
 
     /** every database insert should go through this. adds logging if enabled */
     public static Uri execInsert(String dbgContext, Context context, ContentValues values) {
-        Uri result = context.getContentResolver().insert(SQL_TABLE_EXTERNAL_CONTENT_URI, values);
+        Uri providerUri = (null != values.get(SQL_COL_EXT_MEDIA_TYPE)) ? SQL_TABLE_EXTERNAL_CONTENT_URI_FILE : SQL_TABLE_EXTERNAL_CONTENT_URI;
+
+        // on my android-4.4 insert with media_type=1001 (private) does insert with media_type=1 (image)
+        Uri result = context.getContentResolver().insert(providerUri, values);
         if (Global.debugEnabledSql) {
             Log.i(Global.LOG_CONTEXT, dbgContext + ":FotoSql.execInsert" +
                     values.toString() + " => " + result);
@@ -791,12 +820,12 @@ public class FotoSql extends FotoSqlBase {
 
     @NonNull
     public static CursorLoader createCursorLoader(Context context, final QueryParameter query) {
-        FotoSql.setWhereVisibility(query, IGalleryFilter.VISIBILITY_DEFAULT);
+        FotoSql.setWhereVisibility(query, VISIBILITY.DEFAULT);
         final CursorLoader loader = new CursorLoaderWithException(context, query);
         return loader;
     }
 
-    public static int execDeleteByPath(String dbgContext, Activity context, String parentDirString, int visibility) {
+    public static int execDeleteByPath(String dbgContext, Activity context, String parentDirString, VISIBILITY visibility) {
         int delCount = FotoSql.deleteMedia(dbgContext, context, getFilterExprPathLikeWithVisibility(visibility), new String[] {parentDirString + "/%"}, true);
         return delCount;
     }
@@ -912,7 +941,7 @@ public class FotoSql extends FotoSqlBase {
         Cursor c = null;
 
         try {
-            c = FotoSql.createCursorForQuery("getSelectedfiles", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+            c = FotoSql.createCursorForQuery("getSelectedfiles", context, query, VISIBILITY.PRIVATE_PUBLIC);
             int len = c.getCount();
             Long[] ids = new Long[len];
             String[] paths = new String[len];
@@ -950,7 +979,7 @@ public class FotoSql extends FotoSqlBase {
             Cursor cursor = null;
 
             try {
-                cursor = createCursorForQuery("getFileNames", context, parameters, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                cursor = createCursorForQuery("getFileNames", context, parameters, VISIBILITY.PRIVATE_PUBLIC);
 
                 int colPath = cursor.getColumnIndex(SQL_COL_DISPLAY_TEXT);
                 while (cursor.moveToNext()) {
@@ -974,28 +1003,28 @@ public class FotoSql extends FotoSqlBase {
 
     }
 
-    protected static String getFilterExpressionVisibility(int _visibility) {
-        int visibility = _visibility;
+    protected static String getFilterExpressionVisibility(VISIBILITY _visibility) {
+        VISIBILITY visibility = _visibility;
         // add visibility column only if not included yet
-        if (visibility == IGalleryFilter.VISIBILITY_DEFAULT) {
+        if (visibility == VISIBILITY.DEFAULT) {
             visibility = (FotoLibGlobal.visibilityShowPrivateByDefault)
-                    ? IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC
-                    : IGalleryFilter.VISIBILITY_PUBLIC;
+                    ? VISIBILITY.PRIVATE_PUBLIC
+                    : VISIBILITY.PUBLIC;
         }
 
         switch (visibility) {
-            case IGalleryFilter.VISIBILITY_PRIVATE:
+            case PRIVATE:
                 return FILTER_EXPR_PRIVATE;
-            case IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC:
+            case PRIVATE_PUBLIC:
                 return FILTER_EXPR_PRIVATE_PUBLIC;
-            case IGalleryFilter.VISIBILITY_PUBLIC:
+            case PUBLIC:
             default:
                 return FILTER_EXPR_PUBLIC;
         }
     }
 
     /** adds visibility to sql of parameters, if not set yet */
-    public static QueryParameter setWhereVisibility(QueryParameter parameters, int visibility) {
+    public static QueryParameter setWhereVisibility(QueryParameter parameters, VISIBILITY visibility) {
         if (parameters.toFrom() == null) {
             parameters.addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME);
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -26,9 +26,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +43,8 @@ import de.k3b.FotoLibGlobal;
  */
 public class FileUtils {
     private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+    private static final String DBG_CONTEXT = "FileUtils:";
+
     public static final String MEDIA_IGNORE_FILENAME = ".nomedia"; // MediaStore.MEDIA_IGNORE_FILENAME;
 
     public static InputStream streamFromStringContent(String data) {
@@ -67,7 +71,7 @@ public class FileUtils {
 			try {			
 				stream.close();
 			} catch (IOException e) {
-                logger.warn("Error close " + source, e);
+                logger.warn(DBG_CONTEXT + "Error close " + source, e);
 			}
 		}
 	}
@@ -87,9 +91,7 @@ public class FileUtils {
         try {
             return file.getCanonicalFile();
         } catch (IOException ex) {
-            if (FotoLibGlobal.debugEnabled) {
-                logger.warn("Error tryGetCanonicalFile('" + file.getAbsolutePath() + "') => '" + errorValue + "' exception " + ex.getMessage(), ex);
-            }
+            logger.warn(DBG_CONTEXT + "Error tryGetCanonicalFile('" + file.getAbsolutePath() + "') => '" + errorValue + "' exception " + ex.getMessage(), ex);
             return errorValue;
         }
     }
@@ -106,9 +108,7 @@ public class FileUtils {
         try {
             return file.getCanonicalPath();
         } catch (IOException ex) {
-            if (FotoLibGlobal.debugEnabled) {
-                logger.warn("Error tryGetCanonicalPath('" + file.getAbsolutePath() + "') => '" + errorValue + "' exception " + ex.getMessage(), ex);
-            }
+            logger.warn(DBG_CONTEXT + "Error tryGetCanonicalPath('" + file.getAbsolutePath() + "') => '" + errorValue + "' exception " + ex.getMessage(), ex);
             return errorValue;
         }
     }
@@ -124,7 +124,7 @@ public class FileUtils {
         if (canonicalPath != null) {
             boolean result = !directory.getAbsolutePath().equals(canonicalPath);
             if (result && FotoLibGlobal.debugEnabled) {
-                logger.debug("isSymlinkDir('" + directory.getAbsolutePath() + "') => true because CanonicalPath='" + canonicalPath + "'");
+                logger.debug(DBG_CONTEXT + "isSymlinkDir('" + directory.getAbsolutePath() + "') => true because CanonicalPath='" + canonicalPath + "'");
             }
 			
 			return result;
@@ -145,6 +145,7 @@ public class FileUtils {
         return result.toString();
     }
 
+    /** replaceExtension("/path/to/image.jpg", ".xmp") becomes "/path/to/image.xmp" */
     public static String replaceExtension(String path, String extension) {
         if (path == null) return null;
         int ext = path.lastIndexOf(".");
@@ -171,6 +172,17 @@ public class FileUtils {
     /** return parent of file if path is not a dir. else return file */
     private static File getDir(File file) {
         return ((file != null) && (!file.isDirectory())) ? file.getParentFile() : file;
+    }
+
+    /** find cildren by regular expression */
+    public static File[] listFiles(File parent, final Pattern fileOrDirThatMustBeInTheRoot) {
+        return parent.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File owner, String fileName) {
+                final boolean found = fileOrDirThatMustBeInTheRoot.matcher(fileName).matches();
+                return found;
+            }
+        });
     }
 
     /** return true, if file is in a ".nomedia" dir */
@@ -218,16 +230,18 @@ public class FileUtils {
                 String path = file.getAbsolutePath();
                 if(fileExt == null || path.endsWith(fileExt)) {
                     boolean result = file.delete();
-                    // test if delete of file is success or not
-                    if (result) {
-                        logger.info("File {} deleted", file.getAbsolutePath());
-                    } else {
-                        logger.info("File {} was not deleted, unknown reason", file.getAbsolutePath());
+                    if (FotoLibGlobal.debugEnabled) {
+                        // test if delete of file is success or not
+                        if (result) {
+                            logger.info(DBG_CONTEXT + "File {} deleted", file.getAbsolutePath());
+                        } else {
+                            logger.info(DBG_CONTEXT + "File {} was not deleted, unknown reason", file.getAbsolutePath());
+                        }
                     }
                 }
             }
         } else {
-            logger.info("File {} doesn't exist", file.getAbsolutePath());
+            if (FotoLibGlobal.debugEnabled) logger.info(DBG_CONTEXT + "File {} doesn't exist", file.getAbsolutePath());
         }
     }
 
@@ -239,7 +253,7 @@ public class FileUtils {
 
     public static void copyReplace(File inFile, File outFile, boolean deleteOriginalAfterFinish, String what) throws IOException {
         if (logger.isDebugEnabled()) {
-            logger.debug(what + (deleteOriginalAfterFinish ? "-move" : "-copy") + ": " + inFile +
+            logger.debug(DBG_CONTEXT + what + (deleteOriginalAfterFinish ? "-move" : "-copy") + ": " + inFile +
                     " ==> " + outFile);
         }
         InputStream sourceStream = null;

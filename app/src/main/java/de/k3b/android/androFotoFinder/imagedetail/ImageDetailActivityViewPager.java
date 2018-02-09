@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright 2011, 2012 Chris Banes.
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -53,6 +53,7 @@ import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.ExifEditActivity;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.LockScreen;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.SettingsActivity;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
@@ -77,7 +78,6 @@ import de.k3b.geo.io.GeoUri;
 import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
-import de.k3b.io.OSDirectory;
 import de.k3b.io.StringUtils;
 import de.k3b.media.MediaUtil;
 import de.k3b.tagDB.Tag;
@@ -119,6 +119,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     private boolean mWaitingForMediaScannerResult = false;
 
+	MoveOrCopyDestDirPicker mDestDirPicker = null;
+	
     private LocalCursorLoader mCurorLoader;
 
     // private static final String ISLOCKED_ARG = "isLocked";
@@ -152,6 +154,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     /** #70: optinal sql expression to be shown in detailview */
     private String mContextColumnExpression = null; // sql field expression. Result will be displayed in ImageView Context area
     private String mContextName;                    // name of current ImageView Context persisted in bundle
+    private boolean mMustReplaceMenue       = false;
+    private boolean locked = false; // if != Global.locked : must update menu
 
     /** executes sql to load image detail data in a background task that may survive
      * conriguration change (i.e. device rotation) */
@@ -533,6 +537,14 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     protected void onActivityResult(final int requestCode,
                                     final int resultCode, final Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
+        if (mDestDirPicker != null) mDestDirPicker.onActivityResult(requestCode,resultCode,intent);
+
+        final boolean locked = LockScreen.isLocked(this);
+        if (this.locked != locked) {
+            this.locked = locked;
+            mMustReplaceMenue = true;
+            invalidateOptionsMenu();
+        }
 
         if (requestCode == ACTION_RESULT_FORWARD) {
             // forward result from child-activity to parent-activity
@@ -645,6 +657,14 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         unhideActionBar(Global.actionBarHideTimeInMilliSecs, "onResume");
         Global.debugMemory(mDebugPrefix, "onResume");
         super.onResume();
+
+        final boolean locked = LockScreen.isLocked(this);
+        if (this.locked != locked) {
+            this.locked = locked;
+            mMustReplaceMenue = true;
+            invalidateOptionsMenu();
+        }
+
         if (Global.debugEnabledMemory) {
             Log.d(Global.LOG_CONTEXT, mDebugPrefix + " - onResume cmd (" +
                     MoveOrCopyDestDirPicker.sFileCommands + ") => (" + mFileCommands +
@@ -660,6 +680,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     @Override
     protected void onDestroy() {
         Global.debugMemory(mDebugPrefix, "onDestroy");
+		mDestDirPicker = null;
 
         unhideActionBar(DISABLE_HIDE_ACTIONBAR, "onDestroy");
 
@@ -779,7 +800,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         if (existing != null) {
             for (File file : existing) {
                 String found = file.getAbsolutePath();
-                if (MediaUtil.isImage(found, false) && !known.contains(found)) {
+                if (MediaUtil.isImage(found, MediaUtil.IMG_TYPE_ALL) && !known.contains(found)) {
                     missing.add(found);
                 }
             }
@@ -803,19 +824,38 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_image_detail, menu);
-        getMenuInflater().inflate(R.menu.menu_image_commands, menu);
-        Global.fixMenu(this, menu);
-        mMenuSlideshow = menu.findItem(R.id.action_slideshow);
-        if (mAdapter != null) mAdapter.setMenu(menu);
+        defineMenu(menu);
 
         boolean result = super.onCreateOptionsMenu(menu);
-        getOrCreateContextTextController().setMenu(menu);
         return result;
+    }
+
+    private void defineMenu(Menu menu) {
+        if (LockScreen.isLocked(this)) {
+            getMenuInflater().inflate(R.menu.menu_image_detail_locked, menu);
+            LockScreen.fixMenu(menu);
+
+        } else {
+            getMenuInflater().inflate(R.menu.menu_image_detail, menu);
+            getMenuInflater().inflate(R.menu.menu_image_commands, menu);
+            Global.fixMenu(this, menu);
+        }
+        mMenuSlideshow = menu.findItem(R.id.action_slideshow);
+        if (mAdapter != null) mAdapter.setMenu(menu);
+        getOrCreateContextTextController().setMenu(menu);
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        final boolean locked = LockScreen.isLocked(this);
+        if (mMustReplaceMenue || (locked != this.locked)) {
+            this.locked = locked;
+
+            mMustReplaceMenue = false;
+            menu.clear();
+            defineMenu(menu);
+        }
+
         // have more time to find and press the menu
         unhideActionBar(Global.actionBarHideTimeInMilliSecs * 3, "onPrepareOptionsMenu");
         AboutDialogPreference.onPrepareOptionsMenu(this, menu);
@@ -843,6 +883,11 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         boolean slideShowStarted = mSlideShowStarted;
 
         onGuiTouched();
+        if (LockScreen.onOptionsItemSelected(this, item)) {
+            mMustReplaceMenue       = true;
+            this.invalidateOptionsMenu();
+            return true;
+        }
         if (mFileCommands.onOptionsItemSelected(item, getCurrentFoto())) {
             mModifyCount++;
         } else {
@@ -902,7 +947,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                 }
 
                 case R.id.cmd_show_geo:
-                    MapGeoPickerActivity.showActivity(this, getCurrentFoto());
+                    MapGeoPickerActivity.showActivity(this, getCurrentFoto(), null);
                     break;
 
                 case R.id.cmd_show_geo_as: {
@@ -1007,13 +1052,13 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
         if (AndroidFileCommands.canProcessFile(this, false)) {
-            MoveOrCopyDestDirPicker destDir = MoveOrCopyDestDirPicker.newInstance(move, fotos);
+            mDestDirPicker = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
-            destDir.defineDirectoryNavigation(OsUtils.getRootOSDirectory(),
+            mDestDirPicker.defineDirectoryNavigation(OsUtils.getRootOSDirectory(),
                     (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
                     lastCopyToPath);
-            destDir.setContextMenuId(R.menu.menu_context_osdir);
-            destDir.show(this.getFragmentManager(), "osdirimage");
+            mDestDirPicker.setContextMenuId(LockScreen.isLocked(this) ? 0 :  R.menu.menu_context_osdir);
+            mDestDirPicker.show(this.getFragmentManager(), "osdirimage");
         }
         return false;
     }

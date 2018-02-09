@@ -419,7 +419,7 @@ public class TagsPickerFragment  extends DialogFragment  {
         // without mClipboardItem paste is not possible
         if (mClipboardItem == null) {
             MenuItem menuItem = popup.getMenu().findItem(android.R.id.paste);
-            menuItem.setVisible(false);
+            if (menuItem != null) menuItem.setVisible(false);
         }
 
         if (popup != null) {

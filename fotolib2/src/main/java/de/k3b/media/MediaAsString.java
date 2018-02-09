@@ -26,6 +26,7 @@ import java.util.Arrays;
 import de.k3b.csv2db.csv.CsvItem;
 import de.k3b.csv2db.csv.CsvReader;
 import de.k3b.io.FileUtils;
+import de.k3b.io.VISIBILITY;
 
 /**
  * A IMetaApi that can be converted to/from string using toString() and fromString().
@@ -59,6 +60,9 @@ public class MediaAsString extends MediaCsvItem implements IMetaApi {
         this.clear();
         if (data != null) {
             MediaUtil.copy(this, data, true, true);
+            if (data instanceof MediaAsString) {
+                this.setExtra(((MediaAsString) data).getExtra());
+            }
         }
         return this;
     }

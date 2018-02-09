@@ -19,10 +19,15 @@
 
 package de.k3b.io;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import de.k3b.FotoLibGlobal;
 
 /**
  * #93: rule based file renaming for same target directory.
@@ -32,18 +37,20 @@ import java.util.Date;
  */
 
 public class RuleFileNameProcessor extends FileProcessor implements IFileNameProcessor {
+    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+
     public static final String APM_FILE_NAME = ".apm";
     /** i.e "yyMM" for year and month each with 2 digits */
+    private String mDateFormat;
     private final SimpleDateFormat mDateFormatter = new SimpleDateFormat();
     private String mName;
+    private String mNumberFormat;
     private final DecimalFormat mNumberFormatter = new DecimalFormat();
     private final File mOutDir;
 
     // optimisationn as long as lastDateFormatted does not changed nextFileInstanceNumber is recycled
     private String mLastDateFormatted = null;
     private int mNextFileInstanceNumber = 0;
-    private String mDateFormat;
-    private String mNumberFormat;
     private static final File sSomeExampleSourceFile = new File("/a/Xxxxxxxx.jpg");
 
     /**
@@ -78,24 +85,35 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
      *                      Example "000" always at least 3 digits
      */
     public void set(String dateFormat, String name, String numberFormat) {
-        if (StringUtils.isNullOrEmpty(dateFormat)) {
-            this.mDateFormat = null;
-        } else {
-            this.mDateFormat = dateFormat;
-            this.mDateFormatter.applyPattern(dateFormat);
+        final String DBG_CONTEXT = getClass().getSimpleName() + ".set@" + this.mOutDir;
+        this.mDateFormat = null;
+        this.mNumberFormat = null;
+        this.mNextFileInstanceNumber = 0;
+
+        if (!StringUtils.isNullOrEmpty(dateFormat)) {
+            try {
+                this.mDateFormatter.applyPattern(dateFormat);
+                this.mDateFormat = dateFormat;
+            } catch(Exception e) {
+                logger.warn(ListUtils.toString(" ", getClass().getSimpleName(),"set@",this.mOutDir
+                        ,":illegal dateFormat ",dateFormat), e);
+            }
         }
 
-        this.mName = name;
-
-        if (StringUtils.isNullOrEmpty(numberFormat)) {
-            this.mNumberFormat = null;
-            this.mNextFileInstanceNumber = 0;
-        } else {
-            this.mNumberFormat = numberFormat;
-            this.mNumberFormatter.applyPattern(numberFormat);
-            this.mNextFileInstanceNumber = 1;
+        if (!StringUtils.isNullOrEmpty(numberFormat)) {
+            try {
+                this.mNumberFormatter.applyPattern(numberFormat);
+                this.mNumberFormat = numberFormat;
+                this.mNextFileInstanceNumber = 1;
+            } catch(Exception e) {
+                logger.warn(ListUtils.toString(" ", getClass().getSimpleName() ,".set@",this.mOutDir
+                        , ":illegal numberFormat " , numberFormat), e);
+            }
         }
 
+        if (!StringUtils.isNullOrEmpty(name)) {
+            this.mName = name;
+        }
     }
 
     protected String generateFileName(Date date, int instanceNumber, String fileExtension) {
@@ -142,10 +160,14 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
     @Override
     public File getNextFile(File sourceFile, Date sourceFileDate, int firstFileInstanceNumber) {
         String name = getFile(sourceFile).getName();
+
         if (!mustRename(name)) {
 			// no rename rule or file already matches rules
 			File result = new File(this.mOutDir, name);
-			
+
+            // usecase: apply auto where inFile is already in outdir: no modification
+            if (sourceFile.equals(result)) return result;
+
 			// change file name if result already exists
 			return renameDuplicate(result);
 		}
@@ -170,11 +192,20 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
             tryCount++;
         } while (tryCount < 32000);
 
+        final String msg = getClass().getSimpleName() + ".mustRename@" + this.mOutDir
+                + ": Cannot generate new unused Filename " + result;
+        logger.warn(msg);
+
         // give up after a lot of tries.
-        throw new IllegalArgumentException("Cannot generate new unused Filename " + result);
+        throw new IllegalArgumentException(msg);
     }
 
     public static File getFile(File _file) {
         return (_file != null) ? _file : sSomeExampleSourceFile;
+    }
+
+    @Override
+    public String toString() {
+        return ListUtils.toString(" ", this.getClass().getSimpleName(),  mDateFormat, mName, mNumberFormat, ": +", mNextFileInstanceNumber);
     }
 }

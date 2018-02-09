@@ -31,11 +31,6 @@ public interface IGalleryFilter extends IGeoRectangle {
     String SORT_DIRECTION_ASCENDING = "^";
     String SORT_DIRECTION_DESCENDING = "V";
 
-    public static final int VISIBILITY_DEFAULT          = 0;
-    public static final int VISIBILITY_PRIVATE          = 1;
-    public static final int VISIBILITY_PUBLIC           = 2;
-    public static final int VISIBILITY_PRIVATE_PUBLIC   = 3;
-
     /******************** properties **************************/
     String getPath();
 
@@ -66,7 +61,7 @@ public interface IGalleryFilter extends IGeoRectangle {
     String getInAnyField();
 
     /** one of the VISIBILITY_XXXX values for public/private images */
-    int getVisibility();
+    VISIBILITY getVisibility();
 
     /** load content of other IGalleryFilter implementation into this */
     IGalleryFilter get(IGalleryFilter src);

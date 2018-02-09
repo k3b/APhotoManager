@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 by k3b.
+ * Copyright (c) 2016-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -43,7 +43,7 @@ import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.csv2db.csv.CsvLoader;
 import de.k3b.io.FileUtils;
-import de.k3b.io.IGalleryFilter;
+import de.k3b.io.VISIBILITY;
 import de.k3b.media.MediaCsvItem;
 import de.k3b.media.MediaUtil;
 import de.k3b.tagDB.Tag;
@@ -183,7 +183,7 @@ public class MediaDBActivity extends Activity {
             String path = _path;
             if (path != null) {
                 if (!path.contains("%")) {
-                    if (MediaUtil.isImage(path, false)) {
+                    if (MediaUtil.isImage(path, MediaUtil.IMG_TYPE_ALL)) {
                         // non xmp-file: do not update file modify date
                         xmlLastFileModifyDate = (Global.Media.enableXmpNone)
                                 ? TagSql.EXT_LAST_EXT_SCAN_NO_XMP_IN_CSV
@@ -204,7 +204,10 @@ public class MediaDBActivity extends Activity {
                 if (xmlLastFileModifyDate != TagSql.EXT_LAST_EXT_SCAN_UNKNOWN) {
                     TagSql.setXmpFileModifyDate(dbValues, xmlLastFileModifyDate);
                 }
-                mUpdateCount += TagSql.execUpdate(dbgContext, MediaDBActivity.this, path, xmlLastFileModifyDate, dbValues, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+
+                TagSql.setFileModifyDate(dbValues, new Date().getTime() / 1000);
+
+                mUpdateCount += TagSql.execUpdate(dbgContext, MediaDBActivity.this, path, xmlLastFileModifyDate, dbValues, VISIBILITY.PRIVATE_PUBLIC);
                 mItemCount++;
             }
         }

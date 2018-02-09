@@ -29,6 +29,10 @@
     <item android:id="@+id/cmd_cancel" android:title="@string/btn_cancel"
         android:icon="@drawable/ic_action_cancel"
         android:orderInCategory="5" android:showAsAction="always" android:visible="true" />
+    <item android:id="@+id/cmd_clear" android:title="@string/delete_menu_title"
+        android:icon="@drawable/ic_action_undo"
+        android:orderInCategory="5" android:showAsAction="always" android:visible="true" />
+
     <item android:id="@+id/cmd_settings" android:title="@string/settings_title"
         android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
     <item android:id="@+id/cmd_about"

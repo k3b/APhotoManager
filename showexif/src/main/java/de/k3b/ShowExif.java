@@ -57,7 +57,7 @@ public class ShowExif {
             ExifInterfaceEx exif = new ExifInterfaceEx(fileName, null, xmp, dbg_context);
             ImageMetaReader jpg = new ImageMetaReader().load(fileName, null, xmp, dbg_context);
             show(jpg, debug);
-            show(exif, debug);
+            if (exif.isValidJpgExifFormat()) show(exif, debug);
             show(xmp, debug);
 
         } catch (IOException e) {

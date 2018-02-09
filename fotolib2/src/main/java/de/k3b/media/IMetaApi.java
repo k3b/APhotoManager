@@ -22,6 +22,8 @@ package de.k3b.media;
 import java.util.Date;
 import java.util.List;
 
+import de.k3b.io.VISIBILITY;
+
 /*
 This is sourcecode of uml diagrams using
 http://plantuml.com/
@@ -145,5 +147,9 @@ public interface IMetaApi {
     /** 5=best .. 1=worst or 0/null unknown */
     Integer getRating();
     IMetaApi setRating(Integer value);
+
+    /** real photo-files and database entries have either visiblity PUBLIC or PRIVATE (if it has a tag PRIVATE)  */
+    VISIBILITY getVisibility();
+    IMetaApi setVisibility(VISIBILITY visibility);
 
 }

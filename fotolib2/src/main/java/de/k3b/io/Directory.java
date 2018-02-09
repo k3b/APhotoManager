@@ -273,6 +273,11 @@ public class Directory implements IDirectory {
         return isApmDir() ? IDirectory.DIR_FLAG_APM_DIR : IDirectory.DIR_FLAG_NONE;
     }
 
+    @Override
+    public void refresh() {
+        apmDir = null;
+    }
+
     public IDirectory setIconID(int iconID) {
         this.iconID = iconID;
         return this;

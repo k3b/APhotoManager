@@ -40,6 +40,7 @@ import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.GalleryFilterActivity;
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.LockScreen;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.SettingsActivity;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
@@ -73,10 +74,16 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
 
     private BookmarkController mBookmarkController = null;
 
-    public static void showActivity(Activity context, SelectedFiles selectedItems) {
+    public static void showActivity(Activity context, SelectedFiles selectedItems, GalleryFilterParameter filter) {
         Uri initalUri = null;
         final Intent intent = new Intent().setClass(context,
                 MapGeoPickerActivity.class);
+
+        GalleryFilterParameter localFilter = new GalleryFilterParameter();
+
+        if (filter != null) {
+            localFilter.get(filter);
+        }
 
         if ((selectedItems != null) && (selectedItems.size() > 0)) {
             intent.putExtra(EXTRA_SELECTED_ITEM_PATHS, selectedItems.toString());
@@ -89,10 +96,10 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
                 initalUri = Uri.parse(PARSER.toUriString(new GeoPointDto(initialPoint.getLatitude(),initialPoint.getLongitude(), IGeoPointInfo.NO_ZOOM)));
                 intent.setData(initalUri);
             }
-            GalleryFilterParameter filter = new GalleryFilterParameter();
-            filter.setNonGeoOnly(true);
-            intent.putExtra(EXTRA_FILTER, filter.toString());
         }
+
+        localFilter.setNonGeoOnly(false);
+        intent.putExtra(EXTRA_FILTER, localFilter.toString());
 
         intent.setAction(Intent.ACTION_VIEW);
         if (Global.debugEnabled) {
@@ -197,7 +204,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_map_geo_picker, menu);
+        getMenuInflater().inflate(LockScreen.isLocked(this) ? R.menu.menu_map_context_locked :  R.menu.menu_map_geo_picker, menu);
         AboutDialogPreference.onPrepareOptionsMenu(this, menu);
 
         return true;
@@ -241,11 +248,14 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (LockScreen.onOptionsItemSelected(this, item))
+            return true;
         // Handle presses on the action bar items
         switch (item.getItemId()) {
             case R.id.cmd_filter:
                 openFilter();
                 return true;
+            //cmd_lock
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
                 return true;
@@ -300,7 +310,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
     }
 
     private void onFilterChanged(GalleryFilterParameter filter) {
-        if (filter != null) {
+        if ((mMap != null) && (filter != null)) {
             this.mFilter = filter;
             mMap.defineNavigation(this.mFilter, null, OsmdroidUtil.NO_ZOOM, null, null);
         }

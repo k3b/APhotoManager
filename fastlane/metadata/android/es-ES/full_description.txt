@@ -1,0 +1,20 @@
+    Gestiona fotos locales: Encontrar/Copiar/Editar-Exif y mostrar en galería o Mapa.
+
+    Características:
+
+    * Encontrar rápido fotos por etiquetas(palabras claves), (sub-)carpeta, fecha, mapa geográfico, título, ...
+    * Mostrar resultado en galería o mapa geográfico desde el mapa de calle público.
+    * Vista detallada características del enfoque, deslizar para imagen siguiente/anterior.
+    * Creando el manejador de archivos para fotos: encontrar, ordenar, ver, copiar, eliminar, enviar, ... .
+    * Editar metadata de exif: fecha, título, descripción, etiquetas(palabras claves), geo, valoración, ....
+    * Puede manejar grandes colecciones de imágenes (20000+ imágenes en 1000+ carpetas).
+    * Usa el proveedor de contenido de imágenes de Android. No es necesario un escaneo inicial de imágenes.
+    * Escaneo extendido de multimedia de imágenes para Exif, IPTC, XMP
+
+    Permisos requeridos de Android:
+
+    * INTERNET: para descargar el mapa de datos del servidor público de Streetmap
+    * ACCESS_NETWORK_STATE y ACCESS_WIFI_STATE: para determinar si esta conectado al  wifi/internet para comenzar a descargar la datos geográficos
+    * WRITE_EXTERNAL_STORAGE para guardar los datos del mapa descargado en el sistema de archivos local y realizar operaciones de archivos con las fotos
+    * READ_LOGS para leer y salvar los registros de fallas potenciales en un archivo de texto.
+

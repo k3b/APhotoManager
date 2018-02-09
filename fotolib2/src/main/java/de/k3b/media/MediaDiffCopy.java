@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -25,6 +25,7 @@ import java.util.EnumSet;
 import java.util.List;
 
 import de.k3b.io.ListUtils;
+import de.k3b.io.VISIBILITY;
 import de.k3b.media.MediaUtil.FieldID;
 
 import de.k3b.tagDB.TagProcessor;
@@ -42,6 +43,7 @@ import de.k3b.tagDB.TagRepository;
 public class MediaDiffCopy {
     /** true: do not copy file path */
     private final boolean excludePath;
+    private final boolean overwriteExisting;
 
     private int numberOfChangedFields = 0;
 
@@ -67,13 +69,15 @@ public class MediaDiffCopy {
 
     /**
      * @param excludePath true: do not copy file path
+     * @param overwriteExisting
      */
-    public MediaDiffCopy(boolean excludePath) {
+    public MediaDiffCopy(boolean excludePath, boolean overwriteExisting) {
         this.excludePath = excludePath;
+        this.overwriteExisting = overwriteExisting;
     }
 
-    public MediaDiffCopy(IMetaApi newData) {
-        this(true);
+    public MediaDiffCopy(IMetaApi newData, boolean overwriteExisting) {
+        this(true, overwriteExisting);
         if (newData != null) {
             setDiff(null, newData);
         }
@@ -159,11 +163,13 @@ public class MediaDiffCopy {
         return null;
     }
 
-    /** Similar to {@link MediaUtil#copySpecificProperties(IMetaApi, IMetaApi, EnumSet)} but with special diff handling. */
+    /** Similar to {@link MediaUtil#copySpecificProperties(IMetaApi, IMetaApi, boolean, EnumSet)} but with special diff handling. */
     public List<FieldID> applyChanges(IMetaApi destination) {
         if (this.numberOfChangedFields > 0) {
             // note: special processing was excluded from this.diffSet
-            List<FieldID> collectedChanges = MediaUtil.copySpecificProperties(destination, newData, this.diffSet);
+
+            List<FieldID> collectedChanges = MediaUtil.copySpecificProperties(destination, newData,
+                    this.overwriteExisting, this.diffSet);
 
             if (this.timeAdded != 0) {
                 Date oldDate = destination.getDateTimeTaken();
@@ -177,6 +183,9 @@ public class MediaDiffCopy {
                 collectedChanges.add(FieldID.dateTimeTaken);
             }
 
+            VISIBILITY vValue = newData.getVisibility();
+            final VISIBILITY oldVisibility = (destination == null) ? null : destination.getVisibility();
+
             if ((this.addedTags.size() > 0) || (this.removedTags.size() > 0)) {
                 List<String> updated = TagProcessor.getUpdated(destination.getTags(), this.addedTags, this.removedTags);
                 if (updated != null) {
@@ -185,6 +194,14 @@ public class MediaDiffCopy {
                 }
             }
 
+            // visibility need special handling because visibility public should be overweritten by private and vice versa
+            if (!collectedChanges.contains(FieldID.visibility)) {
+                if (VISIBILITY.isChangingValue(vValue) &&
+                        (oldVisibility != vValue)) {
+                    collectedChanges.add(FieldID.visibility);
+                    destination.setVisibility(vValue);
+                }
+            }
             String modifiedValue = getAppended(destination.getTitle(), this.titleAppend);
             if (modifiedValue != null) {
                 destination.setTitle(modifiedValue);
@@ -206,8 +223,10 @@ public class MediaDiffCopy {
     public void fixTagRepository() {
         if ((this.addedTags != null) && (this.addedTags.size() > 0)) {
             TagRepository tagRepository = TagRepository.getInstance();
-            tagRepository.includeTagNamesIfNotFound(this.addedTags);
-            tagRepository.save();
+            if (tagRepository != null) {
+                tagRepository.includeTagNamesIfNotFound(this.addedTags);
+                tagRepository.save();
+            }
         }
     }
 
@@ -246,6 +265,10 @@ public class MediaDiffCopy {
         if (this.excludePath) {
             diffSet.remove(FieldID.path);
         }
+    }
+
+    public VISIBILITY getVisibility() {
+        return (newData == null) ? null : newData.getVisibility();
     }
 
     @Override

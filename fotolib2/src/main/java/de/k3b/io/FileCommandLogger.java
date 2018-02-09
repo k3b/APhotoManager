@@ -95,7 +95,7 @@ public class FileCommandLogger implements IFileCommandLogger {
     public IFileCommandLogger log(Object... messages) {
         if (mLogFile != null) {
             for(Object message : messages) {
-                mLogFile.print(message);
+                if (message != null) mLogFile.print(message);
             }
             mLogFile.println();
             mLogFile.flush();

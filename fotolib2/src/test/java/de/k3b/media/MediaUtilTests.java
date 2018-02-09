@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 by k3b.
+ * Copyright (c) 2016-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -30,6 +30,7 @@ import java.util.List;
 
 import de.k3b.TestUtil;
 import de.k3b.io.ListUtils;
+import de.k3b.io.VISIBILITY;
 
 public class MediaUtilTests {
     @Test
@@ -162,6 +163,25 @@ public class MediaUtilTests {
         Assert.assertEquals("(" + initalSrcValue +
                 "," + initialDestValue +
                 ")=>" +expected, expected, dest.getTitle());
+    }
+
+    @Test
+    public void shouldCalculateModifiedPath() {
+        check("/path/to/file.jpg-p", "/path/to/file.jpg", VISIBILITY.PRIVATE);
+        check("/path/to/file.jpg", "/path/to/file.jpg-p", VISIBILITY.PUBLIC);
+    }
+
+    @Test
+    public void shouldNotCalculateModifiedPath() {
+        check(null, "/path/to/file.jpg", VISIBILITY.PUBLIC);
+        check(null, "/path/to/file.jpg-p", VISIBILITY.PRIVATE);
+        check(null, "/path/to/file.jpg", VISIBILITY.PRIVATE_PUBLIC);
+        check(null, "/path/to/file.jpg", VISIBILITY.DEFAULT);
+    }
+
+    private void check(String expected, String actual, VISIBILITY visibility) {
+        Assert.assertEquals(visibility +
+                "(" + actual + ")=>" +expected, expected, MediaUtil.getModifiedPath(actual,visibility));
     }
 
 }

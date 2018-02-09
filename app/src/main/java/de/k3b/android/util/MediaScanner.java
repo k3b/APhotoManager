@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -50,7 +50,7 @@ import de.k3b.database.QueryParameter;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.io.FileUtils;
-import de.k3b.io.IGalleryFilter;
+import de.k3b.io.VISIBILITY;
 import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaUtil;
 import de.k3b.media.MediaXmpSegment;
@@ -152,7 +152,7 @@ abstract public class MediaScanner  {
                 if (Global.debugEnabled) {
                     Log.i(Global.LOG_CONTEXT, CONTEXT + " hideFolderMedia: delete from media db " + path + "/**");
                 }
-                result = FotoSql.execDeleteByPath(CONTEXT + " hideFolderMedia", context, path, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                result = FotoSql.execDeleteByPath(CONTEXT + " hideFolderMedia", context, path, VISIBILITY.PRIVATE_PUBLIC);
                 if (result > 0) {
                     MediaScanner.notifyChanges(context, "hide " + path + "/**");
                 }
@@ -164,15 +164,17 @@ abstract public class MediaScanner  {
     public int updateMediaDatabase_Android42(Context context, String[] oldPathNames, String... newPathNames) {
         final boolean hasNew = excludeNomediaFiles(newPathNames) > 0;
         final boolean hasOld = excludeNomediaFiles(oldPathNames) > 0;
+        int result = 0;
 
         if (hasNew && hasOld) {
-            return renameInMediaDatabase(context, oldPathNames, newPathNames);
+            result = renameInMediaDatabase(context, oldPathNames, newPathNames);
         } else if (hasOld) {
-            return deleteInMediaDatabase(context, oldPathNames);
+            result = deleteInMediaDatabase(context, oldPathNames);
         } if (hasNew) {
-            return insertIntoMediaDatabase(context, newPathNames);
+            result = insertIntoMediaDatabase(context, newPathNames);
         }
-        return 0;
+        TagSql.fixPrivate(context);
+        return result;
     }
 
     /**
@@ -188,7 +190,7 @@ abstract public class MediaScanner  {
             for (int i = 0; i < fullPathNames.length; i++) {
                 String fullPathName = fullPathNames[i];
                 if (fullPathName != null) {
-                    if (!MediaUtil.isImage(fullPathName, false) || isNoMedia(fullPathName, 22)) {
+                    if (!MediaUtil.isImage(fullPathName, MediaUtil.IMG_TYPE_ALL) || isNoMedia(fullPathName, 22)) {
                         fullPathNames[i] = null;
                     } else {
                         itemsLeft++;
@@ -299,7 +301,7 @@ abstract public class MediaScanner  {
 
             Cursor c = null;
             try {
-                c = FotoSql.createCursorForQuery("renameInMediaDatabase", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                c = FotoSql.createCursorForQuery("renameInMediaDatabase", context, query, VISIBILITY.PRIVATE_PUBLIC);
                 int pkColNo = c.getColumnIndex(FotoSql.SQL_COL_PK);
                 int pathColNo = c.getColumnIndex(FotoSql.SQL_COL_PATH);
                 while (c.moveToNext()) {
@@ -351,16 +353,23 @@ abstract public class MediaScanner  {
 
         IMetaApi exif = loadNonMediaValues(values, absoluteJpgPath, xmpContent);
 
+        IMetaApi src = null;
+        if (exif == null) {
+            src = xmpContent;
+        } else {
+            // (!writeExif) prefer read from xmp value before exif value
+            src = (FotoLibGlobal.mediaUpdateStrategy.contains("J"))
+                    ? exif
+                    : new MetaApiChainReader(xmpContent, exif);
+        }
         MediaContentValues dest = new MediaContentValues().set(values, null);
 
-        // (!writeExif) prefer read from xmp value before exif value
-        IMetaApi src = (FotoLibGlobal.mediaUpdateStrategy.contains("J"))
-                ? exif
-                : new MetaApiChainReader(xmpContent, exif);
+        if (src != null) {
+            // image has valid exif
+            getExifValues(dest, jpgFile, src);
 
-        getExifValues(dest, jpgFile, src);
-
-        updateTagRepository(src.getTags());
+            updateTagRepository(src.getTags());
+        }
 
         setPathRelatedFieldsIfNeccessary(values, absoluteJpgPath, null);
 
@@ -372,6 +381,7 @@ abstract public class MediaScanner  {
         tagRepository.includeTagNamesIfNotFound(tags);
     }
 
+    /** in secs since 1970 */
     protected static long getXmpFilelastModified(MediaXmpSegment xmpContent) {
         long xmpFilelastModified = 0;
         if (xmpContent != null) {

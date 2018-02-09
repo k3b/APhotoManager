@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -28,6 +28,8 @@ import java.util.EnumSet;
 import java.util.List;
 
 import de.k3b.FotoLibGlobal;
+import de.k3b.io.FileProcessor;
+import de.k3b.io.VISIBILITY;
 import de.k3b.transactionlog.TransactionLoggerBase;
 
 /**
@@ -61,7 +63,7 @@ public class JpgMetaWorkflow {
     }
     public MetaWriterExifXml saveLatLon(File filePath, Double latitude, Double longitude) {
         IMetaApi changedData = new MediaDTO().setLatitudeLongitude(latitude, longitude);
-        MediaDiffCopy metaDiffCopy = new MediaDiffCopy(true)
+        MediaDiffCopy metaDiffCopy = new MediaDiffCopy(true, true)
                 .setDiff(changedData, MediaUtil.FieldID.latitude_longitude);
         MetaWriterExifXml exif = applyChanges(filePath, null, 0, false, metaDiffCopy);
         metaDiffCopy.close();
@@ -78,12 +80,23 @@ public class JpgMetaWorkflow {
         File outFile = (outFilePath != null) ? new File(outFilePath) : inFilePath;
         if ((inFilePath != null) && outFile.getParentFile().canWrite()) {
             MetaWriterExifXml exif = null;
-            boolean sameFile = (outFile.equals(inFilePath));
             try {
                 long lastModified = inFilePath.lastModified();
                 exif = MetaWriterExifXml.create (inFilePath.getAbsolutePath(), outFilePath, false, "MetaWriterExifXml:");
                 debugExif(sb, "old", exif, inFilePath);
                 List<String> oldTags = exif.getTags();
+
+                boolean sameFile = (outFile.equals(inFilePath));
+
+                File newOutFile = handleVisibility(metaDiffCopy.getVisibility(), outFile, exif);
+                if (newOutFile != null) {
+                    outFile = newOutFile;
+                    outFilePath = outFile.getAbsolutePath();
+                    if (sameFile) {
+                        sameFile = false;
+                        deleteOriginalWhenFinished = true;
+                    }
+                }
 
                 List<MediaUtil.FieldID> changed = metaDiffCopy.applyChanges(exif);
 
@@ -105,9 +118,27 @@ public class JpgMetaWorkflow {
                         debugExif(sb, "new ", exifVerify, inFilePath);
                     }
 
+                    // add applied meta changes to transactionlog
                     if(transactionLogger != null) {
+                        if (!sameFile) {
+                            // first log copy/move. copy  may change databaseID
+                            transactionLogger.addChangesCopyMove(deleteOriginalWhenFinished, outFilePath, "applyChanges");
+                        }
                         transactionLogger.set(id, outFilePath);
-                        transactionLogger.addChanges(exif, EnumSet.copyOf(changed), oldTags);
+                        if ((changed != null) && (changed.size() > 0)) {
+                            transactionLogger.addChanges(exif, EnumSet.copyOf(changed), oldTags);
+                        }
+                    }
+
+                    if (!sameFile && deleteOriginalWhenFinished) {
+                        File delete = FileProcessor.getSidecar(inFilePath, false);
+                        if (delete != null) delete.delete();
+
+                        delete = FileProcessor.getSidecar(inFilePath, true);
+                        if (delete != null) delete.delete();
+
+                        delete = inFilePath;
+                        if (delete != null) delete.delete();
                     }
                 } else {
                     if (sb != null) sb.append("no changes ");
@@ -137,6 +168,25 @@ public class JpgMetaWorkflow {
             JpgMetaWorkflow.logger.error(sb.toString());
             return null;
         }
+    }
+
+    /** return modified out file or null if filename must not change due to visibility rule */
+    protected File handleVisibility(VISIBILITY newVisibility, File outFile, MetaWriterExifXml exif) {
+        if (FotoLibGlobal.renamePrivateJpg) {
+            final String oldAbsoluteOutPath = (outFile == null) ? null : outFile.getAbsolutePath();
+            String newAbsoluteOutPath = MediaUtil.getModifiedPath(oldAbsoluteOutPath, newVisibility);
+
+            if (newAbsoluteOutPath != null) {
+                String sourcePath = exif.getPath();
+                if ((sourcePath != null) && (sourcePath.compareTo(oldAbsoluteOutPath) == 0)) {
+                    // original intend was "change in same file" so add to log that filename has changed (rename/move)
+                    transactionLogger.addChangesCopyMove(true, newAbsoluteOutPath, "handleVisibility");
+                }
+                exif.setAbsoluteJpgOutPath(newAbsoluteOutPath);
+                return new File(newAbsoluteOutPath);
+            }
+        }
+        return null;
     }
 
     /** todo overwrite in android class to implement update media db */
@@ -174,9 +224,11 @@ public class JpgMetaWorkflow {
     public static int getRotationFromExifOrientation(String fullPathToImageFile) {
         try {
             ExifInterfaceEx exif = new ExifInterfaceEx(fullPathToImageFile, null, null, "getRotationFromExifOrientation");
-            int orientation = exif.getAttributeInt(ExifInterfaceEx.TAG_ORIENTATION, 0);
-            if ((orientation >= 0) && (orientation < exifOrientationCode2RotationDegrees.length))
-                return exifOrientationCode2RotationDegrees[orientation];
+            if (exif.isValidJpgExifFormat()) {
+                int orientation = exif.getAttributeInt(ExifInterfaceEx.TAG_ORIENTATION, 0);
+                if ((orientation >= 0) && (orientation < exifOrientationCode2RotationDegrees.length))
+                    return exifOrientationCode2RotationDegrees[orientation];
+            }
         }
         catch (Exception e) {
         }

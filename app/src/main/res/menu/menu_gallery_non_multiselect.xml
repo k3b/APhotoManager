@@ -56,10 +56,20 @@
                 android:title="@string/sort_by_modification"
                 android:visible="true"
                 android:orderInCategory="5" />
-            <item android:id="@+id/cmd_sort_len"
+            <item android:id="@+id/cmd_sort_width"
+                android:title="@string/sort_by_width"
+                android:visible="true"
+                android:orderInCategory="5" />
+            <item android:id="@+id/cmd_sort_file_len"
+                android:title="@string/sort_by_file_size"
+                android:visible="true"
+                android:orderInCategory="5" />
+
+            <item android:id="@+id/cmd_sort_path_len"
                 android:title="@string/sort_by_name_len"
                 android:visible="true"
                 android:orderInCategory="5" />
+
         </menu>
     </item>
 
@@ -79,6 +89,12 @@
 
     <item android:id="@+id/cmd_scan" android:title="@string/scanner_menu_title" android:orderInCategory="110"
         android:showAsAction="never" android:visible="true"/>
+
+    <item android:id="@+id/cmd_app_pin"
+        android:title="@string/menu_title_app_pinnend"
+        android:visible="true"
+        android:orderInCategory="9999"
+        android:showAsAction="never" />
 
     <item android:id="@+id/cmd_about"
         android:title="@string/about_summary"

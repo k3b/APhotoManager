@@ -1,0 +1,20 @@
+Gérez vos photos locales : Trouvez / Copiez / Éditez les Exif et affichez vos photos dans la Galerie ou sur une Carte.
+
+Fonctionnalités :
+
+* Trouvez rapidement vos photos par tag(mot-clé), (sous-)dossier, date, géolocalisation, titre...
+* Affichez les résultats dans la Galerie ou une carte géographique d'OpenStreetMap.
+* Les fonctions d'affichage permettent de zoomer, de glisser pour afficher l'image suivante / précédente.
+* Gestionnaire de fichiers intégré pour les photos: trouver, trier, afficher, copier, supprimer, envoyer...
+* Éditez les métadonnées exif : date, titre, description, tag(mot-clé), géolocalisation, évaluation...
+* Peut manipuler de grandes collections d'images (+ de 20000 images dans + de 1000 dossiers).
+* Utilise le fournisseur de contenu d'image d'Android. Aucun scan d'image initial nécessaire.
+* Scan étendu d'images pour les formats Exif, IPTC, XMP
+
+Permissions Android nécessaires:
+
+* INTERNET : pour télécharger les données cartographiques à partir du serveur OpenStreetMap
+* ACCESS_NETWORK_STATE et ACCESS_WIFI_STATE : pour savoir si le Wi-Fi/internet est activé pour commencer à télécharger des géodonnées
+* WRITE_EXTERNAL_STORAGE : pour mettre en cache les données cartographiques téléchargées dans le système de fichiers local et pour faire des opérations de fichiers avec les photos
+* READ_LOGS : pour lire et enregistrer des journaux de plantage potentiels dans un fichier texte.
+.

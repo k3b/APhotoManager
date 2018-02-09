@@ -1,0 +1,1 @@
+Mengelola foto lokal: menemukan/Copy/Edit-Exif dan Tampilkan di galeri atau peta.

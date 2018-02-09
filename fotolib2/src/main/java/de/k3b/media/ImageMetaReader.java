@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -46,6 +46,7 @@ import de.k3b.FotoLibGlobal;
 import de.k3b.io.DateUtil;
 import de.k3b.io.ListUtils;
 import de.k3b.io.StringUtils;
+import de.k3b.io.VISIBILITY;
 
 /**
  * com.drewnoakes:metadata-extractor based reader for image meta data files
@@ -357,6 +358,29 @@ public class ImageMetaReader implements IMetaApi, Closeable {
 
     @Override
     public IMetaApi setRating(Integer value) {
+        throw new UnsupportedOperationException ();
+    }
+
+    @Override
+    public VISIBILITY getVisibility() {
+        String debugContext = "getVisibility";
+        int i=0;
+        init();
+
+        VISIBILITY result = null;
+        if (isEmpty(result, ++i, debugContext, "Exif.XPKEYWORDS(PRIVATE)") && (mExifDir != null)) {
+            List<String> list = getStringList(debugContext, this.mExifDir, ExifDirectoryBase.TAG_WIN_KEYWORDS);
+            result = VISIBILITY.getVisibility(list);
+        }
+        if (isEmpty(result, ++i, debugContext, "ExternalXmp.apm.Visibility") && (mExternalXmpDir != null)) result = mExternalXmpDir.getVisibility();
+        if (isEmpty(result, ++i, debugContext, "InternalXmp.apm.Visibility") && (mInternalXmpDir != null)) result = mInternalXmpDir.getVisibility();
+
+        isEmpty(result, ++i, null, null);
+        return result;
+    }
+
+    @Override
+    public IMetaApi setVisibility(VISIBILITY value) {
         throw new UnsupportedOperationException ();
     }
 

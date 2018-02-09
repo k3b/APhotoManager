@@ -173,8 +173,8 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
     <string name="lbl_any">lbl_any Find</string>
     <string name="filter_any_hint">filter_any_hint Part of Tags, Title, Description or Path</string>
 
-    <string name="lbl_images_public">lbl_images_public Public Images</string>
-    <string name="lbl_images_private">lbl_images_private Private Images</string>
+    <string name="lbl_images_public">lbl_images_public Public Image</string>
+    <string name="lbl_images_private">lbl_images_private Private Image</string>
 
     <string name="lbl_with_no_tags">lbl_with_no_tags With no Tags</string>
     <string name="lbl_tags_include">lbl_tags_include +Tags</string>

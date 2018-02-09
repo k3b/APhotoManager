@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*
+ * Copyright (c) 2015-2018 by k3b.
+ *
+ * This file is part of AndroFotoFinder / #APhotoManager.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
+ -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".imagedetail.ImageDetailActivityViewPager">
+    <!-- note: items with odd orderInCategory will not go to quick button  -->
+
+    <item android:id="@+id/cmd_app_unpin"
+        android:title="@string/menu_title_app_unpinnend"
+        android:icon="@android:drawable/ic_lock_lock"
+        android:visible="true"
+        android:orderInCategory="1"
+        android:showAsAction="always" />
+		
+    <item android:id="@+id/action_slideshow" android:title="@string/slideshow_menu_title"
+        android:checkable="true"
+        android:orderInCategory="901" android:showAsAction="never" />
+
+    <item android:id="@+id/cmd_app_unpin2"
+        android:title="@string/menu_title_app_unpinnend"
+        android:icon="@android:drawable/ic_lock_lock"
+        android:visible="true"
+        android:orderInCategory="9999"
+        android:showAsAction="never" />
+
+    <item android:id="@+id/cmd_about"
+        android:title="@string/about_summary"
+        android:visible="true"
+        android:orderInCategory="10001"
+        android:showAsAction="never" />
+</menu>

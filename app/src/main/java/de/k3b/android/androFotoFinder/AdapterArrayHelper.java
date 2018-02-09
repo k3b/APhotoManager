@@ -26,9 +26,9 @@ import java.io.File;
 import java.util.ArrayList;
 
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedItems;
 import de.k3b.io.FileUtils;
-import de.k3b.io.IGalleryFilter;
 import de.k3b.media.MediaUtil;
 
 /**
@@ -47,7 +47,7 @@ public class AdapterArrayHelper {
 
         if (Global.mustRemoveNOMEDIAfromDB && (mRootDir != null) && (mFullPhotoPaths != null)) {
             String parentDirString = mRootDir.getAbsolutePath();
-            FotoSql.execDeleteByPath(debugContext + " AdapterArrayHelper mustRemoveNOMEDIAfromDB ", context, parentDirString, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+            FotoSql.execDeleteByPath(debugContext + " AdapterArrayHelper mustRemoveNOMEDIAfromDB ", context, parentDirString, VISIBILITY.PRIVATE_PUBLIC);
         }
     }
 

@@ -26,9 +26,9 @@ this program. If not, see <http://www.gnu.org/licenses/>
 	<string name="global_log_file_path" translatable="false">copy/aPhotoManager.log</string>
 	<string name="settings_debug_libs_title" translatable="false">LogCat libs</string>
 	<string name="settings_debug_sql_title" translatable="false">LogCat SQL</string>
-	<string name="settings_debug_map_title">LogCat geo map</string>
+	<string name="settings_debug_map_title" translatable="false">LogCat geo map</string>
 
-	<string name="bookmark_reset">RESET</string>
+	<string name="bookmark_reset" translatable="false">RESET</string>
 
 	<string name="settings_debug_view_item_title" translatable="false">LogCat gridview/listview</string>
 
@@ -39,6 +39,7 @@ this program. If not, see <http://www.gnu.org/licenses/>
 		ar,&nbsp;
 		<a href="https://github.com/k3b/APhotoManager/wiki/de-home">de</a>,&nbsp;
 		<a href="https://github.com/k3b/APhotoManager/wiki/home">en</a>,&nbsp;
+		<a href="https://github.com/k3b/APhotoManager/wiki/es-home">es</a>,&nbsp;
 		<a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr</a>,&nbsp;
 		<a href="https://github.com/k3b/APhotoManager/wiki/it-home">it</a>,&nbsp;
 		<a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja</a>,&nbsp;

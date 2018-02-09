@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 by k3b.
+ * Copyright (c) 2016-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -104,6 +104,14 @@ public class MediaCsvTests {
             System.out.println(item.toString());
         }
 
+    }
+
+
+    @Test
+    public void shouldSaveLoadExtra() {
+        String data = new MediaAsString().setExtra("some extra").toString();
+        MediaAsString sut = new MediaAsString().fromString(data);
+        Assert.assertEquals("some extra", sut.getExtra());
     }
 
     @Test

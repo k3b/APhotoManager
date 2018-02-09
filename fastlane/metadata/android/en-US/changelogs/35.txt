@@ -1,0 +1,9 @@
+Changes from 0.6.2.171126 (34) to 0.6.3 (35)
+
+* NEW: Mode (App protected/pinned(Extended App Pinning)): Allow to savley hand over your phone to someone else and allow him/her to view only those images that you have chosen before. Dangerous commands (edit, copy, delete, rootfilter, settings, ...) are not available while "App Pinning" is active.
+* NEW: Folder-rule-based autoprocessing for copy/move photo(s) with rename-file-pattern and auto-apply userdefined exif. Example: If you move IMG_20171221_085715.jpg to folder .../holiday/2017krete/ it will be automatically renamed to 17krete022.jpg and gets tags holiday, greece, krete if you define a rule for that folder.
+* NEW: Mark images as "PRIVATE" and allow filtering include/exclude "PRIVATE". Private Images are hidden from other Gallery-Apps and image pickers by changing media_type to 1001 and fileextension to ".jpg-p".
+* Gallery view: Added sort by (image-)width, (file-)size
+* Fix update tags/geo also update lastModified in mediadb always in format secs since 1970. Else "sort by last modified" does not work.
+* Fix allow xmp edit of png/gif.
+* Translations and Translationupdates: French by Poussinou and Tuuux; Indonesian by riesky and isaideureka; Hindi by jznsamuel (jasonsamuel88); Japanese by naofum; Chinese Simplified and Chinese Traditional by Liu Feng (pitumaomao), Russian by ku ku,

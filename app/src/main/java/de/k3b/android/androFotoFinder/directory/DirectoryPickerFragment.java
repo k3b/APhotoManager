@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -23,6 +23,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -358,36 +360,59 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     private final PopupMenu.OnMenuItemClickListener popUpListener = new PopupMenu.OnMenuItemClickListener() {
         @Override
         public boolean onMenuItemClick(MenuItem menuItem) {
-            return onPopUpClick(menuItem);
+            return onPopUpClick(menuItem, mPopUpSelection);
         }
     };
 
-    private boolean onPopUpClick(MenuItem menuItem) {
+    protected boolean onPopUpClick(MenuItem menuItem, IDirectory popUpSelection) {
         switch (menuItem.getItemId()) {
             case R.id.cmd_mk_dir:
-                return onCreateSubDirQuestion(mPopUpSelection);
+                return onCreateSubDirQuestion(popUpSelection);
             case R.id.cmd_apm_edit:
-                return onEditApm(mPopUpSelection);
+                return onEditApm(popUpSelection);
+            case android.R.id.copy:
+                return onCopy(popUpSelection);
             case R.id.cmd_photo:
-                return showPhoto(mPopUpSelection);
+                return showPhoto(popUpSelection);
             case R.id.cmd_gallery:
-                return showGallery(mPopUpSelection);
+                return showGallery(popUpSelection);
             case R.id.action_details:
-                return showDirInfo(mPopUpSelection);
+                return showDirInfo(popUpSelection);
             case R.id.cmd_fix_link:
-                return fixLinks(mPopUpSelection);
+                return fixLinks(popUpSelection);
             case R.id.cmd_folder_hide_images:
-                onHideFolderMediaQuestion(mPopUpSelection.getAbsolute());
+                onHideFolderMediaQuestion(popUpSelection.getAbsolute());
                 return true;
             default:break;
         }
         return false;
     }
 
-    private boolean onEditApm(IDirectory mPopUpSelection) {
-        String path = (mPopUpSelection == null) ? null : mPopUpSelection.getAbsolute();
+    @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if ((requestCode == R.id.cmd_apm_edit) && (resultCode == Activity.RESULT_OK) && (mPopUpSelection != null)) {
+            // autoprocessing status may have changed: refresh data and gui
+            mPopUpSelection.refresh();
+            this.mAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private boolean onCopy(IDirectory selection) {
+        String path = (selection == null) ? null : selection.getAbsolute();
         if (!StringUtils.isNullOrEmpty(path)) {
-            PhotoAutoprocessingEditActivity.showActivity(getActivity(), null, path, null, 0);
+            ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText(getActivity().getString(R.string.lbl_path), path);
+            clipboard.setPrimaryClip(clip);
+            Toast.makeText(getActivity(), path, Toast.LENGTH_LONG).show();
+            return true;
+        }
+        return false;
+    }
+
+    private boolean onEditApm(IDirectory selection) {
+        String path = (selection == null) ? null : selection.getAbsolute();
+        if (!StringUtils.isNullOrEmpty(path)) {
+            PhotoAutoprocessingEditActivity.showActivity(getActivity(), null, path, this.getSrcFotos(), R.id.cmd_apm_edit);
             return true;
         }
         return false;
@@ -847,16 +872,21 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         return false;
     }
 
+    /** overwritten by dialog host to get selected photos for edit autoprocessing mode */
+    public SelectedFiles getSrcFotos() {
+        return null;
+    }
+
     /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
+         * This interface must be implemented by activities that contain this
+         * fragment to allow an interaction in this fragment to be communicated
+         * to the activity and potentially other fragments contained in that
+         * activity.
+         * <p/>
+         * See the Android Training lesson <a href=
+         * "http://developer.android.com/training/basics/fragments/communicating.html"
+         * >Communicating with Other Fragments</a> for more information.
+         */
     public interface OnDirectoryInteractionListener {
         /** called when user picks a new directory */
         void onDirectoryPick(String selectedAbsolutePath, int queryTypeId);

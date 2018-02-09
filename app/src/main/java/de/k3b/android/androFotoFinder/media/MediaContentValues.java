@@ -26,6 +26,7 @@ import java.util.List;
 
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
+import de.k3b.io.VISIBILITY;
 import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaUtil;
 import de.k3b.tagDB.TagConverter;
@@ -153,6 +154,30 @@ public class MediaContentValues implements IMetaApi {
     public IMetaApi setRating(Integer value) {
         mData.put(TagSql.SQL_COL_EXT_RATING, value);
         setLastXmpFileModifyDate();
+        return this;
+    }
+
+    @Override
+    public VISIBILITY getVisibility() {
+        Integer ty = mData.getAsInteger(TagSql.SQL_COL_EXT_MEDIA_TYPE);
+        if (ty != null) {
+            if (ty.intValue() == FotoSql.MEDIA_TYPE_IMAGE_PRIVATE)
+                return VISIBILITY.PRIVATE;
+
+            return VISIBILITY.PUBLIC;
+        }
+        return null;
+    }
+
+    @Override
+    public IMetaApi setVisibility(VISIBILITY value) {
+        if (VISIBILITY.isChangingValue(value)) {
+            int iValue = (value.equals(VISIBILITY.PRIVATE))
+                    ? FotoSql.MEDIA_TYPE_IMAGE_PRIVATE
+                    : FotoSql.MEDIA_TYPE_IMAGE;
+            mData.put(TagSql.SQL_COL_EXT_MEDIA_TYPE, iValue);
+            setLastXmpFileModifyDate();
+        }
         return this;
     }
 

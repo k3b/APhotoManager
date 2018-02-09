@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -38,6 +38,9 @@ public class FotoLibGlobal {
     /** false do not follow symlinks when scanning Directories.  */
     public static final boolean ignoreSymLinks = false;
 
+    /** #100: true: private images get the extension ".jpg-p" which hides them from other gallery-apps and image pickers.  */
+    public static boolean renamePrivateJpg = true;
+
     /** #84 true: file.jpg.xmp; false: file.xmp.  */
     public static boolean preferLongXmpFormat = false;
 
@@ -58,7 +61,7 @@ public class FotoLibGlobal {
     public static boolean preserveJpgFileModificationDate = true;
 
     /** #93 false: implementation not finished yet. intermediate release for hotfix. */
-    public static final boolean apmEnabled = false;
+    public static final boolean apmEnabled = true;
 
     /** progressbar advances after processing x photos */
     public static final int itemsPerProgress = 10;

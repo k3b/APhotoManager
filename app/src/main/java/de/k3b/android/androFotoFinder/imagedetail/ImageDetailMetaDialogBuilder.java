@@ -30,10 +30,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
+import de.k3b.io.DateUtil;
 import de.k3b.media.ExifInterfaceEx;
 import de.k3b.database.QueryParameter;
 import de.k3b.media.ImageMetaReader;
@@ -106,6 +108,12 @@ public class ImageDetailMetaDialogBuilder {
         return builder.create();
     }
 
+    private static final String dateFields = (","
+            + TagSql.SQL_COL_DATE_ADDED + ","
+            + TagSql.SQL_COL_EXT_XMP_LAST_MODIFIED_DATE + ","
+            + TagSql.SQL_COL_LAST_MODIFIED
+            + ",").toLowerCase();
+
     private static void appendExifInfo(StringBuilder result, Activity context, String filepath, long currentImageId) {
         try {
             getExifInfo_android(result, filepath);
@@ -131,7 +139,9 @@ public class ImageDetailMetaDialogBuilder {
                         String sValue = (value != null) ? value.toString() : null;
                         if ((sValue != null) && (sValue.length() > 0) && (sValue.compareTo("0") != 0)) {
                             // show only non empty values
-                            result.append(key).append("=").append(sValue).append(NL);
+                            result.append(key).append("=").append(sValue);
+                            appendDate(result, key, value);
+                            result.append(NL);
                         }
                     }
                 }
@@ -139,6 +149,26 @@ public class ImageDetailMetaDialogBuilder {
 
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private static void appendDate(StringBuilder result, String key, Object value) {
+        if (dateFields.indexOf(key.toLowerCase()) >=0) {
+            appendDate(result, value, 1000); // value in secs since 1970. Java needs millisecs
+        } else if (TagSql.SQL_COL_DATE_TAKEN.compareToIgnoreCase(key) == 0) {
+            appendDate(result, value, 1); // value in millisecs since 1970. same as Java
+        }
+    }
+
+    private static void appendDate(StringBuilder result, Object value, int factor) {
+        try {
+            long milliSecs = Long.parseLong(value.toString());
+            Date d = (milliSecs == 0) ? null : new Date(milliSecs * factor);
+            if (d != null) {
+                result.append("=").append(DateUtil.toIsoDateTimeString(d)).append("z");
+            }
+        } catch (Exception ignore) {
+
         }
     }
 
@@ -172,7 +202,7 @@ public class ImageDetailMetaDialogBuilder {
 
         builder.append(NL).append(line).append(NL);
         builder.append(NL).append(filepath).append(NL).append(NL);
-        builder.append(exif.getDebugString(NL));
+        if (exif.isValidJpgExifFormat()) builder.append(exif.getDebugString(NL));
 
         builder.append(NL).append(line).append(NL);
     }

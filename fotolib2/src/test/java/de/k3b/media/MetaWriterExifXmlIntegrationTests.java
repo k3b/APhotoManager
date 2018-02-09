@@ -34,6 +34,7 @@ import de.k3b.FotoLibGlobal;
 import de.k3b.TestUtil;
 import de.k3b.io.FileCommands;
 import de.k3b.io.FileUtils;
+import de.k3b.io.VISIBILITY;
 
 /**
  * Created by k3b on 24.04.2017.
@@ -62,6 +63,8 @@ public class MetaWriterExifXmlIntegrationTests {
         MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(), null, false, "JUnit"
                 , true, true, true); //exif, xmp, create
         MediaDTO empty = new MediaDTO();
+        empty.setVisibility(VISIBILITY.PUBLIC); // not complete empty since it is public visible
+
         MediaUtil.copy(sut, empty, true, true);
 
         // was overwritten by copy
@@ -90,6 +93,7 @@ public class MetaWriterExifXmlIntegrationTests {
         MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(), null, false, "JUnit"
                 , true, true, true); //exif, xmp, create
         MediaDTO empty = new MediaDTO();
+        empty.setVisibility(VISIBILITY.PUBLIC); // not complete empty since it is public visible
         MediaUtil.copy(sut, empty, true, true);
 
 //        System.out.printf("exif " + MediaUtil.toString(sut.getExif()));
@@ -114,7 +118,7 @@ public class MetaWriterExifXmlIntegrationTests {
 
         MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(), null, false, "JUnit"
                 , true, true, true); //exif, xmp, create
-        MediaDTO value = TestUtil.createTestMediaDTO(2);
+        MediaDTO value = createTestValue();
         MediaUtil.copy(sut, value, true, true);
 
 //        System.out.printf("exif " + MediaUtil.toString(sut.getExif()));
@@ -129,6 +133,12 @@ public class MetaWriterExifXmlIntegrationTests {
         assertEqual(out, value, value, sut);
     }
 
+    private static MediaDTO createTestValue() {
+        final MediaDTO testMediaDTO = TestUtil.createTestMediaDTO(2);
+        testMediaDTO.setVisibility(VISIBILITY.PUBLIC);
+        return testMediaDTO;
+    }
+
 
     @Test
     public void emptyWriteValuesXmpCreate() throws IOException
@@ -138,7 +148,7 @@ public class MetaWriterExifXmlIntegrationTests {
 
         MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(), null, false, "JUnit"
                 , false, true, true); //exif, xmp, create
-        MediaDTO values = TestUtil.createTestMediaDTO(2);
+        MediaDTO values = createTestValue();
         MediaUtil.copy(sut, values, true, true);
 
         // was overwritten by copy
@@ -159,7 +169,7 @@ public class MetaWriterExifXmlIntegrationTests {
 
         MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(), null, false, "JUnit"
                 , true, false, false); //exif, xmp, create
-        MediaDTO values = TestUtil.createTestMediaDTO(2);
+        MediaDTO values = createTestValue();
         MediaUtil.copy(sut, values, true, true);
 
         // was overwritten by copy

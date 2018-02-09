@@ -55,6 +55,13 @@
         android:visible="true"
         android:orderInCategory="1001"
         android:showAsAction="never" />
+
+    <item android:id="@+id/cmd_app_pin"
+        android:title="@string/menu_title_app_pinnend"
+        android:visible="true"
+        android:orderInCategory="9999"
+        android:showAsAction="never" />
+
     <item android:id="@+id/cmd_about"
         android:title="@string/about_summary"
         android:visible="true"

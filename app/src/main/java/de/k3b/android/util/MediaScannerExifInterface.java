@@ -47,6 +47,7 @@ public class MediaScannerExifInterface extends MediaScanner {
         ExifInterfaceEx exif = null;
         try {
             exif = new ExifInterfaceEx(absoluteJpgPath, null, xmpContent, "MediaScannerExifInterface.loadNonMediaValues");
+            if (!exif.isValidJpgExifFormat()) exif = null;
         } catch (IOException ex) {
             // exif is null
         }
@@ -63,10 +64,12 @@ public class MediaScannerExifInterface extends MediaScanner {
         ExifInterfaceEx exif = null;
         try {
             exif = new ExifInterfaceEx(absoluteJpgPath, null, null, "MediaScannerExifInterface.getPositionFromFile");
+            if (!exif.isValidJpgExifFormat()) exif = null;
         } catch (IOException ex) {
             // exif is null
         }
 
+        if (exif == null) return null;
         return getPositionFromMeta(absoluteJpgPath, id, exif);
     }
 }

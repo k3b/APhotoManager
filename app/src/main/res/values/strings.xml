@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?><!--
 /*
- * Translation to English and Copyright (c) 2015-2016 by k3b, "mary-kate" & keunes.
+ * Translation to English and Copyright (c) 2015-2018 by k3b, "mary-kate" & keunes.
  *
  * This file is part of "A Photo Manager" (A(ndro)FotoFinder).
  *
@@ -176,8 +176,8 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
     <string name="lbl_any">Find</string>
     <string name="filter_any_hint">Part of Tags, Title, Description or Path</string>
 
-    <string name="lbl_images_public">Public Images</string>
-    <string name="lbl_images_private">Private Images</string>
+    <string name="lbl_images_public">Public Image</string>
+    <string name="lbl_images_private">Private Image</string>
 
     <string name="lbl_with_no_tags">With no Tags</string>
     <string name="lbl_tags_include">+Tags</string>
@@ -231,6 +231,19 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
 				1708NewName0001.jpg -->
     <string name="preview_message_format">"%1$s %2$d Photos\n\t%3$s (%4$s), &#8230;\nTo %5$s\n\t%6$s"</string>
 
+    <!-- new in 0.6.3 additional sorting options -->
+    <string name="sort_by_file_size">Size</string>
+    <string name="sort_by_width">Width</string>
+
+    <!-- new in 0.6.3 edit exif images can have visibility private or public -->
+    <string name="lbl_image_visibility">Visibility</string>
+
+    <!-- #105 Appplication-pinning, aka "Kiosk Mode", "LockTask": disable dangerous menu-items -->
+    <string name="menu_title_app_pinnend">App protected/pinned</string>
+    <string name="menu_title_app_unpinnend">App unprotect/unpinned</string>
+
+    <!-- #100: private images get the extension ".jpg-p" which hides them from other gallery-apps and image pickers.  -->
+    <string name="settings_rename_private_jpg_title">Rename PRIVATE ...jpg to ....jpg-p</string>
 
     <!--  depricated tags_update_result_format use image_success_update_format instead -->
 </resources>

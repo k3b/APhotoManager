@@ -45,6 +45,7 @@ import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.directory.DirectoryLoaderTask;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.locationmap.LocationMapFragment;
+import de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
@@ -58,6 +59,7 @@ import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
+import de.k3b.io.VISIBILITY;
 import de.k3b.tagDB.Tag;
 
 /**
@@ -82,6 +84,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
     private FilterValue mFilterValue = null;
     private HistoryEditText mHistory;
     private BookmarkController mBookmarkController = null;
+    private IDirectory mPopUpSelection = null;
 
     public static void showActivity(Activity context, IGalleryFilter filter, QueryParameter rootQuery,
                                     String lastBookmarkFileName, int requestCode) {
@@ -215,6 +218,15 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                 SettingsActivity.show(this);
                 return true;
 
+            case R.id.cmd_gallery:
+                FotoGalleryActivity.showActivity(this, getAsGalleryFilter(), null, 0);
+                return true;
+            case R.id.cmd_show_geo: {
+                MapGeoPickerActivity.showActivity(this, null, getAsGalleryFilter());
+                return true;
+            }
+
+
             case R.id.action_save_as:
                 mBookmarkController.onSaveAsQuestion(mBookmarkController.getlastBookmarkFileName(), getAsQuery());
                 return true;
@@ -230,6 +242,25 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    /**
+     * Call back from sub-activities.<br/>
+     * Process Change StartTime (longpress start), Select StopTime before stop
+     * (longpress stop) or filter change for detailReport
+     */
+    @Override
+    protected void onActivityResult(final int requestCode,
+                                    final int resultCode, final Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+
+        if (mPopUpSelection != null) mPopUpSelection.refresh();
+    }
+
+    private GalleryFilterParameter getAsGalleryFilter() {
+        GalleryFilterParameter filter = new GalleryFilterParameter();
+        fromGui(filter);
+        return filter;
     }
 
     private QueryParameter getAsQuery() {
@@ -287,6 +318,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         Global.debugMemory(mDebugPrefix, "onDestroy start");
         super.onDestroy();
 
+        mPopUpSelection = null;
         if (dirInfos != null)
         {
             for(Integer id : dirInfos.keySet()) {
@@ -324,7 +356,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         private EditText mAny            ;
         private EditText mTagsInclude    ;
         private EditText mTagsExclude    ;
-        private int      mVisibility = VISIBILITY_DEFAULT;
+        private VISIBILITY mVisibility = VISIBILITY.DEFAULT;
 
         FilterValue() {
             this.mPath = (EditText) findViewById(R.id.edit_path);
@@ -381,22 +413,22 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                     mTagsExclude);
         }
 
-        protected void showVisibility(int visibility) {
-            int actualVisibility = visibility;
-            if (actualVisibility == VISIBILITY_DEFAULT) {
-                actualVisibility = (FotoLibGlobal.visibilityShowPrivateByDefault) ? VISIBILITY_PRIVATE_PUBLIC : VISIBILITY_PUBLIC;
+        protected void showVisibility(VISIBILITY visibility) {
+            VISIBILITY actualVisibility = visibility;
+            if (actualVisibility == VISIBILITY.DEFAULT) {
+                actualVisibility = (FotoLibGlobal.visibilityShowPrivateByDefault) ? VISIBILITY.PRIVATE_PUBLIC : VISIBILITY.PUBLIC;
             }
 
             switch (actualVisibility) {
-                case VISIBILITY_PRIVATE:
+                case PRIVATE:
                     mPrivate.setChecked(true);
                     mPublic.setChecked(false);
                     break;
-                case VISIBILITY_PRIVATE_PUBLIC:
+                case PRIVATE_PUBLIC:
                     mPrivate.setChecked(true);
                     mPublic.setChecked(true);
                     break;
-                case VISIBILITY_PUBLIC:
+                case PUBLIC:
                 default:
                     mPublic.setChecked(true);
                     mPrivate.setChecked(false);
@@ -409,12 +441,12 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             if ((!chk1.isChecked()) && (!chk2.isChecked())) chk2.setChecked(true);
             if (mPrivate.isChecked()) {
                 if (mPublic.isChecked()) {
-                    mVisibility = VISIBILITY_PRIVATE_PUBLIC;
+                    mVisibility = VISIBILITY.PRIVATE_PUBLIC;
                 } else {
-                    mVisibility = VISIBILITY_PRIVATE;
+                    mVisibility = VISIBILITY.PRIVATE;
                 }
             } else {
-                mVisibility = VISIBILITY_PUBLIC;
+                mVisibility = VISIBILITY.PUBLIC;
             }
         }
 
@@ -503,7 +535,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         }
 
         @Override
-        public int getVisibility() {
+        public VISIBILITY getVisibility() {
             return mVisibility;
         }
 
@@ -723,8 +755,18 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             DirInfo dirInfo = getOrCreateDirInfo(queryId);
             dirInfo.directoryRoot = directoryRoot;
             final FragmentManager manager = getFragmentManager();
-            DirectoryPickerFragment dlg = new DirectoryPickerFragment();
-            dlg.setContextMenuId(R.menu.menu_context_dirpicker);
+            DirectoryPickerFragment dlg = new DirectoryPickerFragment() {
+                protected boolean onPopUpClick(MenuItem menuItem, IDirectory popUpSelection) {
+                    mPopUpSelection = popUpSelection;
+                    return super.onPopUpClick(menuItem, popUpSelection);
+                }
+            };
+
+            int menuResId = 0; // no menu in app lock mode
+            if (!LockScreen.isLocked(this)) {
+                menuResId = (queryId == FotoSql.QUERY_TYPE_GROUP_DATE) ? R.menu.menu_context_datepicker :  R.menu.menu_context_dirpicker;
+            }
+            dlg.setContextMenuId(menuResId);
 
             dlg.defineDirectoryNavigation(dirInfo.directoryRoot, dirInfo.queryId, dirInfo.currentPath);
 

@@ -156,7 +156,7 @@ onzichtbaar voor de media-database, de galerij apps en de media-scanner. De best
   <string name="filter_path_hint">Part of Folder or Filename. %=Wildcard</string>
   <string name="lbl_any">Zoek</string>
   <string name="filter_any_hint">Part of Tags, Title, Description or Path</string>
-  <string name="lbl_images_public">Public Images</string>
+  <string name="lbl_images_public">Public Image</string>
   <string name="lbl_images_private">Privé foto\'s</string>
   <string name="lbl_with_no_tags">Zonder tags</string>
   <string name="lbl_tags_include">+Tags</string>

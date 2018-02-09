@@ -26,6 +26,7 @@ import android.util.Log;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.IGalleryFilter;
+import de.k3b.io.VISIBILITY;
 
 /**
  * Created by k3b on 21.06.2016.
@@ -47,7 +48,7 @@ public class FotoThumbSql {
                 .addFrom(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE.toString())
                 .addWhere(FotoSql.SQL_COL_PATH +
                         " like ?", imagePath + "%"),
-                IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC)
+                VISIBILITY.PRIVATE_PUBLIC)
                 ;
     }
 
@@ -66,7 +67,7 @@ public class FotoThumbSql {
 
             Cursor c = null;
             try {
-                c = FotoSql.createCursorForQuery(mDebugPrefix + "getStatistic", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                c = FotoSql.createCursorForQuery(mDebugPrefix + "getStatistic", context, query, VISIBILITY.PRIVATE_PUBLIC);
                 if (Global.debugEnabledSql) {
                     Log.i(Global.LOG_CONTEXT, mDebugPrefix + "getStatistic " + c.getCount() +
                             "\n\t" + query.toSqlString());

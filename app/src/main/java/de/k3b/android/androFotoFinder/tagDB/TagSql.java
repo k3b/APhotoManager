@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 by k3b.
+ * Copyright (c) 2016-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -27,10 +27,12 @@ import android.database.DatabaseUtils;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.media.MediaContentValues;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
@@ -39,6 +41,7 @@ import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.ListUtils;
+import de.k3b.io.VISIBILITY;
 import de.k3b.media.MediaUtil;
 import de.k3b.media.MediaXmpSegment;
 import de.k3b.media.MetaWriterExifXml;
@@ -73,6 +76,7 @@ public class TagSql extends FotoSql {
 
     protected static final String FILTER_EXPR_TAGS_NONE         = "(" + SQL_COL_EXT_TAGS + " is null)";
     protected static final String FILTER_EXPR_TAGS_INCLUDED = "(" + SQL_COL_EXT_TAGS + " like ?)";
+
     protected static final String FILTER_EXPR_TAGS_NONE_OR_INCLUDED = "(" + FILTER_EXPR_TAGS_NONE
             + " or " + FILTER_EXPR_TAGS_INCLUDED +")";
     protected static final String FILTER_EXPR_TAG_EXCLUDED = "(" + SQL_COL_EXT_TAGS + " not like ?)";
@@ -97,13 +101,13 @@ public class TagSql extends FotoSql {
             parseTagsFromQuery(query, remove, resultFilter);
 
             if (getParams(query, FILTER_EXPR_PRIVATE_PUBLIC, remove) != null) {
-                resultFilter.setVisibility(IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                resultFilter.setVisibility(VISIBILITY.PRIVATE_PUBLIC);
             }
             if (getParams(query, FILTER_EXPR_PRIVATE, remove) != null) {
-                resultFilter.setVisibility(IGalleryFilter.VISIBILITY_PRIVATE);
+                resultFilter.setVisibility(VISIBILITY.PRIVATE);
             }
             if (getParams(query, FILTER_EXPR_PUBLIC, remove) != null) {
-                resultFilter.setVisibility(IGalleryFilter.VISIBILITY_PUBLIC);
+                resultFilter.setVisibility(VISIBILITY.PUBLIC);
             }
 
             return resultFilter;
@@ -235,6 +239,25 @@ public class TagSql extends FotoSql {
         }
     }
 
+    public static int fixPrivate(Context context) {
+        // update ... set media_type=1001 where media_type=1 and tags like '%;PRIVATE;%'
+        ContentValues values = new ContentValues();
+        values.put(SQL_COL_EXT_MEDIA_TYPE, MEDIA_TYPE_IMAGE_PRIVATE);
+        StringBuilder where = new StringBuilder();
+        where
+            .append(TagSql.FILTER_EXPR_PUBLIC)
+            .append(" AND (")
+            .append(TagSql.FILTER_EXPR_TAGS_INCLUDED);
+        if (FotoLibGlobal.renamePrivateJpg) {
+            where.append(" OR ").append(TagSql.FILTER_EXPR_PATH_LIKE.replace("?","'%" +
+                            MediaUtil.IMG_TYPE_PRIVATE + "'"));
+        }
+        where.append(")");
+        return exexUpdateImpl("Fix visibility private", context,
+                values, where.toString(), new String[] {"%;" + VISIBILITY.TAG_PRIVATE +
+                ";%"});
+    }
+
     public static void setTags(ContentValues values, Date xmpFileModifyDate, String... tags) {
         values.put(SQL_COL_EXT_TAGS, TagConverter.asDbString("", tags));
         setXmpFileModifyDate(values, xmpFileModifyDate);
@@ -252,15 +275,33 @@ public class TagSql extends FotoSql {
 
     public static void setXmpFileModifyDate(ContentValues values, Date xmpFileModifyDate) {
         long lastScan = (xmpFileModifyDate != null)
-                ? xmpFileModifyDate.getTime() // millisec since 1970-01-01
+                ? xmpFileModifyDate.getTime()/1000 // secs since 1970-01-01
                 : EXT_LAST_EXT_SCAN_UNKNOWN;
         setXmpFileModifyDate(values, lastScan);
     }
 
-    public static void setXmpFileModifyDate(ContentValues values, long xmpFileModifyDateMilliSecs) {
+    public static void setXmpFileModifyDate(ContentValues values, long xmpFileModifyDateSecs) {
         if ((values != null)
-                && (xmpFileModifyDateMilliSecs != EXT_LAST_EXT_SCAN_UNKNOWN)) {
-            values.put(SQL_COL_EXT_XMP_LAST_MODIFIED_DATE, xmpFileModifyDateMilliSecs);
+                && (xmpFileModifyDateSecs != EXT_LAST_EXT_SCAN_UNKNOWN)) {
+            values.put(SQL_COL_EXT_XMP_LAST_MODIFIED_DATE, xmpFileModifyDateSecs);
+        }
+    }
+
+    public static void setFileModifyDate(ContentValues values, String path) {
+        File f = new File(path);
+
+        if ((values != null)
+                && (f != null)) {
+            long millisecs = f.lastModified();
+            if (millisecs != 0) {
+                setFileModifyDate(values, millisecs / 1000);
+            }
+        }
+    }
+
+    public static void setFileModifyDate(ContentValues values, long fileModifyDateSecs) {
+        if (fileModifyDateSecs != 0) {
+            values.put(SQL_COL_LAST_MODIFIED, fileModifyDateSecs);
         }
     }
 
@@ -290,21 +331,34 @@ public class TagSql extends FotoSql {
      * @param allowSetNulls     if one of these columns are null, the set null is copied, too
      * @return number of changed db items
      */
-    public static int updateDB(String dbgContext, Context context, String path,
+    public static int updateDB(String dbgContext, Context context, String oldFullJpgFilePath,
                                MetaWriterExifXml jpg, MediaUtil.FieldID... allowSetNulls) {
-        if ((jpg != null) && (!MediaScanner.isNoMedia(path))) {
+        if ((jpg != null) && (!MediaScanner.isNoMedia(oldFullJpgFilePath))) {
             ContentValues dbValues = new ContentValues();
             MediaContentValues mediaValueAdapter = new MediaContentValues();
 
             // dbValues.clear();
-            if (MediaUtil.copyNonEmpty(mediaValueAdapter.set(dbValues, null), jpg, allowSetNulls) >= 1) {
-                mediaValueAdapter.setPath(path);
+            final int modifiedColumCout = MediaUtil.copyNonEmpty(mediaValueAdapter.set(dbValues, null), jpg, allowSetNulls);
+            if (modifiedColumCout >= 1) {
+                String newFullJpgFilePath = null;
+                if (FotoLibGlobal.renamePrivateJpg) {
+                    newFullJpgFilePath = MediaUtil.getModifiedPath(jpg);
+                }
+
+                if (newFullJpgFilePath == null) {
+                    newFullJpgFilePath = oldFullJpgFilePath;
+                }
+
+                mediaValueAdapter.setPath(newFullJpgFilePath);
+
                 MediaXmpSegment xmp = jpg.getXmp();
                 long xmpFilelastModified = (xmp != null) ? xmp.getFilelastModified() : 0;
                 if (xmpFilelastModified == 0) xmpFilelastModified = TagSql.EXT_LAST_EXT_SCAN_NO_XMP;
                 TagSql.setXmpFileModifyDate(dbValues, xmpFilelastModified);
-                return TagSql.execUpdate(dbgContext, context, path,
-                        TagSql.EXT_LAST_EXT_SCAN_UNKNOWN, dbValues, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                TagSql.setFileModifyDate(dbValues, newFullJpgFilePath);
+
+                return TagSql.execUpdate(dbgContext, context, oldFullJpgFilePath,
+                        TagSql.EXT_LAST_EXT_SCAN_UNKNOWN, dbValues, VISIBILITY.PRIVATE_PUBLIC);
             }
 
 
@@ -313,7 +367,7 @@ public class TagSql extends FotoSql {
     }
 
 
-    public static int execUpdate(String dbgContext, Context context, String path, long xmpFileDate, ContentValues values, int visibility) {
+    public static int execUpdate(String dbgContext, Context context, String path, long xmpFileDate, ContentValues values, VISIBILITY visibility) {
         if ((!Global.Media.enableXmpNone) || (xmpFileDate == EXT_LAST_EXT_SCAN_UNKNOWN)) {
             return execUpdate(dbgContext, context, path, values, visibility);
         }
@@ -327,12 +381,12 @@ public class TagSql extends FotoSql {
         if (addWhereAnyOfTags(query, tags) > 0) {
             Cursor c = null;
             try {
-                c = createCursorForQuery("getTagRefCount", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                c = createCursorForQuery("getTagRefCount", context, query, VISIBILITY.PRIVATE_PUBLIC);
                 if (c.moveToFirst()) {
                     return c.getInt(0);
                 }
             } catch (Exception ex) {
-                Log.e(Global.LOG_CONTEXT, "FotoSql.execGetGeoRectangle(): error executing " + query, ex);
+                Log.e(Global.LOG_CONTEXT, "FotoSql.getTagRefCount(): error executing " + query, ex);
             } finally {
                 if (c != null) c.close();
             }
@@ -381,7 +435,7 @@ public class TagSql extends FotoSql {
 
         if (filterCount > 0) {
             try {
-                c = createCursorForQuery("loadTagWorflowItems", context, query, IGalleryFilter.VISIBILITY_PRIVATE_PUBLIC);
+                c = createCursorForQuery("loadTagWorflowItems", context, query, VISIBILITY.PRIVATE_PUBLIC);
                 if (c.moveToFirst()) {
                     do {
                         result.add(new TagWorflowItem(c.getLong(0), c.getString(1), TagConverter.fromString(c.getString(2)),

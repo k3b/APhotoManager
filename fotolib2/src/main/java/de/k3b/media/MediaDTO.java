@@ -22,6 +22,8 @@ package de.k3b.media;
 import java.util.Date;
 import java.util.List;
 
+import de.k3b.io.VISIBILITY;
+
 /**
  * DTO=DataTransferObject: In Memory implementation of {@link IMetaApi}.
  *
@@ -37,6 +39,7 @@ public class MediaDTO implements IMetaApi {
     private String description;
     private List<String> tags;
     private Integer rating;
+    private VISIBILITY visibility;
 
     public MediaDTO() {}
 
@@ -139,6 +142,15 @@ public class MediaDTO implements IMetaApi {
     @Override
     public IMetaApi setRating(Integer value) {
         this.rating = value;
+        return this;
+    }
+
+    public VISIBILITY getVisibility() {
+        return visibility;
+    }
+
+    public IMetaApi setVisibility(VISIBILITY visibility) {
+        this.visibility = visibility;
         return this;
     }
 

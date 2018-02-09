@@ -24,7 +24,9 @@ import android.database.Cursor;
 import java.util.Date;
 import java.util.List;
 
+import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
+import de.k3b.io.VISIBILITY;
 import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaUtil;
 import de.k3b.tagDB.TagConverter;
@@ -45,6 +47,7 @@ public class MediaCursor implements IMetaApi {
     private final int colLatitude;
     private final int colLongitude;
     private final int colRating;
+    private final int colType;
 
     public MediaCursor(Cursor cursor) {
         this.cursor = cursor;
@@ -58,6 +61,7 @@ public class MediaCursor implements IMetaApi {
         colLatitude         = getColumnIndex(TagSql.SQL_COL_LAT);
         colLongitude        = getColumnIndex(TagSql.SQL_COL_LON);
         colRating           = getColumnIndex(TagSql.SQL_COL_EXT_RATING);
+        colType             = getColumnIndex(TagSql.SQL_COL_EXT_MEDIA_TYPE);
     }
 
     public Integer getID() {
@@ -112,6 +116,18 @@ public class MediaCursor implements IMetaApi {
         return cursor.getInt(colRating);
     }
 
+    @Override
+    public VISIBILITY getVisibility() {
+        if (colType == -1) return null;
+        Integer ty = cursor.getInt(colType);
+        if (ty != null) {
+            if (ty.intValue() == FotoSql.MEDIA_TYPE_IMAGE_PRIVATE)
+                return VISIBILITY.PRIVATE;
+
+            return VISIBILITY.PUBLIC;
+        }
+        return null;
+    }
 
     @Override
     public List<String> getTags() {
@@ -161,6 +177,11 @@ public class MediaCursor implements IMetaApi {
 
     @Override
     public IMetaApi setRating(Integer value) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public IMetaApi setVisibility(VISIBILITY value) {
         throw new UnsupportedOperationException();
     }
 

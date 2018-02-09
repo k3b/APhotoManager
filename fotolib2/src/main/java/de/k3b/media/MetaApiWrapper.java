@@ -22,6 +22,8 @@ package de.k3b.media;
 import java.util.Date;
 import java.util.List;
 
+import de.k3b.io.VISIBILITY;
+
 /**
  * (Default) Implementation of {@link IMetaApi} to forward all methods to an inner child {@link IMetaApi}.
  *
@@ -116,6 +118,19 @@ public class MetaApiWrapper implements IMetaApi {
         if (writeChild != null) writeChild.setRating(value);
         return this;
     }
+
+    @Override
+    public VISIBILITY getVisibility() {
+        return (readChild == null) ? null : readChild.getVisibility();
+    }
+
+    @Override
+    public IMetaApi setVisibility(VISIBILITY value) {
+        modifyCount++;
+        if (writeChild != null) writeChild.setVisibility(value);
+        return this;
+    }
+
 
     public String getPath() {
         return (readChild == null) ? null : readChild.getPath();

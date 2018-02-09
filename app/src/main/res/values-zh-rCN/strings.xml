@@ -104,7 +104,7 @@
   <string name="settings_debug_sql_summary">...... 包含已执行 SQL查询。</string>
   <string name="settings_debug_view_item_summary">...... 包含 网格/列表视图条目。</string>
   <string name="settings_debug_memory_title">日志服务内存消耗</string>
-  <string name="settings_debug_meta_io">记录 JPG/XMP文件元数据的读写</string>
+  <string name="settings_debug_meta_io">记录 Jpg/Xmp文件元数据的读写</string>
   <string name="settings_debug_libs_summary">&#8230; of 3rd party libraries.</string>
   <string name="settings_debug_title">日志服务杂项</string>
   <string name="settings_debug_summary">...... 包含其他日志消息。</string>
@@ -177,8 +177,8 @@
   <string name="tags_hint">在标签名上长按打开菜单</string>
   <string name="tags_defaults">活动、人们、地点、主题、项目</string>
   <string name="settings_media_update_strategy_title">将变更写入到</string>
-  <string name="settings_media_update_strategy_jpg_xmp_create">jpp与xmp文件（自动创建）</string>
-  <string name="settings_media_update_strategy_jpg_xmp_update">jpg (如果存在，同时更新xmp文件)</string>
+  <string name="settings_media_update_strategy_jpg_xmp_create">jpg 和 xmp (如果未找到则创建)</string>
+  <string name="settings_media_update_strategy_jpg_xmp_update">jpg (如存在xmp文件，一并更新)</string>
   <string name="settings_media_update_strategy_jpg">仅jpg文件</string>
   <string name="settings_media_update_strategy_xmp">仅xmp文件</string>
   <string name="settings_xmp_file_schema_title">Xmp附加文件使用长文件名？</string>
@@ -203,5 +203,13 @@
 			To .../path/toFile/
 				1708NewName0001.jpg -->
   <string name="preview_message_format">"%1$s %2$d 照片\n\t%3$s (%4$s), …\n至%5$s\n\t%6$s"</string>
+  <!-- new in 0.6.3 additional sorting options -->
+  <string name="sort_by_file_size">大小</string>
+  <string name="sort_by_width">宽度</string>
+  <!-- new in 0.6.3 edit exif images can have visibility private or public -->
+  <string name="lbl_image_visibility">可见性</string>
+  <!-- #105 Appplication-pinning, aka "Kiosk Mode", "LockTask": disable dangerous menu-items -->
+  <string name="menu_title_app_pinnend">固定应用窗口</string>
+  <string name="menu_title_app_unpinnend">应用窗口取消保护/固定</string>
   <!--  depricated tags_update_result_format use image_success_update_format instead -->
 </resources>

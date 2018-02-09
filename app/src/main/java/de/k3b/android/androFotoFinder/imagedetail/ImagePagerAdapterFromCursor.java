@@ -205,8 +205,16 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
         Cursor cursor = getCursorAt(position);
         if (cursor != null) {
             String fullPhotoPath = getFullFilePath(position);
+
             // determine max(with,height) from db
-            final int colSize = (cursor != null) ? cursor.getColumnIndex(FotoSql.SQL_COL_SIZE) : -1;
+            // new col id for with since ver 0.6.3
+            int colSize = cursor.getColumnIndex(FotoSql.SQL_COL_WIDTH);
+
+            if (colSize < 0) {
+                // backward compatibility old col id for with before ver 0.6.3
+                colSize = cursor.getColumnIndex(FotoSql.SQL_COL_SIZE);
+            }
+
             int size = (colSize >= 0) ? cursor.getInt(colSize) : 32767;
 
             if (fullPhotoPath != null) {

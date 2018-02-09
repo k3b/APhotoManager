@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -84,24 +84,24 @@ public class RecursiveMediaScannerAsyncTask extends MediaScannerAsyncTask {
         return resultCount;
     }
 
-    private int scanDirOrFile(File parent) {
+    private int scanDirOrFile(File file) {
         int resultCount = 0;
-        final String parentPath = FileUtils.tryGetCanonicalPath(parent, null);
-        if (parentPath != null) {
+        final String fullFilePath = FileUtils.tryGetCanonicalPath(file, null);
+        if (fullFilePath != null) {
             if (!isCancelled()) {
-                if (parent.isDirectory()) {
-                    String[] childFileNames = parent.list(MediaUtil.JPG_FILENAME_FILTER);
+                if (file.isDirectory()) {
+                    String[] childFileNames = file.list(MediaUtil.JPG_FILENAME_FILTER);
 
                     if (childFileNames != null) {
                         // #33
                         // convert to absolute paths
                         for (int i = 0; i < childFileNames.length; i++) {
-                            childFileNames[i] = parentPath + "/" + childFileNames[i];
+                            childFileNames[i] = fullFilePath + "/" + childFileNames[i];
                         }
-                        resultCount += runScanner(parentPath, childFileNames);
+                        resultCount += runScanner(fullFilePath, childFileNames);
                     }
 
-                    File[] subDirs = parent.listFiles(new FileFilter() {
+                    File[] subDirs = file.listFiles(new FileFilter() {
                         @Override
                         public boolean accept(File file) {
                             return ((file != null) && (file.isDirectory()) && (!file.getName().startsWith(".")));
@@ -116,11 +116,11 @@ public class RecursiveMediaScannerAsyncTask extends MediaScannerAsyncTask {
                             }
                         }
                     }
-                } else if (MediaUtil.isImage(parent.getName(), true)) {
-                    resultCount += runScanner(parentPath, parentPath);
+                } else if (MediaUtil.isImage(file.getName(), MediaUtil.IMG_TYPE_ALL)) {
+                    resultCount += runScanner(fullFilePath, fullFilePath);
                 }
             } else if (mPaused != null) {
-                mPaused.add(parentPath);
+                mPaused.add(fullFilePath);
             }
         }
         return resultCount;

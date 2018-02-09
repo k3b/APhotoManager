@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -26,9 +26,12 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.io.DateUtil;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileProcessor;
+import de.k3b.io.ListUtils;
+import de.k3b.io.VISIBILITY;
 import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaUtil;
 import de.k3b.tagDB.TagConverter;
@@ -67,12 +70,21 @@ public class TransactionLoggerBase implements Closeable {
         execLog = null;
     }
     public void addChanges(IMetaApi newData, EnumSet<MediaUtil.FieldID> changes, List<String> oldTags) {
+        addComment("apply changes image#",id);
+
         if (changes.contains(MediaUtil.FieldID.dateTimeTaken))  addChangesDateTaken(newData.getDateTimeTaken());
         if (changes.contains(MediaUtil.FieldID.latitude_longitude)) addChanges(MediaTransactionLogEntryType.GPS, DirectoryFormatter.formatLatLon(newData.getLatitude()) + " " + DirectoryFormatter.formatLatLon(newData.getLongitude()), false);
         if (changes.contains(MediaUtil.FieldID.description))  addChanges(MediaTransactionLogEntryType.DESCRIPTION, newData.getDescription(), true);
         if (changes.contains(MediaUtil.FieldID.title))  addChanges(MediaTransactionLogEntryType.HEADER, newData.getTitle(), true);
         if (changes.contains(MediaUtil.FieldID.rating)) addChanges(MediaTransactionLogEntryType.RATING, (newData.getRating() != null) ? newData.getRating().toString(): "0", false);
+
         if (changes.contains(MediaUtil.FieldID.tags)) addChangesTags(oldTags, newData.getTags());
+
+        final VISIBILITY visibility = newData.getVisibility();
+        if (changes.contains(MediaUtil.FieldID.visibility) && VISIBILITY.isChangingValue(visibility)) {
+            addChanges(MediaTransactionLogEntryType.VISIBILITY, ((VISIBILITY.PRIVATE.equals(visibility)) ? "1": "0") + " " + visibility, false);
+        }
+
     }
 
     protected void addChangesDateTaken(Date newData) {
@@ -89,11 +101,32 @@ public class TransactionLoggerBase implements Closeable {
         if (removedTags.size() > 0) {
             addChanges(MediaTransactionLogEntryType.TAGSREMOVE, TagConverter.asBatString(removedTags), false);
         }
+        if ((newTags != null) && (newTags.size() > 0)) {
+            addChanges(MediaTransactionLogEntryType.TAGS, TagConverter.asBatString(newTags), false);
+        }
     }
 
-    public void addChangesCopyMove(boolean move, String newFullPath) {
-        addChanges(move ? MediaTransactionLogEntryType.MOVE : MediaTransactionLogEntryType.COPY,
-                newFullPath, true);
+    public void addChangesCopyMove(boolean move, String newFullPath, String debugContext) {
+        if (this.path.compareToIgnoreCase(newFullPath) != 0) {
+            if (!move) {
+                addComment(debugContext, "copy image #", this.id);
+            }
+
+            addChanges(move ? MediaTransactionLogEntryType.MOVE : MediaTransactionLogEntryType.COPY,
+                    newFullPath, true);
+            if (move) {
+                String oldPath = this.path;
+                // id remains the same but path has changed
+                set(this.id, newFullPath);
+                addComment(debugContext, "image #", this.id, " was renamed from ", oldPath);
+            }
+        }
+    }
+
+    public void addComment(Object... comment) {
+        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+            addChanges(MediaTransactionLogEntryType.COMMENT, ListUtils.toString(" ", comment), true);
+        }
     }
 
     /** android specific logging is implemented in AndroidTransactionLogger in Override */

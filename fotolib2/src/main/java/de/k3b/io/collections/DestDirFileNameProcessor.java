@@ -31,8 +31,11 @@ import de.k3b.io.IFileNameProcessor;
 
 public class DestDirFileNameProcessor  extends FileProcessor implements IFileNameProcessor {
     private final File destDirFolder;
-    public DestDirFileNameProcessor(File destDirFolder) {
+    private final boolean doNotRenameIfSourceInDestFolder;
+
+    public DestDirFileNameProcessor(File destDirFolder, boolean doNotRenameIfSourceInDestFolder) {
         this.destDirFolder = destDirFolder;
+        this.doNotRenameIfSourceInDestFolder = doNotRenameIfSourceInDestFolder;
     }
 
     /**
@@ -44,6 +47,9 @@ public class DestDirFileNameProcessor  extends FileProcessor implements IFileNam
      */
     @Override
     public File getNextFile(File sourceFile, Date sourceFileDate, int firstFileInstanceNumber) {
+        // usecase: apply auto where inFile is already in outdir.
+        if (doNotRenameIfSourceInDestFolder && this.destDirFolder.equals(sourceFile.getParentFile())) return sourceFile;
+
         File dest = renameDuplicate(new File(this.destDirFolder, sourceFile.getName()));
         return dest;
     }

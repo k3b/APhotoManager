@@ -49,4 +49,6 @@ public interface IDirectory {
 
     int getDirFlags();
 
+    /** reloads entry flags */
+    void refresh();
 }

@@ -25,6 +25,7 @@ import java.util.List;
 
 import de.k3b.csv2db.csv.CsvItem;
 import de.k3b.io.GeoUtil;
+import de.k3b.io.VISIBILITY;
 import de.k3b.tagDB.TagConverter;
 
 /**
@@ -41,7 +42,8 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
             MediaXmpFieldDefinition.GPSLatitude.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
             MediaXmpFieldDefinition.GPSLongitude.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
             MediaXmpFieldDefinition.subject.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
-            MediaXmpFieldDefinition.Rating.getShortName();
+            MediaXmpFieldDefinition.Rating.getShortName() + DEFAULT_CSV_FIELD_DELIMITER +
+            MediaXmpFieldDefinition.Visibility.getShortName();
 
     private int colFilePath;
     private int colFileModifyDate;
@@ -55,6 +57,7 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
     private int colLatitude;
     private int colLongitude;
     private int colRating;
+    private int colVisibility;
 
     /** there are cols 0..maxColumnIndex */
     public int maxColumnIndex;
@@ -87,6 +90,7 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
         colLatitude         = getColumnIndex(lcHeader, MediaXmpFieldDefinition.GPSLatitude);
         colLongitude        = getColumnIndex(lcHeader, MediaXmpFieldDefinition.GPSLongitude);
         colRating           = getColumnIndex(lcHeader, MediaXmpFieldDefinition.Rating);
+        colVisibility       = getColumnIndex(lcHeader, MediaXmpFieldDefinition.Visibility);
     }
 
     @Override
@@ -166,7 +170,6 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
         return this;
     }
 
-
     @Override
     public Integer getRating() {
         return getInteger("getRating", colRating);
@@ -175,6 +178,20 @@ public class MediaCsvItem extends CsvItem implements IMetaApi {
     @Override
     public IMetaApi setRating(Integer value) {
         setString(value, colRating);
+        return this;
+    }
+
+    @Override
+    public VISIBILITY getVisibility() {
+        String sValue = getString("getVisibility", colVisibility);
+        if (sValue == null) return null;
+        return VISIBILITY.valueOf(sValue);
+    }
+
+    @Override
+    public IMetaApi setVisibility(VISIBILITY value) {
+        String sValue = VISIBILITY.isChangingValue(value) ? value.toString() : null;
+        setString(sValue, colVisibility);
         return this;
     }
 

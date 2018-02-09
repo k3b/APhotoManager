@@ -52,6 +52,8 @@ import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
+import de.k3b.io.ListUtils;
+import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.DateUtil;
 import de.k3b.io.RuleFileNameProcessor;
@@ -125,9 +127,6 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
-        if (Global.debugEnabled) {
-            Log.d(Global.LOG_CONTEXT, mDebugPrefix + " onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME) + "\n" + savedInstanceState);
-        }
         mSelectedFiles = getSelectedFiles("onCreate ", intent, false);
 
         // Edit dir or edit ".apm"
@@ -148,6 +147,15 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
             }
         }
 
+        if (Global.debugEnabled) {
+            final String nl = "\n\t.";
+            Log.d(Global.LOG_CONTEXT, ListUtils.toString(" ", mDebugPrefix,
+                    "onCreate",intent.toUri(Intent.URI_INTENT_SCHEME),
+                    nl,currentOutDir,
+                    nl,"savedInstanceState",savedInstanceState,
+                    nl,mCurrentData));
+        }
+
         if ((currentOutDir == null) || (mCurrentData == null)) {
             onFatalError(mDebugPrefix + "Missing Intent.data parameter. intent="
                     + intent.toUri(Intent.URI_INTENT_SCHEME), null);
@@ -160,11 +168,13 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
         if (mCurrentData.getMediaDefaults() == null) {
             File first = mSelectedFiles.getFile(0);
 
-            IMetaApi exampleExif = null;
+            MediaAsString exampleExif = new MediaAsString();
             if ((first != null) && (first.exists())) {
-                exampleExif = MediaScanner.getInstance(this).getExifFromFile(first);
+                IMetaApi example = MediaScanner.getInstance(this).getExifFromFile(first);
+                if (example != null) {
+                    exampleExif.setData(example);
+                }
             }
-            if (exampleExif == null) exampleExif = new MediaAsString();
             exampleExif.setDateTimeTaken(null);
             exampleExif.setPath(null);
             mCurrentData.setMediaDefaults(exampleExif);
@@ -176,6 +186,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     private void onFatalError(String msg, Exception exception) {
         Log.e(Global.LOG_CONTEXT, msg, exception);
         Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+        setResult(Activity.RESULT_CANCELED, null);
         finish();
     }
 
@@ -203,46 +214,57 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
         mCurrentData.setNumberFormat(getSelectedPattern(mSpinnerNumberPattern));
     }
 
+    /** to avoid endless recursion toGui() ... TextView.setText ... afterTextChanged ... toGui() */
+    private int inToGuiCount = 0;
     private void toGui() {
-        mEditName.setText(mCurrentData.getName());
-        select(mSpinnerDatePattern, mCurrentData.getDateFormat());
-        String numberFormat = mCurrentData.getNumberFormat();
-        select(mSpinnerNumberPattern, numberFormat);
-        mProcessor.set(mCurrentData.getDateFormat(), mCurrentData.getName(), numberFormat);
+        inToGuiCount++;
+        try {
+            mEditName.setText(mCurrentData.getName());
+            select(mSpinnerDatePattern, mCurrentData.getDateFormat());
+            String numberFormat = mCurrentData.getNumberFormat();
+            select(mSpinnerNumberPattern, numberFormat);
+            mProcessor.set(mCurrentData.getDateFormat(), mCurrentData.getName(), numberFormat);
 
-        File exampleSrcfile = mProcessor.getFile(mSelectedFiles.getFile(0));
-        Date exampleDate = getExampleDate(exampleSrcfile);
-        File exampleResultFile = mProcessor.getNextFile(exampleSrcfile, exampleDate, StringUtils.isNullOrEmpty(numberFormat) ? 0 : 1);
+            File exampleSrcfile = mProcessor.getFile(mSelectedFiles.getFile(0));
+            Date exampleDate = getExampleDate(exampleSrcfile);
+            File exampleResultFile = mProcessor.getNextFile(exampleSrcfile, exampleDate, StringUtils.isNullOrEmpty(numberFormat) ? 0 : 1);
 
-        // !!! where to get "copy"/"move" from?
-        String photoOperation = ""; // getString(R.string.move_menu_title);
+            // !!! where to get "copy"/"move" from?
+            String photoOperation = ""; // getString(R.string.move_menu_title);
 
-        // %1$s %2$d Photos\n\t%3$s (%4$s), ...\nTo %5$s\n\t%6$s
+            // %1$s %2$d Photos\n\t%3$s (%4$s), ...\nTo %5$s\n\t%6$s
         /*
             Copy 5 Photos
 				hello.jpg (2017-08-02), ...
 			To .../path/toFile/
 				1708NewName0001.jpg
         */
-        mPreview.setText(getString(R.string.preview_message_format,
-                photoOperation,
-                mSelectedFiles.size(),
-                (exampleSrcfile == null) ? null : exampleSrcfile.getName(),
-                DateUtil.toIsoDateString(exampleDate),
-                mCurrentData.getOutDir(), exampleResultFile.getName()));
+            mPreview.setText(getString(R.string.preview_message_format,
+                    photoOperation,
+                    mSelectedFiles.size(),
+                    (exampleSrcfile == null) ? null : exampleSrcfile.getName(),
+                    DateUtil.toIsoDateString(exampleDate),
+                    mCurrentData.getOutDir(), exampleResultFile.getName()));
 
-        IMetaApi mediaChanges = mCurrentData.getMediaDefaults();
-        String exifChange = (mediaChanges == null) ? null : MediaUtil.toString(mediaChanges, false, mLabelGenerator, MediaUtil.FieldID.clasz);
-        mExifChanges.setText(exifChange);
+            IMetaApi mediaChanges = mCurrentData.getMediaDefaults();
+            String exifChange = null;
+            if (mediaChanges != null) {
+                exifChange = MediaUtil.toString(mediaChanges, false, mLabelGenerator, MediaUtil.FieldID.clasz);
+            }
+            mExifChanges.setText(exifChange);
+        } finally {
+            inToGuiCount--;
+        }
     }
 
-    private void select(Spinner spinner, String selectedFormat) {
+    private void select(Spinner spinner, String selectedValueOrNull) {
         ArrayAdapter<Pattern> adapter = (ArrayAdapter<Pattern>) spinner.getAdapter();
         int count = adapter.getCount();
+        String selectedValue = selectedValueOrNull == null ? "" : selectedValueOrNull;
 
         for (int i = 0; i < count; i++) {
             Pattern p = adapter.getItem(i);
-            if (StringUtils.compare(p.pattern, selectedFormat) == 0) {
+            if (StringUtils.compare(p.pattern, selectedValue) == 0) {
                 spinner.setSelection(i);
             }
         }
@@ -301,14 +323,17 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
 
             @Override
             public void afterTextChanged(Editable s) {
-                String newValue = s.toString();
-                if (0 != StringUtils.compare(newValue, mCurrentData.getName())) {
-                    int start = mEditName.getSelectionStart();
-                    int end = mEditName.getSelectionEnd();
-                    // prevent stackoverflow
-                    mCurrentData.setName(newValue);
-                    toGui();
-                    mEditName.setSelection(start, end); // prevent cursor from jumping
+                // to avoid endless recursion toGui() ... TextView.setText ... afterTextChanged ... toGui()
+                if (inToGuiCount == 0) {
+                    String newValue = s.toString();
+                    if (0 != StringUtils.compare(newValue, mCurrentData.getName())) {
+                        int start = mEditName.getSelectionStart();
+                        int end = mEditName.getSelectionEnd();
+                        // prevent stackoverflow
+                        mCurrentData.setName(newValue);
+                        toGui();
+                        mEditName.setSelection(start, end); // prevent cursor from jumping
+                    }
                 }
             }
         });
@@ -481,10 +506,14 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
 
         switch (id) {
             case R.id.cmd_cancel:
+                setResult(Activity.RESULT_CANCELED, null);
                 finish();
                 return true;
             case R.id.cmd_ok:
                 onOk();
+                return true;
+            case R.id.cmd_clear:
+                clearFilter();
                 return true;
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
@@ -532,10 +561,16 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
         fromGui();
         try {
             mCurrentData.save();
+            setResult(Activity.RESULT_OK, null);
         } catch (IOException e) {
             onFatalError("onOk()-save()", e);
         }
         finish();
+    }
+
+    private void clearFilter() {
+        mCurrentData.clear();
+        toGui();
     }
 
     /**
@@ -555,6 +590,8 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
                     return getString2(R.string.lbl_latitude_short) + "/" + getString(R.string.lbl_longitude_short) + " ";
                 case rating:
                     return getString2(R.string.lbl_rating);
+                case visibility:
+                    return getString2(R.string.lbl_image_visibility);
                 case tags:
                     return getString2(R.string.lbl_tag);
                 case path:
