@@ -19,8 +19,10 @@
 
 package de.k3b.io;
 
+import static java.lang.System.out;
 import static org.junit.Assert.*;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -50,7 +52,7 @@ public class OSDirectoryTests {
         mRoot = createTestData("/", "a/b/c/d");
         IDirectory found = OSDirectory.find(mRoot, new File("/a/b/c"));
 
-        System.out.println(mRoot.toTreeString());
+        out.println(mRoot.toTreeString());
         assertNotNull(found);
         assertEquals(1, found.getChildren().size());
         assertEquals("d", found.getChildren().get(0).getRelPath());
@@ -85,7 +87,7 @@ public class OSDirectoryTests {
         mRoot = createTestData("/", "a/b/c/d");
         IDirectory found = OSDirectory.find(mRoot, new File("/q"));
 
-        System.out.println(mRoot.toTreeString());
+        out.println(mRoot.toTreeString());
         assertNotNull(found);
         assertEquals(2, mRoot.getChildren().size());
     }
@@ -122,6 +124,39 @@ public class OSDirectoryTests {
     public void shoudNotFind() {
         assertEquals(null, mRoot.find("DoesReallyNotExist"));
     }
+
+    @Ignore("https://stackoverflow.com/questions/48710003/how-to-make-this-junit-test-for-java-memory-leak-pass")
+    @Test
+    public void shoudNotMemoryLeak()
+    {
+        Runtime runtime = Runtime.getRuntime();
+        // make shure that gc has collected all
+        System.gc ();
+        System.runFinalization ();
+
+        // memory before creating my sut
+        long memoryUsedBefore = runtime.freeMemory();
+        long memoryUsedAfter = 0;
+
+        // this consumes memory
+        StringBuilder sut = new StringBuilder("hello world");
+
+        // make memory available to gc
+        sut = null;
+
+        // make shure that gc has collected all
+        System.gc ();
+        System.runFinalization ();
+
+        // memory after creating my sut
+        memoryUsedAfter = runtime.freeMemory();
+
+        // this
+        assertEquals(memoryUsedAfter, memoryUsedBefore);
+    }
+
+
+
 
     private OSDirectory createTestData(String rootName, String elements) {
         OSDirectory root = new OSDirectory(new File(rootName), null, new ArrayList<IDirectory>());
