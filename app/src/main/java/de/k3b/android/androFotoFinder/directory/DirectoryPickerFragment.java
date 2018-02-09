@@ -23,6 +23,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -368,6 +370,8 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                 return onCreateSubDirQuestion(popUpSelection);
             case R.id.cmd_apm_edit:
                 return onEditApm(popUpSelection);
+            case android.R.id.copy:
+                return onCopy(popUpSelection);
             case R.id.cmd_photo:
                 return showPhoto(popUpSelection);
             case R.id.cmd_gallery:
@@ -391,6 +395,18 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             mPopUpSelection.refresh();
             this.mAdapter.notifyDataSetChanged();
         }
+    }
+
+    private boolean onCopy(IDirectory selection) {
+        String path = (selection == null) ? null : selection.getAbsolute();
+        if (!StringUtils.isNullOrEmpty(path)) {
+            ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText(getActivity().getString(R.string.lbl_path), path);
+            clipboard.setPrimaryClip(clip);
+            Toast.makeText(getActivity(), path, Toast.LENGTH_LONG).show();
+            return true;
+        }
+        return false;
     }
 
     private boolean onEditApm(IDirectory selection) {

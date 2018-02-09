@@ -233,23 +233,43 @@ public class OSDirectory implements IDirectory {
         }
     }
 
+    /** return the deepest added childFolder */
     public OSDirectory addChildFolder(String newCildFolderName) {
-        return addChildFolder(newCildFolderName, null);
+        if ((newCildFolderName != null) && (!newCildFolderName.isEmpty())) {
+            String subfolderNames[] = newCildFolderName.split("/|\\\\");
+            return addChildSubFolders(subfolderNames);
+        }
+        return null;
     }
 
-    /** for unittesting without load on demand */
-    protected OSDirectory addChildFolder(String newCildFolderName, List<IDirectory> grandChilden) {
-        List<IDirectory> children = this.getChildren();
-        OSDirectory result = (OSDirectory) findChildByRelPath(children, newCildFolderName);
-
-        if (result == null) {
-            File newChildFile = FileUtils.tryGetCanonicalFile(new File(mCurrent, newCildFolderName), null);
-            result = new OSDirectory(newChildFile, this, grandChilden);
-            if (result != null) {
-                children.add(result);
+    /** return the deepest added childFolder */
+    private OSDirectory addChildSubFolders(String... newCildFolderNames) {
+        OSDirectory current = this;
+        if ((newCildFolderNames != null) && (newCildFolderNames.length > 0)) {
+            for (String newCildFolderName : newCildFolderNames) {
+                if ((newCildFolderName != null) && (!newCildFolderName.isEmpty())) {
+                   current = current.addChildFolder(newCildFolderName, new ArrayList<IDirectory>());
+                }
             }
         }
+        return current;
+    }
 
+    private OSDirectory addChildFolder(String newCildFolderName, List<IDirectory> grandChilden) {
+        OSDirectory result = null;
+        List<IDirectory> children = this.getChildren();
+        File newRelativeChild = new File(newCildFolderName);
+        if (!newRelativeChild.isAbsolute()) {
+            result = (OSDirectory) findChildByRelPath(children, newCildFolderName);
+
+            if (result == null) {
+                File newChildFile = FileUtils.tryGetCanonicalFile(new File(mCurrent, newCildFolderName), null);
+                result = new OSDirectory(newChildFile, this, grandChilden);
+                if (result != null) {
+                    children.add(result);
+                }
+            }
+        }
         return result;
     }
 

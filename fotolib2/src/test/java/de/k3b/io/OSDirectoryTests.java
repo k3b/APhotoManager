@@ -34,7 +34,7 @@ public class OSDirectoryTests {
 
     @Before
     public void setup() {
-        mRoot = createTestData("a","b","c","d");
+        mRoot = createTestData("a","b/c/d");
     }
 
     @Test
@@ -47,7 +47,7 @@ public class OSDirectoryTests {
 
     @Test
     public void shoudFindExistingWithRoot() {
-        mRoot = createTestData("/", "a","b","c","d");
+        mRoot = createTestData("/", "a/b/c/d");
         IDirectory found = OSDirectory.find(mRoot, new File("/a/b/c"));
 
         System.out.println(mRoot.toTreeString());
@@ -57,8 +57,32 @@ public class OSDirectoryTests {
     }
 
     @Test
+    public void shoudAddDir() {
+        OSDirectory parent = (OSDirectory) OSDirectory.find(mRoot, new File("a/b/c")); // (OSDirectory) OSDirectory.findChildByRelPath(mRoot.getChildren(), "a/b/c");
+        OSDirectory newDir = parent.addChildFolder("d1");
+
+        assertEquals(parent.getAbsolute(), newDir.getParent().getAbsolute());
+    }
+
+    @Test
+    public void shoudAddPath() {
+        OSDirectory parent = (OSDirectory) OSDirectory.find(mRoot, new File("a/b/c")); // (OSDirectory) OSDirectory.findChildByRelPath(mRoot.getChildren(), "a/b/c");
+        OSDirectory newDir = parent.addChildFolder("d1/e1");
+
+        assertEquals(parent.getAbsolute(), newDir.getParent().getParent().getAbsolute());
+    }
+
+    @Test
+    public void shoudAddDirWithSub() {
+        OSDirectory parent = (OSDirectory) OSDirectory.find(mRoot, new File("a/b/c"));
+        OSDirectory newDir = parent.addChildFolder("d/e\\f");
+
+        assertEquals(parent.getAbsolute(), newDir.getParent().getParent().getParent().getAbsolute());
+    }
+
+    @Test
     public void shoudFindNewWithRoot() {
-        mRoot = createTestData("/", "a","b","c","d");
+        mRoot = createTestData("/", "a/b/c/d");
         IDirectory found = OSDirectory.find(mRoot, new File("/q"));
 
         System.out.println(mRoot.toTreeString());
@@ -99,16 +123,9 @@ public class OSDirectoryTests {
         assertEquals(null, mRoot.find("DoesReallyNotExist"));
     }
 
-    private OSDirectory createTestData(String... elements) {
-        OSDirectory root = null;
-        if ((elements != null) && (elements.length > 0)) {
-            root = new OSDirectory(new File(elements[0]), null, new ArrayList<IDirectory>());
-
-            OSDirectory current = root;
-            for (int i = 1; i < elements.length; i++) {
-                current = current.addChildFolder(elements[i], new ArrayList<IDirectory>());
-            }
-        }
+    private OSDirectory createTestData(String rootName, String elements) {
+        OSDirectory root = new OSDirectory(new File(rootName), null, new ArrayList<IDirectory>());
+        root.addChildFolder(elements);
         return root;
     }
 }
