@@ -99,7 +99,7 @@ public class ImageDetailMetaDialogBuilder {
         sv.addView(view);
         builder.setView(sv);
 
-        builder.setPositiveButton(R.string.btn_ok, null); /*, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(android.R.string.ok, null); /*, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 this.finalize();
             }

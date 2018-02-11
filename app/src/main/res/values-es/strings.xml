@@ -30,13 +30,8 @@
   <string name="bookmark_file_comment_format">Generado en %3$s con \'%1$s\' Versión %2$s. Visitar https://github.com/k3b/APhotoManager/wiki/intentapi#sql para detalles</string>
   <string name="bookmark_load_from_menu_title">Cargar marcador desde &#8230;</string>
   <string name="bookmark_save_as_menu_title">Guardar marcador como &#8230;</string>
-  <string name="btn_cancel">Cancelar</string>
-  <string name="btn_no">No</string>
-  <string name="btn_yes">Si</string>
   <string name="btn_change">Cambio</string>
-  <string name="btn_ok">Ok</string>
   <string name="btn_pause">Pausa</string>
-  <string name="copy_menu_title">Copiar</string>
   <string name="copy_result_format">Copiados %1$d/%2$d archivos</string>
   <string name="delete_menu_title">Borrar</string>
   <string name="delete_question_message_format">"¿Está seguro que desea eliminar estos archivos permanentemente?

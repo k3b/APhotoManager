@@ -30,13 +30,8 @@
   <string name="bookmark_file_comment_format">Erstellt am %3$s mit \'%1$s\' Version %2$s. weitere Informationen finden Sie unter https://github.com/k3b/APhotoManager/wiki/intentapi#sql</string>
   <string name="bookmark_load_from_menu_title">Lade Lesezeichen aus&#8230;</string>
   <string name="bookmark_save_as_menu_title">Lesezeichen speichern unter...</string>
-  <string name="btn_cancel">Abbrechen</string>
-  <string name="btn_no">Nein</string>
-  <string name="btn_yes">Ja</string>
   <string name="btn_change">Ändern</string>
-  <string name="btn_ok">Ok</string>
   <string name="btn_pause">Anhalten</string>
-  <string name="copy_menu_title">Kopieren</string>
   <string name="copy_result_format">%1$d/%2$d Dateien kopiert</string>
   <string name="delete_menu_title">Löschen</string>
   <string name="delete_question_message_format">"Sind Sie sicher, dass Sie diese Dateien dauerhaft löschen möchten?

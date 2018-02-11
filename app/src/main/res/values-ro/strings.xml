@@ -31,13 +31,8 @@
 https://github.com/k3b/APhotoManager/wiki/intentapi#sql</string>
   <string name="bookmark_load_from_menu_title">Incarca marcaj de la &#8230;</string>
   <string name="bookmark_save_as_menu_title">Salveaza Marcajul ca &#8230;</string>
-  <string name="btn_cancel">Anuleaza</string>
-  <string name="btn_no">Nu</string>
-  <string name="btn_yes">Da</string>
   <string name="btn_change">Schimba</string>
-  <string name="btn_ok">OK</string>
   <string name="btn_pause">Pauza</string>
-  <string name="copy_menu_title">Copiaza</string>
   <string name="copy_result_format">Fisiere copiate%1$d/%2$d</string>
   <string name="delete_menu_title">Sterge</string>
   <string name="delete_question_message_format">"Esti sigur ca vrei sa stergi definitiv aceste fisiere?

@@ -30,13 +30,8 @@
   <string name="bookmark_file_comment_format">Gegenereerd op %3$s met \'%1$s\' versie %2$s. Meer informatie op https://github.com/k3b/AndroFotoFinder/wiki/intentap#sql</string>
   <string name="bookmark_load_from_menu_title">Bladwijzer laden uit &#8230;</string>
   <string name="bookmark_save_as_menu_title">Bladwijzer opslaan als &#8230;</string>
-  <string name="btn_cancel">Annuleren</string>
-  <string name="btn_no">Nee</string>
-  <string name="btn_yes">Ja</string>
   <string name="btn_change">Aanpassen</string>
-  <string name="btn_ok">Ok</string>
   <string name="btn_pause">Pauzeren</string>
-  <string name="copy_menu_title">Kopiëren</string>
   <string name="copy_result_format">%1$d van %2$d bestanden gekopieerd</string>
   <string name="delete_menu_title">Verwijderen</string>
   <string name="delete_question_message_format">"Weet u zeker dat u deze bestanden definitief wilt verwijderen?

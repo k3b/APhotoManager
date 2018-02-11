@@ -33,13 +33,8 @@
 https://github.com/k3b/APhotoManager/wiki/intentapi#sql لمزيد من التفاصيل</string>
   <string name="bookmark_load_from_menu_title">تحميل العلامات المرجعية من&#8230;</string>
   <string name="bookmark_save_as_menu_title">حفظ العلامة المرجعية كـ &#8230;</string>
-  <string name="btn_cancel">إلغاء</string>
-  <string name="btn_no">لا</string>
-  <string name="btn_yes">نعم</string>
   <string name="btn_change">تغيير</string>
-  <string name="btn_ok">حسنًا</string>
   <string name="btn_pause">ايقاف مؤقت</string>
-  <string name="copy_menu_title">نسخ</string>
   <string name="copy_result_format">تم نسخ %1$d من %2$d ملفات</string>
   <string name="delete_menu_title">إزالة</string>
   <string name="delete_question_message_format">"هل أنت متأكد من أنك تود إزالة هذه الملفات كليًا؟

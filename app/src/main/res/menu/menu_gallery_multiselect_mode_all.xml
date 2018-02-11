@@ -24,7 +24,7 @@
     xmlns:tools="http://schemas.android.com/tools" tools:context=".GalleryActivity">
 
     <item android:id="@+id/cmd_cancel_multiselect"
-        android:title="@string/btn_cancel"
+        android:title="@android:string/cancel"
         android:icon="@android:drawable/ic_menu_close_clear_cancel"
         android:visible="true"
         android:orderInCategory="2"

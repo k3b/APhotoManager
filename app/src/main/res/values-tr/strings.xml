@@ -30,13 +30,8 @@
 	<string name="bookmark_file_comment_format">%3$s üzerinde \'%1$s\' %2$s versiyonu ile üretildi. Detaylar için https://github.com/k3b/APhotoManager/wiki/intentapi#sql adresine bakın.</string>
 	<string name="bookmark_load_from_menu_title">Yer imini al &#8230;</string>
 	<string name="bookmark_save_as_menu_title">Yer imi olarak kaydet&#8230;</string>
-	<string name="btn_cancel">İptal</string>
-	<string name="btn_no">Hayır</string>
-	<string name="btn_yes">Evet</string>
 	<string name="btn_change">Değiştir</string>
-	<string name="btn_ok">Tamam</string>
 	<string name="btn_pause">Duraklat</string>
-	<string name="copy_menu_title">Kopyala</string>
 	<string name="copy_result_format">%1$d/%2$d dosya kopyalandı</string>
 	<string name="delete_menu_title">Sil</string>
 	<string name="delete_question_message_format">"Bu dosyaları kalıcı olarak silmek istediğinize emin misiniz? %1$s  Bu işlem geri alınamaz."</string>

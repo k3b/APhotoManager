@@ -30,13 +30,8 @@
   <string name="bookmark_file_comment_format">\'%1$s\' のバージョン %2$s と %3$s で生成されました。詳細は https://github.com/k3b/APhotoManager/wiki/intentapi#sql を参照してください。</string>
   <string name="bookmark_load_from_menu_title">&#8230; からブックマークを読み込む</string>
   <string name="bookmark_save_as_menu_title">&#8230; としてブックマークを保存</string>
-  <string name="btn_cancel">キャンセル</string>
-  <string name="btn_no">いいえ</string>
-  <string name="btn_yes">はい</string>
   <string name="btn_change">変更</string>
-  <string name="btn_ok">OK</string>
   <string name="btn_pause">一時停止</string>
-  <string name="copy_menu_title">コピー</string>
   <string name="copy_result_format">%1$d/%2$d ファイルをコピーしました</string>
   <string name="delete_menu_title">削除</string>
   <string name="delete_question_message_format">"これらのファイルを完全に削除してもよろしいですか?

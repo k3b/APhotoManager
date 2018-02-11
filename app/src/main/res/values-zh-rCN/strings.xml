@@ -30,13 +30,8 @@
   <string name="bookmark_file_comment_format">使用\'%1$s\'（%2$s版）基于%3$s 生成。详情参见https://github.com/k3b/APhotoManager/wiki/intentapi#sql</string>
   <string name="bookmark_load_from_menu_title">加载书签&#8230;</string>
   <string name="bookmark_save_as_menu_title">书签另存为...</string>
-  <string name="btn_cancel">取消</string>
-  <string name="btn_no">否</string>
-  <string name="btn_yes">是</string>
   <string name="btn_change">变更</string>
-  <string name="btn_ok">确定</string>
   <string name="btn_pause">暂停</string>
-  <string name="copy_menu_title">复制</string>
   <string name="copy_result_format">已复制%1$d/%2$d 文件</string>
   <string name="delete_menu_title">删除</string>
   <string name="delete_question_message_format">"是否确实要永久删除这些文件？

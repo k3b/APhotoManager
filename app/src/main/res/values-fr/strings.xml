@@ -30,13 +30,8 @@
 	<string name="bookmark_file_comment_format">Générer sur %3$s avec \'%1$s\' Version %2$s. Allez sur https://github.com/k3b/APhotoManager/wiki/intentapi#sql pour plus de détails</string>
 	<string name="bookmark_load_from_menu_title">Charger le Signet de &#8230;</string>
 	<string name="bookmark_save_as_menu_title">Enregistrer le signet sous &#8230;</string>
-	<string name="btn_cancel">Annuler</string>
-	<string name="btn_no">Non</string>
-	<string name="btn_yes">Oui</string>
 	<string name="btn_change">Modifier</string>
-	<string name="btn_ok">OK</string>
 	<string name="btn_pause">Suspendre</string>
-	<string name="copy_menu_title">Copier</string>
 	<string name="copy_result_format">%1$d/%2$d fichiers copiés</string>
 	<string name="delete_menu_title">Supprimer</string>
 	<string name="delete_question_message_format">Êtes-vous sûr de que vouloir supprimer définitivement ces fichiers	  ?%1$s,	  cette opération n\'est pas réversible.</string>

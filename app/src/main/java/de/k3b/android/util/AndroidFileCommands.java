@@ -258,7 +258,7 @@ public class AndroidFileCommands extends FileCommands {
             builder.setTitle(title + pathNames.length);
             builder.setMessage(message)
                     .setCancelable(false)
-                    .setPositiveButton(R.string.btn_yes,
+                    .setPositiveButton(android.R.string.yes,
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(
@@ -269,7 +269,7 @@ public class AndroidFileCommands extends FileCommands {
                                 }
                             }
                     )
-                    .setNegativeButton(R.string.btn_no,
+                    .setNegativeButton(android.R.string.no,
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(

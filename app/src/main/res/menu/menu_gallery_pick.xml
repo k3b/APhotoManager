@@ -21,10 +21,10 @@
  -->
 <!-- menue of gallery for modus pick/getContent -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/cmd_ok" android:title="@string/btn_ok"
+    <item android:id="@+id/cmd_ok" android:title="@android:string/ok"
         android:icon="@drawable/ic_action_accept"
         android:orderInCategory="1" android:showAsAction="always" android:visible="true" />
-    <item android:id="@+id/cmd_cancel_pick" android:title="@string/btn_cancel"
+    <item android:id="@+id/cmd_cancel_pick" android:title="@android:string/cancel"
         android:icon="@drawable/ic_action_cancel"
         android:orderInCategory="1" android:showAsAction="always" android:visible="true" />
 

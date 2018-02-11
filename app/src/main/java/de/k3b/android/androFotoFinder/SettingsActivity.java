@@ -428,7 +428,7 @@ public class SettingsActivity extends PreferenceActivity {
                 builder.setTitle(R.string.settings_translate_title);
                 builder.setMessage(R.string.message_translate_not_installed)
                         .setCancelable(false)
-                        .setPositiveButton(R.string.btn_yes,
+                        .setPositiveButton(android.R.string.yes,
                                 new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(
@@ -439,7 +439,7 @@ public class SettingsActivity extends PreferenceActivity {
                                     }
                                 }
                         )
-                        .setNegativeButton(R.string.btn_no,
+                        .setNegativeButton(android.R.string.no,
                                 new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(

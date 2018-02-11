@@ -28,13 +28,8 @@
     <string name="bookmark_file_comment_format">bookmark_file_comment_format Generated on %3$s with \'%1$s\' Version %2$s. See https://github.com/k3b/APhotoManager/wiki/intentapi#sql for details</string>
     <string name="bookmark_load_from_menu_title">bookmark_load_from_menu_title Load bookmark from &#8230;</string>
     <string name="bookmark_save_as_menu_title">bookmark_save_as_menu_title Save bookmark as &#8230;</string>
-    <string name="btn_cancel">btn_cancel Cancel</string>
-    <string name="btn_no">btn_no No</string>
-    <string name="btn_yes">btn_yes Yes</string>
     <string name="btn_change">btn_change Change</string>
-    <string name="btn_ok">btn_ok OK</string>
     <string name="btn_pause">btn_pause Pause</string>
-    <string name="copy_menu_title">copy_menu_title Copy</string>
     <string name="copy_result_format">copy_result_format Copied %1$d/%2$d files</string>
     <string name="delete_menu_title">delete_menu_title Delete</string>
 	<string name="delete_question_message_format">"delete_question_message_format Are you sure you want to permanently delete these files?
@@ -214,5 +209,31 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
     <!-- #90 add: sort by Rating, Date-Last-modified -->
     <string name="sort_by_rating">sort_by_rating:Rating</string>
     <string name="sort_by_modification">sort_by_modification:Last Modified</string>
+
+    <!-- #93: edit-exif: image title, description, rating -->
+    <string name="photo_autoprocessing_edit_menu_title">photo_autoprocessing_edit_menu_title:Edit Photo Autoprocessing</string>
+    <string name="lbl_file_name_pattern">lbl_file_name_pattern:Filename Pattern</string>
+    <string name="lbl_exif">lbl_exif:Exif</string>
+
+    <!-- i.e.
+            Copy 5 Photos
+				hello.jpg (2017-08-02), ...
+			To .../path/toFile/
+				1708NewName0001.jpg -->
+    <string name="preview_message_format">"preview_message_format:%1$s %2$d Photos\n\t%3$s (%4$s), &#8230;\nTo %5$s\n\t%6$s"</string>
+
+    <!-- new in 0.6.3 additional sorting options -->
+    <string name="sort_by_file_size">sort_by_file_size:Size</string>
+    <string name="sort_by_width">sort_by_width:Width</string>
+
+    <!-- new in 0.6.3 edit exif images can have visibility private or public -->
+    <string name="lbl_image_visibility">lbl_image_visibility:Visibility</string>
+
+    <!-- #105 Appplication-pinning, aka "Kiosk Mode", "LockTask": disable dangerous menu-items -->
+    <string name="menu_title_app_pinnend">menu_title_app_pinnend:App protected/pinned</string>
+    <string name="menu_title_app_unpinnend">menu_title_app_unpinnend:App unprotect/unpinned</string>
+
+    <!-- #100: private images get the extension ".jpg-p" which hides them from other gallery-apps and image pickers.  -->
+    <string name="settings_rename_private_jpg_title">settings_rename_private_jpg_title:Rename PRIVATE ...jpg to ....jpg-p</string>
 
 </resources>

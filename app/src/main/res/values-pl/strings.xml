@@ -30,13 +30,8 @@
   <string name="bookmark_file_comment_format">Wygenerowano na %3$s z \'%1$s\' Wersja %2$s. Zobacz https://github.com/k3b/APhotoManager/wiki/intentapi#sql</string>
   <string name="bookmark_load_from_menu_title">Wczytaj zakładki z &#8230;</string>
   <string name="bookmark_save_as_menu_title">Zapisz zakładkę jako &#8230;</string>
-  <string name="btn_cancel">Anuluj</string>
-  <string name="btn_no">Nie</string>
-  <string name="btn_yes">Tak</string>
   <string name="btn_change">Zmień</string>
-  <string name="btn_ok">OK</string>
   <string name="btn_pause">Pauzuj</string>
-  <string name="copy_menu_title">Kopiuj</string>
   <string name="copy_result_format">Skopiowano %1$d/%2$d plików</string>
   <string name="delete_menu_title">Usuń</string>
   <string name="delete_question_message_format">"Na pewno chcesz usunąć te pliki?
