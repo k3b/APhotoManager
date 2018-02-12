@@ -53,6 +53,12 @@ Features:
 		Edit exif metadata</a>: date, title, description,
 		<a href='https://github.com/k3b/APhotoManager/wiki/Tags'>
 		tags(keywords)</a>, geo, rating, ....
+</li><li>Optional Folder-Rule based <a href='https://github.com/k3b/AndroFotoFinder/wiki/AutoProcessing'>autoprocessing</a>:
+		Photos are automatically renamed and get tags, geo, title, ... when you copy/move them.
+</li><li>Mark images as "PRIVATE" to hide them from other Gallery-Apps and image pickers.
+</li><li>In <a href='https://github.com/k3b/APhotoManager/wiki/AppPinning'>Protected/Pinned Mode</a>
+		potetially dangerous app-commands like edit/copy/delete/share/settings/"change image selection"
+		are disabled so you can savley hand over your phone to someone else.
 </li><li>Can handle big image collections (20000+ images in 1000+ folders).
 </li><li>Uses Android's image content-provider. No initial image scan
 		neccessary.

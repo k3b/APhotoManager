@@ -15,6 +15,9 @@ Manage local photos: Find/Copy/Edit-Exif and show in Gallery or Map.
 * Detail view features zooming, swiping for next/previous image.
 * Buildin file manager for photos: find, sort, view, copy, delete, send, ... .
 * Edit exif metadata: date, title, description, tags(keywords), geo, rating, ....
+* Optional Folder-Rule based [autoprocessing](https://github.com/k3b/AndroFotoFinder/wiki/AutoProcessing): Photos are automatically renamed and get tags, geo, title, ... when you copy/move them
+* Mark images as "PRIVATE" to hide them from other Gallery-Apps and image pickers.
+* In "Protected/Pinned Mode" potetially dangerous app-commands like edit/copy/delete/share/settings/"change image selection" are disabled so you can savley hand over your phone to someone else
 * Can handle big image collections (20000+ images in 1000+ folders).
 * Uses Android's image content-provider. No initial image scan neccessary.
 * Extended photo media scanner for Exif, IPTC, XMP
