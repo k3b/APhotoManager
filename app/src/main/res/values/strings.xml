@@ -243,4 +243,8 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
     <!--  depricated tags_update_result_format 
 			replaced by android.R.string.xxx @android:string/xxx : btn_cancel btn_no btn_yes btn_okcopy_menu_title
     -->
+
+    <string name="clear_menu_title">Clear</string>
+
+
 </resources>

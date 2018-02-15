@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -21,19 +21,24 @@ package de.k3b.android.androFotoFinder;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.PopupMenu;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,7 +58,6 @@ import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.io.ListUtils;
-import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.DateUtil;
 import de.k3b.io.RuleFileNameProcessor;
@@ -73,6 +77,8 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     private static final String mDebugPrefix = "AutoProcEdit-";
     private static final String SETTINGS_KEY = "AutoProcEditCurrent-";
     private static final int EXIF_EDIT_RESULT_ID = 86441;
+    private static final String PREF_LAST_RENAME_DATE_PATTERN = "LastRenameDatePattern";
+    private static final String PREF_LAST_RENAME_NUMBER_PATTERN = "LastRenameNumberPattern";
 
     /**
      * current modified value of the first selected file
@@ -87,6 +93,8 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     private EditText mEditName;
     private Spinner mSpinnerNumberPattern;
     private TextView mExifChanges;
+    private File exampleSrcfile;
+    private Date exampleDate;
 
     public static void showActivity(Activity context, PhotoWorkFlowDto workflow,
                                     String directoryOrApmFileUrl
@@ -179,6 +187,9 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
             exampleExif.setPath(null);
             mCurrentData.setMediaDefaults(exampleExif);
         }
+        this.exampleSrcfile = mProcessor.getFile(mSelectedFiles.getFile(0));
+        this.exampleDate = getExampleDate(exampleSrcfile);
+
         defineGui();
         toGui();
     }
@@ -216,18 +227,20 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
 
     /** to avoid endless recursion toGui() ... TextView.setText ... afterTextChanged ... toGui() */
     private int inToGuiCount = 0;
+
+
     private void toGui() {
+        String numberFormat = mCurrentData.getNumberFormat();
+        final String namePart = mCurrentData.getName();
+        final String dateFormat = mCurrentData.getDateFormat();
+
         inToGuiCount++;
         try {
-            mEditName.setText(mCurrentData.getName());
-            select(mSpinnerDatePattern, mCurrentData.getDateFormat());
-            String numberFormat = mCurrentData.getNumberFormat();
+            mEditName.setText(namePart);
+            select(mSpinnerDatePattern, dateFormat);
             select(mSpinnerNumberPattern, numberFormat);
-            mProcessor.set(mCurrentData.getDateFormat(), mCurrentData.getName(), numberFormat);
 
-            File exampleSrcfile = mProcessor.getFile(mSelectedFiles.getFile(0));
-            Date exampleDate = getExampleDate(exampleSrcfile);
-            File exampleResultFile = mProcessor.getNextFile(exampleSrcfile, exampleDate, StringUtils.isNullOrEmpty(numberFormat) ? 0 : 1);
+            String exampleResultFileName = createExampleResultFileName(dateFormat, namePart, numberFormat);
 
             // !!! where to get "copy"/"move" from?
             String photoOperation = ""; // getString(R.string.move_menu_title);
@@ -244,7 +257,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
                     mSelectedFiles.size(),
                     (exampleSrcfile == null) ? null : exampleSrcfile.getName(),
                     DateUtil.toIsoDateString(exampleDate),
-                    mCurrentData.getOutDir(), exampleResultFile.getName()));
+                    mCurrentData.getOutDir(), exampleResultFileName));
 
             IMetaApi mediaChanges = mCurrentData.getMediaDefaults();
             String exifChange = null;
@@ -255,6 +268,14 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
         } finally {
             inToGuiCount--;
         }
+    }
+
+    private String createExampleResultFileName(String dateFormat, String baseName, String numberFormat) {
+        mProcessor.set(dateFormat, baseName, numberFormat);
+
+        File file = mProcessor.getNextFile(exampleSrcfile, exampleDate, StringUtils.isNullOrEmpty(numberFormat) ? 0 : 1);
+        if(file != null) return file.getName();
+        return null;
     }
 
     private void select(Spinner spinner, String selectedValueOrNull) {
@@ -362,6 +383,13 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
             }
         });
 
+        ((ImageButton) findViewById(R.id.cmd_file_name_pattern_history)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onOpenRenamerPopupMenu(v);
+            }
+        });
+
     }
 
     private List<Pattern> createDatePatterns() {
@@ -409,6 +437,80 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
             result.add(new Pattern(patternValue, formattedExample, false));
         }
         return result;
+    }
+
+    private void onOpenRenamerPopupMenu(View anchor) {
+        PopupMenu popup = createRenamerPopupMenu(anchor);
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                return onRenamerPopupMenuClick(item);
+            }
+        });
+
+        if (popup != null) {
+            popup.show();
+        }
+    }
+
+    private PopupMenu createRenamerPopupMenu(View anchor) {
+        PopupMenu popup = new PopupMenu(this, anchor);
+        MenuInflater inflater = popup.getMenuInflater();
+        inflater.inflate(R.menu.menu_renamer_context, popup.getMenu());
+
+        setMenuItem(popup, R.id.cmd_dir, this.mProcessor.getDirBaseName());
+        setMenuItem(popup, R.id.cmd_subdir_dir, getParentDirBaseName());
+        return popup;
+    }
+
+    private String getParentDirBaseName() {
+        return this.mProcessor.getParentDirBaseName() + "-" + this.mProcessor.getDirBaseName();
+    }
+
+    private void setMenuItem(PopupMenu popup, int menuId, String dirBaseName) {
+        MenuItem menuitem = popup.getMenu().findItem(menuId);
+        if ((dirBaseName != null) && (menuitem != null)) {
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+
+            String dateFormat = sharedPref.getString(PREF_LAST_RENAME_DATE_PATTERN, null);
+            String numberFormat = sharedPref.getString(PREF_LAST_RENAME_NUMBER_PATTERN, null);
+            menuitem.setTitle(createExampleResultFileName(dateFormat, dirBaseName, numberFormat));
+        }
+    }
+
+    private boolean onRenamerPopupMenuClick(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.cmd_clear:
+                return setFileRule(null);
+            case R.id.cmd_dir:
+                return setFileRule(this.mProcessor.getDirBaseName());
+            case R.id.cmd_subdir_dir:
+                return setFileRule(this.getParentDirBaseName());
+        }
+        return false;
+    }
+
+    private boolean setFileRule(String namePart) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+
+        mCurrentData.setNumberFormat((namePart == null) ? "" : sharedPref.getString(PREF_LAST_RENAME_NUMBER_PATTERN, null));
+        mCurrentData.setName((namePart == null) ? "" : namePart);
+        mCurrentData.setDateFormat((namePart == null) ? "" : sharedPref.getString(PREF_LAST_RENAME_DATE_PATTERN, null));
+
+        toGui();
+
+        return true;
+    }
+
+    private void saveLastFilePattern(String dateFormat, String numberFormat) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor edit = sharedPref.edit();
+
+        edit.putString(PREF_LAST_RENAME_DATE_PATTERN, dateFormat);
+        edit.putString(PREF_LAST_RENAME_NUMBER_PATTERN, numberFormat);
+
+        edit.apply();
+
     }
 
     /**
@@ -561,6 +663,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
         fromGui();
         try {
             mCurrentData.save();
+            saveLastFilePattern(mCurrentData.getDateFormat(), mCurrentData.getNumberFormat());
             setResult(Activity.RESULT_OK, null);
         } catch (IOException e) {
             onFatalError("onOk()-save()", e);

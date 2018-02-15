@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -207,5 +207,36 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
     @Override
     public String toString() {
         return ListUtils.toString(" ", this.getClass().getSimpleName(),  mDateFormat, mName, mNumberFormat, ": +", mNextFileInstanceNumber);
+    }
+
+    public String getDirBaseName() {
+        if (mOutDir != null) return getBaseName(mOutDir.getName());
+        return null;
+    }
+
+    public String getParentDirBaseName() {
+        File parent = (mOutDir != null) ? mOutDir.getParentFile() : null;
+        if (parent != null) return getBaseName(parent.getName());
+        return null;
+    }
+
+    /** Get name without leading numbers. i.e. getBaseName("01701Test001") ==> "Test". package to allow unittesting */
+    static String getBaseName(String name) {
+        if (name != null) {
+            int len = name.length();
+            int begin = 0;
+            while ((begin < len) && !isLetter(name, begin)) begin++;
+            int end = len - 1;
+            while ((end >= 0) && !isLetter(name, end)) end--;
+
+            if ((begin < len) && (begin >= 0)) return name.substring(begin,end+1);
+        }
+        return null;
+    }
+
+    private static boolean isLetter(String name, int offset) {
+        final int c = name.charAt(offset);
+        final boolean result = Character.isLetter(c);
+        return result;
     }
 }

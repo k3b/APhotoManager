@@ -68,11 +68,11 @@ public class StringUtils {
         return null;
     }
 
-    public static int length(String str) {
+    public static int length(CharSequence str) {
         return (str != null) ? str.length() : 0;
     }
 
-    public static boolean isNullOrEmpty(String str) {
+    public static boolean isNullOrEmpty(CharSequence str) {
         return (0 == length(str));
     }
 
