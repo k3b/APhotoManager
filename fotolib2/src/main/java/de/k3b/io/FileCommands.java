@@ -227,7 +227,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
         int result = 0;
         if (canProcessFile(move ? OP_MOVE : OP_COPY)) {
             if (osCreateDirIfNeccessary(destDirFolder)) {
-                File[] destFiles = createDestFiles(renameProcessor, destDirFolder, SelectedFiles.getFiles(selectedFiles.getFileNames()));
+                File[] destFiles = createDestFiles(renameProcessor, destDirFolder, selectedFiles.getDatesPhotoTaken() , SelectedFiles.getFiles(selectedFiles.getFileNames()));
 
                 result = moveOrCopyFiles(move, (move ? "mov" : "copy"), exifChanges, selectedFiles, destFiles, progessListener);
 
@@ -388,14 +388,14 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
         return new JpgMetaWorkflow(logger);
     }
 
-    private File[] createDestFiles(IFileNameProcessor renameProcessor, File destDirFolder, File... sourceFiles) {
+    private File[] createDestFiles(IFileNameProcessor renameProcessor, File destDirFolder, Date[] datesLastModified, File... sourceFiles) {
         File[] result = new File[sourceFiles.length];
 
         int pos = 0;
         File destFile;
         for(File srcFile : sourceFiles) {
             if (renameProcessor != null) {
-                destFile = renameProcessor.getNextFile(srcFile, new Date(srcFile.lastModified()), -1);
+                destFile = renameProcessor.getNextFile(srcFile, getRenameSourceFileDate(srcFile, datesLastModified, pos), -1);
             } else {
                 destFile = new File(destDirFolder, srcFile.getName());
             }
@@ -403,6 +403,13 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
         }
 
         return result;
+    }
+
+    private Date getRenameSourceFileDate(File srcFile, Date[] datesLastModified, int pos) {
+        if ((datesLastModified != null) && (pos >= 0) && (pos < datesLastModified.length)) {
+            return datesLastModified[pos];
+        }
+        return new Date(srcFile.lastModified());
     }
 
     /** executes os specific move or copy operation and updates the list of modified files */

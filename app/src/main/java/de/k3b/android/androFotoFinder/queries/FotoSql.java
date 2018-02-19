@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -281,6 +281,7 @@ public class FotoSql extends FotoSqlBase {
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
             ;
 
+    // query ordered by DatePhotoTaken so that lower rename-numbers correspond to older images.
     public static final QueryParameter queryAutoRename = new QueryParameter()
             .setID(QUERY_TYPE_GALLERY)
             .addColumn(SQL_COL_PK, SQL_COL_PATH, SQL_COL_DATE_TAKEN, SQL_COL_LAST_MODIFIED)
@@ -986,6 +987,7 @@ public class FotoSql extends FotoSqlBase {
         if (!items.isEmpty()) {
             List<String> result = (paths != null) ? paths : new ArrayList<String>();
 
+            // query ordered by DatePhotoTaken so that lower rename-numbers correspond to older images.
             QueryParameter parameters = new QueryParameter(queryAutoRename);
             setWhereSelectionPks(parameters, items);
 

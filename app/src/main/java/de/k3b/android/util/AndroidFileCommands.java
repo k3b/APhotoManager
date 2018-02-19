@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -48,12 +48,10 @@ import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.transactionlog.TransactionLogSql;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.IProgessListener;
-import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
 import de.k3b.io.IDirectory;
-import de.k3b.io.OSDirectory;
 import de.k3b.media.JpgMetaWorkflow;
 import de.k3b.media.MediaUtil;
 import de.k3b.media.MetaWriterExifXml;

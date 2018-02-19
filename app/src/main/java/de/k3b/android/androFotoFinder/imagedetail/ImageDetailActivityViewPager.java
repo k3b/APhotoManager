@@ -47,6 +47,7 @@ import org.osmdroid.api.IGeoPoint;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import de.k3b.android.androFotoFinder.Common;
@@ -1163,7 +1164,11 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     protected SelectedFiles getCurrentFoto() {
         long imageId = getCurrentImageId();
-        SelectedFiles result = new SelectedFiles(new String[] {getCurrentFilePath()}, new Long[] {Long.valueOf(imageId)}, null);
+        Date imageDatePhotoTaken = getCurrentDatePhotoTaken();
+        SelectedFiles result = new SelectedFiles(
+                new String[] {getCurrentFilePath()},
+                new Long[] {Long.valueOf(imageId)},
+                new Date[] {imageDatePhotoTaken});
         return  result;
     }
 
@@ -1173,6 +1178,14 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             return this.mAdapter.getImageId(itemPosition);
         }
         return -1;
+    }
+
+    private Date getCurrentDatePhotoTaken() {
+        if ((mViewPager != null) && (mAdapter != null)) {
+            int itemPosition = mViewPager.getCurrentItem();
+            return this.mAdapter.getDatePhotoTaken(itemPosition);
+        }
+        return null;
     }
 
     protected String getCurrentFilePath() {

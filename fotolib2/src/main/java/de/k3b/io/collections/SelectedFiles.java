@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -23,6 +23,7 @@ import java.io.File;
 import java.util.Date;
 
 /**
+ * The Multi-selection data for all photo commands.
  * Unmodifyable list of file names and optional their IDs.
  *
  * Created by k3b on 17.05.2016.
@@ -32,6 +33,7 @@ public class SelectedFiles  {
     private static final String SORUNDER = "'";
     private final String[] mFileNames;
     private final Long[] mIds;
+    private final Date[] mDatesPhotoTaken;
 
     public static String[] getFileNameList(String fileNameListAsString) {
         return (fileNameListAsString != null) ? fileNameListAsString.split(DELIMITER) : null;
@@ -49,6 +51,7 @@ public class SelectedFiles  {
             }
         }
         mIds = ids;
+        mDatesPhotoTaken = datesPhotoTaken;
     }
 
     private static Long[] parseIds(String idListAsString) {
@@ -151,4 +154,9 @@ public class SelectedFiles  {
         return mIds;
     }
 
+    /** needed for AutoRenaming which is based on DatesPhotoTaken.
+     * return null if unknwon */
+    public Date[] getDatesPhotoTaken() {
+        return mDatesPhotoTaken;
+    }
 }
