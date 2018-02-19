@@ -579,7 +579,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
                 }
 
             }
-            result = new SelectedFiles(fileNames, ids);
+            result = new SelectedFiles(fileNames, ids, null);
         }
 
         if (Global.debugEnabled && (intent != null)) {

@@ -136,7 +136,7 @@ public class FileCommandTests {
             ids[pos] = Long.valueOf(pos+1);
             paths[pos++] = createTestFile(destDir, file).getAbsolutePath();
         }
-        return new SelectedFiles(paths, ids);
+        return new SelectedFiles(paths, ids, null);
     }
 
 

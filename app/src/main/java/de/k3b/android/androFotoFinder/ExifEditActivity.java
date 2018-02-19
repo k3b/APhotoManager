@@ -299,7 +299,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
                     }
                 }
 
-                result = new SelectedFiles(fileNames, ids);
+                result = new SelectedFiles(fileNames, ids, null);
             }
         }
 

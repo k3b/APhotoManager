@@ -31,6 +31,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
@@ -38,6 +41,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.DBUtils;
+import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
 
 /**
@@ -56,7 +60,7 @@ import de.k3b.io.collections.SelectedItems;
 * 
  * Created by k3b on 02.06.2015.
  */
-public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItems.Id2FileNameConverter  {
+public class GalleryCursorAdapter extends CursorAdapter  {
     private static final int MAX_IMAGE_DIMENSION = HugeImageLoader.getMaxTextureSize();
 
     // Identifies a particular Loader or a LoaderManager being used in this component
@@ -200,10 +204,18 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
         }
     }
 
-    /** SelectedItems.Id2FileNameConverter: converts items.id-s to string array of filenNames via media database. */
-    @Override
-    public String[] getFileNames(SelectedItems items) {
-        return FotoSql.getFileNames(mContext, items);
+    public SelectedFiles createSelectedFiles(Context context, SelectedItems items) {
+        if ((items != null) && (items.size() > 0)) {
+            List<Long> ids = new ArrayList<Long>();
+            List<String> paths = new ArrayList<String>();
+            List<Date> datesPhotoTaken = new ArrayList<Date>();
+
+            FotoSql.getFileNames(context, items, ids, paths, datesPhotoTaken);
+            if (paths.size() > 0) {
+                return new SelectedFiles(paths.toArray(new String[paths.size()]), ids.toArray(new Long[ids.size()]), datesPhotoTaken.toArray(new Date[datesPhotoTaken.size()]));
+            }
+        }
+        return null;
     }
 
     public String getFullFilePath(int position) {

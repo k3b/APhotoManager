@@ -20,6 +20,7 @@
 package de.k3b.android.androFotoFinder.gallery.cursor;
 
 import android.app.Activity;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
@@ -33,6 +34,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
 import de.k3b.android.util.MediaScanner;
+import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
 
 /**
@@ -128,13 +130,16 @@ public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
         return super.getUri(imageID);
     }
 
-
-    /** SelectedItems.Id2FileNameConverter: converts items.id-s to string array of filenNames via media database. */
     @Override
-    public String[] getFileNames(SelectedItems items) {
-        if (mArrayImpl != null) return mArrayImpl.getFileNames(items);
-        return super.getFileNames(items);
+    public SelectedFiles createSelectedFiles(Context context, SelectedItems items) {
+        String[] paths = (mArrayImpl != null) ? mArrayImpl.getFileNames(items) : null;
+        if ((paths != null) && (paths.length > 0)) {
+            return new SelectedFiles(paths, items.getIds(), null);
+        }
+
+        return super.createSelectedFiles(context, items);
     }
+
 
     public void refreshLocal() {
         if (mArrayImpl != null) mArrayImpl.reload(" after move delete rename ");

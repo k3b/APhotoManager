@@ -21,6 +21,7 @@ package de.k3b.android.androFotoFinder.gallery.cursor;
 
 import android.app.Activity;
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
@@ -47,6 +48,7 @@ import android.widget.Toast;
 import org.osmdroid.api.IGeoPoint;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -832,7 +834,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
         // Handle menuItem selection
         AndroidFileCommands fileCommands = mFileCommands;
-        final SelectedFiles selectedFiles = (mSelectedItems != null) ? new SelectedFiles(this.mSelectedItems, this.mAdapter) : null;
+        final SelectedFiles selectedFiles = this.mAdapter.createSelectedFiles(getActivity(), this.mSelectedItems);
         if ((mSelectedItems != null) && (fileCommands.onOptionsItemSelected(menuItem, selectedFiles))) {
             return true;
         }
@@ -882,7 +884,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     private void cmdShowDetails() {
         SelectedItems ids = getSelectedItems();
-        String files = (ids != null) ? new SelectedFiles(ids, mAdapter).toString().replace(",","\n") : null;
+        String files = ((ids != null) && (ids.size() > 0)) ? mAdapter.createSelectedFiles(this.getActivity(), ids).toString().replace(",","\n") : null;
         ImageDetailMetaDialogBuilder.createImageDetailDialog(
                 this.getActivity(),
                 getActivity().getTitle().toString(),

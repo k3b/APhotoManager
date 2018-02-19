@@ -1163,7 +1163,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     protected SelectedFiles getCurrentFoto() {
         long imageId = getCurrentImageId();
-        SelectedFiles result = new SelectedFiles(new String[] {getCurrentFilePath()}, new Long[] {Long.valueOf(imageId)});
+        SelectedFiles result = new SelectedFiles(new String[] {getCurrentFilePath()}, new Long[] {Long.valueOf(imageId)}, null);
         return  result;
     }
 

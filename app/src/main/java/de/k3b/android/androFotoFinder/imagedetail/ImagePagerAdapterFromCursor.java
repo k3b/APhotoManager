@@ -58,7 +58,7 @@ import de.k3b.io.collections.SelectedItems;
  * Translates between position in ViewPager and content page content with image
  * Created by k3b on 04.07.2015.
  */
-public class ImagePagerAdapterFromCursor extends PagerAdapter implements SelectedItems.Id2FileNameConverter {
+public class ImagePagerAdapterFromCursor extends PagerAdapter {
     private static final int MAX_IMAGE_DIMENSION = HugeImageLoader.getMaxTextureSize();
 
     /** colum alias for optinal sql expression to show ContextDetails */
@@ -376,12 +376,6 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
         if (object != null) {
             mImageButtonController.create((ImageButton) ((View) object).findViewById(R.id.cmd_any));
         }
-    }
-
-    /** SelectedItems.Id2FileNameConverter: converts items.id-s to string array of filenNames via media database. */
-    @Override
-    public String[] getFileNames(SelectedItems items) {
-        return FotoSql.getFileNames(mActivity, items);
     }
 
     public void setIconResourceName(String name) {

@@ -88,14 +88,6 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
         return super.getPositionFromPath(path);
     }
 
-
-    /** SelectedItems.Id2FileNameConverter: converts items.id-s to string array of filenNames via media database. */
-    @Override
-    public String[] getFileNames(SelectedItems items) {
-        if (mArrayImpl != null) return mArrayImpl.getFileNames(items);
-        return super.getFileNames(items);
-    }
-
     public void refreshLocal() {
         if (mArrayImpl != null) mArrayImpl.reload(" after move delete rename ");
     }

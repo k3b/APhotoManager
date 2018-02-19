@@ -281,6 +281,13 @@ public class FotoSql extends FotoSqlBase {
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
             ;
 
+    public static final QueryParameter queryAutoRename = new QueryParameter()
+            .setID(QUERY_TYPE_GALLERY)
+            .addColumn(SQL_COL_PK, SQL_COL_PATH, SQL_COL_DATE_TAKEN, SQL_COL_LAST_MODIFIED)
+            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
+            .addOrderBy(SQL_COL_DATE_TAKEN + " ASC", SQL_COL_LAST_MODIFIED + " ASC")
+            ;
+
     public static final QueryParameter queryGps = new QueryParameter()
             .setID(QUERY_TYPE_UNDEFINED)
             .addColumn(
@@ -954,7 +961,7 @@ public class FotoSql extends FotoSqlBase {
                 row++;
             }
 
-            result = new SelectedFiles(paths, ids);
+            result = new SelectedFiles(paths, ids, null);
         } catch (Exception ex) {
             Log.e(Global.LOG_CONTEXT, "FotoSql.getSelectedfiles() error :", ex);
         } finally {
@@ -968,12 +975,18 @@ public class FotoSql extends FotoSqlBase {
         return result;
     }
 
-    /** converts internal ID-list to string array of filenNames via media database. */
-    public static String[] getFileNames(Context context, SelectedItems items) {
-        if (!items.isEmpty()) {
-            ArrayList<String> result = new ArrayList<>();
+    public static Date getDate(Cursor cursor,int colDateTimeTaken) {
+        if (colDateTimeTaken == -1) return null;
+        Long value = cursor.getLong(colDateTimeTaken);
+        return (value != null) ? new Date(value.longValue()) : null;
+    }
 
-            QueryParameter parameters = new QueryParameter(queryDetail);
+    /** converts internal ID-list to string array of filenNames via media database. */
+    public static String[] getFileNames(Context context, SelectedItems items, List<Long> ids, List<String> paths, List<Date> datesPhotoTaken) {
+        if (!items.isEmpty()) {
+            List<String> result = (paths != null) ? paths : new ArrayList<String>();
+
+            QueryParameter parameters = new QueryParameter(queryAutoRename);
             setWhereSelectionPks(parameters, items);
 
             Cursor cursor = null;
@@ -982,11 +995,13 @@ public class FotoSql extends FotoSqlBase {
                 cursor = createCursorForQuery("getFileNames", context, parameters, VISIBILITY.PRIVATE_PUBLIC);
 
                 int colPath = cursor.getColumnIndex(SQL_COL_DISPLAY_TEXT);
+                if (colPath == -1) colPath = cursor.getColumnIndex(SQL_COL_PATH);
+                int colIds = (ids == null) ? -1 : cursor.getColumnIndex(SQL_COL_PK);
+                int colDates = (datesPhotoTaken == null) ? -1 : cursor.getColumnIndex(SQL_COL_DATE_TAKEN);
                 while (cursor.moveToNext()) {
-                    String path = cursor.getString(colPath);
-                    if ((path != null) && (path.length() > 0)) {
-                        result.add(path);
-                    }
+                    result.add(cursor.getString(colPath));
+                    if (colIds >= 0) ids.add(cursor.getLong(colIds));
+                    if (colDates >= 0) datesPhotoTaken.add(getDate(cursor, colDates));
                 }
             } finally {
                 if (cursor != null) {

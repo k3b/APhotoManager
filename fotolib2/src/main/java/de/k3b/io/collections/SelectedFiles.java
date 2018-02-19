@@ -20,6 +20,7 @@
 package de.k3b.io.collections;
 
 import java.io.File;
+import java.util.Date;
 
 /**
  * Unmodifyable list of file names and optional their IDs.
@@ -37,14 +38,10 @@ public class SelectedFiles  {
     }
 
     public SelectedFiles(String fileNameListAsString, String idListAsString) {
-        this(getFileNameList(fileNameListAsString), idListAsString);
+        this(getFileNameList(fileNameListAsString), parseIds(idListAsString), null);
     }
 
-    public SelectedFiles(String[] fileNameList, String idListAsString) {
-        this(fileNameList, parseIds(idListAsString));
-    }
-
-    public SelectedFiles(String[] fileNameList, Long[] ids) {
+    public SelectedFiles(String[] fileNameList, Long[] ids, Date[] datesPhotoTaken) {
         mFileNames = fileNameList;
         if (mFileNames != null) {
             for (int i = mFileNames.length -1; i >= 0; i--) {
@@ -54,18 +51,14 @@ public class SelectedFiles  {
         mIds = ids;
     }
 
-    public SelectedFiles(SelectedItems items, SelectedItems.Id2FileNameConverter id2FileNameConverter) {
-        this(items.getFileNames(id2FileNameConverter), items.getIds());
-    }
-
     private static Long[] parseIds(String idListAsString) {
         if (idListAsString == null) return null;
 
         SelectedItems ids = new SelectedItems().parse(idListAsString);
         return ids.toArray(new Long[ids.size()]);
     }
-    /** removes SORUNDER from beginning/end if present */
-    public static String reomoveApostrophes(String fileName) {
+    /** removes SORUNDER from beginning/end if present. Package to allow unittests */
+    static String reomoveApostrophes(String fileName) {
         if ((fileName != null) && (fileName.length() > 2)
                 && (fileName.startsWith(SORUNDER)) && (fileName.endsWith(SORUNDER))) {
             return fileName.substring(1, fileName.length()-1);
