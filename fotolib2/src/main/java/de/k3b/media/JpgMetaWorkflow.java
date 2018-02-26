@@ -132,13 +132,13 @@ public class JpgMetaWorkflow {
 
                     if (!sameFile && deleteOriginalWhenFinished) {
                         File delete = FileProcessor.getSidecar(inFilePath, false);
-                        if (delete != null) delete.delete();
+                        deleteFile(delete);
 
                         delete = FileProcessor.getSidecar(inFilePath, true);
-                        if (delete != null) delete.delete();
+                        deleteFile(delete);
 
                         delete = inFilePath;
-                        if (delete != null) delete.delete();
+                        deleteFile(delete);
                     }
                 } else {
                     if (sb != null) sb.append("no changes ");
@@ -167,6 +167,15 @@ public class JpgMetaWorkflow {
             sb.append("error='file is write protected' ");
             JpgMetaWorkflow.logger.error(sb.toString());
             return null;
+        }
+    }
+
+    protected void deleteFile(File delete) {
+        if ((delete != null) && delete.exists()) {
+            delete.delete();
+            if (FotoLibGlobal.debugEnabledJpg) {
+                logger.info("JpgMetaWorkflow deleteFile " + delete);
+            }
         }
     }
 

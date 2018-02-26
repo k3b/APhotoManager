@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -38,9 +38,11 @@ import android.widget.Toast;
 
 import java.util.Arrays;
 
+import de.k3b.android.androFotoFinder.AffUtils;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.HistoryEditText;
@@ -83,10 +85,7 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
         final Intent intent = new Intent().setClass(context,
                 GeoEditActivity.class);
 
-        if ((selectedFiles != null) && (selectedFiles.size() > 0)) {
-            intent.putExtra(EXTRA_SELECTED_ITEM_IDS, selectedFiles.toIdString());
-            intent.putExtra(EXTRA_SELECTED_ITEM_PATHS, selectedFiles.toString());
-
+        if (AffUtils.putSelectedFiles(intent, selectedFiles)) {
             Long id = selectedFiles.getId(0);
             IGeoPointInfo initialPoint = MediaScanner.getInstance(context).getPositionFromFile(selectedFiles.getFileNames()[0], (id != null) ? id.toString() : null);
             if (initialPoint != null) {
@@ -118,7 +117,7 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
         if (Global.debugEnabled && (intent != null)){
             Log.d(Global.LOG_CONTEXT, mDebugPrefix + "onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
         }
-        SelectedFiles selectedItems = getItems(intent);
+        SelectedFiles selectedItems = AffUtils.getSelectedFiles(intent);
         if (selectedItems != null) {
             mSelectedItems = selectedItems;
 
@@ -178,16 +177,6 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
         mProgressBar = null;
 
         super.onDestroy();
-    }
-
-    public static SelectedFiles getItems(Intent intent) {
-        if (intent == null) return null;
-        String selectedIDs = intent.getStringExtra(EXTRA_SELECTED_ITEM_IDS);
-        String selectedFiles = intent.getStringExtra(EXTRA_SELECTED_ITEM_PATHS);
-
-        if ((selectedIDs == null) && (selectedFiles == null)) return null;
-        SelectedFiles result = new SelectedFiles(selectedFiles, selectedIDs);
-        return result;
     }
 
     private String fromGui() {
@@ -313,10 +302,7 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
             calculatedSelectedFotosIds.addAll(Arrays.asList(mSelectedItems.getIds()));
         }
 
-        if (calculatedSelectedFotosIds.size() > 0) {
-            intent.putExtra(EXTRA_SELECTED_ITEM_IDS, calculatedSelectedFotosIds.toString());
-            //!!! ???EXTRA_SELECTED_ITEM_PATHS
-        }
+        AffUtils.putSelectedFiles(intent, AffUtils.querySelectedFiles(this, calculatedSelectedFotosIds));
         try {
             // #7: allow choosing geo pick from map or from "photo with geo"
             this.startActivityForResult(Intent.createChooser(intent, this.getString(R.string.geo_edit_menu_title)), GeoEditActivity.RESULT_ID);

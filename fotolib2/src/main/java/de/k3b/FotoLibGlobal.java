@@ -32,6 +32,9 @@ public class FotoLibGlobal {
      */
     public static boolean debugEnabled = false;
 
+    /** if debugEnabledJpg jpg files (copy/move/delete/exif) */
+    public static boolean debugEnabledJpg = false;
+
     /** if debugEnabledJpgMetaIo debug read/write jpg/exif/iptc/xmp io */
     public static boolean debugEnabledJpgMetaIo = false;
 

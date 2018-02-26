@@ -1,7 +1,7 @@
 // ExifInterface source code from android-6 - special version without jni
 /*
  * Copyright (C) 2007 The Android Open Source Project under the Apache License, Version 2.0
- * Copyright (C) 2016-2017 by k3b under the GPL-v3+.
+ * Copyright (C) 2016-2018 by k3b under the GPL-v3+.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -50,6 +50,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 /**
  * This is a class for reading and writing Exif tags in a JPEG file.
  * It is based on ExifInterface of android-6 version.
@@ -1517,11 +1518,15 @@ public class ExifInterface {
             closeQuietly(out);
 
             if (deleteInFileOnFinish || overwriteOriginal) {
-                renamedInFile.delete();
+                deleteFile(renamedInFile);
             }
         }
         // Discard the thumbnail in memory
         mThumbnailBytes = null;
+    }
+
+    protected boolean deleteFile(File renamedInFile) {
+        return renamedInFile.delete();
     }
 
     /** repairs wrong/missing attributes */

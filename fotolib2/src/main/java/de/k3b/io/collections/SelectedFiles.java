@@ -39,8 +39,19 @@ public class SelectedFiles  {
         return (fileNameListAsString != null) ? fileNameListAsString.split(DELIMITER) : null;
     }
 
-    public SelectedFiles(String fileNameListAsString, String idListAsString) {
-        this(getFileNameList(fileNameListAsString), parseIds(idListAsString), null);
+    public static SelectedFiles create(String fileNameListAsString, String idListAsString, String selectedDates) {
+        Date[] dates = null;
+        if (selectedDates != null) {
+            Long[] dateIds = parseIds(selectedDates);
+            if ((dateIds != null) && (dateIds.length > 0)) {
+                dates = new Date[dateIds.length];
+                for(int i = 0; i < dateIds.length; i++) {
+                    Long dateId = dateIds[i];
+                    dates[i] = ((dateId != null) && (dateId.longValue() != 0)) ? new Date(dateId.longValue()) : null;
+                }
+            }
+        }
+        return new SelectedFiles(getFileNameList(fileNameListAsString), parseIds(idListAsString), dates);
     }
 
     public SelectedFiles(String[] fileNameList, Long[] ids, Date[] datesPhotoTaken) {
@@ -54,12 +65,20 @@ public class SelectedFiles  {
         mDatesPhotoTaken = datesPhotoTaken;
     }
 
-    private static Long[] parseIds(String idListAsString) {
-        if (idListAsString == null) return null;
+    private static Long[] parseIds(String listAsString) {
+        Long[] result = null;
 
-        SelectedItems ids = new SelectedItems().parse(idListAsString);
-        return ids.toArray(new Long[ids.size()]);
+        if ((listAsString != null) && (listAsString.length() > 0)) {
+            String itemsAsString[] = listAsString.split(DELIMITER);
+            result = new Long[itemsAsString.length];
+            for (int i= 0; i < itemsAsString.length; i++) {
+                result[i] = Long.valueOf(itemsAsString[i]);
+            }
+        }
+
+        return result;
     }
+
     /** removes SORUNDER from beginning/end if present. Package to allow unittests */
     static String reomoveApostrophes(String fileName) {
         if ((fileName != null) && (fileName.length() > 2)
@@ -104,6 +123,17 @@ public class SelectedFiles  {
         return toString(SORUNDER, mFileNames);
     }
 
+    public static <T> String toString(String SORUNDER, Date[] values) {
+        if ((values != null) && (values.length > 0)) {
+            Long[] lvalue = new Long[values.length];
+            for (int i = 0; i < values.length; i++) {
+                lvalue[i] = (values[i] == null) ? 0 : values[i].getTime();
+            }
+            return toString(SORUNDER, lvalue);
+        }
+        return null;
+    }
+
     public static <T> String toString(String SORUNDER, T[] values) {
         // Arrays.asList()
         StringBuilder result = new StringBuilder();
@@ -125,6 +155,11 @@ public class SelectedFiles  {
     /** converts this into komma seperated list of names */
     public String toIdString() {
         return toString("", this.mIds);
+    }
+
+    /** converts this into komma seperated list of names */
+    public String toDateString() {
+        return toString("", this.mDatesPhotoTaken);
     }
 
     public int size() {

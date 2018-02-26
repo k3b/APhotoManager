@@ -151,6 +151,7 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putBoolean("debugEnabledMemory", Global.debugEnabledMemory);
 
         prefs.putBoolean("debugEnabledJpgMetaIo", FotoLibGlobal.debugEnabledJpgMetaIo);
+        prefs.putBoolean("debugEnabledJpg", FotoLibGlobal.debugEnabledJpg);
 
         /** #100: true: private images get the extension ".jpg-p" which hides them from other gallery-apps and image pickers.  */
         prefs.putBoolean("renamePrivateJpg", FotoLibGlobal.renamePrivateJpg);
@@ -206,6 +207,7 @@ public class SettingsActivity extends PreferenceActivity {
         Global.locked                           = getPref(prefs, "locked", Global.locked);
         Global.passwordHash                     = getPref(prefs, "passwordHash", Global.passwordHash);
 
+        FotoLibGlobal.debugEnabledJpg = getPref(prefs, "debugEnabledJpg", FotoLibGlobal.debugEnabledJpg);
         FotoLibGlobal.debugEnabledJpgMetaIo     = getPref(prefs, "debugEnabledJpgMetaIo", FotoLibGlobal.debugEnabledJpgMetaIo);
 
         /** #100: true: private images get the extension ".jpg-p" which hides them from other gallery-apps and image pickers.  */

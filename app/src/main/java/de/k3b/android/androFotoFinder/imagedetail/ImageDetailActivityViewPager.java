@@ -50,6 +50,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import de.k3b.android.androFotoFinder.AffUtils;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.ExifEditActivity;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
@@ -274,8 +275,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             // Supply index input as an argument.
             Bundle args = new Bundle();
             args.putBoolean("move", move);
-            args.putSerializable(EXTRA_SELECTED_ITEM_PATHS, srcFotos.toString());
-            args.putSerializable(EXTRA_SELECTED_ITEM_IDS, srcFotos.toIdString());
+            AffUtils.putSelectedFiles(args, srcFotos);
             f.setArguments(args);
 
             return f;
@@ -290,12 +290,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         }
 
         public SelectedFiles getSrcFotos() {
-            String selectedIDs = (String) getArguments().getSerializable(EXTRA_SELECTED_ITEM_IDS);
-            String selectedFiles = (String) getArguments().getSerializable(EXTRA_SELECTED_ITEM_PATHS);
-
-            if ((selectedIDs == null) && (selectedFiles == null)) return null;
-            SelectedFiles result = new SelectedFiles(selectedFiles, selectedIDs);
-            return result;
+            return AffUtils.getSelectedFiles(getArguments());
         }
 
         /**
@@ -392,8 +387,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             childIntent.setAction(intent.getAction());
             IntentUtil.setDataAndTypeAndNormalize(childIntent, intent.getData(), intent.getType());
             copyExtras(childIntent, intent.getExtras(),
-                    EXTRA_FILTER, EXTRA_POSITION, EXTRA_QUERY, EXTRA_SELECTED_ITEM_IDS,
-                    EXTRA_SELECTED_ITEM_PATHS, EXTRA_STREAM, EXTRA_TITLE);
+                    EXTRA_FILTER, EXTRA_POSITION, EXTRA_QUERY, AffUtils.EXTRA_SELECTED_ITEM_IDS, AffUtils.EXTRA_SELECTED_ITEM_DATES,
+                    AffUtils.EXTRA_SELECTED_ITEM_PATHS, EXTRA_STREAM, EXTRA_TITLE);
             startActivityForResult(childIntent, ACTION_RESULT_FORWARD);
         } else { // not in forward mode
             setContentView(R.layout.activity_image_view_pager);

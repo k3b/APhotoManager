@@ -112,10 +112,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
             intent.setData(Uri.parse(directoryOrApmFileUrl));
         }
 
-        if ((selectedFiles != null) && (selectedFiles.size() > 0)) {
-            intent.putExtra(EXTRA_SELECTED_ITEM_IDS, selectedFiles.toIdString());
-            intent.putExtra(EXTRA_SELECTED_ITEM_PATHS, selectedFiles.toString());
-        }
+        AffUtils.putSelectedFiles(intent, selectedFiles);
 
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, mDebugPrefix + context.getClass().getSimpleName()
@@ -183,8 +180,11 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
                     exampleExif.setData(example);
                 }
             }
+
+            // do not predefine these
             exampleExif.setDateTimeTaken(null);
             exampleExif.setPath(null);
+            exampleExif.setTitle(null);
             mCurrentData.setMediaDefaults(exampleExif);
         }
         this.exampleSrcfile = mProcessor.getFile(mSelectedFiles.getFile(0));
@@ -546,14 +546,9 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     private SelectedFiles getSelectedFiles(String dbgContext, Intent intent, boolean mustLoadIDs) {
         if (intent == null) return null;
 
-        SelectedFiles result = null;
+        SelectedFiles result = AffUtils.getSelectedFiles(intent);
 
-        String selectedIDs = intent.getStringExtra(EXTRA_SELECTED_ITEM_IDS);
-        String selectedFiles = intent.getStringExtra(EXTRA_SELECTED_ITEM_PATHS);
-
-        if ((selectedIDs != null) && (selectedFiles != null)) {
-            result = new SelectedFiles(selectedFiles, selectedIDs);
-        } else {
+        if (result == null) {
             String path = IntentUtil.getFilePath(this, IntentUtil.getUri(intent));
             File rootDirFile = new File(path);
             String[] fileNames = rootDirFile.list(MediaUtil.JPG_FILENAME_FILTER);

@@ -272,6 +272,7 @@ public class FotoSql extends FotoSqlBase {
             // "0 AS " + SQL_COL_COUNT,
             SQL_COL_MAX_WITH + " AS " + SQL_COL_WIDTH,
             SQL_COL_GPS,
+            SQL_COL_DATE_TAKEN,
             SQL_COL_PATH};
 
     public static final QueryParameter queryDetail = new QueryParameter()
@@ -782,7 +783,7 @@ public class FotoSql extends FotoSqlBase {
         int result = context.getContentResolver().update(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE,
                     values, sqlWhere,
                     selectionArgs);
-        if (Global.debugEnabledSql) {
+        if (Global.debugEnabledSql || FotoLibGlobal.debugEnabledJpg) {
             Log.i(Global.LOG_CONTEXT, dbgContext + ":FotoSql.exexUpdate\n" +
                     QueryParameter.toString(null, values.toString(), SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
                     sqlWhere, selectionArgs, null, result));
@@ -819,7 +820,7 @@ public class FotoSql extends FotoSqlBase {
 
         // on my android-4.4 insert with media_type=1001 (private) does insert with media_type=1 (image)
         Uri result = context.getContentResolver().insert(providerUri, values);
-        if (Global.debugEnabledSql) {
+        if (Global.debugEnabledSql || FotoLibGlobal.debugEnabledJpg) {
             Log.i(Global.LOG_CONTEXT, dbgContext + ":FotoSql.execInsert" +
                     values.toString() + " => " + result);
         }
@@ -877,7 +878,7 @@ public class FotoSql extends FotoSqlBase {
                 lastSelectionArgs = null;
                 delCount = context.getContentResolver()
                         .delete(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, lastUsedWhereClause, lastSelectionArgs);
-                if (Global.debugEnabledSql) {
+                if (Global.debugEnabledSql || FotoLibGlobal.debugEnabledJpg) {
                     Log.i(Global.LOG_CONTEXT, dbgContext + "-b: FotoSql.deleteMedia delete\n" +
                             QueryParameter.toString(null, null, SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
                             lastUsedWhereClause, lastSelectionArgs, null, delCount));
@@ -885,7 +886,7 @@ public class FotoSql extends FotoSqlBase {
             } else {
                 delCount = context.getContentResolver()
                         .delete(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, lastUsedWhereClause, lastSelectionArgs);
-                if (Global.debugEnabledSql) {
+                if (Global.debugEnabledSql || FotoLibGlobal.debugEnabledJpg) {
                     Log.i(Global.LOG_CONTEXT, dbgContext +": FotoSql.deleteMedia\ndelete " +
                             QueryParameter.toString(null, null,
                                     SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
@@ -983,33 +984,31 @@ public class FotoSql extends FotoSqlBase {
     }
 
     /** converts internal ID-list to string array of filenNames via media database. */
-    public static String[] getFileNames(Context context, SelectedItems items, List<Long> ids, List<String> paths, List<Date> datesPhotoTaken) {
+    public static List<String> getFileNames(Context context, SelectedItems items, List<Long> ids, List<String> paths, List<Date> datesPhotoTaken) {
         if (!items.isEmpty()) {
-            List<String> result = (paths != null) ? paths : new ArrayList<String>();
-
             // query ordered by DatePhotoTaken so that lower rename-numbers correspond to older images.
             QueryParameter parameters = new QueryParameter(queryAutoRename);
             setWhereSelectionPks(parameters, items);
 
-            Cursor cursor = null;
+            List<String> result = getFileNamesImpl(context, parameters, ids, paths, datesPhotoTaken);
+            int size = result.size();
 
-            try {
-                cursor = createCursorForQuery("getFileNames", context, parameters, VISIBILITY.PRIVATE_PUBLIC);
-
-                int colPath = cursor.getColumnIndex(SQL_COL_DISPLAY_TEXT);
-                if (colPath == -1) colPath = cursor.getColumnIndex(SQL_COL_PATH);
-                int colIds = (ids == null) ? -1 : cursor.getColumnIndex(SQL_COL_PK);
-                int colDates = (datesPhotoTaken == null) ? -1 : cursor.getColumnIndex(SQL_COL_DATE_TAKEN);
-                while (cursor.moveToNext()) {
-                    result.add(cursor.getString(colPath));
-                    if (colIds >= 0) ids.add(cursor.getLong(colIds));
-                    if (colDates >= 0) datesPhotoTaken.add(getDate(cursor, colDates));
-                }
-            } finally {
-                if (cursor != null) {
-                    cursor.close();
-                }
+            if (size > 0) {
+                return result;
             }
+        }
+        return null;
+
+    }
+
+    /** converts internal ID-list to string array of filenNames via media database. */
+    public static String[] getFileNames(Context context, String pksAsListString , List<Long> ids, List<String> paths, List<Date> datesPhotoTaken) {
+        if ((pksAsListString != null) && !pksAsListString.isEmpty()) {
+            // query ordered by DatePhotoTaken so that lower rename-numbers correspond to older images.
+            QueryParameter parameters = new QueryParameter(queryAutoRename);
+            setWhereSelectionPks(parameters, pksAsListString);
+
+            List<String> result = getFileNamesImpl(context, parameters, ids, paths, datesPhotoTaken);
             int size = result.size();
 
             if (size > 0) {
@@ -1017,7 +1016,31 @@ public class FotoSql extends FotoSqlBase {
             }
         }
         return null;
+    }
 
+    private static List<String> getFileNamesImpl(Context context, QueryParameter parameters, List<Long> ids, List<String> paths, List<Date> datesPhotoTaken) {
+        List<String> result = (paths != null) ? paths : new ArrayList<String>();
+
+        Cursor cursor = null;
+
+        try {
+            cursor = createCursorForQuery("getFileNames", context, parameters, VISIBILITY.PRIVATE_PUBLIC);
+
+            int colPath = cursor.getColumnIndex(SQL_COL_DISPLAY_TEXT);
+            if (colPath == -1) colPath = cursor.getColumnIndex(SQL_COL_PATH);
+            int colIds = (ids == null) ? -1 : cursor.getColumnIndex(SQL_COL_PK);
+            int colDates = (datesPhotoTaken == null) ? -1 : cursor.getColumnIndex(SQL_COL_DATE_TAKEN);
+            while (cursor.moveToNext()) {
+                result.add(cursor.getString(colPath));
+                if (colIds >= 0) ids.add(cursor.getLong(colIds));
+                if (colDates >= 0) datesPhotoTaken.add(getDate(cursor, colDates));
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return result;
     }
 
     protected static String getFilterExpressionVisibility(VISIBILITY _visibility) {

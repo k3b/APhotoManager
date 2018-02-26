@@ -27,9 +27,9 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -94,10 +94,25 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
         fixDateTakenIfNeccessary(inFile);
         super.saveAttributes(inFile, outFile, deleteInFileOnFinish);
         setFilelastModified(outFile);
-        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
-            logger.debug(mDbg_context +
-                    " saved: " + MediaUtil.toString(this, false, null, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
+    }
+
+    // Stores a new JPEG image with EXIF attributes into a given output stream.
+    @Override
+    public void saveJpegAttributes(InputStream inputStream, OutputStream outputStream, byte[] thumbnail)
+            throws IOException {
+        if (FotoLibGlobal.debugEnabledJpg || FotoLibGlobal.debugEnabledJpgMetaIo) {
+            logger.debug(mDbg_context + " saveJpegAttributes: " + getPath());
         }
+        super.saveJpegAttributes(inputStream, outputStream, thumbnail);
+    }
+
+    @Override
+    protected boolean deleteFile(File file) {
+        boolean result = super.deleteFile(file);
+        if (result && FotoLibGlobal.debugEnabledJpg || FotoLibGlobal.debugEnabledJpgMetaIo) {
+            logger.debug(mDbg_context + " deleteFile: " + file);
+        }
+        return result;
     }
 
     private void fixDateTakenIfNeccessary(File inFile) {

@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import de.k3b.android.androFotoFinder.AffUtils;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
@@ -205,17 +206,7 @@ public class GalleryCursorAdapter extends CursorAdapter  {
     }
 
     public SelectedFiles createSelectedFiles(Context context, SelectedItems items) {
-        if ((items != null) && (items.size() > 0)) {
-            List<Long> ids = new ArrayList<Long>();
-            List<String> paths = new ArrayList<String>();
-            List<Date> datesPhotoTaken = new ArrayList<Date>();
-
-            FotoSql.getFileNames(context, items, ids, paths, datesPhotoTaken);
-            if (paths.size() > 0) {
-                return new SelectedFiles(paths.toArray(new String[paths.size()]), ids.toArray(new Long[ids.size()]), datesPhotoTaken.toArray(new Date[datesPhotoTaken.size()]));
-            }
-        }
-        return null;
+        return AffUtils.querySelectedFiles(context, items);
     }
 
     public String getFullFilePath(int position) {

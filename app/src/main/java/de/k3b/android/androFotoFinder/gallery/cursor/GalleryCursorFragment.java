@@ -21,7 +21,6 @@ package de.k3b.android.androFotoFinder.gallery.cursor;
 
 import android.app.Activity;
 import android.app.LoaderManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
@@ -48,11 +47,11 @@ import android.widget.Toast;
 import org.osmdroid.api.IGeoPoint;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
 import de.k3b.FotoLibGlobal;
+import de.k3b.android.androFotoFinder.AffUtils;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.ExifEditActivity;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
@@ -374,7 +373,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             mGetGeo = ((schema != null) && ("geo".compareTo(schema) == 0));
         }
 
-        String path = (intent == null) ? null : intent.getStringExtra(EXTRA_SELECTED_ITEM_PATHS);
+        String path = (intent == null) ? null : intent.getStringExtra(AffUtils.EXTRA_SELECTED_ITEM_PATHS);
 
         String filterValue = ((intent != null) && (path == null)) ? intent.getStringExtra(EXTRA_FILTER) : null;
         IGalleryFilter filter = (filterValue != null) ? GalleryFilterParameter.parse(filterValue, new GalleryFilterParameter()) : null;
@@ -834,6 +833,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
         // Handle menuItem selection
         AndroidFileCommands fileCommands = mFileCommands;
+
         final SelectedFiles selectedFiles = this.mAdapter.createSelectedFiles(getActivity(), this.mSelectedItems);
         if ((mSelectedItems != null) && (fileCommands.onOptionsItemSelected(menuItem, selectedFiles))) {
             return true;
@@ -965,9 +965,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             // Supply index input as an argument.
             Bundle args = new Bundle();
             args.putBoolean("move", move);
-
-            args.putSerializable(EXTRA_SELECTED_ITEM_PATHS, srcFotos.toString());
-            args.putSerializable(EXTRA_SELECTED_ITEM_IDS, srcFotos.toIdString());
+            AffUtils.putSelectedFiles(args, srcFotos);
 
             f.setArguments(args);
 
@@ -984,12 +982,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
         /** overwritten by dialog host to get selected photos for edit autoprocessing mode */
         @Override public SelectedFiles getSrcFotos() {
-            String selectedIDs = (String) getArguments().getSerializable(EXTRA_SELECTED_ITEM_IDS);
-            String selectedFiles = (String) getArguments().getSerializable(EXTRA_SELECTED_ITEM_PATHS);
-
-            if ((selectedIDs == null) && (selectedFiles == null)) return null;
-            SelectedFiles result = new SelectedFiles(selectedFiles, selectedIDs);
-            return result;
+            return AffUtils.getSelectedFiles(getArguments());
         }
 
         @Override

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <!--
-Copyright (C) 2014-2016 k3b
+Copyright (C) 2014-2018 k3b
 
 This file is part of "A Photo Manager" (https://github.com/k3b/AndroFotoFinder/)
 
@@ -26,6 +26,7 @@ this program. If not, see <http://www.gnu.org/licenses/>
 	<string name="global_log_file_path" translatable="false">copy/aPhotoManager.log</string>
 	<string name="settings_debug_libs_title" translatable="false">LogCat libs</string>
 	<string name="settings_debug_sql_title" translatable="false">LogCat SQL</string>
+	<string name="settings_debug_jpg_title" translatable="false">LogCat JPG</string>
 	<string name="settings_debug_map_title" translatable="false">LogCat geo map</string>
 
 	<string name="bookmark_reset" translatable="false">RESET</string>
