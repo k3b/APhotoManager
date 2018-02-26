@@ -1,0 +1,4 @@
+Changes from 0.6.3 (35) to 0.6.4 (36)
+
+* Bugfix and imporvements AutoProcessingMode/Rule based automatic file rename)  (#112,#111)
+* Translations and Translationupdates: 	en, ja
