@@ -45,6 +45,7 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -140,9 +141,12 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
             if (currentOutDir.isFile()) currentOutDir = currentOutDir.getParentFile();
         }
 
+        mCurrentData = null;
         if (savedInstanceState != null) {
-            mCurrentData = PhotoWorkFlowDto.load(savedInstanceState.getSerializable(SETTINGS_KEY));
-        } else if (currentOutDir != null) {
+            final Serializable settingsAsSerializable = savedInstanceState.getSerializable(SETTINGS_KEY);
+            mCurrentData = PhotoWorkFlowDto.load(settingsAsSerializable);
+        }
+        if ((mCurrentData == null) && (currentOutDir != null)) {
             try {
                 mCurrentData = new PhotoWorkFlowDto();
                 mCurrentData.load(currentOutDir);
@@ -188,7 +192,13 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
             mCurrentData.setMediaDefaults(exampleExif);
         }
         this.exampleSrcfile = mProcessor.getFile(mSelectedFiles.getFile(0));
-        this.exampleDate = getExampleDate(exampleSrcfile);
+
+        final Date[] datesPhotoTaken = mSelectedFiles.getDatesPhotoTaken();
+
+        this.exampleDate = ((datesPhotoTaken != null) && (datesPhotoTaken.length > 0))
+                ? datesPhotoTaken[0]
+                : getExampleDate(mProcessor.getFile(this.exampleSrcfile));
+
 
         defineGui();
         toGui();
@@ -273,7 +283,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     private String createExampleResultFileName(String dateFormat, String baseName, String numberFormat) {
         mProcessor.set(dateFormat, baseName, numberFormat);
 
-        File file = mProcessor.getNextFile(exampleSrcfile, exampleDate, StringUtils.isNullOrEmpty(numberFormat) ? 0 : 1);
+        File file = mProcessor.getNextFile(null, exampleDate, StringUtils.isNullOrEmpty(numberFormat) ? 0 : 1);
         if(file != null) return file.getName();
         return null;
     }
@@ -393,13 +403,11 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     }
 
     private List<Pattern> createDatePatterns() {
-        Date exampleValue = getExampleDate(mProcessor.getFile(mSelectedFiles.getFile(0)));
-
         String[] patternValues = getResources().getStringArray(R.array.date_patterns);
         ArrayList<Pattern> result = new ArrayList<Pattern>();
         for (String patternValue : patternValues) {
             String formattedExample = (!StringUtils.isNullOrEmpty(patternValue))
-                    ? new SimpleDateFormat(patternValue).format(exampleValue)
+                    ? new SimpleDateFormat(patternValue).format(this.exampleDate)
                     : "";
             result.add(new Pattern(patternValue, formattedExample, true));
         }
@@ -458,8 +466,10 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(R.menu.menu_renamer_context, popup.getMenu());
 
-        setMenuItem(popup, R.id.cmd_dir, this.mProcessor.getDirBaseName());
-        setMenuItem(popup, R.id.cmd_subdir_dir, getParentDirBaseName());
+        String name = this.mProcessor.getDirBaseName();
+        setMenuItem(popup, R.id.cmd_dir, name);
+        name = getParentDirBaseName();
+        setMenuItem(popup, R.id.cmd_subdir_dir, name);
         return popup;
     }
 

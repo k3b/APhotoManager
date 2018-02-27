@@ -112,8 +112,8 @@ public class PhotoWorkFlowDto {
     /** Android support: to persist state and to transfer activites via intent.  */
     public static PhotoWorkFlowDto load(Serializable content) {
         PhotoWorkFlowDto photoWorkFlowDto = null;
-        Properties properties = (Properties) content;
-        if (properties != null) {
+        if (content instanceof Properties ) {
+            Properties properties = (Properties) content;
             String outDir = properties.getProperty(KEY_OUT_DIR);
             photoWorkFlowDto = new PhotoWorkFlowDto((outDir != null) ? new File(outDir) : null, properties);
         }
