@@ -246,5 +246,6 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
 
     <string name="clear_menu_title">Clear</string>
 
+    <string name="show_in_filemanager_menu_title">Open in Filemanager</string>
 
 </resources>

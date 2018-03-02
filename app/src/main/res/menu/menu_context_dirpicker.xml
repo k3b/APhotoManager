@@ -35,6 +35,9 @@
     <item android:id="@+id/cmd_gallery" android:title="@string/show_in_gallery_menu_title"
         android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
 
+    <item android:id="@+id/cmd_filemanager" android:title="@string/show_in_filemanager_menu_title"
+        android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
+
     <!--  become visible if current folder is a symlink and not a canonical link -->
     <item android:id="@+id/cmd_fix_link" android:title="@string/fix_link_menu_title"
         android:orderInCategory="400" android:showAsAction="never" android:visible="false" />

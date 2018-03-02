@@ -60,6 +60,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.util.AndroidFileCommands;
+import de.k3b.android.util.FileManagerUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
@@ -352,6 +353,12 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                     menuItem.setVisible(false);
                 }
             }
+            menuItem = popup.getMenu().findItem(R.id.cmd_filemanager);
+            if ((menuItem != null) && !FileManagerUtil.hasShowInFilemanager(getActivity(), absoluteSelectedPath)) {
+                // no filemanager installed
+                menuItem.setVisible(false);
+            }
+
         }
         return popup;
     }
@@ -376,6 +383,8 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                 return showPhoto(popUpSelection);
             case R.id.cmd_gallery:
                 return showGallery(popUpSelection);
+            case R.id.cmd_filemanager:
+                return FileManagerUtil.showInFilemanager(getActivity(), popUpSelection.getAbsolute());
             case R.id.action_details:
                 return showDirInfo(popUpSelection);
             case R.id.cmd_fix_link:

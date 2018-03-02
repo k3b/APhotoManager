@@ -66,6 +66,7 @@ import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagTask;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.util.AndroidFileCommands;
+import de.k3b.android.util.FileManagerUtil;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.MediaScannerAsyncTask;
@@ -834,6 +835,13 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         } else {
             getMenuInflater().inflate(R.menu.menu_image_detail, menu);
             getMenuInflater().inflate(R.menu.menu_image_commands, menu);
+            MenuItem item = menu.findItem(R.id.cmd_filemanager);
+            final boolean hasShowInFilemanager = FileManagerUtil.hasShowInFilemanager(this, "/a/b/");
+            if ((item != null) && !hasShowInFilemanager) {
+                // no filemanager installed
+                item.setVisible(false);
+            }
+
             Global.fixMenu(this, menu);
         }
         mMenuSlideshow = menu.findItem(R.id.action_slideshow);
@@ -896,6 +904,11 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                 case R.id.action_view_context_mode:
                     pickContextDefinition();
                     break;
+                case R.id.cmd_filemanager:
+                    FileManagerUtil.showInFilemanager(this, getCurrentDir());
+                    break;
+
+
                 case R.id.action_slideshow:
                     reloadContext = false;
                     // only if not started
@@ -1180,6 +1193,13 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             int itemPosition = mViewPager.getCurrentItem();
             return this.mAdapter.getDatePhotoTaken(itemPosition);
         }
+        return null;
+    }
+
+    protected String getCurrentDir() {
+        try {
+            return new File(getCurrentFilePath()).getParent();
+        } catch (Exception ignore) {}
         return null;
     }
 

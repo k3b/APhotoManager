@@ -49,6 +49,9 @@
         android:checkable="true"
         android:orderInCategory="901" android:showAsAction="never" />
 
+    <item android:id="@+id/cmd_filemanager" android:title="@string/show_in_filemanager_menu_title"
+        android:orderInCategory="901" android:showAsAction="never" android:visible="true" />
+
     <item android:id="@+id/cmd_settings"
         android:title="@string/settings_title"
         android:icon="@android:drawable/ic_menu_preferences"

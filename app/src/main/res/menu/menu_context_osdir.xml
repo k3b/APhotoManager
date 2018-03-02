@@ -40,6 +40,9 @@
     <item android:id="@+id/cmd_gallery" android:title="@string/show_in_gallery_menu_title"
         android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
 
+    <item android:id="@+id/cmd_filemanager" android:title="@string/show_in_filemanager_menu_title"
+        android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
+
     <item android:id="@+id/action_details" android:title="@string/details_menu_title"
         android:orderInCategory="900" android:showAsAction="never" />
 </menu>
