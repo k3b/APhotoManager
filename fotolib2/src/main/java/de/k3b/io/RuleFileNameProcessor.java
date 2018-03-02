@@ -166,7 +166,7 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
 			File result = new File(this.mOutDir, name);
 
             // usecase: apply auto where inFile is already in outdir: no modification
-            if (sourceFile.equals(result)) return result;
+            if ((sourceFile != null) && sourceFile.equals(result)) return result;
 
 			// change file name if result already exists
 			return renameDuplicate(result);
