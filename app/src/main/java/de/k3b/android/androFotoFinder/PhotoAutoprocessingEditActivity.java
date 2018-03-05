@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.util.ClipboardUtil;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.AboutDialogPreference;
@@ -84,6 +85,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     /**
      * current modified value of the first selected file
      */
+    private File mCurrentOutDir = null;
     private PhotoWorkFlowDto mCurrentData;
     private SelectedFiles mSelectedFiles;
 
@@ -136,9 +138,9 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
         mSelectedFiles = getSelectedFiles("onCreate ", intent, false);
 
         // Edit dir or edit ".apm"
-        File currentOutDir = IntentUtil.getFile(intent.getData());
-        if (currentOutDir != null) {
-            if (currentOutDir.isFile()) currentOutDir = currentOutDir.getParentFile();
+        mCurrentOutDir = IntentUtil.getFile(intent.getData());
+        if (mCurrentOutDir != null) {
+            if (mCurrentOutDir.isFile()) mCurrentOutDir = mCurrentOutDir.getParentFile();
         }
 
         mCurrentData = null;
@@ -146,10 +148,10 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
             final Serializable settingsAsSerializable = savedInstanceState.getSerializable(SETTINGS_KEY);
             mCurrentData = PhotoWorkFlowDto.load(settingsAsSerializable);
         }
-        if ((mCurrentData == null) && (currentOutDir != null)) {
+        if ((mCurrentData == null) && (mCurrentOutDir != null)) {
             try {
                 mCurrentData = new PhotoWorkFlowDto();
-                mCurrentData.load(currentOutDir);
+                mCurrentData.load(mCurrentOutDir);
             } catch (IOException e) {
                 onFatalError(mDebugPrefix + "Cannot load .apm from " + mCurrentData, e);
                 return;
@@ -160,19 +162,19 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
             final String nl = "\n\t.";
             Log.d(Global.LOG_CONTEXT, ListUtils.toString(" ", mDebugPrefix,
                     "onCreate",intent.toUri(Intent.URI_INTENT_SCHEME),
-                    nl,currentOutDir,
+                    nl,mCurrentOutDir,
                     nl,"savedInstanceState",savedInstanceState,
                     nl,mCurrentData));
         }
 
-        if ((currentOutDir == null) || (mCurrentData == null)) {
+        if ((mCurrentOutDir == null) || (mCurrentData == null)) {
             onFatalError(mDebugPrefix + "Missing Intent.data parameter. intent="
                     + intent.toUri(Intent.URI_INTENT_SCHEME), null);
             return;
         }
 
-        mCurrentData.setOutDir(currentOutDir);
-        mProcessor = new RuleFileNameProcessor(currentOutDir);
+        mCurrentData.setOutDir(mCurrentOutDir);
+        mProcessor = new RuleFileNameProcessor(mCurrentOutDir);
 
         if (mCurrentData.getMediaDefaults() == null) {
             File first = mSelectedFiles.getFile(0);
@@ -584,7 +586,8 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
                 }
 
             }
-            result = new SelectedFiles(fileNames, ids, null);
+            result = new SelectedFiles(fileNames,
+                    ids, null);
         }
 
         if (Global.debugEnabled && (intent != null)) {
@@ -594,11 +597,23 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
         return result;
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_edit_common, menu);
+        getMenuInflater().inflate(R.menu.menu_autoprocessing, menu);
+
+        MenuItem item = menu.findItem(android.R.id.paste);
+        final File clipboardDir = ClipboardUtil.getClipboardDir(this);
+        final File apmFile = (clipboardDir == null) ? null : PhotoWorkFlowDto.getApmFile(clipboardDir);
+        if ((item != null) && (apmFile != null) && apmFile.exists()) {
+            item.setVisible(true);
+        }
+
+        item = menu.findItem(android.R.id.copy);
+        if ((item != null) && (mCurrentOutDir == null)) {
+            item.setVisible(false);
+        }
         AboutDialogPreference.onPrepareOptionsMenu(this, menu);
 
         return true;
@@ -629,9 +644,30 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
                 SettingsActivity.show(this);
                 return true;
 
+            case android.R.id.copy:
+                return ClipboardUtil.addDirToClipboard(this, mCurrentOutDir);
+            case android.R.id.paste:
+                return onPaste();
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private boolean onPaste() {
+        File dir = ClipboardUtil.getClipboardDir(this);
+        if (dir != null) {
+            try {
+                PhotoWorkFlowDto srcApm = new PhotoWorkFlowDto().load(dir);
+                if (srcApm != null) {
+                    mCurrentData.paste(srcApm);
+                    toGui();
+                    return true;
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
     }
 
     /**

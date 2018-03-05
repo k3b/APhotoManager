@@ -75,6 +75,27 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
         set(dateFormat, name, numberFormat);
     }
 
+    public RuleFileNameProcessor(RuleFileNameProcessor ancestor, File newDir) {
+        this(newDir);
+        if (ancestor != null) {
+            String name = ancestor.mName;
+            final File oldDir = ancestor.mOutDir;
+            if ((newDir != null) && (!StringUtils.isNullOrEmpty(name) & (oldDir != null)
+                    && (newDir != oldDir))) {
+                name = replace(name,ancestor.getDirBaseName(),this.getDirBaseName());
+                name = replace(name,ancestor.getParentDirBaseName(),this.getParentDirBaseName());
+            }
+            set(ancestor.mDateFormat, name,ancestor.mNumberFormat);
+        }
+    }
+
+    private static String replace(String name, String oldDir, String newDir) {
+        if (!StringUtils.isNullOrEmpty(oldDir) && !StringUtils.isNullOrEmpty(newDir)) {
+            return name.replace(oldDir, newDir);
+        }
+        return name;
+    }
+
     /**
      * filename = outDir+dateFormat+name+numberFormat+fileExtension.
      *  @param dateFormat null or dateformat
@@ -238,5 +259,10 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
         final int c = name.charAt(offset);
         final boolean result = Character.isLetter(c);
         return result;
+    }
+
+    public static String translateName(RuleFileNameProcessor srcData, File outDir) {
+        RuleFileNameProcessor translated = new RuleFileNameProcessor(srcData, outDir);
+        return translated.mName;
     }
 }

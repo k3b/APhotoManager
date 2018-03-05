@@ -60,6 +60,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.util.AndroidFileCommands;
+import de.k3b.android.util.ClipboardUtil;
 import de.k3b.android.util.FileManagerUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.Dialogs;
@@ -408,14 +409,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
 
     private boolean onCopy(IDirectory selection) {
         String path = (selection == null) ? null : selection.getAbsolute();
-        if (!StringUtils.isNullOrEmpty(path)) {
-            ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText(getActivity().getString(R.string.lbl_path), path);
-            clipboard.setPrimaryClip(clip);
-            Toast.makeText(getActivity(), path, Toast.LENGTH_LONG).show();
-            return true;
-        }
-        return false;
+        return ClipboardUtil.addDirToClipboard(this.getActivity(), path);
     }
 
     private boolean onEditApm(IDirectory selection) {

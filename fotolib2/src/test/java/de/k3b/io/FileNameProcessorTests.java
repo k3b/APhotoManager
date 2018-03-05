@@ -133,6 +133,18 @@ public class FileNameProcessorTests {
         Assert.assertEquals(null, baseName);
     }
 
+    @Test
+    public void shouldFixRuleOnFileChange() {
+        RuleFileNameProcessor ancestor = new RuleFileNameProcessor(
+                null,"Crete-habour",null,
+                new File ("/DCIM/2007Crete/habour/")
+        );
+
+        String newName = RuleFileNameProcessor.translateName(ancestor, new File ("/DCIM/2008Teneriffe/beach/"));
+
+        Assert.assertEquals("Teneriffe-beach", newName);
+    }
+
     /** these files exist in source-dir and in dest-dir */
     private static void registerFakeFiles(RuleFileNameProcessor sut, String... filenames) {
         if (filenames.length == 0) {

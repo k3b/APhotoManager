@@ -29,7 +29,7 @@
     <item android:id="@+id/cmd_cancel" android:title="@android:string/cancel"
         android:icon="@drawable/ic_action_cancel"
         android:orderInCategory="5" android:showAsAction="always" android:visible="true" />
-    <item android:id="@+id/cmd_clear" android:title="@string/delete_menu_title"
+    <item android:id="@+id/cmd_clear" android:title="@string/clear_menu_title"
         android:icon="@drawable/ic_action_undo"
         android:orderInCategory="5" android:showAsAction="always" android:visible="true" />
 
