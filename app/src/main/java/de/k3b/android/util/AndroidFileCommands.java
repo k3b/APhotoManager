@@ -47,6 +47,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.transactionlog.TransactionLogSql;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.FileUtils;
 import de.k3b.io.IProgessListener;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.DirectoryFormatter;
@@ -204,6 +205,32 @@ public class AndroidFileCommands extends FileCommands {
     public boolean rename(SelectedFiles selectedFiles, File dest, IProgessListener progessListener) {
         int result = moveOrCopyFiles(true, "rename", null, selectedFiles, new File[]{dest}, progessListener);
         return (result != 0);
+    }
+
+    public int execRename(File srcDirFile, String newFolderName) {
+        // this will allow to be newFolderName = "../someOtherDir/newName" or even "/absolute/path/to"
+        File destDirFile = FileUtils.tryGetCanonicalFile(new File(srcDirFile.getParent(), newFolderName));
+
+        int modifyCount = -1;
+
+        if (destDirFile != null) {
+            destDirFile.getParentFile().mkdirs();
+            if (srcDirFile.renameTo(destDirFile)) {
+                modifyCount = FotoSql.execRenameFolder(this.mContext, srcDirFile.getAbsolutePath() + "/", destDirFile.getAbsolutePath() + "/");
+                if (modifyCount < 0) {
+                    destDirFile.renameTo(srcDirFile); // error: undo change
+                    return -1;
+                } else {
+                    long now = new Date().getTime();
+                    this.addTransactionLog(-1, srcDirFile.getAbsolutePath(), now,
+                            MediaTransactionLogEntryType.MOVE_DIR,
+                            destDirFile.getAbsolutePath());
+
+                    MediaScanner.notifyChanges(this.mContext,"renamed dir");
+                }
+            }
+        }
+        return modifyCount;
     }
 
     /** implement copy/move called after dest-dir-pick  */
@@ -463,6 +490,13 @@ public class AndroidFileCommands extends FileCommands {
         cmd.setLogFilePath(cmd.getDefaultLogFile());
         cmd.openLogfile();
         return cmd;
+    }
+
+    @NonNull
+    public AndroidFileCommands openDefaultLogFile() {
+        setLogFilePath(getDefaultLogFile());
+        openLogfile();
+        return this;
     }
 
     private AndroidFileCommands setInBackground(boolean isInBackground) {

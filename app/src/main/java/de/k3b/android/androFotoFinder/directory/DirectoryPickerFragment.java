@@ -23,8 +23,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -380,6 +378,10 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                 return onEditApm(popUpSelection);
             case android.R.id.copy:
                 return onCopy(popUpSelection);
+
+            case R.id.menu_item_rename:
+                return onRenameDirQuestion(popUpSelection);
+
             case R.id.cmd_photo:
                 return showPhoto(popUpSelection);
             case R.id.cmd_gallery:
@@ -438,6 +440,49 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                     mContext.getString(R.string.folder_hide_images_question_message_format, path));
         } // else toast "cannot process because scanner is active"
         return true;
+    }
+
+    private boolean onRenameDirQuestion(final IDirectory parentDir) {
+        if (parentDir != null) {
+			File parentFile = FileUtils.tryGetCanonicalFile(parentDir.getAbsolute());
+			if (parentFile != null) {
+				String defaultName = parentFile.getName();
+				Dialogs dialog = new Dialogs() {
+					@Override
+					protected void onDialogResult(String newFileName, Object... parameters) {
+						if (newFileName != null) {
+							onRenameDirAnswer(parentDir, newFileName);
+						}
+						mSubDialog = null;
+					}
+				};
+				mSubDialog = dialog.editFileName(getActivity(), getString(R.string.rename_menu_title), defaultName);
+				return true;
+			}
+        }
+        return false;
+    }
+
+    private void onRenameDirAnswer(final IDirectory srcDir, String newFolderName) {
+        int modified = -1;
+        File srcDirFile = (srcDir != null) ? FileUtils.tryGetCanonicalFile(srcDir.getAbsolute()) : null;
+        if (srcDirFile != null) {
+            AndroidFileCommands cmd
+                    = new AndroidFileCommands()
+                    .setContext(getActivity())
+                    .openDefaultLogFile();
+            modified = cmd.execRename(srcDirFile, newFolderName);
+            cmd.closeAll();
+        }
+
+        if (modified <= 0) {
+            Toast.makeText(getActivity(), getActivity().getString(R.string.image_err_file_rename_format, srcDirFile.getAbsolutePath()),
+                    Toast.LENGTH_LONG).show();
+        } else {
+            // update dirpicker
+            srcDir.rename(srcDirFile.getName(), newFolderName);
+            this.mAdapter.notifyDataSetChanged();
+        }
     }
 
     private boolean onCreateSubDirQuestion(final IDirectory parentDir) {

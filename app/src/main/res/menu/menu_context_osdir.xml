@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -30,6 +30,14 @@
         android:visible="true"
         android:orderInCategory="10"
         android:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_item_rename"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:orderInCategory="10"
+        android:showAsAction="never"
+        android:title="@string/rename_menu_title" />
+
     <item android:id="@+id/cmd_apm_edit"
         android:title="@string/photo_autoprocessing_edit_menu_title"
         android:visible="true"

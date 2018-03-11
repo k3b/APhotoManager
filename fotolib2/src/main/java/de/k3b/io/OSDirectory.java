@@ -94,6 +94,12 @@ public class OSDirectory implements IDirectory {
         setDirFlags(getCalculateFlags(mCurrent));
     }
 
+    /** #114: update internal data after a folder has been renamed in the gui */
+    @Override
+    public void rename(String oldFolderName, String newFolderName) {
+        this.mCurrent = new File(mCurrent.getParentFile(), newFolderName);
+    }
+
     @Override
     public String getRelPath() {
         return mCurrent.getName();

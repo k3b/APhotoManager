@@ -20,6 +20,7 @@
 package de.k3b.android.androFotoFinder.queries;
 
 import android.app.Activity;
+import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -623,7 +624,7 @@ public class FotoSql extends FotoSqlBase {
     }
 
     public static Cursor createCursorForQuery(String dbgContext, final Context context, QueryParameter parameters, VISIBILITY visibility) {
-        setWhereVisibility(parameters, visibility);
+        if (visibility != null) setWhereVisibility(parameters, visibility);
         return createCursorForQuery(dbgContext, context, parameters.toFrom(), parameters.toAndroidWhere(),
                 parameters.toAndroidParameters(), parameters.toOrderBy(),
                 parameters.toColumns()
@@ -635,11 +636,20 @@ public class FotoSql extends FotoSqlBase {
                                                final String[] sqlWhereParameters, final String sqlSortOrder,
                                                final String... sqlSelectColums) {
         ContentResolver resolver = context.getContentResolver();
-        Cursor query = resolver.query(Uri.parse(from), sqlSelectColums, sqlWhereStatement, sqlWhereParameters, sqlSortOrder);
-        if (Global.debugEnabledSql) {
-            Log.i(Global.LOG_CONTEXT, dbgContext +": FotoSql.createCursorForQuery:\n" +
-                    QueryParameter.toString(sqlSelectColums, null, from, sqlWhereStatement,
-                            sqlWhereParameters, sqlSortOrder, query.getCount()));
+        Cursor query = null;
+
+        Exception excpetion = null;
+        try {
+            query = resolver.query(Uri.parse(from), sqlSelectColums, sqlWhereStatement, sqlWhereParameters, sqlSortOrder);
+        } catch (Exception ex) {
+            excpetion = ex;
+        } finally {
+            if ((excpetion != null) || Global.debugEnabledSql) {
+                Log.i(Global.LOG_CONTEXT, dbgContext + ": FotoSql.createCursorForQuery: " + excpetion +
+                        "\n" +
+                        QueryParameter.toString(sqlSelectColums, null, from, sqlWhereStatement,
+                                sqlWhereParameters, sqlSortOrder, query.getCount()), excpetion);
+            }
         }
 
         return query;
@@ -778,15 +788,123 @@ public class FotoSql extends FotoSqlBase {
         return exexUpdateImpl(dbgContext, context, values, getFilterExprPathLikeWithVisibility(visibility), new String[]{path});
     }
 
+    /**
+     * execRenameFolder(getActivity(),"/storage/sdcard0/testFolder/", "/storage/sdcard0/renamedFolder/")
+     *    "/storage/sdcard0/testFolder/image.jpg" becomes "/storage/sdcard0/renamedFolder/image.jpg"
+     * @return number of updated items
+     */
+    public static int execRenameFolder(Context context, String pathOld, String pathNew) {
+        final String dbgContext = "FotoSql.execRenameFolder('" +
+                pathOld + "' => '" + pathNew + "')";
+        // sql update file set path = newBegin + substing(path, begin+len) where path like newBegin+'%'
+        // public static final String SQL_EXPR_FOLDER = "substr(" + SQL_COL_PATH + ",1,length(" + SQL_COL_PATH + ") - length(" + MediaStore.Images.Media.DISPLAY_NAME + "))";
+
+        final String sqlColNewPathAlias = "new_path";
+        final String sql_col_pathnew = "'" + pathNew + "' || substr(" + SQL_COL_PATH +
+            "," + (pathOld.length() + 1) + ",255) AS " + sqlColNewPathAlias;
+
+        QueryParameter queryAffectedFiles = new QueryParameter()
+                .setID(QUERY_TYPE_DEFAULT)
+                .addColumn(SQL_COL_PK,
+                        sql_col_pathnew)
+                .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
+                .addWhere(SQL_COL_PATH + " like '" + pathOld + "%'")
+                // SQL_COL_EXT_MEDIA_TYPE IS NOT NULL enshures that all media types (mp3, mp4, txt,...) are updated
+                .addWhere(SQL_COL_EXT_MEDIA_TYPE + " IS NOT NULL")
+                ;
+
+        SelectedFiles selectedFiles= getSelectedfiles(context, queryAffectedFiles, sqlColNewPathAlias);
+
+        String[] paths = selectedFiles.getFileNames();
+        Long[] ids = selectedFiles.getIds();
+        ContentValues values = new ContentValues();
+        String[] selectionArgs = new String[1];
+        String _dbgContext = dbgContext + "(" +
+                ids.length + " times)";
+        for (int i = 0; i < ids.length; i++) {
+            values.put(SQL_COL_PATH, paths[i]);
+            selectionArgs[0] = ids[i].toString();
+            if (exexUpdateImpl(_dbgContext, context, values, FILTER_COL_PK, selectionArgs) < 0) return -1;
+            _dbgContext = null;
+        }
+        return ids.length;
+    }
+
+    /**
+     * execRenameFolder(getActivity(),"/storage/sdcard0/testFolder/", "/storage/sdcard0/renamedFolder/")
+     *    "/storage/sdcard0/testFolder/image.jpg" becomes "/storage/sdcard0/renamedFolder/image.jpg"
+     * @return number of updated items
+     */
+    private static int _del_execRenameFolder_batch_not_working(Context context, String pathOld, String pathNew) {
+        final String dbgContext = "FotoSql.execRenameFolder('" +
+                pathOld + "' => '" + pathNew + "')";
+        // sql update file set path = newBegin + substing(path, begin+len) where path like newBegin+'%'
+        // public static final String SQL_EXPR_FOLDER = "substr(" + SQL_COL_PATH + ",1,length(" + SQL_COL_PATH + ") - length(" + MediaStore.Images.Media.DISPLAY_NAME + "))";
+
+        final String sqlColNewPathAlias = "new_path";
+        final String sql_col_pathnew = "'" + pathNew + "' || substr(" + SQL_COL_PATH +
+                "," + (pathOld.length() + 1) + ",255) AS " + sqlColNewPathAlias;
+
+        QueryParameter queryAffectedFiles = new QueryParameter()
+                .setID(QUERY_TYPE_DEFAULT)
+                .addColumn(SQL_COL_PK,
+                        sql_col_pathnew)
+                .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
+                .addWhere(SQL_COL_PATH + " like '" + pathOld + "%'")
+                // SQL_COL_EXT_MEDIA_TYPE IS NOT NULL enshures that all media types (mp3, mp4, txt,...) are updated
+                .addWhere(SQL_COL_EXT_MEDIA_TYPE + " IS NOT NULL")
+                ;
+
+        ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
+
+        Cursor c = null;
+        try {
+            c = createCursorForQuery(dbgContext, context, queryAffectedFiles, null);
+            int pkColNo = c.getColumnIndex(FotoSql.SQL_COL_PK);
+            int pathColNo = c.getColumnIndex(sqlColNewPathAlias);
+
+            while (c.moveToNext()) {
+                // paths[row] = c.getString(pathColNo);
+                // ids[row] = c.getLong(pkColNo);
+                ops.add(ContentProviderOperation.newUpdate(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE)
+                        .withSelection(FILTER_COL_PK, new String[]{c.getString(pkColNo)})
+                        .withValue(SQL_COL_PATH, c.getString(pathColNo))
+                        .build());
+            }
+        } catch (Exception ex) {
+            Log.e(Global.LOG_CONTEXT, dbgContext + "-getAffected error :", ex);
+            return -1;
+        } finally {
+            if (c != null) c.close();
+        }
+
+        try {
+            context.getContentResolver().applyBatch(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME, ops);
+        } catch (Exception ex) {
+            // java.lang.IllegalArgumentException: Unknown authority content://media/external/file
+            // i assume not batch support for file
+            Log.e(Global.LOG_CONTEXT, dbgContext + "-updateAffected error :", ex);
+            return -1;
+        }
+        return ops.size();
+    }
+
     /** every database update should go through this. adds logging if enabled */
     protected static int exexUpdateImpl(String dbgContext, Context context, ContentValues values, String sqlWhere, String[] selectionArgs) {
-        int result = context.getContentResolver().update(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE,
+        int result = -1;
+        Exception excpetion = null;
+        try {
+            result = context.getContentResolver().update(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE,
                     values, sqlWhere,
                     selectionArgs);
-        if (Global.debugEnabledSql || FotoLibGlobal.debugEnabledJpg) {
-            Log.i(Global.LOG_CONTEXT, dbgContext + ":FotoSql.exexUpdate\n" +
-                    QueryParameter.toString(null, values.toString(), SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
-                    sqlWhere, selectionArgs, null, result));
+        } catch (Exception ex) {
+            excpetion = ex;
+        } finally {
+            if ((excpetion != null) || ((dbgContext != null) && (Global.debugEnabledSql || FotoLibGlobal.debugEnabledJpg))) {
+                Log.i(Global.LOG_CONTEXT, dbgContext + ":FotoSql.exexUpdate " + excpetion + "\n" +
+                        QueryParameter.toString(null, values.toString(), SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
+                        sqlWhere, selectionArgs, null, result), excpetion);
+            }
         }
         return result;
     }
@@ -818,11 +936,18 @@ public class FotoSql extends FotoSqlBase {
     public static Uri execInsert(String dbgContext, Context context, ContentValues values) {
         Uri providerUri = (null != values.get(SQL_COL_EXT_MEDIA_TYPE)) ? SQL_TABLE_EXTERNAL_CONTENT_URI_FILE : SQL_TABLE_EXTERNAL_CONTENT_URI;
 
+        Uri result = null;
+        Exception excpetion = null;
+        try {
         // on my android-4.4 insert with media_type=1001 (private) does insert with media_type=1 (image)
-        Uri result = context.getContentResolver().insert(providerUri, values);
-        if (Global.debugEnabledSql || FotoLibGlobal.debugEnabledJpg) {
-            Log.i(Global.LOG_CONTEXT, dbgContext + ":FotoSql.execInsert" +
-                    values.toString() + " => " + result);
+            result = context.getContentResolver().insert(providerUri, values);
+        } catch (Exception ex) {
+            excpetion = ex;
+        } finally {
+            if ((excpetion != null) || Global.debugEnabledSql || FotoLibGlobal.debugEnabledJpg) {
+                Log.i(Global.LOG_CONTEXT, dbgContext + ":FotoSql.execInsert " + excpetion + " " +
+                        values.toString() + " => " + result + " " + excpetion, excpetion);
+            }
         }
         return result;
     }
@@ -847,7 +972,7 @@ public class FotoSql extends FotoSqlBase {
 
         // return deleteMedia("delete without path (_data = null)", context, wherePathIsNull.toAndroidWhere(), null, false);
 
-        SelectedFiles filesWitoutPath = getSelectedfiles(context, wherePathIsNull);
+        SelectedFiles filesWitoutPath = getSelectedfiles(context, wherePathIsNull, FotoSql.SQL_COL_PATH);
         String pksAsString = filesWitoutPath.toIdString();
         if ((pksAsString != null) && (pksAsString.length() > 0)) {
             QueryParameter whereInIds = new QueryParameter();
@@ -940,12 +1065,12 @@ public class FotoSql extends FotoSqlBase {
         query.addWhere(sqlWhere);
         query.addOrderBy(FotoSql.SQL_COL_PATH);
 
-        return getSelectedfiles(context, query);
+        return getSelectedfiles(context, query, FotoSql.SQL_COL_PATH);
 
     }
 
     @Nullable
-    private static SelectedFiles getSelectedfiles(Context context, QueryParameter query) {
+    private static SelectedFiles getSelectedfiles(Context context, QueryParameter query, String colnameForPath) {
         SelectedFiles result = null;
         Cursor c = null;
 
@@ -955,7 +1080,7 @@ public class FotoSql extends FotoSqlBase {
             Long[] ids = new Long[len];
             String[] paths = new String[len];
             int pkColNo = c.getColumnIndex(FotoSql.SQL_COL_PK);
-            int pathColNo = c.getColumnIndex(FotoSql.SQL_COL_PATH);
+            int pathColNo = c.getColumnIndex(colnameForPath);
             int row = 0;
             while (c.moveToNext()) {
                 paths[row] = c.getString(pathColNo);
