@@ -1464,7 +1464,7 @@ public class ExifInterface {
                                     .append(Integer.toHexString(tag.id)).append(")");
                         }
                     }
-                    sb.append("='").append(tagValue.getStringValue(mExifByteOrder) + "'");
+                    sb.append("='").append(tagValue.getStringValue(mExifByteOrder)).append("'");
                     if (DEBUG) {
                         sb.append(" : ")
                                 .append(tagValue.getFormatName());

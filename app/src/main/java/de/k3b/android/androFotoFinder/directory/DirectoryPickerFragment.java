@@ -88,9 +88,6 @@ import java.util.List;
  * to handle interaction events.
  */
 public class DirectoryPickerFragment extends DialogFragment implements DirectoryGui {
-
-    private static final int FIRST_RADIO = 5000;
-
     /** executer for background task, that updates status-message and stops if cancel is pressed */
     private abstract class AsyncTaskEx<Params> extends AsyncTask<Params, Integer,Integer> {
         private final int mProgressMessageResourceId;

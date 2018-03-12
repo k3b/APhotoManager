@@ -19,17 +19,8 @@
  
 package de.k3b.android.osmdroid;
 
-import java.util.List;
-
-import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.DefaultOverlayManager;
 import org.osmdroid.views.overlay.FolderOverlay;
-import org.osmdroid.views.overlay.Overlay;
 import org.osmdroid.views.overlay.OverlayManager;
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.graphics.Canvas;
-import android.view.MotionEvent;
 
 public class FolderOverlayEx extends FolderOverlay {
 

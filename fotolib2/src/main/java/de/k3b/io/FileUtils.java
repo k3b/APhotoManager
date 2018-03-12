@@ -134,7 +134,7 @@ public class FileUtils {
 	}
 
     public static String getDebugString(String prefix, File file) {
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         result.append(prefix)
                 .append(" dir ").append(file.isDirectory())
                 .append(", hid ").append(file.isHidden())
@@ -204,7 +204,7 @@ public class FileUtils {
 
     // linux convention: folder names starting with "." are hidden
     public static boolean isHiddenFolder(String path) {
-        return (path.indexOf("/.") >= 0);
+        return (path.contains("/."));
     }
 
     public static void delete(String fileName) {

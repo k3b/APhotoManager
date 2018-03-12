@@ -329,7 +329,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             // first creation of new instance
             loaderID = nextLoaderID++;
         }
-        if (mDebugPrefix.indexOf("@") < 0) {
+        if (!mDebugPrefix.contains("@")) {
             mDebugPrefix += "@" + loaderID + " ";
         }
         super.onCreate(savedInstanceState);
@@ -1131,9 +1131,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
                 ArrayList<Uri> uris = new ArrayList<Uri>();
 
-                Iterator<Long> iter = mSelectedItems.iterator();
-                while (iter.hasNext()) {
-                    uris.add(getUri(iter.next()));
+                for (Long mSelectedItem : mSelectedItems) {
+                    uris.add(getUri(mSelectedItem));
                 }
                 sendIntent.putParcelableArrayListExtra(EXTRA_STREAM, uris);
             }

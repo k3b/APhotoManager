@@ -20,7 +20,6 @@
 package de.k3b.android.androFotoFinder;
 
 import android.app.Activity;
-import android.content.Context;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -36,12 +35,10 @@ import de.k3b.transactionlog.TransactionLoggerBase;
  */
 
 public class AndroidTransactionLogger extends TransactionLoggerBase implements Closeable {
-    private Context ctx;
     private AndroidFileCommands execLog;
 
     public AndroidTransactionLogger(Activity ctx, long now, AndroidFileCommands execLog) {
         super(execLog, now);
-        this.ctx = ctx.getApplicationContext(); // to avoid memory leaks
 
         this.execLog = execLog;
     }
@@ -56,6 +53,5 @@ public class AndroidTransactionLogger extends TransactionLoggerBase implements C
     public void close() throws IOException {
         super.close();
         execLog = null;
-        ctx = null;
     }
 }

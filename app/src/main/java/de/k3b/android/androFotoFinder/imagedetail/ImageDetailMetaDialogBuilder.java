@@ -153,7 +153,7 @@ public class ImageDetailMetaDialogBuilder {
     }
 
     private static void appendDate(StringBuilder result, String key, Object value) {
-        if (dateFields.indexOf(key.toLowerCase()) >=0) {
+        if (dateFields.contains(key.toLowerCase())) {
             appendDate(result, value, 1000); // value in secs since 1970. Java needs millisecs
         } else if (TagSql.SQL_COL_DATE_TAKEN.compareToIgnoreCase(key) == 0) {
             appendDate(result, value, 1); // value in millisecs since 1970. same as Java

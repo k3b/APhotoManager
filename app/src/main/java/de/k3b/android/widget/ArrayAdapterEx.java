@@ -530,8 +530,8 @@ public class ArrayAdapterEx<T> extends BaseAdapter implements Filterable {
             final int wordCount = words.length;
 
             // Start at index 0, in case lowerCaseValueText starts with space(s)
-            for (int k = 0; k < wordCount; k++) {
-                if (words[k].startsWith(lowerCaseSearchString)) {
+            for (String word : words) {
+                if (word.startsWith(lowerCaseSearchString)) {
                     return true;
                 }
             }

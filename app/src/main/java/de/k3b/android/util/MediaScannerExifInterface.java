@@ -25,11 +25,9 @@ import android.content.Context;
 
 import java.io.IOException;
 
-import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.media.ExifInterfaceEx;
 import de.k3b.media.IMetaApi;
-import de.k3b.media.MediaXmpSegment;
 
 /**
  * MediaScanner based on android ExifInterface.

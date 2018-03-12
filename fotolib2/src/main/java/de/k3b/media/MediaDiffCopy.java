@@ -249,7 +249,7 @@ public class MediaDiffCopy {
             String value = oldValue;
             if (value == null) {
                 value = append.trim();
-            } else if (value.indexOf(append.trim()) < 0) {
+            } else if (!value.contains(append.trim())) {
                 // not already included
                 value += append;
             } else {

@@ -145,7 +145,7 @@ public class AndroidFileCommands extends FileCommands {
     /** called for every cath(Exception...). Version with Android specific logging */
     @Override
     protected void onException(final Throwable e, Object... params) {
-        StringBuffer message = new StringBuffer();
+        StringBuilder message = new StringBuilder();
         message.append(mDebugPrefix).append("onException(");
         for (Object param : params) {
             if (param != null) {
@@ -269,7 +269,7 @@ public class AndroidFileCommands extends FileCommands {
                 Toast.makeText(this.mContext, errorMessage, Toast.LENGTH_LONG).show();
             }
         } else {
-            StringBuffer names = new StringBuffer();
+            StringBuilder names = new StringBuilder();
             for (String name : pathNames) {
                 names.append(name).append("\n");
             }

@@ -42,7 +42,6 @@ import de.k3b.android.androFotoFinder.AffUtils;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
-import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.HistoryEditText;

@@ -131,8 +131,6 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
      */
     public static void showActivity(Activity context, IMetaApi exifDataToEdit, String url,
                                     SelectedFiles selectedFiles, int requestCode) {
-        Uri initalUri = null;
-
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, context.getClass().getSimpleName()
                     + " > ExifEditActivity.showActivity");

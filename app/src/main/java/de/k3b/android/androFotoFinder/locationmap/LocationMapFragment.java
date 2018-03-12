@@ -761,8 +761,8 @@ public class LocationMapFragment extends DialogFragment {
         StringBuilder dbg = (Global.debugEnabledSql || Global.debugEnabledMap) ? new StringBuilder() : null;
         if (dbg != null) {
             int found = (newFotoIcons != null) ? newFotoIcons.size() : 0;
-            dbg.append(mDebugPrefix).append("onLoadFinishedFotoMarker(z=" + mMapView.getZoomLevelDouble() +
-                    ") markers created: ").append(found).append(". ");
+            dbg.append(mDebugPrefix).append("onLoadFinishedFotoMarker(z=")
+                    .append(mMapView.getZoomLevelDouble()).append(") markers created: ").append(found).append(". ");
         }
 
         if (newFotoIcons != null) {

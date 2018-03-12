@@ -24,11 +24,9 @@ import android.content.Context;
 
 import java.io.IOException;
 
-import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.media.IMetaApi;
 import de.k3b.media.ImageMetaReader;
-import de.k3b.media.MediaXmpSegment;
 
 /**
  * MediaScanner implementation based on Drewnoakes image meta reader.

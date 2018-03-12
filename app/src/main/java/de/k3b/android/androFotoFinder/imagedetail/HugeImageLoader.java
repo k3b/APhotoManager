@@ -55,7 +55,6 @@ public class HugeImageLoader {
     }
 
     private static Bitmap loadImageOld(File file, WindowManager windowManager) {
-        Point outSize = new Point();
         final Display display = windowManager.getDefaultDisplay();
         DisplayMetrics displaymetrics = new DisplayMetrics();
         display.getMetrics(displaymetrics);

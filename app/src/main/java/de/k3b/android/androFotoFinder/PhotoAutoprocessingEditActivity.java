@@ -543,17 +543,6 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
         }
     }
 
-
-    private File getExample(String dbgContext, Intent intent) {
-        SelectedFiles selectedFiles = getSelectedFiles(dbgContext, intent, false);
-        File file = (selectedFiles != null)
-                ? selectedFiles.getFile(0) : null;
-        if (file == null) {
-            file = new File("/path/to/source.jpg");
-        }
-        return file;
-    }
-
     @NonNull
     private SelectedFiles getSelectedFiles(String dbgContext, Intent intent, boolean mustLoadIDs) {
         if (intent == null) return null;

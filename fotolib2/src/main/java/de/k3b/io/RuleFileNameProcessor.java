@@ -169,7 +169,7 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
 
 		if (nameEmpty) return true; // at least date or number is set
 
-        return (filenameWithoutPath.indexOf(this.mName) < 0);
+        return (!filenameWithoutPath.contains(this.mName));
     }
 
     /**
