@@ -3,11 +3,12 @@
 buildscript {
     repositories {
         jcenter()
+        google()
         // mavenCentral()
     }
     dependencies {
 		// see https://jcenter.bintray.com/com/android/tools/build/gradle/
-        classpath 'com.android.tools.build:gradle:2.3.1'
+        classpath 'com.android.tools.build:gradle:3.0.1'
 
 		// markdown & unl-diagrams in javadoc
 		// https://github.com/Abnaxos/pegdown-doclet
@@ -31,7 +32,7 @@ task clean(type: Delete) {
 
 // download and generate gradlew which is not part of this repository and is required by travis
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.3'
+    gradleVersion = '4.1'
 }
 
 
