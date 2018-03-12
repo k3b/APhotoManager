@@ -224,8 +224,8 @@ public class SettingsActivity extends PreferenceActivity {
         com.nostra13.universalimageloader.utils.L.writeLogs(debug3rdParty);
 
         // details osmdroid debugging only if Global.debugEnabledMap && debug3rdParty
-        OpenStreetMapTileProviderConstants.DEBUG_TILE_PROVIDERS = Global.debugEnabledMap && debug3rdParty;
-        OpenStreetMapTileProviderConstants.DEBUGMODE = Global.debugEnabledMap && debug3rdParty;
+        // OpenStreetMapTileProviderConstants.DEBUG_TILE_PROVIDERS = Global.debugEnabledMap && debug3rdParty;
+        // OpenStreetMapTileProviderConstants.DEBUGMODE = Global.debugEnabledMap && debug3rdParty;
 
         // #26
         Global.initialImageDetailResolutionHigh = getPref(prefs, "initialImageDetailResolutionHigh", Global.initialImageDetailResolutionHigh);

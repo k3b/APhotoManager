@@ -147,7 +147,7 @@ public class GuestureOverlay extends Overlay /* Debug */ {
     */
 
     @Override
-    protected void draw(Canvas c, MapView mapView, boolean shadow) {
+    public void draw(Canvas c, MapView mapView, boolean shadow) {
         if ((!shadow) && (this.mRectVisible)) {
             drawBorder(c , this.mStart.x, this.mStart.y, this.mEnd.x, mEnd.y);
         }

@@ -58,7 +58,8 @@ public class OsmdroidUtil {
             if (calculatedZoom == NO_ZOOM) {
                 // int pixels = Math.min(mapView.getWidth(), mapView.getHeight());
                 double pixels = Math.sqrt((mapView.getWidth() * mapView.getWidth()) + (mapView.getHeight() * mapView.getHeight()));
-                final double requiredMinimalGroundResolutionInMetersPerPixel = ((double) new GeoPoint(min.getLatitudeE6(), min.getLongitudeE6()).distanceTo(max)) / pixels;
+                final double requiredMinimalGroundResolutionInMetersPerPixel
+                        = ((double) new GeoPoint(min.getLatitude(), min.getLongitude()).distanceToAsDouble(max)) / pixels;
                 calculatedZoom = calculateZoom(center.getLatitude(), requiredMinimalGroundResolutionInMetersPerPixel, tileProvider.getMaximumZoomLevel(), tileProvider.getMinimumZoomLevel());
             }
         }

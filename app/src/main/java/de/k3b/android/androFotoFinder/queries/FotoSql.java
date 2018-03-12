@@ -223,8 +223,8 @@ public class FotoSql extends FotoSqlBase {
      *  the links are first set to null before delete. */
     private static final String DELETED_FILE_MARKER = null;
 
-    public static final double getGroupFactor(final int _zoomLevel) {
-        int zoomLevel = _zoomLevel;
+    public static final double getGroupFactor(final double _zoomLevel) {
+        double zoomLevel = _zoomLevel;
         double result = GROUPFACTOR_FOR_Z0;
         while (zoomLevel > 0) {
             // result <<= 2; //
