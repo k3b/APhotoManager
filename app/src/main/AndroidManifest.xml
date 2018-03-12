@@ -215,15 +215,16 @@
             <!-- ImageDetail edit schema=file with mime=image/* -->
             <intent-filter>
                 <action android:name="android.intent.action.EDIT" />
+                <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <!-- file must have mimeType to match -->
-                <data android:mimeType="*/*" />
                 <data android:scheme="file" />
+                <data android:mimeType="*/*" />
                 <data android:host="*" />
-                <data android:pathPattern="\\.apm" />
+                <data android:pathPattern=".*\\.apm" />
             </intent-filter>
         </activity>
 
