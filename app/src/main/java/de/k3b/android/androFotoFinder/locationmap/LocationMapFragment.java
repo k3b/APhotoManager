@@ -141,8 +141,8 @@ public class LocationMapFragment extends DialogFragment {
     private boolean mIsInitialized = false;
 
     private IGalleryFilter mRootFilter;
-    private int mMinZoomLevel;
-    private int mMaxZoomLevel;
+    private double mMinZoomLevel;
+    private double mMaxZoomLevel;
 
     public LocationMapFragment() {
         // Required empty public constructor
@@ -201,8 +201,8 @@ public class LocationMapFragment extends DialogFragment {
     public String getCurrentGeoUri() {
         BoundingBox currentViewPort = this.mMapView.getBoundingBox();
 
-        GeoPoint currentCenter = currentViewPort.getCenter();
-        int currentZoomLevel = this.mMapView.getZoomLevel();
+        GeoPoint currentCenter = currentViewPort.getCenterWithDateLine();
+        int currentZoomLevel = (int) this.mMapView.getZoomLevelDouble();
         String uriCurrentViewport = mGeoUriEngine.toUriString(
                 new GeoPointDto(currentCenter.getLatitude(), currentCenter.getLongitude()
                         , currentZoomLevel));
@@ -292,7 +292,7 @@ public class LocationMapFragment extends DialogFragment {
             }
         });
         createZoomBar(view);
-        mMapView.setMapListener(new DelayedMapListener(new MapListener() {
+        mMapView.addMapListener(new DelayedMapListener(new MapListener() {
             @Override
             public boolean onScroll(ScrollEvent event) {
                 reloadFotoMarker("onScroll");
@@ -301,7 +301,7 @@ public class LocationMapFragment extends DialogFragment {
 
             @Override
             public boolean onZoom(ZoomEvent event) {
-                int zoomLevel1 = mMapView.getZoomLevel();
+                double zoomLevel1 = mMapView.getZoomLevelDouble();
                 setZoomBarZoomLevel("onZoom ", zoomLevel1);
 
                 reloadFotoMarker("onZoom " + zoomLevel1);
@@ -338,10 +338,10 @@ public class LocationMapFragment extends DialogFragment {
         return view;
     }
 
-    protected void setZoomBarZoomLevel(String why, int zoomLevel) {
+    protected void setZoomBarZoomLevel(String why, double zoomLevel) {
         // map: mMinZoomLevel..mMaxZoomLevel
         // mZoomBar: 0..mMaxZoomLevel-mMinZoomLevel
-        int newProgress = zoomLevel - mMinZoomLevel;
+        int newProgress = (int) (zoomLevel - mMinZoomLevel);
         if (newProgress != mZoomBar.getProgress()) {
             // only if changed to avoid zoom events that modify the map
             if (Global.debugEnabledMap) {
@@ -439,7 +439,7 @@ public class LocationMapFragment extends DialogFragment {
         mMinZoomLevel = mMapView.getMinZoomLevel();
         mMaxZoomLevel = mMapView.getMaxZoomLevel();
 
-        mZoomBar.setMax(mMaxZoomLevel - mMinZoomLevel);
+        mZoomBar.setMax((int) (mMaxZoomLevel - mMinZoomLevel));
         mZoomBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -586,14 +586,14 @@ public class LocationMapFragment extends DialogFragment {
                 if (Global.debugEnabledMap) {
                     Log.i(Global.LOG_CONTEXT, mDebugPrefix
                             + "zoomToBoundingBox(" + why
-                            + "; z=" + mMapView.getZoomLevel()
+                            + "; z=" + mMapView.getZoomLevelDouble()
                             + ") :"
                             + boundingBox
                             + " <= "
                             + mMapView.getBoundingBox()
                             );
                 }
-                setZoomBarZoomLevel(why, mMapView.getZoomLevel());
+                setZoomBarZoomLevel(why, mMapView.getZoomLevelDouble());
             } else {
                 // map not initialized yet. do it later.
                 this.mDelayedZoomToBoundingBox = boundingBox;
@@ -630,7 +630,7 @@ public class LocationMapFragment extends DialogFragment {
                 // not active yet
                 List<Overlay> oldItems = mFolderOverlayGreenPhotoMarker.getItems();
 
-                mLastZoom = this.mMapView.getZoomLevel();
+                mLastZoom = this.mMapView.getZoomLevelDouble();
                 double groupingFactor = getGroupingFactor(mLastZoom);
                 BoundingBox world = this.mMapView.getBoundingBox();
                 if (Global.debugEnabledMap) {
@@ -679,7 +679,7 @@ public class LocationMapFragment extends DialogFragment {
     /** translates map-zoomlevel to groupfactor
      * that tells sql how geo-points are grouped together.
      */
-    private double getGroupingFactor(int zoomlevel) {
+    private double getGroupingFactor(double zoomlevel) {
         // todo
         return FotoSql.getGroupFactor(zoomlevel);
     }
@@ -689,7 +689,7 @@ public class LocationMapFragment extends DialogFragment {
 
     /** caching support: if zoom level changes the cached items become invalid
      * because the marker clustering is different */
-    private int mLastZoom = NO_ZOOM;
+    private double mLastZoom = NO_ZOOM;
 
     /** how much mCurrentFotoMarkerLoader are tirggerd while task is loading */
     private int mFotoMarkerPendingLoads = 0;
@@ -716,7 +716,7 @@ public class LocationMapFragment extends DialogFragment {
         // This is called when doInBackground() is finished
         @Override
         protected void onPostExecute(OverlayManager result) {
-            boolean zoomLevelChanged = mMapView.getZoomLevel() != mLastZoom;
+            boolean zoomLevelChanged = mMapView.getZoomLevelDouble() != mLastZoom;
 
             if (isCancelled()) {
                 onLoadFinishedFotoMarker(null, zoomLevelChanged);
@@ -733,7 +733,7 @@ public class LocationMapFragment extends DialogFragment {
                 mStatus.append("\n\tRecycler: ").append(mRecyclerSizeBefore).append(",")
                         .append(mRecyclerSizeAfter).append(",").append(recyclerSize)
                         .append("\n\t").append(mMapView.getBoundingBox())
-                        .append(", z= ").append(mMapView.getZoomLevel())
+                        .append(", z= ").append(mMapView.getZoomLevelDouble())
                         .append("\n\tPendingLoads: ").append(mFotoMarkerPendingLoads);
                 if (Global.debugEnabledSql) {
                     Log.w(Global.LOG_CONTEXT, mDebugPrefix + mStatus);
@@ -761,8 +761,8 @@ public class LocationMapFragment extends DialogFragment {
         StringBuilder dbg = (Global.debugEnabledSql || Global.debugEnabledMap) ? new StringBuilder() : null;
         if (dbg != null) {
             int found = (newFotoIcons != null) ? newFotoIcons.size() : 0;
-            dbg.append(mDebugPrefix).append("onLoadFinishedFotoMarker(z=" + mMapView.getZoomLevel() +
-                    ") markers created: ").append(found).append(". ");
+            dbg.append(mDebugPrefix).append("onLoadFinishedFotoMarker(z=")
+                    .append(mMapView.getZoomLevelDouble()).append(") markers created: ").append(found).append(". ");
         }
 
         if (newFotoIcons != null) {
@@ -1092,7 +1092,7 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     private double getMarkerDelta() {
-        int zoomLevel = this.mMapView.getZoomLevel();
+        double zoomLevel = this.mMapView.getZoomLevelDouble();
         double groupingFactor = getGroupingFactor(zoomLevel);
         return 1/groupingFactor/2;
     }

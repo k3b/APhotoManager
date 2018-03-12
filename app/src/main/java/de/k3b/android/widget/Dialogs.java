@@ -125,14 +125,14 @@ public abstract class Dialogs {
 		MenuUtils.changeShowAsActionFlags(edit, SHOW_AS_ACTION_IF_ROOM, android.R.id.copy, android.R.id.cut, android.R.id.selectAll);
 
 		builder.setView(content);
-		builder.setNegativeButton(R.string.btn_cancel, new DialogInterface.OnClickListener() {
+		builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				onDialogResult(null);
 				dialog.dismiss();
 			}
 		});
-		builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
+		builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				onDialogResult(edit.getText().toString(), parameters);
@@ -179,14 +179,14 @@ public abstract class Dialogs {
         final TextView textView = new TextView(parent);
         textView.setText(question);
         builder.setView(textView);
-        builder.setNegativeButton(R.string.btn_no, new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 onDialogResult(null);
                 dialog.dismiss();
             }
         });
-        builder.setPositiveButton(R.string.btn_yes, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 onDialogResult(title, parameters);
@@ -204,7 +204,7 @@ public abstract class Dialogs {
 		final TextView textView = new TextView(parent);
 		textView.setText(question);
 		builder.setView(textView);
-		builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
+		builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				dialog.dismiss();

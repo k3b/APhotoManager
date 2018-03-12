@@ -67,7 +67,8 @@ public class MapsForgeSupport {
             }
             MapsForgeTileProvider forge = new MapsForgeTileProvider(
                     new SimpleRegisterReceiver(activity),
-                    MapsForgeTileSource.createFromFiles(maps, theme, "rendertheme-v4"));
+                    MapsForgeTileSource.createFromFiles(maps, theme, "rendertheme-v4"),
+                    null);
 
             mMap.setTileProvider(forge);
             mMap.setUseDataConnection(false);

@@ -198,7 +198,7 @@ public class RecursiveMediaScannerAsyncTask extends MediaScannerAsyncTask {
         final TextView count = (TextView) content.findViewById(R.id.count);
 
         builder.setView(content);
-        builder.setNeutralButton(R.string.btn_cancel, new DialogInterface.OnClickListener() {
+        builder.setNeutralButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 onStatusDialogEnd(null, true);

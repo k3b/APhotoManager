@@ -68,12 +68,6 @@
          tools:node="remove" means remove permission
          see http://stackoverflow.com/questions/37223379/google-play-game-service-adds-an-unwanted-permission-in-my-app-phone-status-and
     -->
-    <uses-permission
-        android:name="android.permission.ACCESS_FINE_LOCATION"
-        tools:node="remove" />
-    <uses-permission
-        android:name="android.permission.ACCESS_COARSE_LOCATION"
-        tools:node="remove" />
 
     <application
         android:name=".AndroFotoFinderApp"
@@ -82,7 +76,7 @@
         android:label="@string/app_name"
         android:largeHeap="true"
         android:theme="@style/AppTheme"
-        tools:replace="android:allowBackup">
+        >
         <activity
             android:name=".FotoGalleryActivity"
             android:label="@string/app_name">
@@ -215,15 +209,16 @@
             <!-- ImageDetail edit schema=file with mime=image/* -->
             <intent-filter>
                 <action android:name="android.intent.action.EDIT" />
+                <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <!-- file must have mimeType to match -->
-                <data android:mimeType="*/*" />
                 <data android:scheme="file" />
+                <data android:mimeType="*/*" />
                 <data android:host="*" />
-                <data android:pathPattern="\\.apm" />
+                <data android:pathPattern=".*\\.apm" />
             </intent-filter>
         </activity>
 
@@ -403,7 +398,7 @@
                 android:icon="@drawable/foto_gallery"
                 android:label="@string/scanner_menu_title">
                 <action android:name="android.intent.action.VIEW" />
-                ^
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 

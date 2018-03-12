@@ -58,7 +58,7 @@ public class PhotoWorkFlowDto {
         this(null, new Properties());
     }
 
-    protected PhotoWorkFlowDto(File outDir, Properties properties) {
+    public PhotoWorkFlowDto(File outDir, Properties properties) {
         this.outDir = outDir;
         this.properties = properties;
     }
@@ -83,8 +83,33 @@ public class PhotoWorkFlowDto {
         return null;
     }
 
+    public void paste(PhotoWorkFlowDto newData) {
+        if (newData != null) {
+            this.setDateFormat(newData.getDateFormat());
+            this.setNumberFormat(newData.getNumberFormat());
+            this.setMediaDefaults(newData.getMediaDefaults());
+            String name = getTranslateName(newData);
+            this.setName(name);
+        }
+
+    }
+
+    public String getTranslateName(PhotoWorkFlowDto newData) {
+        if (newData != null) {
+            final RuleFileNameProcessor srcData = (RuleFileNameProcessor) newData.createFileNameProcessor();
+            if (srcData != null) {
+                return RuleFileNameProcessor.translateName(srcData, this.getOutDir());
+            }
+        }
+        return null;
+    }
+
     private File getApmFile() {
-        return new File(this.outDir, RuleFileNameProcessor.APM_FILE_NAME);
+        return getApmFile(this.outDir);
+    }
+
+    public static File getApmFile(File outDir) {
+        return new File(outDir, RuleFileNameProcessor.APM_FILE_NAME);
     }
 
     /** if has no data the file is deleted */
@@ -112,8 +137,8 @@ public class PhotoWorkFlowDto {
     /** Android support: to persist state and to transfer activites via intent.  */
     public static PhotoWorkFlowDto load(Serializable content) {
         PhotoWorkFlowDto photoWorkFlowDto = null;
-        Properties properties = (Properties) content;
-        if (properties != null) {
+        if (content instanceof Properties ) {
+            Properties properties = (Properties) content;
             String outDir = properties.getProperty(KEY_OUT_DIR);
             photoWorkFlowDto = new PhotoWorkFlowDto((outDir != null) ? new File(outDir) : null, properties);
         }

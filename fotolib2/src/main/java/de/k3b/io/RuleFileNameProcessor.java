@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -75,6 +75,27 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
         set(dateFormat, name, numberFormat);
     }
 
+    public RuleFileNameProcessor(RuleFileNameProcessor ancestor, File newDir) {
+        this(newDir);
+        if (ancestor != null) {
+            String name = ancestor.mName;
+            final File oldDir = ancestor.mOutDir;
+            if ((newDir != null) && (!StringUtils.isNullOrEmpty(name) & (oldDir != null)
+                    && (newDir != oldDir))) {
+                name = replace(name,ancestor.getDirBaseName(),this.getDirBaseName());
+                name = replace(name,ancestor.getParentDirBaseName(),this.getParentDirBaseName());
+            }
+            set(ancestor.mDateFormat, name,ancestor.mNumberFormat);
+        }
+    }
+
+    private static String replace(String name, String oldDir, String newDir) {
+        if (!StringUtils.isNullOrEmpty(oldDir) && !StringUtils.isNullOrEmpty(newDir)) {
+            return name.replace(oldDir, newDir);
+        }
+        return name;
+    }
+
     /**
      * filename = outDir+dateFormat+name+numberFormat+fileExtension.
      *  @param dateFormat null or dateformat
@@ -148,7 +169,7 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
 
 		if (nameEmpty) return true; // at least date or number is set
 
-        return (filenameWithoutPath.indexOf(this.mName) < 0);
+        return (!filenameWithoutPath.contains(this.mName));
     }
 
     /**
@@ -166,7 +187,7 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
 			File result = new File(this.mOutDir, name);
 
             // usecase: apply auto where inFile is already in outdir: no modification
-            if (sourceFile.equals(result)) return result;
+            if ((sourceFile != null) && sourceFile.equals(result)) return result;
 
 			// change file name if result already exists
 			return renameDuplicate(result);
@@ -207,5 +228,41 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
     @Override
     public String toString() {
         return ListUtils.toString(" ", this.getClass().getSimpleName(),  mDateFormat, mName, mNumberFormat, ": +", mNextFileInstanceNumber);
+    }
+
+    public String getDirBaseName() {
+        if (mOutDir != null) return getBaseName(mOutDir.getName());
+        return null;
+    }
+
+    public String getParentDirBaseName() {
+        File parent = (mOutDir != null) ? mOutDir.getParentFile() : null;
+        if (parent != null) return getBaseName(parent.getName());
+        return null;
+    }
+
+    /** Get name without leading numbers. i.e. getBaseName("01701Test001") ==> "Test". package to allow unittesting */
+    static String getBaseName(String name) {
+        if (name != null) {
+            int len = name.length();
+            int begin = 0;
+            while ((begin < len) && !isLetter(name, begin)) begin++;
+            int end = len - 1;
+            while ((end >= 0) && !isLetter(name, end)) end--;
+
+            if ((begin < len) && (begin >= 0)) return name.substring(begin,end+1);
+        }
+        return null;
+    }
+
+    private static boolean isLetter(String name, int offset) {
+        final int c = name.charAt(offset);
+        final boolean result = Character.isLetter(c);
+        return result;
+    }
+
+    public static String translateName(RuleFileNameProcessor srcData, File outDir) {
+        RuleFileNameProcessor translated = new RuleFileNameProcessor(srcData, outDir);
+        return translated.mName;
     }
 }

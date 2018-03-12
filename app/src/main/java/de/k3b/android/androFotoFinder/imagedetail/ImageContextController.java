@@ -22,7 +22,6 @@ package de.k3b.android.androFotoFinder.imagedetail;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
-import android.provider.MediaStore;
 import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
@@ -238,7 +237,7 @@ public abstract class ImageContextController {
         // sql: sting concatenation "||" becomes null if one of the substrings is null
         // example: 'hello ' || 'world' || null => null
         // sqLite special: ifnull(expr,'') ==> '' if expr is null
-        result.append(" || ifnull(" + expr + "||'|','')");
+        result.append(" || ifnull(").append(expr).append("||'|','')");
         return "";
     }
 

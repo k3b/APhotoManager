@@ -151,6 +151,7 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putBoolean("debugEnabledMemory", Global.debugEnabledMemory);
 
         prefs.putBoolean("debugEnabledJpgMetaIo", FotoLibGlobal.debugEnabledJpgMetaIo);
+        prefs.putBoolean("debugEnabledJpg", FotoLibGlobal.debugEnabledJpg);
 
         /** #100: true: private images get the extension ".jpg-p" which hides them from other gallery-apps and image pickers.  */
         prefs.putBoolean("renamePrivateJpg", FotoLibGlobal.renamePrivateJpg);
@@ -206,6 +207,7 @@ public class SettingsActivity extends PreferenceActivity {
         Global.locked                           = getPref(prefs, "locked", Global.locked);
         Global.passwordHash                     = getPref(prefs, "passwordHash", Global.passwordHash);
 
+        FotoLibGlobal.debugEnabledJpg = getPref(prefs, "debugEnabledJpg", FotoLibGlobal.debugEnabledJpg);
         FotoLibGlobal.debugEnabledJpgMetaIo     = getPref(prefs, "debugEnabledJpgMetaIo", FotoLibGlobal.debugEnabledJpgMetaIo);
 
         /** #100: true: private images get the extension ".jpg-p" which hides them from other gallery-apps and image pickers.  */
@@ -222,8 +224,8 @@ public class SettingsActivity extends PreferenceActivity {
         com.nostra13.universalimageloader.utils.L.writeLogs(debug3rdParty);
 
         // details osmdroid debugging only if Global.debugEnabledMap && debug3rdParty
-        OpenStreetMapTileProviderConstants.DEBUG_TILE_PROVIDERS = Global.debugEnabledMap && debug3rdParty;
-        OpenStreetMapTileProviderConstants.DEBUGMODE = Global.debugEnabledMap && debug3rdParty;
+        // OpenStreetMapTileProviderConstants.DEBUG_TILE_PROVIDERS = Global.debugEnabledMap && debug3rdParty;
+        // OpenStreetMapTileProviderConstants.DEBUGMODE = Global.debugEnabledMap && debug3rdParty;
 
         // #26
         Global.initialImageDetailResolutionHigh = getPref(prefs, "initialImageDetailResolutionHigh", Global.initialImageDetailResolutionHigh);
@@ -428,7 +430,7 @@ public class SettingsActivity extends PreferenceActivity {
                 builder.setTitle(R.string.settings_translate_title);
                 builder.setMessage(R.string.message_translate_not_installed)
                         .setCancelable(false)
-                        .setPositiveButton(R.string.btn_yes,
+                        .setPositiveButton(android.R.string.yes,
                                 new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(
@@ -439,7 +441,7 @@ public class SettingsActivity extends PreferenceActivity {
                                     }
                                 }
                         )
-                        .setNegativeButton(R.string.btn_no,
+                        .setNegativeButton(android.R.string.no,
                                 new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(

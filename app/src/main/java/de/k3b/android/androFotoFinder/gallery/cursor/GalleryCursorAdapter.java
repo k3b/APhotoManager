@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -32,12 +32,14 @@ import android.widget.TextView;
 
 import java.io.File;
 
+import de.k3b.android.androFotoFinder.AffUtils;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.DBUtils;
+import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
 
 /**
@@ -56,7 +58,7 @@ import de.k3b.io.collections.SelectedItems;
 * 
  * Created by k3b on 02.06.2015.
  */
-public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItems.Id2FileNameConverter  {
+public class GalleryCursorAdapter extends CursorAdapter  {
     private static final int MAX_IMAGE_DIMENSION = HugeImageLoader.getMaxTextureSize();
 
     // Identifies a particular Loader or a LoaderManager being used in this component
@@ -200,10 +202,8 @@ public class GalleryCursorAdapter extends CursorAdapter  implements SelectedItem
         }
     }
 
-    /** SelectedItems.Id2FileNameConverter: converts items.id-s to string array of filenNames via media database. */
-    @Override
-    public String[] getFileNames(SelectedItems items) {
-        return FotoSql.getFileNames(mContext, items);
+    public SelectedFiles createSelectedFiles(Context context, SelectedItems items) {
+        return AffUtils.querySelectedFiles(context, items);
     }
 
     public String getFullFilePath(int position) {

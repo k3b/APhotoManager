@@ -47,8 +47,10 @@ import org.osmdroid.api.IGeoPoint;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import de.k3b.android.androFotoFinder.AffUtils;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.ExifEditActivity;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
@@ -64,6 +66,7 @@ import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagTask;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.util.AndroidFileCommands;
+import de.k3b.android.util.FileManagerUtil;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.MediaScannerAsyncTask;
@@ -273,8 +276,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             // Supply index input as an argument.
             Bundle args = new Bundle();
             args.putBoolean("move", move);
-            args.putSerializable(EXTRA_SELECTED_ITEM_PATHS, srcFotos.toString());
-            args.putSerializable(EXTRA_SELECTED_ITEM_IDS, srcFotos.toIdString());
+            AffUtils.putSelectedFiles(args, srcFotos);
             f.setArguments(args);
 
             return f;
@@ -289,12 +291,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         }
 
         public SelectedFiles getSrcFotos() {
-            String selectedIDs = (String) getArguments().getSerializable(EXTRA_SELECTED_ITEM_IDS);
-            String selectedFiles = (String) getArguments().getSerializable(EXTRA_SELECTED_ITEM_PATHS);
-
-            if ((selectedIDs == null) && (selectedFiles == null)) return null;
-            SelectedFiles result = new SelectedFiles(selectedFiles, selectedIDs);
-            return result;
+            return AffUtils.getSelectedFiles(getArguments());
         }
 
         /**
@@ -391,8 +388,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             childIntent.setAction(intent.getAction());
             IntentUtil.setDataAndTypeAndNormalize(childIntent, intent.getData(), intent.getType());
             copyExtras(childIntent, intent.getExtras(),
-                    EXTRA_FILTER, EXTRA_POSITION, EXTRA_QUERY, EXTRA_SELECTED_ITEM_IDS,
-                    EXTRA_SELECTED_ITEM_PATHS, EXTRA_STREAM, EXTRA_TITLE);
+                    EXTRA_FILTER, EXTRA_POSITION, EXTRA_QUERY, AffUtils.EXTRA_SELECTED_ITEM_IDS, AffUtils.EXTRA_SELECTED_ITEM_DATES,
+                    AffUtils.EXTRA_SELECTED_ITEM_PATHS, EXTRA_STREAM, EXTRA_TITLE);
             startActivityForResult(childIntent, ACTION_RESULT_FORWARD);
         } else { // not in forward mode
             setContentView(R.layout.activity_image_view_pager);
@@ -838,6 +835,13 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         } else {
             getMenuInflater().inflate(R.menu.menu_image_detail, menu);
             getMenuInflater().inflate(R.menu.menu_image_commands, menu);
+            MenuItem item = menu.findItem(R.id.cmd_filemanager);
+            final boolean hasShowInFilemanager = FileManagerUtil.hasShowInFilemanager(this, "/a/b/");
+            if ((item != null) && !hasShowInFilemanager) {
+                // no filemanager installed
+                item.setVisible(false);
+            }
+
             Global.fixMenu(this, menu);
         }
         mMenuSlideshow = menu.findItem(R.id.action_slideshow);
@@ -900,6 +904,11 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                 case R.id.action_view_context_mode:
                     pickContextDefinition();
                     break;
+                case R.id.cmd_filemanager:
+                    FileManagerUtil.showInFilemanager(this, getCurrentDir());
+                    break;
+
+
                 case R.id.action_slideshow:
                     reloadContext = false;
                     // only if not started
@@ -1163,7 +1172,11 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     protected SelectedFiles getCurrentFoto() {
         long imageId = getCurrentImageId();
-        SelectedFiles result = new SelectedFiles(new String[] {getCurrentFilePath()}, new Long[] {Long.valueOf(imageId)});
+        Date imageDatePhotoTaken = getCurrentDatePhotoTaken();
+        SelectedFiles result = new SelectedFiles(
+                new String[] {getCurrentFilePath()},
+                new Long[] {Long.valueOf(imageId)},
+                new Date[] {imageDatePhotoTaken});
         return  result;
     }
 
@@ -1173,6 +1186,21 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             return this.mAdapter.getImageId(itemPosition);
         }
         return -1;
+    }
+
+    private Date getCurrentDatePhotoTaken() {
+        if ((mViewPager != null) && (mAdapter != null)) {
+            int itemPosition = mViewPager.getCurrentItem();
+            return this.mAdapter.getDatePhotoTaken(itemPosition);
+        }
+        return null;
+    }
+
+    protected String getCurrentDir() {
+        try {
+            return new File(getCurrentFilePath()).getParent();
+        } catch (Exception ignore) {}
+        return null;
     }
 
     protected String getCurrentFilePath() {

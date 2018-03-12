@@ -1,3 +1,22 @@
+/*
+ * Copyright (c) 2017-2018 by k3b.
+ *
+ * This file is part of AndroFotoFinder / #APhotoManager.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
+
 package de.k3b.android.androFotoFinder.imagedetail;
 
 import android.app.Activity;
@@ -6,10 +25,11 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.Date;
+
 import de.k3b.android.androFotoFinder.AdapterArrayHelper;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.util.MediaScanner;
-import de.k3b.io.collections.SelectedItems;
 
 /**
  * Purpose: allow viewing images from ".nomedia" folders where no data is available in mediadb/cursor.
@@ -65,6 +85,12 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
     }
 
     @Override
+    public Date getDatePhotoTaken(int position) {
+        if (mArrayImpl != null) return null;
+        return super.getDatePhotoTaken(position);
+    }
+
+    @Override
     public View instantiateItem(ViewGroup container, int position) {
         final String fullPhotoPath = (mArrayImpl != null) ? mArrayImpl.getFullFilePathfromArray(position) : null;
         if (fullPhotoPath != null) {
@@ -86,14 +112,6 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
             return result;
         }
         return super.getPositionFromPath(path);
-    }
-
-
-    /** SelectedItems.Id2FileNameConverter: converts items.id-s to string array of filenNames via media database. */
-    @Override
-    public String[] getFileNames(SelectedItems items) {
-        if (mArrayImpl != null) return mArrayImpl.getFileNames(items);
-        return super.getFileNames(items);
     }
 
     public void refreshLocal() {

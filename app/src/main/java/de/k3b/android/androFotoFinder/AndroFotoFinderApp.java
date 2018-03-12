@@ -98,7 +98,7 @@ public class AndroFotoFinderApp extends Application {
 
         //https://github.com/osmdroid/osmdroid/issues/366
         //super important. Many tile servers, including open street maps, will BAN applications by user
-        OpenStreetMapTileProviderConstants.setUserAgentValue(getAppId() + " https://github.com/k3b/APhotoManager"); // BuildConfig.APPLICATION_ID);
+        //??? OpenStreetMapTileProviderConstants.setUserAgentValue(getAppId() + " https://github.com/k3b/APhotoManager"); // BuildConfig.APPLICATION_ID);
 
         // #60: configure some of the mapsforge settings first
         MapsForgeSupport.createInstance(this);

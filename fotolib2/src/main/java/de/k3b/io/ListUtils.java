@@ -59,7 +59,7 @@ public class ListUtils {
     }
 
     public static String toString(String elementDelimiter, List<?> list) {
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         if (list != null) {
             String nextDelim = "";
             for (Object instance : list) {
@@ -76,7 +76,7 @@ public class ListUtils {
     }
 
     public static String toString(String elementDelimiter, Object... list) {
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         if (list != null) {
             String nextDelim = "";
             for (Object instance : list) {

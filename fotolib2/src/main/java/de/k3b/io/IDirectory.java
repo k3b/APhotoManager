@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -51,4 +51,7 @@ public interface IDirectory {
 
     /** reloads entry flags */
     void refresh();
+
+    /** #114: update internal data after a folder has been renamed in the gui */
+    void rename(String oldFolderName, String newFolderName);
 }

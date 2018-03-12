@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -25,6 +25,14 @@
         android:visible="true"
         android:orderInCategory="10"
         android:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_item_rename"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:orderInCategory="10"
+        android:showAsAction="never"
+        android:title="@string/rename_menu_title" />
+
     <item android:id="@+id/cmd_apm_edit"
         android:title="@string/photo_autoprocessing_edit_menu_title"
         android:visible="true"
@@ -33,6 +41,9 @@
     <item android:id="@+id/cmd_photo" android:title="@string/show_photo"
         android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
     <item android:id="@+id/cmd_gallery" android:title="@string/show_in_gallery_menu_title"
+        android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
+
+    <item android:id="@+id/cmd_filemanager" android:title="@string/show_in_filemanager_menu_title"
         android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
 
     <!--  become visible if current folder is a symlink and not a canonical link -->

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -41,6 +41,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.display.SimpleBitmapDisplayer;
 
 import java.io.File;
+import java.util.Date;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
@@ -50,7 +51,6 @@ import de.k3b.android.util.GarbageCollector;
 import de.k3b.media.JpgMetaWorkflow;
 import de.k3b.android.util.MenuUtils;
 import de.k3b.android.util.ResourceUtils;
-import de.k3b.io.collections.SelectedItems;
 
 /**
  * Adapter for android.support.v4.view.ViewPager that allows swiping next/previous image.<br>
@@ -58,7 +58,7 @@ import de.k3b.io.collections.SelectedItems;
  * Translates between position in ViewPager and content page content with image
  * Created by k3b on 04.07.2015.
  */
-public class ImagePagerAdapterFromCursor extends PagerAdapter implements SelectedItems.Id2FileNameConverter {
+public class ImagePagerAdapterFromCursor extends PagerAdapter {
     private static final int MAX_IMAGE_DIMENSION = HugeImageLoader.getMaxTextureSize();
 
     /** colum alias for optinal sql expression to show ContextDetails */
@@ -182,6 +182,12 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
         Cursor cursor = getCursorAt(position);
         return DBUtils.getLong(cursor, FotoSql.SQL_COL_PK,0);
     }
+
+    public Date getDatePhotoTaken(int position) {
+        Cursor cursor = getCursorAt(position);
+        return FotoSql.getDate(cursor, cursor.getColumnIndex(FotoSql.SQL_COL_DATE_TAKEN));
+    }
+
 
     public boolean hasGeo(int position) {
         Cursor cursor = getCursorAt(position);
@@ -376,12 +382,6 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements Selecte
         if (object != null) {
             mImageButtonController.create((ImageButton) ((View) object).findViewById(R.id.cmd_any));
         }
-    }
-
-    /** SelectedItems.Id2FileNameConverter: converts items.id-s to string array of filenNames via media database. */
-    @Override
-    public String[] getFileNames(SelectedItems items) {
-        return FotoSql.getFileNames(mActivity, items);
     }
 
     public void setIconResourceName(String name) {

@@ -23,8 +23,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -60,6 +58,8 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.util.AndroidFileCommands;
+import de.k3b.android.util.ClipboardUtil;
+import de.k3b.android.util.FileManagerUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
@@ -88,9 +88,6 @@ import java.util.List;
  * to handle interaction events.
  */
 public class DirectoryPickerFragment extends DialogFragment implements DirectoryGui {
-
-    private static final int FIRST_RADIO = 5000;
-
     /** executer for background task, that updates status-message and stops if cancel is pressed */
     private abstract class AsyncTaskEx<Params> extends AsyncTask<Params, Integer,Integer> {
         private final int mProgressMessageResourceId;
@@ -352,6 +349,12 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                     menuItem.setVisible(false);
                 }
             }
+            menuItem = popup.getMenu().findItem(R.id.cmd_filemanager);
+            if ((menuItem != null) && !FileManagerUtil.hasShowInFilemanager(getActivity(), absoluteSelectedPath)) {
+                // no filemanager installed
+                menuItem.setVisible(false);
+            }
+
         }
         return popup;
     }
@@ -372,10 +375,16 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                 return onEditApm(popUpSelection);
             case android.R.id.copy:
                 return onCopy(popUpSelection);
+
+            case R.id.menu_item_rename:
+                return onRenameDirQuestion(popUpSelection);
+
             case R.id.cmd_photo:
                 return showPhoto(popUpSelection);
             case R.id.cmd_gallery:
                 return showGallery(popUpSelection);
+            case R.id.cmd_filemanager:
+                return FileManagerUtil.showInFilemanager(getActivity(), popUpSelection.getAbsolute());
             case R.id.action_details:
                 return showDirInfo(popUpSelection);
             case R.id.cmd_fix_link:
@@ -399,14 +408,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
 
     private boolean onCopy(IDirectory selection) {
         String path = (selection == null) ? null : selection.getAbsolute();
-        if (!StringUtils.isNullOrEmpty(path)) {
-            ClipboardManager clipboard = (ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE);
-            ClipData clip = ClipData.newPlainText(getActivity().getString(R.string.lbl_path), path);
-            clipboard.setPrimaryClip(clip);
-            Toast.makeText(getActivity(), path, Toast.LENGTH_LONG).show();
-            return true;
-        }
-        return false;
+        return ClipboardUtil.addDirToClipboard(this.getActivity(), path);
     }
 
     private boolean onEditApm(IDirectory selection) {
@@ -435,6 +437,49 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                     mContext.getString(R.string.folder_hide_images_question_message_format, path));
         } // else toast "cannot process because scanner is active"
         return true;
+    }
+
+    private boolean onRenameDirQuestion(final IDirectory parentDir) {
+        if (parentDir != null) {
+			File parentFile = FileUtils.tryGetCanonicalFile(parentDir.getAbsolute());
+			if (parentFile != null) {
+				String defaultName = parentFile.getName();
+				Dialogs dialog = new Dialogs() {
+					@Override
+					protected void onDialogResult(String newFileName, Object... parameters) {
+						if (newFileName != null) {
+							onRenameDirAnswer(parentDir, newFileName);
+						}
+						mSubDialog = null;
+					}
+				};
+				mSubDialog = dialog.editFileName(getActivity(), getString(R.string.rename_menu_title), defaultName);
+				return true;
+			}
+        }
+        return false;
+    }
+
+    private void onRenameDirAnswer(final IDirectory srcDir, String newFolderName) {
+        int modified = -1;
+        File srcDirFile = (srcDir != null) ? FileUtils.tryGetCanonicalFile(srcDir.getAbsolute()) : null;
+        if (srcDirFile != null) {
+            AndroidFileCommands cmd
+                    = new AndroidFileCommands()
+                    .setContext(getActivity())
+                    .openDefaultLogFile();
+            modified = cmd.execRename(srcDirFile, newFolderName);
+            cmd.closeAll();
+        }
+
+        if (modified <= 0) {
+            Toast.makeText(getActivity(), getActivity().getString(R.string.image_err_file_rename_format, srcDirFile.getAbsolutePath()),
+                    Toast.LENGTH_LONG).show();
+        } else {
+            // update dirpicker
+            srcDir.rename(srcDirFile.getName(), newFolderName);
+            this.mAdapter.notifyDataSetChanged();
+        }
     }
 
     private boolean onCreateSubDirQuestion(final IDirectory parentDir) {

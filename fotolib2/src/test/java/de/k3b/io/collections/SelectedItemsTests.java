@@ -33,17 +33,17 @@ public class SelectedItemsTests {
     public void shoudParse() {
         SelectedItems sut = new SelectedItems().parse("1,2,3,1");
         Assert.assertEquals("size",3, sut.size());
-        Assert.assertEquals("has 2",true, sut.contains(2l));
-        Assert.assertEquals("has not 5",false, sut.contains(5l));
+        Assert.assertEquals("has 2",true, sut.contains(2L));
+        Assert.assertEquals("has not 5",false, sut.contains(5L));
     }
 
     @Test
     public void shoudCreateString() {
         SelectedItems sut = new SelectedItems();
-        sut.add(1l);
-        sut.add(2l);
-        sut.add(3l);
-        sut.add(1l); // douplicate not included again
+        sut.add(1L);
+        sut.add(2L);
+        sut.add(3L);
+        sut.add(1L); // douplicate not included again
         Assert.assertEquals("1,2,3", sut.toString());
     }
 

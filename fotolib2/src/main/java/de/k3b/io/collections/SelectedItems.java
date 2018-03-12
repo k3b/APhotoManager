@@ -29,11 +29,6 @@ import java.util.Set;
  * Created by k3b on 01.08.2015.
  */
 public class SelectedItems extends java.util.TreeSet<Long> implements Set<Long> {
-    public interface Id2FileNameConverter {
-        /** converts items.id-s to string array of filenNames via media database. */
-        public String[] getFileNames(SelectedItems items);
-    }
-
     private static final String DELIMITER = ",";
 
     /** converts this into komma seperated list of ID-s */
@@ -77,11 +72,4 @@ public class SelectedItems extends java.util.TreeSet<Long> implements Set<Long> 
         return toArray(new Long[this.size()]);
     }
 
-    /** converts internal ID-list to string array of filenNames. */
-    public String[] getFileNames(Id2FileNameConverter id2FileNameConverter) {
-        if (!isEmpty()) {
-            return id2FileNameConverter.getFileNames(this);
-        }
-        return null;
-    }
 }

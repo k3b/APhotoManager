@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -119,6 +119,30 @@ public class FileNameProcessorTests {
     @Test
     public void shouldGetFileExtension() {
         Assert.assertEquals(".jpg", FileUtils.getExtension("hello.jpg"));
+    }
+
+    @Test
+    public void shouldGetBaseName() {
+        CharSequence baseName = RuleFileNameProcessor.getBaseName("01701Test001");
+        Assert.assertEquals("Test", baseName);
+
+        baseName = RuleFileNameProcessor.getBaseName("Test");
+        Assert.assertEquals("Test", baseName);
+
+        baseName = RuleFileNameProcessor.getBaseName("001");
+        Assert.assertEquals(null, baseName);
+    }
+
+    @Test
+    public void shouldFixRuleOnFileChange() {
+        RuleFileNameProcessor ancestor = new RuleFileNameProcessor(
+                null,"Crete-habour",null,
+                new File ("/DCIM/2007Crete/habour/")
+        );
+
+        String newName = RuleFileNameProcessor.translateName(ancestor, new File ("/DCIM/2008Teneriffe/beach/"));
+
+        Assert.assertEquals("Teneriffe-beach", newName);
     }
 
     /** these files exist in source-dir and in dest-dir */

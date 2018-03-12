@@ -131,8 +131,6 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
      */
     public static void showActivity(Activity context, IMetaApi exifDataToEdit, String url,
                                     SelectedFiles selectedFiles, int requestCode) {
-        Uri initalUri = null;
-
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, context.getClass().getSimpleName()
                     + " > ExifEditActivity.showActivity");
@@ -153,10 +151,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
                 intent.setData(Uri.parse(url));
             }
 
-            if ((selectedFiles != null) && (selectedFiles.size() > 0)) {
-                intent.putExtra(EXTRA_SELECTED_ITEM_IDS, selectedFiles.toIdString());
-                intent.putExtra(EXTRA_SELECTED_ITEM_PATHS, selectedFiles.toString());
-            }
+            AffUtils.putSelectedFiles(intent, selectedFiles);
         }
 
         if (requestCode != 0) {
@@ -276,14 +271,9 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
     private static SelectedFiles getSelectedFiles(String dbgContext, Context ctx, Intent intent, boolean mustLoadIDs) {
         if (intent == null) return null;
 
-        SelectedFiles result = null;
+        SelectedFiles result = AffUtils.getSelectedFiles(intent);
 
-        String selectedIDs = intent.getStringExtra(EXTRA_SELECTED_ITEM_IDS);
-        String selectedFiles = intent.getStringExtra(EXTRA_SELECTED_ITEM_PATHS);
-
-        if ((selectedIDs != null) && (selectedFiles != null)) {
-            result = new SelectedFiles(selectedFiles, selectedIDs);
-        } else {
+        if (result == null) {
             String path = IntentUtil.getFilePath(ctx, IntentUtil.getUri(intent));
             String fileNames[] = SelectedFiles.getFileNameList(path);
             Long[] ids = null;
@@ -299,7 +289,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
                     }
                 }
 
-                result = new SelectedFiles(fileNames, ids);
+                result = new SelectedFiles(fileNames, ids, null);
             }
         }
 

@@ -105,7 +105,7 @@ public class IntentUtil implements Common {
     }
 
     public static boolean isFileUri(String initalFileUrl) {
-        return ((initalFileUrl != null) && ((initalFileUrl.indexOf(":") == -1)
+        return ((initalFileUrl != null) && ((!initalFileUrl.contains(":"))
                 || (initalFileUrl.startsWith("file:"))));
     }
 

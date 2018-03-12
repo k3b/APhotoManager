@@ -30,13 +30,8 @@
   <string name="bookmark_file_comment_format">Ini dihasilkan %3$s dengan %1$s\' versi %2$s\'. Untuk detailnya, kunjungi https://github.com/k3b/APhotoManager/wiki/intentapi#sql</string>
   <string name="bookmark_load_from_menu_title">Muat markah buku dari&#8230;</string>
   <string name="bookmark_save_as_menu_title">Simpan markah buku sebagai &#8230;</string>
-  <string name="btn_cancel">Batal</string>
-  <string name="btn_no">Tidak</string>
-  <string name="btn_yes">Ya</string>
   <string name="btn_change">Ubah</string>
-  <string name="btn_ok">OK</string>
   <string name="btn_pause">Jeda</string>
-  <string name="copy_menu_title">Salin</string>
   <string name="copy_result_format">Menyalin file %1$d%2$d</string>
   <string name="delete_menu_title">Hapus</string>
   <string name="delete_question_message_format">"Apakah Anda yakin ingin menghapus secara permanen berkas-berkas ini? %1$s operasi ini tidak dapat dikembalikan."</string>

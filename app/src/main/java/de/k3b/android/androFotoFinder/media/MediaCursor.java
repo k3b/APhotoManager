@@ -78,9 +78,7 @@ public class MediaCursor implements IMetaApi {
 
     @Override
     public Date getDateTimeTaken() {
-        if (colDateTimeTaken == -1) return null;
-        Long value = cursor.getLong(colDateTimeTaken);
-        return (value != null) ? new Date(value.longValue()) : null;
+        return FotoSql.getDate(cursor, colDateTimeTaken);
     }
 
     @Override

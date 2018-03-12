@@ -43,6 +43,9 @@ Merkmale:
 * Photoansicht mit stufenloser Vergrößerung (Zoom), links/rechts wischen für nächstes/vorheriges Bild.
 * Eingebaute Dateiverwaltung für Bilder: Suchen, Sorieren, Kopieren, Löschen, Teilen/Senden, ... .
 * Exif-Daten bearbeiten: Datum, Titel, Beschreibung, Tags(Suchbegriffe), Geo, Bewerung, ....
+* Optional autoprocessing: Photos können beim Kopieren/Verschieben automatisch umbenannt und mit Tags, Geo, Title, ... versehen werden.
+* Bilder als "Privat" markieren und so für andere Bild programme unsichtbar machen.
+* Im geschützen/fixieren Modus sind potentiell gefährliche Aktionen (Kopieren, Löschen, Verschieben, Bildauswahl ändern, ...) nicht möglich. So kann das Gerät gefahrlos einem dritten übergeben werden.
 * Verwaltet große Bildersammlungen (15000+ Bilder in 1000+ Ordnern)
 * Funktioniert auch ohne vorherigem media scan (Android native media content-provider).
 * Erweiterter Media-Scanner für Bilder: Exif, IPTC, XMP.

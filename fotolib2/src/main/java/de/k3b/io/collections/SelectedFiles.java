@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -20,8 +20,10 @@
 package de.k3b.io.collections;
 
 import java.io.File;
+import java.util.Date;
 
 /**
+ * The Multi-selection data for all photo commands.
  * Unmodifyable list of file names and optional their IDs.
  *
  * Created by k3b on 17.05.2016.
@@ -31,20 +33,28 @@ public class SelectedFiles  {
     private static final String SORUNDER = "'";
     private final String[] mFileNames;
     private final Long[] mIds;
+    private final Date[] mDatesPhotoTaken;
 
     public static String[] getFileNameList(String fileNameListAsString) {
         return (fileNameListAsString != null) ? fileNameListAsString.split(DELIMITER) : null;
     }
 
-    public SelectedFiles(String fileNameListAsString, String idListAsString) {
-        this(getFileNameList(fileNameListAsString), idListAsString);
+    public static SelectedFiles create(String fileNameListAsString, String idListAsString, String selectedDates) {
+        Date[] dates = null;
+        if (selectedDates != null) {
+            Long[] dateIds = parseIds(selectedDates);
+            if ((dateIds != null) && (dateIds.length > 0)) {
+                dates = new Date[dateIds.length];
+                for(int i = 0; i < dateIds.length; i++) {
+                    Long dateId = dateIds[i];
+                    dates[i] = ((dateId != null) && (dateId.longValue() != 0)) ? new Date(dateId.longValue()) : null;
+                }
+            }
+        }
+        return new SelectedFiles(getFileNameList(fileNameListAsString), parseIds(idListAsString), dates);
     }
 
-    public SelectedFiles(String[] fileNameList, String idListAsString) {
-        this(fileNameList, parseIds(idListAsString));
-    }
-
-    public SelectedFiles(String[] fileNameList, Long[] ids) {
+    public SelectedFiles(String[] fileNameList, Long[] ids, Date[] datesPhotoTaken) {
         mFileNames = fileNameList;
         if (mFileNames != null) {
             for (int i = mFileNames.length -1; i >= 0; i--) {
@@ -52,20 +62,25 @@ public class SelectedFiles  {
             }
         }
         mIds = ids;
+        mDatesPhotoTaken = datesPhotoTaken;
     }
 
-    public SelectedFiles(SelectedItems items, SelectedItems.Id2FileNameConverter id2FileNameConverter) {
-        this(items.getFileNames(id2FileNameConverter), items.getIds());
+    private static Long[] parseIds(String listAsString) {
+        Long[] result = null;
+
+        if ((listAsString != null) && (listAsString.length() > 0)) {
+            String itemsAsString[] = listAsString.split(DELIMITER);
+            result = new Long[itemsAsString.length];
+            for (int i= 0; i < itemsAsString.length; i++) {
+                result[i] = Long.valueOf(itemsAsString[i]);
+            }
+        }
+
+        return result;
     }
 
-    private static Long[] parseIds(String idListAsString) {
-        if (idListAsString == null) return null;
-
-        SelectedItems ids = new SelectedItems().parse(idListAsString);
-        return ids.toArray(new Long[ids.size()]);
-    }
-    /** removes SORUNDER from beginning/end if present */
-    public static String reomoveApostrophes(String fileName) {
+    /** removes SORUNDER from beginning/end if present. Package to allow unittests */
+    static String reomoveApostrophes(String fileName) {
         if ((fileName != null) && (fileName.length() > 2)
                 && (fileName.startsWith(SORUNDER)) && (fileName.endsWith(SORUNDER))) {
             return fileName.substring(1, fileName.length()-1);
@@ -108,6 +123,17 @@ public class SelectedFiles  {
         return toString(SORUNDER, mFileNames);
     }
 
+    public static <T> String toString(String SORUNDER, Date[] values) {
+        if ((values != null) && (values.length > 0)) {
+            Long[] lvalue = new Long[values.length];
+            for (int i = 0; i < values.length; i++) {
+                lvalue[i] = (values[i] == null) ? 0 : values[i].getTime();
+            }
+            return toString(SORUNDER, lvalue);
+        }
+        return null;
+    }
+
     public static <T> String toString(String SORUNDER, T[] values) {
         // Arrays.asList()
         StringBuilder result = new StringBuilder();
@@ -129,6 +155,11 @@ public class SelectedFiles  {
     /** converts this into komma seperated list of names */
     public String toIdString() {
         return toString("", this.mIds);
+    }
+
+    /** converts this into komma seperated list of names */
+    public String toDateString() {
+        return toString("", this.mDatesPhotoTaken);
     }
 
     public int size() {
@@ -158,4 +189,9 @@ public class SelectedFiles  {
         return mIds;
     }
 
+    /** needed for AutoRenaming which is based on DatesPhotoTaken.
+     * return null if unknwon */
+    public Date[] getDatesPhotoTaken() {
+        return mDatesPhotoTaken;
+    }
 }

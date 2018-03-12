@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -47,13 +47,12 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.transactionlog.TransactionLogSql;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.FileUtils;
 import de.k3b.io.IProgessListener;
-import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
 import de.k3b.io.IDirectory;
-import de.k3b.io.OSDirectory;
 import de.k3b.media.JpgMetaWorkflow;
 import de.k3b.media.MediaUtil;
 import de.k3b.media.MetaWriterExifXml;
@@ -146,7 +145,7 @@ public class AndroidFileCommands extends FileCommands {
     /** called for every cath(Exception...). Version with Android specific logging */
     @Override
     protected void onException(final Throwable e, Object... params) {
-        StringBuffer message = new StringBuffer();
+        StringBuilder message = new StringBuilder();
         message.append(mDebugPrefix).append("onException(");
         for (Object param : params) {
             if (param != null) {
@@ -208,6 +207,32 @@ public class AndroidFileCommands extends FileCommands {
         return (result != 0);
     }
 
+    public int execRename(File srcDirFile, String newFolderName) {
+        // this will allow to be newFolderName = "../someOtherDir/newName" or even "/absolute/path/to"
+        File destDirFile = FileUtils.tryGetCanonicalFile(new File(srcDirFile.getParent(), newFolderName));
+
+        int modifyCount = -1;
+
+        if (destDirFile != null) {
+            destDirFile.getParentFile().mkdirs();
+            if (srcDirFile.renameTo(destDirFile)) {
+                modifyCount = FotoSql.execRenameFolder(this.mContext, srcDirFile.getAbsolutePath() + "/", destDirFile.getAbsolutePath() + "/");
+                if (modifyCount < 0) {
+                    destDirFile.renameTo(srcDirFile); // error: undo change
+                    return -1;
+                } else {
+                    long now = new Date().getTime();
+                    this.addTransactionLog(-1, srcDirFile.getAbsolutePath(), now,
+                            MediaTransactionLogEntryType.MOVE_DIR,
+                            destDirFile.getAbsolutePath());
+
+                    MediaScanner.notifyChanges(this.mContext,"renamed dir");
+                }
+            }
+        }
+        return modifyCount;
+    }
+
     /** implement copy/move called after dest-dir-pick  */
     public void onMoveOrCopyDirectoryPick(boolean move, SelectedFiles selectedFiles, IDirectory destFolder) {
         if (destFolder != null) {
@@ -244,7 +269,7 @@ public class AndroidFileCommands extends FileCommands {
                 Toast.makeText(this.mContext, errorMessage, Toast.LENGTH_LONG).show();
             }
         } else {
-            StringBuffer names = new StringBuffer();
+            StringBuilder names = new StringBuilder();
             for (String name : pathNames) {
                 names.append(name).append("\n");
             }
@@ -258,7 +283,7 @@ public class AndroidFileCommands extends FileCommands {
             builder.setTitle(title + pathNames.length);
             builder.setMessage(message)
                     .setCancelable(false)
-                    .setPositiveButton(R.string.btn_yes,
+                    .setPositiveButton(android.R.string.yes,
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(
@@ -269,7 +294,7 @@ public class AndroidFileCommands extends FileCommands {
                                 }
                             }
                     )
-                    .setNegativeButton(R.string.btn_no,
+                    .setNegativeButton(android.R.string.no,
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(
@@ -465,6 +490,13 @@ public class AndroidFileCommands extends FileCommands {
         cmd.setLogFilePath(cmd.getDefaultLogFile());
         cmd.openLogfile();
         return cmd;
+    }
+
+    @NonNull
+    public AndroidFileCommands openDefaultLogFile() {
+        setLogFilePath(getDefaultLogFile());
+        openLogfile();
+        return this;
     }
 
     private AndroidFileCommands setInBackground(boolean isInBackground) {

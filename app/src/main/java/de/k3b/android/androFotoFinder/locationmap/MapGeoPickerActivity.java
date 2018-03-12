@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -35,6 +35,7 @@ import android.widget.Toast;
 
 import org.osmdroid.api.IGeoPoint;
 
+import de.k3b.android.androFotoFinder.AffUtils;
 import de.k3b.android.androFotoFinder.BookmarkController;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
@@ -85,10 +86,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
             localFilter.get(filter);
         }
 
-        if ((selectedItems != null) && (selectedItems.size() > 0)) {
-            intent.putExtra(EXTRA_SELECTED_ITEM_PATHS, selectedItems.toString());
-            intent.putExtra(EXTRA_SELECTED_ITEM_IDS, selectedItems.toIdString());
-
+        if (AffUtils.putSelectedFiles(intent, selectedItems)) {
             IGeoPoint initialPoint = FotoSql.execGetPosition(context, null, selectedItems.getId(0));
             if (initialPoint != null) {
                 GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
@@ -167,8 +165,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
             rectangle.setLogituedMax(initalZoom.getLongitude()).setLatitudeMax(initalZoom.getLatitude());
         } // else (savedInstanceState != null) restore after rotation. fragment takes care of restoring map pos
 
-        String selectedIDsString = intent.getStringExtra(EXTRA_SELECTED_ITEM_IDS);
-        SelectedItems selectedItems = (selectedIDsString != null) ? new SelectedItems().parse(selectedIDsString) : null;
+        SelectedItems selectedItems = AffUtils.getSelectedItems(intent);
 
         // TODO !!! #62 gpx/kml files: wie an LocatonMapFragment übergeben??
         String filter = null;

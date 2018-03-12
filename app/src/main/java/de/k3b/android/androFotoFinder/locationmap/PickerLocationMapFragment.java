@@ -168,9 +168,9 @@ public class PickerLocationMapFragment extends LocationMapFragment {
         }
 
         if (result != null) {
-            int currentZoomLevel = this.mMapView.getZoomLevel();
+            double currentZoomLevel = this.mMapView.getZoomLevelDouble();
             String uriCurrentPoint = mGeoUriEngine.toUriString(
-                    new GeoPointDto(result.getLatitude(), result.getLongitude(), currentZoomLevel));
+                    new GeoPointDto(result.getLatitude(), result.getLongitude(), (int) currentZoomLevel));
 
             // save as value if picker is called again with no geo-coordinate
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());

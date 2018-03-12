@@ -19,14 +19,12 @@
 
 package de.k3b.media;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.Arrays;
 
 import de.k3b.csv2db.csv.CsvItem;
 import de.k3b.csv2db.csv.CsvReader;
 import de.k3b.io.FileUtils;
-import de.k3b.io.VISIBILITY;
 
 /**
  * A IMetaApi that can be converted to/from string using toString() and fromString().

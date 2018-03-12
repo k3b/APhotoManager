@@ -555,13 +555,13 @@ public class TagsPickerFragment  extends DialogFragment  {
         chkUpdateAffectedPhotos.setText(getString(R.string.tags_update_photos) + " (" +
                 rootTagReferenceCount + ")");
         builder.setView(content);
-        builder.setNegativeButton(R.string.btn_cancel, new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
             }
         });
-        builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
             //@Override
             public void onClick(DialogInterface dialog, int which) {
                 tagDelete(item, chkDeleteChildren.isChecked(), chkUpdateAffectedPhotos.isChecked());

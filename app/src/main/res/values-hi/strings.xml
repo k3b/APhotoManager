@@ -21,8 +21,6 @@
  */
  -->
 <resources>
-  <string name="btn_no">नहीं</string>
-  <string name="btn_yes">हाँ</string>
   <string name="geo_show_menu_title">नक्शे पर प्रदर्शन करें</string>
   <string name="geo_edit_menu_title">भूमि को सेट करें</string>
   <string name="geo_edit_update_in_progress">चयन किये गए चित्रों में भूमि जानकारी बदला जा रहा है</string>

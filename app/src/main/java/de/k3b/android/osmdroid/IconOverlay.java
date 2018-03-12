@@ -68,7 +68,7 @@ public class IconOverlay extends Overlay {
      * Draw the icon.
      */
     @Override
-    protected void draw(Canvas canvas, MapView mapView, boolean shadow) {
+    public void draw(Canvas canvas, MapView mapView, boolean shadow) {
         if (shadow)
             return;
         if (mIcon == null)

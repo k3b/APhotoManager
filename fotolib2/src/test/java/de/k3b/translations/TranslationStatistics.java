@@ -132,7 +132,7 @@ public class TranslationStatistics {
             }
             return toString(item.locale, DateUtil.toIsoDateString(item.lastModified),
                     item.translators, asValue(item.strings, reference.strings), item.html,
-                    asValue(fdroid, fdroidExpected), ListUtils.toString(", ", diffArray));
+                    asValue(fdroid, fdroidExpected), ListUtils.toString(", ", (Object[]) diffArray));
         }
 
         public CharSequence toString(LocaleInfos infos, LocaleInfo reference) {

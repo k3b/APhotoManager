@@ -54,10 +54,13 @@ public class FileCommandAutoIntegrationTests {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileCommandAutoIntegrationTests.class);
     public static final String TEST_CLASS_NAME = FileCommandAutoIntegrationTests.class.getSimpleName();
 
+    private static final String FAKE_ID = "1";
+    private static final String FAKE_DATE = "1223372036854775807";
+
     private static final File OUTDIR = new File(TestUtil.OUTDIR_ROOT, TEST_CLASS_NAME + "/out").getAbsoluteFile();
     private static final File INDIR = new File(TestUtil.OUTDIR_ROOT, TEST_CLASS_NAME + "/in").getAbsoluteFile();
     private static final File INJPG = new File(INDIR, "myTestSource.jpg").getAbsoluteFile();
-    public static final SelectedFiles FAKE_SELECTED_FILES = new SelectedFiles(INJPG.getAbsolutePath(), "1");
+    public static final SelectedFiles FAKE_SELECTED_FILES = SelectedFiles.create(INJPG.getAbsolutePath(), FAKE_ID, FAKE_DATE);
 
     @BeforeClass
     public static void setUpClass() throws IOException {
@@ -90,7 +93,7 @@ public class FileCommandAutoIntegrationTests {
         MediaDiffCopy addExif = new MediaDiffCopy(new MediaDTO().setTitle("title added by " + TEST_CLASS_NAME), true);
 
         // false do not delete source file
-        int changes = sut.applyExifChanges(false, addExif,new SelectedFiles(testJpg.toString(), "1"), null);
+        int changes = sut.applyExifChanges(false, addExif,SelectedFiles.create(testJpg.toString(), FAKE_ID, FAKE_DATE), null);
 
         Assert.assertEquals(1, changes);
     }
@@ -133,7 +136,7 @@ public class FileCommandAutoIntegrationTests {
         TestUtil.saveTestResourceAs("test-WitExtraData.jpg", inFile);
 
         FileCommands sut = createFileCommands(outFileBaseName);
-        SelectedFiles selectedFiles = new SelectedFiles(inFile.getAbsolutePath(), "1");
+        SelectedFiles selectedFiles = SelectedFiles.create(inFile.getAbsolutePath(), FAKE_ID, FAKE_DATE);
         final IMetaApi exifChanges = new MediaDTO();
         exifChanges.setTags(ListUtils.fromString(tagAdded));
 
@@ -168,7 +171,7 @@ public class FileCommandAutoIntegrationTests {
         TestUtil.saveTestResourceAs("test-WitExtraData.jpg", inFile);
 
         FileCommands sut = createFileCommands(outFileBaseName);
-        SelectedFiles selectedFiles = new SelectedFiles(inFile.getAbsolutePath(), "1");
+        SelectedFiles selectedFiles = SelectedFiles.create(inFile.getAbsolutePath(), FAKE_ID, FAKE_DATE);
         final IMetaApi exifChanges = new MediaDTO();
         exifChanges.setVisibility(VISIBILITY.PRIVATE);
 
@@ -193,7 +196,7 @@ public class FileCommandAutoIntegrationTests {
         TestUtil.saveTestResourceAs("test-WitExtraData.jpg", inFile);
 
         FileCommands sut = createFileCommands(outFileBaseName);
-        SelectedFiles selectedFiles = new SelectedFiles(inFile.getAbsolutePath(), "1");
+        SelectedFiles selectedFiles = SelectedFiles.create(inFile.getAbsolutePath(), FAKE_ID, FAKE_DATE);
         final IMetaApi exifChanges = new MediaDTO();
         exifChanges.setTags(ListUtils.fromString(tagAdded));
 
@@ -218,7 +221,7 @@ public class FileCommandAutoIntegrationTests {
         TestUtil.saveTestResourceAs("test-WitExtraData.jpg", inFile);
 
         FileCommands sut = createFileCommands(outFileBaseName);
-        SelectedFiles selectedFiles = new SelectedFiles(inFile.getAbsolutePath(), "1");
+        SelectedFiles selectedFiles = SelectedFiles.create(inFile.getAbsolutePath(), FAKE_ID, FAKE_DATE);
         final IMetaApi exifChanges = new MediaDTO();
         exifChanges.setTags(ListUtils.fromString(tagAdded));
 
@@ -243,7 +246,7 @@ public class FileCommandAutoIntegrationTests {
         FileCommands sut = createFileCommands(outFileBaseName);
 
         final String newName = outFileBaseName + "-new";
-        SelectedFiles selectedFiles = new SelectedFiles(inFile.getAbsolutePath(), "1");
+        SelectedFiles selectedFiles = SelectedFiles.create(inFile.getAbsolutePath(), FAKE_ID, FAKE_DATE);
 
         // 0 avoid rounding of lat/lon; visibility not supported is only public
         final IMetaApi exifChanges = TestUtil.createTestMediaDTO(0).setVisibility(VISIBILITY.PUBLIC);
@@ -274,7 +277,7 @@ public class FileCommandAutoIntegrationTests {
         FileCommands sut = createFileCommands(outFileBaseName);
 
         final String newName = outFileBaseName + "-new";
-        SelectedFiles selectedFiles = new SelectedFiles(inFile.getAbsolutePath(), "1");
+        SelectedFiles selectedFiles = SelectedFiles.create(inFile.getAbsolutePath(), FAKE_ID, FAKE_DATE);
 
         //  final IMetaApi exifChanges = new MediaDTO().setVisibility(VISIBILITY.PUBLIC).setRating(3);
         final IMetaApi exifChanges = new MediaDTO().setVisibility(VISIBILITY.PRIVATE);

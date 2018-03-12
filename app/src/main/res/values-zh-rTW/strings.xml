@@ -32,13 +32,8 @@
 </string>
   <string name="bookmark_load_from_menu_title">加載書簽&#8230;</string>
   <string name="bookmark_save_as_menu_title">書簽另存為...</string>
-  <string name="btn_cancel">取消</string>
-  <string name="btn_no">否</string>
-  <string name="btn_yes">是</string>
   <string name="btn_change">變更</string>
-  <string name="btn_ok">確定</string>
   <string name="btn_pause">暫停</string>
-  <string name="copy_menu_title">復制</string>
   <string name="copy_result_format">已復制%1$d/%2$d 文件</string>
   <string name="delete_menu_title">刪除</string>
   <string name="delete_question_message_format">"是否確實要永久刪除這些文件？

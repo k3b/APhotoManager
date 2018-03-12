@@ -42,7 +42,10 @@ public enum MediaTransactionLogEntryType {
     RATING("r", "apmRating"),
     VISIBILITY("s","rem apmSecurity"),
     DATE("dm", "apmDateTimeOriginal"),
-    COMMENT(null, "rem");
+    COMMENT(null, "rem"),
+// dir operatins affects path
+    MOVE_DIR("Dm", "apmMoveDir",true),
+    ;
 
 // implementaion
     private final String id;

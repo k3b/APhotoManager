@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager
  *
@@ -281,5 +281,13 @@ public class Directory implements IDirectory {
     public IDirectory setIconID(int iconID) {
         this.iconID = iconID;
         return this;
+    }
+
+    /** #114: update internal data after a folder has been renamed in the gui */
+    @Override
+    public void rename(String oldFolderName, String newFolderName) {
+        String relPath = this.getRelPath();
+        relPath = relPath.replace(oldFolderName, newFolderName);
+        this.relPath = relPath;
     }
 }

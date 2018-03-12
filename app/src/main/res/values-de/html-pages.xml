@@ -54,6 +54,9 @@ Merkmale:
 		<a href='https://github.com/k3b/APhotoManager/wiki/Tags'>
 		Tags(Suchbegriffe)</a>,
 		Geo, Bewerung, ....
+</li><li>Optional <a href='https://github.com/k3b/AndroFotoFinder/wiki/AutoProcessing>autoprocessing</a>: Photos können beim Kopieren/Verschieben automatisch umbenannt und mit Tags, Geo, Title, ... versehen werden.
+</li><li>Bilder als "Privat" markieren und so für andere Bild programme unsichtbar machen.
+</li><li>Im <a href='https://github.com/k3b/APhotoManager/wiki/AppPinning>geschützen/fixieren Modus</a> sind potentiell gefährliche Aktionen (Kopieren, Löschen, Verschieben, Bildauswahl ändern, ...) nicht möglich. So kann das Gerät gefahrlos einem dritten übergeben werden.
 </li><li>Verwaltet große Bildersammlungen (15000+ Bilder in 1000+ Ordnern)
 </li><li>Funktioniert auch ohne vorherigem Media-Scan (Android native media content-provider).
 </li><li>Erweiterter Media-Scanner für Bilder: Exif, IPTC, XMP.

@@ -30,13 +30,8 @@
   <string name="bookmark_file_comment_format">Сформировано на %3$s с \'%1$s\' версии %2$s. Смотри https://github.com/k3b/APhotoManager/wiki/intentapi#sql</string>
   <string name="bookmark_load_from_menu_title">Загрузить закладки из &#8230;</string>
   <string name="bookmark_save_as_menu_title">Сохранить как &#8230;</string>
-  <string name="btn_cancel">Отмена</string>
-  <string name="btn_no">Нет</string>
-  <string name="btn_yes">Да</string>
   <string name="btn_change">Изменить</string>
-  <string name="btn_ok">Ок</string>
   <string name="btn_pause">Пауза</string>
-  <string name="copy_menu_title">Копия</string>
   <string name="copy_result_format">Скопировано %1$d/%2$d файлов</string>
   <string name="delete_menu_title">Удалить</string>
   <string name="delete_question_message_format">"Вы уверены, что хотите удалить эти файлы?

@@ -360,7 +360,7 @@ public class QueryParameter {
 
     private static boolean isKeyword(String line) {
         String fixedLine = (line != null) ? (";" + line.trim().toUpperCase() + ";") : null;
-        return ((fixedLine != null) && (PARSER_KEYWORDS.indexOf(fixedLine) >= 0));
+        return ((fixedLine != null) && (PARSER_KEYWORDS.contains(fixedLine)));
     }
 
     public String toSqlString() {
@@ -492,13 +492,13 @@ public class QueryParameter {
 
                 boolean first = true;
                 int listSize = list.length;
-                for (int i = 0; i < listSize; i++) {
+                for (String listElement : list) {
                     if (!first) {
                         result.append(delimiter);
                     }
 
                     result.append(before);
-                    result.append(list[i]);
+                    result.append(listElement);
                     result.append(after);
                     first = false;
                 }

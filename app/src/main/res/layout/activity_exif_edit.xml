@@ -190,7 +190,7 @@
             android:background="@android:drawable/ic_menu_more"
             android:layout_below="@+id/cmd_date"
             android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" />
+            android:layout_alignParentEnd="true"
         />
 
         <EditText android:id="@+id/edit_date"

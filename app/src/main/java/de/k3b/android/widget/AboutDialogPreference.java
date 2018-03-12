@@ -108,7 +108,7 @@ public class AboutDialogPreference extends DialogPreference {
         final AlertDialog.Builder alert = new AlertDialog.Builder(context);
         alert.setTitle(getAboutTitle(context));
         alert.setIcon(R.drawable.foto_gallery);
-        alert.setNeutralButton(R.string.btn_cancel,
+        alert.setNeutralButton(android.R.string.cancel,
                 new DialogInterface.OnClickListener() {
 
                     @Override

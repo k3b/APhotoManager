@@ -399,7 +399,6 @@ public class ImageMetaReader implements IMetaApi, Closeable {
         Integer orientation = getOrientationId();
         if (orientation != null) {
             // We only recognize a subset of orientation tag values.
-            int degree;
             switch (orientation.intValue()) {
                 case ORIENTATION_ROTATE_90:
                     return 90;
