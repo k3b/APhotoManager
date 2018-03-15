@@ -1,9 +1,19 @@
 # ![](https://raw.githubusercontent.com/k3b/APhotoManager/master/app/src/main/res/drawable-hdpi/foto_gallery.png) "A Photo Manager" with "A Photo Map", AndroFotoFinder
 
-Enhanced Android [Gallery App](https://github.com/k3b/APhotoManager/wiki/Gallery-View) to manage local photos: 
-[geotagging with map](https://github.com/k3b/APhotoManager/wiki/geographic-map), 
-[tags (keywords)](https://github.com/k3b/APhotoManager/wiki/Tags),
-find, sort, view, copy, delete, set gps exif data, set tags(Keywords), send, edit exif, ... .
+Enhanced, privacy aware Android **[Gallery App](https://github.com/k3b/APhotoManager/wiki/Gallery-View)** to manage local photos: 
+
+Highlights:
+* [geotagging with map](https://github.com/k3b/APhotoManager/wiki/geographic-map), 
+* [Virtual Albums](https://github.com/k3b/APhotoManager/wiki/Bookmarks) filesystem-folder indepenant,
+* management:  on-move automatically [rename photo-files](https://github.com/k3b/AndroFotoFinder/wiki/AutoProcessing) and/or [add metadata](https://github.com/k3b/AndroFotoFinder/wiki/AutoProcessing),
+* find, sort, view, copy, delete, set gps exif data, set [tags(keywords)](https://github.com/k3b/APhotoManager/wiki/Tags), send, ... .
+* available in [many languages](https://github.com/k3b/APhotoManager/issues/21)
+
+Privacy:
+* can [hide photos](https://github.com/k3b/APhotoManager/wiki/Exif-Edit#Visibility) from other gallery-apps/image-pickers.
+* [Vault mode](https://github.com/k3b/APhotoManager/wiki/AppPinning): If enabled unwanted photos cannot be seen.
+* photos are kept on local device. No upload to third party.
+* no adds, no usertracking, free open source, available on f-droid
 
 ---<br/>
 [<img src="https://github.com/k3b/APhotoManager/wiki/uptodown.png" alt="available on upToDown store" height="82" width="324">](https://a-photo-manager.en.uptodown.com/android) [<img src="https://github.com/k3b/APhotoManager/wiki/fdroid.png" alt="available on F-Droid app store" height="82" width="324">](https://f-droid.org/app/de.k3b.android.androFotoFinder)<br/>
