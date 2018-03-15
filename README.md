@@ -1,6 +1,19 @@
 # ![](https://raw.githubusercontent.com/k3b/APhotoManager/master/app/src/main/res/drawable-hdpi/foto_gallery.png) "A Photo Manager" with "A Photo Map", AndroFotoFinder
 
-Manage local photos: Find/Copy/Edit-Exif and show in Gallery or Map.
+Enhanced, privacy aware Android **[Gallery App](https://github.com/k3b/APhotoManager/wiki/Gallery-View)** to manage local photos: 
+
+Highlights:
+* [geotagging with map](https://github.com/k3b/APhotoManager/wiki/geographic-map), 
+* [Virtual Albums](https://github.com/k3b/APhotoManager/wiki/Bookmarks) filesystem-folder indepenant,
+* management:  on-move automatically [rename photo-files](https://github.com/k3b/AndroFotoFinder/wiki/AutoProcessing) and/or [add metadata](https://github.com/k3b/AndroFotoFinder/wiki/AutoProcessing),
+* find, sort, view, copy, delete, set gps exif data, set [tags(keywords)](https://github.com/k3b/APhotoManager/wiki/Tags), send, ... .
+* available in [many languages](https://github.com/k3b/APhotoManager/issues/21)
+
+Privacy:
+* can [hide photos](https://github.com/k3b/APhotoManager/wiki/Exif-Edit#Visibility) from other gallery-apps/image-pickers.
+* [Vault mode](https://github.com/k3b/APhotoManager/wiki/AppPinning): If enabled unwanted photos cannot be seen.
+* photos are kept on local device. No upload to third party.
+* no adds, no usertracking, free open source, available on f-droid
 
 ---<br/>
 [<img src="https://github.com/k3b/APhotoManager/wiki/uptodown.png" alt="available on upToDown store" height="82" width="324">](https://a-photo-manager.en.uptodown.com/android) [<img src="https://github.com/k3b/APhotoManager/wiki/fdroid.png" alt="available on F-Droid app store" height="82" width="324">](https://f-droid.org/app/de.k3b.android.androFotoFinder)<br/>
@@ -10,29 +23,13 @@ Manage local photos: Find/Copy/Edit-Exif and show in Gallery or Map.
 
 ## Features
 
-* Fast find photos by tags(keywords), (sub-)folder, date, geo , title, ...
-* Display result in gallery or geographic map from openstreetmap.
-* Detail view features zooming, swiping for next/previous image.
-* Buildin file manager for photos: find, sort, view, copy, delete, send, ... .
-* Edit exif metadata: date, title, description, tags(keywords), geo, rating, ....
-* Optional Folder-Rule based [autoprocessing](https://github.com/k3b/AndroFotoFinder/wiki/AutoProcessing): Photos are automatically renamed and get tags, geo, title, ... when you copy/move them
-* Mark images as "PRIVATE" to hide them from other Gallery-Apps and image pickers.
-* In "Protected/Pinned Mode" potetially dangerous app-commands like edit/copy/delete/share/settings/"change image selection" are disabled so you can savley hand over your phone to someone else
-* Can handle big image collections (20000+ images in 1000+ folders).
-* Uses Android's image content-provider. No initial image scan neccessary.
-* Extended photo media scanner for Exif, IPTC, XMP
-* [Translations](https://crowdin.com/project/AndroFotoFinder): &nbsp;ar,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/de-home">de</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/home"   >en</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/id-home">id</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/it-home">it</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja</a>,&nbsp;nl,&nbsp;pl,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro</a>,&nbsp;ru&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/tr-home">tr</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/zh-CN-home">zh-CN</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/zh-TW-home">zh-TW</a>
+* Free, opensource, no adds, no user tracking, available on [f-droid](https://f-droid.org/)
+* Geotagging: Shows photos in a [geographic map](https://github.com/k3b/APhotoManager/wiki/geographic-map) from [openstreetmap](http://www.openstreetmap.org)
+* Buildin file manager for photos: find, sort, view, copy, delete, Show in map, set gps exif data, send, edit exif, ... .
+* Fast [find](https://github.com/k3b/APhotoManager/wiki/Filter-View) local photos by (sub-)folder, date, [geographic map](https://github.com/k3b/APhotoManager/wiki/geographic-map)or [tags (keywords)](https://github.com/k3b/APhotoManager/wiki/Tags).
+* [Translations](https://crowdin.com/project/AndroFotoFinder): &nbsp;ar,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/de-home">de</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/home"   >en</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/it-home">it</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/fr-home">fr</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja</a>,&nbsp;nl,&nbsp;pl,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro</a>,&nbsp;ru&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/tr-home">tr</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/zh-CN-home">zh-CN</a>,&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/zh-TW-home">zh-TW</a>
 	* [![Crowdin](https://d322cqt584bo4o.cloudfront.net/androFotoFinder/localized.svg)](https://crowdin.com/project/androFotoFinder)<a href="https://github.com/k3b/APhotoManager/issues/21">Help us to translate into other languages.</a>
 	
----
-
-## Required Android Permissions:
-
-* INTERNET: to download map data from Open Streetmap Server
-* ACCESS_NETWORK_STATE and ACCESS_WIFI_STATE: to find out if wifi/internet is online to start downloaded geodata
-* WRITE_EXTERNAL_STORAGE to cache downloaded map data in local file system and to do file operations with the photos
-* READ_LOGS to read and save potential crash-logs to a textfile.
-
 ---
 
 [... features more detailed](https://github.com/k3b/APhotoManager/wiki/features)
