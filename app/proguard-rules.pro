@@ -19,6 +19,7 @@
 -dontwarn org.xmlpull.v1.**
 -dontwarn com.caverock.androidsvg.**
 -keep class org.xmlpull.** { *; }
+-keep class de.k3b.android.widget.EditTextPreferenceWithSummary { *; }
 -assumenosideeffects class com.google.android.gms.ads.MobileAds { *; }
 
 ###############
