@@ -1,0 +1,7 @@
+Changes from 0.6.3 (35) to 0.6.4.180321 (37)
+
+* Bugfix for 0.6.4.180314 (36) that crashes.
+* Bugfix and imporvements AutoProcessingMode/Rule based automatic file rename  (#112, #111, #110, #99)
+* add contextmenu "open in filemanager" in dir-picker and imagedetailview if capable filemanager is installed (#99)
+* add contextmenu: "rename folder" in dirpicker (#114)
+* Translationupdates: de, en, fr, ja, pt-BR, tr  
