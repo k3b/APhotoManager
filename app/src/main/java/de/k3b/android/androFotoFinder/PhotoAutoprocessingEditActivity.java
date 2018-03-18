@@ -530,7 +530,10 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
      */
     private void onPickExif() {
         fromGui();
-        ExifEditActivity.showActivity(this, mCurrentData.getMediaDefaults(), null, null, EXIF_EDIT_RESULT_ID);
+        ExifEditActivity.showActivity(this, mCurrentData.getMediaDefaults(),
+                null, getSelectedFiles(mDebugPrefix+"EditExif-", getIntent(),
+                        false),
+                EXIF_EDIT_RESULT_ID, false);
     }
 
     /**

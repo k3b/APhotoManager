@@ -47,7 +47,6 @@ import android.widget.Toast;
 import org.osmdroid.api.IGeoPoint;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import de.k3b.FotoLibGlobal;
@@ -911,7 +910,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     private boolean onEditExif(SelectedFiles fotos) {
-        ExifEditActivity.showActivity(getActivity(), null, null, fotos, 0);
+        ExifEditActivity.showActivity(getActivity(), null, null, fotos, 0, true);
         return true;
     }
 

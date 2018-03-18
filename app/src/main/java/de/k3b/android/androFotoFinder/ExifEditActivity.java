@@ -81,7 +81,7 @@ import de.k3b.tagDB.TagConverter;
 
 /**
  * Defines a gui to edit Exif content.
- * Invoke: see {@link #showActivity(Activity, IMetaApi, String, SelectedFiles, int)}.
+ * Invoke: see {@link #showActivity(Activity, IMetaApi, String, SelectedFiles, int, boolean)}.
  * Modes: if IMetaApi is not null edit exif data witout modifying any jpg file.
  * Modes: else if data-url/SelectedFiles is not null: modify the referenced jpg files.
  */
@@ -93,7 +93,6 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
     public static final int EXIF_RESULT_ID = UpdateTask.EXIF_RESULT_ID;
     private static final int GEO_RESULT_ID = 572;
 
-    /** detail,gallery:  sql where ... order by ... group by ... */
     public static final String EXTRA_EXIF_DATA = "de.k3b.extra.EXIF";
 
     private static final String SETTINGS_KEY = "ExifEditActivity-";
@@ -123,14 +122,17 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
 
     /**
      * @param context owhner activity starting this activity
-     * @param exifDataToEdit if not null: the content of exif that is edited. url and
-     *                       selectedFiles are ignored
-     * @param url if not null url of jpg who-s exif will be modified. Only if exifDataToEdit is null.
-     * @param selectedFiles if not null url of jpg who-s exif will be modified. Only if exifDataToEdit is null.
-     * @param requestCode if not null request code for onActivityResult of calling activity that receives the edit result.
+     * @param exifDataToEdit if not null: edit value only via intent. donot update any files.
+     *                       the content of exif that is edited.
+     * @param url if not null url of jpg who-s exif will be modified or analysed.
+     * @param selectedFiles if not null url of jpg who-s exif will be modified or analysed.
+     * @param requestCode if not 0 request code for onActivityResult of calling activity
+     *                    that receives the edit result.
+     * @param saveChangesToUri false: edit value only via intent. donot update any files.
+     *                         Neccessary to suport inital empy value of exifDataToEdit.
      */
     public static void showActivity(Activity context, IMetaApi exifDataToEdit, String url,
-                                    SelectedFiles selectedFiles, int requestCode) {
+                                    SelectedFiles selectedFiles, int requestCode, boolean saveChangesToUri) {
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, context.getClass().getSimpleName()
                     + " > ExifEditActivity.showActivity");
@@ -146,11 +148,15 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
                     ? exifDataToEdit.toString()
                     : new MediaAsString().setData(exifDataToEdit).toString();
             intent.putExtra(EXTRA_EXIF_DATA, exifAsString);
-        } else {
-            if (url != null) {
-                intent.setData(Uri.parse(url));
-            }
+        } else if (!saveChangesToUri) {
+            // special edit exif via intent without initial value
+            intent.putExtra(EXTRA_EXIF_DATA, "");
+        }
+        if (url != null) {
+            intent.setData(Uri.parse(url));
+        }
 
+        if (selectedFiles != null) {
             AffUtils.putSelectedFiles(intent, selectedFiles);
         }
 
@@ -794,39 +800,45 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
     /** save exif changes back to image and database */
     private void onOk() {
         Activity ctx = this;
-        Intent intent = getIntent();
         saveGuiToExif("onOk (finish)");
         mHistory.saveHistory();
+        boolean finish = true;
 
-        if (null != getExifParam(intent)) {
-            // return form EXIF-Edit-Mode
-            Intent resultIntent = new Intent(Intent.ACTION_EDIT);
-            resultIntent.putExtra(EXTRA_EXIF_DATA, mCurrentData.toString());
-            setResult(EXIF_RESULT_ID, resultIntent);
-            finish();
-        } else {
-            // modify jpg files and return
-            SelectedFiles items = getSelectedFiles("onOk ", this, getIntent(), true);
-
-            //!!! todo #93: this code also in
-            AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(this, true);
-
-            MediaDiffCopy exifChanges = new MediaDiffCopy(true, true).setDiff(mInitialData, mCurrentData);
-
-            if (exifChanges != null) {
-                if (!SYNC_UPDATE_EXIF) {
-                    this.exifUpdate = new UpdateTask(ctx, cmd, exifChanges);
-                    exifUpdate.execute(items);
-                } else {
-                    // for debugging: sync debugging is easier
-                    cmd.applyExifChanges(true, exifChanges, items, null);
-
-                    this.setResult(EXIF_RESULT_ID, intent);
-                    finish();
-                }
+        Intent intent = getIntent();
+        if (intent != null) {
+            if (intent.getStringExtra(EXTRA_EXIF_DATA) != null) {
+                Intent resultIntent = new Intent(Intent.ACTION_EDIT);
+                resultIntent.putExtra(EXTRA_EXIF_DATA, mCurrentData.toString());
+                setResult(EXIF_RESULT_ID, resultIntent);
             } else {
-                finish(); // no changes, nothing to do
-            }
+                // modify jpg files and return
+                SelectedFiles items = getSelectedFiles("onOk ", this, getIntent(), true);
+
+                if ((items != null) && (items.size() > 0)) {
+
+                    //!!! todo #93: this code also in
+                    AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(this, true);
+
+                    MediaDiffCopy exifChanges = new MediaDiffCopy(true, true).setDiff(mInitialData, mCurrentData);
+
+                    if (exifChanges != null) {
+                        if (!SYNC_UPDATE_EXIF) {
+                            this.exifUpdate = new UpdateTask(ctx, cmd, exifChanges);
+                            exifUpdate.execute(items);
+                            finish = false;
+                        } else {
+                            // for debugging: sync debugging is easier
+                            cmd.applyExifChanges(true, exifChanges, items, null);
+
+                            this.setResult(EXIF_RESULT_ID, intent);
+                        }
+                    } // else  no changes, nothing to do
+                } // if there are selected items
+            } // if save mode
+        } // if intent exists
+
+        if (finish) {
+            finish();
         }
     }
 

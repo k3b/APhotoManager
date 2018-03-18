@@ -46,10 +46,11 @@ android {
         // 0.6.2.171114 (33)    Bugfix: non-root android-5 (or newer) direcotry picker not working because of permissions. Necessary for copy/move file commands.
         // 0.6.2.171126 (34)    Bugfix Crash (NullPointerException) in mediascanner after updating exif
         // 0.6.3.180211 (35)    Extended Applocking; Autoprocessingmode for copy/move; Private images
-        // 0.6.4.180314 (36)    Fix/Improved Autoprocessingmode, Menu "open in filemanager" & "rename folder"
+        // 0.6.4.180314 (36)    Buggy: Fix/Improved Autoprocessingmode, Menu "open in filemanager" & "rename folder"-Crash in Settings
+        // 0.6.4.180321 (37)    Bugfix for 0.6.4.180314 (36)
 
-        versionCode = 36
-        versionName = '0.6.4.180314'
+        versionCode = 37
+        versionName = '0.6.4.180321'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
