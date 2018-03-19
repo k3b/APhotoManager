@@ -94,9 +94,16 @@ public class TagSql extends FotoSql {
 
             // from more complex to less complex
             String[] params;
-            if ((params = getParams(query, FILTER_EXPR_ANY_LIKE, remove)) != null) {
-                resultFilter.setInAnyField(params[0]);
+            StringBuilder any = null;
+            while ((params = getParams(query, FILTER_EXPR_ANY_LIKE, remove)) != null) {
+                if (any == null) {
+                    any = new StringBuilder().append(params[0]);
+                } else {
+                    any.append(" ").append(params[0]);
+
+                }
             }
+            if (any != null) resultFilter.setInAnyField(any.toString());
 
             parseTagsFromQuery(query, remove, resultFilter);
 
@@ -156,12 +163,17 @@ public class TagSql extends FotoSql {
         if ((resultQuery != null) && (!GalleryFilterParameter.isEmpty(filter))) {
             filter2Query(resultQuery, filter, clearWhereBefore);
             if (Global.Media.enableIptcMediaScanner) {
-                String any = filter.getInAnyField();
-                if ((any != null) && (any.length() > 0)) {
-                    if (!any.contains("%")) {
-                        any = "%" + any + "%";
+                String allAny = filter.getInAnyField();
+
+                if (allAny != null) {
+                    for (String any : allAny.split(" ")) {
+                        if ((any != null) && (any.length() > 0)) {
+                            if (!any.contains("%")) {
+                                any = "%" + any + "%";
+                            }
+                            resultQuery.addWhere(FILTER_EXPR_ANY_LIKE, any, any, any, any);
+                        }
                     }
-                    resultQuery.addWhere(FILTER_EXPR_ANY_LIKE, any, any, any, any);
                 }
 
 

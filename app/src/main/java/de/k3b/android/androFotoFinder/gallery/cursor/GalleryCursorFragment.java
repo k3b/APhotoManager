@@ -108,9 +108,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private static final String INSTANCE_STATE_SEL_ONLY = "selectedOnly";
     private static final String INSTANCE_STATE_LOADER_ID = "loaderID";
 
-    private static final int MODE_VIEW = 0;
-    private static final int MODE_PICK_SINGLE = 1;
-    private static final int MODE_PICK_MULTIBLE = 2;
+    private static final int MODE_VIEW_PICKER_NONE = 0;
+    private static final int MODE_VIEW_PICK_SINGLE = 1;
+    private static final int MODE_VIEW_PICK_MULTIBLE = 2;
 
     private static int nextLoaderID = 100;
     private int loaderID = -1;
@@ -153,7 +153,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     /** true pick geo; false pick image */
     private boolean mGetGeo = false;
 
-    private int mMode = MODE_VIEW;
+    /** one of the MODE_VIEW_PICKER_XXXX */
+    private int mMode = MODE_VIEW_PICKER_NONE;
 
     private MoveOrCopyDestDirPicker mDestDirPicker = null;
     /**************** construction ******************/
@@ -366,7 +367,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         String action = (intent != null) ? intent.getAction() : null;
 
         if ((action != null) && ((Intent.ACTION_PICK.compareTo(action) == 0) || (Intent.ACTION_GET_CONTENT.compareTo(action) == 0))) {
-            this.mMode = (intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE,false)) ? MODE_PICK_MULTIBLE : MODE_PICK_SINGLE;
+            this.mMode = (intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE,false)) ? MODE_VIEW_PICK_MULTIBLE : MODE_VIEW_PICK_SINGLE;
             mMustReplaceMenue = true;
             String schema = intent.getScheme();
             mGetGeo = ((schema != null) && ("geo".compareTo(schema) == 0));
@@ -758,6 +759,27 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         getActivity().invalidateOptionsMenu();
     }
 
+    /**
+     * Different menu modes
+     * 	* normal		name searchbar-icon folder map (tags) (filter) menu
+     * 	    * R.menu.menu_gallery_non_selected_only R.menu.menu_gallery_non_multiselect
+     * 	* selected	    selected cancel seleted-only share (save) menu
+     * 	    * (Filter not available; this.isMultiSelectionActive();
+     * 	    * R.menu.menu_gallery_multiselect_mode_all R.menu.menu_image_commands
+     * 	* locked		name lock folder map menu
+     * 	    * (no multiselection, no base-filters)
+     * 	    * (this.locked; R.menu.menu_gallery_locked)
+     * 	* searchbar	    bar cancel-searc-bar (folder) (map) (tags) (filter) menu
+     * 	* picker-locked
+     * 	    * R.menu.menu_gallery_pick R.menu.menu_gallery_locked
+     * 	* picker-non-locked     selected ok cancel filter settings
+     * 	    * R.menu.menu_gallery_pick  R.menu.menu_gallery_non_multiselect
+     *
+     * 	(xxxx) with "IFROOM" (in wide screen only)
+     * 	searchbarmode is like "normal" where there is no "IFROOM" on no-searchbar items
+     *
+     * @param menu
+     */
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
@@ -769,12 +791,13 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             mMustReplaceMenue = false;
             menu.clear();
             mMenuRemoveAllSelected = null;
-            if (mMode == MODE_VIEW) {
+            if (mMode == MODE_VIEW_PICKER_NONE) {
+                //
                 if (locked) { // view-locked
                     mSelectedItems.clear();
                     inflater.inflate(R.menu.menu_gallery_locked, menu);
                     LockScreen.fixMenu(menu);
-                } else if (isMultiSelectionActive()) { // view-multiselect
+                } else if (this.isMultiSelectionActive()) { // view-multiselect
                     inflater.inflate(R.menu.menu_gallery_multiselect_mode_all, menu);
 
                     mShareOnlyToggle = menu.findItem(R.id.cmd_selected_only);
@@ -796,7 +819,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 }
 
 
-            } else {
+            } else { // picker mode
                 inflater.inflate(R.menu.menu_gallery_pick, menu);
                 if (locked) { // pick-locked
                     mSelectedItems.clear();
@@ -1316,7 +1339,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     private boolean isMultiSelectionActive() {
-        if (mMode != MODE_VIEW) return true;
+        if (mMode != MODE_VIEW_PICKER_NONE) return true;
         return !mSelectedItems.isEmpty();
     }
 
@@ -1344,7 +1367,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     /** return true if included; false if excluded */
     private boolean toggleSelection(long imageID) {
         boolean contains = mSelectedItems.contains(imageID);
-        if (mMode == MODE_PICK_SINGLE) {
+        if (mMode == MODE_VIEW_PICK_SINGLE) {
             clearSelections();
         }
         if (contains) {

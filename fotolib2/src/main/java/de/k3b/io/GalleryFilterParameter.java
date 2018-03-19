@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -39,6 +39,8 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
 
     private List<String> tagsAllIncluded;
     private List<String> tagsAllExcluded;
+
+    /** match if the text is in path, filename, title, description, tags. Wildcard "%" is allowed. Sub-expressions are seperated by " " */
     private String inAnyField;
 
     private long dateMin = 0;
@@ -152,12 +154,13 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
         return this;
     }
 
-    /** match if the text is in path, filename, title, description, tags */
+    /** match if the text is in path, filename, title, description, tags. Wildcard "%" is allowed. Sub-expressions are seperated by " " */
     @Override
     public String getInAnyField() {
         return inAnyField;
     }
 
+    /** match if the text is in path, filename, title, description, tags. Wildcard "%" is allowed. Sub-expressions are seperated by " " */
     public GalleryFilterParameter setInAnyField(String inAnyField) {
         this.inAnyField = inAnyField;
         return this;
