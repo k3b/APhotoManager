@@ -8,5 +8,13 @@
         <attr name="metaButtonBarStyle" format="reference" />
         <attr name="metaButtonBarButtonStyle" format="reference" />
     </declare-styleable>
+    <declare-styleable name="SearchViewWithHistory">
+        <attr name="searchBackground" format="integer" />
+        <attr name="searchCloseIcon" format="integer" />
+        <attr name="searchBackIcon" format="integer" />
+        <attr name="android:hint" />
+        <attr name="android:textColor" />
+        <attr name="android:textColorHint" />
+    </declare-styleable>
 
 </resources>

@@ -165,16 +165,7 @@ public class TagSql extends FotoSql {
             if (Global.Media.enableIptcMediaScanner) {
                 String allAny = filter.getInAnyField();
 
-                if (allAny != null) {
-                    for (String any : allAny.split(" ")) {
-                        if ((any != null) && (any.length() > 0)) {
-                            if (!any.contains("%")) {
-                                any = "%" + any + "%";
-                            }
-                            resultQuery.addWhere(FILTER_EXPR_ANY_LIKE, any, any, any, any);
-                        }
-                    }
-                }
+                addFilterAny(resultQuery, allAny);
 
 
                 List<String> includes = ListUtils.emptyAsNull(filter.getTagsAllIncluded());
@@ -201,6 +192,19 @@ public class TagSql extends FotoSql {
                 }
 
                 setWhereVisibility(resultQuery, filter.getVisibility());
+            }
+        }
+    }
+
+    public static void addFilterAny(QueryParameter resultQuery, String allAny) {
+        if (allAny != null) {
+            for (String any : allAny.split(" ")) {
+                if ((any != null) && (any.length() > 0)) {
+                    if (!any.contains("%")) {
+                        any = "%" + any + "%";
+                    }
+                    resultQuery.addWhere(FILTER_EXPR_ANY_LIKE, any, any, any, any);
+                }
             }
         }
     }

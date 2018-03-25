@@ -19,16 +19,29 @@
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
  -->
-<!-- menue of gallery activity/fragment if gallery is NOT in multiselection mode -->
+<!-- menue of gallery activity/fragment if gallery is NOT in multiselection mode (in picker and in gallery mode) when searchbar is hidden
+
+Note menu_gallery_non_multiselect-seachbar and menu_gallery_non_multiselect are nearly idenitcal
+
+* menu_gallery_non_multiselect-seachbar has seachbar and minimal "IFROOM"
+-->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".GalleryActivity">
 
+    <item android:id="@+id/cmd_searchbar"
+        android:icon="@android:drawable/ic_menu_search"
+        android:orderInCategory="1"
+        android:title="@android:string/search_go"
+        android:showAsAction="always|collapseActionView"
+        android:actionViewClass="de.k3b.android.widget.SearchViewWithHistory"
+        />
     <item android:id="@+id/cmd_filter"
         android:title="@string/filter_menu_title"
-        android:icon="@android:drawable/ic_menu_search"
+        android:icon="@drawable/ic_menu_find_holo_dark"
         android:visible="true"
         android:orderInCategory="10"
-        android:showAsAction="ifRoom" />
+        android:showAsAction="ifRoom"
+        />
 
     <item android:id="@+id/cmd_sort"
         android:title="@string/sort_menu_title"

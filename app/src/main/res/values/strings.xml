@@ -244,6 +244,8 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
 
     <string name="show_in_filemanager_menu_title">Open in Filemanager</string>
 
+    <!-- #1113: Searchbar  -->
+    <string name="searchbar_menu_title">Searchbar</string>
 
     <!--  depricated tags_update_result_format
 			replaced by android.R.string.xxx @android:string/xxx : btn_cancel btn_no btn_yes btn_okcopy_menu_title

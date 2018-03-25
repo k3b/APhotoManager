@@ -30,6 +30,7 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
@@ -61,7 +62,9 @@ import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.LocalizedActivity;
+import de.k3b.android.widget.SearchViewWithHistory;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.StringUtils;
 import de.k3b.io.collections.SelectedItems;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryFormatter;
@@ -140,10 +143,13 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         private static final int SUB_FILTER_MODE_PATH = 0;
         private static final int SUB_FILTER_MODE_GEO = 1;
         private static final int SUB_FILTER_MODE_TAG = 2;
+        private static final int SUB_FILTER_MODE_SEARCH_BAR = 3;
         private int mCurrentSubFilterMode = SUB_FILTER_MODE_PATH;
 
         private GeoRectangle mCurrentLatLonFromGeoAreaPicker = new GeoRectangle();
         private List<String> mCurrentTagsFromPicker = new ArrayList<String>();
+
+        private String mCurrentSearchbarValue = null;
 
         /** one of the FotoSql.QUERY_TYPE_xxx values */
         protected int mDirQueryID = FotoSql.QUERY_TYPE_GROUP_DEFAULT;
@@ -223,7 +229,9 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
             TagSql.filter2QueryEx(result, this.getCurrentFilterSettings(), !hasUserDefinedQuery());
             if (result == null) return null;
 
-            if (mCurrentSubFilterMode == SUB_FILTER_MODE_GEO) {
+            if (mCurrentSubFilterMode == SUB_FILTER_MODE_SEARCH_BAR) {
+                TagSql.addFilterAny(result, mCurrentSearchbarValue);
+            } else if (mCurrentSubFilterMode == SUB_FILTER_MODE_GEO) {
                 FotoSql.addWhereFilterLatLon(result, mCurrentLatLonFromGeoAreaPicker);
             } else if (mCurrentSubFilterMode == SUB_FILTER_MODE_TAG) {
                 TagSql.addWhereTagsIncluded(result, mCurrentTagsFromPicker,false);
@@ -550,7 +558,9 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
             Global.fixMenu(this, menu);
         }
 
-        return super.onCreateOptionsMenu(menu);
+        final boolean result = super.onCreateOptionsMenu(menu);
+        initSearchView(menu.findItem(R.id.cmd_searchbar));
+        return result;
     }
 
     @Override
@@ -701,7 +711,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
     }
 
     private void openLatLonPicker() {
-        mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_GEO;
+        this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_GEO;
 
         final FragmentManager manager = getFragmentManager();
         LocationMapFragment dialog = new LocationMapFragment();
@@ -742,6 +752,15 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
     @Override
     public boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag) {
         return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, this, this.mGalleryQueryParameter.getCurrentFilterSettings());
+    }
+
+    @Override
+    public void onBackPressed() {
+        if ((searchView != null) && searchView.isSearchOpen()) {
+            searchView.closeSearch();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     private void openFolderPicker() {
@@ -960,4 +979,103 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
     public String toString() {
         return mDebugPrefix + "->" + this.mGalleryGui;
     }
+
+
+    /*********************** search view *******************/
+    private SearchViewWithHistory searchView = null;
+    private String mLastSearchViewValue = null;
+
+    private void initSearchView(MenuItem item) {
+        final SearchViewWithHistory searchView = (SearchViewWithHistory) item.getActionView();
+        this.searchView = searchView;
+        if (searchView != null) {
+            searchView.setMenuItem(item);
+            // searchView.setCursorDrawable(R.drawable.custom_cursor);
+            searchView.setEllipsize(true);
+            searchView.setOnQueryTextListener(new SearchViewWithHistory.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    showSearchbarResult(query, "search bar submit");
+                    // Toast.makeText(FotoGalleryActivity.this, "Query: " + query, Toast.LENGTH_LONG).show();
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    sendDelayed(HANDLER_FILTER_TEXT_CHANGED, HANDLER_FILTER_TEXT_DELAY);
+                    return false;
+                }
+            });
+
+            searchView.setOnSearchViewListener(new SearchViewWithHistory.SearchViewListener() {
+                @Override
+                public void onSearchViewShown() {
+                    showSearchbarResult("onSearchViewShown");
+                }
+
+                @Override
+                public void onSearchViewClosed() {
+                    showSearchbarResult("onSearchViewClosed");
+                }
+            });
+        }
+    }
+
+    private void showSearchbarResult(String why) {
+        if ((searchView != null) && (searchView.isSearchOpen()) ) {
+            showSearchbarResult(searchView.getFilterValue(), "onSearchViewClosed");
+        }
+    }
+    private void showSearchbarResult(String query, String why) {
+        if ((mGalleryQueryParameter.mCurrentSubFilterMode != GalleryQueryParameter.SUB_FILTER_MODE_SEARCH_BAR)
+                || (0 != StringUtils.compare(query, mLastSearchViewValue))) {
+            mLastSearchViewValue = query;
+            mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_SEARCH_BAR;
+            mGalleryQueryParameter.mCurrentSearchbarValue = query;
+            if (Global.debugEnabledSql) {
+                Log.i(Global.LOG_CONTEXT, why + ": search " + query);
+            }
+            reloadGui(why);
+        } else {
+            if (Global.debugEnabledSql) {
+                Log.i(Global.LOG_CONTEXT, why + ": ignore " + query);
+            }
+
+        }
+    }
+
+    // char(s) typing in filter is active
+    private static final int HANDLER_FILTER_TEXT_CHANGED = 0;
+    private static final int HANDLER_FILTER_TEXT_DELAY = 500;
+
+    private final Handler delayProcessor = new Handler() {
+        @Override
+        public void handleMessage(final Message msg) {
+            clearDelayProcessor();
+            switch (msg.what) {
+                case HANDLER_FILTER_TEXT_CHANGED:
+                    showSearchbarResult( "onQueryTextChange");
+                    break;
+                default:
+                    // not implemented
+                    throw new IllegalStateException();
+            }
+        }
+
+    };
+
+    private void clearDelayProcessor() {
+        this.delayProcessor
+                .removeMessages(HANDLER_FILTER_TEXT_CHANGED);
+    }
+
+    private void sendDelayed(final int messageID, final int delayInMilliSec) {
+        this.clearDelayProcessor();
+
+        final Message msg = Message
+                .obtain(this.delayProcessor, messageID, null);
+        delayProcessor.sendMessageDelayed(msg,
+                delayInMilliSec);
+    }
+
 }
