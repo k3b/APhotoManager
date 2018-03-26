@@ -38,8 +38,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-// import com.squareup.leakcanary.RefWatcher;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -758,6 +756,8 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
     public void onBackPressed() {
         if ((searchView != null) && searchView.isSearchOpen()) {
             searchView.closeSearch();
+
+            // ??bug?? : with back-key on my android-4.2 the soft keyboard does not close
         } else {
             super.onBackPressed();
         }
@@ -1015,7 +1015,9 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
 
                 @Override
                 public void onSearchViewClosed() {
+
                     showSearchbarResult("onSearchViewClosed");
+                    searchView.hideKeyboard(FotoGalleryActivity.this.searchView.getRootView());
                 }
             });
         }
