@@ -1,0 +1,4 @@
+Changes from 0.6.4.180321 (37) to 0.7.0 (38)
+
+* #113: Added search bar in gallery view to fast find photos by text contained in tag, title, description, path.
+* #113: In "Filter Find Field" allow to search for subexpressions seperated by " " 
