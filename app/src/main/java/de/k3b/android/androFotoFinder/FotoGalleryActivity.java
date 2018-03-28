@@ -49,6 +49,7 @@ import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
 import de.k3b.android.androFotoFinder.locationmap.LocationMapFragment;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
+import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.queries.Queryable;
@@ -681,7 +682,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
                     mGalleryQueryParameter.mGalleryContentQuery = new QueryParameter(FotoSql.queryDetail);
                 }
                 mBookmarkController.loadState(intent, null);
-                onFilterChanged(GalleryFilterActivity.getFilter(intent), mDebugPrefix + "#onActivityResult from GalleryFilterActivity");
+                onFilterChanged(AndroidAlbumUtils.getFilter(this, intent), mDebugPrefix + "#onActivityResult from GalleryFilterActivity");
                 break;
             case ImageDetailActivityViewPager.ACTIVITY_ID:
                 if (resultCode == ImageDetailActivityViewPager.RESULT_CHANGE) {
@@ -789,7 +790,13 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
                         onDirectoryDataLoadComplete(directoryRoot);
                     }
                 };
-                loader.execute(currentDirContentQuery);
+
+                if (dirQueryID == FotoSql.QUERY_TYPE_GROUP_ALBUM) {
+                    // load dir-s + "*.album"
+                    loader.execute(currentDirContentQuery, FotoSql.queryVAlbum);
+                } else {
+                    loader.execute(currentDirContentQuery);
+                }
             } else {
                 Log.e(Global.LOG_CONTEXT, mDebugPrefix + " this.mDirQueryID undefined "
                         + this.mGalleryQueryParameter.mDirQueryID);

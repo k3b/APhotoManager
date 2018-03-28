@@ -29,6 +29,7 @@ import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.regex.Pattern;
 
@@ -52,8 +53,15 @@ public class FileUtils {
         return s;
     }
 
+    public static String readFile(InputStream file) throws IOException {
+        return internalReadFile(new BufferedReader(new InputStreamReader(file)), file);
+    }
+
     public static String readFile(File file) throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(file));
+        return internalReadFile(new BufferedReader(new FileReader(file)), file);
+    }
+
+    public static String internalReadFile(BufferedReader br, Object source) throws IOException {
         StringBuilder sb = new StringBuilder();
         String line = br.readLine();
 
@@ -62,11 +70,11 @@ public class FileUtils {
             sb.append("\n");
             line = br.readLine();
         }
-        close(br, file);
+        close(br, source);
         return sb.toString();
     }
 
-	public static void close(Closeable stream, Object source) {
+    public static void close(Closeable stream, Object source) {
 		if (stream != null) {
 			try {			
 				stream.close();

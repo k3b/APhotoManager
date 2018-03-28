@@ -45,6 +45,7 @@ import de.k3b.android.androFotoFinder.LockScreen;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.SettingsActivity;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
+import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.osmdroid.OsmdroidUtil;
 import de.k3b.android.widget.AboutDialogPreference;
@@ -299,7 +300,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
         switch (requestCode) {
             case GalleryFilterActivity.resultID :
                 mBookmarkController.loadState(intent, null);
-                onFilterChanged(GalleryFilterActivity.getFilter(intent));
+                onFilterChanged(AndroidAlbumUtils.getFilter(this, intent));
                 break;
             default:
                 throw new IllegalStateException();

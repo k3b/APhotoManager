@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -46,6 +47,7 @@ import de.k3b.android.androFotoFinder.directory.DirectoryLoaderTask;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.locationmap.LocationMapFragment;
 import de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity;
+import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
@@ -63,6 +65,8 @@ import de.k3b.io.VISIBILITY;
 import de.k3b.tagDB.Tag;
 
 /**
+ * Editor for GalleryFilterParameter and for parsed *.query and *.album QueryParameter-files.
+ *
  * Defines a gui for global foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.
  */
 public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
@@ -109,13 +113,6 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         }
     }
 
-    public static GalleryFilterParameter getFilter(Intent intent) {
-        if (intent == null) return null;
-        String filter = intent.getStringExtra(EXTRA_FILTER);
-        if (filter == null) return null;
-        return GalleryFilterParameter.parse(filter, new GalleryFilterParameter());
-    }
-
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         fromGui(mFilter);
@@ -138,7 +135,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         onCreateButtos();
 
         GalleryFilterParameter filter = (savedInstanceState == null)
-                ? getFilter(intent)
+                ? AndroidAlbumUtils.getFilter(this, intent)
                 : GalleryFilterParameter.parse(savedInstanceState.getString(FILTER_VALUE, ""),  new GalleryFilterParameter()) ;
 
         if (filter != null) {
@@ -656,11 +653,18 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             final Intent intent = new Intent();
             if (this.mFilter != null) {
                 intent.putExtra(EXTRA_FILTER, this.mFilter.toString());
+
+                Uri uri = getIntent().getData();
+                if (uri != null) {
+                    AndroidAlbumUtils.saveGalleryFilterParameterAsQuery(GalleryFilterActivity.this,  this.mFilter, uri );
+                    intent.setData(uri);
+                }
             }
 
             mBookmarkController.saveState(intent, null);
 
             this.setResult(resultID, intent);
+
             finish();
         }
     }

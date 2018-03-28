@@ -185,6 +185,17 @@ public class FotoSql extends FotoSqlBase {
             .addGroupBy(SQL_EXPR_FOLDER)
             .addOrderBy(SQL_EXPR_FOLDER);
 
+    public static final QueryParameter queryVAlbum = new QueryParameter()
+            .setID(QUERY_TYPE_GROUP_ALBUM)
+            .addColumn(
+                    SQL_COL_PK,
+                    SQL_COL_PATH + " AS " + SQL_COL_DISPLAY_TEXT,
+                    "0 AS " + SQL_COL_COUNT,
+                    "null AS " + SQL_COL_GPS)
+            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
+            .addWhere(SQL_COL_PATH + " like '%" + QueryParameter.SUFFIX_VALBUM + "'")
+            .addOrderBy(SQL_COL_PATH);
+
     /* image entries may become duplicated if media scanner finds new images that have not been inserted into media database yet
      * and aFotoSql tries to show the new image and triggers a filescan. */
     public static final QueryParameter queryGetDuplicates = new QueryParameter()

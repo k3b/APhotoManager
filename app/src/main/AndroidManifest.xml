@@ -182,7 +182,22 @@
         <activity
             android:name=".GalleryFilterActivity"
             android:icon="@drawable/ic_action_search"
-            android:label="@string/filter_menu_title" />
+            android:label="@string/filter_menu_title" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.EDIT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!-- file must have mimeType to match -->
+                <data android:scheme="file" />
+                <data android:mimeType="*/*" />
+                <data android:host="*" />
+                <data android:pathPattern=".*\\.album" />
+            </intent-filter>
+
+        </activity>
         <activity
             android:name=".ExifEditActivity"
             android:icon="@drawable/exif_edit"
