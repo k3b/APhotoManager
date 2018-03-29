@@ -79,6 +79,7 @@
         >
         <activity
             android:name=".FotoGalleryActivity"
+            android:icon="@drawable/foto_gallery"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -121,6 +122,7 @@
         <activity
             android:name=".imagedetail.ImageDetailActivityViewPager"
             android:ellipsize="middle"
+            android:icon="@drawable/foto_gallery"
             android:label="@string/app_image_viewer_title">
 
             <!-- ImageDetail view/send(to) schema=file with mime=image/* -->
@@ -181,7 +183,7 @@
         </activity>
         <activity
             android:name=".GalleryFilterActivity"
-            android:icon="@drawable/ic_action_search"
+            android:icon="@drawable/exif_edit"
             android:label="@string/filter_menu_title" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
