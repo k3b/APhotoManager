@@ -184,7 +184,8 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
             filter = savedInstanceState.getString(STATE_Filter);
             if (filter != null) dbgFilter = "filter from savedInstanceState=" + filter;
         } else { // first run
-            GalleryFilterParameter albumFilter = AndroidAlbumUtils.getGalleryFilterParameterFromQueryUri(this, uriFromIntent);
+            GalleryFilterParameter albumFilter
+                    = AndroidAlbumUtils.getGalleryFilterParameterFromQueryUri(this, uriFromIntent);
 
             if (albumFilter != null) {
                 albumFilter.setHasGeo(); // geo only data
