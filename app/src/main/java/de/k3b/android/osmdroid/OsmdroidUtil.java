@@ -29,6 +29,7 @@ import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.tileprovider.MapTileProviderBase;
 import org.osmdroid.util.GeoPoint;
+import org.osmdroid.util.TileSystem;
 import org.osmdroid.views.MapView;
 
 /**
@@ -89,35 +90,13 @@ public class OsmdroidUtil {
                                         int maximumZoomLevel, int minimumZoomLevel) {
         double groundResolution;
         for (int zoom = Math.min(maximumZoomLevel, 15); zoom >= minimumZoomLevel; zoom--) {
-            groundResolution = TileSystemFix_978.GroundResolution(latitude, zoom);
+            // groundResolution = TileSystemFix_978.GroundResolution(latitude, zoom);
+            groundResolution = TileSystem.GroundResolution(latitude, zoom);
             if (groundResolution > requiredMinimalGroundResolutionInMetersPerPixel)
                 return zoom;
         }
 
         return NO_ZOOM;
-    }
-
-    private static class TileSystemFix_978 {
-        protected static long mTileSize = 256;
-        private static final double EarthRadius = 6378137;
-        private static final double MinLatitude = -85.05112878;
-        private static final double MaxLatitude = 85.05112878;
-
-        public static double GroundResolution(double latitude, final int levelOfDetail) {
-            latitude = Clip(latitude, MinLatitude, MaxLatitude);
-            return Math.cos(latitude * Math.PI / 180) * 2 * Math.PI * EarthRadius
-                    / MapSize(levelOfDetail);
-        }
-
-        public static long MapSize(final int levelOfDetail) {
-            return mTileSize << (levelOfDetail < 29 ? levelOfDetail
-                    : 29);
-        }
-
-        private static double Clip(final double n, final double minValue, final double maxValue) {
-            return Math.min(Math.max(n, minValue), maxValue);
-        }
-
     }
 
     /**
