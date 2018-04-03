@@ -125,7 +125,8 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
         // no geo: from intent: use last used value
         mSaveLastUsedGeoToSharedPrefs = (geoPointFromIntent == null);
 
-        Uri additionalPointsContentUri = ((intent != null) && (geoPointFromIntent == null)) ? intent.getData() : null;
+        final Uri uriFromIntent = intent.getData();
+        Uri additionalPointsContentUri = ((intent != null) && (geoPointFromIntent == null)) ? uriFromIntent : null;
 
         String lastGeoUri = sharedPref.getString(STATE_LAST_GEO, "geo:53,8?z=6");
         IGeoPointInfo lastGeo = mGeoUriParser.fromUri(lastGeoUri);
@@ -175,28 +176,45 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
         if (intent != null) {
             filter = intent.getStringExtra(EXTRA_FILTER);
         }
+
+        boolean zoom2fit = false;
+        this.mFilter = null;
         this.mSaveLastUsedFilterToSharedPrefs = (filter == null); // false if controlled via intent
         if (savedInstanceState != null) {
             filter = savedInstanceState.getString(STATE_Filter);
             if (filter != null) dbgFilter = "filter from savedInstanceState=" + filter;
+        } else { // first run
+            GalleryFilterParameter albumFilter = AndroidAlbumUtils.getGalleryFilterParameterFromQueryUri(this, uriFromIntent);
+
+            if (albumFilter != null) {
+                albumFilter.setHasGeo(); // geo only data
+                this.mFilter = albumFilter;
+                this.mSaveLastUsedFilterToSharedPrefs = false;
+                filter = null;
+                zoom2fit = true;
+                zoom = OsmdroidUtil.RECALCULATE_ZOOM;
+            }
         }
 
-        if (this.mSaveLastUsedFilterToSharedPrefs) {
-            filter = sharedPref.getString(STATE_Filter, null);
-            if (filter != null) dbgFilter = "filter from sharedPref=" + filter;
-        }
+        if (this.mFilter == null) {
+            if (this.mSaveLastUsedFilterToSharedPrefs) {
+                filter = sharedPref.getString(STATE_Filter, null);
+                if (filter != null) dbgFilter = "filter from sharedPref=" + filter;
+            }
 
-        this.mFilter = new GalleryFilterParameter();
 
-        if (filter != null) {
-            GalleryFilterParameter.parse(filter, this.mFilter);
+            this.mFilter = new GalleryFilterParameter();
+
+            if (filter != null) {
+                GalleryFilterParameter.parse(filter, this.mFilter);
+            }
         }
 
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + dbgFilter + " => " + this.mFilter);
         }
 
-        mMap.defineNavigation(this.mFilter, geoPointFromIntent, rectangle, zoom, selectedItems, additionalPointsContentUri);
+        mMap.defineNavigation(this.mFilter, geoPointFromIntent, rectangle, zoom, selectedItems, additionalPointsContentUri, zoom2fit);
     }
 
     @Override
@@ -310,7 +328,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
     private void onFilterChanged(GalleryFilterParameter filter) {
         if ((mMap != null) && (filter != null)) {
             this.mFilter = filter;
-            mMap.defineNavigation(this.mFilter, null, OsmdroidUtil.NO_ZOOM, null, null);
+            mMap.defineNavigation(this.mFilter, null, OsmdroidUtil.NO_ZOOM, null, null, false);
         }
     }
 
@@ -320,8 +338,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
     }
 
     private GeoPointDto getGeoPointDtoFromIntent(Intent intent) {
-        final Uri uri = (intent != null) ? intent.getData() : null;
-        String uriAsString = (uri != null) ? uri.toString() : null;
+        String uriAsString =  (intent != null) ? intent.getDataString() : null;
         GeoPointDto pointFromIntent = null;
         if (uriAsString != null) {
             Toast.makeText(this, getString(R.string.app_name) + ": received  " + uriAsString, Toast.LENGTH_LONG).show();

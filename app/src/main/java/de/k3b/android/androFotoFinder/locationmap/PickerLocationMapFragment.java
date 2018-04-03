@@ -131,7 +131,7 @@ public class PickerLocationMapFragment extends LocationMapFragment {
     /** get all important parameters for displaying the map */
     public void defineNavigation(GalleryFilterParameter rootFilter, IGeoPointInfo selectedItem,
                                  GeoRectangle rectangle, int zoomlevel,
-                                 SelectedItems selectedItems, Uri additionalPointsContentUri) {
+                                 SelectedItems selectedItems, Uri additionalPointsContentUri, boolean zoomToFit) {
         IGeoPointInfo currentSelection = selectedItem;
         if ((currentSelection == null) && (getCurrentSelectionPosition() == null)) {
             // first call with no geo: take last use from config
@@ -141,7 +141,7 @@ public class PickerLocationMapFragment extends LocationMapFragment {
             currentSelection = (lastValue == null) ? null : mGeoUriEngine.fromUri(lastValue);
         }
 
-        super.defineNavigation(rootFilter, rectangle, zoomlevel, selectedItems, additionalPointsContentUri);
+        super.defineNavigation(rootFilter, rectangle, zoomlevel, selectedItems, additionalPointsContentUri, zoomToFit);
         if (currentSelection != null) {
             updateMarker(null, NO_MARKER_ID, new GeoPoint(currentSelection.getLatitude(), currentSelection.getLongitude()), null);
         }

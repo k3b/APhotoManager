@@ -48,14 +48,16 @@ public class AndroidAlbumUtils implements Common {
     private static final String mDebugPrefix = AndroidAlbumUtils.class.getSimpleName();
 
     public static GalleryFilterParameter getGalleryFilterParameterFromQueryUri(Context context, Uri uri) {
-        try {
-            QueryParameter query = QueryParameter.load(context.getContentResolver().openInputStream(uri));
-            if (query != null) {
-                return (GalleryFilterParameter) TagSql.parseQueryEx(query, true);
+        if ((uri != null) && (context != null)) {
+            try {
+                QueryParameter query = QueryParameter.load(context.getContentResolver().openInputStream(uri));
+                if (query != null) {
+                    return (GalleryFilterParameter) TagSql.parseQueryEx(query, true);
+                }
+            } catch (IOException e) {
+                Log.e(Global.LOG_CONTEXT, mDebugPrefix + ".loadFrom(" + uri +
+                        ") failed: " + e.getMessage(), e);
             }
-        } catch (IOException e) {
-            Log.e(Global.LOG_CONTEXT, mDebugPrefix + ".loadFrom(" + uri +
-                    ") failed: " + e.getMessage(), e);
         }
         return null;
     }
@@ -64,15 +66,13 @@ public class AndroidAlbumUtils implements Common {
     public static GalleryFilterParameter getFilter(Context context, Intent intent) {
         if (intent == null) return null;
 
+        Uri uri = intent.getData();
+        if ((uri != null) && QueryParameter.isQueryFile(uri.getPath())) {
+            return getGalleryFilterParameterFromQueryUri(context, uri);
+        }
         String filter = intent.getStringExtra(EXTRA_FILTER);
-        if (!StringUtils.isNullOrEmpty(filter)) {
+        if (filter != null) {
             return GalleryFilterParameter.parse(filter, new GalleryFilterParameter());
-        } else {
-
-            Uri uri = intent.getData();
-            if ((uri != null) && QueryParameter.isQueryFile(uri.getPath())) {
-                return getGalleryFilterParameterFromQueryUri(context, uri);
-            }
         }
         return null;
     }

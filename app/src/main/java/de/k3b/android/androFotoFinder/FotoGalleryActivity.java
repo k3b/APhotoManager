@@ -400,10 +400,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
             if ((newFilterSettings != null) && (PICK_GEO_SUFFIX.compareTo(mStatSuffix) == 0)) {
                 // geopick: only photos that have lat/lon
                 GalleryFilterParameter parameter = new GalleryFilterParameter().get(newFilterSettings);
-                parameter.setNonGeoOnly(false);
-                if (parameter.isEmpty()) {
-                    parameter.setLatitude(-90.0,90.0).setLogitude(-180.0,180.0);
-                }
+                parameter.setHasGeo();
                 this.mCurrentFilterSettings = parameter;
             } else {
                 this.mCurrentFilterSettings = newFilterSettings;
@@ -715,7 +712,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         final FragmentManager manager = getFragmentManager();
         LocationMapFragment dialog = new LocationMapFragment();
         dialog.defineNavigation(this.mGalleryQueryParameter.getCurrentFilterSettings(),
-                this.mGalleryQueryParameter.mCurrentLatLonFromGeoAreaPicker, OsmdroidUtil.NO_ZOOM, mSelectedItems, null);
+                this.mGalleryQueryParameter.mCurrentLatLonFromGeoAreaPicker, OsmdroidUtil.NO_ZOOM, mSelectedItems, null, false);
 
         dialog.show(manager, DLG_NAVIGATOR_TAG);
     }

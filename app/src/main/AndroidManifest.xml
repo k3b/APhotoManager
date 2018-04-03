@@ -115,6 +115,23 @@
                 <data android:mimeType="image/*" />
                 <data android:mimeType="vnd.android.cursor.dir/image" />
             </intent-filter>
+
+            <!-- fixme icon -->
+            <intent-filter
+                android:icon="@drawable/exif_edit"
+                >
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!-- file must have mimeType to match -->
+                <data android:scheme="file" />
+                <data android:mimeType="*/*" />
+                <data android:host="*" />
+                <data android:pathPattern=".*\\.album" />
+            </intent-filter>
+
         </activity>
 
         <!-- mime image/* for SEND(_TO)/(RE)VIEW for file -->
@@ -401,6 +418,21 @@
                 <data android:mimeType="application/xml+kml" />
                 <data android:mimeType="application/xml+gpx" />
                 <data android:mimeType="application/xml+poi" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SENDTO" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!-- file must have mimeType to match -->
+                <data android:scheme="file" />
+                <data android:mimeType="*/*" />
+                <data android:host="*" />
+                <data android:pathPattern=".*\\.album" />
             </intent-filter>
         </activity>
         <activity
