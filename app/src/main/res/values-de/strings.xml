@@ -211,7 +211,7 @@ Verstecken kann über das 'Media-Scanner' Gallery-Menü rückgängig gemacht wer
   <string name="sort_by_modification">letzte Änderung</string>
 
   <!-- #93: edit-exif: image title, description, rating -->
-  <string name="photo_autoprocessing_edit_menu_title">Automatische processing bearbeiten</string>
+  <string name="photo_autoprocessing_edit_menu_title">Autoprocessing Regeln bearbeiten</string>
   <string name="lbl_file_name_pattern">Umbenennungsmuster</string>
   <string name="lbl_exif">Exif</string>
 
