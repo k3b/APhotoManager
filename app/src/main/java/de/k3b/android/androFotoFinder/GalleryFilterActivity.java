@@ -728,7 +728,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         if (fromGui(mFilter)) {
             final FragmentManager manager = getFragmentManager();
             LocationMapFragment dlg = new LocationMapFragment();
-            dlg.defineNavigation(null, mFilter, OsmdroidUtil.NO_ZOOM, null, null);
+            dlg.defineNavigation(null, mFilter, OsmdroidUtil.NO_ZOOM, null, null, false);
 
             dlg.show(manager, DLG_NAVIGATOR_TAG);
             setAutoClose(dlg, null, null);

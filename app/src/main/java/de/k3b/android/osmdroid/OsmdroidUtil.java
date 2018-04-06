@@ -29,9 +29,8 @@ import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.api.IMapController;
 import org.osmdroid.tileprovider.MapTileProviderBase;
 import org.osmdroid.util.GeoPoint;
+import org.osmdroid.util.TileSystem;
 import org.osmdroid.views.MapView;
-
-import microsoft.mappoint.TileSystem;
 
 /**
  * Helper for OsmDroid lib.
@@ -39,49 +38,61 @@ import microsoft.mappoint.TileSystem;
  * Created by k3b on 16.03.2015.
  */
 public class OsmdroidUtil {
+    // osmdroid supports 0..29.0 but this app only 0..22
+    private static int MAX_ZOOM_LEVEL = 22;
 
     public static final int NO_ZOOM = -1; // GeoPointDto.NO_ZOOM;
+    public static final int RECALCULATE_ZOOM = NO_ZOOM; // GeoPointDto.NO_ZOOM;
 
     /**
      * Similar to MapView.zoomToBoundingBox that seems to be to inexact.
      * @param zoom if NO_ZOOM (-1) zoom is calculated from min and max
      */
-    public static void zoomTo(MapView mapView, int zoom, IGeoPoint min, IGeoPoint max) {
+    public static int zoomTo(MapView mapView, int zoom, IGeoPoint min, IGeoPoint max) {
         int calculatedZoom = zoom;
         MapTileProviderBase tileProvider = mapView.getTileProvider();
         IMapController controller = mapView.getController();
         IGeoPoint center = min;
 
         if (max != null) {
-            center = new GeoPoint((max.getLatitudeE6() + min.getLatitudeE6()) / 2, (max.getLongitudeE6() + min.getLongitudeE6()) / 2);
+            center = new GeoPoint((max.getLatitude() + min.getLatitude()) / 2, (max.getLongitude() + min.getLongitude()) / 2);
 
             if (calculatedZoom == NO_ZOOM) {
                 // int pixels = Math.min(mapView.getWidth(), mapView.getHeight());
                 double pixels = Math.sqrt((mapView.getWidth() * mapView.getWidth()) + (mapView.getHeight() * mapView.getHeight()));
                 final double requiredMinimalGroundResolutionInMetersPerPixel
                         = ((double) new GeoPoint(min.getLatitude(), min.getLongitude()).distanceToAsDouble(max)) / pixels;
-                calculatedZoom = calculateZoom(center.getLatitude(), requiredMinimalGroundResolutionInMetersPerPixel, tileProvider.getMaximumZoomLevel(), tileProvider.getMinimumZoomLevel());
+                calculatedZoom = calculateZoom(center.getLatitude(), requiredMinimalGroundResolutionInMetersPerPixel, getMaximumZoomLevel(tileProvider), tileProvider.getMinimumZoomLevel());
             }
         }
         if (calculatedZoom != NO_ZOOM) {
-            controller.setZoom(calculatedZoom);
+            controller.setZoom((double) calculatedZoom);
         }
 
         if (center != null) {
             controller.setCenter(center);
         }
-/*
-            if (logger.isDebugEnabled()) {
-                logger.debug("DelayedSetCenterZoom.execute({}: ({}) .. ({}),z={}) => ({}), z={} => {}",
-                        debugContext,
-                        min, max, mZoomLevel, center, zoom, getStatusForDebug());
-            }
-*/
+
+        return calculatedZoom;
     }
 
-    private static int calculateZoom(double latitude, double requiredMinimalGroundResolutionInMetersPerPixel, int maximumZoomLevel, int minimumZoomLevel) {
-        for (int zoom = maximumZoomLevel; zoom >= minimumZoomLevel; zoom--) {
-            if (TileSystem.GroundResolution(latitude, zoom) > requiredMinimalGroundResolutionInMetersPerPixel)
+    public static double getMaximumZoomLevel(MapView map) {
+        final double maxZoomLevel = map.getMaxZoomLevel();
+        return (maxZoomLevel > MAX_ZOOM_LEVEL) ? MAX_ZOOM_LEVEL : maxZoomLevel;
+    }
+
+    public static int getMaximumZoomLevel(MapTileProviderBase tileProvider) {
+        final int maxZoomLevel = tileProvider.getMaximumZoomLevel();
+        return (maxZoomLevel > MAX_ZOOM_LEVEL) ? MAX_ZOOM_LEVEL : maxZoomLevel;
+    }
+
+    private static int calculateZoom(double latitude, double requiredMinimalGroundResolutionInMetersPerPixel,
+                                        int maximumZoomLevel, int minimumZoomLevel) {
+        double groundResolution;
+        for (int zoom = Math.min(maximumZoomLevel, 15); zoom >= minimumZoomLevel; zoom--) {
+            // groundResolution = TileSystemFix_978.GroundResolution(latitude, zoom);
+            groundResolution = TileSystem.GroundResolution(latitude, zoom);
+            if (groundResolution > requiredMinimalGroundResolutionInMetersPerPixel)
                 return zoom;
         }
 

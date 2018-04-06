@@ -75,7 +75,6 @@ import de.k3b.io.StringUtils;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
-// import static android.view.MenuItem.SHOW_AS_ACTION_NEVER;
 
 /**
  * A fragment with a Listing of Directories to be picked.

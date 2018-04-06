@@ -121,6 +121,14 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
         return this;
     }
 
+    public void setHasGeo() {
+        if (isNonGeoOnly() || isEmpty((IGeoRectangle) this)) {
+            setNonGeoOnly(false);
+            setLogitude(-180.0, +180);
+            setLatitude(-90.0, +90.0);
+        }
+    }
+
     @Override
     public boolean isWithNoTags() {
         return withNoTags;

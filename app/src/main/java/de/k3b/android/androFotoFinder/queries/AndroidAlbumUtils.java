@@ -47,15 +47,26 @@ import de.k3b.io.StringUtils;
 public class AndroidAlbumUtils implements Common {
     private static final String mDebugPrefix = AndroidAlbumUtils.class.getSimpleName();
 
-    public static GalleryFilterParameter getGalleryFilterParameterFromQueryUri(Context context, Uri uri) {
-        try {
-            QueryParameter query = QueryParameter.load(context.getContentResolver().openInputStream(uri));
-            if (query != null) {
-                return (GalleryFilterParameter) TagSql.parseQueryEx(query, true);
+    public static QueryParameter getQueryFromUri(Context context, Uri uri) {
+        if ((uri != null) && (context != null) && QueryParameter.isQueryFile(uri.getPath())) {
+            try {
+                QueryParameter query = QueryParameter.load(context.getContentResolver().openInputStream(uri));
+                if (query != null) {
+                    insertToMediaDB(context,uri,mDebugPrefix + ".load");
+                    return query;
+                }
+            } catch (IOException e) {
+                Log.e(Global.LOG_CONTEXT, mDebugPrefix + ".loadFrom(" + uri +
+                        ") failed: " + e.getMessage(), e);
             }
-        } catch (IOException e) {
-            Log.e(Global.LOG_CONTEXT, mDebugPrefix + ".loadFrom(" + uri +
-                    ") failed: " + e.getMessage(), e);
+        }
+        return null;
+    }
+
+    public static GalleryFilterParameter getGalleryFilterParameterFromQueryUri(Context context, Uri uri) {
+        QueryParameter query = getQueryFromUri(context, uri);
+        if (query != null) {
+            return (GalleryFilterParameter) TagSql.parseQueryEx(query, true);
         }
         return null;
     }
@@ -64,15 +75,13 @@ public class AndroidAlbumUtils implements Common {
     public static GalleryFilterParameter getFilter(Context context, Intent intent) {
         if (intent == null) return null;
 
+        Uri uri = intent.getData();
+        if (uri != null) {
+            return getGalleryFilterParameterFromQueryUri(context, uri);
+        }
         String filter = intent.getStringExtra(EXTRA_FILTER);
-        if (!StringUtils.isNullOrEmpty(filter)) {
+        if (filter != null) {
             return GalleryFilterParameter.parse(filter, new GalleryFilterParameter());
-        } else {
-
-            Uri uri = intent.getData();
-            if ((uri != null) && QueryParameter.isQueryFile(uri.getPath())) {
-                return getGalleryFilterParameterFromQueryUri(context, uri);
-            }
         }
         return null;
     }
@@ -85,19 +94,24 @@ public class AndroidAlbumUtils implements Common {
             TagSql.filter2QueryEx(query, filter, true);
 
             query.save(context.getContentResolver().openOutputStream(uri, "w"));
-            if (IntentUtil.isFileUri(uri)) {
-                File f = FileUtils.tryGetCanonicalFile(IntentUtil.getFile(uri));
-                if (f != null) {
-                    ContentValues values = new ContentValues();
-                    String newAbsolutePath = MediaScanner.setFileFields(values, f);
-                    FotoSql.insertOrUpdateMediaDatabase(dbgContext, context, newAbsolutePath, values, 1l);
-                }
-            }
+            insertToMediaDB(context, uri, dbgContext);
         } catch (IOException e) {
             Log.e(Global.LOG_CONTEXT, dbgContext +
                     " failed: " + e.getMessage(), e);
         } finally {
             FileUtils.close(out, "");
+        }
+    }
+
+    public static void insertToMediaDB(Context context, Uri uri, String dbgContext) {
+        if (IntentUtil.isFileUri(uri)) {
+            File f = FileUtils.tryGetCanonicalFile(IntentUtil.getFile(uri));
+            if (f != null) {
+                ContentValues values = new ContentValues();
+                String newAbsolutePath = MediaScanner.setFileFields(values, f);
+                values.put(FotoSql.SQL_COL_EXT_MEDIA_TYPE,0);
+                FotoSql.insertOrUpdateMediaDatabase(dbgContext, context, newAbsolutePath, values, 1l);
+            }
         }
     }
 }
