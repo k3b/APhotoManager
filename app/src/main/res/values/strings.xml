@@ -50,6 +50,7 @@
     <string name="filter_err_invalid_date_format">\'%1$s\' is not a valid date.</string>
     <string name="filter_err_invalid_location_format">\'%1$s\' is not a valid coordinate.</string>
     <string name="filter_menu_title">Filter</string>
+
     <string name="folder_dialog_title_format">Select %1$s</string>
     <string name="folder_err_load_failed_format">Loading folder %1$s failed</string>
     <string name="folder_menu_title">Folder Filter</string>
@@ -246,6 +247,9 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
 
     <!-- #1113: Searchbar  -->
     <string name="searchbar_menu_title">Searchbar</string>
+
+    <!-- #115: Virtual album -->
+    <string name="filter_menu_title_album">Edit Virtual Album</string>
 
     <!--  depricated tags_update_result_format
 			replaced by android.R.string.xxx @android:string/xxx : btn_cancel btn_no btn_yes btn_okcopy_menu_title

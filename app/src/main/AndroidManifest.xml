@@ -119,7 +119,7 @@
 
             <!-- fixme icon -->
             <intent-filter
-                android:icon="@drawable/exif_edit"
+                android:icon="@drawable/album"
                 >
                 <action android:name="android.intent.action.VIEW" />
 
@@ -200,9 +200,10 @@
         </activity>
         <activity
             android:name=".GalleryFilterActivity"
-            android:icon="@drawable/exif_edit"
+            android:icon="@drawable/album"
             android:label="@string/filter_menu_title" >
-            <intent-filter>
+            <intent-filter
+                android:label="@string/filter_menu_title_album">
                 <action android:name="android.intent.action.VIEW" />
                 <action android:name="android.intent.action.EDIT" />
 
@@ -238,7 +239,7 @@
 
         <activity
             android:name=".PhotoAutoprocessingEditActivity"
-            android:icon="@drawable/exif_edit"
+            android:icon="@drawable/rule"
             android:label="@string/photo_autoprocessing_edit_menu_title">
             <!-- ImageDetail edit schema=file with mime=image/* -->
             <intent-filter>

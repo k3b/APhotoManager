@@ -240,6 +240,11 @@ Verstecken kann über das 'Media-Scanner' Gallery-Menü rückgängig gemacht wer
 
   <string name="show_in_filemanager_menu_title">In Filemanager öffnen</string>
 
+  <!-- #1113: Searchbar  -->
+  <string name="searchbar_menu_title">Schnellsuche</string>
+
+  <!-- #115: Virtual album -->
+  <string name="filter_menu_title_album">Virtuelles Album bearbeiten</string>
 
   <!--  depricated tags_update_result_format use image_success_update_format instead -->
 
