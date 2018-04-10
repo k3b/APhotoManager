@@ -131,6 +131,8 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     // public state
     private IDirectory mCurrentSelection = null;
 
+    private IDirectory mLastPopUpSelection = null;
+
     // Layout
     private HorizontalScrollView mParentPathBarScroller;
     private LinearLayout mParentPathBar;
@@ -183,6 +185,10 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     public DirectoryPickerFragment setContextMenuId(int contextMenuId) {
         mContextMenue = contextMenuId;
         return this;
+    }
+
+    public IDirectory getLastPopUpSelection() {
+        return mLastPopUpSelection;
     }
 
     /****** live cycle ********/
@@ -367,6 +373,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     };
 
     protected boolean onPopUpClick(MenuItem menuItem, IDirectory popUpSelection) {
+        this.mLastPopUpSelection = popUpSelection;
         switch (menuItem.getItemId()) {
             case R.id.cmd_mk_dir:
                 return onCreateSubDirQuestion(popUpSelection);
@@ -673,6 +680,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     }
 
     @Override public void onDestroy() {
+        mLastPopUpSelection = null;
         closeAll();
         super.onDestroy();
         // RefWatcher refWatcher = AndroFotoFinderApp.getRefWatcher(getActivity());

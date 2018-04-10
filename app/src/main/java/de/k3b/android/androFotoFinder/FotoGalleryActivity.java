@@ -20,7 +20,6 @@
 package de.k3b.android.androFotoFinder;
 
 import android.app.Activity;
-import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
@@ -60,7 +59,7 @@ import de.k3b.android.util.GarbageCollector;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.AboutDialogPreference;
-import de.k3b.android.widget.LocalizedActivity;
+import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.SearchViewWithHistory;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.StringUtils;
@@ -74,7 +73,7 @@ import de.k3b.io.IGalleryFilter;
 import de.k3b.io.ListUtils;
 import de.k3b.tagDB.Tag;
 
-public class FotoGalleryActivity extends LocalizedActivity implements Common,
+public class FotoGalleryActivity extends ActivityWithAutoCloseDialogs implements Common,
         OnGalleryInteractionListener, DirectoryPickerFragment.OnDirectoryInteractionListener,
         LocationMapFragment.OnDirectoryInteractionListener,
         TagsPickerFragment.ITagsPicker
@@ -104,7 +103,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
     };
 
     /** set while dir picker is active */
-    private DialogFragment mDirPicker = null;
+    private DirectoryPickerFragment mDirPicker = null;
 
     private GalleryQueryParameter mGalleryQueryParameter = new GalleryQueryParameter();
     // multi selection support
@@ -114,7 +113,6 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
 
     private boolean mHasEmbeddedDirPicker = false;
     private DirectoryGui mDirGui;
-    private IDirectory mPopUpSelection = null;
 
     private String mTitleResultCount = "";
 
@@ -542,7 +540,6 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         Global.debugMemory(mDebugPrefix, "onDestroy start");
         super.onDestroy();
         this.getContentResolver().unregisterContentObserver(mMediaObserverDirectory);
-        mPopUpSelection = null;
         // to avoid memory leaks
         GarbageCollector.freeMemory(findViewById(R.id.root_view));
 
@@ -687,11 +684,8 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
             ((Fragment) mGalleryGui).onActivityResult(requestCode, resultCode, intent);
         }
 
-        if (mDirPicker instanceof Fragment) {
-            ((Fragment) mDirPicker).onActivityResult(requestCode, resultCode, intent);
-        }
-
-        if (mPopUpSelection != null) mPopUpSelection.refresh();
+        IDirectory lastPopUpSelection = (mDirPicker == null) ? null : mDirPicker.getLastPopUpSelection();
+        if (lastPopUpSelection != null) lastPopUpSelection.refresh();
 
         switch (requestCode) {
             case GalleryFilterActivity.resultID :
@@ -822,12 +816,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         } else {
             this.mMustShowNavigator = false;
             final FragmentManager manager = getFragmentManager();
-            DirectoryPickerFragment dirDialog =new DirectoryPickerFragment() {
-                protected boolean onPopUpClick(MenuItem menuItem, IDirectory popUpSelection) {
-                    mPopUpSelection = popUpSelection;
-                    return super.onPopUpClick(menuItem, popUpSelection);
-                }
-            };
+            DirectoryPickerFragment dirDialog =new DirectoryPickerFragment();
 
             // (DirectoryPickerFragment) manager.findFragmentByTag(DLG_NAVIGATOR_TAG);
             dirDialog.setContextMenuId(LockScreen.isLocked(this) ? 0 :  R.menu.menu_context_dirpicker);
@@ -836,6 +825,7 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
                     this.mGalleryQueryParameter.mCurrentPathFromFolderPicker);
 
             mDirPicker = dirDialog;
+            setAutoClose(mDirPicker, null, null);
             dirDialog.show(manager, DLG_NAVIGATOR_TAG);
         }
     }
@@ -876,7 +866,8 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
         if (!this.mHasEmbeddedDirPicker) {
             navigateTo(selectedAbsolutePath, queryTypeId);
         }
-        mDirPicker = null;
+        closeDialogIfNeeded();
+
     }
 
     /* OnDirectoryInteractionListener */
@@ -901,6 +892,12 @@ public class FotoGalleryActivity extends LocalizedActivity implements Common,
      */
     @Override
     public void onDirectoryCancel(int queryTypeId) {
+        closeDialogIfNeeded();
+    }
+
+    @Override
+    protected void closeDialogIfNeeded() {
+        super.closeDialogIfNeeded();
         mDirPicker = null;
     }
 
