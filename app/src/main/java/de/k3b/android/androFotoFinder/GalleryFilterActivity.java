@@ -88,7 +88,11 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
     private FilterValue mFilterValue = null;
     private HistoryEditText mHistory;
     private BookmarkController mBookmarkController = null;
-    private IDirectory mPopUpSelection = null;
+
+    /** set while dir picker is active */
+    private DirectoryPickerFragment mDirPicker = null;
+
+
 
     public static void showActivity(Activity context, IGalleryFilter filter, QueryParameter rootQuery,
                                     String lastBookmarkFileName, int requestCode) {
@@ -251,7 +255,8 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                                     final int resultCode, final Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
-        if (mPopUpSelection != null) mPopUpSelection.refresh();
+        IDirectory lastPopUpSelection = (mDirPicker == null) ? null : mDirPicker.getLastPopUpSelection();
+        if (lastPopUpSelection != null) lastPopUpSelection.refresh();
     }
 
     private GalleryFilterParameter getAsGalleryFilter() {
@@ -315,7 +320,6 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         Global.debugMemory(mDebugPrefix, "onDestroy start");
         super.onDestroy();
 
-        mPopUpSelection = null;
         if (dirInfos != null)
         {
             for(Integer id : dirInfos.keySet()) {
@@ -759,12 +763,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             DirInfo dirInfo = getOrCreateDirInfo(queryId);
             dirInfo.directoryRoot = directoryRoot;
             final FragmentManager manager = getFragmentManager();
-            DirectoryPickerFragment dlg = new DirectoryPickerFragment() {
-                protected boolean onPopUpClick(MenuItem menuItem, IDirectory popUpSelection) {
-                    mPopUpSelection = popUpSelection;
-                    return super.onPopUpClick(menuItem, popUpSelection);
-                }
-            };
+            DirectoryPickerFragment dlg = new DirectoryPickerFragment();
 
             int menuResId = 0; // no menu in app lock mode
             if (!LockScreen.isLocked(this)) {
@@ -775,6 +774,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             dlg.defineDirectoryNavigation(dirInfo.directoryRoot, dirInfo.queryId, dirInfo.currentPath);
 
             dlg.show(manager, DLG_NAVIGATOR_TAG);
+            mDirPicker = dlg;
             setAutoClose(dlg, null, null);
         }
     }
@@ -787,6 +787,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         DirInfo dirInfo = getOrCreateDirInfo(queryTypeId);
         dirInfo.currentPath=selectedAbsolutePath;
 
+        closeDialogIfNeeded();
         FotoSql.set(mFilter,selectedAbsolutePath, queryTypeId);
         toGui(mFilter);
     }
@@ -798,7 +799,13 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
 
     /** interface DirectoryPickerFragment.OnDirectoryInteractionListener not used */
     @Override
-    public void onDirectoryCancel(int queryTypeId) {}
+    public void onDirectoryCancel(int queryTypeId) {closeDialogIfNeeded();}
+
+    @Override
+    protected void closeDialogIfNeeded() {
+        super.closeDialogIfNeeded();
+        mDirPicker = null;
+    }
 
     /** interface DirectoryPickerFragment.OnDirectoryInteractionListener not used */
     @Override
