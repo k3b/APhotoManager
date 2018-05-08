@@ -1,25 +1,20 @@
-Privacy Policy
- APhotoManager app is an absolutely Open Source app. All services the software provides comes at no cost and is intended for use as is.
+# Privacy Policy
 
-This privacy policy document provides information regarding the developer's policies with the procurement, utilization, and disclosure of Personal Information should incase the services of the software is utilized by anyone.
-
-If you choose to utilize the services within the confines of APhotoManager, then you agree to the procurement and use of information in relation to this policy. The Personal Information that maybe collected is used for providing and improving the services of the software. These personal information garnered will not be used or disclosed with anyone except as described in this Privacy Policy.
+This app "A Photo Manager" is an absolutely Open Source app. All services the software provides comes at no cost and is intended for use as is.
 
 ## Data collection and Usage
 
-For a better experience and optimum perfomance, while using APhotoManager, You may be required to provide permissions to your device storage which doesn't include any personally identifiable information. The requested permission  is retained on your device and is not collected by me in any way
+You can use this app to add personal informations (geo data and comments) to your local photos which will also been transfered into android-s local media database for faster search and that will also become visible to other android apps.
 
-The app does use third party services that may collect information used to identify you. 
+This app will never transfer local photos or content of android-s local media database to any other computer/server. 
 
-## Log Data
+Other Android Apps like "goolge photos" might transfer the photos with personal informations to other computer/server.
 
-I want to inform you that whenever you use my Service, If settings  ShowInMap/UseMapsforgeOfflineMap is disabled and some mapdata is shown, openstreetmap servers may contain logentries with your IP Adress, date/time and geographic coordinates you viewwed on the map. Each mapdata is only loaded once and then locally stored.
+This app does not collect any other personal informoation.
 
+If you use the geographic map then map data may be fetched from OpenStreetMap servers so OpenStreetMap servers may be logging your ip address, date/time and the geographic area you are currently looking at.
 
-## Security
-
-I value your trust in providing us your Personal Information, thus we are striving to use commercially acceptable means of protecting it. But remember that no method of transmission over the internet, or method of electronic storage is 100% secure and reliable, and I cannot guarantee its absolute security.
-
+Each mapdata piece is only loaded once and then locally stored.
 
 ## Changes to This Privacy Policy
 
