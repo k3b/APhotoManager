@@ -63,6 +63,7 @@ import de.k3b.android.util.FileManagerUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.AlbumFile;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryNavigator;
@@ -766,17 +767,23 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     }
 
     private void updateStatus() {
-        int itemCount = getItemCount(mCurrentSelection);
-
         String selectedPath = (this.mCurrentSelection != null) ? this.mCurrentSelection.getAbsolute() : null;
 
-        String statusMessage = (itemCount == 0) ? mContext.getString(R.string.selection_none_hint)  : getStatusErrorMessage(selectedPath);
+        String statusMessage = (!isPickable(mCurrentSelection)) ? mContext.getString(R.string.selection_none_hint)  : getStatusErrorMessage(selectedPath);
         boolean canPressOk = (statusMessage == null);
 
         if (mCmdOk != null) mCmdOk.setEnabled(canPressOk);
         if (mCmdPopup != null) mCmdPopup.setEnabled(canPressOk);
 
         setStatusMessage(statusMessage);
+    }
+
+    /** decides if an item can be picked */
+    protected boolean isPickable(IDirectory selection) {
+        if (selection == null) return false;
+        if (AlbumFile.isQueryFile (selection.getRelPath())) return true;
+        int itemCount = getItemCount(selection);
+        return (itemCount > 0);
     }
 
     private void setStatusMessage(String statusMessage) {

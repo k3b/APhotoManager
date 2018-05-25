@@ -18,6 +18,8 @@
  */
 package de.k3b.io;
 
+import java.io.File;
+
 /**
  * Created by k3b on 17.04.2018.
  */
@@ -31,5 +33,12 @@ public class AlbumFile {
             return uri.endsWith(SUFFIX_VALBUM) || uri.endsWith(SUFFIX_QUERY);
         }
         return false;
+    }
+    public static File getQueryFileOrNull(String uri) {
+        if (isQueryFile(uri)) {
+            File result = new File(uri);
+            if ((result != null) && result.isFile() && result.exists()) return result;
+        }
+        return null;
     }
 }

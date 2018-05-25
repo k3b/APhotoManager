@@ -189,8 +189,13 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
                 formatPrefix = IDirectory.APM_DIR_PREFIX;
                 break;
             case IDirectory.DIR_FLAG_VIRTUAL_DIR:
-                formatPrefix = "<";
-                formatSuffix = ">";
+                if ((options & Directory.OPT_AS_HTML) != 0) {
+                    formatPrefix = "<i>{";
+                    formatSuffix = "}</i>";
+                } else {
+                    formatPrefix = "{";
+                    formatSuffix = "}";
+                }
                 break;
             case IDirectory.DIR_FLAG_NONE:
                 if ((options & Directory.OPT_AS_HTML) != 0) {

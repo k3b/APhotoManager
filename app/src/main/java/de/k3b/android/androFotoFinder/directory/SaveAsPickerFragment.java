@@ -140,5 +140,11 @@ public abstract class SaveAsPickerFragment extends DirectoryPickerFragment {
         }
     }
 
+    /** decides if an item can be picked */
+    protected boolean isPickable(IDirectory selection) {
+        // if ((selection != null) && AlbumFile.isQueryFile (selection.getRelPath()) ) return true;
+        return super.isPickable(selection);
+    }
+
     abstract protected void onFilePick(File pickedOrCreatedFile);
 }

@@ -37,6 +37,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,6 +63,7 @@ import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.SearchViewWithHistory;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.AlbumFile;
 import de.k3b.io.StringUtils;
 import de.k3b.io.collections.SelectedItems;
 import de.k3b.io.Directory;
@@ -98,7 +100,7 @@ public class FotoGalleryActivity extends ActivityWithAutoCloseDialogs implements
         @Override
         public void setQuery(String fileName, QueryParameter albumQuery) {
             mBookmarkController.setlastBookmarkFileName(fileName);
-            onBaseFilterChanged(albumQuery, null, "#onBookmarkLoaded " + fileName);
+            onBaseFilterChanged(albumQuery, null, fileName, "#onBookmarkLoaded " + fileName);
         }
     };
 
@@ -137,6 +139,9 @@ public class FotoGalleryActivity extends ActivityWithAutoCloseDialogs implements
         private static final int SUB_FILTER_MODE_GEO = 1;
         private static final int SUB_FILTER_MODE_TAG = 2;
         private static final int SUB_FILTER_MODE_SEARCH_BAR = 3;
+
+        private static final int SUB_FILTER_MODE_ALBUM = 4;
+
         private int mCurrentSubFilterMode = SUB_FILTER_MODE_PATH;
 
         private GeoRectangle mCurrentLatLonFromGeoAreaPicker = new GeoRectangle();
@@ -170,6 +175,9 @@ public class FotoGalleryActivity extends ActivityWithAutoCloseDialogs implements
          * naem=STATE_XXXXX + mStatSuffix
          * ""==view; "-pick-image"; "-pick-geo" */
         private String mStatSuffix = "";
+
+        // name of the current album if in album mode
+        public String mCurrentAlbum;
 
         /** one of the FotoSql.QUERY_TYPE_xxx values. if undefined use default */
         private int getDirQueryID() {
@@ -694,7 +702,7 @@ public class FotoGalleryActivity extends ActivityWithAutoCloseDialogs implements
                     mGalleryQueryParameter.mGalleryContentQuery = new QueryParameter(FotoSql.queryDetail);
                 }
                 mBookmarkController.loadState(intent, null);
-                onBaseFilterChanged(null, AndroidAlbumUtils.getFilter(this, intent), mDebugPrefix + "#onActivityResult from GalleryFilterActivity");
+                onBaseFilterChanged(null, AndroidAlbumUtils.getFilter(this, intent), null, mDebugPrefix + "#onActivityResult from GalleryFilterActivity");
                 break;
             case ImageDetailActivityViewPager.ACTIVITY_ID:
                 if (resultCode == ImageDetailActivityViewPager.RESULT_CHANGE) {
@@ -711,13 +719,19 @@ public class FotoGalleryActivity extends ActivityWithAutoCloseDialogs implements
     }
 
     /** redefine base filter and refresh gui */
-    private void onBaseFilterChanged(QueryParameter album, IGalleryFilter filter, String why) {
+    private void onBaseFilterChanged(QueryParameter album, IGalleryFilter filter, String albumName, String why) {
         if ((filter != null) || (album != null)) {
             this.mGalleryQueryParameter.setCurrentFilterSettings(album, filter);
 
             invalidateDirectories(mDebugPrefix + "#filter changed " + why);
 
-            reloadGui("filter changed");
+            if (albumName != null) {
+                this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_ALBUM;
+                this.mGalleryQueryParameter.mCurrentAlbum = albumName;
+            }
+
+            reloadGui("filter changed"  + why);
+            setTitle();
         }
     }
 
@@ -924,12 +938,22 @@ public class FotoGalleryActivity extends ActivityWithAutoCloseDialogs implements
                 this.mGalleryQueryParameter.mCurrentTagsFromPicker = new ArrayList<>(ListUtils.fromString(selectedAbsolutePath));
                 reloadGui("navigate to tags");
             } else if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_PATH) {
-                Log.d(Global.LOG_CONTEXT, "FotoGalleryActivity.navigateTo " + selectedAbsolutePath + " from " + this.mGalleryQueryParameter.mCurrentPathFromFolderPicker);
-                this.mGalleryQueryParameter.mCurrentPathFromFolderPicker = selectedAbsolutePath;
-                this.mGalleryQueryParameter.mDirQueryID = queryTypeId;
-                setTitle();
+                File queryFile = AlbumFile.getQueryFileOrNull(selectedAbsolutePath);
+                if (queryFile != null) {
 
-                reloadGui("navigate to dir");
+                    QueryParameter albumQuery = AndroidAlbumUtils.getQueryFromUri(this, Uri.fromFile(queryFile));
+                    this.mGalleryQueryParameter.mCurrentPathFromFolderPicker = queryFile.getParent();
+                    this.mGalleryQueryParameter.mDirQueryID = queryTypeId;
+                    mBookmarkController.setlastBookmarkFileName(selectedAbsolutePath);
+                    onBaseFilterChanged(albumQuery, null, queryFile.getName(), "FotoGalleryActivity.navigateTo load virtual album '" + selectedAbsolutePath + "' from " + this.mGalleryQueryParameter.mCurrentPathFromFolderPicker);
+                } else {
+                    Log.d(Global.LOG_CONTEXT, "FotoGalleryActivity.navigateTo " + selectedAbsolutePath + " from " + this.mGalleryQueryParameter.mCurrentPathFromFolderPicker);
+                    this.mGalleryQueryParameter.mCurrentPathFromFolderPicker = selectedAbsolutePath;
+                    this.mGalleryQueryParameter.mDirQueryID = queryTypeId;
+                    setTitle();
+
+                    reloadGui("navigate to dir");
+                }
             }
         }
     }
@@ -984,7 +1008,9 @@ public class FotoGalleryActivity extends ActivityWithAutoCloseDialogs implements
         String title = (intent == null) ? null : intent.getStringExtra(EXTRA_TITLE);
 
         if (title == null) {
-            if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_GEO) {
+            if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_ALBUM) {
+                title = this.mGalleryQueryParameter.mCurrentAlbum;
+            } else if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_GEO) {
                 title = getString(R.string.gallery_title);
             } else if (this.mGalleryQueryParameter.mCurrentPathFromFolderPicker != null) {
                 title = FotoSql.getName(this, this.mGalleryQueryParameter.getDirQueryID())
