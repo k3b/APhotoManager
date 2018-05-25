@@ -102,6 +102,7 @@ public class BookmarkController {
         }
     }
 
+    @Deprecated
     public void onSaveAsQuestion(final String name, final QueryParameter currentFilter) {
         mCurrentFilter = currentFilter;
         Dialogs dlg = new Dialogs() {
@@ -119,6 +120,7 @@ public class BookmarkController {
         }
     }
 
+    @Deprecated
     private void onSaveAsAnswer(final String fileName, boolean askToOverwrite) {
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, "onSaveAsAnswer(" + fileName +
@@ -143,18 +145,26 @@ public class BookmarkController {
                 dialog.yesNoQuestion(mContext, mContext.getString(R.string.overwrite_question_title) ,
                         mContext.getString(R.string.image_err_file_exists_format, outFile.getAbsoluteFile()));
             } else {
-                PrintWriter out = null;
-                try {
-                    out = new PrintWriter(outFile);
-                    out.println(mCurrentFilter.toReParseableString());
-                    out.close();
-                    out = null;
-                } catch (IOException err) {
-                    String errorMessage = mContext.getString(R.string.mk_err_failed_format, outFile.getAbsoluteFile());
-                    Toast.makeText(mContext, errorMessage, Toast.LENGTH_LONG).show();
-                    Log.e(Global.LOG_CONTEXT, errorMessage, err);
-                }
+                onSaveAs(outFile, mCurrentFilter);
             }
+        }
+    }
+
+    protected void onSaveAs(File outFile, final QueryParameter currentFilter) {
+        if (Global.debugEnabled) {
+            Log.d(Global.LOG_CONTEXT, "onSaveAs(" + outFile.getAbsolutePath() +
+                    ")");
+        }
+        PrintWriter out = null;
+        try {
+            out = new PrintWriter(outFile);
+            out.println(currentFilter.toReParseableString());
+            out.close();
+            out = null;
+        } catch (IOException err) {
+            String errorMessage = mContext.getString(R.string.mk_err_failed_format, outFile.getAbsoluteFile());
+            Toast.makeText(mContext, errorMessage, Toast.LENGTH_LONG).show();
+            Log.e(Global.LOG_CONTEXT, errorMessage, err);
         }
     }
 

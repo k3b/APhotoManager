@@ -35,9 +35,9 @@ import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.AlbumFile;
 import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
-import de.k3b.io.StringUtils;
 
 /**
  * Handles file io of QueryParameter and GalleryFilterParameter via intent.
@@ -48,7 +48,7 @@ public class AndroidAlbumUtils implements Common {
     private static final String mDebugPrefix = AndroidAlbumUtils.class.getSimpleName();
 
     public static QueryParameter getQueryFromUri(Context context, Uri uri) {
-        if ((uri != null) && (context != null) && QueryParameter.isQueryFile(uri.getPath())) {
+        if ((uri != null) && (context != null) && AlbumFile.isQueryFile(uri.getPath())) {
             try {
                 QueryParameter query = QueryParameter.load(context.getContentResolver().openInputStream(uri));
                 if (query != null) {

@@ -1063,7 +1063,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         if (AndroidFileCommands.canProcessFile(this, false)) {
             mDestDirPicker = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
-            mDestDirPicker.defineDirectoryNavigation(OsUtils.getRootOSDirectory(),
+            mDestDirPicker.defineDirectoryNavigation(OsUtils.getRootOSDirectory(null),
                     (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
                     lastCopyToPath);
             mDestDirPicker.setContextMenuId(LockScreen.isLocked(this) ? 0 :  R.menu.menu_context_osdir);

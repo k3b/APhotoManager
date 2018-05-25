@@ -267,12 +267,6 @@ public class QueryParameter {
 
     /************************** end properties *********************/
 
-    public static boolean isQueryFile(String uri) {
-        if (uri != null) {
-            return uri.endsWith(SUFFIX_VALBUM) || uri.endsWith(SUFFIX_QUERY);
-        }
-        return false;
-    }
     public void save(OutputStream _out) throws IOException {
         PrintWriter writer = null;
         try {

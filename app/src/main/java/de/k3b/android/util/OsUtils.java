@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -23,6 +23,7 @@ import android.os.Environment;
 
 import java.io.File;
 
+import de.k3b.io.FileUtils;
 import de.k3b.io.OSDirectory;
 
 /**
@@ -60,20 +61,32 @@ public class OsUtils {
         return cur;
     }
 
-    public static OSDirectory getRootOSDirectory() {
+    /**
+     * create android specific dir root.
+     *
+     * @param factory null or factory that creates OSDirectory or subclass of OSDirectory.
+     */
+    public static OSDirectory getRootOSDirectory(OSDirectory factory) {
         // #103: bugfix
         // this works for android-4.4 an earlier and on rooted devices
-        OSDirectory root = new OSDirectory("/", null);
+        OSDirectory root = createOsDirectory(FileUtils.tryGetCanonicalFile("/"), factory);
         if (root.getChildren().size() == 0) {
             // on android-5.0 an newer root access is not allowed.
             // i.e. /storage/emulated/0
             File externalRoot = Environment.getExternalStorageDirectory();
             if (externalRoot != null) {
-                root = new OSDirectory(externalRoot.getAbsolutePath(), null);
+                root = createOsDirectory(externalRoot, factory);
             }
         }
         return root;
     }
 
+    private static OSDirectory createOsDirectory(File file, OSDirectory factory) {
+        if (factory != null) return factory.createOsDirectory(file, null, null);
+        return new OSDirectory(file, null, null);
+    }
 
+    public static File getDefaultPhotoRoot() {
+        return new File(Environment.getExternalStorageDirectory(),Environment.DIRECTORY_DCIM);
+    }
 }

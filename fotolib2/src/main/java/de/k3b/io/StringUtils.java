@@ -68,6 +68,11 @@ public class StringUtils {
         return null;
     }
 
+    public static String trim(CharSequence str) {
+        if (str == null) return null;
+        return str.toString().trim();
+
+    }
     public static int length(CharSequence str) {
         return (str != null) ? str.length() : 0;
     }

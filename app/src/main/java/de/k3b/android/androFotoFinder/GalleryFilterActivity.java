@@ -36,6 +36,7 @@ import android.widget.EditText;
 import android.widget.RatingBar;
 import android.widget.Toast;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -52,10 +53,12 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.osmdroid.OsmdroidUtil;
+import de.k3b.android.util.OsUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.AlbumFile;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
@@ -78,16 +81,19 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
 
     public static final int resultID = 522;
     private static final String DLG_NAVIGATOR_TAG = "GalleryFilterActivity";
+    private static final String DLG_SAVE_AS_TAG = "GalleryFilterActivitySaveAs";
     private static final String SETTINGS_KEY = "GalleryFilterActivity-";
     private static final String FILTER_VALUE = "CURRENT_FILTER";
     private static final String WILDCARD = "%";
+    private static final int SAVE_AS_VALBUM_PICK = 9921;
     private static QueryParameter mRootQuery;
 
     private GalleryFilterParameter mFilter = new GalleryFilterParameter();
 
     private FilterValue mFilterValue = null;
     private HistoryEditText mHistory;
-    private BookmarkController mBookmarkController = null;
+
+    private VirtualAlbumController mBookmarkController = null;
 
     /** set while dir picker is active */
     private DirectoryPickerFragment mDirPicker = null;
@@ -148,7 +154,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             mFilterValue.showLatLon(filter.isNonGeoOnly());
         }
 
-        mBookmarkController = new BookmarkController(this);
+        mBookmarkController = new VirtualAlbumController(this);
         mBookmarkController.loadState(intent,savedInstanceState);
     }
 
@@ -157,14 +163,14 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         cmd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showDirectoryPicker(FotoSql.queryGroupByDir);
+                showDirectoryPickerForFilterParamValue(FotoSql.queryGroupByDir);
             }
         });
         cmd = (Button) findViewById(R.id.cmd_date);
         cmd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showDirectoryPicker(FotoSql.queryGroupByDate);
+                showDirectoryPickerForFilterParamValue(FotoSql.queryGroupByDate);
             }
         });
         cmd = (Button) findViewById(R.id.cmd_select_lat_lon);
@@ -229,7 +235,12 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
 
 
             case R.id.action_save_as:
-                mBookmarkController.onSaveAsQuestion(mBookmarkController.getlastBookmarkFileName(), getAsQuery());
+                // mBookmarkController.onSaveAsQuestion(mBookmarkController.getlastBookmarkFileName(), getAsQuery());
+                File valbum = mBookmarkController.getlastBookmarkFile();
+                if (valbum == null) {
+                    valbum = new File(OsUtils.getDefaultPhotoRoot(), getString(R.string.mk_dir_default) + AlbumFile.SUFFIX_VALBUM);
+                }
+                mBookmarkController.onSaveAsVirutalAlbumQuestion(valbum,getAsQuery());
                 return true;
             case R.id.action_load_from:
                 mBookmarkController.onLoadFromQuestion(new BookmarkController.IQueryConsumer() {
@@ -739,24 +750,24 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         }
     }
 
-    private void showDirectoryPicker(final QueryParameter currentDirContentQuery) {
+    private void showDirectoryPickerForFilterParamValue(final QueryParameter currentDirContentQuery) {
         if (fromGui(mFilter)) {
             IDirectory directoryRoot = getOrCreateDirInfo(currentDirContentQuery.getID()).directoryRoot;
             if (directoryRoot == null) {
                 DirectoryLoaderTask loader = new DirectoryLoaderTask(this, mDebugPrefix) {
                     @Override
                     protected void onPostExecute(IDirectory directoryRoot) {
-                        onDirectoryDataLoadComplete(directoryRoot, currentDirContentQuery.getID());
+                        onDirectoryDataLoadCompleteForFilterParamValue(directoryRoot, currentDirContentQuery.getID());
                     }
                 };
                 loader.execute(currentDirContentQuery);
             } else {
-                onDirectoryDataLoadComplete(directoryRoot, currentDirContentQuery.getID());
+                onDirectoryDataLoadCompleteForFilterParamValue(directoryRoot, currentDirContentQuery.getID());
             }
         }
     }
 
-    private void onDirectoryDataLoadComplete(IDirectory directoryRoot, int queryId) {
+    private void onDirectoryDataLoadCompleteForFilterParamValue(IDirectory directoryRoot, int queryId) {
         if (directoryRoot != null) {
             Global.debugMemory(mDebugPrefix, "onDirectoryDataLoadComplete");
 
@@ -780,16 +791,19 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
     }
 
     /**
-     * called when user picks a new directory
+     * called when user picks a new directory.
+     * Sources: Filter-Path, Filter-Date or SaveAs distinguished via queryTypeId
      */
     @Override
     public void onDirectoryPick(String selectedAbsolutePath, int queryTypeId) {
-        DirInfo dirInfo = getOrCreateDirInfo(queryTypeId);
-        dirInfo.currentPath=selectedAbsolutePath;
-
-        closeDialogIfNeeded();
-        FotoSql.set(mFilter,selectedAbsolutePath, queryTypeId);
-        toGui(mFilter);
+        //if (queryTypeId == SAVE_AS_VALBUM_PICK) {
+        //    this.mBookmarkController.onSaveAsVirutalAlbumAnswer(new File(selectedAbsolutePath));
+        //} else
+        {
+            closeDialogIfNeeded();
+            FotoSql.set(mFilter, selectedAbsolutePath, queryTypeId);
+            toGui(mFilter);
+        }
     }
 
     /** interface DirectoryPickerFragment.invalidateDirectories not used */

@@ -47,6 +47,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.DBUtils;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.AlbumFile;
 import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
@@ -193,7 +194,7 @@ public class FotoSql extends FotoSqlBase {
                     "0 AS " + SQL_COL_COUNT,
                     "null AS " + SQL_COL_GPS)
             .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
-            .addWhere(SQL_COL_PATH + " like '%" + QueryParameter.SUFFIX_VALBUM + "'")
+            .addWhere(SQL_COL_PATH + " like '%" + AlbumFile.SUFFIX_VALBUM + "'")
             .addOrderBy(SQL_COL_PATH);
 
     /* image entries may become duplicated if media scanner finds new images that have not been inserted into media database yet

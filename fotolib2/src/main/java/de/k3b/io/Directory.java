@@ -42,7 +42,7 @@ public class Directory implements IDirectory {
 
     private String relPath = null;
     private Boolean apmDir = null;
-    private IDirectory parent = null;
+    private Directory parent = null;
     private List<IDirectory> children = null;
 
     private int nonDirItemCount = 0;
@@ -52,14 +52,26 @@ public class Directory implements IDirectory {
 
     private int iconID = 0;
 
-    public Directory(String relPath, Directory parent, int nonDirItemCount) {
+    public Directory(String relPath, IDirectory parent, int nonDirItemCount) {
         this.setRelPath(relPath);
         this.setParent(parent);
         // this.setHasNonDirElements(hasNonDirElements);
         if (parent != null) {
-            parent.addChild(this);
+            ((Directory) parent).addChild(this);
         }
         setNonDirItemCount(nonDirItemCount);
+    }
+
+    /** factory method to be overwrittern by derived classes, if tree should consist of derived classes. */
+    public IDirectory createOsDirectory(File file, IDirectory parent, List<IDirectory> children) {
+        final Directory result = new Directory(file.getName(), parent, 0);
+
+        if (children != null) {
+            for (IDirectory child : children) {
+                addChild(child);
+            }
+        }
+        return result;
     }
 
     @Override
@@ -103,8 +115,8 @@ public class Directory implements IDirectory {
         return parent;
     }
 
-    public void setParent(Directory parent) {
-        this.parent = parent;
+    public void setParent(IDirectory parent) {
+        this.parent = (Directory) parent;
     }
 
     @Override
@@ -270,6 +282,7 @@ public class Directory implements IDirectory {
 
     @Override
     public int getDirFlags() {
+        if (AlbumFile.isQueryFile(this.getRelPath())) return IDirectory.DIR_FLAG_VIRTUAL_DIR;
         return isApmDir() ? IDirectory.DIR_FLAG_APM_DIR : IDirectory.DIR_FLAG_NONE;
     }
 

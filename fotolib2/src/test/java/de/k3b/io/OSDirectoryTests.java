@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -45,6 +45,15 @@ public class OSDirectoryTests {
         assertNotNull(found);
         assertEquals(1, found.getChildren().size());
         assertEquals("d", found.getChildren().get(0).getRelPath());
+    }
+
+    @Test
+    public void shoudFindCurrentDirIntegrationTest() {
+        mRoot = new OSDirectory(FileUtils.tryGetCanonicalFile(new File("/"), null), null, null);
+        final File currentDir = FileUtils.tryGetCanonicalFile(".");
+        IDirectory found = OSDirectory.find(mRoot, currentDir);
+        assertNotNull(found);
+        assertEquals(currentDir.getAbsolutePath(), found.getAbsolute());
     }
 
     @Test

@@ -22,12 +22,12 @@
     <string name="about_summary">About \"A Photo Manager%1$s\"</string>
     <string name="area_menu_title">Map Area Filter</string>
     <string name="background">Background</string>
-    <string name="bookmark_delete_answer_format">Deleted bookmark %1$s.</string>
-    <string name="bookmark_delete_error_format">Cannot delete bookmark %1$s.</string>
-    <string name="bookmark_delete_question">Delete this bookmark?</string>
+    <string name="bookmark_delete_answer_format">Deleted album %1$s.</string>
+    <string name="bookmark_delete_error_format">Cannot delete album %1$s.</string>
+    <string name="bookmark_delete_question">Delete this album?</string>
     <string name="bookmark_file_comment_format">Generated on %3$s with \'%1$s\' Version %2$s. See https://github.com/k3b/APhotoManager/wiki/intentapi#sql for details</string>
-    <string name="bookmark_load_from_menu_title">Load bookmark from &#8230;</string>
-    <string name="bookmark_save_as_menu_title">Save bookmark as &#8230;</string>
+    <string name="bookmark_load_from_menu_title">Load album from &#8230;</string>
+    <string name="bookmark_save_as_menu_title">Save album as &#8230;</string>
     <string name="btn_change">Change</string>
     <string name="btn_pause">Pause</string>
     <string name="copy_result_format">Copied %1$d/%2$d files</string>
@@ -96,7 +96,6 @@
     <string name="selected_only_menu_title">Selected only</string>
     <string name="selection_add_all_menu_title">Selection: Add all visible</string>
     <string name="selection_remove_menu_title">Selection: Remove all visible</string>
-    <string name="settings_bookmark_dir_title">Bookmark folder</string>
 
     <string name="settings_group_debug_title">Diagnostics</string>
     <string name="settings_debug_sql_summary">&#8230; containing executed SQL.</string>
@@ -250,4 +249,6 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
     <!--  depricated tags_update_result_format
 			replaced by android.R.string.xxx @android:string/xxx : btn_cancel btn_no btn_yes btn_okcopy_menu_title
     -->
+    <string name="settings_bookmark_dir_title">Bookmark folder</string>
+
 </resources>

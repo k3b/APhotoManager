@@ -380,7 +380,7 @@ public class AndroidFileCommands extends FileCommands {
 
             destDir.setParent(this);
             destDir.setTitleId(R.string.scanner_dir_question);
-            destDir.defineDirectoryNavigation(OsUtils.getRootOSDirectory(),
+            destDir.defineDirectoryNavigation(OsUtils.getRootOSDirectory(null),
                     FotoSql.QUERY_TYPE_UNDEFINED,
                     getLastCopyToPath());
             destDir.setContextMenuId(LockScreen.isLocked(mContext) ? 0 : R.menu.menu_context_osdir);

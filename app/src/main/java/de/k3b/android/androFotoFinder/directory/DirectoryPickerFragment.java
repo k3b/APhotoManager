@@ -129,7 +129,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     private static final java.lang.String INSTANCE_STATE_CONTEXT_MENU = "contextmenu";
 
     // public state
-    private IDirectory mCurrentSelection = null;
+    protected IDirectory mCurrentSelection = null;
 
     private IDirectory mLastPopUpSelection = null;
 
@@ -146,12 +146,13 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     // local data
     protected Activity mContext;
     private DirectoryListAdapter mAdapter;
-    private DirectoryNavigator mNavigation;
+    protected DirectoryNavigator mNavigation;
     private int mDirTypId = 0;
     protected int mTitleId = 0;
 
     // api to fragment owner or null
     private OnDirectoryInteractionListener mDirectoryListener = null;
+    private OnDirectoryPickListener mDirectoryPickListener = null;
 
     // for debugging
     private static int id = 1;
@@ -647,8 +648,8 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     protected void onDirectoryPick(IDirectory selection) {
         closeAll();
         Log.d(Global.LOG_CONTEXT, debugPrefix + "onDirectoryPick: " + selection);
-        if ((mDirectoryListener != null) && (selection != null)) {
-            mDirectoryListener.onDirectoryPick(selection.getAbsolute()
+        if ((mDirectoryPickListener != null) && (selection != null)) {
+            mDirectoryPickListener.onDirectoryPick(selection.getAbsolute()
                     , mDirTypId);
             dismiss();
         }
@@ -695,7 +696,13 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
 
     protected void setDirectoryListener(Activity activity) {
         try {
-            mDirectoryListener = (OnDirectoryInteractionListener) activity;
+            if ((activity == null) || activity instanceof OnDirectoryInteractionListener) {
+                mDirectoryListener = (OnDirectoryInteractionListener) activity;
+            }
+
+            if ((activity == null) || activity instanceof OnDirectoryPickListener) {
+                mDirectoryPickListener = (OnDirectoryPickListener) activity;
+            }
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement OnDirectoryInteractionListener");
@@ -929,6 +936,11 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         return null;
     }
 
+    public interface OnDirectoryPickListener {
+        /** called when user picks a new directory */
+        void onDirectoryPick(String selectedAbsolutePath, int queryTypeId);
+    }
+
     /**
          * This interface must be implemented by activities that contain this
          * fragment to allow an interaction in this fragment to be communicated
@@ -939,10 +951,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
          * "http://developer.android.com/training/basics/fragments/communicating.html"
          * >Communicating with Other Fragments</a> for more information.
          */
-    public interface OnDirectoryInteractionListener {
-        /** called when user picks a new directory */
-        void onDirectoryPick(String selectedAbsolutePath, int queryTypeId);
-
+    public interface OnDirectoryInteractionListener extends OnDirectoryPickListener {
         /** called when user cancels picking of a new directory */
         void onDirectoryCancel(int queryTypeId);
 
