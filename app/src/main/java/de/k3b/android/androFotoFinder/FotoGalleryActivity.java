@@ -615,9 +615,6 @@ public class FotoGalleryActivity extends ActivityWithAutoCloseDialogs implements
             case R.id.cmd_filter:
                 openFilter();
                 return true;
-            case R.id.cmd_load_bookmark:
-                loadBookmark();
-                return true;
             case R.id.cmd_sort_date:
                 this.mGalleryQueryParameter.setSortID(FotoSql.SORT_BY_DATE);
                 reloadGui("sort date");
@@ -676,9 +673,6 @@ public class FotoGalleryActivity extends ActivityWithAutoCloseDialogs implements
 
     }
 
-    private void loadBookmark() {
-        mBookmarkController.onLoadFromQuestion(mLoadBookmarkResultConsumer, this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery());
-    }
     /**
      * Call back from sub-activities.<br/>
      * Process Change StartTime (longpress start), Select StopTime before stop

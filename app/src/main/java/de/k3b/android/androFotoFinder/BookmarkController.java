@@ -178,29 +178,6 @@ public class BookmarkController {
         return new File(Global.reportDir, fileNameWithExt);
     }
 
-    public void onLoadFromQuestion(final IQueryConsumer consumer, final QueryParameter currentFilter) {
-        mCurrentFilter = currentFilter;
-        List<String> fileNamesPlusReset = new ArrayList<String>();
-        fileNamesPlusReset.add(RESET_PREFIX + mContext.getString(R.string.bookmark_reset) + RESET_SUFFIX);
-        String[] fileNames = Global.reportDir.list(new FilenameFilter() {
-            @Override public boolean accept(File dir, String filename) {
-                return ((filename != null) && (filename.endsWith(Global.reportExt)));
-            }
-        });
-
-        if ((fileNames != null) && (fileNames.length > 0)) {
-            fileNamesPlusReset.addAll(Arrays.asList(fileNames));
-        }
-        Dialogs dlg = new Dialogs() {
-            @Override protected boolean onContextMenuItemClick(int menuItemId, int itemIndex, String[] items) {
-                return onBookmarkMenuItemClick(menuItemId, itemIndex, items);
-            }
-
-            @Override protected void onDialogResult(String fileName, Object[] parameters) {onLoadFromAnswer(fileName, consumer);}
-        };
-        dlg.pickFromStrings(mContext, mContext.getString(R.string.bookmark_load_from_menu_title), R.menu.menu_bookmark_context, fileNamesPlusReset);
-    }
-
     public void onLoadFromAnswer(final String fileName, final IQueryConsumer consumer) {
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, "onLoadFromAnswer(" + fileName + ")");

@@ -26,7 +26,6 @@
     <string name="bookmark_delete_error_format">Cannot delete album %1$s.</string>
     <string name="bookmark_delete_question">Delete this album?</string>
     <string name="bookmark_file_comment_format">Generated on %3$s with \'%1$s\' Version %2$s. See https://github.com/k3b/APhotoManager/wiki/intentapi#sql for details</string>
-    <string name="bookmark_load_from_menu_title">Load album from &#8230;</string>
     <string name="bookmark_save_as_menu_title">Save album as &#8230;</string>
     <string name="btn_change">Change</string>
     <string name="btn_pause">Pause</string>
@@ -248,7 +247,11 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
 
     <!--  depricated tags_update_result_format
 			replaced by android.R.string.xxx @android:string/xxx : btn_cancel btn_no btn_yes btn_okcopy_menu_title
+
+    sperate boomark picker is deprecated. now open via folder picker
+        <string name="bookmark_load_from_menu_title">Load album from &#8230;</string>
     -->
+
     <string name="settings_bookmark_dir_title">Bookmark folder</string>
 
 </resources>
