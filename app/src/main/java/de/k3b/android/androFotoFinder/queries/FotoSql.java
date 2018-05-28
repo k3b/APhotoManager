@@ -353,6 +353,26 @@ public class FotoSql extends FotoSqlBase {
         return null;
     }
 
+    /** append path expressions from src to dest. Return null if unchanged. */
+    public static QueryParameter copyPathExpressions(QueryParameter dest, QueryParameter src) {
+        QueryParameter resultQuery = null;
+        if (src != null) {
+            // duplicate will be modified. preserve original
+            QueryParameter remainingQuery = new QueryParameter(src);
+            String pathExpr = null;
+            while (true) {
+                pathExpr = getParam(remainingQuery, FILTER_EXPR_PATH_LIKE, true);
+                if (pathExpr != null) {
+                    if (resultQuery == null) resultQuery = new QueryParameter(dest);
+                    resultQuery.addWhere(FILTER_EXPR_PATH_LIKE, pathExpr);
+                } else {
+                    break;
+                }
+            }
+        }
+        return resultQuery;
+    }
+
     /** @return return param for expression inside query. null if expression is not in query or number of params is not 1. */
     protected static String getParam(QueryParameter query, String expresion, boolean remove) {
         final String[] result = getParams(query, expresion, remove);

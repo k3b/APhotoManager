@@ -163,14 +163,14 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         cmd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showDirectoryPickerForFilterParamValue(FotoSql.queryGroupByDir);
+                showDirectoryPickerForFilterParamValue(FotoSql.queryGroupByDir, true);
             }
         });
         cmd = (Button) findViewById(R.id.cmd_date);
         cmd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showDirectoryPickerForFilterParamValue(FotoSql.queryGroupByDate);
+                showDirectoryPickerForFilterParamValue(FotoSql.queryGroupByDate, false);
             }
         });
         cmd = (Button) findViewById(R.id.cmd_select_lat_lon);
@@ -741,7 +741,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         }
     }
 
-    private void showDirectoryPickerForFilterParamValue(final QueryParameter currentDirContentQuery) {
+    private void showDirectoryPickerForFilterParamValue(final QueryParameter currentDirContentQuery, boolean addVAlbums) {
         if (fromGui(mFilter)) {
             IDirectory directoryRoot = getOrCreateDirInfo(currentDirContentQuery.getID()).directoryRoot;
             if (directoryRoot == null) {
@@ -751,7 +751,13 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                         onDirectoryDataLoadCompleteForFilterParamValue(directoryRoot, currentDirContentQuery.getID());
                     }
                 };
-                loader.execute(currentDirContentQuery, FotoSql.queryVAlbum);
+
+                if (addVAlbums) {
+                    // load dir-s + "*.album"
+                    loader.execute(currentDirContentQuery, FotoSql.queryVAlbum);
+                } else {
+                    loader.execute(currentDirContentQuery);
+                }
             } else {
                 onDirectoryDataLoadCompleteForFilterParamValue(directoryRoot, currentDirContentQuery.getID());
             }
