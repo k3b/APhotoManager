@@ -245,6 +245,9 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
     <!-- #1113: Searchbar  -->
     <string name="searchbar_menu_title">Searchbar</string>
 
+    <string name="settings_pick_date_decade4year_title">Date Picker: use decades</string>
+    <string name="settings_pick_date_decade4year_summary">I.E. Put 2010, 2011,...2019 below 2010*</string>
+
     <!--  depricated tags_update_result_format
 			replaced by android.R.string.xxx @android:string/xxx : btn_cancel btn_no btn_yes btn_okcopy_menu_title
 

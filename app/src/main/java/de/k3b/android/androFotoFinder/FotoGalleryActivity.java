@@ -826,7 +826,7 @@ public class FotoGalleryActivity extends ActivityWithAutoCloseDialogs implements
 
             if (currentDirContentQuery != null) {
                 this.mMustShowNavigator = true;
-                DirectoryLoaderTask loader = new DirectoryLoaderTask(this, mDebugPrefix) {
+                DirectoryLoaderTask loader = new DirectoryLoaderTask(this, false, mDebugPrefix) {
                     @Override
                     protected void onPostExecute(IDirectory directoryRoot) {
                         onDirectoryDataLoadComplete(directoryRoot);

@@ -66,6 +66,10 @@ this program. If not, see <http://www.gnu.org/licenses/>
         <de.k3b.android.widget.EditTextPreferenceWithSummary
             android:key="reportDir"
             android:title="@string/settings_bookmark_dir_title" />
+        <CheckBoxPreference android:key="datePickerUseDecade"
+            android:defaultValue="false"
+            android:title="@string/settings_pick_date_decade4year_title"
+            android:summary="@string/settings_pick_date_decade4year_summary" />
 
     </PreferenceCategory>
 

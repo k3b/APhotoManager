@@ -163,14 +163,17 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         cmd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showDirectoryPickerForFilterParamValue(FotoSql.queryGroupByDir, true);
+                String path = getAsGalleryFilter().getPath();
+                if (path != null) path = path.replaceAll("%","");
+                showDirectoryPickerForFilterParamValue(mDebugPrefix + " path picker " + path, FotoSql.queryGroupByDir, true, false, path);
             }
         });
         cmd = (Button) findViewById(R.id.cmd_date);
         cmd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showDirectoryPickerForFilterParamValue(FotoSql.queryGroupByDate, false);
+                String path = getAsGalleryFilter().getDatePath();
+                showDirectoryPickerForFilterParamValue(mDebugPrefix + " date picker " + path, FotoSql.queryGroupByDate, false, FotoLibGlobal.datePickerUseDecade, path);
             }
         });
         cmd = (Button) findViewById(R.id.cmd_select_lat_lon);
@@ -306,7 +309,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         {
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
             SharedPreferences.Editor edit = sharedPref.edit();
-            
+
             for(Integer id : dirInfos.keySet()) {
                 DirInfo dir = dirInfos.get(id);
                 if ((dir != null) && (dir.currentPath != null) && (dir.currentPath.length() > 0)) {
@@ -741,11 +744,16 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         }
     }
 
-    private void showDirectoryPickerForFilterParamValue(final QueryParameter currentDirContentQuery, boolean addVAlbums) {
+    private void showDirectoryPickerForFilterParamValue(
+                            final String debugContext, final QueryParameter currentDirContentQuery,
+                            boolean addVAlbums, boolean datePickerUseDecade,
+                            final String initialSelection) {
         if (fromGui(mFilter)) {
-            IDirectory directoryRoot = getOrCreateDirInfo(currentDirContentQuery.getID()).directoryRoot;
+            final DirInfo dirInfo = getOrCreateDirInfo(currentDirContentQuery.getID());
+            IDirectory directoryRoot = dirInfo.directoryRoot;
+            dirInfo.currentPath = initialSelection;
             if (directoryRoot == null) {
-                DirectoryLoaderTask loader = new DirectoryLoaderTask(this, mDebugPrefix) {
+                DirectoryLoaderTask loader = new DirectoryLoaderTask(this, datePickerUseDecade, debugContext) {
                     @Override
                     protected void onPostExecute(IDirectory directoryRoot) {
                         onDirectoryDataLoadCompleteForFilterParamValue(directoryRoot, currentDirContentQuery.getID());
@@ -780,9 +788,9 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             dlg.setContextMenuId(menuResId);
 
             dlg.defineDirectoryNavigation(dirInfo.directoryRoot, dirInfo.queryId, dirInfo.currentPath);
-
             dlg.show(manager, DLG_NAVIGATOR_TAG);
             mDirPicker = dlg;
+
             setAutoClose(dlg, null, null);
         }
     }
