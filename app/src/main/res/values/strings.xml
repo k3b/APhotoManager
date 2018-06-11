@@ -256,5 +256,6 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
     -->
 
     <string name="settings_bookmark_dir_title">Bookmark folder</string>
+    <string name="date_picker_menu_title">Date Filter</string>
 
 </resources>
