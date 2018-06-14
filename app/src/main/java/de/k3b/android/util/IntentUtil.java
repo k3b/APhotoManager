@@ -74,7 +74,7 @@ public class IntentUtil implements Common {
 
             // #118 app specific content uri convert from //storage/emulated/0/DCIM/... to /storage/emulated/0/DCIM/
             if ((path != null) && (path.startsWith("//"))) path = path.substring(1);
-            final File file = getExistingFileOrNull(uri.getPath());
+            final File file = getExistingFileOrNull(path);
 
             if (file == null) {
                 path = null;
@@ -110,14 +110,16 @@ public class IntentUtil implements Common {
     }
 
     private static File getExistingFileOrNull(String fullPath) {
-        try {
-            final File file = new File(fullPath);
-            if ((file != null) && (file.exists())) {
-                return file;
+        if (fullPath != null) {
+            try {
+                final File file = new File(fullPath);
+                if ((file != null) && (file.exists())) {
+                    return file;
+                }
+            } catch (Exception ex) {
+                Log.d(Global.LOG_CONTEXT,
+                        "Cannot open " + fullPath + " as file ");
             }
-        } catch (Exception ex) {
-            Log.d(Global.LOG_CONTEXT,
-                    "Cannot open " + fullPath + " as file ");
         }
         return null;
     }
