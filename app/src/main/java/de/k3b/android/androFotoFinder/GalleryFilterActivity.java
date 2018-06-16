@@ -228,7 +228,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                 return true;
 
             case R.id.cmd_gallery:
-                FotoGalleryActivity.showActivity(this, null, TagSql.filter2NewQuery(getAsGalleryFilter()), 0);
+                FotoGalleryActivity.showActivity(this, TagSql.filter2NewQuery(getAsGalleryFilter()), 0);
                 return true;
             case R.id.cmd_show_geo: {
                 MapGeoPickerActivity.showActivity(this, null, getAsGalleryFilter());

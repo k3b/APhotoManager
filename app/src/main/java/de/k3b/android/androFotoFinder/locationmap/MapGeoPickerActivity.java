@@ -305,7 +305,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
         filter.get(geoArea);
         QueryParameter query = TagSql.filter2NewQuery(filter);
 
-        FotoGalleryActivity.showActivity(this, null, query, 0);
+        FotoGalleryActivity.showActivity(this, query, 0);
         return true;
     }
 

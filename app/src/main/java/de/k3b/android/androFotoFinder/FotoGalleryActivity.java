@@ -498,16 +498,14 @@ public class FotoGalleryActivity extends ActivityWithAutoCloseDialogs implements
 
     /**
      * shows a new instance of FotoGalleryActivity.
-     *
-     * @param context     calling activity
-     * @param filter      if != null set initial filter to new FotoGalleryActivity
+     *  @param context     calling activity
      * @param query       if != null set initial filter to new FotoGalleryActivity
      * @param requestCode if != 0 start for result. else start without result
      */
-    public static void showActivity(Activity context, GalleryFilterParameter filter, QueryParameter query, int requestCode) {
+    public static void showActivity(Activity context, QueryParameter query, int requestCode) {
         Intent intent = new Intent(context, FotoGalleryActivity.class);
 
-        AndroidAlbumUtils.saveFilterAndQuery(context, null, intent, null, filter, query);
+        AndroidAlbumUtils.saveFilterAndQuery(context, null, intent, null, null, query);
 
         if (requestCode != 0) {
             context.startActivityForResult(intent, requestCode);

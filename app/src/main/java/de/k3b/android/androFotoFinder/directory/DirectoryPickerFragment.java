@@ -627,7 +627,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     private boolean showGallery(IDirectory selectedDir) {
         QueryParameter query = getSelectionQuery(selectedDir);
         if (query != null) {
-            FotoGalleryActivity.showActivity(this.getActivity(), null, query, 0);
+            FotoGalleryActivity.showActivity(this.getActivity(), query, 0);
             return true;
         }
         return false;

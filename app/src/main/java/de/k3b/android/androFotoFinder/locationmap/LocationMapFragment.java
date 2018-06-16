@@ -1052,7 +1052,7 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     private boolean showGallery(IGeoPoint geoPosition) {
-        FotoGalleryActivity.showActivity(this.getActivity(), null, getMarkerQuery(geoPosition), 0);
+        FotoGalleryActivity.showActivity(this.getActivity(), getMarkerQuery(geoPosition), 0);
         return true;
     }
 

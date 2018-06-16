@@ -951,7 +951,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                         // int callBackId = (MediaScanner.isNoMedia(dirPath,MediaScanner.DEFAULT_SCAN_DEPTH)) ? NOMEDIA_GALLERY : 0;
 
                         QueryParameter query = TagSql.filter2NewQuery(this.mFilter);
-                        FotoGalleryActivity.showActivity(this, null, query, 0);
+                        FotoGalleryActivity.showActivity(this, query, 0);
                     }
                     break;
                 }

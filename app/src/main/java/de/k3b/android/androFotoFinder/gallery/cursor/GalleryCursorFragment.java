@@ -628,7 +628,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         if (Global.debugEnabledSql) {
             Log.i(Global.LOG_CONTEXT, "Exec child gallery\n\t" + subGalleryQuery.toSqlString());
         }
-        FotoGalleryActivity.showActivity(getActivity(), null, subGalleryQuery, 0);
+        FotoGalleryActivity.showActivity(getActivity(), subGalleryQuery, 0);
     }
 
     /****************** path navigation *************************/

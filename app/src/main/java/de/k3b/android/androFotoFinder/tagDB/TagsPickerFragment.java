@@ -490,7 +490,7 @@ public class TagsPickerFragment  extends DialogFragment  {
                 ImageDetailActivityViewPager.showActivity(context, null, 0, createSubQueryByTag(parentFilter, selectedTag), 0);
                 return true;
             case R.id.cmd_gallery:
-                FotoGalleryActivity.showActivity(context, null, createSubQueryByTag(parentFilter, selectedTag), 0);
+                FotoGalleryActivity.showActivity(context, createSubQueryByTag(parentFilter, selectedTag), 0);
                 return true;
             default:break;
         }
