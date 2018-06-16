@@ -1044,9 +1044,7 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     private boolean showPhoto(IGeoPoint geoPosition) {
-        GalleryFilterParameter filter = getMarkerFilter(geoPosition);
-        QueryParameter query = new QueryParameter();
-        TagSql.filter2QueryEx(query, filter, false);
+        QueryParameter query = getMarkerQuery(geoPosition);
         FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
 
         ImageDetailActivityViewPager.showActivity(this.getActivity(), null, 0, query, 0);
@@ -1054,8 +1052,7 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     private boolean showGallery(IGeoPoint geoPosition) {
-        GalleryFilterParameter filter = getMarkerFilter(geoPosition);
-        FotoGalleryActivity.showActivity(this.getActivity(), filter, null, 0);
+        FotoGalleryActivity.showActivity(this.getActivity(), null, getMarkerQuery(geoPosition), 0);
         return true;
     }
 
@@ -1094,6 +1091,11 @@ public class LocationMapFragment extends DialogFragment {
 
         return Math.max(Math.abs(fittingRectangle.getLogituedMax() - fittingRectangle.getLogituedMin())
                 , Math.abs(fittingRectangle.getLatitudeMax() - fittingRectangle.getLatitudeMin()));
+    }
+
+    private QueryParameter getMarkerQuery(IGeoPoint geoPosition) {
+        GalleryFilterParameter filter = getMarkerFilter(geoPosition);
+        return TagSql.filter2NewQuery(filter);
     }
 
     private GalleryFilterParameter getMarkerFilter(IGeoPoint geoPosition) {

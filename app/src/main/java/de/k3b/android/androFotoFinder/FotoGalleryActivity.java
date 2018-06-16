@@ -121,7 +121,8 @@ public class FotoGalleryActivity extends ActivityWithAutoCloseDialogs implements
     private String mTitleResultCount = "";
 
     /**
-     * every thing that belongs to search
+     * every thing that belongs to search.
+     * visible gallery items are mGalleryContentBaseQuery + expression(mCurrentSubFilterMode)
      */
     private static class GalleryQueryParameter {
         private static final String PICK_GEO_SUFFIX = "-pick-geo";
@@ -346,6 +347,7 @@ public class FotoGalleryActivity extends ActivityWithAutoCloseDialogs implements
 
             // for debugging: where does the filter come from
             StringBuilder dbgFilter = (Global.debugEnabled) ? new StringBuilder() : null;
+            //!!! AndroidAlbumUtils.
 
             // data contain either album, filter or path
             QueryParameter album = null;
@@ -358,24 +360,21 @@ public class FotoGalleryActivity extends ActivityWithAutoCloseDialogs implements
 
                 if (album != null) {
                     filter = album.toString();
-                    if ((filter != null) && (dbgFilter != null))
-                        dbgFilter.append("filter from album file ").append(uri).append("=").append(filter).append("\n");
+                    //!!! dbg
                 }
 
                 if (album == null) {
                     // extra parameter
                     final String sqlString = intent.getStringExtra(EXTRA_QUERY);
                     if (sqlString != null) {
-                        if (dbgFilter != null)
-                            dbgFilter.append("query from ").append(EXTRA_QUERY).append("\n\t").append(sqlString).append("\n");
+                        //!!! dbg
                         album = QueryParameter.parse(sqlString);
                     }
                 }
 
                 if (album == null) {
                     filter = intent.getStringExtra(EXTRA_FILTER);
-                    if ((filter != null) && (dbgFilter != null))
-                        dbgFilter.append("filter from ").append(EXTRA_FILTER).append("=").append(filter).append("\n");
+                    //!!! dbg
                 }
 
 
@@ -385,8 +384,7 @@ public class FotoGalleryActivity extends ActivityWithAutoCloseDialogs implements
                     if (fileUri) {
                         pathFilter = uri.getSchemeSpecificPart();
                         if (pathFilter != null) pathFilter = pathFilter.replace('*', '%');
-                        if (dbgFilter != null)
-                            dbgFilter.append("path from uri=").append(pathFilter).append("\n");
+                        //!!! dbg
                     } else {
                         String action = (intent != null) ? intent.getAction() : null;
 
@@ -439,16 +437,13 @@ public class FotoGalleryActivity extends ActivityWithAutoCloseDialogs implements
                 this.mCurrentSortID = savedInstanceState.getInt(STATE_SortID, this.mCurrentSortID);
                 this.mCurrentSortAscending = savedInstanceState.getBoolean(STATE_SortAscending, this.mCurrentSortAscending);
                 filter = savedInstanceState.getString(STATE_Filter);
-                if ((filter != null) && (dbgFilter != null))
-                    dbgFilter.append("filter from savedInstanceState=").append(filter).append("\n");
-
+                //!!! dbg
                 this.mCurrentSubFilterMode = savedInstanceState.getInt(STATE_SUB_FILTR_MODE, this.mCurrentSubFilterMode);
             }
 
             if ((album == null) && (pathFilter == null) && (filter == null) && (this.getCurrentFilterSettings() == null)) {
                 filter = sharedPref.getString(STATE_Filter + mStatSuffix, null);
-                if ((filter != null) && (dbgFilter != null))
-                    dbgFilter.append("filter from sharedPref=").append(filter).append("\n");
+                //!!! dbg
             }
 
             // all parameters loaded: either album, filter or path
@@ -512,13 +507,7 @@ public class FotoGalleryActivity extends ActivityWithAutoCloseDialogs implements
     public static void showActivity(Activity context, GalleryFilterParameter filter, QueryParameter query, int requestCode) {
         Intent intent = new Intent(context, FotoGalleryActivity.class);
 
-        if (filter != null) {
-            intent.putExtra(EXTRA_FILTER, filter.toString());
-        }
-
-        if (query != null) {
-            intent.putExtra(EXTRA_QUERY, query.toReParseableString());
-        }
+        AndroidAlbumUtils.saveFilterAndQuery(context, null, intent, null, filter, query);
 
         if (requestCode != 0) {
             context.startActivityForResult(intent, requestCode);
@@ -765,7 +754,10 @@ public class FotoGalleryActivity extends ActivityWithAutoCloseDialogs implements
                     mGalleryQueryParameter.mGalleryContentBaseQuery = new QueryParameter(FotoSql.queryDetail);
                 }
                 mBookmarkController.loadState(intent, null);
-                onBaseFilterChanged(AndroidAlbumUtils.getFilter(this, intent), mDebugPrefix + "#onActivityResult from GalleryFilterActivity");
+                onBaseFilterChanged(AndroidAlbumUtils.getFilterAndRestQuery(
+                        this, null, intent, null,
+                        true, null)
+                        , mDebugPrefix + "#onActivityResult from GalleryFilterActivity");
                 break;
             case ImageDetailActivityViewPager.ACTIVITY_ID:
                 if (resultCode == ImageDetailActivityViewPager.RESULT_CHANGE) {

@@ -83,14 +83,16 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
     private static final String DLG_NAVIGATOR_TAG = "GalleryFilterActivity";
     private static final String DLG_SAVE_AS_TAG = "GalleryFilterActivitySaveAs";
     private static final String SETTINGS_KEY = "GalleryFilterActivity-";
-    private static final String FILTER_VALUE = "CURRENT_FILTER";
     private static final String WILDCARD = "%";
     private static final int SAVE_AS_VALBUM_PICK = 9921;
-    private static QueryParameter mRootQuery;
 
     private GalleryFilterParameter mFilter = new GalleryFilterParameter();
 
+    // parsed filter part of query
     private FilterValue mFilterValue = null;
+    // contains the non parsebale part of query
+    private QueryParameter mQueryWithoutFilter;
+
     private HistoryEditText mHistory;
 
     private VirtualAlbumController mBookmarkController = null;
@@ -100,9 +102,8 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
 
 
 
-    public static void showActivity(Activity context, IGalleryFilter filter, QueryParameter rootQuery,
+    public static void showActivity(Activity context, IGalleryFilter filter, QueryParameter query,
                                     String lastBookmarkFileName, int requestCode) {
-        mRootQuery = rootQuery;
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, context.getClass().getSimpleName()
                     + " > GalleryFilterActivity.showActivity");
@@ -111,10 +112,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         final Intent intent = new Intent().setClass(context,
                 GalleryFilterActivity.class);
 
-        if ((intent != null) && (filter != null)) {
-            intent.putExtra(EXTRA_FILTER, filter.toString());
-        }
-
+        AndroidAlbumUtils.saveFilterAndQuery(context, null, intent, null, filter, query);
         BookmarkController.saveState(lastBookmarkFileName, intent, null);
         if (requestCode != 0) {
             context.startActivityForResult(intent, requestCode);
@@ -126,7 +124,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         fromGui(mFilter);
-        savedInstanceState.putString(FILTER_VALUE, mFilter.toString());
+        AndroidAlbumUtils.saveFilterAndQuery(this, null, null, savedInstanceState, mFilter, mQueryWithoutFilter);
         mBookmarkController.saveState(null, savedInstanceState);
 
         super.onSaveInstanceState(savedInstanceState);
@@ -144,9 +142,10 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         this.mFilterValue = new FilterValue();
         onCreateButtos();
 
+
         GalleryFilterParameter filter = (savedInstanceState == null)
-                ? AndroidAlbumUtils.getFilter(this, intent)
-                : GalleryFilterParameter.parse(savedInstanceState.getString(FILTER_VALUE, ""),  new GalleryFilterParameter()) ;
+                ? AndroidAlbumUtils.getFilterAndRestQuery(this, savedInstanceState, intent, mQueryWithoutFilter, false, null)
+                : GalleryFilterParameter.parse(savedInstanceState.getString(EXTRA_FILTER, ""),  new GalleryFilterParameter()) ;
 
         if (filter != null) {
             mFilter = filter;
@@ -229,7 +228,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                 return true;
 
             case R.id.cmd_gallery:
-                FotoGalleryActivity.showActivity(this, getAsGalleryFilter(), null, 0);
+                FotoGalleryActivity.showActivity(this, null, TagSql.filter2NewQuery(getAsGalleryFilter()), 0);
                 return true;
             case R.id.cmd_show_geo: {
                 MapGeoPickerActivity.showActivity(this, null, getAsGalleryFilter());
@@ -273,9 +272,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
     private QueryParameter getAsQuery() {
         IGalleryFilter filter = new GalleryFilterParameter();
         fromGui(filter);
-        QueryParameter query = new QueryParameter(mRootQuery);
-        TagSql.filter2QueryEx(query, filter, true);
-        return query;
+        return TagSql.filter2NewQuery(filter);
     }
 
     @Override
@@ -665,7 +662,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
 
                 Uri uri = getIntent().getData();
                 if (uri != null) {
-                    AndroidAlbumUtils.saveGalleryFilterParameterAsQuery(GalleryFilterActivity.this,  this.mFilter, uri );
+                    AndroidAlbumUtils.saveFilterAndQuery(GalleryFilterActivity.this, uri, null, null, this.mFilter, null);
                     intent.setData(uri);
                 }
             }
@@ -809,7 +806,9 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                         + selectedAbsolutePath);
             }
 
-            GalleryFilterParameter newFilter = AndroidAlbumUtils.getGalleryFilterParameterFromQueryUri(this, Uri.fromFile(queryFile));
+            GalleryFilterParameter newFilter
+                    = AndroidAlbumUtils.getGalleryFilterAndRestQueryFromQueryUri(this,
+                    Uri.fromFile(queryFile), mQueryWithoutFilter, false, null);
             if (newFilter != null) {
                 mBookmarkController.setlastBookmarkFileName(selectedAbsolutePath);
                 mFilter = newFilter;

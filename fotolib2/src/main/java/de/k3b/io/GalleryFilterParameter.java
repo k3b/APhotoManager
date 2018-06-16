@@ -401,8 +401,9 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
         return SelectedItems.toString(strings.iterator());
     }
 
-    public void setRatingMin(int ratingMin) {
+    public GalleryFilterParameter setRatingMin(int ratingMin) {
         this.ratingMin = ratingMin;
+        return this;
     }
 
     @Override

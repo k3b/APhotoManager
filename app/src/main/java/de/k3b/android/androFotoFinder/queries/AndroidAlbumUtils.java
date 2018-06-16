@@ -23,6 +23,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.util.Log;
 
 import java.io.File;
@@ -38,6 +39,7 @@ import de.k3b.database.QueryParameter;
 import de.k3b.io.AlbumFile;
 import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
+import de.k3b.io.IGalleryFilter;
 
 /**
  * Handles file io of QueryParameter and GalleryFilterParameter via intent.
@@ -47,6 +49,29 @@ import de.k3b.io.GalleryFilterParameter;
 public class AndroidAlbumUtils implements Common {
     private static final String mDebugPrefix = AndroidAlbumUtils.class.getSimpleName();
 
+    /** get from savedInstanceState else intent: inten.data=file-uri else EXTRA_QUERY else EXTRA_FILTER */
+    public static GalleryFilterParameter getFilterAndRestQuery(
+            Context context, Bundle savedInstanceState, Intent intent, QueryParameter resultQueryWithoutFilter,
+            boolean ignoreFilter, StringBuilder dbgFilter) {
+        if (savedInstanceState != null) {
+            return getFilterAndRestQuery(
+                    context,
+                    null,
+                    savedInstanceState.getString(EXTRA_QUERY),
+                    savedInstanceState.getString(EXTRA_FILTER),
+                    resultQueryWithoutFilter, ignoreFilter, dbgFilter);
+        } else if (intent != null) {
+            return getFilterAndRestQuery(
+                    context,
+                    IntentUtil.getUri(intent),
+                    intent.getStringExtra(EXTRA_QUERY),
+                    intent.getStringExtra(EXTRA_FILTER),
+                    resultQueryWithoutFilter, ignoreFilter, dbgFilter);
+        }
+        return null;
+    }
+
+    /** used by folder picker if album-file is picked instead of folder */
     public static QueryParameter getQueryFromUri(Context context, Uri uri) {
         if ((uri != null) && (context != null) && AlbumFile.isQueryFile(uri.getPath())) {
             try {
@@ -63,43 +88,86 @@ public class AndroidAlbumUtils implements Common {
         return null;
     }
 
-    public static GalleryFilterParameter getGalleryFilterParameterFromQueryUri(Context context, Uri uri) {
+    public static GalleryFilterParameter getGalleryFilterAndRestQueryFromQueryUri(
+            Context context, Uri uri, QueryParameter resultQueryWithoutFilter,
+            boolean ignoreFilter, StringBuilder dbgFilter) {
         QueryParameter query = getQueryFromUri(context, uri);
         if (query != null) {
-            return (GalleryFilterParameter) TagSql.parseQueryEx(query, true);
+            if ((uri != null) && (dbgFilter != null)) {
+                dbgFilter.append("query from uri ").append(uri).append("\n");
+            }
+            return getFilterAndRestQuery(query, resultQueryWithoutFilter, ignoreFilter, dbgFilter);
         }
         return null;
     }
 
-    /** get from file-uri via intent.data else from EXTRA_FILTER */
-    public static GalleryFilterParameter getFilter(Context context, Intent intent) {
-        if (intent == null) return null;
-
-        Uri uri = intent.getData();
+    private static GalleryFilterParameter getFilterAndRestQuery(
+            Context context, Uri uri, String sql, String filter, QueryParameter resultQueryWithoutFilter,
+            boolean ignoreFilter, StringBuilder dbgFilter) {
         if (uri != null) {
-            return getGalleryFilterParameterFromQueryUri(context, uri);
+            return getGalleryFilterAndRestQueryFromQueryUri(context, uri, resultQueryWithoutFilter, ignoreFilter, dbgFilter);
         }
-        String filter = intent.getStringExtra(EXTRA_FILTER);
+
+        if ((sql != null) && (dbgFilter != null)) {
+            dbgFilter.append("query from ").append(EXTRA_QUERY).append("\n\t").append(sql).append("\n");
+        }
+        QueryParameter query = QueryParameter.parse(sql);
+        final GalleryFilterParameter result = getFilterAndRestQuery(query, resultQueryWithoutFilter, ignoreFilter, dbgFilter);
+
+        if (filter == null) {
+            // no own value for filter return parsed filter
+            return result;
+        }
+
         if (filter != null) {
+            if (dbgFilter != null) {
+                dbgFilter.append("filter from ").append(EXTRA_FILTER).append("=").append(filter).append("\n");
+            }
             return GalleryFilterParameter.parse(filter, new GalleryFilterParameter());
         }
         return null;
     }
 
-    public static void saveGalleryFilterParameterAsQuery(Context context, GalleryFilterParameter filter, Uri uri) {
-        final String dbgContext = mDebugPrefix + ".saveTo(" + uri + ")";
-        PrintWriter out = null;
-        try {
-            final QueryParameter query = new QueryParameter();
-            TagSql.filter2QueryEx(query, filter, true);
+    private static GalleryFilterParameter getFilterAndRestQuery(
+            QueryParameter query, QueryParameter resultQueryWithoutFilter,
+            boolean ignoreFilter, StringBuilder dbgFilter) {
 
-            query.save(context.getContentResolver().openOutputStream(uri, "w"));
-            insertToMediaDB(context, uri, dbgContext);
-        } catch (IOException e) {
-            Log.e(Global.LOG_CONTEXT, dbgContext +
-                    " failed: " + e.getMessage(), e);
-        } finally {
-            FileUtils.close(out, "");
+        final GalleryFilterParameter result = (ignoreFilter) ? null : (GalleryFilterParameter) TagSql.parseQueryEx(query, true);
+
+        if (resultQueryWithoutFilter != null) {
+            resultQueryWithoutFilter.clear();
+            resultQueryWithoutFilter.getFrom(query);
+        }
+        return result;
+    }
+
+    public static void saveFilterAndQuery(
+            Context context, Uri destUri, Intent destIntent, Bundle destBundle,
+            IGalleryFilter filter, QueryParameter queryParameter) {
+        final String dbgContext = mDebugPrefix + ".saveFilterAndQuery(" + destUri + ")";
+        final QueryParameter query = new QueryParameter(queryParameter);
+        TagSql.filter2QueryEx(query, filter, false);
+
+        if (destUri != null) {
+            PrintWriter out = null;
+            try {
+                query.save(context.getContentResolver().openOutputStream(destUri, "w"));
+                insertToMediaDB(context, destUri, dbgContext);
+            } catch (IOException e) {
+                Log.e(Global.LOG_CONTEXT, dbgContext +
+                        " failed: " + e.getMessage(), e);
+            } finally {
+                FileUtils.close(out, "");
+            }
+        }
+
+        if (destBundle != null) {
+            if (queryParameter != null) destBundle.putString(EXTRA_QUERY, query.toReParseableString());
+            if (filter != null) destBundle.putString(EXTRA_FILTER, filter.toString());
+        }
+        if (destIntent != null) {
+            if (queryParameter != null) destIntent.putExtra(EXTRA_QUERY, query.toReParseableString());
+            if (filter != null) destIntent.putExtra(EXTRA_FILTER, filter.toString());
         }
     }
 

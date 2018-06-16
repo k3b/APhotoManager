@@ -29,7 +29,7 @@ public class VirtualAlbumController extends BookmarkController {
         SaveAsPickerFragment dirDialog = new SaveAsPickerFragment(valbum) {
             @Override
             protected void onFilePick(File pickedOrCreatedFile) {
-                onSaveAsVirutalAlbumAnswer(valbum, currentFilter);
+                onSaveAsVirutalAlbumAnswer(pickedOrCreatedFile, currentFilter);
             }
         };
 

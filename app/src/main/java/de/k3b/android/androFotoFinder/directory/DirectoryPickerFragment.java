@@ -600,7 +600,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         return false;
     }
 
-    private boolean showPhoto(IDirectory selectedDir) {
+    private QueryParameter getSelectionQuery(IDirectory selectedDir) {
         String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
         if (pathFilter != null) {
             GalleryFilterParameter filter = new GalleryFilterParameter(); //.setPath(pathFilter);
@@ -609,8 +609,14 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                 filter.setPath(pathFilter + "/%");
             }
 
-            QueryParameter query = new QueryParameter();
-            TagSql.filter2QueryEx(query, filter, true);
+            return TagSql.filter2NewQuery(filter);
+        }
+        return null;
+
+    }
+    private boolean showPhoto(IDirectory selectedDir) {
+        QueryParameter query = getSelectionQuery(selectedDir);
+        if (query != null) {
             FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
             ImageDetailActivityViewPager.showActivity(this.getActivity(), null, 0, query, 0);
             return true;
@@ -619,15 +625,9 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     }
 
     private boolean showGallery(IDirectory selectedDir) {
-        String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
-        if (pathFilter != null) {
-            GalleryFilterParameter filter = new GalleryFilterParameter(); //.setPath(pathFilter);
-            if (!FotoSql.set(filter, pathFilter, mDirTypId))
-            {
-                filter.setPath(pathFilter + "/%");
-            }
-
-            FotoGalleryActivity.showActivity(this.getActivity(), filter, null, 0);
+        QueryParameter query = getSelectionQuery(selectedDir);
+        if (query != null) {
+            FotoGalleryActivity.showActivity(this.getActivity(), null, query, 0);
             return true;
         }
         return false;

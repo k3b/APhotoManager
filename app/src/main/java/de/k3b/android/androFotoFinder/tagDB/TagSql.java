@@ -159,6 +159,12 @@ public class TagSql extends FotoSql {
 
     }
 
+    public static QueryParameter filter2NewQuery(IGalleryFilter filter) {
+        QueryParameter query = new QueryParameter();
+        TagSql.filter2QueryEx(query, filter, false);
+        return query;
+    }
+
     public static void filter2QueryEx(QueryParameter resultQuery, IGalleryFilter filter, boolean clearWhereBefore) {
         if ((resultQuery != null) && (!GalleryFilterParameter.isEmpty(filter))) {
             filter2Query(resultQuery, filter, clearWhereBefore);

@@ -94,6 +94,33 @@ public class TagSqlQueryParserTests {
         return query;
     }
 
+    @Test
+    public void assertGFilterQueryGFilter() {
+        assertGFilterQueryGFilter("InAnyField", createPublicGalleryFilterParameter().setInAnyField("%1% %2%"));
+        assertGFilterQueryGFilter("Date", createPublicGalleryFilterParameter().setDate("1997-12-24","2005-11-30"));
+        assertGFilterQueryGFilter("Path", createPublicGalleryFilterParameter().setPath("%1%"));
+        GalleryFilterParameter gfLL = createPublicGalleryFilterParameter();
+        gfLL.setLatitude("12.34", "34.56").setLogitude("45.67", "56.78");
+        assertGFilterQueryGFilter("Latitude Logitude", gfLL);
+        assertGFilterQueryGFilter("Rating", createPublicGalleryFilterParameter().setRatingMin(4));
+    }
+
+    private GalleryFilterParameter createPublicGalleryFilterParameter() {
+        return new GalleryFilterParameter().setVisibility(VISIBILITY.PUBLIC);
+    }
+
+    static private void assertGFilterQueryGFilter(String msg, GalleryFilterParameter original) {
+        QueryParameter query = new QueryParameter();
+        TagSql.filter2QueryEx(query, original, true);
+        String sql = query.toReParseableString();
+
+        // query is destroyed by parse so use a clone
+        QueryParameter queryToParse = QueryParameter.parse(sql); //  new QueryParameter(query);
+        GalleryFilterParameter parsedFilter = (GalleryFilterParameter) TagSql.parseQueryEx(queryToParse, true);
+
+        assertEquals(msg, original.toString(), parsedFilter.toString());
+    }
+
     // assert that input-string==output-string in  input-string -> filter -> query -> filter -> output-string
     private QueryParameter assertFilterFind(String expectedFilterFindValue, String debugPrefixPrintSql) {
         GalleryFilterParameter initialFilter = new GalleryFilterParameter().setInAnyField(expectedFilterFindValue);

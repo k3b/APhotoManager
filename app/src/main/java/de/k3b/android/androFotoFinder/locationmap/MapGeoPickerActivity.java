@@ -47,6 +47,7 @@ import de.k3b.android.androFotoFinder.SettingsActivity;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.osmdroid.OsmdroidUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.LocalizedActivity;
@@ -185,7 +186,8 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
             if (filter != null) dbgFilter = "filter from savedInstanceState=" + filter;
         } else { // first run
             GalleryFilterParameter albumFilter
-                    = AndroidAlbumUtils.getGalleryFilterParameterFromQueryUri(this, uriFromIntent);
+                    = AndroidAlbumUtils.getGalleryFilterAndRestQueryFromQueryUri(this,
+                    uriFromIntent, null, false, null);
 
             if (albumFilter != null) {
                 albumFilter.setHasGeo(); // geo only data
@@ -301,7 +303,9 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
     private boolean showGallery(IGeoRectangle geoArea) {
         GalleryFilterParameter filter = new GalleryFilterParameter();
         filter.get(geoArea);
-        FotoGalleryActivity.showActivity(this, filter, null, 0);
+        QueryParameter query = TagSql.filter2NewQuery(filter);
+
+        FotoGalleryActivity.showActivity(this, null, query, 0);
         return true;
     }
 
@@ -319,7 +323,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
         switch (requestCode) {
             case GalleryFilterActivity.resultID :
                 mBookmarkController.loadState(intent, null);
-                onFilterChanged(AndroidAlbumUtils.getFilter(this, intent));
+                onFilterChanged(AndroidAlbumUtils.getFilterAndRestQuery(this, null, intent, null, false, null));
                 break;
             default:
                 throw new IllegalStateException();

@@ -42,6 +42,8 @@ import de.k3b.database.QueryParameter;
 import de.k3b.io.FileUtils;
 
 /**
+ * Handle QueryParameter mCurrentFilter in mLastBookmarkFileName
+ *
  * Created by k3b on 07.10.2015.
  */
 public class BookmarkController {
