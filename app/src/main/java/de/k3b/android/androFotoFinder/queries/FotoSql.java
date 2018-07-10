@@ -325,12 +325,18 @@ public class FotoSql extends FotoSqlBase {
                 addWhereFilterLatLon(resultQuery, filter);
             }
 
-            if (filter.getDateMin() != 0) resultQuery.addWhere(FILTER_EXPR_DATE_MIN, Long.toString(filter.getDateMin()));
-            if (filter.getDateMax() != 0) resultQuery.addWhere(FILTER_EXPR_DATE_MAX, Long.toString(filter.getDateMax()));
+            addWhereDateMinMax(resultQuery, filter.getDateMin(), filter.getDateMax());
 
             String path = filter.getPath();
             if ((path != null) && (path.length() > 0)) resultQuery.addWhere(FILTER_EXPR_PATH_LIKE, path);
         }
+    }
+
+    public static void addWhereDateMinMax(QueryParameter resultQuery, final long dateMin, final long dateMax) {
+
+        if (dateMin != 0) resultQuery.addWhere(FILTER_EXPR_DATE_MIN, Long.toString(dateMin));
+
+        if (dateMax != 0) resultQuery.addWhere(FILTER_EXPR_DATE_MAX, Long.toString(dateMax));
     }
 
     /** translates a query back to filter */
@@ -346,11 +352,16 @@ public class FotoSql extends FotoSqlBase {
 
             filter.setRatingMin(GalleryFilterParameter.parseRating(getParam(query, FILTER_EXPR_RATING_MIN, remove)));
             filter.setDate(getParam(query, FILTER_EXPR_DATE_MIN, remove), getParam(query, FILTER_EXPR_DATE_MAX, remove));
-            filter.setPath(getParam(query, FILTER_EXPR_PATH_LIKE, remove));
+            filter.setPath(getFilePath(query, remove));
 
             return filter;
         }
         return null;
+    }
+
+    public static String getFilePath(QueryParameter query, boolean remove) {
+        if (query == null) return null;
+        return getParam(query, FILTER_EXPR_PATH_LIKE, remove);
     }
 
     /** append path expressions from src to dest. Return null if unchanged. */
@@ -361,7 +372,7 @@ public class FotoSql extends FotoSqlBase {
             QueryParameter remainingQuery = new QueryParameter(src);
             String pathExpr = null;
             while (true) {
-                pathExpr = getParam(remainingQuery, FILTER_EXPR_PATH_LIKE, true);
+                pathExpr = getFilePath(remainingQuery, true);
                 if (pathExpr != null) {
                     if (resultQuery == null) resultQuery = new QueryParameter(dest);
                     resultQuery.addWhere(FILTER_EXPR_PATH_LIKE, pathExpr);

@@ -125,9 +125,14 @@ public class IntentUtil implements Common {
     }
 
     public static boolean isFileUri(Uri uri) {
+        return isFileOrContentUri(uri,false);
+    }
+
+    public static boolean isFileOrContentUri(Uri uri, boolean allowContent) {
         if (uri == null) return false;
         String scheme = uri.getScheme();
-        return StringUtils.isNullOrEmpty(scheme) || (0 == "file".compareTo(scheme));
+        return StringUtils.isNullOrEmpty(scheme) || (0 == "file".compareTo(scheme)
+                || (allowContent && (0 == "content".compareTo(scheme))));
     }
 
     public static boolean isFileUri(String initalFileUrl) {

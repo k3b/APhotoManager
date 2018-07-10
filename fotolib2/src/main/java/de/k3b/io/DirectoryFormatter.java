@@ -117,6 +117,12 @@ public class DirectoryFormatter {
         return formatLatLon(latOrLon.doubleValue());
     }
 
+    public static CharSequence formatLatLon(Double... latOrLons) {
+        StringBuilder result = new StringBuilder();
+        for (Double latOrLon : latOrLons)
+            result.append(formatLatLon(latOrLon)).append(" ");
+        return result;
+    }
 
     public static String formatLatLon(double latOrLon) {
         if ((latOrLon <= 0.0000005) && (latOrLon >= -0.0000005)) return "0";
