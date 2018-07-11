@@ -266,20 +266,19 @@ public class AndroidAlbumUtils implements Common {
      * @param destUri if not null: merged-query-filter will be saved to this uri/file with update mediaDB
      * @param destIntent if not null: merged-query-filter will be saved to this intent
      * @param destBundle if not null: merged-query-filter will be saved to this intent
-     * @param filter if not null filter will be appended to query parameter
-     * @param queryParameter
+     * @param srcFilter if not null filter will be appended to query parameter
+     * @param srcQueryParameter
      */
     public static void saveFilterAndQuery(
             @NonNull Context context, Uri destUri, Intent destIntent, Bundle destBundle,
-            final IGalleryFilter filter, final QueryParameter queryParameter) {
+            final IGalleryFilter srcFilter, final QueryParameter srcQueryParameter) {
         final String dbgContext = mDebugPrefix + ".saveFilterAndQuery(" + destUri + ")";
-        final QueryParameter query = new QueryParameter(queryParameter);
-        TagSql.filter2QueryEx(query, filter, false);
+        final QueryParameter mergedQuery = getAsMergedNewQueryParameter(srcQueryParameter, srcFilter);
 
         if (destUri != null) {
             PrintWriter out = null;
             try {
-                query.save(context.getContentResolver().openOutputStream(destUri, "w"));
+                mergedQuery.save(context.getContentResolver().openOutputStream(destUri, "w"));
                 insertToMediaDB(context, destUri, dbgContext);
             } catch (IOException e) {
                 Log.e(Global.LOG_CONTEXT, dbgContext +
@@ -287,20 +286,28 @@ public class AndroidAlbumUtils implements Common {
             } finally {
                 FileUtils.close(out, "");
             }
+            if (destIntent != null) destIntent.setData(destUri);
         }
 
         if (destBundle != null) {
-            if (queryParameter != null)
-                destBundle.putString(EXTRA_QUERY, query.toReParseableString());
-            else if (filter != null)
-                destBundle.putString(EXTRA_FILTER, filter.toString());
+            if (srcQueryParameter != null)
+                destBundle.putString(EXTRA_QUERY, mergedQuery.toReParseableString());
+            else if (srcFilter != null)
+                destBundle.putString(EXTRA_FILTER, srcFilter.toString());
         }
         if (destIntent != null) {
-            if (queryParameter != null)
-                destIntent.putExtra(EXTRA_QUERY, query.toReParseableString());
-            else if (filter != null)
-                destIntent.putExtra(EXTRA_FILTER, filter.toString());
+            if (srcQueryParameter != null)
+                destIntent.putExtra(EXTRA_QUERY, mergedQuery.toReParseableString());
+            else if (srcFilter != null)
+                destIntent.putExtra(EXTRA_FILTER, srcFilter.toString());
         }
+    }
+
+    /** create a copy of srcQueryParameter and add srcFilter */
+    public static QueryParameter getAsMergedNewQueryParameter(QueryParameter srcQueryParameter, IGalleryFilter srcFilter) {
+        final QueryParameter mergedQuery = new QueryParameter(srcQueryParameter);
+        TagSql.filter2QueryEx(mergedQuery, srcFilter, false);
+        return mergedQuery;
     }
 
     public static void insertToMediaDB(@NonNull Context context, Uri uri, String dbgContext) {

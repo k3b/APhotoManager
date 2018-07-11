@@ -152,12 +152,17 @@ public class QueryParameter {
 
     public QueryParameter clear() {
         clearWhere();
-        mColumns.clear();
+        clearColumns();
         mFrom.clear();
         mGroupBy.clear();
         mHaving.clear();
         mOrderBy.clear();
         mHavingParameters.clear();
+        return this;
+    }
+
+    public QueryParameter clearColumns() {
+        mColumns.clear();
         return this;
     }
 

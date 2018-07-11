@@ -94,4 +94,29 @@ public class StringUtils {
 
         return result.toString();
     }
+
+    /**
+     *  append 0..n parameters to stringbuilder
+     *
+     * @param resultOrNull where the data is appended to. if null a StringBuilder is created
+     * @param exceptionOrNull if not null type and message of exception
+     * @param parameters all non null param-values will be appended seperated by " "
+     * @return either resultOrNull or newly created StringBuilder if resultOrNull was null
+     */
+    public static StringBuilder appendMessage(StringBuilder resultOrNull, final Exception exceptionOrNull, final Object... parameters) {
+        if (resultOrNull == null) {
+            resultOrNull = new StringBuilder();
+        }
+
+        if (exceptionOrNull != null) {
+            resultOrNull.append(exceptionOrNull.getClass().getSimpleName()).append("=").append(exceptionOrNull.getMessage()).append(" ");
+        }
+        for (final Object param : parameters) {
+            if (param != null) {
+                resultOrNull.append(param.toString()).append(" ");
+            }
+        }
+        return resultOrNull;
+    }
+
 }

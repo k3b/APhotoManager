@@ -1057,7 +1057,15 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     private void cmdShowDetails(String fullFilePath, long currentImageId) {
 
-        ImageDetailMetaDialogBuilder.createImageDetailDialog(this, fullFilePath, currentImageId, mGalleryContentQuery, mViewPager.getCurrentItem()).show();
+        StringBuilder countMsg = (mGalleryContentQuery == null) ? null : StringUtils.appendMessage(null, null,
+                getString(R.string.show_photo),
+                TagSql.getCount(this, mGalleryContentQuery));
+
+        ImageDetailMetaDialogBuilder.createImageDetailDialog(this, fullFilePath, currentImageId,
+                mGalleryContentQuery,
+                mViewPager.getCurrentItem(),
+                countMsg).show();
+
     }
 
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {

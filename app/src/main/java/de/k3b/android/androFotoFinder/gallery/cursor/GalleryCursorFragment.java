@@ -68,6 +68,7 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.OnGalleryInteractionListener;
 import de.k3b.android.androFotoFinder.queries.Queryable;
 import de.k3b.android.androFotoFinder.queries.SqlJobTaskBase;
+import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagTask;
 import de.k3b.android.androFotoFinder.tagDB.TagWorflow;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
@@ -78,6 +79,7 @@ import de.k3b.android.util.OsUtils;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
@@ -913,7 +915,11 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 this.toString(),
                 ids,
                 files,
-                (mGalleryContentQuery != null) ? mGalleryContentQuery.toSqlString() : null
+                (mGalleryContentQuery != null) ? mGalleryContentQuery.toSqlString() : null,
+                (mGalleryContentQuery == null) ? null : StringUtils.appendMessage(null, null,
+                        getString(R.string.show_photo),
+                        TagSql.getCount(this.getActivity(), mGalleryContentQuery))
+
         ).show();
     }
 

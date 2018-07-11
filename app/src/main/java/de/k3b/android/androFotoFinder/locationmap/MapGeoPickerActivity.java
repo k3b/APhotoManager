@@ -50,6 +50,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.osmdroid.OsmdroidUtil;
 import de.k3b.android.widget.AboutDialogPreference;
+import de.k3b.android.widget.BaseQueryActivity;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.collections.SelectedFiles;
@@ -321,7 +322,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
         super.onActivityResult(requestCode, resultCode, intent);
 
         switch (requestCode) {
-            case GalleryFilterActivity.resultID :
+            case BaseQueryActivity.resultID :
                 mBookmarkController.loadState(intent, null);
                 onFilterChanged(AndroidAlbumUtils.getFilterAndRestQuery(this, null, intent, null, false, null));
                 break;
@@ -339,7 +340,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
 
     private void openFilter() {
         GalleryFilterActivity.showActivity(this, this.mFilter, null,
-                mBookmarkController.getlastBookmarkFileName(), GalleryFilterActivity.resultID);
+                mBookmarkController.getlastBookmarkFileName(), BaseQueryActivity.resultID);
     }
 
     private GeoPointDto getGeoPointDtoFromIntent(Intent intent) {

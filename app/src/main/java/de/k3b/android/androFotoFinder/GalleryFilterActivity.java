@@ -46,6 +46,7 @@ import java.util.Locale;
 import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.directory.DirectoryLoaderTask;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
+import de.k3b.android.androFotoFinder.imagedetail.ImageDetailMetaDialogBuilder;
 import de.k3b.android.androFotoFinder.locationmap.LocationMapFragment;
 import de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity;
 import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
@@ -56,6 +57,7 @@ import de.k3b.android.osmdroid.OsmdroidUtil;
 import de.k3b.android.util.OsUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
+import de.k3b.android.widget.BaseQueryActivity;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.AlbumFile;
@@ -64,6 +66,7 @@ import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
+import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.tagDB.Tag;
 
@@ -79,7 +82,6 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
 {
     private static final String mDebugPrefix = "GalF-";
 
-    public static final int resultID = 522;
     private static final String DLG_NAVIGATOR_TAG = "GalleryFilterActivity";
     private static final String DLG_SAVE_AS_TAG = "GalleryFilterActivitySaveAs";
     private static final String SETTINGS_KEY = "GalleryFilterActivity-";
@@ -135,22 +137,32 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         Global.debugMemory(mDebugPrefix, "onCreate");
         super.onCreate(savedInstanceState);
         final Intent intent = getIntent();
-        if (Global.debugEnabled && (intent != null)){
-            Log.d(Global.LOG_CONTEXT, mDebugPrefix + "onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
+
+        // for debugging: where does the filter come from
+        StringBuilder dbgMessageResult = (Global.debugEnabled) ? new StringBuilder() : null;
+
+        if ((dbgMessageResult != null) && (intent != null)){
+            dbgMessageResult.append(StringUtils.appendMessage(dbgMessageResult, null,
+                    mDebugPrefix , "onCreate", intent.toUri(Intent.URI_INTENT_SCHEME)));
         }
         setContentView(R.layout.activity_gallery_filter);
         this.mFilterValue = new FilterValue();
         onCreateButtos();
 
+        this.mQueryWithoutFilter = AndroidAlbumUtils.getQuery(this, "",
+                savedInstanceState, intent, null, dbgMessageResult);
+        if (this.mQueryWithoutFilter == null) {
+            this.mQueryWithoutFilter = new QueryParameter();
+            this.mFilter = new GalleryFilterParameter();
+        } else {
+            this.mFilter.get(TagSql.parseQueryEx(this.mQueryWithoutFilter, true));
+        }
 
-        GalleryFilterParameter filter = (savedInstanceState == null)
-                ? AndroidAlbumUtils.getFilterAndRestQuery(this, savedInstanceState, intent, mQueryWithoutFilter, false, null)
-                : GalleryFilterParameter.parse(savedInstanceState.getString(EXTRA_FILTER, ""),  new GalleryFilterParameter()) ;
+        toGui(this.mFilter);
+        mFilterValue.showLatLon(this.mFilter.isNonGeoOnly());
 
-        if (filter != null) {
-            mFilter = filter;
-            toGui(mFilter);
-            mFilterValue.showLatLon(filter.isNonGeoOnly());
+        if (dbgMessageResult != null) {
+            Log.i(Global.LOG_CONTEXT, dbgMessageResult.toString());
         }
 
         mBookmarkController = new VirtualAlbumController(this);
@@ -228,12 +240,16 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                 return true;
 
             case R.id.cmd_gallery:
-                FotoGalleryActivity.showActivity(this, TagSql.filter2NewQuery(getAsGalleryFilter()), 0);
+                FotoGalleryActivity.showActivity(this, getAsMergedQuery(), 0);
+                        // TagSql.filter2NewQuery(getAsGalleryFilter()), 0);
                 return true;
             case R.id.cmd_show_geo: {
                 MapGeoPickerActivity.showActivity(this, null, getAsGalleryFilter());
                 return true;
             }
+            case R.id.action_details:
+                cmdShowDetails();
+                return true;
 
 
             case R.id.action_save_as:
@@ -242,7 +258,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                 if (valbum == null) {
                     valbum = new File(OsUtils.getDefaultPhotoRoot(), getString(R.string.mk_dir_default) + AlbumFile.SUFFIX_VALBUM);
                 }
-                mBookmarkController.onSaveAsVirutalAlbumQuestion(valbum,getAsQuery());
+                mBookmarkController.onSaveAsVirutalAlbumQuestion(valbum, getAsMergedQuery());
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -269,10 +285,8 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         return filter;
     }
 
-    private QueryParameter getAsQuery() {
-        IGalleryFilter filter = new GalleryFilterParameter();
-        fromGui(filter);
-        return TagSql.filter2NewQuery(filter);
+    private QueryParameter getAsMergedQuery() {
+        return AndroidAlbumUtils.getAsMergedNewQueryParameter(mQueryWithoutFilter, getAsGalleryFilter());
     }
 
     @Override
@@ -622,6 +636,10 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             }
         }
 
+        @Override public String toString() {
+            return new GalleryFilterParameter().get(this).toString();
+        }
+
     }
 
     private void toGui(IGalleryFilter gf) {
@@ -641,6 +659,19 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         }
     }
 
+    private void cmdShowDetails() {
+        final QueryParameter asMergedQuery = getAsMergedQuery();
+
+        ImageDetailMetaDialogBuilder.createImageDetailDialog(
+                this,
+                getTitle().toString(),
+                asMergedQuery.toSqlString(),
+                StringUtils.appendMessage(null, null,
+                        getString(R.string.show_photo),
+                        TagSql.getCount(this, asMergedQuery))
+        ).show();
+    }
+
     private void clearFilter() {
         GalleryFilterParameter filter = new GalleryFilterParameter();
 
@@ -648,7 +679,8 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             filter.setSort(mFilter.getSortID(), mFilter.isSortAscending());
         }
 
-        this.mFilter = filter;
+        mFilter = filter;
+        mQueryWithoutFilter = new QueryParameter();
         toGui(mFilter);
     }
 
@@ -656,25 +688,20 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         if (fromGui(mFilter)) {
             mHistory.saveHistory();
 
-            final Intent intent = new Intent();
-            if (this.mFilter != null) {
-                intent.putExtra(EXTRA_FILTER, this.mFilter.toString());
+            final Intent resultIntent = new Intent();
+            final Intent originalIntent = getIntent();
 
-                Uri uri = getIntent().getData();
-                if (uri != null) {
-                    AndroidAlbumUtils.saveFilterAndQuery(GalleryFilterActivity.this, uri, null, null, this.mFilter, null);
-                    intent.setData(uri);
-                }
-            }
+            // if result must be saved to file
+            Uri originalUri = (originalIntent == null) ? null : originalIntent.getData();
 
-            mBookmarkController.saveState(intent, null);
+            AndroidAlbumUtils.saveFilterAndQuery(this, originalUri, resultIntent, null, mFilter, mQueryWithoutFilter);
+            mBookmarkController.saveState(resultIntent, null);
 
-            this.setResult(resultID, intent);
+            this.setResult(BaseQueryActivity.resultID, resultIntent);
 
             finish();
         }
     }
-
 
     /**************** DirectoryPicker *****************/
     private static class DirInfo {

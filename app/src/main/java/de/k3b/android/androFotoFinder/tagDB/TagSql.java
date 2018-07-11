@@ -35,6 +35,7 @@ import java.util.List;
 import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.media.MediaContentValues;
+import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.io.GalleryFilterParameter;
@@ -160,9 +161,7 @@ public class TagSql extends FotoSql {
     }
 
     public static QueryParameter filter2NewQuery(IGalleryFilter filter) {
-        QueryParameter query = new QueryParameter();
-        TagSql.filter2QueryEx(query, filter, false);
-        return query;
+        return AndroidAlbumUtils.getAsMergedNewQueryParameter(null, filter);
     }
 
     public static void filter2QueryEx(QueryParameter resultQuery, IGalleryFilter filter, boolean clearWhereBefore) {
