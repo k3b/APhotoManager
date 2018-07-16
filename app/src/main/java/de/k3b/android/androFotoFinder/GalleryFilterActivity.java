@@ -149,17 +149,9 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         this.mFilterValue = new FilterValue();
         onCreateButtos();
 
-        this.mQueryWithoutFilter = AndroidAlbumUtils.getQuery(this, "",
+        final QueryParameter query = AndroidAlbumUtils.getQuery(this, "",
                 savedInstanceState, intent, null, dbgMessageResult);
-        if (this.mQueryWithoutFilter == null) {
-            this.mQueryWithoutFilter = new QueryParameter();
-            this.mFilter = new GalleryFilterParameter();
-        } else {
-            this.mFilter.get(TagSql.parseQueryEx(this.mQueryWithoutFilter, true));
-        }
-
-        toGui(this.mFilter);
-        mFilterValue.showLatLon(this.mFilter.isNonGeoOnly());
+        setQueryAndFilter(query);
 
         if (dbgMessageResult != null) {
             Log.i(Global.LOG_CONTEXT, dbgMessageResult.toString());
@@ -167,6 +159,19 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
 
         mBookmarkController = new VirtualAlbumController(this);
         mBookmarkController.loadState(intent,savedInstanceState);
+    }
+
+    private void setQueryAndFilter(QueryParameter query) {
+        this.mQueryWithoutFilter = query;
+        if (this.mQueryWithoutFilter == null) {
+            this.mQueryWithoutFilter = new QueryParameter();
+            this.mFilter = new GalleryFilterParameter();
+        } else {
+            this.mFilter.get(TagSql.parseQueryEx(this.mQueryWithoutFilter, true));
+        }
+
+        mFilterValue.showLatLon(this.mFilter.isNonGeoOnly());
+        toGui(this.mFilter);
     }
 
     private void onCreateButtos() {
@@ -826,24 +831,19 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
     @Override
     public void onDirectoryPick(String selectedAbsolutePath, int queryTypeId) {
         closeDialogIfNeeded();
+
         File queryFile = AlbumFile.getQueryFileOrNull(selectedAbsolutePath);
         if (queryFile != null) {
+            setQueryAndFilter(AndroidAlbumUtils.getQueryFromUri(this, Uri.fromFile(queryFile), null));
             if (Global.debugEnabled) {
                 Log.d(Global.LOG_CONTEXT, mDebugPrefix + ".onDirectoryPick loading album "
                         + selectedAbsolutePath);
             }
-
-            GalleryFilterParameter newFilter
-                    = AndroidAlbumUtils.getGalleryFilterAndRestQueryFromQueryUri(this,
-                    Uri.fromFile(queryFile), mQueryWithoutFilter, false, null);
-            if (newFilter != null) {
-                mBookmarkController.setlastBookmarkFileName(selectedAbsolutePath);
-                mFilter = newFilter;
-            }
+            mBookmarkController.setlastBookmarkFileName(selectedAbsolutePath);
         } else {
             FotoSql.set(mFilter, selectedAbsolutePath, queryTypeId);
+            toGui(mFilter);
         }
-        toGui(mFilter);
     }
 
     /** interface DirectoryPickerFragment.invalidateDirectories not used */

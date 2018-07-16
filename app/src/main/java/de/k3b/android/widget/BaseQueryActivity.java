@@ -431,7 +431,9 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                         final int lon = (int) v.getLogituedMin();
                         return lat + " " + lon;
                     case SUB_FILTER_MODE_TAG:
-                        return ListUtils.toString(v.getTagsAllIncluded());
+                        String tags = ListUtils.toString(v.getTagsAllIncluded());
+                        if (!StringUtils.isNullOrEmpty(tags)) tags = "+" + tags;
+                        return tags;
                     case SUB_FILTER_MODE_SEARCH_BAR:
                         return v.getInAnyField();
                     case SUB_FILTER_MODE_DATE:
@@ -533,8 +535,12 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                 // (DirectoryPickerFragment) manager.findFragmentByTag(DLG_NAVIGATOR_TAG);
                 dirDialog.setContextMenuId(LockScreen.isLocked(context) ? 0 : R.menu.menu_context_dirpicker);
 
+                String initialPath = mGalleryQueryParameter.getCurrentSubFilterSettings().getPath();
+                if ((initialPath != null) && (initialPath.endsWith("%"))) {
+                    initialPath = initialPath.substring(0,initialPath.length() - 1);
+                }
                 dirDialog.defineDirectoryNavigation(currentDirectoryRoot, dirQueryID,
-                        mGalleryQueryParameter.getCurrentSubFilterSettings().getPath());
+                        initialPath);
 
                 mDirPicker = dirDialog;
                 setAutoClose(mDirPicker, null, null);
@@ -771,7 +777,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                     final String why = "FotoGalleryActivity.navigateTo dir ";
                     Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath + " from " + currentSubFilterSettings.getPath());
 
-                    currentSubFilterSettings.setPath(selectedAbsolutePath);
+                    currentSubFilterSettings.setPath(selectedAbsolutePath + "/%");
                     this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_PATH;
                     this.mGalleryQueryParameter.mDirQueryID = queryTypeId;
                     setTitle();
