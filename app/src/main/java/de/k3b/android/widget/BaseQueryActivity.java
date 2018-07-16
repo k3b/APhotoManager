@@ -133,6 +133,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
         /**
          * mCurrentSubFilterMode = SUB_FILTER_MODE_XXX: which filter addon is currently active
          */
+        private static final int SUB_FILTER_MODE_NONE = -1;
         private static final int SUB_FILTER_MODE_PATH = 0;
         private static final int SUB_FILTER_MODE_GEO = 1;
         private static final int SUB_FILTER_MODE_TAG = 2;
@@ -144,7 +145,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
          * mCurrentSubFilterMode = SUB_FILTER_MODE_XXX: which filter addon is currently active:
          * Filter = basefilter + mCurrentSubFilterMode
          */
-        private int mCurrentSubFilterMode = SUB_FILTER_MODE_PATH;
+        private int mCurrentSubFilterMode = SUB_FILTER_MODE_NONE;
 
         /**
          * mCurrentSubFilterMode defines which of the Filter parameters define the current visible items
@@ -403,6 +404,42 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
             return mCurrentSubFilterSettings;
         }
 
+        public CharSequence getValueAsTitle() {
+            GalleryFilterParameter v = mCurrentSubFilterSettings;
+
+            if (v != null) {
+                switch (mCurrentSubFilterMode) {
+                    case SUB_FILTER_MODE_PATH: {
+                        File f = v.getPathFile();
+                        if (f == null) break;
+                        StringBuilder result = new StringBuilder();
+                        result.insert(0, f.getName());
+                        f = f.getParentFile();
+                        if (f != null) {
+                            result.insert(0, "/");
+                            result.insert(0, f.getName());
+                        }
+                        result.insert(0, "...");
+                        return result;
+                    }
+                    case SUB_FILTER_MODE_ALBUM:
+                        File f = v.getPathFile();
+                        if (f != null) return f.getName();
+
+                    case SUB_FILTER_MODE_GEO:
+                        final int lat = (int) v.getLatitudeMin();
+                        final int lon = (int) v.getLogituedMin();
+                        return lat + " " + lon;
+                    case SUB_FILTER_MODE_TAG:
+                        return ListUtils.toString(v.getTagsAllIncluded());
+                    case SUB_FILTER_MODE_SEARCH_BAR:
+                        return v.getInAnyField();
+                    case SUB_FILTER_MODE_DATE:
+                        return v.getDatePath();
+                }
+            }
+            return null;
+        }
     }
 
 
@@ -579,7 +616,8 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
 
         final FragmentManager manager = getFragmentManager();
         LocationMapFragment dialog = new LocationMapFragment();
-        dialog.defineNavigation(this.mGalleryQueryParameter.getCurrentSubFilterSettings(),
+        dialog.defineNavigation(this.mGalleryQueryParameter.mGalleryContentBaseQuery,
+                null,
                 this.mGalleryQueryParameter.getCurrentSubFilterSettings(), OsmdroidUtil.NO_ZOOM, selectedItems, null, false);
 
         dialog.show(manager, DLG_NAVIGATOR_TAG);
@@ -599,7 +637,9 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
         TagsPickerFragment dlg = new TagsPickerFragment();
         dlg.setFragmentOnwner(this);
         dlg.setTitleId(R.string.tags_activity_title);
-        dlg.setAddNames(this.mGalleryQueryParameter.getCurrentSubFilterSettings().getTagsAllIncluded());
+        List<String> included = this.mGalleryQueryParameter.getCurrentSubFilterSettings().getTagsAllIncluded();
+        if (included == null) included = new ArrayList<String>();
+        dlg.setAddNames(included);
         dlg.show(manager, DLG_NAVIGATOR_TAG);
     }
 
@@ -883,35 +923,37 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
     protected void onBaseFilterChanged(QueryParameter query, String why) {
         if (query != null) {
             this.mGalleryQueryParameter.mGalleryContentBaseQuery = query;
+            this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_NONE;
 
             invalidateDirectories(mDebugPrefix + "#filter changed " + why);
 
-            reloadGui("filter changed" + why);
+            reloadGui("basefilter changed " + why);
             setTitle();
         }
     }
+
+    /** GalleryFragment tells the Owning Activity that querying data has finisched */
+    public void setResultCount(int count) {
+        this.mTitleResultCount = (count > 0) ? ("(" + count + ")") : "";
+        setTitle();
+
+        // current path does not contain photo => refreshLocal witout current path
+        if ((count == 0) &&(mGalleryQueryParameter.clearPathIfActive())) {
+            setTitle();
+            reloadGui("query changed");
+        }
+    }
+
     protected void setTitle() {
         Intent intent = getIntent();
-        String title = (intent == null) ? null : intent.getStringExtra(EXTRA_TITLE);
+        CharSequence title = (intent == null) ? null : intent.getStringExtra(EXTRA_TITLE);
 
         if (title == null) {
-            final int subFilterMode = mGalleryQueryParameter.mCurrentSubFilterMode;
-            final GalleryFilterParameter currentSubFilterSettings = mGalleryQueryParameter.getCurrentSubFilterSettings();
-            if (currentSubFilterSettings != null) {
-                if (subFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_ALBUM) {
-                    title = currentSubFilterSettings.getPath();
-                } else if (subFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_GEO) {
-                    title = getString(R.string.gallery_title);
-                } else if (currentSubFilterSettings.getPath() != null) {
-                    title = FotoSql.getName(this, this.mGalleryQueryParameter.getDirQueryID())
-                            + " - " + currentSubFilterSettings.getPath();
-                } else {
-                    title = FotoSql.getName(this, this.mGalleryQueryParameter.getDirQueryID());
-                }
-            }
+            title = mGalleryQueryParameter.getValueAsTitle();
+            if (StringUtils.isNullOrEmpty(title)) title = getString(R.string.gallery_title);
         }
         if (title != null) {
-            this.setTitle(title + mTitleResultCount);
+            this.setTitle(mTitleResultCount + title);
         }
     }
     /*********************** search view *******************/

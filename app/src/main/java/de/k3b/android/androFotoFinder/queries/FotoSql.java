@@ -319,11 +319,7 @@ public class FotoSql extends FotoSqlBase {
                 resultQuery.clearWhere();
             }
 
-            if (filter.isNonGeoOnly()) {
-                resultQuery.addWhere(FILTER_EXPR_NO_GPS);
-            } else {
-                addWhereFilterLatLon(resultQuery, filter);
-            }
+            addWhereFilterLatLon(resultQuery, filter);
 
             addWhereDateMinMax(resultQuery, filter.getDateMin(), filter.getDateMax());
 
@@ -340,28 +336,40 @@ public class FotoSql extends FotoSqlBase {
     }
 
     /** translates a query back to filter */
-    public static IGalleryFilter parseQuery(QueryParameter query, boolean remove) {
+    public static IGalleryFilter parseQuery(QueryParameter query, boolean removeFromSourceQuery) {
         if (query != null) {
             GalleryFilterParameter filter = new GalleryFilterParameter();
-            if (null != getParams(query, FILTER_EXPR_NO_GPS, remove)) {
-                filter.setNonGeoOnly(true);
-            } else {
-                filter.setLogitude(getParam(query, FILTER_EXPR_LON_MIN, remove), getParam(query, FILTER_EXPR_LON_MAX, remove));
-                filter.setLatitude(getParam(query, FILTER_EXPR_LAT_MIN, remove), getParam(query, FILTER_EXPR_LAT_MAX, remove));
-            }
+            parseQueryGeo(query, filter, removeFromSourceQuery);
 
-            filter.setRatingMin(GalleryFilterParameter.parseRating(getParam(query, FILTER_EXPR_RATING_MIN, remove)));
-            filter.setDate(getParam(query, FILTER_EXPR_DATE_MIN, remove), getParam(query, FILTER_EXPR_DATE_MAX, remove));
-            filter.setPath(getFilePath(query, remove));
+            filter.setRatingMin(GalleryFilterParameter.parseRating(getParam(query, FILTER_EXPR_RATING_MIN, removeFromSourceQuery)));
+            filter.setDate(getParam(query, FILTER_EXPR_DATE_MIN, removeFromSourceQuery), getParam(query, FILTER_EXPR_DATE_MAX, removeFromSourceQuery));
+            filter.setPath(getFilePath(query, removeFromSourceQuery));
 
             return filter;
         }
         return null;
     }
 
-    public static String getFilePath(QueryParameter query, boolean remove) {
+    /** extracts geo infos from srcQuery to destFilter */
+    public static GeoRectangle parseQueryGeo(QueryParameter srcQuery, GeoRectangle destFilter, boolean removeFromSourceQuery) {
+        if (null != getParams(srcQuery, FILTER_EXPR_NO_GPS, removeFromSourceQuery)) {
+            if (destFilter != null) destFilter.setNonGeoOnly(true);
+        } else {
+            final String lonMin = getParam(srcQuery, FILTER_EXPR_LON_MIN, removeFromSourceQuery);
+            final String lonMax = getParam(srcQuery, FILTER_EXPR_LON_MAX, removeFromSourceQuery);
+            final String latMin = getParam(srcQuery, FILTER_EXPR_LAT_MIN, removeFromSourceQuery);
+            final String latMax = getParam(srcQuery, FILTER_EXPR_LAT_MAX, removeFromSourceQuery);
+            if (destFilter != null) {
+                destFilter.setLogitude(lonMin, lonMax);
+                destFilter.setLatitude(latMin, latMax);
+            }
+        }
+        return destFilter;
+    }
+
+    public static String getFilePath(QueryParameter query, boolean removeFromSourceQuery) {
         if (query == null) return null;
-        return getParam(query, FILTER_EXPR_PATH_LIKE, remove);
+        return getParam(query, FILTER_EXPR_PATH_LIKE, removeFromSourceQuery);
     }
 
     /** append path expressions from src to dest. Return null if unchanged. */
@@ -385,14 +393,14 @@ public class FotoSql extends FotoSqlBase {
     }
 
     /** @return return param for expression inside query. null if expression is not in query or number of params is not 1. */
-    protected static String getParam(QueryParameter query, String expresion, boolean remove) {
-        final String[] result = getParams(query, expresion, remove);
+    protected static String getParam(QueryParameter query, String expresion, boolean removeFromSourceQuery) {
+        final String[] result = getParams(query, expresion, removeFromSourceQuery);
         return ((result != null) && (result.length > 0)) ? result[0] : null;
     }
 
     /** @return return all params for expression inside query. null if expression is not in query */
-    protected static String[] getParams(QueryParameter query, String expresion, boolean remove) {
-        return query.getWhereParameter(expresion, remove);
+    protected static String[] getParams(QueryParameter query, String expresion, boolean removeFromSourceQuery) {
+        return query.getWhereParameter(expresion, removeFromSourceQuery);
     }
 
     public static QueryParameter setWhereSelectionPks(QueryParameter query, SelectedItems selectedItems) {
@@ -429,14 +437,18 @@ public class FotoSql extends FotoSqlBase {
     }
 
     public static void addWhereLatLonNotNull(QueryParameter query) {
-        query.addWhere(FotoSql.SQL_COL_LAT + " is not null and " + FotoSql.SQL_COL_LON + " is not null")
-        ;
+        query.addWhere(FotoSql.SQL_COL_LAT + " is not null and "
+                + FotoSql.SQL_COL_LON + " is not null");
     }
 
-    public static void addWhereFilterLatLon(QueryParameter parameters, IGeoRectangle filter) {
-        if ((parameters != null) && (filter != null)) {
-            addWhereFilterLatLon(parameters, filter.getLatitudeMin(),
-                    filter.getLatitudeMax(), filter.getLogituedMin(), filter.getLogituedMax());
+    public static void addWhereFilterLatLon(QueryParameter resultQuery, IGeoRectangle filter) {
+        if ((resultQuery != null) && (filter != null)) {
+            if (filter.isNonGeoOnly()) {
+                resultQuery.addWhere(FILTER_EXPR_NO_GPS);
+            } else {
+                addWhereFilterLatLon(resultQuery, filter.getLatitudeMin(),
+                        filter.getLatitudeMax(), filter.getLogituedMin(), filter.getLogituedMax());
+            }
         }
     }
 
@@ -698,7 +710,8 @@ public class FotoSql extends FotoSqlBase {
         return query;
     }
 
-    public static IGeoRectangle execGetGeoRectangle(Context context, IGalleryFilter filter, SelectedItems selectedItems) {
+    public static IGeoRectangle execGetGeoRectangle(Context context, QueryParameter baseQuery,
+                                                    SelectedItems selectedItems) {
         QueryParameter query = new QueryParameter()
                 .setID(QUERY_TYPE_UNDEFINED)
                 .addColumn(
@@ -711,8 +724,8 @@ public class FotoSql extends FotoSqlBase {
                 .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
                 ;
 
-        if (!GalleryFilterParameter.isEmpty(filter)) {
-            filter2Query(query, filter, true);
+        if (baseQuery != null) {
+            query.getWhereFrom(baseQuery, true);
         }
 
         if (selectedItems != null) {

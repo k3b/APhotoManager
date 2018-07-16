@@ -45,6 +45,7 @@ import de.k3b.android.androFotoFinder.LockScreen;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.SettingsActivity;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
+import de.k3b.android.androFotoFinder.imagedetail.ImageDetailMetaDialogBuilder;
 import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
@@ -53,6 +54,7 @@ import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.BaseQueryActivity;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.StringUtils;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
@@ -218,7 +220,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + dbgFilter + " => " + this.mFilter);
         }
 
-        mMap.defineNavigation(this.mFilter, geoPointFromIntent, rectangle, zoom, selectedItems, additionalPointsContentUri, zoom2fit);
+        mMap.defineNavigation(null, this.mFilter, geoPointFromIntent, rectangle, zoom, selectedItems, additionalPointsContentUri, zoom2fit);
     }
 
     @Override
@@ -286,6 +288,9 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
 				return showPhoto(mMap.getCurrentGeoRectangle());
 			case R.id.cmd_gallery:
 				return showGallery(mMap.getCurrentGeoRectangle());
+            case R.id.action_details:
+                cmdShowDetails();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -302,15 +307,35 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
     }
 
     private boolean showGallery(IGeoRectangle geoArea) {
-        GalleryFilterParameter filter = new GalleryFilterParameter();
-        filter.get(geoArea);
-        QueryParameter query = TagSql.filter2NewQuery(filter);
+        QueryParameter query = getAsMergedQuery(geoArea);
 
         FotoGalleryActivity.showActivity(this, query, 0);
         return true;
     }
 
-	
+    private QueryParameter getAsMergedQuery() {
+        return getAsMergedQuery(mMap.getCurrentGeoRectangle());
+    }
+
+    private QueryParameter getAsMergedQuery(IGeoRectangle geoArea) {
+        GalleryFilterParameter filter = new GalleryFilterParameter();
+        filter.get(geoArea);
+        return TagSql.filter2NewQuery(filter);
+    }
+
+    private void cmdShowDetails() {
+        final QueryParameter asMergedQuery = getAsMergedQuery();
+
+        ImageDetailMetaDialogBuilder.createImageDetailDialog(
+                this,
+                getTitle().toString(),
+                asMergedQuery.toSqlString(),
+                StringUtils.appendMessage(null, null,
+                        getString(R.string.show_photo),
+                        TagSql.getCount(this, asMergedQuery))
+        ).show();
+    }
+
     /**
      * Call back from sub-activities.<br/>
      * Process Change StartTime (longpress start), Select StopTime before stop
@@ -334,7 +359,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
     private void onFilterChanged(GalleryFilterParameter filter) {
         if ((mMap != null) && (filter != null)) {
             this.mFilter = filter;
-            mMap.defineNavigation(this.mFilter, null, OsmdroidUtil.NO_ZOOM, null, null, false);
+            mMap.defineNavigation(null, this.mFilter, null, OsmdroidUtil.NO_ZOOM, null, null, false);
         }
     }
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -33,5 +33,7 @@
         android:visible="true"
         android:orderInCategory="200"
         android:showAsAction="never" />
+    <item android:id="@+id/action_details" android:title="@string/details_menu_title"
+        android:orderInCategory="900" android:showAsAction="never" />
 
 </menu>

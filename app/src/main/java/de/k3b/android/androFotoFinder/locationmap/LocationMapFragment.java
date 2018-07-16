@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -65,6 +65,7 @@ import de.k3b.android.androFotoFinder.LockScreen;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
+import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.osmdroid.FolderOverlayEx;
@@ -84,7 +85,6 @@ import de.k3b.geo.api.IGeoInfoHandler;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
 import de.k3b.geo.io.gpx.GpxReaderBase;
-import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
@@ -143,7 +143,8 @@ public class LocationMapFragment extends DialogFragment {
     private int mDelayedZoomLevel = RECALCULATE_ZOOM;
     private boolean mIsInitialized = false;
 
-    private IGalleryFilter mRootFilter;
+    private QueryParameter mRootQuery;
+
     private double mMinZoomLevel;
     private double mMaxZoomLevel;
 
@@ -473,27 +474,39 @@ public class LocationMapFragment extends DialogFragment {
         return result;
     }
 
-    public void defineNavigation(IGalleryFilter rootFilter, GeoRectangle rectangle, int zoomlevel,
-                                 SelectedItems selectedItems, Uri gpxAdditionalPointsContentUri, boolean zoomToFit) {
+    /**
+     * (re)define map display. Data sohow from rootQuery + rectangle + zoomlevel.
+     *
+     * @param rootQuery if not null contain database where to limit the photo data displayed
+     * @param depricated_rootFilter should be null. if not null contain database where to limit the data displayed
+     * @param rectangle if nut null the initial visible rectange
+     * @param zoomlevel the initial zoomlevel
+     * @param selectedItems if not null: items to be displayed as blue markers
+     * @param gpxAdditionalPointsContentUri if not null the file containing additional geo coords for blue marker
+     * @param zoomToFit true mean recalculate zoomlevel from rectangle
+     */
+    public void defineNavigation(QueryParameter rootQuery,
+                                 IGalleryFilter depricated_rootFilter,
+                                 GeoRectangle rectangle, int zoomlevel,
+                                 SelectedItems selectedItems,
+                                 Uri gpxAdditionalPointsContentUri, boolean zoomToFit) {
         String debugContext = mDebugPrefix + "defineNavigation: ";
         if (Global.debugEnabled || Global.debugEnabledMap) {
             Log.i(Global.LOG_CONTEXT, debugContext + rectangle + ";z=" + zoomlevel);
         }
 
-        if (rootFilter != null) {
-            this.mRootFilter = rootFilter;
-        }
+        this.mRootQuery = AndroidAlbumUtils.getAsMergedNewQueryParameter(rootQuery, depricated_rootFilter);
 
         mSelectedItemsHandler.define(selectedItems);
         if (zoomToFit) {
-            zoomToFit(null, rootFilter);
+            zoomToFit(null);
         } else {
             // load this.mFolderOverlayBlueGpxMarker
             GeoRectangle increasedRrectangle = defineGpxAdditionalPoints(gpxAdditionalPointsContentUri, rectangle);
 
             zoomToBoundingBox(debugContext, increasedRrectangle, zoomlevel);
         }
-        if (rootFilter != null) {
+        if ((rootQuery != null) || (depricated_rootFilter != null)) {
             reloadFotoMarker(debugContext);
         }
     }
@@ -672,8 +685,8 @@ public class LocationMapFragment extends DialogFragment {
         QueryParameter query = FotoSql.getQueryGroupByPlace(groupingFactor);
         query.clearWhere();
 
-        if (this.mRootFilter != null) {
-            TagSql.filter2QueryEx(query, this.mRootFilter, true);
+        if (this.mRootQuery != null) {
+            query.getWhereFrom(this.mRootQuery, true);
         }
 
         // delta: make the grouping area a little bit bigger than the viewport
@@ -1057,14 +1070,11 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     private boolean zoomToFit(IGeoPoint geoCenterPoint) {
-        final GalleryFilterParameter markerFilter = getMarkerFilter(geoCenterPoint);
-        return zoomToFit(geoCenterPoint, markerFilter);
-    }
-
-    private boolean zoomToFit(IGeoPoint geoCenterPoint, IGalleryFilter markerFilter) {
+        QueryParameter baseQuery = this.mRootQuery;
         BoundingBox BoundingBox = null;
 
-        IGeoRectangle fittingRectangle = FotoSql.execGetGeoRectangle(this.getActivity(), markerFilter, null);
+        IGeoRectangle fittingRectangle = FotoSql.execGetGeoRectangle(this.getActivity(),
+                baseQuery, null);
         double delta = getDelta(fittingRectangle);
         if ((geoCenterPoint != null) && (delta < 1e-6)) {
             BoundingBox = getMarkerBoundingBox(geoCenterPoint);
@@ -1094,14 +1104,17 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     private QueryParameter getMarkerQuery(IGeoPoint geoPosition) {
-        GalleryFilterParameter filter = getMarkerFilter(geoPosition);
-        return TagSql.filter2NewQuery(filter);
+        QueryParameter result = AndroidAlbumUtils.getAsMergedNewQueryParameter(mRootQuery, null);
+
+        GeoRectangle rect = getRectangleFrom(new GeoRectangle(), geoPosition);
+        FotoSql.addWhereFilterLatLon(result, rect);
+
+        return result;
     }
 
-    private GalleryFilterParameter getMarkerFilter(IGeoPoint geoPosition) {
+    private GeoRectangle getRectangleFrom(GeoRectangle result, IGeoPoint geoPosition) {
         double delta = getMarkerDelta();
 
-        GalleryFilterParameter result = new GalleryFilterParameter().get(mRootFilter);
         result.setNonGeoOnly(false);
         result.setLatitude(geoPosition.getLatitude() - delta, geoPosition.getLatitude() + delta);
         result.setLogitude(geoPosition.getLongitude() - delta, geoPosition.getLongitude() + delta);

@@ -263,19 +263,6 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
         ImageDetailActivityViewPager.showActivity(this, imageUri, position, imageDetailQuery, ImageDetailActivityViewPager.ACTIVITY_ID);
     }
 
-    /** GalleryFragment tells the Owning Activity that querying data has finisched */
-    @Override
-    public void setResultCount(int count) {
-        this.mTitleResultCount = (count > 0) ? ("(" + count + ")") : "";
-        setTitle();
-
-        // current path does not contain photo => refreshLocal witout current path
-        if ((count == 0) &&(mGalleryQueryParameter.clearPathIfActive())) {
-            setTitle();
-            reloadGui("query changed");
-        }
-    }
-
     @Override
     protected void defineDirectoryNavigation(IDirectory directoryRoot) {
         if (mDirGui != null) {
