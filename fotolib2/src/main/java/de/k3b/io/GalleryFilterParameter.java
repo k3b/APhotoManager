@@ -19,6 +19,7 @@
  
 package de.k3b.io;
 
+import java.io.File;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -47,7 +48,6 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
     private long dateMin = 0;
     private long dateMax = 0;
 
-    private boolean nonGeoOnly = false;
     private boolean withNoTags = false;
 
     /** one of the VISIBILITY_.XXXX values */
@@ -63,7 +63,6 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
             this.setDateMax(src.getDateMax());
             this.setDateMin(src.getDateMin());
             this.setPath(src.getPath());
-            this.setNonGeoOnly(src.isNonGeoOnly());
             this.setWithNoTags(src.isWithNoTags());
             this.setVisibility(src.getVisibility());
 
@@ -84,6 +83,11 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
 
     public GalleryFilterParameter setPath(String path) {
         this.path = path;return this;
+    }
+
+    public File getPathFile() {
+        if (StringUtils.isNullOrEmpty(getPath())) return null;
+        return new File(getPath());
     }
 
     @Override
@@ -110,24 +114,6 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
 
     public GalleryFilterParameter setDate(long min, long max) {
         return setDateMin(min).setDateMax(max);
-    }
-
-    @Override
-    public boolean isNonGeoOnly() {
-        return nonGeoOnly;
-    }
-
-    public GalleryFilterParameter setNonGeoOnly(boolean nonGeoOnly) {
-        this.nonGeoOnly = nonGeoOnly;
-        return this;
-    }
-
-    public void setHasGeo() {
-        if (isNonGeoOnly() || isEmpty((IGeoRectangle) this)) {
-            setNonGeoOnly(false);
-            setLogitude(-180.0, +180);
-            setLatitude(-90.0, +90.0);
-        }
     }
 
     @Override

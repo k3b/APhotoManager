@@ -38,9 +38,6 @@ public interface IGalleryFilter extends IGeoRectangle {
 
     long getDateMax();
 
-    /** true: only photos whith no geo info (lat==lon==null) */
-    boolean isNonGeoOnly();
-
     /** number defining current sorting */
     int getSortID();
 
