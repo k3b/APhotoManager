@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -22,6 +22,26 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity">
+    <item android:id="@+id/cmd_select_folder"
+        android:title="@string/folder_menu_title"
+        android:icon="@drawable/ic_action_holo_dark_folder"
+        android:visible="true"
+        android:orderInCategory="2"
+        android:showAsAction="ifRoom" />
+    <item android:id="@+id/cmd_select_date"
+        android:title="@string/date_picker_menu_title"
+        android:icon="@android:drawable/ic_menu_month"
+        android:visible="true"
+        android:orderInCategory="2"
+        android:showAsAction="ifRoom" />
+
+    <item android:id="@+id/cmd_select_tag"
+        android:title="@string/tags_activity_title"
+        android:icon="@drawable/ic_action_tag"
+        android:visible="true"
+        android:orderInCategory="2"
+        android:showAsAction="ifRoom" />
+
     <item android:id="@+id/cmd_filter"
         android:title="@string/filter_menu_title"
         android:icon="@android:drawable/ic_menu_search"
@@ -37,6 +57,8 @@
     <item android:id="@+id/cmd_settings" android:title="@string/settings_title"
         android:orderInCategory="500" android:showAsAction="never" android:visible="true" />
 
+    <item android:id="@+id/action_details" android:title="@string/details_menu_title"
+        android:orderInCategory="900" android:showAsAction="never" />
     <item android:id="@+id/cmd_about"
         android:title="@string/about_summary"
         android:visible="true"

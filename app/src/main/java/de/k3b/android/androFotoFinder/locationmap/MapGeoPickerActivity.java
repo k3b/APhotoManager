@@ -21,7 +21,6 @@ package de.k3b.android.androFotoFinder.locationmap;
 
 import android.app.ActionBar;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -30,7 +29,6 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.Window;
 import android.widget.Toast;
 
 import org.osmdroid.api.IGeoPoint;
@@ -39,7 +37,6 @@ import de.k3b.android.androFotoFinder.AffUtils;
 import de.k3b.android.androFotoFinder.BookmarkController;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
-import de.k3b.android.androFotoFinder.GalleryFilterActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.LockScreen;
 import de.k3b.android.androFotoFinder.R;
@@ -52,8 +49,8 @@ import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.osmdroid.OsmdroidUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.BaseQueryActivity;
-import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.IDirectory;
 import de.k3b.io.StringUtils;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
@@ -64,7 +61,8 @@ import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGeoRectangle;
 
-public class MapGeoPickerActivity extends LocalizedActivity implements Common {
+// BaseQueryActivity LocalizedActivity
+public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
     private static final String mDebugPrefix = "GalM-";
     private static final String STATE_Filter = "filterMap";
     private static final String STATE_LAST_GEO = "geoLastView";
@@ -75,21 +73,17 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
     private boolean mSaveLastUsedFilterToSharedPrefs = true;
     private boolean mSaveLastUsedGeoToSharedPrefs = true;
 
-    private GalleryFilterParameter mFilter;
     private GeoUri mGeoUriParser = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
 
     private BookmarkController mBookmarkController = null;
 
-    public static void showActivity(Activity context, SelectedFiles selectedItems, GalleryFilterParameter filter) {
+    public static void showActivity(Activity context, SelectedFiles selectedItems,
+                                    QueryParameter query, int requestCode) {
         Uri initalUri = null;
         final Intent intent = new Intent().setClass(context,
                 MapGeoPickerActivity.class);
 
-        GalleryFilterParameter localFilter = new GalleryFilterParameter();
-
-        if (filter != null) {
-            localFilter.get(filter);
-        }
+        AndroidAlbumUtils.saveFilterAndQuery(context, null, intent, null, null, query);
 
         if (AffUtils.putSelectedFiles(intent, selectedItems)) {
             IGeoPoint initialPoint = FotoSql.execGetPosition(null, context,
@@ -102,15 +96,16 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
             }
         }
 
-        localFilter.setNonGeoOnly(false);
-        intent.putExtra(EXTRA_FILTER, localFilter.toString());
-
         intent.setAction(Intent.ACTION_VIEW);
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, context.getClass().getSimpleName()
                     + " > MapGeoPickerActivity.showActivity@" + initalUri);
         }
-        context.startActivity(intent);
+        if (requestCode != 0) {
+            context.startActivityForResult(intent, requestCode);
+        } else {
+            context.startActivity(intent);
+        }
     }
 
     @Override
@@ -144,22 +139,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
 
         IGeoPointInfo initalZoom = (mSaveLastUsedGeoToSharedPrefs) ? lastGeo : geoPointFromIntent;
 
-        String extraTitle = intent.getStringExtra(EXTRA_TITLE);
-        if (extraTitle == null && (geoPointFromIntent == null)) {
-            extraTitle = getString(R.string.app_map_title);
-        }
-
-        if (extraTitle == null) {
-            this.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        }
-
         setContentView(R.layout.activity_map_geo_picker);
-
-        if (extraTitle != null) {
-            this.setTitle(extraTitle);
-        } else {
-            setNoTitle();
-        }
 
         mMap = (PickerLocationMapFragment) getFragmentManager().findFragmentById(R.id.fragment_map);
 
@@ -178,50 +158,13 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
         String filter = null;
         // for debugging: where does the filter come from
         String dbgFilter = null;
-        if (intent != null) {
-            filter = intent.getStringExtra(EXTRA_FILTER);
-        }
 
         boolean zoom2fit = false;
-        this.mFilter = null;
-        this.mSaveLastUsedFilterToSharedPrefs = (filter == null); // false if controlled via intent
-        if (savedInstanceState != null) {
-            filter = savedInstanceState.getString(STATE_Filter);
-            if (filter != null) dbgFilter = "filter from savedInstanceState=" + filter;
-        } else { // first run
-            GalleryFilterParameter albumFilter
-                    = AndroidAlbumUtils.getGalleryFilterAndRestQueryFromQueryUri(this,
-                    uriFromIntent, null, false, null);
 
-            if (albumFilter != null) {
-                albumFilter.setHasGeo(); // geo only data
-                this.mFilter = albumFilter;
-                this.mSaveLastUsedFilterToSharedPrefs = false;
-                filter = null;
-                zoom2fit = true;
-                zoom = OsmdroidUtil.RECALCULATE_ZOOM;
-            }
-        }
+        onCreateData(savedInstanceState);
 
-        if (this.mFilter == null) {
-            if (this.mSaveLastUsedFilterToSharedPrefs) {
-                filter = sharedPref.getString(STATE_Filter, null);
-                if (filter != null) dbgFilter = "filter from sharedPref=" + filter;
-            }
-
-
-            this.mFilter = new GalleryFilterParameter();
-
-            if (filter != null) {
-                GalleryFilterParameter.parse(filter, this.mFilter);
-            }
-        }
-
-        if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, mDebugPrefix + dbgFilter + " => " + this.mFilter);
-        }
-
-        mMap.defineNavigation(null, this.mFilter, geoPointFromIntent, rectangle, zoom, selectedItems, additionalPointsContentUri, zoom2fit);
+        mMap.defineNavigation(this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery(),
+                null, geoPointFromIntent, rectangle, zoom, selectedItems, additionalPointsContentUri, zoom2fit);
     }
 
     @Override
@@ -234,50 +177,11 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
     }
 
     @Override
-    protected void onDestroy() {
-        saveSettings(this);
-        super.onDestroy();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        super.onSaveInstanceState(savedInstanceState);
-        saveSettings(this);
-        mBookmarkController.saveState(null, savedInstanceState);
-
-        if ((savedInstanceState != null) && (this.mFilter != null)) {
-            savedInstanceState.putString(STATE_Filter, this.mFilter.toString());
-        }
-    }
-
-    private void saveSettings(Context context) {
-        if (mSaveLastUsedFilterToSharedPrefs || mSaveLastUsedGeoToSharedPrefs) {
-            // save settings
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-            SharedPreferences.Editor edit = sharedPref.edit();
-
-            if (mSaveLastUsedFilterToSharedPrefs && (mFilter != null)) {
-                edit.putString(STATE_Filter, mFilter.toString());
-            }
-
-            if (mSaveLastUsedGeoToSharedPrefs) {
-                String currentGeoUri = mMap.getCurrentGeoUri();
-                edit.putString(STATE_LAST_GEO, currentGeoUri);
-            }
-
-            edit.apply();
-        }
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (LockScreen.onOptionsItemSelected(this, item))
             return true;
         // Handle presses on the action bar items
         switch (item.getItemId()) {
-            case R.id.cmd_filter:
-                openFilter();
-                return true;
             //cmd_lock
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
@@ -293,7 +197,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
                 cmdShowDetails();
                 return true;
             default:
-                return super.onOptionsItemSelected(item);
+                return onOptionsItemSelected(item, AffUtils.getSelectedItems(getIntent()));
         }
 
     }
@@ -337,36 +241,24 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
         ).show();
     }
 
-    /**
-     * Call back from sub-activities.<br/>
-     * Process Change StartTime (longpress start), Select StopTime before stop
-     * (longpress stop) or filter change for detailReport
-     */
     @Override
-    protected void onActivityResult(final int requestCode,
-                                    final int resultCode, final Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-
-        switch (requestCode) {
-            case BaseQueryActivity.resultID :
-                mBookmarkController.loadState(intent, null);
-                onFilterChanged(AndroidAlbumUtils.getFilterAndRestQuery(this, null, intent, null, false, null));
-                break;
-            default:
-                throw new IllegalStateException();
+    protected void reloadGui(String why) {
+        if (mMap != null) {
+            QueryParameter query = this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery();
+            mMap.defineNavigation(query,
+                    null,null, IGeoPointInfo.NO_ZOOM, null, null, false);
         }
+
     }
 
-    private void onFilterChanged(GalleryFilterParameter filter) {
-        if ((mMap != null) && (filter != null)) {
-            this.mFilter = filter;
-            mMap.defineNavigation(null, this.mFilter, null, OsmdroidUtil.NO_ZOOM, null, null, false);
-        }
+    @Override
+    protected void defineDirectoryNavigation(IDirectory directoryRoot) {
     }
 
-    private void openFilter() {
-        GalleryFilterActivity.showActivity(this, this.mFilter, null,
-                mBookmarkController.getlastBookmarkFileName(), BaseQueryActivity.resultID);
+    /** allows childclass to have their own sharedPreference names */
+    @Override
+    protected String fixSharedPrefSuffix(String statSuffix) {
+        return super.fixSharedPrefSuffix(statSuffix) + "-map";
     }
 
     private GeoPointDto getGeoPointDtoFromIntent(Intent intent) {

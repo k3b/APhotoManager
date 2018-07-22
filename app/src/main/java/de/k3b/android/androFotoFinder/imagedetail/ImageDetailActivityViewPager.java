@@ -957,7 +957,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                 }
 
                 case R.id.cmd_show_geo:
-                    MapGeoPickerActivity.showActivity(this, getCurrentFoto(), null);
+                    MapGeoPickerActivity.showActivity(this, getCurrentFoto(), null, 0);
                     break;
 
                 case R.id.cmd_show_geo_as: {

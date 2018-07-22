@@ -67,16 +67,6 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
      * intent parameters supported by FotoGalleryActivity: EXTRA_...
      */
 
-    /**
-     * after media db change cached Directories must be recalculated
-     */
-    private final ContentObserver mMediaObserverDirectory = new ContentObserver(null) {
-        @Override
-        public void onChange(boolean selfChange) {
-            invalidateDirectories(mDebugPrefix + "#onChange from mMediaObserverDirectory");
-        }
-    };
-
     // multi selection support
     private SelectedItems mSelectedItems = null;
 
@@ -116,8 +106,6 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
             Log.d(Global.LOG_CONTEXT, mDebugPrefix + "onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
         }
 
-        this.getContentResolver().registerContentObserver(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, true, mMediaObserverDirectory);
-        this.getContentResolver().registerContentObserver(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, true, mMediaObserverDirectory);
         setContentView(R.layout.activity_gallery); // .gallery_activity);
 
         onCreateData(savedInstanceState);
@@ -155,7 +143,6 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
         Global.debugMemory(mDebugPrefix, "onDestroy start");
         super.onDestroy();
 
-        this.getContentResolver().unregisterContentObserver(mMediaObserverDirectory);
         // to avoid memory leaks
         GarbageCollector.freeMemory(findViewById(R.id.root_view));
         mGalleryGui = null;
@@ -185,7 +172,6 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
         }
 
         final boolean result = super.onCreateOptionsMenu(menu);
-        initSearchView(menu.findItem(R.id.cmd_searchbar));
         return result;
     }
 

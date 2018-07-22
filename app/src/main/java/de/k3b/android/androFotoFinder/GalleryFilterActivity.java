@@ -249,7 +249,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                         // TagSql.filter2NewQuery(getAsGalleryFilter()), 0);
                 return true;
             case R.id.cmd_show_geo: {
-                MapGeoPickerActivity.showActivity(this, null, getAsGalleryFilter());
+                MapGeoPickerActivity.showActivity(this, null, getAsMergedQuery(), 0);
                 return true;
             }
             case R.id.action_details:

@@ -24,12 +24,14 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -114,10 +116,10 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
         /**
          * one of the PICK_XXXX_SUFFIX constants
          * view/pick-image/pick-geo have different state persistence.
-         * naem=STATE_XXXXX + mStatSuffix
+         * naem=STATE_XXXXX + mSharedPrefKeySuffix
          * ""==view; "-pick-image"; "-pick-geo"
          */
-        private String mStatSuffix = PICK_NONE_SUFFIX;
+        private String mSharedPrefKeySuffix = PICK_NONE_SUFFIX;
 
         /**
          * STATE_... to persist current filter
@@ -175,7 +177,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
          * true: if activity started without special intent-parameters,
          * the last mCurrentSubFilterSettings is saved/loaded for next use
          */
-        private boolean mSaveToSharedPrefs = true;
+        private boolean mSaveLastUsedFilterToSharedPrefs = true;
 
         /**
          * one of the FotoSql.QUERY_TYPE_xxx values. if undefined use default
@@ -271,7 +273,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
         }
 
         public boolean isGeoPick() {
-            return (mStatSuffix != null) && mStatSuffix.equals(PICK_GEO_SUFFIX);
+            return (mSharedPrefKeySuffix != null) && mSharedPrefKeySuffix.equals(PICK_GEO_SUFFIX);
         }
 
         // load from intent/ savedInstanceState/ SharedPrefs
@@ -302,26 +304,26 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
             if ((action != null) && ((Intent.ACTION_PICK.compareTo(action) == 0) || (Intent.ACTION_GET_CONTENT.compareTo(action) == 0))) {
                 String schema = intent.getScheme();
                 if ((schema != null) && ("geo".compareTo(schema) == 0)) {
-                    this.mStatSuffix = PICK_GEO_SUFFIX;
+                    this.mSharedPrefKeySuffix = PICK_GEO_SUFFIX;
                     if (dbgMessageResult != null) dbgMessageResult.append("pick geo ");
                 } else {
-                    this.mStatSuffix = PICK_IMAGE_SUFFIX;
+                    this.mSharedPrefKeySuffix = PICK_IMAGE_SUFFIX;
                     if (dbgMessageResult != null) dbgMessageResult.append("pick photo ");
                 }
-                this.mSaveToSharedPrefs = true;
+                this.mSaveLastUsedFilterToSharedPrefs = true;
             } else {
-                this.mStatSuffix = PICK_NONE_SUFFIX;
+                this.mSharedPrefKeySuffix = PICK_NONE_SUFFIX;
                 // save only if no intent-uri is involved
-                this.mSaveToSharedPrefs = StringUtils.isNullOrEmpty(intent.getDataString());
+                this.mSaveLastUsedFilterToSharedPrefs = StringUtils.isNullOrEmpty(intent.getDataString());
             }
-
+            this.mSharedPrefKeySuffix = fixSharedPrefSuffix(this.mSharedPrefKeySuffix);
             SharedPreferences sharedPref =
-                    (this.mSaveToSharedPrefs)
+                    (this.mSaveLastUsedFilterToSharedPrefs)
                             ? PreferenceManager.getDefaultSharedPreferences(context)
                             : null;
 
             this.mGalleryContentBaseQuery = AndroidAlbumUtils.getQuery(
-                    BaseQueryActivity.this, mStatSuffix,
+                    BaseQueryActivity.this, mSharedPrefKeySuffix,
                     savedInstanceState, intent, sharedPref, dbgMessageResult);
 
             if (dbgMessageResult != null) dbgMessageResult.append("SubFilter ");
@@ -339,10 +341,10 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                 }
                 if (!found && (sharedPref != null)) {
                     found = setState(dbgMessageResult, " from-SharedPrefs: ",
-                                sharedPref.getString(STATE_SUB_FILTER + mStatSuffix, null),
-                                sharedPref.getInt(STATE_DirQueryID + mStatSuffix, this.getDirQueryID()),
-                                sharedPref.getInt(STATE_SortID + mStatSuffix, this.mCurrentSortID),
-                                sharedPref.getBoolean(STATE_SortAscending + mStatSuffix, this.mCurrentSortAscending),
+                                sharedPref.getString(STATE_SUB_FILTER + mSharedPrefKeySuffix, null),
+                                sharedPref.getInt(STATE_DirQueryID + mSharedPrefKeySuffix, this.getDirQueryID()),
+                                sharedPref.getInt(STATE_SortID + mSharedPrefKeySuffix, this.mCurrentSortID),
+                                sharedPref.getBoolean(STATE_SortAscending + mSharedPrefKeySuffix, this.mCurrentSortAscending),
                                 sharedPref.getInt(STATE_SUB_FILTR_MODE, this.mCurrentSubFilterMode));
                 }
             } else  {
@@ -403,22 +405,22 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
         }
 
         private void saveToSharedPrefs(Context context) {
-            if (mSaveToSharedPrefs) {
+            if (mSaveLastUsedFilterToSharedPrefs) {
                 // SubFilterSettings, DirQueryID, SortID, SortAscending, SubFilterMode
                 SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
                 SharedPreferences.Editor edit = sharedPref.edit();
 
                 if (getCurrentSubFilterSettings() != null) {
-                    edit.putString(STATE_SUB_FILTER + mStatSuffix, getCurrentSubFilterSettings().toString());
+                    edit.putString(STATE_SUB_FILTER + mSharedPrefKeySuffix, getCurrentSubFilterSettings().toString());
                 }
 
-                edit.putInt(STATE_DirQueryID + mStatSuffix, this.getDirQueryID());
-                edit.putInt(STATE_SortID + mStatSuffix, this.mCurrentSortID);
-                edit.putBoolean(STATE_SortAscending + mStatSuffix, this.mCurrentSortAscending);
+                edit.putInt(STATE_DirQueryID + mSharedPrefKeySuffix, this.getDirQueryID());
+                edit.putInt(STATE_SortID + mSharedPrefKeySuffix, this.mCurrentSortID);
+                edit.putBoolean(STATE_SortAscending + mSharedPrefKeySuffix, this.mCurrentSortAscending);
                 edit.putInt(STATE_SUB_FILTR_MODE, this.mCurrentSubFilterMode);
 
                 if ((mGalleryQueryParameter != null) && (mGalleryQueryParameter.mGalleryContentBaseQuery != null)) {
-                    edit.putString(EXTRA_QUERY + mStatSuffix, mGalleryQueryParameter.mGalleryContentBaseQuery.toReParseableString());
+                    edit.putString(EXTRA_QUERY + mSharedPrefKeySuffix, mGalleryQueryParameter.mGalleryContentBaseQuery.toReParseableString());
                 }
 
                 edit.apply();
@@ -474,6 +476,11 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
             if (!StringUtils.isNullOrEmpty(value)) value = prefix + value;
             return value;
         }
+    }
+
+    /** allows childclass to have their own sharedPreference names */
+    protected String fixSharedPrefSuffix(String statSuffix) {
+        return statSuffix;
     }
 
 
@@ -702,6 +709,14 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
         return true;
     }
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        Global.debugMemory(mDebugPrefix, "onCreate");
+        super.onCreate(savedInstanceState);
+        this.getContentResolver().registerContentObserver(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, true, mMediaObserverDirectory);
+        this.getContentResolver().registerContentObserver(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, true, mMediaObserverDirectory);
+    }
+
     protected void onCreateData(Bundle savedInstanceState) {
         final Intent intent = getIntent();
 
@@ -727,6 +742,16 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
         closeDialogIfNeeded();
 
     }
+
+    /**
+     * after media db change cached Directories must be recalculated
+     */
+    private final ContentObserver mMediaObserverDirectory = new ContentObserver(null) {
+        @Override
+        public void onChange(boolean selfChange) {
+            invalidateDirectories(mDebugPrefix + "#onChange from mMediaObserverDirectory");
+        }
+    };
 
     /* OnDirectoryInteractionListener */
     @Override
@@ -844,6 +869,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        this.getContentResolver().unregisterContentObserver(mMediaObserverDirectory);
         this.mGalleryQueryParameter.mGalleryContentBaseQuery = null;
         invalidateDirectories(mDebugPrefix + "#onDestroy");
     }
@@ -891,6 +917,13 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
     @Override
     public boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag) {
         return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, this, this.mGalleryQueryParameter.getCurrentSubFilterSettings());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        final boolean result = super.onCreateOptionsMenu(menu);
+        initSearchView(menu.findItem(R.id.cmd_searchbar));
+        return result;
     }
 
     protected boolean onOptionsItemSelected(MenuItem item, SelectedItems selectedItems) {
@@ -998,40 +1031,42 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
     private SearchViewWithHistory searchView = null;
 
     protected void initSearchView(MenuItem item) {
-        final SearchViewWithHistory searchView = (SearchViewWithHistory) item.getActionView();
-        this.searchView = searchView;
-        if (searchView != null) {
-            searchView.setMenuItem(item);
-            // searchView.setCursorDrawable(R.drawable.custom_cursor);
-            searchView.setEllipsize(true);
-            searchView.setOnQueryTextListener(new SearchViewWithHistory.OnQueryTextListener() {
-                @Override
-                public boolean onQueryTextSubmit(String query) {
-                    showSearchbarResult(query, "search bar submit");
-                    // Toast.makeText(FotoGalleryActivity.this, "Query: " + query, Toast.LENGTH_LONG).show();
-                    return false;
-                }
+        if (item != null) {
+            final SearchViewWithHistory searchView = (SearchViewWithHistory) item.getActionView();
+            this.searchView = searchView;
+            if (searchView != null) {
+                searchView.setMenuItem(item);
+                // searchView.setCursorDrawable(R.drawable.custom_cursor);
+                searchView.setEllipsize(true);
+                searchView.setOnQueryTextListener(new SearchViewWithHistory.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextSubmit(String query) {
+                        showSearchbarResult(query, "search bar submit");
+                        // Toast.makeText(FotoGalleryActivity.this, "Query: " + query, Toast.LENGTH_LONG).show();
+                        return false;
+                    }
 
-                @Override
-                public boolean onQueryTextChange(String newText) {
-                    sendDelayed(HANDLER_FILTER_TEXT_CHANGED, HANDLER_FILTER_TEXT_DELAY);
-                    return false;
-                }
-            });
+                    @Override
+                    public boolean onQueryTextChange(String newText) {
+                        sendDelayed(HANDLER_FILTER_TEXT_CHANGED, HANDLER_FILTER_TEXT_DELAY);
+                        return false;
+                    }
+                });
 
-            searchView.setOnSearchViewListener(new SearchViewWithHistory.SearchViewListener() {
-                @Override
-                public void onSearchViewShown() {
-                    showSearchbarResult("onSearchViewShown");
-                }
+                searchView.setOnSearchViewListener(new SearchViewWithHistory.SearchViewListener() {
+                    @Override
+                    public void onSearchViewShown() {
+                        showSearchbarResult("onSearchViewShown");
+                    }
 
-                @Override
-                public void onSearchViewClosed() {
+                    @Override
+                    public void onSearchViewClosed() {
 
-                    showSearchbarResult("onSearchViewClosed");
-                    searchView.hideKeyboard(BaseQueryActivity.this.searchView.getRootView());
-                }
-            });
+                        showSearchbarResult("onSearchViewClosed");
+                        searchView.hideKeyboard(BaseQueryActivity.this.searchView.getRootView());
+                    }
+                });
+            }
         }
     }
 
