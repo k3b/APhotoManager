@@ -962,7 +962,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
                 case R.id.cmd_show_geo_as: {
                     final long imageId = getCurrentImageId();
-                    IGeoPoint _geo = FotoSql.execGetPosition(this, null, imageId);
+                    IGeoPoint _geo = FotoSql.execGetPosition(null, this,
+                            null, imageId, mDebugPrefix, "on cmd_show_geo_as");
                     final String currentFilePath = getCurrentFilePath();
                     GeoPointDto geo = new GeoPointDto(_geo.getLatitude(), _geo.getLongitude(), GeoPointDto.NO_ZOOM);
 
@@ -1057,7 +1058,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     private void cmdShowDetails(String fullFilePath, long currentImageId) {
 
-        StringBuilder countMsg = (mGalleryContentQuery == null) ? null : StringUtils.appendMessage(null, null,
+        StringBuilder countMsg = (mGalleryContentQuery == null) ? null : StringUtils.appendMessage(null,
                 getString(R.string.show_photo),
                 TagSql.getCount(this, mGalleryContentQuery));
 

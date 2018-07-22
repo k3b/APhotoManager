@@ -48,6 +48,7 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.DBUtils;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.AlbumFile;
+import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
@@ -642,7 +643,7 @@ public class FotoSql extends FotoSqlBase {
     public static String execGetFotoPath(Context context, Uri uriWithID) {
         Cursor c = null;
         try {
-            c = createCursorForQuery("execGetFotoPath", context, uriWithID.toString(), null, null, null, FotoSql.SQL_COL_PATH);
+            c = createCursorForQuery(null, "execGetFotoPath(uri)", context, uriWithID.toString(), null, null, null, FotoSql.SQL_COL_PATH);
             if (c.moveToFirst()) {
                 return DBUtils.getString(c,FotoSql.SQL_COL_PATH, null);
             }
@@ -660,7 +661,7 @@ public class FotoSql extends FotoSqlBase {
 
         Cursor c = null;
         try {
-            c = createCursorForQuery("execGetFotoPaths", context,SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
+            c = createCursorForQuery(null, "execGetFotoPaths(pathFilter)", context,SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
                         FotoSql.SQL_COL_PATH + " like ? and " + FILTER_EXPR_PRIVATE_PUBLIC,
                         new String[]{pathFilter}, FotoSql.SQL_COL_PATH, FotoSql.SQL_COL_PATH);
             while (c.moveToNext()) {
@@ -678,16 +679,16 @@ public class FotoSql extends FotoSqlBase {
         return result;
     }
 
-    public static Cursor createCursorForQuery(String dbgContext, final Context context, QueryParameter parameters, VISIBILITY visibility) {
+    public static Cursor createCursorForQuery(StringBuilder out_debugMessage, String dbgContext, final Context context, QueryParameter parameters, VISIBILITY visibility) {
         if (visibility != null) setWhereVisibility(parameters, visibility);
-        return createCursorForQuery(dbgContext, context, parameters.toFrom(), parameters.toAndroidWhere(),
+        return createCursorForQuery(out_debugMessage, dbgContext, context, parameters.toFrom(), parameters.toAndroidWhere(),
                 parameters.toAndroidParameters(), parameters.toOrderBy(),
                 parameters.toColumns()
         );
     }
 
     /** every cursor query should go through this. adds logging if enabled */
-    private static Cursor createCursorForQuery(String dbgContext, final Context context, final String from, final String sqlWhereStatement,
+    private static Cursor createCursorForQuery(StringBuilder out_debugMessage, String dbgContext, final Context context, final String from, final String sqlWhereStatement,
                                                final String[] sqlWhereParameters, final String sqlSortOrder,
                                                final String... sqlSelectColums) {
         ContentResolver resolver = context.getContentResolver();
@@ -699,19 +700,25 @@ public class FotoSql extends FotoSqlBase {
         } catch (Exception ex) {
             excpetion = ex;
         } finally {
-            if ((excpetion != null) || Global.debugEnabledSql) {
-                Log.i(Global.LOG_CONTEXT, dbgContext + ": FotoSql.createCursorForQuery: " + excpetion +
-                        "\n" +
+            if ((excpetion != null) || Global.debugEnabledSql || (out_debugMessage != null)) {
+                StringBuilder message = StringUtils.appendMessage(out_debugMessage, excpetion,
+                        dbgContext,"FotoSql.createCursorForQuery:\n" ,
                         QueryParameter.toString(sqlSelectColums, null, from, sqlWhereStatement,
-                                sqlWhereParameters, sqlSortOrder, query.getCount()), excpetion);
+                                sqlWhereParameters, sqlSortOrder, query.getCount()));
+                if (out_debugMessage == null) {
+                    Log.i(Global.LOG_CONTEXT, message.toString(), excpetion);
+                } // else logging is done my caller
             }
         }
 
         return query;
     }
 
-    public static IGeoRectangle execGetGeoRectangle(Context context, QueryParameter baseQuery,
-                                                    SelectedItems selectedItems) {
+    public static IGeoRectangle execGetGeoRectangle(StringBuilder out_debugMessage, Context context, QueryParameter baseQuery,
+                                                    SelectedItems selectedItems, Object... dbgContext) {
+        StringBuilder debugMessage = (out_debugMessage == null)
+                ? StringUtils.createDebugMessage(Global.debugEnabledSql, dbgContext)
+                : out_debugMessage;
         QueryParameter query = new QueryParameter()
                 .setID(QUERY_TYPE_UNDEFINED)
                 .addColumn(
@@ -733,17 +740,14 @@ public class FotoSql extends FotoSqlBase {
         }
         FotoSql.addWhereLatLonNotNull(query);
 
+        GeoRectangle result = null;
         Cursor c = null;
         try {
-            c = createCursorForQuery("execGetGeoRectangle", context, query, VISIBILITY.PRIVATE_PUBLIC);
+            c = createCursorForQuery(debugMessage, "execGetGeoRectangle", context, query, VISIBILITY.PRIVATE_PUBLIC);
             if (c.moveToFirst()) {
-                GeoRectangle result = new GeoRectangle();
+                result = new GeoRectangle();
                 result.setLatitude(c.getDouble(0), c.getDouble(1));
                 result.setLogitude(c.getDouble(2), c.getDouble(3));
-
-                if (Global.debugEnabledSql) {
-                    Log.i(Global.LOG_CONTEXT, "FotoSql.execGetGeoRectangle() => " + result + " from " + c.getLong(4) + " via\n\t" + query);
-                }
 
                 return result;
             }
@@ -751,18 +755,27 @@ public class FotoSql extends FotoSqlBase {
             Log.e(Global.LOG_CONTEXT, "FotoSql.execGetGeoRectangle(): error executing " + query, ex);
         } finally {
             if (c != null) c.close();
+            if (debugMessage != null) {
+                StringUtils.appendMessage(debugMessage,  "result", result);
+            }
+            if (out_debugMessage == null) {
+                Log.i(Global.LOG_CONTEXT, debugMessage.toString());
+            }
         }
-        return null;
+        return result;
     }
 
     /** gets IGeoPoint either from file if fullPath is not null else from db via id */
-    public static IGeoPoint execGetPosition(Context context, String fullPath, long id) {
+    public static IGeoPoint execGetPosition(StringBuilder out_debugMessage, Context context,
+                                            String fullPath, long id, Object... dbgContext) {
+        StringBuilder debugMessage = (out_debugMessage == null) ? StringUtils.createDebugMessage(Global.debugEnabledSql, dbgContext) : out_debugMessage;
         QueryParameter query = new QueryParameter()
         .setID(QUERY_TYPE_UNDEFINED)
                 .addColumn(SQL_COL_LAT, SQL_COL_LON)
                 .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
                 .addWhere(SQL_COL_LAT + " IS NOT NULL")
-                .addWhere(SQL_COL_LON + " IS NOT NULL");
+                .addWhere(SQL_COL_LON + " IS NOT NULL")
+                .addWhere("(" + SQL_COL_LON + " <> 0 OR " + SQL_COL_LAT + " <> 0)");
 
         if (fullPath != null) {
             query.addWhere(SQL_COL_PATH + "= ?", fullPath);
@@ -771,17 +784,24 @@ public class FotoSql extends FotoSqlBase {
             query.addWhere(FILTER_COL_PK, "" + id);
         }
 
+        GeoPoint result = null;
         Cursor c = null;
         try {
-            c = createCursorForQuery("execGetPosition", context, query, VISIBILITY.PRIVATE_PUBLIC);
+            c = createCursorForQuery(debugMessage, "execGetPosition", context, query, VISIBILITY.PRIVATE_PUBLIC);
             if (c.moveToFirst()) {
-                GeoPoint result = new GeoPoint(c.getDouble(0),c.getDouble(1));
+                result = new GeoPoint(c.getDouble(0),c.getDouble(1));
                 return result;
             }
         } catch (Exception ex) {
             Log.e(Global.LOG_CONTEXT, "FotoSql.execGetPosition: error executing " + query, ex);
         } finally {
             if (c != null) c.close();
+            if (debugMessage != null) {
+                StringUtils.appendMessage(debugMessage,  "result", result);
+            }
+            if (out_debugMessage == null) {
+                Log.i(Global.LOG_CONTEXT, debugMessage.toString());
+            } // else logging by caller
         }
         return null;
     }
@@ -802,7 +822,7 @@ public class FotoSql extends FotoSqlBase {
 
             Cursor c = null;
             try {
-                c = createCursorForQuery("execGetPathIdMap", context, query, VISIBILITY.PRIVATE_PUBLIC);
+                c = createCursorForQuery(null, "execGetPathIdMap", context, query, VISIBILITY.PRIVATE_PUBLIC);
                 while (c.moveToNext()) {
                     result.put(c.getString(1),c.getLong(0));
                 }
@@ -915,7 +935,7 @@ public class FotoSql extends FotoSqlBase {
 
         Cursor c = null;
         try {
-            c = createCursorForQuery(dbgContext, context, queryAffectedFiles, null);
+            c = createCursorForQuery(null, dbgContext, context, queryAffectedFiles, null);
             int pkColNo = c.getColumnIndex(FotoSql.SQL_COL_PK);
             int pathColNo = c.getColumnIndex(sqlColNewPathAlias);
 
@@ -1132,7 +1152,7 @@ public class FotoSql extends FotoSqlBase {
         Cursor c = null;
 
         try {
-            c = FotoSql.createCursorForQuery("getCount", context, queryModified, null);
+            c = FotoSql.createCursorForQuery(null, "getCount", context, queryModified, null);
             if (c.moveToNext()) {
                 return c.getLong(0);
             }
@@ -1150,7 +1170,7 @@ public class FotoSql extends FotoSqlBase {
         Cursor c = null;
 
         try {
-            c = FotoSql.createCursorForQuery("getSelectedfiles", context, query, VISIBILITY.PRIVATE_PUBLIC);
+            c = FotoSql.createCursorForQuery(null, "getSelectedfiles", context, query, VISIBILITY.PRIVATE_PUBLIC);
             int len = c.getCount();
             Long[] ids = new Long[len];
             String[] paths = new String[len];
@@ -1224,7 +1244,7 @@ public class FotoSql extends FotoSqlBase {
         Cursor cursor = null;
 
         try {
-            cursor = createCursorForQuery("getFileNames", context, parameters, VISIBILITY.PRIVATE_PUBLIC);
+            cursor = createCursorForQuery(null, "getFileNames", context, parameters, VISIBILITY.PRIVATE_PUBLIC);
 
             int colPath = cursor.getColumnIndex(SQL_COL_DISPLAY_TEXT);
             if (colPath == -1) colPath = cursor.getColumnIndex(SQL_COL_PATH);

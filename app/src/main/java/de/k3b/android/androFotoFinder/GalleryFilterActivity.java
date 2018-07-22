@@ -142,7 +142,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         StringBuilder dbgMessageResult = (Global.debugEnabled) ? new StringBuilder() : null;
 
         if ((dbgMessageResult != null) && (intent != null)){
-            dbgMessageResult.append(StringUtils.appendMessage(dbgMessageResult, null,
+            dbgMessageResult.append(StringUtils.appendMessage(dbgMessageResult,
                     mDebugPrefix , "onCreate", intent.toUri(Intent.URI_INTENT_SCHEME)));
         }
         setContentView(R.layout.activity_gallery_filter);
@@ -671,7 +671,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                 this,
                 getTitle().toString(),
                 asMergedQuery.toSqlString(),
-                StringUtils.appendMessage(null, null,
+                StringUtils.appendMessage(null,
                         getString(R.string.show_photo),
                         TagSql.getCount(this, asMergedQuery))
         ).show();

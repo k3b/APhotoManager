@@ -92,7 +92,8 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
         }
 
         if (AffUtils.putSelectedFiles(intent, selectedItems)) {
-            IGeoPoint initialPoint = FotoSql.execGetPosition(context, null, selectedItems.getId(0));
+            IGeoPoint initialPoint = FotoSql.execGetPosition(null, context,
+                    null, selectedItems.getId(0), context, mDebugPrefix, "showActivity");
             if (initialPoint != null) {
                 GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
 
@@ -330,7 +331,7 @@ public class MapGeoPickerActivity extends LocalizedActivity implements Common {
                 this,
                 getTitle().toString(),
                 asMergedQuery.toSqlString(),
-                StringUtils.appendMessage(null, null,
+                StringUtils.appendMessage(null,
                         getString(R.string.show_photo),
                         TagSql.getCount(this, asMergedQuery))
         ).show();

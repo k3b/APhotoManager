@@ -301,7 +301,7 @@ abstract public class MediaScanner  {
 
             Cursor c = null;
             try {
-                c = FotoSql.createCursorForQuery("renameInMediaDatabase", context, query, VISIBILITY.PRIVATE_PUBLIC);
+                c = FotoSql.createCursorForQuery(null, "renameInMediaDatabase", context, query, VISIBILITY.PRIVATE_PUBLIC);
                 int pkColNo = c.getColumnIndex(FotoSql.SQL_COL_PK);
                 int pathColNo = c.getColumnIndex(FotoSql.SQL_COL_PATH);
                 while (c.moveToNext()) {

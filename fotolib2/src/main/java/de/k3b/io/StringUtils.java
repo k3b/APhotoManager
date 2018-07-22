@@ -95,28 +95,42 @@ public class StringUtils {
         return result.toString();
     }
 
+    public static StringBuilder createDebugMessage(boolean enabled, final Object... parameters) {
+        if (enabled) return appendMessage(null, parameters);
+        return null;
+    }
+
     /**
      *  append 0..n parameters to stringbuilder
      *
      * @param resultOrNull where the data is appended to. if null a StringBuilder is created
-     * @param exceptionOrNull if not null type and message of exception
      * @param parameters all non null param-values will be appended seperated by " "
-     * @return either resultOrNull or newly created StringBuilder if resultOrNull was null
+     * @return either result or newly created StringBuilder if result was null
      */
-    public static StringBuilder appendMessage(StringBuilder resultOrNull, final Exception exceptionOrNull, final Object... parameters) {
-        if (resultOrNull == null) {
-            resultOrNull = new StringBuilder();
-        }
+    public static StringBuilder appendMessage(StringBuilder resultOrNull, final Object... parameters) {
+        StringBuilder result = (resultOrNull == null) ? new StringBuilder() : resultOrNull;
 
-        if (exceptionOrNull != null) {
-            resultOrNull.append(exceptionOrNull.getClass().getSimpleName()).append("=").append(exceptionOrNull.getMessage()).append(" ");
-        }
-        for (final Object param : parameters) {
-            if (param != null) {
-                resultOrNull.append(param.toString()).append(" ");
+        append(result, parameters);
+        return result;
+    }
+
+    private static void append(StringBuilder result, Object[] parameters) {
+        if ((result != null) && (parameters != null) && (parameters.length > 0)) {
+            result.append("(");
+            for (final Object param : parameters) {
+                if (param != null) {
+                    if (param instanceof Object[]) {
+                        append(result, (Object[]) param);
+                    } else if (param instanceof Exception) {
+                        Exception ex = (Exception) param;
+                        result.append(ex.getClass().getSimpleName()).append("=").append(ex.getMessage()).append(" ");
+                    } else {
+                        result.append(param.toString()).append(" ");
+                    }
+                }
             }
+            result.append(") ");
         }
-        return resultOrNull;
     }
 
 }

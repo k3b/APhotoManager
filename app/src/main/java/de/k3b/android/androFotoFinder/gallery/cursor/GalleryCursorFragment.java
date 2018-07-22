@@ -153,7 +153,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private boolean mNoShareError = true;
 
     /** true pick geo; false pick image */
-    private boolean mGetGeo = false;
+    private boolean mModePickGeoElsePickImaage = false;
 
     /** one of the MODE_VIEW_PICKER_XXXX */
     private int mMode = MODE_VIEW_PICKER_NONE;
@@ -372,7 +372,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             this.mMode = (intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE,false)) ? MODE_VIEW_PICK_MULTIBLE : MODE_VIEW_PICK_SINGLE;
             mMustReplaceMenue = true;
             String schema = intent.getScheme();
-            mGetGeo = ((schema != null) && ("geo".compareTo(schema) == 0));
+            mModePickGeoElsePickImaage = ((schema != null) && ("geo".compareTo(schema) == 0));
         }
 
         String path = (intent == null) ? null : intent.getStringExtra(AffUtils.EXTRA_SELECTED_ITEM_PATHS);
@@ -916,7 +916,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 ids,
                 files,
                 (mGalleryContentQuery != null) ? mGalleryContentQuery.toSqlString() : null,
-                (mGalleryContentQuery == null) ? null : StringUtils.appendMessage(null, null,
+                (mGalleryContentQuery == null) ? null : StringUtils.appendMessage(null,
                         getString(R.string.show_photo),
                         TagSql.getCount(this.getActivity(), mGalleryContentQuery))
 
@@ -1036,14 +1036,14 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private boolean onPickOk() {
         mDestDirPicker = null;
         Activity parent = getActivity();
-        Uri resultUri = getSelectedUri(parent);
+        Uri resultUri = getSelectedUri(parent, "onPickOk");
 
         if (resultUri != null) {
             final Intent intent = new Intent();
 
             // permission result.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             intent.setData(resultUri);
-            if (!mGetGeo) {
+            if (!mModePickGeoElsePickImaage) {
                 intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
 
@@ -1055,15 +1055,19 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     @Nullable
-    private Uri getSelectedUri(Activity parent) {
+    private Uri getSelectedUri(Activity parent, Object... dbgContext) {
+        StringBuilder debugMessage = StringUtils.createDebugMessage(Global.debugEnabledSql,mDebugPrefix,"getSelectedUri", dbgContext);
+
         Uri resultUri = null;
 
         SelectedItems items = getSelectedItems();
         if ((items != null) && (items.size() > 0)) {
             long id = items.first();
 
-            if (mGetGeo) {
-                IGeoPoint initialPoint = FotoSql.execGetPosition(parent, null, id);
+            if (mModePickGeoElsePickImaage) {
+                // mode pick gep
+                IGeoPoint initialPoint = FotoSql.execGetPosition(null, parent,
+                        null, id, mDebugPrefix, "getSelectedUri");
 
                 if (initialPoint != null) {
                     GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
@@ -1073,8 +1077,13 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
 
             } else {
+                // mode pick image
                 resultUri = FotoSql.getUri(id);
             }
+        }
+        if (debugMessage != null) {
+            StringUtils.appendMessage(debugMessage, "result", resultUri);
+            Log.i(Global.LOG_CONTEXT, debugMessage.toString());
         }
         return resultUri;
     }

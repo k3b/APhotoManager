@@ -170,7 +170,8 @@ public class PickerLocationMapFragment extends LocationMapFragment {
 
         Activity activity = getActivity();
         if (mMarkerId != NO_MARKER_ID) {
-            result = FotoSql.execGetPosition(activity, null, mMarkerId);
+            result = FotoSql.execGetPosition(null, activity, null, mMarkerId,
+                    mDebugPrefix,"onOk");
         }
 
         if (result == null) {

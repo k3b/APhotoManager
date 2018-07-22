@@ -498,7 +498,7 @@ public class LocationMapFragment extends DialogFragment {
 
         mSelectedItemsHandler.define(selectedItems);
         if (zoomToFit) {
-            zoomToFit(null);
+            zoomToFit(null, "defineNavigation");
         } else {
             // load this.mFolderOverlayBlueGpxMarker
             GeoRectangle increasedRrectangle = defineGpxAdditionalPoints(gpxAdditionalPointsContentUri, rectangle);
@@ -1019,14 +1019,14 @@ public class LocationMapFragment extends DialogFragment {
 
                 switch (item.getItemId()) {
                     case R.id.cmd_photo:
-                        return showPhoto(getGeoPointById(markerId, geoPosition));
+                        return showPhoto(getGeoPointById(markerId, geoPosition, "showPhoto"));
                     case R.id.cmd_gallery:
-                        return showGallery(getGeoPointById(markerId, geoPosition));
+                        return showGallery(getGeoPointById(markerId, geoPosition,"showGallery"));
                     case R.id.cmd_zoom:
-                        return zoomToFit(getGeoPointById(markerId, geoPosition));
+                        return zoomToFit(getGeoPointById(markerId, geoPosition,"on cmd zoomToFit"));
 
                     case R.id.cmd_show_geo_as: {
-                        IGeoPoint _geo = getGeoPointById(markerId, geoPosition);
+                        IGeoPoint _geo = getGeoPointById(markerId, geoPosition,"cmd_show_geo_as");
                         GeoPointDto geo = new GeoPointDto(_geo.getLatitude(), _geo.getLongitude(), GeoPointDto.NO_ZOOM);
                         geo.setId(""+markerId);
                         geo.setName("#"+markerId);
@@ -1056,7 +1056,7 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     private boolean showPhoto(IGeoPoint geoPosition) {
-        QueryParameter query = getMarkerQuery(geoPosition);
+        QueryParameter query = getQueryForPositionRectangle(geoPosition);
         FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
 
         ImageDetailActivityViewPager.showActivity(this.getActivity(), null, 0, query, 0);
@@ -1064,16 +1064,16 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     private boolean showGallery(IGeoPoint geoPosition) {
-        FotoGalleryActivity.showActivity(this.getActivity(), getMarkerQuery(geoPosition), 0);
+        FotoGalleryActivity.showActivity(this.getActivity(), getQueryForPositionRectangle(geoPosition), 0);
         return true;
     }
 
-    private boolean zoomToFit(IGeoPoint geoCenterPoint) {
-        QueryParameter baseQuery = this.mRootQuery;
+    private boolean zoomToFit(IGeoPoint geoCenterPoint, Object... dbgContext) {
+        QueryParameter baseQuery = getQueryForPositionRectangle(geoCenterPoint);
         BoundingBox BoundingBox = null;
 
-        IGeoRectangle fittingRectangle = FotoSql.execGetGeoRectangle(this.getActivity(),
-                baseQuery, null);
+        IGeoRectangle fittingRectangle = FotoSql.execGetGeoRectangle(null, this.getActivity(),
+                baseQuery, null, mDebugPrefix, "zoomToFit", dbgContext);
         double delta = getDelta(fittingRectangle);
         if ((geoCenterPoint != null) && (delta < 1e-6)) {
             BoundingBox = getMarkerBoundingBox(geoCenterPoint);
@@ -1102,7 +1102,7 @@ public class LocationMapFragment extends DialogFragment {
                 , Math.abs(fittingRectangle.getLatitudeMax() - fittingRectangle.getLatitudeMin()));
     }
 
-    private QueryParameter getMarkerQuery(IGeoPoint geoPosition) {
+    private QueryParameter getQueryForPositionRectangle(IGeoPoint geoPosition) {
         QueryParameter result = AndroidAlbumUtils.getAsMergedNewQueryParameter(mRootQuery, null);
 
         GeoRectangle rect = getRectangleFrom(new GeoRectangle(), geoPosition);
@@ -1138,9 +1138,10 @@ public class LocationMapFragment extends DialogFragment {
         return 1/groupingFactor/2;
     }
 
-    private IGeoPoint getGeoPointById(int markerId, IGeoPoint notFoundValue) {
+    private IGeoPoint getGeoPointById(int markerId, IGeoPoint notFoundValue, Object... dbgContext) {
         if (markerId != NO_MARKER_ID) {
-            IGeoPoint pos = FotoSql.execGetPosition(this.getActivity(), null, markerId);
+            IGeoPoint pos = FotoSql.execGetPosition(null, this.getActivity(),
+                    null, markerId, mDebugPrefix, "getGeoPointById", dbgContext);
             if (pos != null) {
                 return pos;
             }
