@@ -270,36 +270,6 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
             return result;
         }
 
-        private void saveInstanceState(Context context, Bundle savedInstanceState) {
-            saveSettings(context);
-
-            // save InstanceState
-            savedInstanceState.putInt(STATE_DirQueryID, this.getDirQueryID());
-            if (mCurrentSubFilterSettings != null) {
-                savedInstanceState.putString(STATE_SUB_FILTER + mStatSuffix, mCurrentSubFilterSettings.toString());
-            }
-            savedInstanceState.putInt(STATE_SortID + mStatSuffix, this.mCurrentSortID);
-            savedInstanceState.putBoolean(STATE_SortAscending + mStatSuffix, this.mCurrentSortAscending);
-            savedInstanceState.putInt(STATE_SUB_FILTR_MODE + mStatSuffix, this.mCurrentSubFilterMode);
-        }
-
-        private void saveSettings(Context context) {
-            if (mSaveToSharedPrefs) {
-                // save settings
-                SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
-                SharedPreferences.Editor edit = sharedPref.edit();
-
-                edit.putInt(STATE_DirQueryID + mStatSuffix, this.getDirQueryID());
-                edit.putInt(STATE_SortID + mStatSuffix, this.mCurrentSortID);
-                edit.putBoolean(STATE_SortAscending + mStatSuffix, this.mCurrentSortAscending);
-
-                if (getCurrentSubFilterSettings() != null) {
-                    edit.putString(STATE_SUB_FILTER + mStatSuffix, getCurrentSubFilterSettings().toString());
-                }
-                edit.apply();
-            }
-        }
-
         public boolean isGeoPick() {
             return (mStatSuffix != null) && mStatSuffix.equals(PICK_GEO_SUFFIX);
         }
@@ -355,38 +325,35 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                     savedInstanceState, intent, sharedPref, dbgMessageResult);
 
             if (dbgMessageResult != null) dbgMessageResult.append("SubFilter ");
+            boolean found = false;
             if (savedInstanceState == null) {
                 // onCreate (first call) : if intent is usefull use it else use sharedPref
-                String subFilterSettingsAsString =
-                        (intent != null)
-                                ? intent.getStringExtra(STATE_SUB_FILTER)
-                                : null;
-                if (subFilterSettingsAsString != null) {
-                    if (dbgMessageResult != null) dbgMessageResult.append(" from-Intent: ").append(subFilterSettingsAsString);
-                    this.mDirQueryID = intent.getIntExtra(STATE_DirQueryID + mStatSuffix, this.getDirQueryID());
-                    this.mCurrentSortID = intent.getIntExtra(STATE_SortID + mStatSuffix, this.mCurrentSortID);
-                    this.mCurrentSortAscending = intent.getBooleanExtra(STATE_SortAscending + mStatSuffix, this.mCurrentSortAscending);
-                    this.mCurrentSubFilterMode = intent.getIntExtra(STATE_SUB_FILTR_MODE, this.mCurrentSubFilterMode);
+                if (!found && (intent != null)) {
+
+                    found = setState(dbgMessageResult, " from-Intent: ",
+                                intent.getStringExtra(STATE_SUB_FILTER),
+                                intent.getIntExtra(STATE_DirQueryID, this.getDirQueryID()),
+                                intent.getIntExtra(STATE_SortID, this.mCurrentSortID),
+                                intent.getBooleanExtra(STATE_SortAscending, this.mCurrentSortAscending),
+                                intent.getIntExtra(STATE_SUB_FILTR_MODE, this.mCurrentSubFilterMode));
                 }
-                if ((subFilterSettingsAsString == null) && (sharedPref != null)) {
-                    subFilterSettingsAsString = sharedPref.getString(STATE_SUB_FILTER + mStatSuffix, null);
-                    GalleryFilterParameter.parse(subFilterSettingsAsString, mCurrentSubFilterSettings);
-                    if (dbgMessageResult != null) dbgMessageResult.append(" from-SharedPrefs: ").append(subFilterSettingsAsString);
-                    this.mDirQueryID = sharedPref.getInt(STATE_DirQueryID + mStatSuffix, this.getDirQueryID());
-                    this.mCurrentSortID = sharedPref.getInt(STATE_SortID + mStatSuffix, this.mCurrentSortID);
-                    this.mCurrentSortAscending = sharedPref.getBoolean(STATE_SortAscending + mStatSuffix, this.mCurrentSortAscending);
-                    this.mCurrentSubFilterMode = sharedPref.getInt(STATE_SUB_FILTR_MODE, this.mCurrentSubFilterMode);
+                if (!found && (sharedPref != null)) {
+                    found = setState(dbgMessageResult, " from-SharedPrefs: ",
+                                sharedPref.getString(STATE_SUB_FILTER + mStatSuffix, null),
+                                sharedPref.getInt(STATE_DirQueryID + mStatSuffix, this.getDirQueryID()),
+                                sharedPref.getInt(STATE_SortID + mStatSuffix, this.mCurrentSortID),
+                                sharedPref.getBoolean(STATE_SortAscending + mStatSuffix, this.mCurrentSortAscending),
+                                sharedPref.getInt(STATE_SUB_FILTR_MODE, this.mCurrentSubFilterMode));
                 }
             } else  {
                 // (savedInstanceState != null) : onCreate after screen rotation
 
-                String subFilterSettingsAsString = savedInstanceState.getString(STATE_SUB_FILTER + mStatSuffix, null);
-                GalleryFilterParameter.parse(subFilterSettingsAsString, mCurrentSubFilterSettings);
-                if (dbgMessageResult != null) dbgMessageResult.append(" from-InstanceState: ").append(subFilterSettingsAsString);
-                this.mDirQueryID = savedInstanceState.getInt(STATE_DirQueryID + mStatSuffix, this.getDirQueryID());
-                this.mCurrentSortID = savedInstanceState.getInt(STATE_SortID + mStatSuffix, this.mCurrentSortID);
-                this.mCurrentSortAscending = savedInstanceState.getBoolean(STATE_SortAscending + mStatSuffix, this.mCurrentSortAscending);
-                this.mCurrentSubFilterMode = savedInstanceState.getInt(STATE_SUB_FILTR_MODE, this.mCurrentSubFilterMode);
+                found = setState(dbgMessageResult, " from-InstanceState: ",
+                            savedInstanceState.getString(STATE_SUB_FILTER, null),
+                            savedInstanceState.getInt(STATE_DirQueryID, this.getDirQueryID()),
+                            savedInstanceState.getInt(STATE_SortID, this.mCurrentSortID),
+                            savedInstanceState.getBoolean(STATE_SortAscending, this.mCurrentSortAscending),
+                            savedInstanceState.getInt(STATE_SUB_FILTR_MODE, this.mCurrentSubFilterMode));
             }
 
             // all parameters loaded: either album, filter or path
@@ -400,10 +367,69 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
             }
         }
 
+        private boolean setState(StringBuilder dbgMessageResult, String dbgContext,
+                              String subFilterSettingsAsString, int dirQueryID, int sortID,
+                              boolean sortAscending, int subFilterMode) {
+            if (subFilterSettingsAsString != null) {
+                // SubFilterSettings, DirQueryID, SortID, SortAscending, SubFilterMode
+                GalleryFilterParameter.parse(subFilterSettingsAsString, mCurrentSubFilterSettings);
+                if (dbgMessageResult != null)
+                    dbgMessageResult.append(dbgContext).append(subFilterSettingsAsString);
+                this.mDirQueryID = dirQueryID;
+                this.mCurrentSortID = sortID;
+                this.mCurrentSortAscending = sortAscending;
+                this.mCurrentSubFilterMode = subFilterMode;
+                return true;
+            }
+            return false;
+        }
+
+        private void saveToInstanceState(Context context, Bundle savedInstanceState) {
+            saveToSharedPrefs(context);
+
+            // SubFilterSettings, DirQueryID, SortID, SortAscending, SubFilterMode
+            if (mCurrentSubFilterSettings != null) {
+                savedInstanceState.putString(STATE_SUB_FILTER, mCurrentSubFilterSettings.toString());
+            }
+            savedInstanceState.putInt(STATE_DirQueryID, this.getDirQueryID());
+            savedInstanceState.putInt(STATE_SortID, this.mCurrentSortID);
+            savedInstanceState.putBoolean(STATE_SortAscending, this.mCurrentSortAscending);
+            savedInstanceState.putInt(STATE_SUB_FILTR_MODE, this.mCurrentSubFilterMode);
+
+            if ((mGalleryQueryParameter != null) && (mGalleryQueryParameter.mGalleryContentBaseQuery != null)) {
+                savedInstanceState.putString(EXTRA_QUERY, mGalleryQueryParameter.mGalleryContentBaseQuery.toReParseableString());
+            }
+
+        }
+
+        private void saveToSharedPrefs(Context context) {
+            if (mSaveToSharedPrefs) {
+                // SubFilterSettings, DirQueryID, SortID, SortAscending, SubFilterMode
+                SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+                SharedPreferences.Editor edit = sharedPref.edit();
+
+                if (getCurrentSubFilterSettings() != null) {
+                    edit.putString(STATE_SUB_FILTER + mStatSuffix, getCurrentSubFilterSettings().toString());
+                }
+
+                edit.putInt(STATE_DirQueryID + mStatSuffix, this.getDirQueryID());
+                edit.putInt(STATE_SortID + mStatSuffix, this.mCurrentSortID);
+                edit.putBoolean(STATE_SortAscending + mStatSuffix, this.mCurrentSortAscending);
+                edit.putInt(STATE_SUB_FILTR_MODE, this.mCurrentSubFilterMode);
+
+                if ((mGalleryQueryParameter != null) && (mGalleryQueryParameter.mGalleryContentBaseQuery != null)) {
+                    edit.putString(EXTRA_QUERY + mStatSuffix, mGalleryQueryParameter.mGalleryContentBaseQuery.toReParseableString());
+                }
+
+                edit.apply();
+            }
+        }
+
         public GalleryFilterParameter getCurrentSubFilterSettings() {
             return mCurrentSubFilterSettings;
         }
 
+        // ...path, {album, +tag, ?search, #date, lat+long
         public CharSequence getValueAsTitle() {
             GalleryFilterParameter v = mCurrentSubFilterSettings;
 
@@ -422,25 +448,31 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                         result.insert(0, "...");
                         return result;
                     }
-                    case SUB_FILTER_MODE_ALBUM:
+
+                    case SUB_FILTER_MODE_ALBUM: {
                         File f = v.getPathFile();
-                        if (f != null) return f.getName();
+                        if (f != null) return getValueAsTitle("{", f.getName());
+                        return null;
+                    }
 
                     case SUB_FILTER_MODE_GEO:
                         final int lat = (int) v.getLatitudeMin();
                         final int lon = (int) v.getLogituedMin();
-                        return lat + " " + lon;
+                        return "" + lat + " " + lon;
                     case SUB_FILTER_MODE_TAG:
-                        String tags = ListUtils.toString(v.getTagsAllIncluded());
-                        if (!StringUtils.isNullOrEmpty(tags)) tags = "+" + tags;
-                        return tags;
+                        return getValueAsTitle("+",ListUtils.toString(v.getTagsAllIncluded()));
                     case SUB_FILTER_MODE_SEARCH_BAR:
-                        return v.getInAnyField();
+                        return getValueAsTitle("?",v.getInAnyField());
                     case SUB_FILTER_MODE_DATE:
-                        return v.getDatePath();
+                        return getValueAsTitle("#",v.getDatePath());
                 }
             }
             return null;
+        }
+
+        private CharSequence getValueAsTitle(String prefix, String value) {
+            if (!StringUtils.isNullOrEmpty(value)) value = prefix + value;
+            return value;
         }
     }
 
@@ -791,7 +823,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
-        this.mGalleryQueryParameter.saveInstanceState(this, savedInstanceState);
+        this.mGalleryQueryParameter.saveToInstanceState(this, savedInstanceState);
         mBookmarkController.saveState(null, savedInstanceState);
         super.onSaveInstanceState(savedInstanceState);
     }
@@ -799,7 +831,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
     @Override
     protected void onPause() {
         Global.debugMemory(mDebugPrefix, "onPause");
-        this.mGalleryQueryParameter.saveSettings(this);
+        this.mGalleryQueryParameter.saveToSharedPrefs(this);
         super.onPause();
     }
 
