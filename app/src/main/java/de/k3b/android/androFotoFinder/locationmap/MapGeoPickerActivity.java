@@ -231,13 +231,15 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
     private void cmdShowDetails() {
         final QueryParameter asMergedQuery = getAsMergedQuery();
 
+        CharSequence subQuerymTitle = getValueAsTitle(true);
         ImageDetailMetaDialogBuilder.createImageDetailDialog(
                 this,
                 getTitle().toString(),
                 asMergedQuery.toSqlString(),
                 StringUtils.appendMessage(null,
                         getString(R.string.show_photo),
-                        TagSql.getCount(this, asMergedQuery))
+                        TagSql.getCount(this, asMergedQuery)),
+                subQuerymTitle
         ).show();
     }
 

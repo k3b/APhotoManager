@@ -908,17 +908,27 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     private void cmdShowDetails() {
         SelectedItems ids = getSelectedItems();
-        String files = ((ids != null) && (ids.size() > 0)) ? mAdapter.createSelectedFiles(this.getActivity(), ids).toString().replace(",","\n") : null;
+
+        final Activity activity = this.getActivity();
+        CharSequence subQueryTypName = (activity instanceof FotoGalleryActivity)
+                ? ((FotoGalleryActivity)activity).getValueAsTitle(true)
+                : null;
+
+        String files = ((ids != null) && (ids.size() > 0)) ? mAdapter.createSelectedFiles(activity, ids).toString().replace(",","\n") : null;
         ImageDetailMetaDialogBuilder.createImageDetailDialog(
-                this.getActivity(),
+                activity,
                 getActivity().getTitle().toString(),
                 this.toString(),
                 ids,
                 files,
                 (mGalleryContentQuery != null) ? mGalleryContentQuery.toSqlString() : null,
+                StringUtils.appendMessage(null,
+                        getString(R.string.show_photo),
+                        TagSql.getCount(activity, mGalleryContentQuery)),
+                subQueryTypName,
                 (mGalleryContentQuery == null) ? null : StringUtils.appendMessage(null,
                         getString(R.string.show_photo),
-                        TagSql.getCount(this.getActivity(), mGalleryContentQuery))
+                        TagSql.getCount(activity, mGalleryContentQuery))
 
         ).show();
     }

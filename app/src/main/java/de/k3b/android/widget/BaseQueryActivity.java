@@ -432,11 +432,12 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
         }
 
         // ...path, {album, +tag, ?search, #date, lat+long
-        public CharSequence getValueAsTitle() {
+        protected CharSequence getValueAsTitle(boolean longName) {
+            final int subFilterMode = this.mCurrentSubFilterMode;
             GalleryFilterParameter v = mCurrentSubFilterSettings;
 
             if (v != null) {
-                switch (mCurrentSubFilterMode) {
+                switch (subFilterMode) {
                     case SUB_FILTER_MODE_PATH: {
                         File f = v.getPathFile();
                         if (f == null) break;
@@ -448,34 +449,45 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                             result.insert(0, f.getName());
                         }
                         result.insert(0, "...");
+                        if (longName) result.insert(0, getString(R.string.folder_menu_title));
+
                         return result;
                     }
 
                     case SUB_FILTER_MODE_ALBUM: {
                         File f = v.getPathFile();
-                        if (f != null) return getValueAsTitle("{", f.getName());
+                        if (f != null) return getValueAsTitle(longName, "{", R.string.bookmark, f.getName());
                         return null;
                     }
 
                     case SUB_FILTER_MODE_GEO:
                         final int lat = (int) v.getLatitudeMin();
                         final int lon = (int) v.getLogituedMin();
-                        return "" + lat + " " + lon;
+                        return ((longName) ? getString(R.string.area_menu_title) : "") + lat + " " + lon;
                     case SUB_FILTER_MODE_TAG:
-                        return getValueAsTitle("+",ListUtils.toString(v.getTagsAllIncluded()));
+                        return getValueAsTitle(longName, "+", R.string.tags_activity_title, ListUtils.toString(v.getTagsAllIncluded()));
                     case SUB_FILTER_MODE_SEARCH_BAR:
-                        return getValueAsTitle("?",v.getInAnyField());
+                        return getValueAsTitle(longName, "?", R.string.searchbar_menu_title, v.getInAnyField());
                     case SUB_FILTER_MODE_DATE:
-                        return getValueAsTitle("#",v.getDatePath());
+                        return getValueAsTitle(longName, "#", R.string.date_picker_menu_title, v.getDatePath());
                 }
             }
             return null;
         }
 
-        private CharSequence getValueAsTitle(String prefix, String value) {
-            if (!StringUtils.isNullOrEmpty(value)) value = prefix + value;
-            return value;
+        private  CharSequence getValueAsTitle(boolean longName, String prefix, int stringResourceId, String value) {
+            StringBuilder result = new StringBuilder();
+            if (longName && (stringResourceId != 0)) result.append(getString(stringResourceId)).append(": ");
+            if (!StringUtils.isNullOrEmpty(value)) result.append(prefix);
+            result.append(value);
+            return result;
         }
+    }
+
+    // ...path, {album, +tag, ?search, #date, lat+long
+    public CharSequence getValueAsTitle(boolean longName) {
+        if (mGalleryQueryParameter == null) return null;
+        return mGalleryQueryParameter.getValueAsTitle(longName);
     }
 
     /** allows childclass to have their own sharedPreference names */
@@ -1020,7 +1032,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
         CharSequence title = (intent == null) ? null : intent.getStringExtra(EXTRA_TITLE);
 
         if (title == null) {
-            title = mGalleryQueryParameter.getValueAsTitle();
+            title = mGalleryQueryParameter.getValueAsTitle(false);
             if (StringUtils.isNullOrEmpty(title)) title = getString(R.string.gallery_title);
         }
         if (title != null) {

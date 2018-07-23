@@ -25,6 +25,7 @@
     <string name="bookmark_delete_answer_format">Deleted album %1$s.</string>
     <string name="bookmark_delete_error_format">Cannot delete album %1$s.</string>
     <string name="bookmark_delete_question">Delete this album?</string>
+    <string name="bookmark">Album</string>
     <string name="bookmark_file_comment_format">Generated on %3$s with \'%1$s\' Version %2$s. See https://github.com/k3b/APhotoManager/wiki/intentapi#sql for details</string>
     <string name="bookmark_save_as_menu_title">Save album as &#8230;</string>
     <string name="btn_change">Change</string>
