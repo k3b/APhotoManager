@@ -511,14 +511,20 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     protected void zoomToBoundingBox(String debugContext, GeoRectangle rectangle, int zoomlevel) {
-        if ((rectangle != null) && !rectangle.isEmpty()) {
-            BoundingBox boundingBox = new BoundingBox(
-                    rectangle.getLatitudeMax(),
-                    rectangle.getLogituedMin(),
-                    rectangle.getLatitudeMin(),
-                    rectangle.getLogituedMax());
+        if (rectangle != null) {
+            if (!rectangle.isEmpty()) {
+                BoundingBox boundingBox = new BoundingBox(
+                        rectangle.getLatitudeMax(),
+                        rectangle.getLogituedMin(),
+                        rectangle.getLatitudeMin(),
+                        rectangle.getLogituedMax());
 
-            zoomToBoundingBox(debugContext, boundingBox, zoomlevel);
+                zoomToBoundingBox(debugContext, boundingBox, zoomlevel);
+            } else {
+                // rectangle is single point (size=0)
+                GeoPoint point = new GeoPoint(rectangle.getLatitudeMin(),rectangle.getLogituedMin());
+                OsmdroidUtil.zoomTo(this.mMapView, zoomlevel,point , null);
+            }
         }
     }
 
@@ -553,6 +559,8 @@ public class LocationMapFragment extends DialogFragment {
                     gpxBox.increase(Global.mapMultiselectionBoxIncreaseByProcent, Global.mapMultiselectionBoxIncreaseMinSizeInDegrees);
                 }
             } catch (IOException e) {
+				Log.w(Global.LOG_CONTEXT, mDebugPrefix + "defineGpxAdditionalPoints cannot open points from  " + gpxAdditionalPointsContentUri);
+
                 e.printStackTrace();
             }
             if (mFolderOverlayBlueGpxMarker != null) {

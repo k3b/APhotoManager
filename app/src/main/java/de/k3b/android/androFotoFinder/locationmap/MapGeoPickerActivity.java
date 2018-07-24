@@ -29,9 +29,11 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import org.osmdroid.api.IGeoPoint;
+import org.osmdroid.views.MapView;
 
 import de.k3b.android.androFotoFinder.AffUtils;
 import de.k3b.android.androFotoFinder.BookmarkController;
@@ -121,12 +123,12 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
         mBookmarkController = new BookmarkController(this);
         mBookmarkController.loadState(intent,savedInstanceState);
 
-        GeoPointDto geoPointFromIntent = getGeoPointDtoFromIntent(intent);
+        final GeoPointDto geoPointFromIntent = getGeoPointDtoFromIntent(intent);
         // no geo: from intent: use last used value
         mSaveLastUsedGeoToSharedPrefs = (geoPointFromIntent == null);
 
         final Uri uriFromIntent = intent.getData();
-        Uri additionalPointsContentUri = ((intent != null) && (geoPointFromIntent == null)) ? uriFromIntent : null;
+        final Uri additionalPointsContentUri = ((intent != null) && (geoPointFromIntent == null)) ? uriFromIntent : null;
 
         String lastGeoUri = sharedPref.getString(STATE_LAST_GEO, "geo:53,8?z=6");
         IGeoPointInfo lastGeo = mGeoUriParser.fromUri(lastGeoUri);
@@ -152,19 +154,31 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
             rectangle.setLogituedMax(initalZoom.getLongitude()).setLatitudeMax(initalZoom.getLatitude());
         } // else (savedInstanceState != null) restore after rotation. fragment takes care of restoring map pos
 
-        SelectedItems selectedItems = AffUtils.getSelectedItems(intent);
+        final SelectedItems selectedItems = AffUtils.getSelectedItems(intent);
 
         // TODO !!! #62 gpx/kml files: wie an LocatonMapFragment übergeben??
         String filter = null;
         // for debugging: where does the filter come from
         String dbgFilter = null;
 
-        boolean zoom2fit = false;
+        final boolean zoom2fit = false;
 
         onCreateData(savedInstanceState);
 
-        mMap.defineNavigation(this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery(),
-                null, geoPointFromIntent, rectangle, zoom, selectedItems, additionalPointsContentUri, zoom2fit);
+        {
+            // bugfix: first defineNavigation will not work until map is created completely
+            // so wait until then
+            // note: delayed params must be final
+            final GeoRectangle _rectangle = rectangle;
+            final int _zoom = zoom;
+            mMap.mMapView.addOnFirstLayoutListener(new MapView.OnFirstLayoutListener() {
+                @Override
+                public void onFirstLayout(View v, int left, int top, int right, int bottom) {
+                    mMap.defineNavigation(mGalleryQueryParameter.calculateEffectiveGalleryContentQuery(),
+                            null, geoPointFromIntent, _rectangle, _zoom, selectedItems, additionalPointsContentUri, zoom2fit);
+                }
+            });
+        }
     }
 
     @Override
