@@ -1,9 +1,8 @@
 Changes from 0.6.4.180321 (37) to 0.7.0 (38)
 
-* Bugfix in Geographic-Map: Zoombar and Zoom-to-fit now works with zoomfactor > 19. 
 * New Logo/Icons by Md Nazmul Hasan. 
-* #113: Added search bar in Gallery-View to fast find photos by text contained in tag, title, description, dir, filename.
-* #113: In Filter-View in field "Find": allow to search for subexpressions seperated by " " 
-* In Gallery-View: Added gobal menu "Filter by Date".
-* #115: ".album" files: edit with Filter-View; open with Geographic-Map and Gallery-View. 
-* #118: Fix: Open image via filemanager with app specific content urls (i.e. OI File Manager)
+* New Virutal Albums/".album" files: edit with Filter-View; open with Geographic-Map and Gallery-View; show in Dirpicker. 
+* Gallery-View: Added "Filter by Date"; Added search bar.
+* Openstreemap-Display: added optional path/date/tag-filter; fixed: works with zoomfactor > 19; Fixed initial zoom region. 
+* Filter-View: In field "Find": allow to search for subexpressions seperated by " " 
+* Fixed: Open image via filemanager with app specific content urls (i.e. OI File Manager)

@@ -50,29 +50,30 @@ public class OsmdroidUtil {
      */
     public static int zoomTo(MapView mapView, int zoom, IGeoPoint min, IGeoPoint max) {
         int calculatedZoom = zoom;
-        MapTileProviderBase tileProvider = mapView.getTileProvider();
-        IMapController controller = mapView.getController();
-        IGeoPoint center = min;
+        if (mapView != null) {
+            MapTileProviderBase tileProvider = mapView.getTileProvider();
+            IMapController controller = mapView.getController();
+            IGeoPoint center = min;
 
-        if (max != null) {
-            center = new GeoPoint((max.getLatitude() + min.getLatitude()) / 2, (max.getLongitude() + min.getLongitude()) / 2);
+            if (max != null) {
+                center = new GeoPoint((max.getLatitude() + min.getLatitude()) / 2, (max.getLongitude() + min.getLongitude()) / 2);
 
-            if (calculatedZoom == NO_ZOOM) {
-                // int pixels = Math.min(mapView.getWidth(), mapView.getHeight());
-                double pixels = Math.sqrt((mapView.getWidth() * mapView.getWidth()) + (mapView.getHeight() * mapView.getHeight()));
-                final double requiredMinimalGroundResolutionInMetersPerPixel
-                        = ((double) new GeoPoint(min.getLatitude(), min.getLongitude()).distanceToAsDouble(max)) / pixels;
-                calculatedZoom = calculateZoom(center.getLatitude(), requiredMinimalGroundResolutionInMetersPerPixel, getMaximumZoomLevel(tileProvider), tileProvider.getMinimumZoomLevel());
+                if (calculatedZoom == NO_ZOOM) {
+                    // int pixels = Math.min(mapView.getWidth(), mapView.getHeight());
+                    double pixels = Math.sqrt((mapView.getWidth() * mapView.getWidth()) + (mapView.getHeight() * mapView.getHeight()));
+                    final double requiredMinimalGroundResolutionInMetersPerPixel
+                            = ((double) new GeoPoint(min.getLatitude(), min.getLongitude()).distanceToAsDouble(max)) / pixels;
+                    calculatedZoom = calculateZoom(center.getLatitude(), requiredMinimalGroundResolutionInMetersPerPixel, getMaximumZoomLevel(tileProvider), tileProvider.getMinimumZoomLevel());
+                }
+            }
+            if (calculatedZoom != NO_ZOOM) {
+                controller.setZoom((double) calculatedZoom);
+            }
+
+            if (center != null) {
+                controller.setCenter(center);
             }
         }
-        if (calculatedZoom != NO_ZOOM) {
-            controller.setZoom((double) calculatedZoom);
-        }
-
-        if (center != null) {
-            controller.setCenter(center);
-        }
-
         return calculatedZoom;
     }
 
