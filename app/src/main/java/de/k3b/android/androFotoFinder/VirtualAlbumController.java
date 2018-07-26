@@ -1,6 +1,7 @@
 package de.k3b.android.androFotoFinder;
 
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.app.FragmentManager;
 
 import java.io.File;
@@ -24,17 +25,29 @@ public class VirtualAlbumController extends BookmarkController {
         mContext = context;
     }
 
+    private static class SaveAs extends SaveAsPickerFragment {
+        private final VirtualAlbumController mVirtualAlbumController;
+        private final QueryParameter mCurrentFilter;
+
+        // only needed to prevent crash on rotation
+        public SaveAs() {this(null, null, null);}
+        public SaveAs(VirtualAlbumController virtualAlbumController, final File valbum, final QueryParameter currentFilter) {
+            super(valbum);
+            this.mVirtualAlbumController = virtualAlbumController;
+            this.mCurrentFilter = currentFilter;
+        }
+        @Override
+        protected void onFilePick(File pickedOrCreatedFile) {
+            if (mVirtualAlbumController != null) mVirtualAlbumController.onSaveAsVirutalAlbumAnswer(pickedOrCreatedFile, mCurrentFilter);
+        }
+    }
     // workflow onSaveAsVirutalAlbumQuestion-onSaveAsVirutalAlbumAnswer-onSaveAsVirutalAlbumAllowOverwriteAnswer
-    public void onSaveAsVirutalAlbumQuestion(final File valbum, final QueryParameter currentFilter) {
-        SaveAsPickerFragment dirDialog = new SaveAsPickerFragment(valbum) {
-            @Override
-            protected void onFilePick(File pickedOrCreatedFile) {
-                onSaveAsVirutalAlbumAnswer(pickedOrCreatedFile, currentFilter);
-            }
-        };
+    public DialogFragment onSaveAsVirutalAlbumQuestion(final File valbum, final QueryParameter currentFilter) {
+        SaveAs dirDialog = new SaveAs(this, valbum, currentFilter);
 
         final FragmentManager manager = this.mContext.getFragmentManager();
         dirDialog.show(manager, DLG_SAVE_AS_TAG);
+        return dirDialog;
     }
 
     // workflow onSaveAsVirutalAlbumQuestion-onSaveAsVirutalAlbumAnswer-onSaveAsVirutalAlbumAllowOverwriteAnswer

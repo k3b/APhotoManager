@@ -20,6 +20,8 @@
 package de.k3b.android.androFotoFinder;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -263,7 +265,8 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                 if (valbum == null) {
                     valbum = new File(OsUtils.getDefaultPhotoRoot(), getString(R.string.mk_dir_default) + AlbumFile.SUFFIX_VALBUM);
                 }
-                mBookmarkController.onSaveAsVirutalAlbumQuestion(valbum, getAsMergedQuery());
+                DialogFragment dlg = mBookmarkController.onSaveAsVirutalAlbumQuestion(valbum, getAsMergedQuery());
+                setAutoClose(dlg, null, null);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

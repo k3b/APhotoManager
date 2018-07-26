@@ -57,16 +57,12 @@ public abstract class SaveAsPickerFragment extends DirectoryPickerFragment {
 
     public SaveAsPickerFragment(File path) {
         this.path = path;
-        this.extension = FileUtils.getExtension(path.getName());
+        if (path != null) {
+            this.extension = FileUtils.getExtension(path.getName());
 
-        OSDirectory root = OsUtils.getRootOSDirectory(new OSDirOrVirtualAlbumFile(null,null,null));
-        this.defineDirectoryNavigation(root, FotoSql.QUERY_TYPE_UNDEFINED,FileUtils.tryGetCanonicalPath(path, null) );
-
-        // Supply index input as an argument.
-        // Bundle args = new Bundle();
-        // args.putBoolean("move", move);
-        // AffUtils.putSelectedFiles(args, srcFotos);
-        // f.setArguments(args);
+            OSDirectory root = OsUtils.getRootOSDirectory(new OSDirOrVirtualAlbumFile(null, null, null));
+            this.defineDirectoryNavigation(root, FotoSql.QUERY_TYPE_UNDEFINED, FileUtils.tryGetCanonicalPath(path, null));
+        }
     }
 
     /* do not use activity callback */
