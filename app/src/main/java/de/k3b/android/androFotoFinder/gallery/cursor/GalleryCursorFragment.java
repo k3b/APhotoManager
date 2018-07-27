@@ -19,12 +19,16 @@
  
 package de.k3b.android.androFotoFinder.gallery.cursor;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.LoaderManager;
+import android.content.ClipData;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.annotation.NonNull;
@@ -80,6 +84,7 @@ import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.ListUtils;
 import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
@@ -114,6 +119,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private static final int MODE_VIEW_PICKER_NONE = 0;
     private static final int MODE_VIEW_PICK_SINGLE = 1;
     private static final int MODE_VIEW_PICK_MULTIBLE = 2;
+
+    private static final boolean SUPPORT_MULTISELECTION = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN);
 
     private static int nextLoaderID = 100;
     private int loaderID = -1;
@@ -1050,14 +1057,15 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private boolean onPickOk() {
         mDestDirPicker = null;
         Activity parent = getActivity();
-        Uri resultUri = getSelectedUri(parent, "onPickOk");
+        List<Uri> resultUri = getSelectedUri(parent, "onPickOk");
 
-        if (resultUri != null) {
+        if ((resultUri != null) && (resultUri.size() > 0)) {
             final Intent intent = new Intent();
 
-            // permission result.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            intent.setData(resultUri);
+            intent.setData(resultUri.get(0));
+            addAsClip(intent, parent.getContentResolver(), resultUri);
             if (!mModePickGeoElsePickImaage) {
+                // permission result.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
 
@@ -1068,36 +1076,63 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         return true;
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    private void addAsClip(Intent intent, ContentResolver contentResolver, List<Uri> resultUri) {
+        if (SUPPORT_MULTISELECTION && (resultUri.size() > 1)) {
+            ClipData clip = null;
+            for (Uri uri : resultUri) {
+                ClipData clipData = ClipData.newUri(contentResolver, uri.toString(), uri);
+                if (clip == null) {
+                    clip = clipData;
+                } else  {
+                    clip.addItem(clipData.getItemAt(0));
+                }
+                intent.setClipData(clip);
+            }
+        }
+    }
+
     @Nullable
-    private Uri getSelectedUri(Activity parent, Object... dbgContext) {
+    private List<Uri> getSelectedUri(Activity parent, Object... dbgContext) {
         StringBuilder debugMessage = StringUtils.createDebugMessage(Global.debugEnabledSql,mDebugPrefix,"getSelectedUri", dbgContext);
 
-        Uri resultUri = null;
+        List<Uri> resultUri = null;
 
         SelectedItems items = getSelectedItems();
         if ((items != null) && (items.size() > 0)) {
             long id = items.first();
 
-            if (mModePickGeoElsePickImaage) {
-                // mode pick gep
-                IGeoPoint initialPoint = FotoSql.execGetPosition(null, parent,
-                        null, id, mDebugPrefix, "getSelectedUri");
-
-                if (initialPoint != null) {
-                    GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
-
-                    resultUri = Uri.parse(PARSER.toUriString(new GeoPointDto(initialPoint.getLatitude(),initialPoint.getLongitude(), IGeoPointInfo.NO_ZOOM)));
-                }
-
-
-            } else {
-                // mode pick image
-                resultUri = FotoSql.getUri(id);
+            if (resultUri == null) {
+                resultUri = new ArrayList<Uri>();
             }
+            resultUri.add(getUri(parent, id));
         }
         if (debugMessage != null) {
-            StringUtils.appendMessage(debugMessage, "result", resultUri);
+
+            StringUtils.appendMessage(debugMessage, "result",
+                    ListUtils.toString(" ", resultUri));
             Log.i(Global.LOG_CONTEXT, debugMessage.toString());
+        }
+        return resultUri;
+    }
+
+    private Uri getUri(Activity parent, long id) {
+        Uri resultUri = null;
+        if (mModePickGeoElsePickImaage) {
+            // mode pick gep
+            IGeoPoint initialPoint = FotoSql.execGetPosition(null, parent,
+                    null, id, mDebugPrefix, "getSelectedUri");
+
+            if (initialPoint != null) {
+                GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
+
+                resultUri = Uri.parse(PARSER.toUriString(new GeoPointDto(initialPoint.getLatitude(),initialPoint.getLongitude(), IGeoPointInfo.NO_ZOOM)));
+            }
+
+
+        } else {
+            // mode pick image
+            resultUri = FotoSql.getUri(id);
         }
         return resultUri;
     }
