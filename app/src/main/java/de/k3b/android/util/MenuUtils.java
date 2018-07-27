@@ -68,6 +68,19 @@ public class MenuUtils {
             if (sub != null) sub.setShowAsActionFlags(SHOW_AS_ACTION_NEVER);
         }
     }
+    /**
+     * For api convinience: remove 0, 1 or more menuitems by id
+     * @param menu where items are removed from
+     * @param menuIds 0 or more menu-ids to be modified.
+     */
+    public static void removeItems(Menu menu, int... menuIds) {
+        if ((menu != null) && (menuIds != null)) {
+            for (int menuId: menuIds) {
+                menu.removeItem(menuId);
+            }
+        }
+
+    }
 
     public static void changeShowAsActionFlags(EditText edit, final int actionEnum, final int... menuIds) {
         ActionMode.Callback callback = new ActionMode.Callback() {

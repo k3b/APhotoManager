@@ -139,6 +139,14 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        if (mGalleryGui instanceof GalleryCursorFragment) {
+            this.mSelectedItems = ((GalleryCursorFragment) mGalleryGui).getSelectedItems();
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         Global.debugMemory(mDebugPrefix, "onDestroy start");
         super.onDestroy();

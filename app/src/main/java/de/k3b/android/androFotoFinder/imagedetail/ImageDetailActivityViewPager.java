@@ -830,7 +830,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     private void defineMenu(Menu menu) {
         if (LockScreen.isLocked(this)) {
             getMenuInflater().inflate(R.menu.menu_image_detail_locked, menu);
-            LockScreen.fixMenu(menu);
+            LockScreen.removeDangerousCommandsFromMenu(menu);
 
         } else {
             getMenuInflater().inflate(R.menu.menu_image_detail, menu);

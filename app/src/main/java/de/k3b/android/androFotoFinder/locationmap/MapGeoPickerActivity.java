@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -78,6 +79,10 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
     private GeoUri mGeoUriParser = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
 
     private BookmarkController mBookmarkController = null;
+
+    // lockscreen support
+    private boolean locked = false; // if != Global.locked : must update menu
+    private boolean mMustReplaceMenue = false;
 
     public static void showActivity(Activity context, SelectedFiles selectedItems,
                                     QueryParameter query, int requestCode) {
@@ -182,12 +187,51 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+
+        // if lock mode has changed redefine menu
+        final boolean locked = LockScreen.isLocked(this);
+        if (this.locked != locked) {
+            this.locked = locked;
+            mMustReplaceMenue = true;
+            invalidateOptionsMenu();
+        }
+    }
+
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(LockScreen.isLocked(this) ? R.menu.menu_map_context_locked :  R.menu.menu_map_geo_picker, menu);
-        AboutDialogPreference.onPrepareOptionsMenu(this, menu);
-
+        mMustReplaceMenue = true;
+        fixOptionsMenu(menu);
         return true;
+    }
+
+        @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+
+        // if lock mode has changed redefine menu
+        fixOptionsMenu(menu);
+        return true;
+    }
+
+    private void fixOptionsMenu(Menu menu) {
+        final boolean locked = LockScreen.isLocked(this);
+        if (mMustReplaceMenue || (locked != this.locked)) {
+            mMustReplaceMenue = false;
+            this.locked = locked;
+            menu.clear();
+            MenuInflater inflater = getMenuInflater();
+
+            if (locked) {
+                inflater.inflate(R.menu.menu_locked, menu);
+                LockScreen.removeDangerousCommandsFromMenu(menu);
+            } else {
+                inflater.inflate(R.menu.menu_map_geo_picker, menu);
+
+            }
+            AboutDialogPreference.onPrepareOptionsMenu(this, menu);
+        }
     }
 
     @Override

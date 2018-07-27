@@ -309,6 +309,11 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         Global.debugMemory(mDebugPrefix, "onResume");
         loadLastFilter();
         super.onResume();
+        if (LockScreen.isLocked(this)) {
+            // filter is forbidden when locked. Might occur via
+            //    gallery -> filter -> dir-pick -> openInNew Gallery -> exit
+            finish();
+        }
     }
 
     private void loadLastFilter() {

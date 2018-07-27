@@ -77,6 +77,7 @@ import de.k3b.android.util.DBUtils;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.OsUtils;
 import de.k3b.android.util.ResourceUtils;
+import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.StringUtils;
@@ -770,10 +771,10 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
      * 	    * R.menu.menu_gallery_multiselect_mode_all R.menu.menu_image_commands
      * 	* locked		name lock folder map menu
      * 	    * (no multiselection, no base-filters)
-     * 	    * (this.locked; R.menu.menu_gallery_locked)
+     * 	    * (this.locked; R.menu.menu_locked)
      * 	* searchbar	    bar cancel-searc-bar (folder) (map) (tags) (filter) menu
      * 	* picker-locked
-     * 	    * R.menu.menu_gallery_pick R.menu.menu_gallery_locked
+     * 	    * R.menu.menu_gallery_pick R.menu.menu_locked
      * 	* picker-non-locked     selected ok cancel filter settings
      * 	    * R.menu.menu_gallery_pick  R.menu.menu_gallery_non_multiselect
      *
@@ -796,9 +797,12 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             if (mMode == MODE_VIEW_PICKER_NONE) {
                 //
                 if (locked) { // view-locked
-                    mSelectedItems.clear();
-                    inflater.inflate(R.menu.menu_gallery_locked, menu);
-                    LockScreen.fixMenu(menu);
+                    if (isMultiSelectionActive()) {
+                        clearSelections();
+                    }
+                    inflater.inflate(R.menu.menu_locked, menu);
+                    LockScreen.removeDangerousCommandsFromMenu(menu);
+                    AboutDialogPreference.onPrepareOptionsMenu(getActivity(), menu);
                 } else if (this.isMultiSelectionActive()) { // view-multiselect
                     inflater.inflate(R.menu.menu_gallery_multiselect_mode_all, menu);
 
@@ -823,12 +827,12 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
             } else { // picker mode
                 inflater.inflate(R.menu.menu_gallery_pick, menu);
-                if (locked) { // pick-locked
-                    mSelectedItems.clear();
-                    inflater.inflate(R.menu.menu_gallery_locked, menu);
-                } else { // pick-single/multible
+                if (!locked) {
                     inflater.inflate(R.menu.menu_gallery_non_multiselect, menu);
+                } else { // pick-locked
+                  LockScreen.removeDangerousCommandsFromMenu(menu);
                 }
+                AboutDialogPreference.onPrepareOptionsMenu(getActivity(), menu);
             }
             mMenuRemoveAllSelected = menu.findItem(R.id.cmd_selection_remove_all);
         }
