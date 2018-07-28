@@ -707,7 +707,7 @@ public class FotoSql extends FotoSqlBase {
                                 sqlWhereParameters, sqlSortOrder, query.getCount()));
                 if (out_debugMessage == null) {
                     Log.i(Global.LOG_CONTEXT, message.toString(), excpetion);
-                } // else logging is done my caller
+                } // else logging is done by caller
             }
         }
 
@@ -757,9 +757,9 @@ public class FotoSql extends FotoSqlBase {
             if (c != null) c.close();
             if (debugMessage != null) {
                 StringUtils.appendMessage(debugMessage,  "result", result);
-            }
-            if (out_debugMessage == null) {
-                Log.i(Global.LOG_CONTEXT, debugMessage.toString());
+                if (out_debugMessage == null) {
+                    Log.i(Global.LOG_CONTEXT, debugMessage.toString());
+                }
             }
         }
         return result;
