@@ -51,7 +51,7 @@ public class ImageDetailMetaDialogBuilder {
 
     public static Dialog createImageDetailDialog(Activity context, String filePath, long imageId,
                                                  QueryParameter query,
-                                                 long offset) {
+                                                 long offset, Object... moreBlocks) {
         StringBuilder result = new StringBuilder();
         result
                 .append(imageId)
@@ -59,6 +59,15 @@ public class ImageDetailMetaDialogBuilder {
                 .append("\n");
         appendExifInfo(result, context, filePath, imageId);
         appendQueryInfo(result, query, offset);
+
+        if ((moreBlocks != null) && (moreBlocks.length > 0)) {
+            for (Object subBlock : moreBlocks) {
+                if (subBlock != null) {
+                    append(result,"\n");
+                    append(result, subBlock.toString());
+                }
+            }
+        }
         return createImageDetailDialog(context, filePath, result.toString());
     }
 

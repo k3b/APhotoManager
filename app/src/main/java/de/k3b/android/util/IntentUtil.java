@@ -58,6 +58,7 @@ public class IntentUtil implements Common {
             if ((scheme == null) || ("file".equals(scheme))) {
                 path = uri.getPath();
             } else if ("content".equals(scheme)) {
+                // try to translate via media db
                 path = FotoSql.execGetFotoPath(context, uri);
                 if (path != null) {
                     if (Global.debugEnabled) {
@@ -65,9 +66,20 @@ public class IntentUtil implements Common {
                                 "' to '" + path + "'");
                     }
                 } else {
-                    Log.i(Global.LOG_CONTEXT, "Cannot translate from '" + uri +
-                            "' to local file");
+                    // #118 try to translate from app specific content uri
+                    // i.e. "OI file manager" uses "content://org.openintents.filemanager/%2Fstorage%2Femulated%2F0%2FDCIM%2F%F0%9F%93%B8test%2F180122mytest001.jpg"
+                    path = uri.getPath();
                 }
+            }
+
+            // #118 app specific content uri convert from //storage/emulated/0/DCIM/... to /storage/emulated/0/DCIM/
+            if ((path != null) && (path.startsWith("//"))) path = path.substring(1);
+            final File file = getExistingFileOrNull(path);
+
+            if (file == null) {
+                path = null;
+                Log.i(Global.LOG_CONTEXT, "Cannot translate from '" + uri +
+                        "' to local file");
             }
         }
         return path;
@@ -88,20 +100,39 @@ public class IntentUtil implements Common {
     /** return null if uri is not a valid file scheam */
     @Nullable
     public static File getFile(Uri uri) {
+        // #118: opened from "OI file manager" with app specific content uri-s i.e.
+        // "content://org.openintents.filemanager/%2Fstorage%2Femulated%2F0%2FDCIM%2F%F0%9F%93%B8test%2F180122mytest001.jpg"
         if (isFileUri(uri)) {
+            final File file = getExistingFileOrNull(uri.getPath());
+            if (file != null) return file;
+        }
+        return null;
+    }
+
+    private static File getExistingFileOrNull(String fullPath) {
+        if (fullPath != null) {
             try {
-                return new File(uri.getPath());
+                final File file = new File(fullPath);
+                if ((file != null) && (file.exists())) {
+                    return file;
+                }
             } catch (Exception ex) {
-                ; // i.e. contain illegal chars
+                Log.d(Global.LOG_CONTEXT,
+                        "Cannot open " + fullPath + " as file ");
             }
         }
         return null;
     }
 
     public static boolean isFileUri(Uri uri) {
+        return isFileOrContentUri(uri,false);
+    }
+
+    public static boolean isFileOrContentUri(Uri uri, boolean allowContent) {
         if (uri == null) return false;
         String scheme = uri.getScheme();
-        return StringUtils.isNullOrEmpty(scheme) || (0 == "file".compareTo(scheme));
+        return StringUtils.isNullOrEmpty(scheme) || (0 == "file".compareTo(scheme)
+                || (allowContent && (0 == "content".compareTo(scheme))));
     }
 
     public static boolean isFileUri(String initalFileUrl) {

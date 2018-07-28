@@ -27,6 +27,8 @@ import android.os.Build;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import de.k3b.android.util.MenuUtils;
+
 /**
  * #105: Management of app locking (aka Android "Screen"-pinning, "Kiosk Mode", "LockTask")
  * https://developer.android.com/about/versions/android-5.0.html#ScreenPinning.
@@ -75,13 +77,12 @@ public class LockScreen {
         return Global.locked;
     }
 
-    public static void fixMenu(Menu menu) {
-        if ((menu != null) && OS_APPLOCK_ENABLED) {
-            MenuItem unlock = menu.findItem(R.id.cmd_app_unpin2);
-            if (unlock != null) menu.removeItem(R.id.cmd_app_unpin2);
-
-            menu.removeItem(R.id.cmd_show_geo);
-            menu.removeItem(R.id.cmd_gallery);
+    public static void removeDangerousCommandsFromMenu(Menu menu) {
+        if (OS_APPLOCK_ENABLED) {
+            // use os-unlock method instead
+            MenuUtils.removeItems(menu,R.id.cmd_app_unpin2);
         }
+        MenuUtils.removeItems(menu,R.id.cmd_show_geo,
+                R.id.cmd_gallery, R.id.cmd_filter);
     }
 }

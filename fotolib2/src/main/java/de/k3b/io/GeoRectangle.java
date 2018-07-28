@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -33,6 +33,8 @@ public class GeoRectangle implements IGeoRectangle {
     private double logituedMin = Double.NaN;
     private double logituedMax = Double.NaN;
 
+    private boolean nonGeoOnly = false;
+
     protected static double parseLatLon(String value) {
         if ((value == null) || value.isEmpty()) return Double.NaN;
         try {
@@ -48,6 +50,7 @@ public class GeoRectangle implements IGeoRectangle {
             this.setLatitudeMin(src.getLatitudeMin());
             this.setLatitudeMax(src.getLatitudeMax());
             this.setLogituedMax(src.getLogituedMax());
+            this.setNonGeoOnly(src.isNonGeoOnly());
         }
         return this;
     }
@@ -196,6 +199,24 @@ public class GeoRectangle implements IGeoRectangle {
     private static String format(double d) {
         if (Double.isNaN(d)) return "";
         return Double.toString(d);
+    }
+
+    @Override
+    public boolean isNonGeoOnly() {
+        return nonGeoOnly;
+    }
+
+    public GeoRectangle setNonGeoOnly(boolean nonGeoOnly) {
+        this.nonGeoOnly = nonGeoOnly;
+        return this;
+    }
+
+    public void setHasGeo() {
+        if (isNonGeoOnly() || isEmpty((IGeoRectangle) this)) {
+            setNonGeoOnly(false);
+            setLogitude(-180.0, +180);
+            setLatitude(-90.0, +90.0);
+        }
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -41,6 +41,7 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.osmdroid.IconOverlay;
 import de.k3b.android.util.ResourceUtils;
+import de.k3b.database.QueryParameter;
 import de.k3b.io.collections.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
@@ -129,7 +130,16 @@ public class PickerLocationMapFragment extends LocationMapFragment {
     }
 
     /** get all important parameters for displaying the map */
-    public void defineNavigation(GalleryFilterParameter rootFilter, IGeoPointInfo selectedItem,
+    /**
+     * (re)define map display
+     * @param rootQuery if not null contain database where to limit the photo data displayed
+     * @param depricated_rootFilter should be null. if not null contain database where to limit the data displayed
+     * @param rectangle if nut null the initial visible rectange
+     * @param zoomlevel the initial zoomlevel
+     * @param selectedItems if not null: items to be displayed as blue markers
+     * @param zoomToFit true mean recalculate zoomlevel from rectangle
+     */
+    public void defineNavigation(QueryParameter rootQuery, GalleryFilterParameter depricated_rootFilter, IGeoPointInfo selectedItem,
                                  GeoRectangle rectangle, int zoomlevel,
                                  SelectedItems selectedItems, Uri additionalPointsContentUri, boolean zoomToFit) {
         IGeoPointInfo currentSelection = selectedItem;
@@ -141,7 +151,7 @@ public class PickerLocationMapFragment extends LocationMapFragment {
             currentSelection = (lastValue == null) ? null : mGeoUriEngine.fromUri(lastValue);
         }
 
-        super.defineNavigation(rootFilter, rectangle, zoomlevel, selectedItems, additionalPointsContentUri, zoomToFit);
+        super.defineNavigation(rootQuery, depricated_rootFilter, rectangle, zoomlevel, selectedItems, additionalPointsContentUri, zoomToFit);
         if (currentSelection != null) {
             updateMarker(null, NO_MARKER_ID, new GeoPoint(currentSelection.getLatitude(), currentSelection.getLongitude()), null);
         }
@@ -160,7 +170,8 @@ public class PickerLocationMapFragment extends LocationMapFragment {
 
         Activity activity = getActivity();
         if (mMarkerId != NO_MARKER_ID) {
-            result = FotoSql.execGetPosition(activity, null, mMarkerId);
+            result = FotoSql.execGetPosition(null, activity, null, mMarkerId,
+                    mDebugPrefix,"onOk");
         }
 
         if (result == null) {

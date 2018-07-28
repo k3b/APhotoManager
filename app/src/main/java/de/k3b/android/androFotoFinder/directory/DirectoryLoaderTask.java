@@ -61,14 +61,16 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
     private static final int PROGRESS_INCREMENT = 500;
 
     private final Activity context;
+    private final boolean datePickerUseDecade;
 
     // will receive debug output
     private StringBuffer mStatus = null;
 
     protected Exception mException = null;
 
-    public DirectoryLoaderTask(Activity context, String debugPrefix) {
+    public DirectoryLoaderTask(Activity context, boolean datePickerUseDecade, String debugPrefix) {
         this.context = context;
+        this.datePickerUseDecade = datePickerUseDecade;
         String combinedDebugPrefix = debugPrefix + "-DirectoryLoaderTask";
         Global.debugMemory(combinedDebugPrefix, "ctor");
 
@@ -132,7 +134,8 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
                     String path = (colText >= 0) ? cursor.getString(colText) : getLatLonPath(cursor.getDouble(colLat), cursor.getDouble(colLon));
                     if (path != null) {
                         if (colCount != -1) markerItemCount = cursor.getInt(colCount);
-                        builder.add(path, markerItemCount, cursor.getInt(colIconID));
+                        final int iconID = cursor.getInt(colIconID);
+                        addItem(builder, path, markerItemCount, iconID);
                         itemCount++;
                         if ((--increment) <= 0) {
                             publishProgress(itemCount, expectedCount);
@@ -172,6 +175,17 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
             compressLatLon(result);
         }
         return result;
+    }
+
+    protected void addItem(DirectoryBuilder builder, String path, int markerItemCount, int iconID) {
+        if (path != null) {
+            String decade = (datePickerUseDecade) ? DirectoryFormatter.getDecade(path,1) : null;
+
+            String newPath = (decade != null)
+                    ? ("/" + decade + path)
+                    : path;
+            builder.add(newPath, markerItemCount, iconID);
+        }
     }
 
     private void compressLatLon(IDirectory result) {

@@ -150,6 +150,22 @@ public class QueryParameter {
         return this;
     }
 
+    public QueryParameter clear() {
+        clearWhere();
+        clearColumns();
+        mFrom.clear();
+        mGroupBy.clear();
+        mHaving.clear();
+        mOrderBy.clear();
+        mHavingParameters.clear();
+        return this;
+    }
+
+    public QueryParameter clearColumns() {
+        mColumns.clear();
+        return this;
+    }
+
     public QueryParameter addWhere(String where, String... parameters) {
         mWhere.add(where);
         return addToList(mParameters, true, parameters);
@@ -211,7 +227,7 @@ public class QueryParameter {
      * Therefore this sql is added to the WHERE part.
      * [select ... from ... where (] [[mWhere][) GROUP BY (mGroupBy][) HAVING (mHaving]] [) ORDER BY ] [mOrderBy]*/
     public String toAndroidWhere() {
-        boolean hasWhere = Helper.isNotEmpty(mWhere);
+        boolean hasWhere = hasWhere();
         boolean hasGroup = Helper.isNotEmpty(mGroupBy);
         boolean hasHaving = Helper.isNotEmpty(mHaving);
         if (!hasWhere && !hasGroup && !hasHaving) return null;
@@ -226,6 +242,10 @@ public class QueryParameter {
         }
 
         return result.toString();
+    }
+
+    public boolean hasWhere() {
+        return Helper.isNotEmpty(mWhere);
     }
 
     public String[] toAndroidParameters() {
@@ -267,12 +287,6 @@ public class QueryParameter {
 
     /************************** end properties *********************/
 
-    public static boolean isQueryFile(String uri) {
-        if (uri != null) {
-            return uri.endsWith(SUFFIX_VALBUM) || uri.endsWith(SUFFIX_QUERY);
-        }
-        return false;
-    }
     public void save(OutputStream _out) throws IOException {
         PrintWriter writer = null;
         try {

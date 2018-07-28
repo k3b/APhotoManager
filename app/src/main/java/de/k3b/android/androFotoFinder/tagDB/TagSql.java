@@ -35,6 +35,7 @@ import java.util.List;
 import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.media.MediaContentValues;
+import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.io.GalleryFilterParameter;
@@ -157,6 +158,10 @@ public class TagSql extends FotoSql {
         }
 
 
+    }
+
+    public static QueryParameter filter2NewQuery(IGalleryFilter filter) {
+        return AndroidAlbumUtils.getAsMergedNewQueryParameter(null, filter);
     }
 
     public static void filter2QueryEx(QueryParameter resultQuery, IGalleryFilter filter, boolean clearWhereBefore) {
@@ -397,7 +402,7 @@ public class TagSql extends FotoSql {
         if (addWhereAnyOfTags(query, tags) > 0) {
             Cursor c = null;
             try {
-                c = createCursorForQuery("getTagRefCount", context, query, VISIBILITY.PRIVATE_PUBLIC);
+                c = createCursorForQuery(null, "getTagRefCount", context, query, VISIBILITY.PRIVATE_PUBLIC);
                 if (c.moveToFirst()) {
                     return c.getInt(0);
                 }
@@ -451,7 +456,7 @@ public class TagSql extends FotoSql {
 
         if (filterCount > 0) {
             try {
-                c = createCursorForQuery("loadTagWorflowItems", context, query, VISIBILITY.PRIVATE_PUBLIC);
+                c = createCursorForQuery(null, "loadTagWorflowItems", context, query, VISIBILITY.PRIVATE_PUBLIC);
                 if (c.moveToFirst()) {
                     do {
                         result.add(new TagWorflowItem(c.getLong(0), c.getString(1), TagConverter.fromString(c.getString(2)),

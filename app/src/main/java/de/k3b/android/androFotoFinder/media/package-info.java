@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -113,7 +113,68 @@ android2pc.png
     [TODO:syncAndroid]-->[TODO:syncPC] : {TODO:z}
 @enduml
 
+camera-worflow-simple.png
+@startuml
+    title Workflow Photo management Android-PC (simple)
+	package "PC" {
+        [Folder pc-in "from-android"]
+        [DigiKam]
+    }
+
+	package "Android" {
+        [Camera]
+        [Folder "camera"]
+        [Folder android-out "to-pc"]
+        ["A Photo Manager"]
+    }
+
+    [Camera] --> [Folder "camera"] #blue : {1-take}
+    [Folder "camera"] <-- ["A Photo Manager"]  #blue : {2-move}
+    [Folder "camera"] --> [Folder android-out "to-pc"] : {2-Autoprocessing:\nRename+Exif}
+
+    ["A Photo Manager"] --> [Folder android-out "to-pc"] #blue : {3-process}
+
+    [Folder android-out "to-pc"] <--> [Folder pc-in "from-android"] : {4-Syncthing}
+    [Folder pc-in "from-android"] <-- [DigiKam] #blue : {5-process}
+
+@enduml
 
 
+camera-worflow-huge.png
+@startuml
+    title Workflow Photo management Android-PC (huge)
+	package "PC" {
+        [Folder pc-in "from-android"]
+        [Folder pc "hires"]
+        [Folder pc-out "lowres"]
+        [DigiKam]
+        [IrfanView]
+    }
+
+	package "Android" {
+        [Camera]
+        [Folder "camera"]
+        [Folder android-out "to-pc"]
+        [Folder android-in "from-pc"]
+        ["A Photo Manager"]
+    }
+
+    [Camera] --> [Folder "camera"] #blue : {1-take}
+    [Folder "camera"] <-- ["A Photo Manager"]  #blue : {2-move}
+    [Folder "camera"] --> [Folder android-out "to-pc"] : {2-Autoprocessing:\nRename+Exif}
+
+    ["A Photo Manager"] --> [Folder android-out "to-pc"] #blue : {3-process}
+
+    [Folder android-out "to-pc"] --> [Folder pc-in "from-android"] : {4-Syncthing}
+    [Folder pc-in "from-android"] <-- [DigiKam] #blue : {5-process\nmove}
+    [Folder pc "hires"] <- [Folder pc-in "from-android"] : {5}
+    [Folder pc "hires"] <-- [DigiKam] #blue : {6-process}
+    [Folder pc "hires"] <-- [IrfanView] #blue : {7-resize}
+    [Folder pc-out "lowres"] <- [Folder pc "hires"] : {7}
+
+    [Folder android-in "from-pc"] <-- [Folder pc-out "lowres"] : {8b-Syncthing}
+
+    ["A Photo Manager"] --> [Folder android-in "from-pc"] #blue : {9-process}
+@enduml
 
 */

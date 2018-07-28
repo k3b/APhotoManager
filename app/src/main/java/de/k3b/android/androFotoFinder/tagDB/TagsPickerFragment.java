@@ -490,7 +490,7 @@ public class TagsPickerFragment  extends DialogFragment  {
                 ImageDetailActivityViewPager.showActivity(context, null, 0, createSubQueryByTag(parentFilter, selectedTag), 0);
                 return true;
             case R.id.cmd_gallery:
-                FotoGalleryActivity.showActivity(context, createSubFilterByTag(parentFilter, selectedTag), null, 0);
+                FotoGalleryActivity.showActivity(context, createSubQueryByTag(parentFilter, selectedTag), 0);
                 return true;
             default:break;
         }
@@ -500,8 +500,7 @@ public class TagsPickerFragment  extends DialogFragment  {
     @NonNull
     private static QueryParameter createSubQueryByTag(IGalleryFilter parentFilter, Tag selectedTag) {
         GalleryFilterParameter filter = createSubFilterByTag(parentFilter, selectedTag);
-        QueryParameter query = new QueryParameter();
-        TagSql.filter2QueryEx(query, filter, false);
+        QueryParameter query = TagSql.filter2NewQuery(filter);
         FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
         return query;
     }

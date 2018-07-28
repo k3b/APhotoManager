@@ -24,12 +24,12 @@
   <string name="about_summary">Über \"A Photo Manager%1$s\"</string>
   <string name="area_menu_title">Karten-Filter</string>
   <string name="background">Hintergrund</string>
-  <string name="bookmark_delete_answer_format">Lesezeichen %1$s gelöscht.</string>
-  <string name="bookmark_delete_error_format">Kann Lesezeichen %1$s nicht löschen.</string>
-  <string name="bookmark_delete_question">Lesezeichen löschen?</string>
+  <string name="bookmark_delete_answer_format">Album %1$s gelöscht.</string>
+  <string name="bookmark_delete_error_format">Kann Album %1$s nicht löschen.</string>
+  <string name="bookmark_delete_question">Album löschen?</string>
   <string name="bookmark_file_comment_format">Erstellt am %3$s mit \'%1$s\' Version %2$s. weitere Informationen finden Sie unter https://github.com/k3b/APhotoManager/wiki/intentapi#sql</string>
-  <string name="bookmark_load_from_menu_title">Lade Lesezeichen aus&#8230;</string>
-  <string name="bookmark_save_as_menu_title">Lesezeichen speichern unter...</string>
+  <string name="bookmark_load_from_menu_title">Lade Album aus&#8230;</string>
+  <string name="bookmark_save_as_menu_title">Album speichern unter...</string>
   <string name="btn_change">Ändern</string>
   <string name="btn_pause">Anhalten</string>
   <string name="copy_result_format">%1$d/%2$d Dateien kopiert</string>
@@ -94,7 +94,6 @@
   <string name="selected_only_menu_title">Nur ausgewählte</string>
   <string name="selection_add_all_menu_title">Auswahl: alle sichtbaren</string>
   <string name="selection_remove_menu_title">Auswahl: alle sichtbaren abwählen</string>
-  <string name="settings_bookmark_dir_title">Ordner für Lesezeichen</string>
   <string name="settings_debug_libs_summary">&#8230; Fremdkomponenten.</string>
   <string name="settings_debug_memory_title">LogCat Speicherverbrauch</string>
 
@@ -247,5 +246,6 @@ Verstecken kann über das 'Media-Scanner' Gallery-Menü rückgängig gemacht wer
   <string name="filter_menu_title_album">Virtuelles Album bearbeiten</string>
 
   <!--  depricated tags_update_result_format use image_success_update_format instead -->
+  <string name="settings_bookmark_dir_title">Ordner für Lesezeichen</string>
 
 </resources>

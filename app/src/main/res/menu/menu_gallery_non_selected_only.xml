@@ -37,6 +37,12 @@
         android:orderInCategory="2"
         android:showAsAction="ifRoom" />
 
+    <item android:id="@+id/cmd_select_date"
+        android:title="@string/date_picker_menu_title"
+        android:icon="@android:drawable/ic_menu_month"
+        android:visible="true"
+        android:orderInCategory="2"
+        android:showAsAction="ifRoom" />
 
     <item android:id="@+id/cmd_select_tag"
         android:title="@string/tags_activity_title"

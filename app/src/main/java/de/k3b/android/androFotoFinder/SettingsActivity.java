@@ -150,6 +150,8 @@ public class SettingsActivity extends PreferenceActivity {
 
         prefs.putBoolean("debugEnabledMemory", Global.debugEnabledMemory);
 
+        prefs.putBoolean("datePickerUseDecade", FotoLibGlobal.datePickerUseDecade);
+
         prefs.putBoolean("debugEnabledJpgMetaIo", FotoLibGlobal.debugEnabledJpgMetaIo);
         prefs.putBoolean("debugEnabledJpg", FotoLibGlobal.debugEnabledJpg);
 
@@ -203,6 +205,8 @@ public class SettingsActivity extends PreferenceActivity {
         Global.debugEnabledMap                  = getPref(prefs, "debugEnabledMap", Global.debugEnabledMap);
 
         Global.debugEnabledMemory               = getPref(prefs, "debugEnabledMemory", Global.debugEnabledMemory);
+
+        FotoLibGlobal.datePickerUseDecade              = getPref(prefs, "datePickerUseDecade", FotoLibGlobal.datePickerUseDecade);
 
         Global.locked                           = getPref(prefs, "locked", Global.locked);
         Global.passwordHash                     = getPref(prefs, "passwordHash", Global.passwordHash);

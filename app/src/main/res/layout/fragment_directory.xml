@@ -35,6 +35,33 @@
         android:layout_height="fill_parent"
         >
 
+        <TextView
+            android:id="@+id/lblName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:text="@string/sort_by_name"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:visibility="gone"
+            />
+        <EditText android:id="@+id/edName"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:layout_weight="1"
+            android:inputType="text"
+            android:singleLine="true"
+            android:maxLines="1"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/lblName"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignBaseline="@+id/lblName"
+            android:visibility="gone"
+
+            />
         <HorizontalScrollView
             android:id="@+id/parent_scroller"
             android:layout_width="fill_parent"
@@ -42,8 +69,7 @@
             android:scrollbars="horizontal"
             android:scrollbarSize="2dp"
             android:scrollbarStyle="insideInset"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
+            android:layout_below="@+id/edName"
             >
             <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:id="@+id/parent_owner"

@@ -42,6 +42,8 @@ import de.k3b.database.QueryParameter;
 import de.k3b.io.FileUtils;
 
 /**
+ * Handle QueryParameter mCurrentFilter in mLastBookmarkFileName
+ *
  * Created by k3b on 07.10.2015.
  */
 public class BookmarkController {
@@ -102,6 +104,7 @@ public class BookmarkController {
         }
     }
 
+    @Deprecated
     public void onSaveAsQuestion(final String name, final QueryParameter currentFilter) {
         mCurrentFilter = currentFilter;
         Dialogs dlg = new Dialogs() {
@@ -119,6 +122,7 @@ public class BookmarkController {
         }
     }
 
+    @Deprecated
     private void onSaveAsAnswer(final String fileName, boolean askToOverwrite) {
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, "onSaveAsAnswer(" + fileName +
@@ -143,18 +147,26 @@ public class BookmarkController {
                 dialog.yesNoQuestion(mContext, mContext.getString(R.string.overwrite_question_title) ,
                         mContext.getString(R.string.image_err_file_exists_format, outFile.getAbsoluteFile()));
             } else {
-                PrintWriter out = null;
-                try {
-                    out = new PrintWriter(outFile);
-                    out.println(mCurrentFilter.toReParseableString());
-                    out.close();
-                    out = null;
-                } catch (IOException err) {
-                    String errorMessage = mContext.getString(R.string.mk_err_failed_format, outFile.getAbsoluteFile());
-                    Toast.makeText(mContext, errorMessage, Toast.LENGTH_LONG).show();
-                    Log.e(Global.LOG_CONTEXT, errorMessage, err);
-                }
+                onSaveAs(outFile, mCurrentFilter);
             }
+        }
+    }
+
+    protected void onSaveAs(File outFile, final QueryParameter currentFilter) {
+        if (Global.debugEnabled) {
+            Log.d(Global.LOG_CONTEXT, "onSaveAs(" + outFile.getAbsolutePath() +
+                    ")");
+        }
+        PrintWriter out = null;
+        try {
+            out = new PrintWriter(outFile);
+            out.println(currentFilter.toReParseableString());
+            out.close();
+            out = null;
+        } catch (IOException err) {
+            String errorMessage = mContext.getString(R.string.mk_err_failed_format, outFile.getAbsoluteFile());
+            Toast.makeText(mContext, errorMessage, Toast.LENGTH_LONG).show();
+            Log.e(Global.LOG_CONTEXT, errorMessage, err);
         }
     }
 
@@ -166,29 +178,6 @@ public class BookmarkController {
             fileNameWithExt += Global.reportExt;
         }
         return new File(Global.reportDir, fileNameWithExt);
-    }
-
-    public void onLoadFromQuestion(final IQueryConsumer consumer, final QueryParameter currentFilter) {
-        mCurrentFilter = currentFilter;
-        List<String> fileNamesPlusReset = new ArrayList<String>();
-        fileNamesPlusReset.add(RESET_PREFIX + mContext.getString(R.string.bookmark_reset) + RESET_SUFFIX);
-        String[] fileNames = Global.reportDir.list(new FilenameFilter() {
-            @Override public boolean accept(File dir, String filename) {
-                return ((filename != null) && (filename.endsWith(Global.reportExt)));
-            }
-        });
-
-        if ((fileNames != null) && (fileNames.length > 0)) {
-            fileNamesPlusReset.addAll(Arrays.asList(fileNames));
-        }
-        Dialogs dlg = new Dialogs() {
-            @Override protected boolean onContextMenuItemClick(int menuItemId, int itemIndex, String[] items) {
-                return onBookmarkMenuItemClick(menuItemId, itemIndex, items);
-            }
-
-            @Override protected void onDialogResult(String fileName, Object[] parameters) {onLoadFromAnswer(fileName, consumer);}
-        };
-        dlg.pickFromStrings(mContext, mContext.getString(R.string.bookmark_load_from_menu_title), R.menu.menu_bookmark_context, fileNamesPlusReset);
     }
 
     public void onLoadFromAnswer(final String fileName, final IQueryConsumer consumer) {

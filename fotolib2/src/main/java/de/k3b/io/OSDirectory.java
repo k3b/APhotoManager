@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager
  *
@@ -43,16 +43,8 @@ public class OSDirectory implements IDirectory {
 
     private int mDirFlags = DIR_FLAG_NONE;
 
-    public OSDirectory(String current, OSDirectory parent) {
-        this(FileUtils.tryGetCanonicalFile(current), parent);
-    }
-
-    protected OSDirectory(File current, OSDirectory parent) {
-        this(current, parent, null);
-    }
-
     // protected constructor to allow unittesting with fake children
-    protected OSDirectory(File current, OSDirectory parent, List<IDirectory> childen) {
+    public OSDirectory(File current, OSDirectory parent, List<IDirectory> childen) {
         setCurrent(current);
         mParent = parent;
         mChilden = childen;
@@ -64,6 +56,11 @@ public class OSDirectory implements IDirectory {
         }
     }
 
+    /** factory method to be overwrittern by derived classes, if tree should consist of derived classes. */
+    public OSDirectory createOsDirectory(File file, IDirectory parent, List<IDirectory> children) {
+        return new OSDirectory(file, (OSDirectory) parent, children);
+    }
+
     public OSDirectory setCurrent(File current) {
         destroy();
         mCurrent = current;
@@ -71,7 +68,7 @@ public class OSDirectory implements IDirectory {
         return this;
     }
 
-    private int getCalculateFlags(File directory) {
+    protected int getCalculateFlags(File directory) {
         int result = 0;
         if ((directory != null) && (directory.isDirectory())) {
             if (new File(directory, FileUtils.MEDIA_IGNORE_FILENAME).exists()) {
@@ -133,12 +130,14 @@ public class OSDirectory implements IDirectory {
             if (files != null) {
                 for (File file : files) {
                     if ((file != null)
-                            && file.isDirectory()
                             && !file.isHidden()
                             && !file.getName().startsWith(".")
+                            && !FileUtils.isSymlinkDir(file,true)
                             // && file.canWrite() // bugfix: must be visible because writeprotected parentdir may contain writeenabled subdirs
-                            && !FileUtils.isSymlinkDir(file,true)) {
-                        mChilden.add(new OSDirectory(file, this));
+                            ) {
+                        if (isDirectory(file)) {
+                            mChilden.add(createOsDirectory(file, this, null));
+                        }
 //                    } else if (FotoLibGlobal.debugEnabled) {
 //                        logger.debug(FileUtils.getDebugString("OSDirectory.getChildren() rejected ", file));
                     }
@@ -146,6 +145,10 @@ public class OSDirectory implements IDirectory {
             }
         }
         return mChilden;
+    }
+
+    protected boolean isDirectory(File file) {
+        return file.isDirectory();
     }
 
     // package to allow unit testing
@@ -168,7 +171,7 @@ public class OSDirectory implements IDirectory {
         OSDirectory result = (OSDirectory) findChildByRelPath(children, name);
 
         if (result == null) {
-            result = new OSDirectory(file, (OSDirectory) parentDir);
+            result = root.createOsDirectory(file, (OSDirectory) parentDir, null);
             children.add(result);
         }
         return result;
@@ -270,7 +273,7 @@ public class OSDirectory implements IDirectory {
 
             if (result == null) {
                 File newChildFile = FileUtils.tryGetCanonicalFile(new File(mCurrent, newCildFolderName), null);
-                result = new OSDirectory(newChildFile, this, grandChilden);
+                result = createOsDirectory(newChildFile, this, grandChilden);
                 if (result != null) {
                     children.add(result);
                 }

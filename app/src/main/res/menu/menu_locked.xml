@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -19,20 +19,27 @@
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
  -->
+<!-- menue of gallery activity/fragment common for non multiselection mode and for multiselection mode with disabled selected-only -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="de.k3b.android.androFotoFinder.GalleryFilterActivity">
+    xmlns:tools="http://schemas.android.com/tools" tools:context=".GalleryActivity">
 
-    <item android:id="@+id/action_save_as" android:title="@string/bookmark_save_as_menu_title"
-        android:orderInCategory="200" android:showAsAction="never" android:visible="true" />
-    <item android:id="@+id/cmd_gallery" android:title="@string/show_in_gallery_menu_title"
-        android:orderInCategory="300" android:showAsAction="never" android:visible="true" />
-    <item android:id="@+id/cmd_show_geo"
-        android:title="@string/geo_show_menu_title"
+    <item android:id="@+id/cmd_app_unpin"
+        android:title="@string/menu_title_app_unpinnend"
+        android:icon="@android:drawable/ic_lock_lock"
         android:visible="true"
-        android:orderInCategory="395"
-        android:showAsAction="never" />
-    <item android:id="@+id/action_details" android:title="@string/details_menu_title"
-        android:orderInCategory="900" android:showAsAction="never" />
+        android:orderInCategory="3"
+        android:showAsAction="always" />
 
+    <item android:id="@+id/cmd_app_unpin2"
+        android:title="@string/menu_title_app_unpinnend"
+        android:icon="@android:drawable/ic_lock_lock"
+        android:visible="true"
+        android:orderInCategory="9998"
+        android:showAsAction="never" />
+
+    <item android:id="@+id/cmd_about"
+        android:title="@string/about_summary"
+        android:visible="true"
+        android:orderInCategory="10000"
+        android:showAsAction="never" />
 </menu>

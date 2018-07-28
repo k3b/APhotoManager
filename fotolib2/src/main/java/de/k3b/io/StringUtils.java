@@ -68,6 +68,11 @@ public class StringUtils {
         return null;
     }
 
+    public static String trim(CharSequence str) {
+        if (str == null) return null;
+        return str.toString().trim();
+
+    }
     public static int length(CharSequence str) {
         return (str != null) ? str.length() : 0;
     }
@@ -89,4 +94,43 @@ public class StringUtils {
 
         return result.toString();
     }
+
+    public static StringBuilder createDebugMessage(boolean enabled, final Object... parameters) {
+        if (enabled) return appendMessage(null, parameters);
+        return null;
+    }
+
+    /**
+     *  append 0..n parameters to stringbuilder
+     *
+     * @param resultOrNull where the data is appended to. if null a StringBuilder is created
+     * @param parameters all non null param-values will be appended seperated by " "
+     * @return either result or newly created StringBuilder if result was null
+     */
+    public static StringBuilder appendMessage(StringBuilder resultOrNull, final Object... parameters) {
+        StringBuilder result = (resultOrNull == null) ? new StringBuilder() : resultOrNull;
+
+        append(result, parameters);
+        return result;
+    }
+
+    private static void append(StringBuilder result, Object[] parameters) {
+        if ((result != null) && (parameters != null) && (parameters.length > 0)) {
+            result.append("(");
+            for (final Object param : parameters) {
+                if (param != null) {
+                    if (param instanceof Object[]) {
+                        append(result, (Object[]) param);
+                    } else if (param instanceof Exception) {
+                        Exception ex = (Exception) param;
+                        result.append(ex.getClass().getSimpleName()).append("=").append(ex.getMessage()).append(" ");
+                    } else {
+                        result.append(param.toString()).append(" ");
+                    }
+                }
+            }
+            result.append(") ");
+        }
+    }
+
 }

@@ -86,13 +86,6 @@ Note menu_gallery_non_multiselect-seachbar and menu_gallery_non_multiselect are 
         </menu>
     </item>
 
-    <item android:id="@+id/cmd_load_bookmark"
-        android:title="@string/bookmark_load_from_menu_title"
-        android:icon="@android:drawable/ic_menu_myplaces"
-        android:visible="true"
-        android:orderInCategory="18"
-        android:showAsAction="never" />
-
     <item android:id="@+id/cmd_settings"
         android:title="@string/settings_title"
         android:icon="@android:drawable/ic_menu_preferences"
