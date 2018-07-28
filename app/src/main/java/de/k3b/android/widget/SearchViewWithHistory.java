@@ -46,6 +46,7 @@ import android.widget.TextView;
 import java.lang.reflect.Field;
 
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.io.StringUtils;
 
 /**
  * This is the implementation of a Searchview based on
@@ -117,6 +118,14 @@ public class SearchViewWithHistory extends FrameLayout implements Filter.FilterL
         initiateView();
 
         initStyle(attrs, defStyleAttr);
+    }
+
+    // for debugging
+    @Override
+    public String toString() {
+        return StringUtils.appendMessage(null,
+                this.getClass().getSimpleName(),": open",
+                mIsSearchOpen, mUserQuery, mSavedState).toString();
     }
 
     private void initStyle(AttributeSet attrs, int defStyleAttr) {
@@ -575,6 +584,14 @@ public class SearchViewWithHistory extends FrameLayout implements Filter.FilterL
                         return new SavedState[size];
                     }
                 };
+
+        // for debugging
+        @Override
+        public String toString() {
+            return StringUtils.appendMessage(null,
+                    this.getClass().getSimpleName(),": open",isSearchOpen, query).toString();
+        }
+
     }
 
     public interface OnQueryTextListener {

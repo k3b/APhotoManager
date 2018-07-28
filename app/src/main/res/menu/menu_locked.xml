@@ -27,7 +27,7 @@
         android:title="@string/menu_title_app_unpinnend"
         android:icon="@android:drawable/ic_lock_lock"
         android:visible="true"
-        android:orderInCategory="1"
+        android:orderInCategory="3"
         android:showAsAction="always" />
 
     <item android:id="@+id/cmd_app_unpin2"

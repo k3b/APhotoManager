@@ -25,14 +25,14 @@
         android:title="@string/menu_title_app_unpinnend"
         android:icon="@android:drawable/ic_lock_lock"
         android:visible="true"
-        android:orderInCategory="1"
+        android:orderInCategory="3"
         android:showAsAction="always" />
     <item android:id="@+id/cmd_ok" android:title="@android:string/ok"
         android:icon="@drawable/ic_action_accept"
-        android:orderInCategory="1" android:showAsAction="always" android:visible="true" />
+        android:orderInCategory="2" android:showAsAction="always" android:visible="true" />
     <item android:id="@+id/cmd_cancel_pick" android:title="@android:string/cancel"
         android:icon="@drawable/ic_action_cancel"
-        android:orderInCategory="1" android:showAsAction="always" android:visible="true" />
+        android:orderInCategory="2" android:showAsAction="always" android:visible="true" />
 
     <item android:id="@+id/cmd_sort"
         android:title="@string/sort_menu_title"

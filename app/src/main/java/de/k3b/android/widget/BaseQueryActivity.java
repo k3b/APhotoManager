@@ -938,6 +938,13 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
         return result;
     }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        final boolean result = super.onPrepareOptionsMenu(menu);
+        initSearchView(menu.findItem(R.id.cmd_searchbar));
+        return result;
+    }
+
     protected boolean onOptionsItemSelected(MenuItem item, SelectedItems selectedItems) {
         // Handle presses on the action bar items
         switch (item.getItemId()) {
@@ -1078,16 +1085,24 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                         searchView.hideKeyboard(BaseQueryActivity.this.searchView.getRootView());
                     }
                 });
+                if (Global.debugEnabledViewItem) {
+                    Log.i(Global.LOG_CONTEXT, mDebugPrefix + " initSearchView " + searchView);
+                }
+
             }
         }
     }
 
     private void showSearchbarResult(String why) {
         if ((searchView != null) && (searchView.isSearchOpen()) ) {
-            showSearchbarResult(searchView.getFilterValue(), "onSearchViewClosed");
+            showSearchbarResult(searchView.getFilterValue(), why);
         }
     }
     private void showSearchbarResult(String query, String why) {
+        if (Global.debugEnabledViewItem) {
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + " showSearchbarResult(" +
+                    why + ") " + searchView);
+        }
         final GalleryFilterParameter currentSubFilterSettings = mGalleryQueryParameter.getCurrentSubFilterSettings();
         if ((mGalleryQueryParameter.mCurrentSubFilterMode != GalleryQueryParameter.SUB_FILTER_MODE_SEARCH_BAR)
                 || (0 != StringUtils.compare(query, currentSubFilterSettings.getInAnyField()))) {
@@ -1097,6 +1112,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
             if (Global.debugEnabledSql) {
                 Log.i(Global.LOG_CONTEXT, why + ": search " + query);
             }
+
             reloadGui(why);
         } else {
             if (Global.debugEnabledSql) {

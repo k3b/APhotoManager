@@ -798,10 +798,10 @@ public class FotoSql extends FotoSqlBase {
             if (c != null) c.close();
             if (debugMessage != null) {
                 StringUtils.appendMessage(debugMessage,  "result", result);
+                if (out_debugMessage == null) {
+                    Log.i(Global.LOG_CONTEXT, debugMessage.toString());
+                } // else logging by caller
             }
-            if (out_debugMessage == null) {
-                Log.i(Global.LOG_CONTEXT, debugMessage.toString());
-            } // else logging by caller
         }
         return null;
     }
