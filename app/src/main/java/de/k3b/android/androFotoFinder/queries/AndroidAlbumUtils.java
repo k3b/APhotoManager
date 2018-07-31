@@ -82,18 +82,29 @@ public class AndroidAlbumUtils implements Common {
             @NonNull Context context, @NonNull String paramNameSuffix,
             @Nullable Bundle savedInstanceState,
             @Nullable Intent intent, @Nullable SharedPreferences sharedPref,
-            @Nullable StringBuilder dbgMessageResult) {
+            StringBuilder outQueryFileUri, @Nullable StringBuilder dbgMessageResult) {
         QueryParameter result = null;
 
         if (savedInstanceState == null) {
             // onCreate (first call) : if intent is usefull use it else use sharedPref
             if (intent != null) {
+                Uri uri = IntentUtil.getUri(intent);
                 result = getQueryFromFirstMatching(
                         context,
-                        IntentUtil.getUri(intent),
-                        intent.getStringExtra(EXTRA_QUERY),
-                        intent.getStringExtra(EXTRA_FILTER),
-                        "Intent", dbgMessageResult);
+                        uri,
+                        null,
+                        null,
+                        "Intent-uri", dbgMessageResult);
+                if (result == null) {
+                    result = getQueryFromFirstMatching(
+                            context,
+                            uri,
+                            intent.getStringExtra(EXTRA_QUERY),
+                            intent.getStringExtra(EXTRA_FILTER),
+                            "Intent", dbgMessageResult);
+                } else if (outQueryFileUri !=  null) {
+                    outQueryFileUri.append(uri.toString());
+                }
             }
 
             if ((result == null) && (sharedPref != null)) {

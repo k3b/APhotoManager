@@ -20,7 +20,6 @@
 package de.k3b.android.androFotoFinder;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.Intent;
@@ -152,7 +151,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         onCreateButtos();
 
         final QueryParameter query = AndroidAlbumUtils.getQuery(this, "",
-                savedInstanceState, intent, null, dbgMessageResult);
+                savedInstanceState, intent, null, null, dbgMessageResult);
         setQueryAndFilter(query);
 
         if (dbgMessageResult != null) {

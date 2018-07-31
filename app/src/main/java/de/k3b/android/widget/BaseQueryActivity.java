@@ -148,6 +148,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
          * Filter = basefilter + mCurrentSubFilterMode
          */
         private int mCurrentSubFilterMode = SUB_FILTER_MODE_NONE;
+        private String mAlbumName = null;
 
         /**
          * mCurrentSubFilterMode defines which of the Filter parameters define the current visible items
@@ -322,9 +323,10 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                             ? PreferenceManager.getDefaultSharedPreferences(context)
                             : null;
 
+            StringBuilder uriQueryFile = new StringBuilder();
             this.mGalleryContentBaseQuery = AndroidAlbumUtils.getQuery(
                     BaseQueryActivity.this, mSharedPrefKeySuffix,
-                    savedInstanceState, intent, sharedPref, dbgMessageResult);
+                    savedInstanceState, intent, sharedPref, uriQueryFile, dbgMessageResult);
 
             if (dbgMessageResult != null) dbgMessageResult.append("SubFilter ");
             boolean found = false;
@@ -364,8 +366,20 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                 if (dbgMessageResult != null) dbgMessageResult.append(" no query in parameters-use defaults ");
             }
 
+            if (uriQueryFile.length() > 0) {
+                this.setAlbum(uriQueryFile.toString());
+            }
+
             if (dbgMessageResult != null) {
                 Log.i(Global.LOG_CONTEXT, mDebugPrefix + dbgMessageResult.toString());
+            }
+        }
+
+        private void setAlbum(String uriQueryFile) {
+            Uri uri = (uriQueryFile == null) ? null : Uri.parse(uriQueryFile);
+            if (uri != null) {
+                this.mAlbumName = uri.getLastPathSegment();
+                this.mCurrentSubFilterMode = SUB_FILTER_MODE_ALBUM;
             }
         }
 
@@ -455,8 +469,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                     }
 
                     case SUB_FILTER_MODE_ALBUM: {
-                        File f = v.getPathFile();
-                        if (f != null) return getValueAsTitle(longName, "{", R.string.bookmark, f.getName());
+                        if (this.mAlbumName != null) return getValueAsTitle(longName, "{", R.string.bookmark, this.mAlbumName);
                         return null;
                     }
 
@@ -912,7 +925,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                 }
                 mBookmarkController.loadState(intent, null);
                 onBaseFilterChanged(AndroidAlbumUtils.getQuery(
-                        this, "", null, intent, null, null)
+                        this, "", null, intent, null, null, null)
                         , mDebugPrefix + "#onActivityResult from GalleryFilterActivity");
                 break;
             default:
