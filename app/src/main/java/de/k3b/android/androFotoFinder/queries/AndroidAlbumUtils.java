@@ -134,9 +134,7 @@ public class AndroidAlbumUtils implements Common {
         if (!StringUtils.isNullOrEmpty(path)) {
             // #118 app specific content uri convert
             // from {content://approvider}//storage/emulated/0/DCIM/... to /storage/emulated/0/DCIM/
-            while (path.startsWith("//")) {
-                path = path.substring(1);
-            }
+            path = FileUtils.fixPath(path);
 
             if ((context != null) && AlbumFile.isQueryFile(path)) {
                 try {

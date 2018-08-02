@@ -294,4 +294,14 @@ public class FileUtils {
     }
 
 
+    // #118 app specific content uri convert
+    // from {content://approvider}//storage/emulated/0/DCIM/... to /storage/emulated/0/DCIM/
+    public static String fixPath(String path) {
+        if (path != null) {
+            while (path.startsWith("//")) {
+                path = path.substring(1);
+            }
+        }
+        return path;
+    }
 }

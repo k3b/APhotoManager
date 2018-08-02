@@ -34,9 +34,15 @@ public class AlbumFile {
         }
         return false;
     }
+    public static boolean isQueryFile(File uri) {
+        if (uri != null) {
+            return isQueryFile(uri.getName());
+        }
+        return false;
+    }
     public static File getQueryFileOrNull(String uri) {
         if (isQueryFile(uri)) {
-            File result = new File(uri);
+            File result = new File(FileUtils.fixPath(uri));
             if ((result != null) && result.isFile() && result.exists()) return result;
         }
         return null;
