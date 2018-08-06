@@ -28,13 +28,10 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
+import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.Dialogs;
@@ -163,6 +160,12 @@ public class BookmarkController {
             out.println(currentFilter.toReParseableString());
             out.close();
             out = null;
+
+            AndroidAlbumUtils.insertToMediaDB(
+                    ".saveAlbumAs",
+                    mContext,
+                    outFile);
+
         } catch (IOException err) {
             String errorMessage = mContext.getString(R.string.mk_err_failed_format, outFile.getAbsoluteFile());
             Toast.makeText(mContext, errorMessage, Toast.LENGTH_LONG).show();

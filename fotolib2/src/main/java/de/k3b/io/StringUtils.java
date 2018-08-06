@@ -77,6 +77,18 @@ public class StringUtils {
         return (str != null) ? str.length() : 0;
     }
 
+    public static int charCount(CharSequence str, char c) {
+        int len = length(str);
+        int result = 0;
+        for (int i=0; i < len;i++) {
+            if (str.charAt(i) == c) {
+                result++;
+            }
+        }
+
+        return result;
+    }
+
     public static boolean isNullOrEmpty(CharSequence str) {
         return (0 == length(str));
     }

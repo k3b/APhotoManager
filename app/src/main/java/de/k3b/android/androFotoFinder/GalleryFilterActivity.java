@@ -335,6 +335,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 
         loadLastFilter(sharedPref, FotoSql.QUERY_TYPE_GROUP_ALBUM);
+        loadLastFilter(sharedPref, FotoSql.QUERY_TYPE_GALLERY);
         loadLastFilter(sharedPref, FotoSql.QUERY_TYPE_GROUP_DATE);
         loadLastFilter(sharedPref, FotoSql.QUERY_TYPE_GROUP_PLACE);
     }
@@ -856,17 +857,25 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
     public void onDirectoryPick(final String selectedAbsolutePath, int queryTypeId) {
         closeDialogIfNeeded();
 
-        File selectedAlbumFile = AlbumFile.getQueryFileOrNull(selectedAbsolutePath);
+        File selectedAlbumFile = AlbumFile.getExistingQueryFileOrNull(selectedAbsolutePath);
         if (selectedAlbumFile != null) {
             // selection was an album file
             final String selectedAlbumPath = selectedAlbumFile.getPath();
-            setQueryAndFilter(AndroidAlbumUtils.getQueryFromUri(this, Uri.fromFile(selectedAlbumFile), null));
-            if (Global.debugEnabled) {
-                Log.d(Global.LOG_CONTEXT, mDebugPrefix + ".onDirectoryPick loading album "
-                        + selectedAlbumPath);
-            }
+            setQueryAndFilter(AndroidAlbumUtils.getQueryFromUri(mDebugPrefix + ".onDirectoryPick loading album "
+                    + selectedAlbumPath, this, Uri.fromFile(selectedAlbumFile), null));
             mBookmarkController.setlastBookmarkFileName(selectedAlbumPath);
             mLastSelectedAlbumDir = selectedAlbumPath; //??electedAlbumFile.getParent();
+        } else if (AlbumFile.isQueryFile(selectedAbsolutePath)) {
+            // album does not exist (any more) rescan
+            AndroidAlbumUtils.albumMediaScan(mDebugPrefix + " onAlbumPick not found in filesystem => ",
+                    this, new File(selectedAbsolutePath), 1);
+
+            getOrCreateDirInfo(FotoSql.QUERY_TYPE_GROUP_ALBUM).directoryRoot = null;
+            getOrCreateDirInfo(FotoSql.QUERY_TYPE_GALLERY).directoryRoot = null;
+            // user has to reopen
+
+            // finish();
+
         } else {
             // selection was a path (os-dir or date)
             mLastSelectedAlbumDir = null;

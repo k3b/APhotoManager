@@ -304,4 +304,11 @@ public class FileUtils {
         }
         return path;
     }
+
+    public static File getFirstExistingDir(File root) {
+        while ((root != null) && (!root.exists() || !root.isDirectory())) {
+            root = root.getParentFile();
+        }
+        return root;
+    }
 }

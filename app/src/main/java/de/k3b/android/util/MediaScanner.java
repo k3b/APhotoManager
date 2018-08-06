@@ -235,7 +235,9 @@ abstract public class MediaScanner  {
         if ((currentJpgFile != null) && currentJpgFile.exists() && currentJpgFile.canRead()) {
             ContentValues values = createDefaultContentValues();
             getExifFromFile(values, currentJpgFile);
-            Long result = FotoSql.insertOrUpdateMediaDatabase(dbgContext, context, dbUpdateFilterJpgFullPathName, values, updateSuccessValue);
+            Long result = FotoSql.insertOrUpdateMediaDatabase(
+                    dbgContext, context, dbUpdateFilterJpgFullPathName,
+                    values, VISIBILITY.PRIVATE_PUBLIC, updateSuccessValue);
 
             return result;
         }

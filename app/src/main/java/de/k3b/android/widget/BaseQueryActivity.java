@@ -248,7 +248,9 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                         final String path = currentSubFilterSettings.getPath();
                         if (!StringUtils.isNullOrEmpty(path)) {
                             Uri uri = Uri.fromFile(new File(path));
-                            QueryParameter albumQuery = AndroidAlbumUtils.getQueryFromUri(BaseQueryActivity.this, uri, null);
+                            QueryParameter albumQuery = AndroidAlbumUtils.getQueryFromUri(
+                                    mDebugPrefix + " calculateEffectiveGalleryContentQuery ",
+                                    BaseQueryActivity.this, uri, null);
                             if (albumQuery != null) {
                                 result.getWhereFrom(albumQuery, true);
                             } else if (MediaScanner.isNoMedia(path, MediaScanner.DEFAULT_SCAN_DEPTH)) {
@@ -843,12 +845,12 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
 
                 reloadGui(why);
             } else if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_PATH) {
-                File queryFile = AlbumFile.getQueryFileOrNull(selectedAbsolutePath);
+                File queryFile = AlbumFile.getExistingQueryFileOrNull(selectedAbsolutePath);
                 if (queryFile != null) {
                     final String why = "FotoGalleryActivity.navigate to virtual album ";
                     Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath);
 
-                    QueryParameter albumQuery = AndroidAlbumUtils.getQueryFromUri(this, Uri.fromFile(queryFile), null);
+                    QueryParameter albumQuery = AndroidAlbumUtils.getQueryFromUri(mDebugPrefix + " navigateTo ", this, Uri.fromFile(queryFile), null);
                     if (albumQuery != null) {
                         this.mGalleryQueryParameter.mGalleryContentBaseQuery = albumQuery;
                         this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_ALBUM;

@@ -64,6 +64,7 @@ import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.AlbumFile;
+import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryNavigator;
@@ -542,11 +543,11 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                     if (!canonicalPath.endsWith("/")) canonicalPath+="/";
 
                     String sqlWhereLink = FotoSql.SQL_COL_PATH + " like '" + linkPath + "%'";
-                    SelectedFiles linkFiles = FotoSql.getSelectedfiles(context, sqlWhereLink);
+                    SelectedFiles linkFiles = FotoSql.getSelectedfiles(context, sqlWhereLink, VISIBILITY.PRIVATE_PUBLIC);
 
                     String sqlWhereCanonical = FotoSql.SQL_COL_PATH + " in (" + linkFiles.toString() + ")";
                     sqlWhereCanonical = sqlWhereCanonical.replace(linkPath,canonicalPath);
-                    SelectedFiles canonicalFiles = FotoSql.getSelectedfiles(context, sqlWhereCanonical);
+                    SelectedFiles canonicalFiles = FotoSql.getSelectedfiles(context, sqlWhereCanonical, VISIBILITY.PRIVATE_PUBLIC);
                     HashMap<String, String> link2canonical = new HashMap<String, String>();
                     for(String cann : canonicalFiles.getFileNames()) {
                         link2canonical.put(linkPath + cann.substring(canonicalPath.length()), cann);

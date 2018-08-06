@@ -19,6 +19,8 @@
 package de.k3b.io;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by k3b on 17.04.2018.
@@ -40,11 +42,28 @@ public class AlbumFile {
         }
         return false;
     }
-    public static File getQueryFileOrNull(String uri) {
+    public static File getExistingQueryFileOrNull(String uri) {
         if (isQueryFile(uri)) {
             File result = new File(FileUtils.fixPath(uri));
             if ((result != null) && result.isFile() && result.exists()) return result;
         }
         return null;
+    }
+
+    /** return all album files as absolute path */
+    public static List<String> getFilePaths(List<String> result, File root, int subDirLevels) {
+        if (result == null) result = new ArrayList<String>();
+
+        if ((root != null) && !FileUtils.isSymlinkDir(root,false) && root.isDirectory()) {
+            for (File file : root.listFiles()) {
+                if (file.isDirectory() && (subDirLevels > 1)) {
+                    getFilePaths(result, file, subDirLevels - 1);
+                } else if (isQueryFile((file))) {
+                    String path = FileUtils.tryGetCanonicalPath(file, null);
+                    result.add(path);
+                }
+            }
+        }
+        return result;
     }
 }

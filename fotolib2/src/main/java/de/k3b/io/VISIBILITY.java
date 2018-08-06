@@ -28,9 +28,13 @@ import java.util.List;
 import de.k3b.FotoLibGlobal;
 
 public enum VISIBILITY {
+    /** take from current settings */
     DEFAULT(0),
+    /** private only */
     PRIVATE(1),
+    /** public only */
     PUBLIC(2),
+    /** private and public images but not other files like album-files */
     PRIVATE_PUBLIC(3);
 
     // #100: if photo has this tag it has visibility PRIVATE
