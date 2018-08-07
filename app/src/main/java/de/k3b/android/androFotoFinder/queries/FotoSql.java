@@ -1338,6 +1338,13 @@ public class FotoSql extends FotoSqlBase {
         return paths;
     }
 
+    public static int execRename(Context context, String oldFullPath, String newFullPath) {
+        ContentValues values = new ContentValues();
+        values.put(SQL_COL_PATH, newFullPath);
+        return FotoSql.execUpdate("rename file", context, oldFullPath,
+                values, null);
+    }
+
     public static class CursorLoaderWithException extends CursorLoader {
         private final QueryParameter query;
         private Exception mException;

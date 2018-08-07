@@ -215,8 +215,13 @@ public class AndroidFileCommands extends FileCommands {
 
         if (destDirFile != null) {
             destDirFile.getParentFile().mkdirs();
+            boolean isDir = srcDirFile.isDirectory();
             if (srcDirFile.renameTo(destDirFile)) {
-                modifyCount = FotoSql.execRenameFolder(this.mContext, srcDirFile.getAbsolutePath() + "/", destDirFile.getAbsolutePath() + "/");
+                if (isDir) {
+                    modifyCount = FotoSql.execRenameFolder(this.mContext, srcDirFile.getAbsolutePath() + "/", destDirFile.getAbsolutePath() + "/");
+                } else {
+                    modifyCount = FotoSql.execRename(mContext, srcDirFile.getAbsolutePath(), destDirFile.getAbsolutePath());
+                }
                 if (modifyCount < 0) {
                     destDirFile.renameTo(srcDirFile); // error: undo change
                     return -1;
