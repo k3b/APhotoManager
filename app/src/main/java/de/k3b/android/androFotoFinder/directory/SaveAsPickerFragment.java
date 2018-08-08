@@ -132,6 +132,7 @@ public abstract class SaveAsPickerFragment extends DirectoryPickerFragment {
             // close dialog and return to caller
             super.onDirectoryPick(result);
             onFilePick(new File(result.getAbsolute()));
+            this.notifyDataSetChanged();
             dismiss();
         }
     }

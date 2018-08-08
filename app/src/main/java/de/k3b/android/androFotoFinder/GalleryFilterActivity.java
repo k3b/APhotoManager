@@ -282,6 +282,8 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                 }
                 DialogFragment dlg = mBookmarkController.onSaveAsVirutalAlbumQuestion(valbum, getAsMergedQuery());
                 setAutoClose(dlg, null, null);
+                invalidatePathData();
+
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -870,18 +872,18 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             AndroidAlbumUtils.albumMediaScan(mDebugPrefix + " onAlbumPick not found in filesystem => ",
                     this, new File(selectedAbsolutePath), 1);
 
-            getOrCreateDirInfo(FotoSql.QUERY_TYPE_GROUP_ALBUM).directoryRoot = null;
-            getOrCreateDirInfo(FotoSql.QUERY_TYPE_GALLERY).directoryRoot = null;
-            // user has to reopen
-
-            // finish();
-
+            invalidatePathData();
         } else {
             // selection was a path (os-dir or date)
             mLastSelectedAlbumDir = null;
             FotoSql.set(mFilter, selectedAbsolutePath, queryTypeId);
             toGui(mFilter);
         }
+    }
+
+    private void invalidatePathData() {
+        getOrCreateDirInfo(FotoSql.QUERY_TYPE_GROUP_ALBUM).directoryRoot = null;
+        getOrCreateDirInfo(FotoSql.QUERY_TYPE_GALLERY).directoryRoot = null;
     }
 
     /** interface DirectoryPickerFragment.invalidateDirectories not used */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -165,7 +165,6 @@ public class BookmarkController {
                     ".saveAlbumAs",
                     mContext,
                     outFile);
-
         } catch (IOException err) {
             String errorMessage = mContext.getString(R.string.mk_err_failed_format, outFile.getAbsoluteFile());
             Toast.makeText(mContext, errorMessage, Toast.LENGTH_LONG).show();
@@ -211,91 +210,4 @@ public class BookmarkController {
             }
         }
     }
-
-    protected boolean onBookmarkMenuItemClick(int menuItemId, int itemIndex, String[] items) {
-        if ((itemIndex > 0) && (itemIndex < items.length)) {
-            switch (menuItemId) {
-                case R.id.action_save_as:
-                    onSaveAsQuestion(mLastBookmarkFileName, mCurrentFilter); return true;
-                case R.id.action_edit:
-                    return onEdit(getFile(items[itemIndex]));
-                case R.id.menu_item_rename:
-                    return onRenameQuestion(items[itemIndex], items[itemIndex]);
-                case R.id.cmd_delete:
-                    return onDeleteQuestion(itemIndex, items);
-                default:break;
-            }
-        } // ignore index 0 = reset.
-        return false;
-    }
-
-    private boolean onEdit(File file) {
-        Intent sendIntent = new Intent();
-        IntentUtil.setDataAndTypeAndNormalize(sendIntent, Uri.fromFile(file), "text/plain");
-        sendIntent.setAction(Intent.ACTION_EDIT);
-        mContext.startActivity(sendIntent);
-        return true;
-    }
-
-    private boolean onRenameQuestion(String _newName, final String oldName) {
-        if (_newName == null) return false;
-
-        String newName = (_newName.endsWith(Global.reportExt))
-                ? _newName.substring(0, _newName.length() - Global.reportExt.length())
-                : _newName;
-
-        Dialogs dialog = new Dialogs() {
-            @Override
-            protected void onDialogResult(String newFileName, Object... parameters) {
-                if (newFileName != null) {
-                    onRenameAnswer(newFileName, oldName);
-                }
-            }
-        };
-        dialog.editFileName(mContext, mContext.getString(R.string.rename_menu_title), newName);
-        return true;
-    }
-
-    private void onRenameAnswer(String newFileName, String oldName) {
-        if ((newFileName != null) || (newFileName.length() > 0)) { //  || (oldName.compareToIgnoreCase(newFileName) == 0)) {
-            File from = getFile(oldName);
-            File to = getFile(newFileName);
-
-            if ((from.getAbsolutePath().compareToIgnoreCase(to.getAbsolutePath()) != 0) && !to.exists()) {
-                from.renameTo(to);
-            }
-        }
-    }
-
-    private boolean onDeleteQuestion(final int itemIndex, final String[] items) {
-        Dialogs dlg = new Dialogs() {
-            @Override protected void onDialogResult(String result, Object[] parameters) {
-                if (result != null) {
-                    onDeleteAnswer(getFile(items[itemIndex]), itemIndex, items);
-                }
-            }
-        };
-
-        dlg.yesNoQuestion(mContext, items[itemIndex], mContext.getString(R.string.bookmark_delete_question));
-        return true;
-    }
-
-    private void onDeleteAnswer(File file, int itemIndex, String[] items) {
-        if (file.exists() && file.delete()) {
-            String message = mContext.getString(R.string.bookmark_delete_answer_format, file.getAbsoluteFile() );
-            Toast.makeText(mContext,
-                     message,
-                    Toast.LENGTH_LONG).show();
-            Log.d(Global.LOG_CONTEXT, message);
-            items[itemIndex] = null;
-        } else {
-            String message = mContext.getString(R.string.bookmark_delete_error_format, file.getAbsoluteFile() );
-            Toast.makeText(mContext,
-                    message,
-                    Toast.LENGTH_LONG).show();
-            Log.d(Global.LOG_CONTEXT, message);
-
-        }
-    }
-
 }
