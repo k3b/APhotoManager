@@ -165,6 +165,7 @@ public class BookmarkController {
                     ".saveAlbumAs",
                     mContext,
                     outFile);
+            GalleryFilterPathState.saveAsPreference(mContext, Uri.fromFile(outFile), null);
         } catch (IOException err) {
             String errorMessage = mContext.getString(R.string.mk_err_failed_format, outFile.getAbsoluteFile());
             Toast.makeText(mContext, errorMessage, Toast.LENGTH_LONG).show();

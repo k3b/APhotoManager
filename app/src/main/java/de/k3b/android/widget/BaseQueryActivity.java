@@ -44,6 +44,7 @@ import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.BookmarkController;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.GalleryFilterActivity;
+import de.k3b.android.androFotoFinder.GalleryFilterPathState;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.LockScreen;
 import de.k3b.android.androFotoFinder.R;
@@ -593,15 +594,24 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                     Log.e(Global.LOG_CONTEXT, mDebugPrefix + " this.mDirQueryID undefined "
                             + mGalleryQueryParameter.mDirQueryID);
                 }
+                // if not loaded yet
             } else {
+                // if loaded
                 mMustShowNavigator = false;
                 final FragmentManager manager = getFragmentManager();
                 DirectoryPickerFragment dirDialog = new DirectoryPickerFragment();
 
-                // (DirectoryPickerFragment) manager.findFragmentByTag(DLG_NAVIGATOR_TAG);
                 dirDialog.setContextMenuId(LockScreen.isLocked(context) ? 0 : R.menu.menu_context_dirpicker);
 
                 String initialPath = mGalleryQueryParameter.getCurrentSubFilterSettings().getPath();
+
+                if ((initialPath == null) && (!loadDate)) {
+                    initialPath = new GalleryFilterPathState()
+                            .load(BaseQueryActivity.this,
+                                    null,null)
+                            .getPathDefault(null);
+                }
+
                 if ((initialPath != null) && (initialPath.endsWith("%"))) {
                     initialPath = initialPath.substring(0,initialPath.length() - 1);
                 }
@@ -845,6 +855,9 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
 
                 reloadGui(why);
             } else if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_PATH) {
+                GalleryFilterPathState state = new GalleryFilterPathState()
+                        .load(BaseQueryActivity.this,
+                                null,null);
                 File queryFile = AlbumFile.getExistingQueryFileOrNull(selectedAbsolutePath);
                 if (queryFile != null) {
                     final String why = "FotoGalleryActivity.navigate to virtual album ";
@@ -855,6 +868,10 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                         this.mGalleryQueryParameter.mGalleryContentBaseQuery = albumQuery;
                         this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_ALBUM;
                         currentSubFilterSettings.setPath(selectedAbsolutePath);
+
+                        state.setLastPath(queryFile.getParent());
+                        state.setAlbum(Uri.fromFile(queryFile));
+
                         reloadGui(why);
                     }
                 } else {
@@ -864,11 +881,14 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                     currentSubFilterSettings.setPath(selectedAbsolutePath + "/%");
                     this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_PATH;
                     this.mGalleryQueryParameter.mDirQueryID = queryTypeId;
+                    state.setLastPath(selectedAbsolutePath);
                     setTitle();
 
                     reloadGui(why);
                 }
-            }
+                state.save(this, null);
+
+            } // if SUB_FILTER_MODE_PATH
         }
     }
 

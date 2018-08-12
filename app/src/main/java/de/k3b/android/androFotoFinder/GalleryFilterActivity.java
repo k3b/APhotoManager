@@ -87,7 +87,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
     private static final String DLG_SAVE_AS_TAG = "GalleryFilterActivitySaveAs";
     private static final String SETTINGS_KEY = "GalleryFilterActivity-";
     private static final String LAST_SELECTED_DIR_KEY = "mLastSelectedAlbumDir";
-    
+
     private static final String WILDCARD = "%";
     private static final int SAVE_AS_VALBUM_PICK = 9921;
 
@@ -103,6 +103,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
 
     private HistoryEditText mHistory;
 
+    private GalleryFilterPathState mGalleryFilterPathState = null;
     private VirtualAlbumController mBookmarkController = null;
 
     /** set while dir picker is active */
@@ -132,8 +133,9 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         fromGui(mFilter);
         AndroidAlbumUtils.saveFilterAndQuery(this, null, null, savedInstanceState, mFilter, mQueryWithoutFilter);
 
-        mBookmarkController.saveState(null, savedInstanceState);
         savedInstanceState.putString(LAST_SELECTED_DIR_KEY, mLastSelectedAlbumDir);
+
+        mGalleryFilterPathState.save(this, savedInstanceState);
 
         super.onSaveInstanceState(savedInstanceState);
     }
@@ -144,6 +146,8 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         super.onCreate(savedInstanceState);
         final Intent intent = getIntent();
 
+        mGalleryFilterPathState = new GalleryFilterPathState().load(this, intent,
+                savedInstanceState);
         // for debugging: where does the filter come from
         StringBuilder dbgMessageResult = (Global.debugEnabled) ? new StringBuilder() : null;
 
@@ -164,7 +168,6 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         }
 
         mBookmarkController = new VirtualAlbumController(this);
-        mBookmarkController.loadState(intent,savedInstanceState);
 
         if (savedInstanceState != null) {
             mLastSelectedAlbumDir = savedInstanceState.getString(LAST_SELECTED_DIR_KEY);
@@ -190,6 +193,12 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             @Override
             public void onClick(View v) {
                 String path = (mLastSelectedAlbumDir != null) ? mLastSelectedAlbumDir : getAsGalleryFilter().getPath();
+
+                if (path == null) {
+                   mGalleryFilterPathState.load(GalleryFilterActivity.this,
+                                null, null)
+                            .getPathDefault(null);
+                }
                 if (path != null) path = path.replaceAll("%","");
                 showDirectoryPickerForFilterParamValue(
                         mDebugPrefix + " path picker " + path,
@@ -275,11 +284,9 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
 
 
             case R.id.action_save_as:
+                mGalleryFilterPathState.load(this,null,null);
                 // mBookmarkController.onSaveAsQuestion(mBookmarkController.getlastBookmarkFileName(), getAsQuery());
-                File valbum = mBookmarkController.getlastBookmarkFile();
-                if (valbum == null) {
-                    valbum = new File(OsUtils.getDefaultPhotoRoot(), getString(R.string.mk_dir_default) + AlbumFile.SUFFIX_VALBUM);
-                }
+                File valbum = mGalleryFilterPathState.getSaveAlbumAs(getString(R.string.mk_dir_default), AlbumFile.SUFFIX_VALBUM);
                 DialogFragment dlg = mBookmarkController.onSaveAsVirutalAlbumQuestion(valbum, getAsMergedQuery());
                 setAutoClose(dlg, null, null);
                 invalidatePathData();
@@ -858,6 +865,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
     @Override
     public void onDirectoryPick(final String selectedAbsolutePath, int queryTypeId) {
         closeDialogIfNeeded();
+        mGalleryFilterPathState.load(this, null, null);
 
         File selectedAlbumFile = AlbumFile.getExistingQueryFileOrNull(selectedAbsolutePath);
         if (selectedAlbumFile != null) {
@@ -865,6 +873,8 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             final String selectedAlbumPath = selectedAlbumFile.getPath();
             setQueryAndFilter(AndroidAlbumUtils.getQueryFromUri(mDebugPrefix + ".onDirectoryPick loading album "
                     + selectedAlbumPath, this, Uri.fromFile(selectedAlbumFile), null));
+            mGalleryFilterPathState.setAlbum(Uri.fromFile(selectedAlbumFile));
+            mGalleryFilterPathState.setLastPath(selectedAlbumFile.getParent());
             mBookmarkController.setlastBookmarkFileName(selectedAlbumPath);
             mLastSelectedAlbumDir = selectedAlbumPath; //??electedAlbumFile.getParent();
         } else if (AlbumFile.isQueryFile(selectedAbsolutePath)) {
@@ -872,11 +882,15 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             AndroidAlbumUtils.albumMediaScan(mDebugPrefix + " onAlbumPick not found in filesystem => ",
                     this, new File(selectedAbsolutePath), 1);
 
+            mGalleryFilterPathState.setLastPath(selectedAlbumFile.getParent());
             invalidatePathData();
         } else {
             // selection was a path (os-dir or date)
             mLastSelectedAlbumDir = null;
             FotoSql.set(mFilter, selectedAbsolutePath, queryTypeId);
+            if (queryTypeId == FotoSql.QUERY_TYPE_GROUP_ALBUM) {
+                mGalleryFilterPathState.setLastPath(selectedAbsolutePath);
+            }
             toGui(mFilter);
         }
     }

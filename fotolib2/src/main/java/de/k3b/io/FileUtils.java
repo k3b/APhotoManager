@@ -311,4 +311,16 @@ public class FileUtils {
         }
         return root;
     }
+
+    public static File getFirstNonExistingFile(File parentDir, String newFilePrefix, int number, String newFileSuffix) {
+        if (parentDir == null) return null;
+
+        parentDir.mkdirs();
+        File candidate = new File(parentDir, newFilePrefix + newFileSuffix);
+        while (candidate.exists()) {
+            candidate = new File(parentDir, newFilePrefix + number + newFileSuffix);
+            number ++;
+        }
+        return candidate;
+    }
 }
