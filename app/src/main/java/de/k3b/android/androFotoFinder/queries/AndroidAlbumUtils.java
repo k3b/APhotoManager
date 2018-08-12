@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,7 +38,9 @@ import java.util.List;
 import java.util.Map;
 
 import de.k3b.android.androFotoFinder.Common;
+import de.k3b.android.androFotoFinder.GalleryFilterPathState;
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
@@ -373,6 +376,29 @@ public class AndroidAlbumUtils implements Common {
             result += FotoSql.deleteMedia(dbgMessage + "delete-obsolete", context, removed, false);
         }
         return result;
+    }
+
+    public static void saveAs(Context context, File outFile, final QueryParameter currentFilter) {
+        if (Global.debugEnabled) {
+            Log.d(Global.LOG_CONTEXT, "onSaveAs(" + outFile.getAbsolutePath() + ")");
+        }
+        PrintWriter out = null;
+        try {
+            out = new PrintWriter(outFile);
+            out.println(currentFilter.toReParseableString());
+            out.close();
+            out = null;
+
+            AndroidAlbumUtils.insertToMediaDB(
+                    ".saveAlbumAs",
+                    context,
+                    outFile);
+            GalleryFilterPathState.saveAsPreference(context, Uri.fromFile(outFile), null);
+        } catch (IOException err) {
+            String errorMessage = context.getString(R.string.mk_err_failed_format, outFile.getAbsoluteFile());
+            Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show();
+            Log.e(Global.LOG_CONTEXT, errorMessage, err);
+        }
     }
 
 }

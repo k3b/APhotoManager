@@ -7,25 +7,26 @@ import android.app.FragmentManager;
 import java.io.File;
 
 import de.k3b.android.androFotoFinder.directory.SaveAsPickerFragment;
+import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
 
 /**
  * Encapsulates logic to handle virtual albums (former known as Bookmarks)
  *
- * Created by EVE on 21.05.2018.
+ * Created by k3b on 21.05.2018.
  */
 
-public class VirtualAlbumController extends BookmarkController {
-    public static final String DLG_SAVE_AS_TAG = "GalleryFilterActivitySaveAs";
+public class VirtualAlbumController  {
+    public static final String DLG_SAVE_ALBUM_AS = "GalleryFilterActivitySaveAs";
     private final Activity mContext;
 
     public VirtualAlbumController(Activity context) {
-        super(context);
+        super();
         mContext = context;
     }
 
-    private static class SaveAs extends SaveAsPickerFragment {
+    public static class SaveAs extends SaveAsPickerFragment {
         private final VirtualAlbumController mVirtualAlbumController;
         private final QueryParameter mCurrentFilter;
 
@@ -46,7 +47,7 @@ public class VirtualAlbumController extends BookmarkController {
         SaveAs dirDialog = new SaveAs(this, valbum, currentFilter);
 
         final FragmentManager manager = this.mContext.getFragmentManager();
-        dirDialog.show(manager, DLG_SAVE_AS_TAG);
+        dirDialog.show(manager, DLG_SAVE_ALBUM_AS);
         return dirDialog;
     }
 
@@ -81,11 +82,6 @@ public class VirtualAlbumController extends BookmarkController {
 
     // workflow onSaveAsVirutalAlbumQuestion-onSaveAsVirutalAlbumAnswer-onSaveAsVirutalAlbumAllowOverwriteAnswer
     private void onSaveAsVirutalAlbumAllowOverwriteAnswer(File valbum, final QueryParameter currentFilter) {
-        onSaveAs(valbum, currentFilter);
-    }
-
-    public File getlastBookmarkFile() {
-        String name = getlastBookmarkFileName();
-        return name == null ? null : new File(name);
+        AndroidAlbumUtils.saveAs(mContext, valbum, currentFilter);
     }
 }

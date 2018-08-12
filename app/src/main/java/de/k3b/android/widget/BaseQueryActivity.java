@@ -41,7 +41,6 @@ import java.util.Date;
 import java.util.List;
 
 import de.k3b.FotoLibGlobal;
-import de.k3b.android.androFotoFinder.BookmarkController;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.GalleryFilterActivity;
 import de.k3b.android.androFotoFinder.GalleryFilterPathState;
@@ -89,19 +88,6 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
     protected String mTitleResultCount = "";
 
     protected boolean mHasEmbeddedDirPicker = false;
-
-    private BookmarkController mBookmarkController = null;
-
-    /**
-     * Called by answer from command load bookmark from
-     */
-    private final BookmarkController.IQueryConsumer mLoadBookmarkResultConsumer = new BookmarkController.IQueryConsumer() {
-        @Override
-        public void setQuery(String fileName, QueryParameter albumQuery) {
-            mBookmarkController.setlastBookmarkFileName(fileName);
-            onBaseFilterChanged(null, "#onBookmarkLoaded " + fileName);
-        }
-    };
 
     /**
      * every thing that belongs to search.
@@ -709,7 +695,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
         GalleryFilterActivity.showActivity(this,
                 null,
                 this.mGalleryQueryParameter.mGalleryContentBaseQuery,
-                mBookmarkController.getlastBookmarkFileName(), BaseQueryActivity.resultID);
+                null, BaseQueryActivity.resultID);
     }
 
     private void openTagPicker() {
@@ -757,15 +743,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
     protected void onCreateData(Bundle savedInstanceState) {
         final Intent intent = getIntent();
 
-        mBookmarkController = new BookmarkController(this);
-        mBookmarkController.loadState(intent, savedInstanceState);
-
         this.mGalleryQueryParameter.loadSettingsAndInstanceState(this, savedInstanceState);
-
-        if (this.mGalleryQueryParameter.isGeoPick()) {
-            // #76: load predefined bookmark file
-            this.mBookmarkController.onLoadFromAnswer(DEFAULT_BOOKMARKNAME_PICK_GEO, this.mLoadBookmarkResultConsumer);
-        }
     }
 
     /**
@@ -896,7 +874,6 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         this.mGalleryQueryParameter.saveToInstanceState(this, savedInstanceState);
-        mBookmarkController.saveState(null, savedInstanceState);
         super.onSaveInstanceState(savedInstanceState);
     }
 
@@ -941,11 +918,6 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
 
         switch (requestCode) {
             case BaseQueryActivity.resultID:
-                // result from Edit Basefilter
-                if (BookmarkController.isReset(intent)) {
-                    mGalleryQueryParameter.mGalleryContentBaseQuery = new QueryParameter(FotoSql.queryDetail);
-                }
-                mBookmarkController.loadState(intent, null);
                 onBaseFilterChanged(AndroidAlbumUtils.getQuery(
                         this, "", null, intent, null, null, null)
                         , mDebugPrefix + "#onActivityResult from GalleryFilterActivity");

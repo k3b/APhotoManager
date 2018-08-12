@@ -24,6 +24,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 
 import java.io.File;
@@ -118,6 +119,9 @@ public class GalleryFilterPathState {
     public File getSaveAlbumAs(String newFilePrefix, String newFileSuffix) {
         if (mCurrentAlbum != null) return getFile(mCurrentAlbum);
         File parentDir = getExistingParentDirFile(this.mLastAlbum);
+        if (parentDir == null) {
+            parentDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+        }
         return FileUtils.getFirstNonExistingFile(parentDir, newFilePrefix, 0, newFileSuffix);
     }
 

@@ -120,7 +120,6 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                 GalleryFilterActivity.class);
 
         AndroidAlbumUtils.saveFilterAndQuery(context, null, intent, null, filter, query);
-        BookmarkController.saveState(lastBookmarkFileName, intent, null);
         if (requestCode != 0) {
             context.startActivityForResult(intent, requestCode);
         } else {
@@ -733,7 +732,6 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             Uri originalUri = (originalIntent == null) ? null : originalIntent.getData();
 
             AndroidAlbumUtils.saveFilterAndQuery(this, originalUri, resultIntent, null, mFilter, mQueryWithoutFilter);
-            mBookmarkController.saveState(resultIntent, null);
 
             this.setResult(BaseQueryActivity.resultID, resultIntent);
 
@@ -875,7 +873,6 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                     + selectedAlbumPath, this, Uri.fromFile(selectedAlbumFile), null));
             mGalleryFilterPathState.setAlbum(Uri.fromFile(selectedAlbumFile));
             mGalleryFilterPathState.setLastPath(selectedAlbumFile.getParent());
-            mBookmarkController.setlastBookmarkFileName(selectedAlbumPath);
             mLastSelectedAlbumDir = selectedAlbumPath; //??electedAlbumFile.getParent();
         } else if (AlbumFile.isQueryFile(selectedAbsolutePath)) {
             // album does not exist (any more) rescan

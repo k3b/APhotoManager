@@ -318,8 +318,8 @@ public class FileUtils {
         parentDir.mkdirs();
         File candidate = new File(parentDir, newFilePrefix + newFileSuffix);
         while (candidate.exists()) {
-            candidate = new File(parentDir, newFilePrefix + number + newFileSuffix);
             number ++;
+            candidate = new File(parentDir, newFilePrefix + number + newFileSuffix);
         }
         return candidate;
     }

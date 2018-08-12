@@ -969,6 +969,11 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         navigateTo(initialAbsolutePath);
     }
 
+    public IDirectory getRoot() {
+        if (mNavigation != null) return mNavigation.getRoot();
+        return null;
+    }
+
     /** refreshLocal tree to new newGrandParent by preserving selection */
     private void navigateTo(int newGroupSelection, IDirectory newGrandParent) {
         if (newGrandParent != null) {
