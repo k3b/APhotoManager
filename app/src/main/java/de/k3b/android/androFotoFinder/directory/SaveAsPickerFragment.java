@@ -143,5 +143,15 @@ public abstract class SaveAsPickerFragment extends DirectoryPickerFragment {
         return super.isPickable(selection);
     }
 
+    @Override
+    protected IDirectory getSelectedDir(String absolutePath) {
+        if (absolutePath == null) return null;
+
+        File abs = new File(absolutePath);
+        if (!abs.isDirectory()) return super.getSelectedDir(abs.getParent());
+
+        return super.getSelectedDir(absolutePath);
+    }
+
     abstract protected void onFilePick(File pickedOrCreatedFile);
 }

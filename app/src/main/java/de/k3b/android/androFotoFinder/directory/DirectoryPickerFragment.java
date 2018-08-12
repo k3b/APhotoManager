@@ -68,6 +68,7 @@ import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.AlbumFile;
+import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.Directory;
@@ -494,25 +495,34 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     }
 
     private void onDeleteAnswer(File file, IDirectory dir) {
-        if (file.exists() && file.delete()) {
-            String message = mContext.getString(R.string.bookmark_delete_answer_format, file.getAbsoluteFile() );
-            Toast.makeText(mContext,
-                    message,
-                    Toast.LENGTH_LONG).show();
-            Log.d(Global.LOG_CONTEXT, message);
-        } else {
-            String message = mContext.getString(R.string.bookmark_delete_error_format, file.getAbsoluteFile() );
-            Toast.makeText(mContext,
-                    message,
-                    Toast.LENGTH_LONG).show();
-            Log.d(Global.LOG_CONTEXT, message);
+        boolean deleteSuccess = false;
 
+        // delete from filesystem
+        if (file.exists() && file.delete()) {
+            deleteSuccess = true;
         }
+
+        // delete from database
+        if (FotoSql.deleteMedia("delete album", getActivity(),
+                ListUtils.toStringList(file.getAbsolutePath()),false) > 0) {
+            deleteSuccess = true;
+        }
+
+        // delete from dir tree
         IDirectory parent = (dir != null) ? dir.getParent() :null;
         if (parent != null) {
             parent.getChildren().remove(dir);
             dir.destroy();
         }
+
+        String message = (deleteSuccess)
+                ? mContext.getString(R.string.bookmark_delete_answer_format, file.getAbsoluteFile() )
+                : mContext.getString(R.string.bookmark_delete_error_format, file.getAbsoluteFile() );
+        Toast.makeText(mContext,
+                message,
+                Toast.LENGTH_LONG).show();
+        Log.d(Global.LOG_CONTEXT, message);
+
         // notifyDataSetChanged();
         mAdapter = null;
         reloadTreeViewIfAvailable();
@@ -882,7 +892,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     /*********************** local helper *******************************************/
     private void updateParentPathBar(String currentSelection) {
         if (this.mNavigation != null) {
-            updateParentPathBar(this.mNavigation.getRoot().find(currentSelection));
+            updateParentPathBar(getSelectedDir(currentSelection));
         }
     }
 
@@ -983,13 +993,17 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         }
 
         if ((mNavigation != null) && (absolutePath != null)) {
-            mCurrentSelection = mNavigation.getRoot().find(absolutePath);
+            mCurrentSelection = getSelectedDir(absolutePath);
             mNavigation.navigateTo(mCurrentSelection);
         }
 
         // does nothing if OnCreate() has not been called yet
 
         reloadTreeViewIfAvailable();
+    }
+
+    protected IDirectory getSelectedDir(String absolutePath) {
+        return mNavigation.getRoot().find(absolutePath);
     }
 
     /** Does nothing if either OnCreate() or defineDirectoryNavigation() has NOT been called yet */
