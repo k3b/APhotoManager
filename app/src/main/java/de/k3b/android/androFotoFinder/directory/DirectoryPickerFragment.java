@@ -26,11 +26,13 @@ import android.app.DialogFragment;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -51,6 +53,7 @@ import de.k3b.android.androFotoFinder.PhotoAutoprocessingEditActivity;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailMetaDialogBuilder;
+import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoThumbSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
@@ -60,10 +63,13 @@ import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.ClipboardUtil;
 import de.k3b.android.util.FileManagerUtil;
+import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.AlbumFile;
+import de.k3b.io.ListUtils;
+import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryNavigator;
@@ -336,34 +342,34 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         PopupMenu popup = new PopupMenu(getActivity(), anchor);
         popup.setOnMenuItemClickListener(popUpListener);
         MenuInflater inflater = popup.getMenuInflater();
-        inflater.inflate(this.mContextMenue, popup.getMenu());
+        Menu menu = popup.getMenu();
+        inflater.inflate(this.mContextMenue, menu);
         if (selection != null) {
-            mPopUpSelection = selection;
-            MenuItem menuItem = popup.getMenu().findItem(R.id.cmd_fix_link);
             String absoluteSelectedPath = selection.getAbsolute();
-            if ((menuItem != null) && (FileUtils.isSymlinkDir(new File(absoluteSelectedPath), false))) {
-                menuItem.setVisible(true);
-            }
+            boolean isAlbumFile = AlbumFile.isQueryFile(absoluteSelectedPath);
+            mPopUpSelection = selection;
 
-            menuItem = popup.getMenu().findItem(R.id.cmd_folder_hide_images);
-            if ((menuItem != null) && MediaScanner.canHideFolderMedia(absoluteSelectedPath)) {
-                menuItem.setVisible(true);
-            }
+            setMenuVisibility(menu, R.id.cmd_fix_link, FileUtils.isSymlinkDir(new File(absoluteSelectedPath), false));
+            setMenuVisibility(menu, R.id.cmd_folder_hide_images, !isAlbumFile && MediaScanner.canHideFolderMedia(absoluteSelectedPath));
 
-            if (!FotoLibGlobal.apmEnabled) {
-                menuItem = popup.getMenu().findItem(R.id.cmd_apm_edit);
-                if (menuItem != null) {
-                    menuItem.setVisible(false);
-                }
-            }
-            menuItem = popup.getMenu().findItem(R.id.cmd_filemanager);
-            if ((menuItem != null) && !FileManagerUtil.hasShowInFilemanager(getActivity(), absoluteSelectedPath)) {
-                // no filemanager installed
-                menuItem.setVisible(false);
-            }
+            setMenuVisibility(menu, R.id.cmd_apm_edit, !isAlbumFile && FotoLibGlobal.apmEnabled);
+
+            setMenuVisibility(menu, R.id.cmd_filemanager, !isAlbumFile && FileManagerUtil.hasShowInFilemanager(getActivity(), absoluteSelectedPath));
+            setMenuVisibility(menu, R.id.cmd_delete, isAlbumFile);
+            setMenuVisibility(menu, R.id.action_edit, isAlbumFile);
+
+            setMenuVisibility(menu, android.R.id.copy, !isAlbumFile);
 
         }
         return popup;
+    }
+
+    private void setMenuVisibility(Menu menu, int menuId, boolean visibility) {
+        MenuItem menuItem = menu.findItem(menuId);
+        if (menuItem != null) {
+            menuItem.setVisible(visibility);
+        }
+
     }
 
     private IDirectory mPopUpSelection = null;
@@ -386,6 +392,11 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
 
             case R.id.menu_item_rename:
                 return onRenameDirQuestion(popUpSelection);
+            case R.id.cmd_delete:
+                return onDeleteDirQuestion(popUpSelection);
+
+            case R.id.action_edit:
+                return onEdit(popUpSelection);
 
             case R.id.cmd_photo:
                 return showPhoto(popUpSelection);
@@ -410,8 +421,14 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         if ((requestCode == R.id.cmd_apm_edit) && (resultCode == Activity.RESULT_OK) && (mPopUpSelection != null)) {
             // autoprocessing status may have changed: refresh data and gui
             mPopUpSelection.refresh();
-            this.mAdapter.notifyDataSetChanged();
+            // notifyDataSetChanged();
+            mAdapter = null;
+            reloadTreeViewIfAvailable();
         }
+    }
+
+    public void notifyDataSetChanged() {
+        if (this.mAdapter != null) this.mAdapter.notifyDataSetChanged();
     }
 
     private boolean onCopy(IDirectory selection) {
@@ -422,7 +439,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     private boolean onEditApm(IDirectory selection) {
         String path = (selection == null) ? null : selection.getAbsolute();
         if (!StringUtils.isNullOrEmpty(path)) {
-            PhotoAutoprocessingEditActivity.showActivity(getActivity(), null, path, this.getSrcFotos(), R.id.cmd_apm_edit);
+            PhotoAutoprocessingEditActivity.showActivity(getActivity(), null, path, getSrcFotos(), R.id.cmd_apm_edit);
             return true;
         }
         return false;
@@ -447,6 +464,69 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         return true;
     }
 
+    private boolean onEdit(IDirectory dir) {
+        if (dir != null) {
+            File file = FileUtils.tryGetCanonicalFile(dir.getAbsolute());
+            Intent sendIntent = new Intent();
+            IntentUtil.setDataAndTypeAndNormalize(sendIntent, Uri.fromFile(file), "text/plain");
+            sendIntent.setAction(Intent.ACTION_EDIT);
+            mContext.startActivity(sendIntent);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean onDeleteDirQuestion(final IDirectory parentDir) {
+        Dialogs dlg = new Dialogs() {
+            @Override protected void onDialogResult(String result, Object[] parameters) {
+                if (result != null) {
+                    if (parentDir != null) {
+                        File parentFile = FileUtils.tryGetCanonicalFile(parentDir.getAbsolute());
+                        if (parentFile != null) {
+                            onDeleteAnswer(parentFile, parentDir);
+                        }
+                    }
+                }
+            }
+        };
+
+        dlg.yesNoQuestion(mContext, parentDir.getRelPath(), mContext.getString(R.string.bookmark_delete_question));
+        return true;
+    }
+
+    private void onDeleteAnswer(File file, IDirectory dir) {
+        boolean deleteSuccess = false;
+
+        // delete from filesystem
+        if (file.exists() && file.delete()) {
+            deleteSuccess = true;
+        }
+
+        // delete from database
+        if (FotoSql.deleteMedia("delete album", getActivity(),
+                ListUtils.toStringList(file.getAbsolutePath()),false) > 0) {
+            deleteSuccess = true;
+        }
+
+        // delete from dir tree
+        IDirectory parent = (dir != null) ? dir.getParent() :null;
+        if (parent != null) {
+            parent.getChildren().remove(dir);
+            dir.destroy();
+        }
+
+        String message = (deleteSuccess)
+                ? mContext.getString(R.string.bookmark_delete_answer_format, file.getAbsoluteFile() )
+                : mContext.getString(R.string.bookmark_delete_error_format, file.getAbsoluteFile() );
+        Toast.makeText(mContext,
+                message,
+                Toast.LENGTH_LONG).show();
+        Log.d(Global.LOG_CONTEXT, message);
+
+        // notifyDataSetChanged();
+        mAdapter = null;
+        reloadTreeViewIfAvailable();
+    }
     private boolean onRenameDirQuestion(final IDirectory parentDir) {
         if (parentDir != null) {
 			File parentFile = FileUtils.tryGetCanonicalFile(parentDir.getAbsolute());
@@ -486,7 +566,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         } else {
             // update dirpicker
             srcDir.rename(srcDirFile.getName(), newFolderName);
-            this.mAdapter.notifyDataSetChanged();
+            notifyDataSetChanged();
         }
     }
 
@@ -542,11 +622,11 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                     if (!canonicalPath.endsWith("/")) canonicalPath+="/";
 
                     String sqlWhereLink = FotoSql.SQL_COL_PATH + " like '" + linkPath + "%'";
-                    SelectedFiles linkFiles = FotoSql.getSelectedfiles(context, sqlWhereLink);
+                    SelectedFiles linkFiles = FotoSql.getSelectedfiles(context, sqlWhereLink, VISIBILITY.PRIVATE_PUBLIC);
 
                     String sqlWhereCanonical = FotoSql.SQL_COL_PATH + " in (" + linkFiles.toString() + ")";
                     sqlWhereCanonical = sqlWhereCanonical.replace(linkPath,canonicalPath);
-                    SelectedFiles canonicalFiles = FotoSql.getSelectedfiles(context, sqlWhereCanonical);
+                    SelectedFiles canonicalFiles = FotoSql.getSelectedfiles(context, sqlWhereCanonical, VISIBILITY.PRIVATE_PUBLIC);
                     HashMap<String, String> link2canonical = new HashMap<String, String>();
                     for(String cann : canonicalFiles.getFileNames()) {
                         link2canonical.put(linkPath + cann.substring(canonicalPath.length()), cann);
@@ -600,22 +680,26 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         return false;
     }
 
-    private QueryParameter getSelectionQuery(IDirectory selectedDir) {
+    private QueryParameter getSelectionQuery(String dbgContext, IDirectory selectedDir) {
         String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
+        QueryParameter query = null;
         if (pathFilter != null) {
-            GalleryFilterParameter filter = new GalleryFilterParameter(); //.setPath(pathFilter);
-            if (!FotoSql.set(filter, pathFilter, mDirTypId))
-            {
-                filter.setPath(pathFilter + "/%");
-            }
+            query = AndroidAlbumUtils.getQueryFromUri(dbgContext, getActivity(), Uri.fromFile(new File(pathFilter)), null);
 
-            return TagSql.filter2NewQuery(filter);
+            if (query == null) {
+                GalleryFilterParameter filter = new GalleryFilterParameter(); //.setPath(pathFilter);
+                if (!FotoSql.set(filter, pathFilter, mDirTypId)) {
+                    filter.setPath(pathFilter + "/%");
+                }
+
+                query = TagSql.filter2NewQuery(filter);
+            }
         }
-        return null;
+        return query;
 
     }
     private boolean showPhoto(IDirectory selectedDir) {
-        QueryParameter query = getSelectionQuery(selectedDir);
+        QueryParameter query = getSelectionQuery("showPhoto", selectedDir);
         if (query != null) {
             FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
             ImageDetailActivityViewPager.showActivity(this.getActivity(), null, 0, query, 0);
@@ -625,7 +709,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     }
 
     private boolean showGallery(IDirectory selectedDir) {
-        QueryParameter query = getSelectionQuery(selectedDir);
+        QueryParameter query = getSelectionQuery("showGallery", selectedDir);
         if (query != null) {
             FotoGalleryActivity.showActivity(this.getActivity(), query, 0);
             return true;
@@ -808,7 +892,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     /*********************** local helper *******************************************/
     private void updateParentPathBar(String currentSelection) {
         if (this.mNavigation != null) {
-            updateParentPathBar(this.mNavigation.getRoot().find(currentSelection));
+            updateParentPathBar(getSelectedDir(currentSelection));
         }
     }
 
@@ -885,6 +969,11 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         navigateTo(initialAbsolutePath);
     }
 
+    public IDirectory getRoot() {
+        if (mNavigation != null) return mNavigation.getRoot();
+        return null;
+    }
+
     /** refreshLocal tree to new newGrandParent by preserving selection */
     private void navigateTo(int newGroupSelection, IDirectory newGrandParent) {
         if (newGrandParent != null) {
@@ -909,13 +998,17 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         }
 
         if ((mNavigation != null) && (absolutePath != null)) {
-            mCurrentSelection = mNavigation.getRoot().find(absolutePath);
+            mCurrentSelection = getSelectedDir(absolutePath);
             mNavigation.navigateTo(mCurrentSelection);
         }
 
         // does nothing if OnCreate() has not been called yet
 
         reloadTreeViewIfAvailable();
+    }
+
+    protected IDirectory getSelectedDir(String absolutePath) {
+        return mNavigation.getRoot().find(absolutePath);
     }
 
     /** Does nothing if either OnCreate() or defineDirectoryNavigation() has NOT been called yet */

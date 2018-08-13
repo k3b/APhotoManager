@@ -56,4 +56,10 @@ public class OSDirOrVirtualAlbumFile extends OSDirectory {
         if (super.isDirectory(candidate)) return true;
         return isAlbum(candidate);
     }
+
+    /** factory method to be overwrittern by derived classes, if tree should consist of derived classes. */
+    @Override
+    public OSDirectory createOsDirectory(File file, IDirectory parent, List<IDirectory> children) {
+        return new OSDirOrVirtualAlbumFile(file, (OSDirectory) parent, children);
+    }
 }

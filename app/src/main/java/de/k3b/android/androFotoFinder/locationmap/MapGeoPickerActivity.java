@@ -37,7 +37,6 @@ import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.views.MapView;
 
 import de.k3b.android.androFotoFinder.AffUtils;
-import de.k3b.android.androFotoFinder.BookmarkController;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
@@ -77,8 +76,6 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
     private boolean mSaveLastUsedGeoToSharedPrefs = true;
 
     private GeoUri mGeoUriParser = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
-
-    private BookmarkController mBookmarkController = null;
 
     // lockscreen support
     private boolean locked = false; // if != Global.locked : must update menu
@@ -124,9 +121,6 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
         if (Global.debugEnabled && (intent != null)){
             Log.d(Global.LOG_CONTEXT, mDebugPrefix + "onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
         }
-
-        mBookmarkController = new BookmarkController(this);
-        mBookmarkController.loadState(intent,savedInstanceState);
 
         final GeoPointDto geoPointFromIntent = getGeoPointDtoFromIntent(intent);
         // no geo: from intent: use last used value

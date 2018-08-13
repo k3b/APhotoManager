@@ -24,11 +24,11 @@
   <string name="about_summary">À propos de \"A Photo Manager%1$s\"</string>
   <string name="area_menu_title">Sélectionnez une zone sur la carte</string>
   <string name="background">Arrière plan</string>
+  <string name="bookmark">Album</string>
   <string name="bookmark_delete_answer_format">Supprimer le signet %1$s.</string>
   <string name="bookmark_delete_error_format">Impossible de supprimer le signet %1$s.</string>
   <string name="bookmark_delete_question">Supprimer ce signet ?</string>
   <string name="bookmark_file_comment_format">Générer sur %3$s avec \'%1$s\' Version %2$s. Allez sur https://github.com/k3b/APhotoManager/wiki/intentapi#sql pour plus de détails</string>
-  <string name="bookmark_load_from_menu_title">Charger le Signet de &#8230;</string>
   <string name="bookmark_save_as_menu_title">Enregistrer le signet sous &#8230;</string>
   <string name="btn_change">Modifier</string>
   <string name="btn_pause">Suspendre</string>
@@ -93,7 +93,6 @@
   <string name="selected_only_menu_title">Uniquement les Sélectionnée(s)</string>
   <string name="selection_add_all_menu_title">Sélection : Ajouter tous les visibles</string>
   <string name="selection_remove_menu_title">Sélection : Supprimer tous les visibles</string>
-  <string name="settings_bookmark_dir_title">Dossier de signet</string>
   <string name="settings_group_debug_title">Diagnostiques</string>
   <string name="settings_debug_sql_summary">Enregistrer les requêtes SQL.</string>
   <string name="settings_debug_view_item_summary">Enregistrer les évènements de la grille et des vues.</string>
@@ -199,9 +198,21 @@
   <string name="menu_title_app_unpinnend">Appli non-protégée/non-épinglée</string>
   <!-- #100: private images get the extension ".jpg-p" which hides them from other gallery-apps and image pickers.  -->
   <string name="settings_rename_private_jpg_title">Renommer les images privées de .jpg à jpg-p</string>
-  <!--  depricated tags_update_result_format 
-			replaced by android.R.string.xxx @android:string/xxx : btn_cancel btn_no btn_yes btn_okcopy_menu_title
-    -->
   <string name="clear_menu_title">Effacer</string>
   <string name="show_in_filemanager_menu_title">Ouvrir dans le gestionnaire de fichier</string>
+  <!-- #1113: Searchbar  -->
+  <string name="searchbar_menu_title">Barre de recherche</string>
+  <string name="settings_pick_date_decade4year_title">Sélecteur de dates : utilisez des décennies</string>
+  <string name="settings_pick_date_decade4year_summary">Par ex. mettez 2010, 2011,...2019 dessous 2010*</string>
+  <string name="date_picker_menu_title">Filtre par date</string>
+  <!-- #115: Virtual album -->
+  <string name="filter_menu_title_album">Modifier l’Album Virtuel</string>
+  <!--  depricated tags_update_result_format
+			replaced by android.R.string.xxx @android:string/xxx : btn_cancel btn_no btn_yes btn_okcopy_menu_title
+
+    sperate boomark picker is deprecated. now open via folder picker
+        <string name="bookmark_load_from_menu_title">Load album from &#8230;</string><br/>
+	note: with ver 0.7.0 'bookmark' will become 'virtual album'
+    -->
+  <string name="settings_bookmark_dir_title">Dossier de signet</string>
 </resources>

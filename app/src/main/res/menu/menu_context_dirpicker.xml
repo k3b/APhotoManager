@@ -25,6 +25,10 @@
         android:visible="true"
         android:orderInCategory="10"
         android:showAsAction="never" />
+    <item android:id="@+id/action_edit" android:title="@string/edit_menu_title"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:visible="false"
+        android:orderInCategory="10" android:showAsAction="never" />
 
     <item
         android:id="@+id/menu_item_rename"
@@ -33,6 +37,12 @@
         android:showAsAction="never"
         android:title="@string/rename_menu_title" />
 
+    <item android:id="@+id/cmd_delete"
+        android:title="@string/delete_menu_title"
+        android:icon="@android:drawable/ic_menu_delete"
+        android:visible="false"
+        android:orderInCategory="10"
+        android:showAsAction="never" />
     <item android:id="@+id/cmd_apm_edit"
         android:title="@string/photo_autoprocessing_edit_menu_title"
         android:visible="true"

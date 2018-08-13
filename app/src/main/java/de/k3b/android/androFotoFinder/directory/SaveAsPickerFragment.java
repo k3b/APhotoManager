@@ -132,6 +132,7 @@ public abstract class SaveAsPickerFragment extends DirectoryPickerFragment {
             // close dialog and return to caller
             super.onDirectoryPick(result);
             onFilePick(new File(result.getAbsolute()));
+            this.notifyDataSetChanged();
             dismiss();
         }
     }
@@ -140,6 +141,16 @@ public abstract class SaveAsPickerFragment extends DirectoryPickerFragment {
     protected boolean isPickable(IDirectory selection) {
         // if ((selection != null) && AlbumFile.isQueryFile (selection.getRelPath()) ) return true;
         return super.isPickable(selection);
+    }
+
+    @Override
+    protected IDirectory getSelectedDir(String absolutePath) {
+        if (absolutePath == null) return null;
+
+        File abs = new File(absolutePath);
+        if (!abs.isDirectory()) return super.getSelectedDir(abs.getParent());
+
+        return super.getSelectedDir(absolutePath);
     }
 
     abstract protected void onFilePick(File pickedOrCreatedFile);

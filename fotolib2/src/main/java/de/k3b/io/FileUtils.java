@@ -294,4 +294,33 @@ public class FileUtils {
     }
 
 
+    // #118 app specific content uri convert
+    // from {content://approvider}//storage/emulated/0/DCIM/... to /storage/emulated/0/DCIM/
+    public static String fixPath(String path) {
+        if (path != null) {
+            while (path.startsWith("//")) {
+                path = path.substring(1);
+            }
+        }
+        return path;
+    }
+
+    public static File getFirstExistingDir(File root) {
+        while ((root != null) && (!root.exists() || !root.isDirectory())) {
+            root = root.getParentFile();
+        }
+        return root;
+    }
+
+    public static File getFirstNonExistingFile(File parentDir, String newFilePrefix, int number, String newFileSuffix) {
+        if (parentDir == null) return null;
+
+        parentDir.mkdirs();
+        File candidate = new File(parentDir, newFilePrefix + newFileSuffix);
+        while (candidate.exists()) {
+            number ++;
+            candidate = new File(parentDir, newFilePrefix + number + newFileSuffix);
+        }
+        return candidate;
+    }
 }

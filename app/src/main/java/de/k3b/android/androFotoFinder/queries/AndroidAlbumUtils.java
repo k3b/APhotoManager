@@ -28,13 +28,19 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import de.k3b.android.androFotoFinder.Common;
+import de.k3b.android.androFotoFinder.GalleryFilterPathState;
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
@@ -44,6 +50,7 @@ import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.StringUtils;
+import de.k3b.tagDB.TagProcessor;
 
 /**
  * Handles file io of QueryParameter and GalleryFilterParameter via intent.
@@ -82,63 +89,83 @@ public class AndroidAlbumUtils implements Common {
             @NonNull Context context, @NonNull String paramNameSuffix,
             @Nullable Bundle savedInstanceState,
             @Nullable Intent intent, @Nullable SharedPreferences sharedPref,
-            @Nullable StringBuilder dbgMessageResult) {
+            StringBuilder outQueryFileUri, @Nullable StringBuilder dbgMessageResult) {
         QueryParameter result = null;
 
         if (savedInstanceState == null) {
             // onCreate (first call) : if intent is usefull use it else use sharedPref
             if (intent != null) {
+                Uri uri = IntentUtil.getUri(intent);
                 result = getQueryFromFirstMatching(
-                        context,
-                        IntentUtil.getUri(intent),
-                        intent.getStringExtra(EXTRA_QUERY),
-                        intent.getStringExtra(EXTRA_FILTER),
-                        "Intent", dbgMessageResult);
+                        "Intent-uri", context,
+                        uri,
+                        null,
+                        null,
+                        dbgMessageResult);
+                if (result == null) {
+                    result = getQueryFromFirstMatching(
+                            "Intent", context,
+                            uri,
+                            intent.getStringExtra(EXTRA_QUERY),
+                            intent.getStringExtra(EXTRA_FILTER),
+                            dbgMessageResult);
+                } else if (outQueryFileUri !=  null) {
+                    outQueryFileUri.append(uri.toString());
+                }
             }
 
             if ((result == null) && (sharedPref != null)) {
                 result = getQueryFromFirstMatching(
-                        context,
+                        "SharedPreferences", context,
                         null,
                         sharedPref.getString(EXTRA_QUERY + paramNameSuffix, null),
                         sharedPref.getString(EXTRA_FILTER + paramNameSuffix, null),
-                        "SharedPreferences", dbgMessageResult);
+                        dbgMessageResult);
             }
         } else  {
             // (savedInstanceState != null) : onCreate after screen rotation
             result = getQueryFromFirstMatching(
-                    context,
+                    "InstanceState", context,
                     null,
                     savedInstanceState.getString(EXTRA_QUERY + paramNameSuffix),
                     savedInstanceState.getString(EXTRA_FILTER + paramNameSuffix),
-                    "InstanceState", dbgMessageResult);
+                    dbgMessageResult);
         }
         return result;
     }
 
     /** used by folder picker if album-file is picked instead of folder */
-    public static QueryParameter getQueryFromUri(@NonNull Context context, Uri uri, @Nullable StringBuilder dbgFilter) {
+    public static QueryParameter getQueryFromUri(String dbgContext, @NonNull Context context, Uri uri, @Nullable StringBuilder dbgFilter) {
         // ignore geo: or area: uri-s
         String path = (IntentUtil.isFileOrContentUri(uri, true)) ? uri.getPath() : null;
         if (!StringUtils.isNullOrEmpty(path)) {
             // #118 app specific content uri convert
             // from {content://approvider}//storage/emulated/0/DCIM/... to /storage/emulated/0/DCIM/
-            while (path.startsWith("//")) {
-                path = path.substring(1);
+            path = FileUtils.fixPath(path);
+            if (dbgFilter != null) {
+                dbgFilter.append(dbgContext).append("\n");
+            } else if (Global.debugEnabled) {
+                Log.d(Global.LOG_CONTEXT, dbgContext);
             }
 
             if ((context != null) && AlbumFile.isQueryFile(path)) {
                 try {
                     QueryParameter query = QueryParameter.load(context.getContentResolver().openInputStream(uri));
                     if (query != null) {
-                        insertToMediaDB(context,
-                                Uri.fromFile(new File(path)), mDebugPrefix + ".load");
+                        Map<String, Long> found = FotoSql.execGetPathIdMap(context, path);
+                        if ((found == null) || (found.size() == 0)) {
+                            AndroidAlbumUtils.albumMediaScan(dbgContext + " not found mediadb => ", context, new File(path), 1);
+                        }
+
                         if (dbgFilter != null) {
                             dbgFilter.append("query album from uri ").append(uri).append("\n")
                                     .append(query).append("\n");
                         }
                         return query;
                     }
+
+                    // not found in filesystem.
+                    AndroidAlbumUtils.albumMediaScan(dbgContext + " not found in filesystem => ", context, new File(path), 1);
                 } catch (IOException e) {
                     Log.e(Global.LOG_CONTEXT, mDebugPrefix + ".loadFrom(" + uri +
                             ") failed: " + e.getMessage(), e);
@@ -175,7 +202,7 @@ public class AndroidAlbumUtils implements Common {
     public static GalleryFilterParameter getGalleryFilterAndRestQueryFromQueryUri(
             @NonNull Context context, Uri uri, QueryParameter resultQueryWithoutFilter,
             boolean ignoreFilter, @Nullable StringBuilder dbgFilter) {
-        QueryParameter query = getQueryFromUri(context, uri, null);
+        QueryParameter query = getQueryFromUri(mDebugPrefix, context, uri, null);
         if (query != null) {
             if ((uri != null) && (dbgFilter != null)) {
                 dbgFilter.append("query from uri ").append(uri).append("\n");
@@ -214,17 +241,17 @@ public class AndroidAlbumUtils implements Common {
     }
 
     /**
+     * @param dbgMessagePrefix
      * @param context
      * @param uri if not null and exist: load from uri
      * @param sql else if not null: parse query from this sql
      * @param filter else if not null parse query from filter
-     * @param dbgMessagePrefix
      */
     private static QueryParameter getQueryFromFirstMatching(
-            @NonNull Context context, @Nullable Uri uri, @Nullable String sql, @Nullable String filter,
-            String dbgMessagePrefix, @Nullable StringBuilder dbgMessageResult) {
+            String dbgMessagePrefix, @NonNull Context context, @Nullable Uri uri, @Nullable String sql, @Nullable String filter,
+            @Nullable StringBuilder dbgMessageResult) {
         if (uri != null) {
-            QueryParameter query = getQueryFromUri(context, uri, dbgMessageResult);
+            QueryParameter query = getQueryFromUri(dbgMessagePrefix, context, uri, dbgMessageResult);
             if (query != null) {
                 return query;
             }
@@ -279,7 +306,7 @@ public class AndroidAlbumUtils implements Common {
             PrintWriter out = null;
             try {
                 mergedQuery.save(context.getContentResolver().openOutputStream(destUri, "w"));
-                insertToMediaDB(context, destUri, dbgContext);
+                insertToMediaDB(dbgContext, context, destUri);
             } catch (IOException e) {
                 Log.e(Global.LOG_CONTEXT, dbgContext +
                         " failed: " + e.getMessage(), e);
@@ -310,15 +337,68 @@ public class AndroidAlbumUtils implements Common {
         return mergedQuery;
     }
 
-    public static void insertToMediaDB(@NonNull Context context, Uri uri, String dbgContext) {
+    public static void insertToMediaDB(String dbgContext, @NonNull Context context, Uri uri) {
         if (IntentUtil.isFileUri(uri)) {
             File f = FileUtils.tryGetCanonicalFile(IntentUtil.getFile(uri));
-            if (f != null) {
-                ContentValues values = new ContentValues();
-                String newAbsolutePath = MediaScanner.setFileFields(values, f);
-                values.put(FotoSql.SQL_COL_EXT_MEDIA_TYPE,0);
-                FotoSql.insertOrUpdateMediaDatabase(dbgContext, context, newAbsolutePath, values, 1l);
-            }
+            insertToMediaDB(dbgContext, context, f);
         }
     }
+
+    public static void insertToMediaDB(String dbgContext, @NonNull Context context, File fileToBeScannedAndInserted) {
+        if (fileToBeScannedAndInserted != null) {
+            ContentValues values = new ContentValues();
+            String newAbsolutePath = MediaScanner.setFileFields(values, fileToBeScannedAndInserted);
+            values.put(FotoSql.SQL_COL_EXT_MEDIA_TYPE, FotoSql.MEDIA_TYPE_ALBUM_FILE);
+            FotoSql.insertOrUpdateMediaDatabase(dbgContext, context, newAbsolutePath, values, null, 1l);
+        }
+    }
+
+    // !!! todo einbauen in filter-edit if item not found in db and/or filesystem und in media scanner
+    /** return the number of modified(added+deleted) items */
+    public static int albumMediaScan(String dbgContext, Context context, File _root, int subDirLevels) {
+        String dbgMessage = dbgContext + ": albumMediaScan(" + _root + "): ";
+
+        File root = FileUtils.getFirstExistingDir(_root);
+        int result = 0;
+        if (root != null) {
+            List<String> currentFiles = AlbumFile.getFilePaths(null, root, subDirLevels);
+            List<String> databaseFiles = FotoSql.getAlbumFiles(context, FileUtils.tryGetCanonicalPath(root, null), subDirLevels);
+
+            List<String> added = new ArrayList<String>();
+            List<String> removed = new ArrayList<String>();
+            TagProcessor.getDiff(databaseFiles, currentFiles, added, removed);
+
+            for (String insert : added) {
+                insertToMediaDB(dbgMessage + "add-new", context, new File(insert));
+                result++;
+            }
+
+            result += FotoSql.deleteMedia(dbgMessage + "delete-obsolete", context, removed, false);
+        }
+        return result;
+    }
+
+    public static void saveAs(Context context, File outFile, final QueryParameter currentFilter) {
+        if (Global.debugEnabled) {
+            Log.d(Global.LOG_CONTEXT, "onSaveAs(" + outFile.getAbsolutePath() + ")");
+        }
+        PrintWriter out = null;
+        try {
+            out = new PrintWriter(outFile);
+            out.println(currentFilter.toReParseableString());
+            out.close();
+            out = null;
+
+            AndroidAlbumUtils.insertToMediaDB(
+                    ".saveAlbumAs",
+                    context,
+                    outFile);
+            GalleryFilterPathState.saveAsPreference(context, Uri.fromFile(outFile), null);
+        } catch (IOException err) {
+            String errorMessage = context.getString(R.string.mk_err_failed_format, outFile.getAbsoluteFile());
+            Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show();
+            Log.e(Global.LOG_CONTEXT, errorMessage, err);
+        }
+    }
+
 }

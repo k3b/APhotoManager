@@ -35,6 +35,7 @@ public class StringUtils {
         return (rhs == null);
     }
 
+	/** return pos of '#' before {start} or {-1} if not found */
     public static int getTagStart(CharSequence s, int start) {
         if (start <= s.length()) {
             int i = start -1;
@@ -44,6 +45,8 @@ public class StringUtils {
         }
         return -1;
     }
+	
+	/** return first char after tagword or {-1} if not a tag-word-end */
     public static int getTagEnd(CharSequence s, int start) {
         int len = s.length();
         int i = start;
@@ -55,10 +58,12 @@ public class StringUtils {
     private static boolean isTagChar(char c) {
         return Character.isJavaIdentifierPart(c) || (c == '-');
     }
+	
     private static boolean isTagDelimiterChar(char c) {
         return Character.isSpaceChar(c) || (",;(){}".indexOf(c) >= 0);
     }
-    /** words surrounded by blank and starting with '#' */
+	
+    /** a tag is a word surrounded by blank and starting with '#' */
     public static CharSequence getTag(CharSequence s, int start) {
         int tagStart = getTagStart(s,start);
         int tagEnd = getTagEnd(s,start);
@@ -75,6 +80,20 @@ public class StringUtils {
     }
     public static int length(CharSequence str) {
         return (str != null) ? str.length() : 0;
+    }
+
+    public static int charCount(CharSequence str, char c) {
+		int result = 0;
+		if (str != null) {
+			int len = length(str);
+			for (int i=0; i < len;i++) {
+				if (str.charAt(i) == c) {
+					result++;
+				}
+			}
+		}
+
+        return result;
     }
 
     public static boolean isNullOrEmpty(CharSequence str) {
