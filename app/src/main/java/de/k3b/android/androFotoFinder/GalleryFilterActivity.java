@@ -191,10 +191,10 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         cmd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String path = (mLastSelectedAlbumDir != null) ? mLastSelectedAlbumDir : getAsGalleryFilter().getPath();
+                String path = (!StringUtils.isNullOrEmpty(mLastSelectedAlbumDir)) ? mLastSelectedAlbumDir : getAsGalleryFilter().getPath();
 
-                if (path == null) {
-                   mGalleryFilterPathState.load(GalleryFilterActivity.this,
+                if (StringUtils.isNullOrEmpty(path)) {
+                    path = mGalleryFilterPathState.load(GalleryFilterActivity.this,
                                 null, null)
                             .getPathDefault(null);
                 }
