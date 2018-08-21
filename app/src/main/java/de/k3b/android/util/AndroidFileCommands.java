@@ -215,8 +215,13 @@ public class AndroidFileCommands extends FileCommands {
 
         if (destDirFile != null) {
             destDirFile.getParentFile().mkdirs();
+            boolean isDir = srcDirFile.isDirectory();
             if (srcDirFile.renameTo(destDirFile)) {
-                modifyCount = FotoSql.execRenameFolder(this.mContext, srcDirFile.getAbsolutePath() + "/", destDirFile.getAbsolutePath() + "/");
+                if (isDir) {
+                    modifyCount = FotoSql.execRenameFolder(this.mContext, srcDirFile.getAbsolutePath() + "/", destDirFile.getAbsolutePath() + "/");
+                } else {
+                    modifyCount = FotoSql.execRename(mContext, srcDirFile.getAbsolutePath(), destDirFile.getAbsolutePath());
+                }
                 if (modifyCount < 0) {
                     destDirFile.renameTo(srcDirFile); // error: undo change
                     return -1;
@@ -329,17 +334,41 @@ public class AndroidFileCommands extends FileCommands {
     }
 
     @SuppressLint("ValidFragment")
-    class MediaScannerDirectoryPickerFragment extends DirectoryPickerFragment {
+    private static class MediaScannerDirectoryPickerFragment extends DirectoryPickerFragment {
+        private AndroidFileCommands mParent = null;
+
         /** do not use activity callback */
         @Override protected void setDirectoryListener(Activity activity) {}
 
         @Override
         protected void onDirectoryPick(IDirectory selection) {
             dismiss();
-            if (selection != null) {
-                onMediaScannerAnswer(selection.getAbsolute());
+            if ((mParent != null) && (selection != null)) {
+                mParent.onMediaScannerAnswer(selection.getAbsolute());
             }
         }
+
+        @Override
+        public void onPause() {
+            super.onPause();
+
+            // else the java.lang.InstantiationException: can't instantiate
+            // class de.k3b.android.util.AndroidFileCommands$MediaScannerDirectoryPickerFragment;
+            // no empty constructor
+            // on orientation change
+            dismiss();
+        }
+
+        public void setParent(AndroidFileCommands parent) {
+            this.mParent = parent;
+        }
+
+        @Override
+        public void dismiss() {
+            setParent(null);
+            super.dismiss();
+        }
+
     }
 
     public boolean cmdMediaScannerWithQuestion() {
@@ -352,35 +381,14 @@ public class AndroidFileCommands extends FileCommands {
             return true;
         } else if (AndroidFileCommands.canProcessFile(mContext, this.isInBackground)) {
             // show dialog to get start parameter
-            DirectoryPickerFragment destDir = new MediaScannerDirectoryPickerFragment() {
-                /** do not use activity callback */
-                @Override protected void setDirectoryListener(Activity activity) {}
+            MediaScannerDirectoryPickerFragment destDir = new MediaScannerDirectoryPickerFragment();
 
-                @Override
-                protected void onDirectoryPick(IDirectory selection) {
-                    dismiss();
-                    if (selection != null) {
-                        onMediaScannerAnswer(selection.getAbsolute());
-                    }
-                }
-
-                @Override
-                public void onPause() {
-                    super.onPause();
-
-                    // else the java.lang.InstantiationException: can't instantiate
-                    // class de.k3b.android.util.AndroidFileCommands$MediaScannerDirectoryPickerFragment;
-                    // no empty constructor
-                    // on orientation change
-                    dismiss();
-                }
-            };
-
+            destDir.setParent(this);
             destDir.setTitleId(R.string.scanner_dir_question);
-            destDir.defineDirectoryNavigation(OsUtils.getRootOSDirectory(),
+            destDir.defineDirectoryNavigation(OsUtils.getRootOSDirectory(null),
                     FotoSql.QUERY_TYPE_UNDEFINED,
                     getLastCopyToPath());
-            destDir.setContextMenuId(LockScreen.isLocked(mContext) ? 0 :  R.menu.menu_context_osdir);
+            destDir.setContextMenuId(LockScreen.isLocked(mContext) ? 0 : R.menu.menu_context_osdir);
             destDir.show(mContext.getFragmentManager(), "scannerPick");
 
             return true;

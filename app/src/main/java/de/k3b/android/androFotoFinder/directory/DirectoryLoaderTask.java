@@ -61,14 +61,16 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
     private static final int PROGRESS_INCREMENT = 500;
 
     private final Activity context;
+    private final boolean datePickerUseDecade;
 
     // will receive debug output
     private StringBuffer mStatus = null;
 
     protected Exception mException = null;
 
-    public DirectoryLoaderTask(Activity context, String debugPrefix) {
+    public DirectoryLoaderTask(Activity context, boolean datePickerUseDecade, String debugPrefix) {
         this.context = context;
+        this.datePickerUseDecade = datePickerUseDecade;
         String combinedDebugPrefix = debugPrefix + "-DirectoryLoaderTask";
         Global.debugMemory(combinedDebugPrefix, "ctor");
 
@@ -83,91 +85,106 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
 
     protected IDirectory doInBackground(QueryParameter... queryParameter) {
         mException = null;
-        if (queryParameter.length != 1) throw new IllegalArgumentException();
+        if ((queryParameter == null) || (queryParameter.length < 1)) throw new IllegalArgumentException();
 
-        QueryParameter queryParameters = queryParameter[0];
+        DirectoryBuilder builder = new DirectoryBuilder();
 
-        if (mStatus != null) {
-            mStatus.append("\n\t");
-            if (queryParameters != null) {
-                mStatus.append(queryParameters.toSqlString());
-            }
-        }
         Cursor cursor = null;
-        try {
-            cursor = context.getContentResolver().query(Uri.parse(queryParameters.toFrom()), queryParameters.toColumns(),
-                    queryParameters.toAndroidWhere(), queryParameters.toAndroidParameters(), queryParameters.toOrderBy());
+        int colText = -1;
+        for(QueryParameter queryParameters : queryParameter) {
 
-            int itemCount = cursor.getCount();
-            final int expectedCount = itemCount + itemCount;
-
-            publishProgress(itemCount, expectedCount);
-
-            DirectoryBuilder builder = new DirectoryBuilder();
-
-            int colCount = cursor.getColumnIndex(FotoSql.SQL_COL_COUNT);
-            int colIconID = cursor.getColumnIndex(FotoSql.SQL_COL_PK);
-
-            int colText = cursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT);
-            int colLat = cursor.getColumnIndex(FotoSql.SQL_COL_LAT);
-            int colLon = cursor.getColumnIndex(FotoSql.SQL_COL_LON);
-
-            int markerItemCount = 1;
-            int increment = PROGRESS_INCREMENT;
-
-            if (colIconID == -1) {
-                throw new IllegalArgumentException("Missing SQL Column " + FotoSql.SQL_COL_PK);
+            if (mStatus != null) {
+                mStatus.append("\n\t");
+                if (queryParameters != null) {
+                    mStatus.append(queryParameters.toSqlString());
+                }
             }
 
-            if ((colText == -1) && ((colLat == -1) || (colLon == -1))) {
-                throw new IllegalArgumentException("Missing SQL Column. Need either " +
-                        FotoSql.SQL_COL_DISPLAY_TEXT +
-                        " or " + FotoSql.SQL_COL_LAT +
-                                " + " +FotoSql.SQL_COL_LON);
-            }
+            try {
+                cursor = context.getContentResolver().query(Uri.parse(queryParameters.toFrom()), queryParameters.toColumns(),
+                        queryParameters.toAndroidWhere(), queryParameters.toAndroidParameters(), queryParameters.toOrderBy());
 
-            while (cursor.moveToNext()) {
-                String path = (colText >= 0) ? cursor.getString(colText) : getLatLonPath(cursor.getDouble(colLat), cursor.getDouble(colLon));
-                if (path != null) {
-                    if (colCount != -1) markerItemCount = cursor.getInt(colCount);
-                    builder.add(path, markerItemCount, cursor.getInt(colIconID));
-                    itemCount++;
-                    if ((--increment) <= 0) {
-                        publishProgress(itemCount, expectedCount);
-                        increment = PROGRESS_INCREMENT;
+                int itemCount = cursor.getCount();
+                final int expectedCount = itemCount + itemCount;
 
-                        // Escape early if cancel() is called
-                        if (isCancelled()) break;
+                publishProgress(itemCount, expectedCount);
+
+                int colCount = cursor.getColumnIndex(FotoSql.SQL_COL_COUNT);
+                int colIconID = cursor.getColumnIndex(FotoSql.SQL_COL_PK);
+
+                colText = cursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT);
+                int colLat = cursor.getColumnIndex(FotoSql.SQL_COL_LAT);
+                int colLon = cursor.getColumnIndex(FotoSql.SQL_COL_LON);
+
+                int markerItemCount = 1;
+                int increment = PROGRESS_INCREMENT;
+
+                if (colIconID == -1) {
+                    throw new IllegalArgumentException("Missing SQL Column " + FotoSql.SQL_COL_PK);
+                }
+
+                if ((colText == -1) && ((colLat == -1) || (colLon == -1))) {
+                    throw new IllegalArgumentException("Missing SQL Column. Need either " +
+                            FotoSql.SQL_COL_DISPLAY_TEXT +
+                            " or " + FotoSql.SQL_COL_LAT +
+                            " + " + FotoSql.SQL_COL_LON);
+                }
+
+                while (cursor.moveToNext()) {
+                    String path = (colText >= 0) ? cursor.getString(colText) : getLatLonPath(cursor.getDouble(colLat), cursor.getDouble(colLon));
+                    if (path != null) {
+                        if (colCount != -1) markerItemCount = cursor.getInt(colCount);
+                        final int iconID = cursor.getInt(colIconID);
+                        addItem(builder, path, markerItemCount, iconID);
+                        itemCount++;
+                        if ((--increment) <= 0) {
+                            publishProgress(itemCount, expectedCount);
+                            increment = PROGRESS_INCREMENT;
+
+                            // Escape early if cancel() is called
+                            if (isCancelled()) break;
+                        }
                     }
                 }
-            }
-            if (mStatus != null) {
-                mStatus.append("\n\tfound ").append(itemCount).append(" db rows");
-            }
-
-            IDirectory result = builder.getRoot();
-            if (colText < 0) {
-                compressLatLon(result);
-            }
-            return result;
-        } catch (Exception ex) {
-            mException = ex;
-            if (mStatus != null) {
-                mStatus.append("\n\t").append(ex.getMessage());
-            }
-            return null;
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-            if (mStatus != null) {
-                if (Global.debugEnabledSql) {
-                    Log.w(Global.LOG_CONTEXT, mStatus.toString());
-                } else if (Global.debugEnabled) {
-                    Log.i(Global.LOG_CONTEXT, mStatus.toString());
+                if (mStatus != null) {
+                    mStatus.append("\n\tfound ").append(itemCount).append(" db rows");
                 }
-            }
+            } catch (Exception ex) {
+                mException = ex;
+                if (mStatus != null) {
+                    mStatus.append("\n\t").append(ex.getMessage());
+                }
+                return null;
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                    cursor = null;
+                }
+                if (mStatus != null) {
+                    if (Global.debugEnabledSql) {
+                        Log.w(Global.LOG_CONTEXT, mStatus.toString());
+                    } else if (Global.debugEnabled) {
+                        Log.i(Global.LOG_CONTEXT, mStatus.toString());
+                    }
+                }
 
+            }
+        }
+        IDirectory result = builder.getRoot();
+        if (colText < 0) {
+            compressLatLon(result);
+        }
+        return result;
+    }
+
+    protected void addItem(DirectoryBuilder builder, String path, int markerItemCount, int iconID) {
+        if (path != null) {
+            String decade = (datePickerUseDecade) ? DirectoryFormatter.getDecade(path,1) : null;
+
+            String newPath = (decade != null)
+                    ? ("/" + decade + path)
+                    : path;
+            builder.add(newPath, markerItemCount, iconID);
         }
     }
 

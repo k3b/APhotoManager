@@ -35,6 +35,7 @@ import java.util.List;
 import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.media.MediaContentValues;
+import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.io.GalleryFilterParameter;
@@ -94,9 +95,16 @@ public class TagSql extends FotoSql {
 
             // from more complex to less complex
             String[] params;
-            if ((params = getParams(query, FILTER_EXPR_ANY_LIKE, remove)) != null) {
-                resultFilter.setInAnyField(params[0]);
+            StringBuilder any = null;
+            while ((params = getParams(query, FILTER_EXPR_ANY_LIKE, remove)) != null) {
+                if (any == null) {
+                    any = new StringBuilder().append(params[0]);
+                } else {
+                    any.append(" ").append(params[0]);
+
+                }
             }
+            if (any != null) resultFilter.setInAnyField(any.toString());
 
             parseTagsFromQuery(query, remove, resultFilter);
 
@@ -152,17 +160,17 @@ public class TagSql extends FotoSql {
 
     }
 
+    public static QueryParameter filter2NewQuery(IGalleryFilter filter) {
+        return AndroidAlbumUtils.getAsMergedNewQueryParameter(null, filter);
+    }
+
     public static void filter2QueryEx(QueryParameter resultQuery, IGalleryFilter filter, boolean clearWhereBefore) {
         if ((resultQuery != null) && (!GalleryFilterParameter.isEmpty(filter))) {
             filter2Query(resultQuery, filter, clearWhereBefore);
             if (Global.Media.enableIptcMediaScanner) {
-                String any = filter.getInAnyField();
-                if ((any != null) && (any.length() > 0)) {
-                    if (!any.contains("%")) {
-                        any = "%" + any + "%";
-                    }
-                    resultQuery.addWhere(FILTER_EXPR_ANY_LIKE, any, any, any, any);
-                }
+                String allAny = filter.getInAnyField();
+
+                addFilterAny(resultQuery, allAny);
 
 
                 List<String> includes = ListUtils.emptyAsNull(filter.getTagsAllIncluded());
@@ -189,6 +197,19 @@ public class TagSql extends FotoSql {
                 }
 
                 setWhereVisibility(resultQuery, filter.getVisibility());
+            }
+        }
+    }
+
+    public static void addFilterAny(QueryParameter resultQuery, String allAny) {
+        if (allAny != null) {
+            for (String any : allAny.split(" ")) {
+                if ((any != null) && (any.length() > 0)) {
+                    if (!any.contains("%")) {
+                        any = "%" + any + "%";
+                    }
+                    resultQuery.addWhere(FILTER_EXPR_ANY_LIKE, any, any, any, any);
+                }
             }
         }
     }
@@ -381,7 +402,7 @@ public class TagSql extends FotoSql {
         if (addWhereAnyOfTags(query, tags) > 0) {
             Cursor c = null;
             try {
-                c = createCursorForQuery("getTagRefCount", context, query, VISIBILITY.PRIVATE_PUBLIC);
+                c = createCursorForQuery(null, "getTagRefCount", context, query, VISIBILITY.PRIVATE_PUBLIC);
                 if (c.moveToFirst()) {
                     return c.getInt(0);
                 }
@@ -435,7 +456,7 @@ public class TagSql extends FotoSql {
 
         if (filterCount > 0) {
             try {
-                c = createCursorForQuery("loadTagWorflowItems", context, query, VISIBILITY.PRIVATE_PUBLIC);
+                c = createCursorForQuery(null, "loadTagWorflowItems", context, query, VISIBILITY.PRIVATE_PUBLIC);
                 if (c.moveToFirst()) {
                     do {
                         result.add(new TagWorflowItem(c.getLong(0), c.getString(1), TagConverter.fromString(c.getString(2)),

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -20,9 +20,11 @@
 package de.k3b.android.androFotoFinder;
 
 import android.app.Activity;
+import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -35,6 +37,7 @@ import android.widget.EditText;
 import android.widget.RatingBar;
 import android.widget.Toast;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -44,25 +47,33 @@ import java.util.Locale;
 import de.k3b.FotoLibGlobal;
 import de.k3b.android.androFotoFinder.directory.DirectoryLoaderTask;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
+import de.k3b.android.androFotoFinder.imagedetail.ImageDetailMetaDialogBuilder;
 import de.k3b.android.androFotoFinder.locationmap.LocationMapFragment;
 import de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity;
+import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.osmdroid.OsmdroidUtil;
+import de.k3b.android.util.OsUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
+import de.k3b.android.widget.BaseQueryActivity;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.AlbumFile;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
+import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.tagDB.Tag;
 
 /**
+ * Editor for GalleryFilterParameter and for parsed *.query and *.album QueryParameter-files.
+ *
  * Defines a gui for global foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.
  */
 public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
@@ -72,23 +83,34 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
 {
     private static final String mDebugPrefix = "GalF-";
 
-    public static final int resultID = 522;
     private static final String DLG_NAVIGATOR_TAG = "GalleryFilterActivity";
+    private static final String DLG_SAVE_AS_TAG = "GalleryFilterActivitySaveAs";
     private static final String SETTINGS_KEY = "GalleryFilterActivity-";
-    private static final String FILTER_VALUE = "CURRENT_FILTER";
+    private static final String LAST_SELECTED_DIR_KEY = "mLastSelectedAlbumDir";
+
     private static final String WILDCARD = "%";
-    private static QueryParameter mRootQuery;
+    private static final int SAVE_AS_VALBUM_PICK = 9921;
 
     private GalleryFilterParameter mFilter = new GalleryFilterParameter();
 
-    private FilterValue mFilterValue = null;
-    private HistoryEditText mHistory;
-    private BookmarkController mBookmarkController = null;
-    private IDirectory mPopUpSelection = null;
+    // where to navigate to when folder picker is opend: last path or last picked album file
+    private String mLastSelectedAlbumDir = null;
 
-    public static void showActivity(Activity context, IGalleryFilter filter, QueryParameter rootQuery,
+    // parsed filter part of query
+    private FilterValue mFilterValue = null;
+    // contains the non parsebale part of query
+    private QueryParameter mQueryWithoutFilter;
+
+    private HistoryEditText mHistory;
+
+    private GalleryFilterPathState mGalleryFilterPathState = null;
+    private VirtualAlbumController mBookmarkController = null;
+
+    /** set while dir picker is active */
+    private DirectoryPickerFragment mDirPicker = null;
+
+    public static void showActivity(Activity context, IGalleryFilter filter, QueryParameter query,
                                     String lastBookmarkFileName, int requestCode) {
-        mRootQuery = rootQuery;
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, context.getClass().getSimpleName()
                     + " > GalleryFilterActivity.showActivity");
@@ -97,11 +119,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         final Intent intent = new Intent().setClass(context,
                 GalleryFilterActivity.class);
 
-        if ((intent != null) && (filter != null)) {
-            intent.putExtra(EXTRA_FILTER, filter.toString());
-        }
-
-        BookmarkController.saveState(lastBookmarkFileName, intent, null);
+        AndroidAlbumUtils.saveFilterAndQuery(context, null, intent, null, filter, query);
         if (requestCode != 0) {
             context.startActivityForResult(intent, requestCode);
         } else {
@@ -109,18 +127,14 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         }
     }
 
-    public static GalleryFilterParameter getFilter(Intent intent) {
-        if (intent == null) return null;
-        String filter = intent.getStringExtra(EXTRA_FILTER);
-        if (filter == null) return null;
-        return GalleryFilterParameter.parse(filter, new GalleryFilterParameter());
-    }
-
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         fromGui(mFilter);
-        savedInstanceState.putString(FILTER_VALUE, mFilter.toString());
-        mBookmarkController.saveState(null, savedInstanceState);
+        AndroidAlbumUtils.saveFilterAndQuery(this, null, null, savedInstanceState, mFilter, mQueryWithoutFilter);
+
+        savedInstanceState.putString(LAST_SELECTED_DIR_KEY, mLastSelectedAlbumDir);
+
+        mGalleryFilterPathState.save(this, savedInstanceState);
 
         super.onSaveInstanceState(savedInstanceState);
     }
@@ -130,25 +144,46 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         Global.debugMemory(mDebugPrefix, "onCreate");
         super.onCreate(savedInstanceState);
         final Intent intent = getIntent();
-        if (Global.debugEnabled && (intent != null)){
-            Log.d(Global.LOG_CONTEXT, mDebugPrefix + "onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
+
+        mGalleryFilterPathState = new GalleryFilterPathState().load(this, intent,
+                savedInstanceState);
+        // for debugging: where does the filter come from
+        StringBuilder dbgMessageResult = (Global.debugEnabled) ? new StringBuilder() : null;
+
+        if ((dbgMessageResult != null) && (intent != null)){
+            dbgMessageResult.append(StringUtils.appendMessage(dbgMessageResult,
+                    mDebugPrefix , "onCreate", intent.toUri(Intent.URI_INTENT_SCHEME)));
         }
         setContentView(R.layout.activity_gallery_filter);
         this.mFilterValue = new FilterValue();
         onCreateButtos();
 
-        GalleryFilterParameter filter = (savedInstanceState == null)
-                ? getFilter(intent)
-                : GalleryFilterParameter.parse(savedInstanceState.getString(FILTER_VALUE, ""),  new GalleryFilterParameter()) ;
+        final QueryParameter query = AndroidAlbumUtils.getQuery(this, "",
+                savedInstanceState, intent, null, null, dbgMessageResult);
+        setQueryAndFilter(query);
 
-        if (filter != null) {
-            mFilter = filter;
-            toGui(mFilter);
-            mFilterValue.showLatLon(filter.isNonGeoOnly());
+        if (dbgMessageResult != null) {
+            Log.i(Global.LOG_CONTEXT, dbgMessageResult.toString());
         }
 
-        mBookmarkController = new BookmarkController(this);
-        mBookmarkController.loadState(intent,savedInstanceState);
+        mBookmarkController = new VirtualAlbumController(this);
+
+        if (savedInstanceState != null) {
+            mLastSelectedAlbumDir = savedInstanceState.getString(LAST_SELECTED_DIR_KEY);
+        }
+    }
+
+    private void setQueryAndFilter(QueryParameter query) {
+        this.mQueryWithoutFilter = query;
+        if (this.mQueryWithoutFilter == null) {
+            this.mQueryWithoutFilter = new QueryParameter();
+            this.mFilter = new GalleryFilterParameter();
+        } else {
+            this.mFilter.get(TagSql.parseQueryEx(this.mQueryWithoutFilter, true));
+        }
+
+        mFilterValue.showLatLon(this.mFilter.isNonGeoOnly());
+        toGui(this.mFilter);
     }
 
     private void onCreateButtos() {
@@ -156,14 +191,30 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         cmd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showDirectoryPicker(FotoSql.queryGroupByDir);
+                String path = (!StringUtils.isNullOrEmpty(mLastSelectedAlbumDir)) ? mLastSelectedAlbumDir : getAsGalleryFilter().getPath();
+
+                if (StringUtils.isNullOrEmpty(path)) {
+                    path = mGalleryFilterPathState.load(GalleryFilterActivity.this,
+                                null, null)
+                            .getPathDefault(null);
+                }
+                if (path != null) path = path.replaceAll("%","");
+                showDirectoryPickerForFilterParamValue(
+                        mDebugPrefix + " path picker " + path,
+                        FotoSql.queryGroupByDir,
+                        true,
+                        false, path);
             }
         });
         cmd = (Button) findViewById(R.id.cmd_date);
         cmd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showDirectoryPicker(FotoSql.queryGroupByDate);
+                String path = getAsGalleryFilter().getDatePath();
+                showDirectoryPickerForFilterParamValue(
+                        mDebugPrefix + " date picker " + path,
+                        FotoSql.queryGroupByDate, false,
+                        FotoLibGlobal.datePickerUseDecade, path);
             }
         });
         cmd = (Button) findViewById(R.id.cmd_select_lat_lon);
@@ -219,25 +270,26 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                 return true;
 
             case R.id.cmd_gallery:
-                FotoGalleryActivity.showActivity(this, getAsGalleryFilter(), null, 0);
+                FotoGalleryActivity.showActivity(this, getAsMergedQuery(), 0);
+                        // TagSql.filter2NewQuery(getAsGalleryFilter()), 0);
                 return true;
             case R.id.cmd_show_geo: {
-                MapGeoPickerActivity.showActivity(this, null, getAsGalleryFilter());
+                MapGeoPickerActivity.showActivity(this, null, getAsMergedQuery(), 0);
                 return true;
             }
+            case R.id.action_details:
+                cmdShowDetails();
+                return true;
 
 
             case R.id.action_save_as:
-                mBookmarkController.onSaveAsQuestion(mBookmarkController.getlastBookmarkFileName(), getAsQuery());
-                return true;
-            case R.id.action_load_from:
-                mBookmarkController.onLoadFromQuestion(new BookmarkController.IQueryConsumer() {
-                    @Override
-                    public void setQuery(String fileName, QueryParameter newQuery) {
-                        IGalleryFilter filter = TagSql.parseQueryEx(newQuery, false);
-                        toGui(filter);
-                    }
-                }, getAsQuery());
+                mGalleryFilterPathState.load(this,null,null);
+                // mBookmarkController.onSaveAsQuestion(mBookmarkController.getlastBookmarkFileName(), getAsQuery());
+                File valbum = mGalleryFilterPathState.getSaveAlbumAs(getString(R.string.mk_dir_default), AlbumFile.SUFFIX_VALBUM);
+                DialogFragment dlg = mBookmarkController.onSaveAsVirutalAlbumQuestion(valbum, getAsMergedQuery());
+                setAutoClose(dlg, null, null);
+                invalidatePathData();
+
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -254,7 +306,8 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                                     final int resultCode, final Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
-        if (mPopUpSelection != null) mPopUpSelection.refresh();
+        IDirectory lastPopUpSelection = (mDirPicker == null) ? null : mDirPicker.getLastPopUpSelection();
+        if (lastPopUpSelection != null) lastPopUpSelection.refresh();
     }
 
     private GalleryFilterParameter getAsGalleryFilter() {
@@ -263,12 +316,8 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         return filter;
     }
 
-    private QueryParameter getAsQuery() {
-        IGalleryFilter filter = new GalleryFilterParameter();
-        fromGui(filter);
-        QueryParameter query = new QueryParameter(mRootQuery);
-        TagSql.filter2QueryEx(query, filter, true);
-        return query;
+    private QueryParameter getAsMergedQuery() {
+        return AndroidAlbumUtils.getAsMergedNewQueryParameter(mQueryWithoutFilter, getAsGalleryFilter());
     }
 
     @Override
@@ -283,12 +332,18 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         Global.debugMemory(mDebugPrefix, "onResume");
         loadLastFilter();
         super.onResume();
+        if (LockScreen.isLocked(this)) {
+            // filter is forbidden when locked. Might occur via
+            //    gallery -> filter -> dir-pick -> openInNew Gallery -> exit
+            finish();
+        }
     }
 
     private void loadLastFilter() {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 
         loadLastFilter(sharedPref, FotoSql.QUERY_TYPE_GROUP_ALBUM);
+        loadLastFilter(sharedPref, FotoSql.QUERY_TYPE_GALLERY);
         loadLastFilter(sharedPref, FotoSql.QUERY_TYPE_GROUP_DATE);
         loadLastFilter(sharedPref, FotoSql.QUERY_TYPE_GROUP_PLACE);
     }
@@ -298,13 +353,13 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
     }
 
     private void saveLastFilter() {
-        if (dirInfos != null)
+        if (mDirInfos != null)
         {
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
             SharedPreferences.Editor edit = sharedPref.edit();
-            
-            for(Integer id : dirInfos.keySet()) {
-                DirInfo dir = dirInfos.get(id);
+
+            for(Integer id : mDirInfos.keySet()) {
+                DirInfo dir = mDirInfos.get(id);
                 if ((dir != null) && (dir.currentPath != null) && (dir.currentPath.length() > 0)) {
                     edit.putString(SETTINGS_KEY + id, dir.currentPath);
                 }
@@ -318,16 +373,15 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         Global.debugMemory(mDebugPrefix, "onDestroy start");
         super.onDestroy();
 
-        mPopUpSelection = null;
-        if (dirInfos != null)
+        if (mDirInfos != null)
         {
-            for(Integer id : dirInfos.keySet()) {
-                DirInfo dir = dirInfos.get(id);
+            for(Integer id : mDirInfos.keySet()) {
+                DirInfo dir = mDirInfos.get(id);
                 if (dir.directoryRoot != null) {
                     dir.directoryRoot.destroy();
                 }
             }
-            dirInfos = null;
+            mDirInfos = null;
         }
 
         Global.debugMemory(mDebugPrefix, "onDestroy end");
@@ -619,6 +673,10 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             }
         }
 
+        @Override public String toString() {
+            return new GalleryFilterParameter().get(this).toString();
+        }
+
     }
 
     private void toGui(IGalleryFilter gf) {
@@ -638,6 +696,19 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         }
     }
 
+    private void cmdShowDetails() {
+        final QueryParameter asMergedQuery = getAsMergedQuery();
+
+        ImageDetailMetaDialogBuilder.createImageDetailDialog(
+                this,
+                getTitle().toString(),
+                asMergedQuery.toSqlString(),
+                StringUtils.appendMessage(null,
+                        getString(R.string.show_photo),
+                        TagSql.getCount(this, asMergedQuery))
+        ).show();
+    }
+
     private void clearFilter() {
         GalleryFilterParameter filter = new GalleryFilterParameter();
 
@@ -645,7 +716,8 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             filter.setSort(mFilter.getSortID(), mFilter.isSortAscending());
         }
 
-        this.mFilter = filter;
+        mFilter = filter;
+        mQueryWithoutFilter = new QueryParameter();
         toGui(mFilter);
     }
 
@@ -653,18 +725,19 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         if (fromGui(mFilter)) {
             mHistory.saveHistory();
 
-            final Intent intent = new Intent();
-            if (this.mFilter != null) {
-                intent.putExtra(EXTRA_FILTER, this.mFilter.toString());
-            }
+            final Intent resultIntent = new Intent();
+            final Intent originalIntent = getIntent();
 
-            mBookmarkController.saveState(intent, null);
+            // if result must be saved to file
+            Uri originalUri = (originalIntent == null) ? null : originalIntent.getData();
 
-            this.setResult(resultID, intent);
+            AndroidAlbumUtils.saveFilterAndQuery(this, originalUri, resultIntent, null, mFilter, mQueryWithoutFilter);
+
+            this.setResult(BaseQueryActivity.resultID, resultIntent);
+
             finish();
         }
     }
-
 
     /**************** DirectoryPicker *****************/
     private static class DirInfo {
@@ -673,13 +746,14 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         public String currentPath = null;
     }
 
-    private HashMap<Integer, DirInfo> dirInfos = new HashMap<Integer, DirInfo>();
+    /** one DirInfo per possible queyType */
+    private HashMap<Integer, DirInfo> mDirInfos = new HashMap<Integer, DirInfo>();
     private DirInfo getOrCreateDirInfo(int queryId) {
-        DirInfo result = dirInfos.get(queryId);
+        DirInfo result = mDirInfos.get(queryId);
         if (result == null) {
             result = new DirInfo();
             result.queryId = queryId;
-            dirInfos.put(queryId, result);
+            mDirInfos.put(queryId, result);
         }
         return result;
     }
@@ -724,43 +798,49 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         if (fromGui(mFilter)) {
             final FragmentManager manager = getFragmentManager();
             LocationMapFragment dlg = new LocationMapFragment();
-            dlg.defineNavigation(null, mFilter, OsmdroidUtil.NO_ZOOM, null, null);
+            dlg.defineNavigation(null, null, mFilter, OsmdroidUtil.NO_ZOOM, null, null, false);
 
             dlg.show(manager, DLG_NAVIGATOR_TAG);
             setAutoClose(dlg, null, null);
         }
     }
 
-    private void showDirectoryPicker(final QueryParameter currentDirContentQuery) {
+    private void showDirectoryPickerForFilterParamValue(
+                            final String debugContext, final QueryParameter currentDirContentQuery,
+                            boolean addVAlbums, boolean datePickerUseDecade,
+                            final String initialSelection) {
         if (fromGui(mFilter)) {
-            IDirectory directoryRoot = getOrCreateDirInfo(currentDirContentQuery.getID()).directoryRoot;
+            final DirInfo dirInfo = getOrCreateDirInfo(currentDirContentQuery.getID());
+            IDirectory directoryRoot = dirInfo.directoryRoot;
+            dirInfo.currentPath = initialSelection;
             if (directoryRoot == null) {
-                DirectoryLoaderTask loader = new DirectoryLoaderTask(this, mDebugPrefix) {
+                DirectoryLoaderTask loader = new DirectoryLoaderTask(this, datePickerUseDecade, debugContext) {
                     @Override
                     protected void onPostExecute(IDirectory directoryRoot) {
-                        onDirectoryDataLoadComplete(directoryRoot, currentDirContentQuery.getID());
+                        onDirectoryDataLoadCompleteForFilterParamValue(directoryRoot, currentDirContentQuery.getID());
                     }
                 };
-                loader.execute(currentDirContentQuery);
+
+                if (addVAlbums) {
+                    // load dir-s + "*.album"
+                    loader.execute(currentDirContentQuery, FotoSql.queryVAlbum);
+                } else {
+                    loader.execute(currentDirContentQuery);
+                }
             } else {
-                onDirectoryDataLoadComplete(directoryRoot, currentDirContentQuery.getID());
+                onDirectoryDataLoadCompleteForFilterParamValue(directoryRoot, currentDirContentQuery.getID());
             }
         }
     }
 
-    private void onDirectoryDataLoadComplete(IDirectory directoryRoot, int queryId) {
+    private void onDirectoryDataLoadCompleteForFilterParamValue(IDirectory directoryRoot, int queryId) {
         if (directoryRoot != null) {
             Global.debugMemory(mDebugPrefix, "onDirectoryDataLoadComplete");
 
             DirInfo dirInfo = getOrCreateDirInfo(queryId);
             dirInfo.directoryRoot = directoryRoot;
             final FragmentManager manager = getFragmentManager();
-            DirectoryPickerFragment dlg = new DirectoryPickerFragment() {
-                protected boolean onPopUpClick(MenuItem menuItem, IDirectory popUpSelection) {
-                    mPopUpSelection = popUpSelection;
-                    return super.onPopUpClick(menuItem, popUpSelection);
-                }
-            };
+            DirectoryPickerFragment dlg = new DirectoryPickerFragment();
 
             int menuResId = 0; // no menu in app lock mode
             if (!LockScreen.isLocked(this)) {
@@ -769,22 +849,52 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             dlg.setContextMenuId(menuResId);
 
             dlg.defineDirectoryNavigation(dirInfo.directoryRoot, dirInfo.queryId, dirInfo.currentPath);
-
             dlg.show(manager, DLG_NAVIGATOR_TAG);
+            mDirPicker = dlg;
+
             setAutoClose(dlg, null, null);
         }
     }
 
     /**
-     * called when user picks a new directory
+     * called when user picks a new directory.
+     * Sources: Filter-Path, Filter-Date or SaveAs distinguished via queryTypeId
      */
     @Override
-    public void onDirectoryPick(String selectedAbsolutePath, int queryTypeId) {
-        DirInfo dirInfo = getOrCreateDirInfo(queryTypeId);
-        dirInfo.currentPath=selectedAbsolutePath;
+    public void onDirectoryPick(final String selectedAbsolutePath, int queryTypeId) {
+        closeDialogIfNeeded();
+        mGalleryFilterPathState.load(this, null, null);
 
-        FotoSql.set(mFilter,selectedAbsolutePath, queryTypeId);
-        toGui(mFilter);
+        File selectedAlbumFile = AlbumFile.getExistingQueryFileOrNull(selectedAbsolutePath);
+        if (selectedAlbumFile != null) {
+            // selection was an album file
+            final String selectedAlbumPath = selectedAlbumFile.getPath();
+            setQueryAndFilter(AndroidAlbumUtils.getQueryFromUri(mDebugPrefix + ".onDirectoryPick loading album "
+                    + selectedAlbumPath, this, Uri.fromFile(selectedAlbumFile), null));
+            mGalleryFilterPathState.setAlbum(Uri.fromFile(selectedAlbumFile));
+            mGalleryFilterPathState.setLastPath(selectedAlbumFile.getParent());
+            mLastSelectedAlbumDir = selectedAlbumPath; //??electedAlbumFile.getParent();
+        } else if (AlbumFile.isQueryFile(selectedAbsolutePath)) {
+            // album does not exist (any more) rescan
+            AndroidAlbumUtils.albumMediaScan(mDebugPrefix + " onAlbumPick not found in filesystem => ",
+                    this, new File(selectedAbsolutePath), 1);
+
+            mGalleryFilterPathState.setLastPath(selectedAlbumFile.getParent());
+            invalidatePathData();
+        } else {
+            // selection was a path (os-dir or date)
+            mLastSelectedAlbumDir = null;
+            FotoSql.set(mFilter, selectedAbsolutePath, queryTypeId);
+            if (queryTypeId == FotoSql.QUERY_TYPE_GROUP_ALBUM) {
+                mGalleryFilterPathState.setLastPath(selectedAbsolutePath);
+            }
+            toGui(mFilter);
+        }
+    }
+
+    private void invalidatePathData() {
+        getOrCreateDirInfo(FotoSql.QUERY_TYPE_GROUP_ALBUM).directoryRoot = null;
+        getOrCreateDirInfo(FotoSql.QUERY_TYPE_GALLERY).directoryRoot = null;
     }
 
     /** interface DirectoryPickerFragment.invalidateDirectories not used */
@@ -794,7 +904,13 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
 
     /** interface DirectoryPickerFragment.OnDirectoryInteractionListener not used */
     @Override
-    public void onDirectoryCancel(int queryTypeId) {}
+    public void onDirectoryCancel(int queryTypeId) {closeDialogIfNeeded();}
+
+    @Override
+    protected void closeDialogIfNeeded() {
+        super.closeDialogIfNeeded();
+        mDirPicker = null;
+    }
 
     /** interface DirectoryPickerFragment.OnDirectoryInteractionListener not used */
     @Override

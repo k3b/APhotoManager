@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -20,11 +20,10 @@
 package de.k3b.android.widget;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -39,9 +38,10 @@ import java.util.List;
 import de.k3b.io.ListUtils;
 
 /**
- * Add history-popup to EditText.
- * invoke via Clipboard ContextActionBar: star (history) to open a popupmenu with previous values.
+ * Add history-popup to a list of EditText+ImageButton pairs.
+ * The ImageButton opens a popupmenu with previous values.
  * Long-Press if no selection => popup with previous values.
+ * Use HistoryEditText.saveHistory() to persist the previous values in shared preferences.
  *
  * Popup-menu requires at least api 11 (HONEYCOMB)
  * Created by k3b on 26.08.2015.
@@ -49,7 +49,7 @@ import de.k3b.io.ListUtils;
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class HistoryEditText {
     private static final int NO_ID = -1;
-    private final Activity mContext;
+    private final Context mContext;
     private final String mDelimiter;
     private final int mMaxHisotrySize;
     private final EditorHandler[] mEditorHandlers;
@@ -60,11 +60,11 @@ public class HistoryEditText {
         private final ImageButton mCmd;
         private final String mId;
 
-        public EditorHandler(String id, EditText editor, int cmdId) {
+        public EditorHandler(String id, EditText editor, int imageButtonResourceId) {
             mId = id;
             mEditor = editor;
 
-            mCmd = (cmdId != NO_ID) ? (ImageButton) mContext.findViewById(cmdId) : null;
+            mCmd = (imageButtonResourceId != NO_ID) ? (ImageButton) editor.getRootView().findViewById(imageButtonResourceId) : null;
 
             if (mCmd == null) {
                 mEditor.setOnLongClickListener(this);
@@ -107,7 +107,6 @@ public class HistoryEditText {
             popup.show();
         }
 
-        @NonNull
         private List<String> getHistoryItems() {
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
             return getHistory(sharedPref);
@@ -176,12 +175,12 @@ public class HistoryEditText {
     }
 
     /** define history function for these editors */
-    public HistoryEditText(Activity context, int[] cmdIds, EditText... editors) {
+    public HistoryEditText(Context context, int[] cmdIds, EditText... editors) {
         this(context, context.getClass().getSimpleName() + "_history_","';'",  8, cmdIds, editors);
     }
 
     /** define history function for these editors */
-    public HistoryEditText(Activity context, String settingsPrefix, String delimiter, int maxHisotrySize, int[] cmdIds, EditText... editors) {
+    public HistoryEditText(Context context, String settingsPrefix, String delimiter, int maxHisotrySize, int[] cmdIds, EditText... editors) {
 
         this.mContext = context;
         this.mDelimiter = delimiter;

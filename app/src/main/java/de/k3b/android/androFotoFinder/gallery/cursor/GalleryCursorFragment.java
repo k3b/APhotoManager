@@ -19,12 +19,16 @@
  
 package de.k3b.android.androFotoFinder.gallery.cursor;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.LoaderManager;
+import android.content.ClipData;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.annotation.NonNull;
@@ -68,6 +72,7 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.OnGalleryInteractionListener;
 import de.k3b.android.androFotoFinder.queries.Queryable;
 import de.k3b.android.androFotoFinder.queries.SqlJobTaskBase;
+import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagTask;
 import de.k3b.android.androFotoFinder.tagDB.TagWorflow;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
@@ -76,8 +81,11 @@ import de.k3b.android.util.DBUtils;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.OsUtils;
 import de.k3b.android.util.ResourceUtils;
+import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.ListUtils;
+import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
@@ -108,9 +116,11 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private static final String INSTANCE_STATE_SEL_ONLY = "selectedOnly";
     private static final String INSTANCE_STATE_LOADER_ID = "loaderID";
 
-    private static final int MODE_VIEW = 0;
-    private static final int MODE_PICK_SINGLE = 1;
-    private static final int MODE_PICK_MULTIBLE = 2;
+    private static final int MODE_VIEW_PICKER_NONE = 0;
+    private static final int MODE_VIEW_PICK_SINGLE = 1;
+    private static final int MODE_VIEW_PICK_MULTIBLE = 2;
+
+    private static final boolean SUPPORT_MULTISELECTION = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN);
 
     private static int nextLoaderID = 100;
     private int loaderID = -1;
@@ -151,9 +161,10 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private boolean mNoShareError = true;
 
     /** true pick geo; false pick image */
-    private boolean mGetGeo = false;
+    private boolean mModePickGeoElsePickImaage = false;
 
-    private int mMode = MODE_VIEW;
+    /** one of the MODE_VIEW_PICKER_XXXX */
+    private int mMode = MODE_VIEW_PICKER_NONE;
 
     private MoveOrCopyDestDirPicker mDestDirPicker = null;
     /**************** construction ******************/
@@ -366,10 +377,10 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         String action = (intent != null) ? intent.getAction() : null;
 
         if ((action != null) && ((Intent.ACTION_PICK.compareTo(action) == 0) || (Intent.ACTION_GET_CONTENT.compareTo(action) == 0))) {
-            this.mMode = (intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE,false)) ? MODE_PICK_MULTIBLE : MODE_PICK_SINGLE;
+            this.mMode = (intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE,false)) ? MODE_VIEW_PICK_MULTIBLE : MODE_VIEW_PICK_SINGLE;
             mMustReplaceMenue = true;
             String schema = intent.getScheme();
-            mGetGeo = ((schema != null) && ("geo".compareTo(schema) == 0));
+            mModePickGeoElsePickImaage = ((schema != null) && ("geo".compareTo(schema) == 0));
         }
 
         String path = (intent == null) ? null : intent.getStringExtra(AffUtils.EXTRA_SELECTED_ITEM_PATHS);
@@ -627,7 +638,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         if (Global.debugEnabledSql) {
             Log.i(Global.LOG_CONTEXT, "Exec child gallery\n\t" + subGalleryQuery.toSqlString());
         }
-        FotoGalleryActivity.showActivity(getActivity(), null, subGalleryQuery, 0);
+        FotoGalleryActivity.showActivity(getActivity(), subGalleryQuery, 0);
     }
 
     /****************** path navigation *************************/
@@ -758,6 +769,27 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         getActivity().invalidateOptionsMenu();
     }
 
+    /**
+     * Different menu modes
+     * 	* normal		name searchbar-icon folder map (tags) (filter) menu
+     * 	    * R.menu.menu_gallery_non_selected_only R.menu.menu_gallery_non_multiselect
+     * 	* selected	    selected cancel seleted-only share (save) menu
+     * 	    * (Filter not available; this.isMultiSelectionActive();
+     * 	    * R.menu.menu_gallery_multiselect_mode_all R.menu.menu_image_commands
+     * 	* locked		name lock folder map menu
+     * 	    * (no multiselection, no base-filters)
+     * 	    * (this.locked; R.menu.menu_locked)
+     * 	* searchbar	    bar cancel-searc-bar (folder) (map) (tags) (filter) menu
+     * 	* picker-locked
+     * 	    * R.menu.menu_gallery_pick R.menu.menu_locked
+     * 	* picker-non-locked     selected ok cancel filter settings
+     * 	    * R.menu.menu_gallery_pick  R.menu.menu_gallery_non_multiselect
+     *
+     * 	(xxxx) with "IFROOM" (in wide screen only)
+     * 	searchbarmode is like "normal" where there is no "IFROOM" on no-searchbar items
+     *
+     * @param menu
+     */
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
@@ -769,12 +801,16 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             mMustReplaceMenue = false;
             menu.clear();
             mMenuRemoveAllSelected = null;
-            if (mMode == MODE_VIEW) {
+            if (mMode == MODE_VIEW_PICKER_NONE) {
+                //
                 if (locked) { // view-locked
-                    mSelectedItems.clear();
-                    inflater.inflate(R.menu.menu_gallery_locked, menu);
-                    LockScreen.fixMenu(menu);
-                } else if (isMultiSelectionActive()) { // view-multiselect
+                    if (isMultiSelectionActive()) {
+                        clearSelections();
+                    }
+                    inflater.inflate(R.menu.menu_locked, menu);
+                    LockScreen.removeDangerousCommandsFromMenu(menu);
+                    AboutDialogPreference.onPrepareOptionsMenu(getActivity(), menu);
+                } else if (this.isMultiSelectionActive()) { // view-multiselect
                     inflater.inflate(R.menu.menu_gallery_multiselect_mode_all, menu);
 
                     mShareOnlyToggle = menu.findItem(R.id.cmd_selected_only);
@@ -796,14 +832,14 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 }
 
 
-            } else {
+            } else { // picker mode
                 inflater.inflate(R.menu.menu_gallery_pick, menu);
-                if (locked) { // pick-locked
-                    mSelectedItems.clear();
-                    inflater.inflate(R.menu.menu_gallery_locked, menu);
-                } else { // pick-single/multible
+                if (!locked) {
                     inflater.inflate(R.menu.menu_gallery_non_multiselect, menu);
+                } else { // pick-locked
+                  LockScreen.removeDangerousCommandsFromMenu(menu);
                 }
+                AboutDialogPreference.onPrepareOptionsMenu(getActivity(), menu);
             }
             mMenuRemoveAllSelected = menu.findItem(R.id.cmd_selection_remove_all);
         }
@@ -852,7 +888,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             case R.id.cmd_move:
                 return cmdMoveOrCopyWithDestDirPicker(true, fileCommands.getLastCopyToPath(), selectedFiles);
             case R.id.cmd_show_geo:
-                MapGeoPickerActivity.showActivity(this.getActivity(), selectedFiles, null);
+                MapGeoPickerActivity.showActivity(this.getActivity(), selectedFiles, null, 0);
                 return true;
             case R.id.cmd_edit_geo:
                 GeoEditActivity.showActivity(this.getActivity(), selectedFiles, GeoEditActivity.RESULT_ID);
@@ -883,14 +919,28 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     private void cmdShowDetails() {
         SelectedItems ids = getSelectedItems();
-        String files = ((ids != null) && (ids.size() > 0)) ? mAdapter.createSelectedFiles(this.getActivity(), ids).toString().replace(",","\n") : null;
+
+        final Activity activity = this.getActivity();
+        CharSequence subQueryTypName = (activity instanceof FotoGalleryActivity)
+                ? ((FotoGalleryActivity)activity).getValueAsTitle(true)
+                : null;
+
+        String files = ((ids != null) && (ids.size() > 0)) ? mAdapter.createSelectedFiles(activity, ids).toString().replace(",","\n") : null;
         ImageDetailMetaDialogBuilder.createImageDetailDialog(
-                this.getActivity(),
+                activity,
                 getActivity().getTitle().toString(),
                 this.toString(),
                 ids,
                 files,
-                (mGalleryContentQuery != null) ? mGalleryContentQuery.toSqlString() : null
+                (mGalleryContentQuery != null) ? mGalleryContentQuery.toSqlString() : null,
+                StringUtils.appendMessage(null,
+                        getString(R.string.show_photo),
+                        TagSql.getCount(activity, mGalleryContentQuery)),
+                subQueryTypName,
+                (mGalleryContentQuery == null) ? null : StringUtils.appendMessage(null,
+                        getString(R.string.show_photo),
+                        TagSql.getCount(activity, mGalleryContentQuery))
+
         ).show();
     }
 
@@ -991,12 +1041,11 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             dismiss();
         }
     };
-
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
         if (AndroidFileCommands.canProcessFile(this.getActivity(), false)) {
             mDestDirPicker = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
-            mDestDirPicker.defineDirectoryNavigation(OsUtils.getRootOSDirectory(),
+            mDestDirPicker.defineDirectoryNavigation(OsUtils.getRootOSDirectory(null),
                     (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
                     lastCopyToPath);
             mDestDirPicker.setContextMenuId(LockScreen.isLocked(this.getActivity()) ? 0 :  R.menu.menu_context_osdir);
@@ -1008,14 +1057,15 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private boolean onPickOk() {
         mDestDirPicker = null;
         Activity parent = getActivity();
-        Uri resultUri = getSelectedUri(parent);
+        List<Uri> resultUri = getSelectedUri(parent, "onPickOk");
 
-        if (resultUri != null) {
+        if ((resultUri != null) && (resultUri.size() > 0)) {
             final Intent intent = new Intent();
 
-            // permission result.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            intent.setData(resultUri);
-            if (!mGetGeo) {
+            intent.setData(resultUri.get(0));
+            addAsClip(intent, parent.getContentResolver(), resultUri);
+            if (!mModePickGeoElsePickImaage) {
+                // permission result.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
 
@@ -1026,27 +1076,63 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         return true;
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    private void addAsClip(Intent intent, ContentResolver contentResolver, List<Uri> resultUri) {
+        if (SUPPORT_MULTISELECTION && (resultUri.size() > 1)) {
+            ClipData clip = null;
+            for (Uri uri : resultUri) {
+                ClipData clipData = ClipData.newUri(contentResolver, uri.toString(), uri);
+                if (clip == null) {
+                    clip = clipData;
+                } else  {
+                    clip.addItem(clipData.getItemAt(0));
+                }
+                intent.setClipData(clip);
+            }
+        }
+    }
+
     @Nullable
-    private Uri getSelectedUri(Activity parent) {
-        Uri resultUri = null;
+    private List<Uri> getSelectedUri(Activity parent, Object... dbgContext) {
+        StringBuilder debugMessage = StringUtils.createDebugMessage(Global.debugEnabledSql,mDebugPrefix,"getSelectedUri", dbgContext);
+
+        List<Uri> resultUri = null;
 
         SelectedItems items = getSelectedItems();
         if ((items != null) && (items.size() > 0)) {
             long id = items.first();
 
-            if (mGetGeo) {
-                IGeoPoint initialPoint = FotoSql.execGetPosition(parent, null, id);
-
-                if (initialPoint != null) {
-                    GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
-
-                    resultUri = Uri.parse(PARSER.toUriString(new GeoPointDto(initialPoint.getLatitude(),initialPoint.getLongitude(), IGeoPointInfo.NO_ZOOM)));
-                }
-
-
-            } else {
-                resultUri = FotoSql.getUri(id);
+            if (resultUri == null) {
+                resultUri = new ArrayList<Uri>();
             }
+            resultUri.add(getUri(parent, id));
+        }
+        if (debugMessage != null) {
+
+            StringUtils.appendMessage(debugMessage, "result",
+                    ListUtils.toString(" ", resultUri));
+            Log.i(Global.LOG_CONTEXT, debugMessage.toString());
+        }
+        return resultUri;
+    }
+
+    private Uri getUri(Activity parent, long id) {
+        Uri resultUri = null;
+        if (mModePickGeoElsePickImaage) {
+            // mode pick gep
+            IGeoPoint initialPoint = FotoSql.execGetPosition(null, parent,
+                    null, id, mDebugPrefix, "getSelectedUri");
+
+            if (initialPoint != null) {
+                GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
+
+                resultUri = Uri.parse(PARSER.toUriString(new GeoPointDto(initialPoint.getLatitude(),initialPoint.getLongitude(), IGeoPointInfo.NO_ZOOM)));
+            }
+
+
+        } else {
+            // mode pick image
+            resultUri = FotoSql.getUri(id);
         }
         return resultUri;
     }
@@ -1316,7 +1402,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     private boolean isMultiSelectionActive() {
-        if (mMode != MODE_VIEW) return true;
+        if (mMode != MODE_VIEW_PICKER_NONE) return true;
         return !mSelectedItems.isEmpty();
     }
 
@@ -1344,7 +1430,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     /** return true if included; false if excluded */
     private boolean toggleSelection(long imageID) {
         boolean contains = mSelectedItems.contains(imageID);
-        if (mMode == MODE_PICK_SINGLE) {
+        if (mMode == MODE_VIEW_PICK_SINGLE) {
             clearSelections();
         }
         if (contains) {

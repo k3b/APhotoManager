@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -21,6 +21,8 @@ package de.k3b.io;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.Date;
 
 /**
  * Created by k3b on 08.06.2015.
@@ -80,4 +82,27 @@ public class DirectoryFormatterTests {
         Assert.assertEquals("123.000000", DirectoryFormatter.formatLatLon(123));
         Assert.assertEquals("0", DirectoryFormatter.formatLatLon(0));
     }
+
+    @Test
+    public void shoudFormatDatePath() {
+        int no = 1;
+        String context = "#";
+        assertEquals(context + no++, "/2010*/2017/05/03", true, "2017-05-03", "2017-05-03");
+        assertEquals(context + no++, "/2010*/2017/05/03", true, "2017-05-03", "2017-05-04");
+        assertEquals(context + no++, "/2010*/2017/12/31", true, "2017-12-31", "2018-01-01");
+
+        assertEquals(context + no++, "/2017/05/03", false, "2017-05-03", "2017-05-04");
+
+        assertEquals(context + no++, "/2010*/2017/05", true, "2017-05-01", "2017-06-01");
+        assertEquals(context + no++, "/2010*/2017", true, "2017-01-01", "2018-01-01");
+        assertEquals(context + no++, "/2010*", true, "2010-01-01", "2020-01-01");
+    }
+
+    private void assertEquals(String message, String expected, boolean withDecade, String from, String to) {
+        Date dateFrom = DateUtil.parseIsoDate(from);
+        Date dateTo = DateUtil.parseIsoDate(to);
+
+        Assert.assertEquals(message, expected, DirectoryFormatter.getDatePath(withDecade, dateFrom.getTime(), dateTo.getTime()));
+    }
+
 }

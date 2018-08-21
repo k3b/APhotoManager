@@ -830,7 +830,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     private void defineMenu(Menu menu) {
         if (LockScreen.isLocked(this)) {
             getMenuInflater().inflate(R.menu.menu_image_detail_locked, menu);
-            LockScreen.fixMenu(menu);
+            LockScreen.removeDangerousCommandsFromMenu(menu);
 
         } else {
             getMenuInflater().inflate(R.menu.menu_image_detail, menu);
@@ -950,18 +950,20 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                         newFilter.setPath(dirPath);
                         // int callBackId = (MediaScanner.isNoMedia(dirPath,MediaScanner.DEFAULT_SCAN_DEPTH)) ? NOMEDIA_GALLERY : 0;
 
-                        FotoGalleryActivity.showActivity(this, this.mFilter, null, 0);
+                        QueryParameter query = TagSql.filter2NewQuery(this.mFilter);
+                        FotoGalleryActivity.showActivity(this, query, 0);
                     }
                     break;
                 }
 
                 case R.id.cmd_show_geo:
-                    MapGeoPickerActivity.showActivity(this, getCurrentFoto(), null);
+                    MapGeoPickerActivity.showActivity(this, getCurrentFoto(), null, 0);
                     break;
 
                 case R.id.cmd_show_geo_as: {
                     final long imageId = getCurrentImageId();
-                    IGeoPoint _geo = FotoSql.execGetPosition(this, null, imageId);
+                    IGeoPoint _geo = FotoSql.execGetPosition(null, this,
+                            null, imageId, mDebugPrefix, "on cmd_show_geo_as");
                     final String currentFilePath = getCurrentFilePath();
                     GeoPointDto geo = new GeoPointDto(_geo.getLatitude(), _geo.getLongitude(), GeoPointDto.NO_ZOOM);
 
@@ -1056,14 +1058,22 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     private void cmdShowDetails(String fullFilePath, long currentImageId) {
 
-        ImageDetailMetaDialogBuilder.createImageDetailDialog(this, fullFilePath, currentImageId, mGalleryContentQuery, mViewPager.getCurrentItem()).show();
+        StringBuilder countMsg = (mGalleryContentQuery == null) ? null : StringUtils.appendMessage(null,
+                getString(R.string.show_photo),
+                TagSql.getCount(this, mGalleryContentQuery));
+
+        ImageDetailMetaDialogBuilder.createImageDetailDialog(this, fullFilePath, currentImageId,
+                mGalleryContentQuery,
+                mViewPager.getCurrentItem(),
+                countMsg).show();
+
     }
 
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
         if (AndroidFileCommands.canProcessFile(this, false)) {
             mDestDirPicker = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
-            mDestDirPicker.defineDirectoryNavigation(OsUtils.getRootOSDirectory(),
+            mDestDirPicker.defineDirectoryNavigation(OsUtils.getRootOSDirectory(null),
                     (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
                     lastCopyToPath);
             mDestDirPicker.setContextMenuId(LockScreen.isLocked(this) ? 0 :  R.menu.menu_context_osdir);

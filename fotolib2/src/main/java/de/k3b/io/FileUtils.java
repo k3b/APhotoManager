@@ -29,6 +29,7 @@ import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.regex.Pattern;
 
@@ -52,8 +53,15 @@ public class FileUtils {
         return s;
     }
 
+    public static String readFile(InputStream file) throws IOException {
+        return internalReadFile(new BufferedReader(new InputStreamReader(file)), file);
+    }
+
     public static String readFile(File file) throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(file));
+        return internalReadFile(new BufferedReader(new FileReader(file)), file);
+    }
+
+    public static String internalReadFile(BufferedReader br, Object source) throws IOException {
         StringBuilder sb = new StringBuilder();
         String line = br.readLine();
 
@@ -62,11 +70,11 @@ public class FileUtils {
             sb.append("\n");
             line = br.readLine();
         }
-        close(br, file);
+        close(br, source);
         return sb.toString();
     }
 
-	public static void close(Closeable stream, Object source) {
+    public static void close(Closeable stream, Object source) {
 		if (stream != null) {
 			try {			
 				stream.close();
@@ -286,4 +294,33 @@ public class FileUtils {
     }
 
 
+    // #118 app specific content uri convert
+    // from {content://approvider}//storage/emulated/0/DCIM/... to /storage/emulated/0/DCIM/
+    public static String fixPath(String path) {
+        if (path != null) {
+            while (path.startsWith("//")) {
+                path = path.substring(1);
+            }
+        }
+        return path;
+    }
+
+    public static File getFirstExistingDir(File root) {
+        while ((root != null) && (!root.exists() || !root.isDirectory())) {
+            root = root.getParentFile();
+        }
+        return root;
+    }
+
+    public static File getFirstNonExistingFile(File parentDir, String newFilePrefix, int number, String newFileSuffix) {
+        if (parentDir == null) return null;
+
+        parentDir.mkdirs();
+        File candidate = new File(parentDir, newFilePrefix + newFileSuffix);
+        while (candidate.exists()) {
+            number ++;
+            candidate = new File(parentDir, newFilePrefix + number + newFileSuffix);
+        }
+        return candidate;
+    }
 }

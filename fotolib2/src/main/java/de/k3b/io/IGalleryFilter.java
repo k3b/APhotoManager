@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -38,9 +38,6 @@ public interface IGalleryFilter extends IGeoRectangle {
 
     long getDateMax();
 
-    /** true: only photos whith no geo info (lat==lon==null) */
-    boolean isNonGeoOnly();
-
     /** number defining current sorting */
     int getSortID();
 
@@ -57,7 +54,7 @@ public interface IGalleryFilter extends IGeoRectangle {
     /** None of the Tags/Keywords/Categories/VirtualAlbum that the image must NOT contain. ("AND NOT") */
     List<String> getTagsAllExcluded();
 
-    /** match if the text is in path, filename, title, description, tags */
+    /** match if the text is in path, filename, title, description, tags. Wildcard "%" is allowed. Sub-expressions are seperated by " " */
     String getInAnyField();
 
     /** one of the VISIBILITY_XXXX values for public/private images */

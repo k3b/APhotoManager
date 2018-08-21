@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -40,6 +40,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
 import org.osmdroid.api.*;
 import org.osmdroid.events.DelayedMapListener;
@@ -64,8 +65,8 @@ import de.k3b.android.androFotoFinder.LockScreen;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
+import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.osmdroid.FolderOverlayEx;
 import de.k3b.android.osmdroid.GuestureOverlay;
 import de.k3b.android.osmdroid.IconOverlay;
@@ -83,7 +84,6 @@ import de.k3b.geo.api.IGeoInfoHandler;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
 import de.k3b.geo.io.gpx.GpxReaderBase;
-import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
@@ -98,6 +98,8 @@ public class LocationMapFragment extends DialogFragment {
     protected String STATE_LAST_VIEWPORT = "LAST_VIEWPORT";
 
     private static final int NO_ZOOM = OsmdroidUtil.NO_ZOOM;
+    private static final int RECALCULATE_ZOOM = OsmdroidUtil.RECALCULATE_ZOOM;
+
 
     /** If there is more than 200 millisecs no zoom/scroll update markers */
     protected static final int DEFAULT_INACTIVITY_DELAY_IN_MILLISECS = 200;
@@ -137,10 +139,11 @@ public class LocationMapFragment extends DialogFragment {
      * see http://stackoverflow.com/questions/10411975/how-to-get-the-width-and-height-of-an-image-view-in-android/10412209#10412209
      */
     private BoundingBox mDelayedZoomToBoundingBox = null;
-    private int mDelayedZoomLevel = NO_ZOOM;
+    private int mDelayedZoomLevel = RECALCULATE_ZOOM;
     private boolean mIsInitialized = false;
 
-    private IGalleryFilter mRootFilter;
+    private QueryParameter mRootQuery;
+
     private double mMinZoomLevel;
     private double mMaxZoomLevel;
 
@@ -328,7 +331,8 @@ public class LocationMapFragment extends DialogFragment {
             @Override
             public void onFirstLayout(View v, int left, int top, int right, int bottom) {
                 mIsInitialized = true;
-                zoomToBoundingBox("onFirstLayout", mDelayedZoomToBoundingBox, mDelayedZoomLevel);
+                final String why = "onFirstLayout";
+                int newZoom = zoomToBoundingBox(why, mDelayedZoomToBoundingBox, mDelayedZoomLevel);
                 mDelayedZoomToBoundingBox = null;
                 mDelayedZoomLevel = NO_ZOOM;
             }
@@ -437,14 +441,16 @@ public class LocationMapFragment extends DialogFragment {
 
         mZoomBar = (SeekBar) view.findViewById(R.id.zoomBar);
         mMinZoomLevel = mMapView.getMinZoomLevel();
-        mMaxZoomLevel = mMapView.getMaxZoomLevel();
+        mMaxZoomLevel = OsmdroidUtil.getMaximumZoomLevel(mMapView);
 
         mZoomBar.setMax((int) (mMaxZoomLevel - mMinZoomLevel));
         mZoomBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser)
+                if (fromUser) {
                     mMapView.getController().setZoom(progress + mMinZoomLevel);
+                }
+                Toast.makeText(getActivity(), "" + progress, Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -467,38 +473,58 @@ public class LocationMapFragment extends DialogFragment {
         return result;
     }
 
-    public void defineNavigation(IGalleryFilter rootFilter, GeoRectangle rectangle, int zoomlevel,
-                                 SelectedItems selectedItems, Uri gpxAdditionalPointsContentUri) {
+    /**
+     * (re)define map display. Data sohow from rootQuery + rectangle + zoomlevel.
+     *
+     * @param rootQuery if not null contain database where to limit the photo data displayed
+     * @param depricated_rootFilter should be null. if not null contain database where to limit the data displayed
+     * @param rectangle if nut null the initial visible rectange
+     * @param zoomlevel the initial zoomlevel
+     * @param selectedItems if not null: items to be displayed as blue markers
+     * @param gpxAdditionalPointsContentUri if not null the file containing additional geo coords for blue marker
+     * @param zoomToFit true mean recalculate zoomlevel from rectangle
+     */
+    public void defineNavigation(QueryParameter rootQuery,
+                                 IGalleryFilter depricated_rootFilter,
+                                 GeoRectangle rectangle, int zoomlevel,
+                                 SelectedItems selectedItems,
+                                 Uri gpxAdditionalPointsContentUri, boolean zoomToFit) {
+        String debugContext = mDebugPrefix + "defineNavigation: ";
         if (Global.debugEnabled || Global.debugEnabledMap) {
-            Log.i(Global.LOG_CONTEXT, mDebugPrefix + "defineNavigation: " + rectangle + ";z=" + zoomlevel);
+            Log.i(Global.LOG_CONTEXT, debugContext + rectangle + ";z=" + zoomlevel);
         }
 
-        if (rootFilter != null) {
-            this.mRootFilter = rootFilter;
-        }
-
-        // load this.mFolderOverlayBlueGpxMarker
-        GeoRectangle increasedRrectangle = defineGpxAdditionalPoints(gpxAdditionalPointsContentUri, rectangle);
+        this.mRootQuery = AndroidAlbumUtils.getAsMergedNewQueryParameter(rootQuery, depricated_rootFilter);
 
         mSelectedItemsHandler.define(selectedItems);
+        if (zoomToFit) {
+            zoomToFit(null, "defineNavigation");
+        } else {
+            // load this.mFolderOverlayBlueGpxMarker
+            GeoRectangle increasedRrectangle = defineGpxAdditionalPoints(gpxAdditionalPointsContentUri, rectangle);
 
-        String debugContext = "defineNavigation";
-        zoomToBoundingBox(debugContext, increasedRrectangle, zoomlevel);
-
-        if (rootFilter != null) {
+            zoomToBoundingBox(debugContext, increasedRrectangle, zoomlevel);
+        }
+        if ((rootQuery != null) || (depricated_rootFilter != null)) {
             reloadFotoMarker(debugContext);
         }
     }
 
     protected void zoomToBoundingBox(String debugContext, GeoRectangle rectangle, int zoomlevel) {
-        if ((rectangle != null) && !rectangle.isEmpty()) {
-            BoundingBox boundingBox = new BoundingBox(
-                    rectangle.getLatitudeMax(),
-                    rectangle.getLogituedMin(),
-                    rectangle.getLatitudeMin(),
-                    rectangle.getLogituedMax());
+        if (rectangle != null) {
+            if (!rectangle.isEmpty()) {
+                BoundingBox boundingBox = new BoundingBox(
+                        rectangle.getLatitudeMax(),
+                        rectangle.getLogituedMin(),
+                        rectangle.getLatitudeMin(),
+                        rectangle.getLogituedMax());
 
-            zoomToBoundingBox(debugContext, boundingBox, zoomlevel);
+                zoomToBoundingBox(debugContext, boundingBox, zoomlevel);
+            } else {
+                // rectangle is single point (size=0)
+                GeoPoint point = new GeoPoint(rectangle.getLatitudeMin(),rectangle.getLogituedMin());
+                OsmdroidUtil.zoomTo(this.mMapView, zoomlevel,point , null);
+            }
         }
     }
 
@@ -533,6 +559,8 @@ public class LocationMapFragment extends DialogFragment {
                     gpxBox.increase(Global.mapMultiselectionBoxIncreaseByProcent, Global.mapMultiselectionBoxIncreaseMinSizeInDegrees);
                 }
             } catch (IOException e) {
+				Log.w(Global.LOG_CONTEXT, mDebugPrefix + "defineGpxAdditionalPoints cannot open points from  " + gpxAdditionalPointsContentUri);
+
                 e.printStackTrace();
             }
             if (mFolderOverlayBlueGpxMarker != null) {
@@ -569,37 +597,51 @@ public class LocationMapFragment extends DialogFragment {
         return new MarkerEx<GeoPointDtoEx>(mPopup).set(mId++, position, mSelectedItemsHandler.mBlueMarker, position );
     }
 
-    private void zoomToBoundingBox(String why, BoundingBox boundingBox, int zoomLevel) {
+    private int zoomToBoundingBox(String why, BoundingBox boundingBox, int zoomLevel) {
+        int recalculatedZoom = NO_ZOOM;
         if (boundingBox != null) {
+            final double oldZoomLevelDouble = (mMapView == null) ? -1 : mMapView.getZoomLevelDouble();
+            final BoundingBox oldBoundingBox = (mMapView == null) ? null : mMapView.getBoundingBox();
             if (mIsInitialized) {
                 // if map is already initialized
                 GeoPoint min = new GeoPoint(boundingBox.getLatSouth(), boundingBox.getLonWest());
 
                 if (zoomLevel != NO_ZOOM) {
-                    OsmdroidUtil.zoomTo(this.mMapView, zoomLevel, min, null);
+                    recalculatedZoom = OsmdroidUtil.zoomTo(this.mMapView, zoomLevel, min, null);
                 } else {
                     GeoPoint max = new GeoPoint(boundingBox.getLatNorth(), boundingBox.getLonEast());
-                    OsmdroidUtil.zoomTo(this.mMapView, OsmdroidUtil.NO_ZOOM, min, max);
+                    recalculatedZoom = OsmdroidUtil.zoomTo(this.mMapView, OsmdroidUtil.NO_ZOOM, min, max);
 
                     // this.mMapView.zoomToBoundingBox(boundingBox); this is to inexact
                 }
                 if (Global.debugEnabledMap) {
                     Log.i(Global.LOG_CONTEXT, mDebugPrefix
                             + "zoomToBoundingBox(" + why
-                            + "; z=" + mMapView.getZoomLevelDouble()
                             + ") :"
-                            + boundingBox
+                            + boundingBox + "; z=" + zoomLevel // oldZoomLevelDouble
                             + " <= "
-                            + mMapView.getBoundingBox()
+                            + oldBoundingBox+ "; z=" + oldZoomLevelDouble + "(" + recalculatedZoom + ")"
                             );
                 }
-                setZoomBarZoomLevel(why, mMapView.getZoomLevelDouble());
+                setZoomBarZoomLevel(why, recalculatedZoom);
             } else {
                 // map not initialized yet. do it later.
                 this.mDelayedZoomToBoundingBox = boundingBox;
+
                 this.mDelayedZoomLevel = zoomLevel;
+                if (Global.debugEnabledMap) {
+                    Log.i(Global.LOG_CONTEXT, mDebugPrefix
+                            + "zoomToBoundingBox-enque(" + why
+                            + "; z=" + oldZoomLevelDouble
+                            + ") :"
+                            + boundingBox
+                            + " <= "
+                            + oldBoundingBox
+                    );
+                }
             }
         }
+        return recalculatedZoom;
     }
 
     /** all marker clicks will be delegated to LocationMapFragment#onFotoMarkerClicked() */
@@ -650,8 +692,8 @@ public class LocationMapFragment extends DialogFragment {
         QueryParameter query = FotoSql.getQueryGroupByPlace(groupingFactor);
         query.clearWhere();
 
-        if (this.mRootFilter != null) {
-            TagSql.filter2QueryEx(query, this.mRootFilter, true);
+        if (this.mRootQuery != null) {
+            query.getWhereFrom(this.mRootQuery, true);
         }
 
         // delta: make the grouping area a little bit bigger than the viewport
@@ -985,14 +1027,14 @@ public class LocationMapFragment extends DialogFragment {
 
                 switch (item.getItemId()) {
                     case R.id.cmd_photo:
-                        return showPhoto(getGeoPointById(markerId, geoPosition));
+                        return showPhoto(getGeoPointById(markerId, geoPosition, "showPhoto"));
                     case R.id.cmd_gallery:
-                        return showGallery(getGeoPointById(markerId, geoPosition));
+                        return showGallery(getGeoPointById(markerId, geoPosition,"showGallery"));
                     case R.id.cmd_zoom:
-                        return zoomToFit(getGeoPointById(markerId, geoPosition));
+                        return zoomToFit(getGeoPointById(markerId, geoPosition,"on cmd zoomToFit"));
 
                     case R.id.cmd_show_geo_as: {
-                        IGeoPoint _geo = getGeoPointById(markerId, geoPosition);
+                        IGeoPoint _geo = getGeoPointById(markerId, geoPosition,"cmd_show_geo_as");
                         GeoPointDto geo = new GeoPointDto(_geo.getLatitude(), _geo.getLongitude(), GeoPointDto.NO_ZOOM);
                         geo.setId(""+markerId);
                         geo.setName("#"+markerId);
@@ -1022,9 +1064,7 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     private boolean showPhoto(IGeoPoint geoPosition) {
-        GalleryFilterParameter filter = getMarkerFilter(geoPosition);
-        QueryParameter query = new QueryParameter();
-        TagSql.filter2QueryEx(query, filter, false);
+        QueryParameter query = getQueryForPositionRectangle(geoPosition);
         FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
 
         ImageDetailActivityViewPager.showActivity(this.getActivity(), null, 0, query, 0);
@@ -1032,18 +1072,19 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     private boolean showGallery(IGeoPoint geoPosition) {
-        GalleryFilterParameter filter = getMarkerFilter(geoPosition);
-        FotoGalleryActivity.showActivity(this.getActivity(), filter, null, 0);
+        FotoGalleryActivity.showActivity(this.getActivity(), getQueryForPositionRectangle(geoPosition), 0);
         return true;
     }
 
-    private boolean zoomToFit(IGeoPoint geoPosition) {
+    private boolean zoomToFit(IGeoPoint geoCenterPoint, Object... dbgContext) {
+        QueryParameter baseQuery = getQueryForPositionRectangle(geoCenterPoint);
         BoundingBox BoundingBox = null;
 
-        IGeoRectangle fittingRectangle = FotoSql.execGetGeoRectangle(this.getActivity(), getMarkerFilter(geoPosition), null);
+        IGeoRectangle fittingRectangle = FotoSql.execGetGeoRectangle(null, this.getActivity(),
+                baseQuery, null, mDebugPrefix, "zoomToFit", dbgContext);
         double delta = getDelta(fittingRectangle);
-        if (delta < 1e-6) {
-            BoundingBox = getMarkerBoundingBox(geoPosition);
+        if ((geoCenterPoint != null) && (delta < 1e-6)) {
+            BoundingBox = getMarkerBoundingBox(geoCenterPoint);
 
         } else {
             double enlarge = delta * 0.2;
@@ -1069,10 +1110,18 @@ public class LocationMapFragment extends DialogFragment {
                 , Math.abs(fittingRectangle.getLatitudeMax() - fittingRectangle.getLatitudeMin()));
     }
 
-    private GalleryFilterParameter getMarkerFilter(IGeoPoint geoPosition) {
+    private QueryParameter getQueryForPositionRectangle(IGeoPoint geoPosition) {
+        QueryParameter result = AndroidAlbumUtils.getAsMergedNewQueryParameter(mRootQuery, null);
+
+        GeoRectangle rect = getRectangleFrom(new GeoRectangle(), geoPosition);
+        FotoSql.addWhereFilterLatLon(result, rect);
+
+        return result;
+    }
+
+    private GeoRectangle getRectangleFrom(GeoRectangle result, IGeoPoint geoPosition) {
         double delta = getMarkerDelta();
 
-        GalleryFilterParameter result = new GalleryFilterParameter().get(mRootFilter);
         result.setNonGeoOnly(false);
         result.setLatitude(geoPosition.getLatitude() - delta, geoPosition.getLatitude() + delta);
         result.setLogitude(geoPosition.getLongitude() - delta, geoPosition.getLongitude() + delta);
@@ -1097,9 +1146,10 @@ public class LocationMapFragment extends DialogFragment {
         return 1/groupingFactor/2;
     }
 
-    private IGeoPoint getGeoPointById(int markerId, IGeoPoint notFoundValue) {
+    private IGeoPoint getGeoPointById(int markerId, IGeoPoint notFoundValue, Object... dbgContext) {
         if (markerId != NO_MARKER_ID) {
-            IGeoPoint pos = FotoSql.execGetPosition(this.getActivity(), null, markerId);
+            IGeoPoint pos = FotoSql.execGetPosition(null, this.getActivity(),
+                    null, markerId, mDebugPrefix, "getGeoPointById", dbgContext);
             if (pos != null) {
                 return pos;
             }

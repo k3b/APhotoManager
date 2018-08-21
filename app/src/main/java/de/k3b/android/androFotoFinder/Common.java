@@ -28,10 +28,10 @@ import android.content.Intent;
 public interface Common {
     /**
      * gallery,filter:
-     * Format:GalleryFilterParameter.toString/parseMultiple.
+     * Format:GalleryFilterParameter.toString/parse as a "," seperated list of values.
      * See https://github.com/k3b/AndroFotoFinder/wiki/intentapi#filter
      */
-    static final String EXTRA_FILTER = "de.k3b.extra.FILTER";
+    public static final String EXTRA_FILTER = "de.k3b.extra.FILTER";
 
     /** detail,gallery:  sql where ... order by ... group by ... */
     public static final String EXTRA_QUERY = "de.k3b.extra.SQL";

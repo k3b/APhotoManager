@@ -63,7 +63,8 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_toLeftOf="@+id/cmd_title_history"
-            android:layout_toStartOf="@+id/cmd_title_history" />
+            android:layout_toStartOf="@+id/cmd_title_history"
+            />
 
         <View android:id="@+id/line_title"
             android:layout_height="2dp"

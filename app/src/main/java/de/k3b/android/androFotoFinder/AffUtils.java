@@ -106,7 +106,7 @@ public class AffUtils {
     }
 
     public static SelectedItems getSelectedItems(Intent intent) {
-        String selectedIDsString = intent.getStringExtra(EXTRA_SELECTED_ITEM_IDS);
+        String selectedIDsString = (intent == null) ? null : intent.getStringExtra(EXTRA_SELECTED_ITEM_IDS);
         return (selectedIDsString != null) ? new SelectedItems().parse(selectedIDsString) : null;
     }
 }

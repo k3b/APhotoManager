@@ -41,6 +41,9 @@ public class FotoLibGlobal {
     /** false do not follow symlinks when scanning Directories.  */
     public static final boolean ignoreSymLinks = false;
 
+    /** datePickerUseDecade true add decade in date picker */
+    public static boolean datePickerUseDecade = false;
+
     /** #100: true: private images get the extension ".jpg-p" which hides them from other gallery-apps and image pickers.  */
     public static boolean renamePrivateJpg = true;
 

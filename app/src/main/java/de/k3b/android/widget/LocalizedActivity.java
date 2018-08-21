@@ -106,4 +106,7 @@ public abstract class LocalizedActivity extends Activity {
         }
     }
 
+    @Override public String toString() {
+        return getClass().getSimpleName();
+    }
 }

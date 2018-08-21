@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -19,12 +19,14 @@
  
 package de.k3b.io;
 
+import java.io.File;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import de.k3b.FotoLibGlobal;
 import de.k3b.io.collections.SelectedItems;
 
 /**
@@ -39,12 +41,13 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
 
     private List<String> tagsAllIncluded;
     private List<String> tagsAllExcluded;
+
+    /** match if the text is in path, filename, title, description, tags. Wildcard "%" is allowed. Sub-expressions are seperated by " " */
     private String inAnyField;
 
     private long dateMin = 0;
     private long dateMax = 0;
 
-    private boolean nonGeoOnly = false;
     private boolean withNoTags = false;
 
     /** one of the VISIBILITY_.XXXX values */
@@ -60,7 +63,6 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
             this.setDateMax(src.getDateMax());
             this.setDateMin(src.getDateMin());
             this.setPath(src.getPath());
-            this.setNonGeoOnly(src.isNonGeoOnly());
             this.setWithNoTags(src.isWithNoTags());
             this.setVisibility(src.getVisibility());
 
@@ -81,6 +83,11 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
 
     public GalleryFilterParameter setPath(String path) {
         this.path = path;return this;
+    }
+
+    public File getPathFile() {
+        if (StringUtils.isNullOrEmpty(getPath())) return null;
+        return new File(getPath());
     }
 
     @Override
@@ -107,16 +114,6 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
 
     public GalleryFilterParameter setDate(long min, long max) {
         return setDateMin(min).setDateMax(max);
-    }
-
-    @Override
-    public boolean isNonGeoOnly() {
-        return nonGeoOnly;
-    }
-
-    public GalleryFilterParameter setNonGeoOnly(boolean nonGeoOnly) {
-        this.nonGeoOnly = nonGeoOnly;
-        return this;
     }
 
     @Override
@@ -152,12 +149,13 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
         return this;
     }
 
-    /** match if the text is in path, filename, title, description, tags */
+    /** match if the text is in path, filename, title, description, tags. Wildcard "%" is allowed. Sub-expressions are seperated by " " */
     @Override
     public String getInAnyField() {
         return inAnyField;
     }
 
+    /** match if the text is in path, filename, title, description, tags. Wildcard "%" is allowed. Sub-expressions are seperated by " " */
     public GalleryFilterParameter setInAnyField(String inAnyField) {
         this.inAnyField = inAnyField;
         return this;
@@ -389,12 +387,18 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
         return SelectedItems.toString(strings.iterator());
     }
 
-    public void setRatingMin(int ratingMin) {
+    public GalleryFilterParameter setRatingMin(int ratingMin) {
         this.ratingMin = ratingMin;
+        return this;
     }
 
     @Override
     public int getRatingMin() {
         return ratingMin;
+    }
+
+    /** get Date Min/Max in date picker compatible format */
+    public String getDatePath() {
+        return DirectoryFormatter.getDatePath(FotoLibGlobal.datePickerUseDecade, getDateMin(), getDateMax());
     }
 }

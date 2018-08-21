@@ -1,0 +1,7 @@
+* New Logo/Icons by Md Nazmul Hasan. 
+* New Virutal Albums/".album" files: edit with Filter-View; open with Dirpicker for Gallery-View and Geographic-Map. 
+* Gallery-View: Added "Filter by Date"; Added search bar.
+* Openstreemap-Display: added optional path/date/tag-filter; fixed: works with zoomfactor > 19; Fixed initial zoom region. 
+* Filter-View: In field "Find": allow to search for subexpressions seperated by " " 
+* Fixed: Open image via filemanager with app specific content urls (i.e. OI File Manager)
+* Translation updates: ar,de,en,es,fr,it,ja,ru,tr,zh-CN (7 = 100%, 5 > 90%, 5 < 65%

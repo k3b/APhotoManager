@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -34,6 +34,9 @@ public interface IGeoRectangle {
 
     /** maximum longitude, in degrees east. -180..+180 */
     double getLogituedMax();
+
+    /** true: only photos whith no geo info (lat==lon==null) */
+    boolean isNonGeoOnly();
 
     IGeoRectangle get(IGeoRectangle src);
 }

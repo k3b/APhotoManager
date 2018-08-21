@@ -19,6 +19,7 @@
 
 package de.k3b.io;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -32,10 +33,13 @@ public interface IDirectory {
     public static final int DIR_FLAG_NOMEDIA_ROOT   = 2; // containing ".nomedia"
 
     public static final int DIR_FLAG_APM_DIR        = 8; // containing ".apm"
+    public static final int DIR_FLAG_VIRTUAL_DIR    = 9; // containing "*.album"
     String APM_DIR_PREFIX = "§ ";
 
     String getRelPath();
     String getAbsolute();
+
+    IDirectory createOsDirectory(File file, IDirectory parent, List<IDirectory> children);
 
     IDirectory getParent();
 

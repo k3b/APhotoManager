@@ -22,9 +22,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.Date;
+
+import de.k3b.io.DateUtil;
 
 /**
- * Created by EVE on 15.01.2018.
+ * Created by k3b on 15.01.2018.
  */
 
 public class TranslationStatisticsTests {
@@ -41,15 +44,20 @@ public class TranslationStatisticsTests {
     @Test
     public void dumpAsMD() {
         final TranslationStatistics translationStatistics = new TranslationStatistics();
-        System.out.println("<!-- generated with TranslationStatisticsTests#dumpAsMD -->\n" +
+        System.out.println("<!-- generated on " + DateUtil.toIsoDateString(new Date()) +
+                " with de.k3b.translations.TranslationStatisticsTests#dumpAsMD -->\n" +
                 translationStatistics.formatterMarkdown.toString(translationStatistics.getLocaleInfos(), translationStatistics.english));
     }
 
     @Test
     public void dupmpAsIni() {
         final TranslationStatistics translationStatistics = new TranslationStatistics();
-        System.out.println("# generated with TranslationStatisticsTests#dupmpAsIni\n" +
+        System.out.println("# generated on " + DateUtil.toIsoDateString(new Date()) +
+                " with de.k3b.translations.TranslationStatisticsTests#dupmpAsIni\n" +
                 translationStatistics.formatterIni.toString(translationStatistics.getLocaleInfos(), translationStatistics.english));
+
+        System.out.println("\n\n\n" +
+                translationStatistics.country2History.toString());
     }
 
 

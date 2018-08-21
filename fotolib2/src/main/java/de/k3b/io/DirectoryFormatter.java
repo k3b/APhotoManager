@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -21,14 +21,20 @@ package de.k3b.io;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.TimeZone;
+
+import de.k3b.FotoLibGlobal;
 
 /**
  * Created by k3b on 12.07.2015.
  */
 public class DirectoryFormatter {
+    private static final int INTDECADE_LEN = 3;
+
     /**
      * "/2001/01/16" => 2001-01-16 - 2001-01-17
      * "/2001/01/" => 2001-01-01 - 2001-02-01
@@ -38,14 +44,19 @@ public class DirectoryFormatter {
         Integer year = null;
         Integer month = null;
         Integer day = null;
+        Integer decade = (FotoLibGlobal.datePickerUseDecade) ? null : Integer.MIN_VALUE;
 
         String parts[] = selectedAbsolutePath.split(Directory.PATH_DELIMITER);
 
         for (String part : parts) {
             if ((part != null) && ((part.length() > 0))) {
                 try {
+                    if (decade == null) {
+                        part = part.substring(0,part.length() - 1); // remove trailing "*"
+                    }
                     Integer value = Integer.parseInt(part);
-                    if (year == null) year = value;
+                    if (decade == null) decade = value;
+                    else if (year == null) year = value;
                     else if (month == null) month = value;
                     else if (day == null) day = value;
                 } catch (NumberFormatException ex) {
@@ -54,27 +65,29 @@ public class DirectoryFormatter {
             }
         }
 
-        if (year != null) {
-            int yearFrom = year.intValue();
+        int yearFrom = 0;
+        if ((FotoLibGlobal.datePickerUseDecade) && (decade != null)) yearFrom = decade.intValue();
+        if (year != null) yearFrom = year.intValue();
 
-            if (yearFrom == 1970) {
+        if (yearFrom != 0) {
+            if ((year != null) && (yearFrom == 1970)) {
                 from.setTime(0);
                 to.setTime(0);
             } else {
                 int monthFrom = (month != null) ? month.intValue() : 1;
                 int dayFrom = (day != null) ? day.intValue() : 1;
 
-                GregorianCalendar _from = new GregorianCalendar(yearFrom, monthFrom - 1, dayFrom, 0, 0, 0);
-                _from.setTimeInMillis(_from.getTimeInMillis());
+                GregorianCalendar cal = new GregorianCalendar(yearFrom, monthFrom - 1, dayFrom, 0, 0, 0);
+                from.setTime(cal.getTimeInMillis());
+
                 int field = GregorianCalendar.YEAR;
+                int increment = 10;
+                if (year != null) increment = 1;
                 if (month != null) field = GregorianCalendar.MONTH;
                 if (day != null) field = GregorianCalendar.DAY_OF_MONTH;
 
-                GregorianCalendar _to = new GregorianCalendar();
-                _to.setTimeInMillis(_from.getTimeInMillis());
-                _to.add(field, 1);
-                to.setTime(_to.getTimeInMillis());
-                from.setTime(_from.getTimeInMillis());
+                cal.add(field, increment);
+                to.setTime(cal.getTimeInMillis());
             }
         }
     }
@@ -104,6 +117,12 @@ public class DirectoryFormatter {
         return formatLatLon(latOrLon.doubleValue());
     }
 
+    public static CharSequence formatLatLon(Double... latOrLons) {
+        StringBuilder result = new StringBuilder();
+        for (Double latOrLon : latOrLons)
+            result.append(formatLatLon(latOrLon)).append(" ");
+        return result;
+    }
 
     public static String formatLatLon(double latOrLon) {
         if ((latOrLon <= 0.0000005) && (latOrLon >= -0.0000005)) return "0";
@@ -183,4 +202,54 @@ public class DirectoryFormatter {
         return Double.parseDouble(latOrLon);
     }
 
+    public static String getDecade(String stringWithYear, int posOfYear) {
+        if ((stringWithYear == null) || (stringWithYear.length() - posOfYear < INTDECADE_LEN)) {
+            return null;
+        }
+        return stringWithYear.substring(posOfYear, posOfYear + INTDECADE_LEN)  + "0*";
+    }
+
+    public static String getDatePath(final boolean withDecade, long dateFrom, long dateTo) {
+        // special cases if null, empty or only one value
+        if (dateFrom == 0) dateFrom = dateTo;
+        if (dateTo == 0) dateTo = dateFrom;
+        if (dateTo == 0) return null;
+
+        final long diffTage = Math.abs (dateTo - dateFrom) / (1000 * 60 * 60 * 24);
+
+        final Calendar date = Calendar.getInstance(); // TimeZone.getTimeZone("UTC"));
+        date.setTimeInMillis(dateFrom);
+        final int year = date.get(Calendar.YEAR);
+
+        final StringBuilder result = new StringBuilder();
+        if ((withDecade) && (diffTage < 3800)) {
+            result.append("/").append(year / 10).append("0*");
+        }
+        if (diffTage < 380) {
+            result.append("/").append(year);
+        }
+        if (diffTage < 40) {
+            final int month = date.get(Calendar.MONTH) + 1;
+            result.append("/").append(n2(month) );
+        }
+        if (diffTage <= 2) {
+            final int day = date.get(Calendar.DAY_OF_MONTH);
+            result.append("/").append(n2(day));
+        }
+        if (result.length() == 0) return null;
+        return result.toString();
+    }
+
+    private static int getYear(Date dateTo) {
+        int year = dateTo.getYear();
+        if ((year >= 0) && (year < 1000)) year += 1900;
+        return year;
+    }
+
+
+    private static String n2(int i) {
+        if (i < 10) return "0"+i;
+
+        return ""+i;
+    }
 }

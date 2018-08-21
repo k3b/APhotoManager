@@ -24,4 +24,5 @@
     <color name="white">#ffffff</color>
     <color name="image_label_background">#70ffffff</color>
     <color name="drag_to">@android:color/black</color>
+    <color name="search_layover_bg">#50000000</color>
 </resources>

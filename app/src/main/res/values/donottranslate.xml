@@ -106,9 +106,10 @@ this program. If not, see <http://www.gnu.org/licenses/>
   <p>The code uses</p>
   <ul>
     <li>
+    App icons desigend by Md Nazmul Hasan (cc) 2018 Creative Commons Attribution 4.0 International License.</li>
+    <li>
     <a href="https://github.com/osmdroid/osmdroid">osmdroid library</a> to display online maps from
     <a href="http://www.openstreetmap.org">Open Street Map</a></li>
-    <li>
     <li>
     <a href="https://github.com/LonamiWebs/Stringlate/">Andrid Stringlate app</a> to allow the app
     user to thranslate this app to other gui-languages</li>
@@ -126,16 +127,10 @@ this program. If not, see <http://www.gnu.org/licenses/>
     <a href="https://github.com/drewnoakes/metadata-extractor/wiki/GettingStarted">drew noakes metadata-extractor</a> to display
     extended exif info</li>
     <li>
-    Sergey Tarasevich-s <a href="https://github.com/nostra13/Android-Universal-Image-Loader/">Android-Universal-Image-Loader</a> 
-	a Powerful and flexible library for loading, caching and displaying (thumbnail-) images on Android. </li>
-    <li>
     <a href="http://www.slf4j.org/">slf4j logging for java</a> with the 
     <a href="http://github.com/lp0/slf4j-android">https://github.com/lp0/slf4j-android</a> driver</li>
     <li>
     <a href="http://junit.org/">junit testing support</a> with 
-    <a href="https://github.com/mockito/mockito">Mockito</a></li>
-    <li>
-    <a href="http://junit.org/">junit testing support</a> with
     <a href="https://github.com/mockito/mockito">Mockito</a></li>
   </ul>
   <hr />
@@ -178,8 +173,8 @@ this program. If not, see <http://www.gnu.org/licenses/>
   <h2>Legal stuff</h2>
   <b>A Photo Manager (A(ndro)FotoFinder)</b>
   <br />
-  <br />Copyright (c) 2015-2016 by k3b
-  <br />Licensed under GPL, Version 3.0 or later.
+  <br />Copyright (c) 2015-2018 by k3b
+  <br />Licensed under GPL, Verion 3.0 or later.
   <br />
   <hr />Translations supported 
   <a href="http://crowdin.com">crowdin.com</a>

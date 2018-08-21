@@ -110,7 +110,7 @@ public class TagProcessor {
         int modifyCount = 0;
         if (addedTags != null) {
             for (String tag : changed) {
-                if (!original.contains(tag) && !addedTags.contains(tag)) {
+                if ((tag != null) && !original.contains(tag) && !addedTags.contains(tag)) {
                     addedTags.add(tag);
                     modifyCount++;
                 }
@@ -118,7 +118,7 @@ public class TagProcessor {
         }
         if (removedTags != null) {
             for (String tag : original) {
-                if (!changed.contains(tag) && !removedTags.contains(tag)) {
+                if ((tag != null) && !changed.contains(tag) && !removedTags.contains(tag)) {
                     removedTags.add(tag);
                     modifyCount++;
                 }

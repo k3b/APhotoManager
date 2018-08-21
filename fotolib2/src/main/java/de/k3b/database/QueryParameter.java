@@ -19,8 +19,15 @@
  
 package de.k3b.database;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+
+import de.k3b.io.FileUtils;
+import de.k3b.io.StringUtils;
 
 /**
  * Utility to collect query parameters for content-provider.
@@ -33,6 +40,9 @@ import java.util.List;
  * Created by k3b on 04.06.2015.
  */
 public class QueryParameter {
+    public static final String SUFFIX_VALBUM = ".album";
+    public static final String SUFFIX_QUERY = ".query";
+
     /** added to every serialized item if != null. Example "Generated on 2015-10-19 with myApp Version 0815." */
     public static String sFileComment = null;
 
@@ -140,6 +150,22 @@ public class QueryParameter {
         return this;
     }
 
+    public QueryParameter clear() {
+        clearWhere();
+        clearColumns();
+        mFrom.clear();
+        mGroupBy.clear();
+        mHaving.clear();
+        mOrderBy.clear();
+        mHavingParameters.clear();
+        return this;
+    }
+
+    public QueryParameter clearColumns() {
+        mColumns.clear();
+        return this;
+    }
+
     public QueryParameter addWhere(String where, String... parameters) {
         mWhere.add(where);
         return addToList(mParameters, true, parameters);
@@ -201,7 +227,7 @@ public class QueryParameter {
      * Therefore this sql is added to the WHERE part.
      * [select ... from ... where (] [[mWhere][) GROUP BY (mGroupBy][) HAVING (mHaving]] [) ORDER BY ] [mOrderBy]*/
     public String toAndroidWhere() {
-        boolean hasWhere = Helper.isNotEmpty(mWhere);
+        boolean hasWhere = hasWhere();
         boolean hasGroup = Helper.isNotEmpty(mGroupBy);
         boolean hasHaving = Helper.isNotEmpty(mHaving);
         if (!hasWhere && !hasGroup && !hasHaving) return null;
@@ -216,6 +242,10 @@ public class QueryParameter {
         }
 
         return result.toString();
+    }
+
+    public boolean hasWhere() {
+        return Helper.isNotEmpty(mWhere);
     }
 
     public String[] toAndroidParameters() {
@@ -256,6 +286,27 @@ public class QueryParameter {
     }
 
     /************************** end properties *********************/
+
+    public void save(OutputStream _out) throws IOException {
+        PrintWriter writer = null;
+        try {
+            writer = new PrintWriter(_out);
+            writer.println(this.toReParseableString());
+            writer.flush();
+        } finally {
+            writer.close();
+        }
+        writer = null;
+    }
+
+    public static QueryParameter load(InputStream input) throws IOException {
+        String sql = FileUtils.readFile(input);
+        if (!StringUtils.isNullOrEmpty(sql)) {
+            return QueryParameter.parse(sql);
+        }
+        return null;
+    }
+
     public String toReParseableString() {
         StringBuilder result = new StringBuilder();
         if (sFileComment != null) result.append("# ").append(sFileComment).append("\n");

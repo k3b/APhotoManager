@@ -99,17 +99,32 @@ public class MetaWriterExifXml extends MetaApiWrapper  implements IMetaApi {
             startTimestamp = new Date().getTime();
         }
         MediaXmpSegment xmp = MediaXmpSegment.loadXmpSidecarContentOrNull(absoluteJpgInPath, dbg_context);
-        if ((createXmpIfNotExist) && (xmp == null)) {
+        if ((xmp == null) && (createXmpIfNotExist || MediaUtil.isImage(absoluteJpgInPath,MediaUtil.IMG_TYPE_NON_JPG))) {
             ImageMetaReader jpg = new ImageMetaReader().load(absoluteJpgInPath,null,null,
                     dbg_context + " xmp-file not found. create/extract from jpg ");
 
-            xmp = jpg.getImternalXmp();
+            // #124: fix can be null for gif/png
+            xmp = (jpg == null) ? null : jpg.getImternalXmp();
 
             // jpg has no embedded xmp create
-            if (xmp == null) xmp = new MediaXmpSegment();
+            if (xmp == null) {
+                xmp = new MediaXmpSegment();
+            }
 
             // xmp should have the same data as exif/iptc
             MediaUtil.copyNonEmpty(xmp, jpg);
+            if ((absoluteJpgInPath != null) && (xmp.getDateTimeTaken() == null)) {
+                File in = new File(absoluteJpgInPath);
+                if (in.exists() && in.isFile()) {
+                    long lastModified = in.lastModified();
+                    if (lastModified != 0) {
+                        final Date newDate = new Date(lastModified);
+                        xmp.setDateTimeTaken(newDate);
+                        if (xmp.getFilelastModified() == 0) xmp.setFilelastModified(in);
+                    }
+                }
+
+            }
         }
         ExifInterfaceEx exif = new ExifInterfaceEx(absoluteJpgInPath, null, xmp, dbg_context);
         if (exif.isValidJpgExifFormat()) {

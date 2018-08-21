@@ -235,7 +235,9 @@ abstract public class MediaScanner  {
         if ((currentJpgFile != null) && currentJpgFile.exists() && currentJpgFile.canRead()) {
             ContentValues values = createDefaultContentValues();
             getExifFromFile(values, currentJpgFile);
-            Long result = FotoSql.insertOrUpdateMediaDatabase(dbgContext, context, dbUpdateFilterJpgFullPathName, values, updateSuccessValue);
+            Long result = FotoSql.insertOrUpdateMediaDatabase(
+                    dbgContext, context, dbUpdateFilterJpgFullPathName,
+                    values, VISIBILITY.PRIVATE_PUBLIC, updateSuccessValue);
 
             return result;
         }
@@ -301,7 +303,7 @@ abstract public class MediaScanner  {
 
             Cursor c = null;
             try {
-                c = FotoSql.createCursorForQuery("renameInMediaDatabase", context, query, VISIBILITY.PRIVATE_PUBLIC);
+                c = FotoSql.createCursorForQuery(null, "renameInMediaDatabase", context, query, VISIBILITY.PRIVATE_PUBLIC);
                 int pkColNo = c.getColumnIndex(FotoSql.SQL_COL_PK);
                 int pathColNo = c.getColumnIndex(FotoSql.SQL_COL_PATH);
                 while (c.moveToNext()) {
@@ -436,14 +438,24 @@ abstract public class MediaScanner  {
     }
 
     /** sets the path related fields */
-    private void setPathRelatedFieldsIfNeccessary(ContentValues values, String newAbsolutePath, String oldAbsolutePath) {
+    private static void setPathRelatedFieldsIfNeccessary(ContentValues values, String newAbsolutePath, String oldAbsolutePath) {
         setFieldIfNeccessary(values, DB_TITLE, generateTitleFromFilePath(newAbsolutePath), generateTitleFromFilePath(oldAbsolutePath));
         setFieldIfNeccessary(values, DB_DISPLAY_NAME, generateDisplayNameFromFilePath(newAbsolutePath), generateDisplayNameFromFilePath(oldAbsolutePath));
         values.put(DB_DATA, newAbsolutePath);
     }
 
+    /** sets the path related fields */
+    public static String setFileFields(ContentValues values, File file) {
+        String newAbsolutePath = FileUtils.tryGetCanonicalPath(file, file.getAbsolutePath());
+        setPathRelatedFieldsIfNeccessary(values, newAbsolutePath, null);
+        values.put(DB_DATE_MODIFIED, file.lastModified() / 1000);
+        values.put(DB_SIZE, file.length());
+        return newAbsolutePath;
+    }
+
+
     /** values[fieldName]=newCalculatedValue if current not set or equals oldCalculatedValue */
-    private void setFieldIfNeccessary(ContentValues values, String fieldName, String newCalculatedValue, String oldCalculatedValue) {
+    private static void setFieldIfNeccessary(ContentValues values, String fieldName, String newCalculatedValue, String oldCalculatedValue) {
         String currentValue = values.getAsString(fieldName);
         if ((currentValue == null) || (TextUtils.isEmpty(currentValue.trim())) || (currentValue.equals(oldCalculatedValue))) {
             values.put(fieldName, newCalculatedValue);
@@ -485,7 +497,7 @@ abstract public class MediaScanner  {
 
     @NonNull
     // generates a title based on file name
-    protected String generateTitleFromFilePath(String _filePath) {
+    protected static String generateTitleFromFilePath(String _filePath) {
         String filePath = generateDisplayNameFromFilePath(_filePath);
 
         if (filePath != null) {

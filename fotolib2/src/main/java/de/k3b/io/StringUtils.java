@@ -35,6 +35,7 @@ public class StringUtils {
         return (rhs == null);
     }
 
+	/** return pos of '#' before {start} or {-1} if not found */
     public static int getTagStart(CharSequence s, int start) {
         if (start <= s.length()) {
             int i = start -1;
@@ -44,6 +45,8 @@ public class StringUtils {
         }
         return -1;
     }
+	
+	/** return first char after tagword or {-1} if not a tag-word-end */
     public static int getTagEnd(CharSequence s, int start) {
         int len = s.length();
         int i = start;
@@ -55,10 +58,12 @@ public class StringUtils {
     private static boolean isTagChar(char c) {
         return Character.isJavaIdentifierPart(c) || (c == '-');
     }
+	
     private static boolean isTagDelimiterChar(char c) {
         return Character.isSpaceChar(c) || (",;(){}".indexOf(c) >= 0);
     }
-    /** words surrounded by blank and starting with '#' */
+	
+    /** a tag is a word surrounded by blank and starting with '#' */
     public static CharSequence getTag(CharSequence s, int start) {
         int tagStart = getTagStart(s,start);
         int tagEnd = getTagEnd(s,start);
@@ -68,8 +73,27 @@ public class StringUtils {
         return null;
     }
 
+    public static String trim(CharSequence str) {
+        if (str == null) return null;
+        return str.toString().trim();
+
+    }
     public static int length(CharSequence str) {
         return (str != null) ? str.length() : 0;
+    }
+
+    public static int charCount(CharSequence str, char c) {
+		int result = 0;
+		if (str != null) {
+			int len = length(str);
+			for (int i=0; i < len;i++) {
+				if (str.charAt(i) == c) {
+					result++;
+				}
+			}
+		}
+
+        return result;
     }
 
     public static boolean isNullOrEmpty(CharSequence str) {
@@ -89,4 +113,43 @@ public class StringUtils {
 
         return result.toString();
     }
+
+    public static StringBuilder createDebugMessage(boolean enabled, final Object... parameters) {
+        if (enabled) return appendMessage(null, parameters);
+        return null;
+    }
+
+    /**
+     *  append 0..n parameters to stringbuilder
+     *
+     * @param resultOrNull where the data is appended to. if null a StringBuilder is created
+     * @param parameters all non null param-values will be appended seperated by " "
+     * @return either result or newly created StringBuilder if result was null
+     */
+    public static StringBuilder appendMessage(StringBuilder resultOrNull, final Object... parameters) {
+        StringBuilder result = (resultOrNull == null) ? new StringBuilder() : resultOrNull;
+
+        append(result, parameters);
+        return result;
+    }
+
+    private static void append(StringBuilder result, Object[] parameters) {
+        if ((result != null) && (parameters != null) && (parameters.length > 0)) {
+            result.append("(");
+            for (final Object param : parameters) {
+                if (param != null) {
+                    if (param instanceof Object[]) {
+                        append(result, (Object[]) param);
+                    } else if (param instanceof Exception) {
+                        Exception ex = (Exception) param;
+                        result.append(ex.getClass().getSimpleName()).append("=").append(ex.getMessage()).append(" ");
+                    } else {
+                        result.append(param.toString()).append(" ");
+                    }
+                }
+            }
+            result.append(") ");
+        }
+    }
+
 }

@@ -32,7 +32,9 @@ import android.widget.TextView;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.io.AlbumFile;
 import de.k3b.io.Directory;
+import de.k3b.io.FileUtils;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IExpandableListViewNavigation;
 
@@ -186,6 +188,15 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
             case IDirectory.DIR_FLAG_APM_DIR:
                 formatPrefix = IDirectory.APM_DIR_PREFIX;
                 break;
+            case IDirectory.DIR_FLAG_VIRTUAL_DIR:
+                if ((options & Directory.OPT_AS_HTML) != 0) {
+                    formatPrefix = "<i>{";
+                    formatSuffix = "}</i>";
+                } else {
+                    formatPrefix = "{";
+                    formatSuffix = "}";
+                }
+                break;
             case IDirectory.DIR_FLAG_NONE:
                 if ((options & Directory.OPT_AS_HTML) != 0) {
                     formatPrefix = "<b>";
@@ -198,7 +209,11 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
 
         if (prefix != null) result.append(prefix);
         result.append(formatPrefix);
-        result.append(directory.getRelPath()).append(" ");
+        String dirName = directory.getRelPath();
+        if (dirName.endsWith(AlbumFile.SUFFIX_VALBUM)) {
+            dirName = dirName.substring(0, dirName.length() - AlbumFile.SUFFIX_VALBUM.length());
+        }
+        result.append(dirName).append(" ");
         result.append(formatSuffix);
 
         Directory.appendCount(result, directory, options);

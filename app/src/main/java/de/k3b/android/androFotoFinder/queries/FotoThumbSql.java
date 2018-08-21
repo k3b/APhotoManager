@@ -25,7 +25,6 @@ import android.util.Log;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.database.QueryParameter;
-import de.k3b.io.IGalleryFilter;
 import de.k3b.io.VISIBILITY;
 
 /**
@@ -67,7 +66,7 @@ public class FotoThumbSql {
 
             Cursor c = null;
             try {
-                c = FotoSql.createCursorForQuery(mDebugPrefix + "getStatistic", context, query, VISIBILITY.PRIVATE_PUBLIC);
+                c = FotoSql.createCursorForQuery(null, mDebugPrefix + "getStatistic", context, query, VISIBILITY.PRIVATE_PUBLIC);
                 if (Global.debugEnabledSql) {
                     Log.i(Global.LOG_CONTEXT, mDebugPrefix + "getStatistic " + c.getCount() +
                             "\n\t" + query.toSqlString());
