@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -34,13 +34,17 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         >
-        <TextView android:id="@+id/lblName" android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:padding="@dimen/activity_horizontal_margin" android:text="@string/sort_by_name"
+        <TextView android:id="@+id/lblName"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/sort_by_name"
+            android:padding="@dimen/grid_cell_margin"
             android:layout_alignParentTop="true" android:layout_alignParentLeft="true" android:layout_alignParentStart="true"
             android:visibility="gone"/>
-        <EditText android:id="@+id/edName" android:layout_width="fill_parent" android:layout_height="wrap_content"
-            android:paddingRight="@dimen/activity_horizontal_margin" android:layout_weight="1"
-            android:inputType="text" android:singleLine="true" android:maxLines="1" android:layout_alignParentTop="true"
+        <EditText android:id="@+id/edName"
+            android:layout_width="fill_parent" android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="text" android:singleLine="true" android:maxLines="1"
+            android:layout_alignParentTop="true"
             android:layout_toRightOf="@+id/lblName" android:layout_alignParentRight="true" android:layout_alignParentEnd="true"
             android:layout_alignBaseline="@+id/lblName" android:visibility="gone"/>
 
@@ -51,7 +55,7 @@
             android:scrollbars="horizontal"
             android:scrollbarSize="2dp"
             android:scrollbarStyle="insideInset"
-            android:layout_below="@+id/edName"
+            android:layout_below="@+id/lblName"
             >
             <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:id="@+id/parent_owner"
