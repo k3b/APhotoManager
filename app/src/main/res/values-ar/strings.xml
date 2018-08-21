@@ -24,12 +24,12 @@
   <string name="about_summary">عن \"A Photo Manager%1$s\"</string>
   <string name="area_menu_title">مرشح الخريطة</string>
   <string name="background">الخلفية</string>
+  <string name="bookmark">الألبوم</string>
   <string name="bookmark_delete_answer_format">علامة مرجعية تمت إزالتها %1$s.</string>
   <string name="bookmark_delete_error_format">لا يمكن إزالة العلامة المرجعية %s$1.</string>
   <string name="bookmark_delete_question">هل تريد إزالة هذه العلامة المرجعية؟</string>
   <string name="bookmark_file_comment_format">تم توليده في %3$s بـ %1$s إصدار %2$s شاهد
 https://github.com/k3b/APhotoManager/wiki/intentapi#sql لمزيد من التفاصيل</string>
-  <string name="bookmark_load_from_menu_title">تحميل العلامات المرجعية من&#8230;</string>
   <string name="bookmark_save_as_menu_title">حفظ العلامة المرجعية كـ &#8230;</string>
   <string name="btn_change">تغيير</string>
   <string name="btn_pause">ايقاف مؤقت</string>
@@ -97,7 +97,6 @@ https://github.com/k3b/APhotoManager/wiki/intentapi#sql لمزيد من التف
   <string name="selected_only_menu_title">المختارة فقط</string>
   <string name="selection_add_all_menu_title">الاختيار: أضف كل المرئي</string>
   <string name="selection_remove_menu_title">الاختيار: إزالة كل المرئي</string>
-  <string name="settings_bookmark_dir_title">مجلد العلامات المرجعية</string>
   <string name="settings_group_debug_title">التشخيصات</string>
   <string name="settings_debug_sql_summary">... محتويات SQL التي تم تنفيذها.</string>
   <string name="settings_debug_view_item_summary">... محتويات عناصر gridview/listview.</string>
@@ -208,9 +207,21 @@ https://github.com/k3b/APhotoManager/wiki/intentapi#sql لمزيد من التف
   <string name="menu_title_app_unpinnend">التطبيق غير محمي/مثبت</string>
   <!-- #100: private images get the extension ".jpg-p" which hides them from other gallery-apps and image pickers.  -->
   <string name="settings_rename_private_jpg_title">اعادة تسمية الصور الخاصة من .jpg الى .jpg-p</string>
-  <!--  depricated tags_update_result_format 
-			replaced by android.R.string.xxx @android:string/xxx : btn_cancel btn_no btn_yes btn_okcopy_menu_title
-    -->
   <string name="clear_menu_title">مسح</string>
   <string name="show_in_filemanager_menu_title">فتح في مدير الملفات</string>
+  <!-- #1113: Searchbar  -->
+  <string name="searchbar_menu_title">شريط البحث</string>
+  <string name="settings_pick_date_decade4year_title">منتقي التاريخ: استخدام العقود</string>
+  <string name="settings_pick_date_decade4year_summary">أي وضع 2010، 2011،... 2019 اسفل 2010 *</string>
+  <string name="date_picker_menu_title">مرشح التاريخ</string>
+  <!-- #115: Virtual album -->
+  <string name="filter_menu_title_album">تحرير الألبوم الافتراضي</string>
+  <!--  depricated tags_update_result_format
+			replaced by android.R.string.xxx @android:string/xxx : btn_cancel btn_no btn_yes btn_okcopy_menu_title
+
+    sperate boomark picker is deprecated. now open via folder picker
+        <string name="bookmark_load_from_menu_title">Load album from &#8230;</string><br/>
+	note: with ver 0.7.0 'bookmark' will become 'virtual album'
+    -->
+  <string name="settings_bookmark_dir_title">مجلد العلامات المرجعية</string>
 </resources>
