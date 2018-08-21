@@ -55,6 +55,9 @@ public class TranslationStatisticsTests {
         System.out.println("# generated on " + DateUtil.toIsoDateString(new Date()) +
                 " with de.k3b.translations.TranslationStatisticsTests#dupmpAsIni\n" +
                 translationStatistics.formatterIni.toString(translationStatistics.getLocaleInfos(), translationStatistics.english));
+
+        System.out.println("\n\n\n" +
+                translationStatistics.country2History.toString());
     }
 
 

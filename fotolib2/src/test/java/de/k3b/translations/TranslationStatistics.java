@@ -25,8 +25,10 @@ import de.k3b.io.DateUtil;
 import de.k3b.io.FileUtils;
 import de.k3b.io.ListUtils;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -34,7 +36,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -61,6 +65,7 @@ public class TranslationStatistics {
     private static final XPathExpression stringNodesExpression = getStringsXPathExpression("/resources/string/@name");
     public final File root = getAppRootFolder(Pattern.compile("^app$"));
     private final File iniFile = new File(root,"translation-history.ini");
+    private final File gitFile = new File(root,"translation-git-entries.lis");
 
     private final File resRoot = new File(root, "app/src/main/res");
     private final File fdroidRoot = new File(root, "app/src/debug/res");
@@ -69,6 +74,9 @@ public class TranslationStatistics {
 
     final Properties lastLocales = new Properties();
     final Date fileLimitDate;
+
+    final Country2History country2History = new Country2History ();
+
 
     public final Formatter formatterIni = new Formatter("",";","", "\n", true){
         @Override public CharSequence toString(LocaleInfo item, LocaleInfo reference) {
@@ -244,11 +252,75 @@ public class TranslationStatistics {
             lastLocales.load(inputStream);
 
             fileLimitDate = getModifyDateProperty("ignore");
+
+            readCountryTimeStatistics(country2History, gitFile);
         } catch (IOException ex) {
         } finally {
             FileUtils.close(inputStream,"TranslationStatistics.load(" + iniFile + ")");
         }
         this.fileLimitDate = fileLimitDate;
+    }
+
+    public static class Country2History extends HashMap<String,StringBuilder> {
+        // +2 lowercase letters sorunded by non-word-char or begine-of-line/end-of-line
+        Pattern languagePattern = Pattern.compile("[\\W^]([a-z][a-z])[$\\W]")  ;
+
+        public int add(String timmed) {
+            int found = 0;
+            Matcher match = languagePattern.matcher(timmed);
+
+            if (match.find()) {
+                String lan = match.group(1);
+                if ("by".compareTo(lan) != 0) {
+                    StringBuilder buff = this.get(lan);
+                    if (buff != null) {
+                        buff.append(nl).append(timmed);
+                    } else {
+                        buff = new StringBuilder();
+                        buff.append(timmed);
+                        this.put(lan,buff);
+                    }
+                }
+                found++;
+            }
+
+            return found;
+        }
+
+        @Override public String toString() {
+            String[] keys = this.keySet().toArray(new String[this.size()]);
+            Arrays.sort(keys);
+            StringBuilder result = new StringBuilder();
+
+            for(String lan : keys) {
+                result.append(lan).append(nl).append(this.get(lan)).append(nl).append(nl);
+            }
+
+            return result.toString();
+        }
+    }
+    private static String nl = "\n";
+    private static int dateExampleLen = "2018-07-28".length();
+    public int readCountryTimeStatistics(Country2History country2History, File file) throws IOException {
+        int found = 0;
+        BufferedReader br = null;
+        String firstDate = "#";
+
+        try {
+            br = new BufferedReader(new FileReader(file));
+            for (String line; (line = br.readLine()) != null; ) {
+                String timmed = line.trim();
+                int length = timmed.length();
+                if (length == dateExampleLen) {
+                    firstDate = timmed;
+                } else if ((length > dateExampleLen) && ( timmed.compareTo(firstDate) > 0)) {
+                    found += country2History.add(timmed);
+                }
+            }
+            return found;
+        } finally {
+            FileUtils.close(br, file);
+        }
     }
 
     protected String getCommentProperty(String name) {
