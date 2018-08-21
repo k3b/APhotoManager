@@ -1,0 +1,52 @@
+Q. What is APhotoManager?
+
+A. APhotoManager is an opensource mobile gallery app that can manage your local photos. 
+
+Q. What is geotagging?
+
+A. Geotagging is the act of assigning geographical location to a photographs or videos.
+
+Q. How do I add geotags to my photos using APhotoManager?
+
+A. Highlight the photos(s), click the option button and select "set geo" option, then you can decide to pick a location from map or from an existing photo.
+
+Q. What is exif data?
+
+A. Exif stands for Exchangeable image file format. It allows you to store certain information within your photos.This information is known as "metadata" and can include things like the date and time the shot was taken, camera settings like shutter speed and focal length, and copyright information.
+
+Q. How do I add, remove or edit exif data on my photo using APhotoManager?
+
+A. Highlight the photo(s), click the option button and select "set geo" option, then you can decide to pick a location from map or from an existing photo.
+
+
+Q. Can I select a folder to view pictures?
+
+A. Yes, by clicking the folder icon on the top, you are shown all the folders that contain pictures on your deivce, selecting any folder and clicking ok allows you to view only pictures contained in that folder.
+
+Q. How do I find pictures on APhotoManager?
+
+A. Specific photos can be found on APhotoManager using the filter option by providing some information of the photo which may include the filename, path, tags etc. Providing any of those information will open up results relating to information provided.
+
+Q. Can I sort my photos on APhotoManager?
+
+A. Yes the sorting feature is available on APhotoManager. Photos can be sorted by name, date, place, rating, last modified, width, size and file path length, all in ascending order.
+
+Q. Can I share photos from APhotoManager?
+
+A. You can share photos from APhotoManager to any other location that is supported for such operation. To share photo(s), from APhotomanager you can highlight the picture(s) and the share button will be visible at the top, clicking it will pop-up several locations where the picture(s) can be shared to. The share button is automatically visible when a picture is viewed.
+
+
+Q. Which photo management options are available on APhotoManager?
+
+A. File management options like, rename, copy and move are available on APhotoManager.
+
+Q. Are my photos uploaded to third party apps?
+
+A. No, photos are stored locally on the device, there's no upload to third party applications.
+
+Q. Does APhotoManager contain ads?
+
+A. APhotoManager does not contain ads, no usertracking, it is absolutely free and open source. 
+
+
+Thank you for using APhotoManager, if you like the app and wish to make contributions to the project, contact the developer via [github](https://github.com/k3b/APhotoManager)
