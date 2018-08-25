@@ -62,6 +62,7 @@ import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
+import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.UpdateTask;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.io.VISIBILITY;
@@ -81,7 +82,7 @@ import de.k3b.tagDB.TagConverter;
 
 /**
  * Defines a gui to edit Exif content.
- * Invoke: see {@link #showActivity(Activity, IMetaApi, String, SelectedFiles, int, boolean)}.
+ * Invoke: see {@link #showActivity(String, Activity, IMetaApi, String, SelectedFiles, int, boolean)}.
  * Modes: if IMetaApi is not null edit exif data witout modifying any jpg file.
  * Modes: else if data-url/SelectedFiles is not null: modify the referenced jpg files.
  */
@@ -121,21 +122,22 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
     private UpdateTask exifUpdate;
 
     /**
+     * @param debugContext
      * @param context owhner activity starting this activity
      * @param exifDataToEdit if not null: edit value only via intent. donot update any files.
-     *                       the content of exif that is edited.
+ *                       the content of exif that is edited.
      * @param url if not null url of jpg who-s exif will be modified or analysed.
      * @param selectedFiles if not null url of jpg who-s exif will be modified or analysed.
      * @param requestCode if not 0 request code for onActivityResult of calling activity
-     *                    that receives the edit result.
+*                    that receives the edit result.
      * @param saveChangesToUri false: edit value only via intent. donot update any files.
-     *                         Neccessary to suport inital empy value of exifDataToEdit.
      */
-    public static void showActivity(Activity context, IMetaApi exifDataToEdit, String url,
+    public static void showActivity(String debugContext, Activity context, IMetaApi exifDataToEdit, String url,
                                     SelectedFiles selectedFiles, int requestCode, boolean saveChangesToUri) {
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, context.getClass().getSimpleName()
-                    + " > ExifEditActivity.showActivity");
+                    + " > ExifEditActivity.showActivity(" +
+                    debugContext + ")");
         }
 
         final Intent intent = new Intent().setClass(context,
@@ -160,6 +162,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
             AffUtils.putSelectedFiles(intent, selectedFiles);
         }
 
+        ActivityWithCallContext.additionalCallContext = debugContext;
         if (requestCode != 0) {
             context.startActivityForResult(intent, requestCode);
         } else {
@@ -446,6 +449,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
 
         try {
             // #7: allow choosing geo pick from map or from "photo with geo"
+
             startActivityForResult(Intent.createChooser(intent, getString(R.string.geo_edit_menu_title)), GEO_RESULT_ID);
             // this.startActivityForResult(intent, RESULT_ID);
         } catch (ActivityNotFoundException ex) {

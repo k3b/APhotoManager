@@ -59,7 +59,6 @@ import de.k3b.android.androFotoFinder.queries.FotoThumbSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
-import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.ClipboardUtil;
 import de.k3b.android.util.FileManagerUtil;
@@ -68,13 +67,13 @@ import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.AlbumFile;
+import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryNavigator;
 import de.k3b.io.FileUtils;
-import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirectory;
 import de.k3b.io.StringUtils;
@@ -399,9 +398,9 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                 return onEdit(popUpSelection);
 
             case R.id.cmd_photo:
-                return showPhoto(popUpSelection);
+                return showPhoto(popUpSelection, mDirTypId);
             case R.id.cmd_gallery:
-                return showGallery(popUpSelection);
+                return showGallery(popUpSelection, mDirTypId);
             case R.id.cmd_filemanager:
                 return FileManagerUtil.showInFilemanager(getActivity(), popUpSelection.getAbsolute());
             case R.id.action_details:
@@ -439,7 +438,8 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     private boolean onEditApm(IDirectory selection) {
         String path = (selection == null) ? null : selection.getAbsolute();
         if (!StringUtils.isNullOrEmpty(path)) {
-            PhotoAutoprocessingEditActivity.showActivity(getActivity(), null, path, getSrcFotos(), R.id.cmd_apm_edit);
+            PhotoAutoprocessingEditActivity.showActivity("onEditApm(" + selection +
+                    ")", getActivity(), null, path, getSrcFotos(), R.id.cmd_apm_edit);
             return true;
         }
         return false;
@@ -680,38 +680,40 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         return false;
     }
 
-    private QueryParameter getSelectionQuery(String dbgContext, IDirectory selectedDir) {
+    private QueryParameter getSelectionQuery(String dbgContext, IDirectory selectedDir, int dirTypId) {
         String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
         QueryParameter query = null;
         if (pathFilter != null) {
-            query = AndroidAlbumUtils.getQueryFromUri(dbgContext, getActivity(), Uri.fromFile(new File(pathFilter)), null);
 
-            if (query == null) {
-                GalleryFilterParameter filter = new GalleryFilterParameter(); //.setPath(pathFilter);
-                if (!FotoSql.set(filter, pathFilter, mDirTypId)) {
-                    filter.setPath(pathFilter + "/%");
-                }
-
-                query = TagSql.filter2NewQuery(filter);
+            if(dirTypId == FotoSql.QUERY_TYPE_GROUP_ALBUM) {
+                String pathWithWildcard = pathFilter + "/%";
+                query = AndroidAlbumUtils.getQueryFromUri(dbgContext, getActivity(), Uri.fromFile(new File(pathWithWildcard)), null);
+            } else {
+                GalleryFilterParameter filterParameter = new GalleryFilterParameter();
+                FotoSql.set(filterParameter, pathFilter, dirTypId);
+                return AndroidAlbumUtils.getAsMergedNewQueryParameter(null, filterParameter);
             }
         }
         return query;
 
     }
-    private boolean showPhoto(IDirectory selectedDir) {
-        QueryParameter query = getSelectionQuery("showPhoto", selectedDir);
+    private boolean showPhoto(IDirectory selectedDir, int dirTypId) {
+        QueryParameter query = getSelectionQuery("showPhoto", selectedDir, dirTypId);
         if (query != null) {
+            String dbgContext = "showPhoto(" + FotoSql.getName(mContext,dirTypId) + ":" + selectedDir + ")";
+
             FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
-            ImageDetailActivityViewPager.showActivity(this.getActivity(), null, 0, query, 0);
+            ImageDetailActivityViewPager.showActivity(dbgContext, this.getActivity(), null, 0, query, 0);
             return true;
         }
         return false;
     }
 
-    private boolean showGallery(IDirectory selectedDir) {
-        QueryParameter query = getSelectionQuery("showGallery", selectedDir);
+    private boolean showGallery(IDirectory selectedDir, int dirTypId) {
+        String dbgContext = "showGallery(" + FotoSql.getName(mContext,dirTypId) + ":" + selectedDir + ")";
+        QueryParameter query = getSelectionQuery(dbgContext, selectedDir, dirTypId);
         if (query != null) {
-            FotoGalleryActivity.showActivity(this.getActivity(), query, 0);
+            FotoGalleryActivity.showActivity(dbgContext, this.getActivity(), query, 0);
             return true;
         }
         return false;

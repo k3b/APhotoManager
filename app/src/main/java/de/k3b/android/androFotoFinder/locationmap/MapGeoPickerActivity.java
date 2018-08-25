@@ -50,6 +50,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.osmdroid.OsmdroidUtil;
 import de.k3b.android.widget.AboutDialogPreference;
+import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.BaseQueryActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.IDirectory;
@@ -81,7 +82,7 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
     private boolean locked = false; // if != Global.locked : must update menu
     private boolean mMustReplaceMenue = false;
 
-    public static void showActivity(Activity context, SelectedFiles selectedItems,
+    public static void showActivity(String debugContext, Activity context, SelectedFiles selectedItems,
                                     QueryParameter query, int requestCode) {
         Uri initalUri = null;
         final Intent intent = new Intent().setClass(context,
@@ -105,6 +106,7 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
             Log.d(Global.LOG_CONTEXT, context.getClass().getSimpleName()
                     + " > MapGeoPickerActivity.showActivity@" + initalUri);
         }
+        ActivityWithCallContext.additionalCallContext = debugContext;
         if (requestCode != 0) {
             context.startActivityForResult(intent, requestCode);
         } else {
@@ -259,14 +261,14 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
         FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
         FotoSql.addWhereFilterLatLon(query, geoArea);
 
-        ImageDetailActivityViewPager.showActivity(this, null, 0, query, 0);
+        ImageDetailActivityViewPager.showActivity("showPhoto current", this, null, 0, query, 0);
         return true;
     }
 
     private boolean showGallery(IGeoRectangle geoArea) {
         QueryParameter query = getAsMergedQuery(geoArea);
 
-        FotoGalleryActivity.showActivity(this, query, 0);
+        FotoGalleryActivity.showActivity("showGallery current", this, query, 0);
         return true;
     }
 

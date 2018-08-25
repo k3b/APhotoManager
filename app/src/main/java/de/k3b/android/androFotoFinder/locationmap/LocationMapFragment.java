@@ -1041,7 +1041,7 @@ public class LocationMapFragment extends DialogFragment {
                         GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
                         String uri = PARSER.toUriString(geo);
 
-                        IntentUtil.cmdStartIntent(getActivity(), null, uri, null, Intent.ACTION_VIEW, R.string.geo_show_as_menu_title, R.string.geo_picker_err_not_found, 0);
+                        IntentUtil.cmdStartIntent("show_geo_as", getActivity(), null, uri, null, Intent.ACTION_VIEW, R.string.geo_show_as_menu_title, R.string.geo_picker_err_not_found, 0);
 
                         return true;
                     }
@@ -1067,12 +1067,12 @@ public class LocationMapFragment extends DialogFragment {
         QueryParameter query = getQueryForPositionRectangle(geoPosition);
         FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
 
-        ImageDetailActivityViewPager.showActivity(this.getActivity(), null, 0, query, 0);
+        ImageDetailActivityViewPager.showActivity("showPhoto " + geoPosition, this.getActivity(), null, 0, query, 0);
         return true;
     }
 
     private boolean showGallery(IGeoPoint geoPosition) {
-        FotoGalleryActivity.showActivity(this.getActivity(), getQueryForPositionRectangle(geoPosition), 0);
+        FotoGalleryActivity.showActivity("showGallery " + geoPosition, this.getActivity(), getQueryForPositionRectangle(geoPosition), 0);
         return true;
     }
 

@@ -44,6 +44,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.MediaScanner;
+import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.io.collections.SelectedFiles;
@@ -79,7 +80,7 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
     private ProgressBar mProgressBar = null;
     private TextView mLblStatusMessage;
 
-    public static void showActivity(Activity context, SelectedFiles selectedFiles, int requestCode) {
+    public static void showActivity(String debugContext, Activity context, SelectedFiles selectedFiles, int requestCode) {
         Uri initalUri = null;
         final Intent intent = new Intent().setClass(context,
                 GeoEditActivity.class);
@@ -98,6 +99,7 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
                     + " > GeoEditActivity.showActivity@" + initalUri);
         }
 
+        ActivityWithCallContext.additionalCallContext = debugContext;
         if (requestCode != 0) {
             context.startActivityForResult(intent, requestCode);
         } else {

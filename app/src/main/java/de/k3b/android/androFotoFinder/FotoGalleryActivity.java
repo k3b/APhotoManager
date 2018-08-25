@@ -23,7 +23,6 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
-import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -38,11 +37,11 @@ import de.k3b.android.androFotoFinder.gallery.cursor.GalleryCursorFragment;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
 import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
-import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.queries.Queryable;
 import de.k3b.android.util.GarbageCollector;
 import de.k3b.android.widget.AboutDialogPreference;
+import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.BaseQueryActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.collections.SelectedItems;
@@ -76,15 +75,17 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
 
     /**
      * shows a new instance of FotoGalleryActivity.
-     *  @param context     calling activity
+     * @param debugContext
+     * @param context     calling activity
      * @param query       if != null set initial filter to new FotoGalleryActivity
      * @param requestCode if != 0 start for result. else start without result
      */
-    public static void showActivity(Activity context, QueryParameter query, int requestCode) {
+    public static void showActivity(String debugContext, Activity context, QueryParameter query, int requestCode) {
         Intent intent = new Intent(context, FotoGalleryActivity.class);
 
         AndroidAlbumUtils.saveFilterAndQuery(context, null, intent, null, null, query);
 
+        ActivityWithCallContext.additionalCallContext = debugContext;
         if (requestCode != 0) {
             context.startActivityForResult(intent, requestCode);
         } else {
@@ -254,7 +255,7 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
     public void onGalleryImageClick(long imageId, Uri imageUri, int position) {
         Global.debugMemory(mDebugPrefix, "onGalleryImageClick");
         QueryParameter imageDetailQuery = this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery();
-        ImageDetailActivityViewPager.showActivity(this, imageUri, position, imageDetailQuery, ImageDetailActivityViewPager.ACTIVITY_ID);
+        ImageDetailActivityViewPager.showActivity("onGalleryImageClick#" + imageId, this, imageUri, position, imageDetailQuery, ImageDetailActivityViewPager.ACTIVITY_ID);
     }
 
     @Override

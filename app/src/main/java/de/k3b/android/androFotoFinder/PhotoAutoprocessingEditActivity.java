@@ -59,6 +59,7 @@ import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
+import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.io.ListUtils;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.DateUtil;
@@ -99,7 +100,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     private File exampleSrcfile;
     private Date exampleDate;
 
-    public static void showActivity(Activity context, PhotoWorkFlowDto workflow,
+    public static void showActivity(String debugContext, Activity context, PhotoWorkFlowDto workflow,
                                     String directoryOrApmFileUrl
             , SelectedFiles selectedFiles, int requestCode) {
         final Intent intent = new Intent().setClass(context,
@@ -122,6 +123,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
                     + " > PhotoAutoprocessingEditActivity.showActivity " + intent.toUri(Intent.URI_INTENT_SCHEME));
         }
 
+        ActivityWithCallContext.additionalCallContext = debugContext;
         if (requestCode != 0) {
             context.startActivityForResult(intent, requestCode);
         } else {
@@ -530,7 +532,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
      */
     private void onPickExif() {
         fromGui();
-        ExifEditActivity.showActivity(this, mCurrentData.getMediaDefaults(),
+        ExifEditActivity.showActivity("onPickExif", this, mCurrentData.getMediaDefaults(),
                 null, getSelectedFiles(mDebugPrefix+"EditExif-", getIntent(),
                         false),
                 EXIF_EDIT_RESULT_ID, false);

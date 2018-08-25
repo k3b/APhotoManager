@@ -55,9 +55,9 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.osmdroid.OsmdroidUtil;
-import de.k3b.android.util.OsUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
+import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.BaseQueryActivity;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.database.QueryParameter;
@@ -109,7 +109,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
     /** set while dir picker is active */
     private DirectoryPickerFragment mDirPicker = null;
 
-    public static void showActivity(Activity context, IGalleryFilter filter, QueryParameter query,
+    public static void showActivity(String debugContext, Activity context, IGalleryFilter filter, QueryParameter query,
                                     String lastBookmarkFileName, int requestCode) {
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, context.getClass().getSimpleName()
@@ -120,6 +120,8 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                 GalleryFilterActivity.class);
 
         AndroidAlbumUtils.saveFilterAndQuery(context, null, intent, null, filter, query);
+        ActivityWithCallContext.additionalCallContext = debugContext;
+
         if (requestCode != 0) {
             context.startActivityForResult(intent, requestCode);
         } else {
@@ -270,11 +272,11 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                 return true;
 
             case R.id.cmd_gallery:
-                FotoGalleryActivity.showActivity(this, getAsMergedQuery(), 0);
+                FotoGalleryActivity.showActivity("current-Filter", this, getAsMergedQuery(), 0);
                         // TagSql.filter2NewQuery(getAsGalleryFilter()), 0);
                 return true;
             case R.id.cmd_show_geo: {
-                MapGeoPickerActivity.showActivity(this, null, getAsMergedQuery(), 0);
+                MapGeoPickerActivity.showActivity("current-Filter", this, null, getAsMergedQuery(), 0);
                 return true;
             }
             case R.id.action_details:
@@ -791,7 +793,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
     /** called by {@link TagsPickerFragment} */
     @Override
     public boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag) {
-        return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, this, this.mFilterValue);
+        return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, this, getAsMergedQuery());
     }
 
     private void showLatLonPicker() {

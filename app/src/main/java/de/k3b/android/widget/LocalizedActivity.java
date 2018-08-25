@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder and of ToGoZip.
  *
@@ -40,7 +40,7 @@ import de.k3b.android.androFotoFinder.Global;
  *
  * Created by k3b on 07.01.2016.
  */
-public abstract class LocalizedActivity extends Activity {
+public abstract class LocalizedActivity extends ActivityWithCallContext {
     /** if myLocale != Locale.Default : activity must be recreated in on resume */
     private Locale myLocale = null;
 
@@ -65,8 +65,7 @@ public abstract class LocalizedActivity extends Activity {
      * Set Activity-s locale to SharedPreferences-setting.
      * Must be called before
      */
-    public static void fixLocale(Context context)
-    {
+    public static void fixLocale(Context context) {
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(context);
         String language = prefs.getString(Global.PREF_KEY_USER_LOCALE, "");

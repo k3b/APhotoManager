@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -35,6 +35,7 @@ import java.util.List;
 
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
+import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.io.DateUtil;
 import de.k3b.media.ExifInterfaceEx;
 import de.k3b.database.QueryParameter;
@@ -93,17 +94,18 @@ public class ImageDetailMetaDialogBuilder {
         sv.setVerticalScrollBarEnabled(true);
         TextView view = new TextView(context);
 
+        StringBuilder result = new StringBuilder(block);
         if ((moreBlocks != null) && (moreBlocks.length > 0)) {
-            StringBuilder result = new StringBuilder(block);
             for (Object subBlock : moreBlocks) {
                 if (subBlock != null) {
                     append(result, subBlock.toString());
                 }
             }
-            view.setText(result.toString());
-        } else {
-            view.setText(block);
         }
+        if (context instanceof ActivityWithCallContext) {
+            append(result, ((ActivityWithCallContext) context).getCallContext());
+        }
+        view.setText(result.toString());
 
         sv.addView(view);
         builder.setView(sv);

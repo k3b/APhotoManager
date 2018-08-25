@@ -692,7 +692,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
     }
 
     private void openFilter() {
-        GalleryFilterActivity.showActivity(this,
+        GalleryFilterActivity.showActivity("openFilter", this,
                 null,
                 this.mGalleryQueryParameter.mGalleryContentBaseQuery,
                 null, BaseQueryActivity.resultID);
@@ -935,7 +935,8 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
      */
     @Override
     public boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag) {
-        return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, this, this.mGalleryQueryParameter.getCurrentSubFilterSettings());
+        return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, this,
+                this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery());
     }
 
     @Override
