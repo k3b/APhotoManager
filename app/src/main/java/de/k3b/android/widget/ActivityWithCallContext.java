@@ -43,25 +43,20 @@ public class ActivityWithCallContext extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState != null) {
-            this.parentCallContext = savedInstanceState.getString(PARAM_CALLSTACK, parentCallContext);
-        } else if (getIntent() != null) {
-            this.parentCallContext = getIntent().getStringExtra(PARAM_CALLSTACK);
-            if (this.parentCallContext == null) this.parentCallContext = "";
-        }
+        Intent intent = getIntent();
+        this.parentCallContext = readCallContext(intent);
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        super.onSaveInstanceState(savedInstanceState);
-        if (savedInstanceState != null) {
-            savedInstanceState.putString(PARAM_CALLSTACK, parentCallContext);
-        }
+    public static String readCallContext(Intent intent) {
+        String parentCallContext = (intent != null)
+                ? intent.getStringExtra(PARAM_CALLSTACK) : null;
+        if (parentCallContext == null) parentCallContext = "";
+        return parentCallContext;
+
     }
 
     public String getCallContext() {
-        Activity owner = this;
-        return parentCallContext + " => " + getCallerDescription(owner);
+        return parentCallContext + " => " + getCallerDescription(this);
     }
 
     private static String getCallerDescription(Activity owner) {

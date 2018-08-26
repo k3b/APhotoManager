@@ -43,6 +43,7 @@ import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.AndroidFileCommands;
+import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.HistoryEditText;
@@ -99,12 +100,7 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
                     + " > GeoEditActivity.showActivity@" + initalUri);
         }
 
-        ActivityWithCallContext.additionalCallContext = debugContext;
-        if (requestCode != 0) {
-            context.startActivityForResult(intent, requestCode);
-        } else {
-            context.startActivity(intent);
-        }
+        IntentUtil.startActivity(debugContext, context, requestCode, intent);
     }
 
     @Override

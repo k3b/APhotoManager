@@ -62,7 +62,6 @@ import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
-import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.UpdateTask;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.io.VISIBILITY;
@@ -162,12 +161,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
             AffUtils.putSelectedFiles(intent, selectedFiles);
         }
 
-        ActivityWithCallContext.additionalCallContext = debugContext;
-        if (requestCode != 0) {
-            context.startActivityForResult(intent, requestCode);
-        } else {
-            context.startActivity(intent);
-        }
+        IntentUtil.startActivity(debugContext, context, requestCode, intent);
     }
 
     @Override
@@ -396,7 +390,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
                 AboutDialogPreference.createAboutDialog(this).show();
                 return true;
             case R.id.cmd_settings:
-                SettingsActivity.show(this);
+                SettingsActivity.showActivity(this);
                 return true;
 
             default:

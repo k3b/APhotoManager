@@ -59,7 +59,6 @@ import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
-import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.io.ListUtils;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.DateUtil;
@@ -123,12 +122,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
                     + " > PhotoAutoprocessingEditActivity.showActivity " + intent.toUri(Intent.URI_INTENT_SCHEME));
         }
 
-        ActivityWithCallContext.additionalCallContext = debugContext;
-        if (requestCode != 0) {
-            context.startActivityForResult(intent, requestCode);
-        } else {
-            context.startActivity(intent);
-        }
+        IntentUtil.startActivity(debugContext, context, requestCode, intent);
     }
 
     @Override
@@ -532,7 +526,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
      */
     private void onPickExif() {
         fromGui();
-        ExifEditActivity.showActivity("onPickExif", this, mCurrentData.getMediaDefaults(),
+        ExifEditActivity.showActivity("[4]", this, mCurrentData.getMediaDefaults(),
                 null, getSelectedFiles(mDebugPrefix+"EditExif-", getIntent(),
                         false),
                 EXIF_EDIT_RESULT_ID, false);
@@ -635,7 +629,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
                 AboutDialogPreference.createAboutDialog(this).show();
                 return true;
             case R.id.cmd_settings:
-                SettingsActivity.show(this);
+                SettingsActivity.showActivity(this);
                 return true;
 
             case android.R.id.copy:

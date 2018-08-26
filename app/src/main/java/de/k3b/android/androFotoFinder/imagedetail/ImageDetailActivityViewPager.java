@@ -358,12 +358,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         intent.putExtra(ImageDetailActivityViewPager.EXTRA_POSITION, position);
         intent.setData(imageUri);
 
-        ActivityWithCallContext.additionalCallContext = debugContext;
-        if (requestCode != 0) {
-            context.startActivityForResult(intent, requestCode);
-        } else {
-            context.startActivity(intent);
-        }
+        IntentUtil.startActivity(debugContext, context, requestCode, intent);
     }
 
     @Override
@@ -955,13 +950,13 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                         // int callBackId = (MediaScanner.isNoMedia(dirPath,MediaScanner.DEFAULT_SCAN_DEPTH)) ? NOMEDIA_GALLERY : 0;
 
                         QueryParameter query = TagSql.filter2NewQuery(this.mFilter);
-                        FotoGalleryActivity.showActivity("cmd_gallery " + dirPath, this, query, 0);
+                        FotoGalleryActivity.showActivity("[13]" + dirPath, this, query, 0);
                     }
                     break;
                 }
 
                 case R.id.cmd_show_geo:
-                    MapGeoPickerActivity.showActivity("cmd_show_geo", this, getCurrentFoto(), null, 0);
+                    MapGeoPickerActivity.showActivity("[14]", this, getCurrentFoto(), null, 0);
                     break;
 
                 case R.id.cmd_show_geo_as: {
@@ -983,7 +978,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
                 case R.id.cmd_edit_geo: {
                     SelectedFiles selectedItem = getCurrentFoto();
-                    GeoEditActivity.showActivity("cmd_edit_geo", this, selectedItem, GeoEditActivity.RESULT_ID);
+                    GeoEditActivity.showActivity("[15]:"+selectedItem, this, selectedItem, GeoEditActivity.RESULT_ID);
                     break;
                 }
                 case R.id.cmd_edit_tags: {
@@ -998,7 +993,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                     break;
                 case R.id.cmd_settings:
                     reloadContext = false;
-                    SettingsActivity.show(this);
+                    SettingsActivity.showActivity(this);
                     break;
                 case R.id.cmd_more:
                     reloadContext = false;
@@ -1087,7 +1082,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     }
 
     private boolean onEditExif(SelectedFiles currentFoto, final long fotoId, final String fotoPath) {
-        ExifEditActivity.showActivity("onEditExif", this, null, fotoPath, currentFoto, 0, true);
+        ExifEditActivity.showActivity("[16]:", this, null, fotoPath, currentFoto, 0, true);
         return true;
     }
     private boolean onRenameDirQueston(final SelectedFiles currentFoto, final long fotoId, final String fotoPath, final String _newName) {

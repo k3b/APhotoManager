@@ -40,8 +40,8 @@ import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.queries.Queryable;
 import de.k3b.android.util.GarbageCollector;
+import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.AboutDialogPreference;
-import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.BaseQueryActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.collections.SelectedItems;
@@ -85,12 +85,7 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
 
         AndroidAlbumUtils.saveFilterAndQuery(context, null, intent, null, null, query);
 
-        ActivityWithCallContext.additionalCallContext = debugContext;
-        if (requestCode != 0) {
-            context.startActivityForResult(intent, requestCode);
-        } else {
-            context.startActivity(intent);
-        }
+        IntentUtil.startActivity(debugContext, context, requestCode, intent);
     }
 
     @Override
@@ -202,7 +197,7 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.cmd_settings:
-                SettingsActivity.show(this);
+                SettingsActivity.showActivity(this);
                 return true;
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
@@ -255,7 +250,7 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
     public void onGalleryImageClick(long imageId, Uri imageUri, int position) {
         Global.debugMemory(mDebugPrefix, "onGalleryImageClick");
         QueryParameter imageDetailQuery = this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery();
-        ImageDetailActivityViewPager.showActivity("onGalleryImageClick#" + imageId, this, imageUri, position, imageDetailQuery, ImageDetailActivityViewPager.ACTIVITY_ID);
+        ImageDetailActivityViewPager.showActivity("[1]#" + imageId, this, imageUri, position, imageDetailQuery, ImageDetailActivityViewPager.ACTIVITY_ID);
     }
 
     @Override

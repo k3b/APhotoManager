@@ -1067,12 +1067,12 @@ public class LocationMapFragment extends DialogFragment {
         QueryParameter query = getQueryForPositionRectangle(geoPosition);
         FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
 
-        ImageDetailActivityViewPager.showActivity("showPhoto " + geoPosition, this.getActivity(), null, 0, query, 0);
+        ImageDetailActivityViewPager.showActivity("[17]:" + geoPosition, this.getActivity(), null, 0, query, 0);
         return true;
     }
 
     private boolean showGallery(IGeoPoint geoPosition) {
-        FotoGalleryActivity.showActivity("showGallery " + geoPosition, this.getActivity(), getQueryForPositionRectangle(geoPosition), 0);
+        FotoGalleryActivity.showActivity("[18]:"+geoPosition, this.getActivity(), getQueryForPositionRectangle(geoPosition), 0);
         return true;
     }
 

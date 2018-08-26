@@ -215,5 +215,13 @@ public class IntentUtil implements Common {
         }
     }
 
+    public static void startActivity(String debugContext, Activity context, int requestCode, Intent intent) {
+        ActivityWithCallContext.additionalCallContext = debugContext;
+        if (requestCode != 0) {
+            context.startActivityForResult(intent, requestCode);
+        } else {
+            context.startActivity(intent);
+        }
+    }
 
 }

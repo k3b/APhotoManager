@@ -55,9 +55,9 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.osmdroid.OsmdroidUtil;
+import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
-import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.BaseQueryActivity;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.database.QueryParameter;
@@ -120,13 +120,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                 GalleryFilterActivity.class);
 
         AndroidAlbumUtils.saveFilterAndQuery(context, null, intent, null, filter, query);
-        ActivityWithCallContext.additionalCallContext = debugContext;
-
-        if (requestCode != 0) {
-            context.startActivityForResult(intent, requestCode);
-        } else {
-            context.startActivity(intent);
-        }
+        IntentUtil.startActivity(debugContext, context, requestCode, intent);
     }
 
     @Override
@@ -268,15 +262,15 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                 AboutDialogPreference.createAboutDialog(this).show();
                 return true;
             case R.id.cmd_settings:
-                SettingsActivity.show(this);
+                SettingsActivity.showActivity(this);
                 return true;
 
             case R.id.cmd_gallery:
-                FotoGalleryActivity.showActivity("current-Filter", this, getAsMergedQuery(), 0);
+                FotoGalleryActivity.showActivity("[2]", this, getAsMergedQuery(), 0);
                         // TagSql.filter2NewQuery(getAsGalleryFilter()), 0);
                 return true;
             case R.id.cmd_show_geo: {
-                MapGeoPickerActivity.showActivity("current-Filter", this, null, getAsMergedQuery(), 0);
+                MapGeoPickerActivity.showActivity("[3]", this, null, getAsMergedQuery(), 0);
                 return true;
             }
             case R.id.action_details:

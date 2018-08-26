@@ -438,8 +438,8 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     private boolean onEditApm(IDirectory selection) {
         String path = (selection == null) ? null : selection.getAbsolute();
         if (!StringUtils.isNullOrEmpty(path)) {
-            PhotoAutoprocessingEditActivity.showActivity("onEditApm(" + selection +
-                    ")", getActivity(), null, path, getSrcFotos(), R.id.cmd_apm_edit);
+            PhotoAutoprocessingEditActivity.showActivity("[5]", getActivity(),
+                    null, path, getSrcFotos(), R.id.cmd_apm_edit);
             return true;
         }
         return false;
@@ -684,9 +684,8 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
         QueryParameter query = null;
         if (pathFilter != null) {
-
             if(dirTypId == FotoSql.QUERY_TYPE_GROUP_ALBUM) {
-                String pathWithWildcard = pathFilter + "/%";
+                String pathWithWildcard = (AlbumFile.isQueryFile(pathFilter)) ? pathFilter : pathFilter + "/%";
                 query = AndroidAlbumUtils.getQueryFromUri(dbgContext, getActivity(), Uri.fromFile(new File(pathWithWildcard)), null);
             } else {
                 GalleryFilterParameter filterParameter = new GalleryFilterParameter();
@@ -700,7 +699,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     private boolean showPhoto(IDirectory selectedDir, int dirTypId) {
         QueryParameter query = getSelectionQuery("showPhoto", selectedDir, dirTypId);
         if (query != null) {
-            String dbgContext = "showPhoto(" + FotoSql.getName(mContext,dirTypId) + ":" + selectedDir + ")";
+            String dbgContext = "[6]"+FotoSql.getName(mContext,dirTypId) + ":" + selectedDir;
 
             FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
             ImageDetailActivityViewPager.showActivity(dbgContext, this.getActivity(), null, 0, query, 0);
@@ -710,7 +709,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     }
 
     private boolean showGallery(IDirectory selectedDir, int dirTypId) {
-        String dbgContext = "showGallery(" + FotoSql.getName(mContext,dirTypId) + ":" + selectedDir + ")";
+        String dbgContext = "[7]"+FotoSql.getName(mContext,dirTypId) + ":" + selectedDir;
         QueryParameter query = getSelectionQuery(dbgContext, selectedDir, dirTypId);
         if (query != null) {
             FotoGalleryActivity.showActivity(dbgContext, this.getActivity(), query, 0);
