@@ -49,10 +49,11 @@ android {
         // 0.6.4.180314 (36)    Buggy: Fix/Improved Autoprocessingmode, Menu "open in filemanager" & "rename folder"-Crash in Settings
         // 0.6.4.180321 (37)    Bugfix for 0.6.4.180314 (36)
         // 0.6.9.180813 (37)    public betta: Searchbar, vitual-folder, new icons
-        // 0.7.0.180823 (38)    public betta: Searchbar, vitual-folder, new icons
+        // 0.7.0.180823 (38)    Searchbar, vitual-folder, new icons
+        // 0.7.1.180830 (39)    Bugfix for 38; translation uk
 
-        versionCode = 38
-        versionName = '0.7.0.180823'
+        versionCode = 39
+        versionName = '0.7.1.180830'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
