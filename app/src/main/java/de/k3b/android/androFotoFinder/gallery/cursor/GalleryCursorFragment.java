@@ -622,7 +622,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 QueryParameter subGalleryQuery = new QueryParameter(FotoSql.queryDetail);
 
                 subGalleryQuery.addWhere(holder.filter);
-                onOpenChildGallery(subGalleryQuery);
+                onOpenChildGallery("Image#filter", subGalleryQuery);
                 return;
             }
             long imageID = holder.imageID;
@@ -634,11 +634,12 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         return mAdapter.getUri(imageID);
     }
 
-    private void onOpenChildGallery(QueryParameter subGalleryQuery) {
+    private void onOpenChildGallery(String debugContext, QueryParameter subGalleryQuery) {
         if (Global.debugEnabledSql) {
-            Log.i(Global.LOG_CONTEXT, "Exec child gallery\n\t" + subGalleryQuery.toSqlString());
+            Log.i(Global.LOG_CONTEXT, "Exec child gallery " +
+                    debugContext + "\n\t" + subGalleryQuery.toSqlString());
         }
-        FotoGalleryActivity.showActivity(getActivity(), subGalleryQuery, 0);
+        FotoGalleryActivity.showActivity("[8]"+debugContext, getActivity(), subGalleryQuery, 0);
     }
 
     /****************** path navigation *************************/
@@ -754,7 +755,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 multiSelectionUpdateActionbar("Start multisel");
             } else {
                 // in gallery mode long click is view image
-                ImageDetailActivityViewPager.showActivity(this.getActivity(), getUri(holder.imageID), position, getCurrentQuery(), ImageDetailActivityViewPager.ACTIVITY_ID);
+                ImageDetailActivityViewPager.showActivity("[9]", this.getActivity(), getUri(holder.imageID), position, getCurrentQuery(), ImageDetailActivityViewPager.ACTIVITY_ID);
             }
             return true;
         }
@@ -888,10 +889,10 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             case R.id.cmd_move:
                 return cmdMoveOrCopyWithDestDirPicker(true, fileCommands.getLastCopyToPath(), selectedFiles);
             case R.id.cmd_show_geo:
-                MapGeoPickerActivity.showActivity(this.getActivity(), selectedFiles, null, 0);
+                MapGeoPickerActivity.showActivity("[10]", this.getActivity(), selectedFiles, null, 0);
                 return true;
             case R.id.cmd_edit_geo:
-                GeoEditActivity.showActivity(this.getActivity(), selectedFiles, GeoEditActivity.RESULT_ID);
+                GeoEditActivity.showActivity("[11]", this.getActivity(), selectedFiles, GeoEditActivity.RESULT_ID);
                 return true;
             case R.id.cmd_edit_tags: {
                 return tagsShowEditDialog(selectedFiles);
@@ -960,7 +961,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     private boolean onEditExif(SelectedFiles fotos) {
-        ExifEditActivity.showActivity(getActivity(), null, null, fotos, 0, true);
+        ExifEditActivity.showActivity("[12]", getActivity(), null, null, fotos, 0, true);
         return true;
     }
 

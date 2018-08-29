@@ -72,6 +72,7 @@ import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.MediaScannerAsyncTask;
 import de.k3b.android.util.OsUtils;
 import de.k3b.android.widget.AboutDialogPreference;
+import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
@@ -339,13 +340,14 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     /**
      * shows a new instance of ImageDetailActivityViewPager.
      *
+     * @param debugContext
      * @param context calling activity
      * @param imageUri if != null initial image to show
      * @param position offset of image to display in query or current file directory
      * @param imageDetailQuery if != null set initial filter to new FotoGalleryActivity
      * @param requestCode if != 0 start for result. else start without result
      */
-    public static void showActivity(Activity context, Uri imageUri, int position, QueryParameter imageDetailQuery, int requestCode) {
+    public static void showActivity(String debugContext, Activity context, Uri imageUri, int position, QueryParameter imageDetailQuery, int requestCode) {
         Intent intent;
         //Create intent
         intent = new Intent(context, ImageDetailActivityViewPager.class);
@@ -356,11 +358,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         intent.putExtra(ImageDetailActivityViewPager.EXTRA_POSITION, position);
         intent.setData(imageUri);
 
-        if (requestCode != 0) {
-            context.startActivityForResult(intent, requestCode);
-        } else {
-            context.startActivity(intent);
-        }
+        IntentUtil.startActivity(debugContext, context, requestCode, intent);
     }
 
     @Override
@@ -390,6 +388,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             copyExtras(childIntent, intent.getExtras(),
                     EXTRA_FILTER, EXTRA_POSITION, EXTRA_QUERY, AffUtils.EXTRA_SELECTED_ITEM_IDS, AffUtils.EXTRA_SELECTED_ITEM_DATES,
                     AffUtils.EXTRA_SELECTED_ITEM_PATHS, EXTRA_STREAM, EXTRA_TITLE);
+            ActivityWithCallContext.additionalCallContext = "-must-forward-";
             startActivityForResult(childIntent, ACTION_RESULT_FORWARD);
         } else { // not in forward mode
             setContentView(R.layout.activity_image_view_pager);
@@ -917,7 +916,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
                 case R.id.action_edit:
                     // #64: (not) open editor via chooser
-                    IntentUtil.cmdStartIntent(this, getCurrentFilePath(), null, null,
+                    IntentUtil.cmdStartIntent("edit", this, getCurrentFilePath(), null, null,
                             Intent.ACTION_EDIT,
                             (Global.showEditChooser) ? R.string.edit_chooser_title : 0,
                             R.string.edit_err_editor_not_found, ACTION_RESULT_MUST_MEDIA_SCAN);
@@ -925,7 +924,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
                 case R.id.menu_item_share:
                     reloadContext = false;
-                    IntentUtil.cmdStartIntent(this, null, null, getCurrentFilePath(), Intent.ACTION_SEND, R.string.share_menu_title, R.string.share_err_not_found, 0);
+                    IntentUtil.cmdStartIntent("share", this, null, null, getCurrentFilePath(), Intent.ACTION_SEND, R.string.share_menu_title, R.string.share_err_not_found, 0);
                     break;
 
                 case R.id.cmd_copy:
@@ -951,13 +950,13 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                         // int callBackId = (MediaScanner.isNoMedia(dirPath,MediaScanner.DEFAULT_SCAN_DEPTH)) ? NOMEDIA_GALLERY : 0;
 
                         QueryParameter query = TagSql.filter2NewQuery(this.mFilter);
-                        FotoGalleryActivity.showActivity(this, query, 0);
+                        FotoGalleryActivity.showActivity("[13]" + dirPath, this, query, 0);
                     }
                     break;
                 }
 
                 case R.id.cmd_show_geo:
-                    MapGeoPickerActivity.showActivity(this, getCurrentFoto(), null, 0);
+                    MapGeoPickerActivity.showActivity("[14]", this, getCurrentFoto(), null, 0);
                     break;
 
                 case R.id.cmd_show_geo_as: {
@@ -973,13 +972,13 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                     GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
                     String uri = PARSER.toUriString(geo);
 
-                    IntentUtil.cmdStartIntent(this, null, uri, null, Intent.ACTION_VIEW, R.string.geo_show_as_menu_title, R.string.geo_picker_err_not_found, 0);
+                    IntentUtil.cmdStartIntent("cmd_show_geo_as", this, null, uri, null, Intent.ACTION_VIEW, R.string.geo_show_as_menu_title, R.string.geo_picker_err_not_found, 0);
                     break;
                 }
 
                 case R.id.cmd_edit_geo: {
                     SelectedFiles selectedItem = getCurrentFoto();
-                    GeoEditActivity.showActivity(this, selectedItem, GeoEditActivity.RESULT_ID);
+                    GeoEditActivity.showActivity("[15]:"+selectedItem, this, selectedItem, GeoEditActivity.RESULT_ID);
                     break;
                 }
                 case R.id.cmd_edit_tags: {
@@ -994,7 +993,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                     break;
                 case R.id.cmd_settings:
                     reloadContext = false;
-                    SettingsActivity.show(this);
+                    SettingsActivity.showActivity(this);
                     break;
                 case R.id.cmd_more:
                     reloadContext = false;
@@ -1083,7 +1082,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     }
 
     private boolean onEditExif(SelectedFiles currentFoto, final long fotoId, final String fotoPath) {
-        ExifEditActivity.showActivity(this, null, fotoPath, currentFoto, 0, true);
+        ExifEditActivity.showActivity("[16]:", this, null, fotoPath, currentFoto, 0, true);
         return true;
     }
     private boolean onRenameDirQueston(final SelectedFiles currentFoto, final long fotoId, final String fotoPath, final String _newName) {
@@ -1177,7 +1176,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     /** called by {@link TagsPickerFragment} */
     @Override
     public boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag) {
-        return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, this, this.mFilter);
+        return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, this, mGalleryContentQuery);
     }
 
     protected SelectedFiles getCurrentFoto() {
@@ -1234,7 +1233,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     }
 
 	@Override
-	protected void onSaveInstanceState(Bundle outState) {
+	public void onSaveInstanceState(Bundle outState) {
         if (mGalleryContentQuery != null) {
             outState.putString(EXTRA_QUERY, mGalleryContentQuery.toReParseableString());
         }

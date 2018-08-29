@@ -49,6 +49,7 @@ import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.osmdroid.OsmdroidUtil;
+import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.BaseQueryActivity;
 import de.k3b.database.QueryParameter;
@@ -81,7 +82,7 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
     private boolean locked = false; // if != Global.locked : must update menu
     private boolean mMustReplaceMenue = false;
 
-    public static void showActivity(Activity context, SelectedFiles selectedItems,
+    public static void showActivity(String debugContext, Activity context, SelectedFiles selectedItems,
                                     QueryParameter query, int requestCode) {
         Uri initalUri = null;
         final Intent intent = new Intent().setClass(context,
@@ -105,11 +106,7 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
             Log.d(Global.LOG_CONTEXT, context.getClass().getSimpleName()
                     + " > MapGeoPickerActivity.showActivity@" + initalUri);
         }
-        if (requestCode != 0) {
-            context.startActivityForResult(intent, requestCode);
-        } else {
-            context.startActivity(intent);
-        }
+        IntentUtil.startActivity(debugContext, context, requestCode, intent);
     }
 
     @Override
@@ -239,7 +236,7 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
                 AboutDialogPreference.createAboutDialog(this).show();
                 return true;
             case R.id.cmd_settings:
-                SettingsActivity.show(this);
+                SettingsActivity.showActivity(this);
                 return true;
 			case R.id.cmd_photo:
 				return showPhoto(mMap.getCurrentGeoRectangle());
@@ -259,19 +256,15 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
         FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
         FotoSql.addWhereFilterLatLon(query, geoArea);
 
-        ImageDetailActivityViewPager.showActivity(this, null, 0, query, 0);
+        ImageDetailActivityViewPager.showActivity("[19]-"+geoArea, this, null, 0, query, 0);
         return true;
     }
 
     private boolean showGallery(IGeoRectangle geoArea) {
         QueryParameter query = getAsMergedQuery(geoArea);
 
-        FotoGalleryActivity.showActivity(this, query, 0);
+        FotoGalleryActivity.showActivity("[20]-"+geoArea, this, query, 0);
         return true;
-    }
-
-    private QueryParameter getAsMergedQuery() {
-        return getAsMergedQuery(mMap.getCurrentGeoRectangle());
     }
 
     private QueryParameter getAsMergedQuery(IGeoRectangle geoArea) {
@@ -281,7 +274,7 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
     }
 
     private void cmdShowDetails() {
-        final QueryParameter asMergedQuery = getAsMergedQuery();
+        final QueryParameter asMergedQuery = mMap.getCurrentAreaQuery();
 
         CharSequence subQuerymTitle = getValueAsTitle(true);
         ImageDetailMetaDialogBuilder.createImageDetailDialog(
@@ -291,6 +284,7 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
                 StringUtils.appendMessage(null,
                         getString(R.string.show_photo),
                         TagSql.getCount(this, asMergedQuery)),
+                mMap.getCurrentGeoRectangle() + " ==> " + mMap.getCurrentGeoUri(),
                 subQuerymTitle
         ).show();
     }

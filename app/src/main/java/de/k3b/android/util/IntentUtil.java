@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -35,6 +35,7 @@ import java.io.File;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.io.StringUtils;
 
 /**
@@ -151,6 +152,7 @@ public class IntentUtil implements Common {
     /**
      * Helper to Execute parent.startActivity(ForResult)()
      *
+     * @param debugContext
      * @param parentActivity    activity used to start and to receive actionResult
      * @param currentFilePath   for setData: null or file-path that also defines the content type.
      * @param currentUri        for setData: null or uri to be procesed (i.e. content:...)
@@ -160,7 +162,7 @@ public class IntentUtil implements Common {
      * @param idEditError       string-resource-id for error message if there is no hadler for action
      * @param idActivityResultRequestCode  if != 0 execute startActivityForResult else startActivity
      */
-    public static void cmdStartIntent(Activity parentActivity,
+    public static void cmdStartIntent(String debugContext, Activity parentActivity,
                                       String currentFilePath, String currentUri,
                                       String extraPath, String action,
                                       int idChooserCaption, int idEditError,
@@ -202,6 +204,7 @@ public class IntentUtil implements Common {
                     ? outIntent
                     : Intent.createChooser(outIntent, parentActivity.getText(idChooserCaption));
 
+            ActivityWithCallContext.additionalCallContext = debugContext;
             if (idActivityResultRequestCode == 0) {
                 parentActivity.startActivity(execIntent);
             } else {
@@ -212,5 +215,13 @@ public class IntentUtil implements Common {
         }
     }
 
+    public static void startActivity(String debugContext, Activity context, int requestCode, Intent intent) {
+        ActivityWithCallContext.additionalCallContext = debugContext;
+        if (requestCode != 0) {
+            context.startActivityForResult(intent, requestCode);
+        } else {
+            context.startActivity(intent);
+        }
+    }
 
 }

@@ -673,14 +673,13 @@ public class LocationMapFragment extends DialogFragment {
                 List<Overlay> oldItems = mFolderOverlayGreenPhotoMarker.getItems();
 
                 mLastZoom = this.mMapView.getZoomLevelDouble();
-                double groupingFactor = getGroupingFactor(mLastZoom);
-                BoundingBox world = this.mMapView.getBoundingBox();
+                QueryParameter query = getCurrentAreaQuery();
+
                 if (Global.debugEnabledMap) {
                     Log.d(Global.LOG_CONTEXT, mDebugPrefix + "reloadFotoMarker(" + why + ")"
-                            + world + ", zoom " + mLastZoom);
+                            + " zoom " + mLastZoom + ", query " + query);
                 }
-
-                reloadFotoMarker(world, groupingFactor, oldItems);
+                reloadFotoMarker(query, oldItems);
             } else {
                 // background load is already active. Remember that at least one scroll/zoom was missing
                 mFotoMarkerPendingLoads++;
@@ -688,7 +687,17 @@ public class LocationMapFragment extends DialogFragment {
         }
     }
 
-    private void reloadFotoMarker(BoundingBox latLonArea, double groupingFactor, List<Overlay> oldItems) {
+    private void reloadFotoMarker(QueryParameter query, List<Overlay> oldItems) {
+
+        mCurrentFotoMarkerLoader = new FotoMarkerLoaderTask(createHashMap(oldItems));
+        mCurrentFotoMarkerLoader.execute(query);
+    }
+
+    public QueryParameter getCurrentAreaQuery() {
+        double groupingFactor = getGroupingFactor(mLastZoom);
+        BoundingBox latLonArea = this.mMapView.getBoundingBox();
+
+        // only selected fields are required whithout where
         QueryParameter query = FotoSql.getQueryGroupByPlace(groupingFactor);
         query.clearWhere();
 
@@ -705,9 +714,7 @@ public class LocationMapFragment extends DialogFragment {
                 , rect.getLatitudeMax() + delta
                 , rect.getLogituedMin() - delta
                 , rect.getLogituedMax() + delta);
-
-        mCurrentFotoMarkerLoader = new FotoMarkerLoaderTask(createHashMap(oldItems));
-        mCurrentFotoMarkerLoader.execute(query);
+        return query;
     }
 
     private IGeoRectangle getGeoRectangle(BoundingBox boundingBox) {
@@ -1041,7 +1048,7 @@ public class LocationMapFragment extends DialogFragment {
                         GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
                         String uri = PARSER.toUriString(geo);
 
-                        IntentUtil.cmdStartIntent(getActivity(), null, uri, null, Intent.ACTION_VIEW, R.string.geo_show_as_menu_title, R.string.geo_picker_err_not_found, 0);
+                        IntentUtil.cmdStartIntent("show_geo_as", getActivity(), null, uri, null, Intent.ACTION_VIEW, R.string.geo_show_as_menu_title, R.string.geo_picker_err_not_found, 0);
 
                         return true;
                     }
@@ -1067,12 +1074,12 @@ public class LocationMapFragment extends DialogFragment {
         QueryParameter query = getQueryForPositionRectangle(geoPosition);
         FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
 
-        ImageDetailActivityViewPager.showActivity(this.getActivity(), null, 0, query, 0);
+        ImageDetailActivityViewPager.showActivity("[17]:" + geoPosition, this.getActivity(), null, 0, query, 0);
         return true;
     }
 
     private boolean showGallery(IGeoPoint geoPosition) {
-        FotoGalleryActivity.showActivity(this.getActivity(), getQueryForPositionRectangle(geoPosition), 0);
+        FotoGalleryActivity.showActivity("[18]:"+geoPosition, this.getActivity(), getQueryForPositionRectangle(geoPosition), 0);
         return true;
     }
 

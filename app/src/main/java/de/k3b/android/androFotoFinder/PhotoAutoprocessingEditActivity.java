@@ -99,7 +99,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     private File exampleSrcfile;
     private Date exampleDate;
 
-    public static void showActivity(Activity context, PhotoWorkFlowDto workflow,
+    public static void showActivity(String debugContext, Activity context, PhotoWorkFlowDto workflow,
                                     String directoryOrApmFileUrl
             , SelectedFiles selectedFiles, int requestCode) {
         final Intent intent = new Intent().setClass(context,
@@ -122,11 +122,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
                     + " > PhotoAutoprocessingEditActivity.showActivity " + intent.toUri(Intent.URI_INTENT_SCHEME));
         }
 
-        if (requestCode != 0) {
-            context.startActivityForResult(intent, requestCode);
-        } else {
-            context.startActivity(intent);
-        }
+        IntentUtil.startActivity(debugContext, context, requestCode, intent);
     }
 
     @Override
@@ -530,7 +526,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
      */
     private void onPickExif() {
         fromGui();
-        ExifEditActivity.showActivity(this, mCurrentData.getMediaDefaults(),
+        ExifEditActivity.showActivity("[4]", this, mCurrentData.getMediaDefaults(),
                 null, getSelectedFiles(mDebugPrefix+"EditExif-", getIntent(),
                         false),
                 EXIF_EDIT_RESULT_ID, false);
@@ -633,7 +629,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
                 AboutDialogPreference.createAboutDialog(this).show();
                 return true;
             case R.id.cmd_settings:
-                SettingsActivity.show(this);
+                SettingsActivity.showActivity(this);
                 return true;
 
             case android.R.id.copy:

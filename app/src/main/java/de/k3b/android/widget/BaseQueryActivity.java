@@ -290,6 +290,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
             StringBuilder dbgMessageResult = (Global.debugEnabled) ? new StringBuilder() : null;
 
             // special name handling for pickers
+            boolean isPick = false;
             String action = (intent != null) ? intent.getAction() : null;
             if ((action != null) && ((Intent.ACTION_PICK.compareTo(action) == 0) || (Intent.ACTION_GET_CONTENT.compareTo(action) == 0))) {
                 String schema = intent.getScheme();
@@ -301,6 +302,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                     if (dbgMessageResult != null) dbgMessageResult.append("pick photo ");
                 }
                 this.mSaveLastUsedFilterToSharedPrefs = true;
+                isPick = true;
             } else {
                 this.mSharedPrefKeySuffix = PICK_NONE_SUFFIX;
                 // save only if no intent-uri is involved
@@ -329,6 +331,14 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                                 intent.getIntExtra(STATE_SortID, this.mCurrentSortID),
                                 intent.getBooleanExtra(STATE_SortAscending, this.mCurrentSortAscending),
                                 intent.getIntExtra(STATE_SUB_FILTR_MODE, this.mCurrentSubFilterMode));
+                    if ((!found) && (!isPick) && (AndroidAlbumUtils.getQuery(
+                            BaseQueryActivity.this, null,
+                            null, intent, null,
+                            null, null) != null)) {
+                        // has been called with  intent filter data so no more state loading
+                        found = true;
+                       this.mSaveLastUsedFilterToSharedPrefs = false;
+                    }
                 }
                 if (!found && (sharedPref != null)) {
                     found = setState(dbgMessageResult, " from-SharedPrefs: ",
@@ -692,7 +702,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
     }
 
     private void openFilter() {
-        GalleryFilterActivity.showActivity(this,
+        GalleryFilterActivity.showActivity("[23]", this,
                 null,
                 this.mGalleryQueryParameter.mGalleryContentBaseQuery,
                 null, BaseQueryActivity.resultID);
@@ -935,7 +945,8 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
      */
     @Override
     public boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag) {
-        return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, this, this.mGalleryQueryParameter.getCurrentSubFilterSettings());
+        return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, this,
+                this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery());
     }
 
     @Override

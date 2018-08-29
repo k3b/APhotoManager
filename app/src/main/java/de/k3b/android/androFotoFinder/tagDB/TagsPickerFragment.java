@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-18 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -484,13 +484,13 @@ public class TagsPickerFragment  extends DialogFragment  {
     }
 
 
-    public static boolean handleMenuShow(int menuItemItemId, Tag selectedTag, Activity context, IGalleryFilter parentFilter) {
+    public static boolean handleMenuShow(int menuItemItemId, Tag selectedTag, Activity context, QueryParameter baseQuery) {
         switch (menuItemItemId) {
             case R.id.cmd_photo:
-                ImageDetailActivityViewPager.showActivity(context, null, 0, createSubQueryByTag(parentFilter, selectedTag), 0);
+                ImageDetailActivityViewPager.showActivity("[21]tag:" + selectedTag, context, null, 0, createSubQueryByTag(null, selectedTag), 0);
                 return true;
             case R.id.cmd_gallery:
-                FotoGalleryActivity.showActivity(context, createSubQueryByTag(parentFilter, selectedTag), 0);
+                FotoGalleryActivity.showActivity("[22]tag:" + selectedTag, context, createSubQueryByTag(null, selectedTag), 0);
                 return true;
             default:break;
         }
@@ -498,11 +498,13 @@ public class TagsPickerFragment  extends DialogFragment  {
     }
 
     @NonNull
-    private static QueryParameter createSubQueryByTag(IGalleryFilter parentFilter, Tag selectedTag) {
-        GalleryFilterParameter filter = createSubFilterByTag(parentFilter, selectedTag);
-        QueryParameter query = TagSql.filter2NewQuery(filter);
-        FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
-        return query;
+    private static QueryParameter createSubQueryByTag(QueryParameter baseQuery, Tag selectedTag) {
+        QueryParameter result = new QueryParameter(baseQuery);
+        ArrayList<Tag> includes = new ArrayList<Tag>();
+        includes.add(selectedTag);
+        TagSql.addWhereTagsIncluded(result, ListUtils.toStringList(selectedTag.getName()), false);
+        FotoSql.setSort(result, FotoSql.SORT_BY_DATE, false);
+        return result;
     }
 
     @NonNull

@@ -46,6 +46,7 @@ import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.MediaScannerExifInterface;
 import de.k3b.android.util.MediaScannerImageMetaReader;
 import de.k3b.android.widget.AboutDialogPreference;
+import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.tagDB.TagRepository;
 import io.github.lonamiwebs.stringlate.utilities.Api;
@@ -378,7 +379,7 @@ public class SettingsActivity extends PreferenceActivity {
         return prefs.getBoolean(key, defaultValue);
     }
 
-    public static void show(Activity parent) {
+    public static void showActivity(Activity parent) {
         Intent intent = new Intent(parent, SettingsActivity.class);
         parent.startActivity(intent);
     }
@@ -419,7 +420,7 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     private void onDebugSaveLogCat() {
-        Log.e(Global.LOG_CONTEXT, "SettingsActivity-SaveLogCat()");
+        Log.e(Global.LOG_CONTEXT, "SettingsActivity-SaveLogCat(): " + ActivityWithCallContext.readCallContext(getIntent()));
         ((AndroFotoFinderApp) getApplication()).saveToFile();
     }
 
