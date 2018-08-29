@@ -23,50 +23,37 @@
  -->
 <resources>
   <string name="about_content_about"><![CDATA["
-<h1> A Photo Manager </h1> dengan &#39;'A Photo Map' di &#39;'AndroFotoFinder&#39;
-  <br /> Fitur:
-  <ul>
-    <li> Dapat menangani koleksi gambar berukuran besar (15000+ gambar dalam 1000+ folder) </li>
-    <li> Menggunakan penyedia konten gambar Android. Aplikasi usabla tanpa pemindaian gambar awal. </li>
-    <li>
-    <a href="https://github.com/k3b/APhotoManager/wiki/Filter-View"> Temukan gambar </a> via
-    <ul>
-      <li> Quicksearch di Folder, Filename, Imagetitle, Imagedescription, Tags (Kata Kunci) dengan wildcard </li>
-      <li> folder (dengan hierarkis
-      <a href="https://github.com/k3b/APhotoManager/wiki/Folder-Picker"> pemilih peta </a>) </li>
-      <li> wildcard yang cocok dengan folder / nama file </li>
-      <li> tanggal </li>
-<li> Termasuk / Tag yang Dikecualikan (Kata Kunci) dengan wildcard </li>
-      area <li> di
-      <a href="https://github.com/k3b/APhotoManager/wiki/geographic-map"> peta geografis </a> (jika gambar memiliki info GPS Exif) </li>
-      <li> rating </li>
-    </ul> </li>
-    <li> Menunjukkan hasilnya bisa digulir
-    <a href="https://github.com/k3b/APhotoManager/wiki/Gallery-View"> tampilan galeri </a> dengan
-    <ul>
-      <li> mendukung beberapa pilihan foto </li>
-      <li> operasi file Salin, Pindahkan, Hapus, Bagi, Setel Geo, Tetapkan Tag, Edit Exif </li>
-    </ul> </li>
-    <li>
-    <a href="https://github.com/k3b/APhotoManager/wiki/Image-View"> Foto-detail-lihat </a> dengan
-    <ul>
-      <li> zoom gambar </li>
-      <li> gesek untuk pergi ke gambar berikutnya / sebelumnya </li>
-      <li> menunjukkan info gambar yang diperluas (Exif, IPTC, XMP, ICC) </li>
-      <li> operasi file Copy, Move, Delete, Rename, Share, Set Geo, Set Tags, Edit Exif </li>
-    </ul> </li>
-    <li>
-    <a href="https://github.com/k3b/APhotoManager/wiki/geographic-map"> peta geografis </a> menunjukkan penanda di tempat foto
-    diambil </li>
-    <li> Perubahan dalam Foto-Metadata (Exif-Geo, Tag (Kata Kunci), Path, Filename, ...) dapat menjadi
-    <a href="https://github.com/k3b/APhotoManager/wiki/sync"> Disinkronkan antara Android dan PC MS Windows </a>. </li>
-    <li> Operasi file
-      <ul>
-        <li> juga akan memperbarui database penyedia konten gambar Android </li>
-        <li> perbarui berkas xmp-sespan </li>
-      </ul>
-    </li>
-  </ul>
-  <br />
+<h1>A Photo Manager</h1>dengan 'A Photo Map' di 'AndroFotoFinder'<br/>
+<br/>Fitur:
+<ul>
+    <li>Dapat menangani koleksi gambar berukuran besar (15000+ gambar dalam 1000+ folder)</li>
+    <li>Menggunakan penyedia konten gambar Android. Aplikasi usabla tanpa pemindaian gambar awal.</li>
+    <li><a href='https://github.com/k3b/APhotoManager/wiki/Filter-View'>Temukan gambar</a> via <ul>
+      <li>Quicksearch di Folder, Filename, Imagetitle, Imagedescription, Tags (Kata Kunci) dengan wildcard</li>
+      <li>folder (dengan hierarkis <a href='https://github.com/k3b/APhotoManager/wiki/Folder-Picker'>pemilih peta</a> )</li>
+      <li>wildcard yang cocok dengan folder / nama file</li>
+      <li>tanggal</li>
+      <li>Termasuk / Tag yang Dikecualikan (Kata Kunci) dengan wildcard</li>
+      <li>area di <a href='https://github.com/k3b/APhotoManager/wiki/geographic-map'>peta geografis</a> (jika gambar memiliki info GPS Exif)</li>
+      <li>rating</li>
+    </ul></li>
+    <li>Menunjukkan hasilnya bisa digulir <a href='https://github.com/k3b/APhotoManager/wiki/Gallery-View'>tampilan galeri</a> dengan <ul>
+      <li>mendukung beberapa pilihan foto</li>
+      <li>operasi file Salin, Pindahkan, Hapus, Bagi, Setel Geo, Tetapkan Tag, Edit Exif</li>
+    </ul></li>
+    <li><a href='https://github.com/k3b/APhotoManager/wiki/Image-View'>Foto-detail-lihat</a> dengan <ul>
+      <li>zoom gambar</li>
+      <li>gesek untuk pergi ke gambar berikutnya / sebelumnya</li>
+      <li>menunjukkan info gambar yang diperluas (Exif, IPTC, XMP, ICC)</li>
+      <li>operasi file Copy, Move, Delete, Rename, Share, Set Geo, Set Tags, Edit Exif</li>
+    </ul></li>
+    <li><a href='https://github.com/k3b/APhotoManager/wiki/geographic-map'>peta geografis</a> menunjukkan penanda di tempat foto diambil</li>
+    <li>Perubahan dalam Foto-Metadata (Exif-Geo, Tag (Kata Kunci), Path, Filename, ...) dapat menjadi <a href='https://github.com/k3b/APhotoManager/wiki/sync'>Disinkronkan antara Android dan PC MS Windows</a>.</li>
+    <li>Operasi file <ul>
+      <li>juga akan memperbarui database penyedia konten gambar Android</li>
+      <li>perbarui berkas xmp-sespan</li>
+    </ul></li>
+  </ul>
+  <br />
 "]]></string>
 </resources>
