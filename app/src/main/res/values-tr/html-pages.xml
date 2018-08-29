@@ -22,31 +22,31 @@
  -->
 <resources>
   <string name="about_content_about"><![CDATA["
-<h1>A Photo Manager</h1>ve &#39;A Photo Map&#39; &#39;AndroFotoFinder&#39; içerisinde
+	<h1>A Photo Manager</h1>ve 'A Photo Map' 'AndroFotoFinder' içerisinde
   <br />Özellikler:
   <ul>
     <li>Büyük görüntü yığınlarının üstesinden gelebilir (1000+ dizinde 15000+ görüntü)</li>
-    <li>Android&#39;in görüntü içerik sağlayıcısını kullanır. Önden görüntü taramaya gerek yoktur.</li>
+    <li>Android'in görüntü içerik sağlayıcısını kullanır. Önden görüntü taramaya gerek yoktur.</li>
     <li>
-    <a href="https://github.com/k3b/APhotoManager/wiki/Filter-View">Görüntüleri</a> şu yollarla bulur
+    <a href='https://github.com/k3b/APhotoManager/wiki/Filter-View'>Görüntüleri</a> şu yollarla bulur
     <ul>
       <li>joker karakterler kullanarak Dizin, Dosya adı, Görüntü başlığı, Görüntü tanımı, Etiketler (Anahtar kelimeler) içerisinde bulun (0.6.0 sürümünde yeni)</li>
       <li>dizin (hiyerarşik
-      <a href="https://github.com/k3b/APhotoManager/wiki/Folder-Picker">dizin seçici ile</a>)</li>
+      <a href='https://github.com/k3b/APhotoManager/wiki/Folder-Picker'>dizin seçici ile</a>)</li>
       <li>joker karakterler ile eşleşen dizin/dosya adı</li>
       <li>tarih</li>
 	  <li>joker karakterler ile dahil edilen/hariç tutulan etiketler (anahtar kelimeler) (0.6.0 sürümünde yeni)</li>
       <li>konum
-      <a href="https://github.com/k3b/APhotoManager/wiki/geographic-map">coğrafik haritada</a> (eğer görüntünün GPS Exif bilgisi varsa)</li>
+      <a href='https://github.com/k3b/APhotoManager/wiki/geographic-map'>coğrafik haritada</a> (eğer görüntünün GPS Exif bilgisi varsa)</li>
     </ul></li>
     <li>Sonuçları kaydırılabilir
-    <a href="https://github.com/k3b/APhotoManager/wiki/Gallery-View">galeri görüntüsü</a> olarak aşağıdakilerle destekleyerek gösterir
+    <a href='https://github.com/k3b/APhotoManager/wiki/Gallery-View'>galeri görüntüsü</a> olarak aşağıdakilerle destekleyerek gösterir
     <ul>
       <li>çoklu fotoğraf seçimi</li>
       <li>dosya işlemleri Kopyala, Taşı, Sil, Paylaş, Jeo Ata, Etiketleri Ata</li>
     </ul></li>
     <li>
-    <a href="https://github.com/k3b/APhotoManager/wiki/Image-View">Foto-ayrıntı-görünümü</a>
+    <a href='https://github.com/k3b/APhotoManager/wiki/Image-View'>Foto-ayrıntı-görünümü</a>
     <ul>
       <li>görüntü yakınlaştırma</li>
       <li>önceki/sonraki görüntüye gitmek için kaydırma</li>
@@ -54,12 +54,12 @@
       <li>dosya işlemleri Kopyala, Taşı, Sil, Yeniden Adlandır, Paylaş, Jeo Ata, Etiketleri Ata</li>
     </ul></li>
     <li>
-    <a href="https://github.com/k3b/APhotoManager/wiki/geographic-map">Coğrafik harita</a> fotoğrafların çekildiği yerlerde imleçler gösterir</li>
+    <a href='https://github.com/k3b/APhotoManager/wiki/geographic-map'>Coğrafik harita</a> fotoğrafların çekildiği yerlerde imleçler gösterir</li>
     <li>Fotoğraf üstverilerindeki (Exif-Jeo, Etiketler (Anahtar kelimeler), Yol, Dosya adı, ...) değişiklikler
-    <a href="https://github.com/k3b/APhotoManager/wiki/sync">Android ve MS Windows PC arasında senkronize edilebilir</a>.(0.6.0 sürümünde yeni)</li>
+    <a href='https://github.com/k3b/APhotoManager/wiki/sync'>Android ve MS Windows PC arasında senkronize edilebilir</a>.(0.6.0 sürümünde yeni)</li>
     <li>Dosya işlemleri
       <ul>
-        <li>ayrıca Android&#39;in görüntü içerik sağlayıcı veritabanını da güncelleştirir</li>
+        <li>ayrıca Android'in görüntü içerik sağlayıcı veritabanını da güncelleştirir</li>
         <li>xmp-sidecar dosyalarını güncelleştirir</li>
       </ul>
     </li>

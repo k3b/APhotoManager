@@ -59,7 +59,7 @@ Features:
 		علامات(الكلمات الرئيسية)</a>, geo, التقييم, ....
 </li><li>Optional Folder-Rule based <a href='https://github.com/k3b/AndroFotoFinder/wiki/AutoProcessing'>autoprocessing</a>:
 		القيام بمعالجة الصور باعادة التسمية, وضع العلامات, والموقع الجغرافي, والعنوان تلقائيا ... عند نسخهم وقصهم .
-</li><li>وضع "خاص" في الصور لاخفائهم من بقية برامج عرض الصور.
+</li><li>وضع 'خاص' في الصور لاخفائهم من بقية برامج عرض الصور.
 </li><li>In <a href='https://github.com/k3b/APhotoManager/wiki/AppPinning'>Protected/Pinned Mode</a>
 		الأوامر الحساسة مثل تعديل ونسخ, حذف, مشاركة, الاعدادات, وتغيير اختيار الصور, موقفة فبامكانك اعطاء هاتفك للغير بدون خوف.
 </li><li>يمكنه تحمل مجموعة كبيرة من الصور (فوق 20000 صورة و 1000 مجلد).
