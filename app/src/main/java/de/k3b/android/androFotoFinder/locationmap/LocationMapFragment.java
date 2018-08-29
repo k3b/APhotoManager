@@ -673,14 +673,13 @@ public class LocationMapFragment extends DialogFragment {
                 List<Overlay> oldItems = mFolderOverlayGreenPhotoMarker.getItems();
 
                 mLastZoom = this.mMapView.getZoomLevelDouble();
-                double groupingFactor = getGroupingFactor(mLastZoom);
-                BoundingBox world = this.mMapView.getBoundingBox();
+                QueryParameter query = getCurrentAreaQuery();
+
                 if (Global.debugEnabledMap) {
                     Log.d(Global.LOG_CONTEXT, mDebugPrefix + "reloadFotoMarker(" + why + ")"
-                            + world + ", zoom " + mLastZoom);
+                            + " zoom " + mLastZoom + ", query " + query);
                 }
-
-                reloadFotoMarker(world, groupingFactor, oldItems);
+                reloadFotoMarker(query, oldItems);
             } else {
                 // background load is already active. Remember that at least one scroll/zoom was missing
                 mFotoMarkerPendingLoads++;
@@ -688,7 +687,17 @@ public class LocationMapFragment extends DialogFragment {
         }
     }
 
-    private void reloadFotoMarker(BoundingBox latLonArea, double groupingFactor, List<Overlay> oldItems) {
+    private void reloadFotoMarker(QueryParameter query, List<Overlay> oldItems) {
+
+        mCurrentFotoMarkerLoader = new FotoMarkerLoaderTask(createHashMap(oldItems));
+        mCurrentFotoMarkerLoader.execute(query);
+    }
+
+    public QueryParameter getCurrentAreaQuery() {
+        double groupingFactor = getGroupingFactor(mLastZoom);
+        BoundingBox latLonArea = this.mMapView.getBoundingBox();
+
+        // only selected fields are required whithout where
         QueryParameter query = FotoSql.getQueryGroupByPlace(groupingFactor);
         query.clearWhere();
 
@@ -705,9 +714,7 @@ public class LocationMapFragment extends DialogFragment {
                 , rect.getLatitudeMax() + delta
                 , rect.getLogituedMin() - delta
                 , rect.getLogituedMax() + delta);
-
-        mCurrentFotoMarkerLoader = new FotoMarkerLoaderTask(createHashMap(oldItems));
-        mCurrentFotoMarkerLoader.execute(query);
+        return query;
     }
 
     private IGeoRectangle getGeoRectangle(BoundingBox boundingBox) {

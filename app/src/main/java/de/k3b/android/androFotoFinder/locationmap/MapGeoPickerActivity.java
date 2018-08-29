@@ -267,10 +267,6 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
         return true;
     }
 
-    private QueryParameter getAsMergedQuery() {
-        return getAsMergedQuery(mMap.getCurrentGeoRectangle());
-    }
-
     private QueryParameter getAsMergedQuery(IGeoRectangle geoArea) {
         GalleryFilterParameter filter = new GalleryFilterParameter();
         filter.get(geoArea);
@@ -278,7 +274,7 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
     }
 
     private void cmdShowDetails() {
-        final QueryParameter asMergedQuery = getAsMergedQuery();
+        final QueryParameter asMergedQuery = mMap.getCurrentAreaQuery();
 
         CharSequence subQuerymTitle = getValueAsTitle(true);
         ImageDetailMetaDialogBuilder.createImageDetailDialog(
@@ -288,6 +284,7 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
                 StringUtils.appendMessage(null,
                         getString(R.string.show_photo),
                         TagSql.getCount(this, asMergedQuery)),
+                mMap.getCurrentGeoRectangle() + " ==> " + mMap.getCurrentGeoUri(),
                 subQuerymTitle
         ).show();
     }
