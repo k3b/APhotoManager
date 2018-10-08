@@ -39,7 +39,9 @@ public enum XmpNamespace {
     DC("XMP-dc", "http://purl.org/dc/elements/1.1/"),
     APM("apm", "https://github.com/k3b/APhotoManager/wiki/spec"),
     PHOTOSHOP("photoshop","http://ns.adobe.com/photoshop/1.0/"),
-    MICROSOFT_PHOTO("MicrosoftPhoto", "http://ns.microsoft.com/photo/1.0");
+    MICROSOFT_PHOTO("MicrosoftPhoto", "http://ns.microsoft.com/photo/1.0"),
+    Iptc4xmpCore("Iptc4xmpCore","http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/")
+    ;
 
     private static final String dbg_context = XmpNamespace.class.getSimpleName();
     private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
