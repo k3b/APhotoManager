@@ -310,16 +310,19 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter {
                 loadType = "image small enough ";
                 photoView.setImageBitmap(HugeImageLoader.loadImage(imageFile, MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION));
                 photoView.setImageReloadFile(null);
+                photoView.setDebugInfo(imageFile.getName());
             } catch (OutOfMemoryError err) {
                 loadType = "small image out of memory using thumb ";
                 setImageFromThumbnail(photoView, imageFile);
             }
         }
-        photoView.setRotationTo(JpgMetaWorkflow.getRotationFromExifOrientation(fullPhotoPath));
+        final int rotationInDegrees = JpgMetaWorkflow.getRotationFromExifOrientation(fullPhotoPath);
         if (Global.debugEnabledViewItem) {
-            Log.i(Global.LOG_CONTEXT, mDebugPrefix + debugContext + position +", "
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + debugContext + position +", rotation=" +
+                    rotationInDegrees + ", "
                     + loadType + ") => " + fullPhotoPath + " => " + photoView);
         }
+        photoView.setRotationTo(rotationInDegrees);
 
         container.addView(root, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         return root;

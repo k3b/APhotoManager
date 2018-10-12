@@ -3,10 +3,12 @@ package de.k3b.android.androFotoFinder.imagedetail;
 import android.content.Context;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.ImageView;
 
 import java.io.File;
 
+import de.k3b.android.androFotoFinder.Global;
 import de.k3b.media.JpgMetaWorkflow;
 import uk.co.senab.photoview.PhotoView;
 import uk.co.senab.photoview.PhotoViewAttacher;
@@ -24,6 +26,10 @@ import uk.co.senab.photoview.log.LogManager;
  */
 public class PhotoViewEx extends PhotoView {
     private PhotoViewAttacherEx mAttacher;
+
+    /** if != null must rotate to this */
+    private float mustRotationToInDegrees = 0f;
+    private String name = PhotoViewEx.class.getSimpleName();
 
     public PhotoViewEx(Context context) {
         this(context, null);
@@ -47,6 +53,48 @@ public class PhotoViewEx extends PhotoView {
      * on first zoom it is reloaded with this uri */
     public void setImageReloadFile(File file) {
         mAttacher.setImageReloadFile(file);
+        if (file != null) {
+            setDebugInfo(file.getName());
+        }
+    }
+
+    public PhotoViewEx setDebugInfo(String name) {
+        this.name = getClass().getSimpleName() + "#" + name;
+        mAttacher.setDebugInfo(name);
+        return this;
+    }
+
+    @Override
+    public ScaleType getScaleType() {
+        if (mAttacher != null) return super.getScaleType();
+        return ScaleType.CENTER;
+    }
+
+    @Override
+    public void setRotationTo(float rotationDegree) {
+        rotationDegree = 180;
+        if (rotationDegree != 0f) {
+            // this.mustRotationToInDegrees = rotationDegree;
+            if (true || PhotoViewAttacher.DEBUG) { // Global.debugEnabledViewItem
+                Log.i(Global.LOG_CONTEXT,
+                        name + "-setRotationTo: defered setRotationTo " + rotationDegree);
+            }
+        }
+        super.setRotationTo(rotationDegree);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        if ((this.mustRotationToInDegrees != 0f) && (this.getWidth() != 0)) {
+            float rotateTo = this.mustRotationToInDegrees;
+            this.mustRotationToInDegrees = 0;
+            LogManager.getLogger().d(
+                    PhotoViewAttacher.LOG_TAG,
+                    name + "-defered setRotationTo: " + rotateTo);
+
+            super.setRotationTo(rotateTo);
+        }
     }
 
     static class PhotoViewAttacherEx extends PhotoViewAttacher {
@@ -64,6 +112,37 @@ public class PhotoViewEx extends PhotoView {
          * on first zoom it is reloaded with this uri */
         public void setImageReloadFile(File imageReloadURI) {
             this.mImageReloadFile = imageReloadURI;
+        }
+
+        @Override
+        public void setPhotoViewRotation(float degrees) {
+            super.setPhotoViewRotation(degrees);
+            dbg("setPhotoViewRotation", degrees);
+        }
+
+        @Override
+        public void setRotationTo(float degrees) {
+            super.setRotationTo(degrees);
+            dbg("setRotationTo", degrees);
+        }
+        @Override
+        public void setRotationBy(float degrees) {
+            super.setRotationBy(degrees);
+            dbg("setRotationBy", degrees);
+        }
+
+        private String name = PhotoViewEx.class.getSimpleName();
+        public void setDebugInfo(String name) {
+            this.name = getClass().getSimpleName() + "#" + name;
+        }
+
+        private void dbg(String ctx, float degrees) {
+            if (true || PhotoViewAttacher.DEBUG) { // Global.debugEnabledViewItem
+                Log.i(Global.LOG_CONTEXT,
+                        name + "-" +
+                                ctx +
+                                " " + degrees);
+            }
         }
 
         /** invoked by the guesture detector */
