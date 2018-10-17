@@ -8,7 +8,6 @@ import android.widget.ImageView;
 
 import java.io.File;
 
-import de.k3b.android.androFotoFinder.Global;
 import de.k3b.media.JpgMetaWorkflow;
 import uk.co.senab.photoview.PhotoView;
 import uk.co.senab.photoview.PhotoViewAttacher;
@@ -25,11 +24,8 @@ import uk.co.senab.photoview.log.LogManager;
  * Created by k3b on 14.07.2016.
  */
 public class PhotoViewEx extends PhotoView {
+    private static final String LOG_CONTEXT = PhotoViewAttacher.LOG_TAG; // ;Global.LOG_CONTEXT;
     private PhotoViewAttacherEx mAttacher;
-
-    /** if != null must rotate to this */
-    private float mustRotationToInDegrees = 0f;
-    private String name = PhotoViewEx.class.getSimpleName();
 
     public PhotoViewEx(Context context) {
         this(context, null);
@@ -43,58 +39,27 @@ public class PhotoViewEx extends PhotoView {
         super(context, attr, defStyle);
     }
 
-    /** Required to have my own enhanced attacher that contains the additional functionality */
-    protected IPhotoViewAttacher onCreatePhotoViewAttacher(PhotoView photoView) {
-        mAttacher = new PhotoViewAttacherEx(photoView);
+    /** factory method to be overwritten if you need different attacher functionality */
+    @Override
+    protected PhotoViewAttacher createPhotoViewAttacher() {
+        mAttacher = new PhotoViewAttacherEx(this);
         return mAttacher;
     }
+
 
     /** k3b 20150913 #10: Faster initial loading: initially the view is loaded with low res image.
      * on first zoom it is reloaded with this uri */
     public void setImageReloadFile(File file) {
         mAttacher.setImageReloadFile(file);
         if (file != null) {
-            setDebugInfo(file.getName());
+            setDebugPrefix(file.getName());
         }
-    }
-
-    public PhotoViewEx setDebugInfo(String name) {
-        this.name = getClass().getSimpleName() + "#" + name;
-        mAttacher.setDebugInfo(name);
-        return this;
     }
 
     @Override
     public ScaleType getScaleType() {
         if (mAttacher != null) return super.getScaleType();
         return ScaleType.CENTER;
-    }
-
-    @Override
-    public void setRotationTo(float rotationDegree) {
-        rotationDegree = 180;
-        if (rotationDegree != 0f) {
-            // this.mustRotationToInDegrees = rotationDegree;
-            if (true || PhotoViewAttacher.DEBUG) { // Global.debugEnabledViewItem
-                Log.i(Global.LOG_CONTEXT,
-                        name + "-setRotationTo: defered setRotationTo " + rotationDegree);
-            }
-        }
-        super.setRotationTo(rotationDegree);
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        if ((this.mustRotationToInDegrees != 0f) && (this.getWidth() != 0)) {
-            float rotateTo = this.mustRotationToInDegrees;
-            this.mustRotationToInDegrees = 0;
-            LogManager.getLogger().d(
-                    PhotoViewAttacher.LOG_TAG,
-                    name + "-defered setRotationTo: " + rotateTo);
-
-            super.setRotationTo(rotateTo);
-        }
     }
 
     static class PhotoViewAttacherEx extends PhotoViewAttacher {
@@ -112,36 +77,8 @@ public class PhotoViewEx extends PhotoView {
          * on first zoom it is reloaded with this uri */
         public void setImageReloadFile(File imageReloadURI) {
             this.mImageReloadFile = imageReloadURI;
-        }
-
-        @Override
-        public void setPhotoViewRotation(float degrees) {
-            super.setPhotoViewRotation(degrees);
-            dbg("setPhotoViewRotation", degrees);
-        }
-
-        @Override
-        public void setRotationTo(float degrees) {
-            super.setRotationTo(degrees);
-            dbg("setRotationTo", degrees);
-        }
-        @Override
-        public void setRotationBy(float degrees) {
-            super.setRotationBy(degrees);
-            dbg("setRotationBy", degrees);
-        }
-
-        private String name = PhotoViewEx.class.getSimpleName();
-        public void setDebugInfo(String name) {
-            this.name = getClass().getSimpleName() + "#" + name;
-        }
-
-        private void dbg(String ctx, float degrees) {
-            if (true || PhotoViewAttacher.DEBUG) { // Global.debugEnabledViewItem
-                Log.i(Global.LOG_CONTEXT,
-                        name + "-" +
-                                ctx +
-                                " " + degrees);
+            if (imageReloadURI != null) {
+                setDebugPrefix(imageReloadURI.getName());
             }
         }
 

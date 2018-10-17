@@ -310,7 +310,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter {
                 loadType = "image small enough ";
                 photoView.setImageBitmap(HugeImageLoader.loadImage(imageFile, MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION));
                 photoView.setImageReloadFile(null);
-                photoView.setDebugInfo(imageFile.getName());
+                photoView.setDebugPrefix(imageFile.getName());
             } catch (OutOfMemoryError err) {
                 loadType = "small image out of memory using thumb ";
                 setImageFromThumbnail(photoView, imageFile);
