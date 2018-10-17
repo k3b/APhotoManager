@@ -111,9 +111,8 @@ dependencies {
     // zoomable image view
     // from https://github.com/chrisbanes/PhotoView
     // compile 'com.github.chrisbanes.photoview:library:1.2.3'
-    // compile project(':fotoview.library')
-    // compile 'com.github.k3b.PhotoView:library:v1.2.6.k3b-SNAPSHOT' // via jitpack.io
-    compile 'com.github.k3b:PhotoView:v1.2.6.k3b-5-SNAPSHOT' // via jitpack.io
+    // compile project(':fotoview.library')  // local copy of PhotoView
+    compile 'com.github.k3b:PhotoView:v1.2.6.k3b-7-SNAPSHOT' // via jitpack.io last bugfix on 2018-10-17
 
     // for view-pager
     compile 'com.android.support:support-v4:21.0.2'
