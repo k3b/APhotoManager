@@ -141,21 +141,10 @@
   <string name="settings_maps_forge_dir_title">Оффлайн папка Mapsforge</string>
   <string name="show_photo">Показать фото(ы)</string>
   <string name="fix_link_menu_title">Восстановить дубликаты</string>
-  <string name="geo_picker_from_photo_title">Pick Geo from Photo</string>
-  <string name="geo_picker_from_map_title">Pick Geo from Map</string>
+  <string name="geo_picker_from_photo_title">Выберите Геопозицию из фото</string>
+  <string name="geo_picker_from_map_title">Выберите Геопозицию из Карты</string>
   <string name="folder_hide_images_menu_title">Скрыть изображения</string>
-  <string name="folder_hide_images_question_message_format">"Are you sure?
-
-Do you want to make all media files (photo, video, audio) below
-
-    %1$s
-
-invisible for media database, gallery apps and the media scanner?
-
-You can undo hiding by calling the mediascanner from gallery-menu."</string>
-  <string name="filter_path_hint">Part of Folder or Filename. %=Wildcard</string>
   <string name="lbl_any">Найти</string>
-  <string name="filter_any_hint">Part of Tags, Title, Description or Path</string>
   <string name="lbl_images_public">Общедоступное изображение</string>
   <string name="lbl_images_private">Приватное изображение</string>
   <string name="lbl_with_no_tags">Без тегов</string>
@@ -173,14 +162,11 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
   <string name="tags_hint">Долгое нажатие открывает меню имени тега</string>
   <string name="tags_defaults">Виды деятельности, Люди, Места, Темы, Проекты</string>
   <string name="settings_media_update_strategy_title">Внести изменения в</string>
-  <string name="settings_media_update_strategy_jpg_xmp_create">jpg and xmp (Create if not found)</string>
-  <string name="settings_media_update_strategy_jpg_xmp_update">jpg (and xmp if exists)</string>
+  <string name="settings_media_update_strategy_jpg_xmp_update">jpg (и xmp if exists)</string>
   <string name="settings_media_update_strategy_jpg">только jpg файл</string>
   <string name="settings_media_update_strategy_xmp">только xmp файл</string>
-  <string name="settings_xmp_file_schema_title">Long Xmp Sidecar File Name?</string>
-  <string name="settings_xmp_file_schema_summary">Long: file.jpg.xmp; Short: file.xmp</string>
   <!-- #70: manually select sql column defintition for extra detail display in image detail view  -->
-  <string name="view_context_menu_title">Load Context ...</string>
+  <string name="view_context_menu_title">Загрузка Контекста ...</string>
   <!-- #87: edit-exif: image title, description, rating -->
   <string name="exif_menu_title">Редактировать Exif</string>
   <string name="lbl_title">Название</string>
@@ -190,7 +176,6 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
   <string name="sort_by_rating">Рейтинг</string>
   <string name="sort_by_modification">Последнее изменение</string>
   <!-- #93: edit-exif: image title, description, rating -->
-  <string name="photo_autoprocessing_edit_menu_title">Edit Photo Autoprocessing</string>
   <string name="lbl_file_name_pattern">Шаблон имени файла</string>
   <string name="lbl_exif">Exif</string>
   <!-- i.e.
@@ -198,7 +183,6 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
 				hello.jpg (2017-08-02), ...
 			To .../path/toFile/
 				1708NewName0001.jpg -->
-  <string name="preview_message_format">"%1$s %2$d Photos\n\t%3$s (%4$s), …\nTo %5$s\n\t%6$s"</string>
   <!-- new in 0.6.3 additional sorting options -->
   <string name="sort_by_file_size">Размер</string>
   <string name="sort_by_width">Ширина</string>
@@ -208,7 +192,7 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
   <string name="menu_title_app_pinnend">Приложение защищено/закреплено</string>
   <string name="menu_title_app_unpinnend">Приложение незащищено/откреплено</string>
   <!-- #100: private images get the extension ".jpg-p" which hides them from other gallery-apps and image pickers.  -->
-  <string name="settings_rename_private_jpg_title">Rename private *.jpg to *.jpg-p</string>
+  <string name="settings_rename_private_jpg_title">Переименуйте приватное *.jpg в *.jpg-p</string>
   <string name="clear_menu_title">Очистить</string>
   <string name="show_in_filemanager_menu_title">Открыть в файловом менеджере</string>
   <!-- #1113: Searchbar  -->
