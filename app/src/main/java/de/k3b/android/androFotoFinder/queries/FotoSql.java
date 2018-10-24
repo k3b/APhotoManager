@@ -126,6 +126,8 @@ public class FotoSql extends FotoSqlBase {
     public static final String SQL_COL_EXT_RATING = MediaStore.Video.Media.BOOKMARK;
     public static final String SQL_COL_PATH = MediaStore.Images.Media.DATA;
 
+    // either code 0..8 or rotation angle 0, 90, 180, 270
+    public static final String SQL_COL_ORIENTATION = MediaStore.Images.ImageColumns.ORIENTATION;
 
     // only works with api >= 16
     public static final String SQL_COL_MAX_WITH =
@@ -289,7 +291,8 @@ public class FotoSql extends FotoSqlBase {
             SQL_COL_MAX_WITH + " AS " + SQL_COL_WIDTH,
             SQL_COL_GPS,
             SQL_COL_DATE_TAKEN,
-            SQL_COL_PATH};
+            SQL_COL_PATH,
+            SQL_COL_ORIENTATION};
 
     public static final QueryParameter queryDetail = new QueryParameter()
             .setID(QUERY_TYPE_GALLERY)

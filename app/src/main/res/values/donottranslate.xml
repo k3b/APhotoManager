@@ -181,17 +181,23 @@ this program. If not, see <http://www.gnu.org/licenses/>
   <hr />Translations supported 
   <a href="http://crowdin.com">crowdin.com</a>
   <ul>
-  	<li>arabic by medowill</li>
-  	<li>Dutch by keunes</li>
-    <li>English by k3b, v133, keunes and mary-kate</li>
-    <li>French by Tuuux</li>
-    <li>German by k3b and v133</li>
-    <li>Italian by random_r</li>
-    <li>Japanese by naofum</li>
-    <li>Polish by Maselkowicz</li>
-    <li>Romanian by mironeasav</li>
-    <li>russian by divizdev</li>
-    <li>turkish by  erdenerr and srkns</li>
+  	<li>ar Arabic by Vitality, medowill</li>
+  	<li>nl Dutch by ookikgavertalen, keunes</li>
+    <li>en English by k3b, v133, keunes and mary-kate</li>
+    <li>fr French by Poussinou, tuuux</li>
+    <li>de German by k3b and v133</li>
+    <li>in Indonesian by isaideureka</li>
+    <li>it Italian by .Rogue.,random_r</li>
+    <li>ja Japanese by naofum</li>
+    <li>pl Polish by Maselkowicz</li>
+    <li>pt-rBR Portugeese by thiagonkami, Nana13</li>
+    <li>ro Romanian by mironeasav</li>
+    <li>es Spanish by Andreaevangelina, Dani Certad (daniconejito)
+    <li>ru Russian by Dmitry Zhgun (trupizzza), ku ku(2ku), divizdev, Sergey (LegionAnon)</li>
+    <li>tr Turkish by Boyut, srkns, erdenerr</li>
+    <li>uk Ukrainian by Sergey (LegionAnon)</li>
+	<li>zh-rCN Chinese (China) by Forbidden (cptbl00dra1n), Liu Feng (pitumaomao)</li>
+	<li>zh-rTW Chinese (Taiwan) by Liu Feng (pitumaomao), rosatravels</li>
   </ul>
   <br />Android is a trademark of Google Inc. Use of this trademark is subject to Google Permissions.
   <br />

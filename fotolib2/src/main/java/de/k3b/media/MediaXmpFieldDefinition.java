@@ -55,8 +55,8 @@ public enum MediaXmpFieldDefinition {
 
     subject(XmpNamespace.DC, PropertyOptions.ARRAY),        // xmp dc standard for keywords
     LastKeywordIPTC(XmpNamespace.MICROSOFT_PHOTO, PropertyOptions.ARRAY),   // used by microsoft for subject
-    LastKeywordXMP(XmpNamespace.MICROSOFT_PHOTO, PropertyOptions.ARRAY)     // used by microsoft for subject
-
+    LastKeywordXMP(XmpNamespace.MICROSOFT_PHOTO, PropertyOptions.ARRAY),     // used by microsoft for subject
+    DateCreatedIptcXmp(XmpNamespace.Iptc4xmpCore)                            // used by jtagger for DateCreated
     ;
 
     private final XmpNamespace xmpNamespace;

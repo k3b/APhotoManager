@@ -1,0 +1,6 @@
+Changes from 0.7.1 to 0.7.2
+
+* Fixed: Some images where shown with wrong orientation
+* Fixed: Could not start media scanner from gallery menu
+* Folderpicker: animated pathbar makes it discoverable.
+* updated translation: uk (100%), ru (95%)

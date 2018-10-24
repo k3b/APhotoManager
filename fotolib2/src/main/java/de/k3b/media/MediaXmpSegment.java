@@ -74,7 +74,8 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
                 "getDateTimeTaken", MediaXmpFieldDefinition.CreateDate,   // JPhotoTagger default
                 MediaXmpFieldDefinition.DateCreated,  // exiftool default
                 MediaXmpFieldDefinition.DateTimeOriginal,
-                MediaXmpFieldDefinition.DateAcquired);
+                MediaXmpFieldDefinition.DateAcquired,
+                MediaXmpFieldDefinition.DateCreatedIptcXmp);
     }
 
     @Override

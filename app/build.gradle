@@ -51,9 +51,10 @@ android {
         // 0.6.9.180813 (37)    public betta: Searchbar, vitual-folder, new icons
         // 0.7.0.180823 (38)    Searchbar, vitual-folder, new icons
         // 0.7.1.180830 (39)    Bugfix for 38; translation uk
+        // 0.7.2.181027 (40)    Bugfixes: image orientation, media scanner
 
-        versionCode = 39
-        versionName = '0.7.1.180830'
+        versionCode = 40
+        versionName = '0.7.2.181027'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -111,9 +112,8 @@ dependencies {
     // zoomable image view
     // from https://github.com/chrisbanes/PhotoView
     // compile 'com.github.chrisbanes.photoview:library:1.2.3'
-    // compile project(':fotoview.library')
-    // compile 'com.github.k3b.PhotoView:library:v1.2.6.k3b-SNAPSHOT' // via jitpack.io
-    compile 'com.github.k3b:PhotoView:v1.2.6.k3b-5-SNAPSHOT' // via jitpack.io
+    // compile project(':fotoview.library')  // local copy of PhotoView
+    compile 'com.github.k3b:PhotoView:v1.2.6.k3b-7-SNAPSHOT' // via jitpack.io last bugfix on 2018-10-17
 
     // for view-pager
     compile 'com.android.support:support-v4:21.0.2'

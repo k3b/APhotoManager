@@ -55,4 +55,9 @@ public class DBUtils {
         int columnIndex = (cursor == null) ? -1 : cursor.getColumnIndex(colId);
         return (columnIndex == -1)  ? notFoundValue : cursor.getLong(columnIndex);
     }
+
+    public static int getInt(Cursor cursor, String colId, int notFoundValue) {
+        int columnIndex = (cursor == null) ? -1 : cursor.getColumnIndex(colId);
+        return (columnIndex == -1)  ? notFoundValue : cursor.getInt(columnIndex);
+    }
 }

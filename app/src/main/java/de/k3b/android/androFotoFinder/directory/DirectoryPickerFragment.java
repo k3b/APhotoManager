@@ -19,6 +19,7 @@
  
 package de.k3b.android.androFotoFinder.directory;
 
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -29,12 +30,14 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -147,6 +150,10 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     private Button mCmdOk = null;
     private Button mCmdPopup = null;
 
+    // #127: Folderpicker: moving pathbar makes it discoverable. stop animation once the pathbar is touched
+    private boolean showPathBarAnimation = Global.showPathBarAnimation;
+    private ValueAnimator mPathbarAnimation = null;
+
     private View.OnClickListener mPathButtonClickHandler;
     private View.OnLongClickListener mPathButtonLongClickHandler = null;
     // local data
@@ -227,6 +234,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             mPathButtonLongClickHandler = new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
+                    showPathBarAnimation = false;
                     onShowPopUp(v, (IDirectory) v.getTag());
                     return true;
                 }
@@ -235,6 +243,15 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
 
         this.mParentPathBar = (LinearLayout) view.findViewById(R.id.parent_owner);
         this.mParentPathBarScroller = (HorizontalScrollView) view.findViewById(R.id.parent_scroller);
+        this.mParentPathBarScroller.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                animationPathBarStop();
+                // #127: stop animation once the pathbar is touched
+                showPathBarAnimation = false;
+                return false; // assume that the event is not handled yet so button can do it-s function
+            }
+        });
 
         mTreeView = (ExpandableListView)view.findViewById(R.id.directory_tree);
         mTreeView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
@@ -825,6 +842,9 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         Log.d(TAG, debugPrefix + "onParentPathBarButtonClick(" +
                 selectedChild.getAbsolute() + ")");
 
+        showPathBarAnimation = false;
+        animationPathBarStop();
+
         // naviationchange only if there are children below child
         IDirectory newGrandParent = ((selectedChild != null) && (Directory.getChildCount(selectedChild) > 0)) ? selectedChild.getParent() : null;
         List<IDirectory> siblings = (newGrandParent != null) ? newGrandParent.getChildren() : null;
@@ -915,6 +935,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
 
             // scroll to right where deepest child is
             mParentPathBarScroller.requestChildFocus(mParentPathBar, first);
+
         }
 
         if (mImage != null) {
@@ -924,6 +945,47 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         this.mCurrentSelection = selectedChild;
 
         updateStatus();
+
+        if (showPathBarAnimation) {
+            new Handler().postDelayed(new Runnable() {
+                public void run() {
+                    // start animation after some delay
+                    animationPathBarInit();
+                }
+            }, 800);
+        }
+    }
+
+    // #127: Folderpicker: moving pathbar makes it discoverable. stop animation once the pathbar is touched
+    private void animationPathBarInit() {
+        animationPathBarStop();
+
+        if (showPathBarAnimation) {
+            int delta = mParentPathBar.getWidth() - mParentPathBarScroller.getWidth();
+            if (delta > 0) {
+                mPathbarAnimation = ValueAnimator.ofInt(delta, 0);
+                mPathbarAnimation.setDuration(5000); // 5 from right to left seconds
+                mPathbarAnimation.setRepeatCount(ValueAnimator.INFINITE);
+                mPathbarAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                    @Override
+                    public void onAnimationUpdate(ValueAnimator updatedAnimation) {
+                        int x = (int) updatedAnimation.getAnimatedValue();
+                        mParentPathBarScroller.smoothScrollTo(x, 0);
+                    }
+                });
+                mPathbarAnimation.setRepeatMode(ValueAnimator.REVERSE);
+                mPathbarAnimation.start();
+            }
+        }
+    }
+
+    // #127: Folderpicker: moving pathbar makes it discoverable. stop animation once the pathbar is touched
+    private void animationPathBarStop() {
+        if (mPathbarAnimation != null) {
+            mPathbarAnimation.end();
+            mPathbarAnimation.removeAllUpdateListeners();
+            mPathbarAnimation = null;
+        }
     }
 
     private void updateBitmap(int iconID) {

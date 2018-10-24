@@ -8,4 +8,4 @@ Changes from 0.6.4 to 0.7.0
 * New Logo/Icons. 
 * New Virutal Albums/".album" files. 
 * New search bar and "Filter by Date".
-* Translation updates: ar,de,en,es,fr,it,ja,ru,tr,zh-CN (7 = 100%, 5 > 90%, 5 < 65%
+* Translation updates: ar,de,en,es,fr,it,ja,ru,tr,zh-CN (7 = 100%, 5 > 90%, 5 < 65%)

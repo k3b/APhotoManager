@@ -308,18 +308,23 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter {
             try {
                 // #53 Optimisation: no need for thumbnail - saves cache memory but may throw OutOfMemoryError
                 loadType = "image small enough ";
-                photoView.setImageBitmap(HugeImageLoader.loadImage(imageFile, MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION));
+                Bitmap bitmap = HugeImageLoader.loadImage(imageFile, MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION);
+                // rotation is done by photoView
+                photoView.setImageBitmap(bitmap);
                 photoView.setImageReloadFile(null);
+                photoView.setDebugPrefix(imageFile.getName());
             } catch (OutOfMemoryError err) {
                 loadType = "small image out of memory using thumb ";
                 setImageFromThumbnail(photoView, imageFile);
             }
         }
-        photoView.setRotationTo(JpgMetaWorkflow.getRotationFromExifOrientation(fullPhotoPath));
+        final int rotationInDegrees = JpgMetaWorkflow.getRotationFromExifOrientation(fullPhotoPath);
         if (Global.debugEnabledViewItem) {
-            Log.i(Global.LOG_CONTEXT, mDebugPrefix + debugContext + position +", "
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + debugContext + position +", rotation=" +
+                    rotationInDegrees + ", "
                     + loadType + ") => " + fullPhotoPath + " => " + photoView);
         }
+        photoView.setRotationTo(rotationInDegrees);
 
         container.addView(root, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         return root;

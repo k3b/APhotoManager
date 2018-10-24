@@ -82,6 +82,9 @@ public class Global {
     /** true every time a .nomedia dir/file is opend remeove items from db.  */
     public static final boolean mustRemoveNOMEDIAfromDB = true;
 
+    // #127: Folderpicker: moving pathbar makes it discoverable. stop animation once the pathbar is touched
+    public static final boolean showPathBarAnimation = true;
+
     private static final File externalStorageDirectory = Environment.getExternalStorageDirectory();
 
     /** defines the filesystem's directory where [Bookmark files](Bookmarks) are stored and loaded from. */

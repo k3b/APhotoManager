@@ -342,10 +342,10 @@ public class AndroidFileCommands extends FileCommands {
 
         @Override
         protected void onDirectoryPick(IDirectory selection) {
-            dismiss();
             if ((mParent != null) && (selection != null)) {
                 mParent.onMediaScannerAnswer(selection.getAbsolute());
             }
+            dismiss();
         }
 
         @Override

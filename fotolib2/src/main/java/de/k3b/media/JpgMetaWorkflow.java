@@ -210,20 +210,6 @@ public class JpgMetaWorkflow {
         return new StringBuilder();
     }
 
-
-    // Translate exif-orientation code (0..8) to exifOrientationCode2RotationDegrees (clockwise)
-    // http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/EXIF.html
-    private static final short[] exifOrientationCode2RotationDegrees = {
-            0,     // EXIF Orientation constants:
-            0,     // 1 = Horizontal (normal)
-            0,     // 2 = (!) Mirror horizontal
-            180,   // 3 = Rotate 180
-            180,   // 4 = (!) Mirror vertical
-            90,    // 5 = (!) Mirror horizontal and rotate 270 CW
-            90,    // 6 = Rotate 90 CW
-            270,   // 7 = (!) Mirror horizontal and rotate 90 CW
-            270};  // 8 = Rotate 270 CW
-
     /**
      * Get necessary rotation for image file from exif.
      *
@@ -234,15 +220,12 @@ public class JpgMetaWorkflow {
         try {
             ExifInterfaceEx exif = new ExifInterfaceEx(fullPathToImageFile, null, null, "getRotationFromExifOrientation");
             if (exif.isValidJpgExifFormat()) {
-                int orientation = exif.getAttributeInt(ExifInterfaceEx.TAG_ORIENTATION, 0);
-                if ((orientation >= 0) && (orientation < exifOrientationCode2RotationDegrees.length))
-                    return exifOrientationCode2RotationDegrees[orientation];
+
+                return MediaUtil.exifOrientationCode2RotationDegrees(exif.getAttributeInt(ExifInterfaceEx.TAG_ORIENTATION, 0), 0);
             }
         }
         catch (Exception e) {
         }
         return 0;
     }
-
-
 }
