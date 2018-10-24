@@ -22,7 +22,9 @@ package de.k3b.android.androFotoFinder.gallery.cursor;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -128,6 +130,9 @@ public class GalleryCursorAdapter extends CursorAdapter  {
             imageSize = DBUtils.getLong(cursor, FotoSql.SQL_COL_SIZE, 0);
         }
 
+        // either code 0..8 or rotation angle 0, 90, 180, 270
+        int exifOrientationCode = DBUtils.getInt(cursor, FotoSql.SQL_COL_ORIENTATION, 0);
+
         holder.filter = DBUtils.getString(cursor, FotoSql.SQL_COL_WHERE_PARAM, null);
 
         String description = DBUtils.getString(cursor, FotoSql.SQL_COL_DISPLAY_TEXT, "");
@@ -143,7 +148,8 @@ public class GalleryCursorAdapter extends CursorAdapter  {
             if ((imageSize > 0) && (imageSize <= Global.imageDetailThumbnailIfBiggerThan)) {
                 try {
                     // #53, #83 Optimisation: no need for thumbnail - saves cache memory but may throw OutOfMemoryError
-                    holder.image.setImageBitmap(HugeImageLoader.loadImage(new File(uri), MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION));
+                    Bitmap bitmap = HugeImageLoader.loadImage(new File(uri), MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION);
+                    holder.image.setImageBitmap(ThumbNailUtils.rotateBitmap(bitmap, exifOrientationCode));
                 } catch (OutOfMemoryError err) {
                     ThumbNailUtils.getThumb(uri, holder.image);
                 }

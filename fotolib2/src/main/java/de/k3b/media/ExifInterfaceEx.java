@@ -379,33 +379,24 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
         return this;
     }
 
-    /** return the image orinentation as id (one of the ORIENTATION_ROTATE_XXX constants) */
-    private int getOrientationId() {
-        return getAttributeInt(
-                ExifInterfaceEx.TAG_ORIENTATION, -1);
+    public static int getOrientationId(String fullPath) {
+        try {
+            return new ExifInterfaceEx(fullPath, null, null, "getOrientationId").getOrientationId();
+        } catch (IOException e) {
+        }
+        return 0;
     }
 
-    private static final int ORIENTATION_ROTATE_180 = 3;
-    private static final int ORIENTATION_ROTATE_90 = 6;  // rotate 90 cw to right it
-    private static final int ORIENTATION_ROTATE_270 = 8;  // rotate 270 to right it
+    /** return the image orinentation as id (one of the ORIENTATION_ROTATE_XXX constants) */
+    public int getOrientationId() {
+        return getAttributeInt(
+                ExifInterfaceEx.TAG_ORIENTATION, 0);
+    }
 
     /** return image orinentation in degrees (0, 90,180,270) or 0 if inknown */
     public int getOrientationInDegrees() {
-        int orientation = getOrientationId();
-        if (orientation != -1) {
-            // We only recognize a subset of orientation tag values.
-            int degree;
-            switch (orientation) {
-                case ExifInterfaceEx.ORIENTATION_ROTATE_90:
-                    return 90;
-                case ExifInterfaceEx.ORIENTATION_ROTATE_180:
-                    return 180;
-                case ExifInterfaceEx.ORIENTATION_ROTATE_270:
-                    return 270;
-                default:
-            }
-        }
-        return 0;
+        int orientationId = getOrientationId();
+        return MediaUtil.exifOrientationCode2RotationDegrees(orientationId, orientationId);
     }
 
     protected Date getAttributeDate(String tag) {

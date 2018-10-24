@@ -69,6 +69,20 @@ public class MediaUtil {
         visibility,
     };
 
+
+    // Translate exif-orientation code (0..8) to EXIF_ORIENTATION_CODE_2_ROTATION_DEGREES (clockwise)
+    // http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/EXIF.html
+    private static final short[] EXIF_ORIENTATION_CODE_2_ROTATION_DEGREES = {
+            0,     // EXIF Orientation constants:
+            0,     // 1 = Horizontal (normal)
+            0,     // 2 = (!) Mirror horizontal
+            180,   // 3 = Rotate 180
+            180,   // 4 = (!) Mirror vertical
+            90,    // 5 = (!) Mirror horizontal and rotate 270 CW
+            90,    // 6 = Rotate 90 CW
+            270,   // 7 = (!) Mirror horizontal and rotate 90 CW
+            270};  // 8 = Rotate 270 CW
+
     /** translates FieldID to text. In android this is implemented via resource id  */
     public interface ILabelGenerator {
         String get(FieldID id);
@@ -400,4 +414,11 @@ public class MediaUtil {
         }
     };
 
+    /** @param exifOrientationCode either code 0..8 or rotation angle 0, 90, 180, 270 */
+    public static int exifOrientationCode2RotationDegrees(int exifOrientationCode, int notFoundValue) {
+        if ((exifOrientationCode >= 0) && (exifOrientationCode < EXIF_ORIENTATION_CODE_2_ROTATION_DEGREES.length)) {
+            return EXIF_ORIENTATION_CODE_2_ROTATION_DEGREES[exifOrientationCode];
+        }
+        return notFoundValue;
+    }
 }

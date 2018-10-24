@@ -22,6 +22,7 @@ package de.k3b.android.androFotoFinder.gallery.cursor;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
 import android.view.View;
@@ -36,6 +37,8 @@ import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
+import de.k3b.media.ExifInterface;
+import de.k3b.media.ExifInterfaceEx;
 
 /**
  * Created by k3b on 30.05.2016.
@@ -108,8 +111,9 @@ public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
             holder.url =  fullPhotoPathFromArray;
 
             final File file = new File(fullPhotoPathFromArray);
-            ThumbNailUtils.getThumb(fullPhotoPathFromArray, holder.image);
-            holder.image.setImageBitmap(HugeImageLoader.loadImage(file, 32,32));
+            int exifOrientationCode = ExifInterfaceEx.getOrientationId (fullPhotoPathFromArray);
+            Bitmap bitmap = HugeImageLoader.loadImage(file, 32, 32);
+            holder.image.setImageBitmap(ThumbNailUtils.rotateBitmap(bitmap, exifOrientationCode));
 
             holder.image.setImageURI(Uri.parse(holder.url));
             holder.imageID = this.getImageId(position);

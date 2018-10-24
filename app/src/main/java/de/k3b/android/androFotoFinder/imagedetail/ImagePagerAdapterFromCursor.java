@@ -308,7 +308,9 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter {
             try {
                 // #53 Optimisation: no need for thumbnail - saves cache memory but may throw OutOfMemoryError
                 loadType = "image small enough ";
-                photoView.setImageBitmap(HugeImageLoader.loadImage(imageFile, MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION));
+                Bitmap bitmap = HugeImageLoader.loadImage(imageFile, MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION);
+                // rotation is done by photoView
+                photoView.setImageBitmap(bitmap);
                 photoView.setImageReloadFile(null);
                 photoView.setDebugPrefix(imageFile.getName());
             } catch (OutOfMemoryError err) {
