@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.TimeZone;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.TestUtil;
 
 /**
@@ -46,8 +46,8 @@ public class MediaXmpTests {
 
     @BeforeClass
     public static void initDirectories() {
-        FotoLibGlobal.appName = "JUnit";
-        FotoLibGlobal.appVersion = "MediaXmpTests";
+        LibGlobal.appName = "JUnit";
+        LibGlobal.appVersion = "MediaXmpTests";
     }
 
     @Test

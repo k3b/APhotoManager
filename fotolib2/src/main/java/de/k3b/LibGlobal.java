@@ -23,7 +23,7 @@ package de.k3b;
  * Public Global stuff for the lib.
  * Created by k3b on 03.03.2016.
  */
-public class FotoLibGlobal {
+public class LibGlobal {
     /** LOG_CONTEXT is used as logging source for filtering logging messages that belong to this */
     public static final String LOG_TAG = "k3bFotoLib2";
 

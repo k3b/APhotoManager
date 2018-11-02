@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 
 public enum VISIBILITY {
     /** take from current settings */
@@ -39,7 +39,7 @@ public enum VISIBILITY {
 
     // #100: if photo has this tag it has visibility PRIVATE
     public static final String TAG_PRIVATE = "PRIVATE";
-    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+    private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
 
     public static final VISIBILITY MAX = PRIVATE_PUBLIC;
     public final int value;

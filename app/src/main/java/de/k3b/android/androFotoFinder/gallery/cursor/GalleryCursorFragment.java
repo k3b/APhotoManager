@@ -53,7 +53,7 @@ import org.osmdroid.api.IGeoPoint;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.AffUtils;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.ExifEditActivity;
@@ -1420,7 +1420,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     private void fix() {
-        if (((mRequeryInstanceCount > 2) && (FotoLibGlobal.itpcWriteSupport))) {
+        if (((mRequeryInstanceCount > 2) && (LibGlobal.itpcWriteSupport))) {
             View iptc = ResourceUtils.findLast(this.mGalleryView.getRootView(), "ads");
             if (iptc != null) {
                 ((ViewGroup) iptc.getParent()).removeView(iptc);

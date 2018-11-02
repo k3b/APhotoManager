@@ -50,7 +50,7 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.PhotoAutoprocessingEditActivity;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
@@ -368,7 +368,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             setMenuVisibility(menu, R.id.cmd_fix_link, FileUtils.isSymlinkDir(new File(absoluteSelectedPath), false));
             setMenuVisibility(menu, R.id.cmd_folder_hide_images, !isAlbumFile && MediaScanner.canHideFolderMedia(absoluteSelectedPath));
 
-            setMenuVisibility(menu, R.id.cmd_apm_edit, !isAlbumFile && FotoLibGlobal.apmEnabled);
+            setMenuVisibility(menu, R.id.cmd_apm_edit, !isAlbumFile && LibGlobal.apmEnabled);
 
             setMenuVisibility(menu, R.id.cmd_filemanager, !isAlbumFile && FileManagerUtil.hasShowInFilemanager(getActivity(), absoluteSelectedPath));
             setMenuVisibility(menu, R.id.cmd_delete, isAlbumFile);

@@ -34,7 +34,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
 
@@ -79,7 +79,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
 
         this.xmpExtern = xmpExtern;
         this.mDbg_context = dbg_context + "->ExifInterfaceEx(" + absoluteJpgPath+ ") ";
-        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+        if (LibGlobal.debugEnabledJpgMetaIo) {
             logger.debug(this.mDbg_context +
                     " load: " + MediaUtil.toString(this, false, null, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
         }
@@ -100,7 +100,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     @Override
     public void saveJpegAttributes(InputStream inputStream, OutputStream outputStream, byte[] thumbnail)
             throws IOException {
-        if (FotoLibGlobal.debugEnabledJpg || FotoLibGlobal.debugEnabledJpgMetaIo) {
+        if (LibGlobal.debugEnabledJpg || LibGlobal.debugEnabledJpgMetaIo) {
             logger.debug(mDbg_context + " saveJpegAttributes: " + getPath());
         }
         super.saveJpegAttributes(inputStream, outputStream, thumbnail);
@@ -109,7 +109,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     @Override
     protected boolean deleteFile(File file) {
         boolean result = super.deleteFile(file);
-        if (result && FotoLibGlobal.debugEnabledJpg || FotoLibGlobal.debugEnabledJpgMetaIo) {
+        if (result && LibGlobal.debugEnabledJpg || LibGlobal.debugEnabledJpgMetaIo) {
             logger.debug(mDbg_context + " deleteFile: " + file);
         }
         return result;
@@ -130,12 +130,12 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     protected void fixAttributes() {
         fixDateTakenIfNeccessary(mExifFile);
 
-        if ((FotoLibGlobal.appName != null) && (null == getAttribute(ExifInterfaceEx.TAG_MAKE))) {
-            setAttribute(ExifInterfaceEx.TAG_MAKE, FotoLibGlobal.appName);
+        if ((LibGlobal.appName != null) && (null == getAttribute(ExifInterfaceEx.TAG_MAKE))) {
+            setAttribute(ExifInterfaceEx.TAG_MAKE, LibGlobal.appName);
         }
 
-        if ((FotoLibGlobal.appVersion != null) && (null == getAttribute(ExifInterfaceEx.TAG_MODEL))) {
-            setAttribute(ExifInterfaceEx.TAG_MODEL, FotoLibGlobal.appVersion);
+        if ((LibGlobal.appVersion != null) && (null == getAttribute(ExifInterfaceEx.TAG_MODEL))) {
+            setAttribute(ExifInterfaceEx.TAG_MODEL, LibGlobal.appVersion);
         }
         super.fixAttributes();
     }

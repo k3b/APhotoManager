@@ -30,7 +30,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.TestUtil;
 import de.k3b.io.FileCommands;
 import de.k3b.io.FileUtils;
@@ -46,8 +46,8 @@ public class MetaWriterExifXmlIntegrationTests {
 
     @BeforeClass
     public static void initDirectories() {
-        FotoLibGlobal.appName = "JUnit";
-        FotoLibGlobal.appVersion = "MetaWriterExifXmlIntegrationTests";
+        LibGlobal.appName = "JUnit";
+        LibGlobal.appVersion = "MetaWriterExifXmlIntegrationTests";
 
         OUTDIR.mkdirs();
     }

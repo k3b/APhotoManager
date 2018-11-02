@@ -26,7 +26,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.io.FileCommands;
 import de.k3b.io.FileProcessor;
 import de.k3b.io.FileUtils;
@@ -45,7 +45,7 @@ import de.k3b.io.FileUtils;
  */
 
 public class MetaWriterExifXml extends MetaApiWrapper  implements IMetaApi {
-    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+    private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
 
     private ExifInterfaceEx exif;   // not null if exif changes are written to jpg file
     private MediaXmpSegment xmp;    // not null if exif changes are written to xmp sidecar file.
@@ -70,9 +70,9 @@ public class MetaWriterExifXml extends MetaApiWrapper  implements IMetaApi {
                                            boolean deleteOriginalAfterFinish, String dbg_context)
             throws IOException {
         return create(absoluteJpgInPath, absoluteJpgOutPath, deleteOriginalAfterFinish, dbg_context,
-                FotoLibGlobal.mediaUpdateStrategy.contains("J"),    // write jpg file
-                FotoLibGlobal.mediaUpdateStrategy.contains("X"),    // write xmp file
-                FotoLibGlobal.mediaUpdateStrategy.contains("C")    // create xmp if it does not exist
+                LibGlobal.mediaUpdateStrategy.contains("J"),    // write jpg file
+                LibGlobal.mediaUpdateStrategy.contains("X"),    // write xmp file
+                LibGlobal.mediaUpdateStrategy.contains("C")    // create xmp if it does not exist
         );
     }
 
@@ -95,7 +95,7 @@ public class MetaWriterExifXml extends MetaApiWrapper  implements IMetaApi {
                                            boolean writeJpg, boolean writeXmp, boolean createXmpIfNotExist)
             throws IOException {
         long    startTimestamp = 0;
-        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+        if (LibGlobal.debugEnabledJpgMetaIo) {
             startTimestamp = new Date().getTime();
         }
         MediaXmpSegment xmp = MediaXmpSegment.loadXmpSidecarContentOrNull(absoluteJpgInPath, dbg_context);
@@ -153,7 +153,7 @@ public class MetaWriterExifXml extends MetaApiWrapper  implements IMetaApi {
         result.absoluteJpgOutPath = (absoluteJpgOutPath != null) ? absoluteJpgOutPath : absoluteJpgInPath;
         result.absoluteJpgInPath = absoluteJpgInPath;
         result.deleteOriginalAfterFinish = deleteOriginalAfterFinish;
-        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+        if (LibGlobal.debugEnabledJpgMetaIo) {
             result.dbgLoadEndTimestamp = new Date().getTime();
             logger.debug(dbg_context + " load[msec]:" + (result.dbgLoadEndTimestamp - startTimestamp));
         }
@@ -178,14 +178,14 @@ public class MetaWriterExifXml extends MetaApiWrapper  implements IMetaApi {
 
     public int save(String dbg_context)  throws IOException {
         long    startTimestamp = 0;
-        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+        if (LibGlobal.debugEnabledJpgMetaIo) {
             startTimestamp = new Date().getTime();
         }
 
         final int result = transferExif(dbg_context)
                 + transferXmp(dbg_context);
 
-        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+        if (LibGlobal.debugEnabledJpgMetaIo) {
             long    endTimestamp = new Date().getTime();
             logger.debug(dbg_context
                     + " process[msec]:" + (startTimestamp - this.dbgLoadEndTimestamp)
@@ -209,7 +209,7 @@ public class MetaWriterExifXml extends MetaApiWrapper  implements IMetaApi {
             Boolean xmpLongFormat = xmp.isLongFormat();
             boolean isLongFormat = (xmpLongFormat != null)
                     ? xmpLongFormat.booleanValue()
-                    : FotoLibGlobal.preferLongXmpFormat;
+                    : LibGlobal.preferLongXmpFormat;
 
             changedFiles += saveXmp(xmp, outJpgFullPath, isLongFormat, dbg_context);
 
@@ -248,7 +248,7 @@ public class MetaWriterExifXml extends MetaApiWrapper  implements IMetaApi {
                         String outFullJpgPath,
                         boolean isLongFileName, String dbg_context) throws IOException {
         File xmpOutFile = FileCommands.getSidecar(outFullJpgPath, isLongFileName);
-        xmp.save(xmpOutFile, FotoLibGlobal.debugEnabledJpgMetaIo, dbg_context);
+        xmp.save(xmpOutFile, LibGlobal.debugEnabledJpgMetaIo, dbg_context);
         return 1;
     }
 

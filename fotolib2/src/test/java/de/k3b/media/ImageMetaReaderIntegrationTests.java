@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.TestUtil;
 import de.k3b.io.DateUtil;
 import de.k3b.io.ListUtils;
@@ -48,8 +48,8 @@ public class ImageMetaReaderIntegrationTests {
     private ImageMetaReader sut = null;
     @BeforeClass
     public static void initDirectories() {
-        FotoLibGlobal.appName = "JUnit";
-        FotoLibGlobal.appVersion = "ImageMetaReaderIntegrationTests";
+        LibGlobal.appName = "JUnit";
+        LibGlobal.appVersion = "ImageMetaReaderIntegrationTests";
     }
 
     @Before

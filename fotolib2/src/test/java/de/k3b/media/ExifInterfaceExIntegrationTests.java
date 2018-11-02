@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.TestUtil;
 import de.k3b.io.DateUtil;
 import de.k3b.io.ListUtils;
@@ -46,8 +46,8 @@ public class ExifInterfaceExIntegrationTests {
 
     @BeforeClass
     public static void initDirectories() {
-        FotoLibGlobal.appName = "JUnit";
-        FotoLibGlobal.appVersion = "ExifInterfaceExIntegrationTests";
+        LibGlobal.appName = "JUnit";
+        LibGlobal.appVersion = "ExifInterfaceExIntegrationTests";
     }
 
     @Before

@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Properties;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.TestUtil;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.media.ExifInterface;
@@ -75,11 +75,11 @@ public class FileCommandAutoIntegrationTests {
     }
     @Before
     public void setUp() throws IOException {
-        FotoLibGlobal.appName = "JUnit";
-        FotoLibGlobal.appVersion = TEST_CLASS_NAME;
+        LibGlobal.appName = "JUnit";
+        LibGlobal.appVersion = TEST_CLASS_NAME;
 
         ExifInterface.DEBUG = true;
-        FotoLibGlobal.debugEnabledJpgMetaIo = true;
+        LibGlobal.debugEnabledJpgMetaIo = true;
     }
 
     /// TODO: move to seperate class FileCommandsIntegrationTests

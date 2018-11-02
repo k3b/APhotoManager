@@ -44,7 +44,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.directory.DirectoryLoaderTask;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailMetaDialogBuilder;
@@ -210,7 +210,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                 showDirectoryPickerForFilterParamValue(
                         mDebugPrefix + " date picker " + path,
                         FotoSql.queryGroupByDate, false,
-                        FotoLibGlobal.datePickerUseDecade, path);
+                        LibGlobal.datePickerUseDecade, path);
             }
         });
         cmd = (Button) findViewById(R.id.cmd_select_lat_lon);
@@ -466,7 +466,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         protected void showVisibility(VISIBILITY visibility) {
             VISIBILITY actualVisibility = visibility;
             if (actualVisibility == VISIBILITY.DEFAULT) {
-                actualVisibility = (FotoLibGlobal.visibilityShowPrivateByDefault) ? VISIBILITY.PRIVATE_PUBLIC : VISIBILITY.PUBLIC;
+                actualVisibility = (LibGlobal.visibilityShowPrivateByDefault) ? VISIBILITY.PRIVATE_PUBLIC : VISIBILITY.PUBLIC;
             }
 
             switch (actualVisibility) {

@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.util.EnumSet;
 import java.util.List;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.io.FileProcessor;
 import de.k3b.io.VISIBILITY;
 import de.k3b.transactionlog.TransactionLoggerBase;
@@ -38,7 +38,7 @@ import de.k3b.transactionlog.TransactionLoggerBase;
  * Created by k3b on 25.08.2015.
  */
 public class JpgMetaWorkflow {
-    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+    private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
     private final TransactionLoggerBase transactionLogger;
 
     private StringBuilder debugExif(StringBuilder sb, String context, MetaWriterExifXml exif, File filePath) {
@@ -74,7 +74,7 @@ public class JpgMetaWorkflow {
      * Returns new values or null if no change. */
     public MetaWriterExifXml applyChanges(File inFilePath, String outFilePath,
                                           long id, boolean deleteOriginalWhenFinished, MediaDiffCopy metaDiffCopy) {
-        StringBuilder sb = (FotoLibGlobal.debugEnabled)
+        StringBuilder sb = (LibGlobal.debugEnabled)
                 ? createDebugStringBuilder(inFilePath)
                 : null;
         File outFile = (outFilePath != null) ? new File(outFilePath) : inFilePath;
@@ -105,7 +105,7 @@ public class JpgMetaWorkflow {
 
                     exif.save("MetaWriterExifXml save");
 
-                    if (FotoLibGlobal.preserveJpgFileModificationDate) {
+                    if (LibGlobal.preserveJpgFileModificationDate) {
                         // preseve file modification date
                         inFilePath.setLastModified(lastModified);
                     }
@@ -173,7 +173,7 @@ public class JpgMetaWorkflow {
     protected void deleteFile(File delete) {
         if ((delete != null) && delete.exists()) {
             delete.delete();
-            if (FotoLibGlobal.debugEnabledJpg) {
+            if (LibGlobal.debugEnabledJpg) {
                 logger.info("JpgMetaWorkflow deleteFile " + delete);
             }
         }
@@ -181,7 +181,7 @@ public class JpgMetaWorkflow {
 
     /** return modified out file or null if filename must not change due to visibility rule */
     protected File handleVisibility(VISIBILITY newVisibility, File outFile, MetaWriterExifXml exif) {
-        if (FotoLibGlobal.renamePrivateJpg) {
+        if (LibGlobal.renamePrivateJpg) {
             final String oldAbsoluteOutPath = (outFile == null) ? null : outFile.getAbsolutePath();
             String newAbsoluteOutPath = MediaUtil.getModifiedPath(oldAbsoluteOutPath, newVisibility);
 

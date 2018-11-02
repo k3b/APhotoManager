@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.TimeZone;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.TestUtil;
 import de.k3b.io.DateUtil;
 import de.k3b.io.ListUtils;
@@ -45,8 +45,8 @@ public class MediaXmpSegmentIntegrationTests {
     private IMetaApi sut = null;
     @BeforeClass
     public static void initDirectories() {
-        FotoLibGlobal.appName = "JUnit";
-        FotoLibGlobal.appVersion = "MediaXmpSegmentIntegrationTests";
+        LibGlobal.appName = "JUnit";
+        LibGlobal.appVersion = "MediaXmpSegmentIntegrationTests";
     }
 
     @Before

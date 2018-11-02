@@ -27,7 +27,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 
 /**
  * #93: rule based file renaming for same target directory.
@@ -37,7 +37,7 @@ import de.k3b.FotoLibGlobal;
  */
 
 public class RuleFileNameProcessor extends FileProcessor implements IFileNameProcessor {
-    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+    private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
 
     public static final String APM_FILE_NAME = ".apm";
     /** i.e "yyMM" for year and month each with 2 digits */

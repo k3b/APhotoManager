@@ -42,7 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.DBUtils;
@@ -983,7 +983,7 @@ public class FotoSql extends FotoSqlBase {
         } catch (Exception ex) {
             excpetion = ex;
         } finally {
-            if ((excpetion != null) || ((dbgContext != null) && (Global.debugEnabledSql || FotoLibGlobal.debugEnabledJpg))) {
+            if ((excpetion != null) || ((dbgContext != null) && (Global.debugEnabledSql || LibGlobal.debugEnabledJpg))) {
                 Log.i(Global.LOG_CONTEXT, dbgContext + ":FotoSql.exexUpdate " + excpetion + "\n" +
                         QueryParameter.toString(null, values.toString(), SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
                         sqlWhere, selectionArgs, null, result), excpetion);
@@ -1033,7 +1033,7 @@ public class FotoSql extends FotoSqlBase {
         } catch (Exception ex) {
             excpetion = ex;
         } finally {
-            if ((excpetion != null) || Global.debugEnabledSql || FotoLibGlobal.debugEnabledJpg) {
+            if ((excpetion != null) || Global.debugEnabledSql || LibGlobal.debugEnabledJpg) {
                 Log.i(Global.LOG_CONTEXT, dbgContext + ":FotoSql.execInsert " + excpetion + " " +
                         values.toString() + " => " + result + " " + excpetion, excpetion);
             }
@@ -1101,7 +1101,7 @@ public class FotoSql extends FotoSqlBase {
                 lastSelectionArgs = null;
                 delCount = context.getContentResolver()
                         .delete(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, lastUsedWhereClause, lastSelectionArgs);
-                if (Global.debugEnabledSql || FotoLibGlobal.debugEnabledJpg) {
+                if (Global.debugEnabledSql || LibGlobal.debugEnabledJpg) {
                     Log.i(Global.LOG_CONTEXT, dbgContext + "-b: FotoSql.deleteMedia delete\n" +
                             QueryParameter.toString(null, null, SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
                             lastUsedWhereClause, lastSelectionArgs, null, delCount));
@@ -1109,7 +1109,7 @@ public class FotoSql extends FotoSqlBase {
             } else {
                 delCount = context.getContentResolver()
                         .delete(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, lastUsedWhereClause, lastSelectionArgs);
-                if (Global.debugEnabledSql || FotoLibGlobal.debugEnabledJpg) {
+                if (Global.debugEnabledSql || LibGlobal.debugEnabledJpg) {
                     Log.i(Global.LOG_CONTEXT, dbgContext +": FotoSql.deleteMedia\ndelete " +
                             QueryParameter.toString(null, null,
                                     SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
@@ -1289,7 +1289,7 @@ public class FotoSql extends FotoSqlBase {
         VISIBILITY visibility = _visibility;
         // add visibility column only if not included yet
         if (visibility == VISIBILITY.DEFAULT) {
-            visibility = (FotoLibGlobal.visibilityShowPrivateByDefault)
+            visibility = (LibGlobal.visibilityShowPrivateByDefault)
                     ? VISIBILITY.PRIVATE_PUBLIC
                     : VISIBILITY.PUBLIC;
         }

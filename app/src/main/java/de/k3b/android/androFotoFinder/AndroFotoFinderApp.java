@@ -25,13 +25,12 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import org.osmdroid.api.IMapView;
-import org.osmdroid.tileprovider.constants.OpenStreetMapTileProviderConstants;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
@@ -75,8 +74,8 @@ public class AndroFotoFinderApp extends Application {
 
         super.onCreate();
 
-        FotoLibGlobal.appName = getString(R.string.app_name);
-        FotoLibGlobal.appVersion = GuiUtil.getAppVersionName(this);
+        LibGlobal.appName = getString(R.string.app_name);
+        LibGlobal.appVersion = GuiUtil.getAppVersionName(this);
 
         Global.pickHistoryFile = getDatabasePath("pickHistory.geouri.txt");
         SettingsActivity.prefs2Global(this);
@@ -91,7 +90,7 @@ public class AndroFotoFinderApp extends Application {
         Collections.addAll(QueryParameter.sParserDefaultSelect, FotoSql.DEFAULT_GALLERY_COLUMNS);
         mCrashSaveToFile = new LogCat(this, Global.LOG_CONTEXT, HugeImageLoader.LOG_TAG,
                 PhotoViewAttacher.LOG_TAG, CupcakeGestureDetector.LOG_TAG,
-                FotoLibGlobal.LOG_TAG, ThumbNailUtils.LOG_TAG, IMapView.LOGTAG,
+                LibGlobal.LOG_TAG, ThumbNailUtils.LOG_TAG, IMapView.LOGTAG,
                 ExifInterface.LOG_TAG, ImageMetaReader.LOG_TAG);
 
         ThumbNailUtils.init(this, null);

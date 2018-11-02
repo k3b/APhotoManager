@@ -1,7 +1,8 @@
 /*
  * Copyright (c) 2015-2018 by k3b.
  *
- * This file is part of AndroFotoFinder / #APhotoManager.
+ * This file is part of #APhotoManager (https://github.com/k3b/APhotoManager/)
+ *              and #toGoZip (https://github.com/k3b/ToGoZip/).
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -36,14 +37,14 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 
 
 /**
  * Created by k3b on 06.10.2015.
  */
 public class FileUtils {
-    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+    private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
     private static final String DBG_CONTEXT = "FileUtils:";
 
     public static final String MEDIA_IGNORE_FILENAME = ".nomedia"; // MediaStore.MEDIA_IGNORE_FILENAME;
@@ -123,7 +124,7 @@ public class FileUtils {
 
     /** @return true if directory is an alias of an other (symlink-dir). */
 	public static  boolean isSymlinkDir(File directory, boolean errorValue) {
-        if (FotoLibGlobal.ignoreSymLinks || (directory == null)) {
+        if (LibGlobal.ignoreSymLinks || (directory == null)) {
             return false;
         }
 
@@ -131,7 +132,7 @@ public class FileUtils {
         String canonicalPath = tryGetCanonicalPath(directory, null);
         if (canonicalPath != null) {
             boolean result = !directory.getAbsolutePath().equals(canonicalPath);
-            if (result && FotoLibGlobal.debugEnabled) {
+            if (result && LibGlobal.debugEnabled) {
                 logger.debug(DBG_CONTEXT + "isSymlinkDir('" + directory.getAbsolutePath() + "') => true because CanonicalPath='" + canonicalPath + "'");
             }
 			
@@ -238,7 +239,7 @@ public class FileUtils {
                 String path = file.getAbsolutePath();
                 if(fileExt == null || path.endsWith(fileExt)) {
                     boolean result = file.delete();
-                    if (FotoLibGlobal.debugEnabled) {
+                    if (LibGlobal.debugEnabled) {
                         // test if delete of file is success or not
                         if (result) {
                             logger.info(DBG_CONTEXT + "File {} deleted", file.getAbsolutePath());
@@ -249,7 +250,7 @@ public class FileUtils {
                 }
             }
         } else {
-            if (FotoLibGlobal.debugEnabled) logger.info(DBG_CONTEXT + "File {} doesn't exist", file.getAbsolutePath());
+            if (LibGlobal.debugEnabled) logger.info(DBG_CONTEXT + "File {} doesn't exist", file.getAbsolutePath());
         }
     }
 

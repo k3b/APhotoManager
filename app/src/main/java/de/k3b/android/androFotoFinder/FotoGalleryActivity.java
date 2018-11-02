@@ -31,7 +31,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.directory.DirectoryGui;
 import de.k3b.android.androFotoFinder.gallery.cursor.GalleryCursorFragment;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
@@ -96,7 +96,7 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
 
         if (BuildConfig.DEBUG) {
             // not implemented yet
-            FotoLibGlobal.itpcWriteSupport = false;
+            LibGlobal.itpcWriteSupport = false;
         }
         if (Global.debugEnabled && (intent != null)) {
             Log.d(Global.LOG_CONTEXT, mDebugPrefix + "onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));

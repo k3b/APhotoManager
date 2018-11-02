@@ -42,7 +42,7 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.io.DateUtil;
 import de.k3b.io.ListUtils;
 import de.k3b.io.StringUtils;
@@ -82,7 +82,7 @@ public class ImageMetaReader implements IMetaApi, Closeable {
     private boolean mInitExecuted = false;
 
     static {
-        FotoLibGlobal.itpcWriteSupport = hasItpcWriteSupport();
+        LibGlobal.itpcWriteSupport = hasItpcWriteSupport();
     }
 
     private static boolean hasItpcWriteSupport() {
@@ -128,14 +128,14 @@ public class ImageMetaReader implements IMetaApi, Closeable {
         mMetadata = metadata;
 
         if (metadata == null) {
-            if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+            if (LibGlobal.debugEnabledJpgMetaIo) {
                 logger.debug(dbg_context +
                         "load: file not found ");
             }
             return null;
         }
 
-        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+        if (LibGlobal.debugEnabledJpgMetaIo) {
             logger.debug(dbg_context +
                     "loaded: " + MediaUtil.toString(this, false, null, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
         }

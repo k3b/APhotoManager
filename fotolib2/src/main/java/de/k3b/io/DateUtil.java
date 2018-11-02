@@ -1,7 +1,8 @@
 /*
  * Copyright (c) 2016-2018 by k3b.
  *
- * This file is part of AndroFotoFinder / #APhotoManager and toGoZip.
+ * This file is part of #APhotoManager (https://github.com/k3b/APhotoManager/)
+ *              and #toGoZip (https://github.com/k3b/ToGoZip/).
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by

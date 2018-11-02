@@ -32,7 +32,7 @@ import java.io.OutputStream;
 import java.util.Date;
 import java.util.List;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.io.DateUtil;
 import de.k3b.io.FileCommands;
 import de.k3b.io.GeoUtil;
@@ -46,7 +46,7 @@ import de.k3b.io.VISIBILITY;
 
 public class MediaXmpSegment extends XmpSegment implements IMetaApi {
     private static final String dbg_context = "MediaXmpSegment: ";
-    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+    private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
 
     /** the full path of the image where this xmp-file belongs to */
     private String path = null;
@@ -190,7 +190,7 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
     @Override
     public XmpSegment setXmpMeta(XMPMeta xmpMeta, String dbg_context) {
         super.setXmpMeta(xmpMeta, dbg_context);
-        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+        if (LibGlobal.debugEnabledJpgMetaIo) {
             logger.info(dbg_context + " setXmpMeta " +  MediaUtil.toString(this, false, null, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
         }
 
@@ -208,7 +208,7 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
             setProperty(file.getName(), MediaXmpFieldDefinition.OriginalFileName);
         }
         if (getPropertyAsString("   fixAttributes AppVersion", MediaXmpFieldDefinition.AppVersion) == null) {
-            setProperty(FotoLibGlobal.appName + "-" + FotoLibGlobal.appVersion, MediaXmpFieldDefinition.AppVersion);
+            setProperty(LibGlobal.appName + "-" + LibGlobal.appVersion, MediaXmpFieldDefinition.AppVersion);
         }
     }
 
@@ -216,7 +216,7 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
     @Override
     public XmpSegment save(OutputStream os, boolean humanReadable, String dbg_context) {
         super.save(os, humanReadable, dbg_context);
-        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+        if (LibGlobal.debugEnabledJpgMetaIo) {
             logger.info(dbg_context + " save " + MediaUtil.toString(this, false, null, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
         }
 
@@ -238,7 +238,7 @@ public class MediaXmpSegment extends XmpSegment implements IMetaApi {
                 xmpContent = null;
             }
 
-        } else if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+        } else if (LibGlobal.debugEnabledJpgMetaIo) {
             logger.error(dbg_context + "file not found");
         }
 

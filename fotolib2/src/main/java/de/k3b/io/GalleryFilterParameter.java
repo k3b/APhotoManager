@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.io.collections.SelectedItems;
 
 /**
@@ -399,6 +399,6 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
 
     /** get Date Min/Max in date picker compatible format */
     public String getDatePath() {
-        return DirectoryFormatter.getDatePath(FotoLibGlobal.datePickerUseDecade, getDateMin(), getDateMax());
+        return DirectoryFormatter.getDatePath(LibGlobal.datePickerUseDecade, getDateMin(), getDateMax());
     }
 }

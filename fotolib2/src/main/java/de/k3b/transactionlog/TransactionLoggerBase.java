@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2017-2018 by k3b.
+ * Copyright (c) 2018 by k3b.
  *
- * This file is part of AndroFotoFinder / #APhotoManager.
+ * This file is part of #APhotoManager (https://github.com/k3b/APhotoManager/)
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -11,8 +11,8 @@
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License
- * for more details.
  *
+ * for more details.
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
@@ -26,7 +26,7 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.io.DateUtil;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileProcessor;
@@ -124,7 +124,7 @@ public class TransactionLoggerBase implements Closeable {
     }
 
     public void addComment(Object... comment) {
-        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+        if (LibGlobal.debugEnabledJpgMetaIo) {
             addChanges(MediaTransactionLogEntryType.COMMENT, ListUtils.toString(" ", comment), true);
         }
     }

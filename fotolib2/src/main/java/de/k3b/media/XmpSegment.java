@@ -44,7 +44,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.io.FileUtils;
 import de.k3b.tagDB.TagConverter;
 
@@ -56,7 +56,7 @@ import de.k3b.tagDB.TagConverter;
 public class XmpSegment {
     public static final String DBG_PREFIX = "XmpSegment: ";
     private static String dbg_context = DBG_PREFIX;
-    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+    private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
     // public: can be changed in settings dialog
     public  static boolean DEBUG = false;
 

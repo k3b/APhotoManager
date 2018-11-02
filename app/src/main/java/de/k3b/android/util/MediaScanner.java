@@ -41,7 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.media.MediaContentValues;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
@@ -360,7 +360,7 @@ abstract public class MediaScanner  {
             src = xmpContent;
         } else {
             // (!writeExif) prefer read from xmp value before exif value
-            src = (FotoLibGlobal.mediaUpdateStrategy.contains("J"))
+            src = (LibGlobal.mediaUpdateStrategy.contains("J"))
                     ? exif
                     : new MetaApiChainReader(xmpContent, exif);
         }

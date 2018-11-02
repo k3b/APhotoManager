@@ -53,7 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.util.AndroidFileCommands;
@@ -315,10 +315,10 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
 
     // used to analyse error #91:.
     private void debugChanges(String function) {
-        if (FotoLibGlobal.debugEnabledJpgMetaIo){
+        if (LibGlobal.debugEnabledJpgMetaIo){
             MediaDiffCopy diff = new MediaDiffCopy(true, true);
             diff.setDiff(mInitialData, mCurrentData);
-            Log.d(FotoLibGlobal.LOG_TAG, mDebugPrefix + " "
+            Log.d(LibGlobal.LOG_TAG, mDebugPrefix + " "
                     + function + "\n\t"
                     + diff + "\n\t"
                     + SETTINGS_KEY_INITIAL + "=" + mInitialData.toString() + ";\n\t"

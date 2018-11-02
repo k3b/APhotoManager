@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.media.MediaContentValues;
 import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
@@ -269,7 +269,7 @@ public class TagSql extends FotoSql {
             .append(TagSql.FILTER_EXPR_PUBLIC)
             .append(" AND (")
             .append(TagSql.FILTER_EXPR_TAGS_INCLUDED);
-        if (FotoLibGlobal.renamePrivateJpg) {
+        if (LibGlobal.renamePrivateJpg) {
             where.append(" OR ").append(TagSql.FILTER_EXPR_PATH_LIKE.replace("?","'%" +
                             MediaUtil.IMG_TYPE_PRIVATE + "'"));
         }
@@ -362,7 +362,7 @@ public class TagSql extends FotoSql {
             final int modifiedColumCout = MediaUtil.copyNonEmpty(mediaValueAdapter.set(dbValues, null), jpg, allowSetNulls);
             if (modifiedColumCout >= 1) {
                 String newFullJpgFilePath = null;
-                if (FotoLibGlobal.renamePrivateJpg) {
+                if (LibGlobal.renamePrivateJpg) {
                     newFullJpgFilePath = MediaUtil.getModifiedPath(jpg);
                 }
 

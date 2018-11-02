@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Properties;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaAsString;
 
@@ -40,7 +40,7 @@ import de.k3b.media.MediaAsString;
  */
 
 public class PhotoWorkFlowDto {
-    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+    private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
 
     /** added to every serialized item if != null. Example "Generated on 2015-10-19 with myApp Version 0815." */
     public static String sFileComment = "";
@@ -72,7 +72,7 @@ public class PhotoWorkFlowDto {
             try {
                 inputStream = new FileInputStream(apm);
                 properties.load(inputStream);
-                if (FotoLibGlobal.debugEnabled) {
+                if (LibGlobal.debugEnabled) {
                     logger.debug(this.getClass().getSimpleName() + ": loaded from " + apm + ":" + this);
                 }
                 return this;
@@ -117,13 +117,13 @@ public class PhotoWorkFlowDto {
         File apm = getApmFile();
         FileOutputStream stream = null;
         if (isEmpty()) {
-            if (FotoLibGlobal.debugEnabled) {
+            if (LibGlobal.debugEnabled) {
                 logger.debug(this.getClass().getSimpleName() + ": save delete empty " + apm + ":" + this);
             }
             apm.delete();
         } else {
             try {
-                if (FotoLibGlobal.debugEnabled) {
+                if (LibGlobal.debugEnabled) {
                     logger.debug(this.getClass().getSimpleName() + ": save to " + apm + ":" + this);
                 }
                 stream = new FileOutputStream(apm);
@@ -142,7 +142,7 @@ public class PhotoWorkFlowDto {
             String outDir = properties.getProperty(KEY_OUT_DIR);
             photoWorkFlowDto = new PhotoWorkFlowDto((outDir != null) ? new File(outDir) : null, properties);
         }
-        if (FotoLibGlobal.debugEnabled) {
+        if (LibGlobal.debugEnabled) {
             logger.debug(PhotoWorkFlowDto.class.getSimpleName() + ": load De-Serialize:" + photoWorkFlowDto);
         }
         return photoWorkFlowDto;

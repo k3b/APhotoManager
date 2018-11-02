@@ -36,11 +36,9 @@ import android.util.Log;
 import android.view.Display;
 import android.widget.Toast;
 
-import org.osmdroid.tileprovider.constants.OpenStreetMapTileProviderConstants;
-
 import java.io.File;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
 import de.k3b.android.util.MediaScanner;
 import de.k3b.android.util.MediaScannerExifInterface;
@@ -98,12 +96,12 @@ public class SettingsActivity extends PreferenceActivity {
         mediaUpdateStrategyPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
-                FotoLibGlobal.mediaUpdateStrategy = (String) newValue;
-                setPref(FotoLibGlobal.mediaUpdateStrategy, mediaUpdateStrategyPreference, R.array.pref_media_update_strategy_names);
+                LibGlobal.mediaUpdateStrategy = (String) newValue;
+                setPref(LibGlobal.mediaUpdateStrategy, mediaUpdateStrategyPreference, R.array.pref_media_update_strategy_names);
                 return true;
             }
         });
-        setPref(FotoLibGlobal.mediaUpdateStrategy, mediaUpdateStrategyPreference, R.array.pref_media_update_strategy_names);
+        setPref(LibGlobal.mediaUpdateStrategy, mediaUpdateStrategyPreference, R.array.pref_media_update_strategy_names);
 
         findPreference("debugClearLog").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -151,13 +149,13 @@ public class SettingsActivity extends PreferenceActivity {
 
         prefs.putBoolean("debugEnabledMemory", Global.debugEnabledMemory);
 
-        prefs.putBoolean("datePickerUseDecade", FotoLibGlobal.datePickerUseDecade);
+        prefs.putBoolean("datePickerUseDecade", LibGlobal.datePickerUseDecade);
 
-        prefs.putBoolean("debugEnabledJpgMetaIo", FotoLibGlobal.debugEnabledJpgMetaIo);
-        prefs.putBoolean("debugEnabledJpg", FotoLibGlobal.debugEnabledJpg);
+        prefs.putBoolean("debugEnabledJpgMetaIo", LibGlobal.debugEnabledJpgMetaIo);
+        prefs.putBoolean("debugEnabledJpg", LibGlobal.debugEnabledJpg);
 
         /** #100: true: private images get the extension ".jpg-p" which hides them from other gallery-apps and image pickers.  */
-        prefs.putBoolean("renamePrivateJpg", FotoLibGlobal.renamePrivateJpg);
+        prefs.putBoolean("renamePrivateJpg", LibGlobal.renamePrivateJpg);
 
         // #26
         prefs.putBoolean("initialImageDetailResolutionHigh", Global.initialImageDetailResolutionHigh);
@@ -165,7 +163,7 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putBoolean("debugEnableLibs", PhotoViewAttacher.DEBUG);
 
         prefs.putBoolean("clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
-        prefs.putBoolean("xmp_file_schema_long", FotoLibGlobal.preferLongXmpFormat);
+        prefs.putBoolean("xmp_file_schema_long", LibGlobal.preferLongXmpFormat);
 
         prefs.putBoolean("mapsForgeEnabled", Global.mapsForgeEnabled);
 
@@ -185,7 +183,7 @@ public class SettingsActivity extends PreferenceActivity {
 
         prefs.putString("pickHistoryFile", (Global.pickHistoryFile != null) ? Global.pickHistoryFile.getAbsolutePath() : null);
 
-        prefs.putString("mediaUpdateStrategy", FotoLibGlobal.mediaUpdateStrategy);
+        prefs.putString("mediaUpdateStrategy", LibGlobal.mediaUpdateStrategy);
 
         prefs.apply();
 
@@ -198,7 +196,7 @@ public class SettingsActivity extends PreferenceActivity {
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(context.getApplicationContext());
         Global.debugEnabled                     = getPref(prefs, "debugEnabled", Global.debugEnabled);
-        FotoLibGlobal.debugEnabled = Global.debugEnabled;
+        LibGlobal.debugEnabled = Global.debugEnabled;
 
         Global.debugEnabledViewItem             = getPref(prefs, "debugEnabledViewItem", Global.debugEnabledViewItem);
         Global.debugEnabledSql                  = getPref(prefs, "debugEnabledSql", Global.debugEnabledSql);
@@ -207,16 +205,16 @@ public class SettingsActivity extends PreferenceActivity {
 
         Global.debugEnabledMemory               = getPref(prefs, "debugEnabledMemory", Global.debugEnabledMemory);
 
-        FotoLibGlobal.datePickerUseDecade              = getPref(prefs, "datePickerUseDecade", FotoLibGlobal.datePickerUseDecade);
+        LibGlobal.datePickerUseDecade              = getPref(prefs, "datePickerUseDecade", LibGlobal.datePickerUseDecade);
 
         Global.locked                           = getPref(prefs, "locked", Global.locked);
         Global.passwordHash                     = getPref(prefs, "passwordHash", Global.passwordHash);
 
-        FotoLibGlobal.debugEnabledJpg = getPref(prefs, "debugEnabledJpg", FotoLibGlobal.debugEnabledJpg);
-        FotoLibGlobal.debugEnabledJpgMetaIo     = getPref(prefs, "debugEnabledJpgMetaIo", FotoLibGlobal.debugEnabledJpgMetaIo);
+        LibGlobal.debugEnabledJpg = getPref(prefs, "debugEnabledJpg", LibGlobal.debugEnabledJpg);
+        LibGlobal.debugEnabledJpgMetaIo     = getPref(prefs, "debugEnabledJpgMetaIo", LibGlobal.debugEnabledJpgMetaIo);
 
         /** #100: true: private images get the extension ".jpg-p" which hides them from other gallery-apps and image pickers.  */
-        FotoLibGlobal.renamePrivateJpg          = getPref(prefs, "renamePrivateJpg", FotoLibGlobal.renamePrivateJpg);
+        LibGlobal.renamePrivateJpg          = getPref(prefs, "renamePrivateJpg", LibGlobal.renamePrivateJpg);
 
         // one setting for several 3d party debug-flags
         boolean debug3rdParty                   = getPref(prefs, "debugEnableLibs", PhotoViewAttacher.DEBUG);
@@ -236,7 +234,7 @@ public class SettingsActivity extends PreferenceActivity {
         Global.initialImageDetailResolutionHigh = getPref(prefs, "initialImageDetailResolutionHigh", Global.initialImageDetailResolutionHigh);
 
         Global.clearSelectionAfterCommand       = getPref(prefs, "clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
-        FotoLibGlobal.preferLongXmpFormat       = getPref(prefs, "xmp_file_schema_long", FotoLibGlobal.preferLongXmpFormat);
+        LibGlobal.preferLongXmpFormat       = getPref(prefs, "xmp_file_schema_long", LibGlobal.preferLongXmpFormat);
 
         Global.mapsForgeEnabled                 = getPref(prefs, "mapsForgeEnabled", Global.mapsForgeEnabled);
 
@@ -257,7 +255,7 @@ public class SettingsActivity extends PreferenceActivity {
 
         Global.pickHistoryFile                  = getPref(prefs, "pickHistoryFile", Global.pickHistoryFile);
 
-        FotoLibGlobal.mediaUpdateStrategy       = getPref(prefs, "mediaUpdateStrategy", FotoLibGlobal.mediaUpdateStrategy);
+        LibGlobal.mediaUpdateStrategy       = getPref(prefs, "mediaUpdateStrategy", LibGlobal.mediaUpdateStrategy);
 
         /*
         // bool

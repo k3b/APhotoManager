@@ -40,7 +40,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.GalleryFilterActivity;
 import de.k3b.android.androFotoFinder.GalleryFilterPathState;
@@ -566,7 +566,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                     this.mMustShowNavigator = true;
                     mergedBaseQuery.setID(dirQueryID);
 
-                    DirectoryLoaderTask loader = new DirectoryLoaderTask(context, loadDate ? FotoLibGlobal.datePickerUseDecade : false,
+                    DirectoryLoaderTask loader = new DirectoryLoaderTask(context, loadDate ? LibGlobal.datePickerUseDecade : false,
                             mDebugPrefix + " from openPicker(loadDate=" +
                                     loadDate + ")") {
                         @Override

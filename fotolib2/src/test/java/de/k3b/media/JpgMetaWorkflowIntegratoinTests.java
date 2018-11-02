@@ -9,7 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.EnumSet;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.TestUtil;
 import de.k3b.io.FileUtils;
 
@@ -46,24 +46,24 @@ public class JpgMetaWorkflowIntegratoinTests {
 
     @BeforeClass
     public static void initDirectories() {
-        FotoLibGlobal.appName = "JUnit";
-        FotoLibGlobal.appVersion = SUT_CLASS_NAME;
+        LibGlobal.appName = "JUnit";
+        LibGlobal.appVersion = SUT_CLASS_NAME;
 
         FileUtils.delete(OUTDIR, null);
         OUTDIR.mkdirs();
 
 
         ExifInterface.DEBUG = true;
-        FotoLibGlobal.debugEnabled = true;
+        LibGlobal.debugEnabled = true;
 
         // so you can see that the file was modified
-        FotoLibGlobal.preserveJpgFileModificationDate = false;
+        LibGlobal.preserveJpgFileModificationDate = false;
     }
 
     @Test
     public void shouldUpdateExistingExifWithCreateXmp() throws IOException
     {
-        FotoLibGlobal.mediaUpdateStrategy = "JXC";
+        LibGlobal.mediaUpdateStrategy = "JXC";
         String fileNameSrc = "test-WitExtraData.jpg";
         String fileNameDest = "shouldUpdateExistingExifWithCreateXmp.jpg";
 
