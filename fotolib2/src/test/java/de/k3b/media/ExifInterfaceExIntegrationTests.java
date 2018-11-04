@@ -53,7 +53,7 @@ public class ExifInterfaceExIntegrationTests {
     @Before
     public void setup() throws IOException {
         // ExifInterfaceEx.DEBUG = true;
-        sut = getMeta("test-WitExtraData.jpg");
+        sut = getMeta(TestUtil.TEST_FILE_JPG_WITH_EXIF);
     }
 
     @Test

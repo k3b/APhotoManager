@@ -67,9 +67,9 @@ public class FileCommandAutoIntegrationTests {
         FileUtils.delete(OUTDIR.getParentFile(), null);
         OUTDIR.mkdirs();
 
-        TestUtil.saveTestResourceAs("test-WitExtraData.jpg", INJPG);
-        TestUtil.saveTestResourceAs("test-WitExtraData.xmp", FileProcessor.getSidecar(INJPG, true));
-        TestUtil.saveTestResourceAs("test-WitExtraData.xmp", FileProcessor.getSidecar(INJPG, false));
+        TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_JPG_WITH_EXIF, INJPG);
+        TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_XMP_WITH_EXIF, FileProcessor.getSidecar(INJPG, true));
+        TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_XMP_WITH_EXIF, FileProcessor.getSidecar(INJPG, false));
 
         LOGGER.info(" outdir:" + OUTDIR.getAbsolutePath());
     }
@@ -88,7 +88,7 @@ public class FileCommandAutoIntegrationTests {
         String outFileBaseName = "shouldApplyExifChange";
         FileCommands sut = createFileCommands(outFileBaseName);
         final File testJpg = new File(OUTDIR, outFileBaseName + ".jpg");
-        TestUtil.saveTestResourceAs("NoExif.jpg", testJpg);
+        TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_JPG_WITH_NO_EXIF, testJpg);
 
         MediaDiffCopy addExif = new MediaDiffCopy(new MediaDTO().setTitle("title added by " + TEST_CLASS_NAME), true);
 
@@ -133,14 +133,14 @@ public class FileCommandAutoIntegrationTests {
         final String tagAdded = outFileBaseName + "_" + (DateUtil.toIsoDateTimeString(new Date()).replace(":","_") );
         final File inFile = new File(OUTDIR, outFileBaseName + ".jpg");
 
-        TestUtil.saveTestResourceAs("test-WitExtraData.jpg", inFile);
+        TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_JPG_WITH_EXIF, inFile);
 
         FileCommands sut = createFileCommands(outFileBaseName);
         SelectedFiles selectedFiles = SelectedFiles.create(inFile.getAbsolutePath(), FAKE_ID, FAKE_DATE);
         final IMetaApi exifChanges = new MediaDTO();
         exifChanges.setTags(ListUtils.fromString(tagAdded));
 
-        PhotoWorkFlowDto autoProccessData = new PhotoWorkFlowDto(OUTDIR, new Properties())
+        PhotoAutoprocessingDto autoProccessData = new PhotoAutoprocessingDto(OUTDIR, new Properties())
                 .setMediaDefaults(exifChanges);
 
         int changes = sut.moveOrCopyFilesTo(true, selectedFiles, OUTDIR,
@@ -168,14 +168,14 @@ public class FileCommandAutoIntegrationTests {
         final File outFileExpexted = new File(OUTDIR, outFileBaseName + ".jpg-p");
         final File outFileNotExpexted = new File(OUTDIR, outFileBaseName + ".jpg");
 
-        TestUtil.saveTestResourceAs("test-WitExtraData.jpg", inFile);
+        TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_JPG_WITH_EXIF, inFile);
 
         FileCommands sut = createFileCommands(outFileBaseName);
         SelectedFiles selectedFiles = SelectedFiles.create(inFile.getAbsolutePath(), FAKE_ID, FAKE_DATE);
         final IMetaApi exifChanges = new MediaDTO();
         exifChanges.setVisibility(VISIBILITY.PRIVATE);
 
-        PhotoWorkFlowDto autoProccessData = new PhotoWorkFlowDto(OUTDIR, new Properties())
+        PhotoAutoprocessingDto autoProccessData = new PhotoAutoprocessingDto(OUTDIR, new Properties())
                 .setMediaDefaults(exifChanges);
 
         sut.moveOrCopyFilesTo(move, selectedFiles, OUTDIR,
@@ -193,14 +193,14 @@ public class FileCommandAutoIntegrationTests {
         final String tagAdded = outFileBaseName + "_" + (DateUtil.toIsoDateTimeString(new Date()).replace(":","_") );
         final File inFile = new File(OUTDIR, outFileBaseName + ".jpg");
 
-        TestUtil.saveTestResourceAs("test-WitExtraData.jpg", inFile);
+        TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_JPG_WITH_EXIF, inFile);
 
         FileCommands sut = createFileCommands(outFileBaseName);
         SelectedFiles selectedFiles = SelectedFiles.create(inFile.getAbsolutePath(), FAKE_ID, FAKE_DATE);
         final IMetaApi exifChanges = new MediaDTO();
         exifChanges.setTags(ListUtils.fromString(tagAdded));
 
-        PhotoWorkFlowDto autoProccessData = new PhotoWorkFlowDto(OUTDIR, new Properties())
+        PhotoAutoprocessingDto autoProccessData = new PhotoAutoprocessingDto(OUTDIR, new Properties())
                 .setMediaDefaults(exifChanges).setName("ShouldAddTagSameFile");
 
         int changes = sut.moveOrCopyFilesTo(true, selectedFiles, OUTDIR,
@@ -218,14 +218,14 @@ public class FileCommandAutoIntegrationTests {
         final String tagAdded = outFileBaseName + "_" + (DateUtil.toIsoDateTimeString(new Date()).replace(":","_") );
         final File inFile = new File(OUTDIR, outFileBaseName + "-old.jpg");
 
-        TestUtil.saveTestResourceAs("test-WitExtraData.jpg", inFile);
+        TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_JPG_WITH_EXIF, inFile);
 
         FileCommands sut = createFileCommands(outFileBaseName);
         SelectedFiles selectedFiles = SelectedFiles.create(inFile.getAbsolutePath(), FAKE_ID, FAKE_DATE);
         final IMetaApi exifChanges = new MediaDTO();
         exifChanges.setTags(ListUtils.fromString(tagAdded));
 
-        PhotoWorkFlowDto autoProccessData = new PhotoWorkFlowDto(OUTDIR, new Properties())
+        PhotoAutoprocessingDto autoProccessData = new PhotoAutoprocessingDto(OUTDIR, new Properties())
                 .setMediaDefaults(exifChanges).setName(outFileBaseName + "-new");
 
         int changes = sut.moveOrCopyFilesTo(true, selectedFiles, OUTDIR,
@@ -241,7 +241,7 @@ public class FileCommandAutoIntegrationTests {
         final String originalName = outFileBaseName + "-old";
         File inFile = new File(OUTDIR, originalName + ".jpg");
 
-        TestUtil.saveTestResourceAs("NoExif.jpg", inFile);
+        TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_JPG_WITH_NO_EXIF, inFile);
 
         FileCommands sut = createFileCommands(outFileBaseName);
 
@@ -250,7 +250,7 @@ public class FileCommandAutoIntegrationTests {
 
         // 0 avoid rounding of lat/lon; visibility not supported is only public
         final IMetaApi exifChanges = TestUtil.createTestMediaDTO(0).setVisibility(VISIBILITY.PUBLIC);
-        PhotoWorkFlowDto autoProccessData = new PhotoWorkFlowDto(OUTDIR, new Properties())
+        PhotoAutoprocessingDto autoProccessData = new PhotoAutoprocessingDto(OUTDIR, new Properties())
                 .setName(newName).setMediaDefaults(exifChanges);
 
         int changes = sut.moveOrCopyFilesTo(true, selectedFiles, OUTDIR,
@@ -272,7 +272,7 @@ public class FileCommandAutoIntegrationTests {
         String outFileBaseName = "shouldChangeFileNameOnVisibilityPrivate";
         File inFile = new File(OUTDIR, outFileBaseName + ".jpg");
 
-        TestUtil.saveTestResourceAs("NoExif.jpg", inFile);
+        TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_JPG_WITH_NO_EXIF, inFile);
 
         FileCommands sut = createFileCommands(outFileBaseName);
 
@@ -282,7 +282,7 @@ public class FileCommandAutoIntegrationTests {
         //  final IMetaApi exifChanges = new MediaDTO().setVisibility(VISIBILITY.PUBLIC).setRating(3);
         final IMetaApi exifChanges = new MediaDTO().setVisibility(VISIBILITY.PRIVATE);
 
-        PhotoWorkFlowDto autoProccessData = new PhotoWorkFlowDto(OUTDIR, new Properties())
+        PhotoAutoprocessingDto autoProccessData = new PhotoAutoprocessingDto(OUTDIR, new Properties())
                 .setMediaDefaults(exifChanges);
 
         int changes = sut.moveOrCopyFilesTo(true, selectedFiles, OUTDIR,

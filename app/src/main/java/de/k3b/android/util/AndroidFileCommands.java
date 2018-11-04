@@ -440,7 +440,7 @@ public class AndroidFileCommands extends FileCommands {
         String dbgContext = "setGeo";
         if (!Double.isNaN(latitude) && !Double.isNaN(longitude) && (selectedItems != null) && (selectedItems.size() > 0)) {
             // in case that current activity is destroyed while running async, applicationContext will allow to finish database operation
-            File[] files = SelectedFiles.getFiles(selectedItems.getFileNames());
+            File[] files = selectedItems.getFiles();
             String errorMessage = checkWriteProtected(R.string.geo_edit_menu_title, files);
 
             if (errorMessage != null) {

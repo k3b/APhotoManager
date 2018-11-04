@@ -164,7 +164,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
      */
     public int applyExifChanges(boolean move, MediaDiffCopy exifChanges, SelectedFiles selectedFiles, IProgessListener progessListener) {
         // source files are the same as dest files.
-        final File[] destFiles = SelectedFiles.getFiles(selectedFiles.getFileNames());
+        final File[] destFiles = selectedFiles.getFiles();
         return moveOrCopyFiles(move, "change_exif", exifChanges, selectedFiles, destFiles, progessListener);
     }
 
@@ -177,7 +177,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
      * @param destDirFolder where files are moved/copied to
      * @param progessListener  */
     public int moveOrCopyFilesTo(boolean move, SelectedFiles selectedFiles, File destDirFolder, IProgessListener progessListener) {
-        PhotoWorkFlowDto autoProccessData = (!LibGlobal.apmEnabled) ? null : getPhotoWorkFlowDto(destDirFolder);
+        PhotoAutoprocessingDto autoProccessData = (!LibGlobal.apmEnabled) ? null : getPhotoAutoprocessingDto(destDirFolder);
 
         return moveOrCopyFilesTo(move, selectedFiles, destDirFolder, autoProccessData, progessListener);
     }
@@ -193,7 +193,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
      * @param autoProccessData null or data for auto rename/exif data
      * @param progessListener  */
     int moveOrCopyFilesTo(boolean move, SelectedFiles selectedFiles, File destDirFolder,
-                          PhotoWorkFlowDto autoProccessData, IProgessListener progessListener) {
+                          PhotoAutoprocessingDto autoProccessData, IProgessListener progessListener) {
         boolean doNotRenameIfSourceInDestFolder = false;
         IFileNameProcessor renameProcessor = null;
         MediaDiffCopy exifChanges = null;
@@ -227,7 +227,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
         int result = 0;
         if (canProcessFile(move ? OP_MOVE : OP_COPY)) {
             if (osCreateDirIfNeccessary(destDirFolder)) {
-                File[] destFiles = createDestFiles(renameProcessor, destDirFolder, selectedFiles.getDatesPhotoTaken() , SelectedFiles.getFiles(selectedFiles.getFileNames()));
+                File[] destFiles = createDestFiles(renameProcessor, destDirFolder, selectedFiles.getDatesPhotoTaken() , selectedFiles.getFiles());
 
                 result = moveOrCopyFiles(move, (move ? "mov" : "copy"), exifChanges, selectedFiles, destFiles, progessListener);
 
@@ -258,7 +258,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                 int fileCount = destFiles.length;
 
                 Long[] ids = fotos.getIds();
-                File[] sourceFiles = SelectedFiles.getFiles(fotos.getFileNames());
+                File[] sourceFiles = fotos.getFiles();
 
                 mModifiedSrcFiles = (move) ? new ArrayList<String>() : null;
                 mModifiedDestFiles = new ArrayList<String>();
@@ -373,10 +373,10 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
         return itemCount;
     }
 
-    private PhotoWorkFlowDto getPhotoWorkFlowDto(File destDirFolder) {
-        PhotoWorkFlowDto autoProccessData = null;
+    private PhotoAutoprocessingDto getPhotoAutoprocessingDto(File destDirFolder) {
+        PhotoAutoprocessingDto autoProccessData = null;
         try {
-            autoProccessData = new PhotoWorkFlowDto().load(destDirFolder);
+            autoProccessData = new PhotoAutoprocessingDto().load(destDirFolder);
         } catch (IOException e) {
             log("cannot load .apm file for '", destDirFolder, "'. ", e.getMessage());
             autoProccessData = null;

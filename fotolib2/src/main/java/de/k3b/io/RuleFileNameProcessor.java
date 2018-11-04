@@ -75,6 +75,9 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
         set(dateFormat, name, numberFormat);
     }
 
+    /**
+     * Fix Autoprocessing/PhotoAutoprocessingDto renaming rules that contain source file direcory names.
+     */
     public RuleFileNameProcessor(RuleFileNameProcessor ancestor, File newDir) {
         this(newDir);
         if (ancestor != null) {
@@ -261,6 +264,9 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
         return result;
     }
 
+    /**
+     * Fix Autoprocessing/PhotoAutoprocessingDto renaming rules that contain source file direcory names.
+     */
     public static String translateName(RuleFileNameProcessor srcData, File outDir) {
         RuleFileNameProcessor translated = new RuleFileNameProcessor(srcData, outDir);
         return translated.mName;

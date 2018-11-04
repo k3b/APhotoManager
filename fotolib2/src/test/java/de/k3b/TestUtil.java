@@ -35,7 +35,13 @@ import de.k3b.media.MediaDTO;
 import de.k3b.tagDB.TagConverter;
 
 public class TestUtil {
+    // where unittest-files are processed
     public static final File OUTDIR_ROOT = new File("./build/test-results/metafiles");
+
+    // these test files exist as embedded resources
+    public static final String TEST_FILE_JPG_WITH_EXIF = "test-WitExtraData.jpg";
+    public static final String TEST_FILE_XMP_WITH_EXIF = "test-WitExtraData.xmp";
+    public static final String TEST_FILE_JPG_WITH_NO_EXIF = "NoExif.jpg";
 
     public static Reader createReader(String csvSrc) {
 		return new java.io.StringReader(csvSrc);
@@ -76,12 +82,23 @@ public class TestUtil {
         return inputStream;
     }
 
-    public static void saveTestResourceAs(String resourceName, File destination) throws IOException {
+    public static File saveTestResourceAs(String resourceName, File destination) throws IOException {
         InputStream sourceStream = getResourceInputStream(resourceName);
 
         FileUtils.copyReplace(sourceStream, destination);
         FileUtils.close(sourceStream,resourceName);
         destination.setLastModified(DateUtil.parseIsoDate("1972-03-04T05:06:07").getTime());
+        return destination;
+    }
+
+    public static File[] saveTestResourcesIn(File destinationFolder, String... resourceNames) throws IOException {
+        File[] result = new File[resourceNames.length];
+
+        for(int i = 0; i <resourceNames.length; i++) {
+            String resourceName = resourceNames[i];
+            result[i] = saveTestResourceAs(resourceName, new File(destinationFolder, resourceName));
+        }
+        return result;
     }
 
 }

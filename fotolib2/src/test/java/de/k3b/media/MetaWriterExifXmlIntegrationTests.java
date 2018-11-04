@@ -58,7 +58,7 @@ public class MetaWriterExifXmlIntegrationTests {
         ExifInterfaceEx.fixDateOnSave = false;
 
         File out = new File(OUTDIR,"emptyWriteEmptyExifXmpCreate.jpg");
-        TestUtil.saveTestResourceAs("NoExif.jpg", out);
+        TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_JPG_WITH_NO_EXIF, out);
 
         MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(), null, false, "JUnit"
                 , true, true, true); //exif, xmp, create
@@ -87,8 +87,8 @@ public class MetaWriterExifXmlIntegrationTests {
         ExifInterfaceEx.fixDateOnSave = false;
 
         File out = new File(OUTDIR,"existingWriteEmptyExifXmp.jpg");
-        TestUtil.saveTestResourceAs("test-WitExtraData.jpg", out);
-        TestUtil.saveTestResourceAs("test-WitExtraData.xmp", FileCommands.getSidecar(out.getAbsolutePath(), false));
+        TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_JPG_WITH_EXIF, out);
+        TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_XMP_WITH_EXIF, FileCommands.getSidecar(out.getAbsolutePath(), false));
 
         MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(), null, false, "JUnit"
                 , true, true, true); //exif, xmp, create
@@ -114,7 +114,7 @@ public class MetaWriterExifXmlIntegrationTests {
     public void existingWriteValueExifXmpCreate() throws IOException
     {
         File out = new File(OUTDIR,"existingWriteValueExifXmpCreate.jpg");
-        TestUtil.saveTestResourceAs("test-WitExtraData.jpg", out);
+        TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_JPG_WITH_EXIF, out);
 
         MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(), null, false, "JUnit"
                 , true, true, true); //exif, xmp, create
@@ -144,7 +144,7 @@ public class MetaWriterExifXmlIntegrationTests {
     public void emptyWriteValuesXmpCreate() throws IOException
     {
         File out = new File(OUTDIR,"emptyWriteValuesXmpCreate.jpg");
-        TestUtil.saveTestResourceAs("NoExif.jpg", out);
+        TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_JPG_WITH_NO_EXIF, out);
 
         MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(), null, false, "JUnit"
                 , false, true, true); //exif, xmp, create
@@ -165,7 +165,7 @@ public class MetaWriterExifXmlIntegrationTests {
     public void emptyWriteValuesExifOnly() throws IOException
     {
         File out = new File(OUTDIR,"emptyWriteValuesExifOnly.jpg");
-        TestUtil.saveTestResourceAs("NoExif.jpg", out);
+        TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_JPG_WITH_NO_EXIF, out);
 
         MetaWriterExifXml sut = MetaWriterExifXml.create(out.getAbsolutePath(), null, false, "JUnit"
                 , true, false, false); //exif, xmp, create

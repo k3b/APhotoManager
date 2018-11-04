@@ -105,6 +105,10 @@ public class SelectedFiles  {
         return result;
     }
 
+    public File[] getFiles() {
+        return SelectedFiles.getFiles(getFileNames());
+    }
+
     public int getNonEmptyNameCount() {
         int result = 0;
         if (mFileNames != null) {

@@ -52,7 +52,7 @@ public class MediaXmpSegmentIntegrationTests {
     @Before
     public void setup() throws IOException {
         // MediaXmpSegment.DEBUG = true;
-        sut = getMeta("test-WitExtraData.xmp");
+        sut = getMeta(TestUtil.TEST_FILE_XMP_WITH_EXIF);
         TimeZone.setDefault(DateUtil.UTC);
     }
 

@@ -64,7 +64,7 @@ public class JpgMetaWorkflowIntegratoinTests {
     public void shouldUpdateExistingExifWithCreateXmp() throws IOException
     {
         LibGlobal.mediaUpdateStrategy = "JXC";
-        String fileNameSrc = "test-WitExtraData.jpg";
+        String fileNameSrc = TestUtil.TEST_FILE_JPG_WITH_EXIF;
         String fileNameDest = "shouldUpdateExistingExifWithCreateXmp.jpg";
 
         File testJpg = copy(fileNameSrc, fileNameDest);

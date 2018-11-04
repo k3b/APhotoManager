@@ -19,17 +19,23 @@
 
 package de.k3b.media;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 
+import de.k3b.LibGlobal;
 import de.k3b.io.DateUtil;
 import de.k3b.io.FileUtils;
 import de.k3b.io.GeoUtil;
+import de.k3b.io.ListUtils;
 import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.tagDB.TagConverter;
@@ -39,6 +45,7 @@ import de.k3b.tagDB.TagConverter;
  */
 
 public class MediaUtil {
+    private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
 
     /** image will get this fileextension if updated from private image to public image. */
     private static final String EXT_JPG = ".jpg";
@@ -421,4 +428,56 @@ public class MediaUtil {
         }
         return notFoundValue;
     }
+
+    /** loads IMetaApi from jpg and corresponding xmp */
+    public static IMetaApi loadExifAndXmp(String fileName, String dbg_context) {
+        try {
+            MediaXmpSegment xmp = MediaXmpSegment.loadXmpSidecarContentOrNull(fileName, dbg_context);
+
+            ImageMetaReader jpg = new ImageMetaReader().load(fileName, null, xmp, dbg_context);
+
+            return jpg;
+        } catch (IOException ex) {
+            logger.error(dbg_context, "MediaUtil.loadExifAndXmp", ex);
+        }
+        return null;
+    }
+
+    /** #132: reads lat,lon,description,tags from files until tags and lat/long are found */
+    public static <T extends IMetaApi> T inferAutoprocessingExifDefaults(T result, File... files) {
+        return inferAutoprocessingExifDefaults(result, files, null,null,null, null);
+    }
+
+    /** #132: reads lat,lon,description,tags from files until tags and lat/long are found */
+    public static <T extends IMetaApi> T inferAutoprocessingExifDefaults(T result,
+                                                                         File[] files,
+                                                                         Double latitude,
+                                                                         Double longitude,
+                                                                         String description,
+                                                                         List<String> _tags) {
+        List<String> tags = (_tags == null) ? new ArrayList<String>() : _tags;
+
+        int exampleCount = files.length;
+        int index = 0;
+        while ((index < exampleCount) && ((latitude == null) || (longitude == null)  || (tags.size() == 0))) {
+            File exampleFile = files[index++];
+
+            if ((exampleFile != null) && (exampleFile.exists())) {
+                IMetaApi example = MediaUtil.loadExifAndXmp(exampleFile.getPath(),"infer defaults for autoprocessing");
+                if (example != null) {
+                    ListUtils.include(tags, example.getTags());
+                    latitude = GeoUtil.getValue(example.getLatitude(), latitude);
+                    longitude = GeoUtil.getValue(example.getLongitude(), longitude);
+                    if (StringUtils.isNullOrEmpty(description)) description = example.getDescription();
+                }
+            }
+        }
+        result.setLatitudeLongitude(latitude,longitude)
+                .setDescription(description)
+                .setTags(tags);
+
+        return result;
+    }
+
+
 }

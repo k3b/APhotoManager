@@ -55,7 +55,7 @@ public class ImageMetaReaderIntegrationTests {
     @Before
     public void setup() throws IOException {
         ImageMetaReader.DEBUG = true;
-        sut = getMeta("test-WitExtraData.jpg");
+        sut = getMeta(TestUtil.TEST_FILE_JPG_WITH_EXIF);
     }
 
     @Test

@@ -26,6 +26,8 @@ package de.k3b.media;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import de.k3b.TestUtil;
@@ -179,9 +181,26 @@ public class MediaUtilTests {
         check(null, "/path/to/file.jpg", VISIBILITY.DEFAULT);
     }
 
+
     private void check(String expected, String actual, VISIBILITY visibility) {
         Assert.assertEquals(visibility +
                 "(" + actual + ")=>" +expected, expected, MediaUtil.getModifiedPath(actual,visibility));
+    }
+
+    /***** Integrationtests via file system *********/
+    private static final File INDIR = new File(TestUtil.OUTDIR_ROOT, "MediaUtilTests");
+
+    @Test
+    public void shouldInferAutoprocessingExifDefaultsFromExistingFiles() throws IOException {
+        File[] jpgFilesToAnalyse = TestUtil.saveTestResourcesIn(INDIR,
+                TestUtil.TEST_FILE_JPG_WITH_NO_EXIF,
+                TestUtil.TEST_FILE_JPG_WITH_EXIF);
+        MediaAsString result = MediaUtil.inferAutoprocessingExifDefaults(new MediaAsString(),
+                jpgFilesToAnalyse);
+
+        Assert.assertEquals(
+                "regression: description, lat, lon, tags should be identical to " + TestUtil.TEST_FILE_JPG_WITH_EXIF,
+                ",,ImageDescription,,27.818611,-15.764444,\"Marker1, Marker2\"", result.toString());
     }
 
 }

@@ -96,7 +96,7 @@ public class ExifInterfaceIntegrationTests {
     @Test
     public void shouldWriteExifToNonExif() throws IOException
     {
-        String fileNameSrc = "NoExif.jpg";
+        String fileNameSrc = TestUtil.TEST_FILE_JPG_WITH_NO_EXIF;
         String fileNameDest = "shouldWriteExifToNonExif.jpg";
 
         ExifInterface sutRead = assertUpdateSameAsAfterWrite(fileNameDest, fileNameSrc, testItems);
@@ -107,7 +107,7 @@ public class ExifInterfaceIntegrationTests {
     @Test
     public void shouldUpdateExistingExif() throws IOException
     {
-        String fileNameSrc = "test-WitExtraData.jpg";
+        String fileNameSrc = TestUtil.TEST_FILE_JPG_WITH_EXIF;
         String fileNameDest = "shouldUpdateExistingExif.jpg";
 
         ExifInterface sutRead = assertUpdateSameAsAfterWrite(fileNameDest, fileNameSrc, testItems);
@@ -120,7 +120,7 @@ public class ExifInterfaceIntegrationTests {
     @Ignore("Not implemented ExifInterface.UserComment=null for tif-com-segment is not implemented :-(")
     public void shouldClearUsercommentFromExistingExif() throws IOException
     {
-        String fileNameSrc = "test-WitExtraData.jpg";
+        String fileNameSrc = TestUtil.TEST_FILE_JPG_WITH_EXIF;
         String fileNameDest = "shouldClearUsercommentFromExistingExif.jpg";
 
         HashMap<String, String> testItems = new HashMap<String, String>();

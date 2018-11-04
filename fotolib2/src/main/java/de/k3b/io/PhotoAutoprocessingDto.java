@@ -34,17 +34,20 @@ import de.k3b.media.IMetaApi;
 import de.k3b.media.MediaAsString;
 
 /**
- * #93: Persistable data for autoproccessing images (auto-rename, auto-add-exif)
+ * #93: Persistable data for autoproccessing images (auto-rename, auto-add-exif).
+ *
+ * Implemented as Properties file.
  *
  * Created by k3b on 04.08.2017.
  */
 
-public class PhotoWorkFlowDto {
+public class PhotoAutoprocessingDto {
     private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
 
     /** added to every serialized item if != null. Example "Generated on 2015-10-19 with myApp Version 0815." */
     public static String sFileComment = "";
 
+    // KEY_xxx for properties file
     private static final String KEY_DATE_FORMAT     = "DateFormat";
     private static final String KEY_NAME            = "Name";
     private static final String KEY_NUMBER_FORMAT   = "NumberFormat";
@@ -54,16 +57,16 @@ public class PhotoWorkFlowDto {
     private final Properties properties;
     private File outDir;
 
-    public PhotoWorkFlowDto() {
+    public PhotoAutoprocessingDto() {
         this(null, new Properties());
     }
 
-    public PhotoWorkFlowDto(File outDir, Properties properties) {
+    public PhotoAutoprocessingDto(File outDir, Properties properties) {
         this.outDir = outDir;
         this.properties = properties;
     }
 
-    public PhotoWorkFlowDto load(File outDir) throws IOException {
+    public PhotoAutoprocessingDto load(File outDir) throws IOException {
         this.outDir = outDir;
         File apm = getApmFile();
         properties.clear();
@@ -77,24 +80,30 @@ public class PhotoWorkFlowDto {
                 }
                 return this;
             } finally {
-                FileUtils.close(inputStream,"PhotoWorkFlowDto.load(" + apm + ")");
+                FileUtils.close(inputStream,"PhotoAutoprocessingDto.load(" + apm + ")");
             }
         }
         return null;
     }
 
-    public void paste(PhotoWorkFlowDto newData) {
+    public void paste(PhotoAutoprocessingDto newData) {
         if (newData != null) {
             this.setDateFormat(newData.getDateFormat());
             this.setNumberFormat(newData.getNumberFormat());
             this.setMediaDefaults(newData.getMediaDefaults());
+
+            // Fix Autoprocessing/PhotoAutoprocessingDto renaming rules that contain source file direcory names.
             String name = getTranslateName(newData);
             this.setName(name);
         }
 
     }
 
-    public String getTranslateName(PhotoWorkFlowDto newData) {
+    /**
+     * Get the fixed rename-name part in case Autoprocessing/PhotoAutoprocessingDto was moved/copied to a
+     * different dir and renaming rules contain source file direcory names.
+     */
+    public String getTranslateName(PhotoAutoprocessingDto newData) {
         if (newData != null) {
             final RuleFileNameProcessor srcData = (RuleFileNameProcessor) newData.createFileNameProcessor();
             if (srcData != null) {
@@ -127,25 +136,25 @@ public class PhotoWorkFlowDto {
                     logger.debug(this.getClass().getSimpleName() + ": save to " + apm + ":" + this);
                 }
                 stream = new FileOutputStream(apm);
-                properties.store(stream, PhotoWorkFlowDto.sFileComment);
+                properties.store(stream, PhotoAutoprocessingDto.sFileComment);
             } finally {
-                FileUtils.close(stream, "PhotoWorkFlowDto.load(" + apm + ")");
+                FileUtils.close(stream, "PhotoAutoprocessingDto.load(" + apm + ")");
             }
         }
     }
 
     /** Android support: to persist state and to transfer activites via intent.  */
-    public static PhotoWorkFlowDto load(Serializable content) {
-        PhotoWorkFlowDto photoWorkFlowDto = null;
+    public static PhotoAutoprocessingDto load(Serializable content) {
+        PhotoAutoprocessingDto photoAutoprocessingDto = null;
         if (content instanceof Properties ) {
             Properties properties = (Properties) content;
             String outDir = properties.getProperty(KEY_OUT_DIR);
-            photoWorkFlowDto = new PhotoWorkFlowDto((outDir != null) ? new File(outDir) : null, properties);
+            photoAutoprocessingDto = new PhotoAutoprocessingDto((outDir != null) ? new File(outDir) : null, properties);
         }
         if (LibGlobal.debugEnabled) {
-            logger.debug(PhotoWorkFlowDto.class.getSimpleName() + ": load De-Serialize:" + photoWorkFlowDto);
+            logger.debug(PhotoAutoprocessingDto.class.getSimpleName() + ": load De-Serialize:" + photoAutoprocessingDto);
         }
-        return photoWorkFlowDto;
+        return photoAutoprocessingDto;
     }
 
     /** Android support: to persist state and to transfer activites via intent */
@@ -162,7 +171,7 @@ public class PhotoWorkFlowDto {
     }
 
     /** DateFormat part for {@link RuleFileNameProcessor} */
-    public PhotoWorkFlowDto setDateFormat(String dateFormat) {
+    public PhotoAutoprocessingDto setDateFormat(String dateFormat) {
         setProperty(KEY_DATE_FORMAT,dateFormat);
         return this;
     }
@@ -173,7 +182,7 @@ public class PhotoWorkFlowDto {
     }
 
     /**  fixed-Name part for {@link RuleFileNameProcessor} */
-    public PhotoWorkFlowDto setName(String Name) {
+    public PhotoAutoprocessingDto setName(String Name) {
         setProperty(KEY_NAME,Name);
         return this;
     }
@@ -184,7 +193,7 @@ public class PhotoWorkFlowDto {
     }
 
     /**  NumberFormat part for {@link RuleFileNameProcessor} */
-    public PhotoWorkFlowDto setNumberFormat(String NumberFormat) {
+    public PhotoAutoprocessingDto setNumberFormat(String NumberFormat) {
         setProperty(KEY_NUMBER_FORMAT,NumberFormat);
         return this;
     }
@@ -192,7 +201,7 @@ public class PhotoWorkFlowDto {
     public File getOutDir() {
         return outDir;
     }
-    public PhotoWorkFlowDto setOutDir(File outDir) {
+    public PhotoAutoprocessingDto setOutDir(File outDir) {
         this.outDir = outDir;
         return this;
     }
@@ -201,12 +210,14 @@ public class PhotoWorkFlowDto {
         return new RuleFileNameProcessor(getDateFormat(), getName(), getNumberFormat(), getOutDir());
     }
 
+    /** exif data that should be applied to every jpg file */
     public IMetaApi getMediaDefaults() {
         String mediaDefaultString = getProperty(KEY_EXIF);
         return (mediaDefaultString == null) ? null : new MediaAsString().fromString(mediaDefaultString);
     }
 
-    public PhotoWorkFlowDto setMediaDefaults(IMetaApi mediaDefaults) {
+    /** exif data that should be applied to every jpg file */
+    public PhotoAutoprocessingDto setMediaDefaults(IMetaApi mediaDefaults) {
         String mediaDefaultString = null;
         if (mediaDefaults != null) {
             mediaDefaultString = (mediaDefaults instanceof MediaAsString)
