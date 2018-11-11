@@ -38,6 +38,10 @@ public interface IGalleryFilter extends IGeoRectangle {
 
     long getDateMax();
 
+    long getDateModifiedMin();
+
+    long getDateModifiedMax();
+
     /** number defining current sorting */
     int getSortID();
 

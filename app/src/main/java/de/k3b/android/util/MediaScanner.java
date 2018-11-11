@@ -75,9 +75,6 @@ abstract public class MediaScanner  {
     protected static final String DB_LATITUDE = MediaStore.Images.Media.LATITUDE;
     */
 
-    // the DB_XXXX fields are updated directly by the scanner
-    // private fields are updated by base scanner
-    private static final String DB_DATE_MODIFIED = MediaStore.MediaColumns.DATE_MODIFIED;
     private static final String DB_SIZE = MediaStore.MediaColumns.SIZE;
     private static final String DB_WIDTH = MediaStore.MediaColumns.WIDTH;
     private static final String DB_HEIGHT = MediaStore.MediaColumns.HEIGHT;
@@ -342,7 +339,7 @@ abstract public class MediaScanner  {
         MediaXmpSegment xmpContent = MediaXmpSegment.loadXmpSidecarContentOrNull(absoluteJpgPath, "getExifFromFile");
         final long xmpFilelastModified = getXmpFilelastModified(xmpContent);
 
-        values.put(DB_DATE_MODIFIED, jpgFile.lastModified() / 1000);
+        values.put(FotoSql.SQL_COL_LAST_MODIFIED, jpgFile.lastModified() / 1000);
         values.put(DB_SIZE, jpgFile.length());
 
         if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) && mWidth > 0 && mHeight > 0) {
@@ -448,7 +445,7 @@ abstract public class MediaScanner  {
     public static String setFileFields(ContentValues values, File file) {
         String newAbsolutePath = FileUtils.tryGetCanonicalPath(file, file.getAbsolutePath());
         setPathRelatedFieldsIfNeccessary(values, newAbsolutePath, null);
-        values.put(DB_DATE_MODIFIED, file.lastModified() / 1000);
+        values.put(FotoSql.SQL_COL_LAST_MODIFIED, file.lastModified() / 1000);
         values.put(DB_SIZE, file.length());
         return newAbsolutePath;
     }

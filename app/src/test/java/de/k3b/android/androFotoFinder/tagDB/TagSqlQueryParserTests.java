@@ -36,7 +36,7 @@ import static org.junit.Assert.*;
 public class TagSqlQueryParserTests {
     @Test
     public void shouldParseFull() throws Exception {
-        String FILTER_STRING = "1.23,2.34;3.45,4.56;2001-02-03,2005-12-31;/some/path/;q,^;%filter%;tag1,tag2,tag3;utag1,utag2,utag3;notags;3;4";
+        String FILTER_STRING = "1.23,2.34;3.45,4.56;2001-02-03,2005-12-31;/some/path/;q,^;%filter%;tag1,tag2,tag3;utag1,utag2,utag3;notags;3;4;2004-02-03,2009-12-31";
         assertFilterQueryFilter(FILTER_STRING);
     }
 
@@ -98,6 +98,7 @@ public class TagSqlQueryParserTests {
     public void assertGFilterQueryGFilter() {
         assertGFilterQueryGFilter("InAnyField", createPublicGalleryFilterParameter().setInAnyField("%1% %2%"));
         assertGFilterQueryGFilter("Date", createPublicGalleryFilterParameter().setDate("1997-12-24","2005-11-30"));
+        assertGFilterQueryGFilter("Date Modified", createPublicGalleryFilterParameter().setDateModified("1999-12-24","2009-11-30"));
         assertGFilterQueryGFilter("Path", createPublicGalleryFilterParameter().setPath("%1%"));
         GalleryFilterParameter gfLL = createPublicGalleryFilterParameter();
         gfLL.setLatitude("12.34", "34.56").setLogitude("45.67", "56.78");

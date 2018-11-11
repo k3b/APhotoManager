@@ -213,6 +213,17 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                         LibGlobal.datePickerUseDecade, path);
             }
         });
+        cmd = (Button) findViewById(R.id.cmd_date_modified);
+        cmd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String path = getAsGalleryFilter().getDateModifiedPath();
+                showDirectoryPickerForFilterParamValue(
+                        mDebugPrefix + " date modified picker " + path,
+                        FotoSql.queryGroupByDateModified, false,
+                        LibGlobal.datePickerUseDecade, path);
+            }
+        });
         cmd = (Button) findViewById(R.id.cmd_select_lat_lon);
         cmd.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -342,6 +353,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         loadLastFilter(sharedPref, FotoSql.QUERY_TYPE_GALLERY);
         loadLastFilter(sharedPref, FotoSql.QUERY_TYPE_GROUP_DATE);
         loadLastFilter(sharedPref, FotoSql.QUERY_TYPE_GROUP_PLACE);
+        loadLastFilter(sharedPref, FotoSql.QUERY_TYPE_GROUP_DATE_MODIFIED);
     }
 
     private void loadLastFilter(SharedPreferences sharedPref, int queryTypeID) {
@@ -394,6 +406,8 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
 
         private EditText mDateFrom;
         private EditText mDateTo;
+        private EditText mDateModifiedFrom;
+        private EditText mDateModifiedTo;
         private EditText mLongitudeFrom;
         private EditText mLongitudeTo;
         private EditText mLatitudeTo;
@@ -415,6 +429,8 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             this.mTagsExclude     = (EditText) findViewById(R.id.edit_tags_exclude);
             this.mDateFrom = (EditText) findViewById(R.id.edit_date_from);
             this.mDateTo = (EditText) findViewById(R.id.edit_date_to);
+            this.mDateModifiedFrom = (EditText) findViewById(R.id.edit_date_modified_from);
+            this.mDateModifiedTo = (EditText) findViewById(R.id.edit_date_modified_to);
             this.mLatitudeFrom = (EditText) findViewById(R.id.edit_latitude_from);
             this.mLatitudeTo = (EditText) findViewById(R.id.edit_latitude_to);
             this.mLongitudeFrom = (EditText) findViewById(R.id.edit_longitude_from);
@@ -451,13 +467,18 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                     R.id.cmd_path_history,
                     R.id.cmd_date_from_history,
                     R.id.cmd_date_to_history,
+                    R.id.cmd_date_modified_from_history,
+                    R.id.cmd_date_modified_to_history,
                     R.id.cmd_lat_from_history, R.id.cmd_lat_to_history, R.id.cmd_lon_from_history, R.id.cmd_lon_to_history ,
                     R.id.cmd_any_history,
                     R.id.cmd_tags_include_history,
                     R.id.cmd_tags_exclude_history} ,
                     mPath ,
                     mDateFrom ,
-                    mDateTo, mLatitudeFrom, mLatitudeTo, mLongitudeFrom, mLongitudeTo,
+                    mDateTo,
+                    mDateModifiedFrom ,
+                    mDateModifiedTo,
+                    mLatitudeFrom, mLatitudeTo, mLongitudeFrom, mLongitudeTo,
                     mAny             ,
                     mTagsInclude     ,
                     mTagsExclude);
@@ -508,7 +529,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
 
         private void show(boolean checked, int... ids) {
             for(int id:ids)
-                findViewById(id).setVisibility((!checked) ? View.VISIBLE : View.INVISIBLE );
+                findViewById(id).setVisibility((!checked) ? View.VISIBLE : View.GONE );
         }
 
         /** minimum latitude, in degrees north. -90..+90 */
@@ -570,6 +591,16 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         }
 
         @Override
+        public long getDateModifiedMin() {
+            return convertDate(mDateModifiedFrom.getText().toString());
+        }
+
+        @Override
+        public long getDateModifiedMax() {
+            return convertDate(mDateModifiedTo.getText().toString());
+        }
+
+        @Override
         public boolean isNonGeoOnly() {
             return mWithNoGeoInfo.isChecked();
         }
@@ -615,6 +646,8 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                 mTagsExclude    .setText(GalleryFilterParameter.convertList(src.getTagsAllExcluded()));
                 mDateFrom.setText(convertDate(src.getDateMin()));
                 mDateTo.setText(convertDate(src.getDateMax()));
+                mDateModifiedFrom.setText(convertDate(src.getDateModifiedMin()));
+                mDateModifiedTo.setText(convertDate(src.getDateModifiedMax()));
                 mWithNoGeoInfo.setChecked(src.isNonGeoOnly());
                 mWithNoTags.setChecked(src.isWithNoTags());
                 mRatingBar.setRating(src.getRatingMin());
@@ -840,7 +873,10 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
 
             int menuResId = 0; // no menu in app lock mode
             if (!LockScreen.isLocked(this)) {
-                menuResId = (queryId == FotoSql.QUERY_TYPE_GROUP_DATE) ? R.menu.menu_context_datepicker :  R.menu.menu_context_dirpicker;
+                menuResId = R.menu.menu_context_dirpicker;
+                if ((queryId == FotoSql.QUERY_TYPE_GROUP_DATE) || (queryId == FotoSql.QUERY_TYPE_GROUP_DATE)) {
+                    menuResId = R.menu.menu_context_datepicker;
+                }
             }
             dlg.setContextMenuId(menuResId);
 
