@@ -95,9 +95,10 @@
             android:layout_alignBaseline="@+id/lbl_any"
             android:layout_alignBottom="@+id/cmd_any"
             android:layout_alignTop="@+id/cmd_any"
-            android:layout_toEndOf="@+id/lbl_any"
             android:layout_toLeftOf="@+id/cmd_any_history"
+            android:layout_toStartOf="@+id/cmd_any_history"
             android:layout_toRightOf="@+id/lbl_any"
+            android:layout_toEndOf="@+id/lbl_any"
             android:ellipsize="end"
             android:inputType="text"
             android:lines="1"
@@ -114,8 +115,8 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_below="@+id/edit_any"
-            android:layout_toEndOf="@+id/cmd_any_history"
             android:layout_toRightOf="@+id/cmd_any_history"
+            android:layout_toEndOf="@+id/cmd_any_history"
             android:text="@string/btn_popup" />
 
         <TextView
@@ -135,10 +136,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/cmd_path"
-            android:layout_toEndOf="@+id/edit_any"
             android:layout_toLeftOf="@+id/cmd_any"
-            android:layout_toRightOf="@+id/edit_any"
             android:layout_toStartOf="@+id/cmd_any"
+            android:layout_toRightOf="@+id/edit_any"
+            android:layout_toEndOf="@+id/edit_any"
             android:background="@android:drawable/ic_menu_more" />
 
         <EditText
@@ -150,10 +151,10 @@
             android:layout_alignBottom="@+id/cmd_path"
             android:layout_below="@+id/edit_any"
             android:layout_toLeftOf="@+id/cmd_path_history"
-            android:layout_toRightOf="@+id/lbl_path"
             android:layout_toStartOf="@+id/cmd_path_history"
+            android:layout_toRightOf="@+id/lbl_path"
+            android:layout_toEndOf="@+id/lbl_path"
             android:ellipsize="end"
-
             android:inputType="text"
             android:lines="1"
             android:maxLines="1"
@@ -167,11 +168,11 @@
             android:id="@+id/cmd_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/edit_path"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:layout_below="@+id/edit_path"
-            android:layout_toEndOf="@+id/cmd_any_history"
             android:layout_toRightOf="@+id/cmd_any_history"
+            android:layout_toEndOf="@+id/cmd_any_history"
             android:text="@string/btn_popup" />
 
         <TextView
@@ -190,10 +191,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/cmd_date"
-            android:layout_toEndOf="@+id/edit_any"
             android:layout_toLeftOf="@+id/cmd_any"
-            android:layout_toRightOf="@+id/edit_any"
             android:layout_toStartOf="@+id/cmd_any"
+            android:layout_toRightOf="@+id/edit_any"
+            android:layout_toEndOf="@+id/edit_any"
             android:background="@android:drawable/ic_menu_more" />
 
         <EditText
@@ -204,8 +205,9 @@
             android:layout_alignBottom="@+id/cmd_date"
             android:layout_below="@+id/edit_path"
             android:layout_toLeftOf="@+id/cmd_date_from_history"
-            android:layout_toRightOf="@+id/lbl_date"
             android:layout_toStartOf="@+id/cmd_date_from_history"
+            android:layout_toRightOf="@+id/lbl_date"
+            android:layout_toEndOf="@+id/lbl_date"
             android:ems="10"
             android:inputType="date" />
 
@@ -227,8 +229,9 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/cmd_date"
             android:layout_toLeftOf="@+id/cmd_date_from_history"
-            android:layout_toRightOf="@+id/lbl_date"
             android:layout_toStartOf="@+id/cmd_date_from_history"
+            android:layout_toRightOf="@+id/lbl_date"
+            android:layout_toEndOf="@+id/lbl_date"
             android:ems="10"
             android:inputType="date" />
         <!-- -->
@@ -248,6 +251,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/edit_date_to"
             android:layout_toRightOf="@+id/chk_public"
+            android:layout_toEndOf="@+id/chk_public"
             android:text="@string/lbl_images_private" />
 
         <!-- -->
@@ -266,11 +270,11 @@
             android:id="@+id/cmd_tags_include"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/chk_with_no_tags"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:layout_below="@+id/chk_with_no_tags"
-            android:layout_toEndOf="@+id/cmd_any_history"
             android:layout_toRightOf="@+id/cmd_any_history"
+            android:layout_toEndOf="@+id/cmd_any_history"
             android:text="@string/btn_popup" />
 
         <TextView
@@ -290,10 +294,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/cmd_tags_include"
-            android:layout_toEndOf="@+id/edit_any"
+            android:layout_toStartOf="@+id/cmd_any"
             android:layout_toLeftOf="@+id/cmd_any"
             android:layout_toRightOf="@+id/edit_any"
-            android:layout_toStartOf="@+id/cmd_any"
+            android:layout_toEndOf="@+id/edit_any"
             android:background="@android:drawable/ic_menu_more" />
 
         <EditText
@@ -305,9 +309,9 @@
             android:layout_alignBottom="@+id/cmd_tags_include"
             android:layout_below="@+id/chk_with_no_tags"
             android:layout_toLeftOf="@+id/cmd_tags_include_history"
-            android:layout_toRightOf="@+id/lbl_tags_include"
-
             android:layout_toStartOf="@+id/cmd_tags_include_history"
+            android:layout_toRightOf="@+id/lbl_tags_include"
+            android:layout_toEndOf="@+id/lbl_tags_include"
             android:inputType="text"
             android:lines="2"
             android:maxLines="2"
@@ -319,11 +323,11 @@
             android:id="@+id/cmd_tags_exclude"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/edit_tags_include"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:layout_below="@+id/edit_tags_include"
-            android:layout_toEndOf="@+id/cmd_any_history"
             android:layout_toRightOf="@+id/cmd_any_history"
+            android:layout_toEndOf="@+id/cmd_any_history"
             android:text="@string/btn_popup"
             android:visibility="invisible" />
 
@@ -344,10 +348,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/cmd_tags_exclude"
-            android:layout_toEndOf="@+id/edit_any"
             android:layout_toLeftOf="@+id/cmd_any"
-            android:layout_toRightOf="@+id/edit_any"
             android:layout_toStartOf="@+id/cmd_any"
+            android:layout_toRightOf="@+id/edit_any"
+            android:layout_toEndOf="@+id/edit_any"
             android:background="@android:drawable/ic_menu_more" />
 
         <EditText
@@ -359,8 +363,9 @@
             android:layout_alignBottom="@+id/cmd_tags_exclude"
             android:layout_below="@+id/edit_tags_include"
             android:layout_toLeftOf="@+id/cmd_tags_exclude_history"
-            android:layout_toRightOf="@+id/lbl_tags_exclude"
             android:layout_toStartOf="@+id/cmd_tags_exclude_history"
+            android:layout_toRightOf="@+id/lbl_tags_exclude"
+            android:layout_toEndOf="@+id/lbl_tags_exclude"
             android:ellipsize="end"
 
             android:inputType="text"
@@ -413,8 +418,8 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_below="@+id/chk_with_no_geo"
-            android:layout_toEndOf="@+id/cmd_any_history"
             android:layout_toRightOf="@+id/cmd_any_history"
+            android:layout_toEndOf="@+id/cmd_any_history"
             android:text="@string/btn_popup" />
 
         <TextView
@@ -434,10 +439,10 @@
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/cmd_select_lat_lon"
 
-            android:layout_toEndOf="@+id/edit_any"
             android:layout_toLeftOf="@+id/cmd_any"
-            android:layout_toRightOf="@+id/edit_any"
             android:layout_toStartOf="@+id/cmd_any"
+            android:layout_toRightOf="@+id/edit_any"
+            android:layout_toEndOf="@+id/edit_any"
             android:background="@android:drawable/ic_menu_more" />
 
         <EditText
@@ -449,6 +454,7 @@
             android:layout_alignLeft="@+id/edit_date_to"
             android:layout_alignStart="@+id/edit_date_to"
             android:layout_toLeftOf="@+id/cmd_lat_from_history"
+            android:layout_toStartOf="@+id/cmd_lat_from_history"
             android:ems="10"
             android:inputType="numberDecimal|numberSigned" />
 
@@ -458,19 +464,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/cmd_select_lat_lon"
-            android:layout_toEndOf="@+id/edit_any"
             android:layout_toLeftOf="@+id/cmd_any"
-            android:layout_toRightOf="@+id/edit_any"
             android:layout_toStartOf="@+id/cmd_any"
+            android:layout_toRightOf="@+id/edit_any"
+            android:layout_toEndOf="@+id/edit_any"
             android:background="@android:drawable/ic_menu_more" />
 
         <EditText
             android:id="@+id/edit_latitude_to"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/cmd_select_lat_lon"
             android:layout_alignLeft="@+id/edit_latitude_from"
             android:layout_alignStart="@+id/edit_latitude_from"
-            android:layout_below="@+id/cmd_select_lat_lon"
             android:layout_toLeftOf="@+id/cmd_lat_to_history"
             android:layout_toStartOf="@+id/cmd_lat_to_history"
             android:ems="10"
@@ -493,20 +499,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/edit_latitude_to"
-            android:layout_toEndOf="@+id/edit_any"
             android:layout_toLeftOf="@+id/cmd_any"
-            android:layout_toRightOf="@+id/edit_any"
             android:layout_toStartOf="@+id/cmd_any"
+            android:layout_toRightOf="@+id/edit_any"
+            android:layout_toEndOf="@+id/edit_any"
             android:background="@android:drawable/ic_menu_more" />
 
         <EditText
             android:id="@+id/edit_longitude_from"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/edit_latitude_to"
             android:layout_alignBaseline="@+id/lbl_longitude"
             android:layout_alignLeft="@+id/edit_latitude_to"
+            android:layout_toStartOf="@+id/cmd_lon_from_history"
             android:layout_alignStart="@+id/edit_latitude_to"
-            android:layout_below="@+id/edit_latitude_to"
             android:layout_toLeftOf="@+id/cmd_lon_from_history"
             android:ems="10"
             android:inputType="numberDecimal|numberSigned" />
@@ -531,6 +538,7 @@
             android:layout_alignStart="@+id/edit_longitude_from"
             android:layout_below="@+id/edit_longitude_from"
             android:layout_toLeftOf="@+id/cmd_lon_from_history"
+            android:layout_toStartOf="@+id/cmd_lon_from_history"
             android:ems="10"
             android:inputType="numberDecimal|numberSigned" />
 

@@ -262,5 +262,14 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
     -->
 
     <string name="settings_bookmark_dir_title">Bookmark folder</string>
+
+    <!-- #108: Backup to Zip-file -->
+    <string name="backup_title">Backup</string>
+
+    <string name="lbl_zip_out">Output Zip</string>
+    <string name="lbl_zip_dir">Folder</string>
+    <string name="lbl_zip_name">File</string>
+    <string name="lbl_zip_rel_path">Generate Zip-Subfolders below</string>
+
 </resources>
 
