@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+ * Copyright (c) 2018 by k3b.
+ *
+ * This file is part of AndroFotoFinder / #APhotoManager.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
+
+ lbl_date_modified
+ edit_date_modified_from
+ edit_filter
+
+ lbl_zip_out
+ lbl_zip_dir edit_zip_dir cmd_zip_dir_history cmd_zip_dir
+ edit_zip_name
+
+ -->
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent" android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        tools:context="de.k3b.android.androFotoFinder.BackupActivity">
+
+        <!-- -->
+
+        <TextView android:id="@+id/lbl_zip_out"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/lbl_zip_out"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            />
+
+        <!-- -->
+        <TextView android:id="@+id/lbl_zip_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/lbl_zip_out"
+            android:text="@string/lbl_zip_name"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <EditText android:id="@+id/edit_zip_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/lbl_zip_name"
+            android:layout_alignLeft="@+id/edit_zip_dir"
+            android:layout_alignStart="@+id/edit_zip_dir"
+            android:layout_below="@+id/lbl_zip_out"
+            android:layout_toLeftOf="@+id/cmd_lon_from_history"
+            android:ems="10"
+            android:inputType="numberDecimal|numberSigned" />
+
+        <ImageButton android:id="@+id/cmd_lon_from_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/edit_zip_name"
+            android:layout_toEndOf="@+id/edit_zip_dir"
+            android:layout_toLeftOf="@+id/cmd_zip_dir"
+            android:layout_toRightOf="@+id/edit_zip_dir"
+            android:layout_toStartOf="@+id/cmd_zip_dir"
+            android:background="@android:drawable/ic_menu_more" />
+
+        <!-- -->
+
+        <Button android:id="@+id/cmd_zip_dir"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_popup"
+            android:layout_below="@+id/edit_zip_name"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            />
+
+        <TextView android:id="@+id/lbl_zip_dir"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/edit_zip_name"
+            android:layout_alignBaseline="@+id/cmd_zip_dir"
+            android:layout_alignParentLeft="true"
+            android:text="@string/lbl_zip_dir"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <ImageButton android:id="@+id/cmd_zip_dir_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/cmd_zip_dir"
+            android:layout_toLeftOf="@+id/cmd_zip_dir"
+            android:layout_toStartOf="@+id/cmd_zip_dir"
+            android:background="@android:drawable/ic_menu_more" />
+
+        <EditText android:id="@+id/edit_zip_dir"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/edit_zip_name"
+            android:layout_alignBaseline="@+id/lbl_zip_dir"
+            android:layout_alignBottom="@+id/cmd_zip_dir"
+            android:layout_alignTop="@+id/cmd_zip_dir"
+            android:layout_toEndOf="@+id/lbl_zip_dir"
+            android:layout_toLeftOf="@+id/cmd_zip_dir_history"
+            android:layout_toRightOf="@+id/lbl_zip_dir"
+            android:ellipsize="end"
+            android:inputType="text"
+            android:lines="1"
+            android:maxLines="1"
+            android:nestedScrollingEnabled="false"
+            android:singleLine="true"
+            tools:ignore="UnusedAttribute" />
+
+
+        <!-- -->
+
+        <TextView android:id="@+id/lbl_zip_rel_path"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/edit_zip_dir"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:text="@string/lbl_zip_rel_path"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <!-- -->
+        <Button android:id="@+id/cmd_zip_rel_path"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/lbl_zip_rel_path"
+            android:layout_toRightOf="@+id/cmd_zip_dir_history"
+            android:layout_toEndOf="@+id/cmd_zip_dir_history"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:text="@string/btn_popup" />
+
+        <ImageButton android:id="@+id/cmd_zip_rel_path_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/cmd_zip_rel_path"
+            android:layout_toLeftOf="@+id/cmd_zip_dir"
+            android:layout_toStartOf="@+id/cmd_zip_dir"
+            android:layout_toRightOf="@+id/edit_zip_dir"
+            android:layout_toEndOf="@+id/edit_zip_dir"
+            android:background="@android:drawable/ic_menu_more" />
+
+        <EditText android:id="@+id/edit_zip_rel_path"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/lbl_zip_rel_path"
+            android:layout_alignBottom="@+id/cmd_zip_rel_path"
+            android:layout_toEndOf="@+id/lbl_zip_dir"
+            android:layout_toLeftOf="@+id/cmd_zip_dir_history"
+            android:layout_toRightOf="@+id/lbl_zip_dir"
+            android:layout_toStartOf="@+id/cmd_zip_dir_history"
+            android:ems="10"
+            android:inputType="numberDecimal|numberSigned" />
+
+        <!-- -->
+
+        <View android:id="@+id/line_zip_modified"
+            android:layout_height="2dp"
+            android:layout_width="fill_parent"
+            android:layout_below="@+id/edit_zip_rel_path"
+            android:background="#c0c0c0"
+            android:layout_marginBottom="@dimen/line_margin"
+            android:layout_marginTop="@dimen/line_margin"
+            />
+        <!-- -->
+
+        <TextView android:id="@+id/lbl_when"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/line_zip_modified"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:text="@string/lbl_when"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+        <TextView android:id="@+id/lbl_date_modified"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/line_zip_modified"
+            android:layout_toEndOf="@+id/lbl_when"
+            android:layout_toRightOf="@+id/lbl_when"
+            android:text="@string/sort_by_modification"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <!-- -->
+        <Button android:id="@+id/cmd_date_modified"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/lbl_date_modified"
+            android:layout_toEndOf="@+id/cmd_zip_dir_history"
+            android:layout_toRightOf="@+id/cmd_zip_dir_history"
+            android:text="@string/btn_popup" />
+
+        <ImageButton android:id="@+id/cmd_date_modified_from_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/cmd_date_modified"
+            android:layout_toEndOf="@+id/edit_zip_dir"
+            android:layout_toLeftOf="@+id/cmd_zip_dir"
+            android:layout_toRightOf="@+id/edit_zip_dir"
+            android:layout_toStartOf="@+id/cmd_zip_dir"
+            android:background="@android:drawable/ic_menu_more" />
+
+        <EditText android:id="@+id/edit_date_modified_from"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/cmd_date_modified"
+            android:layout_below="@+id/lbl_date_modified"
+            android:layout_toEndOf="@+id/lbl_zip_dir"
+            android:layout_toLeftOf="@+id/cmd_zip_dir_history"
+            android:layout_toRightOf="@+id/lbl_zip_dir"
+            android:layout_toStartOf="@+id/cmd_zip_dir_history"
+            android:ems="10"
+            android:inputType="date" />
+
+        <!-- -->
+
+        <TextView android:id="@+id/lbl_filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/edit_date_modified_from"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:text="@string/filter_menu_title"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <!-- -->
+        <Button android:id="@+id/cmd_filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/edit_date_modified_from"
+            android:layout_toRightOf="@+id/cmd_zip_dir_history"
+            android:layout_toEndOf="@+id/cmd_zip_dir_history"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:text="@string/btn_popup" />
+
+        <ImageButton android:id="@+id/cmd_filter_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/cmd_filter"
+            android:layout_toLeftOf="@+id/cmd_zip_dir"
+            android:layout_toStartOf="@+id/cmd_zip_dir"
+            android:layout_toRightOf="@+id/edit_zip_dir"
+            android:layout_toEndOf="@+id/edit_zip_dir"
+            android:background="@android:drawable/ic_menu_more" />
+
+        <EditText android:id="@+id/edit_filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/edit_date_modified_from"
+            android:layout_alignBottom="@+id/cmd_filter"
+            android:layout_toEndOf="@+id/lbl_zip_dir"
+            android:layout_toLeftOf="@+id/cmd_zip_dir_history"
+            android:layout_toRightOf="@+id/lbl_zip_dir"
+            android:layout_toStartOf="@+id/cmd_zip_dir_history"
+            android:ems="10"
+            android:inputType="numberDecimal|numberSigned" />
+
+        <!-- -->
+
+        <View android:id="@+id/line_filter_what"
+            android:layout_height="2dp"
+            android:layout_width="fill_parent"
+            android:layout_below="@+id/edit_filter"
+            android:background="#c0c0c0"
+            android:layout_marginBottom="@dimen/line_margin"
+            android:layout_marginTop="@dimen/line_margin"
+            />
+        <!-- #108 Zip-file export/backup will be implemented later - - >
+
+        <TextView android:id="@+id/lbl_what"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/line_filter_what"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:text="@string/lbl_what"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        < ! - - - - >
+        <Spinner android:id="@+id/spin_photo_type"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/lbl_what"
+            android:layout_toEndOf="@+id/lbl_zip_dir"
+            android:layout_toRightOf="@+id/lbl_zip_dir"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerHorizontal="true"
+            android:entries="@array/pref_media_update_strategy_names"
+            />
+
+        <CheckBox android:id="@+id/chk_csv_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/spin_photo_type"
+            android:layout_toEndOf="@+id/lbl_zip_dir"
+            android:layout_toRightOf="@+id/lbl_zip_dir"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:text="@string/lbl_change_history" />
+        <CheckBox android:id="@+id/chk_apm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/chk_csv_history"
+            android:layout_toEndOf="@+id/lbl_zip_dir"
+            android:layout_toRightOf="@+id/lbl_zip_dir"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:text="@string/lbl_apm_file" />
+        < ! - - -->
+
+    </RelativeLayout>
+</ScrollView>

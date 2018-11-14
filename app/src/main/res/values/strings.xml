@@ -257,7 +257,7 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
 			replaced by android.R.string.xxx @android:string/xxx : btn_cancel btn_no btn_yes btn_okcopy_menu_title
 
     sperate boomark picker is deprecated. now open via folder picker
-        <string name="bookmark_load_from_menu_title">Load album from &#8230;</string><br/>
+        <string name="bookmark_load_from_menu_title">Load album from &#8230;</string>
 	note: with ver 0.7.0 'bookmark' will become 'virtual album'
     -->
 
@@ -266,10 +266,16 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
     <!-- #108: Backup to Zip-file -->
     <string name="backup_title">Backup</string>
 
-    <string name="lbl_zip_out">Output Zip</string>
-    <string name="lbl_zip_dir">Folder</string>
+    <string name="lbl_zip_out">Where: Output Zip</string>
     <string name="lbl_zip_name">File</string>
+    <string name="lbl_zip_dir">Folder</string>
     <string name="lbl_zip_rel_path">Generate Zip-Subfolders below</string>
 
+    <!-- when should backup start ? -->
+    <string name="lbl_when">When: </string>
+<!-- #108 Zip-file export/backup will be implemented later
+    < ! - - what type of data should be saven ? - - >
+    <string name="lbl_what">What: </string>
+-->
 </resources>
 
