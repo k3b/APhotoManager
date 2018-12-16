@@ -21,129 +21,128 @@
  */
  -->
 <resources>
-  <string name="about_summary">\"A Photo Manager\"%1$s\" について</string>
-  <string name="area_menu_title">地図表示エリアを選択</string>
-  <string name="background">背景</string>
-  <string name="bookmark_delete_answer_format">ブックマーク %1$s を削除しました。</string>
-  <string name="bookmark_delete_error_format">ブックマーク %1$s を削除できません。</string>
-  <string name="bookmark_delete_question">このブックマークを削除しますか?</string>
-  <string name="bookmark_file_comment_format">\'%1$s\' のバージョン %2$s と %3$s で生成されました。詳細は https://github.com/k3b/APhotoManager/wiki/intentapi#sql を参照してください。</string>
-  <string name="bookmark_load_from_menu_title">&#8230; からブックマークを読み込む</string>
-  <string name="bookmark_save_as_menu_title">&#8230; としてブックマークを保存</string>
-  <string name="btn_change">変更</string>
-  <string name="btn_pause">一時停止</string>
-  <string name="copy_result_format">%1$d/%2$d ファイルをコピーしました</string>
-  <string name="delete_menu_title">削除</string>
-  <string name="delete_question_message_format">"これらのファイルを完全に削除してもよろしいですか?
+    <string name="about_summary">\"A Photo Manager\"%1$s\" について</string>
+    <string name="area_menu_title">地図表示エリアを選択</string>
+    <string name="background">背景</string>
+    <string name="bookmark">アルバム</string>
+    <string name="bookmark_delete_answer_format">ブックマーク %1$s を削除しました。</string>
+    <string name="bookmark_delete_error_format">ブックマーク %1$s を削除できません。</string>
+    <string name="bookmark_delete_question">このブックマークを削除しますか?</string>
+    <string name="bookmark_file_comment_format">\'%1$s\' のバージョン %2$s と %3$s で生成されました。詳細は https://github.com/k3b/APhotoManager/wiki/intentapi#sql を参照してください。</string>
+    <string name="bookmark_save_as_menu_title">&#8230; としてブックマークを保存</string>
+    <string name="btn_change">変更</string>
+    <string name="btn_pause">一時停止</string>
+    <string name="copy_result_format">%1$d/%2$d ファイルをコピーしました</string>
+    <string name="delete_menu_title">削除</string>
+    <string name="delete_question_message_format">"これらのファイルを完全に削除してもよろしいですか?
 %1$s
 
 この操作を元に戻すことはできません。"</string>
-  <string name="delete_question_title">写真を削除しますか?</string>
-  <string name="delete_result_format">%1$d/%2$d ファイルを削除しました</string>
-  <string name="destination_copy">コピー先</string>
-  <string name="destination_move">移転先</string>
-  <string name="details_menu_title">詳細</string>
-  <string name="edit_chooser_title">写真エディターを選択</string>
-  <string name="edit_err_editor_not_found">写真エディターが見つかりません</string>
-  <string name="edit_menu_title">編集</string>
-  <string name="file_err_writeprotected">書き込み保護された \'%1$s\'。\n\n \'%2$s\' はできません。</string>
-  <string name="filter_err_invalid_date_format">\'%1$s\' は有効な日付ではありません。</string>
-  <string name="filter_err_invalid_location_format">\'%1$s\' は、有効な座標ではありません。</string>
-  <string name="filter_menu_title">フィルター</string>
-  <string name="folder_dialog_title_format">%1$s を選択</string>
-  <string name="folder_err_load_failed_format">フォルダー %1$s の読み込みに失敗しました</string>
-  <string name="folder_menu_title">フォルダーのフィルター</string>
-  <string name="gallery_title">写真</string>
-  <string name="geo_show_menu_title">地図に表示</string>
-  <string name="geo_show_as_menu_title">外部地理アプリで表示</string>
-  <string name="geo_edit_menu_title">位置情報を設定</string>
-  <string name="geo_edit_update_in_progress">選択した写真に位置情報を変更しています</string>
-  <string name="geo_picker_err_not_found">位置情報選択機能がありません</string>
-  <string name="geo_picker_title">写真の新しい位置情報を選択</string>
-  <string name="global_err_sql_message_format">SQL エラー \'%1$s\'\n\n%2$s</string>
-  <string name="global_err_sql_title_reload">無効な SQL です。デフォルトを再読み込みしています</string>
-  <string name="global_err_system">システムエラーです。終了します</string>
-  <string name="image_err_file_exists_format">\'%1$s\' というファイルは既に存在します。\n 上書きしてもよろしいですか?</string>
-  <string name="image_err_file_rename_format">ファイル \'%1$s\' の名前を変更できません。</string>
-  <string name="image_err_not_found_format">%1$s の写真が見つかりません。</string>
-  <string name="image_err_not_in_db_format">写真が、まだメディア データベース %1$s に見つかりません。%2$d の新しいファイルをスキャンしています。行方不明の写真はすぐに利用できるようになります。</string>
-  <string name="image_loading_at_position_format">"読み込み中(%1$d) …"</string>
-  <string name="image_success_update_format">%1$d の写真を更新しました。</string>
-  <string name="lbl_date">日付</string>
-  <string name="lbl_latitude_short">緯度</string>
-  <string name="lbl_longitude_short">経度</string>
-  <string name="lbl_path">パス</string>
-  <string name="lbl_with_no_geo">位置情報なし</string>
-  <string name="mk_dir_default">新しいフォルダー</string>
-  <string name="mk_dir_menu_title">フォルダーを作成</string>
-  <string name="mk_err_failed_format">%1$s を作成できません</string>
-  <string name="mk_success_format">%1$s を作成しました</string>
-  <string name="more_menu_title">さらに ...</string>
-  <string name="move_menu_title">移動</string>
-  <string name="move_result_format">%1$d/%2$d ファイルを移動しました</string>
-  <string name="osm_cright_title">Map Tiles (c) <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> 貢献者</string>
-  <string name="overwrite_question_title">上書きしますか?</string>
-  <string name="rename_menu_title">名前の変更</string>
-  <string name="rename_result_format">%1$d/%2$d ファイルの名前を変更しました</string>
-  <string name="scanner_dir_question">スキャンを開始する場所?</string>
-  <string name="scanner_err_busy">Android のメディアスキャン中の写真ファイルは処理できません。後でもう一度試してください。</string>
-  <string name="scanner_menu_title">メディア スキャン</string>
-  <string name="scanner_update_result_format">%1$d のメディア データベース項目が更新されました</string>
-  <string name="selection_status_format">%1$d を選択</string>
-  <string name="selection_none_hint">画像のフォルダーを選択すると、OK が有効になります</string>
-  <string name="selected_only_menu_title">選択したもののみ</string>
-  <string name="selection_add_all_menu_title">選択: すべての表示を追加</string>
-  <string name="selection_remove_menu_title">選択: すべての表示を削除</string>
-  <string name="settings_bookmark_dir_title">レポート フォルダー</string>
-  <string name="settings_group_debug_title">診断</string>
-  <string name="settings_debug_sql_summary">&#8230; 実行した SQL を含みます。</string>
-  <string name="settings_debug_view_item_summary">&#8230; グリッド/リストビュー項目を含みます。</string>
-  <string name="settings_debug_memory_title">LogCat メモリ消費量</string>
-  <string name="settings_debug_meta_io">LogCat jpg/xmp メタデータの読み取り/書き込み</string>
-  <string name="settings_debug_libs_summary">&#8230; of 3rd party libraries.</string>
-  <string name="settings_debug_title">LogCat その他。</string>
-  <string name="settings_debug_summary">&#8230; 他のログ メッセージを含みます。</string>
-  <string name="settings_debug_clear_title">LogCat をクリア</string>
-  <string name="settings_debug_save_title">LogCat をファイルに保存</string>
-  <string name="settings_log_folder_title">エラーログのフォルダー</string>
-  <string name="settings_image_hide_time_title">ミリ秒後に、自動アクションバー非表示</string>
-  <string name="settings_image_initialImageDetailResolutionHigh_summary">高品質の初期写真表示 (低速、より多くのメモリが必要)</string>
-  <string name="settings_image_initialImageDetailResolutionHigh_title">初期の写真表示で、品質を向上させます</string>
-  <string name="settings_image_slideshow_intervall_title">ミリ秒単位のスライド ショー間隔</string>
-  <string name="settings_locale_title">言語</string>
-  <string name="settings_locale_os_language">(デバイスの言語)</string>
-  <string name="settings_map_selmarker_max_title">最大。地図に選択マーカー</string>
-  <string name="settings_geo_history_max_title">位置情報履歴数の設定</string>
-  <string name="settings_geo_history_file_title">位置情報履歴ファイルの設定</string>
-  <string name="settings_multisel_clear_title">複数選択をクリア</string>
-  <string name="settings_multisel_clear_summary">… コピー/移動/名前の変更/… 後に。</string>
-  <string name="settings_title">設定</string>
-  <string name="share_err_not_found">送信/共有プロバイダーが見つかりません</string>
-  <string name="share_err_to_many">複数送信: 項目の件数が超過しました</string>
-  <string name="share_menu_title">共有/送信</string>
-  <string name="show_in_gallery_menu_title">新しいギャラリーに表示</string>
-  <string name="slideshow_menu_title">スライド ショー</string>
-  <string name="sort_by_date">日付</string>
-  <string name="sort_by_folder">フォルダー</string>
-  <string name="sort_by_name">名前</string>
-  <string name="sort_by_name_len">長さ</string>
-  <string name="sort_by_none">並び替えない</string>
-  <string name="sort_by_place">場所</string>
-  <string name="sort_menu_title">並べ変え</string>
-  <string name="update_result_format">%1$d/%2$d ファイルを更新しました</string>
-  <string name="zoom_to_fit_menu_title">合わせてズーム</string>
-  <string name="settings_image_thumb_if_bigger_than_title">大きな写真の幅/高さ</string>
-  <string name="settings_image_thumb_if_bigger_than_summary">写真の幅と高さがこれより大きい場合、画像の詳細表示でサムネイルを表示します。 (省メモリ、高速、ただし低品質)</string>
-  <string name="settings_image_thumb_dir_title">サムネイル フォルダー</string>
-  <string name="settings_maps_forge_enable_tile">ローカル *.map 地図ファイルを使用する</string>
-  <string name="settings_maps_forge_enable_summary">pc 経由で手動でダウンロードしたもの</string>
-  <string name="settings_maps_forge_dir_title">*.map 地図ファイル フォルダー</string>
-  <string name="show_photo">写真を表示</string>
-  <string name="fix_link_menu_title">重複を修復</string>
-  <string name="geo_picker_from_photo_title">写真から地域を選択</string>
-  <string name="geo_picker_from_map_title">地図から地域を選択</string>
-  <string name="folder_hide_images_menu_title">画像を非表示</string>
-  <string name="folder_hide_images_question_message_format">"よろしいですか?
+    <string name="delete_question_title">写真を削除しますか?</string>
+    <string name="delete_result_format">%1$d/%2$d ファイルを削除しました</string>
+    <string name="destination_copy">コピー先</string>
+    <string name="destination_move">移転先</string>
+    <string name="details_menu_title">詳細</string>
+    <string name="edit_chooser_title">写真エディターを選択</string>
+    <string name="edit_err_editor_not_found">写真エディターが見つかりません</string>
+    <string name="edit_menu_title">編集</string>
+    <string name="file_err_writeprotected">書き込み保護された \'%1$s\'。\n\n \'%2$s\' はできません。</string>
+    <string name="filter_err_invalid_date_format">\'%1$s\' は有効な日付ではありません。</string>
+    <string name="filter_err_invalid_location_format">\'%1$s\' は、有効な座標ではありません。</string>
+    <string name="filter_menu_title">フィルター</string>
+    <string name="folder_dialog_title_format">%1$s を選択</string>
+    <string name="folder_err_load_failed_format">フォルダー %1$s の読み込みに失敗しました</string>
+    <string name="folder_menu_title">フォルダーのフィルター</string>
+    <string name="gallery_title">写真</string>
+    <string name="geo_show_menu_title">地図に表示</string>
+    <string name="geo_show_as_menu_title">外部地理アプリで表示</string>
+    <string name="geo_edit_menu_title">位置情報を設定</string>
+    <string name="geo_edit_update_in_progress">選択した写真に位置情報を変更しています</string>
+    <string name="geo_picker_err_not_found">位置情報選択機能がありません</string>
+    <string name="geo_picker_title">写真の新しい位置情報を選択</string>
+    <string name="global_err_sql_message_format">SQL エラー \'%1$s\'\n\n%2$s</string>
+    <string name="global_err_sql_title_reload">無効な SQL です。デフォルトを再読み込みしています</string>
+    <string name="global_err_system">システムエラーです。終了します</string>
+    <string name="image_err_file_exists_format">\'%1$s\' というファイルは既に存在します。\n 上書きしてもよろしいですか?</string>
+    <string name="image_err_file_rename_format">ファイル \'%1$s\' の名前を変更できません。</string>
+    <string name="image_err_not_found_format">%1$s の写真が見つかりません。</string>
+    <string name="image_err_not_in_db_format">写真が、まだメディア データベース %1$s に見つかりません。%2$d の新しいファイルをスキャンしています。行方不明の写真はすぐに利用できるようになります。</string>
+    <string name="image_loading_at_position_format">"読み込み中(%1$d) …"</string>
+    <string name="image_success_update_format">%1$d の写真を更新しました。</string>
+    <string name="lbl_date">日付</string>
+    <string name="lbl_latitude_short">緯度</string>
+    <string name="lbl_longitude_short">経度</string>
+    <string name="lbl_path">パス</string>
+    <string name="lbl_with_no_geo">位置情報なし</string>
+    <string name="mk_dir_default">新しいフォルダー</string>
+    <string name="mk_dir_menu_title">フォルダーを作成</string>
+    <string name="mk_err_failed_format">%1$s を作成できません</string>
+    <string name="mk_success_format">%1$s を作成しました</string>
+    <string name="more_menu_title">さらに ...</string>
+    <string name="move_menu_title">移動</string>
+    <string name="move_result_format">%1$d/%2$d ファイルを移動しました</string>
+    <string name="osm_cright_title">Map Tiles (c) <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> 貢献者</string>
+    <string name="overwrite_question_title">上書きしますか?</string>
+    <string name="rename_menu_title">名前の変更</string>
+    <string name="rename_result_format">%1$d/%2$d ファイルの名前を変更しました</string>
+    <string name="scanner_dir_question">スキャンを開始する場所?</string>
+    <string name="scanner_err_busy">Android のメディアスキャン中の写真ファイルは処理できません。後でもう一度試してください。</string>
+    <string name="scanner_menu_title">メディア スキャン</string>
+    <string name="scanner_update_result_format">%1$d のメディア データベース項目が更新されました</string>
+    <string name="selection_status_format">%1$d を選択</string>
+    <string name="selection_none_hint">画像のフォルダーを選択すると、OK が有効になります</string>
+    <string name="selected_only_menu_title">選択したもののみ</string>
+    <string name="selection_add_all_menu_title">選択: すべての表示を追加</string>
+    <string name="selection_remove_menu_title">選択: すべての表示を削除</string>
+    <string name="settings_group_debug_title">診断</string>
+    <string name="settings_debug_sql_summary">&#8230; 実行した SQL を含みます。</string>
+    <string name="settings_debug_view_item_summary">&#8230; グリッド/リストビュー項目を含みます。</string>
+    <string name="settings_debug_memory_title">LogCat メモリ消費量</string>
+    <string name="settings_debug_meta_io">LogCat jpg/xmp メタデータの読み取り/書き込み</string>
+    <string name="settings_debug_libs_summary">&#8230; of 3rd party libraries.</string>
+    <string name="settings_debug_title">LogCat その他。</string>
+    <string name="settings_debug_summary">&#8230; 他のログ メッセージを含みます。</string>
+    <string name="settings_debug_clear_title">LogCat をクリア</string>
+    <string name="settings_debug_save_title">LogCat をファイルに保存</string>
+    <string name="settings_log_folder_title">エラーログのフォルダー</string>
+    <string name="settings_image_hide_time_title">ミリ秒後に、自動アクションバー非表示</string>
+    <string name="settings_image_initialImageDetailResolutionHigh_summary">高品質の初期写真表示 (低速、より多くのメモリが必要)</string>
+    <string name="settings_image_initialImageDetailResolutionHigh_title">初期の写真表示で、品質を向上させます</string>
+    <string name="settings_image_slideshow_intervall_title">ミリ秒単位のスライド ショー間隔</string>
+    <string name="settings_locale_title">言語</string>
+    <string name="settings_locale_os_language">(デバイスの言語)</string>
+    <string name="settings_map_selmarker_max_title">最大。地図に選択マーカー</string>
+    <string name="settings_geo_history_max_title">位置情報履歴数の設定</string>
+    <string name="settings_geo_history_file_title">位置情報履歴ファイルの設定</string>
+    <string name="settings_multisel_clear_title">複数選択をクリア</string>
+    <string name="settings_multisel_clear_summary">… コピー/移動/名前の変更/… 後に。</string>
+    <string name="settings_title">設定</string>
+    <string name="share_err_not_found">送信/共有プロバイダーが見つかりません</string>
+    <string name="share_err_to_many">複数送信: 項目の件数が超過しました</string>
+    <string name="share_menu_title">共有/送信</string>
+    <string name="show_in_gallery_menu_title">新しいギャラリーに表示</string>
+    <string name="slideshow_menu_title">スライド ショー</string>
+    <string name="sort_by_date">日付</string>
+    <string name="sort_by_folder">フォルダー</string>
+    <string name="sort_by_name">名前</string>
+    <string name="sort_by_name_len">長さ</string>
+    <string name="sort_by_none">並び替えない</string>
+    <string name="sort_by_place">場所</string>
+    <string name="sort_menu_title">並べ変え</string>
+    <string name="update_result_format">%1$d/%2$d ファイルを更新しました</string>
+    <string name="zoom_to_fit_menu_title">合わせてズーム</string>
+    <string name="settings_image_thumb_if_bigger_than_title">大きな写真の幅/高さ</string>
+    <string name="settings_image_thumb_if_bigger_than_summary">写真の幅と高さがこれより大きい場合、画像の詳細表示でサムネイルを表示します。 (省メモリ、高速、ただし低品質)</string>
+    <string name="settings_image_thumb_dir_title">サムネイル フォルダー</string>
+    <string name="settings_maps_forge_enable_tile">ローカル *.map 地図ファイルを使用する</string>
+    <string name="settings_maps_forge_enable_summary">pc 経由で手動でダウンロードしたもの</string>
+    <string name="settings_maps_forge_dir_title">*.map 地図ファイル フォルダー</string>
+    <string name="show_photo">写真を表示</string>
+    <string name="fix_link_menu_title">重複を修復</string>
+    <string name="geo_picker_from_photo_title">写真から地域を選択</string>
+    <string name="geo_picker_from_map_title">地図から地域を選択</string>
+    <string name="folder_hide_images_menu_title">画像を非表示</string>
+    <string name="folder_hide_images_question_message_format">"よろしいですか?
 
 下のすべてのメディアファイル (写真、ビデオ、オーディオ)
 
@@ -152,65 +151,77 @@
 を、メディアデータベース、ギャラリーアプリ、メディアスキャナーから非表示にしますか?
 
 ギャラリーメニューからメディアスキャナーを呼び出して、非表示を元に戻すことができます。"</string>
-  <string name="filter_path_hint">フォルダーまたはファイル名の一部。%=ワイルドカード</string>
-  <string name="lbl_any">検索</string>
-  <string name="filter_any_hint">タグ、タイトル、説明、パスの一部</string>
-  <string name="lbl_images_public">公開画像</string>
-  <string name="lbl_images_private">非公開画像</string>
-  <string name="lbl_with_no_tags">タグなし</string>
-  <string name="lbl_tags_include">+タグ</string>
-  <string name="lbl_tags_exclude">-タグ</string>
-  <string name="lbl_tag">タグ</string>
-  <string name="tags_activity_title">タグを選択</string>
-  <string name="tags_search_hint">ここに入力してフィルター ...</string>
-  <string name="tags_search_no_matching_items_found">一致するタグが見つかりません</string>
-  <string name="tags_edit_menu_title">タグを設定</string>
-  <string name="tags_add_menu_title">新しいタグを作成</string>
-  <string name="tags_add_default">新規_タグ</string>
-  <string name="tags_delete_children_title">子を削除</string>
-  <string name="tags_update_photos">影響を受けた写真のタグを更新</string>
-  <string name="tags_hint">タグ名を長押しするとメニューが開きます</string>
-  <string name="tags_defaults">アクティビティ, 人, 場所, テーマ, プロジェクト</string>
-  <string name="settings_media_update_strategy_title">変更の書き込み</string>
-  <string name="settings_media_update_strategy_jpg_xmp_create">jpg および xmp (見つからない場合は作成)</string>
-  <string name="settings_media_update_strategy_jpg_xmp_update">jpg (および xmp、存在する場合)</string>
-  <string name="settings_media_update_strategy_jpg">jpg ファイルのみ</string>
-  <string name="settings_media_update_strategy_xmp">xmp ファイルのみ</string>
-  <string name="settings_xmp_file_schema_title">長い Xmp サイドカー ファイル名?</string>
-  <string name="settings_xmp_file_schema_summary">長い: file.jpg.xmp; 短い: file.xmp</string>
-  <!-- #70: manually select sql column defintition for extra detail display in image detail view  -->
-  <string name="view_context_menu_title">コンテキストをロード ...</string>
-  <!-- #87: edit-exif: image title, description, rating -->
-  <string name="exif_menu_title">Exif を編集</string>
-  <string name="lbl_title">タイトル</string>
-  <string name="lbl_description">説明</string>
-  <string name="lbl_rating">評価</string>
-  <!-- #90 add: sort by Rating, Date-Last-modified -->
-  <string name="sort_by_rating">評価</string>
-  <string name="sort_by_modification">最終更新</string>
-  <!-- #93: edit-exif: image title, description, rating -->
-  <string name="photo_autoprocessing_edit_menu_title">写真の自動処理を編集</string>
-  <string name="lbl_file_name_pattern">ファイル名のパターン</string>
-  <string name="lbl_exif">Exif</string>
-  <!-- i.e.
+    <string name="filter_path_hint">フォルダーまたはファイル名の一部。%=ワイルドカード</string>
+    <string name="lbl_any">検索</string>
+    <string name="filter_any_hint">タグ、タイトル、説明、パスの一部</string>
+    <string name="lbl_images_public">公開画像</string>
+    <string name="lbl_images_private">非公開画像</string>
+    <string name="lbl_with_no_tags">タグなし</string>
+    <string name="lbl_tags_include">+タグ</string>
+    <string name="lbl_tags_exclude">-タグ</string>
+    <string name="lbl_tag">タグ</string>
+    <string name="tags_activity_title">タグを選択</string>
+    <string name="tags_search_hint">ここに入力してフィルター ...</string>
+    <string name="tags_search_no_matching_items_found">一致するタグが見つかりません</string>
+    <string name="tags_edit_menu_title">タグを設定</string>
+    <string name="tags_add_menu_title">新しいタグを作成</string>
+    <string name="tags_add_default">新規_タグ</string>
+    <string name="tags_delete_children_title">子を削除</string>
+    <string name="tags_update_photos">影響を受けた写真のタグを更新</string>
+    <string name="tags_hint">タグ名を長押しするとメニューが開きます</string>
+    <string name="tags_defaults">アクティビティ, 人, 場所, テーマ, プロジェクト</string>
+    <string name="settings_media_update_strategy_title">変更の書き込み</string>
+    <string name="settings_media_update_strategy_jpg_xmp_create">jpg および xmp (見つからない場合は作成)</string>
+    <string name="settings_media_update_strategy_jpg_xmp_update">jpg (および xmp、存在する場合)</string>
+    <string name="settings_media_update_strategy_jpg">jpg ファイルのみ</string>
+    <string name="settings_media_update_strategy_xmp">xmp ファイルのみ</string>
+    <string name="settings_xmp_file_schema_title">長い Xmp サイドカー ファイル名?</string>
+    <string name="settings_xmp_file_schema_summary">長い: file.jpg.xmp; 短い: file.xmp</string>
+    <!-- #70: manually select sql column defintition for extra detail display in image detail view  -->
+    <string name="view_context_menu_title">コンテキストをロード ...</string>
+    <!-- #87: edit-exif: image title, description, rating -->
+    <string name="exif_menu_title">Exif を編集</string>
+    <string name="lbl_title">タイトル</string>
+    <string name="lbl_description">説明</string>
+    <string name="lbl_rating">評価</string>
+    <!-- #90 add: sort by Rating, Date-Last-modified -->
+    <string name="sort_by_rating">評価</string>
+    <string name="sort_by_modification">最終更新</string>
+    <!-- #93: edit-exif: image title, description, rating -->
+    <string name="photo_autoprocessing_edit_menu_title">写真の自動処理を編集</string>
+    <string name="lbl_file_name_pattern">ファイル名のパターン</string>
+    <string name="lbl_exif">Exif</string>
+    <!-- i.e.
             Copy 5 Photos
 				hello.jpg (2017-08-02), ...
 			To .../path/toFile/
 				1708NewName0001.jpg -->
-  <string name="preview_message_format">"%1$s %2$d の写真\n\t%3$s (%4$s), …\nから %5$s\n\t%6$s"</string>
-  <!-- new in 0.6.3 additional sorting options -->
-  <string name="sort_by_file_size">サイズ</string>
-  <string name="sort_by_width">幅</string>
-  <!-- new in 0.6.3 edit exif images can have visibility private or public -->
-  <string name="lbl_image_visibility">公開範囲</string>
-  <!-- #105 Appplication-pinning, aka "Kiosk Mode", "LockTask": disable dangerous menu-items -->
-  <string name="menu_title_app_pinnend">アプリを保護/ピン留め</string>
-  <string name="menu_title_app_unpinnend">アプリの保護を解除/ピン留め解除</string>
-  <!-- #100: private images get the extension ".jpg-p" which hides them from other gallery-apps and image pickers.  -->
-  <string name="settings_rename_private_jpg_title">非公開の名前を変更 ...jpg から ....jpg-p</string>
-  <!--  depricated tags_update_result_format 
+    <string name="preview_message_format">"%1$s %2$d の写真\n\t%3$s (%4$s), …\nから %5$s\n\t%6$s"</string>
+    <!-- new in 0.6.3 additional sorting options -->
+    <string name="sort_by_file_size">サイズ</string>
+    <string name="sort_by_width">幅</string>
+    <!-- new in 0.6.3 edit exif images can have visibility private or public -->
+    <string name="lbl_image_visibility">公開範囲</string>
+    <!-- #105 Appplication-pinning, aka "Kiosk Mode", "LockTask": disable dangerous menu-items -->
+    <string name="menu_title_app_pinnend">アプリを保護/ピン留め</string>
+    <string name="menu_title_app_unpinnend">アプリの保護を解除/ピン留め解除</string>
+    <!-- #100: private images get the extension ".jpg-p" which hides them from other gallery-apps and image pickers.  -->
+    <string name="settings_rename_private_jpg_title">非公開の名前を変更 ...jpg から ....jpg-p</string>
+    <string name="clear_menu_title">クリア</string>
+    <string name="show_in_filemanager_menu_title">ファイルマネージャーで開く</string>
+    <!-- #1113: Searchbar  -->
+    <string name="searchbar_menu_title">検索バー</string>
+    <string name="settings_pick_date_decade4year_title">日付の選択: 十年を使用</string>
+    <string name="settings_pick_date_decade4year_summary">つまり 2010* からの 2010, 2011,...2019</string>
+    <string name="date_picker_menu_title">日付フィルター</string>
+    <!-- #115: Virtual album -->
+    <string name="filter_menu_title_album">仮想アルバムを編集</string>
+    <!--  depricated tags_update_result_format
 			replaced by android.R.string.xxx @android:string/xxx : btn_cancel btn_no btn_yes btn_okcopy_menu_title
+
+    sperate boomark picker is deprecated. now open via folder picker
+        <string name="bookmark_load_from_menu_title">Load album from &#8230;</string><br/>
+	note: with ver 0.7.0 'bookmark' will become 'virtual album'
     -->
-  <string name="clear_menu_title">クリア</string>
-  <string name="show_in_filemanager_menu_title">ファイルマネージャーで開く</string>
+    <string name="settings_bookmark_dir_title">レポート フォルダー</string>
 </resources>
