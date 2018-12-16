@@ -23,9 +23,11 @@ import android.app.Application;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.osmdroid.api.IMapView;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -51,6 +53,8 @@ import uk.co.senab.photoview.gestures.CupcakeGestureDetector;
  * Created by k3b on 14.07.2015.
  */
 public class AndroFotoFinderApp extends Application {
+    private static String fileNamePrefix = "androFotofinder.logcat-";
+
     private LogCat mCrashSaveToFile = null;
 
 
@@ -88,10 +92,40 @@ public class AndroFotoFinderApp extends Application {
         QueryParameter.sParserDefaultQueryTypeId = FotoSql.QUERY_TYPE_DEFAULT;
         QueryParameter.sParserDefaultSelect = new ArrayList<String>();
         Collections.addAll(QueryParameter.sParserDefaultSelect, FotoSql.DEFAULT_GALLERY_COLUMNS);
-        mCrashSaveToFile = new LogCat(this, Global.LOG_CONTEXT, HugeImageLoader.LOG_TAG,
+        mCrashSaveToFile = new LogCat(Global.LOG_CONTEXT, HugeImageLoader.LOG_TAG,
                 PhotoViewAttacher.LOG_TAG, CupcakeGestureDetector.LOG_TAG,
                 LibGlobal.LOG_TAG, ThumbNailUtils.LOG_TAG, IMapView.LOGTAG,
-                ExifInterface.LOG_TAG, ImageMetaReader.LOG_TAG);
+                ExifInterface.LOG_TAG, ImageMetaReader.LOG_TAG) {
+
+            public void saveToFile() {
+                final File logFile = getOutpuFile();
+                String message = (logFile != null)
+                        ? "saving errorlog ('LocCat') to " + logFile.getAbsolutePath()
+                        : "Saving errorlog ('LocCat') is disabled. See Settings 'Diagnostics' for details";
+                Log.e(Global.LOG_CONTEXT, message);
+                Toast.makeText(AndroFotoFinderApp.this , message, Toast.LENGTH_LONG).show();
+
+                saveLogCat(logFile, null, mTags);
+            }
+
+            private File getOutpuFile() {
+                File logDirectory = Global.logCatDir;
+                if (logDirectory == null) return null;
+
+                // Datetime as part of the crash-log-filename
+                // i.e. /mnt/sdcard/copy/log/androFotofinder.logcat-20160509-195217.txt
+
+                File logFile = new File(logDirectory,
+                        getLocalLogFileName(fileNamePrefix));
+
+                // create log folder
+                logDirectory.mkdirs();
+
+                return logFile;
+            }
+
+
+        };
 
         ThumbNailUtils.init(this, null);
 
