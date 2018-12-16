@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -42,7 +42,7 @@
         android:title="@string/delete_menu_title"
         android:icon="@android:drawable/ic_menu_delete"
         android:visible="true"
-        android:orderInCategory="41"
+        android:orderInCategory="42"
         android:showAsAction="ifRoom" />
 
     <item android:id="@+id/cmd_gallery" android:title="@string/show_in_gallery_menu_title"

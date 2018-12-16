@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?><!--
 /*
- * Translation to English and Copyright (c) 2015-2018 by k3b, "mary-kate" & keunes.
+ * Translation to English and Copyright (c) 2015-2019 by k3b, "mary-kate" & keunes.
  *
  * This file is part of "A Photo Manager" (A(ndro)FotoFinder).
  *
@@ -264,7 +264,7 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
     <string name="settings_bookmark_dir_title">Bookmark folder</string>
 
     <!-- #108: Backup to Zip-file -->
-    <string name="backup_title">Backup</string>
+    <string name="backup_title">Backup to zip</string>
 
     <string name="lbl_zip_out">Where: Output Zip</string>
     <string name="lbl_zip_name">File</string>

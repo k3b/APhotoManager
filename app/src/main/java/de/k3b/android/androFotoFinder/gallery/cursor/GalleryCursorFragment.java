@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -55,6 +55,7 @@ import java.util.List;
 
 import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.AffUtils;
+import de.k3b.android.androFotoFinder.BackupActivity;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.ExifEditActivity;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
@@ -108,6 +109,12 @@ import de.k3b.tagDB.Tag;
  *
  * States view-locked <=> view <=> view-multiselect
  *             pick-single, pick-multible, pick-locked
+ *
+ * Menu:
+ *   if (picker-mode) menu_gallery_pick + menu_gallery_non_multiselect
+ *   if (locked) menu_locked
+ *   if (isMultiSelectionActive()) menu_gallery_multiselect_mode_all + menu_image_commands
+ *   if (view-non-select) menu_gallery_non_selected_only + menu_gallery_non_multiselect
  */
 public class GalleryCursorFragment extends Fragment  implements Queryable, DirectoryGui,Common, TagsPickerFragment.ITagsPicker {
     private static final String INSTANCE_STATE_LAST_VISIBLE_POSITION = "lastVisiblePosition";
@@ -884,6 +891,10 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 return onPickOk();
             case R.id.cmd_selected_only:
                 return multiSelectionToggle();
+            case R.id.cmd_backup:
+                BackupActivity.showActivity(mDebugPrefix, getActivity(), null, selectedFiles, null,
+                        getCurrentQuery(), BackupActivity.REQUEST_BACKUP_ID);
+                return true;
             case R.id.cmd_copy:
                 return cmdMoveOrCopyWithDestDirPicker(false, fileCommands.getLastCopyToPath(), selectedFiles);
             case R.id.cmd_move:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -109,7 +109,8 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
     /** set while dir picker is active */
     private DirectoryPickerFragment mDirPicker = null;
 
-    public static void showActivity(String debugContext, Activity context, IGalleryFilter filter, QueryParameter query,
+    public static void showActivity(String debugContext, Activity context,
+                                    IGalleryFilter filter, QueryParameter query,
                                     String lastBookmarkFileName, int requestCode) {
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, context.getClass().getSimpleName()

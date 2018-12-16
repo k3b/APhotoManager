@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 by k3b.
+ * Copyright (c) 2018-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -36,6 +36,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.GalleryFilterPathState;
@@ -84,18 +85,35 @@ public class AndroidAlbumUtils implements Common {
         return null;
     }
 
+    public static QueryParameter getQuery(@NonNull String paramNameSuffix,
+            Properties sourceProperties, StringBuilder outQueryFileUri,
+            @Nullable StringBuilder dbgMessageResult) {
+        QueryParameter result = null;
+
+        if (sourceProperties != null) {
+            result = getQueryFromFirstMatching(
+                    "Properties", null,
+                    null,
+                    sourceProperties.getProperty(EXTRA_QUERY),
+                    sourceProperties.getProperty(EXTRA_FILTER),
+                    dbgMessageResult);
+        }
+        return result;
+    }
+
     /** get from savedInstanceState else intent else sharedPref: inten.data=file-uri else EXTRA_QUERY else EXTRA_FILTER */
     public static QueryParameter getQuery(
             @NonNull Context context, @NonNull String paramNameSuffix,
-            @Nullable Bundle savedInstanceState,
-            @Nullable Intent intent, @Nullable SharedPreferences sharedPref,
-            StringBuilder outQueryFileUri, @Nullable StringBuilder dbgMessageResult) {
+            @Nullable Bundle sourceInstanceState,
+            @Nullable Intent sourceIntent, @Nullable SharedPreferences sourceSharedPref,
+            StringBuilder outQueryFileUri,
+            @Nullable StringBuilder dbgMessageResult) {
         QueryParameter result = null;
 
-        if (savedInstanceState == null) {
+        if (sourceInstanceState == null) {
             // onCreate (first call) : if intent is usefull use it else use sharedPref
-            if (intent != null) {
-                Uri uri = IntentUtil.getUri(intent);
+            if (sourceIntent != null) {
+                Uri uri = IntentUtil.getUri(sourceIntent);
                 result = getQueryFromFirstMatching(
                         "Intent-uri", context,
                         uri,
@@ -106,20 +124,20 @@ public class AndroidAlbumUtils implements Common {
                     result = getQueryFromFirstMatching(
                             "Intent", context,
                             uri,
-                            intent.getStringExtra(EXTRA_QUERY),
-                            intent.getStringExtra(EXTRA_FILTER),
+                            sourceIntent.getStringExtra(EXTRA_QUERY),
+                            sourceIntent.getStringExtra(EXTRA_FILTER),
                             dbgMessageResult);
                 } else if (outQueryFileUri !=  null) {
                     outQueryFileUri.append(uri.toString());
                 }
             }
 
-            if ((result == null) && (sharedPref != null)) {
+            if ((result == null) && (sourceSharedPref != null)) {
                 result = getQueryFromFirstMatching(
                         "SharedPreferences", context,
                         null,
-                        sharedPref.getString(EXTRA_QUERY + paramNameSuffix, null),
-                        sharedPref.getString(EXTRA_FILTER + paramNameSuffix, null),
+                        sourceSharedPref.getString(EXTRA_QUERY + paramNameSuffix, null),
+                        sourceSharedPref.getString(EXTRA_FILTER + paramNameSuffix, null),
                         dbgMessageResult);
             }
         } else  {
@@ -127,8 +145,8 @@ public class AndroidAlbumUtils implements Common {
             result = getQueryFromFirstMatching(
                     "InstanceState", context,
                     null,
-                    savedInstanceState.getString(EXTRA_QUERY + paramNameSuffix),
-                    savedInstanceState.getString(EXTRA_FILTER + paramNameSuffix),
+                    sourceInstanceState.getString(EXTRA_QUERY + paramNameSuffix),
+                    sourceInstanceState.getString(EXTRA_FILTER + paramNameSuffix),
                     dbgMessageResult);
         }
         return result;
@@ -288,7 +306,6 @@ public class AndroidAlbumUtils implements Common {
     }
 
     /**
-     *
      * @param context
      * @param destUri if not null: merged-query-filter will be saved to this uri/file with update mediaDB
      * @param destIntent if not null: merged-query-filter will be saved to this intent
@@ -328,6 +345,14 @@ public class AndroidAlbumUtils implements Common {
             else if (srcFilter != null)
                 destIntent.putExtra(EXTRA_FILTER, srcFilter.toString());
         }
+        /*
+        if (destProperties != null) {
+            if (srcQueryParameter != null)
+                destProperties.put(EXTRA_QUERY, mergedQuery.toReParseableString());
+            else if (srcFilter != null)
+                destProperties.put(EXTRA_FILTER, srcFilter.toString());
+        }
+        */
     }
 
     /** create a copy of srcQueryParameter and add srcFilter */
