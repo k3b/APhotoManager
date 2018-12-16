@@ -38,7 +38,9 @@ import java.util.List;
 public class FileManagerUtil {
     private static Intent getIntentShowInFilemanager(Activity context, String path) {
         if ((path != null) && (path.length() > 0)) {
-            final Uri pathUri = Uri.fromFile(new File(path));
+            final Uri pathUri = (path.indexOf(':') > 0)
+                    ? Uri.parse(path)
+                    : Uri.fromFile(new File(path));
 
             Intent startIntent = new Intent();
             startIntent.setAction(Intent.ACTION_VIEW);
