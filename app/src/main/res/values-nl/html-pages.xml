@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+/* string values containing translatable HTML pages
+ *
+ * Translation to Dutch by Klaas Swart (verydutch) 2018-11-29 .
+ *
+ * This file is part of "A Photo Manager" (A(ndro)FotoFinder).
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
+ -->
+<resources>
+  <string name="about_content_about"><![CDATA["
+<h1>A Photo Manager</h1>
+  <br />
+
+Beheer van lokale foto's: vinden/kopieren/Exif-bewerken en weergave in galerij of op kaart. Beschikt over
+
+<ul>
+<li>Snelzoeken foto's door labels(keywords), (sub-) map, geo-, titel, datum...
+</li><li>Resultaat weergeven in de galerij of landkaarten van OpenStreetMap.
+</li><li>Detail weergave functies zoomen, jatten voor volgende/vorige beeld.
+</li><li>Ingebouwd bestandsbheer voor foto's: zoeken, sorteren, weergeven, kopiëren, verwijderen, delen,....
+</li><li>Exif-metadata bewerken: datum, titel, beschrijving, labels(keywords), geo, rating,...
+</li><li>Optionele map-regel gebaseerde autoprocessing: foto's worden automatisch gewijzigd en krijgen geo, labels, titel,... als  je kopieert/verplaatst
+</li><li>Markeer beelden als 'Particulier' om ze te verbergen voor andere Galerij-Apps en andere foto-apps.
+</li><li>In 'bescherme/vastgepinde modus' worden potentieel gevaarlijke app-opdrachten als bewerken/kopieren/verwijderen/delen/instellingen/ 'afbeelding wijzigen' uitgeschakeld, zodat je veilig je telefoon uit handen kunt geven
+</li><li>Kan grote beeldcollecties (20000 + beelden in 1000 + omslagen) hanteren.
+</li><li>Maakt gebruik van Androids afbeeldinginhoud-provider. Geen eerste afbeelding scan nodig.
+</li><li>Uitgebreide mediascanner voor Exif, IPTC, XMP
+</li>
+</ul>
+
+Vereiste Android machtigingen:
+
+<ul>
+<li>INTERNET: om kaartgegevens te downloaden van Open Streetmap Server 
+</li><li>ACCESS_NETWORK_STATE en ACCESS_WIFI_STATE: controleren of wifi/internet on line is voor start download geodata
+</li><li>WRITE_EXTERNAL_STORAGE voor cache voor gedownloade kaartgegevens in lokale bestandssysteem en voor foto behandeling
+</li><li>READ_LOGS voor lezen en opslaan mogelijke crash-logs in een tekstbestand.
+</li>
+</ul>
+<br />
+"]]></string>
+</resources>

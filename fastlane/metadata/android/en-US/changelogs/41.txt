@@ -2,3 +2,4 @@ Changes from 0.7.2 to 0.7.3
 
 * #132 improved Autoprocessing-Editor: Long press on Exif-Picker butten "..." : get lat/lon/description/tags from selected photos
 * #133: Additional filtercriteria date-last-modified from ... to
+* #21: Translation updates ja, nl
