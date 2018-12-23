@@ -88,7 +88,7 @@ android {
 
 // task from https://stackoverflow.com/questions/45848521/how-to-sync-android-project-by-gradle-task/45856729#45856729
 import java.util.regex.Pattern
-task('increaseVersionCode') << {
+task('increaseVersionCode').doLast({
     def buildFile = file("build.gradle")
     def pattern = Pattern.compile("versionCode\\s+(\\d+)")
     def manifestText = buildFile.getText()
@@ -97,7 +97,7 @@ task('increaseVersionCode') << {
     def versionCode = Integer.parseInt(matcher.group(1))
     def manifestContent = matcher.replaceAll("versionCode " + ++versionCode)
     buildFile.write(manifestContent)
-}
+})
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
