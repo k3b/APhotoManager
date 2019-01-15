@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (c) 2018 by k3b.
+ * Copyright (c) 2018-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -69,9 +69,9 @@
             android:layout_below="@+id/lbl_zip_out"
             android:layout_toLeftOf="@+id/cmd_lon_from_history"
             android:ems="10"
-            android:inputType="numberDecimal|numberSigned" />
+            android:inputType="text" />
 
-        <ImageButton android:id="@+id/cmd_lon_from_history"
+        <ImageButton android:id="@+id/cmd_zip_name_history"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/edit_zip_name"
@@ -201,6 +201,25 @@
             android:text="@string/sort_by_modification"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
+        <Button android:id="@+id/cmd_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_popup"
+            android:layout_below="@+id/line_zip_modified"
+
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+
+        <Button
+            android:id="@+id/cmd_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/line_zip_modified"
+
+            android:layout_toLeftOf="@+id/cmd_time"
+            android:text="@string/btn_popup"
+
+            />
         <!-- -->
         <Button android:id="@+id/cmd_date_modified"
             android:layout_width="wrap_content"
@@ -210,6 +229,7 @@
             android:layout_below="@+id/lbl_date_modified"
             android:layout_toEndOf="@+id/cmd_zip_dir_history"
             android:layout_toRightOf="@+id/cmd_zip_dir_history"
+            android:visibility="invisible"
             android:text="@string/btn_popup" />
 
         <ImageButton android:id="@+id/cmd_date_modified_from_history"

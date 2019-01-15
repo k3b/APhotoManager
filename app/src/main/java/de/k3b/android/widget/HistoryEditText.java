@@ -52,7 +52,7 @@ public class HistoryEditText {
     private final Context mContext;
     private final String mDelimiter;
     private final int mMaxHisotrySize;
-    private final EditorHandler[] mEditorHandlers;
+    protected final EditorHandler[] mEditorHandlers;
 
     /** ContextActionBar for one EditText */
     protected class EditorHandler implements View.OnLongClickListener, View.OnClickListener  {
@@ -99,9 +99,7 @@ public class HistoryEditText {
                 public boolean onMenuItemClick(MenuItem item) {
                     // String text = item.getTitle();
                     String text = getHistoryItems().get(item.getItemId() - 10);
-                    mEditor.setText(text);
-                    mEditor.setSelection(0, mEditor.length());
-                    return true;
+                    return onHistoryPick(EditorHandler.this, mEditor, text);
                 }
             });
             popup.show();
@@ -221,4 +219,11 @@ public class HistoryEditText {
         }
         return result.toString();
     }
+
+    protected boolean onHistoryPick(EditorHandler editorHandler, EditText editText, String text) {
+        editText.setText(text);
+        editText.setSelection(0, editText.length());
+        return true;
+    }
+
 }

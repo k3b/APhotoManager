@@ -20,28 +20,44 @@
 package de.k3b.android.androFotoFinder;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
+import android.app.Dialog;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
+import java.util.TimeZone;
 
+import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.IntentUtil;
+import de.k3b.android.util.OsUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
+import de.k3b.android.widget.HistoryEditText;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
+import de.k3b.io.StringUtils;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.DateUtil;
 import de.k3b.media.MediaUtil;
@@ -56,7 +72,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
 
     public static final int REQUEST_BACKUP_ID = 99289;
     private static final String STATE_ZIP_CONFIG = "zip_config";
-    private static String mDebugPrefix = "BackupActivity";
+    private static String mDebugPrefix = "BackupActivity: ";
 
     private Gui gui = null;
     private SelectedFiles mSelectedFiles;
@@ -133,7 +149,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         if ((uri != null) && ZipConfigRepository.isZipConfig(uri.toString())) {
             try {
                 InputStream inputsteam = context.getContentResolver().openInputStream(uri);
-                return new ZipConfigRepository().load(inputsteam, uri);
+                return new ZipConfigRepository(null).load(inputsteam, uri);
             } catch (Exception ex) {
                 // file not found or no permission
                 if (Global.debugEnabled) {
@@ -152,12 +168,42 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         private final EditText editZipDir;
         private final EditText editFilter;
 
+        private HistoryEditText mHistory;
+
         private Gui() {
             editDateModifiedFrom = (EditText) findViewById(R.id.edit_date_modified_from);
             editFilter = (EditText) findViewById(R.id.edit_filter);
             editZipDir = (EditText) findViewById(R.id.edit_zip_dir);
             editZipName = (EditText) findViewById(R.id.edit_zip_name);
             editZipRelPath = (EditText) findViewById(R.id.edit_zip_rel_path);
+
+            mHistory = new HistoryEditText(BackupActivity.this, new int[] {
+                    R.id.cmd_zip_name_history,
+                    R.id.cmd_date_modified_from_history,
+                    R.id.cmd_zip_rel_path_history,
+                    R.id.cmd_zip_dir_history,
+                    R.id.cmd_filter_history} ,
+                    editZipName,
+                    editDateModifiedFrom,
+                    editZipRelPath,
+                    editZipDir,
+                    editFilter) {
+                @Override
+                protected boolean onHistoryPick(EditorHandler editorHandler, EditText editText, String text) {
+                    boolean zipNameChagend = ((editorHandler == this.mEditorHandlers[0])
+                            && (text != null) && (editText != null)
+                            && (!text.equalsIgnoreCase(editText.getText().toString()) ));
+
+                    final boolean result = super.onHistoryPick(editorHandler, editText, text);
+
+                    if (zipNameChagend) {
+
+                    }
+                    return result;
+                }
+
+            };
+
         }
 
         private void toGui(IZipConfig src) {
@@ -203,17 +249,25 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
-        gui.fromGui(mFilter);
+        saveGuiToData();
         savedInstanceState.putSerializable(STATE_ZIP_CONFIG, mFilter);
         super.onSaveInstanceState(savedInstanceState);
+    }
+
+    private void saveGuiToData() {
+        gui.fromGui(mFilter);
+    }
+
+    private void loadGuiFromData() {
+        gui.toGui(mFilter);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Global.debugMemory(mDebugPrefix, "onCreate");
         super.onCreate(savedInstanceState);
+        defineGui();
 
-        gui = new Gui();
         Intent intent = getIntent();
         mSelectedFiles = getSelectedFiles("onCreate ", intent, false);
 
@@ -223,8 +277,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
             // intent.
 
         }
-        defineGui();
-        gui.toGui(mFilter);
+        loadGuiFromData();
     }
 
     /**
@@ -233,7 +286,154 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
     private void defineGui() {
         setContentView(R.layout.activity_backup);
 
+        this.gui = new Gui();
 
+        Button cmd = (Button) findViewById(R.id.cmd_zip_dir);
+        cmd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String path = gui.getZipDir();
+                pickDir(true, path,R.string.lbl_zip_dir);
+            }
+        });
+
+        cmd = (Button) findViewById(R.id.cmd_zip_rel_path);
+        cmd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String path = gui.getZipRelPath();
+                pickDir(false, path, R.string.lbl_zip_rel_path);
+            }
+        });
+
+        cmd = (Button) findViewById(R.id.cmd_date);
+        cmd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mDateTimeApi.showDatePicker();
+            }
+        });
+        cmd = (Button) findViewById(R.id.cmd_time);
+        cmd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mDateTimeApi.showTimePicker();
+            }
+        });
+
+    }
+
+    private final DateTimeApi mDateTimeApi = new DateTimeApi();
+
+    private class DateTimeApi
+            implements DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
+        public void showTimePicker() {
+            final Calendar c = getDateTimeTakenAsCalendar();
+            int hour = c.get(Calendar.HOUR_OF_DAY);
+            int minute = c.get(Calendar.MINUTE);
+
+            Dialog dlg1 = new TimePickerDialog(BackupActivity.this, mDateTimeApi, hour, minute,
+                    DateFormat.is24HourFormat(BackupActivity.this));
+            dlg1.show();
+            setAutoClose(null, dlg1, null);
+        }
+
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            final Calendar c = getDateTimeTakenAsCalendar();
+            c.set(Calendar.HOUR_OF_DAY, hourOfDay);
+            c.set(Calendar.MINUTE, minute);
+            gui.setDateModifiedFrom(c.getTime());
+        }
+
+        public void showDatePicker() {
+            final Calendar c = getDateTimeTakenAsCalendar();
+            int year = c.get(Calendar.YEAR);
+            int month = c.get(Calendar.MONTH);
+            int day = c.get(Calendar.DAY_OF_MONTH);
+            DatePickerDialog dlg1 = new DatePickerDialog(BackupActivity.this, mDateTimeApi,
+                    year, month, day);
+            dlg1.show();
+            setAutoClose(null, dlg1, null);
+        }
+
+        public void onDateSet(DatePicker view, int year, int month, int day) {
+            final Calendar c = getDateTimeTakenAsCalendar();
+            c.set(Calendar.YEAR, year);
+            c.set(Calendar.MONTH, month);
+            c.set(Calendar.DAY_OF_MONTH, day);
+            gui.setDateModifiedFrom(c.getTime());
+        }
+
+        private Calendar getDateTimeTakenAsCalendar() {
+            final Calendar c = Calendar.getInstance();
+            c.setTimeZone(TimeZone.getTimeZone("gmt"));
+            Date dateTimeTaken = gui.getDateModifiedFrom();
+            if (dateTimeTaken != null) {
+                c.setTimeInMillis(dateTimeTaken.getTime());
+            }
+            return c;
+        }
+    }
+
+    public static class DestZipDirPicker extends DirectoryPickerFragment {
+        protected static AndroidFileCommands sFileCommands = null;
+
+        public static DestZipDirPicker newInstance(boolean outDir/*, final SelectedFiles srcFotos*/) {
+            DestZipDirPicker f = new DestZipDirPicker();
+
+            // Supply index input as an argument.
+            Bundle args = new Bundle();
+            args.putBoolean("outDir", outDir);
+            // AffUtils.putSelectedFiles(args, srcFotos);
+
+            f.setArguments(args);
+
+            return f;
+        }
+
+        public boolean isOutDir() {
+            return getArguments().getBoolean("outDir", false);
+        }
+
+        /** do not use activity callback */
+        @Override
+        protected void setDirectoryListener(Activity activity) {}
+
+        @Override
+        protected void onDirectoryPick(IDirectory selection) {
+            final BackupActivity activity = (BackupActivity) getActivity();
+            if ((selection != null) && (activity != null)) {
+                if (isOutDir()) {
+                    activity.onZipDirPick(selection.getAbsolute());
+                } else {
+                    activity.onRelPathPick(selection.getAbsolute());
+                }
+            }
+            dismiss();
+        }
+
+    };
+    private boolean pickDir(boolean outDir, String lastCopyToPath, int titleId) {
+        if (AndroidFileCommands.canProcessFile(this, false)) {
+            DestZipDirPicker dlg = DestZipDirPicker.newInstance(outDir/*, fotos*/);
+
+            dlg.defineDirectoryNavigation(OsUtils.getRootOSDirectory(null),
+                    0,
+                    lastCopyToPath);
+            dlg.setContextMenuId(R.menu.menu_context_osdir);
+            dlg.setTitleId(titleId);
+            dlg.show(this.getFragmentManager(), "osdir");
+            setAutoClose(dlg, null, null);
+        }
+        return false;
+    }
+
+    private void onZipDirPick(String absolute) {
+        this.gui.setZipDir(absolute);
+    }
+
+    private void onRelPathPick(String absolute) {
+        this.gui.setZipRelPath(absolute);
     }
 
     @NonNull
@@ -244,32 +444,34 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
 
         if (result == null) {
             String path = IntentUtil.getFilePath(this, IntentUtil.getUri(intent));
-            File rootDirFile = new File(path);
-            String[] fileNames = rootDirFile.list(MediaUtil.JPG_FILENAME_FILTER);
+            if (!StringUtils.isNullOrEmpty(path)) {
+                File rootDirFile = new File(path);
+                String[] fileNames = rootDirFile.list(MediaUtil.JPG_FILENAME_FILTER);
 
-            int itemCount = (fileNames != null) ? fileNames.length : 0;
+                int itemCount = (fileNames != null) ? fileNames.length : 0;
 
-            // convert to absolute paths
-            String parentDirString = rootDirFile.getAbsolutePath();
-            for (int i = 0; i < itemCount; i++) {
-                fileNames[i] = parentDirString + "/" + fileNames[i];
-            }
-
-            Long[] ids = null;
-
-            if (itemCount > 0) {
-                if ((mustLoadIDs) && (ids == null)) {
-                    ids = new Long[itemCount];
-                    Map<String, Long> idMap = FotoSql.execGetPathIdMap(this, fileNames);
-
-                    for (int i = 0; i < itemCount; i++) {
-                        ids[i] = idMap.get(fileNames[i]);
-                    }
+                // convert to absolute paths
+                String parentDirString = rootDirFile.getAbsolutePath();
+                for (int i = 0; i < itemCount; i++) {
+                    fileNames[i] = parentDirString + "/" + fileNames[i];
                 }
 
+                Long[] ids = null;
+
+                if (itemCount > 0) {
+                    if ((mustLoadIDs) && (ids == null)) {
+                        ids = new Long[itemCount];
+                        Map<String, Long> idMap = FotoSql.execGetPathIdMap(this, fileNames);
+
+                        for (int i = 0; i < itemCount; i++) {
+                            ids[i] = idMap.get(fileNames[i]);
+                        }
+                    }
+
+                }
+                result = new SelectedFiles(fileNames,
+                        ids, null);
             }
-            result = new SelectedFiles(fileNames,
-                    ids, null);
         }
 
         if (Global.debugEnabled && (intent != null)) {
@@ -298,6 +500,12 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         int id = item.getItemId();
 
         switch (id) {
+            case R.id.cmd_ok:
+                onOk();
+                return true;
+            case R.id.cmd_clear:
+                clearFilter();
+                return true;
             case R.id.cmd_cancel:
                 setResult(Activity.RESULT_CANCELED, null);
                 finish();
@@ -318,6 +526,31 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
     protected void onResume() {
         Global.debugMemory(mDebugPrefix, "onResume");
         super.onResume();
+    }
+
+    private void clearFilter() {
+        mFilter = new ZipConfigDto(null);
+        loadGuiFromData();
+    }
+
+    /** save exif changes back to image and database */
+    private boolean onOk() {
+        boolean ok = false;
+        Activity ctx = this;
+        saveGuiToData();
+        gui.mHistory.saveHistory();
+        ZipConfigRepository repo = new ZipConfigRepository(mFilter);
+        final File zipConfigFile = repo.getZipConfigFile();
+        if (zipConfigFile != null) {
+            ok = repo.save();
+            if (Global.debugEnabled) {
+                Log.d(Global.LOG_CONTEXT, mDebugPrefix + " Saved as " + zipConfigFile);
+            }
+            Toast.makeText(BackupActivity.this, zipConfigFile.toString(), Toast.LENGTH_LONG).show();
+
+            finish();
+        }
+        return ok;
     }
 
 }

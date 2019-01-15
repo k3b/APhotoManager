@@ -19,6 +19,8 @@
  
 package de.k3b;
 
+import java.io.File;
+
 /**
  * Public Global stuff for the lib.
  * Created by k3b on 03.03.2016.
@@ -51,6 +53,9 @@ public class LibGlobal {
     public static boolean preferLongXmpFormat = false;
 
     public static boolean visibilityShowPrivateByDefault = false;
+
+    /** defines the filesystem's directory where zip file definitions are stored.  */
+    public static File zipFileDir = null;
 
     /** strategy config how to read/write meta data: (J)pg, (X)mp, (C)reate. Global to allow changing these via a settings dialog */
     public static String mediaUpdateStrategy = "JX";

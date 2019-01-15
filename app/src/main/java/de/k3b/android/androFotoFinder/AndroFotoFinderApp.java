@@ -43,6 +43,7 @@ import de.k3b.database.QueryParameter;
 import de.k3b.io.PhotoAutoprocessingDto;
 import de.k3b.media.ExifInterface;
 import de.k3b.media.ImageMetaReader;
+import de.k3b.zip.ZipConfigRepository;
 import uk.co.senab.photoview.PhotoViewAttacher;
 import uk.co.senab.photoview.gestures.CupcakeGestureDetector;
 
@@ -87,6 +88,7 @@ public class AndroFotoFinderApp extends Application {
         // create sensible defaults for andorid-independant files from android string resources
         QueryParameter.sFileComment = getBookMarkComment(this);
         PhotoAutoprocessingDto.sFileComment = getBookMarkComment(this);
+        ZipConfigRepository.sFileComment = PhotoAutoprocessingDto.sFileComment;
 
         QueryParameter.sParserDefaultFrom = FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE.toString();
         QueryParameter.sParserDefaultQueryTypeId = FotoSql.QUERY_TYPE_DEFAULT;

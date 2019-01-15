@@ -247,6 +247,7 @@ public class SettingsActivity extends PreferenceActivity {
         Global.pickHistoryMax = getPref(prefs, "pickHistoryMax"               , Global.pickHistoryMax);
 
         Global.reportDir                        = getPref(prefs, "reportDir", Global.reportDir);
+        LibGlobal.zipFileDir                    = Global.reportDir;
 
         Global.logCatDir                        = getPref(prefs, "logCatDir", Global.logCatDir);
 
@@ -318,6 +319,7 @@ public class SettingsActivity extends PreferenceActivity {
             ThumbNailUtils.init(context, previousCacheRoot);
         }
         TagRepository.setInstance(Global.reportDir);
+        LibGlobal.zipFileDir                    = Global.reportDir;
 
         // true if first run or change
         if ((sOldEnableNonStandardIptcMediaScanner == null) || (sOldEnableNonStandardIptcMediaScanner.booleanValue() != Global.Media.enableIptcMediaScanner)) {
