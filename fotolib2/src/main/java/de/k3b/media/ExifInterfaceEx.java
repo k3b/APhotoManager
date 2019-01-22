@@ -158,7 +158,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
 
         Date result = null;
         if (isEmpty(result, ++i, debugContext, "Exif.DATETIME_ORIGINAL")) result = getAttributeDate(ExifInterfaceEx.TAG_DATETIME_ORIGINAL);
-        if (isEmpty(result, ++i, debugContext, "Exif.DATETIME")) getAttributeDate(ExifInterfaceEx.TAG_DATETIME);
+        if (isEmpty(result, ++i, debugContext, "Exif.DATETIME")) result = getAttributeDate(ExifInterfaceEx.TAG_DATETIME);
         if ((isEmpty(result, ++i, debugContext, "xmp.DateTimeTaken")) && (xmpExtern != null)) result = xmpExtern.getDateTimeTaken();
         isEmpty(result, ++i, null, null);
         return result;
