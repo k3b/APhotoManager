@@ -145,9 +145,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
         intent.setAction(Intent.ACTION_EDIT);
 
         if (exifDataToEdit != null) {
-            final String exifAsString = (exifDataToEdit instanceof MediaAsString)
-                    ? exifDataToEdit.toString()
-                    : new MediaAsString().setData(exifDataToEdit).toString();
+            final String exifAsString = MediaAsString.toString(exifDataToEdit);
             intent.putExtra(EXTRA_EXIF_DATA, exifAsString);
         } else if (!saveChangesToUri) {
             // special edit exif via intent without initial value

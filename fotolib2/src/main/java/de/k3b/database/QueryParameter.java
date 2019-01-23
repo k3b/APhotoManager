@@ -308,6 +308,10 @@ public class QueryParameter {
     }
 
     public String toReParseableString() {
+        return toReParseableString(sFileComment);
+    }
+
+    public String toReParseableString(String sFileComment) {
         StringBuilder result = new StringBuilder();
         if (sFileComment != null) result.append("# ").append(sFileComment).append("\n");
         Helper.append(result, "\nFROM ", mFrom, "", "\n\t", "");

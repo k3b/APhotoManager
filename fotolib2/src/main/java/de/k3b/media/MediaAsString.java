@@ -74,4 +74,12 @@ public class MediaAsString extends MediaCsvItem implements IMetaApi {
         return this;
     }
 
+    public static String toString(IMetaApi mediaDefaults) {
+        if (mediaDefaults != null) {
+            return (mediaDefaults instanceof MediaAsString)
+                    ? mediaDefaults.toString()
+                    : new MediaAsString().setData(mediaDefaults).toString();
+        }
+        return null;
+    }
 }

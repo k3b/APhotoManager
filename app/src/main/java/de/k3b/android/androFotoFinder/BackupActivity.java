@@ -40,6 +40,7 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
@@ -48,6 +49,7 @@ import java.util.TimeZone;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.OsUtils;
@@ -55,11 +57,14 @@ import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.StringUtils;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.DateUtil;
+import de.k3b.media.IMetaApi;
+import de.k3b.media.MediaAsString;
 import de.k3b.media.MediaUtil;
 import de.k3b.zip.IZipConfig;
 import de.k3b.zip.ZipConfigDto;
@@ -71,6 +76,7 @@ import de.k3b.zip.ZipConfigRepository;
 public class BackupActivity extends ActivityWithAutoCloseDialogs implements Common {
 
     public static final int REQUEST_BACKUP_ID = 99289;
+    public static final int REQUEST_ID_PICK_EXIF = 99293;
     private static final String STATE_ZIP_CONFIG = "zip_config";
     private static String mDebugPrefix = "BackupActivity: ";
 
@@ -105,9 +111,12 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         }
 
         if (mergedQuery != null) {
-            config.setFilter(mergedQuery.toReParseableString());
+            config.setFilter(mergedQuery.toReParseableString(null));
         }
 
+        if (config != null) {
+            intent.putExtra(STATE_ZIP_CONFIG, (Serializable) config);
+        }
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, mDebugPrefix + context.getClass().getSimpleName()
                     + " > BackupActivity.showActivity " + intent.toUri(Intent.URI_INTENT_SCHEME));
@@ -162,6 +171,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
     }
 
     private class Gui implements IZipConfig {
+        private static final String FILTER_DELIMITER = "\n\n\n\n@--!@--!@--!\n\n\n\n";
         private final EditText editDateModifiedFrom;
         private final EditText editZipRelPath;
         private final EditText editZipName;
@@ -230,10 +240,17 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         @Override
         public String getZipDir() {return editZipDir.getText().toString();}
         @Override
-        public String getFilter() {return editFilter.getText().toString();}
+        public String getFilter() {
+            // display-text = filter-display-Text + FILTER_DELIMITER + sql
+            // return sql-part only
+            final String fullText = editFilter.getText().toString();
+            int delim = fullText.indexOf(FILTER_DELIMITER);
+            if (delim >= 0) return fullText.substring(delim + FILTER_DELIMITER.length());
+            return fullText;
+        }
 
         @Override
-        public void setDateModifiedFrom(Date value) {editDateModifiedFrom.setText(DateUtil.toIsoDateString(value));}
+        public void setDateModifiedFrom(Date value) {editDateModifiedFrom.setText(DateUtil.toIsoDateTimeString(value));}
         @Override
         public void setZipRelPath(String value) {editZipRelPath.setText(value);}
         @Override
@@ -241,7 +258,20 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         @Override
         public void setZipDir(String value) {editZipDir.setText(value);}
         @Override
-        public void setFilter(String value) {editFilter.setText(value);}
+        public void setFilter(String value) {
+            editFilter.setText(getFilterDisplayText(value));
+        }
+
+        private String getFilterDisplayText(String value) {
+            QueryParameter q = (value == null) ? null : QueryParameter.parse(value);
+            if (q != null) {
+                IGalleryFilter filter = TagSql.parseQueryEx(q, true);
+
+                // display-text = filter-display-Text + FILTER_DELIMITER + sql
+                return filter + FILTER_DELIMITER + value;
+            }
+            return "";
+        }
     }
 
     private ZipConfigDto mFilter = new ZipConfigDto(null);
@@ -274,8 +304,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         if (savedInstanceState != null) {
             mFilter.loadFrom((IZipConfig) savedInstanceState.getSerializable(STATE_ZIP_CONFIG));
         } else {
-            // intent.
-
+            mFilter.loadFrom((IZipConfig) intent.getSerializableExtra(STATE_ZIP_CONFIG));
         }
         loadGuiFromData();
     }
@@ -321,6 +350,52 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
             }
         });
 
+        cmd = (Button) findViewById(R.id.cmd_filter);
+        cmd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onClickPickExif();
+            }
+        });
+    }
+
+    /**
+     * Call back from sub-activities.<br/>
+     * Process Change StartTime (longpress start), Select StopTime before stop
+     * (longpress stop) or filter change for detailReport
+     */
+    @Override
+    protected void onActivityResult(final int requestCode,
+                                    final int resultCode, final Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+
+        switch (requestCode) {
+            case REQUEST_ID_PICK_EXIF:
+                if (resultCode != 0) {
+                    QueryParameter q = AndroidAlbumUtils.getQuery(this, "",
+                            null, intent, null,
+                            null, null);
+                    onExifChanged((q != null) ? q.toReParseableString(null) : null);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void onClickPickExif() {
+        saveGuiToData();
+        QueryParameter filter = QueryParameter.parse(mFilter.getFilter());
+        GalleryFilterActivity.showActivity("[20]", BackupActivity.this,
+                null, filter, null, REQUEST_ID_PICK_EXIF);
+    }
+
+    /**
+     * exif editor result
+     */
+    private void onExifChanged(String modifiedQuery) {
+        mFilter.setFilter((modifiedQuery != null) ? modifiedQuery : "");
+        loadGuiFromData();
     }
 
     private final DateTimeApi mDateTimeApi = new DateTimeApi();

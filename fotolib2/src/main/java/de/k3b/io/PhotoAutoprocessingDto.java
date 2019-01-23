@@ -218,15 +218,18 @@ public class PhotoAutoprocessingDto {
 
     /** exif data that should be applied to every jpg file */
     public PhotoAutoprocessingDto setMediaDefaults(IMetaApi mediaDefaults) {
-        String mediaDefaultString = null;
+        String mediaDefaultString = toString(mediaDefaults);
+        setProperty(KEY_EXIF, mediaDefaultString);
+        return this;
+    }
+
+    public static String toString(IMetaApi mediaDefaults) {
         if (mediaDefaults != null) {
-            mediaDefaultString = (mediaDefaults instanceof MediaAsString)
+            return (mediaDefaults instanceof MediaAsString)
                ? mediaDefaults.toString()
                : new MediaAsString().setData(mediaDefaults).toString();
         }
-
-        setProperty(KEY_EXIF, mediaDefaultString);
-        return this;
+        return null;
     }
 
     public boolean isEmpty() {
