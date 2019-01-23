@@ -147,6 +147,9 @@ this program. If not, see <http://www.gnu.org/licenses/>
         <CheckBoxPreference android:key="debugEnabledJpgMetaIo"
             android:defaultValue="false"
             android:title="@string/settings_debug_meta_io" />
+        <CheckBoxPreference android:key="debugEnabledZip"
+            android:defaultValue="false"
+            android:title="@string/settings_debug_zip" />
         <CheckBoxPreference android:key="debugEnableLibs"
             android:defaultValue="false"
             android:title="@string/settings_debug_libs_title"

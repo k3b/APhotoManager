@@ -47,6 +47,7 @@ import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.tagDB.TagRepository;
+import de.k3b.zip.LibZipGlobal;
 import io.github.lonamiwebs.stringlate.utilities.Api;
 import uk.co.senab.photoview.PhotoViewAttacher;
 import uk.co.senab.photoview.log.LogManager;
@@ -146,6 +147,7 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putBoolean("debugEnabledViewItem", Global.debugEnabledViewItem);
         prefs.putBoolean("debugEnabledSql", Global.debugEnabledSql);
         prefs.putBoolean("debugEnabledMap", Global.debugEnabledMap);
+        prefs.putBoolean("debugEnabledZip", LibZipGlobal.debugEnabled);
 
         prefs.putBoolean("debugEnabledMemory", Global.debugEnabledMemory);
 
@@ -203,9 +205,11 @@ public class SettingsActivity extends PreferenceActivity {
 
         Global.debugEnabledMap                  = getPref(prefs, "debugEnabledMap", Global.debugEnabledMap);
 
+        LibZipGlobal.debugEnabled               = getPref(prefs, "debugEnabledZip", LibZipGlobal.debugEnabled);
+
         Global.debugEnabledMemory               = getPref(prefs, "debugEnabledMemory", Global.debugEnabledMemory);
 
-        LibGlobal.datePickerUseDecade              = getPref(prefs, "datePickerUseDecade", LibGlobal.datePickerUseDecade);
+        LibGlobal.datePickerUseDecade           = getPref(prefs, "datePickerUseDecade", LibGlobal.datePickerUseDecade);
 
         Global.locked                           = getPref(prefs, "locked", Global.locked);
         Global.passwordHash                     = getPref(prefs, "passwordHash", Global.passwordHash);

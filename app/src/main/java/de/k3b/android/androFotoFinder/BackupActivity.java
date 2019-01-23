@@ -39,6 +39,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Calendar;
@@ -57,21 +58,24 @@ import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.database.QueryParameter;
-import de.k3b.io.GalleryFilterParameter;
+import de.k3b.io.FileUtils;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.StringUtils;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.DateUtil;
-import de.k3b.media.IMetaApi;
-import de.k3b.media.MediaAsString;
 import de.k3b.media.MediaUtil;
 import de.k3b.zip.IZipConfig;
+import de.k3b.zip.LibZipGlobal;
 import de.k3b.zip.ZipConfigDto;
 import de.k3b.zip.ZipConfigRepository;
 
 /**
  * #108: Zip-file support: backup-or-copy filtered-or-selected photos to Zip-file
+ *
+ * API
+ *  * uri = intent.getData() load file via file-uri
+ *  * else intent.Extra[STATE_ZIP_CONFIG]
  */
 public class BackupActivity extends ActivityWithAutoCloseDialogs implements Common {
 
@@ -117,8 +121,8 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         if (config != null) {
             intent.putExtra(STATE_ZIP_CONFIG, (Serializable) config);
         }
-        if (Global.debugEnabled) {
-            Log.d(Global.LOG_CONTEXT, mDebugPrefix + context.getClass().getSimpleName()
+        if (LibZipGlobal.debugEnabled) {
+            Log.d(LibZipGlobal.LOG_TAG, mDebugPrefix + context.getClass().getSimpleName()
                     + " > BackupActivity.showActivity " + intent.toUri(Intent.URI_INTENT_SCHEME));
         }
 
@@ -156,15 +160,16 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
 
     private static ZipConfigRepository loadZipConfig(Uri uri, Activity context) {
         if ((uri != null) && ZipConfigRepository.isZipConfig(uri.toString())) {
+            InputStream inputsteam = null;
             try {
-                InputStream inputsteam = context.getContentResolver().openInputStream(uri);
+                inputsteam = context.getContentResolver().openInputStream(uri);
                 return new ZipConfigRepository(null).load(inputsteam, uri);
             } catch (Exception ex) {
                 // file not found or no permission
-                if (Global.debugEnabled) {
-                    Log.d(Global.LOG_CONTEXT, mDebugPrefix + context.getClass().getSimpleName()
+                Log.w(LibZipGlobal.LOG_TAG, mDebugPrefix + context.getClass().getSimpleName()
                             + "-loadZipConfig(" + uri + ") failed " + ex.getClass().getSimpleName(), ex);
-                }
+            } finally {
+                FileUtils.close(inputsteam, uri);
             }
         }
         return null;
@@ -225,7 +230,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
                 ZipConfigDto.copy(dest, this);
                 return true;
             } catch (RuntimeException ex) {
-                Log.e(Global.LOG_CONTEXT, mDebugPrefix + ex.getMessage(), ex);
+                Log.e(LibZipGlobal.LOG_TAG, mDebugPrefix + ex.getMessage(), ex);
                 Toast.makeText(BackupActivity.this, ex.getMessage(), Toast.LENGTH_LONG).show();
                 return false;
             }
@@ -299,12 +304,19 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         defineGui();
 
         Intent intent = getIntent();
+
         mSelectedFiles = getSelectedFiles("onCreate ", intent, false);
 
         if (savedInstanceState != null) {
             mFilter.loadFrom((IZipConfig) savedInstanceState.getSerializable(STATE_ZIP_CONFIG));
         } else {
-            mFilter.loadFrom((IZipConfig) intent.getSerializableExtra(STATE_ZIP_CONFIG));
+            Uri uri = intent.getData();
+            ZipConfigRepository config = loadZipConfig(uri, this);
+            if (config != null) {
+                mFilter.loadFrom(config);
+            } else {
+                mFilter.loadFrom((IZipConfig) intent.getSerializableExtra(STATE_ZIP_CONFIG));
+            }
         }
         loadGuiFromData();
     }
@@ -549,8 +561,8 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
             }
         }
 
-        if (Global.debugEnabled && (intent != null)) {
-            Log.d(Global.LOG_CONTEXT, mDebugPrefix + dbgContext + intent.toUri(Intent.URI_INTENT_SCHEME));
+        if (LibZipGlobal.debugEnabled && (intent != null)) {
+            Log.d(LibZipGlobal.LOG_TAG, mDebugPrefix + dbgContext + intent.toUri(Intent.URI_INTENT_SCHEME));
         }
 
         return result;
@@ -618,8 +630,8 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         final File zipConfigFile = repo.getZipConfigFile();
         if (zipConfigFile != null) {
             ok = repo.save();
-            if (Global.debugEnabled) {
-                Log.d(Global.LOG_CONTEXT, mDebugPrefix + " Saved as " + zipConfigFile);
+            if (LibZipGlobal.debugEnabled) {
+                Log.d(LibZipGlobal.LOG_TAG, mDebugPrefix + " Saved as " + zipConfigFile);
             }
             Toast.makeText(BackupActivity.this, zipConfigFile.toString(), Toast.LENGTH_LONG).show();
 
