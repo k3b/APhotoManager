@@ -251,7 +251,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".BackupActivity"
+        <activity android:name=".backup.BackupActivity"
             android:icon="@drawable/rule"
             android:label="@string/backup_title">
             <!-- ImageDetail edit schema=file with mime=image/* -->

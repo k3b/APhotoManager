@@ -55,7 +55,7 @@ import java.util.List;
 
 import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.AffUtils;
-import de.k3b.android.androFotoFinder.BackupActivity;
+import de.k3b.android.androFotoFinder.backup.BackupActivity;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.ExifEditActivity;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;

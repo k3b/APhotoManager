@@ -17,7 +17,7 @@
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
  
-package de.k3b.android.androFotoFinder;
+package de.k3b.android.androFotoFinder.backup;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
@@ -39,14 +39,18 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
 
+import de.k3b.android.androFotoFinder.AffUtils;
+import de.k3b.android.androFotoFinder.Common;
+import de.k3b.android.androFotoFinder.GalleryFilterActivity;
+import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.SettingsActivity;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
@@ -58,7 +62,6 @@ import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.database.QueryParameter;
-import de.k3b.io.FileUtils;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.StringUtils;
@@ -68,10 +71,10 @@ import de.k3b.media.MediaUtil;
 import de.k3b.zip.IZipConfig;
 import de.k3b.zip.LibZipGlobal;
 import de.k3b.zip.ZipConfigDto;
-import de.k3b.zip.ZipConfigRepository;
 
 /**
- * #108: Zip-file support: backup-or-copy filtered-or-selected photos to Zip-file
+ * #108: Zip-file support: backup-or-copy filtered-or-selected photos to Zip-file.
+ * Gui to edit the backup parameters
  *
  * API
  *  * uri = intent.getData() load file via file-uri
@@ -105,7 +108,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
 
         intent.setAction(Intent.ACTION_EDIT);
 
-        IZipConfig config = loadZipConfig(uri, context);
+        IZipConfig config = Backup2ZipService.loadZipConfig(uri, context);
         QueryParameter mergedQuery = null;
         // intent.putExtra()
         if (null == config) {
@@ -156,23 +159,6 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
             }
         }
         return mergedQuery;
-    }
-
-    private static ZipConfigRepository loadZipConfig(Uri uri, Activity context) {
-        if ((uri != null) && ZipConfigRepository.isZipConfig(uri.toString())) {
-            InputStream inputsteam = null;
-            try {
-                inputsteam = context.getContentResolver().openInputStream(uri);
-                return new ZipConfigRepository(null).load(inputsteam, uri);
-            } catch (Exception ex) {
-                // file not found or no permission
-                Log.w(LibZipGlobal.LOG_TAG, mDebugPrefix + context.getClass().getSimpleName()
-                            + "-loadZipConfig(" + uri + ") failed " + ex.getClass().getSimpleName(), ex);
-            } finally {
-                FileUtils.close(inputsteam, uri);
-            }
-        }
-        return null;
     }
 
     private class Gui implements IZipConfig {
@@ -311,7 +297,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
             mFilter.loadFrom((IZipConfig) savedInstanceState.getSerializable(STATE_ZIP_CONFIG));
         } else {
             Uri uri = intent.getData();
-            ZipConfigRepository config = loadZipConfig(uri, this);
+            IZipConfig config = Backup2ZipService.loadZipConfig(uri, this);
             if (config != null) {
                 mFilter.loadFrom(config);
             } else {
@@ -626,18 +612,14 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         Activity ctx = this;
         saveGuiToData();
         gui.mHistory.saveHistory();
-        ZipConfigRepository repo = new ZipConfigRepository(mFilter);
-        final File zipConfigFile = repo.getZipConfigFile();
-        if (zipConfigFile != null) {
-            ok = repo.save();
-            if (LibZipGlobal.debugEnabled) {
-                Log.d(LibZipGlobal.LOG_TAG, mDebugPrefix + " Saved as " + zipConfigFile);
-            }
-            Toast.makeText(BackupActivity.this, zipConfigFile.toString(), Toast.LENGTH_LONG).show();
+        IZipConfig newConfig = Backup2ZipService.execute(mFilter);
+        if (newConfig != null) {
+            Toast.makeText(BackupActivity.this, newConfig.toString(), Toast.LENGTH_LONG).show();
 
             finish();
+            return true;
         }
-        return ok;
+        return false;
     }
 
 }
