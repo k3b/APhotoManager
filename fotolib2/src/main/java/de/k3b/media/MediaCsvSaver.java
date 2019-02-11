@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -23,30 +23,39 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 
 import de.k3b.csv2db.csv.CsvItem;
+import de.k3b.io.IItemSaver;
 
 /**
  * Created by k3b on 13.10.2016.
  */
 
-public class MediaCsvSaver {
-    private final PrintWriter printer;
+public class MediaCsvSaver implements IItemSaver<IMetaApi> {
+    private PrintWriter printer;
     private final MediaCsvItem csvLine;
 
     public MediaCsvSaver(PrintWriter printer) {
-        this.printer = printer;
+        setPrinter(printer);
         csvLine = new MediaCsvItem();
         defineHeader(MediaCsvItem.MEDIA_CSV_STANDARD_HEADER);
     }
 
-    public void save(IMetaApi item) {
+    protected MediaCsvSaver setPrinter(PrintWriter printer) {
+        this.printer = printer;
+        return this;
+    }
+
+    @Override
+    public boolean save(IMetaApi item) {
         if (item != null) {
             csvLine.clear();
             MediaUtil.copy(csvLine, item, true, true);
             if (!csvLine.isEmpty()) {
                 this.printer.write(csvLine.toString());
                 this.printer.write(CsvItem.DEFAULT_CHAR_LINE_DELIMITER);
+                return true;
             }
         }
+        return false;
     }
 
     private void defineHeader(String header) {

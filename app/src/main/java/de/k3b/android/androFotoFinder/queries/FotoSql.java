@@ -390,12 +390,20 @@ public class FotoSql extends FotoSqlBase {
             filter.setPath(getFilePath(query, removeFromSourceQuery));
 
             // SQL_COL_LAST_MODIFIED in seconds since 1970; translate from MilliSecs
-            filter.setDateModified(getParamWithFix(query, FILTER_EXPR_DATE_MODIFIED_MIN, removeFromSourceQuery, LAST_MODIFIED_FACTOR),
-                    getParamWithFix(query, FILTER_EXPR_DATE_MODIFIED_MAX, removeFromSourceQuery, LAST_MODIFIED_FACTOR));
+            filter.setDateModified(parseDateModifiedMin(query, removeFromSourceQuery),
+                    parseDateModifiedMax(query, removeFromSourceQuery));
 
             return filter;
         }
         return null;
+    }
+
+    public static long parseDateModifiedMax(QueryParameter query, boolean removeFromSourceQuery) {
+        return getParamWithFix(query, FILTER_EXPR_DATE_MODIFIED_MAX, removeFromSourceQuery, LAST_MODIFIED_FACTOR);
+    }
+
+    public static long parseDateModifiedMin(QueryParameter query, boolean removeFromSourceQuery) {
+        return getParamWithFix(query, FILTER_EXPR_DATE_MODIFIED_MIN, removeFromSourceQuery, LAST_MODIFIED_FACTOR);
     }
 
     /** extracts geo infos from srcQuery to destFilter */

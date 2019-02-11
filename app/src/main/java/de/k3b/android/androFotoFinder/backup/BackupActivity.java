@@ -612,7 +612,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         Activity ctx = this;
         saveGuiToData();
         gui.mHistory.saveHistory();
-        IZipConfig newConfig = Backup2ZipService.execute(mFilter);
+        IZipConfig newConfig = Backup2ZipService.execute(mFilter, ctx.getContentResolver());
         if (newConfig != null) {
             Toast.makeText(BackupActivity.this, newConfig.toString(), Toast.LENGTH_LONG).show();
 
