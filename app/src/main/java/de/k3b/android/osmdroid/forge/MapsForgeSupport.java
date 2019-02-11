@@ -41,7 +41,7 @@ public class MapsForgeSupport {
         AndroidGraphicFactory.createInstance(application);
 
         // see https://github.com/mapsforge/mapsforge/issues/868
-        ReadBuffer.setMaximumBufferSize(6500000);
+        // ReadBuffer.setMaximumBufferSize(6500000);
     }
 
     public static void load(Activity activity, MapView mMap, File mapsForgeDir) {
