@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 by k3b.
+ * Copyright (c) 2017-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -564,7 +564,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
         public boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag) {
             return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, ExifEditActivity.this, null);
         }
-    };
+    }
 
     private static class HashTagEditWatcher implements TextWatcher {
         private boolean enabled = true;
@@ -771,7 +771,7 @@ public class ExifEditActivity extends ActivityWithAutoCloseDialogs implements Co
         public String toString() {
             return MediaUtil.toString(this);
         }
-    };
+    }
 
     private void onCheckPrivateChanged(CheckBox chk) {
         if (!checkActive && (chk != null)) {

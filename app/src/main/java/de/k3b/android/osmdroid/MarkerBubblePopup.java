@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2016-2019 by k3b.
+ *
+ * This file is part of AndroFotoFinder / #APhotoManager.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
 package de.k3b.android.osmdroid;
 
 import android.app.Activity;
@@ -63,7 +81,7 @@ public class MarkerBubblePopup<Datatype extends IMarkerInfoData> extends MarkerB
             if (childView != null) {
                 childView.setVisibility(View.VISIBLE);
                 if (childView instanceof Button) {
-                    ((Button) childView).setOnClickListener(new View.OnClickListener() {
+                    childView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             MarkerBubblePopup.this.onBubbleButtonClick(debugContext, v, strValue);
@@ -73,7 +91,7 @@ public class MarkerBubblePopup<Datatype extends IMarkerInfoData> extends MarkerB
                     Spanned html = Html.fromHtml(strValue);
                     ((TextView) childView).setText(html);
                 } else if (childView instanceof ImageButton) {
-                    ((ImageButton) childView).setOnClickListener(new View.OnClickListener() {
+                    childView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             MarkerBubblePopup.this.onBubbleButtonClick(debugContext, v, strValue);

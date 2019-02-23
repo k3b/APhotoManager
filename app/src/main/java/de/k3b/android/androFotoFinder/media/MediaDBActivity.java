@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 by k3b.
+ * Copyright (c) 2016-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -79,7 +79,7 @@ public class MediaDBActivity extends Activity {
 
             mFolder.setText(uri.toString());
             mStatus.setText("");
-            ((Button) findViewById(R.id.cmd_cancel)).setOnClickListener(new View.OnClickListener() {
+            findViewById(R.id.cmd_cancel).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (mTask != null) mTask.cancel(false);
@@ -87,7 +87,7 @@ public class MediaDBActivity extends Activity {
                 }
             });
 
-            ((Button) findViewById(R.id.cmd_ok)).setOnClickListener(new View.OnClickListener() {
+            findViewById(R.id.cmd_ok).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     startScanner(uri);

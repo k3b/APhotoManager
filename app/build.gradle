@@ -79,7 +79,8 @@ android {
 		// http://stackoverflow.com/questions/31350350/generating-signed-apk-error7-missingtranslation-in-build-generated-res-gen
 		// MissingTranslation : not all crowdwin translations are complete so ignore them
 		// ValidFragment : local (dialog-)fragment class for customized direcotry picker is fragile but on rotation code makes shure that dialog is closed. 
-        disable 'MissingTranslation','ValidFragment', 'ContentDescription', 'AndroidLintPluralsCandidate', 'AndroidLintRtlHardcoded'
+        // disable 'MissingTranslation','ValidFragment', 'ContentDescription', 'AndroidLintPluralsCandidate', 'AndroidLintRtlHardcoded'
+        disable 'MissingTranslation','ValidFragment', 'ContentDescription', 'ExpiredTargetSdkVersion' 	
 
         abortOnError false
     }
@@ -100,6 +101,11 @@ task('increaseVersionCode').doLast({
 })
 
 dependencies {
+
+    testImplementation 'junit:junit:4.11'
+    testImplementation 'org.slf4j:slf4j-api:1.7.7@jar'
+    testImplementation 'org.slf4j:slf4j-simple:1.7.7'
+
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':fotolib2')
 
@@ -123,7 +129,7 @@ dependencies {
     // exif support
     // https://github.com/drewnoakes/metadata-extractor/wiki/GettingStarted licence: http://www.apache.org/licenses/LICENSE-2.0
     // 2.10.1 includes more recent xmpcore that generates java-8 bytecode not supported by android yet
-    implementation ('com.drewnoakes:metadata-extractor:2.10.1') { transitive = false; } // 2.8.1
+    implementation ('com.drewnoakes:metadata-extractor:2.10.1') { transitive = false } // 2.8.1
 	
 	// implementation 'com.adobe.xmp:xmpcore:6.1.10' // update for drewnoakes:metadata-extractor requires java-8 compiler does not run on my android-4.4.
 	implementation 'com.adobe.xmp:xmpcore:5.1.2' // current version for drewnoakes:metadata-extractor
@@ -133,24 +139,22 @@ dependencies {
     // implementation 'org.apache.commons:commons-configuration2:2.1.1'
 
     // this is osmdroid
-    // implementation 'org.osmdroid:osmdroid-android:5.4:release@aar'
-    // implementation ('org.osmdroid:osmdroid-mapsforge:5.4:release@aar')
+    // https://github.com/osmdroid/osmdroid/  6.0.3 from 11/2018
     implementation 'org.osmdroid:osmdroid-android:6.0.3'
     implementation ('org.osmdroid:osmdroid-mapsforge:6.0.3')
 
 
     //Mapsforge rendering and database support, which is LGPL
+    // https://github.com/mapsforge/mapsforge/   0.10.0 from 8/2018
     implementation 'org.mapsforge:mapsforge-map-android:0.10.0'
     implementation 'org.mapsforge:mapsforge-map:0.10.0'
 
     implementation 'org.slf4j:slf4j-api:1.7.7@jar'
     implementation 'eu.lp0.slf4j:slf4j-android:1.7.7-1@jar'
 
+
     // https://jitpack.io/com/github/k3b/ToGoZip/L2.0.15/build.log
     // https://jitpack.io/com/github/k3b/ToGoZip/libK3bZip/L2.0.15/
     // implementation('com.github.k3b.ToGoZip:libK3bZip:L2.0.15')  { transitive = false; }
-    implementation('com.github.k3b.ToGoZip:libK3bZip:v2.0.18.181224')  { transitive = false; }
-
-    testImplementation 'junit:junit:4.11'
-    testImplementation 'org.slf4j:slf4j-simple:1.7.7'
+    implementation('com.github.k3b.ToGoZip:libK3bZip:v2.0.18.181224')  { transitive = false }
 }

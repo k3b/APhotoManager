@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -105,7 +105,7 @@ public class DirectoryFormatter {
         int lonPos = lon.indexOf(".") + 1;
 
         for (int i = 1; i <= 2; i++) {
-            result.append(lat.substring(0, latPos + i)).append(",").append(lon.substring(0, lonPos + i)).append("/");
+            result.append(lat, 0, latPos + i).append(",").append(lon, 0, lonPos + i).append("/");
         }
 
         return result.toString();

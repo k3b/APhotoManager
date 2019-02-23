@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 by k3b.
+ * Copyright (c) 2017-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -177,13 +177,13 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
             MediaAsString exampleExif = MediaUtil.inferAutoprocessingExifDefaults(new MediaAsString(), mSelectedFiles.getFiles());
             mCurrentAutoprocessingData.setMediaDefaults(exampleExif);
         }
-        this.exampleSrcfile = mProcessor.getFile(mSelectedFiles.getFile(0));
+        this.exampleSrcfile = RuleFileNameProcessor.getFile(mSelectedFiles.getFile(0));
 
         final Date[] datesPhotoTaken = mSelectedFiles.getDatesPhotoTaken();
 
         this.exampleDate = ((datesPhotoTaken != null) && (datesPhotoTaken.length > 0))
                 ? datesPhotoTaken[0]
-                : getExampleDate(mProcessor.getFile(this.exampleSrcfile));
+                : getExampleDate(RuleFileNameProcessor.getFile(this.exampleSrcfile));
 
 
         defineGui();
@@ -385,7 +385,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
             }
         });
 
-        ((ImageButton) findViewById(R.id.cmd_file_name_pattern_history)).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.cmd_file_name_pattern_history).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onOpenRenamerPopupMenu(v);

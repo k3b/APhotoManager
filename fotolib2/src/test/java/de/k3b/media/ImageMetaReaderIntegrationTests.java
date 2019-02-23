@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager
  *
@@ -59,50 +59,42 @@ public class ImageMetaReaderIntegrationTests {
     }
 
     @Test
-    public void shouldDump() throws IOException
-    {
+    public void shouldDump() {
         // System.out.printf(sut.toString());
         logger.info(sut.toString());
     }
 
     @Test
-    public void shouldGetDescription() throws IOException
-    {
+    public void shouldGetDescription() {
         Assert.assertEquals("ImageDescription", sut.getDescription());
     }
 
     @Test
-    public void shouldGetTitle() throws IOException
-    {
+    public void shouldGetTitle() {
         Assert.assertEquals("XPTitle", sut.getTitle());
     }
 
     @Test
-    public void shouldGetDateTimeTaken() throws IOException
-    {
+    public void shouldGetDateTimeTaken() {
         Assert.assertEquals("1962-11-07T09:38:46", DateUtil.toIsoDateTimeString(sut.getDateTimeTaken()));
     }
 
     @Test
-    public void shouldGetLatitude() throws IOException
-    {
+    public void shouldGetLatitude() {
         Assert.assertEquals(27.8186, sut.getLatitude(), 0.01);
     }
     @Test
-    public void shouldGetLongitude() throws IOException
-    {
+    public void shouldGetLongitude() {
         Assert.assertEquals(-15.764, sut.getLongitude(), 0.01);
     }
 
     @Test
-    public void shouldGetTags() throws IOException
-    {
+    public void shouldGetTags() {
         Assert.assertEquals("Marker1, Marker2", ListUtils.toString(", ", sut.getTags()));
     }
 
     @Test
-    public void shouldGetRating() throws IOException
-    {
+    public void shouldGetRating() {
         Assert.assertEquals(3, sut.getRating().intValue());
     }
 
@@ -118,8 +110,7 @@ public class ImageMetaReaderIntegrationTests {
 
     // low levelt implementaion detail test
     @Test
-    public void shouldIptcList() throws IOException
-    {
+    public void shouldIptcList() {
         List<String> expected = ListUtils.toStringList("Marker1","Marker2");
         sut.init();
         List<String> result = sut.getStringList("JUnit", sut.mIptcDir, IptcDirectory.TAG_KEYWORDS);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager
  *
@@ -171,7 +171,7 @@ public class OSDirectory implements IDirectory {
         OSDirectory result = (OSDirectory) findChildByRelPath(children, name);
 
         if (result == null) {
-            result = root.createOsDirectory(file, (OSDirectory) parentDir, null);
+            result = root.createOsDirectory(file, parentDir, null);
             children.add(result);
         }
         return result;

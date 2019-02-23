@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager
  *
@@ -57,57 +57,48 @@ public class MediaXmpSegmentIntegrationTests {
     }
 
     @Test
-    public void shouldDump() throws IOException
-    {
+    public void shouldDump() {
         // System.out.printf(sut.toString());
         logger.info("shouldDump " + sut.toString());
     }
 
     @Test
-    public void shouldGetDescription() throws IOException
-    {
+    public void shouldGetDescription() {
         Assert.assertEquals("XPSubject", sut.getDescription());
     }
 
     @Test
-    public void shouldGetTitle() throws IOException
-    {
+    public void shouldGetTitle() {
         Assert.assertEquals("Headline", sut.getTitle());
     }
 
     @Test
-    public void shouldGetDateTimeTaken() throws IOException
-    {
+    public void shouldGetDateTimeTaken() {
         Assert.assertEquals("1962-11-07T09:38:46", DateUtil.toIsoDateTimeString(sut.getDateTimeTaken()));
     }
 
     @Test
-    public void shouldGetLatitude() throws IOException
-    {
+    public void shouldGetLatitude() {
         Assert.assertEquals(27.8186, sut.getLatitude(), 0.01);
     }
 
     @Test
-    public void shouldGetLongitude() throws IOException
-    {
+    public void shouldGetLongitude() {
         Assert.assertEquals(-15.764, sut.getLongitude(), 0.01);
     }
 
     @Test
-    public void shouldGetTags() throws IOException
-    {
+    public void shouldGetTags() {
         Assert.assertEquals("Marker1, Marker2", ListUtils.toString(", ", sut.getTags()));
     }
 
     @Test
-    public void shouldGetRating() throws IOException
-    {
+    public void shouldGetRating() {
         Assert.assertEquals(3, sut.getRating().intValue());
     }
 
     @Test
-    public void shouldModifyInMemory() throws IOException
-    {
+    public void shouldModifyInMemory() {
         MediaDTO expected = TestUtil.createTestMediaDTO(2);
         MediaUtil.copy(sut, expected, true, true);
         MediaDTO actual = new MediaDTO();
@@ -119,8 +110,7 @@ public class MediaXmpSegmentIntegrationTests {
 
 
     @Test
-    public void shouldClearInMemory() throws IOException
-    {
+    public void shouldClearInMemory() {
         MediaDTO expected = new MediaDTO();
         MediaUtil.copy(sut, expected, true, true);
         MediaDTO actual = new MediaDTO();
@@ -131,7 +121,7 @@ public class MediaXmpSegmentIntegrationTests {
         logger.info("shouldClearInMemory " + sut.toString());
     }
 
-    private static IMetaApi getMeta(String fileName) throws IOException {
+    private static IMetaApi getMeta(String fileName) {
         InputStream inputStream = TestUtil.getResourceInputStream(fileName);
         MediaXmpSegment xmpContent = new MediaXmpSegment();
         xmpContent.load(inputStream, "JUnit");

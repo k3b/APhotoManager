@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2016-2019 by k3b.
+ *
+ * This file is part of AndroFotoFinder / #APhotoManager.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
 package de.k3b.android.util;
 
 import android.content.Context;
@@ -42,7 +60,7 @@ public class MediaScannerAsyncTask  extends AsyncTask<String[],Object,Integer> {
         }
 
         if (modifyCount > 0) {
-            mScanner.notifyChanges(mContext, mWhy);
+            MediaScanner.notifyChanges(mContext, mWhy);
         }
     }
 
@@ -56,7 +74,7 @@ public class MediaScannerAsyncTask  extends AsyncTask<String[],Object,Integer> {
             // Continute in background task
             int modifyCount = scanner.updateMediaDatabase_Android42(context.getApplicationContext(), oldPathNames, newPathNames);
             if (modifyCount > 0) {
-                scanner.notifyChanges(context, why + " within current non-gui-task");
+                MediaScanner.notifyChanges(context, why + " within current non-gui-task");
             }
         }
     }

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright 2011, 2012 Chris Banes.
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -76,6 +76,7 @@ import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.FileProcessor;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.io.GeoUri;
@@ -160,6 +161,9 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     private String mContextName;                    // name of current ImageView Context persisted in bundle
     private boolean mMustReplaceMenue       = false;
     private boolean locked = false; // if != Global.locked : must update menu
+
+    // if not null this one image that cannot be translated to a file uri will be shown
+    private Uri imageUri  = null;
 
     /** executes sql to load image detail data in a background task that may survive
      * conriguration change (i.e. device rotation) */
@@ -320,7 +324,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             sFileCommands.onMoveOrCopyDirectoryPick(getMove(), getSrcFotos(), selection);
             dismiss();
         }
-    };
+    }
 
     private class TagUpdateTask extends TagTask<List<String>> {
 
@@ -433,7 +437,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
             if (savedInstanceState != null) {
                 mInitialScrollPosition = savedInstanceState.getInt(INSTANCE_STATE_LAST_SCROLL_POSITION, this.mInitialScrollPosition);
-                mModifyCount = savedInstanceState.getInt(INSTANCE_STATE_ContextMenuId, this.mModifyCount);
+                mModifyCount = savedInstanceState.getInt(INSTANCE_STATE_ContextMenuId, mModifyCount);
             } else {
                 mModifyCount = 0;
             }
@@ -596,9 +600,14 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
         if (mGalleryContentQuery == null) {
             this.mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
-            String path = IntentUtil.getFilePath(this, IntentUtil.getUri(intent));
-            if (path != null) {
-                setFilter(getParameterFromPath(path));
+            final Uri conentUri = IntentUtil.getUri(intent);
+            if (conentUri != null) {
+                String path = IntentUtil.getFilePath(this, conentUri);
+                if (path != null) {
+                    setFilter(getParameterFromPath(path));
+                } else {
+                    this.imageUri = conentUri;
+                }
             }
         }
 
@@ -1109,13 +1118,13 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         File src = new File(fotoSourcePath);
         File dest = new File(src.getParentFile(), newFileName);
 
-        File srcXmpShort = mFileCommands.getSidecar(src, false);
+        File srcXmpShort = FileProcessor.getSidecar(src, false);
         boolean hasSideCarShort = ((srcXmpShort != null) && (mFileCommands.osFileExists(srcXmpShort)));
-        File srcXmpLong = mFileCommands.getSidecar(src, true);
+        File srcXmpLong = FileProcessor.getSidecar(src, true);
         boolean hasSideCarLong = ((srcXmpLong != null) && (mFileCommands.osFileExists(srcXmpLong)));
 
-        File destXmpShort = mFileCommands.getSidecar(dest, false);
-        File destXmpLong = mFileCommands.getSidecar(dest, true);
+        File destXmpShort = FileProcessor.getSidecar(dest, false);
+        File destXmpLong = FileProcessor.getSidecar(dest, true);
 
         if (src.equals(dest)) return; // new name == old name ==> nothing to do
 

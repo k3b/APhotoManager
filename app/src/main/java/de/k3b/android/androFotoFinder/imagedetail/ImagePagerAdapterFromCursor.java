@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -264,7 +264,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter {
 
         final boolean useLayout=true;
 
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         PhotoViewEx photoView;
         View root;
@@ -318,7 +318,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter {
                 setImageFromThumbnail(photoView, imageFile);
             }
         }
-        final int rotationInDegrees = JpgMetaWorkflow.getRotationFromExifOrientation(fullPhotoPath);
+        final int rotationInDegrees = JpgMetaWorkflow.getRotationFromExifOrientation(fullPhotoPath, null);
         if (Global.debugEnabledViewItem) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + debugContext + position +", rotation=" +
                     rotationInDegrees + ", "

@@ -1052,7 +1052,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             sFileCommands.onMoveOrCopyDirectoryPick(getMove(), getSrcFotos(), selection);
             dismiss();
         }
-    };
+    }
+
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
         if (AndroidFileCommands.canProcessFile(this.getActivity(), false)) {
             mDestDirPicker = MoveOrCopyDestDirPicker.newInstance(move, fotos);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -107,7 +107,7 @@ public class AndroidFileCommands extends FileCommands {
         }
 
         // a nomedia file is affected => must update gui
-        this.mHasNoMedia = mScanner.isNoMedia(22, oldPathNames) || MediaScanner.isNoMedia(22, newPathNames);
+        this.mHasNoMedia = MediaScanner.isNoMedia(22, oldPathNames) || MediaScanner.isNoMedia(22, newPathNames);
         super.onPreProcess(what, opCode, selectedFiles, oldPathNames, newPathNames);
     }
 

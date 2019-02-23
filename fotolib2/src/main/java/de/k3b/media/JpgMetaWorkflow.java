@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -214,11 +215,12 @@ public class JpgMetaWorkflow {
      * Get necessary rotation for image file from exif.
      *
      * @param fullPathToImageFile The filename.
+     * @param inputStream
      * @return right-rotate (in degrees) image according to exifdata.
      */
-    public static int getRotationFromExifOrientation(String fullPathToImageFile) {
+    public static int getRotationFromExifOrientation(String fullPathToImageFile, InputStream inputStream) {
         try {
-            ExifInterfaceEx exif = new ExifInterfaceEx(fullPathToImageFile, null, null, "getRotationFromExifOrientation");
+            ExifInterfaceEx exif = new ExifInterfaceEx(fullPathToImageFile, inputStream, null, "getRotationFromExifOrientation");
             if (exif.isValidJpgExifFormat()) {
 
                 return MediaUtil.exifOrientationCode2RotationDegrees(exif.getAttributeInt(ExifInterfaceEx.TAG_ORIENTATION, 0), 0);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 by k3b.
+ * Copyright (c) 2016-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -208,7 +208,7 @@ public class XmpSegment {
 
     public XmpSegment setXmpMeta(XMPMeta xmpMeta, String dbg_context) {
         if (dbg_context != null) {
-            this.dbg_context = dbg_context + DBG_PREFIX;
+            XmpSegment.dbg_context = dbg_context + DBG_PREFIX;
         }
 
         this.xmpMeta = xmpMeta;
@@ -236,7 +236,7 @@ public class XmpSegment {
             // workaround: my android-4.2 tahblet cannot re-read it-s xmp without trailing "\n"
             if ((file != null) && file.exists()) {
                 try {
-                    setXmpMeta(XMPMetaFactory.parse(FileUtils.streamFromStringContent(FileUtils.readFile(file) + "\n")), this.dbg_context);
+                    setXmpMeta(XMPMetaFactory.parse(FileUtils.streamFromStringContent(FileUtils.readFile(file) + "\n")), XmpSegment.dbg_context);
                 } catch (IOException e1) {
                     onError("->XmpSegment.load-via-string " + file, e);
                 } catch (XMPException e1) {
@@ -265,7 +265,7 @@ public class XmpSegment {
 
     public XmpSegment save(OutputStream os, boolean humanReadable, String dbg_context) {
         if (dbg_context != null) {
-            this.dbg_context = dbg_context + DBG_PREFIX;
+            XmpSegment.dbg_context = dbg_context + DBG_PREFIX;
         }
 
         // humanReadable = false;

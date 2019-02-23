@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 by k3b.
+ * Copyright (c) 2017-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -415,7 +415,7 @@ public class ImageMetaReader implements IMetaApi, Closeable {
 
 
     @Override
-    public void close() throws IOException {
+    public void close() {
 
     }
 

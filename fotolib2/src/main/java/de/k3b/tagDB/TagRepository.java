@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 by k3b.
+ * Copyright (c) 2016-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -299,7 +299,7 @@ public class TagRepository {
                 */
 
                 if (valid) {
-                    result.add((Tag) item);
+                    result.add(item);
                     indents.add(getIndent(rawLine));
                 }
 
@@ -362,7 +362,7 @@ public class TagRepository {
      * The method can be overwritten to create custom Item types.
      */
     protected Tag create() {
-        return (Tag) new Tag();
+        return new Tag();
     }
 
     /** Save source-points to writer */

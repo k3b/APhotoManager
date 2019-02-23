@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 by k3b.
+ * Copyright (c) 2016-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -64,7 +64,7 @@ public class MediaUtil {
     /**
      * used to identify a member of IMetaApi
      */
-    public static enum FieldID {
+    public enum FieldID {
         path,
         dateTimeTaken,
         title,
@@ -74,7 +74,7 @@ public class MediaUtil {
         tags,
         clasz,
         visibility,
-    };
+    }
 
 
     // Translate exif-orientation code (0..8) to EXIF_ORIENTATION_CODE_2_ROTATION_DEGREES (clockwise)
@@ -214,12 +214,12 @@ public class MediaUtil {
         int changes = 0;
 
         if (source != null) {
-            boolean simulateDoNotCopy = (destination == null) ? true : _simulateDoNotCopy;
+            boolean simulateDoNotCopy = (destination == null) || _simulateDoNotCopy;
             final EnumSet<FieldID>  allowSetNulls = toEnumSet(_allowSetNulls);
             String sValue;
 
             sValue = source.getPath();
-            if (allowed(sValue, (destination == null) ? null : destination.getPath()
+            if (allowedObject(sValue, (destination == null) ? null : destination.getPath()
                     , fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls
                     , FieldID.path, collectedChanges)) {
                 destination.setPath(sValue);
@@ -227,7 +227,7 @@ public class MediaUtil {
             }
 
             Date dValue = source.getDateTimeTaken();
-            if (allowed(dValue, (destination == null) ? null : destination.getDateTimeTaken()
+            if (allowedObject(dValue, (destination == null) ? null : destination.getDateTimeTaken()
                     , fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls
                     , FieldID.dateTimeTaken, collectedChanges)) {
                 destination.setDateTimeTaken(dValue);
@@ -247,7 +247,7 @@ public class MediaUtil {
             }
 
             sValue = source.getTitle();
-            if (allowed(sValue, (destination == null) ? null : destination.getTitle()
+            if (allowedObject(sValue, (destination == null) ? null : destination.getTitle()
                     , fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls
                     , FieldID.title, collectedChanges)) {
                 destination.setTitle(sValue);
@@ -255,7 +255,7 @@ public class MediaUtil {
             }
 
             sValue = source.getDescription();
-            if (allowed(sValue, (destination == null) ? null : destination.getDescription()
+            if (allowedObject(sValue, (destination == null) ? null : destination.getDescription()
                     , fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls
                     , FieldID.description, collectedChanges)) {
                 destination.setDescription(sValue);
@@ -269,7 +269,7 @@ public class MediaUtil {
             final VISIBILITY oldVisibility = (destination == null) ? null : destination.getVisibility();
 
             if (VISIBILITY.isChangingValue(vValue) &&
-                allowed(vValue, oldVisibility
+                allowedObject(vValue, oldVisibility
                     , fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls
                     , FieldID.visibility, collectedChanges)) {
                 destination.setVisibility(vValue);
@@ -278,7 +278,7 @@ public class MediaUtil {
                 if (tValueModifiedNewTags != null) tValueNewTags = tValueModifiedNewTags;
             }
 
-            if (allowed(tValueNewTags, (destination == null) ? null : destination.getTags()
+            if (allowedObject(tValueNewTags, (destination == null) ? null : destination.getTags()
                     , fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls
                     , FieldID.tags, collectedChanges)) {
                 destination.setTags(tValueNewTags);
@@ -286,7 +286,7 @@ public class MediaUtil {
             }
 
             Integer iValue = source.getRating();
-            if (allowed(iValue, (destination == null) ? null : destination.getRating()
+            if (allowedObject(iValue, (destination == null) ? null : destination.getRating()
                     , fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull, allowSetNulls
                     , FieldID.rating, collectedChanges)) {
                 destination.setRating(iValue);
@@ -314,14 +314,14 @@ public class MediaUtil {
     private static boolean allowed(Double newValue, Double oldValue, EnumSet<FieldID> fields2copy, boolean simulateDoNotCopy, boolean overwriteExisting, boolean allowSetNull,
                                    final EnumSet<FieldID> allowSetNulls, FieldID item, List<FieldID> collectedChanges) {
         if (GeoUtil.equals(newValue, oldValue))  return false;  // both are the same, no need to write again
-        return allowed((Object) newValue, (Object) oldValue, fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull,
+        return allowedObject(newValue, oldValue, fields2copy, simulateDoNotCopy, overwriteExisting, allowSetNull,
                                             allowSetNulls, item, collectedChanges);
     }
 
-    private static boolean allowed(Object newValue, Object oldValue,
-                                   EnumSet<FieldID> fields2copy,
-                                   boolean simulateDoNotCopy, boolean overwriteExisting, boolean allowSetNull,
-                                   final EnumSet<FieldID> allowSetNulls, FieldID item, List<FieldID> collectedChanges) {
+    private static boolean allowedObject(Object newValue, Object oldValue,
+                                         EnumSet<FieldID> fields2copy,
+                                         boolean simulateDoNotCopy, boolean overwriteExisting, boolean allowSetNull,
+                                         final EnumSet<FieldID> allowSetNulls, FieldID item, List<FieldID> collectedChanges) {
         // in simulate mode return false as success; in non-simulate return true
         boolean success = !simulateDoNotCopy;
 
@@ -381,12 +381,9 @@ public class MediaUtil {
             return true;
         }
 
-        if ((IMG_TYPE_PRIVATE == (imageTypeFlags & IMG_TYPE_PRIVATE)) &&
-                (lcPath.endsWith(EXT_JPG_PRIVATE))) {
-            return true;
-        }
+        return (IMG_TYPE_PRIVATE == (imageTypeFlags & IMG_TYPE_PRIVATE)) &&
+                (lcPath.endsWith(EXT_JPG_PRIVATE));
 
-        return false;
     }
 
     /** returns the full path that item should get or null if path is already ok */

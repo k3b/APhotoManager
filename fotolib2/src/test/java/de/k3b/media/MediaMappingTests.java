@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -51,7 +51,7 @@ public class MediaMappingTests {
     }
 
     @Before
-    public void setup() throws IOException {
+    public void setup() {
         debugResult.setLength(0);
     }
 
@@ -130,21 +130,21 @@ public class MediaMappingTests {
     }
 
     @Test
-    public void dump1ImageMetaReaderDummy() throws IOException {
+    public void dump1ImageMetaReaderDummy() {
         IMetaApi sut = new ImageMetaReaderDummy();
         dump(sut);
 
     }
 
     @Test
-    public void dump2ExifInterfaceExDummy() throws IOException {
+    public void dump2ExifInterfaceExDummy() {
         IMetaApi sut = new ExifInterfaceExDummy();
         dump(sut);
 
     }
 
     @Test
-    public void dump3MediaXmpSegmentDummy() throws IOException {
+    public void dump3MediaXmpSegmentDummy() {
         IMetaApi sut = new MediaXmpSegmentDummy();
         dump(sut);
 
@@ -152,7 +152,7 @@ public class MediaMappingTests {
 
 
     @Test
-    public void dump4MediaCsvItemDummy() throws IOException {
+    public void dump4MediaCsvItemDummy() {
         IMetaApi sut = new MediaCsvItemDummy();
         dump(sut);
     }

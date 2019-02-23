@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of LocationMapViewer.
  *
@@ -62,7 +62,7 @@ public class OsmdroidUtil {
                     // int pixels = Math.min(mapView.getWidth(), mapView.getHeight());
                     double pixels = Math.sqrt((mapView.getWidth() * mapView.getWidth()) + (mapView.getHeight() * mapView.getHeight()));
                     final double requiredMinimalGroundResolutionInMetersPerPixel
-                            = ((double) new GeoPoint(min.getLatitude(), min.getLongitude()).distanceToAsDouble(max)) / pixels;
+                            = new GeoPoint(min.getLatitude(), min.getLongitude()).distanceToAsDouble(max) / pixels;
                     calculatedZoom = calculateZoom(center.getLatitude(), requiredMinimalGroundResolutionInMetersPerPixel, getMaximumZoomLevel(tileProvider), tileProvider.getMinimumZoomLevel());
                 }
             }

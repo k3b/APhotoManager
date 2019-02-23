@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -212,7 +212,7 @@ public class GeoRectangle implements IGeoRectangle {
     }
 
     public void setHasGeo() {
-        if (isNonGeoOnly() || isEmpty((IGeoRectangle) this)) {
+        if (isNonGeoOnly() || isEmpty(this)) {
             setNonGeoOnly(false);
             setLogitude(-180.0, +180);
             setLatitude(-90.0, +90.0);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 by k3b.
+ * Copyright (c) 2018-2019 by k3b.
  *
  * This file is part of #APhotoManager (https://github.com/k3b/APhotoManager/)
  *              and #toGoZip (https://github.com/k3b/ToGoZip/).
@@ -47,7 +47,7 @@ public class TranslationStatisticsTests {
         final TranslationStatistics translationStatistics = new TranslationStatistics();
         System.out.println("<!-- generated on " + DateUtil.toIsoDateString(new Date()) +
                 " with de.k3b.translations.TranslationStatisticsTests#dumpAsMD -->\n" +
-                translationStatistics.formatterMarkdown.toString(translationStatistics.getLocaleInfos(), translationStatistics.english));
+                TranslationStatistics.formatterMarkdown.toString(translationStatistics.getLocaleInfos(), translationStatistics.english));
     }
 
     @Test

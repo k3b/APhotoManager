@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 by k3b.
+ * Copyright (c) 2016-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -62,11 +62,11 @@ public enum MediaXmpFieldDefinition {
     private final XmpNamespace xmpNamespace;
     private final int arrayOption;
 
-    private MediaXmpFieldDefinition(XmpNamespace xmpNamespace) {
+    MediaXmpFieldDefinition(XmpNamespace xmpNamespace) {
         this(xmpNamespace, PropertyOptions.NO_OPTIONS);
     }
 
-    private MediaXmpFieldDefinition(XmpNamespace xmpNamespace, int arrayOption) {
+    MediaXmpFieldDefinition(XmpNamespace xmpNamespace, int arrayOption) {
         this.xmpNamespace = xmpNamespace;
         this.arrayOption = arrayOption;
     }

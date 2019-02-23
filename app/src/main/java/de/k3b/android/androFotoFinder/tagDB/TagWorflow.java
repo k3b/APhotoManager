@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -104,14 +104,14 @@ public class TagWorflow extends TagProcessor implements IProgessListener {
         List<String> currentItemTags = tagWorflowItemFromDB.tags;
         try {
             MetaWriterExifXml exif = MetaWriterExifXml.create (tagWorflowItemFromDB.path, null, false, "updateTags:");
-            List<String> tagsDbPlusFile = this.getUpdated(currentItemTags, exif.getTags(), null);
+            List<String> tagsDbPlusFile = getUpdated(currentItemTags, exif.getTags(), null);
             if (tagsDbPlusFile != null) {
                 mustSave = true;
                 dbgSaveReason += "jpg/xmp has more tags than sql.";
                 currentItemTags = tagsDbPlusFile;
             }
 
-            List<String> modifiedTags = this.getUpdated(currentItemTags, addedTags, removedTags);
+            List<String> modifiedTags = getUpdated(currentItemTags, addedTags, removedTags);
             if (modifiedTags != null) {
                 // tags have changed.
                 currentItemTags = modifiedTags;

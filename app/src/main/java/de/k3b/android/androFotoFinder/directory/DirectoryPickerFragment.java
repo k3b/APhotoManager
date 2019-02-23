@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -273,8 +273,8 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                 @Override
                 public boolean onItemLongClick(AdapterView<?> parent, View view, int flatPosition, long id) {
                     long packedPos = mTreeView.getExpandableListPosition(flatPosition);
-                    int group = mTreeView.getPackedPositionGroup(packedPos);
-                    int child = mTreeView.getPackedPositionChild(packedPos);
+                    int group = ExpandableListView.getPackedPositionGroup(packedPos);
+                    int child = ExpandableListView.getPackedPositionChild(packedPos);
                     IDirectory directory = (child != -1) ? mNavigation.getChild(group, child) : mNavigation.getGroup(group);
                     onShowPopUp(view, directory);
                     return false;
@@ -763,7 +763,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         Dialog result = super.onCreateDialog(savedInstanceState);
 
         return result;
-    };
+    }
 
     public void onResume() {
         super.onResume();

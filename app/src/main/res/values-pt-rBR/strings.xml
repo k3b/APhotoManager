@@ -28,7 +28,6 @@
   <string name="bookmark_delete_error_format">O marcador não pode ser deletado %1$s.</string>
   <string name="bookmark_delete_question">Deletar o marcador?</string>
   <string name="bookmark_file_comment_format">Gerado em %3$s com \'%1$s\' Versão %2$s. Veja https://github.com/k3b/APhotoManager/wiki/intentapi#sql para mais detalhes</string>
-  <string name="bookmark_load_from_menu_title">Carregar &#8230;</string>
   <string name="bookmark_save_as_menu_title">Salvar como &#8230;</string>
   <string name="btn_change">Mudar</string>
   <string name="btn_pause">Pausar</string>

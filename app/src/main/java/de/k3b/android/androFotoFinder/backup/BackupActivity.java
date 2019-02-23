@@ -485,7 +485,8 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
             dismiss();
         }
 
-    };
+    }
+
     private boolean pickDir(boolean outDir, String lastCopyToPath, int titleId) {
         if (AndroidFileCommands.canProcessFile(this, false)) {
             DestZipDirPicker dlg = DestZipDirPicker.newInstance(outDir/*, fotos*/);

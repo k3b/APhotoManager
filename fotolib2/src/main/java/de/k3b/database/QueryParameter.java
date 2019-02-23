@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -287,7 +287,7 @@ public class QueryParameter {
 
     /************************** end properties *********************/
 
-    public void save(OutputStream _out) throws IOException {
+    public void save(OutputStream _out) {
         PrintWriter writer = null;
         try {
             writer = new PrintWriter(_out);

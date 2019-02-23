@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -571,14 +571,13 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
             final IDirectory currentDirectoryRoot = getiDirectoryRoot(dirQueryID);
             if (currentDirectoryRoot == null) {
                 // not loaded yet. load directoryRoot in background
-                        ;
                 final QueryParameter mergedBaseQuery = FotoSql.getQuery(dirQueryID);
                 mergedBaseQuery.getWhereFrom(mGalleryQueryParameter.mGalleryContentBaseQuery, false);
                 if (mergedBaseQuery != null) {
                     this.mMustShowNavigator = true;
                     mergedBaseQuery.setID(dirQueryID);
 
-                    DirectoryLoaderTask loader = new DirectoryLoaderTask(context, loadDate ? LibGlobal.datePickerUseDecade : false,
+                    DirectoryLoaderTask loader = new DirectoryLoaderTask(context, loadDate && LibGlobal.datePickerUseDecade,
                             mDebugPrefix + " from openPicker(dirQueryID=" +
                                     FotoSql.getName(getApplicationContext(), dirQueryID) + ")") {
                         @Override

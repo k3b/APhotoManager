@@ -30,7 +30,6 @@
   <string name="bookmark_file_comment_format">
 使用\'%1$s\'（%2$s版）基於%3$s 生成。詳情參見https://github.com/k3b/APhotoManager/wiki/intentapi#sql
 </string>
-  <string name="bookmark_load_from_menu_title">加載書簽&#8230;</string>
   <string name="bookmark_save_as_menu_title">書簽另存為...</string>
   <string name="btn_change">變更</string>
   <string name="btn_pause">暫停</string>

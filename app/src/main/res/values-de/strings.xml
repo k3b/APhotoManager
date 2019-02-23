@@ -29,7 +29,6 @@
   <string name="bookmark_delete_error_format">Kann Album %1$s nicht löschen.</string>
   <string name="bookmark_delete_question">Album löschen?</string>
   <string name="bookmark_file_comment_format">Erstellt am %3$s mit \'%1$s\' Version %2$s. weitere Informationen finden Sie unter https://github.com/k3b/APhotoManager/wiki/intentapi#sql</string>
-  <string name="bookmark_load_from_menu_title">Lade Album aus&#8230;</string>
   <string name="bookmark_save_as_menu_title">Album speichern unter...</string>
   <string name="btn_change">Ändern</string>
   <string name="btn_pause">Anhalten</string>

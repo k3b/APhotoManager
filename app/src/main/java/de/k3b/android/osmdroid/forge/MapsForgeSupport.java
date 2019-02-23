@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -82,9 +82,7 @@ public class MapsForgeSupport {
         File[] files = (mapDir == null) ? null : mapDir.listFiles(new FileFilter() {
             @Override
             public boolean accept(File pathname) {
-                if (pathname.getName().toLowerCase().endsWith(".map"))
-                    return true;
-                return false;
+                return pathname.getName().toLowerCase().endsWith(".map");
             }
         });
         return files;

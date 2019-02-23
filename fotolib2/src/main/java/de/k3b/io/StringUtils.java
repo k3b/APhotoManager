@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 by k3b.
+ * Copyright (c) 2018-2019 by k3b.
  *
  * This file is part of #APhotoManager (https://github.com/k3b/APhotoManager/)
  *              and #toGoZip (https://github.com/k3b/ToGoZip/).
@@ -32,7 +32,7 @@ public class StringUtils {
 
     /** null save function: return if both are null or both non-null are the same */
     public static boolean equals(Object lhs, Object rhs) {
-        if (lhs != null) return (rhs != null) ? lhs.equals(rhs) : false;
+        if (lhs != null) return (rhs != null) && lhs.equals(rhs);
         return (rhs == null);
     }
 
@@ -79,9 +79,6 @@ public class StringUtils {
         return str.toString().trim();
 
     }
-    public static int length(CharSequence str) {
-        return (str != null) ? str.length() : 0;
-    }
 
     public static int charCount(CharSequence str, char c) {
 		int result = 0;
@@ -97,6 +94,20 @@ public class StringUtils {
         return result;
     }
 
+    /// @Deprecated use Verson with CharSequence parameter instead of string
+    @Deprecated
+    public static int length(String str) {
+        return (str != null) ? str.length() : 0;
+    }
+    /// @Deprecated use Verson with CharSequence parameter instead of string
+    @Deprecated
+    public static boolean isNullOrEmpty(String str) {
+        return (0 == length(str));
+    }
+
+    public static int length(CharSequence str) {
+        return (str != null) ? str.length() : 0;
+    }
     public static boolean isNullOrEmpty(CharSequence str) {
         return (0 == length(str));
     }

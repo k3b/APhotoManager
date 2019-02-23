@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 by k3b.
+ * Copyright (c) 2016-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -49,7 +49,7 @@ public enum XmpNamespace {
     private final String prefix;
     private final String uri;
 
-    private XmpNamespace(String prefix, String uri) {
+    XmpNamespace(String prefix, String uri) {
         this.prefix = prefix;
 
         this.uri = uri;

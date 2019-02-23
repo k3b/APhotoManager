@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -79,7 +79,7 @@ public class SqlTemplateEngine {
 
             result
                     .append("ifnull(")
-                    .append(input.substring(start,endExpression));
+                    .append(input, start, endExpression);
             addConst(result, input, endExpression, end);
             result
                     .append(",'')");

@@ -634,7 +634,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
          */
         @Override
         public boolean isSortAscending() {
-            return (mFilter != null) ? mFilter.isSortAscending() :  false;
+            return (mFilter != null) && mFilter.isSortAscending();
         }
 
         @Override

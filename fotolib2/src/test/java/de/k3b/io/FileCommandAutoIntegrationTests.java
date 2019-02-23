@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 by k3b.
+ * Copyright (c) 2017-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -74,7 +74,7 @@ public class FileCommandAutoIntegrationTests {
         LOGGER.info(" outdir:" + OUTDIR.getAbsolutePath());
     }
     @Before
-    public void setUp() throws IOException {
+    public void setUp() {
         LibGlobal.appName = "JUnit";
         LibGlobal.appVersion = TEST_CLASS_NAME;
 
