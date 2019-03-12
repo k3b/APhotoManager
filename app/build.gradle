@@ -146,8 +146,15 @@ dependencies {
 
     //Mapsforge rendering and database support, which is LGPL
     // https://github.com/mapsforge/mapsforge/   0.10.0 from 8/2018
-    implementation 'org.mapsforge:mapsforge-map-android:0.10.0'
-    implementation 'org.mapsforge:mapsforge-map:0.10.0'
+
+    implementation 'org.mapsforge:mapsforge-map-android:0.8.0'
+    implementation 'org.mapsforge:mapsforge-map:0.8.0'
+
+    //!!! mapsforge-*:0.10.0 requires osmdroid*:6.0.4 or later because call to
+    // !!! org.mapsforge.map.reader.ReadBuffer#setMaximumBufferSize(...) which was removed
+    //!!! implementation 'org.mapsforge:mapsforge-map-android:0.10.0'
+    //!!! implementation 'org.mapsforge:mapsforge-map:0.10.0'
+
 
     implementation 'org.slf4j:slf4j-api:1.7.7@jar'
     implementation 'eu.lp0.slf4j:slf4j-android:1.7.7-1@jar'
