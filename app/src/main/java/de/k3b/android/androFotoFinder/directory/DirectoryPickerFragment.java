@@ -66,7 +66,7 @@ import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.ClipboardUtil;
 import de.k3b.android.util.FileManagerUtil;
 import de.k3b.android.util.IntentUtil;
-import de.k3b.android.util.MediaScanner;
+import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.AlbumFile;
@@ -366,7 +366,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             mPopUpSelection = selection;
 
             setMenuVisibility(menu, R.id.cmd_fix_link, FileUtils.isSymlinkDir(new File(absoluteSelectedPath), false));
-            setMenuVisibility(menu, R.id.cmd_folder_hide_images, !isAlbumFile && MediaScanner.canHideFolderMedia(absoluteSelectedPath));
+            setMenuVisibility(menu, R.id.cmd_folder_hide_images, !isAlbumFile && PhotoPropertiesMediaFilesScanner.canHideFolderMedia(absoluteSelectedPath));
 
             setMenuVisibility(menu, R.id.cmd_apm_edit, !isAlbumFile && LibGlobal.apmEnabled);
 
@@ -468,7 +468,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                 @Override
                 protected void onDialogResult(String result, Object[] parameters) {
                     if (result != null) {
-                        MediaScanner.hideFolderMedia(mContext, path);
+                        PhotoPropertiesMediaFilesScanner.hideFolderMedia(mContext, path);
                         onDirectoryCancel();
                         if (mDirectoryListener != null) mDirectoryListener.invalidateDirectories("hide folder " + path);
                     }
@@ -673,7 +673,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                             FotoSql.deleteMedia("DirectoryPickerFragment.fixLinks", context, FotoSql.FILTER_COL_PK, new String[] {linkIds[i].toString()}, true);
                         }
                     }
-                    MediaScanner.notifyChanges(context, "Fixed link/canonical duplicates");
+                    PhotoPropertiesMediaFilesScanner.notifyChanges(context, "Fixed link/canonical duplicates");
 
 
                 }

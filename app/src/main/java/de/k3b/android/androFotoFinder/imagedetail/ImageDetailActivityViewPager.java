@@ -52,7 +52,7 @@ import java.util.List;
 
 import de.k3b.android.androFotoFinder.AffUtils;
 import de.k3b.android.androFotoFinder.Common;
-import de.k3b.android.androFotoFinder.ExifEditActivity;
+import de.k3b.android.androFotoFinder.PhotoPropertiesEditActivity;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.LockScreen;
@@ -68,8 +68,8 @@ import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.FileManagerUtil;
 import de.k3b.android.util.IntentUtil;
-import de.k3b.android.util.MediaScanner;
-import de.k3b.android.util.MediaScannerAsyncTask;
+import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
+import de.k3b.android.util.PhotoPropertiesMediaFilesScannerAsyncTask;
 import de.k3b.android.util.OsUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithCallContext;
@@ -84,7 +84,7 @@ import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.StringUtils;
-import de.k3b.media.MediaUtil;
+import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.tagDB.Tag;
 
 /**
@@ -555,7 +555,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             String orgiginalFileToScan = getCurrentFilePath();
 
             if (orgiginalFileToScan != null) {
-                MediaScanner.getInstance(this).updateMediaDatabase_Android42(this, null, orgiginalFileToScan);
+                PhotoPropertiesMediaFilesScanner.getInstance(this).updateMediaDatabase_Android42(this, null, orgiginalFileToScan);
             }
         }
 
@@ -774,7 +774,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
      * return false; activity must me closed
      */
     private boolean checkForIncompleteMediaDatabase(String jpgFullFilePath, String why) {
-        if (!MediaScanner.isNoMedia(jpgFullFilePath,MediaScanner.DEFAULT_SCAN_DEPTH)) {
+        if (!PhotoPropertiesMediaFilesScanner.isNoMedia(jpgFullFilePath, PhotoPropertiesMediaFilesScanner.DEFAULT_SCAN_DEPTH)) {
             File fileToLoad = (jpgFullFilePath != null) ? new File(jpgFullFilePath) : null;
 
             if ((!this.mWaitingForMediaScannerResult) && (fileToLoad != null) && (fileToLoad.exists()) && (fileToLoad.canRead())) {
@@ -805,7 +805,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         if (existing != null) {
             for (File file : existing) {
                 String found = file.getAbsolutePath();
-                if (MediaUtil.isImage(found, MediaUtil.IMG_TYPE_ALL) && !known.contains(found)) {
+                if (PhotoPropertiesUtil.isImage(found, PhotoPropertiesUtil.IMG_TYPE_ALL) && !known.contains(found)) {
                     missing.add(found);
                 }
             }
@@ -822,7 +822,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             Log.d(Global.LOG_CONTEXT, message.toString());
         }
 
-        MediaScannerAsyncTask scanner = new MediaScannerAsyncTask(MediaScanner.getInstance(context), context, why);
+        PhotoPropertiesMediaFilesScannerAsyncTask scanner = new PhotoPropertiesMediaFilesScannerAsyncTask(PhotoPropertiesMediaFilesScanner.getInstance(context), context, why);
         scanner.execute(null, missing.toArray(new String[missing.size()]));
         return missing.size();
     }
@@ -951,12 +951,12 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
                 case R.id.cmd_gallery: {
                     reloadContext = false;
-                    String dirPath = getCurrentFilePath(); // MediaScanner.getDir().getAbsolutePath();
+                    String dirPath = getCurrentFilePath(); // PhotoPropertiesMediaFilesScanner.getDir().getAbsolutePath();
                     if (dirPath != null) {
                         dirPath = FileUtils.getDir(dirPath).getAbsolutePath();
                         GalleryFilterParameter newFilter = new GalleryFilterParameter();
                         newFilter.setPath(dirPath);
-                        // int callBackId = (MediaScanner.isNoMedia(dirPath,MediaScanner.DEFAULT_SCAN_DEPTH)) ? NOMEDIA_GALLERY : 0;
+                        // int callBackId = (PhotoPropertiesMediaFilesScanner.isNoMedia(dirPath,PhotoPropertiesMediaFilesScanner.DEFAULT_SCAN_DEPTH)) ? NOMEDIA_GALLERY : 0;
 
                         QueryParameter query = TagSql.filter2NewQuery(this.mFilter);
                         FotoGalleryActivity.showActivity("[13]" + dirPath, this, query, 0);
@@ -1091,7 +1091,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     }
 
     private boolean onEditExif(SelectedFiles currentFoto, final long fotoId, final String fotoPath) {
-        ExifEditActivity.showActivity("[16]:", this, null, fotoPath, currentFoto, 0, true);
+        PhotoPropertiesEditActivity.showActivity("[16]:", this, null, fotoPath, currentFoto, 0, true);
         return true;
     }
     private boolean onRenameDirQueston(final SelectedFiles currentFoto, final long fotoId, final String fotoPath, final String _newName) {

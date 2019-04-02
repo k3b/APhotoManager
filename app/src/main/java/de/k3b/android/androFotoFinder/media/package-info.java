@@ -44,7 +44,7 @@ pc2android.png
     	}
 
     	package "System" {
-	    	[MediaScanner]
+	    	[PhotoPropertiesMediaFilesScanner]
     		[MediaDB]
     	}
 
@@ -64,8 +64,8 @@ pc2android.png
     [JpegFile hires] -> [apm2csv.cmd]
     [apm2csv.cmd] -> [CsvFile] : {c}
 
-    [JpegFile 1024] -> [MediaScanner]
-    [MediaScanner] -> [MediaDB]
+    [JpegFile 1024] -> [PhotoPropertiesMediaFilesScanner]
+    [PhotoPropertiesMediaFilesScanner] -> [MediaDB]
 
     [JpegFile 1024] -> ["A Photo Manager" Scanner]
     [XmpFile] -> ["A Photo Manager" Scanner]

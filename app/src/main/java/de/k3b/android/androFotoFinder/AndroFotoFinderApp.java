@@ -42,7 +42,7 @@ import de.k3b.android.util.LogCat;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.PhotoAutoprocessingDto;
 import de.k3b.media.ExifInterface;
-import de.k3b.media.ImageMetaReader;
+import de.k3b.media.PhotoPropertiesImageReader;
 import de.k3b.zip.ZipConfigRepository;
 import uk.co.senab.photoview.PhotoViewAttacher;
 import uk.co.senab.photoview.gestures.CupcakeGestureDetector;
@@ -97,7 +97,7 @@ public class AndroFotoFinderApp extends Application {
         mCrashSaveToFile = new LogCat(Global.LOG_CONTEXT, HugeImageLoader.LOG_TAG,
                 PhotoViewAttacher.LOG_TAG, CupcakeGestureDetector.LOG_TAG,
                 LibGlobal.LOG_TAG, ThumbNailUtils.LOG_TAG, IMapView.LOGTAG,
-                ExifInterface.LOG_TAG, ImageMetaReader.LOG_TAG) {
+                ExifInterface.LOG_TAG, PhotoPropertiesImageReader.LOG_TAG) {
 
             public void saveToFile() {
                 final File logFile = getOutpuFile();

@@ -33,13 +33,12 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.io.DateUtil;
 import de.k3b.media.ExifInterfaceEx;
 import de.k3b.database.QueryParameter;
-import de.k3b.media.ImageMetaReader;
+import de.k3b.media.PhotoPropertiesImageReader;
 import de.k3b.io.FileCommands;
 import de.k3b.media.XmpSegment;
 
@@ -188,7 +187,7 @@ public class ImageDetailMetaDialogBuilder {
         if (file.exists()) {
             builder.append(NL).append(file).append(NL).append(NL);
 
-            ImageMetaReader meta = new ImageMetaReader().load(file.getAbsolutePath(),null, null, "ImageDetailMetaDialogBuilder");
+            PhotoPropertiesImageReader meta = new PhotoPropertiesImageReader().load(file.getAbsolutePath(),null, null, "ImageDetailMetaDialogBuilder");
             if (meta != null) builder.append(meta.toString());
             builder.append(NL).append(line).append(NL);
         } else {

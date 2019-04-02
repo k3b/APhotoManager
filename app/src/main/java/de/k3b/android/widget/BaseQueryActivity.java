@@ -55,7 +55,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.osmdroid.OsmdroidUtil;
-import de.k3b.android.util.MediaScanner;
+import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 
 import de.k3b.database.QueryParameter;
 import de.k3b.io.AlbumFile;
@@ -242,7 +242,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                                     BaseQueryActivity.this, uri, null);
                             if (albumQuery != null) {
                                 result.getWhereFrom(albumQuery, true);
-                            } else if (MediaScanner.isNoMedia(path, MediaScanner.DEFAULT_SCAN_DEPTH)) {
+                            } else if (PhotoPropertiesMediaFilesScanner.isNoMedia(path, PhotoPropertiesMediaFilesScanner.DEFAULT_SCAN_DEPTH)) {
                                 // do not show (parent-)directories that contain ".nomedia"
                                 return null;
                             } else {

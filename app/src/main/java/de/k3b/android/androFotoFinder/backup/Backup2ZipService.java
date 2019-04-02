@@ -29,15 +29,15 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Date;
 
-import de.k3b.android.androFotoFinder.media.MediaCursor;
+import de.k3b.android.androFotoFinder.media.PhotoPropertiesMediaDBCursor;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.FileUtils;
 import de.k3b.io.IItemSaver;
-import de.k3b.media.IMetaApi;
-import de.k3b.media.Media2ExistingFileSaver;
-import de.k3b.media.MediaCsvStringSaver;
+import de.k3b.media.IPhotoProperties;
+import de.k3b.media.PhotoProperties2ExistingFileSaver;
+import de.k3b.media.PhotoPropertiesCsvStringSaver;
 import de.k3b.zip.IZipConfig;
 import de.k3b.zip.LibZipGlobal;
 import de.k3b.zip.ZipConfigRepository;
@@ -72,11 +72,11 @@ public class Backup2ZipService {
         if (zipConfigFile != null) {
             QueryParameter filter = getEffectiveQueryParameter(zipConfig);
 
-            final MediaCsvStringSaver csv = new MediaCsvStringSaver();
+            final PhotoPropertiesCsvStringSaver csv = new PhotoPropertiesCsvStringSaver();
 
             /// !!!  todo go on here
             final IItemSaver<File> file2Zip = null;
-            final Media2ExistingFileSaver media2file = new Media2ExistingFileSaver(file2Zip);
+            final PhotoProperties2ExistingFileSaver media2file = new PhotoProperties2ExistingFileSaver(file2Zip);
 
             execQuery(filter, contentResolver, csv, media2file);
 
@@ -117,7 +117,7 @@ public class Backup2ZipService {
     }
 
     private static void execQuery(QueryParameter query, ContentResolver contentResolver,
-                                  IItemSaver<IMetaApi>... consumers) {
+                                  IItemSaver<IPhotoProperties>... consumers) {
         Cursor cursor = null;
         try {
             cursor = contentResolver.query(Uri.parse(query.toFrom()), query.toColumns(),
@@ -126,9 +126,9 @@ public class Backup2ZipService {
             int itemCount = cursor.getCount();
             final int expectedCount = itemCount + itemCount;
 
-            MediaCursor mediaItem = new MediaCursor(cursor);
+            PhotoPropertiesMediaDBCursor mediaItem = new PhotoPropertiesMediaDBCursor(cursor);
             while (cursor.moveToNext()) {
-                for (IItemSaver<IMetaApi> consumer :  consumers){
+                for (IItemSaver<IPhotoProperties> consumer :  consumers){
                     if (consumer != null) consumer.save(mediaItem);
                 }
             }

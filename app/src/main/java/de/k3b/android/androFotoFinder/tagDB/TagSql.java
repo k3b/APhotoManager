@@ -34,18 +34,18 @@ import java.util.List;
 
 import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.Global;
-import de.k3b.android.androFotoFinder.media.MediaContentValues;
+import de.k3b.android.androFotoFinder.media.PhotoPropertiesMediaDBContentValues;
 import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.util.MediaScanner;
+import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
-import de.k3b.media.MediaUtil;
-import de.k3b.media.MediaXmpSegment;
-import de.k3b.media.MetaWriterExifXml;
+import de.k3b.media.PhotoPropertiesUtil;
+import de.k3b.media.PhotoPropertiesXmpSegment;
+import de.k3b.media.PhotoPropertiesUpdateHandler;
 import de.k3b.tagDB.Tag;
 import de.k3b.tagDB.TagConverter;
 
@@ -271,7 +271,7 @@ public class TagSql extends FotoSql {
             .append(TagSql.FILTER_EXPR_TAGS_INCLUDED);
         if (LibGlobal.renamePrivateJpg) {
             where.append(" OR ").append(TagSql.FILTER_EXPR_PATH_LIKE.replace("?","'%" +
-                            MediaUtil.IMG_TYPE_PRIVATE + "'"));
+                            PhotoPropertiesUtil.IMG_TYPE_PRIVATE + "'"));
         }
         where.append(")");
         return exexUpdateImpl("Fix visibility private", context,
@@ -353,17 +353,17 @@ public class TagSql extends FotoSql {
      * @return number of changed db items
      */
     public static int updateDB(String dbgContext, Context context, String oldFullJpgFilePath,
-                               MetaWriterExifXml jpg, MediaUtil.FieldID... allowSetNulls) {
-        if ((jpg != null) && (!MediaScanner.isNoMedia(oldFullJpgFilePath))) {
+                               PhotoPropertiesUpdateHandler jpg, PhotoPropertiesUtil.FieldID... allowSetNulls) {
+        if ((jpg != null) && (!PhotoPropertiesMediaFilesScanner.isNoMedia(oldFullJpgFilePath))) {
             ContentValues dbValues = new ContentValues();
-            MediaContentValues mediaValueAdapter = new MediaContentValues();
+            PhotoPropertiesMediaDBContentValues mediaValueAdapter = new PhotoPropertiesMediaDBContentValues();
 
             // dbValues.clear();
-            final int modifiedColumCout = MediaUtil.copyNonEmpty(mediaValueAdapter.set(dbValues, null), jpg, allowSetNulls);
+            final int modifiedColumCout = PhotoPropertiesUtil.copyNonEmpty(mediaValueAdapter.set(dbValues, null), jpg, allowSetNulls);
             if (modifiedColumCout >= 1) {
                 String newFullJpgFilePath = null;
                 if (LibGlobal.renamePrivateJpg) {
-                    newFullJpgFilePath = MediaUtil.getModifiedPath(jpg);
+                    newFullJpgFilePath = PhotoPropertiesUtil.getModifiedPath(jpg);
                 }
 
                 if (newFullJpgFilePath == null) {
@@ -372,7 +372,7 @@ public class TagSql extends FotoSql {
 
                 mediaValueAdapter.setPath(newFullJpgFilePath);
 
-                MediaXmpSegment xmp = jpg.getXmp();
+                PhotoPropertiesXmpSegment xmp = jpg.getXmp();
                 long xmpFilelastModified = (xmp != null) ? xmp.getFilelastModified() : 0;
                 if (xmpFilelastModified == 0) xmpFilelastModified = TagSql.EXT_LAST_EXT_SCAN_NO_XMP;
                 TagSql.setXmpFileModifyDate(dbValues, xmpFilelastModified);

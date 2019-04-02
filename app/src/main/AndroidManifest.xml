@@ -217,7 +217,7 @@
             </intent-filter>
 
         </activity>
-        <activity android:name=".ExifEditActivity"
+        <activity android:name=".PhotoPropertiesEditActivity"
             android:icon="@drawable/exif_edit"
             android:label="@string/exif_menu_title">
         <!-- ImageDetail edit schema=file with mime=image/* -->
@@ -451,7 +451,7 @@
         </activity>
         <activity android:name=".SettingsActivity"
             android:label="Settings" />
-        <activity android:name=".media.MediaDBActivity"
+        <activity android:name=".media.PhotoPropertiesMediaDBCsvImportActivity"
             android:label="@string/scanner_menu_title">
             <intent-filter
                 android:icon="@drawable/foto_gallery"

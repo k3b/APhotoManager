@@ -54,7 +54,16 @@ android {
 
         versionCode = 40
         versionName = '0.7.2.181027'
+
+		// all supported locales
+		// resConfigs "ar","de","es","fr","hi","in","it","ja","nl","pl","ro","ru","tr","uk","zz","pt-rBR","zh-rCN","zh-rTW"
     }
+	
+
+
+	// does not remove german translations :-(
+    // sourceSets.main.res.filter.exclude '**/res/values-de/**'
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7

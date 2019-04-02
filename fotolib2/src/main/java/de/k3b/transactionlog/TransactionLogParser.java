@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import de.k3b.media.MediaDTO;
+import de.k3b.media.PhotoPropertiesDTO;
 
 /**
  * Analyses TransactionLog to generate move/copy/delete script and update-dtos.
@@ -38,7 +38,7 @@ public class TransactionLogParser {
     private IMediaTransactionLogEntry lastLog = null;
 
     public static class Status {
-        public MediaDTO dto = new MediaDTO();
+        public PhotoPropertiesDTO dto = new PhotoPropertiesDTO();
         public List<String> filenames = new ArrayList<String>();
         public boolean isDelete = false;
         private long lastId=-1;

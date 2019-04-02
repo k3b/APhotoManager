@@ -29,7 +29,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedItems;
 import de.k3b.io.FileUtils;
-import de.k3b.media.MediaUtil;
+import de.k3b.media.PhotoPropertiesUtil;
 
 /**
  * Implements the array sepecific stuff that hopefully can be reused in other adapters, too
@@ -53,7 +53,7 @@ public class AdapterArrayHelper {
 
     /** refreshLocal files from inital path */
     public void reload(String why) {
-        mFullPhotoPaths = mRootDir.list(MediaUtil.JPG_FILENAME_FILTER);
+        mFullPhotoPaths = mRootDir.list(PhotoPropertiesUtil.JPG_FILENAME_FILTER);
         if ((mFullPhotoPaths != null) && (mFullPhotoPaths.length == 0)) {
             mFullPhotoPaths = null;
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + why + "AdapterArrayHelper.refreshLocal(" + mRootDir +") " + 0);

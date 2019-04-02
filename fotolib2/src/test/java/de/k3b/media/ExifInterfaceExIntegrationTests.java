@@ -42,7 +42,7 @@ import de.k3b.io.VISIBILITY;
 public class ExifInterfaceExIntegrationTests {
     private static final Logger logger = LoggerFactory.getLogger(ExifInterfaceExIntegrationTests.class);
 
-    private IMetaApi sut = null;
+    private IPhotoProperties sut = null;
 
     @BeforeClass
     public static void initDirectories() {
@@ -99,11 +99,11 @@ public class ExifInterfaceExIntegrationTests {
 
     @Test
     public void shouldModifyInMemory() {
-        MediaDTO expected = TestUtil.createTestMediaDTO(2);
+        PhotoPropertiesDTO expected = TestUtil.createTestMediaDTO(2);
         expected.setVisibility(VISIBILITY.PUBLIC);
-        MediaUtil.copy(sut, expected, true, true);
-        MediaDTO actual = new MediaDTO();
-        MediaUtil.copy(actual, sut, true, true);
+        PhotoPropertiesUtil.copy(sut, expected, true, true);
+        PhotoPropertiesDTO actual = new PhotoPropertiesDTO();
+        PhotoPropertiesUtil.copy(actual, sut, true, true);
         actual.setPath(expected.path);
         Assert.assertEquals(expected.toString(), actual.toString());
 
@@ -113,11 +113,11 @@ public class ExifInterfaceExIntegrationTests {
 
     @Test
     public void shouldPreservePrivate() {
-        MediaDTO expected = TestUtil.createTestMediaDTO(2);
+        PhotoPropertiesDTO expected = TestUtil.createTestMediaDTO(2);
         expected.setVisibility(VISIBILITY.PRIVATE);
-        MediaUtil.copy(sut, expected, true, true);
-        MediaDTO actual = new MediaDTO();
-        MediaUtil.copy(actual, sut, true, true);
+        PhotoPropertiesUtil.copy(sut, expected, true, true);
+        PhotoPropertiesDTO actual = new PhotoPropertiesDTO();
+        PhotoPropertiesUtil.copy(actual, sut, true, true);
         actual.setPath(expected.path);
         Assert.assertEquals(VISIBILITY.PRIVATE, actual.getVisibility());
 
@@ -126,11 +126,11 @@ public class ExifInterfaceExIntegrationTests {
 
     @Test
     public void shouldClearInMemory() {
-        MediaDTO expected = new MediaDTO();
+        PhotoPropertiesDTO expected = new PhotoPropertiesDTO();
         expected.setVisibility(VISIBILITY.PUBLIC);
-        MediaUtil.copy(sut, expected, true, true);
-        MediaDTO actual = new MediaDTO();
-        MediaUtil.copy(actual, sut, true, true);
+        PhotoPropertiesUtil.copy(sut, expected, true, true);
+        PhotoPropertiesDTO actual = new PhotoPropertiesDTO();
+        PhotoPropertiesUtil.copy(actual, sut, true, true);
         actual.setPath(expected.path);
         Assert.assertEquals(expected.toString(), actual.toString());
 
@@ -138,9 +138,9 @@ public class ExifInterfaceExIntegrationTests {
     }
 
 
-    public static IMetaApi getMeta(String fileName) throws IOException {
+    public static IPhotoProperties getMeta(String fileName) throws IOException {
         InputStream inputStream = TestUtil.getResourceInputStream(fileName);
-        IMetaApi result = new ExifInterfaceEx(fileName, inputStream, null, "JUnit");
+        IPhotoProperties result = new ExifInterfaceEx(fileName, inputStream, null, "JUnit");
         return result;
     }
 

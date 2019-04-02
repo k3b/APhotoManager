@@ -30,8 +30,8 @@ import java.io.Serializable;
 import java.util.Properties;
 
 import de.k3b.LibGlobal;
-import de.k3b.media.IMetaApi;
-import de.k3b.media.MediaAsString;
+import de.k3b.media.IPhotoProperties;
+import de.k3b.media.PhotoPropertiesAsString;
 
 /**
  * #93: Persistable data for autoproccessing images (auto-rename, auto-add-exif).
@@ -211,23 +211,23 @@ public class PhotoAutoprocessingDto {
     }
 
     /** exif data that should be applied to every jpg file */
-    public IMetaApi getMediaDefaults() {
+    public IPhotoProperties getMediaDefaults() {
         String mediaDefaultString = getProperty(KEY_EXIF);
-        return (mediaDefaultString == null) ? null : new MediaAsString().fromString(mediaDefaultString);
+        return (mediaDefaultString == null) ? null : new PhotoPropertiesAsString().fromString(mediaDefaultString);
     }
 
     /** exif data that should be applied to every jpg file */
-    public PhotoAutoprocessingDto setMediaDefaults(IMetaApi mediaDefaults) {
+    public PhotoAutoprocessingDto setMediaDefaults(IPhotoProperties mediaDefaults) {
         String mediaDefaultString = toString(mediaDefaults);
         setProperty(KEY_EXIF, mediaDefaultString);
         return this;
     }
 
-    public static String toString(IMetaApi mediaDefaults) {
+    public static String toString(IPhotoProperties mediaDefaults) {
         if (mediaDefaults != null) {
-            return (mediaDefaults instanceof MediaAsString)
+            return (mediaDefaults instanceof PhotoPropertiesAsString)
                ? mediaDefaults.toString()
-               : new MediaAsString().setData(mediaDefaults).toString();
+               : new PhotoPropertiesAsString().setData(mediaDefaults).toString();
         }
         return null;
     }

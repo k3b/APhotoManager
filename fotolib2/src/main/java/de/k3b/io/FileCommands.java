@@ -34,10 +34,10 @@ import java.util.Date;
 import de.k3b.LibGlobal;
 import de.k3b.io.collections.DestDirFileNameProcessor;
 import de.k3b.io.collections.SelectedFiles;
-import de.k3b.media.IMetaApi;
-import de.k3b.media.JpgMetaWorkflow;
-import de.k3b.media.MediaDiffCopy;
-import de.k3b.media.MetaWriterExifXml;
+import de.k3b.media.IPhotoProperties;
+import de.k3b.media.PhotoPropertiesBulkUpdateService;
+import de.k3b.media.PhotoPropertiesDiffCopy;
+import de.k3b.media.PhotoPropertiesUpdateHandler;
 import de.k3b.transactionlog.MediaTransactionLogEntryDto;
 import de.k3b.transactionlog.MediaTransactionLogEntryType;
 import de.k3b.transactionlog.TransactionLoggerBase;
@@ -162,7 +162,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
      * apply changes in exifChanges to all images in selectedFiles.
      * @return number of changed files.
      */
-    public int applyExifChanges(boolean move, MediaDiffCopy exifChanges, SelectedFiles selectedFiles, IProgessListener progessListener) {
+    public int applyExifChanges(boolean move, PhotoPropertiesDiffCopy exifChanges, SelectedFiles selectedFiles, IProgessListener progessListener) {
         // source files are the same as dest files.
         final File[] destFiles = selectedFiles.getFiles();
         return moveOrCopyFiles(move, "change_exif", exifChanges, selectedFiles, destFiles, progessListener);
@@ -196,13 +196,13 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                           PhotoAutoprocessingDto autoProccessData, IProgessListener progessListener) {
         boolean doNotRenameIfSourceInDestFolder = false;
         IFileNameProcessor renameProcessor = null;
-        MediaDiffCopy exifChanges = null;
+        PhotoPropertiesDiffCopy exifChanges = null;
 
         if ((autoProccessData != null) && (!autoProccessData.isEmpty())) {
             doNotRenameIfSourceInDestFolder = true;
             if (!autoProccessData.isRenameEmpty()) renameProcessor = autoProccessData.createFileNameProcessor();
-            final IMetaApi mediaDefaults = autoProccessData.getMediaDefaults();
-            if (mediaDefaults != null) exifChanges = new MediaDiffCopy(mediaDefaults, false);
+            final IPhotoProperties mediaDefaults = autoProccessData.getMediaDefaults();
+            if (mediaDefaults != null) exifChanges = new PhotoPropertiesDiffCopy(mediaDefaults, false);
         }
 
         if (renameProcessor == null){
@@ -222,7 +222,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
      * @param progessListener   not null: to show in gui what is happening
      */
     int moveOrCopyFilesTo(boolean move,
-                          MediaDiffCopy exifChanges, SelectedFiles selectedFiles, IFileNameProcessor renameProcessor,
+                          PhotoPropertiesDiffCopy exifChanges, SelectedFiles selectedFiles, IFileNameProcessor renameProcessor,
                           File destDirFolder, IProgessListener progessListener) {
         int result = 0;
         if (canProcessFile(move ? OP_MOVE : OP_COPY)) {
@@ -239,7 +239,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
     }
 
     /** does the copying and/or apply exif changes. also used by unittesting */
-    protected int moveOrCopyFiles(final boolean move, String what, MediaDiffCopy exifChanges,
+    protected int moveOrCopyFiles(final boolean move, String what, PhotoPropertiesDiffCopy exifChanges,
                                   SelectedFiles fotos, File[] destFiles,
                                   IProgessListener progessListener) {
         long    startTimestamp = 0;
@@ -320,13 +320,13 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                             }
                             addTransactionLog(id, sourceFile.getPath(), now, moveOrCopyCommand, destFile.getPath());
                         } else { // else move/copy with simultanious exif changes
-                            MediaDiffCopy mediaDiffCopy = exifChanges;
+                            PhotoPropertiesDiffCopy mediaDiffCopy = exifChanges;
                             // new style move/copy image with sidecarfile(s) with exif autoprocessing
 
                             // for the log the file has already been copied/moved
                             logger.set(id, sourcePath);
 
-                            MetaWriterExifXml exifProcessor = createWorkflow(logger, what).applyChanges(sourceFile, destPath, id, move, mediaDiffCopy);
+                            PhotoPropertiesUpdateHandler exifProcessor = createWorkflow(logger, what).applyChanges(sourceFile, destPath, id, move, mediaDiffCopy);
 
                             if (exifProcessor == null) break; // error
 
@@ -384,8 +384,8 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
         return autoProccessData;
     }
 
-    public JpgMetaWorkflow createWorkflow(TransactionLoggerBase logger, String dbgContext) {
-        return new JpgMetaWorkflow(logger);
+    public PhotoPropertiesBulkUpdateService createWorkflow(TransactionLoggerBase logger, String dbgContext) {
+        return new PhotoPropertiesBulkUpdateService(logger);
     }
 
     private File[] createDestFiles(IFileNameProcessor renameProcessor, File destDirFolder, Date[] datesLastModified, File... sourceFiles) {

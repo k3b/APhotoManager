@@ -200,7 +200,7 @@ Verstecken kann über das 'Media-Scanner' Gallery-Menü rückgängig gemacht wer
   <string name="view_context_menu_title">Lade Kontext ...</string>
 
   <!-- #87: edit-exif: image title, description, rating -->
-  <string name="exif_menu_title">Exif Metadataen bearbeiten</string>
+  <string name="exif_menu_title">Bildeigenschaften (Exif) bearbeiten</string>
   <string name="lbl_title">Titel</string>
   <string name="lbl_description">Beschreibung</string>
   <string name="lbl_rating">Bewertung</string>
@@ -212,7 +212,7 @@ Verstecken kann über das 'Media-Scanner' Gallery-Menü rückgängig gemacht wer
   <!-- #93: edit-exif: image title, description, rating -->
   <string name="photo_autoprocessing_edit_menu_title">Automatische processing bearbeiten</string>
   <string name="lbl_file_name_pattern">Umbenennungsmuster</string>
-  <string name="lbl_exif">Exif</string>
+  <string name="lbl_exif">Bildeigenschaften (Exif)</string>
 
   <!-- i.e.
           Copy 5 Photos

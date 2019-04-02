@@ -22,7 +22,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -56,7 +55,7 @@ public class MediaMappingTests {
     }
 
 
-    private class ImageMetaReaderDummy extends ImageMetaReader {
+    private class PhotoPropertiesImageReaderDummy extends PhotoPropertiesImageReader {
         protected boolean isEmpty(Object result, int tryNumber, String debugContext, String debugFieldName) {
             return isEmptyDbgImpl(debugResult, result, tryNumber, debugContext, debugFieldName);
         }
@@ -69,33 +68,33 @@ public class MediaMappingTests {
 
     }
 
-    private class MediaXmpSegmentDummy extends MediaXmpSegment {
-        protected String getPropertyAsString(String debugContext, MediaXmpFieldDefinition... definitions) {
+    private class PhotoPropertiesXmpSegmentDummy extends PhotoPropertiesXmpSegment {
+        protected String getPropertyAsString(String debugContext, PhotoPropertiesXmpFieldDefinition... definitions) {
             debugResult.append("| ").append(debugContext.substring(3)).append(" | ");
-            for (MediaXmpFieldDefinition definition : definitions) {
+            for (PhotoPropertiesXmpFieldDefinition definition : definitions) {
                 debugResult.append(definition.getXmpNamespace().getPrefix()).append(".").append(definition.getShortName()).append(" | ");
             }
             debugResult.append("\n");
             return null;
         }
 
-        protected List<String> getPropertyArray(String debugContext, MediaXmpFieldDefinition... definitions) {
+        protected List<String> getPropertyArray(String debugContext, PhotoPropertiesXmpFieldDefinition... definitions) {
             getPropertyAsString(debugContext, definitions);
             return null;
         }
     }
 
-    private class MediaCsvItemDummy extends MediaCsvItem {
-        private ArrayList<MediaXmpFieldDefinition> cols = new ArrayList<>();
+    private class PhotoPropertiesCsvItemDummy extends PhotoPropertiesCsvItem {
+        private ArrayList<PhotoPropertiesXmpFieldDefinition> cols = new ArrayList<>();
 
-        MediaCsvItemDummy() {
+        PhotoPropertiesCsvItemDummy() {
             initFieldDefinitions(null);
         }
 
         protected Date getDate(String debugContext, int... columnNumbers) {
             debugResult.append("| ").append(debugContext.substring(3)).append(" | ");
             for (int columnNumber : columnNumbers) {
-                MediaXmpFieldDefinition definition = cols.get(columnNumber);
+                PhotoPropertiesXmpFieldDefinition definition = cols.get(columnNumber);
                 debugResult.append(definition.getXmpNamespace().getPrefix()).append(".").append(definition.getShortName()).append(" | ");
             }
             debugResult.append("\n");
@@ -106,7 +105,7 @@ public class MediaMappingTests {
             getDate(debugContext, columnNumber);
             return null;
         }
-        protected int getColumnIndex(List<String> lcHeader, MediaXmpFieldDefinition columnDefinition) {
+        protected int getColumnIndex(List<String> lcHeader, PhotoPropertiesXmpFieldDefinition columnDefinition) {
             cols.add(columnDefinition);
             return cols.indexOf(columnDefinition);
         }
@@ -131,21 +130,21 @@ public class MediaMappingTests {
 
     @Test
     public void dump1ImageMetaReaderDummy() {
-        IMetaApi sut = new ImageMetaReaderDummy();
+        IPhotoProperties sut = new PhotoPropertiesImageReaderDummy();
         dump(sut);
 
     }
 
     @Test
     public void dump2ExifInterfaceExDummy() {
-        IMetaApi sut = new ExifInterfaceExDummy();
+        IPhotoProperties sut = new ExifInterfaceExDummy();
         dump(sut);
 
     }
 
     @Test
     public void dump3MediaXmpSegmentDummy() {
-        IMetaApi sut = new MediaXmpSegmentDummy();
+        IPhotoProperties sut = new PhotoPropertiesXmpSegmentDummy();
         dump(sut);
 
     }
@@ -153,12 +152,12 @@ public class MediaMappingTests {
 
     @Test
     public void dump4MediaCsvItemDummy() {
-        IMetaApi sut = new MediaCsvItemDummy();
+        IPhotoProperties sut = new PhotoPropertiesCsvItemDummy();
         dump(sut);
     }
 
-    protected void dump(IMetaApi sut) {
-        MediaUtil.copyNonEmpty(TestUtil.createTestMediaDTO(3), sut);
+    protected void dump(IPhotoProperties sut) {
+        PhotoPropertiesUtil.copyNonEmpty(TestUtil.createTestMediaDTO(3), sut);
 
         System.out.printf("**" + sut.getClass().getSuperclass().getName() + "**\n" + HEADER);
         System.out.printf(debugResult.toString() + "\n");

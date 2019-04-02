@@ -44,8 +44,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.IntentUtil;
-import de.k3b.android.util.MediaScanner;
-import de.k3b.android.widget.ActivityWithCallContext;
+import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.io.collections.SelectedFiles;
@@ -88,7 +87,7 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
 
         if (AffUtils.putSelectedFiles(intent, selectedFiles)) {
             Long id = selectedFiles.getId(0);
-            IGeoPointInfo initialPoint = MediaScanner.getInstance(context).getPositionFromFile(selectedFiles.getFileNames()[0], (id != null) ? id.toString() : null);
+            IGeoPointInfo initialPoint = PhotoPropertiesMediaFilesScanner.getInstance(context).getPositionFromFile(selectedFiles.getFileNames()[0], (id != null) ? id.toString() : null);
             if (initialPoint != null) {
                 initalUri = Uri.parse(PARSER.toUriString(initialPoint));
                 intent.setData(initalUri);

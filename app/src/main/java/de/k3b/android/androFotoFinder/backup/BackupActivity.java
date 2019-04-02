@@ -67,7 +67,7 @@ import de.k3b.io.IGalleryFilter;
 import de.k3b.io.StringUtils;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.DateUtil;
-import de.k3b.media.MediaUtil;
+import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.zip.IZipConfig;
 import de.k3b.zip.LibZipGlobal;
 import de.k3b.zip.ZipConfigDto;
@@ -520,7 +520,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
             String path = IntentUtil.getFilePath(this, IntentUtil.getUri(intent));
             if (!StringUtils.isNullOrEmpty(path)) {
                 File rootDirFile = new File(path);
-                String[] fileNames = rootDirFile.list(MediaUtil.JPG_FILENAME_FILTER);
+                String[] fileNames = rootDirFile.list(PhotoPropertiesUtil.JPG_FILENAME_FILTER);
 
                 int itemCount = (fileNames != null) ? fileNames.length : 0;
 

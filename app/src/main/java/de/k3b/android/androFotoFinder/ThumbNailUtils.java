@@ -38,7 +38,7 @@ import java.io.File;
 import java.io.IOException;
 
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.media.MediaUtil;
+import de.k3b.media.PhotoPropertiesUtil;
 
 /**
  * Service facade hiding com.nostra13.universalimageloader
@@ -131,7 +131,7 @@ public class ThumbNailUtils {
     /** @param exifOrientationCode either code 0..8 or rotation angle 0, 90, 180, 270 */
     public static Bitmap rotateBitmap(Bitmap source, int exifOrientationCode) {
         if (exifOrientationCode != 0) {
-            int angle = MediaUtil.exifOrientationCode2RotationDegrees(exifOrientationCode, exifOrientationCode);
+            int angle = PhotoPropertiesUtil.exifOrientationCode2RotationDegrees(exifOrientationCode, exifOrientationCode);
 
             if (ThumbNailUtils.DEBUG && Global.debugEnabledViewItem) {
                 Log.i(ThumbNailUtils.LOG_TAG, "rotateBitmap code=" + exifOrientationCode +

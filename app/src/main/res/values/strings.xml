@@ -204,7 +204,7 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
     <string name="view_context_menu_title">Load Context ...</string>
 
     <!-- #87: edit-exif: image title, description, rating -->
-    <string name="exif_menu_title">Edit Exif</string>
+    <string name="exif_menu_title">Edit Properties (Exif)</string>
     <string name="lbl_title">Title</string>
     <string name="lbl_description">Description</string>
     <string name="lbl_rating">Rating</string>
@@ -216,7 +216,7 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
     <!-- #93: edit-exif: image title, description, rating -->
     <string name="photo_autoprocessing_edit_menu_title">Edit Photo Autoprocessing</string>
     <string name="lbl_file_name_pattern">Filename Pattern</string>
-    <string name="lbl_exif">Exif</string>
+    <string name="lbl_exif">Photo Properties (Exif)</string>
 
     <!-- i.e.
             Copy 5 Photos

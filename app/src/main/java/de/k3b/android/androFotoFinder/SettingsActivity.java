@@ -40,9 +40,9 @@ import java.io.File;
 
 import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
-import de.k3b.android.util.MediaScanner;
-import de.k3b.android.util.MediaScannerExifInterface;
-import de.k3b.android.util.MediaScannerImageMetaReader;
+import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
+import de.k3b.android.util.PhotoPropertiesMediaFilesScannerExifInterface;
+import de.k3b.android.util.PhotoPropertiesMediaFilesScannerImageMetaReader;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.LocalizedActivity;
@@ -327,7 +327,7 @@ public class SettingsActivity extends PreferenceActivity {
 
         // true if first run or change
         if ((sOldEnableNonStandardIptcMediaScanner == null) || (sOldEnableNonStandardIptcMediaScanner.booleanValue() != Global.Media.enableIptcMediaScanner)) {
-            MediaScanner.setInstance((Global.Media.enableIptcMediaScanner) ? new MediaScannerImageMetaReader(context) : new MediaScannerExifInterface(context));
+            PhotoPropertiesMediaFilesScanner.setInstance((Global.Media.enableIptcMediaScanner) ? new PhotoPropertiesMediaFilesScannerImageMetaReader(context) : new PhotoPropertiesMediaFilesScannerExifInterface(context));
             sOldEnableNonStandardIptcMediaScanner = Global.Media.enableIptcMediaScanner;
         }
     }

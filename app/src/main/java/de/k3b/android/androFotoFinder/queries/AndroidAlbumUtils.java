@@ -44,7 +44,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.util.IntentUtil;
-import de.k3b.android.util.MediaScanner;
+import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.AlbumFile;
 import de.k3b.io.FileUtils;
@@ -372,7 +372,7 @@ public class AndroidAlbumUtils implements Common {
     public static void insertToMediaDB(String dbgContext, @NonNull Context context, File fileToBeScannedAndInserted) {
         if (fileToBeScannedAndInserted != null) {
             ContentValues values = new ContentValues();
-            String newAbsolutePath = MediaScanner.setFileFields(values, fileToBeScannedAndInserted);
+            String newAbsolutePath = PhotoPropertiesMediaFilesScanner.setFileFields(values, fileToBeScannedAndInserted);
             values.put(FotoSql.SQL_COL_EXT_MEDIA_TYPE, FotoSql.MEDIA_TYPE_ALBUM_FILE);
             FotoSql.insertOrUpdateMediaDatabase(dbgContext, context, newAbsolutePath, values, null, 1l);
         }

@@ -32,8 +32,8 @@ import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileProcessor;
 import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
-import de.k3b.media.IMetaApi;
-import de.k3b.media.MediaUtil;
+import de.k3b.media.IPhotoProperties;
+import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.tagDB.TagConverter;
 import de.k3b.tagDB.TagProcessor;
 
@@ -69,19 +69,19 @@ public class TransactionLoggerBase implements Closeable {
         }
         execLog = null;
     }
-    public void addChanges(IMetaApi newData, EnumSet<MediaUtil.FieldID> changes, List<String> oldTags) {
+    public void addChanges(IPhotoProperties newData, EnumSet<PhotoPropertiesUtil.FieldID> changes, List<String> oldTags) {
         addComment("apply changes image#",id);
 
-        if (changes.contains(MediaUtil.FieldID.dateTimeTaken))  addChangesDateTaken(newData.getDateTimeTaken());
-        if (changes.contains(MediaUtil.FieldID.latitude_longitude)) addChanges(MediaTransactionLogEntryType.GPS, DirectoryFormatter.formatLatLon(newData.getLatitude()) + " " + DirectoryFormatter.formatLatLon(newData.getLongitude()), false);
-        if (changes.contains(MediaUtil.FieldID.description))  addChanges(MediaTransactionLogEntryType.DESCRIPTION, newData.getDescription(), true);
-        if (changes.contains(MediaUtil.FieldID.title))  addChanges(MediaTransactionLogEntryType.HEADER, newData.getTitle(), true);
-        if (changes.contains(MediaUtil.FieldID.rating)) addChanges(MediaTransactionLogEntryType.RATING, (newData.getRating() != null) ? newData.getRating().toString(): "0", false);
+        if (changes.contains(PhotoPropertiesUtil.FieldID.dateTimeTaken))  addChangesDateTaken(newData.getDateTimeTaken());
+        if (changes.contains(PhotoPropertiesUtil.FieldID.latitude_longitude)) addChanges(MediaTransactionLogEntryType.GPS, DirectoryFormatter.formatLatLon(newData.getLatitude()) + " " + DirectoryFormatter.formatLatLon(newData.getLongitude()), false);
+        if (changes.contains(PhotoPropertiesUtil.FieldID.description))  addChanges(MediaTransactionLogEntryType.DESCRIPTION, newData.getDescription(), true);
+        if (changes.contains(PhotoPropertiesUtil.FieldID.title))  addChanges(MediaTransactionLogEntryType.HEADER, newData.getTitle(), true);
+        if (changes.contains(PhotoPropertiesUtil.FieldID.rating)) addChanges(MediaTransactionLogEntryType.RATING, (newData.getRating() != null) ? newData.getRating().toString(): "0", false);
 
-        if (changes.contains(MediaUtil.FieldID.tags)) addChangesTags(oldTags, newData.getTags());
+        if (changes.contains(PhotoPropertiesUtil.FieldID.tags)) addChangesTags(oldTags, newData.getTags());
 
         final VISIBILITY visibility = newData.getVisibility();
-        if (changes.contains(MediaUtil.FieldID.visibility) && VISIBILITY.isChangingValue(visibility)) {
+        if (changes.contains(PhotoPropertiesUtil.FieldID.visibility) && VISIBILITY.isChangingValue(visibility)) {
             addChanges(MediaTransactionLogEntryType.VISIBILITY, ((VISIBILITY.PRIVATE.equals(visibility)) ? "1": "0") + " " + visibility, false);
         }
 

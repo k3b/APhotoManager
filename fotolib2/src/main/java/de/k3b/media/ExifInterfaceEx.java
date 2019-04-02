@@ -40,12 +40,12 @@ import de.k3b.io.VISIBILITY;
 
 /**
  * Thin Wrapper around Android-s ExifInterface to read/write exif data from jpg file
- * and also implements IMetaApi
+ * and also implements IPhotoProperties
  *
  * Created by k3b on 08.10.2016.
  */
 
-public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
+public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
     private static final Logger logger = LoggerFactory.getLogger(LOG_TAG);
 
     private static final SimpleDateFormat sExifDateTimeFormatter;
@@ -65,7 +65,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
 
     private final String mDbg_context;
 	/** if not null content of xmp sidecar file */
-    private final IMetaApi xmpExtern;
+    private final IPhotoProperties xmpExtern;
 
     /**
      * Reads Exif tags from the specified JPEG file.
@@ -73,7 +73,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
      * @param xmpExtern if not null content of xmp sidecar file
      * @param dbg_context
      */
-    public ExifInterfaceEx(String absoluteJpgPath, InputStream in, IMetaApi xmpExtern, String dbg_context) throws IOException {
+    public ExifInterfaceEx(String absoluteJpgPath, InputStream in, IPhotoProperties xmpExtern, String dbg_context) throws IOException {
         super(absoluteJpgPath, in);
         setFilelastModified(mExifFile);
 
@@ -81,7 +81,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
         this.mDbg_context = dbg_context + "->ExifInterfaceEx(" + absoluteJpgPath+ ") ";
         if (LibGlobal.debugEnabledJpgMetaIo) {
             logger.debug(this.mDbg_context +
-                    " load: " + MediaUtil.toString(this, false, null, MediaUtil.FieldID.path, MediaUtil.FieldID.clasz));
+                    " load: " + PhotoPropertiesUtil.toString(this, false, null, PhotoPropertiesUtil.FieldID.path, PhotoPropertiesUtil.FieldID.clasz));
         }
         // Log.d(LOG_TAG, msg);
 
@@ -146,7 +146,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     }
 
     @Override
-    public IMetaApi setPath(String filePath) {
+    public IPhotoProperties setPath(String filePath) {
         mExifFile = (filePath != null) ? new File(filePath) : null;
         if (xmpExtern != null) xmpExtern.setPath(filePath);
         return this;
@@ -223,7 +223,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     private Double mLatitude = null;
     private Double mLongitude = null;
     /** latitude, in degrees north. (-90 .. +90); longitude, in degrees east.  (-180 .. + 180)    */
-    @Override public IMetaApi setLatitudeLongitude(Double latitude, Double longitude) {
+    @Override public IPhotoProperties setLatitudeLongitude(Double latitude, Double longitude) {
         setAttribute(ExifInterfaceEx.TAG_GPS_LATITUDE, convert(latitude));
         setAttribute(ExifInterfaceEx.TAG_GPS_LATITUDE_REF, latitudeRef(latitude));
         mLatitude = latitude;
@@ -281,7 +281,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     }
 
     @Override
-    public IMetaApi setTitle(String value) {
+    public IPhotoProperties setTitle(String value) {
         setAttribute(TAG_WIN_TITLE, value);
         if (xmpExtern != null) xmpExtern.setTitle(value);
         return this;
@@ -317,7 +317,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
 
     /** not implemented in {@link ExifInterface} */
     @Override
-    public IMetaApi setDescription(String value) {
+    public IPhotoProperties setDescription(String value) {
         setAttribute(TAG_IMAGE_DESCRIPTION, value);
         setAttribute(TAG_WIN_SUBJECT, value);
 
@@ -351,7 +351,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
 
     /** not implemented in {@link ExifInterface} */
     @Override
-    public IMetaApi setTags(List<String> value) {
+    public IPhotoProperties setTags(List<String> value) {
         setAttribute(TAG_WIN_KEYWORDS, (value == null) ? null : ListUtils.toString(LIST_DELIMITER, value));
         if (xmpExtern != null) xmpExtern.setTags(value);
         return this;
@@ -373,7 +373,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
 
     /** not implemented in {@link ExifInterface} */
     @Override
-    public IMetaApi setRating(Integer value) {
+    public IPhotoProperties setRating(Integer value) {
         setAttribute(TAG_WIN_RATING, (value != null) ? value.toString() : null);
         if (xmpExtern != null) xmpExtern.setRating(value);
         return this;
@@ -396,7 +396,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
     /** return image orinentation in degrees (0, 90,180,270) or 0 if inknown */
     public int getOrientationInDegrees() {
         int orientationId = getOrientationId();
-        return MediaUtil.exifOrientationCode2RotationDegrees(orientationId, orientationId);
+        return PhotoPropertiesUtil.exifOrientationCode2RotationDegrees(orientationId, orientationId);
     }
 
     protected Date getAttributeDate(String tag) {
@@ -445,7 +445,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
         return result;
     }
 
-    public IMetaApi setVisibility(VISIBILITY visibility) {
+    public IPhotoProperties setVisibility(VISIBILITY visibility) {
         // exif does not support Visibility itseltf
         if (this.xmpExtern != null) this.xmpExtern.setVisibility(visibility);
         if (VISIBILITY.isChangingValue(visibility)) {
@@ -457,7 +457,7 @@ public class ExifInterfaceEx extends ExifInterface implements IMetaApi {
 
     @Override
     public String toString() {
-        return MediaUtil.toString(this);
+        return PhotoPropertiesUtil.toString(this);
     }
 
 }

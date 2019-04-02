@@ -32,7 +32,7 @@ public enum MediaTransactionLogEntryType {
     DELETE("F-", "apmDelete"),
     MOVE("Fm", "apmMove",true),
     COPY("F+", "apmCopy",true),
-// IMetaApi
+// IPhotoProperties
     GPS("g", "apmGps"),
     TAGSADD("T+", "apmTagsAdd"),
     TAGSREMOVE("T-", "apmTagsRemove"),

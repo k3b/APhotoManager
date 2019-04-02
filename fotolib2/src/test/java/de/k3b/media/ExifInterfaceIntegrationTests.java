@@ -162,7 +162,7 @@ public class ExifInterfaceIntegrationTests {
     }
 
     private ExifInterface assertUpdateSameAsAfterWrite(String fileNameDest, String fileNameSrc, HashMap<String, String> testItems) throws IOException {
-        InputStream inputStream = ImageMetaReaderIntegrationTests.class.getResourceAsStream("images/" + fileNameSrc);
+        InputStream inputStream = PhotoPropertiesImageReaderIntegrationTests.class.getResourceAsStream("images/" + fileNameSrc);
 
         final File sutFile = new File(OUTDIR, fileNameDest);
         OutputStream outputStream = new FileOutputStream(sutFile);
@@ -176,7 +176,7 @@ public class ExifInterfaceIntegrationTests {
 
         FileUtils.close(inputStream, fileNameSrc);
 
-        inputStream = ImageMetaReaderIntegrationTests.class.getResourceAsStream("images/" + fileNameSrc);
+        inputStream = PhotoPropertiesImageReaderIntegrationTests.class.getResourceAsStream("images/" + fileNameSrc);
         sutWrite.saveJpegAttributes(inputStream, outputStream, null);
 
         FileUtils.close(outputStream, sutFile);

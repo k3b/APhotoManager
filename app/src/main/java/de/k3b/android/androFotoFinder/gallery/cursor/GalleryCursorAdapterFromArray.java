@@ -34,10 +34,9 @@ import de.k3b.android.androFotoFinder.AdapterArrayHelper;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
-import de.k3b.android.util.MediaScanner;
+import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
-import de.k3b.media.ExifInterface;
 import de.k3b.media.ExifInterfaceEx;
 
 /**
@@ -55,7 +54,7 @@ public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
     public GalleryCursorAdapterFromArray(final Activity context, SelectedItems selectedItems, String name, String fullPhotoPath) {
         super(context, selectedItems, name);
 
-        if (MediaScanner.isNoMedia(fullPhotoPath,MediaScanner.DEFAULT_SCAN_DEPTH)) {
+        if (PhotoPropertiesMediaFilesScanner.isNoMedia(fullPhotoPath, PhotoPropertiesMediaFilesScanner.DEFAULT_SCAN_DEPTH)) {
             mArrayImpl = new AdapterArrayHelper(context, fullPhotoPath, "debugContext");
         }
     }

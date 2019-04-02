@@ -37,7 +37,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.PopupMenu;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -64,10 +63,10 @@ import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.DateUtil;
 import de.k3b.io.RuleFileNameProcessor;
 import de.k3b.io.StringUtils;
-import de.k3b.media.IMetaApi;
-import de.k3b.media.MediaAsString;
-import de.k3b.media.MediaDTO;
-import de.k3b.media.MediaUtil;
+import de.k3b.media.IPhotoProperties;
+import de.k3b.media.PhotoPropertiesAsString;
+import de.k3b.media.PhotoPropertiesDTO;
+import de.k3b.media.PhotoPropertiesUtil;
 
 /**
  * #93: Editor for a WorkflowItem ".apm" files that define
@@ -174,7 +173,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
 
         // if there are no MediaDefaults yet infer them from selected files
         if (mCurrentAutoprocessingData.getMediaDefaults() == null) {
-            MediaAsString exampleExif = MediaUtil.inferAutoprocessingExifDefaults(new MediaAsString(), mSelectedFiles.getFiles());
+            PhotoPropertiesAsString exampleExif = PhotoPropertiesUtil.inferAutoprocessingExifDefaults(new PhotoPropertiesAsString(), mSelectedFiles.getFiles());
             mCurrentAutoprocessingData.setMediaDefaults(exampleExif);
         }
         this.exampleSrcfile = RuleFileNameProcessor.getFile(mSelectedFiles.getFile(0));
@@ -255,10 +254,10 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
                     DateUtil.toIsoDateString(exampleDate),
                     mCurrentAutoprocessingData.getOutDir(), exampleResultFileName));
 
-            IMetaApi mediaChanges = mCurrentAutoprocessingData.getMediaDefaults();
+            IPhotoProperties mediaChanges = mCurrentAutoprocessingData.getMediaDefaults();
             String exifChange = null;
             if (mediaChanges != null) {
-                exifChange = MediaUtil.toString(mediaChanges, false, mLabelGenerator, MediaUtil.FieldID.clasz);
+                exifChange = PhotoPropertiesUtil.toString(mediaChanges, false, mLabelGenerator, PhotoPropertiesUtil.FieldID.clasz);
             }
             mExifChanges.setText(exifChange);
         } finally {
@@ -520,7 +519,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
      */
     private void onPickExif() {
         fromGui();
-        ExifEditActivity.showActivity("[4]", this, mCurrentAutoprocessingData.getMediaDefaults(),
+        PhotoPropertiesEditActivity.showActivity("[4]", this, mCurrentAutoprocessingData.getMediaDefaults(),
                 null, getSelectedFiles(mDebugPrefix+"EditExif-", getIntent(),
                         false),
                 EXIF_EDIT_RESULT_ID, false);
@@ -531,11 +530,11 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
      */
     private boolean onReInferExifAndPick() {
         fromGui();
-        IMetaApi currentMediaDefaults = mCurrentAutoprocessingData.getMediaDefaults();
+        IPhotoProperties currentMediaDefaults = mCurrentAutoprocessingData.getMediaDefaults();
 
         SelectedFiles selectedFiles = getSelectedFiles(mDebugPrefix + "EditExif-", getIntent(),
                 false);
-        IMetaApi inferedMediaDefaults = MediaUtil.inferAutoprocessingExifDefaults(new MediaDTO(), selectedFiles.getFiles());
+        IPhotoProperties inferedMediaDefaults = PhotoPropertiesUtil.inferAutoprocessingExifDefaults(new PhotoPropertiesDTO(), selectedFiles.getFiles());
 
         if (inferedMediaDefaults.getDescription() != null) currentMediaDefaults.setDescription(inferedMediaDefaults.getDescription());
         if (inferedMediaDefaults.getLatitude() != null) currentMediaDefaults.setLatitudeLongitude(inferedMediaDefaults.getLatitude(), inferedMediaDefaults.getLongitude());
@@ -546,7 +545,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
             inferedMediaDefaults.setTags(tags);
         }
 
-        ExifEditActivity.showActivity("[4]", this, currentMediaDefaults,
+        PhotoPropertiesEditActivity.showActivity("[4]", this, currentMediaDefaults,
                 null, selectedFiles,
                 EXIF_EDIT_RESULT_ID, false);
         return true;
@@ -554,7 +553,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     /**
      * exif editor result
      */
-    private void onExifChanged(IMetaApi modifiedExif) {
+    private void onExifChanged(IPhotoProperties modifiedExif) {
         if (modifiedExif != null) {
             mCurrentAutoprocessingData.setMediaDefaults(modifiedExif);
             toGui();
@@ -570,7 +569,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
         if (result == null) {
             String path = IntentUtil.getFilePath(this, IntentUtil.getUri(intent));
             File rootDirFile = new File(path);
-            String[] fileNames = rootDirFile.list(MediaUtil.JPG_FILENAME_FILTER);
+            String[] fileNames = rootDirFile.list(PhotoPropertiesUtil.JPG_FILENAME_FILTER);
 
             int itemCount = (fileNames != null) ? fileNames.length : 0;
 
@@ -690,7 +689,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
         switch (requestCode) {
             case EXIF_EDIT_RESULT_ID:
                 if (resultCode != 0) {
-                    onExifChanged(ExifEditActivity.getExifParam(intent));
+                    onExifChanged(PhotoPropertiesEditActivity.getExifParam(intent));
                 }
                 break;
             default:
@@ -725,11 +724,11 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     }
 
     /**
-     * implement resource based labels for MediaUtil.toString(...)
+     * implement resource based labels for PhotoPropertiesUtil.toString(...)
      */
-    private MediaUtil.ILabelGenerator mLabelGenerator = new MediaUtil.ILabelGenerator() {
+    private PhotoPropertiesUtil.ILabelGenerator mLabelGenerator = new PhotoPropertiesUtil.ILabelGenerator() {
         @Override
-        public String get(MediaUtil.FieldID id) {
+        public String get(PhotoPropertiesUtil.FieldID id) {
             switch (id) {
                 case dateTimeTaken:
                     return getString2(R.string.lbl_date);

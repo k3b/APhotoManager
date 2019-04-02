@@ -53,15 +53,15 @@ public class MediaXmpTests {
     @Test
     public void shouldReadExistingXmpFile() throws IOException {
         TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
-        MediaXmpSegment sut = new MediaXmpSegment();
+        PhotoPropertiesXmpSegment sut = new PhotoPropertiesXmpSegment();
         InputStream fis = TestUtil.getResourceInputStream(TestUtil.TEST_FILE_XMP_WITH_EXIF);
-        sut = new MediaXmpSegment();
+        sut = new PhotoPropertiesXmpSegment();
         sut.load(fis, "JUnit");
         fis.close();
 
-        MediaDTO actual = new MediaDTO(sut);
+        PhotoPropertiesDTO actual = new PhotoPropertiesDTO(sut);
 
-        Assert.assertEquals(sut.toString(), "MediaDTO: path null dateTimeTaken 1962-11-07T09:38:46 title Headline description XPSubject latitude_longitude 27.818611, -15.764444 rating 3 visibility null tags Marker1, Marker2", actual.toString());
+        Assert.assertEquals(sut.toString(), "PhotoPropertiesDTO: path null dateTimeTaken 1962-11-07T09:38:46 title Headline description XPSubject latitude_longitude 27.818611, -15.764444 rating 3 visibility null tags Marker1, Marker2", actual.toString());
     }
 
     private InputStream getStream(String _resourceName) {
@@ -95,20 +95,20 @@ public class MediaXmpTests {
 
     @Test
     public void shouldCopyAllFields() {
-        MediaXmpSegment sut = new MediaXmpSegment();
-        MediaDTO expected = TestUtil.createTestMediaDTO(1);
-        MediaUtil.copy(sut, expected, true, true);
-        MediaDTO actual = new MediaDTO(sut);
+        PhotoPropertiesXmpSegment sut = new PhotoPropertiesXmpSegment();
+        PhotoPropertiesDTO expected = TestUtil.createTestMediaDTO(1);
+        PhotoPropertiesUtil.copy(sut, expected, true, true);
+        PhotoPropertiesDTO actual = new PhotoPropertiesDTO(sut);
 
         Assert.assertEquals(expected.toString(), actual.toString());
     }
 
     @Test
     public void shouldSaveAndLoadXmp() throws IOException {
-        MediaDTO content = TestUtil.createTestMediaDTO(1);
+        PhotoPropertiesDTO content = TestUtil.createTestMediaDTO(1);
         content.setPath(null); // path is not copied to/from xmp file
-        MediaXmpSegment sut = new MediaXmpSegment();
-        MediaUtil.copy(sut, content, true, true);
+        PhotoPropertiesXmpSegment sut = new PhotoPropertiesXmpSegment();
+        PhotoPropertiesUtil.copy(sut, content, true, true);
 
         OUTDIR.mkdirs();
         File outFile = new File(OUTDIR, "shouldSaveAsXmp.xmp");
@@ -117,11 +117,11 @@ public class MediaXmpTests {
         fos.close();
 
         FileInputStream fis = new FileInputStream(outFile);
-        sut = new MediaXmpSegment();
+        sut = new PhotoPropertiesXmpSegment();
         sut.load(fis, "JUnit");
         fis.close();
 
-        MediaDTO actual = new MediaDTO(sut);
+        PhotoPropertiesDTO actual = new PhotoPropertiesDTO(sut);
 
         Assert.assertEquals(content.toString(), actual.toString());
     }

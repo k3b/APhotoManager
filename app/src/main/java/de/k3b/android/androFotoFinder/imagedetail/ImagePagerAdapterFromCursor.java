@@ -48,7 +48,7 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.DBUtils;
 import de.k3b.android.util.GarbageCollector;
-import de.k3b.media.JpgMetaWorkflow;
+import de.k3b.media.PhotoPropertiesBulkUpdateService;
 import de.k3b.android.util.MenuUtils;
 import de.k3b.android.util.ResourceUtils;
 
@@ -318,7 +318,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter {
                 setImageFromThumbnail(photoView, imageFile);
             }
         }
-        final int rotationInDegrees = JpgMetaWorkflow.getRotationFromExifOrientation(fullPhotoPath, null);
+        final int rotationInDegrees = PhotoPropertiesBulkUpdateService.getRotationFromExifOrientation(fullPhotoPath, null);
         if (Global.debugEnabledViewItem) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + debugContext + position +", rotation=" +
                     rotationInDegrees + ", "

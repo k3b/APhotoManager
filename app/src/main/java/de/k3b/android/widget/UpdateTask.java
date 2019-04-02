@@ -12,18 +12,18 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.io.IProgessListener;
 import de.k3b.io.collections.SelectedFiles;
-import de.k3b.media.MediaDiffCopy;
+import de.k3b.media.PhotoPropertiesDiffCopy;
 
 /** update exif changes in asynch task mit chow dialog */
 public class UpdateTask extends AsyncTaskWithProgressDialog<SelectedFiles> implements IProgessListener {
     private static final String mDebugPrefix = "UpdateTaskAsync-";
     public static final int EXIF_RESULT_ID = 522;
 
-    private MediaDiffCopy exifChanges;
+    private PhotoPropertiesDiffCopy exifChanges;
     private final AndroidFileCommands cmd;
 
     public UpdateTask(Activity ctx, AndroidFileCommands cmd,
-               MediaDiffCopy exifChanges) {
+               PhotoPropertiesDiffCopy exifChanges) {
         super(ctx, R.string.exif_menu_title);
         this.exifChanges = exifChanges;
         this.cmd = cmd;

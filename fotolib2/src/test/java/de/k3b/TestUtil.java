@@ -30,8 +30,8 @@ import de.k3b.csv2db.csv.CsvReader;
 import de.k3b.io.DateUtil;
 import de.k3b.io.FileUtils;
 import de.k3b.io.VISIBILITY;
-import de.k3b.media.ImageMetaReaderIntegrationTests;
-import de.k3b.media.MediaDTO;
+import de.k3b.media.PhotoPropertiesImageReaderIntegrationTests;
+import de.k3b.media.PhotoPropertiesDTO;
 import de.k3b.tagDB.TagConverter;
 
 public class TestUtil {
@@ -52,8 +52,8 @@ public class TestUtil {
 		return new CsvReader(TestUtil.createReader(csvSrc));
 	}
 
-	public static MediaDTO createTestMediaDTO(int id) {
-        MediaDTO result = new MediaDTO();
+	public static PhotoPropertiesDTO createTestMediaDTO(int id) {
+        PhotoPropertiesDTO result = new PhotoPropertiesDTO();
 
         result.setPath("Path" + id);
         result.setTitle("Title" + id);
@@ -77,7 +77,7 @@ public class TestUtil {
     }
 
     public static InputStream getResourceInputStream(String fileName) {
-        InputStream inputStream = ImageMetaReaderIntegrationTests.class.getResourceAsStream("images/" + fileName);
+        InputStream inputStream = PhotoPropertiesImageReaderIntegrationTests.class.getResourceAsStream("images/" + fileName);
         Assert.assertNotNull("getResourceInputStream images/" + fileName, inputStream);
         return inputStream;
     }
