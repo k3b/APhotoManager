@@ -78,24 +78,19 @@ metadata.png
 	}
 @enduml
 
-
-
-
-
-
-pc2android.png
+PhotoProperties.png
 @startuml
     title IPhotoProperties implementation
-    [IPhotoProperties] --> [MediaContentValues]
-	[IPhotoProperties] --> [MediaCursor]
+    [IPhotoProperties] --> [PhotoPropertiesMediaDBContentValues]
+	[IPhotoProperties] --> [PhotoPropertiesMediaDBCursor]
 	[IPhotoProperties] --> [ExifInterfaceEx]
 	[IPhotoProperties] --> [PhotoPropertiesCsvItem]
 	[PhotoPropertiesDTO] <- [IPhotoProperties]
 	[IPhotoProperties] --> [PhotoPropertiesXmpSegment]
 	[IPhotoProperties] -> [PhotoPropertiesWrapper]
 	
-    [MediaContentValues] --> [MediaDB]
-    [MediaCursor] <-- [MediaDB]
+    [PhotoPropertiesMediaDBContentValues] --> [MediaDB]
+    [PhotoPropertiesMediaDBCursor] <-- [MediaDB]
 
     [AndroidFileCommands44] -> [JPG file]
     [ExifInterfaceEx] <-- [JPG file]
