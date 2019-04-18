@@ -5,3 +5,4 @@ Changes from 0.7.2 to 0.7.3
 * #133: Additional filtercriteria date-last-modified from ... to
 * #21: Translation updates ja, nl, ru, pt-br
 * Bugfix infer DateTimeTaken from exif-TAG_DATETIME if not available in exif-TAG_DATETIME_ORIGINAL
+* Bugfix: A Photo Manger is now listed as provider for "getContent" for photos
