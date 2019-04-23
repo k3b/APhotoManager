@@ -523,6 +523,8 @@ public class AndroidFileCommands extends FileCommands {
     public static boolean canProcessFile(Context context, boolean isInBackground) {
         if (!Global.mustCheckMediaScannerRunning) return true; // always allowed. DANGEROUS !!!
 
+        if (context == null) return false; // #139 might have been destroyed after screen rotation
+
         if (PhotoPropertiesMediaFilesScanner.isScannerActive(context.getContentResolver())) {
             if (!isInBackground) {
                 Toast.makeText(context, R.string.scanner_err_busy, Toast.LENGTH_LONG).show();
