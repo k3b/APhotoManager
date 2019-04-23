@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!--
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -60,8 +60,10 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
-    <!-- after app crash the logcat is written to /mnt/sdcard/copy/log/androFotofinder.logcat*.txt -->
-    <uses-permission android:name="android.permission.READ_LOGS" />
+    <!-- after app crash the logcat is written to /mnt/sdcard/copy/log/androFotofinder.logcat*.txt
+            on old android versions this allows to read logcat -->
+    <uses-permission android:name="android.permission.READ_LOGS"
+        tools:ignore="ProtectedPermissions" />
 
     <!--
          permissions inherited from a lib that the app does not need.
@@ -77,8 +79,7 @@
         android:largeHeap="true"
         android:theme="@style/AppTheme"
         >
-        <activity
-            android:name=".FotoGalleryActivity"
+        <activity android:name=".FotoGalleryActivity"
             android:icon="@drawable/foto_gallery"
             android:label="@string/app_name">
             <intent-filter>
@@ -111,6 +112,7 @@
                 <action android:name="android.intent.action.PICK" />
                 <action android:name="android.intent.action.GET_CONTENT" />
 
+                <category android:name="android.intent.category.OPENABLE"/>
                 <category android:name="android.intent.category.DEFAULT" />
 
                 <data android:mimeType="image/*" />
@@ -136,8 +138,7 @@
         </activity>
 
         <!-- mime image/* for SEND(_TO)/(RE)VIEW for file -->
-        <activity
-            android:name=".imagedetail.ImageDetailActivityViewPager"
+        <activity android:name=".imagedetail.ImageDetailActivityViewPager"
             android:ellipsize="middle"
             android:icon="@drawable/foto_gallery"
             android:label="@string/app_image_viewer_title">
@@ -198,8 +199,7 @@
             </intent-filter>
 
         </activity>
-        <activity
-            android:name=".GalleryFilterActivity"
+        <activity android:name=".GalleryFilterActivity"
             android:icon="@drawable/album"
             android:label="@string/filter_menu_title" >
             <intent-filter
@@ -218,8 +218,7 @@
             </intent-filter>
 
         </activity>
-        <activity
-            android:name=".ExifEditActivity"
+        <activity android:name=".PhotoPropertiesEditActivity"
             android:icon="@drawable/exif_edit"
             android:label="@string/exif_menu_title">
         <!-- ImageDetail edit schema=file with mime=image/* -->
@@ -236,11 +235,26 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".PhotoAutoprocessingEditActivity"
+            android:icon="@drawable/rule" android:label="@string/photo_autoprocessing_edit_menu_title">
+            <!-- ImageDetail edit schema=file with mime=image/* -->
 
-        <activity
-            android:name=".PhotoAutoprocessingEditActivity"
+            <intent-filter>
+                <action android:name="android.intent.action.EDIT"/>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <!-- file must have mimeType to match -->
+                <data android:scheme="file"/>
+                <data android:mimeType="*/*"/>
+                <data android:host="*"/>
+                <data android:pathPattern=".*\\.apm"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".backup.BackupActivity"
             android:icon="@drawable/rule"
-            android:label="@string/photo_autoprocessing_edit_menu_title">
+            android:label="@string/backup_title">
             <!-- ImageDetail edit schema=file with mime=image/* -->
             <intent-filter>
                 <action android:name="android.intent.action.EDIT" />
@@ -253,16 +267,14 @@
                 <data android:scheme="file" />
                 <data android:mimeType="*/*" />
                 <data android:host="*" />
-                <data android:pathPattern=".*\\.apm" />
+                <data android:pathPattern=".*\\.zip\\.apm\\.config" />
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".locationmap.GeoEditActivity"
+        <activity android:name=".locationmap.GeoEditActivity"
             android:icon="@drawable/ic_geo_edit"
             android:label="@string/geo_edit_menu_title" />
-        <activity
-            android:name=".locationmap.MapGeoPickerActivity"
+        <activity android:name=".locationmap.MapGeoPickerActivity"
             android:icon="@drawable/ic_foto_map"
             android:label="@string/app_map_title">
             <intent-filter>
@@ -438,11 +450,9 @@
                 <data android:pathPattern=".*\\.album" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".SettingsActivity"
+        <activity android:name=".SettingsActivity"
             android:label="Settings" />
-        <activity
-            android:name=".media.MediaDBActivity"
+        <activity android:name=".media.PhotoPropertiesMediaDBCsvImportActivity"
             android:label="@string/scanner_menu_title">
             <intent-filter
                 android:icon="@drawable/foto_gallery"

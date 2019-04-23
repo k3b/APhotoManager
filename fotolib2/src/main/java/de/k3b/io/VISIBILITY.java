@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 by k3b.
+ * Copyright (c) 2017-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 
 public enum VISIBILITY {
     /** take from current settings */
@@ -39,7 +39,10 @@ public enum VISIBILITY {
 
     // #100: if photo has this tag it has visibility PRIVATE
     public static final String TAG_PRIVATE = "PRIVATE";
-    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+
+
+    // causes "SLF4J: Class path contains multiple SLF4J bindings." in unittests :-(
+    // private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
 
     public static final VISIBILITY MAX = PRIVATE_PUBLIC;
     public final int value;
@@ -80,6 +83,9 @@ public enum VISIBILITY {
                 }
 
             }
+
+            // workar9oud to avoid "SLF4J: Class path contains multiple SLF4J bindings." in unittests :-(
+            Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
             logger.warn(VISIBILITY.class.getSimpleName() + ".fromString " + value + ": unknown value");
         }
         return null;

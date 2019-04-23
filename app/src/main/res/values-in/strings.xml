@@ -28,7 +28,6 @@
   <string name="bookmark_delete_error_format">Tidak dapat menghapus markah buku %1$s.</string>
   <string name="bookmark_delete_question">Hapus markah buku ini?</string>
   <string name="bookmark_file_comment_format">Ini dihasilkan %3$s dengan %1$s\' versi %2$s\'. Untuk detailnya, kunjungi https://github.com/k3b/APhotoManager/wiki/intentapi#sql</string>
-  <string name="bookmark_load_from_menu_title">Muat markah buku dari&#8230;</string>
   <string name="bookmark_save_as_menu_title">Simpan markah buku sebagai &#8230;</string>
   <string name="btn_change">Ubah</string>
   <string name="btn_pause">Jeda</string>

@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2018 by k3b.
  *
- * This file is part of AndroFotoFinder / #APhotoManager.
+ * This file is part of #APhotoManager (https://github.com/k3b/APhotoManager/)
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -11,8 +11,8 @@
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License
- * for more details.
  *
+ * for more details.
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import de.k3b.media.MediaDTO;
+import de.k3b.media.PhotoPropertiesDTO;
 
 /**
  * Analyses TransactionLog to generate move/copy/delete script and update-dtos.
@@ -38,7 +38,7 @@ public class TransactionLogParser {
     private IMediaTransactionLogEntry lastLog = null;
 
     public static class Status {
-        public MediaDTO dto = new MediaDTO();
+        public PhotoPropertiesDTO dto = new PhotoPropertiesDTO();
         public List<String> filenames = new ArrayList<String>();
         public boolean isDelete = false;
         private long lastId=-1;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -53,10 +53,11 @@ import org.osmdroid.api.IGeoPoint;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.AffUtils;
+import de.k3b.android.androFotoFinder.PhotoPropertiesEditActivity;
+import de.k3b.android.androFotoFinder.backup.BackupActivity;
 import de.k3b.android.androFotoFinder.Common;
-import de.k3b.android.androFotoFinder.ExifEditActivity;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.LockScreen;
@@ -78,7 +79,7 @@ import de.k3b.android.androFotoFinder.tagDB.TagWorflow;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.DBUtils;
-import de.k3b.android.util.MediaScanner;
+import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.OsUtils;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.AboutDialogPreference;
@@ -108,6 +109,12 @@ import de.k3b.tagDB.Tag;
  *
  * States view-locked <=> view <=> view-multiselect
  *             pick-single, pick-multible, pick-locked
+ *
+ * Menu:
+ *   if (picker-mode) menu_gallery_pick + menu_gallery_non_multiselect
+ *   if (locked) menu_locked
+ *   if (isMultiSelectionActive()) menu_gallery_multiselect_mode_all + menu_image_commands
+ *   if (view-non-select) menu_gallery_non_selected_only + menu_gallery_non_multiselect
  */
 public class GalleryCursorFragment extends Fragment  implements Queryable, DirectoryGui,Common, TagsPickerFragment.ITagsPicker {
     private static final String INSTANCE_STATE_LAST_VISIBLE_POSITION = "lastVisiblePosition";
@@ -884,6 +891,10 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 return onPickOk();
             case R.id.cmd_selected_only:
                 return multiSelectionToggle();
+            case R.id.cmd_backup:
+                BackupActivity.showActivity(mDebugPrefix, getActivity(), null, selectedFiles, null,
+                        getCurrentQuery(), BackupActivity.REQUEST_BACKUP_ID);
+                return true;
             case R.id.cmd_copy:
                 return cmdMoveOrCopyWithDestDirPicker(false, fileCommands.getLastCopyToPath(), selectedFiles);
             case R.id.cmd_move:
@@ -961,7 +972,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     private boolean onEditExif(SelectedFiles fotos) {
-        ExifEditActivity.showActivity("[12]", getActivity(), null, null, fotos, 0, true);
+        PhotoPropertiesEditActivity.showActivity("[12]", getActivity(), null, null, fotos, 0, true);
         return true;
     }
 
@@ -1041,7 +1052,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             sFileCommands.onMoveOrCopyDirectoryPick(getMove(), getSrcFotos(), selection);
             dismiss();
         }
-    };
+    }
+
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
         if (AndroidFileCommands.canProcessFile(this.getActivity(), false)) {
             mDestDirPicker = MoveOrCopyDestDirPicker.newInstance(move, fotos);
@@ -1289,7 +1301,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     //-------------------------------------------------------------
 
     private void fixMediaDatabase() {
-        if (!MediaScanner.isScannerActive(getActivity().getContentResolver())) {
+        if (!PhotoPropertiesMediaFilesScanner.isScannerActive(getActivity().getContentResolver())) {
             if (Global.debugEnabled) {
                 Log.d(Global.LOG_CONTEXT, "Analysing media database for potential problems");
             }
@@ -1307,7 +1319,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             @Override
             protected void doInBackground(Long id, Cursor cursor) {
                 if (mPathColNo == -2) mPathColNo = cursor.getColumnIndex(FotoSql.SQL_COL_PATH);
-                mResultCount += MediaScanner.getInstance(getActivity()).updatePathRelatedFields(getActivity(), cursor, cursor.getString(mPathColNo), mColumnIndexPK, mPathColNo);
+                mResultCount += PhotoPropertiesMediaFilesScanner.getInstance(getActivity()).updatePathRelatedFields(getActivity(), cursor, cursor.getString(mPathColNo), mColumnIndexPK, mPathColNo);
             }
 
             @Override
@@ -1420,7 +1432,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     }
 
     private void fix() {
-        if (((mRequeryInstanceCount > 2) && (FotoLibGlobal.itpcWriteSupport))) {
+        if (((mRequeryInstanceCount > 2) && (LibGlobal.itpcWriteSupport))) {
             View iptc = ResourceUtils.findLast(this.mGalleryView.getRootView(), "ads");
             if (iptc != null) {
                 ((ViewGroup) iptc.getParent()).removeView(iptc);

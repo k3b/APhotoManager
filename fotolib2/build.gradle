@@ -22,7 +22,12 @@ dependencies {
 
     // https://github.com/drewnoakes/metadata-extractor/wiki/GettingStarted licence: http://www.apache.org/licenses/LICENSE-2.0
     // 2.10.1 includes more recent xmpcore that generates java-8 bytecode not supported by android yet
-    compile ('com.drewnoakes:metadata-extractor:2.10.1') { transitive = false; } // 2.8.1
+    compile ('com.drewnoakes:metadata-extractor:2.10.1') { transitive = false } // 2.8.1
+
+    // https://jitpack.io/com/github/k3b/ToGoZip/L2.0.15/build.log
+    // https://jitpack.io/com/github/k3b/ToGoZip/libK3bZip/L2.0.15/
+    // implementation('com.github.k3b.ToGoZip:libK3bZip:L2.0.15')  { transitive = false; }
+    implementation('com.github.k3b.ToGoZip:libK3bZip:v2.0.18.181224')  { transitive = false }
 }
 
 // workaround because android-studio does not make the test resources available

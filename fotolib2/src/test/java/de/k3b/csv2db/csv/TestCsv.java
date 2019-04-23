@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -30,7 +30,7 @@ import de.k3b.TestUtil;
 
 public class TestCsv {
 	@Test
-	public void emptyReaderShouldReturnNoData() throws Throwable {
+	public void emptyReaderShouldReturnNoData() {
 		Reader inputStream = TestUtil.createReader("");
 		CsvReader parser = new CsvReader(inputStream);
 		
@@ -39,7 +39,7 @@ public class TestCsv {
 	}
 
 	@Test
-	public void shouldReturn2TabColums() throws Throwable {
+	public void shouldReturn2TabColums() {
 		Reader inputStream = TestUtil.createReader("a\tb");
 		CsvReader parser = new CsvReader(inputStream);
 		
@@ -48,7 +48,7 @@ public class TestCsv {
 	}
 
 	@Test
-	public void shouldReturn2SemicolonColums() throws Throwable {
+	public void shouldReturn2SemicolonColums() {
 		Reader inputStream = TestUtil.createReader("a;\"b;something\nmulti;line\"");
 		CsvReader parser = new CsvReader(inputStream);
 		
@@ -57,7 +57,7 @@ public class TestCsv {
 	}
 
 	@Test
-	public void shouldReturnNullOn2ndLine() throws Throwable {
+	public void shouldReturnNullOn2ndLine() {
 		Reader inputStream = TestUtil.createReader("a;b");
 		CsvReader parser = new CsvReader(inputStream);
 		
@@ -67,7 +67,7 @@ public class TestCsv {
 	}
 	
 	@Test
-	public void shouldNotReturnNullOn2ndLine() throws Throwable {
+	public void shouldNotReturnNullOn2ndLine() {
 		Reader inputStream = TestUtil.createReader("a;b\nc");
 		CsvReader parser = new CsvReader(inputStream);
 		
@@ -77,23 +77,23 @@ public class TestCsv {
 	}
 
 	@Test
-	public void shouldCountLines() throws Throwable {
+	public void shouldCountLines() {
 		Reader inputStream = TestUtil.createReader("a\n\"b;something\nmulti;line\"\n");
 		CsvReader parser = new CsvReader(inputStream);
 		
-		while (null!=parser.readLine()) {};
-		
-		assertEquals(3, parser.getLineNumner());
+		while (null!=parser.readLine()) {}
+
+        assertEquals(3, parser.getLineNumner());
 	}
 
 	@Test
-	public void shouldCountRecordNumber() throws Throwable {
+	public void shouldCountRecordNumber() {
 		Reader inputStream = TestUtil.createReader("a\n\"b;something\nmulti;line\"\n");
 		CsvReader parser = new CsvReader(inputStream);
 		
-		while (null!=parser.readLine()) {};
-		
-		assertEquals(2, parser.getRecordNumber());
+		while (null!=parser.readLine()) {}
+
+        assertEquals(2, parser.getRecordNumber());
 	}
 
 

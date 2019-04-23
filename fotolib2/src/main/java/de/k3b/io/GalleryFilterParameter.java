@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.io.collections.SelectedItems;
 
 /**
@@ -48,6 +48,9 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
     private long dateMin = 0;
     private long dateMax = 0;
 
+    private long dateModifiedMin = 0;
+    private long dateModifiedMax = 0;
+
     private boolean withNoTags = false;
 
     /** one of the VISIBILITY_.XXXX values */
@@ -60,8 +63,8 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
     public GalleryFilterParameter get(IGalleryFilter src) {
         super.get(src);
         if (src != null) {
-            this.setDateMax(src.getDateMax());
-            this.setDateMin(src.getDateMin());
+            this.setDate(src.getDateMin(), src.getDateMax());
+            this.setDateModified(src.getDateModifiedMin(), src.getDateModifiedMax());
             this.setPath(src.getPath());
             this.setWithNoTags(src.isWithNoTags());
             this.setVisibility(src.getVisibility());
@@ -116,6 +119,32 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
         return setDateMin(min).setDateMax(max);
     }
 
+    @Override
+    public long getDateModifiedMin() {
+        return dateModifiedMin;
+    }
+
+    public GalleryFilterParameter setDateModifiedMin(long dateModifiedMin) {
+        this.dateModifiedMin = dateModifiedMin;return this;
+    }
+
+    @Override
+    public long getDateModifiedMax() {
+        return dateModifiedMax;
+    }
+
+    public GalleryFilterParameter setDateModifiedMax(long dateModifiedMax) {
+        this.dateModifiedMax = dateModifiedMax; return this;
+    }
+
+    public GalleryFilterParameter setDateModified(String min, String max) {
+        return setDateModified(parseDate(min), parseDate(max));
+    }
+
+    public GalleryFilterParameter setDateModified(long min, long max) {
+        return setDateModifiedMin(min).setDateModifiedMax(max);
+
+    }
     @Override
     public boolean isWithNoTags() {
         return withNoTags;
@@ -232,6 +261,7 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
         appendSubFields(result, (getVisibility() != VISIBILITY.DEFAULT) ? (""+getVisibility().value):"");
 
         appendSubFields(result, (getRatingMin() > 0) ? (""+getRatingMin()) : "");
+        appendSubFields(result, format(getDateModifiedMin()), format(getDateModifiedMax()));
         return result;
     }
 
@@ -323,6 +353,12 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
             case 10 :
                 setRatingMin(parseRating(value));
                 break;
+            case 11 :
+                if (subfield == 0)
+                    setDateModifiedMin(parseDate(value));
+                else
+                    setDateModifiedMax(parseDate(value));
+                break;
             default:break;
         }
     }
@@ -356,6 +392,8 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
         return (GeoRectangle.isEmpty(filter)
                 && (filter.getDateMin() == 0)
                 && (filter.getDateMax() == 0)
+                && (filter.getDateModifiedMin() == 0)
+                && (filter.getDateModifiedMax() == 0)
                 && (!filter.isNonGeoOnly())
                 && (!filter.isWithNoTags())
                 && (filter.getRatingMin() <= 0)
@@ -399,6 +437,10 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
 
     /** get Date Min/Max in date picker compatible format */
     public String getDatePath() {
-        return DirectoryFormatter.getDatePath(FotoLibGlobal.datePickerUseDecade, getDateMin(), getDateMax());
+        return DirectoryFormatter.getDatePath(LibGlobal.datePickerUseDecade, getDateMin(), getDateMax());
+    }
+    /** get Date Min/Max in date picker compatible format */
+    public String getDateModifiedPath() {
+        return DirectoryFormatter.getDatePath(LibGlobal.datePickerUseDecade, getDateModifiedMin(), getDateModifiedMax());
     }
 }

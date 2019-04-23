@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 by k3b.
+ * Copyright (c) 2018-2019 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -25,6 +25,7 @@ import android.os.Bundle;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.io.collections.SelectedFiles;
@@ -68,6 +69,18 @@ public class AffUtils {
         }
         return null;
     }
+    public static SelectedFiles getSelectedFiles(Properties data) {
+        if (data != null) {
+            String selectedIDs = data.getProperty(EXTRA_SELECTED_ITEM_IDS);
+            String selectedFiles = data.getProperty(EXTRA_SELECTED_ITEM_PATHS);
+            String selectedDates = data.getProperty(EXTRA_SELECTED_ITEM_DATES);
+
+            if ((selectedIDs != null) && (selectedFiles != null)) {
+                return SelectedFiles.create(selectedFiles, selectedIDs, selectedDates);
+            }
+        }
+        return null;
+    }
 
     public static boolean putSelectedFiles(Intent destination, SelectedFiles selectedFiles) {
         if ((destination != null) && (selectedFiles != null) && (selectedFiles.size() > 0)) {
@@ -86,6 +99,17 @@ public class AffUtils {
             destination.putSerializable(EXTRA_SELECTED_ITEM_PATHS, selectedFiles.toString());
             final String dateString = selectedFiles.toDateString();
             if (dateString != null) destination.putSerializable(EXTRA_SELECTED_ITEM_DATES, dateString);
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean putSelectedFiles(Properties destination, SelectedFiles selectedFiles) {
+        if ((destination != null) && (selectedFiles != null) && (selectedFiles.size() > 0)) {
+            destination.put(EXTRA_SELECTED_ITEM_IDS, selectedFiles.toIdString());
+            destination.put(EXTRA_SELECTED_ITEM_PATHS, selectedFiles.toString());
+            final String dateString = selectedFiles.toDateString();
+            if (dateString != null) destination.put(EXTRA_SELECTED_ITEM_DATES, dateString);
             return true;
         }
         return false;

@@ -31,13 +31,13 @@ import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Date;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.io.collections.DestDirFileNameProcessor;
 import de.k3b.io.collections.SelectedFiles;
-import de.k3b.media.IMetaApi;
-import de.k3b.media.JpgMetaWorkflow;
-import de.k3b.media.MediaDiffCopy;
-import de.k3b.media.MetaWriterExifXml;
+import de.k3b.media.IPhotoProperties;
+import de.k3b.media.PhotoPropertiesBulkUpdateService;
+import de.k3b.media.PhotoPropertiesDiffCopy;
+import de.k3b.media.PhotoPropertiesUpdateHandler;
 import de.k3b.transactionlog.MediaTransactionLogEntryDto;
 import de.k3b.transactionlog.MediaTransactionLogEntryType;
 import de.k3b.transactionlog.TransactionLoggerBase;
@@ -52,7 +52,7 @@ import de.k3b.transactionlog.TransactionLoggerBase;
  * Created by k3b on 03.08.2015.
  */
 public class FileCommands extends FileProcessor implements  Cloneable, IProgessListener {
-    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+    private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
 
     public static final int OP_COPY = 1;
     public static final int OP_MOVE = 2;
@@ -79,14 +79,14 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
             this.progessListener = progessListener;
             try {
                 long    startTimestamp = 0;
-                if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+                if (LibGlobal.debugEnabledJpgMetaIo) {
                     startTimestamp = new Date().getTime();
                 }
 
                 String[] fileNames = fotos.getFileNames();
                 long now = new Date().getTime();
 
-                int itemsPerProgress = FotoLibGlobal.itemsPerProgress;
+                int itemsPerProgress = LibGlobal.itemsPerProgress;
                 int itemcount = 0;
                 int countdown = 0;
                 int maxCount = fotos.size();
@@ -107,7 +107,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                     }
                 }
                 onPostProcess(dbgContext, OP_DELETE, fotos, deleteCount, fileNames.length, fileNames, null);
-                if (FotoLibGlobal.debugEnabledJpg || FotoLibGlobal.debugEnabledJpgMetaIo) {
+                if (LibGlobal.debugEnabledJpg || LibGlobal.debugEnabledJpgMetaIo) {
                     long dbgLoadEndTimestamp = new Date().getTime();
 
                     FileCommands.logger.debug(dbgContext + " process items:" + deleteCount
@@ -162,9 +162,9 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
      * apply changes in exifChanges to all images in selectedFiles.
      * @return number of changed files.
      */
-    public int applyExifChanges(boolean move, MediaDiffCopy exifChanges, SelectedFiles selectedFiles, IProgessListener progessListener) {
+    public int applyExifChanges(boolean move, PhotoPropertiesDiffCopy exifChanges, SelectedFiles selectedFiles, IProgessListener progessListener) {
         // source files are the same as dest files.
-        final File[] destFiles = SelectedFiles.getFiles(selectedFiles.getFileNames());
+        final File[] destFiles = selectedFiles.getFiles();
         return moveOrCopyFiles(move, "change_exif", exifChanges, selectedFiles, destFiles, progessListener);
     }
 
@@ -177,7 +177,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
      * @param destDirFolder where files are moved/copied to
      * @param progessListener  */
     public int moveOrCopyFilesTo(boolean move, SelectedFiles selectedFiles, File destDirFolder, IProgessListener progessListener) {
-        PhotoWorkFlowDto autoProccessData = (!FotoLibGlobal.apmEnabled) ? null : getPhotoWorkFlowDto(destDirFolder);
+        PhotoAutoprocessingDto autoProccessData = (!LibGlobal.apmEnabled) ? null : getPhotoAutoprocessingDto(destDirFolder);
 
         return moveOrCopyFilesTo(move, selectedFiles, destDirFolder, autoProccessData, progessListener);
     }
@@ -193,16 +193,16 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
      * @param autoProccessData null or data for auto rename/exif data
      * @param progessListener  */
     int moveOrCopyFilesTo(boolean move, SelectedFiles selectedFiles, File destDirFolder,
-                          PhotoWorkFlowDto autoProccessData, IProgessListener progessListener) {
+                          PhotoAutoprocessingDto autoProccessData, IProgessListener progessListener) {
         boolean doNotRenameIfSourceInDestFolder = false;
         IFileNameProcessor renameProcessor = null;
-        MediaDiffCopy exifChanges = null;
+        PhotoPropertiesDiffCopy exifChanges = null;
 
         if ((autoProccessData != null) && (!autoProccessData.isEmpty())) {
             doNotRenameIfSourceInDestFolder = true;
             if (!autoProccessData.isRenameEmpty()) renameProcessor = autoProccessData.createFileNameProcessor();
-            final IMetaApi mediaDefaults = autoProccessData.getMediaDefaults();
-            if (mediaDefaults != null) exifChanges = new MediaDiffCopy(mediaDefaults, false);
+            final IPhotoProperties mediaDefaults = autoProccessData.getMediaDefaults();
+            if (mediaDefaults != null) exifChanges = new PhotoPropertiesDiffCopy(mediaDefaults, false);
         }
 
         if (renameProcessor == null){
@@ -222,12 +222,12 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
      * @param progessListener   not null: to show in gui what is happening
      */
     int moveOrCopyFilesTo(boolean move,
-                          MediaDiffCopy exifChanges, SelectedFiles selectedFiles, IFileNameProcessor renameProcessor,
+                          PhotoPropertiesDiffCopy exifChanges, SelectedFiles selectedFiles, IFileNameProcessor renameProcessor,
                           File destDirFolder, IProgessListener progessListener) {
         int result = 0;
         if (canProcessFile(move ? OP_MOVE : OP_COPY)) {
             if (osCreateDirIfNeccessary(destDirFolder)) {
-                File[] destFiles = createDestFiles(renameProcessor, destDirFolder, selectedFiles.getDatesPhotoTaken() , SelectedFiles.getFiles(selectedFiles.getFileNames()));
+                File[] destFiles = createDestFiles(renameProcessor, destDirFolder, selectedFiles.getDatesPhotoTaken() , selectedFiles.getFiles());
 
                 result = moveOrCopyFiles(move, (move ? "mov" : "copy"), exifChanges, selectedFiles, destFiles, progessListener);
 
@@ -239,11 +239,11 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
     }
 
     /** does the copying and/or apply exif changes. also used by unittesting */
-    protected int moveOrCopyFiles(final boolean move, String what, MediaDiffCopy exifChanges,
+    protected int moveOrCopyFiles(final boolean move, String what, PhotoPropertiesDiffCopy exifChanges,
                                   SelectedFiles fotos, File[] destFiles,
                                   IProgessListener progessListener) {
         long    startTimestamp = 0;
-        if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+        if (LibGlobal.debugEnabledJpgMetaIo) {
             startTimestamp = new Date().getTime();
         }
 
@@ -258,12 +258,12 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                 int fileCount = destFiles.length;
 
                 Long[] ids = fotos.getIds();
-                File[] sourceFiles = SelectedFiles.getFiles(fotos.getFileNames());
+                File[] sourceFiles = fotos.getFiles();
 
                 mModifiedSrcFiles = (move) ? new ArrayList<String>() : null;
                 mModifiedDestFiles = new ArrayList<String>();
 
-                int itemsPerProgress = FotoLibGlobal.itemsPerProgress;
+                int itemsPerProgress = LibGlobal.itemsPerProgress;
                 int itemcount = 0;
                 int countdown = 0;
                 int maxCount = fotos.size();
@@ -320,13 +320,13 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                             }
                             addTransactionLog(id, sourceFile.getPath(), now, moveOrCopyCommand, destFile.getPath());
                         } else { // else move/copy with simultanious exif changes
-                            MediaDiffCopy mediaDiffCopy = exifChanges;
+                            PhotoPropertiesDiffCopy mediaDiffCopy = exifChanges;
                             // new style move/copy image with sidecarfile(s) with exif autoprocessing
 
                             // for the log the file has already been copied/moved
                             logger.set(id, sourcePath);
 
-                            MetaWriterExifXml exifProcessor = createWorkflow(logger, what).applyChanges(sourceFile, destPath, id, move, mediaDiffCopy);
+                            PhotoPropertiesUpdateHandler exifProcessor = createWorkflow(logger, what).applyChanges(sourceFile, destPath, id, move, mediaDiffCopy);
 
                             if (exifProcessor == null) break; // error
 
@@ -353,7 +353,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
 
                 String[] modifiedDestFiles = (modifyCount > 0) ? mModifiedDestFiles.toArray(new String[modifyCount]) : null;
                 onPostProcess(what, opCode, fotos, itemCount, sourceFiles.length, modifiedSourceFiles, modifiedDestFiles);
-                if (FotoLibGlobal.debugEnabledJpgMetaIo) {
+                if (LibGlobal.debugEnabledJpgMetaIo) {
                     long dbgLoadEndTimestamp = new Date().getTime();
 
                     FileCommands.logger.debug(what + " process items:" + itemCount
@@ -373,10 +373,10 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
         return itemCount;
     }
 
-    private PhotoWorkFlowDto getPhotoWorkFlowDto(File destDirFolder) {
-        PhotoWorkFlowDto autoProccessData = null;
+    private PhotoAutoprocessingDto getPhotoAutoprocessingDto(File destDirFolder) {
+        PhotoAutoprocessingDto autoProccessData = null;
         try {
-            autoProccessData = new PhotoWorkFlowDto().load(destDirFolder);
+            autoProccessData = new PhotoAutoprocessingDto().load(destDirFolder);
         } catch (IOException e) {
             log("cannot load .apm file for '", destDirFolder, "'. ", e.getMessage());
             autoProccessData = null;
@@ -384,8 +384,8 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
         return autoProccessData;
     }
 
-    public JpgMetaWorkflow createWorkflow(TransactionLoggerBase logger, String dbgContext) {
-        return new JpgMetaWorkflow(logger);
+    public PhotoPropertiesBulkUpdateService createWorkflow(TransactionLoggerBase logger, String dbgContext) {
+        return new PhotoPropertiesBulkUpdateService(logger);
     }
 
     private File[] createDestFiles(IFileNameProcessor renameProcessor, File destDirFolder, Date[] datesLastModified, File... sourceFiles) {
@@ -444,7 +444,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
     protected boolean osFileMove(File dest, File source) {
         if (source.renameTo(dest)) {
             // move within same mountpoint
-            if (FotoLibGlobal.debugEnabledJpg) {
+            if (LibGlobal.debugEnabledJpg) {
                 logger.info("osFileMove(rename) '" + source
                         + "' => '" + dest + "'");
             }
@@ -457,14 +457,14 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                 && !osFileExists(dest)
                 && osFileCopy(dest, source)) {
             if (osDeleteFile(source)) {
-                if (FotoLibGlobal.debugEnabledJpg) {
+                if (LibGlobal.debugEnabledJpg) {
                     logger.info("osFileMove(copy+delete) '" + source
                             + "' => '" + dest + "'");
                 }
                 return true; // move: copy + delete(source) : success
             } else {
                 // cannot delete souce: undo copy
-                if (FotoLibGlobal.debugEnabledJpg) {
+                if (LibGlobal.debugEnabledJpg) {
                     logger.info("osFileMove failed for  '" + source
                             + "' => '" + dest + "'");
                 }
@@ -512,7 +512,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
             FileUtils.close(in,"_osFileCopy-close");
             FileUtils.close(out,"_osFileCopy-close");
         }
-        if (FotoLibGlobal.debugEnabledJpg) {
+        if (LibGlobal.debugEnabledJpg) {
             logger.info("osFileCopy '" + sourceFullPath
                     + "' => '" + targetFullPath + "' success=" + result);
         }
@@ -522,7 +522,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
     /** to be replaced by mock/stub in unittests */
     protected boolean osDeleteFile(File file) {
         final boolean result = file.delete();
-        if (FotoLibGlobal.debugEnabledJpg) logger.info("osDeleteFile '" + file + "' success=" + result);
+        if (LibGlobal.debugEnabledJpg) logger.info("osDeleteFile '" + file + "' success=" + result);
         return result;
     }
 
@@ -550,7 +550,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
 
         MediaTransactionLogEntryDto dto = new MediaTransactionLogEntryDto(currentMediaID, fileFullPath, modificationDate,
             mediaTransactionLogEntryType, commandData);
-        if (FotoLibGlobal.debugEnabledJpg) {
+        if (LibGlobal.debugEnabledJpg) {
             logger.info(getClass().getSimpleName() + ".addTransactionLog(" + dto.toString() + ")");
         }
         this.log(mediaTransactionLogEntryType.getCommand(fileFullPath, commandData));

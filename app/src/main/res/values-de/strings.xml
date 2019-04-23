@@ -29,7 +29,6 @@
   <string name="bookmark_delete_error_format">Kann Album %1$s nicht löschen.</string>
   <string name="bookmark_delete_question">Album löschen?</string>
   <string name="bookmark_file_comment_format">Erstellt am %3$s mit \'%1$s\' Version %2$s. weitere Informationen finden Sie unter https://github.com/k3b/APhotoManager/wiki/intentapi#sql</string>
-  <string name="bookmark_load_from_menu_title">Lade Album aus&#8230;</string>
   <string name="bookmark_save_as_menu_title">Album speichern unter...</string>
   <string name="btn_change">Ändern</string>
   <string name="btn_pause">Anhalten</string>
@@ -201,7 +200,7 @@ Verstecken kann über das 'Media-Scanner' Gallery-Menü rückgängig gemacht wer
   <string name="view_context_menu_title">Lade Kontext ...</string>
 
   <!-- #87: edit-exif: image title, description, rating -->
-  <string name="exif_menu_title">Exif Metadataen bearbeiten</string>
+  <string name="exif_menu_title">Bildeigenschaften (Exif) bearbeiten</string>
   <string name="lbl_title">Titel</string>
   <string name="lbl_description">Beschreibung</string>
   <string name="lbl_rating">Bewertung</string>
@@ -213,7 +212,7 @@ Verstecken kann über das 'Media-Scanner' Gallery-Menü rückgängig gemacht wer
   <!-- #93: edit-exif: image title, description, rating -->
   <string name="photo_autoprocessing_edit_menu_title">Automatische processing bearbeiten</string>
   <string name="lbl_file_name_pattern">Umbenennungsmuster</string>
-  <string name="lbl_exif">Exif</string>
+  <string name="lbl_exif">Bildeigenschaften (Exif)</string>
 
   <!-- i.e.
           Copy 5 Photos

@@ -68,7 +68,7 @@
   <string name="image_err_file_exists_format">Файл «%1$s» уже существует. \n Вы действительно хотите перезаписать его?</string>
   <string name="image_err_file_rename_format">Не удается переименовать файл «%1$s».</string>
   <string name="image_err_not_found_format">Нет фотографий в %1$s.</string>
-  <string name="image_err_not_in_db_format">Фото пока не найдено в базе данных мультимедиа% %1$s. Сканирование %2$d новых файлов. Отсутствующее фото будет доступно в ближайшее время.</string>
+  <string name="image_err_not_in_db_format">Фото пока не найдено в базе данных мультимедиа %1$s. Сканирование %2$d новых файлов. Отсутствующее фото будет доступно в ближайшее время.</string>
   <string name="image_loading_at_position_format">"Загрузка (%1$d)…"</string>
   <string name="image_success_update_format">Обновлены фотографии %1$d.</string>
   <string name="lbl_date">Дата</string>

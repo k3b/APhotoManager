@@ -21,7 +21,11 @@
 -keep class org.xmlpull.** { *; }
 -keep class de.k3b.android.widget.EditTextPreferenceWithSummary { *; }
 -keep class de.k3b.android.widget.SearchViewWithHistory { *; }
--assumenosideeffects class com.google.android.gms.ads.MobileAds { *; }
+-dontnote MobileAds
+
+# removed in org.mapsforge:mapsforge-map-android:0.10.0
+# but still referenced in org.osmdroid.mapsforge.MapsForgeTileSource
+# -assumenosideeffects class org.mapsforge.map.reader.ReadBuffer { public void setMaximumBufferSize(...); }
 
 ###############
 # I use proguard only to remove unused stuff and to keep the app small.

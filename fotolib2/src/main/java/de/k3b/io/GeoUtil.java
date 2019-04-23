@@ -162,9 +162,17 @@ public class GeoUtil {
      *  @return always != null: either GeoUtil.NO_LAT_LON if null, empty, unknown or value
      */
     public static Double getValue(Double value) {
-        if (value == null) return GeoUtil.NO_LAT_LON;
+        return getValue(value, GeoUtil.NO_LAT_LON);
+    }
+
+    /** normalized getGeoValue with null or NaN are translated to NO_LAT_LON.
+     *  #91: Fix Photo without geo may have different representations values for no-value
+     *  @return always != null: either GeoUtil.NO_LAT_LON if null, empty, unknown or value
+     */
+    public static Double getValue(Double value, Double noLatLonValue) {
+        if (value == null) return noLatLonValue;
         double result = value.doubleValue();
-        if (Double.isNaN(result) || (result == IGeoPointInfo.NO_LAT_LON)) return GeoUtil.NO_LAT_LON;
+        if (Double.isNaN(result) || (result == IGeoPointInfo.NO_LAT_LON) || (value == GeoUtil.NO_LAT_LON)) return noLatLonValue;
         return value;
     }
 

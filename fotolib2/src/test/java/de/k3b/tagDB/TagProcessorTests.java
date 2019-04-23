@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -43,39 +43,39 @@ public class TagProcessorTests {
     }
 
     @Test
-    public void shouldCalculateAffected() throws Exception {
+    public void shouldCalculateAffected() {
         Assert.assertEquals("getAffected "+ ListUtils.toString(sut.getAffected()), 3, sut.getAffected().size());
     }
 
     @Test
-    public void shouldCalculateAll() throws Exception {
+    public void shouldCalculateAll() {
         Assert.assertEquals("getAllSet "+ ListUtils.toString(sut.getAllSet()), 1, sut.getAllSet().size());
     }
 
     @Test
-    public void shouldGetUpdatedNone() throws Exception {
-        List<String> updated = sut.getUpdated(Arrays.asList("all", "single1"), Arrays.asList("single1"), Arrays.asList("nonExistent"));
+    public void shouldGetUpdatedNone() {
+        List<String> updated = TagProcessor.getUpdated(Arrays.asList("all", "single1"), Arrays.asList("single1"), Arrays.asList("nonExistent"));
         Assert.assertEquals(null, updated);
     }
 
     @Test
-    public void shouldGetUpdatedAdded() throws Exception {
-        List<String> updated = sut.getUpdated(Arrays.asList("all", "single1"), Arrays.asList("single2"), Arrays.asList("nonExistent"));
+    public void shouldGetUpdatedAdded() {
+        List<String> updated = TagProcessor.getUpdated(Arrays.asList("all", "single1"), Arrays.asList("single2"), Arrays.asList("nonExistent"));
         Assert.assertEquals(ListUtils.toString(updated), 3, updated.size());
     }
 
     @Test
-    public void shouldGetUpdatedRemoved() throws Exception {
-        List<String> updated = sut.getUpdated(Arrays.asList("all", "single1"), Arrays.asList("all"), Arrays.asList("single1"));
+    public void shouldGetUpdatedRemoved() {
+        List<String> updated = TagProcessor.getUpdated(Arrays.asList("all", "single1"), Arrays.asList("all"), Arrays.asList("single1"));
         Assert.assertEquals(ListUtils.toString(updated), 1, updated.size());
     }
 
     @Test
-    public void shouldCalculateDiff() throws Exception {
+    public void shouldCalculateDiff() {
         List<String> addedTags = new ArrayList<String>();
         List<String> removedTags = new ArrayList<String>();
 
-        int changes = sut.getDiff(Arrays.asList("a", "b"), Arrays.asList("a","c"), addedTags, removedTags);
+        int changes = TagProcessor.getDiff(Arrays.asList("a", "b"), Arrays.asList("a","c"), addedTags, removedTags);
 
         Assert.assertEquals("removed", ListUtils.toString(Arrays.asList("b")), ListUtils.toString(removedTags) );
         Assert.assertEquals("added", ListUtils.toString(Arrays.asList("c")), ListUtils.toString(addedTags));
@@ -83,7 +83,7 @@ public class TagProcessorTests {
     }
 
     @Test
-    public void shouldFormatTagsForBat() throws Exception {
+    public void shouldFormatTagsForBat() {
         Assert.assertEquals("empty", null, TagConverter.asBatString());
         Assert.assertEquals("empty", "'a' 'b'".replaceAll("'","\""), TagConverter.asBatString("a","b"));
     }

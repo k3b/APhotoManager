@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -18,425 +18,610 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
+
+    Structure:
+        lbl_any + edit_any + cmd_any_history + cmd_any
+
+        edit_date_from
+        edit_date_to
+
+        chk_public + chk_private
+
+        chk_with_no_tags
+            edit_tags_include
+            edit_tags_exclude
+
+        ratingBar
+
+        chk_with_no_geo
+            edit_latitude_from
+            edit_latitude_to
+            edit_longitude_from
+            edit_longitude_to
+
+        lbl_geo_end_invisible
+
+        lbl_date_modified
+            edit_date_modified_from
+            edit_date_modified_to
+
  -->
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent" android:layout_height="wrap_content">
 
-<RelativeLayout
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content" android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="de.k3b.android.androFotoFinder.GalleryFilterActivity">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        tools:context="de.k3b.android.androFotoFinder.GalleryFilterActivity">
 
-    <Button android:id="@+id/cmd_any"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/btn_popup"
-        android:visibility="invisible"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true" />
-    <TextView android:id="@+id/lbl_any"
-        android:text="@string/lbl_any"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:layout_alignParentLeft="true"
-        android:layout_alignBaseline="@+id/cmd_any"
-        />
-    <ImageButton android:id="@+id/cmd_any_history"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@android:drawable/ic_menu_more"
-        android:layout_alignBottom="@+id/cmd_any"
-        android:layout_toLeftOf="@+id/cmd_any"
-        android:layout_toStartOf="@+id/cmd_any"  />
-    <EditText android:id="@+id/edit_any"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/cmd_any"
-        android:layout_alignTop="@+id/cmd_any"
-        android:layout_toLeftOf="@+id/cmd_any_history"
-        android:layout_toRightOf="@+id/lbl_any"
-        android:layout_toEndOf="@+id/lbl_any"
-        android:layout_alignBaseline="@+id/lbl_any"
-        android:ellipsize="end"
-        android:nestedScrollingEnabled="false"
-        android:inputType="text"
-        android:singleLine="true"
-        android:lines="1"
-        android:maxLines="1"
-        tools:ignore="UnusedAttribute" />
+        <Button
+            android:id="@+id/cmd_any"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:text="@string/btn_popup"
+            android:visibility="invisible" />
 
-  <!-- -->
-    <Button android:id="@+id/cmd_path"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/btn_popup"
-        android:layout_below="@+id/edit_any"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        />
-    <TextView android:id="@+id/lbl_path"
-        android:text="@string/lbl_path"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
+        <TextView
+            android:id="@+id/lbl_any"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/cmd_any"
+            android:layout_alignParentLeft="true"
+            android:text="@string/lbl_any"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-        android:layout_below="@+id/cmd_any"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignBaseline="@+id/cmd_path"
-        />
+        <ImageButton
+            android:id="@+id/cmd_any_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/cmd_any"
+            android:layout_toLeftOf="@+id/cmd_any"
+            android:layout_toStartOf="@+id/cmd_any"
+            android:background="@android:drawable/ic_menu_more" />
 
-    <ImageButton android:id="@+id/cmd_path_history"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@android:drawable/ic_menu_more"
-        android:layout_alignBottom="@+id/cmd_path"
-        android:layout_toLeftOf="@+id/cmd_path"
-        />
-    <EditText android:id="@+id/edit_path"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        <EditText
+            android:id="@+id/edit_any"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/lbl_any"
+            android:layout_alignBottom="@+id/cmd_any"
+            android:layout_alignTop="@+id/cmd_any"
+            android:layout_toLeftOf="@+id/cmd_any_history"
+            android:layout_toStartOf="@+id/cmd_any_history"
+            android:layout_toRightOf="@+id/lbl_any"
+            android:layout_toEndOf="@+id/lbl_any"
+            android:ellipsize="end"
+            android:inputType="text"
+            android:lines="1"
+            android:maxLines="1"
+            android:nestedScrollingEnabled="false"
+            android:singleLine="true"
+            tools:ignore="UnusedAttribute" />
 
-        android:ellipsize="end"
-        android:nestedScrollingEnabled="false"
-        android:inputType="text"
-        android:singleLine="true"
-        android:lines="1"
-        android:maxLines="1"
-        tools:ignore="UnusedAttribute"
+        <!-- -->
+        <Button
+            android:id="@+id/cmd_path"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/edit_any"
+            android:layout_toRightOf="@+id/cmd_any_history"
+            android:layout_toEndOf="@+id/cmd_any_history"
+            android:text="@string/btn_popup" />
 
-        android:layout_alignBottom="@+id/cmd_path"
-        android:layout_toRightOf="@+id/lbl_path"
-        android:layout_alignBaseline="@+id/lbl_path"
-        android:layout_toLeftOf="@+id/cmd_path_history"
-        android:layout_toStartOf="@+id/cmd_path_history"
-        android:layout_below="@+id/edit_any"
-        />
+        <TextView
+            android:id="@+id/lbl_path"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/cmd_path"
+            android:layout_alignParentLeft="true"
+
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/cmd_any"
+            android:text="@string/lbl_path"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <ImageButton
+            android:id="@+id/cmd_path_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/cmd_path"
+            android:layout_toLeftOf="@+id/cmd_any"
+            android:layout_toStartOf="@+id/cmd_any"
+            android:layout_toRightOf="@+id/edit_any"
+            android:layout_toEndOf="@+id/edit_any"
+            android:background="@android:drawable/ic_menu_more" />
+
+        <EditText
+            android:id="@+id/edit_path"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_alignBaseline="@+id/lbl_path"
+            android:layout_alignBottom="@+id/cmd_path"
+            android:layout_below="@+id/edit_any"
+            android:layout_toLeftOf="@+id/cmd_path_history"
+            android:layout_toStartOf="@+id/cmd_path_history"
+            android:layout_toRightOf="@+id/lbl_path"
+            android:layout_toEndOf="@+id/lbl_path"
+            android:ellipsize="end"
+            android:inputType="text"
+            android:lines="1"
+            android:maxLines="1"
+            android:nestedScrollingEnabled="false"
+            android:singleLine="true"
+            tools:ignore="UnusedAttribute" />
 
 
+        <!-- -->
+        <Button
+            android:id="@+id/cmd_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/edit_path"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@+id/cmd_any_history"
+            android:layout_toEndOf="@+id/cmd_any_history"
+            android:text="@string/btn_popup" />
+
+        <TextView
+            android:id="@+id/lbl_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/cmd_date"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/cmd_path"
+            android:text="@string/lbl_date"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <ImageButton
+            android:id="@+id/cmd_date_from_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/cmd_date"
+            android:layout_toLeftOf="@+id/cmd_any"
+            android:layout_toStartOf="@+id/cmd_any"
+            android:layout_toRightOf="@+id/edit_any"
+            android:layout_toEndOf="@+id/edit_any"
+            android:background="@android:drawable/ic_menu_more" />
+
+        <EditText
+            android:id="@+id/edit_date_from"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/lbl_date"
+            android:layout_alignBottom="@+id/cmd_date"
+            android:layout_below="@+id/edit_path"
+            android:layout_toLeftOf="@+id/cmd_date_from_history"
+            android:layout_toStartOf="@+id/cmd_date_from_history"
+            android:layout_toRightOf="@+id/lbl_date"
+            android:layout_toEndOf="@+id/lbl_date"
+            android:ems="10"
+            android:inputType="date" />
+
+        <!-- -->
+        <ImageButton
+            android:id="@+id/cmd_date_to_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/edit_date_to"
+            android:layout_toEndOf="@+id/edit_any"
+            android:layout_toLeftOf="@+id/cmd_any"
+            android:layout_toRightOf="@+id/edit_any"
+            android:layout_toStartOf="@+id/cmd_any"
+            android:background="@android:drawable/ic_menu_more" />
+
+        <EditText
+            android:id="@+id/edit_date_to"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/cmd_date"
+            android:layout_toLeftOf="@+id/cmd_date_from_history"
+            android:layout_toStartOf="@+id/cmd_date_from_history"
+            android:layout_toRightOf="@+id/lbl_date"
+            android:layout_toEndOf="@+id/lbl_date"
+            android:ems="10"
+            android:inputType="date" />
+        <!-- -->
+
+        <CheckBox
+            android:id="@+id/chk_public"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/edit_date_to"
+            android:text="@string/lbl_images_public" />
+
+        <CheckBox
+            android:id="@+id/chk_private"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/edit_date_to"
+            android:layout_toRightOf="@+id/chk_public"
+            android:layout_toEndOf="@+id/chk_public"
+            android:text="@string/lbl_images_private" />
+
+        <!-- -->
+
+        <CheckBox
+            android:id="@+id/chk_with_no_tags"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/chk_public"
+            android:text="@string/lbl_with_no_tags" />
+
+        <!-- -->
+        <Button
+            android:id="@+id/cmd_tags_include"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/chk_with_no_tags"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@+id/cmd_any_history"
+            android:layout_toEndOf="@+id/cmd_any_history"
+            android:text="@string/btn_popup" />
+
+        <TextView
+            android:id="@+id/lbl_tags_include"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/cmd_tags_include"
+            android:layout_alignParentLeft="true"
+
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/chk_with_no_tags"
+            android:text="@string/lbl_tags_include"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <ImageButton
+            android:id="@+id/cmd_tags_include_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/cmd_tags_include"
+            android:layout_toStartOf="@+id/cmd_any"
+            android:layout_toLeftOf="@+id/cmd_any"
+            android:layout_toRightOf="@+id/edit_any"
+            android:layout_toEndOf="@+id/edit_any"
+            android:background="@android:drawable/ic_menu_more" />
+
+        <EditText
+            android:id="@+id/edit_tags_include"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_alignBaseline="@+id/lbl_tags_include"
+            android:layout_alignBottom="@+id/cmd_tags_include"
+            android:layout_below="@+id/chk_with_no_tags"
+            android:layout_toLeftOf="@+id/cmd_tags_include_history"
+            android:layout_toStartOf="@+id/cmd_tags_include_history"
+            android:layout_toRightOf="@+id/lbl_tags_include"
+            android:layout_toEndOf="@+id/lbl_tags_include"
+            android:inputType="text"
+            android:lines="2"
+            android:maxLines="2"
+            android:singleLine="false"
+            tools:ignore="UnusedAttribute" />
+
+        <!-- -->
+        <Button
+            android:id="@+id/cmd_tags_exclude"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/edit_tags_include"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@+id/cmd_any_history"
+            android:layout_toEndOf="@+id/cmd_any_history"
+            android:text="@string/btn_popup"
+            android:visibility="invisible" />
+
+        <TextView
+            android:id="@+id/lbl_tags_exclude"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/cmd_tags_exclude"
+            android:layout_alignParentLeft="true"
+
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/cmd_tags_include"
+            android:text="@string/lbl_tags_exclude"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <ImageButton
+            android:id="@+id/cmd_tags_exclude_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/cmd_tags_exclude"
+            android:layout_toLeftOf="@+id/cmd_any"
+            android:layout_toStartOf="@+id/cmd_any"
+            android:layout_toRightOf="@+id/edit_any"
+            android:layout_toEndOf="@+id/edit_any"
+            android:background="@android:drawable/ic_menu_more" />
+
+        <EditText
+            android:id="@+id/edit_tags_exclude"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_alignBaseline="@+id/lbl_tags_exclude"
+            android:layout_alignBottom="@+id/cmd_tags_exclude"
+            android:layout_below="@+id/edit_tags_include"
+            android:layout_toLeftOf="@+id/cmd_tags_exclude_history"
+            android:layout_toStartOf="@+id/cmd_tags_exclude_history"
+            android:layout_toRightOf="@+id/lbl_tags_exclude"
+            android:layout_toEndOf="@+id/lbl_tags_exclude"
+            android:ellipsize="end"
+
+            android:inputType="text"
+            android:lines="1"
+            android:maxLines="1"
+            android:nestedScrollingEnabled="false"
+            android:singleLine="true"
+            tools:ignore="UnusedAttribute" />
+
+        <!-- -->
+        <TextView
+            android:id="@+id/lbl_rating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/edit_tags_exclude"
+            android:text="@string/lbl_rating"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <RatingBar
+            android:id="@+id/ratingBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/edit_tags_exclude"
+            android:elevation="1dp"
+            android:isIndicator="false"
+            android:max="5"
+            android:numStars="5"
+            android:rating="0.0"
+            android:stepSize="1.0" />
+
+        <!-- -->
+
+        <CheckBox
+            android:id="@+id/chk_with_no_geo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/ratingBar"
+            android:text="@string/lbl_with_no_geo" />
+        <!-- -->
+
+        <Button
+            android:id="@+id/cmd_select_lat_lon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/chk_with_no_geo"
+            android:layout_toRightOf="@+id/cmd_any_history"
+            android:layout_toEndOf="@+id/cmd_any_history"
+            android:text="@string/btn_popup" />
+
+        <TextView
+            android:id="@+id/lbl_latitude"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/cmd_select_lat_lon"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/ratingBar"
+            android:text="@string/lbl_latitude_short"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <ImageButton
+            android:id="@+id/cmd_lat_from_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/cmd_select_lat_lon"
+
+            android:layout_toLeftOf="@+id/cmd_any"
+            android:layout_toStartOf="@+id/cmd_any"
+            android:layout_toRightOf="@+id/edit_any"
+            android:layout_toEndOf="@+id/edit_any"
+            android:background="@android:drawable/ic_menu_more" />
+
+        <EditText
+            android:id="@+id/edit_latitude_from"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/lbl_latitude"
+            android:layout_alignBottom="@+id/cmd_select_lat_lon"
+            android:layout_alignLeft="@+id/edit_date_to"
+            android:layout_alignStart="@+id/edit_date_to"
+            android:layout_toLeftOf="@+id/cmd_lat_from_history"
+            android:layout_toStartOf="@+id/cmd_lat_from_history"
+            android:ems="10"
+            android:inputType="numberDecimal|numberSigned" />
+
+        <!-- -->
+        <ImageButton
+            android:id="@+id/cmd_lat_to_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/cmd_select_lat_lon"
+            android:layout_toLeftOf="@+id/cmd_any"
+            android:layout_toStartOf="@+id/cmd_any"
+            android:layout_toRightOf="@+id/edit_any"
+            android:layout_toEndOf="@+id/edit_any"
+            android:background="@android:drawable/ic_menu_more" />
+
+        <EditText
+            android:id="@+id/edit_latitude_to"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/cmd_select_lat_lon"
+            android:layout_alignLeft="@+id/edit_latitude_from"
+            android:layout_alignStart="@+id/edit_latitude_from"
+            android:layout_toLeftOf="@+id/cmd_lat_to_history"
+            android:layout_toStartOf="@+id/cmd_lat_to_history"
+            android:ems="10"
+            android:inputType="numberDecimal|numberSigned" />
+
+        <!-- -->
+        <TextView
+            android:id="@+id/lbl_longitude"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/edit_latitude_to"
+            android:text="@string/lbl_longitude_short"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
 
-<!-- -->
-    <Button android:id="@+id/cmd_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/btn_popup"
-        android:layout_below="@+id/edit_path"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        />
-    <TextView android:id="@+id/lbl_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/lbl_date"
-        android:layout_below="@+id/cmd_path"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignBaseline="@+id/cmd_date" />
-    <ImageButton android:id="@+id/cmd_date_from_history"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@android:drawable/ic_menu_more"
-        android:layout_alignBottom="@+id/cmd_date"
-        android:layout_toLeftOf="@+id/cmd_date"
-        />
-    <EditText android:id="@+id/edit_date_from"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="date"
-        android:ems="10"
-        android:layout_alignBottom="@+id/cmd_date"
-        android:layout_toRightOf="@+id/lbl_date"
-        android:layout_alignBaseline="@+id/lbl_date"
-        android:layout_toLeftOf="@+id/cmd_date_from_history"
-        android:layout_toStartOf="@+id/cmd_date_from_history"
-        android:layout_below="@+id/edit_path" />
+        <ImageButton
+            android:id="@+id/cmd_lon_from_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/edit_latitude_to"
+            android:layout_toLeftOf="@+id/cmd_any"
+            android:layout_toStartOf="@+id/cmd_any"
+            android:layout_toRightOf="@+id/edit_any"
+            android:layout_toEndOf="@+id/edit_any"
+            android:background="@android:drawable/ic_menu_more" />
 
-<!-- -->
-    <ImageButton android:id="@+id/cmd_date_to_history"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@android:drawable/ic_menu_more"
-        android:layout_alignBottom="@+id/edit_date_to"
-        android:layout_toRightOf="@+id/edit_longitude_from"
-        android:layout_toEndOf="@+id/edit_longitude_from" />
-    <EditText android:id="@+id/edit_date_to"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="date"
-        android:ems="10"
-        android:layout_below="@+id/cmd_date"
-        android:layout_toRightOf="@+id/lbl_date"
-        android:layout_toLeftOf="@+id/cmd_date_from_history"
-        android:layout_toStartOf="@+id/cmd_date_from_history" />
-    <!-- -->
+        <EditText
+            android:id="@+id/edit_longitude_from"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/edit_latitude_to"
+            android:layout_alignBaseline="@+id/lbl_longitude"
+            android:layout_alignLeft="@+id/edit_latitude_to"
+            android:layout_toStartOf="@+id/cmd_lon_from_history"
+            android:layout_alignStart="@+id/edit_latitude_to"
+            android:layout_toLeftOf="@+id/cmd_lon_from_history"
+            android:ems="10"
+            android:inputType="numberDecimal|numberSigned" />
 
-    <CheckBox android:id="@+id/chk_public"
-        android:text="@string/lbl_images_public"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/edit_date_to"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        />
+        <!-- -->
+        <ImageButton
+            android:id="@+id/cmd_lon_to_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/edit_longitude_to"
+            android:layout_toEndOf="@+id/edit_any"
+            android:layout_toLeftOf="@+id/cmd_any"
+            android:layout_toRightOf="@+id/edit_any"
+            android:layout_toStartOf="@+id/cmd_any"
+            android:background="@android:drawable/ic_menu_more" />
 
-    <CheckBox android:id="@+id/chk_private"
-        android:text="@string/lbl_images_private"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/edit_date_to"
-        android:layout_toRightOf="@+id/chk_public"
-        />
+        <EditText
+            android:id="@+id/edit_longitude_to"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/edit_longitude_from"
+            android:layout_alignStart="@+id/edit_longitude_from"
+            android:layout_below="@+id/edit_longitude_from"
+            android:layout_toLeftOf="@+id/cmd_lon_from_history"
+            android:layout_toStartOf="@+id/cmd_lon_from_history"
+            android:ems="10"
+            android:inputType="numberDecimal|numberSigned" />
 
-    <!-- -->
+        <!-- lbl_geo_end_invisible   -->
+        <TextView
+            android:id="@+id/lbl_geo_end_invisible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/edit_longitude_to"
+            android:layout_below="@+id/chk_with_no_geo"
+            android:visibility="invisible" />
+        <!-- -->
+        <TextView
+            android:id="@+id/lbl_date_modified"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/lbl_geo_end_invisible"
+            android:text="@string/sort_by_modification"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    <CheckBox android:id="@+id/chk_with_no_tags"
-        android:text="@string/lbl_with_no_tags"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/chk_public"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        />
+        <!-- -->
+        <Button
+            android:id="@+id/cmd_date_modified"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/lbl_date_modified"
+            android:layout_toEndOf="@+id/cmd_any_history"
+            android:layout_toRightOf="@+id/cmd_any_history"
+            android:text="@string/btn_popup" />
 
-    <!-- -->
-    <Button android:id="@+id/cmd_tags_include"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/btn_popup"
-        android:layout_below="@+id/chk_with_no_tags"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        />
-    <TextView android:id="@+id/lbl_tags_include"
-        android:text="@string/lbl_tags_include"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
+        <ImageButton
+            android:id="@+id/cmd_date_modified_from_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/cmd_date_modified"
+            android:layout_toEndOf="@+id/edit_any"
+            android:layout_toLeftOf="@+id/cmd_any"
+            android:layout_toRightOf="@+id/edit_any"
+            android:layout_toStartOf="@+id/cmd_any"
+            android:background="@android:drawable/ic_menu_more" />
 
-        android:layout_below="@+id/chk_with_no_tags"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignBaseline="@+id/cmd_tags_include"
-        />
+        <EditText
+            android:id="@+id/edit_date_modified_from"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/cmd_date_modified"
+            android:layout_below="@+id/lbl_date_modified"
+            android:layout_toEndOf="@+id/lbl_any"
+            android:layout_toLeftOf="@+id/cmd_any_history"
+            android:layout_toRightOf="@+id/lbl_any"
+            android:layout_toStartOf="@+id/cmd_any_history"
+            android:ems="10"
+            android:inputType="date" />
 
-    <ImageButton android:id="@+id/cmd_tags_include_history"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@android:drawable/ic_menu_more"
-        android:layout_alignBottom="@+id/cmd_tags_include"
-        android:layout_toLeftOf="@+id/cmd_tags_include"
-        />
-    <EditText android:id="@+id/edit_tags_include"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        <!-- -->
+        <ImageButton
+            android:id="@+id/cmd_date_modified_to_history"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/edit_date_modified_from"
+            android:layout_toEndOf="@+id/edit_any"
+            android:layout_toLeftOf="@+id/cmd_any"
+            android:layout_toRightOf="@+id/edit_any"
+            android:layout_toStartOf="@+id/cmd_any"
+            android:background="@android:drawable/ic_menu_more" />
 
-        android:inputType="text"
-        android:singleLine="false"
-        android:lines="2"
-        android:maxLines="2"
-        tools:ignore="UnusedAttribute"
+        <EditText
+            android:id="@+id/edit_date_modified_to"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/edit_date_modified_from"
+            android:layout_toEndOf="@+id/lbl_any"
+            android:layout_toLeftOf="@+id/cmd_any_history"
+            android:layout_toRightOf="@+id/lbl_any"
+            android:layout_toStartOf="@+id/cmd_any_history"
+            android:ems="10"
+            android:inputType="date" />
+        <!--  lbl_any + edit_any + cmd_any_history + cmd_any -->
 
-        android:layout_alignBottom="@+id/cmd_tags_include"
-        android:layout_toRightOf="@+id/lbl_tags_include"
-        android:layout_alignBaseline="@+id/lbl_tags_include"
-        android:layout_toLeftOf="@+id/cmd_tags_include_history"
-        android:layout_toStartOf="@+id/cmd_tags_include_history"
-        android:layout_below="@+id/chk_with_no_tags"
-        />
 
-    <!-- -->
-    <Button android:id="@+id/cmd_tags_exclude"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/btn_popup"
-        android:layout_below="@+id/edit_tags_include"
-        android:visibility="invisible"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        />
-    <TextView android:id="@+id/lbl_tags_exclude"
-        android:text="@string/lbl_tags_exclude"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-
-        android:layout_below="@+id/cmd_tags_include"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignBaseline="@+id/cmd_tags_exclude"
-        />
-
-    <ImageButton android:id="@+id/cmd_tags_exclude_history"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@android:drawable/ic_menu_more"
-        android:layout_alignBottom="@+id/cmd_tags_exclude"
-        android:layout_toLeftOf="@+id/cmd_tags_exclude"
-        />
-    <EditText android:id="@+id/edit_tags_exclude"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-
-        android:ellipsize="end"
-        android:nestedScrollingEnabled="false"
-        android:inputType="text"
-        android:singleLine="true"
-        android:lines="1"
-        android:maxLines="1"
-        tools:ignore="UnusedAttribute"
-
-        android:layout_alignBottom="@+id/cmd_tags_exclude"
-        android:layout_toRightOf="@+id/lbl_tags_exclude"
-        android:layout_alignBaseline="@+id/lbl_tags_exclude"
-        android:layout_toLeftOf="@+id/cmd_tags_exclude_history"
-        android:layout_toStartOf="@+id/cmd_tags_exclude_history"
-        android:layout_below="@+id/edit_tags_include"
-        />
-
-    <!-- -->
-    <TextView android:id="@+id/lbl_rating"
-        android:text="@string/lbl_rating"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/edit_tags_exclude"
-        />
-
-    <RatingBar
-        android:id="@+id/ratingBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/edit_tags_exclude"
-        android:elevation="1dp"
-        android:isIndicator="false"
-        android:max="5"
-        android:numStars="5"
-        android:stepSize="1.0"
-        android:rating="0.0"/>
-
-    <!-- -->
-
-    <CheckBox android:id="@+id/chk_with_no_geo"
-        android:text="@string/lbl_with_no_geo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/ratingBar"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        />
-    <!-- -->
-
-    <Button android:id="@+id/cmd_select_lat_lon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/btn_popup"
-        android:layout_below="@+id/chk_with_no_geo"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        />
-    <TextView android:id="@+id/lbl_latitude"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/lbl_latitude_short"
-        android:layout_below="@+id/ratingBar"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignBaseline="@+id/cmd_select_lat_lon" />
-    <ImageButton android:id="@+id/cmd_lat_from_history"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@android:drawable/ic_menu_more"
-
-        android:layout_alignBottom="@+id/cmd_select_lat_lon"
-        android:layout_toLeftOf="@+id/cmd_select_lat_lon"
-        android:layout_toStartOf="@+id/cmd_select_lat_lon" />
-    <EditText android:id="@+id/edit_latitude_from"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="numberDecimal|numberSigned"
-        android:ems="10"
-        android:layout_alignBottom="@+id/cmd_select_lat_lon"
-        android:layout_alignBaseline="@+id/lbl_latitude"
-        android:layout_toLeftOf="@+id/cmd_lat_from_history"
-        android:layout_alignLeft="@+id/edit_date_to"
-        android:layout_alignStart="@+id/edit_date_to" />
-
-<!-- -->
-    <ImageButton android:id="@+id/cmd_lat_to_history"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@android:drawable/ic_menu_more"
-        android:layout_below="@+id/cmd_select_lat_lon"
-        android:layout_toRightOf="@+id/edit_latitude_from"
-        android:layout_toEndOf="@+id/edit_latitude_from" />
-    <EditText android:id="@+id/edit_latitude_to"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="numberDecimal|numberSigned"
-        android:ems="10"
-        android:layout_below="@+id/cmd_select_lat_lon"
-        android:layout_alignLeft="@+id/edit_latitude_from"
-        android:layout_alignStart="@+id/edit_latitude_from"
-        android:layout_toLeftOf="@+id/cmd_lat_to_history"
-        android:layout_toStartOf="@+id/cmd_lat_to_history" />
-
-<!-- -->
-    <TextView android:id="@+id/lbl_longitude"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/lbl_longitude_short"
-        android:layout_below="@+id/edit_latitude_to"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-    <ImageButton android:id="@+id/cmd_lon_from_history"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@android:drawable/ic_menu_more"
-        android:layout_below="@+id/edit_latitude_to"
-        android:layout_toRightOf="@+id/edit_latitude_to"
-        android:layout_toEndOf="@+id/edit_latitude_to" />
-    <EditText android:id="@+id/edit_longitude_from"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="numberDecimal|numberSigned"
-        android:ems="10"
-        android:layout_below="@+id/edit_latitude_to"
-        android:layout_alignBaseline="@+id/lbl_longitude"
-        android:layout_toLeftOf="@+id/cmd_lon_from_history"
-        android:layout_alignLeft="@+id/edit_latitude_to"
-        android:layout_alignStart="@+id/edit_latitude_to" />
-
-<!-- -->
-    <ImageButton android:id="@+id/cmd_lon_to_history"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@android:drawable/ic_menu_more"
-        android:layout_alignBottom="@+id/edit_longitude_to"
-        android:layout_toRightOf="@+id/edit_longitude_to"
-        android:layout_toEndOf="@+id/edit_longitude_to" />
-    <EditText android:id="@+id/edit_longitude_to"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="numberDecimal|numberSigned"
-        android:ems="10"
-        android:layout_below="@+id/edit_longitude_from"
-        android:layout_toLeftOf="@+id/cmd_lon_from_history"
-        android:layout_alignLeft="@+id/edit_longitude_from"
-        android:layout_alignStart="@+id/edit_longitude_from" />
-
-</RelativeLayout>
+    </RelativeLayout>
 </ScrollView>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -28,12 +28,12 @@ import java.util.List;
  * Created by k3b on 04.08.2015.
  */
 public interface IDirectory {
-    public static final int DIR_FLAG_NONE           = 0;
-    public static final int DIR_FLAG_NOMEDIA        = 1; // below linux hidden dir ".*" or below DIR_FLAG_NOMEDIA_ROOT
-    public static final int DIR_FLAG_NOMEDIA_ROOT   = 2; // containing ".nomedia"
+    int DIR_FLAG_NONE           = 0;
+    int DIR_FLAG_NOMEDIA        = 1; // below linux hidden dir ".*" or below DIR_FLAG_NOMEDIA_ROOT
+    int DIR_FLAG_NOMEDIA_ROOT   = 2; // containing ".nomedia"
 
-    public static final int DIR_FLAG_APM_DIR        = 8; // containing ".apm"
-    public static final int DIR_FLAG_VIRTUAL_DIR    = 9; // containing "*.album"
+    int DIR_FLAG_APM_DIR        = 8; // containing ".apm"
+    int DIR_FLAG_VIRTUAL_DIR    = 9; // containing "*.album"
     String APM_DIR_PREFIX = "§ ";
 
     String getRelPath();

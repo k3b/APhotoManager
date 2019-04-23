@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 by k3b.
+ * Copyright (c) 2016-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 
 /**
  * Persistence for all known tags.
@@ -44,7 +44,7 @@ import de.k3b.FotoLibGlobal;
 public class TagRepository {
     // android - log compatible
     private static final String dbg_context = "TagRepository: ";
-    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+    private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
 
     /** Lines starting with char are comments. These lines are not interpreted */
     public static final java.lang.String COMMENT = "#";
@@ -216,7 +216,7 @@ public class TagRepository {
 
             logger.debug(dbg_context + "load(): " + mItemList.size() + " items from " + this.mFile);
 
-        } else if (FotoLibGlobal.debugEnabled) {
+        } else if (LibGlobal.debugEnabled) {
             // logger.debug(dbg_context + "load() cached value : " + mItemList.size() + " items from " + this.mFile);
         }
         return mItemList;
@@ -274,7 +274,7 @@ public class TagRepository {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (FotoLibGlobal.debugEnabled) {
+        if (LibGlobal.debugEnabled) {
             logger.debug(dbg_context + "save(): no items for " + this.mFile);
         }
         return this;
@@ -293,13 +293,13 @@ public class TagRepository {
                 Tag item = loadItem(line);
                 final boolean valid = isValid(item);
                 /*  // to much log output
-                if (FotoLibGlobal.debugEnabled) {
+                if (LibGlobal.debugEnabled) {
                     logger.debug(dbg_context + "load(" + line + "): " + ((valid) ? "loaded" : "ignored"));
                 }
                 */
 
                 if (valid) {
-                    result.add((Tag) item);
+                    result.add(item);
                     indents.add(getIndent(rawLine));
                 }
 
@@ -362,7 +362,7 @@ public class TagRepository {
      * The method can be overwritten to create custom Item types.
      */
     protected Tag create() {
-        return (Tag) new Tag();
+        return new Tag();
     }
 
     /** Save source-points to writer */
@@ -389,7 +389,7 @@ public class TagRepository {
             writer.write("\n");
         }
         /* // to much log output
-        if (FotoLibGlobal.debugEnabled) {
+        if (LibGlobal.debugEnabled) {
             logger.debug(dbg_context + "save(" + line + "): " + ((valid) ? "saved" : "ignored" ));
         }
         */

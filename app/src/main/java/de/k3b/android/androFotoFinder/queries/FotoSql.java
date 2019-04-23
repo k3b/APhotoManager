@@ -42,7 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.DBUtils;
@@ -92,6 +92,9 @@ public class FotoSql extends FotoSqlBase {
     public static final int QUERY_TYPE_GROUP_PLACE = 14;
     public static final int QUERY_TYPE_GROUP_PLACE_MAP = 141;
 
+    public static final int QUERY_TYPE_GROUP_DATE_MODIFIED = 16;
+
+
     public static final int QUERY_TYPE_GROUP_COPY = 20;
     public static final int QUERY_TYPE_GROUP_MOVE = 21;
 
@@ -139,6 +142,10 @@ public class FotoSql extends FotoSqlBase {
 
     public static final String SQL_COL_EXT_MEDIA_TYPE = MediaStore.Files.FileColumns.MEDIA_TYPE;
     public static final int MEDIA_TYPE_IMAGE = MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;   // 1
+
+    // used to translate between LAST_MODIFIED in database (secs since 1970) and internal format (java date milli secs simce 1970)
+    private static final int LAST_MODIFIED_FACTOR = 1000;
+
     public static final int MEDIA_TYPE_IMAGE_PRIVATE = 1000 + MEDIA_TYPE_IMAGE;                 // 1001 APhoto manager specific
     public static final int MEDIA_TYPE_ALBUM_FILE    = 0;
 
@@ -156,12 +163,19 @@ public class FotoSql extends FotoSqlBase {
     private static final String FILTER_EXPR_LON_MIN = SQL_COL_LON + " >= ?";
     protected static final String FILTER_EXPR_RATING_MIN = SQL_COL_EXT_RATING + " >= ?";
 
+    // SQL_COL_DATE_TAKEN and "?" in milli-seconds since 1970
     private static final String FILTER_EXPR_DATE_MAX = SQL_COL_DATE_TAKEN + " < ?";
     private static final String FILTER_EXPR_DATE_MIN = SQL_COL_DATE_TAKEN + " >= ?";
+
+    // SQL_COL_LAST_MODIFIED in seconds since 1970; "?" in milli-seconds since 1970
+    private static final String FILTER_EXPR_DATE_MODIFIED_MAX = SQL_COL_LAST_MODIFIED + " < ?";
+    private static final String FILTER_EXPR_DATE_MODIFIED_MIN = SQL_COL_LAST_MODIFIED + " >= ?";
     protected static final String FILTER_EXPR_PATH_LIKE = "(" + SQL_COL_PATH + " like ?)";
 
     // same format as dir. i.e. description='/2014/12/24/' or '/mnt/sdcard/pictures/'
-    public static final String SQL_EXPR_DAY = "strftime('/%Y/%m/%d/', " + SQL_COL_DATE_TAKEN + " /1000, 'unixepoch', 'localtime')";
+    public static final String SQL_EXPR_DAY = "strftime('/%Y/%m/%d/', " + SQL_COL_DATE_TAKEN + " / " +
+            LAST_MODIFIED_FACTOR + ", 'unixepoch', 'localtime')";
+    public static final String SQL_EXPR_DAY_MODIFIED = "strftime('/%Y/%m/%d/', " + SQL_COL_LAST_MODIFIED + ",  'unixepoch', 'localtime')";
 
     public static final QueryParameter queryGroupByDate = new QueryParameter()
             .setID(QUERY_TYPE_GROUP_DATE)
@@ -175,6 +189,19 @@ public class FotoSql extends FotoSqlBase {
             .addWhere(FILTER_EXPR_PRIVATE_PUBLIC)
             .addGroupBy(SQL_EXPR_DAY)
             .addOrderBy(SQL_EXPR_DAY);
+
+    public static final QueryParameter queryGroupByDateModified = new QueryParameter()
+            .setID(QUERY_TYPE_GROUP_DATE_MODIFIED)
+            .addColumn(
+                    "max(" + SQL_COL_PK + ") AS " + SQL_COL_PK,
+                    SQL_EXPR_DAY_MODIFIED + " AS " + SQL_COL_DISPLAY_TEXT,
+                    "count(*) AS " + SQL_COL_COUNT,
+                    "max(" + SQL_COL_GPS + ") AS " + SQL_COL_GPS,
+                    "max(" + SQL_COL_PATH + ") AS " + SQL_COL_PATH)
+            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
+            .addWhere(FILTER_EXPR_PRIVATE_PUBLIC)
+            .addGroupBy(SQL_EXPR_DAY_MODIFIED)
+            .addOrderBy(SQL_EXPR_DAY_MODIFIED);
 
     public static final String SQL_EXPR_FOLDER = "substr(" + SQL_COL_PATH + ",1,length(" + SQL_COL_PATH + ") - length(" + MediaStore.Images.Media.DISPLAY_NAME + "))";
     public static final QueryParameter queryGroupByDir = new QueryParameter()
@@ -328,17 +355,27 @@ public class FotoSql extends FotoSqlBase {
             addWhereFilterLatLon(resultQuery, filter);
 
             addWhereDateMinMax(resultQuery, filter.getDateMin(), filter.getDateMax());
+            addWhereDateModifiedMinMax(resultQuery, filter.getDateModifiedMin(), filter.getDateModifiedMax());
 
             String path = filter.getPath();
             if ((path != null) && (path.length() > 0)) resultQuery.addWhere(FILTER_EXPR_PATH_LIKE, path);
         }
     }
 
-    public static void addWhereDateMinMax(QueryParameter resultQuery, final long dateMin, final long dateMax) {
+    public static void addWhereDateMinMax(QueryParameter resultQuery, final long dateMinInMilliSecs1970, final long dateMaxInMilliSecs1970) {
 
-        if (dateMin != 0) resultQuery.addWhere(FILTER_EXPR_DATE_MIN, Long.toString(dateMin));
+        // SQL_COL_DATE_TAKEN and "?" in milli-seconds since 1970 no translaton neccessary
+        if (dateMinInMilliSecs1970 != 0) resultQuery.addWhere(FILTER_EXPR_DATE_MIN, Long.toString(dateMinInMilliSecs1970));
 
-        if (dateMax != 0) resultQuery.addWhere(FILTER_EXPR_DATE_MAX, Long.toString(dateMax));
+        if (dateMaxInMilliSecs1970 != 0) resultQuery.addWhere(FILTER_EXPR_DATE_MAX, Long.toString(dateMaxInMilliSecs1970));
+    }
+
+    public static void addWhereDateModifiedMinMax(QueryParameter resultQuery, final long dateMinInMilliSecs1970, final long dateMaxInMilliSecs1970) {
+
+        // SQL_COL_LAST_MODIFIED in seconds since 1970; translate from MilliSecs
+        if (dateMinInMilliSecs1970 != 0) resultQuery.addWhere(FILTER_EXPR_DATE_MODIFIED_MIN, Long.toString(dateMinInMilliSecs1970 / LAST_MODIFIED_FACTOR));
+
+        if (dateMaxInMilliSecs1970 != 0) resultQuery.addWhere(FILTER_EXPR_DATE_MODIFIED_MAX, Long.toString(dateMaxInMilliSecs1970 / LAST_MODIFIED_FACTOR));
     }
 
     /** translates a query back to filter */
@@ -348,12 +385,25 @@ public class FotoSql extends FotoSqlBase {
             parseQueryGeo(query, filter, removeFromSourceQuery);
 
             filter.setRatingMin(GalleryFilterParameter.parseRating(getParam(query, FILTER_EXPR_RATING_MIN, removeFromSourceQuery)));
-            filter.setDate(getParam(query, FILTER_EXPR_DATE_MIN, removeFromSourceQuery), getParam(query, FILTER_EXPR_DATE_MAX, removeFromSourceQuery));
+            filter.setDate(getParam(query, FILTER_EXPR_DATE_MIN, removeFromSourceQuery),
+                    getParam(query, FILTER_EXPR_DATE_MAX, removeFromSourceQuery));
             filter.setPath(getFilePath(query, removeFromSourceQuery));
+
+            // SQL_COL_LAST_MODIFIED in seconds since 1970; translate from MilliSecs
+            filter.setDateModified(parseDateModifiedMin(query, removeFromSourceQuery),
+                    parseDateModifiedMax(query, removeFromSourceQuery));
 
             return filter;
         }
         return null;
+    }
+
+    public static long parseDateModifiedMax(QueryParameter query, boolean removeFromSourceQuery) {
+        return getParamWithFix(query, FILTER_EXPR_DATE_MODIFIED_MAX, removeFromSourceQuery, LAST_MODIFIED_FACTOR);
+    }
+
+    public static long parseDateModifiedMin(QueryParameter query, boolean removeFromSourceQuery) {
+        return getParamWithFix(query, FILTER_EXPR_DATE_MODIFIED_MIN, removeFromSourceQuery, LAST_MODIFIED_FACTOR);
     }
 
     /** extracts geo infos from srcQuery to destFilter */
@@ -402,6 +452,18 @@ public class FotoSql extends FotoSqlBase {
     protected static String getParam(QueryParameter query, String expresion, boolean removeFromSourceQuery) {
         final String[] result = getParams(query, expresion, removeFromSourceQuery);
         return ((result != null) && (result.length > 0)) ? result[0] : null;
+    }
+
+    /** @return return param for expression inside query. null if expression is not in query or number of params is not 1. */
+    protected static long getParamWithFix(QueryParameter query, String expresion, boolean removeFromSourceQuery, long factor) {
+        try {
+            String svalue = getParam(query, expresion, removeFromSourceQuery);
+            long lvalue = Long.parseLong(svalue);
+            return lvalue * factor;
+        } catch (Exception ignore) {
+
+        }
+        return 0;
     }
 
     /** @return return all params for expression inside query. null if expression is not in query */
@@ -467,11 +529,16 @@ public class FotoSql extends FotoSqlBase {
 
     public static void addPathWhere(QueryParameter newQuery, String selectedAbsolutePath, int dirQueryID) {
         if ((selectedAbsolutePath != null) && (selectedAbsolutePath.length() > 0)) {
-            if (QUERY_TYPE_GROUP_DATE == dirQueryID) {
-                addWhereDatePath(newQuery, selectedAbsolutePath);
-            } else {
-                // selectedAbsolutePath is assumed to be a file path i.e. /mnt/sdcard/pictures/
-                addWhereDirectoryPath(newQuery, selectedAbsolutePath);
+            switch (dirQueryID) {
+                case QUERY_TYPE_GROUP_DATE:
+                    addWhereDatePath(newQuery, selectedAbsolutePath);
+                    break;
+                case QUERY_TYPE_GROUP_DATE_MODIFIED:
+                    addWhereDateModifiedPath(newQuery, selectedAbsolutePath);
+                    break;
+                default:
+                    // selectedAbsolutePath is assumed to be a file path i.e. /mnt/sdcard/pictures/
+                    addWhereDirectoryPath(newQuery, selectedAbsolutePath);
             }
         }
     }
@@ -497,6 +564,17 @@ public class FotoSql extends FotoSqlBase {
      * path has format /year/month/day/ or /year/month/ or /year/ or /
      */
     private static void addWhereDatePath(QueryParameter newQuery, String selectedAbsolutePath) {
+        addWhereDatePath(newQuery, selectedAbsolutePath, SQL_COL_DATE_TAKEN, FILTER_EXPR_DATE_MIN, FILTER_EXPR_DATE_MAX);
+    }
+
+    /**
+     * path has format /year/month/day/ or /year/month/ or /year/ or /
+     */
+    private static void addWhereDateModifiedPath(QueryParameter newQuery, String selectedAbsolutePath) {
+        addWhereDatePath(newQuery, selectedAbsolutePath, SQL_COL_LAST_MODIFIED, FILTER_EXPR_DATE_MODIFIED_MIN, FILTER_EXPR_DATE_MODIFIED_MAX);
+    }
+
+    private static void addWhereDatePath(QueryParameter newQuery, String selectedAbsolutePath, String sqlColDate, String filterExprDateMin, String filterExprDateMax) {
         Date from = new Date();
         Date to = new Date();
 
@@ -504,13 +582,13 @@ public class FotoSql extends FotoSqlBase {
 
         if (to.getTime() == 0) {
             newQuery
-                    .addWhere(SQL_COL_DATE_TAKEN + " in (0,-1, null)")
-                    .addOrderBy(SQL_COL_DATE_TAKEN + " desc");
+                    .addWhere(sqlColDate + " in (0,-1, null)")
+                    .addOrderBy(sqlColDate + " desc");
         } else {
             newQuery
-                    .addWhere(FILTER_EXPR_DATE_MIN, "" + from.getTime())
-                    .addWhere(FILTER_EXPR_DATE_MAX, "" + to.getTime())
-                    .addOrderBy(SQL_COL_DATE_TAKEN + " desc");
+                    .addWhere(filterExprDateMin, "" + from.getTime())
+                    .addWhere(filterExprDateMax, "" + to.getTime())
+                    .addOrderBy(sqlColDate + " desc");
         }
     }
 
@@ -522,6 +600,8 @@ public class FotoSql extends FotoSqlBase {
                 return queryDetail;
             case QUERY_TYPE_GROUP_DATE:
                 return queryGroupByDate;
+            case QUERY_TYPE_GROUP_DATE_MODIFIED:
+                return queryGroupByDateModified;
             case QUERY_TYPE_GROUP_ALBUM:
                 return queryGroupByDir;
             case QUERY_TYPE_GROUP_PLACE:
@@ -569,6 +649,8 @@ public class FotoSql extends FotoSqlBase {
                 return context.getString(R.string.gallery_title);
             case QUERY_TYPE_GROUP_DATE:
                 return context.getString(R.string.sort_by_date);
+            case QUERY_TYPE_GROUP_DATE_MODIFIED:
+                return context.getString(R.string.sort_by_modification);
 
             case QUERY_TYPE_GROUP_ALBUM:
                 return context.getString(R.string.sort_by_folder);
@@ -624,14 +706,22 @@ public class FotoSql extends FotoSqlBase {
             case FotoSql.QUERY_TYPE_GROUP_ALBUM:
                 dest.setPath(selectedAbsolutePath + "/%");
                 return true;
-            case FotoSql.QUERY_TYPE_GROUP_DATE:
+            case FotoSql.QUERY_TYPE_GROUP_DATE: {
                 Date from = new Date();
                 Date to = new Date();
 
                 DirectoryFormatter.getDates(selectedAbsolutePath, from, to);
-                dest.setDateMin(from.getTime());
-                dest.setDateMax(to.getTime());
+                dest.setDate(from.getTime(), to.getTime());
                 return true;
+            }
+            case FotoSql.QUERY_TYPE_GROUP_DATE_MODIFIED: {
+                Date from = new Date();
+                Date to = new Date();
+
+                DirectoryFormatter.getDates(selectedAbsolutePath, from, to);
+                dest.setDateModified(from.getTime(), to.getTime());
+                return true;
+            }
             case FotoSql.QUERY_TYPE_GROUP_PLACE_MAP:
             case FotoSql.QUERY_TYPE_GROUP_PLACE:
                 IGeoRectangle geo = DirectoryFormatter.parseLatLon(selectedAbsolutePath);
@@ -983,7 +1073,7 @@ public class FotoSql extends FotoSqlBase {
         } catch (Exception ex) {
             excpetion = ex;
         } finally {
-            if ((excpetion != null) || ((dbgContext != null) && (Global.debugEnabledSql || FotoLibGlobal.debugEnabledJpg))) {
+            if ((excpetion != null) || ((dbgContext != null) && (Global.debugEnabledSql || LibGlobal.debugEnabledJpg))) {
                 Log.i(Global.LOG_CONTEXT, dbgContext + ":FotoSql.exexUpdate " + excpetion + "\n" +
                         QueryParameter.toString(null, values.toString(), SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
                         sqlWhere, selectionArgs, null, result), excpetion);
@@ -1033,7 +1123,7 @@ public class FotoSql extends FotoSqlBase {
         } catch (Exception ex) {
             excpetion = ex;
         } finally {
-            if ((excpetion != null) || Global.debugEnabledSql || FotoLibGlobal.debugEnabledJpg) {
+            if ((excpetion != null) || Global.debugEnabledSql || LibGlobal.debugEnabledJpg) {
                 Log.i(Global.LOG_CONTEXT, dbgContext + ":FotoSql.execInsert " + excpetion + " " +
                         values.toString() + " => " + result + " " + excpetion, excpetion);
             }
@@ -1101,7 +1191,7 @@ public class FotoSql extends FotoSqlBase {
                 lastSelectionArgs = null;
                 delCount = context.getContentResolver()
                         .delete(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, lastUsedWhereClause, lastSelectionArgs);
-                if (Global.debugEnabledSql || FotoLibGlobal.debugEnabledJpg) {
+                if (Global.debugEnabledSql || LibGlobal.debugEnabledJpg) {
                     Log.i(Global.LOG_CONTEXT, dbgContext + "-b: FotoSql.deleteMedia delete\n" +
                             QueryParameter.toString(null, null, SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
                             lastUsedWhereClause, lastSelectionArgs, null, delCount));
@@ -1109,7 +1199,7 @@ public class FotoSql extends FotoSqlBase {
             } else {
                 delCount = context.getContentResolver()
                         .delete(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, lastUsedWhereClause, lastSelectionArgs);
-                if (Global.debugEnabledSql || FotoLibGlobal.debugEnabledJpg) {
+                if (Global.debugEnabledSql || LibGlobal.debugEnabledJpg) {
                     Log.i(Global.LOG_CONTEXT, dbgContext +": FotoSql.deleteMedia\ndelete " +
                             QueryParameter.toString(null, null,
                                     SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
@@ -1150,7 +1240,7 @@ public class FotoSql extends FotoSqlBase {
 
     public static void addDateAdded(ContentValues values) {
         long now = new Date().getTime();
-        values.put(SQL_COL_DATE_ADDED, now / 1000);//sec
+        values.put(SQL_COL_DATE_ADDED, now / LAST_MODIFIED_FACTOR);//sec
     }
 
     @NonNull
@@ -1289,7 +1379,7 @@ public class FotoSql extends FotoSqlBase {
         VISIBILITY visibility = _visibility;
         // add visibility column only if not included yet
         if (visibility == VISIBILITY.DEFAULT) {
-            visibility = (FotoLibGlobal.visibilityShowPrivateByDefault)
+            visibility = (LibGlobal.visibilityShowPrivateByDefault)
                     ? VISIBILITY.PRIVATE_PUBLIC
                     : VISIBILITY.PUBLIC;
         }

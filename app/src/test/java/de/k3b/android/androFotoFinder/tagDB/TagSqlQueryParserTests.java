@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 by k3b.
+ * Copyright (c) 2017-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -35,40 +35,40 @@ import static org.junit.Assert.*;
  */
 public class TagSqlQueryParserTests {
     @Test
-    public void shouldParseFull() throws Exception {
-        String FILTER_STRING = "1.23,2.34;3.45,4.56;2001-02-03,2005-12-31;/some/path/;q,^;%filter%;tag1,tag2,tag3;utag1,utag2,utag3;notags;3;4";
+    public void shouldParseFull() {
+        String FILTER_STRING = "1.23,2.34;3.45,4.56;2001-02-03,2005-12-31;/some/path/;q,^;%filter%;tag1,tag2,tag3;utag1,utag2,utag3;notags;3;4;2004-02-03,2009-12-31";
         assertFilterQueryFilter(FILTER_STRING);
     }
 
     @Test
-    public void shouldEmpty() throws Exception {
+    public void shouldEmpty() {
         String FILTER_STRING = "";
         assertFilterQueryFilter(FILTER_STRING);
     }
 
     @Test
-    public void shouldParseNoGeo() throws Exception {
+    public void shouldParseNoGeo() {
         String FILTER_STRING = "noGeoInfo";
         assertFilterQueryFilter(FILTER_STRING);
     }
 
     @Test
-    public void shouldParsePrivate() throws Exception {
+    public void shouldParsePrivate() {
         assertFilterQueryFilter(VISIBILITY.PRIVATE);
     }
 
     @Test
-    public void shouldParsePrivatePublic() throws Exception {
+    public void shouldParsePrivatePublic() {
         assertFilterQueryFilter(VISIBILITY.PRIVATE_PUBLIC);
     }
 
     @Test
-    public void shouldParsePublic() throws Exception {
+    public void shouldParsePublic() {
         assertFilterQueryFilter(VISIBILITY.PUBLIC);
     }
 
     @Test
-    public void shouldFilterFind() throws Exception {
+    public void shouldFilterFind() {
         assertFilterFind("hello world", "shouldFilterFind");
     }
 
@@ -98,6 +98,7 @@ public class TagSqlQueryParserTests {
     public void assertGFilterQueryGFilter() {
         assertGFilterQueryGFilter("InAnyField", createPublicGalleryFilterParameter().setInAnyField("%1% %2%"));
         assertGFilterQueryGFilter("Date", createPublicGalleryFilterParameter().setDate("1997-12-24","2005-11-30"));
+        assertGFilterQueryGFilter("Date Modified", createPublicGalleryFilterParameter().setDateModified("1999-12-24","2009-11-30"));
         assertGFilterQueryGFilter("Path", createPublicGalleryFilterParameter().setPath("%1%"));
         GalleryFilterParameter gfLL = createPublicGalleryFilterParameter();
         gfLL.setLatitude("12.34", "34.56").setLogitude("45.67", "56.78");
@@ -155,43 +156,43 @@ public class TagSqlQueryParserTests {
 
     //################ tag filter support
     @Test
-    public void shouldTagsNoneOnly() throws Exception {
+    public void shouldTagsNoneOnly() {
         String FILTER_STRING = ";;;;;;;;notags";
         assertFilterQueryFilter(FILTER_STRING,"shouldTagsNoneOnly");
     }
 
     @Test
-    public void shouldTagsIncludeExcludeWithWildcards() throws Exception {
+    public void shouldTagsIncludeExcludeWithWildcards() {
         String FILTER_STRING = ";;;;;;%tag%;%utag%";
         assertFilterQueryFilter(FILTER_STRING,"shouldTagsIncludeExcludeWithWildcards");
     }
 
     @Test
-    public void shouldTagsIncludeOrNone() throws Exception {
+    public void shouldTagsIncludeOrNone() {
         String FILTER_STRING = ";;;;;;tag1,tag2,tag3;;notags";
         assertFilterQueryFilter(FILTER_STRING,"shouldTagsIncludeOrNone");
     }
 
     @Test
-    public void shouldTagsIncludeWithoutNone() throws Exception {
+    public void shouldTagsIncludeWithoutNone() {
         String FILTER_STRING = ";;;;;;tag1,tag2,tag3";
         assertFilterQueryFilter(FILTER_STRING,"shouldTagsIncludeWithoutNone");
     }
 
     @Test
-    public void shouldTagsExcludeOrNone() throws Exception {
+    public void shouldTagsExcludeOrNone() {
         String FILTER_STRING = ";;;;;;;tagexcl1,tagexcl2,tagexcl3;notags";
         assertFilterQueryFilter(FILTER_STRING,"shouldTagsExcludeOrNone");
     }
 
     @Test
-    public void shouldTagsExcludeWithoutNone() throws Exception {
+    public void shouldTagsExcludeWithoutNone() {
         String FILTER_STRING = ";;;;;;;tagexcl1,tagexcl2,tagexcl3";
         assertFilterQueryFilter(FILTER_STRING,"shouldTagsExcludeWithoutNone");
     }
 
     @Test
-    public void shouldTagsIncludeExcludeOrNone() throws Exception {
+    public void shouldTagsIncludeExcludeOrNone() {
         String FILTER_STRING = ";;;;;;tag1,tag2,tag3;tagexcl1,tagexcl2,tagexcl3;notags";
         assertFilterQueryFilter(FILTER_STRING,"shouldTagsIncludeExcludeOrNone");
     }

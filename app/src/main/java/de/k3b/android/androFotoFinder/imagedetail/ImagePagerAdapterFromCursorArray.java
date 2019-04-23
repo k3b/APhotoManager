@@ -29,7 +29,7 @@ import java.util.Date;
 
 import de.k3b.android.androFotoFinder.AdapterArrayHelper;
 import de.k3b.android.androFotoFinder.Global;
-import de.k3b.android.util.MediaScanner;
+import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 
 /**
  * Purpose: allow viewing images from ".nomedia" folders where no data is available in mediadb/cursor.
@@ -46,7 +46,7 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
     public ImagePagerAdapterFromCursorArray(final Activity context, String name, String fullPhotoPath) {
         super(context, name);
 
-        if (MediaScanner.isNoMedia(fullPhotoPath,MediaScanner.DEFAULT_SCAN_DEPTH)) {
+        if (PhotoPropertiesMediaFilesScanner.isNoMedia(fullPhotoPath, PhotoPropertiesMediaFilesScanner.DEFAULT_SCAN_DEPTH)) {
             mArrayImpl = new AdapterArrayHelper(context, fullPhotoPath, "debugContext");
         }
     }

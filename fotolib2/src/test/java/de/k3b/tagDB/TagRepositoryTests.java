@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 by k3b.
+ * Copyright (c) 2016-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -77,14 +77,14 @@ public class TagRepositoryTests {
 
     /* load() reload() createId() delete(T item)  save() */
     @Test
-    public void shouldLoadNonExistentIsEmpty() throws Exception {
+    public void shouldLoadNonExistentIsEmpty() {
         List items = createUnsavedRepo("shouldLoadNonExistentIsEmpty", 0).load();
 
         Assert.assertEquals(0, items.size());
     }
 
     @Test
-    public void shouldSaveLoad() throws Exception {
+    public void shouldSaveLoad() {
         createUnsavedRepo("shouldSaveLoad", 3).save();
 
         List items = new TagRepository(this.repositoryFile).load();
@@ -93,7 +93,7 @@ public class TagRepositoryTests {
     }
 
     @Test
-    public void shouldDeleteExistingItem() throws Exception {
+    public void shouldDeleteExistingItem() {
         List items = createUnsavedRepo("shouldDeleteExistingItem", 3)
                 .save()
                 .delete(createItem(2))
@@ -102,7 +102,7 @@ public class TagRepositoryTests {
     }
 
     @Test
-    public void shouldNotDeleteNonExistingItem() throws Exception {
+    public void shouldNotDeleteNonExistingItem() {
         List items = createUnsavedRepo("shouldNotDeleteNonExistingItem", 3)
                 .save()
                 .delete(createItem(7))
@@ -111,7 +111,7 @@ public class TagRepositoryTests {
     }
 
     @Test
-    public void shouldMerge() throws Exception {
+    public void shouldMerge() {
         // 1,2,3
         TagRepository originalItems = createUnsavedRepo("shouldIncludeItemB12", "a/b1/c,a/b2");
         originalItems .save();
@@ -209,7 +209,7 @@ public class TagRepositoryTests {
 
 
     @Test
-    public void shouldFindByString() throws Exception {
+    public void shouldFindByString() {
         // 1,2,3
         TagRepository items = createUnsavedRepo("shouldFindByString", 3);
 
@@ -263,7 +263,7 @@ public class TagRepositoryTests {
         TagRepository sut = new TagRepository(null);
         sut.load(items, new StringReader(tagData));
 
-        Tag a = sut.findFirstByName(items, "a");
+        Tag a = TagRepository.findFirstByName(items, "a");
         List<Tag> children = a.getChildren(items, true, false);
         Assert.assertEquals(3, children.size());
     }
@@ -282,14 +282,14 @@ public class TagRepositoryTests {
         TagRepository sut = new TagRepository(null);
         sut.load(items, new StringReader(tagData));
 
-        Tag a = sut.findFirstByName(items, "a");
+        Tag a = TagRepository.findFirstByName(items, "a");
         int delCount = a.delete(items, false);
         Assert.assertEquals("delCount", 1, delCount);
 
-        a = sut.findFirstByName(items, "a");
+        a = TagRepository.findFirstByName(items, "a");
         Assert.assertEquals("find a again", null, a);
 
-        Tag z = sut.findFirstByName(items, "acz");
+        Tag z = TagRepository.findFirstByName(items, "acz");
         Assert.assertEquals("z after delete", "/ac/acz", z.getPath());
 
     }
@@ -308,14 +308,14 @@ public class TagRepositoryTests {
         TagRepository sut = new TagRepository(null);
         sut.load(items, new StringReader(tagData));
 
-        Tag a = sut.findFirstByName(items, "a");
+        Tag a = TagRepository.findFirstByName(items, "a");
         int delCount = a.delete(items, true);
         List<Tag> children = a.getChildren(items, false, false);
         Assert.assertEquals("delCount", 4, delCount);
     }
 
     @Test
-    public void shouldInsertHierarchy() throws Exception {
+    public void shouldInsertHierarchy() {
         TagRepository sut = createUnsavedRepo("shouldInsertHierarchy", 0);
         int changes = sut.includePaths(null,"a/b/c1,a/b/c2");
         sut.save();
@@ -323,7 +323,7 @@ public class TagRepositoryTests {
     }
 
     @Test
-    public void shouldInsertIfNotFound() throws Exception {
+    public void shouldInsertIfNotFound() {
         TagRepository sut = createUnsavedRepo("shouldInsertIfNotFound", "a/b/c");
         int changes = sut.includeTagNamesIfNotFound(ListUtils.fromString("c,b,q"));
         sut.save();
@@ -331,7 +331,7 @@ public class TagRepositoryTests {
     }
 
     @Test
-    public void shouldRenameInHierachy() throws Exception {
+    public void shouldRenameInHierachy() {
         TagRepository sut = createUnsavedRepo("shouldRenameInHierachy", "a/b/old/c,x/old/y");
         int changes = sut.renameTags("old","new");
         sut.save();
@@ -341,7 +341,7 @@ public class TagRepositoryTests {
     }
 
     @Test
-    public void shouldFindByPath() throws Exception {
+    public void shouldFindByPath() {
         List<Tag> sut = createUnsavedRepo("shouldFindByPath", "a/b/c,x/y/z").load();
         Tag root = Tag.findByPath(sut, null, "x/y");
 
@@ -353,7 +353,7 @@ public class TagRepositoryTests {
     }
 
     @Test
-    public void shouldNotFindByPath() throws Exception {
+    public void shouldNotFindByPath() {
         List<Tag> sut = createUnsavedRepo("shouldFindByPath", "a/b/c,x/y/z").load();
         Tag root = Tag.findByPath(sut, null, "x/y");
 
@@ -365,7 +365,7 @@ public class TagRepositoryTests {
     }
 
     @Test
-    public void shouldGetPathElements() throws Exception {
+    public void shouldGetPathElements() {
         String[] pathElemens = TagExpression.getPathElemens("/a");
         Assert.assertEquals(2, pathElemens.length);
         Assert.assertEquals("", pathElemens[0]);

@@ -3,7 +3,7 @@ package de.k3b.android.androFotoFinder;
 import android.content.Context;
 import android.util.Log;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.io.ListUtils;
 
@@ -14,7 +14,7 @@ import de.k3b.io.ListUtils;
  */
 public class StringFormatResourceTests {
     public static void test(Context context) {
-        if (Global.debugEnabled && FotoLibGlobal.debugEnabled)
+        if (Global.debugEnabled && LibGlobal.debugEnabled)
         Log.i(Global.LOG_CONTEXT,ListUtils.toString("\n\t"
                 ,"testing some translations with parameters"
                 ,AndroFotoFinderApp.getBookMarkComment(context)

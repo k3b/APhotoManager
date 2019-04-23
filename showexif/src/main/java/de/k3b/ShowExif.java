@@ -21,10 +21,10 @@ package de.k3b;
 import java.io.IOException;
 
 import de.k3b.media.ExifInterfaceEx;
-import de.k3b.media.IMetaApi;
-import de.k3b.media.ImageMetaReader;
-import de.k3b.media.MediaUtil;
-import de.k3b.media.MediaXmpSegment;
+import de.k3b.media.IPhotoProperties;
+import de.k3b.media.PhotoPropertiesImageReader;
+import de.k3b.media.PhotoPropertiesUtil;
+import de.k3b.media.PhotoPropertiesXmpSegment;
 
 /** simple commandline tool to show  */
 public class ShowExif {
@@ -52,10 +52,10 @@ public class ShowExif {
         System.out.println(fileName);
 
         try {
-            MediaXmpSegment xmp = MediaXmpSegment.loadXmpSidecarContentOrNull(fileName, dbg_context);
+            PhotoPropertiesXmpSegment xmp = PhotoPropertiesXmpSegment.loadXmpSidecarContentOrNull(fileName, dbg_context);
 
             ExifInterfaceEx exif = new ExifInterfaceEx(fileName, null, xmp, dbg_context);
-            ImageMetaReader jpg = new ImageMetaReader().load(fileName, null, xmp, dbg_context);
+            PhotoPropertiesImageReader jpg = new PhotoPropertiesImageReader().load(fileName, null, xmp, dbg_context);
             show(jpg, debug);
             if (exif.isValidJpgExifFormat()) show(exif, debug);
             show(xmp, debug);
@@ -66,10 +66,10 @@ public class ShowExif {
 
     }
 
-    private static void show(IMetaApi item, boolean debug) {
+    private static void show(IPhotoProperties item, boolean debug) {
         if (item != null) {
             if (debug) System.out.println("######## " + item.getClass().getName() + " #########");
-            System.out.println(MediaUtil.toString(item, false, null, MediaUtil.FieldID.path));
+            System.out.println(PhotoPropertiesUtil.toString(item, false, null, PhotoPropertiesUtil.FieldID.path));
             if (debug) System.out.println(item.toString());
         }
     }

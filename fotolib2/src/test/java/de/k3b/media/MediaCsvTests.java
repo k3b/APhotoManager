@@ -40,32 +40,32 @@ public class MediaCsvTests {
 
     public static String createTestCsv(int... ids) {
         StringWriter result = new StringWriter();
-        MediaCsvSaver saver = new MediaCsvSaver(new PrintWriter(result));
+        PhotoPropertiesCsvSaver saver = new PhotoPropertiesCsvSaver(new PrintWriter(result));
         for (int id : ids) {
-            MediaDTO item = TestUtil.createTestMediaDTO(id);
+            PhotoPropertiesDTO item = TestUtil.createTestMediaDTO(id);
             saver.save(item);
         }
         return result.toString();
     }
 
-    private static class Sut extends CsvLoader<MediaCsvItem> {
-        private ArrayList<IMetaApi> result = new ArrayList<IMetaApi>();
+    private static class Sut extends CsvLoader<PhotoPropertiesCsvItem> {
+        private ArrayList<IPhotoProperties> result = new ArrayList<IPhotoProperties>();
 
         @Override
-        protected void onNextItem(MediaCsvItem next, int lineNumber, int recordNumber) {
+        protected void onNextItem(PhotoPropertiesCsvItem next, int lineNumber, int recordNumber) {
             if (next != null) {
-                result.add(new MediaDTO(next));
+                result.add(new PhotoPropertiesDTO(next));
             }
         }
 
-        protected List<IMetaApi> load(int... ids) {
+        protected List<IPhotoProperties> load(int... ids) {
             String data = createTestCsv(ids);
             return load(data);
         }
 
-        protected List<IMetaApi> load(String data) {
+        protected List<IPhotoProperties> load(String data) {
             result.clear();
-            super.load(TestUtil.createReader(data), new MediaCsvItem());
+            super.load(TestUtil.createReader(data), new PhotoPropertiesCsvItem());
             return result;
         }
     }
@@ -74,21 +74,21 @@ public class MediaCsvTests {
     public void shouldLoad1() {
         TimeZone.setDefault(DateUtil.UTC);
         Sut sut = new Sut();
-        List<IMetaApi> actual = sut.load(1);
-        MediaDTO expected = TestUtil.createTestMediaDTO(1);
+        List<IPhotoProperties> actual = sut.load(1);
+        PhotoPropertiesDTO expected = TestUtil.createTestMediaDTO(1);
         Assert.assertEquals(expected.toString(), actual.get(0).toString());
     }
 
     @Test
     public void shouldLoadExtremas() {
-        String csv = "a;" + MediaXmpFieldDefinition.title.getShortName() + ";c\n"
+        String csv = "a;" + PhotoPropertiesXmpFieldDefinition.title.getShortName() + ";c\n"
                 + "normal;#1;regular\n"
                 + "short;#2\n"
                 + "long;#3;something;extra column\n"
                 + "empty\n"
                 + "quoted;\"#5\";regular\n";
         Sut sut = new Sut();
-        List<IMetaApi> actual = sut.load(csv);
+        List<IPhotoProperties> actual = sut.load(csv);
         Assert.assertEquals("#", 5, actual.size());
         Assert.assertEquals("unquote", "#5", actual.get(4).getTitle());
     }
@@ -99,8 +99,8 @@ public class MediaCsvTests {
                 "./02-06Greve/020305blockland/ClaudiaNebenFahrrad.jpg,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,4,,,,,,,,,,,,,,,,,,,,,,8,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,UTF8,,3,,,,,,,,,Uncalibrated,,,,,,,,,\"Y, Cb, Cr, -\",,,,,,,,,,,,,,,,,,,,2002:03:05 23:09:04,,,,,,,,,,,,,,,,,,,,b443520a10119da99c2550175e6d0efb,,,,,,,,,,2002:03:05 23:09:04,,,,,,,,,,,,,,,,,,,,,,,,,,,,,./02-06Greve/020305blockland,,,,,,,,,,,,,\"Baseline DCT, Huffman coding\",4,\"Big-endian (Motorola, MM)\",480,640,9.74,0220,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2002:03:05 23:09:04+01:00,2013:07:31 19:21:39+02:00,,2002:03:05 23:09:04+01:00,ClaudiaNebenFahrrad.jpg,,,rw-rw-rw-,49 kB,,JPEG,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,0100,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,480,,,,,640x480,,,640,,,,,,,b443520a10119da99c2550175e6d0efb,,,,,,,,,,,1.01,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,image/jpeg,,,,,2013:06:14 09:35:16,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,480,pixel,640,0.266667,normalized,0.16875,0.496875,0.141667,ClaudiaGreve,Face,,,,,,,,inches,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Picasa,,,,,,,,,,,,ClaudiaGreve,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Image::ExifTool 6.93,,,,,,72,,Centered,YCbCr4:2:0 (2 2),72,,,\n" +
                 "./02-06Greve/020305blockland/ClaudiaNebenFahrrad.xmp,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2002:03:05 23:09:04,,,,,,,,,,,,,,,,,,,,,,,,,2002-03-05,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,./02-06Greve/020305blockland,,,,,,,,,,,,,,,,,,9.74,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,2013:07:31 20:34:38+02:00,2013:07:31 20:34:38+02:00,,2013:07:31 20:34:38+02:00,ClaudiaNebenFahrrad.xmp,,,rw-rw-rw-,713 bytes,,XMP,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,application/rdf+xml,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,\"ClaudiaGreve, Greve\",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Image::ExifTool 9.33,,,,,,,,,,,,,\n";
         Sut sut = new Sut();
-        List<IMetaApi> actual = sut.load(csv);
-        for(IMetaApi item : actual) {
+        List<IPhotoProperties> actual = sut.load(csv);
+        for(IPhotoProperties item : actual) {
             System.out.println(item.toString());
         }
 
@@ -109,8 +109,8 @@ public class MediaCsvTests {
 
     @Test
     public void shouldSaveLoadExtra() {
-        String data = new MediaAsString().setExtra("some extra").toString();
-        MediaAsString sut = new MediaAsString().fromString(data);
+        String data = new PhotoPropertiesAsString().setExtra("some extra").toString();
+        PhotoPropertiesAsString sut = new PhotoPropertiesAsString().fromString(data);
         Assert.assertEquals("some extra", sut.getExtra());
     }
 

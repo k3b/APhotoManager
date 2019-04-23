@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager
  *
@@ -26,7 +26,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 
 /**
  * Operating System Directory with load on demand
@@ -34,7 +34,7 @@ import de.k3b.FotoLibGlobal;
  * Created by k3b on 04.08.2015.
  */
 public class OSDirectory implements IDirectory {
-    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+    private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
 
     private File mCurrent = null;
     private List<IDirectory> mChilden = null;
@@ -138,7 +138,7 @@ public class OSDirectory implements IDirectory {
                         if (isDirectory(file)) {
                             mChilden.add(createOsDirectory(file, this, null));
                         }
-//                    } else if (FotoLibGlobal.debugEnabled) {
+//                    } else if (LibGlobal.debugEnabled) {
 //                        logger.debug(FileUtils.getDebugString("OSDirectory.getChildren() rejected ", file));
                     }
                 }
@@ -171,7 +171,7 @@ public class OSDirectory implements IDirectory {
         OSDirectory result = (OSDirectory) findChildByRelPath(children, name);
 
         if (result == null) {
-            result = root.createOsDirectory(file, (OSDirectory) parentDir, null);
+            result = root.createOsDirectory(file, parentDir, null);
             children.add(result);
         }
         return result;

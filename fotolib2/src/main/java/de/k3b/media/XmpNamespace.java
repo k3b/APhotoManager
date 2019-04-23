@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 by k3b.
+ * Copyright (c) 2016-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -26,7 +26,7 @@ import com.adobe.xmp.XMPSchemaRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 
 /**
  * Created by k3b on 10.10.2016.
@@ -44,12 +44,12 @@ public enum XmpNamespace {
     ;
 
     private static final String dbg_context = XmpNamespace.class.getSimpleName();
-    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+    private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
 
     private final String prefix;
     private final String uri;
 
-    private XmpNamespace(String prefix, String uri) {
+    XmpNamespace(String prefix, String uri) {
         this.prefix = prefix;
 
         this.uri = uri;

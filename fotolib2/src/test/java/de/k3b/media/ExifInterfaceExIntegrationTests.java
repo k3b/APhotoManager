@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager
  *
@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.TestUtil;
 import de.k3b.io.DateUtil;
 import de.k3b.io.ListUtils;
@@ -42,77 +42,68 @@ import de.k3b.io.VISIBILITY;
 public class ExifInterfaceExIntegrationTests {
     private static final Logger logger = LoggerFactory.getLogger(ExifInterfaceExIntegrationTests.class);
 
-    private IMetaApi sut = null;
+    private IPhotoProperties sut = null;
 
     @BeforeClass
     public static void initDirectories() {
-        FotoLibGlobal.appName = "JUnit";
-        FotoLibGlobal.appVersion = "ExifInterfaceExIntegrationTests";
+        LibGlobal.appName = "JUnit";
+        LibGlobal.appVersion = "ExifInterfaceExIntegrationTests";
     }
 
     @Before
     public void setup() throws IOException {
         // ExifInterfaceEx.DEBUG = true;
-        sut = getMeta("test-WitExtraData.jpg");
+        sut = getMeta(TestUtil.TEST_FILE_JPG_WITH_EXIF);
     }
 
     @Test
-    public void shouldDump() throws IOException
-    {
+    public void shouldDump() {
         // System.out.printf(sut.toString());
         logger.info("shouldDump " + sut.toString());
     }
 
     @Test
-    public void shouldGetDescription() throws IOException
-    {
+    public void shouldGetDescription() {
         Assert.assertEquals("ImageDescription", sut.getDescription());
     }
 
     @Test
-    public void shouldGetTitle() throws IOException
-    {
+    public void shouldGetTitle() {
         Assert.assertEquals("XPTitle", sut.getTitle());
     }
 
     @Test
-    public void shouldGetDateTimeTaken() throws IOException
-    {
+    public void shouldGetDateTimeTaken() {
         Assert.assertEquals("1962-11-07T09:38:46", DateUtil.toIsoDateTimeString(sut.getDateTimeTaken()));
     }
 
     @Test
-    public void shouldGetLatitude() throws IOException
-    {
+    public void shouldGetLatitude() {
         Assert.assertEquals(27.8186, sut.getLatitude(), 0.01);
     }
 
     @Test
-    public void shouldGetLongitude() throws IOException
-    {
+    public void shouldGetLongitude() {
         Assert.assertEquals(-15.764, sut.getLongitude(), 0.01);
     }
 
     @Test
-    public void shouldGetTags() throws IOException
-    {
+    public void shouldGetTags() {
         Assert.assertEquals("Marker1, Marker2", ListUtils.toString(", ", sut.getTags()));
     }
 
     @Test
-    public void shouldGetRating() throws IOException
-    {
+    public void shouldGetRating() {
         Assert.assertEquals(3, sut.getRating().intValue());
     }
 
     @Test
-    public void shouldModifyInMemory() throws IOException
-    {
-        MediaDTO expected = TestUtil.createTestMediaDTO(2);
+    public void shouldModifyInMemory() {
+        PhotoPropertiesDTO expected = TestUtil.createTestMediaDTO(2);
         expected.setVisibility(VISIBILITY.PUBLIC);
-        MediaUtil.copy(sut, expected, true, true);
-        MediaDTO actual = new MediaDTO();
-        MediaUtil.copy(actual, sut, true, true);
+        PhotoPropertiesUtil.copy(sut, expected, true, true);
+        PhotoPropertiesDTO actual = new PhotoPropertiesDTO();
+        PhotoPropertiesUtil.copy(actual, sut, true, true);
         actual.setPath(expected.path);
         Assert.assertEquals(expected.toString(), actual.toString());
 
@@ -121,13 +112,12 @@ public class ExifInterfaceExIntegrationTests {
 
 
     @Test
-    public void shouldPreservePrivate() throws IOException
-    {
-        MediaDTO expected = TestUtil.createTestMediaDTO(2);
+    public void shouldPreservePrivate() {
+        PhotoPropertiesDTO expected = TestUtil.createTestMediaDTO(2);
         expected.setVisibility(VISIBILITY.PRIVATE);
-        MediaUtil.copy(sut, expected, true, true);
-        MediaDTO actual = new MediaDTO();
-        MediaUtil.copy(actual, sut, true, true);
+        PhotoPropertiesUtil.copy(sut, expected, true, true);
+        PhotoPropertiesDTO actual = new PhotoPropertiesDTO();
+        PhotoPropertiesUtil.copy(actual, sut, true, true);
         actual.setPath(expected.path);
         Assert.assertEquals(VISIBILITY.PRIVATE, actual.getVisibility());
 
@@ -135,13 +125,12 @@ public class ExifInterfaceExIntegrationTests {
     }
 
     @Test
-    public void shouldClearInMemory() throws IOException
-    {
-        MediaDTO expected = new MediaDTO();
+    public void shouldClearInMemory() {
+        PhotoPropertiesDTO expected = new PhotoPropertiesDTO();
         expected.setVisibility(VISIBILITY.PUBLIC);
-        MediaUtil.copy(sut, expected, true, true);
-        MediaDTO actual = new MediaDTO();
-        MediaUtil.copy(actual, sut, true, true);
+        PhotoPropertiesUtil.copy(sut, expected, true, true);
+        PhotoPropertiesDTO actual = new PhotoPropertiesDTO();
+        PhotoPropertiesUtil.copy(actual, sut, true, true);
         actual.setPath(expected.path);
         Assert.assertEquals(expected.toString(), actual.toString());
 
@@ -149,9 +138,9 @@ public class ExifInterfaceExIntegrationTests {
     }
 
 
-    public static IMetaApi getMeta(String fileName) throws IOException {
+    public static IPhotoProperties getMeta(String fileName) throws IOException {
         InputStream inputStream = TestUtil.getResourceInputStream(fileName);
-        IMetaApi result = new ExifInterfaceEx(fileName, inputStream, null, "JUnit");
+        IPhotoProperties result = new ExifInterfaceEx(fileName, inputStream, null, "JUnit");
         return result;
     }
 

@@ -1,2 +1,9 @@
 Changes from 0.7.2 to 0.7.3
 
+* #135: added support for mapsforge offline maps "v5 format"
+* #132 improved Autoprocessing-Editor: Long press on Exif-Picker butten "..." : get lat/lon/description/tags from selected photos
+* #133: Additional filtercriteria date-last-modified from ... to
+* #21: Translation updates ja, nl, ru, pt-br, uk
+* Bugfix infer DateTimeTaken from exif-TAG_DATETIME if not available in exif-TAG_DATETIME_ORIGINAL
+* Bugfix: A Photo Manger is now listed as provider for "getContent" for photos
+* #139: Bugfix crash after screenrotation in rename

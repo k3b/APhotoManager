@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 by k3b.
+ * Copyright (c) 2017-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -38,7 +38,9 @@ import java.util.List;
 public class FileManagerUtil {
     private static Intent getIntentShowInFilemanager(Activity context, String path) {
         if ((path != null) && (path.length() > 0)) {
-            final Uri pathUri = Uri.fromFile(new File(path));
+            final Uri pathUri = (path.indexOf(':') > 0)
+                    ? Uri.parse(path)
+                    : Uri.fromFile(new File(path));
 
             Intent startIntent = new Intent();
             startIntent.setAction(Intent.ACTION_VIEW);
@@ -80,7 +82,7 @@ public class FileManagerUtil {
     }
 
     private static boolean isInstalled(Context context, Intent intent) {
-        final List<ResolveInfo> list = ((PackageManager)context.getPackageManager()).queryIntentActivities(intent, 0);
+        final List<ResolveInfo> list = context.getPackageManager().queryIntentActivities(intent, 0);
 
         return ((list != null) && (list.size() > 0));
     }

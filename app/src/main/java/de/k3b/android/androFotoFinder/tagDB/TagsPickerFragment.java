@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-18 by k3b.
+ * Copyright (c) 2017-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -88,7 +88,7 @@ public class TagsPickerFragment  extends DialogFragment  {
                      List<String> removeNames);
 
         boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag);
-    };
+    }
 
     private ITagsPicker mFragmentOnwner = null;
     private boolean mIsFilterMode = true;

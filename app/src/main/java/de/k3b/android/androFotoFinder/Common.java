@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -31,23 +31,23 @@ public interface Common {
      * Format:GalleryFilterParameter.toString/parse as a "," seperated list of values.
      * See https://github.com/k3b/AndroFotoFinder/wiki/intentapi#filter
      */
-    public static final String EXTRA_FILTER = "de.k3b.extra.FILTER";
+    String EXTRA_FILTER = "de.k3b.extra.FILTER";
 
     /** detail,gallery:  sql where ... order by ... group by ... */
-    public static final String EXTRA_QUERY = "de.k3b.extra.SQL";
+    String EXTRA_QUERY = "de.k3b.extra.SQL";
 
     /** detail: offset in in the resultset to be shown */
-    public static final String EXTRA_POSITION = "de.k3b.extra.OFFSET";
+    String EXTRA_POSITION = "de.k3b.extra.OFFSET";
 
     /** gallery,geoEdit,picker: app title for picker */
-    public static final String EXTRA_TITLE = Intent.EXTRA_TITLE;
+    String EXTRA_TITLE = Intent.EXTRA_TITLE;
 
     /**  detail:  getData/EXTRA_STREAM - file/content  */
-    public static final String EXTRA_STREAM = Intent.EXTRA_STREAM;
+    String EXTRA_STREAM = Intent.EXTRA_STREAM;
 
     /** detail:  Activity.onActivityResult() - resultCode: no photo-files were modified */
-    public static final int RESULT_NOCHANGE = Activity.RESULT_CANCELED;
+    int RESULT_NOCHANGE = Activity.RESULT_CANCELED;
 
     /** detail,geoEdit:  Activity.onActivityResult() - resultCode:  one or more photo-files were modified. caller must invalidate cached files/directories. */
-    public static final int RESULT_CHANGE = Activity.RESULT_OK;
+    int RESULT_CHANGE = Activity.RESULT_OK;
 }

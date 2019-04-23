@@ -1,7 +1,7 @@
 // ExifInterface source code from android-6 - special version without jni
 /*
  * Copyright (C) 2007 The Android Open Source Project under the Apache License, Version 2.0
- * Copyright (C) 2016-2018 by k3b under the GPL-v3+.
+ * Copyright (C) 2016-2019 by k3b under the GPL-v3+.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -1419,7 +1419,7 @@ public class ExifInterface {
      * type and the content of the input stream. In each case, it reads the first three bytes to
      * determine whether the image data format is JPEG or not.
      */
-    private void loadAttributes(InputStream in) throws IOException {
+    private void loadAttributes(InputStream in) {
         try {
             // Initialize mAttributes.
             for (int i = 0; i < EXIF_TAGS.length; ++i) {
@@ -2081,7 +2081,7 @@ public class ExifInterface {
             long nextEntryOffset = dataInputStream.peek() + 4;  // next four bytes is for data
                                                                 // offset or value.
             // Look up a corresponding tag from tag number
-            final ExifTag tag = (ExifTag) sNumner2ExifTag[hint].get(tagNumber);
+            final ExifTag tag = sNumner2ExifTag[hint].get(tagNumber);
             if (DEBUG_INTERNAL) {
                 logDebug(getContextDebugMessage(hint, tagNumber, dataFormat, numberOfComponents, tag));
             }

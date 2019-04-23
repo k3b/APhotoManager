@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2018 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -30,13 +30,13 @@ import static org.junit.Assert.*;
  */
 public class GalleryFilterParameterTest {
 
-    public static final String FILTER_STRING_FULL_EXAMPLE = "1.23,2.34;3.45,4.56;2001-02-03,2005-12-31;/some/path/;q,^;filter;tag1,tag2,tag3;utag1,utag2,utag3;notags;3;4";
+    public static final String FILTER_STRING_FULL_EXAMPLE = "1.23,2.34;3.45,4.56;2001-02-03,2005-12-31;/some/path/;q,^;filter;tag1,tag2,tag3;utag1,utag2,utag3;notags;3;4;2004-02-03,2007-12-31";
 
     @Test
     public void toStringFullTest() {
         GalleryFilterParameter sut = new GalleryFilterParameter();
         sut.setLatitude(1.23,3.45).setLogitude(2.34, 4.56);
-        sut.setDateMin(Date.valueOf("2001-02-03").getTime()).setDateMax(Date.valueOf("2005-12-31").getTime());
+        sut.setDate(Date.valueOf("2001-02-03").getTime(), Date.valueOf("2005-12-31").getTime());
         sut.setPath("/some/path/");
         sut.setSortID('q');
         sut.setSortAscending(true);
@@ -46,6 +46,7 @@ public class GalleryFilterParameterTest {
         sut.setVisibility(VISIBILITY.PRIVATE_PUBLIC);
         sut.setWithNoTags(true);
         sut.setRatingMin(4);
+        sut.setDateModified(Date.valueOf("2004-02-03").getTime(), Date.valueOf("2007-12-31").getTime());
 
         assertEquals(FILTER_STRING_FULL_EXAMPLE, sut.toString());
         assertEquals("not empty", false,  GalleryFilterParameter.isEmpty(sut));

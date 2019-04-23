@@ -1,7 +1,8 @@
 /*
  * Copyright (c) 2017-2018 by k3b.
  *
- * This file is part of AndroFotoFinder / #APhotoManager.
+ * This file is part of #APhotoManager (https://github.com/k3b/APhotoManager/)
+ *              and #toGoZip (https://github.com/k3b/ToGoZip/).
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -20,6 +21,7 @@ package de.k3b.io;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -61,7 +63,7 @@ public class ListUtils {
         return result;
     }
 
-    public static String toString(String elementDelimiter, List<?> list) {
+    public static String toString(String elementDelimiter, Collection<?> list) {
         StringBuilder result = new StringBuilder();
         if (list != null) {
             String nextDelim = "";
@@ -94,15 +96,36 @@ public class ListUtils {
         }
         return result.toString();
     }
+
     public static String[] asStringArray(List<String> tags) {
         if ((tags == null) || (tags.size() == 0)) return null;
         String[] tagsArray = tags.toArray(new String[tags.size()]);
         return tagsArray;
     }
 
-    /** return null if list has no elements */
+    /**
+     * return null if list has no elements
+     */
     public static <T> List<T> emptyAsNull(List<T> list) {
         if ((list != null) && (list.size() > 0)) return list;
         return null;
+    }
+
+    /** add item "itemToBeAddedIfNotInList" to list if it is not in the list yet */
+    public static <T> List<T> include(List<T> list, T itemToBeAddedIfNotInList) {
+        if ((itemToBeAddedIfNotInList != null) && (!list.contains(itemToBeAddedIfNotInList))) {
+            list.add(itemToBeAddedIfNotInList);
+        }
+        return list;
+    }
+
+    /** add all items from "itemsToBeAddedIfNotInList" to list that are not in the list yet */
+    public static <T> List<T> include(List<T> list, Collection<T> itemsToBeAddedIfNotInList) {
+        if (itemsToBeAddedIfNotInList != null) {
+            for (T itemToBeAddedIfNotInList : itemsToBeAddedIfNotInList) {
+                include(list, itemToBeAddedIfNotInList);
+            }
+        }
+        return list;
     }
 }

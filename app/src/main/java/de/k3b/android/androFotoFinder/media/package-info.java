@@ -22,11 +22,13 @@
 
 This is sourcecode of uml diagrams using
 http://plantuml.com/
+
 notation
 
 pc2android.png
 @startuml
     title Workflow from PC to Android
+
 	package "PC" {
         [Irfanview.exe]
         [apmJpg2xmp.cmd]
@@ -34,8 +36,9 @@ pc2android.png
     	package "Folder structure with hires Images" {
 	    	[JpegFile hires]
     	}
-        ' [JpegFile hires] --> [TODO:syncPC]
+        ' [JpegFile hires] -down-> [TODO:syncPC]
 	}
+
 	package "Android" {
     	package "Folder structure with 1024er Images" {
 	    	[JpegFile 1024]
@@ -55,23 +58,23 @@ pc2android.png
         ' [TODO:syncAndroid] --> [MediaDB]
     }
 
-    [JpegFile hires] -> [Irfanview.exe]
-    [Irfanview.exe] -> [JpegFile 1024] : {a}
+    [JpegFile hires] -down-> [Irfanview.exe]
+    [Irfanview.exe] -down-> [JpegFile 1024] : {a}
 
-    [JpegFile hires] -> [apmJpg2xmp.cmd]
-    [apmJpg2xmp.cmd] -> [XmpFile] : {b}
+    [JpegFile hires] -down-> [apmJpg2xmp.cmd]
+    [apmJpg2xmp.cmd] -down-> [XmpFile] : {b}
 
-    [JpegFile hires] -> [apm2csv.cmd]
-    [apm2csv.cmd] -> [CsvFile] : {c}
+    [JpegFile hires] -down-> [apm2csv.cmd]
+    [apm2csv.cmd] -down-> [CsvFile] : {c}
 
-    [JpegFile 1024] -> [MediaScanner]
-    [MediaScanner] -> [MediaDB]
+    [JpegFile 1024] -down-> [MediaScanner]
+    [MediaScanner] -right-> [MediaDB]
 
-    [JpegFile 1024] -> ["A Photo Manager" Scanner]
-    [XmpFile] -> ["A Photo Manager" Scanner]
-    [CsvFile] -> ["A Photo Manager" Scanner]
-    ["A Photo Manager" Scanner] -> [MediaDB]
-    [MediaDB] -> ["A Photo Manager" Gallery] : filter path date tags geo
+    [JpegFile 1024] -down-> ["A Photo Manager" Scanner]
+    [XmpFile] -down-> ["A Photo Manager" Scanner]
+    [CsvFile] -down-> ["A Photo Manager" Scanner]
+    ["A Photo Manager" Scanner] -down-> [MediaDB]
+    [MediaDB] -down-> ["A Photo Manager" Gallery] : filter path date tags geo
 
     ' [TODO:syncAndroid] <-- [TODO:syncPC] : {c}
 
@@ -84,9 +87,9 @@ android2pc.png
     	package "Folder structure with hires Images" {
 	    	[JpegFile hires]
     	}
-        [apmXmp2jpg.cmd] --> [JpegFile hires]
-        [apm*.cmd] --> [JpegFile hires]
-        [TODO:syncPC] --> [JpegFile hires]
+        [apmXmp2jpg.cmd] -down-> [JpegFile hires]
+        [apm*.cmd] -down-> [JpegFile hires]
+        [TODO:syncPC] -down-> [JpegFile hires]
 	}
 	package "Android" {
     	package "Folder structure with 1024er Images" {
@@ -98,14 +101,14 @@ android2pc.png
     		[MediaDB]
     	}
 
-  	    ["A Photo Manager"] -> [Modfy jpg copy del setGeo ...]
+  	    ["A Photo Manager"] -right-> [Modfy jpg copy del setGeo ...]
 
-  	    [Modfy jpg copy del setGeo ...] -> [transactionlog]
-  	    [transactionlog] --> [TODO:syncAndroid]
-  	    [Modfy jpg copy del setGeo ...] --> [aPhotoManager.log.cmd]
-        [MediaDB] <- [Modfy jpg copy del setGeo ...]
-        [Modfy jpg copy del setGeo ...] -> [JpegFile 1024]
-        [Modfy jpg copy del setGeo ...] -> [XmpFile]
+  	    [Modfy jpg copy del setGeo ...] -right-> [transactionlog]
+  	    [transactionlog] -down-> [TODO:syncAndroid]
+  	    [Modfy jpg copy del setGeo ...] -down-> [aPhotoManager.log.cmd]
+        [Modfy jpg copy del setGeo ...] -up-> [MediaDB]
+        [Modfy jpg copy del setGeo ...] -down-> [JpegFile 1024]
+        [Modfy jpg copy del setGeo ...] -down-> [XmpFile]
     }
 
     [aPhotoManager.log.cmd] --> [apm*.cmd] : {y}

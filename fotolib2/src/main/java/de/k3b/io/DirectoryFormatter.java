@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -25,9 +25,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
-import java.util.TimeZone;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 
 /**
  * Created by k3b on 12.07.2015.
@@ -44,7 +43,7 @@ public class DirectoryFormatter {
         Integer year = null;
         Integer month = null;
         Integer day = null;
-        Integer decade = (FotoLibGlobal.datePickerUseDecade) ? null : Integer.MIN_VALUE;
+        Integer decade = (LibGlobal.datePickerUseDecade) ? null : Integer.MIN_VALUE;
 
         String parts[] = selectedAbsolutePath.split(Directory.PATH_DELIMITER);
 
@@ -66,7 +65,7 @@ public class DirectoryFormatter {
         }
 
         int yearFrom = 0;
-        if ((FotoLibGlobal.datePickerUseDecade) && (decade != null)) yearFrom = decade.intValue();
+        if ((LibGlobal.datePickerUseDecade) && (decade != null)) yearFrom = decade.intValue();
         if (year != null) yearFrom = year.intValue();
 
         if (yearFrom != 0) {
@@ -106,7 +105,7 @@ public class DirectoryFormatter {
         int lonPos = lon.indexOf(".") + 1;
 
         for (int i = 1; i <= 2; i++) {
-            result.append(lat.substring(0, latPos + i)).append(",").append(lon.substring(0, lonPos + i)).append("/");
+            result.append(lat, 0, latPos + i).append(",").append(lon, 0, lonPos + i).append("/");
         }
 
         return result.toString();

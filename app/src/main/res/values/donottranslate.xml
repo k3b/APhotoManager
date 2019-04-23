@@ -28,7 +28,12 @@ this program. If not, see <http://www.gnu.org/licenses/>
 	<string name="settings_debug_sql_title" translatable="false">LogCat SQL</string>
 	<string name="settings_debug_jpg_title" translatable="false">LogCat JPG</string>
 	<string name="settings_debug_map_title" translatable="false">LogCat geo map</string>
+	<string name="settings_debug_zip">LogCat zip-file</string>
 
+	<!-- #108 Zip-file export/backup will be implemented later
+        <string name="lbl_change_history" translatable="false">ChangeHistory.csv</string>
+        <string name="lbl_apm_file" translatable="false">.apm</string>
+    -->
 	<string name="bookmark_reset" translatable="false">RESET</string>
 
 	<string name="settings_debug_view_item_title" translatable="false">LogCat gridview/listview</string>
@@ -45,7 +50,7 @@ this program. If not, see <http://www.gnu.org/licenses/>
 		<a href="https://github.com/k3b/APhotoManager/wiki/id-home">id</a>,&nbsp;
 		<a href="https://github.com/k3b/APhotoManager/wiki/it-home">it</a>,&nbsp;
 		<a href="https://github.com/k3b/APhotoManager/wiki/ja-home">ja</a>,&nbsp;
-		nl,&nbsp;pl,&nbsp;
+		<a href="https://github.com/k3b/APhotoManager/wiki/nl-Home">nl</a>,&nbsp;pl,&nbsp;
 		<a href="https://github.com/k3b/APhotoManager/wiki/ro-home">ro</a>
 		,&nbsp;ru,
 		&nbsp;<a href="https://github.com/k3b/APhotoManager/wiki/tr-home">tr</a>,
@@ -113,7 +118,7 @@ this program. If not, see <http://www.gnu.org/licenses/>
     <a href="https://github.com/osmdroid/osmdroid">osmdroid library</a> to display online maps from
     <a href="http://www.openstreetmap.org">Open Street Map</a></li>
     <li>
-    <a href="https://github.com/LonamiWebs/Stringlate/">Andrid Stringlate app</a> to allow the app
+    <a href="https://github.com/LonamiWebs/Stringlate/">Android Stringlate app</a> to allow the app
     user to thranslate this app to other gui-languages</li>
     <li>
     <a href="https://github.com/mapsforge/mapsforge">mapsforge library</a> to display offline maps</li>

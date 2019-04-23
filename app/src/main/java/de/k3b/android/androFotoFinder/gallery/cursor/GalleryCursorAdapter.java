@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -200,7 +200,7 @@ public class GalleryCursorAdapter extends CursorAdapter  {
             this.description = (TextView) parent.findViewById(R.id.text);
             this.image = (ImageView) parent.findViewById(R.id.image);
             this.icon = (ImageView) parent.findViewById(R.id.icon);
-        };
+        }
 
         @Override
         public String toString() {

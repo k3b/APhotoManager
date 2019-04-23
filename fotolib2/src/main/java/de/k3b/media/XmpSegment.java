@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 by k3b.
+ * Copyright (c) 2016-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -44,7 +44,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import de.k3b.FotoLibGlobal;
+import de.k3b.LibGlobal;
 import de.k3b.io.FileUtils;
 import de.k3b.tagDB.TagConverter;
 
@@ -56,7 +56,7 @@ import de.k3b.tagDB.TagConverter;
 public class XmpSegment {
     public static final String DBG_PREFIX = "XmpSegment: ";
     private static String dbg_context = DBG_PREFIX;
-    private static final Logger logger = LoggerFactory.getLogger(FotoLibGlobal.LOG_TAG);
+    private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
     // public: can be changed in settings dialog
     public  static boolean DEBUG = false;
 
@@ -66,7 +66,7 @@ public class XmpSegment {
     /** when xmp sidecar file was last modified (in secs 1970) or 0 */
     private long filelastModified = 0;
 
-    protected String getPropertyAsString(String debugContext, MediaXmpFieldDefinition... definitions) {
+    protected String getPropertyAsString(String debugContext, PhotoPropertiesXmpFieldDefinition... definitions) {
         List<String> values = getPropertyArray("", definitions);
         if ((values != null) && (values.size() > 0)) {
             return TagConverter.asDbString(null, values);
@@ -79,7 +79,7 @@ public class XmpSegment {
         return null;
     }
 
-    protected Date getPropertyAsDate(String debugContext, MediaXmpFieldDefinition... definitions) {
+    protected Date getPropertyAsDate(String debugContext, PhotoPropertiesXmpFieldDefinition... definitions) {
         try {
             String result = getPropertyAsString(debugContext, definitions);
             if ((result != null) && (result.length() > 0)) return XMPUtils.convertToDate(result).getCalendar().getTime();
@@ -89,8 +89,8 @@ public class XmpSegment {
         return null;
     }
 
-    protected XMPProperty getProperty(MediaXmpFieldDefinition... definitions) {
-        for (MediaXmpFieldDefinition definition: definitions) {
+    protected XMPProperty getProperty(PhotoPropertiesXmpFieldDefinition... definitions) {
+        for (PhotoPropertiesXmpFieldDefinition definition: definitions) {
             if (!definition.isArray()) {
                 XMPProperty result = null;
                 try {
@@ -105,8 +105,8 @@ public class XmpSegment {
         return null;
     }
 
-    protected MediaXmpFieldDefinition findFirst(boolean returnNullIfNotFound, MediaXmpFieldDefinition... definitions)  {
-        for (MediaXmpFieldDefinition definition: definitions) {
+    protected PhotoPropertiesXmpFieldDefinition findFirst(boolean returnNullIfNotFound, PhotoPropertiesXmpFieldDefinition... definitions)  {
+        for (PhotoPropertiesXmpFieldDefinition definition: definitions) {
             XMPProperty result = null;
             try {
                 result = getXmpMeta().getProperty(definition.getXmpNamespace().getUriAsString(), definition.getShortName());
@@ -120,10 +120,10 @@ public class XmpSegment {
     }
 
     /** sets all existing from definitions or first if not found */
-    protected void setProperty(Object value, MediaXmpFieldDefinition... definitions) {
+    protected void setProperty(Object value, PhotoPropertiesXmpFieldDefinition... definitions) {
         try {
             boolean mustAdd = true;
-            for (MediaXmpFieldDefinition definition: definitions) {
+            for (PhotoPropertiesXmpFieldDefinition definition: definitions) {
                 XMPProperty result = getXmpMeta().getProperty(definition.getXmpNamespace().getUriAsString(), definition.getShortName());
                 if (result != null) {
                     setPropertyInternal(value, definition);
@@ -138,7 +138,7 @@ public class XmpSegment {
         }
     }
 
-    private void setPropertyInternal(Object value, MediaXmpFieldDefinition definition) throws XMPException {
+    private void setPropertyInternal(Object value, PhotoPropertiesXmpFieldDefinition definition) throws XMPException {
         if (definition != null) {
             if (value == null) {
                 // XMPProperty prop = getXmpMeta().getProperty(definition.getXmpNamespace().getUriAsString(), definition.getShortName());
@@ -152,9 +152,9 @@ public class XmpSegment {
         } // else both porperty and value do not exist
     }
 
-    protected void replacePropertyArray(List<String> values, MediaXmpFieldDefinition... definitions) {
+    protected void replacePropertyArray(List<String> values, PhotoPropertiesXmpFieldDefinition... definitions) {
         try {
-            MediaXmpFieldDefinition definition = findFirst(false, definitions);
+            PhotoPropertiesXmpFieldDefinition definition = findFirst(false, definitions);
             if ((definition != null) && definition.isArray()) {
                 XMPMeta meta = getXmpMeta();
                 int oldItemCount = meta.countArrayItems(definition.getXmpNamespace().getUriAsString(), definition.getShortName());
@@ -175,10 +175,10 @@ public class XmpSegment {
         }
     }
 
-    protected List<String>  getPropertyArray(String debugContext, MediaXmpFieldDefinition... definitions) {
+    protected List<String>  getPropertyArray(String debugContext, PhotoPropertiesXmpFieldDefinition... definitions) {
         try {
             XMPMeta meta = getXmpMeta();
-            for (MediaXmpFieldDefinition definition : definitions) {
+            for (PhotoPropertiesXmpFieldDefinition definition : definitions) {
                 if (definition.isArray()) {
                     int oldItemCount = meta.countArrayItems(definition.getXmpNamespace().getUriAsString(), definition.getShortName());
                     if (oldItemCount > 0) {
@@ -208,7 +208,7 @@ public class XmpSegment {
 
     public XmpSegment setXmpMeta(XMPMeta xmpMeta, String dbg_context) {
         if (dbg_context != null) {
-            this.dbg_context = dbg_context + DBG_PREFIX;
+            XmpSegment.dbg_context = dbg_context + DBG_PREFIX;
         }
 
         this.xmpMeta = xmpMeta;
@@ -236,7 +236,7 @@ public class XmpSegment {
             // workaround: my android-4.2 tahblet cannot re-read it-s xmp without trailing "\n"
             if ((file != null) && file.exists()) {
                 try {
-                    setXmpMeta(XMPMetaFactory.parse(FileUtils.streamFromStringContent(FileUtils.readFile(file) + "\n")), this.dbg_context);
+                    setXmpMeta(XMPMetaFactory.parse(FileUtils.streamFromStringContent(FileUtils.readFile(file) + "\n")), XmpSegment.dbg_context);
                 } catch (IOException e1) {
                     onError("->XmpSegment.load-via-string " + file, e);
                 } catch (XMPException e1) {
@@ -265,7 +265,7 @@ public class XmpSegment {
 
     public XmpSegment save(OutputStream os, boolean humanReadable, String dbg_context) {
         if (dbg_context != null) {
-            this.dbg_context = dbg_context + DBG_PREFIX;
+            XmpSegment.dbg_context = dbg_context + DBG_PREFIX;
         }
 
         // humanReadable = false;

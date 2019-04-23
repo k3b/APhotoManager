@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -50,6 +50,14 @@
         android:visible="true"
         android:orderInCategory="2"
         android:showAsAction="ifRoom" />
+
+    <!-- image commands always available -->
+    <item android:id="@+id/cmd_backup"
+        android:title="@string/backup_title"
+        android:visible="false"
+        android:orderInCategory="41"
+        android:showAsAction="never" />
+
 
     <item android:id="@+id/cmd_selection_add_all"
         android:title="@string/selection_add_all_menu_title"

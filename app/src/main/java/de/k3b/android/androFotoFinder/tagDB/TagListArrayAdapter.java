@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -110,7 +110,7 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 				if (name != null) {
 					if (onOffValue && !onNames.contains(name))
 						onNames.add(name);
-					if (!onOffValue && onNames.contains(name))
+					if (!onOffValue)
 						onNames.remove(name);
 					icon.setImageDrawable(ResourceUtils.getDrawable(getContext(),(onOffValue) ? id_drawable_on : id_drawable_off));
 				}
@@ -268,9 +268,7 @@ public class TagListArrayAdapter extends ArrayAdapterEx<Tag> {
 			final String valueText = name.toLowerCase();
 
 			// First match against the whole, non-splitted value
-			if (valueText.contains(lowerCaseSearchString)) {
-				return true;
-			}
+            return valueText.contains(lowerCaseSearchString);
 		}
 
 		return false;

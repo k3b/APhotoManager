@@ -1,0 +1,1 @@
+Um Gerenciador de Fotos (A Photo Manager)

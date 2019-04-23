@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright 2011, 2012 Chris Banes.
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -52,7 +52,7 @@ import java.util.List;
 
 import de.k3b.android.androFotoFinder.AffUtils;
 import de.k3b.android.androFotoFinder.Common;
-import de.k3b.android.androFotoFinder.ExifEditActivity;
+import de.k3b.android.androFotoFinder.PhotoPropertiesEditActivity;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.LockScreen;
@@ -68,14 +68,15 @@ import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.FileManagerUtil;
 import de.k3b.android.util.IntentUtil;
-import de.k3b.android.util.MediaScanner;
-import de.k3b.android.util.MediaScannerAsyncTask;
+import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
+import de.k3b.android.util.PhotoPropertiesMediaFilesScannerAsyncTask;
 import de.k3b.android.util.OsUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.FileProcessor;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.io.GeoUri;
@@ -83,7 +84,7 @@ import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.StringUtils;
-import de.k3b.media.MediaUtil;
+import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.tagDB.Tag;
 
 /**
@@ -160,6 +161,9 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     private String mContextName;                    // name of current ImageView Context persisted in bundle
     private boolean mMustReplaceMenue       = false;
     private boolean locked = false; // if != Global.locked : must update menu
+
+    // if not null this one image that cannot be translated to a file uri will be shown
+    private Uri imageUri  = null;
 
     /** executes sql to load image detail data in a background task that may survive
      * conriguration change (i.e. device rotation) */
@@ -320,7 +324,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             sFileCommands.onMoveOrCopyDirectoryPick(getMove(), getSrcFotos(), selection);
             dismiss();
         }
-    };
+    }
 
     private class TagUpdateTask extends TagTask<List<String>> {
 
@@ -433,7 +437,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
             if (savedInstanceState != null) {
                 mInitialScrollPosition = savedInstanceState.getInt(INSTANCE_STATE_LAST_SCROLL_POSITION, this.mInitialScrollPosition);
-                mModifyCount = savedInstanceState.getInt(INSTANCE_STATE_ContextMenuId, this.mModifyCount);
+                mModifyCount = savedInstanceState.getInt(INSTANCE_STATE_ContextMenuId, mModifyCount);
             } else {
                 mModifyCount = 0;
             }
@@ -551,7 +555,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             String orgiginalFileToScan = getCurrentFilePath();
 
             if (orgiginalFileToScan != null) {
-                MediaScanner.getInstance(this).updateMediaDatabase_Android42(this, null, orgiginalFileToScan);
+                PhotoPropertiesMediaFilesScanner.getInstance(this).updateMediaDatabase_Android42(this, null, orgiginalFileToScan);
             }
         }
 
@@ -596,9 +600,14 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
         if (mGalleryContentQuery == null) {
             this.mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
-            String path = IntentUtil.getFilePath(this, IntentUtil.getUri(intent));
-            if (path != null) {
-                setFilter(getParameterFromPath(path));
+            final Uri conentUri = IntentUtil.getUri(intent);
+            if (conentUri != null) {
+                String path = IntentUtil.getFilePath(this, conentUri);
+                if (path != null) {
+                    setFilter(getParameterFromPath(path));
+                } else {
+                    this.imageUri = conentUri;
+                }
             }
         }
 
@@ -765,7 +774,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
      * return false; activity must me closed
      */
     private boolean checkForIncompleteMediaDatabase(String jpgFullFilePath, String why) {
-        if (!MediaScanner.isNoMedia(jpgFullFilePath,MediaScanner.DEFAULT_SCAN_DEPTH)) {
+        if (!PhotoPropertiesMediaFilesScanner.isNoMedia(jpgFullFilePath, PhotoPropertiesMediaFilesScanner.DEFAULT_SCAN_DEPTH)) {
             File fileToLoad = (jpgFullFilePath != null) ? new File(jpgFullFilePath) : null;
 
             if ((!this.mWaitingForMediaScannerResult) && (fileToLoad != null) && (fileToLoad.exists()) && (fileToLoad.canRead())) {
@@ -796,7 +805,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         if (existing != null) {
             for (File file : existing) {
                 String found = file.getAbsolutePath();
-                if (MediaUtil.isImage(found, MediaUtil.IMG_TYPE_ALL) && !known.contains(found)) {
+                if (PhotoPropertiesUtil.isImage(found, PhotoPropertiesUtil.IMG_TYPE_ALL) && !known.contains(found)) {
                     missing.add(found);
                 }
             }
@@ -813,7 +822,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             Log.d(Global.LOG_CONTEXT, message.toString());
         }
 
-        MediaScannerAsyncTask scanner = new MediaScannerAsyncTask(MediaScanner.getInstance(context), context, why);
+        PhotoPropertiesMediaFilesScannerAsyncTask scanner = new PhotoPropertiesMediaFilesScannerAsyncTask(PhotoPropertiesMediaFilesScanner.getInstance(context), context, why);
         scanner.execute(null, missing.toArray(new String[missing.size()]));
         return missing.size();
     }
@@ -942,12 +951,12 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
                 case R.id.cmd_gallery: {
                     reloadContext = false;
-                    String dirPath = getCurrentFilePath(); // MediaScanner.getDir().getAbsolutePath();
+                    String dirPath = getCurrentFilePath(); // PhotoPropertiesMediaFilesScanner.getDir().getAbsolutePath();
                     if (dirPath != null) {
                         dirPath = FileUtils.getDir(dirPath).getAbsolutePath();
                         GalleryFilterParameter newFilter = new GalleryFilterParameter();
                         newFilter.setPath(dirPath);
-                        // int callBackId = (MediaScanner.isNoMedia(dirPath,MediaScanner.DEFAULT_SCAN_DEPTH)) ? NOMEDIA_GALLERY : 0;
+                        // int callBackId = (PhotoPropertiesMediaFilesScanner.isNoMedia(dirPath,PhotoPropertiesMediaFilesScanner.DEFAULT_SCAN_DEPTH)) ? NOMEDIA_GALLERY : 0;
 
                         QueryParameter query = TagSql.filter2NewQuery(this.mFilter);
                         FotoGalleryActivity.showActivity("[13]" + dirPath, this, query, 0);
@@ -1082,7 +1091,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     }
 
     private boolean onEditExif(SelectedFiles currentFoto, final long fotoId, final String fotoPath) {
-        ExifEditActivity.showActivity("[16]:", this, null, fotoPath, currentFoto, 0, true);
+        PhotoPropertiesEditActivity.showActivity("[16]:", this, null, fotoPath, currentFoto, 0, true);
         return true;
     }
     private boolean onRenameDirQueston(final SelectedFiles currentFoto, final long fotoId, final String fotoPath, final String _newName) {
@@ -1109,13 +1118,13 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         File src = new File(fotoSourcePath);
         File dest = new File(src.getParentFile(), newFileName);
 
-        File srcXmpShort = mFileCommands.getSidecar(src, false);
+        File srcXmpShort = FileProcessor.getSidecar(src, false);
         boolean hasSideCarShort = ((srcXmpShort != null) && (mFileCommands.osFileExists(srcXmpShort)));
-        File srcXmpLong = mFileCommands.getSidecar(src, true);
+        File srcXmpLong = FileProcessor.getSidecar(src, true);
         boolean hasSideCarLong = ((srcXmpLong != null) && (mFileCommands.osFileExists(srcXmpLong)));
 
-        File destXmpShort = mFileCommands.getSidecar(dest, false);
-        File destXmpLong = mFileCommands.getSidecar(dest, true);
+        File destXmpShort = FileProcessor.getSidecar(dest, false);
+        File destXmpLong = FileProcessor.getSidecar(dest, true);
 
         if (src.equals(dest)) return; // new name == old name ==> nothing to do
 

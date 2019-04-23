@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -33,9 +33,9 @@ import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.io.IProgessListener;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.FileCommands;
-import de.k3b.media.MediaUtil;
-import de.k3b.media.MediaXmpSegment;
-import de.k3b.media.MetaWriterExifXml;
+import de.k3b.media.PhotoPropertiesUtil;
+import de.k3b.media.PhotoPropertiesXmpSegment;
+import de.k3b.media.PhotoPropertiesUpdateHandler;
 import de.k3b.tagDB.Tag;
 import de.k3b.tagDB.TagConverter;
 import de.k3b.tagDB.TagProcessor;
@@ -103,15 +103,15 @@ public class TagWorflow extends TagProcessor implements IProgessListener {
 
         List<String> currentItemTags = tagWorflowItemFromDB.tags;
         try {
-            MetaWriterExifXml exif = MetaWriterExifXml.create (tagWorflowItemFromDB.path, null, false, "updateTags:");
-            List<String> tagsDbPlusFile = this.getUpdated(currentItemTags, exif.getTags(), null);
+            PhotoPropertiesUpdateHandler exif = PhotoPropertiesUpdateHandler.create (tagWorflowItemFromDB.path, null, false, "updateTags:");
+            List<String> tagsDbPlusFile = getUpdated(currentItemTags, exif.getTags(), null);
             if (tagsDbPlusFile != null) {
                 mustSave = true;
                 dbgSaveReason += "jpg/xmp has more tags than sql.";
                 currentItemTags = tagsDbPlusFile;
             }
 
-            List<String> modifiedTags = this.getUpdated(currentItemTags, addedTags, removedTags);
+            List<String> modifiedTags = getUpdated(currentItemTags, addedTags, removedTags);
             if (modifiedTags != null) {
                 // tags have changed.
                 currentItemTags = modifiedTags;
@@ -124,7 +124,7 @@ public class TagWorflow extends TagProcessor implements IProgessListener {
             if (mustSave) {
                 exif.setTags(currentItemTags);
                 exif.save(dbgSaveReason);
-                TagSql.updateDB(dbgSaveReason, this.context, tagWorflowItemFromDB.path, exif, MediaUtil.FieldID.tags);
+                TagSql.updateDB(dbgSaveReason, this.context, tagWorflowItemFromDB.path, exif, PhotoPropertiesUtil.FieldID.tags);
 
                 // update tag repository
                 TagRepository.getInstance().includeTagNamesIfNotFound(currentItemTags);
@@ -163,15 +163,15 @@ public class TagWorflow extends TagProcessor implements IProgessListener {
     }
 
     private List<String> loadTags(File xmpFile) {
-        MediaXmpSegment xmp = loadXmp(xmpFile);
+        PhotoPropertiesXmpSegment xmp = loadXmp(xmpFile);
         return (xmp == null) ? null : xmp.getTags();
     }
 
     @NonNull
-    private MediaXmpSegment loadXmp(File xmpFile) {
+    private PhotoPropertiesXmpSegment loadXmp(File xmpFile) {
         if ((xmpFile != null) && (xmpFile.exists())) {
             try {
-                MediaXmpSegment xmp = new MediaXmpSegment();
+                PhotoPropertiesXmpSegment xmp = new PhotoPropertiesXmpSegment();
                 xmp.load(xmpFile, "loadXmp(" + xmpFile + ")");
                 return xmp;
             } catch (IOException e) {

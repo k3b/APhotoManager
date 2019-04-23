@@ -1,7 +1,8 @@
 /*
  * Copyright (c) 2016-2018 by k3b.
  *
- * This file is part of AndroFotoFinder / #APhotoManager.
+ * This file is part of #APhotoManager (https://github.com/k3b/APhotoManager/)
+ *              and #toGoZip (https://github.com/k3b/ToGoZip/).
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -33,9 +34,10 @@ import de.k3b.util.IsoDateTimeParser;
  */
 
 public class DateUtil {
-    public static final DateFormat IsoDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.ROOT);
-    public static final DateFormat IsoDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
-    public static final DateFormat IsoDateFormat2 = new SimpleDateFormat("yyyyMMdd", Locale.ROOT);
+    // cannot use Locale.ROOT because it requires api-9. this is api-7
+    public static final DateFormat IsoDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
+    public static final DateFormat IsoDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+    public static final DateFormat IsoDateFormat2 = new SimpleDateFormat("yyyyMMdd", Locale.US);
 
     public static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
