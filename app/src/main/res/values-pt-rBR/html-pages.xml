@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+/* string values containing translatable HTML pages
+ * Translation to German and Copyright (c) 2015-2017 by k3b and v133.
+ *
+ * This file is part of "A Photo Manager" (A(ndro)FotoFinder).
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
+ -->
+<resources>
+  <string name="about_content_about"><![CDATA["
+    <p>Gerenciar fotos locais: Localizar/Copiar/Editar-Exif e mostrar na Galeria ou Mapa. ​​Recursos:</p>
+    <ul>
+      <li>Rápido encontrar fotos por tags (palavras-chave), (sub) pasta, data, geo, título,...</li>
+      <li>Exibir resultado em  galeria ou mapa geográfico a partir do openstreetmap.</li>
+      <li>Recursos de exibição de detalhes ampliando, deslizando para a imagem seguinte/anterior.</li>
+      <li>Gerenciador de arquivos Buildin para fotos: localizar, classificar, visualizar, copiar, excluir, enviar,...</li>
+      <li>Editar metadados exif: data,  título, descrição, tags (palavras-chave), geo, classificação,...</li>
+      <li>Autoprocessamento baseado em regras de pasta opcional: As fotos são automaticamente renomeadas e recebem tags, geo, title, ... quando você copia/move-as</li>
+      <li>Marcar imagens como  "PRIVADO" para ocultá-los de outros aplicativos da Galeria e seletores de imagens.</li>
+      <li>No "Modo Protegido/Fixado", comandos de aplicativos potencialmente perigosos, como editar/copiar/excluir/compartilhar/configurações/ "alterar seleção de imagem", são desativados para que você possa  entregar seu telefone para outra pessoa</li>
+      <li>Pode manipular grandes coleções de imagens (mais de 20000 imagens em mais de 1.000 pastas).</li>
+      <li>Usa o provedor de conteúdo de imagem do Android.</li>
+      <li>Scanner de mídia de foto estendida para Exif, IPTC, XMP</li>
+    </ul>
+    <p>Exigido Android Permissões:</p>
+    <ul>
+      <li>INTERNET: para baixar dados do mapa do Open Streetmap Server</li>
+      <li>ACCESS_NETWORK_STATE e ACCESS_WIFI_STATE: para descobrir se wifi / internet está online para iniciar o download geodata</li>
+      <li>WRITE_EXTERNAL_STORAGE para cache baixado do mapa  dados no sistema de arquivos local e para fazer operações de arquivo com as fotos</li>
+      <li>READ_LOGS para ler e salvar registros de falhas em potencial em um arquivo de texto.  .</li>
+    </ul>
+  "]]></string>
+</resources>
