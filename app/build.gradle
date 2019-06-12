@@ -137,7 +137,7 @@ dependencies {
     // implementation 'com.android.support:support-v4:21.0.2'
     // implementation 'com.android.support:appcompat-v7:21.0.2'
     // exif support
-    // https://github.com/drewnoakes/metadata-extractor/wiki/GettingStarted licence: http://www.apache.org/licenses/LICENSE-2.0
+    // https://github.com/drewnoakes/metadata-extractor/wiki/GettingStarted licence: https://www.apache.org/licenses/LICENSE-2.0
     // 2.10.1 includes more recent xmpcore that generates java-8 bytecode not supported by android yet
     implementation ('com.drewnoakes:metadata-extractor:2.10.1') { transitive = false } // 2.8.1
 	
