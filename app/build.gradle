@@ -86,7 +86,7 @@ android {
     }
 	
 	lintOptions {
-		// http://stackoverflow.com/questions/31350350/generating-signed-apk-error7-missingtranslation-in-build-generated-res-gen
+		// https://stackoverflow.com/questions/31350350/generating-signed-apk-error7-missingtranslation-in-build-generated-res-gen
 		// MissingTranslation : not all crowdwin translations are complete so ignore them
 		// ValidFragment : local (dialog-)fragment class for customized direcotry picker is fragile but on rotation code makes shure that dialog is closed. 
         // disable 'MissingTranslation','ValidFragment', 'ContentDescription', 'AndroidLintPluralsCandidate', 'AndroidLintRtlHardcoded'
