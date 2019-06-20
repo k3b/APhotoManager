@@ -30,7 +30,7 @@ before_install:
 # instead of 
 # - chmod +x gradlew
 # https://stackoverflow.com/questions/52274229/travis-ci-android-28-licenses-have-not-been-accepted
-- yes | sdkmanager "platforms;android-28"
+# - yes | sdkmanager "platforms;android-28"
  
 script:
   - jdk_switcher use oraclejdk8
