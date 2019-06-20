@@ -1,2 +1,2 @@
 Changes from 0.7.3 to ????
-
+Translation updates: pt-BR
