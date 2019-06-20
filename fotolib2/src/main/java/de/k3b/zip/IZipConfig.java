@@ -20,6 +20,7 @@ package de.k3b.zip;
 
 import java.util.Date;
 
+/** Parameters that define a backup*/
 public interface IZipConfig {
     Date getDateModifiedFrom();
     String getZipRelPath    ();

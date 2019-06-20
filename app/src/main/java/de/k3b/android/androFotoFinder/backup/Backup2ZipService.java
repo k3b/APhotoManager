@@ -66,19 +66,25 @@ public class Backup2ZipService {
         return null;
     }
 
+    /** Executes add2zip for all found items of found query-result-item of zipConfig */
     public static IZipConfig execute(IZipConfig zipConfig, ContentResolver contentResolver) {
         ZipConfigRepository repo = new ZipConfigRepository(zipConfig);
         final File zipConfigFile = repo.getZipConfigFile();
         if (zipConfigFile != null) {
             QueryParameter filter = getEffectiveQueryParameter(zipConfig);
 
-            final PhotoPropertiesCsvStringSaver csv = new PhotoPropertiesCsvStringSaver();
+            // pipline for (IPhotoProperties item: query(filter)) : csv+=toCsv(item)
+            final PhotoPropertiesCsvStringSaver csvFromQuery = new PhotoPropertiesCsvStringSaver();
 
+            // pipline for (IPhotoProperties item: query(filter)) : Zip+=File(item)
             /// !!!  todo go on here
-            final IItemSaver<File> file2Zip = null;
-            final PhotoProperties2ExistingFileSaver media2file = new PhotoProperties2ExistingFileSaver(file2Zip);
+            final IItemSaver<File> file2ZipSaver = null;
+            final PhotoProperties2ExistingFileSaver media2fileZipSaver = new PhotoProperties2ExistingFileSaver(file2ZipSaver);
 
-            execQuery(filter, contentResolver, csv, media2file);
+            execQuery(filter, contentResolver, csvFromQuery, media2fileZipSaver);
+
+            // todo add csvFromQuery.toString() to zip
+            // todo add repo to zip
 
             if (repo.save()) {
                 if (LibZipGlobal.debugEnabled) {
@@ -116,6 +122,7 @@ public class Backup2ZipService {
         return filter;
     }
 
+    /** calls consumers for each found query-result-item */
     private static void execQuery(QueryParameter query, ContentResolver contentResolver,
                                   IItemSaver<IPhotoProperties>... consumers) {
         Cursor cursor = null;

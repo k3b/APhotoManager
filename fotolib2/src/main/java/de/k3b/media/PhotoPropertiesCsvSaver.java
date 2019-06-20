@@ -29,6 +29,7 @@ import de.k3b.io.IItemSaver;
  * Created by k3b on 13.10.2016.
  */
 
+/** Transfers {@link IPhotoProperties} - items as csv to a writer via {@link #save(IPhotoProperties)} */
 public class PhotoPropertiesCsvSaver implements IItemSaver<IPhotoProperties> {
     private PrintWriter printer;
     private final PhotoPropertiesCsvItem csvLine;
