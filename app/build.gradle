@@ -51,9 +51,10 @@ android {
         // 0.7.0.180823 (38)    Searchbar, vitual-folder, new icons
         // 0.7.1.180830 (39)    Bugfix for 38; translation uk
         // 0.7.2.181027 (40)    Bugfixes: image orientation, media scanner
+        // 0.7.3.190424 (41)    mapsforge-v5, filter date-last-modified, Fix getContent, exif-TAG_DATETIME, Translation ja, nl, ru, pt-br, uk
 
-        versionCode = 40
-        versionName = '0.7.2.181027'
+        versionCode = 41
+        versionName = '0.7.3.190424'
 
 		// all supported locales
 		// resConfigs "ar","de","es","fr","hi","in","it","ja","nl","pl","ro","ru","tr","uk","zz","pt-rBR","zh-rCN","zh-rTW"
