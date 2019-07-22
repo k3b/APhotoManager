@@ -35,13 +35,16 @@ public class PhotoPropertiesCsvSaver implements IItemSaver<IPhotoProperties> {
     private final PhotoPropertiesCsvItem csvLine;
 
     public PhotoPropertiesCsvSaver(PrintWriter printer) {
-        setPrinter(printer);
         csvLine = new PhotoPropertiesCsvItem();
-        defineHeader(PhotoPropertiesCsvItem.MEDIA_CSV_STANDARD_HEADER);
+        setPrinter(printer);
     }
 
     protected PhotoPropertiesCsvSaver setPrinter(PrintWriter printer) {
         this.printer = printer;
+
+        if (this.printer != null) {
+            defineHeader(PhotoPropertiesCsvItem.MEDIA_CSV_STANDARD_HEADER);
+        }
         return this;
     }
 
