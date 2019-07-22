@@ -37,10 +37,15 @@ import de.k3b.io.FileUtils;
 import de.k3b.io.IItemSaver;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.PhotoProperties2ExistingFileSaver;
-import de.k3b.media.PhotoPropertiesCsvStringSaver;
+import de.k3b.zip.CompressJob;
 import de.k3b.zip.IZipConfig;
 import de.k3b.zip.LibZipGlobal;
 import de.k3b.zip.ZipConfigRepository;
+import de.k3b.zip.ZipLog;
+import de.k3b.zip.ZipLogImpl;
+import de.k3b.zip.ZipStorage;
+
+import de.k3b.media.PhotoPropertiesCsvStringSaver;
 
 /**
  * #108: Zip-file support: backup-or-copy filtered-or-selected photos to Zip-file.
@@ -67,7 +72,7 @@ public class Backup2ZipService {
     }
 
     /** Executes add2zip for all found items of found query-result-item of zipConfig */
-    public static IZipConfig execute(IZipConfig zipConfig, ContentResolver contentResolver) {
+    public static IZipConfig execute(Context context, IZipConfig zipConfig, ZipStorage zipStorage, ContentResolver contentResolver) {
         ZipConfigRepository repo = new ZipConfigRepository(zipConfig);
         final File zipConfigFile = repo.getZipConfigFile();
         if (zipConfigFile != null) {
@@ -76,15 +81,28 @@ public class Backup2ZipService {
             // pipline for (IPhotoProperties item: query(filter)) : csv+=toCsv(item)
             final PhotoPropertiesCsvStringSaver csvFromQuery = new PhotoPropertiesCsvStringSaver();
 
+            ZipLog zipLog = (LibZipGlobal.debugEnabled) ? new ZipLogImpl(true) : null;
+
+            final CompressJob job = new ApmZipCompressJob(context, zipLog,"history.log");
+            job.setDestZipFile(zipStorage);
+
             // pipline for (IPhotoProperties item: query(filter)) : Zip+=File(item)
             /// !!!  todo go on here
-            final IItemSaver<File> file2ZipSaver = null;
+            final IItemSaver<File> file2ZipSaver = new IItemSaver<File>() {
+                @Override
+                public boolean save(File item) {
+                    job.addToCompressQue("", item);
+                    return true;
+                }
+            };
+
             final PhotoProperties2ExistingFileSaver media2fileZipSaver = new PhotoProperties2ExistingFileSaver(file2ZipSaver);
 
             execQuery(filter, contentResolver, csvFromQuery, media2fileZipSaver);
 
-            // todo add csvFromQuery.toString() to zip
-            // todo add repo to zip
+            job.addTextToCompressQue("changes.csv", csvFromQuery.toString());
+
+            job.compress(false);
 
             if (repo.save()) {
                 if (LibZipGlobal.debugEnabled) {
