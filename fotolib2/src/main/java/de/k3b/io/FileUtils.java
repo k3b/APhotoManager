@@ -22,6 +22,7 @@ package de.k3b.io;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
@@ -60,6 +61,25 @@ public class FileUtils {
 
     public static String readFile(File file) throws IOException {
         return internalReadFile(new BufferedReader(new FileReader(file)), file);
+    }
+
+    public static String readFile(InputStream is, byte[] buffer) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        FileUtils.copyStream(byteArrayOutputStream, is, buffer);
+        String result = new String(byteArrayOutputStream.toByteArray());
+        byteArrayOutputStream.flush();
+        byteArrayOutputStream.close();
+        return result;
+    }
+
+    /**
+     * helper to copy stream-data
+     */
+    public static void copyStream(OutputStream outputStream, InputStream inputStream, byte[] buffer) throws IOException {
+        for (int read = inputStream.read(buffer); read > -1; read = inputStream
+                .read(buffer)) {
+            outputStream.write(buffer, 0, read);
+        }
     }
 
     public static String internalReadFile(BufferedReader br, Object source) throws IOException {
