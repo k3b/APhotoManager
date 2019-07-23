@@ -3,10 +3,15 @@ apply plugin: 'java'
 // https://github.com/Abnaxos/pegdown-doclet
 apply plugin: 'ch.raffael.pegdown-doclet'
 apply plugin: 'jacoco'
+apply plugin: 'info.solidsoft.pitest'
 
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
+
+pitest {
+    targetClasses = ['de.k3b.*']
+}
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
