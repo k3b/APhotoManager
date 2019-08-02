@@ -1,0 +1,3 @@
+Changes from 0.7.3 to 0.7.4
+
+* #143 hotfix to reallow openstreetmap online map download
