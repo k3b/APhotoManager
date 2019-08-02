@@ -53,9 +53,10 @@ android {
         // 0.7.1.180830 (39)    Bugfix for 38; translation uk
         // 0.7.2.181027 (40)    Bugfixes: image orientation, media scanner
         // 0.7.3.190424 (41)    mapsforge-v5, filter date-last-modified, Fix getContent, exif-TAG_DATETIME, Translation ja, nl, ru, pt-br, uk
+        // 0.7.4.190801 (42)    hotfix to reallow openstreetmap online map download
 
-        versionCode = 41
-        versionName = '0.7.3.190424'
+        versionCode = 42
+        versionName = '0.7.4.190801'
 
 		// all supported locales
 		// resConfigs "ar","de","es","fr","hi","in","it","ja","nl","pl","ro","ru","tr","uk","zz","pt-rBR","zh-rCN","zh-rTW"
