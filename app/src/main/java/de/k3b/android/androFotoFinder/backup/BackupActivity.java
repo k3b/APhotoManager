@@ -650,7 +650,9 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         ZipStorage zipStorage = getCurrentStorage(this, mZipConfigData.getZipDir(), mZipConfigData.getZipName());
 
         ///!!! TODO do in background with async task and gui update ...
-        IZipConfig newConfig = new Backup2ZipService(this, mZipConfigData, zipStorage, null).execute();
+        new BackupAsyncTask(this, mZipConfigData, zipStorage);
+        IZipConfig newConfig = new Backup2ZipService(this, mZipConfigData, zipStorage, null)
+                .execute();
 
         if (newConfig != null) {
             Toast.makeText(BackupActivity.this, newConfig.toString(), Toast.LENGTH_LONG).show();

@@ -27,8 +27,11 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.Date;
 
+import de.k3b.LibGlobal;
+import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.media.PhotoPropertiesMediaDBCursor;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
@@ -61,6 +64,9 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
     private final ZipStorage zipStorage;
     private final IProgessListener progessListener;
     private final ZipLog zipLog;
+
+    // used to translate ZipLog.traceMessage() to become IProgessListener
+    private int lastZipItemNumber = 0;
 
     public static IZipConfig loadZipConfig(Uri uri, Context context) {
         if ((uri != null) && ZipConfigRepository.isZipConfig(uri.toString())) {
@@ -99,9 +105,11 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
             // pipline for (IPhotoProperties item: query(filter)) : csv+=toCsv(item)
             final PhotoPropertiesCsvStringSaver csvFromQuery = new PhotoPropertiesCsvStringSaver();
 
-            onProgress(0,0, "");
+            onProgress(0,0,
+                    "query images " + ((Global.debugEnabledSql) ? filter : ""));
+
             final CompressJob job = new ApmZipCompressJob(context, this,"history.log");
-            job.setDestZipFile(zipStorage);
+            job.setZipStorage(zipStorage);
 
             // pipline for (IPhotoProperties item: query(filter)) : Zip+=File(item)
             /// !!!  todo go on here
@@ -164,11 +172,14 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
 
         Cursor cursor = null;
         try {
+            this.onProgress(0,0, "Calculate");
             cursor = contentResolver.query(Uri.parse(query.toFrom()), query.toColumns(),
                     query.toAndroidWhere(), query.toAndroidParameters(), query.toOrderBy());
 
             int itemCount = cursor.getCount();
-            final int expectedCount = itemCount + itemCount;
+
+            onProgress(0,itemCount,
+                    context.getString(R.string.view_context_menu_title) );
 
             PhotoPropertiesMediaDBCursor mediaItem = new PhotoPropertiesMediaDBCursor(cursor);
 
@@ -182,7 +193,9 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
                     onProgress(0, itemCount, context.getString(R.string.selection_status_format, progress));
                 }
                 progress++;
+
             }
+            onProgress(progress, progress, context.getString(R.string.selection_status_format, progress));
         } catch (Exception ex){
             Log.e(LibZipGlobal.LOG_TAG, mDebugPrefix + query, ex);
             throw new RuntimeException(mDebugPrefix + query + "\n" + ex.getMessage(), ex);
@@ -207,10 +220,17 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
     }
 
     /**
-     * interface ZipLog: formats context message and does low level logging
+     * 10 `interface ZipLog-traceMessage` become one `interface onProgress()` message
      */
     @Override
     public String traceMessage(ZipJobState state, int itemNumber, int itemTotal, String format, Object... params) {
+        if ((itemNumber != 0) && (itemNumber > this.lastZipItemNumber)) {
+            lastZipItemNumber = itemNumber;
+
+            if ((itemNumber % 10) == 0 ) {
+                onProgress(itemNumber, itemTotal, MessageFormat.format(format, params));
+            }
+        }
         if (zipLog != null) return zipLog.traceMessage(state, itemNumber, itemTotal, format, params);
         return null;
     }
