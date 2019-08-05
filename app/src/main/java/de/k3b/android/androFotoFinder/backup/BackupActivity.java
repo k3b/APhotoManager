@@ -40,6 +40,7 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -655,16 +656,36 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
 
     private void enableBackupAsyncTask(boolean enable) {
         if (backupAsyncTask != null) {
+            final ProgressBar progressBar = (ProgressBar) this.findViewById(R.id.progressBar);
+            final TextView status = (TextView) this.findViewById(R.id.lbl_status);
+            final Button cancel = (Button) this.findViewById(R.id.cmd_cancel);
+
             final boolean isActive = BackupAsyncTask.isActive(backupAsyncTask);
-            if (enable && isActive) {
-                backupAsyncTask.setContext(
-                        (ProgressBar) this.findViewById(R.id.progressBar));
+            final boolean running = enable && isActive;
+            setVisibility(running, progressBar, cancel);
+
+            if (running) {
+                backupAsyncTask.setContext(this, progressBar, status);
+                cancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        backupAsyncTask.cancel(false);
+                    }
+                });
+
             } else {
-                backupAsyncTask.setContext(null);
+                backupAsyncTask.setContext(null, null, null);
+                cancel.setOnClickListener(null);
                 if (!isActive) {
                     backupAsyncTask = null;
                 }
             }
+        }
+    }
+
+    private void setVisibility(boolean visible, View... views) {
+        for (View v : views) {
+            if (v != null) v.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
         }
     }
 
@@ -683,21 +704,11 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         ZipStorage zipStorage = getCurrentStorage(this, mZipConfigData.getZipDir(), mZipConfigData.getZipName());
 
         ///!!! TODO do in background with async task and gui update ...
-        new BackupAsyncTask(this, mZipConfigData, zipStorage);
-        IZipConfig newConfig = new Backup2ZipService(this, mZipConfigData, zipStorage, null)
-                .execute();
+        backupAsyncTask = new BackupAsyncTask(this, mZipConfigData, zipStorage);
+        enableBackupAsyncTask(true);
+        backupAsyncTask.execute();
 
-        if (newConfig != null) {
-            Toast.makeText(BackupActivity.this, newConfig.toString(), Toast.LENGTH_LONG).show();
-
-            if (LibZipGlobal.debugEnabled || Global.debugEnabled) {
-                Log.d(LibZipGlobal.LOG_TAG, mDebugPrefix + "finished backup " + newConfig.toString());
-            }
-
-            finish();
-            return true;
-        }
-        return false;
+        return true;
     }
 
     public static ZipStorage getCurrentStorage(Context context, String zipDir, String baseFileName) {
