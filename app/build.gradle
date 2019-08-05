@@ -169,7 +169,7 @@ dependencies {
     // https://jitpack.io/com/github/k3b/ToGoZip/L2.0.15/build.log
     // https://jitpack.io/com/github/k3b/ToGoZip/libK3bZip/L2.0.15/
     // implementation('com.github.k3b.ToGoZip:libK3bZip:L2.0.15')  { transitive = false; }
-    implementation('com.github.k3b.ToGoZip:libK3bZip:L2.1.21.2')  { transitive = false }
-    implementation('com.github.k3b.ToGoZip:libK3bAndroidZip:L2.1.21.2')  { transitive = false }
+    implementation('com.github.k3b.ToGoZip:libK3bZip:L2.1.22.3')  { transitive = false }
+    implementation('com.github.k3b.ToGoZip:libK3bAndroidZip:L2.1.22.3')  { transitive = false }
 
 }

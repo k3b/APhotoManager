@@ -62,8 +62,11 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
     private final Context context;
     private final IZipConfig zipConfig;
     private final ZipStorage zipStorage;
-    private final IProgessListener progessListener;
+    private IProgessListener progessListener = null;
     private final ZipLog zipLog;
+
+    // set to false (in gui thread) if operation is canceled
+    protected boolean continueProcessing = true;
 
     // used to translate ZipLog.traceMessage() to become IProgessListener
     private int lastZipItemNumber = 0;
@@ -91,9 +94,14 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
         this.context = context;
         this.zipConfig = zipConfig;
         this.zipStorage = zipStorage;
-        this.progessListener = progessListener;
         this.zipLog = (LibZipGlobal.debugEnabled) ? new ZipLogImpl(true) : null;
     }
+
+    public Backup2ZipService setProgessListener(IProgessListener progessListener) {
+        this.progessListener = progessListener;
+        return this;
+    }
+
     /** Executes add2zip for all found items of found query-result-item of zipConfig */
     public IZipConfig execute() {
         ZipConfigRepository repo = new ZipConfigRepository(zipConfig);
@@ -105,35 +113,40 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
             // pipline for (IPhotoProperties item: query(filter)) : csv+=toCsv(item)
             final PhotoPropertiesCsvStringSaver csvFromQuery = new PhotoPropertiesCsvStringSaver();
 
-            onProgress(0,0,
+            onProgress(0, 0,
                     "query images " + ((Global.debugEnabledSql) ? filter : ""));
 
-            final CompressJob job = new ApmZipCompressJob(context, this,"history.log");
-            job.setZipStorage(zipStorage);
+            if (this.continueProcessing) {
+                final CompressJob job = new ApmZipCompressJob(context, this, "history.log");
+                job.setZipStorage(zipStorage);
 
-            // pipline for (IPhotoProperties item: query(filter)) : Zip+=File(item)
-            /// !!!  todo go on here
-            final IItemSaver<File> file2ZipSaver = new IItemSaver<File>() {
-                @Override
-                public boolean save(File item) {
-                    job.addToCompressQue("", item);
-                    return true;
+                // pipline for (IPhotoProperties item: query(filter)) : Zip+=File(item)
+                /// !!!  todo go on here
+                final IItemSaver<File> file2ZipSaver = new IItemSaver<File>() {
+                    @Override
+                    public boolean save(File item) {
+                        job.addToCompressQue("", item);
+                        return true;
+                    }
+                };
+
+                final PhotoProperties2ExistingFileSaver media2fileZipSaver = new PhotoProperties2ExistingFileSaver(file2ZipSaver);
+
+                execQuery(filter, csvFromQuery, media2fileZipSaver);
+
+                job.addTextToCompressQue("changes.csv", csvFromQuery.toString());
+
+                if (this.continueProcessing) {
+                    // not canceled yet in gui thread
+                    job.compress(false);
                 }
-            };
 
-            final PhotoProperties2ExistingFileSaver media2fileZipSaver = new PhotoProperties2ExistingFileSaver(file2ZipSaver);
-
-            execQuery(filter, csvFromQuery, media2fileZipSaver);
-
-            job.addTextToCompressQue("changes.csv", csvFromQuery.toString());
-
-            job.compress(false);
-
-            if (repo.save()) {
-                if (LibZipGlobal.debugEnabled) {
-                    Log.d(LibZipGlobal.LOG_TAG, mDebugPrefix + " Saved as " + repo);
+                if (repo.save()) {
+                    if (LibZipGlobal.debugEnabled) {
+                        Log.d(LibZipGlobal.LOG_TAG, mDebugPrefix + " Saved as " + repo);
+                    }
+                    return repo;
                 }
-                return repo;
             }
         }
         return null;
@@ -190,7 +203,11 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
                 }
 
                 if ((progress % 100) == 0) {
-                    onProgress(0, itemCount, context.getString(R.string.selection_status_format, progress));
+                    if (!onProgress(0, itemCount, context.getString(R.string.selection_status_format, progress)))
+                    {
+                        // canceled in gui thread
+                        return;
+                    }
                 }
                 progress++;
 
@@ -214,16 +231,18 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
     @Override
     public boolean onProgress(int itemcount, int size, String message) {
         if (progessListener != null) {
-            return progessListener.onProgress(itemcount, size, message);
+            if (!progessListener.onProgress(itemcount, size, message)) {
+                this.continueProcessing = false;
+            }
         }
-        return false;
+        return this.continueProcessing;
     }
 
     /**
      * 10 `interface ZipLog-traceMessage` become one `interface onProgress()` message
      */
     @Override
-    public String traceMessage(ZipJobState state, int itemNumber, int itemTotal, String format, Object... params) {
+    public String traceMessage(int state, int itemNumber, int itemTotal, String format, Object... params) {
         if ((itemNumber != 0) && (itemNumber > this.lastZipItemNumber)) {
             lastZipItemNumber = itemNumber;
 

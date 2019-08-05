@@ -39,6 +39,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -96,6 +97,9 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
     public static final int REQUEST_ID_PICK_EXIF = 99293;
     private static final String STATE_ZIP_CONFIG = "zip_config";
     private static String mDebugPrefix = "BackupActivity: ";
+
+    // != null while async backup is running
+    private static BackupAsyncTask backupAsyncTask = null;
 
     private Gui gui = null;
     private SelectedFiles mSelectedFiles;
@@ -315,6 +319,12 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
             }
         }
         loadGuiFromData();
+    }
+
+    @Override
+    protected void onDestroy() {
+        enableBackupAsyncTask(false);
+        super.onDestroy();
     }
 
     /**
@@ -630,9 +640,32 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
     }
 
     @Override
+    protected void onPause() {
+        enableBackupAsyncTask(false);
+        super.onPause();
+    }
+
+    @Override
     protected void onResume() {
+        enableBackupAsyncTask(true);
         Global.debugMemory(mDebugPrefix, "onResume");
         super.onResume();
+
+    }
+
+    private void enableBackupAsyncTask(boolean enable) {
+        if (backupAsyncTask != null) {
+            final boolean isActive = BackupAsyncTask.isActive(backupAsyncTask);
+            if (enable && isActive) {
+                backupAsyncTask.setContext(
+                        (ProgressBar) this.findViewById(R.id.progressBar));
+            } else {
+                backupAsyncTask.setContext(null);
+                if (!isActive) {
+                    backupAsyncTask = null;
+                }
+            }
+        }
     }
 
     private void clearFilter() {
