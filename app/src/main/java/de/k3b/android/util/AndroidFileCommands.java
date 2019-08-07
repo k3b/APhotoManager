@@ -53,8 +53,8 @@ import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
 import de.k3b.io.IDirectory;
+import de.k3b.media.MediaFormatter;
 import de.k3b.media.PhotoPropertiesBulkUpdateService;
-import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.media.PhotoPropertiesUpdateHandler;
 import de.k3b.transactionlog.MediaTransactionLogEntryType;
 import de.k3b.transactionlog.TransactionLoggerBase;
@@ -466,7 +466,7 @@ public class AndroidFileCommands extends FileCommands {
                     File file = files[i];
                     PhotoPropertiesUpdateHandler jpg = createWorkflow(null, dbgContext).saveLatLon(file, latitude, longitude);
                     resultFile += TagSql.updateDB(dbgContext, applicationContext,
-                            file.getAbsolutePath(), jpg, PhotoPropertiesUtil.FieldID.latitude_longitude);
+                            file.getAbsolutePath(), jpg, MediaFormatter.FieldID.latitude_longitude);
                     itemcount++;
                     addTransactionLog(selectedItems.getId(i), file.getAbsolutePath(), now, MediaTransactionLogEntryType.GPS, latLong);
                 }

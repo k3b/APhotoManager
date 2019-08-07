@@ -137,7 +137,7 @@ public class PhotoPropertiesImageReader implements IPhotoProperties, Closeable {
 
         if (LibGlobal.debugEnabledJpgMetaIo) {
             logger.debug(dbg_context +
-                    "loaded: " + PhotoPropertiesUtil.toString(this, false, null, PhotoPropertiesUtil.FieldID.path, PhotoPropertiesUtil.FieldID.clasz));
+                    "loaded: " + PhotoPropertiesFormatter.format(this, false, null, MediaFormatter.FieldID.path, MediaFormatter.FieldID.clasz));
         }
 
         return this;

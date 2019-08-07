@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 by k3b.
+ * Copyright (c) 2017-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -31,6 +31,7 @@ import de.k3b.io.DateUtil;
 import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
 
+import de.k3b.media.MediaFormatter.FieldID;
 /**
  * Created by k3b on 07.07.2017.
  */
@@ -148,7 +149,7 @@ public class PhotoPropertiesDiffCopyTests {
         Assert.assertEquals("#changes2 " + sut, 1, numberofChanges);
 
         destintaion = createMediaDto().setTitle("already-appended");
-        List<PhotoPropertiesUtil.FieldID> changes = sut.applyChanges(destintaion);
+        List<FieldID> changes = sut.applyChanges(destintaion);
 
         Assert.assertEquals("#added title already appended " + sut, "already-appended", destintaion.getTitle());
         Assert.assertNull("#changes3 " + sut, changes);

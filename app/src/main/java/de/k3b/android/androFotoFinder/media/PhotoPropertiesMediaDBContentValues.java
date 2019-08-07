@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 by k3b.
+ * Copyright (c) 2016-2019 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -28,7 +28,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.io.VISIBILITY;
 import de.k3b.media.IPhotoProperties;
-import de.k3b.media.PhotoPropertiesUtil;
+import de.k3b.media.PhotoPropertiesFormatter;
 import de.k3b.tagDB.TagConverter;
 
 /**
@@ -189,6 +189,6 @@ public class PhotoPropertiesMediaDBContentValues implements IPhotoProperties {
 
     @Override
     public String toString() {
-        return PhotoPropertiesUtil.toString(this);
+        return PhotoPropertiesFormatter.format(this).toString();
     }
 }

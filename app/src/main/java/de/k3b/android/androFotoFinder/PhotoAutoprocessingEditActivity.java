@@ -66,6 +66,7 @@ import de.k3b.io.StringUtils;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.PhotoPropertiesAsString;
 import de.k3b.media.PhotoPropertiesDTO;
+import de.k3b.media.PhotoPropertiesFormatter;
 import de.k3b.media.PhotoPropertiesUtil;
 
 /**
@@ -255,9 +256,9 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
                     mCurrentAutoprocessingData.getOutDir(), exampleResultFileName));
 
             IPhotoProperties mediaChanges = mCurrentAutoprocessingData.getMediaDefaults();
-            String exifChange = null;
+            CharSequence exifChange = null;
             if (mediaChanges != null) {
-                exifChange = PhotoPropertiesUtil.toString(mediaChanges, false, mLabelGenerator, PhotoPropertiesUtil.FieldID.clasz);
+                exifChange = PhotoPropertiesFormatter.format(mediaChanges, false, mLabelGenerator, PhotoPropertiesFormatter.FieldID.clasz);
             }
             mExifChanges.setText(exifChange);
         } finally {
@@ -726,9 +727,9 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     /**
      * implement resource based labels for PhotoPropertiesUtil.toString(...)
      */
-    private PhotoPropertiesUtil.ILabelGenerator mLabelGenerator = new PhotoPropertiesUtil.ILabelGenerator() {
+    private PhotoPropertiesFormatter.ILabelGenerator mLabelGenerator = new PhotoPropertiesFormatter.ILabelGenerator() {
         @Override
-        public String get(PhotoPropertiesUtil.FieldID id) {
+        public CharSequence get(PhotoPropertiesFormatter.FieldID id) {
             switch (id) {
                 case dateTimeTaken:
                     return getString2(R.string.lbl_date);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 - 2018 by k3b.
+ * Copyright (c) 2016 - 2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -38,6 +38,7 @@ import de.k3b.LibGlobal;
 import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
 
+import de.k3b.media.MediaFormatter.FieldID;
 /**
  * Thin Wrapper around Android-s ExifInterface to read/write exif data from jpg file
  * and also implements IPhotoProperties
@@ -81,7 +82,7 @@ public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
         this.mDbg_context = dbg_context + "->ExifInterfaceEx(" + absoluteJpgPath+ ") ";
         if (LibGlobal.debugEnabledJpgMetaIo) {
             logger.debug(this.mDbg_context +
-                    " load: " + PhotoPropertiesUtil.toString(this, false, null, PhotoPropertiesUtil.FieldID.path, PhotoPropertiesUtil.FieldID.clasz));
+                    " load: " + PhotoPropertiesFormatter.format(this, false, null, FieldID.path, FieldID.clasz));
         }
         // Log.d(LOG_TAG, msg);
 
@@ -457,7 +458,7 @@ public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
 
     @Override
     public String toString() {
-        return PhotoPropertiesUtil.toString(this);
+        return PhotoPropertiesFormatter.format(this).toString();
     }
 
 }

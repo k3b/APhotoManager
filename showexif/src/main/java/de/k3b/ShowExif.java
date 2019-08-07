@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -22,8 +22,9 @@ import java.io.IOException;
 
 import de.k3b.media.ExifInterfaceEx;
 import de.k3b.media.IPhotoProperties;
+import de.k3b.media.MediaFormatter;
+import de.k3b.media.PhotoPropertiesFormatter;
 import de.k3b.media.PhotoPropertiesImageReader;
-import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.media.PhotoPropertiesXmpSegment;
 
 /** simple commandline tool to show  */
@@ -69,7 +70,7 @@ public class ShowExif {
     private static void show(IPhotoProperties item, boolean debug) {
         if (item != null) {
             if (debug) System.out.println("######## " + item.getClass().getName() + " #########");
-            System.out.println(PhotoPropertiesUtil.toString(item, false, null, PhotoPropertiesUtil.FieldID.path));
+            System.out.println(PhotoPropertiesFormatter.format(item, false, null, MediaFormatter.FieldID.path));
             if (debug) System.out.println(item.toString());
         }
     }

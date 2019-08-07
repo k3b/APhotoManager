@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 by k3b.
+ * Copyright (c) 2016-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -38,6 +38,7 @@ import de.k3b.io.FileCommands;
 import de.k3b.io.GeoUtil;
 import de.k3b.io.VISIBILITY;
 
+import de.k3b.media.MediaFormatter.FieldID;
 /**
  * {@link XmpSegment} that implements {@link IPhotoProperties} to read/write xmp.
  *
@@ -191,7 +192,7 @@ public class PhotoPropertiesXmpSegment extends XmpSegment implements IPhotoPrope
     public XmpSegment setXmpMeta(XMPMeta xmpMeta, String dbg_context) {
         super.setXmpMeta(xmpMeta, dbg_context);
         if (LibGlobal.debugEnabledJpgMetaIo) {
-            logger.info(dbg_context + " setXmpMeta " +  PhotoPropertiesUtil.toString(this, false, null, PhotoPropertiesUtil.FieldID.path, PhotoPropertiesUtil.FieldID.clasz));
+            logger.info(dbg_context + " setXmpMeta " +  PhotoPropertiesFormatter.format(this, false, null, FieldID.path, FieldID.clasz));
         }
 
         return this;
@@ -217,7 +218,7 @@ public class PhotoPropertiesXmpSegment extends XmpSegment implements IPhotoPrope
     public XmpSegment save(OutputStream os, boolean humanReadable, String dbg_context) {
         super.save(os, humanReadable, dbg_context);
         if (LibGlobal.debugEnabledJpgMetaIo) {
-            logger.info(dbg_context + " save " + PhotoPropertiesUtil.toString(this, false, null, PhotoPropertiesUtil.FieldID.path, PhotoPropertiesUtil.FieldID.clasz));
+            logger.info(dbg_context + " save " + PhotoPropertiesFormatter.format(this, false, null, FieldID.path, FieldID.clasz));
         }
 
         return this;
@@ -248,7 +249,7 @@ public class PhotoPropertiesXmpSegment extends XmpSegment implements IPhotoPrope
 
     @Override
     public String toString() {
-        return PhotoPropertiesUtil.toString(this);
+        return PhotoPropertiesFormatter.format(this).toString();
     }
 
     /** true: file.jpg.xmp; false: file.xmp */

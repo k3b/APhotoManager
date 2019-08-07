@@ -75,6 +75,7 @@ import de.k3b.io.StringUtils;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.PhotoPropertiesAsString;
 import de.k3b.media.PhotoPropertiesDiffCopy;
+import de.k3b.media.PhotoPropertiesFormatter;
 import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.tagDB.Tag;
 import de.k3b.tagDB.TagConverter;
@@ -769,7 +770,7 @@ public class PhotoPropertiesEditActivity extends ActivityWithAutoCloseDialogs im
 
         @Override
         public String toString() {
-            return PhotoPropertiesUtil.toString(this);
+            return PhotoPropertiesFormatter.format(this).toString();
         }
     }
 
