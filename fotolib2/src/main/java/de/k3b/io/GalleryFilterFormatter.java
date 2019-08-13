@@ -16,27 +16,33 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
-package de.k3b.media;
+
+package de.k3b.io;
 
 import java.util.EnumSet;
 
-import de.k3b.io.DateUtil;
-import de.k3b.io.GeoUtil;
-import de.k3b.tagDB.TagConverter;
+import de.k3b.LibGlobal;
+import de.k3b.media.MediaFormatter;
 
-public class PhotoPropertiesFormatter extends MediaFormatter {
-    public static CharSequence format(IPhotoProperties item) {
+public class GalleryFilterFormatter extends MediaFormatter {
+    private final ILabelGenerator labeler;
+
+    public GalleryFilterFormatter(ILabelGenerator labeler) {
+        this.labeler = labeler;
+    }
+
+    public static CharSequence format(IGalleryFilter item) {
         return format(item, true, null, (EnumSet<FieldID>) null);
     }
 
-    public static CharSequence format(IPhotoProperties item,
+    public static CharSequence format(IGalleryFilter item,
                                       boolean includeEmpty,
                                       ILabelGenerator labeler,
                                       FieldID... _excludes) {
         return format(item, includeEmpty, labeler, toEnumSet(_excludes));
     }
 
-    public static CharSequence format(IPhotoProperties item,
+    public static CharSequence format(IGalleryFilter item,
                                       boolean includeEmpty,
                                       ILabelGenerator _labeler,
                                       EnumSet<FieldID> excludes) {
@@ -46,15 +52,18 @@ public class PhotoPropertiesFormatter extends MediaFormatter {
         StringBuilder result = new StringBuilder();
         add(result, includeEmpty, excludes, FieldID.clasz, item.getClass().getSimpleName(), ":");
         add(result, includeEmpty, excludes, FieldID.path, labeler, item.getPath());
-        add(result, includeEmpty, excludes, FieldID.dateTimeTaken, labeler, DateUtil.toIsoDateTimeString(item.getDateTimeTaken()));
-        add(result, includeEmpty, excludes, FieldID.title, labeler, item.getTitle());
-        add(result, includeEmpty, excludes, FieldID.description, labeler, item.getDescription());
+        add(result, includeEmpty, excludes, FieldID.dateTimeTaken, labeler,
+                DirectoryFormatter.formatDatePath(LibGlobal.datePickerUseDecade, item.getDateMin(), item.getDateMax()));
+
+        /*
         add(result, includeEmpty, excludes, FieldID.latitude_longitude, labeler, GeoUtil.toCsvStringLatLon(item.getLatitude()));
         // longitude used same flag as latitude but no label of it-s own
         add(result, includeEmpty, excludes, FieldID.latitude_longitude, ", ", GeoUtil.toCsvStringLatLon(item.getLongitude()));
         add(result, includeEmpty, excludes, FieldID.rating, labeler, item.getRating());
         add(result, includeEmpty, excludes, FieldID.visibility, labeler, item.getVisibility());
         add(result, includeEmpty, excludes, FieldID.tags, labeler, TagConverter.asDbString(null, item.getTags()));
+        */
         return result;
     }
+    
 }

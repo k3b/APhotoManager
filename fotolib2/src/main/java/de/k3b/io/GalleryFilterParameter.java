@@ -437,10 +437,10 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
 
     /** get Date Min/Max in date picker compatible format */
     public String getDatePath() {
-        return DirectoryFormatter.getDatePath(LibGlobal.datePickerUseDecade, getDateMin(), getDateMax());
+        return DirectoryFormatter.formatDatePath(LibGlobal.datePickerUseDecade, getDateMin(), getDateMax());
     }
     /** get Date Min/Max in date picker compatible format */
     public String getDateModifiedPath() {
-        return DirectoryFormatter.getDatePath(LibGlobal.datePickerUseDecade, getDateModifiedMin(), getDateModifiedMax());
+        return DirectoryFormatter.formatDatePath(LibGlobal.datePickerUseDecade, getDateModifiedMin(), getDateModifiedMax());
     }
 }

@@ -172,4 +172,7 @@ dependencies {
     implementation('com.github.k3b.ToGoZip:libK3bZip:L2.1.22.3')  { transitive = false }
     implementation('com.github.k3b.ToGoZip:libK3bAndroidZip:L2.1.22.3')  { transitive = false }
 
+    testImplementation('org.powermock:powermock-api-mockito:1.5.2')
+    testImplementation('org.powermock:powermock-module-junit4:1.5.2')
+
 }

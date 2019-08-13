@@ -578,7 +578,7 @@ public class FotoSql extends FotoSqlBase {
         Date from = new Date();
         Date to = new Date();
 
-        DirectoryFormatter.getDates(selectedAbsolutePath, from, to);
+        DirectoryFormatter.parseDatesPath(selectedAbsolutePath, from, to);
 
         if (to.getTime() == 0) {
             newQuery
@@ -710,7 +710,7 @@ public class FotoSql extends FotoSqlBase {
                 Date from = new Date();
                 Date to = new Date();
 
-                DirectoryFormatter.getDates(selectedAbsolutePath, from, to);
+                DirectoryFormatter.parseDatesPath(selectedAbsolutePath, from, to);
                 dest.setDate(from.getTime(), to.getTime());
                 return true;
             }
@@ -718,7 +718,7 @@ public class FotoSql extends FotoSqlBase {
                 Date from = new Date();
                 Date to = new Date();
 
-                DirectoryFormatter.getDates(selectedAbsolutePath, from, to);
+                DirectoryFormatter.parseDatesPath(selectedAbsolutePath, from, to);
                 dest.setDateModified(from.getTime(), to.getTime());
                 return true;
             }

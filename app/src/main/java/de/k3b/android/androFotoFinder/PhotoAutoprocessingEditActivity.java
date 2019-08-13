@@ -52,6 +52,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import de.k3b.android.androFotoFinder.media.AndroidLabelGenerator;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.ClipboardUtil;
 import de.k3b.android.util.IntentUtil;
@@ -99,9 +100,24 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     private File exampleSrcfile;
     private Date exampleDate;
 
-    public static void showActivity(String debugContext, Activity context, PhotoAutoprocessingDto workflow,
-                                    String directoryOrApmFileUrl
-            , SelectedFiles selectedFiles, int requestCode) {
+    private PhotoPropertiesFormatter.ILabelGenerator mLabelGenerator
+                                    = new AndroidLabelGenerator(getApplicationContext()) {
+        @Override
+        public CharSequence get(PhotoPropertiesFormatter.FieldID id) {
+            switch (id) {
+                case clasz:
+                    return null;
+                default:
+                    return super.get(id);
+            }
+        }
+    };
+
+    public static void showActivity(String debugContext, Activity context,
+                                    PhotoAutoprocessingDto workflow,
+                                    String directoryOrApmFileUrl,
+                                    SelectedFiles selectedFiles,
+                                    int requestCode) {
         final Intent intent = new Intent().setClass(context,
                 PhotoAutoprocessingEditActivity.class);
 
@@ -724,37 +740,5 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
         toGui();
     }
 
-    /**
-     * implement resource based labels for PhotoPropertiesUtil.toString(...)
-     */
-    private PhotoPropertiesFormatter.ILabelGenerator mLabelGenerator = new PhotoPropertiesFormatter.ILabelGenerator() {
-        @Override
-        public CharSequence get(PhotoPropertiesFormatter.FieldID id) {
-            switch (id) {
-                case dateTimeTaken:
-                    return getString2(R.string.lbl_date);
-                case title:
-                    return getString2(R.string.lbl_title);
-                case description:
-                    return getString2(R.string.lbl_description);
-                case latitude_longitude:
-                    return getString2(R.string.lbl_latitude_short) + "/" + getString(R.string.lbl_longitude_short) + " ";
-                case rating:
-                    return getString2(R.string.lbl_rating);
-                case visibility:
-                    return getString2(R.string.lbl_image_visibility);
-                case tags:
-                    return getString2(R.string.lbl_tag);
-                case path:
-                case clasz:
-                    return null;
-            }
-            return null;
-        }
-    };
-
-    public final String getString2(int resId) {
-        return "\n" + getString(resId) + " ";
-    }
 }
 

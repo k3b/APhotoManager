@@ -871,7 +871,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
 
                 Date from = new Date();
                 Date to = new Date();
-                DirectoryFormatter.getDates(selectedAbsolutePath, from, to);
+                DirectoryFormatter.parseDatesPath(selectedAbsolutePath, from, to);
 
                 currentSubFilterSettings.setDate(from.getTime(), to.getTime());
                 this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_DATE;
@@ -885,7 +885,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
 
                 Date from = new Date();
                 Date to = new Date();
-                DirectoryFormatter.getDates(selectedAbsolutePath, from, to);
+                DirectoryFormatter.parseDatesPath(selectedAbsolutePath, from, to);
 
                 currentSubFilterSettings.setDateModified(from.getTime(), to.getTime());
                 this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_DATE_MODIFIED;
