@@ -585,7 +585,7 @@ public class TagsPickerFragment  extends DialogFragment  {
 
     private class TagDeleteWithDbUpdateTask extends TagTask<List<Tag>> {
         TagDeleteWithDbUpdateTask() {
-            super(getActivity(), R.string.delete_menu_title);
+            super(TagsPickerFragment.this.getActivity(), R.string.delete_menu_title);
         }
 
         @Override
@@ -682,7 +682,7 @@ public class TagsPickerFragment  extends DialogFragment  {
         private final String mNewName;
 
         TagRenameWithDbUpdateTask(String oldName, String newName) {
-            super(getActivity(), R.string.rename_menu_title);
+            super(TagsPickerFragment.this.getActivity(), R.string.rename_menu_title);
             this.mOldTag = new Tag().setName(oldName);
             this.mNewName = newName;
         }

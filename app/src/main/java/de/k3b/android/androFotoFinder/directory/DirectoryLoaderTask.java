@@ -20,6 +20,7 @@
 package de.k3b.android.androFotoFinder.directory;
 
 import android.app.Activity;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -60,7 +61,7 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
     // every 500 items the progress indicator is advanced
     private static final int PROGRESS_INCREMENT = 500;
 
-    private final Activity context;
+    private final Context context;
     private final boolean datePickerUseDecade;
 
     // will receive debug output
@@ -69,7 +70,7 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
     protected Exception mException = null;
 
     public DirectoryLoaderTask(Activity context, boolean datePickerUseDecade, String debugPrefix) {
-        this.context = context;
+        this.context = context.getApplicationContext();
         this.datePickerUseDecade = datePickerUseDecade;
         String combinedDebugPrefix = debugPrefix + "-DirectoryLoaderTask";
         Global.debugMemory(combinedDebugPrefix, "ctor");
