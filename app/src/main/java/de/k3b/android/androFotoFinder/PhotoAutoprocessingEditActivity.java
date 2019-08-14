@@ -58,12 +58,12 @@ import de.k3b.android.util.ClipboardUtil;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
+import de.k3b.io.DateUtil;
 import de.k3b.io.ListUtils;
 import de.k3b.io.PhotoAutoprocessingDto;
-import de.k3b.io.collections.SelectedFiles;
-import de.k3b.io.DateUtil;
 import de.k3b.io.RuleFileNameProcessor;
 import de.k3b.io.StringUtils;
+import de.k3b.io.collections.SelectedFiles;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.PhotoPropertiesAsString;
 import de.k3b.media.PhotoPropertiesDTO;
@@ -101,17 +101,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     private Date exampleDate;
 
     private PhotoPropertiesFormatter.ILabelGenerator mLabelGenerator
-                                    = new AndroidLabelGenerator(getApplicationContext()) {
-        @Override
-        public CharSequence get(PhotoPropertiesFormatter.FieldID id) {
-            switch (id) {
-                case clasz:
-                    return null;
-                default:
-                    return super.get(id);
-            }
-        }
-    };
+            = new AndroidLabelGenerator(getApplicationContext(), "\n");
 
     public static void showActivity(String debugContext, Activity context,
                                     PhotoAutoprocessingDto workflow,
@@ -274,7 +264,8 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
             IPhotoProperties mediaChanges = mCurrentAutoprocessingData.getMediaDefaults();
             CharSequence exifChange = null;
             if (mediaChanges != null) {
-                exifChange = PhotoPropertiesFormatter.format(mediaChanges, false, mLabelGenerator, PhotoPropertiesFormatter.FieldID.clasz);
+                exifChange = PhotoPropertiesFormatter.format(mediaChanges,
+                        false, mLabelGenerator, PhotoPropertiesFormatter.FieldID.clasz);
             }
             mExifChanges.setText(exifChange);
         } finally {

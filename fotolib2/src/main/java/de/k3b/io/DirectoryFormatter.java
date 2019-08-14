@@ -122,16 +122,23 @@ public class DirectoryFormatter {
         return formatLatLon(latOrLon.doubleValue());
     }
 
-    public static CharSequence formatLatLon(Double... latOrLons) {
+    public static CharSequence formatLatLon(double... latOrLons) {
         StringBuilder result = new StringBuilder();
-        for (Double latOrLon : latOrLons)
-            result.append(formatLatLon(latOrLon)).append(" ");
+        boolean useComma = true;
+        for (Double latOrLon : latOrLons) {
+            result.append(formatLatLon(latOrLon)).append(useComma ? "," : ";");
+            useComma = !useComma;
+        }
         return result;
     }
 
     public static String formatLatLon(double latOrLon) {
-        if ((latOrLon <= 0.0000005) && (latOrLon >= -0.0000005)) return "0";
+        if (is0(latOrLon)) return "0";
         return latLonFormatter6.format(latOrLon);
+    }
+
+    protected static boolean is0(double latOrLon) {
+        return (latOrLon <= 0.0000005) && (latOrLon >= -0.0000005);
     }
 
     private static int getInt(double ll, int factor) {
@@ -220,7 +227,7 @@ public class DirectoryFormatter {
         if (dateTo == 0) dateTo = dateFrom;
         if (dateTo == 0) return null;
 
-        final long diffTage = Math.abs (dateTo - dateFrom) / (1000 * 60 * 60 * 24);
+        final long diffDays = Math.abs(dateTo - dateFrom) / (1000 * 60 * 60 * 24);
 
         final Calendar date = Calendar.getInstance(); // TimeZone.getTimeZone("UTC"));
         date.setTimeZone(TIME_ZONE);
@@ -228,17 +235,17 @@ public class DirectoryFormatter {
         final int year = date.get(Calendar.YEAR);
 
         final StringBuilder result = new StringBuilder();
-        if ((withDecade) && (diffTage < 3800)) {
+        if ((withDecade) && (diffDays < 3800)) {
             result.append("/").append(year / 10).append("0*");
         }
-        if (diffTage < 380) {
+        if (diffDays < 380) {
             result.append("/").append(year);
         }
-        if (diffTage < 40) {
+        if (diffDays < 40) {
             final int month = date.get(Calendar.MONTH) + 1;
             result.append("/").append(n2(month) );
         }
-        if (diffTage <= 2) {
+        if (diffDays <= 2) {
             final int day = date.get(Calendar.DAY_OF_MONTH);
             result.append("/").append(n2(day));
         }

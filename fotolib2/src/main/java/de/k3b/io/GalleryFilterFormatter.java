@@ -19,33 +19,24 @@
 
 package de.k3b.io;
 
+import java.util.Date;
 import java.util.EnumSet;
 
-import de.k3b.LibGlobal;
 import de.k3b.media.MediaFormatter;
 
 public class GalleryFilterFormatter extends MediaFormatter {
-    private final ILabelGenerator labeler;
+    private final boolean includeEmpty;
+    private final ILabelGenerator _labeler;
+    private final EnumSet<FieldID> excludes;
 
-    public GalleryFilterFormatter(ILabelGenerator labeler) {
-        this.labeler = labeler;
+    public GalleryFilterFormatter(boolean includeEmpty, ILabelGenerator labeler,
+                                  FieldID... _excludes) {
+        this.includeEmpty = includeEmpty;
+        this._labeler = labeler;
+        this.excludes = toEnumSet(_excludes);
     }
 
-    public static CharSequence format(IGalleryFilter item) {
-        return format(item, true, null, (EnumSet<FieldID>) null);
-    }
-
-    public static CharSequence format(IGalleryFilter item,
-                                      boolean includeEmpty,
-                                      ILabelGenerator labeler,
-                                      FieldID... _excludes) {
-        return format(item, includeEmpty, labeler, toEnumSet(_excludes));
-    }
-
-    public static CharSequence format(IGalleryFilter item,
-                                      boolean includeEmpty,
-                                      ILabelGenerator _labeler,
-                                      EnumSet<FieldID> excludes) {
+    public CharSequence format(IGalleryFilter item) {
         if (item == null) return "";
 
         ILabelGenerator labeler = (_labeler == null) ? defaultLabeler : _labeler;
@@ -53,17 +44,38 @@ public class GalleryFilterFormatter extends MediaFormatter {
         add(result, includeEmpty, excludes, FieldID.clasz, item.getClass().getSimpleName(), ":");
         add(result, includeEmpty, excludes, FieldID.path, labeler, item.getPath());
         add(result, includeEmpty, excludes, FieldID.dateTimeTaken, labeler,
-                DirectoryFormatter.formatDatePath(LibGlobal.datePickerUseDecade, item.getDateMin(), item.getDateMax()));
+                formatDate(item.getDateMin(), item.getDateMax()));
+        add(result, includeEmpty, excludes, FieldID.lastModified, labeler,
+                formatDate(item.getDateModifiedMin(), item.getDateModifiedMax()));
+        add(result, includeEmpty, excludes, FieldID.rating, labeler, item.getRatingMin());
+        add(result, includeEmpty, excludes, FieldID.visibility, labeler, item.getVisibility());
+        add(result, includeEmpty, excludes, FieldID.find, labeler, item.getInAnyField());
+        add(result, includeEmpty, excludes, FieldID.tags, labeler, GalleryFilterParameter.convertList(item.getTagsAllIncluded()));
+
+        add(result, includeEmpty, excludes, FieldID.latitude_longitude, labeler,
+                DirectoryFormatter.formatLatLon(
+                        item.getLatitudeMin(), item.getLogituedMin(), item.getLatitudeMax(), item.getLogituedMax()));
+
+        // add(result, includeEmpty, excludes, FieldID.sort, labeler, item.getPath());
 
         /*
-        add(result, includeEmpty, excludes, FieldID.latitude_longitude, labeler, GeoUtil.toCsvStringLatLon(item.getLatitude()));
-        // longitude used same flag as latitude but no label of it-s own
-        add(result, includeEmpty, excludes, FieldID.latitude_longitude, ", ", GeoUtil.toCsvStringLatLon(item.getLongitude()));
-        add(result, includeEmpty, excludes, FieldID.rating, labeler, item.getRating());
-        add(result, includeEmpty, excludes, FieldID.visibility, labeler, item.getVisibility());
-        add(result, includeEmpty, excludes, FieldID.tags, labeler, TagConverter.asDbString(null, item.getTags()));
+
+boolean isSortAscending();
+boolean isWithNoTags();
+List<String> getTagsAllExcluded();
+
         */
         return result;
     }
-    
+
+    private CharSequence formatDate(long dateMin, long dateMax) {
+        if ((dateMin == 0) && (dateMax == 0)) return null;
+
+        StringBuffer result = new StringBuffer();
+        if (dateMin != 0) result.append(DateUtil.toIsoDateString(new Date(dateMin)));
+        result.append("...");
+        if (dateMax != 0) result.append(DateUtil.toIsoDateString(new Date(dateMax)));
+        return result;
+    }
+
 }

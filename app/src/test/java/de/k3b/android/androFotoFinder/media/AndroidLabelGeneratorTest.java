@@ -22,11 +22,9 @@ import android.content.Context;
 
 import org.junit.Test;
 import org.mockito.Matchers;
-import org.mockito.internal.matchers.Any;
 
 import de.k3b.media.PhotoPropertiesFormatter;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -37,7 +35,7 @@ public class AndroidLabelGeneratorTest {
         Context mockedContext = mock(Context.class);
         when(mockedContext.getString(Matchers.anyInt())).thenReturn("res" );
 
-        AndroidLabelGenerator sut = new AndroidLabelGenerator(mockedContext);
+        AndroidLabelGenerator sut = new AndroidLabelGenerator(mockedContext, "\n");
 
         for (PhotoPropertiesFormatter.FieldID id : PhotoPropertiesFormatter.FieldID.values()) {
             // will throw if id is undefined

@@ -22,24 +22,21 @@ import java.util.Arrays;
 import java.util.EnumSet;
 
 public class MediaFormatter {
-    /**
-     * used to identify a member of {@link IPhotoProperties} or {@link de.k3b.io.IGalleryFilter}
-     */
-    public enum FieldID {
-        path,
-        dateTimeTaken,
-        title,
-        description,
-        latitude_longitude,
-        rating,
-        tags,
-        clasz,
-        visibility,
-        find,
-        lastModified
+    protected static void add(StringBuilder result, boolean includeEmpty,
+                              final EnumSet<FieldID> excludes, FieldID item,
+                              CharSequence name, Object value) {
+        if (name != null) {
+            if ((includeEmpty) || (value != null)) {
+                if ((excludes == null) || (!excludes.contains(item))) {
+                    result.append(name).append(value);
+                }
+            }
+        }
     }
 
-    /** translates FieldID to text. In android this is implemented via resource id  */
+    /**
+     * translates FieldID to text. In android this is implemented via resource id
+     */
     public interface ILabelGenerator {
         CharSequence get(FieldID id);
     }
@@ -56,20 +53,27 @@ public class MediaFormatter {
     }
 
     protected static void add(StringBuilder result, boolean includeEmpty,
-                            final EnumSet<FieldID> excludes, FieldID item,
-                            ILabelGenerator labeler, Object value) {
+                              final EnumSet<FieldID> excludes, FieldID item,
+                              ILabelGenerator labeler, Object value) {
         add(result, includeEmpty, excludes, item, labeler.get(item), value);
     }
 
-    protected static void add(StringBuilder result, boolean includeEmpty,
-                            final EnumSet<FieldID> excludes, FieldID item, CharSequence name, Object value) {
-        if (name != null) {
-            if ((includeEmpty) || (value != null)) {
-                if ((excludes == null) || (!excludes.contains(item))) {
-                    result.append(name).append(value);
-                }
-            }
-        }
+    /**
+     * used to identify a member of {@link IPhotoProperties} or {@link de.k3b.io.IGalleryFilter}
+     */
+    public enum FieldID {
+        path,
+        dateTimeTaken,
+        title,
+        description,
+        latitude_longitude,
+        rating,
+        tags,
+        clasz,
+        visibility,
+        find,
+        lastModified,
+        // sort
     }
 
 }

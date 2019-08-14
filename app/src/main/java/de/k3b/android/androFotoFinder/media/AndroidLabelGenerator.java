@@ -27,9 +27,11 @@ import de.k3b.media.PhotoPropertiesFormatter;
 /** translates FieldID to text based on translatable android resources  */
 public class AndroidLabelGenerator implements MediaFormatter.ILabelGenerator {
     private final Context context;
+    private final String fieldPrefix;
 
-    public AndroidLabelGenerator(final Context context) {
+    public AndroidLabelGenerator(final Context context, String fieldPrefix) {
         this.context = context;
+        this.fieldPrefix = fieldPrefix;
     }
 
     /** translates FieldID to text based on translatable android resources  */
@@ -58,6 +60,8 @@ public class AndroidLabelGenerator implements MediaFormatter.ILabelGenerator {
                 return getString2(R.string.filter_path_hint);
             case clasz:
                 return getString2(id.toString());
+            //case sort:
+            //    return getString2(R.string.sort_menu_title);
             default:
                 throw new RuntimeException("undefined get(" + id + ")");
         }
@@ -67,6 +71,6 @@ public class AndroidLabelGenerator implements MediaFormatter.ILabelGenerator {
         return getString2(context.getString(resId));
     }
     protected final String getString2(String str) {
-        return "\n" + str + " ";
+        return fieldPrefix + str + " ";
     }
 }
