@@ -19,9 +19,13 @@
 
 package de.k3b.io;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.sql.Date;
+import java.util.Map;
+
+import de.k3b.media.MediaFormatter;
 
 import static org.junit.Assert.assertEquals;
 
@@ -84,6 +88,18 @@ public class GalleryFilterParameterTest {
         CharSequence formatted = new GalleryFilterFormatter(true, null)
                 .format(parsed);
         System.out.println(formatted);
+    }
+
+
+    @Test
+    public void shouldMap() {
+        GalleryFilterParameter parsed
+                = GalleryFilterParameter.parse(FILTER_STRING_FULL_EXAMPLE, new GalleryFilterParameter());
+
+        MediaFormatter.ILabelGenerator labelGenerator = new MediaFormatter.DefaultLabelGenerator("", "");
+        Map<CharSequence, Object> map = new GalleryFilterFormatter(false, labelGenerator, MediaFormatter.FieldID.clasz)
+                .asMap(parsed);
+        Assert.assertEquals(parsed.getPath(), map.get(labelGenerator.get(MediaFormatter.FieldID.path)));
     }
 
 }

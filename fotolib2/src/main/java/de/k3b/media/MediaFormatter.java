@@ -22,15 +22,14 @@ import java.util.Arrays;
 import java.util.EnumSet;
 
 public class MediaFormatter {
+    protected static final ILabelGenerator defaultLabeler = new DefaultLabelGenerator(" ", " ");
+
     protected static void add(StringBuilder result, boolean includeEmpty,
-                              final EnumSet<FieldID> excludes, FieldID item,
+                              final EnumSet<FieldID> excludes, FieldID id,
                               CharSequence name, Object value) {
-        if (name != null) {
-            if ((includeEmpty) || (value != null)) {
-                if ((excludes == null) || (!excludes.contains(item))) {
-                    result.append(name).append(value);
-                }
-            }
+
+        if (notEmpty(id, value, excludes, includeEmpty)) {
+            result.append(name).append(value);
         }
     }
 
@@ -41,12 +40,28 @@ public class MediaFormatter {
         CharSequence get(FieldID id);
     }
 
-    protected static final ILabelGenerator defaultLabeler = new ILabelGenerator() {
+    protected static boolean notEmpty(FieldID id, Object value, EnumSet<FieldID> excludes, boolean includeEmpty) {
+        return (((includeEmpty) || (value != null)) &&
+                ((excludes == null) || (!excludes.contains(id))));
+
+    }
+
+    public static class DefaultLabelGenerator implements ILabelGenerator {
+
+        private final String idPrefix;
+        private final String idSuffix;
+
+        public DefaultLabelGenerator(String idPrefix, String idSuffix) {
+            this.idPrefix = idPrefix;
+            this.idSuffix = idSuffix;
+        }
+
         @Override
         public CharSequence get(FieldID id) {
-            return " " + id + " ";
+            if (id == FieldID.clasz) return "";
+            return idPrefix + id + idSuffix;
         }
-    };
+    }
 
     public static EnumSet<FieldID> toEnumSet(FieldID... _excludes) {
         return ((_excludes == null) || (_excludes.length == 0)) ? null : EnumSet.copyOf(Arrays.asList(_excludes));

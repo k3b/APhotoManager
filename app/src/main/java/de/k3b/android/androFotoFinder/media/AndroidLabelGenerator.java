@@ -59,7 +59,7 @@ public class AndroidLabelGenerator implements MediaFormatter.ILabelGenerator {
             case path:
                 return getString2(R.string.filter_path_hint);
             case clasz:
-                return getString2(id.toString());
+                return "";
             //case sort:
             //    return getString2(R.string.sort_menu_title);
             default:
