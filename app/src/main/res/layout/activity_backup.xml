@@ -302,12 +302,24 @@
             android:ems="10"
             android:inputType="numberDecimal|numberSigned" />
 
+        <TextView
+            android:id="@+id/lbl_exif_filter_details"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/edit_filter"
+            android:layout_marginStart="@dimen/value_indent"
+            android:layout_marginLeft="@dimen/value_indent"
+            android:layout_marginEnd="@dimen/value_indent"
+            android:layout_marginRight="@dimen/value_indent"
+            android:text="@string/preview_message_format"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
         <!-- -->
 
         <View android:id="@+id/line_filter_what"
             android:layout_height="2dp"
             android:layout_width="fill_parent"
-            android:layout_below="@+id/edit_filter"
+            android:layout_below="@+id/lbl_exif_filter_details"
             android:background="#c0c0c0"
             android:layout_marginBottom="@dimen/line_margin"
             android:layout_marginTop="@dimen/line_margin"
@@ -383,7 +395,6 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentRight="true"
             />
-
 
     </RelativeLayout>
 </ScrollView>

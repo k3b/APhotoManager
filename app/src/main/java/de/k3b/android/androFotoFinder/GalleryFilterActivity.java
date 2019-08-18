@@ -63,13 +63,13 @@ import de.k3b.android.widget.BaseQueryActivity;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.AlbumFile;
-import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
 import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
+import de.k3b.media.MediaFormatter;
 import de.k3b.tagDB.Tag;
 
 /**
@@ -664,17 +664,13 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
 
         @Override
         public IGalleryFilter get(IGeoRectangle src) {
-            mLongitudeFrom  .setText(convertLL(src.getLogituedMin()));
-            mLongitudeTo    .setText(convertLL(src.getLogituedMax()));
-            mLatitudeFrom   .setText(convertLL(src.getLatitudeMin()));
-            mLatitudeTo     .setText(convertLL(src.getLatitudeMax()));
+            mLongitudeFrom.setText(MediaFormatter.convertLL(src.getLogituedMin()));
+            mLongitudeTo.setText(MediaFormatter.convertLL(src.getLogituedMax()));
+            mLatitudeFrom.setText(MediaFormatter.convertLL(src.getLatitudeMin()));
+            mLatitudeTo.setText(MediaFormatter.convertLL(src.getLatitudeMax()));
             return this;
         }
         /************* local helper *****************/
-        private String convertLL(double latLon) {
-            if (Double.isNaN(latLon)) return "";
-            return DirectoryFormatter.formatLatLon(latLon);
-        }
 
         private String convertDate(long dateMin) {
             if (dateMin == 0) return "";

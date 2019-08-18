@@ -153,7 +153,7 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
      * @return get query without filte-DateModified-min/max and with added zipConfig.getDateModifiedFrom
      */
     public static QueryParameter getEffectiveQueryParameter(IZipConfig zipConfig) {
-        QueryParameter filter = QueryParameter.parse(zipConfig.getFilter());
+        final QueryParameter filter = QueryParameter.parse(zipConfig.getFilter());
         FotoSql.parseDateModifiedMax(filter, true);
         FotoSql.parseDateModifiedMin(filter, true);
         final Date dateModifiedFrom = zipConfig.getDateModifiedFrom();

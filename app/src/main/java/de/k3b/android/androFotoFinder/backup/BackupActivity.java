@@ -59,6 +59,7 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.SettingsActivity;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailMetaDialogBuilder;
+import de.k3b.android.androFotoFinder.media.AndroidLabelGenerator;
 import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
@@ -70,10 +71,12 @@ import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.DateUtil;
+import de.k3b.io.GalleryFilterFormatter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.StringUtils;
 import de.k3b.io.collections.SelectedFiles;
+import de.k3b.media.MediaFormatter;
 import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.zip.IZipConfig;
 import de.k3b.zip.LibZipGlobal;
@@ -184,12 +187,21 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         private final EditText editZipName;
         private final EditText editZipDir;
         private final EditText editFilter;
+        private final TextView exifFilterDetails;
+        private final GalleryFilterFormatter formatter;
 
         private HistoryEditText mHistory;
 
         private Gui() {
+            formatter = new GalleryFilterFormatter(false,
+                    new AndroidLabelGenerator(getApplicationContext(), "\n"),
+                    MediaFormatter.FieldID.clasz, MediaFormatter.FieldID.visibility,
+                    MediaFormatter.FieldID.lastModified);
+
             editDateModifiedFrom = (EditText) findViewById(R.id.edit_date_modified_from);
             editFilter = (EditText) findViewById(R.id.edit_filter);
+            exifFilterDetails = (TextView) findViewById(R.id.lbl_exif_filter_details);
+
             editZipDir = (EditText) findViewById(R.id.edit_zip_dir);
             editZipName = (EditText) findViewById(R.id.edit_zip_name);
             editZipRelPath = (EditText) findViewById(R.id.edit_zip_rel_path);
@@ -225,6 +237,12 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
 
         private void toGui(IZipConfig src) {
             ZipConfigDto.copy(this, src);
+            QueryParameter query = Backup2ZipService.getEffectiveQueryParameter(this);
+
+            CharSequence details = formatter.format(TagSql.parseQueryEx(query, true));
+
+            exifFilterDetails.setText(details);
+
         }
 
         private boolean fromGui(IZipConfig dest) {

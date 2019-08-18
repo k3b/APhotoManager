@@ -100,8 +100,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     private File exampleSrcfile;
     private Date exampleDate;
 
-    private PhotoPropertiesFormatter.ILabelGenerator mLabelGenerator
-            = new AndroidLabelGenerator(getApplicationContext(), "\n");
+    private PhotoPropertiesFormatter.ILabelGenerator mLabelGenerator;
 
     public static void showActivity(String debugContext, Activity context,
                                     PhotoAutoprocessingDto workflow,
@@ -135,7 +134,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     protected void onCreate(Bundle savedInstanceState) {
         Global.debugMemory(mDebugPrefix, "onCreate");
         super.onCreate(savedInstanceState);
-
+        this.mLabelGenerator = new AndroidLabelGenerator(getApplicationContext(), "\n");
         Intent intent = getIntent();
         mSelectedFiles = getSelectedFiles("onCreate ", intent, false);
 

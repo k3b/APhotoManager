@@ -57,7 +57,7 @@ public class AndroidLabelGenerator implements MediaFormatter.ILabelGenerator {
             case lastModified:
                 return getString2(R.string.sort_by_modification);
             case path:
-                return getString2(R.string.filter_path_hint);
+                return getString2(R.string.lbl_path);
             case clasz:
                 return "";
             //case sort:

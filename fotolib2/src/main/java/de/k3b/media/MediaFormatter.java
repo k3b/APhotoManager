@@ -21,14 +21,16 @@ package de.k3b.media;
 import java.util.Arrays;
 import java.util.EnumSet;
 
+import de.k3b.io.DirectoryFormatter;
+
 public class MediaFormatter {
     protected static final ILabelGenerator defaultLabeler = new DefaultLabelGenerator(" ", " ");
 
     protected static void add(StringBuilder result, boolean includeEmpty,
                               final EnumSet<FieldID> excludes, FieldID id,
-                              CharSequence name, Object value) {
+                              CharSequence name, Object value, boolean isEmpty) {
 
-        if (notEmpty(id, value, excludes, includeEmpty)) {
+        if (notEmpty(id, value, excludes, includeEmpty, isEmpty)) {
             result.append(name).append(value);
         }
     }
@@ -40,8 +42,10 @@ public class MediaFormatter {
         CharSequence get(FieldID id);
     }
 
-    protected static boolean notEmpty(FieldID id, Object value, EnumSet<FieldID> excludes, boolean includeEmpty) {
-        return (((includeEmpty) || (value != null)) &&
+    protected static boolean notEmpty(FieldID id, Object value, EnumSet<FieldID> excludes,
+                                      boolean includeEmpty, boolean isEmpty) {
+        if (value == null) isEmpty = true;
+        return (((includeEmpty) || !isEmpty) &&
                 ((excludes == null) || (!excludes.contains(id))));
 
     }
@@ -69,8 +73,8 @@ public class MediaFormatter {
 
     protected static void add(StringBuilder result, boolean includeEmpty,
                               final EnumSet<FieldID> excludes, FieldID item,
-                              ILabelGenerator labeler, Object value) {
-        add(result, includeEmpty, excludes, item, labeler.get(item), value);
+                              ILabelGenerator labeler, Object value, boolean isEmpty) {
+        add(result, includeEmpty, excludes, item, labeler.get(item), value, isEmpty);
     }
 
     /**
@@ -89,6 +93,11 @@ public class MediaFormatter {
         find,
         lastModified,
         // sort
+    }
+
+    public static String convertLL(double latLon) {
+        if (Double.isNaN(latLon)) return "";
+        return DirectoryFormatter.formatLatLon(latLon);
     }
 
 }

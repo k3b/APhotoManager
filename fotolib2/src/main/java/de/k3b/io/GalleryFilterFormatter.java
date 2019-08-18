@@ -22,6 +22,7 @@ package de.k3b.io;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import de.k3b.media.MediaFormatter;
@@ -65,25 +66,29 @@ public class GalleryFilterFormatter extends MediaFormatter {
     private abstract class Binder {
         abstract void bind(FieldID id, Object value);
 
-        void bindIf(FieldID id, Object value) {
-            if (notEmpty(id, value, excludes, includeEmpty)) {
+        void bindIf(FieldID id, Object value, boolean isEmpty) {
+            if (notEmpty(id, value, excludes, includeEmpty, isEmpty)) {
                 bind(id, value);
             }
         }
 
         void bind(IGalleryFilter item) {
-            bindIf(FieldID.clasz, item.getClass().getSimpleName());
-            bindIf(FieldID.path, item.getPath());
-            bindIf(FieldID.dateTimeTaken, formatDate(item.getDateMin(), item.getDateMax()));
-            bindIf(FieldID.lastModified, formatDate(item.getDateModifiedMin(), item.getDateModifiedMax()));
-            bindIf(FieldID.rating, item.getRatingMin());
-            bindIf(FieldID.visibility, item.getVisibility());
-            bindIf(FieldID.find, item.getInAnyField());
-            bindIf(FieldID.tags, GalleryFilterParameter.convertList(item.getTagsAllIncluded()));
+            bindIf(FieldID.clasz, item.getClass().getSimpleName(), false);
+            bindIf(FieldID.path, item.getPath(), false);
+            bindIf(FieldID.dateTimeTaken, formatDate(item.getDateMin(), item.getDateMax()), false);
+            bindIf(FieldID.lastModified, formatDate(item.getDateModifiedMin(), item.getDateModifiedMax()), false);
+            bindIf(FieldID.find, item.getInAnyField(), false);
+            final List<String> tagsAllIncluded = item.getTagsAllIncluded();
+            bindIf(FieldID.tags, GalleryFilterParameter.convertList(tagsAllIncluded), (tagsAllIncluded == null) || (tagsAllIncluded.size() == 0));
 
-            bindIf(FieldID.latitude_longitude, DirectoryFormatter.formatLatLon(
-                    item.getLatitudeMin(), item.getLogituedMin(), item.getLatitudeMax(), item.getLogituedMax()));
+            final String formatLatLon = DirectoryFormatter.formatLatLon(
+                    item.getLatitudeMin(), item.getLogituedMin(), item.getLatitudeMax(), item.getLogituedMax()).toString();
+            bindIf(FieldID.latitude_longitude, formatLatLon.substring(0, formatLatLon.length() - 1),
+                    0 == formatLatLon.toString().compareTo(",;,;"));
 
+            final int ratingMin = item.getRatingMin();
+            bindIf(FieldID.rating, ratingMin, ratingMin < 1);
+            bindIf(FieldID.visibility, item.getVisibility(), false);
         /* ignored
 
             bindIf(includeEmpty, excludes, FieldID.sort, labeler, item.getPath());

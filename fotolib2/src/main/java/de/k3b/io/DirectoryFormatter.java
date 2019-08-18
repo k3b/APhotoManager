@@ -118,6 +118,7 @@ public class DirectoryFormatter {
     }
 
     public static String formatLatLon(Double latOrLon) {
+        if (Double.isNaN(latOrLon)) return "";
         if (latOrLon == null) return "0";
         return formatLatLon(latOrLon.doubleValue());
     }

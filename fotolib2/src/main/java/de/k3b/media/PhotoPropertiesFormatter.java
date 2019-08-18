@@ -44,17 +44,17 @@ public class PhotoPropertiesFormatter extends MediaFormatter {
 
         ILabelGenerator labeler = (_labeler == null) ? defaultLabeler : _labeler;
         StringBuilder result = new StringBuilder();
-        add(result, includeEmpty, excludes, FieldID.clasz, item.getClass().getSimpleName(), ":");
-        add(result, includeEmpty, excludes, FieldID.path, labeler, item.getPath());
-        add(result, includeEmpty, excludes, FieldID.dateTimeTaken, labeler, DateUtil.toIsoDateTimeString(item.getDateTimeTaken()));
-        add(result, includeEmpty, excludes, FieldID.title, labeler, item.getTitle());
-        add(result, includeEmpty, excludes, FieldID.description, labeler, item.getDescription());
-        add(result, includeEmpty, excludes, FieldID.latitude_longitude, labeler, GeoUtil.toCsvStringLatLon(item.getLatitude()));
+        add(result, includeEmpty, excludes, FieldID.clasz, item.getClass().getSimpleName(), ":", false);
+        add(result, includeEmpty, excludes, FieldID.path, labeler, item.getPath(), false);
+        add(result, includeEmpty, excludes, FieldID.dateTimeTaken, labeler, DateUtil.toIsoDateTimeString(item.getDateTimeTaken()), false);
+        add(result, includeEmpty, excludes, FieldID.title, labeler, item.getTitle(), false);
+        add(result, includeEmpty, excludes, FieldID.description, labeler, item.getDescription(), false);
+        add(result, includeEmpty, excludes, FieldID.latitude_longitude, labeler, GeoUtil.toCsvStringLatLon(item.getLatitude()), false);
         // longitude used same flag as latitude but no label of it-s own
-        add(result, includeEmpty, excludes, FieldID.latitude_longitude, ", ", GeoUtil.toCsvStringLatLon(item.getLongitude()));
-        add(result, includeEmpty, excludes, FieldID.rating, labeler, item.getRating());
-        add(result, includeEmpty, excludes, FieldID.visibility, labeler, item.getVisibility());
-        add(result, includeEmpty, excludes, FieldID.tags, labeler, TagConverter.asDbString(null, item.getTags()));
+        add(result, includeEmpty, excludes, FieldID.latitude_longitude, ", ", GeoUtil.toCsvStringLatLon(item.getLongitude()), false);
+        add(result, includeEmpty, excludes, FieldID.rating, labeler, item.getRating(), false);
+        add(result, includeEmpty, excludes, FieldID.visibility, labeler, item.getVisibility(), false);
+        add(result, includeEmpty, excludes, FieldID.tags, labeler, TagConverter.asDbString(null, item.getTags()), false);
         return result;
     }
 }
