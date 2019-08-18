@@ -50,9 +50,15 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+
 import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
+import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.PhotoAutoprocessingEditActivity;
+import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailMetaDialogBuilder;
@@ -60,8 +66,6 @@ import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoThumbSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
-import de.k3b.android.androFotoFinder.Global;
-import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.ClipboardUtil;
 import de.k3b.android.util.FileManagerUtil;
@@ -70,20 +74,16 @@ import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.AlbumFile;
-import de.k3b.io.GalleryFilterParameter;
-import de.k3b.io.ListUtils;
-import de.k3b.io.VISIBILITY;
-import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryNavigator;
 import de.k3b.io.FileUtils;
+import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
+import de.k3b.io.ListUtils;
 import de.k3b.io.OSDirectory;
 import de.k3b.io.StringUtils;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.List;
+import de.k3b.io.VISIBILITY;
+import de.k3b.io.collections.SelectedFiles;
 
 /**
  * A fragment with a Listing of Directories to be picked.
@@ -687,11 +687,13 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
         if (pathFilter != null) {
 
-            ImageDetailMetaDialogBuilder.createImageDetailDialog(
+            final Dialog dlg = ImageDetailMetaDialogBuilder.createImageDetailDialog(
                     this.getActivity(),
                     pathFilter,
                     FotoThumbSql.formatDirStatistic(this.getActivity(), pathFilter)
-            ).show();
+            );
+            dlg.show();
+            // setAutoClose(null, dlg, null);
             return true;
         }
         return false;

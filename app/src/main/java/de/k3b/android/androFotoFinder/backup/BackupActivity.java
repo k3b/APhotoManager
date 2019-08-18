@@ -58,6 +58,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.SettingsActivity;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
+import de.k3b.android.androFotoFinder.imagedetail.ImageDetailMetaDialogBuilder;
 import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
@@ -68,11 +69,11 @@ import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.DateUtil;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.StringUtils;
 import de.k3b.io.collections.SelectedFiles;
-import de.k3b.io.DateUtil;
 import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.zip.IZipConfig;
 import de.k3b.zip.LibZipGlobal;
@@ -603,7 +604,8 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_edit_common, menu);
-        getMenuInflater().inflate(R.menu.menu_autoprocessing, menu);
+        getMenuInflater().inflate(R.menu.menu_copy_paste, menu);
+        getMenuInflater().inflate(R.menu.menu_backup, menu);
 
         AboutDialogPreference.onPrepareOptionsMenu(this, menu);
 
@@ -634,10 +636,30 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
             case R.id.cmd_settings:
                 SettingsActivity.showActivity(this);
                 return true;
+            case R.id.action_details:
+                cmdShowDetails();
+                return true;
 
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void cmdShowDetails() {
+        final QueryParameter asMergedQuery
+                = Backup2ZipService.getEffectiveQueryParameter(this.mZipConfigData);
+        String sql = (asMergedQuery != null) ? asMergedQuery.toSqlString() : null;
+
+        final Dialog dlg = ImageDetailMetaDialogBuilder.createImageDetailDialog(
+                this,
+                getTitle().toString(),
+                sql,
+                StringUtils.appendMessage(null,
+                        getString(R.string.backup_title),
+                        TagSql.getCount(this, asMergedQuery))
+        );
+        dlg.show();
+        setAutoClose(null, dlg, null);
     }
 
     @Override

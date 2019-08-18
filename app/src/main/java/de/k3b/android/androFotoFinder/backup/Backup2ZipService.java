@@ -30,7 +30,6 @@ import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.Date;
 
-import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.media.PhotoPropertiesMediaDBCursor;
@@ -42,16 +41,14 @@ import de.k3b.io.IItemSaver;
 import de.k3b.io.IProgessListener;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.PhotoProperties2ExistingFileSaver;
+import de.k3b.media.PhotoPropertiesCsvStringSaver;
 import de.k3b.zip.CompressJob;
 import de.k3b.zip.IZipConfig;
 import de.k3b.zip.LibZipGlobal;
 import de.k3b.zip.ZipConfigRepository;
-import de.k3b.zip.ZipJobState;
 import de.k3b.zip.ZipLog;
 import de.k3b.zip.ZipLogImpl;
 import de.k3b.zip.ZipStorage;
-
-import de.k3b.media.PhotoPropertiesCsvStringSaver;
 
 /**
  * #108: Zip-file support: backup-or-copy filtered-or-selected photos to Zip-file.
@@ -155,7 +152,7 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
     /**
      * @return get query without filte-DateModified-min/max and with added zipConfig.getDateModifiedFrom
      */
-    private static QueryParameter getEffectiveQueryParameter(IZipConfig zipConfig) {
+    public static QueryParameter getEffectiveQueryParameter(IZipConfig zipConfig) {
         QueryParameter filter = QueryParameter.parse(zipConfig.getFilter());
         FotoSql.parseDateModifiedMax(filter, true);
         FotoSql.parseDateModifiedMin(filter, true);

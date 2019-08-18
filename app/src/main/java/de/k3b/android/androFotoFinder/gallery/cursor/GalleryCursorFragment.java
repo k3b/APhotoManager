@@ -21,6 +21,8 @@ package de.k3b.android.androFotoFinder.gallery.cursor;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.ClipData;
 import android.content.ContentResolver;
@@ -30,7 +32,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -55,22 +56,22 @@ import java.util.List;
 
 import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.AffUtils;
-import de.k3b.android.androFotoFinder.PhotoPropertiesEditActivity;
-import de.k3b.android.androFotoFinder.backup.BackupActivity;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.LockScreen;
+import de.k3b.android.androFotoFinder.OnGalleryInteractionListener;
+import de.k3b.android.androFotoFinder.PhotoPropertiesEditActivity;
+import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.backup.BackupActivity;
 import de.k3b.android.androFotoFinder.directory.DirectoryGui;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailMetaDialogBuilder;
 import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
 import de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity;
-import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.R;
-import de.k3b.android.androFotoFinder.OnGalleryInteractionListener;
+import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.queries.Queryable;
 import de.k3b.android.androFotoFinder.queries.SqlJobTaskBase;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
@@ -79,17 +80,12 @@ import de.k3b.android.androFotoFinder.tagDB.TagWorflow;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.DBUtils;
-import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.OsUtils;
+import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
-import de.k3b.io.ListUtils;
-import de.k3b.io.StringUtils;
-import de.k3b.io.VISIBILITY;
-import de.k3b.io.collections.SelectedFiles;
-import de.k3b.io.collections.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
@@ -97,6 +93,11 @@ import de.k3b.io.Directory;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
+import de.k3b.io.ListUtils;
+import de.k3b.io.StringUtils;
+import de.k3b.io.VISIBILITY;
+import de.k3b.io.collections.SelectedFiles;
+import de.k3b.io.collections.SelectedItems;
 import de.k3b.tagDB.Tag;
 
 /**
@@ -938,7 +939,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 : null;
 
         String files = ((ids != null) && (ids.size() > 0)) ? mAdapter.createSelectedFiles(activity, ids).toString().replace(",","\n") : null;
-        ImageDetailMetaDialogBuilder.createImageDetailDialog(
+        final Dialog dlg = ImageDetailMetaDialogBuilder.createImageDetailDialog(
                 activity,
                 getActivity().getTitle().toString(),
                 this.toString(),
@@ -953,7 +954,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                         getString(R.string.show_photo),
                         TagSql.getCount(activity, mGalleryContentQuery))
 
-        ).show();
+        );
+        dlg.show();
+        // setAutoClose(null, dlg, null);
     }
 
     private class TagUpdateTask extends TagTask<List<String>> {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -21,6 +21,7 @@ package de.k3b.android.androFotoFinder.locationmap;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -53,16 +54,16 @@ import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.BaseQueryActivity;
 import de.k3b.database.QueryParameter;
-import de.k3b.io.IDirectory;
-import de.k3b.io.StringUtils;
-import de.k3b.io.collections.SelectedFiles;
-import de.k3b.io.collections.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
+import de.k3b.io.IDirectory;
 import de.k3b.io.IGeoRectangle;
+import de.k3b.io.StringUtils;
+import de.k3b.io.collections.SelectedFiles;
+import de.k3b.io.collections.SelectedItems;
 
 // BaseQueryActivity LocalizedActivity
 public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
@@ -277,7 +278,7 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
         final QueryParameter asMergedQuery = mMap.getCurrentAreaQuery();
 
         CharSequence subQuerymTitle = getValueAsTitle(true);
-        ImageDetailMetaDialogBuilder.createImageDetailDialog(
+        final Dialog dlg = ImageDetailMetaDialogBuilder.createImageDetailDialog(
                 this,
                 getTitle().toString(),
                 asMergedQuery.toSqlString(),
@@ -286,7 +287,9 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
                         TagSql.getCount(this, asMergedQuery)),
                 mMap.getCurrentGeoRectangle() + " ==> " + mMap.getCurrentGeoUri(),
                 subQuerymTitle
-        ).show();
+        );
+        dlg.show();
+        setAutoClose(null, dlg, null);
     }
 
     @Override

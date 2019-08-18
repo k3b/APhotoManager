@@ -46,6 +46,7 @@
         <TextView android:id="@+id/lbl_zip_out"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+
             android:text="@string/lbl_zip_out"
             android:textAppearance="?android:attr/textAppearanceLarge"
             />
@@ -67,7 +68,8 @@
             android:layout_alignLeft="@+id/edit_zip_dir"
             android:layout_alignStart="@+id/edit_zip_dir"
             android:layout_below="@+id/lbl_zip_out"
-            android:layout_toLeftOf="@+id/cmd_lon_from_history"
+            android:layout_toStartOf="@+id/cmd_zip_name_history"
+            android:layout_toLeftOf="@+id/cmd_zip_name_history"
             android:ems="10"
             android:inputType="text" />
 
@@ -118,6 +120,7 @@
             android:layout_alignTop="@+id/cmd_zip_dir"
             android:layout_toEndOf="@+id/lbl_zip_dir"
             android:layout_toLeftOf="@+id/cmd_zip_dir_history"
+            android:layout_toStartOf="@+id/cmd_zip_dir_history"
             android:layout_toRightOf="@+id/lbl_zip_dir"
             android:ellipsize="end"
             android:inputType="text"
@@ -217,6 +220,7 @@
             android:layout_below="@+id/line_zip_modified"
 
             android:layout_toLeftOf="@+id/cmd_time"
+            android:layout_toStartOf="@+id/cmd_time"
             android:text="@string/btn_popup"
 
             />
@@ -269,7 +273,7 @@
         <Button android:id="@+id/cmd_filter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/edit_date_modified_from"
+            android:layout_below="@+id/lbl_filter"
             android:layout_toRightOf="@+id/cmd_zip_dir_history"
             android:layout_toEndOf="@+id/cmd_zip_dir_history"
             android:layout_alignParentEnd="true"
@@ -289,9 +293,8 @@
         <EditText android:id="@+id/edit_filter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/edit_date_modified_from"
+            android:layout_below="@+id/lbl_filter"
             android:enabled="false"
-            android:layout_alignBottom="@+id/cmd_filter"
             android:layout_toEndOf="@+id/lbl_zip_dir"
             android:layout_toLeftOf="@+id/cmd_zip_dir_history"
             android:layout_toRightOf="@+id/lbl_zip_dir"

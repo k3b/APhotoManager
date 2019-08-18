@@ -20,6 +20,7 @@
 package de.k3b.android.androFotoFinder;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.Intent;
@@ -729,14 +730,16 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
     private void cmdShowDetails() {
         final QueryParameter asMergedQuery = getAsMergedQuery();
 
-        ImageDetailMetaDialogBuilder.createImageDetailDialog(
+        final Dialog dlg = ImageDetailMetaDialogBuilder.createImageDetailDialog(
                 this,
                 getTitle().toString(),
                 asMergedQuery.toSqlString(),
                 StringUtils.appendMessage(null,
                         getString(R.string.show_photo),
                         TagSql.getCount(this, asMergedQuery))
-        ).show();
+        );
+        dlg.show();
+        setAutoClose(null, dlg, null);
     }
 
     private void clearFilter() {

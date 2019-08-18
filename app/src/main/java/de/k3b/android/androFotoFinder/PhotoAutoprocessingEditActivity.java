@@ -615,7 +615,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_edit_common, menu);
-        getMenuInflater().inflate(R.menu.menu_autoprocessing, menu);
+        getMenuInflater().inflate(R.menu.menu_copy_paste, menu);
 
         MenuItem item = menu.findItem(android.R.id.paste);
         final File clipboardDir = ClipboardUtil.getClipboardDir(this);
