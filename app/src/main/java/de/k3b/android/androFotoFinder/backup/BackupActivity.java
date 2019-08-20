@@ -219,30 +219,35 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
                     editFilter) {
                 @Override
                 protected boolean onHistoryPick(EditorHandler editorHandler, EditText editText, String text) {
-                    boolean zipNameChagend = ((editorHandler == this.mEditorHandlers[0])
-                            && (text != null) && (editText != null)
+                    boolean chagend = ((text != null) && (editText != null)
                             && (!text.equalsIgnoreCase(editText.getText().toString()) ));
 
                     final boolean result = super.onHistoryPick(editorHandler, editText, text);
 
-                    if (zipNameChagend) {
-
+                    if (chagend) {
+                        if (editText.getId() == R.id.edit_filter) {
+                            showExifFilterDetails(gui);
+                        }
                     }
+
                     return result;
                 }
 
-            };
+            }.setIncludeEmpty(true);
 
         }
 
         private void toGui(IZipConfig src) {
             ZipConfigDto.copy(this, src);
-            QueryParameter query = Backup2ZipService.getEffectiveQueryParameter(this);
+            showExifFilterDetails(src);
+        }
+
+        public void showExifFilterDetails(IZipConfig src) {
+            QueryParameter query = Backup2ZipService.getEffectiveQueryParameter(src);
 
             CharSequence details = formatter.format(TagSql.parseQueryEx(query, true));
 
             exifFilterDetails.setText(details);
-
         }
 
         private boolean fromGui(IZipConfig dest) {

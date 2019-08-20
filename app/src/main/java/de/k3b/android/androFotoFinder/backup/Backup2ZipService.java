@@ -153,24 +153,29 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
      * @return get query without filte-DateModified-min/max and with added zipConfig.getDateModifiedFrom
      */
     public static QueryParameter getEffectiveQueryParameter(IZipConfig zipConfig) {
-        final QueryParameter filter = QueryParameter.parse(zipConfig.getFilter());
-        FotoSql.parseDateModifiedMax(filter, true);
-        FotoSql.parseDateModifiedMin(filter, true);
+        QueryParameter filter = QueryParameter.parse(zipConfig.getFilter());
+        if (filter != null) {
+            // remove lastModified from filter
+            FotoSql.parseDateModifiedMax(filter, true);
+            FotoSql.parseDateModifiedMin(filter, true);
+            filter.clearColumns();
+        } else {
+            filter = new QueryParameter();
+        }
+        filter.addColumn(TagSql.SQL_COL_PK
+                , TagSql.SQL_COL_PATH
+                , TagSql.SQL_COL_DATE_TAKEN
+                , TagSql.SQL_COL_EXT_TITLE
+                , TagSql.SQL_COL_EXT_DESCRIPTION
+                , TagSql.SQL_COL_EXT_TAGS
+                , TagSql.SQL_COL_LAT
+                , TagSql.SQL_COL_LON
+                , TagSql.SQL_COL_EXT_RATING
+                , TagSql.SQL_COL_EXT_MEDIA_TYPE);
         final Date dateModifiedFrom = zipConfig.getDateModifiedFrom();
         if (dateModifiedFrom != null) {
             FotoSql.addWhereDateModifiedMinMax(filter, dateModifiedFrom.getTime(), 0);
         }
-
-        filter.clearColumns().addColumn(TagSql.SQL_COL_PK
-                ,TagSql.SQL_COL_PATH
-                ,TagSql.SQL_COL_DATE_TAKEN
-                ,TagSql.SQL_COL_EXT_TITLE
-                ,TagSql.SQL_COL_EXT_DESCRIPTION
-                ,TagSql.SQL_COL_EXT_TAGS
-                ,TagSql.SQL_COL_LAT
-                ,TagSql.SQL_COL_LON
-                ,TagSql.SQL_COL_EXT_RATING
-                ,TagSql.SQL_COL_EXT_MEDIA_TYPE);
 
         return filter;
     }

@@ -483,7 +483,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                     mLatitudeFrom, mLatitudeTo, mLongitudeFrom, mLongitudeTo,
                     mAny             ,
                     mTagsInclude     ,
-                    mTagsExclude);
+                    mTagsExclude).setIncludeEmpty(true);
         }
 
         protected void showVisibility(VISIBILITY visibility) {

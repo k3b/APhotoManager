@@ -62,16 +62,16 @@ import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
-import de.k3b.android.widget.UpdateTask;
 import de.k3b.android.widget.HistoryEditText;
-import de.k3b.io.VISIBILITY;
-import de.k3b.io.collections.SelectedFiles;
+import de.k3b.android.widget.UpdateTask;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
 import de.k3b.io.DateUtil;
 import de.k3b.io.GeoUtil;
 import de.k3b.io.StringUtils;
+import de.k3b.io.VISIBILITY;
+import de.k3b.io.collections.SelectedFiles;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.PhotoPropertiesAsString;
 import de.k3b.media.PhotoPropertiesDiffCopy;
@@ -256,7 +256,7 @@ public class PhotoPropertiesEditActivity extends ActivityWithAutoCloseDialogs im
                 edDate                      ,
                 edTagsInclude               ,
                 edLatitude                  ,
-                edLongitude                 );
+                edLongitude).setIncludeEmpty(true);
 
         new HashTagEditWatcher(this, edTitle);
         new HashTagEditWatcher(this, edDescription);
