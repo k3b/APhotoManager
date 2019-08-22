@@ -61,7 +61,6 @@ import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGeoRectangle;
-import de.k3b.io.StringUtils;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
 
@@ -282,9 +281,8 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
                 this,
                 getTitle().toString(),
                 asMergedQuery.toSqlString(),
-                StringUtils.appendMessage(null,
-                        getString(R.string.show_photo),
-                        TagSql.getCount(this, asMergedQuery)),
+                TagSql.getStatisticsMessage(this, R.string.show_photo,
+                        asMergedQuery),
                 mMap.getCurrentGeoRectangle() + " ==> " + mMap.getCurrentGeoUri(),
                 subQuerymTitle
         );

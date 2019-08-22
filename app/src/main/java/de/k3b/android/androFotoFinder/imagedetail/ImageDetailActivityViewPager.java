@@ -41,8 +41,6 @@ import android.view.Window;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
-// import com.squareup.leakcanary.RefWatcher;
-
 import org.osmdroid.api.IGeoPoint;
 
 import java.io.File;
@@ -52,10 +50,10 @@ import java.util.List;
 
 import de.k3b.android.androFotoFinder.AffUtils;
 import de.k3b.android.androFotoFinder.Common;
-import de.k3b.android.androFotoFinder.PhotoPropertiesEditActivity;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.LockScreen;
+import de.k3b.android.androFotoFinder.PhotoPropertiesEditActivity;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.SettingsActivity;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
@@ -68,24 +66,26 @@ import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.FileManagerUtil;
 import de.k3b.android.util.IntentUtil;
+import de.k3b.android.util.OsUtils;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScannerAsyncTask;
-import de.k3b.android.util.OsUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
-import de.k3b.io.FileProcessor;
-import de.k3b.io.collections.SelectedFiles;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.io.GeoUri;
+import de.k3b.io.FileProcessor;
 import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.StringUtils;
+import de.k3b.io.collections.SelectedFiles;
 import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.tagDB.Tag;
+
+// import com.squareup.leakcanary.RefWatcher;
 
 /**
  * Shows a zoomable imagee.<br>
@@ -1066,9 +1066,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     private void cmdShowDetails(String fullFilePath, long currentImageId) {
 
-        StringBuilder countMsg = (mGalleryContentQuery == null) ? null : StringUtils.appendMessage(null,
-                getString(R.string.show_photo),
-                TagSql.getCount(this, mGalleryContentQuery));
+        CharSequence countMsg = TagSql.getStatisticsMessage(this, R.string.show_photo,
+                mGalleryContentQuery);
 
         ImageDetailMetaDialogBuilder.createImageDetailDialog(this, fullFilePath, currentImageId,
                 mGalleryContentQuery,

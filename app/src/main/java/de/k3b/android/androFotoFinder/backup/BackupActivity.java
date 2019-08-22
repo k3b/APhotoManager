@@ -677,9 +677,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
                 this,
                 getTitle().toString(),
                 sql,
-                StringUtils.appendMessage(null,
-                        getString(R.string.backup_title),
-                        TagSql.getCount(this, asMergedQuery))
+                TagSql.getStatisticsMessage(this, R.string.backup_title, asMergedQuery)
         );
         dlg.show();
         setAutoClose(null, dlg, null);

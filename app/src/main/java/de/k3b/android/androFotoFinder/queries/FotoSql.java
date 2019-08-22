@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -48,17 +48,17 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.DBUtils;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.AlbumFile;
-import de.k3b.io.ListUtils;
-import de.k3b.io.StringUtils;
-import de.k3b.io.VISIBILITY;
-import de.k3b.io.collections.SelectedFiles;
-import de.k3b.io.collections.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
+import de.k3b.io.ListUtils;
+import de.k3b.io.StringUtils;
+import de.k3b.io.VISIBILITY;
+import de.k3b.io.collections.SelectedFiles;
+import de.k3b.io.collections.SelectedItems;
 
 /**
  * contains all SQL needed to query the android gallery
@@ -266,6 +266,15 @@ public class FotoSql extends FotoSqlBase {
     /** to avoid cascade delete of linked file when mediaDB-item is deleted
      *  the links are first set to null before delete. */
     private static final String DELETED_FILE_MARKER = null;
+
+    /**
+     * translate from bytes to kilobytes
+     */
+    private static final int SIZE_K = 1024;
+    /**
+     * translate from bytes to megabytes
+     */
+    private static final int SIZE_M = SIZE_K * SIZE_K;
 
     public static final double getGroupFactor(final double _zoomLevel) {
         double zoomLevel = _zoomLevel;
@@ -1257,23 +1266,51 @@ public class FotoSql extends FotoSqlBase {
 
     }
 
+    /**
+     * get display string with count and total size
+     * @return {getString(prefixStringId)}: #{count(*)} / {sum(size)} Mb
+     */
     @Nullable
-    public static long getCount(Context context, QueryParameter query) {
+    public static CharSequence getStatisticsMessage(Context context, int prefixStringId, QueryParameter query) {
+        if (query == null) return null;
+        String text = context.getString(prefixStringId);
+
         QueryParameter queryModified = new QueryParameter(query);
-        queryModified.clearColumns().addColumn("count(*)");
+        queryModified
+                .clearColumns()
+                .addColumn("count(*)")
+                .addColumn("sum(" + FotoSql.SQL_COL_SIZE + ")");
         Cursor c = null;
 
         try {
             c = FotoSql.createCursorForQuery(null, "getCount", context, queryModified, null);
             if (c.moveToNext()) {
-                return c.getLong(0);
+                final long count = c.getLong(0);
+                long size = c.getLong(1);
+                String unit = "b";
+                if (size > SIZE_M) {
+                    size /= SIZE_K;
+                    unit = "kb";
+                    if (size > SIZE_M) {
+                        size /= SIZE_K;
+                        unit = "Mb";
+                    }
+                }
+                return StringUtils.appendMessage(null,
+                        text,
+                        ": #",
+                        count,
+                        "/",
+                        size,
+                        unit
+                );
             }
         } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, "FotoSql.getCount() error :", ex);
+            Log.e(Global.LOG_CONTEXT, "FotoSql.getStatisticsMessage() error :", ex);
         } finally {
             if (c != null) c.close();
         }
-        return 0;
+        return null;
     }
 
     @Nullable

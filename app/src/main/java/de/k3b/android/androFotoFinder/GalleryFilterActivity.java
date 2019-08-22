@@ -730,9 +730,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                 this,
                 getTitle().toString(),
                 asMergedQuery.toSqlString(),
-                StringUtils.appendMessage(null,
-                        getString(R.string.show_photo),
-                        TagSql.getCount(this, asMergedQuery))
+                TagSql.getStatisticsMessage(this, R.string.show_photo, asMergedQuery)
         );
         dlg.show();
         setAutoClose(null, dlg, null);

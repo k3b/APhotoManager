@@ -946,15 +946,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 ids,
                 files,
                 (mGalleryContentQuery != null) ? mGalleryContentQuery.toSqlString() : null,
-                StringUtils.appendMessage(null,
-                        getString(R.string.show_photo),
-                        TagSql.getCount(activity, mGalleryContentQuery)),
-                subQueryTypName,
-                (mGalleryContentQuery == null) ? null : StringUtils.appendMessage(null,
-                        getString(R.string.show_photo),
-                        TagSql.getCount(activity, mGalleryContentQuery))
-
-        );
+                TagSql.getStatisticsMessage(this.getActivity(), R.string.show_photo, mGalleryContentQuery),
+                subQueryTypName);
         dlg.show();
         // setAutoClose(null, dlg, null);
     }
