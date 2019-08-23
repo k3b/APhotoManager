@@ -23,6 +23,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.io.File;
@@ -39,6 +40,7 @@ import de.k3b.database.QueryParameter;
 import de.k3b.io.FileUtils;
 import de.k3b.io.IItemSaver;
 import de.k3b.io.IProgessListener;
+import de.k3b.io.VISIBILITY;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.PhotoProperties2ExistingFileSaver;
 import de.k3b.media.PhotoPropertiesCsvStringSaver;
@@ -152,17 +154,18 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
     /**
      * @return get query without filte-DateModified-min/max and with added zipConfig.getDateModifiedFrom
      */
-    public static QueryParameter getEffectiveQueryParameter(IZipConfig zipConfig) {
+    @NonNull
+    public static QueryParameter getEffectiveQueryParameter(@NonNull IZipConfig zipConfig) {
         QueryParameter filter = QueryParameter.parse(zipConfig.getFilter());
-        if (filter != null) {
-            // remove lastModified from filter
-            FotoSql.parseDateModifiedMax(filter, true);
-            FotoSql.parseDateModifiedMin(filter, true);
-            filter.clearColumns();
-        } else {
+        if (filter == null) {
             filter = new QueryParameter();
+            FotoSql.setWhereVisibility(filter, VISIBILITY.DEFAULT);
         }
-        filter.addColumn(TagSql.SQL_COL_PK
+
+        // remove lastModified from filter
+        FotoSql.parseDateModifiedMax(filter, true);
+        FotoSql.parseDateModifiedMin(filter, true);
+        filter.clearColumns().addColumn(TagSql.SQL_COL_PK
                 , TagSql.SQL_COL_PATH
                 , TagSql.SQL_COL_DATE_TAKEN
                 , TagSql.SQL_COL_EXT_TITLE

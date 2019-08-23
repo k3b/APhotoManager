@@ -180,128 +180,19 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         return mergedQuery;
     }
 
-    private class Gui implements IZipConfig {
-        private static final String FILTER_DELIMITER = "\n\n\n\n@--!@--!@--!\n\n\n\n";
-        private final EditText editDateModifiedFrom;
-        private final EditText editZipRelPath;
-        private final EditText editZipName;
-        private final EditText editZipDir;
-        private final EditText editFilter;
-        private final TextView exifFilterDetails;
-        private final GalleryFilterFormatter formatter;
+    private void cmdShowDetails() {
+        final QueryParameter asMergedQuery
+                = Backup2ZipService.getEffectiveQueryParameter(this.gui);
+        String sql = (asMergedQuery != null) ? asMergedQuery.toSqlString() : null;
 
-        private HistoryEditText mHistory;
-
-        private Gui() {
-            formatter = new GalleryFilterFormatter(false,
-                    new AndroidLabelGenerator(getApplicationContext(), "\n"),
-                    MediaFormatter.FieldID.clasz, MediaFormatter.FieldID.visibility,
-                    MediaFormatter.FieldID.lastModified);
-
-            editDateModifiedFrom = (EditText) findViewById(R.id.edit_date_modified_from);
-            editFilter = (EditText) findViewById(R.id.edit_filter);
-            exifFilterDetails = (TextView) findViewById(R.id.lbl_exif_filter_details);
-
-            editZipDir = (EditText) findViewById(R.id.edit_zip_dir);
-            editZipName = (EditText) findViewById(R.id.edit_zip_name);
-            editZipRelPath = (EditText) findViewById(R.id.edit_zip_rel_path);
-
-            mHistory = new HistoryEditText(BackupActivity.this, new int[] {
-                    R.id.cmd_zip_name_history,
-                    R.id.cmd_date_modified_from_history,
-                    R.id.cmd_zip_rel_path_history,
-                    R.id.cmd_zip_dir_history,
-                    R.id.cmd_filter_history} ,
-                    editZipName,
-                    editDateModifiedFrom,
-                    editZipRelPath,
-                    editZipDir,
-                    editFilter) {
-                @Override
-                protected boolean onHistoryPick(EditorHandler editorHandler, EditText editText, String text) {
-                    boolean chagend = ((text != null) && (editText != null)
-                            && (!text.equalsIgnoreCase(editText.getText().toString()) ));
-
-                    final boolean result = super.onHistoryPick(editorHandler, editText, text);
-
-                    if (chagend) {
-                        if (editText.getId() == R.id.edit_filter) {
-                            showExifFilterDetails(gui);
-                        }
-                    }
-
-                    return result;
-                }
-
-            }.setIncludeEmpty(true);
-
-        }
-
-        private void toGui(IZipConfig src) {
-            ZipConfigDto.copy(this, src);
-            showExifFilterDetails(src);
-        }
-
-        public void showExifFilterDetails(IZipConfig src) {
-            QueryParameter query = Backup2ZipService.getEffectiveQueryParameter(src);
-
-            CharSequence details = formatter.format(TagSql.parseQueryEx(query, true));
-
-            exifFilterDetails.setText(details);
-        }
-
-        private boolean fromGui(IZipConfig dest) {
-            try {
-                ZipConfigDto.copy(dest, this);
-                return true;
-            } catch (RuntimeException ex) {
-                Log.e(LibZipGlobal.LOG_TAG, mDebugPrefix + ex.getMessage(), ex);
-                Toast.makeText(BackupActivity.this, ex.getMessage(), Toast.LENGTH_LONG).show();
-                return false;
-            }
-        }
-
-        @Override
-        public Date getDateModifiedFrom() {return DateUtil.parseIsoDate(editDateModifiedFrom.getText().toString());}
-        @Override
-        public String getZipRelPath() {return editZipRelPath.getText().toString();}
-        @Override
-        public String getZipName() {return editZipName.getText().toString();}
-        @Override
-        public String getZipDir() {return editZipDir.getText().toString();}
-        @Override
-        public String getFilter() {
-            // display-text = filter-display-Text + FILTER_DELIMITER + sql
-            // return sql-part only
-            final String fullText = editFilter.getText().toString();
-            int delim = fullText.indexOf(FILTER_DELIMITER);
-            if (delim >= 0) return fullText.substring(delim + FILTER_DELIMITER.length());
-            return fullText;
-        }
-
-        @Override
-        public void setDateModifiedFrom(Date value) {editDateModifiedFrom.setText(DateUtil.toIsoDateTimeString(value));}
-        @Override
-        public void setZipRelPath(String value) {editZipRelPath.setText(value);}
-        @Override
-        public void setZipName(String value) {editZipName.setText(value);}
-        @Override
-        public void setZipDir(String value) {editZipDir.setText(value);}
-        @Override
-        public void setFilter(String value) {
-            editFilter.setText(getFilterDisplayText(value));
-        }
-
-        private String getFilterDisplayText(String value) {
-            QueryParameter q = (value == null) ? null : QueryParameter.parse(value);
-            if (q != null) {
-                IGalleryFilter filter = TagSql.parseQueryEx(q, true);
-
-                // display-text = filter-display-Text + FILTER_DELIMITER + sql
-                return filter + FILTER_DELIMITER + value;
-            }
-            return "";
-        }
+        final Dialog dlg = ImageDetailMetaDialogBuilder.createImageDetailDialog(
+                this,
+                getTitle().toString(),
+                sql,
+                TagSql.getStatisticsMessage(this, R.string.backup_title, asMergedQuery)
+        );
+        dlg.show();
+        setAutoClose(null, dlg, null);
     }
 
     private ZipConfigDto mZipConfigData = new ZipConfigDto(null);
@@ -668,19 +559,159 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         }
     }
 
-    private void cmdShowDetails() {
-        final QueryParameter asMergedQuery
-                = Backup2ZipService.getEffectiveQueryParameter(this.mZipConfigData);
-        String sql = (asMergedQuery != null) ? asMergedQuery.toSqlString() : null;
+    private class Gui implements IZipConfig {
+        private static final String FILTER_DELIMITER = "\n\n\n\n@--!@--!@--!\n\n\n\n";
+        private final EditText editDateModifiedFrom;
+        private final EditText editZipRelPath;
+        private final EditText editZipName;
+        private final EditText editZipDir;
+        private final EditText editFilter;
+        private final TextView exifFilterDetails;
+        private final GalleryFilterFormatter formatter;
 
-        final Dialog dlg = ImageDetailMetaDialogBuilder.createImageDetailDialog(
-                this,
-                getTitle().toString(),
-                sql,
-                TagSql.getStatisticsMessage(this, R.string.backup_title, asMergedQuery)
-        );
-        dlg.show();
-        setAutoClose(null, dlg, null);
+        private HistoryEditText mHistory;
+
+        private Gui() {
+            formatter = new GalleryFilterFormatter(false,
+                    new AndroidLabelGenerator(getApplicationContext(), "\n"),
+                    MediaFormatter.FieldID.clasz, MediaFormatter.FieldID.visibility,
+                    MediaFormatter.FieldID.lastModified);
+
+            editDateModifiedFrom = (EditText) findViewById(R.id.edit_date_modified_from);
+            editFilter = (EditText) findViewById(R.id.edit_filter);
+            exifFilterDetails = (TextView) findViewById(R.id.lbl_exif_filter_details);
+
+            editZipDir = (EditText) findViewById(R.id.edit_zip_dir);
+            editZipName = (EditText) findViewById(R.id.edit_zip_name);
+            editZipRelPath = (EditText) findViewById(R.id.edit_zip_rel_path);
+
+            mHistory = new HistoryEditText(BackupActivity.this, new int[]{
+                    R.id.cmd_zip_name_history,
+                    R.id.cmd_date_modified_from_history,
+                    R.id.cmd_zip_rel_path_history,
+                    R.id.cmd_zip_dir_history,
+                    R.id.cmd_filter_history},
+                    editZipName,
+                    editDateModifiedFrom,
+                    editZipRelPath,
+                    editZipDir,
+                    editFilter) {
+                @Override
+                protected boolean onHistoryPick(EditorHandler editorHandler, EditText editText, String text) {
+                    boolean chagend = ((text != null) && (editText != null)
+                            && (!text.equalsIgnoreCase(editText.getText().toString())));
+
+                    final boolean result = super.onHistoryPick(editorHandler, editText, text);
+
+                    if (chagend) {
+                        if (editText.getId() == R.id.edit_filter) {
+                            showExifFilterDetails(gui);
+                        }
+                    }
+
+                    return result;
+                }
+
+            }.setIncludeEmpty(true);
+
+        }
+
+        private void toGui(IZipConfig src) {
+            ZipConfigDto.copy(this, src);
+            showExifFilterDetails(src);
+        }
+
+        public void showExifFilterDetails(IZipConfig src) {
+            QueryParameter query = Backup2ZipService.getEffectiveQueryParameter(src);
+
+            StringBuilder result = new StringBuilder();
+            CharSequence details = formatter.format(TagSql.parseQueryEx(query, true));
+            if (details != null) {
+                result.append(details);
+            }
+            if (query.hasWhere()) {
+                query.toParsableWhere(result);
+            }
+
+            exifFilterDetails.setText(result.toString());
+        }
+
+        private boolean fromGui(IZipConfig dest) {
+            try {
+                ZipConfigDto.copy(dest, this);
+                return true;
+            } catch (RuntimeException ex) {
+                Log.e(LibZipGlobal.LOG_TAG, mDebugPrefix + ex.getMessage(), ex);
+                Toast.makeText(BackupActivity.this, ex.getMessage(), Toast.LENGTH_LONG).show();
+                return false;
+            }
+        }
+
+        @Override
+        public Date getDateModifiedFrom() {
+            return DateUtil.parseIsoDate(editDateModifiedFrom.getText().toString());
+        }
+
+        @Override
+        public String getZipRelPath() {
+            return editZipRelPath.getText().toString();
+        }
+
+        @Override
+        public String getZipName() {
+            return editZipName.getText().toString();
+        }
+
+        @Override
+        public String getZipDir() {
+            return editZipDir.getText().toString();
+        }
+
+        @Override
+        public String getFilter() {
+            // display-text = filter-display-Text + FILTER_DELIMITER + sql
+            // return sql-part only
+            final String fullText = editFilter.getText().toString();
+            int delim = fullText.indexOf(FILTER_DELIMITER);
+            if (delim >= 0) return fullText.substring(delim + FILTER_DELIMITER.length());
+            return fullText;
+        }
+
+        @Override
+        public void setDateModifiedFrom(Date value) {
+            editDateModifiedFrom.setText(DateUtil.toIsoDateTimeString(value));
+        }
+
+        @Override
+        public void setZipRelPath(String value) {
+            editZipRelPath.setText(value);
+        }
+
+        @Override
+        public void setZipName(String value) {
+            editZipName.setText(value);
+        }
+
+        @Override
+        public void setZipDir(String value) {
+            editZipDir.setText(value);
+        }
+
+        @Override
+        public void setFilter(String value) {
+            editFilter.setText(getFilterDisplayText(value));
+        }
+
+        private String getFilterDisplayText(String value) {
+            QueryParameter q = (value == null) ? null : QueryParameter.parse(value);
+            if (q != null) {
+                IGalleryFilter filter = TagSql.parseQueryEx(q, true);
+
+                // display-text = filter-display-Text + FILTER_DELIMITER + sql
+                return filter + FILTER_DELIMITER + value;
+            }
+            return "";
+        }
     }
 
     @Override
