@@ -40,6 +40,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoSqlBase;
 import de.k3b.android.osmdroid.forge.MapsForgeSupport;
 import de.k3b.android.util.LogCat;
+import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.PhotoAutoprocessingDto;
 import de.k3b.media.ExifInterface;
@@ -99,6 +100,14 @@ public class AndroFotoFinderApp extends Application {
                 PhotoViewAttacher.LOG_TAG, CupcakeGestureDetector.LOG_TAG,
                 LibGlobal.LOG_TAG, ThumbNailUtils.LOG_TAG, IMapView.LOGTAG,
                 ExifInterface.LOG_TAG, PhotoPropertiesImageReader.LOG_TAG) {
+
+            @Override
+            public void uncaughtException(Thread thread, Throwable ex) {
+                Log.e(mTags[0], "\n\nUncaughtException. Last know Activity\n "
+                        + ActivityWithCallContext.lastKnownCallContext + "\n");
+
+                super.uncaughtException(thread, ex);
+            }
 
             public void saveToFile() {
                 final File logFile = getOutpuFile();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 by k3b.
+ * Copyright (c) 2018-2019 by k3b.
  *
  * This file is part of AndroFotoFinder and of ToGoZip.
  *
@@ -24,27 +24,56 @@ import android.os.Build;
 import android.os.Bundle;
 
 /**
- * An activity that memorizes the activity call stack for debugging purposes.
+ * An activity that memorizes the activity call stack (parent Activities) for debugging purposes.
  *
  * Created by k3b on 25.08.2018.
  */
-
 public class ActivityWithCallContext extends Activity {
+    /**
+     * the CallContext is an intent-extra with this name
+     */
     private static final String PARAM_CALLSTACK = "callstack";
 
     /**
-     * for debugging the activity call sequence
+     * set to false to disable CallContext for privacy reasons
+     */
+    public static Boolean isCallContextEnabled = true;
+
+    /** what the current activity is doing. This will become part of the callstack when a child activity is invoked */
+    public static String additionalCallContext = "";
+
+    /**
+     * if there is a crash this can become part of the logcat
+     */
+    public static String lastKnownCallContext = "";
+
+    /**
+     * the CallContext of the parent-activity that called this activity
      */
     private String parentCallContext = "";
 
-    public static String additionalCallContext = "";
+    protected static void addContext(String debugContext, Intent targetIntent, Activity context) {
+        if ((targetIntent != null) && (context != null)) {
+            CharSequence caller = (context instanceof ActivityWithCallContext)
+                    ? ((ActivityWithCallContext) context).getCallContext()
+                    : getCallerDescription(context);
+            if ((debugContext != null) && (debugContext.length() > 0)) {
+                targetIntent.putExtra(PARAM_CALLSTACK, caller + "\n\t[" + debugContext + "]");
+            } else {
+                targetIntent.putExtra(PARAM_CALLSTACK, caller);
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Intent intent = getIntent();
-        this.parentCallContext = readCallContext(intent);
+        if (isCallContextEnabled) {
+            Intent intent = getIntent();
+            this.parentCallContext = readCallContext(intent);
+            lastKnownCallContext = getCallContext();
+        }
     }
 
     public static String readCallContext(Intent intent) {
@@ -55,8 +84,12 @@ public class ActivityWithCallContext extends Activity {
 
     }
 
-    public String getCallContext() {
-        return parentCallContext + " => " + getCallerDescription(this);
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (isCallContextEnabled) {
+            lastKnownCallContext = getCallContext();
+        }
     }
 
     private static String getCallerDescription(Activity owner) {
@@ -64,13 +97,8 @@ public class ActivityWithCallContext extends Activity {
                 "{" + owner.getTitle() + "}";
     }
 
-    protected static void addContext(String debugContext, Intent targetIntent, Activity context) {
-        if ((targetIntent != null) && (context != null)) {
-            CharSequence caller = (context instanceof LocalizedActivity)
-                    ? ((LocalizedActivity) context).getCallContext()
-                    : getCallerDescription(context);
-            targetIntent.putExtra(PARAM_CALLSTACK, caller + debugContext);
-        }
+    public String getCallContext() {
+        return parentCallContext + "\n=> " + getCallerDescription(this);
     }
 
     /** called by all variants of startActivity(ForResult): add context to call.*/
@@ -96,7 +124,9 @@ public class ActivityWithCallContext extends Activity {
 
     /** called by all variants of startActivity(ForResult): add context to call.*/
     private void startActivityForResultImpl(Intent intent, int requestCode, Bundle options) {
-        addContext(additionalCallContext, intent, this);
+        if (isCallContextEnabled) {
+            addContext(additionalCallContext, intent, this);
+        }
         additionalCallContext = "";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             super.startActivityForResult(intent, requestCode, options);
