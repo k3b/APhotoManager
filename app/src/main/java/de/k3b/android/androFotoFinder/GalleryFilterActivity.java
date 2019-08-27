@@ -869,16 +869,15 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             final FragmentManager manager = getFragmentManager();
             DirectoryPickerFragment dlg = new DirectoryPickerFragment();
 
-            int menuResId = 0; // no menu in app lock mode
             if (!LockScreen.isLocked(this)) {
-                menuResId = R.menu.menu_context_pick_dir;
                 if ((queryId == FotoSql.QUERY_TYPE_GROUP_DATE) || (queryId == FotoSql.QUERY_TYPE_GROUP_DATE)) {
-                    menuResId = R.menu.menu_context_pick_date;
+                    dlg.setContextMenuId(R.menu.menu_context_pick_show_in_new, R.menu.menu_context_pick_date);
+                } else {
+                    dlg.setContextMenuId(R.menu.menu_context_pick_dir);
                 }
             }
-            dlg.setContextMenuId(menuResId);
-            dlg.setBaseQuery(getAsMergedQuery());
 
+            dlg.setBaseQuery(getAsMergedQuery());
             dlg.defineDirectoryNavigation(dirInfo.directoryRoot, dirInfo.queryId, dirInfo.currentPath);
             dlg.show(manager, DLG_NAVIGATOR_TAG);
 

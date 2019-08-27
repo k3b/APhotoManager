@@ -755,18 +755,20 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
         private DirectoryPickerFragment mDirPicker = null;
 
         private void openDatePicker() {
-            openPicker(BaseQueryActivity.GalleryQueryParameter.SUB_FILTER_MODE_DATE, QUERY_TYPE_GROUP_DATE, R.menu.menu_context_pick_date);
+            openPicker(BaseQueryActivity.GalleryQueryParameter.SUB_FILTER_MODE_DATE, QUERY_TYPE_GROUP_DATE,
+                    R.menu.menu_context_pick_show_in_new, R.menu.menu_context_pick_date);
         }
 
         private void openDateModifiedPicker() {
-            openPicker(GalleryQueryParameter.SUB_FILTER_MODE_DATE_MODIFIED, QUERY_TYPE_GROUP_DATE_MODIFIED, R.menu.menu_context_pick_date);
+            openPicker(GalleryQueryParameter.SUB_FILTER_MODE_DATE_MODIFIED, QUERY_TYPE_GROUP_DATE_MODIFIED,
+                    R.menu.menu_context_pick_show_in_new, R.menu.menu_context_pick_date);
         }
 
         private void openFolderPicker() {
             openPicker(BaseQueryActivity.GalleryQueryParameter.SUB_FILTER_MODE_PATH, QUERY_TYPE_GROUP_ALBUM, R.menu.menu_context_pick_dir);
         }
 
-        private void openPicker(final int filterMode, int _dirQueryID, int menuId) {
+        private void openPicker(final int filterMode, int _dirQueryID, int... menuId) {
             mGalleryQueryParameter.mCurrentSubFilterMode = filterMode;
             final Activity context = BaseQueryActivity.this;
 
@@ -822,7 +824,9 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                 final FragmentManager manager = getFragmentManager();
                 DirectoryPickerFragment dirDialog = new DirectoryPickerFragment();
 
-                dirDialog.setContextMenuId(LockScreen.isLocked(context) ? 0 : menuId);
+                if (!LockScreen.isLocked(context)) {
+                    dirDialog.setContextMenuId(menuId);
+                }
                 dirDialog.setBaseQuery(mGalleryQueryParameter.mGalleryContentBaseQuery);
 
                 String initialPath = mGalleryQueryParameter.getCurrentSubFilterSettings().getPath();

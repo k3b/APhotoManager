@@ -713,6 +713,9 @@ public class FotoSql extends FotoSqlBase {
     public static boolean set(GalleryFilterParameter dest, String selectedAbsolutePath, int queryTypeId) {
         switch (queryTypeId) {
             case FotoSql.QUERY_TYPE_GROUP_ALBUM:
+            case FotoSql.QUERY_TYPE_GROUP_MOVE:
+            case FotoSql.QUERY_TYPE_GROUP_COPY:
+            case QUERY_TYPE_GALLERY:
                 dest.setPath(selectedAbsolutePath + "/%");
                 return true;
             case FotoSql.QUERY_TYPE_GROUP_DATE: {
@@ -740,6 +743,8 @@ public class FotoSql extends FotoSqlBase {
                 return true;
             default:break;
         }
+        Log.e(Global.LOG_CONTEXT, "FotoSql.setFilter(queryTypeId = " + queryTypeId + ") : unknown type");
+
         return false;
     }
 

@@ -1057,7 +1057,10 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             mDestDirPicker.defineDirectoryNavigation(OsUtils.getRootOSDirectory(null),
                     (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
                     lastCopyToPath);
-            mDestDirPicker.setContextMenuId(LockScreen.isLocked(this.getActivity()) ? 0 : R.menu.menu_context_pick_osdir);
+            if (!LockScreen.isLocked(this.getActivity())) {
+                mDestDirPicker.setContextMenuId(R.menu.menu_context_pick_osdir);
+            }
+
             mDestDirPicker.setBaseQuery(getCurrentQuery());
             mDestDirPicker.show(getActivity().getFragmentManager(), "osdir");
         }

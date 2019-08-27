@@ -47,37 +47,36 @@ public class ShowInMenuHandler {
         this.mDirTypId = mDirTypId;
     }
 
-    public void fixMenuOpenIn(ShowInMenuHandler showInMenuHandler, IDirectory selection, Menu menu) {
+    public void fixMenuOpenIn(String selectionPath, Menu menu) {
         if ((baseQuery != null) &&
-                (menu.findItem(R.id.cmd_gallery) != null)) {
-            long baseCount = getPickCount("(with baseQuery)", showInMenuHandler, selection, baseQuery);
+                (menu.findItem(R.id.cmd_gallery) != null) &&
+                (menu.findItem(R.id.cmd_gallery_base) != null)) {
+            long baseCount = getPickCount("(with baseQuery)", selectionPath, baseQuery);
             if (baseCount > 0) {
-                long count = getPickCount(selection.toString(), showInMenuHandler, selection, null);
+                long count = getPickCount(selectionPath, selectionPath, null);
                 setMenuCount(menu, R.id.cmd_gallery, count);
                 setMenuCount(menu, R.id.cmd_photo, count);
-                if (baseCount != count) {
-                    setMenuCount(menu, R.id.cmd_gallery_base, baseCount);
-                    setMenuCount(menu, R.id.cmd_photo_base, baseCount);
-                }
+                if (baseCount == count) baseCount = 0; // hide
+                setMenuCount(menu, R.id.cmd_gallery_base, baseCount);
+                setMenuCount(menu, R.id.cmd_photo_base, baseCount);
             }
         }
     }
 
-    public boolean onPopUpClick(MenuItem menuItem, IDirectory popUpSelection) {
+    public boolean onPopUpClick(MenuItem menuItem, IDirectory popUpSelection, String selectionPath) {
         switch (menuItem.getItemId()) {
             case R.id.cmd_show_in_new:
-                return pickerContext.onShowPopUp(null, null, popUpSelection,
-                        R.menu.menu_context_pick_show_in_new,
+                return pickerContext.onShowPopUp(null, null, selectionPath, popUpSelection,
                         R.menu.menu_context_pick_show_in_new);
 
             case R.id.cmd_photo:
-                return showPhoto(popUpSelection, mDirTypId, null);
+                return showPhoto(selectionPath, mDirTypId, null);
             case R.id.cmd_photo_base:
-                return showPhoto(popUpSelection, mDirTypId, baseQuery);
+                return showPhoto(selectionPath, mDirTypId, baseQuery);
             case R.id.cmd_gallery:
-                return showGallery(popUpSelection, mDirTypId, null);
+                return showGallery(selectionPath, mDirTypId, null);
             case R.id.cmd_gallery_base:
-                return showGallery(popUpSelection, mDirTypId, baseQuery);
+                return showGallery(selectionPath, mDirTypId, baseQuery);
             default:
                 break;
         }
@@ -96,17 +95,18 @@ public class ShowInMenuHandler {
         }
     }
 
-    private long getPickCount(String dbgContext, ShowInMenuHandler showInMenuHandler, IDirectory selection, QueryParameter baseQuery) {
-        QueryParameter query = pickerContext.getSelectionQuery("getPickCount" + dbgContext, selection,
+    private long getPickCount(String dbgContext, String selectionPath,
+                              QueryParameter baseQuery) {
+        QueryParameter query = pickerContext.getSelectionQuery("getPickCount" + dbgContext, selectionPath,
                 mDirTypId, baseQuery);
         if (query == null) return 0;
         return FotoSql.getCount(mContext, query);
     }
 
-    private boolean showPhoto(IDirectory selectedDir, int dirTypId, QueryParameter baseQuery) {
-        QueryParameter query = pickerContext.getSelectionQuery("showPhoto", selectedDir, dirTypId, baseQuery);
+    private boolean showPhoto(String selectionPath, int dirTypId, QueryParameter baseQuery) {
+        QueryParameter query = pickerContext.getSelectionQuery("showPhoto", selectionPath, dirTypId, baseQuery);
         if (query != null) {
-            String dbgContext = "[6]" + FotoSql.getName(mContext, dirTypId) + ":" + selectedDir;
+            String dbgContext = "[6]" + FotoSql.getName(mContext, dirTypId) + ":" + selectionPath;
 
             FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
             ImageDetailActivityViewPager.showActivity(dbgContext, mContext, null, 0, query, 0);
@@ -115,9 +115,9 @@ public class ShowInMenuHandler {
         return false;
     }
 
-    private boolean showGallery(IDirectory selectedDir, int dirTypId, QueryParameter baseQuery) {
-        String dbgContext = "[7]" + FotoSql.getName(mContext, dirTypId) + ":" + selectedDir;
-        QueryParameter query = pickerContext.getSelectionQuery(dbgContext, selectedDir, dirTypId, baseQuery);
+    private boolean showGallery(String selectionPath, int dirTypId, QueryParameter baseQuery) {
+        String dbgContext = "[7]" + FotoSql.getName(mContext, dirTypId) + ":" + selectionPath;
+        QueryParameter query = pickerContext.getSelectionQuery(dbgContext, selectionPath, dirTypId, baseQuery);
         if (query != null) {
             FotoGalleryActivity.showActivity(dbgContext, mContext, query, 0);
             return true;
@@ -126,9 +126,9 @@ public class ShowInMenuHandler {
     }
 
     public interface PickerContext {
-        QueryParameter getSelectionQuery(String dbgContext, IDirectory selectedDir,
+        QueryParameter getSelectionQuery(String dbgContext, String selectionPath,
                                          int dirTypId, QueryParameter baseQuery);
 
-        boolean onShowPopUp(View anchor, View owner, IDirectory selection, int... idContextMenue);
+        boolean onShowPopUp(View anchor, View owner, String selectionPath, IDirectory selection, int... idContextMenue);
     }
 }

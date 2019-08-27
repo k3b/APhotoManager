@@ -351,7 +351,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
      * @param imageDetailQuery if != null set initial filter to new FotoGalleryActivity
      * @param requestCode if != 0 start for result. else start without result
      */
-    public static void showActivity(String debugContext, Activity context, Uri imageUri, int position, QueryParameter imageDetailQuery, int requestCode) {
+    public static void showActivity(String debugContext, Activity context, Uri imageUri,
+                                    int position, QueryParameter imageDetailQuery, int requestCode) {
         Intent intent;
         //Create intent
         intent = new Intent(context, ImageDetailActivityViewPager.class);

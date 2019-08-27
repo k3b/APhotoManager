@@ -388,7 +388,10 @@ public class AndroidFileCommands extends FileCommands {
             destDir.defineDirectoryNavigation(OsUtils.getRootOSDirectory(null),
                     FotoSql.QUERY_TYPE_UNDEFINED,
                     getLastCopyToPath());
-            destDir.setContextMenuId(LockScreen.isLocked(mContext) ? 0 : R.menu.menu_context_pick_osdir);
+            if (!LockScreen.isLocked(mContext)) {
+                destDir.setContextMenuId(R.menu.menu_context_pick_osdir);
+            }
+
             destDir.show(mContext.getFragmentManager(), "scannerPick");
 
             return true;
