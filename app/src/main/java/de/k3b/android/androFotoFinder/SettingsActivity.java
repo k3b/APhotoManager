@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -151,10 +151,11 @@ public class SettingsActivity extends PreferenceActivity {
 
         prefs.putBoolean("debugEnabledMemory", Global.debugEnabledMemory);
 
-        prefs.putBoolean("datePickerUseDecade", LibGlobal.datePickerUseDecade);
-
         prefs.putBoolean("debugEnabledJpgMetaIo", LibGlobal.debugEnabledJpgMetaIo);
         prefs.putBoolean("debugEnabledJpg", LibGlobal.debugEnabledJpg);
+        prefs.putBoolean("debugEnabledCallContext", ActivityWithCallContext.isCallContextEnabled);
+
+        prefs.putBoolean("datePickerUseDecade", LibGlobal.datePickerUseDecade);
 
         /** #100: true: private images get the extension ".jpg-p" which hides them from other gallery-apps and image pickers.  */
         prefs.putBoolean("renamePrivateJpg", LibGlobal.renamePrivateJpg);
@@ -214,6 +215,7 @@ public class SettingsActivity extends PreferenceActivity {
         Global.locked                           = getPref(prefs, "locked", Global.locked);
         Global.passwordHash                     = getPref(prefs, "passwordHash", Global.passwordHash);
 
+        ActivityWithCallContext.isCallContextEnabled = getPref(prefs, "debugEnabledCallContext", ActivityWithCallContext.isCallContextEnabled);
         LibGlobal.debugEnabledJpg = getPref(prefs, "debugEnabledJpg", LibGlobal.debugEnabledJpg);
         LibGlobal.debugEnabledJpgMetaIo     = getPref(prefs, "debugEnabledJpgMetaIo", LibGlobal.debugEnabledJpgMetaIo);
 

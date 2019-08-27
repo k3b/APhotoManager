@@ -1083,7 +1083,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             mDestDirPicker.defineDirectoryNavigation(OsUtils.getRootOSDirectory(null),
                     (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
                     lastCopyToPath);
-            mDestDirPicker.setContextMenuId(LockScreen.isLocked(this) ? 0 :  R.menu.menu_context_osdir);
+            mDestDirPicker.setContextMenuId(LockScreen.isLocked(this) ? 0 : R.menu.menu_context_pick_osdir);
+            mDestDirPicker.setBaseQuery(mGalleryContentQuery);
             mDestDirPicker.show(this.getFragmentManager(), "osdirimage");
         }
         return false;

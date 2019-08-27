@@ -47,12 +47,12 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.transactionlog.TransactionLogSql;
 import de.k3b.database.QueryParameter;
-import de.k3b.io.FileUtils;
-import de.k3b.io.IProgessListener;
-import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
+import de.k3b.io.FileUtils;
 import de.k3b.io.IDirectory;
+import de.k3b.io.IProgessListener;
+import de.k3b.io.collections.SelectedFiles;
 import de.k3b.media.MediaFormatter;
 import de.k3b.media.PhotoPropertiesBulkUpdateService;
 import de.k3b.media.PhotoPropertiesUpdateHandler;
@@ -388,7 +388,7 @@ public class AndroidFileCommands extends FileCommands {
             destDir.defineDirectoryNavigation(OsUtils.getRootOSDirectory(null),
                     FotoSql.QUERY_TYPE_UNDEFINED,
                     getLastCopyToPath());
-            destDir.setContextMenuId(LockScreen.isLocked(mContext) ? 0 : R.menu.menu_context_osdir);
+            destDir.setContextMenuId(LockScreen.isLocked(mContext) ? 0 : R.menu.menu_context_pick_osdir);
             destDir.show(mContext.getFragmentManager(), "scannerPick");
 
             return true;

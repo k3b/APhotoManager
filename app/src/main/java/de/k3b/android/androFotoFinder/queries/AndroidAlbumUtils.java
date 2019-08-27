@@ -61,30 +61,6 @@ import de.k3b.tagDB.TagProcessor;
 public class AndroidAlbumUtils implements Common {
     private static final String mDebugPrefix = AndroidAlbumUtils.class.getSimpleName();
 
-    /** get from savedInstanceState else intent: inten.data=file-uri else EXTRA_QUERY else EXTRA_FILTER */
-    @Deprecated
-    public static GalleryFilterParameter getFilterAndRestQuery(
-            @NonNull Context context, @Nullable Bundle savedInstanceState,
-            @Nullable Intent intent, @Nullable QueryParameter resultQueryWithoutFilter,
-            boolean ignoreFilter, @Nullable StringBuilder dbgFilter) {
-        if (savedInstanceState != null) {
-            return getFilterAndRestQuery(
-                    context,
-                    null,
-                    savedInstanceState.getString(EXTRA_QUERY),
-                    savedInstanceState.getString(EXTRA_FILTER),
-                    resultQueryWithoutFilter, ignoreFilter, dbgFilter);
-        } else if (intent != null) {
-            return getFilterAndRestQuery(
-                    context,
-                    IntentUtil.getUri(intent),
-                    intent.getStringExtra(EXTRA_QUERY),
-                    intent.getStringExtra(EXTRA_FILTER),
-                    resultQueryWithoutFilter, ignoreFilter, dbgFilter);
-        }
-        return null;
-    }
-
     public static QueryParameter getQuery(@NonNull String paramNameSuffix,
             Properties sourceProperties, StringBuilder outQueryFileUri,
             @Nullable StringBuilder dbgMessageResult) {
@@ -153,7 +129,9 @@ public class AndroidAlbumUtils implements Common {
     }
 
     /** used by folder picker if album-file is picked instead of folder */
-    public static QueryParameter getQueryFromUri(String dbgContext, @NonNull Context context, Uri uri, @Nullable StringBuilder dbgFilter) {
+    public static QueryParameter getQueryFromUri(
+            String dbgContext, @NonNull Context context, @Nullable QueryParameter baseQuery, Uri uri,
+            @Nullable StringBuilder dbgFilter) {
         // ignore geo: or area: uri-s
         String path = (IntentUtil.isFileOrContentUri(uri, true)) ? uri.getPath() : null;
         if (!StringUtils.isNullOrEmpty(path)) {
@@ -210,50 +188,8 @@ public class AndroidAlbumUtils implements Common {
                             .append(path).append("'\n");
                 }
                 GalleryFilterParameter filter = new GalleryFilterParameter().setPath(path);
-                return TagSql.filter2NewQuery(filter);
+                return AndroidAlbumUtils.getAsMergedNewQueryParameter(baseQuery, filter);
             }
-        }
-        return null;
-    }
-
-    @Deprecated
-    public static GalleryFilterParameter getGalleryFilterAndRestQueryFromQueryUri(
-            @NonNull Context context, Uri uri, QueryParameter resultQueryWithoutFilter,
-            boolean ignoreFilter, @Nullable StringBuilder dbgFilter) {
-        QueryParameter query = getQueryFromUri(mDebugPrefix, context, uri, null);
-        if (query != null) {
-            if ((uri != null) && (dbgFilter != null)) {
-                dbgFilter.append("query from uri ").append(uri).append("\n");
-            }
-            return getFilterAndRestQuery(query, resultQueryWithoutFilter, ignoreFilter, dbgFilter);
-        }
-        return null;
-    }
-
-    @Deprecated
-    private static GalleryFilterParameter getFilterAndRestQuery(
-            @NonNull Context context, Uri uri, String sql, String filter, QueryParameter resultQueryWithoutFilter,
-            boolean ignoreFilter, @Nullable StringBuilder dbgFilter) {
-        if (uri != null) {
-            return getGalleryFilterAndRestQueryFromQueryUri(context, uri, resultQueryWithoutFilter, ignoreFilter, dbgFilter);
-        }
-
-        if ((sql != null) && (dbgFilter != null)) {
-            dbgFilter.append("query from ").append(EXTRA_QUERY).append("\n\t").append(sql).append("\n");
-        }
-        QueryParameter query = QueryParameter.parse(sql);
-        final GalleryFilterParameter result = getFilterAndRestQuery(query, resultQueryWithoutFilter, ignoreFilter, dbgFilter);
-
-        if (filter == null) {
-            // no own value for filter return parsed filter
-            return result;
-        }
-
-        if (filter != null) {
-            if (dbgFilter != null) {
-                dbgFilter.append("filter from ").append(EXTRA_FILTER).append("=").append(filter).append("\n");
-            }
-            return GalleryFilterParameter.parse(filter, new GalleryFilterParameter());
         }
         return null;
     }
@@ -269,7 +205,7 @@ public class AndroidAlbumUtils implements Common {
             String dbgMessagePrefix, @NonNull Context context, @Nullable Uri uri, @Nullable String sql, @Nullable String filter,
             @Nullable StringBuilder dbgMessageResult) {
         if (uri != null) {
-            QueryParameter query = getQueryFromUri(dbgMessagePrefix, context, uri, dbgMessageResult);
+            QueryParameter query = getQueryFromUri(dbgMessagePrefix, context, null, uri, dbgMessageResult);
             if (query != null) {
                 return query;
             }
@@ -289,20 +225,6 @@ public class AndroidAlbumUtils implements Common {
             return TagSql.filter2NewQuery(GalleryFilterParameter.parse(filter, new GalleryFilterParameter()));
         }
         return null;
-    }
-
-    @Deprecated
-    private static GalleryFilterParameter getFilterAndRestQuery(
-            QueryParameter query, QueryParameter resultQueryWithoutFilter,
-            boolean ignoreFilter, @Nullable StringBuilder dbgFilter) {
-
-        final GalleryFilterParameter result = (ignoreFilter) ? null : (GalleryFilterParameter) TagSql.parseQueryEx(query, true);
-
-        if (resultQueryWithoutFilter != null) {
-            resultQueryWithoutFilter.clear();
-            resultQueryWithoutFilter.getFrom(query);
-        }
-        return result;
     }
 
     /**

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -50,8 +50,22 @@
         android:visible="true"
         android:orderInCategory="15"
         android:showAsAction="never" />
+
     <item android:id="@+id/cmd_photo" android:title="@string/show_photo"
         android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
+    <item
+        android:id="@+id/cmd_photo_base"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/show_photo"
+        android:visible="false" />
     <item android:id="@+id/cmd_gallery" android:title="@string/show_in_gallery_menu_title"
         android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
+    <item
+        android:id="@+id/cmd_gallery_base"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/show_in_gallery_menu_title"
+        android:visible="false" />
+
 </menu>

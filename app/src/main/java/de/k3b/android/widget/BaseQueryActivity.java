@@ -56,7 +56,6 @@ import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.osmdroid.OsmdroidUtil;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
-
 import de.k3b.database.QueryParameter;
 import de.k3b.io.AlbumFile;
 import de.k3b.io.Directory;
@@ -88,6 +87,117 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
     protected String mTitleResultCount = "";
 
     protected boolean mHasEmbeddedDirPicker = false;
+
+    private void navigateTo(String selectedAbsolutePath, int queryTypeId) {
+
+        if (selectedAbsolutePath != null) {
+            final GalleryFilterParameter currentSubFilterSettings = this.mGalleryQueryParameter.getCurrentSubFilterSettings();
+            if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_GEO) {
+                final String why = "FotoGalleryActivity.navigateTo tags geo ";
+                Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath + " from "
+                        + DirectoryFormatter.formatLatLon(currentSubFilterSettings.getLatitudeMin()
+                        , currentSubFilterSettings.getLogituedMin()
+                        , currentSubFilterSettings.getLatitudeMax()
+                        , currentSubFilterSettings.getLogituedMax()));
+                currentSubFilterSettings.get(DirectoryFormatter.parseLatLon(selectedAbsolutePath));
+
+                reloadGui(why);
+
+            } else if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_TAG) {
+                final String why = "FotoGalleryActivity.navigateTo tags ";
+                Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath + " from "
+                        + ListUtils.toString(this.mGalleryQueryParameter.getCurrentSubFilterSettings().getTagsAllIncluded()));
+                currentSubFilterSettings.setTagsAllIncluded(new ArrayList<>(ListUtils.fromString(selectedAbsolutePath)));
+
+                reloadGui(why);
+            } else if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_DATE) {
+                final String why = "FotoGalleryActivity.navigateTo date ";
+                Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath + " from " + currentSubFilterSettings.getDatePath());
+
+                Date from = new Date();
+                Date to = new Date();
+                DirectoryFormatter.parseDatesPath(selectedAbsolutePath, from, to);
+
+                currentSubFilterSettings.setDate(from.getTime(), to.getTime());
+                this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_DATE;
+                this.mGalleryQueryParameter.mDirQueryID = queryTypeId;
+                setTitle();
+
+                reloadGui(why);
+            } else if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_DATE_MODIFIED) {
+                final String why = "FotoGalleryActivity.navigateTo date modified";
+                Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath + " from " + currentSubFilterSettings.getDateModifiedPath());
+
+                Date from = new Date();
+                Date to = new Date();
+                DirectoryFormatter.parseDatesPath(selectedAbsolutePath, from, to);
+
+                currentSubFilterSettings.setDateModified(from.getTime(), to.getTime());
+                this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_DATE_MODIFIED;
+                this.mGalleryQueryParameter.mDirQueryID = queryTypeId;
+                setTitle();
+
+                reloadGui(why);
+            } else if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_PATH) {
+                GalleryFilterPathState state = new GalleryFilterPathState()
+                        .load(BaseQueryActivity.this,
+                                null, null);
+                File queryFile = AlbumFile.getExistingQueryFileOrNull(selectedAbsolutePath);
+                if (queryFile != null) {
+                    final String why = "FotoGalleryActivity.navigate to virtual album ";
+                    Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath);
+
+                    QueryParameter albumQuery = AndroidAlbumUtils.getQueryFromUri(mDebugPrefix + " navigateTo ", this, null, Uri.fromFile(queryFile), null);
+                    if (albumQuery != null) {
+                        this.mGalleryQueryParameter.mGalleryContentBaseQuery = albumQuery;
+                        this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_ALBUM;
+                        currentSubFilterSettings.setPath(selectedAbsolutePath);
+
+                        state.setLastPath(queryFile.getParent());
+                        state.setAlbum(Uri.fromFile(queryFile));
+
+                        reloadGui(why);
+                    }
+                } else {
+                    final String why = "FotoGalleryActivity.navigateTo dir ";
+                    Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath + " from " + currentSubFilterSettings.getPath());
+
+                    currentSubFilterSettings.setPath(selectedAbsolutePath + "/%");
+                    this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_PATH;
+                    this.mGalleryQueryParameter.mDirQueryID = queryTypeId;
+                    state.setLastPath(selectedAbsolutePath);
+                    setTitle();
+
+                    reloadGui(why);
+                }
+                state.save(this, null);
+
+            } // if SUB_FILTER_MODE_PATH
+        }
+    }
+
+    // ...path, {album, +tag, ?search, #date, lat+long
+    public CharSequence getValueAsTitle(boolean longName) {
+        if (mGalleryQueryParameter == null) return null;
+        return mGalleryQueryParameter.getValueAsTitle(longName);
+    }
+
+    /**
+     * allows childclass to have their own sharedPreference names
+     */
+    protected String fixSharedPrefSuffix(String statSuffix) {
+        return statSuffix;
+    }
+
+
+    private FolderApi mFolderApi = null;
+
+    private FolderApi getFolderApi() {
+        if (mFolderApi == null) {
+            mFolderApi = new FolderApi();
+        }
+        return mFolderApi;
+    }
 
     /**
      * every thing that belongs to search.
@@ -239,7 +349,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                             Uri uri = Uri.fromFile(new File(path));
                             QueryParameter albumQuery = AndroidAlbumUtils.getQueryFromUri(
                                     mDebugPrefix + " calculateEffectiveGalleryContentQuery ",
-                                    BaseQueryActivity.this, uri, null);
+                                    BaseQueryActivity.this, null, uri, null);
                             if (albumQuery != null) {
                                 result.getWhereFrom(albumQuery, true);
                             } else if (PhotoPropertiesMediaFilesScanner.isNoMedia(path, PhotoPropertiesMediaFilesScanner.DEFAULT_SCAN_DEPTH)) {
@@ -501,229 +611,6 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
         }
     }
 
-    // ...path, {album, +tag, ?search, #date, lat+long
-    public CharSequence getValueAsTitle(boolean longName) {
-        if (mGalleryQueryParameter == null) return null;
-        return mGalleryQueryParameter.getValueAsTitle(longName);
-    }
-
-    /** allows childclass to have their own sharedPreference names */
-    protected String fixSharedPrefSuffix(String statSuffix) {
-        return statSuffix;
-    }
-
-
-    private FolderApi mFolderApi = null;
-    private FolderApi getFolderApi() {
-        if (mFolderApi == null) {
-            mFolderApi = new FolderApi();
-        }
-        return mFolderApi;
-    }
-
-    protected class FolderApi {
-        // either folder picker or date picker
-        private static final int QUERY_TYPE_GROUP_ALBUM = FotoSql.QUERY_TYPE_GROUP_ALBUM;
-        // either folder picker or date picker
-        private static final int QUERY_TYPE_GROUP_DATE = FotoSql.QUERY_TYPE_GROUP_DATE;
-
-        private static final int QUERY_TYPE_GROUP_DATE_MODIFIED = FotoSql.QUERY_TYPE_GROUP_DATE_MODIFIED;
-
-        private IDirectory mDirectoryRoot = null;
-        private IDirectory mDateRoot = null;
-        private IDirectory mDateModifiedRoot = null;
-
-        /**
-         * true if activity should show navigator dialog after loading mDirectoryRoot is complete
-         */
-        private boolean mMustShowNavigator = false;
-
-        /**
-         * set while dir picker is active
-         */
-        private DirectoryPickerFragment mDirPicker = null;
-
-        private void openDatePicker() {
-            openPicker(BaseQueryActivity.GalleryQueryParameter.SUB_FILTER_MODE_DATE, QUERY_TYPE_GROUP_DATE);
-        }
-
-        private void openDateModifiedPicker() {
-            openPicker(GalleryQueryParameter.SUB_FILTER_MODE_DATE_MODIFIED, QUERY_TYPE_GROUP_DATE_MODIFIED);
-        }
-
-        private void openFolderPicker() {
-            openPicker(BaseQueryActivity.GalleryQueryParameter.SUB_FILTER_MODE_PATH, QUERY_TYPE_GROUP_ALBUM);
-        }
-
-        private void openPicker(final int filterMode, int _dirQueryID) {
-            mGalleryQueryParameter.mCurrentSubFilterMode = filterMode;
-            final Activity context = BaseQueryActivity.this;
-
-            /** if wrong datatype was saved: gallery is not allowed for dirPicker */
-            final int dirQueryID =
-                    (FotoSql.QUERY_TYPE_GALLERY == _dirQueryID)
-                            ? QUERY_TYPE_GROUP_ALBUM
-                            : _dirQueryID;
-
-            mGalleryQueryParameter.mDirQueryID = dirQueryID;
-
-            boolean loadDate = (dirQueryID == QUERY_TYPE_GROUP_DATE) || (dirQueryID == QUERY_TYPE_GROUP_DATE_MODIFIED);
-            final IDirectory currentDirectoryRoot = getiDirectoryRoot(dirQueryID);
-            if (currentDirectoryRoot == null) {
-                // not loaded yet. load directoryRoot in background
-                final QueryParameter mergedBaseQuery = FotoSql.getQuery(dirQueryID);
-                mergedBaseQuery.getWhereFrom(mGalleryQueryParameter.mGalleryContentBaseQuery, false);
-                if (mergedBaseQuery != null) {
-                    this.mMustShowNavigator = true;
-                    mergedBaseQuery.setID(dirQueryID);
-
-                    DirectoryLoaderTask loader = new DirectoryLoaderTask(context, loadDate && LibGlobal.datePickerUseDecade,
-                            mDebugPrefix + " from openPicker(dirQueryID=" +
-                                    FotoSql.getName(getApplicationContext(), dirQueryID) + ")") {
-                        @Override
-                        protected void onPostExecute(IDirectory directoryRoot) {
-                            onDirectoryDataLoadComplete(dirQueryID, directoryRoot);
-                        }
-                    };
-                    switch (dirQueryID) {
-                        case QUERY_TYPE_GROUP_DATE:
-                        case QUERY_TYPE_GROUP_DATE_MODIFIED:
-                            loader.execute(mergedBaseQuery);
-                            break;
-                        default:
-                            // limit valbums to matching parent-path query
-                            QueryParameter vAlbumQueryWithPathExpr = FotoSql.copyPathExpressions(FotoSql.queryVAlbum, mergedBaseQuery);
-                            if (vAlbumQueryWithPathExpr == null)
-                                vAlbumQueryWithPathExpr = FotoSql.queryVAlbum;
-
-                            // load dir-s + "*.album"
-                            loader.execute(mergedBaseQuery, vAlbumQueryWithPathExpr);
-                    }
-
-                } else {
-                    Log.e(Global.LOG_CONTEXT, mDebugPrefix + " this.mDirQueryID undefined "
-                            + FotoSql.getName(getApplicationContext(), mGalleryQueryParameter.mDirQueryID));
-                }
-                // if not loaded yet
-            } else {
-                // if loaded
-                mMustShowNavigator = false;
-                final FragmentManager manager = getFragmentManager();
-                DirectoryPickerFragment dirDialog = new DirectoryPickerFragment();
-
-                dirDialog.setContextMenuId(LockScreen.isLocked(context) ? 0 : R.menu.menu_context_dirpicker);
-
-                String initialPath = mGalleryQueryParameter.getCurrentSubFilterSettings().getPath();
-
-                if ((initialPath == null) && (!loadDate)) {
-                    initialPath = new GalleryFilterPathState()
-                            .load(BaseQueryActivity.this,
-                                    null,null)
-                            .getPathDefault(null);
-                }
-
-                if ((initialPath != null) && (initialPath.endsWith("%"))) {
-                    initialPath = initialPath.substring(0,initialPath.length() - 1);
-                }
-                dirDialog.defineDirectoryNavigation(currentDirectoryRoot, dirQueryID,
-                        initialPath);
-
-                mDirPicker = dirDialog;
-                setAutoClose(mDirPicker, null, null);
-                dirDialog.show(manager, DLG_NAVIGATOR_TAG);
-            }
-        }
-
-        private IDirectory getiDirectoryRoot(int dirQueryID) {
-            switch (dirQueryID) {
-                case QUERY_TYPE_GROUP_DATE:
-                    return this.mDateRoot;
-                case QUERY_TYPE_GROUP_DATE_MODIFIED:
-                    return this.mDateModifiedRoot;
-                default:
-                    return this.mDirectoryRoot;
-            }
-        }
-
-        private void onDirectoryDataLoadComplete(int dirQueryID, IDirectory directoryRoot) {
-            if (directoryRoot == null) {
-                final String message = getString(R.string.folder_err_load_failed_format, FotoSql.getName(BaseQueryActivity.this, mGalleryQueryParameter.getDirQueryID()));
-                Toast.makeText(BaseQueryActivity.this, message, Toast.LENGTH_LONG).show();
-            } else {
-                boolean mustDefineNavigation;
-                switch (dirQueryID) {
-                    case QUERY_TYPE_GROUP_DATE:
-                        mustDefineNavigation= (mGalleryQueryParameter.getCurrentSubFilterSettings().getDatePath() != null);
-                        this.mDateRoot = directoryRoot;
-                        break;
-                    case QUERY_TYPE_GROUP_DATE_MODIFIED:
-                        mustDefineNavigation = (mGalleryQueryParameter.getCurrentSubFilterSettings().getDateModifiedPath() != null);
-                        this.mDateModifiedRoot = directoryRoot;
-                        break;
-                    default:
-                        mustDefineNavigation = (mGalleryQueryParameter.getCurrentSubFilterSettings().getPath() != null);
-                        this.mDirectoryRoot = directoryRoot;
-                }
-
-                final boolean mustShowFolderPicker = (directoryRoot != null) && (this.mMustShowNavigator);
-
-                if (Global.debugEnabled) {
-                    StringBuilder name = new StringBuilder(directoryRoot.getAbsolute());
-                    Directory.appendCount(name, directoryRoot, Directory.OPT_DIR | Directory.OPT_SUB_DIR);
-                    Log.i(Global.LOG_CONTEXT, mDebugPrefix + "onDirectoryDataLoadComplete(" +
-                            "mustDefineNavigation=" + mustDefineNavigation +
-                            ", mustShowFolderPicker=" + mustShowFolderPicker +
-                            ", content=" + name + ",dirQueryID=" +
-                            FotoSql.getName(getApplicationContext(), dirQueryID) + ")");
-                }
-
-                if (mustDefineNavigation) {
-                    defineDirectoryNavigation(directoryRoot);
-                }
-                Global.debugMemory(mDebugPrefix, "onDirectoryDataLoadComplete");
-
-                if (mustShowFolderPicker) {
-                    switch (dirQueryID) {
-                        case QUERY_TYPE_GROUP_DATE:
-                            openDatePicker();
-                            break;
-                        case QUERY_TYPE_GROUP_DATE_MODIFIED:
-                            openDateModifiedPicker();
-                            break;
-                        default:
-                            openFolderPicker();
-                    }
-                }
-            }
-        }
-
-        private void refreshSelection() {
-            IDirectory lastPopUpSelection = (mDirPicker == null) ? null : mDirPicker.getLastPopUpSelection();
-            if (lastPopUpSelection != null) lastPopUpSelection.refresh();
-        }
-
-        private void invalidateDirectories(String why) {
-            mDirectoryRoot = invalidateDirectories(why, mDirectoryRoot);
-            mDateRoot = invalidateDirectories(why, mDateRoot);
-            mDateModifiedRoot = invalidateDirectories(why, mDateModifiedRoot);
-        }
-
-        private IDirectory invalidateDirectories(String why, IDirectory directoryRoot) {
-            if (directoryRoot != null) {
-                if (Global.debugEnabled) {
-                    StringBuilder name = new StringBuilder(directoryRoot.getAbsolute());
-                    Directory.appendCount(name, directoryRoot, Directory.OPT_DIR | Directory.OPT_SUB_DIR);
-                    Log.i(Global.LOG_CONTEXT, mDebugPrefix + "invalidateDirectories(" + name + ") because of " + why);
-                }
-                if (mDirPicker == null) {
-                    directoryRoot.destroy();
-                    directoryRoot = null; // must refreshLocal next time
-                }
-            }
-            return directoryRoot;
-        }
-    }
-
     abstract protected void defineDirectoryNavigation(IDirectory directoryRoot);
 
     private void openLatLonPicker(SelectedItems selectedItems) {
@@ -835,7 +722,9 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
         getFolderApi().mDirPicker = null;
     }
 
-    /** DirectoryPickerFragment#OnDirectoryInteractionListener: called after the selection in tree has changed */
+    /**
+     * DirectoryPickerFragment#OnDirectoryInteractionListener: called after the selection in tree has changed
+     */
     @Override
     public void onDirectorySelectionChanged(String selectedAbsolutePath, int queryTypeId) {
         if (this.mHasEmbeddedDirPicker) {
@@ -843,91 +732,207 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
         }
     }
 
-    private void navigateTo(String selectedAbsolutePath, int queryTypeId) {
+    protected class FolderApi {
+        // either folder picker or date picker
+        private static final int QUERY_TYPE_GROUP_ALBUM = FotoSql.QUERY_TYPE_GROUP_ALBUM;
+        // either folder picker or date picker
+        private static final int QUERY_TYPE_GROUP_DATE = FotoSql.QUERY_TYPE_GROUP_DATE;
 
-        if (selectedAbsolutePath != null) {
-            final GalleryFilterParameter currentSubFilterSettings = this.mGalleryQueryParameter.getCurrentSubFilterSettings();
-            if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_GEO) {
-                final String why = "FotoGalleryActivity.navigateTo tags geo ";
-                Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath + " from "
-                        + DirectoryFormatter.formatLatLon(currentSubFilterSettings.getLatitudeMin()
-                        ,currentSubFilterSettings.getLogituedMin()
-                        ,currentSubFilterSettings.getLatitudeMax()
-                        ,currentSubFilterSettings.getLogituedMax()));
-                currentSubFilterSettings.get(DirectoryFormatter.parseLatLon(selectedAbsolutePath));
+        private static final int QUERY_TYPE_GROUP_DATE_MODIFIED = FotoSql.QUERY_TYPE_GROUP_DATE_MODIFIED;
 
-                reloadGui(why);
+        private IDirectory mDirectoryRoot = null;
+        private IDirectory mDateRoot = null;
+        private IDirectory mDateModifiedRoot = null;
 
-            } else if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_TAG) {
-                final String why = "FotoGalleryActivity.navigateTo tags ";
-                Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath + " from "
-                        + ListUtils.toString(this.mGalleryQueryParameter.getCurrentSubFilterSettings().getTagsAllIncluded()));
-                currentSubFilterSettings.setTagsAllIncluded(new ArrayList<>(ListUtils.fromString(selectedAbsolutePath)));
+        /**
+         * true if activity should show navigator dialog after loading mDirectoryRoot is complete
+         */
+        private boolean mMustShowNavigator = false;
 
-                reloadGui(why);
-            } else if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_DATE) {
-                final String why = "FotoGalleryActivity.navigateTo date ";
-                Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath + " from " + currentSubFilterSettings.getDatePath());
+        /**
+         * set while dir picker is active
+         */
+        private DirectoryPickerFragment mDirPicker = null;
 
-                Date from = new Date();
-                Date to = new Date();
-                DirectoryFormatter.parseDatesPath(selectedAbsolutePath, from, to);
+        private void openDatePicker() {
+            openPicker(BaseQueryActivity.GalleryQueryParameter.SUB_FILTER_MODE_DATE, QUERY_TYPE_GROUP_DATE, R.menu.menu_context_pick_date);
+        }
 
-                currentSubFilterSettings.setDate(from.getTime(), to.getTime());
-                this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_DATE;
-                this.mGalleryQueryParameter.mDirQueryID = queryTypeId;
-                setTitle();
+        private void openDateModifiedPicker() {
+            openPicker(GalleryQueryParameter.SUB_FILTER_MODE_DATE_MODIFIED, QUERY_TYPE_GROUP_DATE_MODIFIED, R.menu.menu_context_pick_date);
+        }
 
-                reloadGui(why);
-            } else if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_DATE_MODIFIED) {
-                final String why = "FotoGalleryActivity.navigateTo date modified";
-                Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath + " from " + currentSubFilterSettings.getDateModifiedPath());
+        private void openFolderPicker() {
+            openPicker(BaseQueryActivity.GalleryQueryParameter.SUB_FILTER_MODE_PATH, QUERY_TYPE_GROUP_ALBUM, R.menu.menu_context_pick_dir);
+        }
 
-                Date from = new Date();
-                Date to = new Date();
-                DirectoryFormatter.parseDatesPath(selectedAbsolutePath, from, to);
+        private void openPicker(final int filterMode, int _dirQueryID, int menuId) {
+            mGalleryQueryParameter.mCurrentSubFilterMode = filterMode;
+            final Activity context = BaseQueryActivity.this;
 
-                currentSubFilterSettings.setDateModified(from.getTime(), to.getTime());
-                this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_DATE_MODIFIED;
-                this.mGalleryQueryParameter.mDirQueryID = queryTypeId;
-                setTitle();
+            /** if wrong datatype was saved: gallery is not allowed for dirPicker */
+            final int dirQueryID =
+                    (FotoSql.QUERY_TYPE_GALLERY == _dirQueryID)
+                            ? QUERY_TYPE_GROUP_ALBUM
+                            : _dirQueryID;
 
-                reloadGui(why);
-            } else if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_PATH) {
-                GalleryFilterPathState state = new GalleryFilterPathState()
-                        .load(BaseQueryActivity.this,
-                                null,null);
-                File queryFile = AlbumFile.getExistingQueryFileOrNull(selectedAbsolutePath);
-                if (queryFile != null) {
-                    final String why = "FotoGalleryActivity.navigate to virtual album ";
-                    Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath);
+            mGalleryQueryParameter.mDirQueryID = dirQueryID;
 
-                    QueryParameter albumQuery = AndroidAlbumUtils.getQueryFromUri(mDebugPrefix + " navigateTo ", this, Uri.fromFile(queryFile), null);
-                    if (albumQuery != null) {
-                        this.mGalleryQueryParameter.mGalleryContentBaseQuery = albumQuery;
-                        this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_ALBUM;
-                        currentSubFilterSettings.setPath(selectedAbsolutePath);
+            boolean loadDate = (dirQueryID == QUERY_TYPE_GROUP_DATE) || (dirQueryID == QUERY_TYPE_GROUP_DATE_MODIFIED);
+            final IDirectory currentDirectoryRoot = getiDirectoryRoot(dirQueryID);
+            if (currentDirectoryRoot == null) {
+                // not loaded yet. load directoryRoot in background
+                final QueryParameter mergedBaseQuery = FotoSql.getQuery(dirQueryID);
+                mergedBaseQuery.getWhereFrom(mGalleryQueryParameter.mGalleryContentBaseQuery, false);
+                if (mergedBaseQuery != null) {
+                    this.mMustShowNavigator = true;
+                    mergedBaseQuery.setID(dirQueryID);
 
-                        state.setLastPath(queryFile.getParent());
-                        state.setAlbum(Uri.fromFile(queryFile));
+                    DirectoryLoaderTask loader = new DirectoryLoaderTask(context, loadDate && LibGlobal.datePickerUseDecade,
+                            mDebugPrefix + " from openPicker(dirQueryID=" +
+                                    FotoSql.getName(getApplicationContext(), dirQueryID) + ")") {
+                        @Override
+                        protected void onPostExecute(IDirectory directoryRoot) {
+                            onDirectoryDataLoadComplete(dirQueryID, directoryRoot);
+                        }
+                    };
+                    switch (dirQueryID) {
+                        case QUERY_TYPE_GROUP_DATE:
+                        case QUERY_TYPE_GROUP_DATE_MODIFIED:
+                            loader.execute(mergedBaseQuery);
+                            break;
+                        default:
+                            // limit valbums to matching parent-path query
+                            QueryParameter vAlbumQueryWithPathExpr = FotoSql.copyPathExpressions(FotoSql.queryVAlbum, mergedBaseQuery);
+                            if (vAlbumQueryWithPathExpr == null)
+                                vAlbumQueryWithPathExpr = FotoSql.queryVAlbum;
 
-                        reloadGui(why);
+                            // load dir-s + "*.album"
+                            loader.execute(mergedBaseQuery, vAlbumQueryWithPathExpr);
                     }
+
                 } else {
-                    final String why = "FotoGalleryActivity.navigateTo dir ";
-                    Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath + " from " + currentSubFilterSettings.getPath());
-
-                    currentSubFilterSettings.setPath(selectedAbsolutePath + "/%");
-                    this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_PATH;
-                    this.mGalleryQueryParameter.mDirQueryID = queryTypeId;
-                    state.setLastPath(selectedAbsolutePath);
-                    setTitle();
-
-                    reloadGui(why);
+                    Log.e(Global.LOG_CONTEXT, mDebugPrefix + " this.mDirQueryID undefined "
+                            + FotoSql.getName(getApplicationContext(), mGalleryQueryParameter.mDirQueryID));
                 }
-                state.save(this, null);
+                // if not loaded yet
+            } else {
+                // if loaded
+                mMustShowNavigator = false;
+                final FragmentManager manager = getFragmentManager();
+                DirectoryPickerFragment dirDialog = new DirectoryPickerFragment();
 
-            } // if SUB_FILTER_MODE_PATH
+                dirDialog.setContextMenuId(LockScreen.isLocked(context) ? 0 : menuId);
+                dirDialog.setBaseQuery(mGalleryQueryParameter.mGalleryContentBaseQuery);
+
+                String initialPath = mGalleryQueryParameter.getCurrentSubFilterSettings().getPath();
+
+                if ((initialPath == null) && (!loadDate)) {
+                    initialPath = new GalleryFilterPathState()
+                            .load(BaseQueryActivity.this,
+                                    null,null)
+                            .getPathDefault(null);
+                }
+
+                if ((initialPath != null) && (initialPath.endsWith("%"))) {
+                    initialPath = initialPath.substring(0,initialPath.length() - 1);
+                }
+                dirDialog.defineDirectoryNavigation(currentDirectoryRoot, dirQueryID,
+                        initialPath);
+
+                mDirPicker = dirDialog;
+                setAutoClose(mDirPicker, null, null);
+                dirDialog.show(manager, DLG_NAVIGATOR_TAG);
+            }
+        }
+
+        private IDirectory getiDirectoryRoot(int dirQueryID) {
+            switch (dirQueryID) {
+                case QUERY_TYPE_GROUP_DATE:
+                    return this.mDateRoot;
+                case QUERY_TYPE_GROUP_DATE_MODIFIED:
+                    return this.mDateModifiedRoot;
+                default:
+                    return this.mDirectoryRoot;
+            }
+        }
+
+        private void onDirectoryDataLoadComplete(int dirQueryID, IDirectory directoryRoot) {
+            if (directoryRoot == null) {
+                final String message = getString(R.string.folder_err_load_failed_format, FotoSql.getName(BaseQueryActivity.this, mGalleryQueryParameter.getDirQueryID()));
+                Toast.makeText(BaseQueryActivity.this, message, Toast.LENGTH_LONG).show();
+            } else {
+                boolean mustDefineNavigation;
+                switch (dirQueryID) {
+                    case QUERY_TYPE_GROUP_DATE:
+                        mustDefineNavigation= (mGalleryQueryParameter.getCurrentSubFilterSettings().getDatePath() != null);
+                        this.mDateRoot = directoryRoot;
+                        break;
+                    case QUERY_TYPE_GROUP_DATE_MODIFIED:
+                        mustDefineNavigation = (mGalleryQueryParameter.getCurrentSubFilterSettings().getDateModifiedPath() != null);
+                        this.mDateModifiedRoot = directoryRoot;
+                        break;
+                    default:
+                        mustDefineNavigation = (mGalleryQueryParameter.getCurrentSubFilterSettings().getPath() != null);
+                        this.mDirectoryRoot = directoryRoot;
+                }
+
+                final boolean mustShowFolderPicker = (directoryRoot != null) && (this.mMustShowNavigator);
+
+                if (Global.debugEnabled) {
+                    StringBuilder name = new StringBuilder(directoryRoot.getAbsolute());
+                    Directory.appendCount(name, directoryRoot, Directory.OPT_DIR | Directory.OPT_SUB_DIR);
+                    Log.i(Global.LOG_CONTEXT, mDebugPrefix + "onDirectoryDataLoadComplete(" +
+                            "mustDefineNavigation=" + mustDefineNavigation +
+                            ", mustShowFolderPicker=" + mustShowFolderPicker +
+                            ", content=" + name + ",dirQueryID=" +
+                            FotoSql.getName(getApplicationContext(), dirQueryID) + ")");
+                }
+
+                if (mustDefineNavigation) {
+                    defineDirectoryNavigation(directoryRoot);
+                }
+                Global.debugMemory(mDebugPrefix, "onDirectoryDataLoadComplete");
+
+                if (mustShowFolderPicker) {
+                    switch (dirQueryID) {
+                        case QUERY_TYPE_GROUP_DATE:
+                            openDatePicker();
+                            break;
+                        case QUERY_TYPE_GROUP_DATE_MODIFIED:
+                            openDateModifiedPicker();
+                            break;
+                        default:
+                            openFolderPicker();
+                    }
+                }
+            }
+        }
+
+        private void refreshSelection() {
+            IDirectory lastPopUpSelection = (mDirPicker == null) ? null : mDirPicker.getLastPopUpSelection();
+            if (lastPopUpSelection != null) lastPopUpSelection.refresh();
+        }
+
+        private void invalidateDirectories(String why) {
+            mDirectoryRoot = invalidateDirectories(why, mDirectoryRoot);
+            mDateRoot = invalidateDirectories(why, mDateRoot);
+            mDateModifiedRoot = invalidateDirectories(why, mDateModifiedRoot);
+        }
+
+        private IDirectory invalidateDirectories(String why, IDirectory directoryRoot) {
+            if (directoryRoot != null) {
+                if (Global.debugEnabled) {
+                    StringBuilder name = new StringBuilder(directoryRoot.getAbsolute());
+                    Directory.appendCount(name, directoryRoot, Directory.OPT_DIR | Directory.OPT_SUB_DIR);
+                    Log.i(Global.LOG_CONTEXT, mDebugPrefix + "invalidateDirectories(" + name + ") because of " + why);
+                }
+                if (mDirPicker == null) {
+                    directoryRoot.destroy();
+                    directoryRoot = null; // must refreshLocal next time
+                }
+            }
+            return directoryRoot;
         }
     }
 

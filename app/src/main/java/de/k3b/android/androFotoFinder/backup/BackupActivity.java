@@ -164,7 +164,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
     private static QueryParameter getQuery(String debugContext, Activity context,
                                           Uri uri, SelectedFiles selectedFiles,
                                           IGalleryFilter filter, QueryParameter query) {
-        QueryParameter mergedQuery = AndroidAlbumUtils.getQueryFromUri(debugContext, context, uri, null);
+        QueryParameter mergedQuery = AndroidAlbumUtils.getQueryFromUri(debugContext, context, null, uri, null);
 
         if (mergedQuery == null) {
             final int idCount = (selectedFiles == null) ? 0 : selectedFiles.size();
@@ -449,9 +449,10 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
                 dlg.defineDirectoryNavigation(OsUtils.getRootOSDirectory(null),
                         0,
                         lastCopyToPath);
-                dlg.setContextMenuId(R.menu.menu_context_osdir);
+                dlg.setContextMenuId(R.menu.menu_context_pick_osdir);
                 dlg.setTitleId(titleId);
                 dlg.show(this.getFragmentManager(), "osdir");
+                dlg.setBaseQuery(Backup2ZipService.getEffectiveQueryParameter(gui));
                 setAutoClose(dlg, null, null);
             }
         }

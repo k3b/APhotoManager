@@ -871,15 +871,17 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
 
             int menuResId = 0; // no menu in app lock mode
             if (!LockScreen.isLocked(this)) {
-                menuResId = R.menu.menu_context_dirpicker;
+                menuResId = R.menu.menu_context_pick_dir;
                 if ((queryId == FotoSql.QUERY_TYPE_GROUP_DATE) || (queryId == FotoSql.QUERY_TYPE_GROUP_DATE)) {
-                    menuResId = R.menu.menu_context_datepicker;
+                    menuResId = R.menu.menu_context_pick_date;
                 }
             }
             dlg.setContextMenuId(menuResId);
+            dlg.setBaseQuery(getAsMergedQuery());
 
             dlg.defineDirectoryNavigation(dirInfo.directoryRoot, dirInfo.queryId, dirInfo.currentPath);
             dlg.show(manager, DLG_NAVIGATOR_TAG);
+
             mDirPicker = dlg;
 
             setAutoClose(dlg, null, null);
@@ -900,7 +902,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             // selection was an album file
             final String selectedAlbumPath = selectedAlbumFile.getPath();
             setQueryAndFilter(AndroidAlbumUtils.getQueryFromUri(mDebugPrefix + ".onDirectoryPick loading album "
-                    + selectedAlbumPath, this, Uri.fromFile(selectedAlbumFile), null));
+                    + selectedAlbumPath, this, null, Uri.fromFile(selectedAlbumFile), null));
             mGalleryFilterPathState.setAlbum(Uri.fromFile(selectedAlbumFile));
             mGalleryFilterPathState.setLastPath(selectedAlbumFile.getParent());
             mLastSelectedAlbumDir = selectedAlbumPath; //??electedAlbumFile.getParent();

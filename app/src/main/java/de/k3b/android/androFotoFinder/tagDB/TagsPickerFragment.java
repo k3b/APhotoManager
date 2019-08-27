@@ -115,7 +115,7 @@ public class TagsPickerFragment  extends DialogFragment  {
     private AlertDialog mSubDialog = null;
 
 
-    private int mContextMenueId = R.menu.menu_tags_context;
+    private int mContextMenueId = R.menu.menu_context_pick_tags;
     private int mTitleId = 0;
 
     // local data
