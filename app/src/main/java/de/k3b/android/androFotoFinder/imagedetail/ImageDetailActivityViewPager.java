@@ -70,9 +70,9 @@ import de.k3b.android.util.OsUtils;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScannerAsyncTask;
 import de.k3b.android.widget.AboutDialogPreference;
+import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.Dialogs;
-import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.io.GeoUri;
@@ -92,7 +92,7 @@ import de.k3b.tagDB.Tag;
  * Swipe left/right to show previous/next image.
  */
 
-public class ImageDetailActivityViewPager extends LocalizedActivity implements Common, TagsPickerFragment.ITagsPicker {
+public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs implements Common, TagsPickerFragment.ITagsPicker {
     private static final String INSTANCE_STATE_MODIFY_COUNT = "mModifyCount";
     private static final String INSTANCE_STATE_LAST_SCROLL_POSITION = "lastScrollPosition";
     /** #70: remember on config change (screen rotation) */
@@ -1161,6 +1161,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         dlg.setAffectedNames(mTagWorflow.getWorkflow().getAffected());
         dlg.setAddNames(new ArrayList<String>());
         dlg.setRemoveNames(new ArrayList<String>());
+        dlg.setBaseQuery(mGalleryContentQuery);
+        setAutoClose(dlg, null, null);
         dlg.show(getFragmentManager(), "editTags");
         return true;
     }
@@ -1185,8 +1187,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     /** called by {@link TagsPickerFragment} */
     @Override
-    public boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag) {
-        return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, this, mGalleryContentQuery);
+    public boolean onTagPopUpClick(MenuItem menuItem, int menuItemItemId, Tag selectedTag) {
+        return TagsPickerFragment.handleMenuShow(mCurrentDialogFragment, menuItem, selectedTag.getName());
     }
 
     protected SelectedFiles getCurrentFoto() {

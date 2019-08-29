@@ -284,11 +284,11 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
             }
         });
 
-        cmd = (Button) findViewById(R.id.cmd_filter);
-        cmd.setOnClickListener(new View.OnClickListener() {
+        final Button cmd2 = (Button) findViewById(R.id.cmd_filter);
+        cmd2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onClickPickExif();
+                onClickPickExif("cmd " + cmd2.getText());
             }
         });
     }
@@ -328,10 +328,10 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         }
     }
 
-    private void onClickPickExif() {
+    private void onClickPickExif(String debugContext) {
         saveGuiToData();
         QueryParameter filter = QueryParameter.parse(mZipConfigData.getFilter());
-        GalleryFilterActivity.showActivity("[20]", BackupActivity.this,
+        GalleryFilterActivity.showActivity("[20] " + debugContext, BackupActivity.this,
                 null, filter, null, REQUEST_ID_PICK_EXIF);
     }
 

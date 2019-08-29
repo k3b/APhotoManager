@@ -51,6 +51,7 @@ import android.widget.Toast;
 
 import org.osmdroid.api.IGeoPoint;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -174,7 +175,16 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     /** one of the MODE_VIEW_PICKER_XXXX */
     private int mMode = MODE_VIEW_PICKER_NONE;
 
+    /**
+     * not null while mDestDirPicker is open
+     */
     private MoveOrCopyDestDirPicker mDestDirPicker = null;
+
+    /**
+     * not null while tag picker is open
+     */
+    private WeakReference<TagsPickerFragment> mTagPickerDialog = null;
+
     /**************** construction ******************/
     /**
      * Use this factory method to create a new instance of
@@ -981,6 +991,10 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         dlg.setAddNames(new ArrayList<String>());
         dlg.setRemoveNames(new ArrayList<String>());
         dlg.show(getFragmentManager(), "editTags");
+        dlg.setBaseQuery(getCurrentQuery());
+
+        ((FotoGalleryActivity) getActivity()).setAutoClose(dlg, null, null);
+        mTagPickerDialog = new WeakReference<TagsPickerFragment>(dlg);
         return true;
     }
 
@@ -1004,8 +1018,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     /** called by {@link TagsPickerFragment} */
     @Override
-    public boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag) {
-        return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, this.getActivity(), null);
+    public boolean onTagPopUpClick(MenuItem menuItem, int menuItemItemId, Tag selectedTag) {
+        if ((mTagPickerDialog == null) || (mTagPickerDialog.get() == null)) return false;
+        return TagsPickerFragment.handleMenuShow(mTagPickerDialog.get(), menuItem, selectedTag.getName());
     }
 
 

@@ -793,7 +793,9 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             dlg.setTitleId(idTitle);
             dlg.setAddNames(mFilter.getTagsAllIncluded());
             dlg.setRemoveNames(mFilter.getTagsAllExcluded());
+            dlg.setBaseQuery(getAsMergedQuery());
             dlg.show(manager, DLG_NAVIGATOR_TAG);
+
             setAutoClose(dlg, null, null);
         }
     }
@@ -817,8 +819,8 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
 
     /** called by {@link TagsPickerFragment} */
     @Override
-    public boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag) {
-        return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, this, getAsMergedQuery());
+    public boolean onTagPopUpClick(MenuItem menuItem, int menuItemItemId, Tag selectedTag) {
+        return TagsPickerFragment.handleMenuShow(mCurrentDialogFragment, menuItem, selectedTag.getName());
     }
 
     private void showLatLonPicker() {

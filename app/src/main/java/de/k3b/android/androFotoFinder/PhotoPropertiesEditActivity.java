@@ -562,8 +562,8 @@ public class PhotoPropertiesEditActivity extends ActivityWithAutoCloseDialogs im
          * called by {@link TagsPickerFragment}
          */
         @Override
-        public boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag) {
-            return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, PhotoPropertiesEditActivity.this, null);
+        public boolean onTagPopUpClick(MenuItem menuItem, int menuItemItemId, Tag selectedTag) {
+            return TagsPickerFragment.handleMenuShow(mCurrentDialogFragment, menuItem, selectedTag.getName());
         }
     }
 

@@ -623,10 +623,11 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                 this.mGalleryQueryParameter.getCurrentSubFilterSettings(), OsmdroidUtil.NO_ZOOM, selectedItems, null, false);
 
         dialog.show(manager, DLG_NAVIGATOR_TAG);
+        setAutoClose(dialog, null, null);
     }
 
-    private void openFilter() {
-        GalleryFilterActivity.showActivity("[23]", this,
+    private void openFilter(CharSequence debugContext) {
+        GalleryFilterActivity.showActivity("[23] neu " + debugContext, this,
                 null,
                 this.mGalleryQueryParameter.mGalleryContentBaseQuery,
                 null, BaseQueryActivity.resultID);
@@ -639,10 +640,12 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
         TagsPickerFragment dlg = new TagsPickerFragment();
         dlg.setFragmentOnwner(this);
         dlg.setTitleId(R.string.tags_activity_title);
+        dlg.setBaseQuery(this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery());
         List<String> included = this.mGalleryQueryParameter.getCurrentSubFilterSettings().getTagsAllIncluded();
         if (included == null) included = new ArrayList<String>();
         dlg.setAddNames(included);
         dlg.show(manager, DLG_NAVIGATOR_TAG);
+        setAutoClose(dlg, null, null);
     }
 
     /**
@@ -1004,9 +1007,8 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
      * called by {@link TagsPickerFragment}
      */
     @Override
-    public boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag) {
-        return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, this,
-                this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery());
+    public boolean onTagPopUpClick(MenuItem menuItem, int menuItemItemId, Tag selectedTag) {
+        return TagsPickerFragment.handleMenuShow(mCurrentDialogFragment, menuItem, selectedTag.getName());
     }
 
     @Override
@@ -1023,9 +1025,9 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
         return result;
     }
 
-    protected boolean onOptionsItemSelected(MenuItem item, SelectedItems selectedItems) {
+    protected boolean onOptionsItemSelected(MenuItem menuItem, SelectedItems selectedItems) {
         // Handle presses on the action bar items
-        switch (item.getItemId()) {
+        switch (menuItem.getItemId()) {
             case R.id.cmd_date:
             case R.id.cmd_select_date:
                 getFolderApi().openDatePicker();
@@ -1047,7 +1049,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                 openTagPicker();
                 return true;
             case R.id.cmd_filter:
-                openFilter();
+                openFilter(menuItem.getTitle());
                 return true;
             case R.id.cmd_sort_date:
                 this.mGalleryQueryParameter.setSortID(FotoSql.SORT_BY_DATE);
@@ -1087,7 +1089,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                 return true;
 
             default:
-                return super.onOptionsItemSelected(item);
+                return super.onOptionsItemSelected(menuItem);
         }
     }
 

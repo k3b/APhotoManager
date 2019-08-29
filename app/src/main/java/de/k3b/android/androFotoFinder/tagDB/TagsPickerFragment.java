@@ -34,6 +34,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -47,13 +48,14 @@ import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
-import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
+import de.k3b.android.androFotoFinder.directory.ShowInMenuHandler;
+import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.Dialogs;
@@ -74,29 +76,23 @@ import de.k3b.tagDB.TagRepository;
  * Created by k3b on 04.01.2017.
  */
 
-public class TagsPickerFragment  extends DialogFragment  {
+public class TagsPickerFragment extends DialogFragment implements ShowInMenuHandler.PickerContext {
     public interface ITagsSelector {
         void onSelect(CharSequence tag, List<String> addNames);
     }
-    /** Owning Activity must implement this if it wants to handle the result of ok and cancel */
-    public interface ITagsPicker {
-        /** tag-dialog cancel pressed */
-        boolean onCancel(String msg);
 
-        /** tag-dialog ok pressed */
-        boolean onOk(List<String> addNames,
-                     List<String> removeNames);
-
-        boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag);
-    }
+    private WeakReference<View> anchor;
 
     private ITagsPicker mFragmentOnwner = null;
     private boolean mIsFilterMode = true;
     private ImageView mFilterMode;
     private ImageView mBookmarkMode;
+    private QueryParameter baseQuery;
     private CharSequence mFilterValue = null;
     private int mFilterSelection = -1;
     private ITagsSelector mSelector = null;
+    private ShowInMenuHandler showInMenuHandler = null;
+    private ListView mListView;
 
     public static final int ACTIVITY_ID = 78921;
 
@@ -111,6 +107,12 @@ public class TagsPickerFragment  extends DialogFragment  {
     private TagListArrayAdapter mDataAdapter;
     private EditText mFilterEdit;
 
+    public static boolean handleMenuShow(DialogFragment currentDialogFragment, MenuItem menuItem, String selectionPath) {
+        if (currentDialogFragment instanceof TagsPickerFragment) {
+            return ((TagsPickerFragment) currentDialogFragment).showInMenuHandler.onPopUpClick(menuItem, null, selectionPath);
+        }
+        return false;
+    }
     // not null when dialog is open that must be closed.
     private AlertDialog mSubDialog = null;
 
@@ -141,6 +143,10 @@ public class TagsPickerFragment  extends DialogFragment  {
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, debugPrefix + "()");
         }
+    }
+
+    public void setBaseQuery(QueryParameter baseQuery) {
+        this.baseQuery = baseQuery;
     }
 
     public TagsPickerFragment setTitleId(int titleId) {
@@ -223,11 +229,11 @@ public class TagsPickerFragment  extends DialogFragment  {
                 mAddNames, mRemoveNames, mAffectedNames, mBookMarkNames
         );
 
-        final ListView list = (ListView)view.findViewById(R.id.list);
-        list.setAdapter(mDataAdapter);
+        mListView = (ListView) view.findViewById(R.id.list);
+        mListView.setAdapter(mDataAdapter);
         if (mSelector != null) {
-            list.setFocusable(true);
-            list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            mListView.setFocusable(true);
+            mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 /** list item click. In tag pick mode: return filter-value and close */
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -248,12 +254,12 @@ public class TagsPickerFragment  extends DialogFragment  {
         if (mContextMenueId != 0)
 
         {
-            list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                 @Override
                 public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                     mCurrentMenuSelection = (position >= 0) ? mDataAdapter.getItem(position) : null;
                     Log.d(Global.LOG_CONTEXT,"tag-OnItemLongClick-" + ((mCurrentMenuSelection != null) ? mCurrentMenuSelection.getPath() : ""));
-                    onShowPopUp(mContextMenueId, view, mCurrentMenuSelection);
+                    onShowPopUp(view, mListView, mCurrentMenuSelection, mContextMenueId);
                     return true;
                 }
             });
@@ -346,12 +352,14 @@ public class TagsPickerFragment  extends DialogFragment  {
     @Override
     public void onDetach() {
         saveSettings();
+        showInMenuHandler = null;
         super.onDetach();
     }
 
     @Override public void onDestroy() {
         if (mSubDialog != null) mSubDialog.dismiss();
         mSubDialog = null;
+        showInMenuHandler = null;
         super.onDestroy();
     }
 
@@ -412,30 +420,64 @@ public class TagsPickerFragment  extends DialogFragment  {
         return true;
     }
 
+    /**
+     * interface PickerContext
+     */
+    @Override
+    public boolean onShowPopUp(View anchor, View owner, String selectionPath, Object selection, int... idContextMenue) {
+        Tag selectedTag = (Tag) selection;
+        if ((selectedTag == null) && (selectionPath != null))
+            selectedTag = new Tag().setName(selectionPath);
+        onShowPopUp(anchor, owner, selectedTag, idContextMenue);
+        return true;
+    }
+
     /** called via pathBar-Button-LongClick, tree-item-LongClick, popUp-button */
-    private void onShowPopUp(int contextMenueId, View anchor, Tag selection) {
-        PopupMenu popup = onCreatePopupMenu(contextMenueId, anchor, selection);
+    private void onShowPopUp(View anchor, View owner, Tag selection, int... idContextMenue) {
+        if (idContextMenue != null) {
+            if (owner != null) {
+                this.anchor = new WeakReference<View>(owner);
+            }
 
-        // without mClipboardItem paste is not possible
-        if (mClipboardItem == null) {
-            MenuItem menuItem = popup.getMenu().findItem(android.R.id.paste);
-            if (menuItem != null) menuItem.setVisible(false);
-        }
+            if ((anchor == null) && (this.anchor != null) && (this.anchor.get() != null)) {
+                anchor = this.anchor.get();
+            }
+            if (this.mListView == anchor) {
+                if (mListView.getSelectedView() != null) {
+                    anchor = mListView.getSelectedView();
+                }
+            }
 
-        if (popup != null) {
-            popup.show();
+
+            PopupMenu popup = onCreatePopupMenu(anchor, selection, idContextMenue);
+
+            // without mClipboardItem paste is not possible
+            if (mClipboardItem == null) {
+                MenuItem menuItem = popup.getMenu().findItem(android.R.id.paste);
+                if (menuItem != null) menuItem.setVisible(false);
+            }
+
+            if (popup != null) {
+                popup.show();
+            }
         }
     }
 
-
     @NonNull
-    private PopupMenu onCreatePopupMenu(int contextMenueId, View anchor, Tag selection) {
+    private PopupMenu onCreatePopupMenu(View anchor, Tag selection, int... contextMenueId) {
         PopupMenu popup = new PopupMenu(getActivity(), anchor);
         popup.setOnMenuItemClickListener(popUpListener);
         MenuInflater inflater = popup.getMenuInflater();
-        inflater.inflate(contextMenueId, popup.getMenu());
+        final Menu menu = popup.getMenu();
+        for (int idMenu : contextMenueId) {
+            inflater.inflate(idMenu, menu);
+        }
         if (selection != null) {
             mCurrentMenuSelection = selection;
+        }
+        this.showInMenuHandler = new ShowInMenuHandler(getActivity(), this, this.baseQuery, FotoSql.QUERY_TYPE_TAG);
+        if (selection != null) {
+            showInMenuHandler.fixMenuOpenIn(selection.getName(), menu);
         }
         return popup;
     }
@@ -448,7 +490,8 @@ public class TagsPickerFragment  extends DialogFragment  {
     };
 
     private boolean onPopUpClick(MenuItem menuItem) {
-        if (mFragmentOnwner.onTagPopUpClick(menuItem.getItemId(), mCurrentMenuSelection)) return true;
+        if ((mCurrentMenuSelection != null) && mFragmentOnwner.onTagPopUpClick(menuItem, menuItem.getItemId(), mCurrentMenuSelection))
+            return true;
         switch (menuItem.getItemId()) {
                     /*!!!!!
                     mCurrentMenuSelection = mDataAdapter.getItem(position);
@@ -483,28 +526,32 @@ public class TagsPickerFragment  extends DialogFragment  {
         return false;
     }
 
-
-    public static boolean handleMenuShow(int menuItemItemId, Tag selectedTag, Activity context, QueryParameter baseQuery) {
-        switch (menuItemItemId) {
-            case R.id.cmd_photo:
-                ImageDetailActivityViewPager.showActivity("[21]tag:" + selectedTag, context, null, 0, createSubQueryByTag(null, selectedTag), 0);
-                return true;
-            case R.id.cmd_gallery:
-                FotoGalleryActivity.showActivity("[22]tag:" + selectedTag, context, createSubQueryByTag(null, selectedTag), 0);
-                return true;
-            default:break;
+    /**
+     * interface PickerContext
+     */
+    @Override
+    public QueryParameter getSelectionQuery(String dbgContext, String tagName, int dirTypId, QueryParameter baseQuery) {
+        GalleryFilterParameter filterParameter = new GalleryFilterParameter();
+        if (!StringUtils.isNullOrEmpty(tagName)) {
+            filterParameter.setTagsAllIncluded(ListUtils.fromString(tagName));
         }
-        return false;
+        // filterParameter.setSort(FotoSql.SORT_BY_DATE, false);
+
+        return AndroidAlbumUtils.getAsMergedNewQueryParameter(baseQuery, filterParameter);
     }
 
-    @NonNull
-    private static QueryParameter createSubQueryByTag(QueryParameter baseQuery, Tag selectedTag) {
-        QueryParameter result = new QueryParameter(baseQuery);
-        ArrayList<Tag> includes = new ArrayList<Tag>();
-        includes.add(selectedTag);
-        TagSql.addWhereTagsIncluded(result, ListUtils.toStringList(selectedTag.getName()), false);
-        FotoSql.setSort(result, FotoSql.SORT_BY_DATE, false);
-        return result;
+    /**
+     * Owning Activity must implement this if it wants to handle the result of ok and cancel
+     */
+    public interface ITagsPicker {
+        /** tag-dialog cancel pressed */
+        boolean onCancel(String msg);
+
+        /** tag-dialog ok pressed */
+        boolean onOk(List<String> addNames,
+                     List<String> removeNames);
+
+        boolean onTagPopUpClick(MenuItem menuItem, int menuItemItemId, @NonNull Tag selectedTag);
     }
 
     @NonNull

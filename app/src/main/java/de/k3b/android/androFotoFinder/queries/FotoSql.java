@@ -97,6 +97,7 @@ public class FotoSql extends FotoSqlBase {
 
     public static final int QUERY_TYPE_GROUP_COPY = 20;
     public static final int QUERY_TYPE_GROUP_MOVE = 21;
+    public static final int QUERY_TYPE_TAG = 60;
 
     public static final int QUERY_TYPE_GROUP_DEFAULT = QUERY_TYPE_GROUP_ALBUM;
     public static final int QUERY_TYPE_DEFAULT = QUERY_TYPE_GALLERY;
@@ -670,6 +671,8 @@ public class FotoSql extends FotoSqlBase {
                 return context.getString(R.string.destination_copy);
             case QUERY_TYPE_GROUP_MOVE:
                 return context.getString(R.string.destination_move);
+            case QUERY_TYPE_TAG:
+                return context.getString(R.string.lbl_tag);
             default:
                 return "???";
         }

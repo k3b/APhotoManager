@@ -323,9 +323,15 @@ public class DirectoryPickerFragment extends DialogFragment
         }
     }
 
+    // interface PickerContext
     /** called via pathBar-Button-LongClick, tree-item-LongClick, popUp-button */
     @Override
-    public boolean onShowPopUp(View anchor, View owner, String selectionPath, IDirectory selection, int... idContextMenue) {
+    public boolean onShowPopUp(View anchor, View owner, String selectionPath, Object selection, int... idContextMenue) {
+        return onShowPopUp(anchor, owner, selectionPath, (IDirectory) selection, idContextMenue);
+    }
+
+    private boolean onShowPopUp(View anchor, View owner, String selectionPath, IDirectory selection, int... idContextMenue) {
+
         if (idContextMenue != null) {
             if (owner != null) {
                 this.anchor = new WeakReference<View>(owner);
@@ -377,7 +383,7 @@ public class DirectoryPickerFragment extends DialogFragment
             setMenuVisibility(menu, android.R.id.copy, !isAlbumFile);
 
             this.showInMenuHandler = new ShowInMenuHandler(mContext, this, baseQuery, mDirTypId);
-            if ((showInMenuHandler != null) && (selection != null)) {
+            if (selection != null) {
                 showInMenuHandler.fixMenuOpenIn(selection.getAbsolute(), menu);
             }
         }
@@ -710,6 +716,9 @@ public class DirectoryPickerFragment extends DialogFragment
         return false;
     }
 
+    /**
+     * interface PickerContext
+     */
     @Override
     public QueryParameter getSelectionQuery(String dbgContext, String selectionPath,
                                             int dirTypId, QueryParameter baseQuery) {
