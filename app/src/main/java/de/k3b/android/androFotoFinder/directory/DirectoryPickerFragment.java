@@ -417,7 +417,7 @@ public class DirectoryPickerFragment extends DialogFragment
             case R.id.cmd_mk_dir:
                 return onCreateSubDirQuestion(popUpSelection);
             case R.id.cmd_apm_edit:
-                return onEditApm(popUpSelection);
+                return onEditApm(menuItem, popUpSelection);
             case android.R.id.copy:
                 return onCopy(popUpSelection);
 
@@ -463,10 +463,10 @@ public class DirectoryPickerFragment extends DialogFragment
         return ClipboardUtil.addDirToClipboard(this.getActivity(), path);
     }
 
-    private boolean onEditApm(IDirectory selection) {
+    private boolean onEditApm(MenuItem menuItem, IDirectory selection) {
         String path = (selection == null) ? null : selection.getAbsolute();
         if (!StringUtils.isNullOrEmpty(path)) {
-            PhotoAutoprocessingEditActivity.showActivity("[5]", getActivity(),
+            PhotoAutoprocessingEditActivity.showActivity("[5]" + " menu " + menuItem.getTitle(), getActivity(),
                     null, path, getSrcFotos(), R.id.cmd_apm_edit);
             return true;
         }

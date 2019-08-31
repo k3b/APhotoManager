@@ -1049,7 +1049,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                 openTagPicker();
                 return true;
             case R.id.cmd_filter:
-                openFilter(menuItem.getTitle());
+                openFilter(" menu " + menuItem.getTitle());
                 return true;
             case R.id.cmd_sort_date:
                 this.mGalleryQueryParameter.setSortID(FotoSql.SORT_BY_DATE);

@@ -377,17 +377,17 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
         });
         mExifChanges = (TextView) findViewById(R.id.lbl_exif_changes);
 
-        Button cmd = (Button) findViewById(R.id.cmd_pick_exif);
+        final Button cmd = (Button) findViewById(R.id.cmd_pick_exif);
         cmd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onPickExif();
+                onPickExif(" cmd " + cmd.getText());
             }
         });
         cmd.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                return onReInferExifAndPick();
+                return onReInferExifAndPick(" cmd " + cmd.getText());
             }
         });
 
@@ -524,9 +524,9 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     /**
      * cmd exif press: schow exif editor
      */
-    private void onPickExif() {
+    private void onPickExif(String debugContext) {
         fromGui();
-        PhotoPropertiesEditActivity.showActivity("[4]", this, mCurrentAutoprocessingData.getMediaDefaults(),
+        PhotoPropertiesEditActivity.showActivity(debugContext, this, mCurrentAutoprocessingData.getMediaDefaults(),
                 null, getSelectedFiles(mDebugPrefix+"EditExif-", getIntent(),
                         false),
                 EXIF_EDIT_RESULT_ID, false);
@@ -535,7 +535,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     /**
      * #132: cmd exif long-press: infer exif from selected and schow exif editor
      */
-    private boolean onReInferExifAndPick() {
+    private boolean onReInferExifAndPick(String debugContext) {
         fromGui();
         IPhotoProperties currentMediaDefaults = mCurrentAutoprocessingData.getMediaDefaults();
 
@@ -552,7 +552,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
             inferedMediaDefaults.setTags(tags);
         }
 
-        PhotoPropertiesEditActivity.showActivity("[4]", this, currentMediaDefaults,
+        PhotoPropertiesEditActivity.showActivity(debugContext, this, currentMediaDefaults,
                 null, selectedFiles,
                 EXIF_EDIT_RESULT_ID, false);
         return true;

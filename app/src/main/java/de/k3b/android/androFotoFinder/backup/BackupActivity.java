@@ -288,7 +288,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         cmd2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onClickPickExif("cmd " + cmd2.getText());
+                onClickPickExif(" cmd " + cmd2.getText());
             }
         });
     }
@@ -441,8 +441,9 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
                 intent.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                         | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                         | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-                startActivityForResult(intent, REQUEST_ID_PICK_ZIP_OUT_DIR);
 
+                IntentUtil.startActivity("pickDir",
+                        this, REQUEST_ID_PICK_ZIP_OUT_DIR, intent);
             } else {
                 DestZipDirPicker dlg = DestZipDirPicker.newInstance(outDir/*, fotos*/);
 

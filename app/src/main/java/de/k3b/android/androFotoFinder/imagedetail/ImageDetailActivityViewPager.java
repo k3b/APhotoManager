@@ -890,22 +890,22 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
         boolean reloadContext = true;
         boolean result = true;
         boolean slideShowStarted = mSlideShowStarted;
 
         onGuiTouched();
-        if (LockScreen.onOptionsItemSelected(this, item)) {
+        if (LockScreen.onOptionsItemSelected(this, menuItem)) {
             mMustReplaceMenue       = true;
             this.invalidateOptionsMenu();
             return true;
         }
-        if (mFileCommands.onOptionsItemSelected(item, getCurrentFoto())) {
+        if (mFileCommands.onOptionsItemSelected(menuItem, getCurrentFoto())) {
             mModifyCount++;
         } else {
             // Handle presses on the action bar items
-            switch (item.getItemId()) {
+            switch (menuItem.getItemId()) {
                 case R.id.action_details:
                     cmdShowDetails(getCurrentFilePath(), getCurrentImageId());
                     break;
@@ -947,7 +947,7 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
                     result =  onRenameDirQueston(getCurrentFoto(), getCurrentImageId(), getCurrentFilePath(), null);
                     break;
                 case R.id.menu_exif:
-                    result =  onEditExif(getCurrentFoto(), getCurrentImageId(), getCurrentFilePath());
+                    result = onEditExif(menuItem, getCurrentFoto(), getCurrentImageId(), getCurrentFilePath());
                     break;
 
                 case R.id.cmd_gallery: {
@@ -960,13 +960,14 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
                         // int callBackId = (PhotoPropertiesMediaFilesScanner.isNoMedia(dirPath,PhotoPropertiesMediaFilesScanner.DEFAULT_SCAN_DEPTH)) ? NOMEDIA_GALLERY : 0;
 
                         QueryParameter query = TagSql.filter2NewQuery(this.mFilter);
-                        FotoGalleryActivity.showActivity("[13]" + dirPath, this, query, 0);
+                        FotoGalleryActivity.showActivity(" menu " + menuItem.getTitle() + "[13]" + dirPath,
+                                this, query, 0);
                     }
                     break;
                 }
 
                 case R.id.cmd_show_geo:
-                    MapGeoPickerActivity.showActivity("[14]", this, getCurrentFoto(), null, 0);
+                    MapGeoPickerActivity.showActivity(" menu " + menuItem.getTitle(), this, getCurrentFoto(), null, 0);
                     break;
 
                 case R.id.cmd_show_geo_as: {
@@ -988,7 +989,8 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
 
                 case R.id.cmd_edit_geo: {
                     SelectedFiles selectedItem = getCurrentFoto();
-                    GeoEditActivity.showActivity("[15]:"+selectedItem, this, selectedItem, GeoEditActivity.RESULT_ID);
+                    GeoEditActivity.showActivity(" menu " + menuItem.getTitle() + " " + selectedItem,
+                            this, selectedItem, GeoEditActivity.RESULT_ID);
                     break;
                 }
                 case R.id.cmd_edit_tags: {
@@ -1016,12 +1018,12 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
                     break;
 
                 default:
-                    result =  super.onOptionsItemSelected(item);
+                    result = super.onOptionsItemSelected(menuItem);
             }
         }
 
         if (reloadContext) {
-            setContextMode(item.getTitle());
+            setContextMode(menuItem.getTitle());
         }
 
         return result;
@@ -1091,8 +1093,9 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
         return false;
     }
 
-    private boolean onEditExif(SelectedFiles currentFoto, final long fotoId, final String fotoPath) {
-        PhotoPropertiesEditActivity.showActivity("[16]:", this, null, fotoPath, currentFoto, 0, true);
+    private boolean onEditExif(MenuItem menuItem, SelectedFiles currentFoto, final long fotoId, final String fotoPath) {
+        PhotoPropertiesEditActivity.showActivity(" menu " + menuItem.getTitle(),
+                this, null, fotoPath, currentFoto, 0, true);
         return true;
     }
     private boolean onRenameDirQueston(final SelectedFiles currentFoto, final long fotoId, final String fotoPath, final String _newName) {

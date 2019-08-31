@@ -436,15 +436,16 @@ public class PhotoPropertiesEditActivity extends ActivityWithAutoCloseDialogs im
         String geoUri = PARSER.toUriString(geo);
         final Intent intent = new Intent();
         intent.setAction(Intent.ACTION_PICK);
+
         final Uri parseUri = Uri.parse(geoUri);
         intent.setData(parseUri);
         intent.putExtra(EXTRA_TITLE, getString(R.string.geo_picker_title));
 
         try {
             // #7: allow choosing geo pick from map or from "photo with geo"
-
-            startActivityForResult(Intent.createChooser(intent, getString(R.string.geo_edit_menu_title)), GEO_RESULT_ID);
-            // this.startActivityForResult(intent, RESULT_ID);
+            IntentUtil.startActivity(getString(R.string.geo_picker_title),
+                    this, GEO_RESULT_ID,
+                    Intent.createChooser(intent, getString(R.string.geo_edit_menu_title)));
         } catch (ActivityNotFoundException ex) {
             Toast.makeText(PhotoPropertiesEditActivity.this, R.string.geo_picker_err_not_found,Toast.LENGTH_LONG).show();
         }

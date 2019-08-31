@@ -255,11 +255,11 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        // Handle action bar menuItem clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        int id = menuItem.getItemId();
 
         switch (id) {
             case R.id.cmd_cancel:
@@ -279,11 +279,13 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                 return true;
 
             case R.id.cmd_gallery:
-                FotoGalleryActivity.showActivity("[2]", this, getAsMergedQuery(), 0);
+                FotoGalleryActivity.showActivity(" menu " + menuItem.getTitle(),
+                        this, getAsMergedQuery(), 0);
                         // TagSql.filter2NewQuery(getAsGalleryFilter()), 0);
                 return true;
             case R.id.cmd_show_geo: {
-                MapGeoPickerActivity.showActivity("[3]", this, null, getAsMergedQuery(), 0);
+                MapGeoPickerActivity.showActivity(" menu " + menuItem.getTitle(),
+                        this, null, getAsMergedQuery(), 0);
                 return true;
             }
             case R.id.action_details:
@@ -301,7 +303,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
 
                 return true;
             default:
-                return super.onOptionsItemSelected(item);
+                return super.onOptionsItemSelected(menuItem);
         }
     }
 

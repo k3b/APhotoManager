@@ -42,7 +42,7 @@ import android.widget.PopupMenu;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
-import org.osmdroid.api.*;
+import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.events.DelayedMapListener;
 import org.osmdroid.events.MapListener;
 import org.osmdroid.events.ScrollEvent;
@@ -50,7 +50,8 @@ import org.osmdroid.events.ZoomEvent;
 import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.*;
+import org.osmdroid.views.overlay.Overlay;
+import org.osmdroid.views.overlay.OverlayManager;
 import org.xml.sax.InputSource;
 
 import java.io.IOException;
@@ -67,10 +68,10 @@ import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.osmdroid.ClickableIconOverlay;
 import de.k3b.android.osmdroid.FolderOverlayEx;
 import de.k3b.android.osmdroid.GuestureOverlay;
 import de.k3b.android.osmdroid.IconOverlay;
-import de.k3b.android.osmdroid.ClickableIconOverlay;
 import de.k3b.android.osmdroid.MarkerBubblePopup;
 import de.k3b.android.osmdroid.MarkerEx;
 import de.k3b.android.osmdroid.OsmdroidUtil;
@@ -78,7 +79,6 @@ import de.k3b.android.osmdroid.forge.MapsForgeSupport;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.database.QueryParameter;
-import de.k3b.io.collections.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoInfoHandler;
 import de.k3b.geo.api.IGeoPointInfo;
@@ -87,6 +87,7 @@ import de.k3b.geo.io.gpx.GpxReaderBase;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
+import de.k3b.io.collections.SelectedItems;
 
 /**
  * A fragment to display Foto locations in a geofrafic map.
@@ -1029,14 +1030,14 @@ public class LocationMapFragment extends DialogFragment {
 
         menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
-            public boolean onMenuItemClick(MenuItem item) {
+            public boolean onMenuItemClick(MenuItem menuItem) {
                 closePopup();
 
-                switch (item.getItemId()) {
+                switch (menuItem.getItemId()) {
                     case R.id.cmd_photo:
-                        return showPhoto(getGeoPointById(markerId, geoPosition, "showPhoto"));
+                        return showPhoto(menuItem, getGeoPointById(markerId, geoPosition, "showPhoto"));
                     case R.id.cmd_gallery:
-                        return showGallery(getGeoPointById(markerId, geoPosition,"showGallery"));
+                        return showGallery(menuItem, getGeoPointById(markerId, geoPosition, "showGallery"));
                     case R.id.cmd_zoom:
                         return zoomToFit(getGeoPointById(markerId, geoPosition,"on cmd zoomToFit"));
 
@@ -1070,16 +1071,18 @@ public class LocationMapFragment extends DialogFragment {
         mTempPopupMenuParentView = null;
     }
 
-    private boolean showPhoto(IGeoPoint geoPosition) {
+    private boolean showPhoto(MenuItem menuItem, IGeoPoint geoPosition) {
         QueryParameter query = getQueryForPositionRectangle(geoPosition);
         FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
 
-        ImageDetailActivityViewPager.showActivity("[17]:" + geoPosition, this.getActivity(), null, 0, query, 0);
+        ImageDetailActivityViewPager.showActivity(" menu " + menuItem.getTitle()
+                + "[17]:" + geoPosition, this.getActivity(), null, 0, query, 0);
         return true;
     }
 
-    private boolean showGallery(IGeoPoint geoPosition) {
-        FotoGalleryActivity.showActivity("[18]:"+geoPosition, this.getActivity(), getQueryForPositionRectangle(geoPosition), 0);
+    private boolean showGallery(MenuItem menuItem, IGeoPoint geoPosition) {
+        FotoGalleryActivity.showActivity(" menu " + menuItem.getTitle() +
+                "[18]:" + geoPosition, this.getActivity(), getQueryForPositionRectangle(geoPosition), 0);
         return true;
     }
 

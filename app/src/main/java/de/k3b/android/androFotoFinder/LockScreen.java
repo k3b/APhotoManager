@@ -82,7 +82,12 @@ public class LockScreen {
             // use os-unlock method instead
             MenuUtils.removeItems(menu,R.id.cmd_app_unpin2);
         }
-        MenuUtils.removeItems(menu,R.id.cmd_show_geo,
-                R.id.cmd_gallery, R.id.cmd_filter);
+        MenuUtils.removeItems(
+                menu, R.id.cmd_show_geo,
+                R.id.cmd_show_geo_base,
+                R.id.cmd_gallery,
+                R.id.cmd_gallery_base,
+                R.id.cmd_show_in_new,
+                R.id.cmd_filter);
     }
 }

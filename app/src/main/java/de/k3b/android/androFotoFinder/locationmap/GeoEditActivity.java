@@ -47,13 +47,13 @@ import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.android.widget.LocalizedActivity;
-import de.k3b.io.collections.SelectedFiles;
-import de.k3b.io.collections.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoPickHistory;
 import de.k3b.geo.io.GeoUri;
 import de.k3b.io.DirectoryFormatter;
+import de.k3b.io.collections.SelectedFiles;
+import de.k3b.io.collections.SelectedItems;
 
 /**
  * Defines a gui for global foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.
@@ -301,8 +301,9 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
         AffUtils.putSelectedFiles(intent, AffUtils.querySelectedFiles(this, calculatedSelectedFotosIds));
         try {
             // #7: allow choosing geo pick from map or from "photo with geo"
-            this.startActivityForResult(Intent.createChooser(intent, this.getString(R.string.geo_edit_menu_title)), GeoEditActivity.RESULT_ID);
-            // this.startActivityForResult(intent, RESULT_ID);
+            IntentUtil.startActivity(getString(R.string.geo_picker_title),
+                    this, GeoEditActivity.RESULT_ID,
+                    Intent.createChooser(intent, this.getString(R.string.geo_edit_menu_title)));
         } catch (ActivityNotFoundException ex) {
             Toast.makeText(this, R.string.geo_picker_err_not_found,Toast.LENGTH_LONG).show();
         }

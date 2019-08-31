@@ -903,7 +903,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             case R.id.cmd_selected_only:
                 return multiSelectionToggle();
             case R.id.cmd_backup:
-                BackupActivity.showActivity(mDebugPrefix, getActivity(), null, selectedFiles, null,
+                BackupActivity.showActivity(" menu " + menuItem.getTitle(),
+                        getActivity(), null, selectedFiles, null,
                         getCurrentQuery(), BackupActivity.REQUEST_BACKUP_ID);
                 return true;
             case R.id.cmd_copy:
@@ -911,16 +912,18 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             case R.id.cmd_move:
                 return cmdMoveOrCopyWithDestDirPicker(true, fileCommands.getLastCopyToPath(), selectedFiles);
             case R.id.cmd_show_geo:
-                MapGeoPickerActivity.showActivity("[10]", this.getActivity(), selectedFiles, null, 0);
+                MapGeoPickerActivity.showActivity(" menu " + menuItem.getTitle(),
+                        this.getActivity(), selectedFiles, null, 0);
                 return true;
             case R.id.cmd_edit_geo:
-                GeoEditActivity.showActivity("[11]", this.getActivity(), selectedFiles, GeoEditActivity.RESULT_ID);
+                GeoEditActivity.showActivity(" menu " + menuItem.getTitle(),
+                        this.getActivity(), selectedFiles, GeoEditActivity.RESULT_ID);
                 return true;
             case R.id.cmd_edit_tags: {
                 return tagsShowEditDialog(selectedFiles);
             }
             case R.id.menu_exif:
-                return onEditExif(selectedFiles);
+                return onEditExif(menuItem, selectedFiles);
             case R.id.cmd_selection_add_all:
                 addAllToSelection();
                 return true;
@@ -977,8 +980,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     }
 
-    private boolean onEditExif(SelectedFiles fotos) {
-        PhotoPropertiesEditActivity.showActivity("[12]", getActivity(), null, null, fotos, 0, true);
+    private boolean onEditExif(MenuItem menuItem, SelectedFiles fotos) {
+        PhotoPropertiesEditActivity.showActivity(" menu " + menuItem.getTitle() + "[12]",
+                getActivity(), null, null, fotos, 0, true);
         return true;
     }
 

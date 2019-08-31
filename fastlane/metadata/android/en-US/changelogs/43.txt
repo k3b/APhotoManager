@@ -3,3 +3,4 @@ Changes from 0.7.4 to ????
 #147: picker-contextmenu: show-in-new redesign
 show-Details dialog displays quantity and total megabytes of current selected photos
 Improved crash log file androFotofinder.logcat-xxxxxx.txt
+Translation updates: pt-BR

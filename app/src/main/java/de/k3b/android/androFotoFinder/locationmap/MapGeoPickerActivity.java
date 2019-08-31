@@ -226,11 +226,11 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (LockScreen.onOptionsItemSelected(this, item))
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        if (LockScreen.onOptionsItemSelected(this, menuItem))
             return true;
         // Handle presses on the action bar items
-        switch (item.getItemId()) {
+        switch (menuItem.getItemId()) {
             //cmd_lock
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
@@ -239,31 +239,31 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
                 SettingsActivity.showActivity(this);
                 return true;
 			case R.id.cmd_photo:
-				return showPhoto(mMap.getCurrentGeoRectangle());
+                return showPhoto(menuItem, mMap.getCurrentGeoRectangle());
 			case R.id.cmd_gallery:
-				return showGallery(mMap.getCurrentGeoRectangle());
+                return showGallery(menuItem, mMap.getCurrentGeoRectangle());
             case R.id.action_details:
                 cmdShowDetails();
                 return true;
             default:
-                return onOptionsItemSelected(item, AffUtils.getSelectedItems(getIntent()));
+                return onOptionsItemSelected(menuItem, AffUtils.getSelectedItems(getIntent()));
         }
 
     }
 
-    private boolean showPhoto(IGeoRectangle geoArea) {
+    private boolean showPhoto(MenuItem menuItem, IGeoRectangle geoArea) {
         QueryParameter query = new QueryParameter();
         FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
         FotoSql.addWhereFilterLatLon(query, geoArea);
 
-        ImageDetailActivityViewPager.showActivity("[19]-"+geoArea, this, null, 0, query, 0);
+        ImageDetailActivityViewPager.showActivity(" menu " + menuItem.getTitle() + "[19]-" + geoArea, this, null, 0, query, 0);
         return true;
     }
 
-    private boolean showGallery(IGeoRectangle geoArea) {
+    private boolean showGallery(MenuItem menuItem, IGeoRectangle geoArea) {
         QueryParameter query = getAsMergedQuery(geoArea);
 
-        FotoGalleryActivity.showActivity("[20]-"+geoArea, this, query, 0);
+        FotoGalleryActivity.showActivity(" menu " + menuItem.getTitle() + "[20]-" + geoArea, this, query, 0);
         return true;
     }
 
