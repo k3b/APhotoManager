@@ -129,23 +129,30 @@ public class AndroidAlbumUtils implements Common {
     }
 
     /** used by folder picker if album-file is picked instead of folder */
-    public static QueryParameter getQueryFromUri(
-            String dbgContext, @NonNull Context context, @Nullable QueryParameter baseQuery, Uri uri,
-            @Nullable StringBuilder dbgFilter) {
+    public static QueryParameter getQueryFromUriOrNull(
+            String dbgContext, @NonNull Context context, Uri uri,
+            String path, @Nullable StringBuilder outDebugLogOrNull) {
         // ignore geo: or area: uri-s
-        String path = (IntentUtil.isFileOrContentUri(uri, true)) ? uri.getPath() : null;
+        if ((uri != null) && (path == null)) {
+            path = (IntentUtil.isFileOrContentUri(uri, true)) ? uri.getPath() : null;
+        }
+
         if (!StringUtils.isNullOrEmpty(path)) {
             // #118 app specific content uri convert
             // from {content://approvider}//storage/emulated/0/DCIM/... to /storage/emulated/0/DCIM/
             path = FileUtils.fixPath(path);
-            if (dbgFilter != null) {
-                dbgFilter.append(dbgContext).append("\n");
+            if (outDebugLogOrNull != null) {
+                outDebugLogOrNull.append(dbgContext).append("\n");
             } else if (Global.debugEnabled) {
                 Log.d(Global.LOG_CONTEXT, dbgContext);
             }
 
             if ((context != null) && AlbumFile.isQueryFile(path)) {
                 try {
+                    if ((uri == null) && (path != null)) {
+                        uri = Uri.fromFile(new File(AlbumFile.fixPath(path)));
+                    }
+
                     QueryParameter query = QueryParameter.load(context.getContentResolver().openInputStream(uri));
                     if (query != null) {
                         Map<String, Long> found = FotoSql.execGetPathIdMap(context, path);
@@ -153,8 +160,8 @@ public class AndroidAlbumUtils implements Common {
                             AndroidAlbumUtils.albumMediaScan(dbgContext + " not found mediadb => ", context, new File(path), 1);
                         }
 
-                        if (dbgFilter != null) {
-                            dbgFilter.append("query album from uri ").append(uri).append("\n")
+                        if (outDebugLogOrNull != null) {
+                            outDebugLogOrNull.append("query album from uri ").append(uri).append("\n")
                                     .append(query).append("\n");
                         }
                         return query;
@@ -165,12 +172,36 @@ public class AndroidAlbumUtils implements Common {
                 } catch (IOException e) {
                     Log.e(Global.LOG_CONTEXT, mDebugPrefix + ".loadFrom(" + uri +
                             ") failed: " + e.getMessage(), e);
-                    if (dbgFilter != null) {
-                        dbgFilter.append("query album from uri '").append(uri).append("' failed:")
+                    if (outDebugLogOrNull != null) {
+                        outDebugLogOrNull.append("query album from uri '").append(uri).append("' failed:")
                                 .append(e.getMessage()).append("\n");
                     }
                 }
             }
+        }
+        return null;
+    }
+
+    /**
+     * used by folder picker if album-file is picked instead of folder
+     */
+    public static QueryParameter getQueryFromUri(
+            String dbgContext, @NonNull Context context,
+            @Nullable QueryParameter baseQuery, @Nullable Uri uri,
+            @Nullable StringBuilder outDebugLogOrNull) {
+
+        if (uri == null) return null;
+
+        String path = (IntentUtil.isFileOrContentUri(uri, true)) ? uri.getPath() : null;
+        QueryParameter album = getQueryFromUriOrNull(
+                dbgContext, context, uri, path, outDebugLogOrNull);
+        if (album != null) return album;
+
+        // ignore geo: or area: uri-s
+        if (!StringUtils.isNullOrEmpty(path)) {
+            // #118 app specific content uri convert
+            // from {content://approvider}//storage/emulated/0/DCIM/... to /storage/emulated/0/DCIM/
+            path = FileUtils.fixPath(path);
 
             // replace file wildcards with sql wildcards
             path = path.replace("*","%");
@@ -183,12 +214,12 @@ public class AndroidAlbumUtils implements Common {
                 }
             }
             if (path.length() > 2) {
-                if (dbgFilter != null) {
-                    dbgFilter.append("path query from uri '").append(uri).append("' : '")
+                if (outDebugLogOrNull != null) {
+                    outDebugLogOrNull.append("path query from uri '").append(uri).append("' : '")
                             .append(path).append("'\n");
                 }
                 GalleryFilterParameter filter = new GalleryFilterParameter().setPath(path);
-                return AndroidAlbumUtils.getAsMergedNewQueryParameter(baseQuery, filter);
+                return AndroidAlbumUtils.getAsMergedNewQuery(baseQuery, filter);
             }
         }
         return null;
@@ -239,7 +270,7 @@ public class AndroidAlbumUtils implements Common {
             @NonNull Context context, Uri destUri, Intent destIntent, Bundle destBundle,
             final IGalleryFilter srcFilter, final QueryParameter srcQueryParameter) {
         final String dbgContext = mDebugPrefix + ".saveFilterAndQuery(" + destUri + ")";
-        final QueryParameter mergedQuery = getAsMergedNewQueryParameter(srcQueryParameter, srcFilter);
+        final QueryParameter mergedQuery = getAsMergedNewQuery(srcQueryParameter, srcFilter);
 
         if (destUri != null) {
             PrintWriter out = null;
@@ -277,11 +308,52 @@ public class AndroidAlbumUtils implements Common {
         */
     }
 
-    /** create a copy of srcQueryParameter and add srcFilter */
-    public static QueryParameter getAsMergedNewQueryParameter(QueryParameter srcQueryParameter, IGalleryFilter srcFilter) {
-        final QueryParameter mergedQuery = new QueryParameter(srcQueryParameter);
-        TagSql.filter2QueryEx(mergedQuery, srcFilter, false);
+    /**
+     * create a copy of baseQuery and add filter
+     */
+    public static QueryParameter getAsMergedNewQuery(
+            QueryParameter baseQuery, IGalleryFilter filter) {
+        /*
+        final QueryParameter mergedQuery = new QueryParameter(baseQuery);
+        TagSql.filter2QueryEx(mergedQuery, filter, false);
         return mergedQuery;
+        */
+
+        if ((baseQuery == null) && (GalleryFilterParameter.isEmpty(filter))) {
+            return null;
+        }
+        final QueryParameter mergedQuery = new QueryParameter(baseQuery);
+        GalleryFilterParameter resultFilter = new GalleryFilterParameter();
+
+        if (baseQuery != null) {
+            /** translates a query back to filter and remove from query*/
+            IGalleryFilter filterFromSrcQuery = TagSql.parseQueryEx(mergedQuery, true);
+            resultFilter.mergeFrom(filterFromSrcQuery);
+        }
+
+        resultFilter.mergeFrom(filter);
+
+        TagSql.filter2QueryEx(mergedQuery, resultFilter, false);
+
+        return mergedQuery;
+
+    }
+
+    /**
+     * create a copy of baseQuery and add filter
+     */
+    public static QueryParameter getAsAlbumOrMergedNewQuery(
+            String dbgContext,
+            Context context,
+            QueryParameter baseQuery, IGalleryFilter filter) {
+        if (filter != null) {
+            QueryParameter album = getQueryFromUriOrNull(
+                    dbgContext, context, null,
+                    filter.getPath(), null);
+            if (album != null) return album;
+        }
+
+        return getAsMergedNewQuery(baseQuery, filter);
     }
 
     public static void insertToMediaDB(String dbgContext, @NonNull Context context, Uri uri) {

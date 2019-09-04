@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 by k3b.
+ * Copyright (c) 2018-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager
  *
@@ -32,10 +32,17 @@ public class AlbumFile {
 
     public static boolean isQueryFile(String uri) {
         if (uri != null) {
-            return uri.endsWith(SUFFIX_VALBUM) || uri.endsWith(SUFFIX_QUERY);
+            return isQueryFile(uri, SUFFIX_VALBUM) || isQueryFile(uri, SUFFIX_QUERY);
         }
         return false;
     }
+
+    private static boolean isQueryFile(String uri, String suffix) {
+        int pos = uri.lastIndexOf(suffix);
+        if (pos < 0) return false;
+        return (uri.length() - pos - suffix.length()) <= 2; // ends with suffix or (suffix + "/%")
+    }
+
     public static boolean isQueryFile(File uri) {
         if (uri != null) {
             return isQueryFile(uri.getName());
@@ -44,10 +51,22 @@ public class AlbumFile {
     }
     public static File getExistingQueryFileOrNull(String uri) {
         if (isQueryFile(uri)) {
-            File result = new File(FileUtils.fixPath(uri));
+            File result = new File(fixPath(uri));
             if ((result != null) && result.isFile() && result.exists()) return result;
         }
         return null;
+    }
+
+    public static String fixPath(String uri) {
+        String result = removeAtEnd(FileUtils.fixPath(uri), "%", "/");
+        return result;
+    }
+
+    private static String removeAtEnd(String result, String... chars) {
+        for (String c : chars) {
+            if (result.endsWith(c)) result = result.substring(0, result.length() - 1);
+        }
+        return result;
     }
 
     /** return all album files as absolute path */

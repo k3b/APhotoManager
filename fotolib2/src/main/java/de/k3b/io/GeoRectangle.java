@@ -35,6 +35,8 @@ public class GeoRectangle implements IGeoRectangle {
 
     private boolean nonGeoOnly = false;
 
+    protected boolean copyAlways = true;
+
     protected static double parseLatLon(String value) {
         if ((value == null) || value.isEmpty()) return Double.NaN;
         try {
@@ -55,13 +57,28 @@ public class GeoRectangle implements IGeoRectangle {
         return this;
     }
 
+    public GeoRectangle mergeFrom(IGeoRectangle src) {
+        if (src != null) {
+            try {
+                copyAlways = false;
+                get(src);
+            } finally {
+                copyAlways = true;
+            }
+        }
+        return this;
+    }
+
     @Override
     public double getLatitudeMin() {
         return latitudeMin;
     }
 
     public GeoRectangle setLatitudeMin(double latitudeMin) {
-        this.latitudeMin = latitudeMin; return this;
+        if (copyAlways || (!Double.isNaN(latitudeMin))) {
+            this.latitudeMin = latitudeMin;
+        }
+        return this;
     }
 
     public static boolean isEmpty(IGeoRectangle rect) {
@@ -108,7 +125,10 @@ public class GeoRectangle implements IGeoRectangle {
     }
 
     public GeoRectangle setLatitudeMax(double latitudeMax) {
-        this.latitudeMax = latitudeMax; return this;
+        if (copyAlways || (!Double.isNaN(latitudeMax))) {
+            this.latitudeMax = latitudeMax;
+        }
+        return this;
     }
 
     @Override
@@ -117,7 +137,10 @@ public class GeoRectangle implements IGeoRectangle {
     }
 
     public GeoRectangle setLogituedMin(double logituedMin) {
-        this.logituedMin = logituedMin; return this;
+        if (copyAlways || (!Double.isNaN(logituedMin))) {
+            this.logituedMin = logituedMin;
+        }
+        return this;
     }
 
     @Override
@@ -126,7 +149,10 @@ public class GeoRectangle implements IGeoRectangle {
     }
 
     public GeoRectangle setLogituedMax(double logituedMax) {
-        this.logituedMax = logituedMax; return this;
+        if (copyAlways || (!Double.isNaN(logituedMax))) {
+            this.logituedMax = logituedMax;
+        }
+        return this;
     }
 
     public GeoRectangle setLatitude(String min, String max) {

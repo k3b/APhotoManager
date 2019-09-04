@@ -55,7 +55,6 @@ import java.util.List;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.directory.ShowInMenuHandler;
-import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.Dialogs;
@@ -448,7 +447,6 @@ public class TagsPickerFragment extends DialogFragment implements ShowInMenuHand
                 }
             }
 
-
             PopupMenu popup = onCreatePopupMenu(anchor, selection, idContextMenue);
 
             // without mClipboardItem paste is not possible
@@ -475,7 +473,11 @@ public class TagsPickerFragment extends DialogFragment implements ShowInMenuHand
         if (selection != null) {
             mCurrentMenuSelection = selection;
         }
-        this.showInMenuHandler = new ShowInMenuHandler(getActivity(), this, this.baseQuery, FotoSql.QUERY_TYPE_TAG);
+
+        IGalleryFilter currentSelectionAsFilter = getCurrentSelectionAsFilter(selection);
+
+        this.showInMenuHandler = new ShowInMenuHandler(getActivity(), this, this.baseQuery,
+                currentSelectionAsFilter, FotoSql.QUERY_TYPE_TAG);
         if (selection != null) {
             showInMenuHandler.fixMenuOpenIn(selection.getName(), menu);
         }
@@ -526,18 +528,16 @@ public class TagsPickerFragment extends DialogFragment implements ShowInMenuHand
         return false;
     }
 
-    /**
-     * interface PickerContext
-     */
-    @Override
-    public QueryParameter getSelectionQuery(String dbgContext, String tagName, int dirTypId, QueryParameter baseQuery) {
-        GalleryFilterParameter filterParameter = new GalleryFilterParameter();
-        if (!StringUtils.isNullOrEmpty(tagName)) {
-            filterParameter.setTagsAllIncluded(ListUtils.fromString(tagName));
+    private IGalleryFilter getCurrentSelectionAsFilter(Tag selection) {
+        if (selection != null) {
+            String tagName = selection.getName();
+            if (!StringUtils.isNullOrEmpty(tagName)) {
+                GalleryFilterParameter filterParameter = new GalleryFilterParameter();
+                filterParameter.setTagsAllIncluded(ListUtils.fromString(tagName));
+                return filterParameter;
+            }
         }
-        // filterParameter.setSort(FotoSql.SORT_BY_DATE, false);
-
-        return AndroidAlbumUtils.getAsMergedNewQueryParameter(baseQuery, filterParameter);
+        return null;
     }
 
     /**

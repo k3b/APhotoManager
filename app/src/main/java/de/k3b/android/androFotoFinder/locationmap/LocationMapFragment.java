@@ -65,6 +65,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.LockScreen;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
+import de.k3b.android.androFotoFinder.directory.ShowInMenuHandler;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
@@ -93,7 +94,7 @@ import de.k3b.io.collections.SelectedItems;
  * A fragment to display Foto locations in a geofrafic map.
  * Used as Dialog to pick a location-area for filtering.
  */
-public class LocationMapFragment extends DialogFragment {
+public class LocationMapFragment extends DialogFragment implements ShowInMenuHandler.PickerContext {
     protected static final int NO_MARKER_ID = -1;
 
     protected String STATE_LAST_VIEWPORT = "LAST_VIEWPORT";
@@ -495,7 +496,7 @@ public class LocationMapFragment extends DialogFragment {
             Log.i(Global.LOG_CONTEXT, debugContext + rectangle + ";z=" + zoomlevel);
         }
 
-        this.mRootQuery = AndroidAlbumUtils.getAsMergedNewQueryParameter(rootQuery, depricated_rootFilter);
+        this.mRootQuery = AndroidAlbumUtils.getAsMergedNewQuery(rootQuery, depricated_rootFilter);
 
         mSelectedItemsHandler.define(selectedItems);
         if (zoomToFit) {
@@ -1018,8 +1019,15 @@ public class LocationMapFragment extends DialogFragment {
         return oldItemsHash;
     }
 
+    // ShowInMenuHandler.PickerContext not used
+    @Override
+    public boolean onShowPopUp(View anchor, View owner, String selectionPath, Object selection, int... idContextMenue) {
+        return false;
+    }
+
     protected   boolean showContextMenu(final View parent, final int markerId,
-                                        final IGeoPoint geoPosition, final Object markerData) {
+                                        final IGeoPoint geoPosition,
+                                        final Object markerData) {
         closePopup();
         MenuInflater inflater = getActivity().getMenuInflater();
 
@@ -1031,39 +1039,41 @@ public class LocationMapFragment extends DialogFragment {
         menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
-                closePopup();
-
-                switch (menuItem.getItemId()) {
-                    case R.id.cmd_photo:
-                        return showPhoto(menuItem, getGeoPointById(markerId, geoPosition, "showPhoto"));
-                    case R.id.cmd_gallery:
-                        return showGallery(menuItem, getGeoPointById(markerId, geoPosition, "showGallery"));
-                    case R.id.cmd_zoom:
-                        return zoomToFit(getGeoPointById(markerId, geoPosition,"on cmd zoomToFit"));
-
-                    case R.id.cmd_show_geo_as: {
-                        IGeoPoint _geo = getGeoPointById(markerId, geoPosition,"cmd_show_geo_as");
-                        GeoPointDto geo = new GeoPointDto(_geo.getLatitude(), _geo.getLongitude(), GeoPointDto.NO_ZOOM);
-                        geo.setId(""+markerId);
-                        geo.setName("#"+markerId);
-                        GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
-                        String uri = PARSER.toUriString(geo);
-
-                        IntentUtil.cmdStartIntent("show_geo_as", getActivity(), null, uri, null, Intent.ACTION_VIEW, R.string.geo_show_as_menu_title, R.string.geo_picker_err_not_found, 0);
-
-                        return true;
-                    }
-
-
-
-
-                    default:
-                        return false;
-                }
+                return onPopUpClick(menuItem, markerId, geoPosition);
             }
         });
         menu.show();
         return true;
+    }
+
+    public boolean onPopUpClick(MenuItem menuItem, int markerId, IGeoPoint geoPosition) {
+        closePopup();
+
+        switch (menuItem.getItemId()) {
+            case R.id.cmd_photo:
+                return showPhoto(menuItem, getGeoPointById(markerId, geoPosition, "showPhoto"));
+            case R.id.cmd_gallery:
+                return showGallery(menuItem, getGeoPointById(markerId, geoPosition, "showGallery"));
+            case R.id.cmd_zoom:
+                return zoomToFit(getGeoPointById(markerId, geoPosition, "on cmd zoomToFit"));
+
+            case R.id.cmd_show_geo_as: {
+                IGeoPoint _geo = getGeoPointById(markerId, geoPosition, "cmd_show_geo_as");
+                GeoPointDto geo = new GeoPointDto(_geo.getLatitude(), _geo.getLongitude(), GeoPointDto.NO_ZOOM);
+                geo.setId("" + markerId);
+                geo.setName("#" + markerId);
+                GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
+                String uri = PARSER.toUriString(geo);
+
+                IntentUtil.cmdStartIntent("show_geo_as", getActivity(), null, uri, null, Intent.ACTION_VIEW, R.string.geo_show_as_menu_title, R.string.geo_picker_err_not_found, 0);
+
+                return true;
+            }
+
+
+            default:
+                return false;
+        }
     }
 
     protected void closePopup() {
@@ -1121,7 +1131,7 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     private QueryParameter getQueryForPositionRectangle(IGeoPoint geoPosition) {
-        QueryParameter result = AndroidAlbumUtils.getAsMergedNewQueryParameter(mRootQuery, null);
+        QueryParameter result = AndroidAlbumUtils.getAsMergedNewQuery(mRootQuery, null);
 
         GeoRectangle rect = getRectangleFrom(new GeoRectangle(), geoPosition);
         FotoSql.addWhereFilterLatLon(result, rect);

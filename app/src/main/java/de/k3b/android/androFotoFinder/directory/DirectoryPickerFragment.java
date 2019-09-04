@@ -61,7 +61,6 @@ import de.k3b.android.androFotoFinder.PhotoAutoprocessingEditActivity;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailMetaDialogBuilder;
-import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoThumbSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
@@ -79,6 +78,7 @@ import de.k3b.io.DirectoryNavigator;
 import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
+import de.k3b.io.IGalleryFilter;
 import de.k3b.io.ListUtils;
 import de.k3b.io.OSDirectory;
 import de.k3b.io.StringUtils;
@@ -382,7 +382,9 @@ public class DirectoryPickerFragment extends DialogFragment
 
             setMenuVisibility(menu, android.R.id.copy, !isAlbumFile);
 
-            this.showInMenuHandler = new ShowInMenuHandler(mContext, this, baseQuery, mDirTypId);
+            IGalleryFilter currentSelectionAsFilter = getCurrentSelectionAsFilter(selection, this.mDirTypId);
+            this.showInMenuHandler = new ShowInMenuHandler(mContext, this, baseQuery,
+                    currentSelectionAsFilter, mDirTypId);
             if (selection != null) {
                 showInMenuHandler.fixMenuOpenIn(selection.getAbsolute(), menu);
             }
@@ -716,26 +718,14 @@ public class DirectoryPickerFragment extends DialogFragment
         return false;
     }
 
-    /**
-     * interface PickerContext
-     */
-    @Override
-    public QueryParameter getSelectionQuery(String dbgContext, String selectionPath,
-                                            int dirTypId, QueryParameter baseQuery) {
-        QueryParameter query = null;
-        if (selectionPath != null) {
-            if(dirTypId == FotoSql.QUERY_TYPE_GROUP_ALBUM) {
-                String pathWithWildcard = (AlbumFile.isQueryFile(selectionPath)) ? selectionPath : selectionPath + "/%";
-                query = AndroidAlbumUtils.getQueryFromUri(dbgContext, getActivity(), baseQuery, Uri.fromFile(new File(pathWithWildcard)), null);
-            } else {
-                GalleryFilterParameter filterParameter = new GalleryFilterParameter();
-                FotoSql.set(filterParameter, selectionPath, dirTypId);
-                return AndroidAlbumUtils.getAsMergedNewQueryParameter(baseQuery, filterParameter);
-            }
-        }
-        return query;
-
+    private IGalleryFilter getCurrentSelectionAsFilter(IDirectory selection,
+                                                       int dirTypId) {
+        String selectionPath = selection.getAbsolute();
+        GalleryFilterParameter filterParameter = new GalleryFilterParameter();
+        FotoSql.set(filterParameter, selectionPath, dirTypId);
+        return filterParameter;
     }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);

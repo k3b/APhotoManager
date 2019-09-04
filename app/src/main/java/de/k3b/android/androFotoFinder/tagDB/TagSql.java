@@ -38,15 +38,15 @@ import de.k3b.android.androFotoFinder.media.PhotoPropertiesMediaDBContentValues;
 import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
+import de.k3b.database.QueryParameter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IGalleryFilter;
-import de.k3b.database.QueryParameter;
 import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.media.MediaFormatter;
+import de.k3b.media.PhotoPropertiesUpdateHandler;
 import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.media.PhotoPropertiesXmpSegment;
-import de.k3b.media.PhotoPropertiesUpdateHandler;
 import de.k3b.tagDB.Tag;
 import de.k3b.tagDB.TagConverter;
 
@@ -162,7 +162,7 @@ public class TagSql extends FotoSql {
     }
 
     public static QueryParameter filter2NewQuery(IGalleryFilter filter) {
-        return AndroidAlbumUtils.getAsMergedNewQueryParameter(null, filter);
+        return AndroidAlbumUtils.getAsMergedNewQuery(null, filter);
     }
 
     public static void filter2QueryEx(QueryParameter resultQuery, IGalleryFilter filter, boolean clearWhereBefore) {

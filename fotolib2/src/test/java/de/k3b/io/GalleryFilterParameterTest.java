@@ -64,6 +64,16 @@ public class GalleryFilterParameterTest {
     }
 
     @Test
+    public void shouldMergeEmpty() {
+        GalleryFilterParameter parsed
+                = GalleryFilterParameter.parse(FILTER_STRING_FULL_EXAMPLE, new GalleryFilterParameter());
+        GalleryFilterParameter sut = new GalleryFilterParameter().get(parsed);
+        sut.mergeFrom(new GalleryFilterParameter());
+
+        assertEquals(FILTER_STRING_FULL_EXAMPLE, sut.toString());
+    }
+
+    @Test
     public void shouldParseFull() {
         GalleryFilterParameter parsed
                 = GalleryFilterParameter.parse(FILTER_STRING_FULL_EXAMPLE, new GalleryFilterParameter());

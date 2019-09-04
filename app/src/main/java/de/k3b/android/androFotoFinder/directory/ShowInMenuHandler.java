@@ -27,9 +27,11 @@ import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity;
+import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.IDirectory;
+import de.k3b.io.IGalleryFilter;
 
 /**
  * Handles aspect "showInNewXxxx for DirectoryPicker, TagPicker, GeoAreaPicker
@@ -41,13 +43,17 @@ public class ShowInMenuHandler {
     private final Activity mContext;
     private final PickerContext pickerContext;
     private final QueryParameter baseQuery;
+    private final IGalleryFilter currentSelectionFilter;
     private final int dirTypId;
 
-    public ShowInMenuHandler(Activity mContext, PickerContext pickerContext, QueryParameter baseQuery, int dirTypId) {
+    public ShowInMenuHandler(Activity mContext, PickerContext pickerContext,
+                             QueryParameter baseQuery, IGalleryFilter currentSelectionFilter,
+                             int dirTypId) {
         this.mContext = mContext;
 
         this.pickerContext = pickerContext;
         this.baseQuery = baseQuery;
+        this.currentSelectionFilter = currentSelectionFilter;
         this.dirTypId = dirTypId;
     }
 
@@ -58,9 +64,9 @@ public class ShowInMenuHandler {
         if ((baseQuery != null) &&
                 (menu.findItem(R.id.cmd_gallery) != null) &&
                 (menu.findItem(R.id.cmd_gallery_base) != null)) {
-            long baseCount = getPickCount("(with baseQuery)", selectionPath, baseQuery);
+            long baseCount = getPickCount("(with baseQuery)", baseQuery, currentSelectionFilter);
             if (baseCount > 0) {
-                long count = getPickCount(selectionPath, selectionPath, null);
+                long count = getPickCount(selectionPath, null, currentSelectionFilter);
                 setMenuCount(menu, R.id.cmd_gallery, count);
                 setMenuCount(menu, R.id.cmd_photo, count);
                 setMenuCount(menu, R.id.cmd_show_geo, count);
@@ -83,23 +89,23 @@ public class ShowInMenuHandler {
 
             case R.id.cmd_photo:
                 return showPhoto(menuItem,
-                        selectionPath, dirTypId, null);
+                        selectionPath, null);
             case R.id.cmd_photo_base:
                 return showPhoto(menuItem,
-                        selectionPath, dirTypId, baseQuery);
+                        selectionPath, baseQuery);
             case R.id.cmd_gallery:
                 return showGallery(menuItem,
-                        selectionPath, dirTypId, null);
+                        selectionPath, null);
             case R.id.cmd_gallery_base:
                 return showGallery(menuItem,
-                        selectionPath, dirTypId, baseQuery);
+                        selectionPath, baseQuery);
 
             case R.id.cmd_show_geo:
                 return showMap(menuItem,
-                        selectionPath, dirTypId, null);
+                        selectionPath, null);
             case R.id.cmd_show_geo_base:
                 return showMap(menuItem,
-                        selectionPath, dirTypId, baseQuery);
+                        selectionPath, baseQuery);
 
             default:
                 break;
@@ -124,17 +130,18 @@ public class ShowInMenuHandler {
         }
     }
 
-    private long getPickCount(String dbgContext, String selectionPath,
-                              QueryParameter baseQuery) {
-        QueryParameter query = pickerContext.getSelectionQuery("getPickCount" + dbgContext, selectionPath,
-                dirTypId, baseQuery);
+    private long getPickCount(String dbgContext,
+                              QueryParameter baseQuery, IGalleryFilter filter) {
+        QueryParameter query = AndroidAlbumUtils.getAsAlbumOrMergedNewQuery(
+                dbgContext, mContext, baseQuery, filter);
         if (query == null) return 0;
         return FotoSql.getCount(mContext, query);
     }
 
-    private boolean showPhoto(MenuItem menuItem, String selectionPath, int dirTypId, QueryParameter baseQuery) {
+    private boolean showPhoto(MenuItem menuItem, String selectionPath, QueryParameter baseQuery) {
         String dbgContext = getDbgContext(menuItem, selectionPath);
-        QueryParameter query = pickerContext.getSelectionQuery("showPhoto", selectionPath, dirTypId, baseQuery);
+        QueryParameter query = AndroidAlbumUtils.getAsAlbumOrMergedNewQuery(
+                dbgContext, mContext, baseQuery, currentSelectionFilter);
         if (query != null) {
             FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
             ImageDetailActivityViewPager.showActivity(dbgContext, mContext, null, 0, query, 0);
@@ -143,9 +150,10 @@ public class ShowInMenuHandler {
         return false;
     }
 
-    private boolean showGallery(MenuItem menuItem, String selectionPath, int dirTypId, QueryParameter baseQuery) {
+    private boolean showGallery(MenuItem menuItem, String selectionPath, QueryParameter baseQuery) {
         String dbgContext = getDbgContext(menuItem, selectionPath);
-        QueryParameter query = pickerContext.getSelectionQuery(dbgContext, selectionPath, dirTypId, baseQuery);
+        QueryParameter query = AndroidAlbumUtils.getAsAlbumOrMergedNewQuery(
+                dbgContext, mContext, baseQuery, currentSelectionFilter);
         if (query != null) {
             FotoGalleryActivity.showActivity(dbgContext, mContext, query, 0);
             return true;
@@ -153,9 +161,10 @@ public class ShowInMenuHandler {
         return false;
     }
 
-    public boolean showMap(MenuItem menuItem, String selectionPath, int dirTypId, QueryParameter baseQuery) {
+    private boolean showMap(MenuItem menuItem, String selectionPath, QueryParameter baseQuery) {
         String dbgContext = getDbgContext(menuItem, selectionPath);
-        QueryParameter query = pickerContext.getSelectionQuery(dbgContext, selectionPath, dirTypId, baseQuery);
+        QueryParameter query = AndroidAlbumUtils.getAsAlbumOrMergedNewQuery(
+                dbgContext, mContext, baseQuery, currentSelectionFilter);
         if (query != null) {
             MapGeoPickerActivity.showActivity(dbgContext, mContext, null, query, 0);
             return true;
@@ -164,9 +173,9 @@ public class ShowInMenuHandler {
     }
 
     public interface PickerContext {
-        QueryParameter getSelectionQuery(String dbgContext, String selectionPath,
-                                         int dirTypId, QueryParameter baseQuery);
-
+        /**
+         * handle menu command show_in_new
+         */
         boolean onShowPopUp(View anchor, View owner, String selectionPath, Object selection, int... idContextMenue);
     }
 }

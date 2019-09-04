@@ -173,7 +173,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
                 if (idCount > 0) {
                     mergedQuery = FotoSql.setWhereSelectionPks(new QueryParameter(), selectedFiles.toIdString());
                 } else {
-                    mergedQuery = AndroidAlbumUtils.getAsMergedNewQueryParameter(query, filter);
+                    mergedQuery = AndroidAlbumUtils.getAsMergedNewQuery(query, filter);
                 }
             }
         }

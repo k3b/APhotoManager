@@ -328,7 +328,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
     }
 
     private QueryParameter getAsMergedQuery() {
-        return AndroidAlbumUtils.getAsMergedNewQueryParameter(mQueryWithoutFilter, getAsGalleryFilter());
+        return AndroidAlbumUtils.getAsMergedNewQuery(mQueryWithoutFilter, getAsGalleryFilter());
     }
 
     @Override
