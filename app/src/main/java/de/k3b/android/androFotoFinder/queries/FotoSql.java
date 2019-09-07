@@ -273,9 +273,10 @@ public class FotoSql extends FotoSqlBase {
      */
     private static final int SIZE_K = 1024;
     /**
-     * translate from bytes to megabytes
+     * when image bigger than this translate image size
+     * from bytes to kilobytes, from kilobytes to megabytes, ...
      */
-    private static final int SIZE_M = SIZE_K * SIZE_K;
+    private static final int SIZE_TRANLATION_LIMIT = SIZE_K * 10;
 
     public static final double getGroupFactor(final double _zoomLevel) {
         double zoomLevel = _zoomLevel;
@@ -1315,10 +1316,10 @@ public class FotoSql extends FotoSqlBase {
                 final long count = c.getLong(0);
                 long size = c.getLong(1);
                 String unit = "b";
-                if (size > SIZE_M) {
+                if (size > SIZE_TRANLATION_LIMIT) {
                     size /= SIZE_K;
                     unit = "kb";
-                    if (size > SIZE_M) {
+                    if (size > SIZE_TRANLATION_LIMIT) {
                         size /= SIZE_K;
                         unit = "Mb";
                     }

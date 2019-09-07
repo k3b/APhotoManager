@@ -85,8 +85,7 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
     public static void showActivity(String debugContext, Activity context, SelectedFiles selectedItems,
                                     QueryParameter query, int requestCode) {
         Uri initalUri = null;
-        final Intent intent = new Intent().setClass(context,
-                MapGeoPickerActivity.class);
+        Intent intent = new Intent(context, MapGeoPickerActivity.class);
 
         AndroidAlbumUtils.saveFilterAndQuery(context, null, intent, null, null, query);
 
