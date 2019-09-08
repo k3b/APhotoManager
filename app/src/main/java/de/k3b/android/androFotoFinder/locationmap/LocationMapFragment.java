@@ -60,6 +60,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
+import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.LockScreen;
@@ -85,6 +86,7 @@ import de.k3b.geo.api.IGeoInfoHandler;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
 import de.k3b.geo.io.gpx.GpxReaderBase;
+import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
@@ -94,7 +96,7 @@ import de.k3b.io.collections.SelectedItems;
  * A fragment to display Foto locations in a geofrafic map.
  * Used as Dialog to pick a location-area for filtering.
  */
-public class LocationMapFragment extends DialogFragment implements ShowInMenuHandler.PickerContext {
+public class LocationMapFragment extends DialogFragment {
     protected static final int NO_MARKER_ID = -1;
 
     protected String STATE_LAST_VIEWPORT = "LAST_VIEWPORT";
@@ -132,7 +134,7 @@ public class LocationMapFragment extends DialogFragment implements ShowInMenuHan
     // api to fragment owner
     protected OnDirectoryInteractionListener mDirectoryListener;
 
-
+    private ShowInMenuHandler showInMenuHandler = null;
 
     /**
      * setCenterZoom does not work in onCreate() because getHeight() and getWidth() are not calculated yet and return 0;
@@ -163,6 +165,7 @@ public class LocationMapFragment extends DialogFragment implements ShowInMenuHan
         saveLastViewPort(null);
         if (mCurrentFotoMarkerLoader != null) mCurrentFotoMarkerLoader.cancel(false);
         mCurrentFotoMarkerLoader = null;
+        showInMenuHandler = null;
 
         if (mFotoMarkerRecycler != null) mFotoMarkerRecycler.empty();
         mSelectedItemsHandler = null;
@@ -192,6 +195,7 @@ public class LocationMapFragment extends DialogFragment implements ShowInMenuHan
         }
         mPopup = null;
 
+        showInMenuHandler = null;
         super.onDetach();
         mDirectoryListener = null;
     }
@@ -262,6 +266,18 @@ public class LocationMapFragment extends DialogFragment implements ShowInMenuHan
         /** after ratation restore selelected view port */
         if (savedInstanceState != null) {
             boundingBox =  savedInstanceState.getParcelable(STATE_LAST_VIEWPORT);
+        } else {
+            //!!! not working: overwriten by navigateTo from activity
+            Intent intent = getActivity().getIntent();
+            if (intent != null) {
+                String zoomToArea = intent.getStringExtra(Common.EXTRA_ZOOM_TO);
+                if (zoomToArea != null) {
+                    IGeoRectangle zoomTo = GalleryFilterParameter.parse(zoomToArea, new GalleryFilterParameter());
+
+                    boundingBox = toBoundingBox(zoomTo);
+                }
+            }
+
         }
         if (boundingBox == null) {
             // if not initialized from outside show last used value
@@ -1019,22 +1035,32 @@ public class LocationMapFragment extends DialogFragment implements ShowInMenuHan
         return oldItemsHash;
     }
 
-    // ShowInMenuHandler.PickerContext not used
-    @Override
-    public boolean onShowPopUp(View anchor, View owner, String selectionPath, Object selection, int... idContextMenue) {
-        return false;
-    }
-
     protected   boolean showContextMenu(final View parent, final int markerId,
                                         final IGeoPoint geoPosition,
                                         final Object markerData) {
         closePopup();
         MenuInflater inflater = getActivity().getMenuInflater();
 
-        mTempPopupMenuParentView = OsmdroidUtil.openMapPopupView(mMapView, 0, new GeoPoint(geoPosition.getLatitude(), geoPosition.getLongitude()));
+        mTempPopupMenuParentView = OsmdroidUtil.openMapPopupView(mMapView, 0,
+                new GeoPoint(geoPosition.getLatitude(), geoPosition.getLongitude()));
         PopupMenu menu = new PopupMenu(getActivity(), mTempPopupMenuParentView);
 
-        inflater.inflate(LockScreen.isLocked(this.getActivity()) ? R.menu.menu_map_context_locked :  R.menu.menu_map_context, menu.getMenu());
+        GalleryFilterParameter filter = new GalleryFilterParameter();
+        getRectangleFrom(filter, geoPosition);
+
+        if (LockScreen.isLocked(this.getActivity())) {
+            inflater.inflate(R.menu.menu_map_context_locked, menu.getMenu());
+
+        } else {
+            inflater.inflate(R.menu.menu_map_context, menu.getMenu());
+            inflater.inflate(R.menu.menu_context_pick_show_in_new, menu.getMenu());
+        }
+
+        this.showInMenuHandler = new ShowInMenuHandler(getActivity(), null, mRootQuery,
+                filter, FotoSql.QUERY_TYPE_GROUP_PLACE_MAP);
+        if (geoPosition != null) {
+            showInMenuHandler.fixMenuOpenIn(geoPosition.toString(), menu.getMenu());
+        }
 
         menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
@@ -1048,6 +1074,11 @@ public class LocationMapFragment extends DialogFragment implements ShowInMenuHan
 
     public boolean onPopUpClick(MenuItem menuItem, int markerId, IGeoPoint geoPosition) {
         closePopup();
+
+        if ((showInMenuHandler != null) && (geoPosition != null)
+                && showInMenuHandler.onPopUpClick(menuItem, null, geoPosition.toString())) {
+            return true;
+        }
 
         switch (menuItem.getItemId()) {
             case R.id.cmd_photo:
@@ -1098,29 +1129,39 @@ public class LocationMapFragment extends DialogFragment implements ShowInMenuHan
 
     private boolean zoomToFit(IGeoPoint geoCenterPoint, Object... dbgContext) {
         QueryParameter baseQuery = getQueryForPositionRectangle(geoCenterPoint);
-        BoundingBox BoundingBox = null;
+        BoundingBox boundingBox = null;
 
         IGeoRectangle fittingRectangle = FotoSql.execGetGeoRectangle(null, this.getActivity(),
                 baseQuery, null, mDebugPrefix, "zoomToFit", dbgContext);
         double delta = getDelta(fittingRectangle);
         if ((geoCenterPoint != null) && (delta < 1e-6)) {
-            BoundingBox = getMarkerBoundingBox(geoCenterPoint);
+            boundingBox = getMarkerBoundingBox(geoCenterPoint);
 
         } else {
-            double enlarge = delta * 0.2;
-            BoundingBox = new BoundingBox(
-                    fittingRectangle.getLatitudeMax()+enlarge,
-                    fittingRectangle.getLogituedMax()+enlarge,
-                    fittingRectangle.getLatitudeMin()-enlarge,
-                    fittingRectangle.getLogituedMin()-enlarge);
+            boundingBox = toBoundingBox(fittingRectangle, delta);
         }
         if (Global.debugEnabledMap) {
             Log.i(Global.LOG_CONTEXT, "zoomToFit(): " + fittingRectangle +
                     " delta " + delta +
-                    " => box " + BoundingBox);
+                    " => box " + boundingBox);
         }
-        zoomToBoundingBox("zoomToFit()", BoundingBox, NO_ZOOM);
+        zoomToBoundingBox("zoomToFit()", boundingBox, NO_ZOOM);
         return true;
+    }
+
+    private BoundingBox toBoundingBox(IGeoRectangle fittingRectangle) {
+        return toBoundingBox(fittingRectangle, getDelta(fittingRectangle));
+    }
+
+    private BoundingBox toBoundingBox(IGeoRectangle fittingRectangle, double delta) {
+        BoundingBox boundingBox;
+        double enlarge = delta * 0.2;
+        boundingBox = new BoundingBox(
+                fittingRectangle.getLatitudeMax() + enlarge,
+                fittingRectangle.getLogituedMax() + enlarge,
+                fittingRectangle.getLatitudeMin() - enlarge,
+                fittingRectangle.getLogituedMin() - enlarge);
+        return boundingBox;
     }
 
     private double getDelta(IGeoRectangle fittingRectangle) {

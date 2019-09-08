@@ -83,11 +83,15 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
     private boolean mMustReplaceMenue = false;
 
     public static void showActivity(String debugContext, Activity context, SelectedFiles selectedItems,
-                                    QueryParameter query, int requestCode) {
+                                    QueryParameter query, IGeoRectangle zoomTo, int requestCode) {
         Uri initalUri = null;
         Intent intent = new Intent(context, MapGeoPickerActivity.class);
 
         AndroidAlbumUtils.saveFilterAndQuery(context, null, intent, null, null, query);
+
+        if (zoomTo != null) {
+            intent.putExtra(EXTRA_ZOOM_TO, new GeoRectangle().get(zoomTo).toString());
+        }
 
         if (AffUtils.putSelectedFiles(intent, selectedItems)) {
             IGeoPoint initialPoint = FotoSql.execGetPosition(null, context,

@@ -32,6 +32,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
+import de.k3b.io.IGeoRectangle;
 
 /**
  * Handles aspect "showInNewXxxx for DirectoryPicker, TagPicker, GeoAreaPicker
@@ -84,8 +85,11 @@ public class ShowInMenuHandler {
 
         switch (menuItem.getItemId()) {
             case R.id.cmd_show_in_new:
-                return pickerContext.onShowPopUp(null, null, selectionPath, popUpSelection,
-                        R.menu.menu_context_pick_show_in_new);
+                if (pickerContext != null) {
+                    return pickerContext.onShowPopUp(null, null, selectionPath, popUpSelection,
+                            R.menu.menu_context_pick_show_in_new);
+                }
+                break;
 
             case R.id.cmd_photo:
                 return showPhoto(menuItem,
@@ -166,7 +170,10 @@ public class ShowInMenuHandler {
         QueryParameter query = AndroidAlbumUtils.getAsAlbumOrMergedNewQuery(
                 dbgContext, mContext, baseQuery, currentSelectionFilter);
         if (query != null) {
-            MapGeoPickerActivity.showActivity(dbgContext, mContext, null, query, 0);
+            IGeoRectangle area = FotoSql.execGetGeoRectangle(null, mContext, query,
+                    null, "Calculate visible arean", selectionPath);
+            MapGeoPickerActivity.showActivity(dbgContext, mContext, null,
+                    query, area, 0);
             return true;
         }
         return false;

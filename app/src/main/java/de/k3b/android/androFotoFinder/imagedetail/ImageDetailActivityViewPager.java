@@ -967,7 +967,8 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
                 }
 
                 case R.id.cmd_show_geo:
-                    MapGeoPickerActivity.showActivity(" menu " + menuItem.getTitle(), this, getCurrentFoto(), null, 0);
+                    MapGeoPickerActivity.showActivity(" menu " + menuItem.getTitle(),
+                            this, getCurrentFoto(), null, null, 0);
                     break;
 
                 case R.id.cmd_show_geo_as: {

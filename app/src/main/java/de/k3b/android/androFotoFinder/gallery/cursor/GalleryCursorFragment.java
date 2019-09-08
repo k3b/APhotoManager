@@ -913,7 +913,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 return cmdMoveOrCopyWithDestDirPicker(true, fileCommands.getLastCopyToPath(), selectedFiles);
             case R.id.cmd_show_geo:
                 MapGeoPickerActivity.showActivity(" menu " + menuItem.getTitle(),
-                        this.getActivity(), selectedFiles, null, 0);
+                        this.getActivity(), selectedFiles, null, null, 0);
                 return true;
             case R.id.cmd_edit_geo:
                 GeoEditActivity.showActivity(" menu " + menuItem.getTitle(),

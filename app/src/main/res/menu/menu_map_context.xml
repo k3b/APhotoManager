@@ -23,23 +23,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity">
 
-    <item android:id="@+id/cmd_photo" android:title="@string/show_photo"
-        android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
-    <item
-        android:id="@+id/cmd_photo_base"
-        android:orderInCategory="100"
-        android:showAsAction="never"
-        android:title="@string/show_photo"
-        android:visible="false" />
-    <item android:id="@+id/cmd_gallery" android:title="@string/show_in_gallery_menu_title"
-        android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
-    <item
-        android:id="@+id/cmd_gallery_base"
-        android:orderInCategory="100"
-        android:showAsAction="never"
-        android:title="@string/show_in_gallery_menu_title"
-        android:visible="false" />
-
     <item android:id="@+id/cmd_zoom" android:title="@string/zoom_to_fit_menu_title"
         android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
     <item android:id="@+id/cmd_show_geo_as"

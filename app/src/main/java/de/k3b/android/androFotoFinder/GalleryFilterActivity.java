@@ -285,7 +285,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                 return true;
             case R.id.cmd_show_geo: {
                 MapGeoPickerActivity.showActivity(" menu " + menuItem.getTitle(),
-                        this, null, getAsMergedQuery(), 0);
+                        this, null, getAsMergedQuery(), null, 0);
                 return true;
             }
             case R.id.action_details:
