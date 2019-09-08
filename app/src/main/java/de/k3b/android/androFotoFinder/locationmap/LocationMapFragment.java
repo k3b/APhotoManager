@@ -60,7 +60,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
-import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.LockScreen;
@@ -266,18 +265,6 @@ public class LocationMapFragment extends DialogFragment {
         /** after ratation restore selelected view port */
         if (savedInstanceState != null) {
             boundingBox =  savedInstanceState.getParcelable(STATE_LAST_VIEWPORT);
-        } else {
-            //!!! not working: overwriten by navigateTo from activity
-            Intent intent = getActivity().getIntent();
-            if (intent != null) {
-                String zoomToArea = intent.getStringExtra(Common.EXTRA_ZOOM_TO);
-                if (zoomToArea != null) {
-                    IGeoRectangle zoomTo = GalleryFilterParameter.parse(zoomToArea, new GalleryFilterParameter());
-
-                    boundingBox = toBoundingBox(zoomTo);
-                }
-            }
-
         }
         if (boundingBox == null) {
             // if not initialized from outside show last used value
@@ -1147,10 +1134,6 @@ public class LocationMapFragment extends DialogFragment {
         }
         zoomToBoundingBox("zoomToFit()", boundingBox, NO_ZOOM);
         return true;
-    }
-
-    private BoundingBox toBoundingBox(IGeoRectangle fittingRectangle) {
-        return toBoundingBox(fittingRectangle, getDelta(fittingRectangle));
     }
 
     private BoundingBox toBoundingBox(IGeoRectangle fittingRectangle, double delta) {

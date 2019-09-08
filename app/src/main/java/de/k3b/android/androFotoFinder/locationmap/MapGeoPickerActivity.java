@@ -144,13 +144,21 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
 
         mMap = (PickerLocationMapFragment) getFragmentManager().findFragmentById(R.id.fragment_map);
 
-        GeoRectangle rectangle = null;
-        int zoom = OsmdroidUtil.NO_ZOOM;
-        if ((savedInstanceState == null) && (initalZoom != null) && (additionalPointsContentUri == null)) {
-            rectangle = new GeoRectangle();
-            zoom = initalZoom.getZoomMin();
-            rectangle.setLogituedMin(initalZoom.getLongitude()).setLatitudeMin(initalZoom.getLatitude());
-            rectangle.setLogituedMax(initalZoom.getLongitude()).setLatitudeMax(initalZoom.getLatitude());
+        GeoRectangle zoomToRectangle = null;
+
+        int zoomToZoomlevel = OsmdroidUtil.NO_ZOOM;
+
+        if (savedInstanceState == null) {
+            String zoomToArea = intent.getStringExtra(Common.EXTRA_ZOOM_TO);
+            if (zoomToArea != null) {
+                zoomToRectangle = new GalleryFilterParameter();
+                GalleryFilterParameter.parse(zoomToArea, (GalleryFilterParameter) zoomToRectangle);
+            } else if ((initalZoom != null) && (additionalPointsContentUri == null)) {
+                zoomToRectangle = new GeoRectangle();
+                zoomToZoomlevel = initalZoom.getZoomMin();
+                zoomToRectangle.setLogituedMin(initalZoom.getLongitude()).setLatitudeMin(initalZoom.getLatitude());
+                zoomToRectangle.setLogituedMax(initalZoom.getLongitude()).setLatitudeMax(initalZoom.getLatitude());
+            }
         } // else (savedInstanceState != null) restore after rotation. fragment takes care of restoring map pos
 
         final SelectedItems selectedItems = AffUtils.getSelectedItems(intent);
@@ -160,21 +168,22 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
         // for debugging: where does the filter come from
         String dbgFilter = null;
 
-        final boolean zoom2fit = false;
-
         onCreateData(savedInstanceState);
 
         {
             // bugfix: first defineNavigation will not work until map is created completely
             // so wait until then
             // note: delayed params must be final
-            final GeoRectangle _rectangle = rectangle;
-            final int _zoom = zoom;
+            final GeoRectangle _zoomToRectangle = zoomToRectangle;
+            final int _zoomToZoomlevel = zoomToZoomlevel;
+            final boolean _zoom2fit = false;
             mMap.mMapView.addOnFirstLayoutListener(new MapView.OnFirstLayoutListener() {
                 @Override
                 public void onFirstLayout(View v, int left, int top, int right, int bottom) {
                     mMap.defineNavigation(mGalleryQueryParameter.calculateEffectiveGalleryContentQuery(),
-                            null, geoPointFromIntent, _rectangle, _zoom, selectedItems, additionalPointsContentUri, zoom2fit);
+                            null, geoPointFromIntent,
+                            _zoomToRectangle, _zoomToZoomlevel,
+                            selectedItems, additionalPointsContentUri, _zoom2fit);
                 }
             });
         }
