@@ -84,6 +84,9 @@ public class ActivityWithCallContext extends Activity {
 
     }
 
+    public boolean hasParentCallContext() {
+        return this.parentCallContext.length() > 0;
+    }
     @Override
     protected void onResume() {
         super.onResume();

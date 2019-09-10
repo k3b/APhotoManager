@@ -1129,7 +1129,11 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
             if (StringUtils.isNullOrEmpty(title)) title = getString(R.string.gallery_title);
         }
         if (title != null) {
-            this.setTitle(mTitleResultCount + title);
+            if (hasParentCallContext()) {
+                this.setTitle("<" + mTitleResultCount + title);
+            } else {
+                this.setTitle(mTitleResultCount + title);
+            }
         }
     }
     /*********************** search view *******************/
