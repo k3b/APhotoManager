@@ -159,12 +159,13 @@ this program. If not, see <http://www.gnu.org/licenses/>
             android:defaultValue="false"
             android:title="@string/settings_debug_title"
             android:summary="@string/settings_debug_summary" />
-
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="debugEnabledCallContext"
-            android:summary="@string/settings_debug_enable_call_context_summary"
-            android:title="@string/settings_debug_enable_call_context_title" />
+        <!--
+                <CheckBoxPreference
+                    android:defaultValue="true"
+                    android:key="debugEnabledCallContext"
+                    android:summary="@string/settings_debug_enable_call_context_summary"
+                    android:title="@string/settings_debug_enable_call_context_title" />
+        -->
 
         <Preference
             android:key="debugClearLog"

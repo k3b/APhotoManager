@@ -61,13 +61,13 @@ public class ShowInMenuHandler {
     /**
      * show/hide show-in-xxx-menu-itmes and add count to them
      */
-    public void fixMenuOpenIn(String selectionPath, Menu menu) {
+    public void fixMenuOpenIn(String dbgContext, Menu menu) {
         if ((baseQuery != null) &&
                 (menu.findItem(R.id.cmd_gallery) != null) &&
                 (menu.findItem(R.id.cmd_gallery_base) != null)) {
             long baseCount = getPickCount("(with baseQuery)", baseQuery, currentSelectionFilter);
             if (baseCount > 0) {
-                long count = getPickCount(selectionPath, null, currentSelectionFilter);
+                long count = getPickCount(dbgContext, null, currentSelectionFilter);
                 setMenuCount(menu, R.id.cmd_gallery, count);
                 setMenuCount(menu, R.id.cmd_photo, count);
                 setMenuCount(menu, R.id.cmd_show_geo, count);
@@ -81,35 +81,30 @@ public class ShowInMenuHandler {
     }
 
     /** handle show-in-xxx-menu-itmes-click events. @return false if not handled */
-    public boolean onPopUpClick(MenuItem menuItem, IDirectory popUpSelection, String selectionPath) {
+    public boolean onPopUpClick(MenuItem menuItem, IDirectory popUpSelection, String _dbgContext) {
+        String dbgContext = getDbgContext(menuItem, _dbgContext);
 
         switch (menuItem.getItemId()) {
             case R.id.cmd_show_in_new:
                 if (pickerContext != null) {
-                    return pickerContext.onShowPopUp(null, null, selectionPath, popUpSelection,
+                    return pickerContext.onShowPopUp(null, null, dbgContext, popUpSelection,
                             R.menu.menu_context_pick_show_in_new);
                 }
                 break;
 
             case R.id.cmd_photo:
-                return showPhoto(menuItem,
-                        selectionPath, null);
+                return showPhoto(dbgContext, null);
             case R.id.cmd_photo_base:
-                return showPhoto(menuItem,
-                        selectionPath, baseQuery);
+                return showPhoto(dbgContext, baseQuery);
             case R.id.cmd_gallery:
-                return showGallery(menuItem,
-                        selectionPath, null);
+                return showGallery(dbgContext, null);
             case R.id.cmd_gallery_base:
-                return showGallery(menuItem,
-                        selectionPath, baseQuery);
+                return showGallery(dbgContext, baseQuery);
 
             case R.id.cmd_show_geo:
-                return showMap(menuItem,
-                        selectionPath, null);
+                return showMap(dbgContext, null);
             case R.id.cmd_show_geo_base:
-                return showMap(menuItem,
-                        selectionPath, baseQuery);
+                return showMap(dbgContext, baseQuery);
 
             default:
                 break;
@@ -117,9 +112,9 @@ public class ShowInMenuHandler {
         return false;
     }
 
-    private String getDbgContext(MenuItem menuItem, String selectionPath) {
+    private String getDbgContext(MenuItem menuItem, String dbgContext) {
         return "[6]" + FotoSql.getName(mContext, dirTypId) + " "
-                + ((menuItem == null) ? "" : menuItem.getTitle()) + ":" + selectionPath;
+                + ((menuItem == null) ? "" : menuItem.getTitle()) + ":" + dbgContext;
     }
 
     private void setMenuCount(Menu menu, int menuId, long count) {
@@ -142,8 +137,7 @@ public class ShowInMenuHandler {
         return FotoSql.getCount(mContext, query);
     }
 
-    private boolean showPhoto(MenuItem menuItem, String selectionPath, QueryParameter baseQuery) {
-        String dbgContext = getDbgContext(menuItem, selectionPath);
+    private boolean showPhoto(String dbgContext, QueryParameter baseQuery) {
         QueryParameter query = AndroidAlbumUtils.getAsAlbumOrMergedNewQuery(
                 dbgContext, mContext, baseQuery, currentSelectionFilter);
         if (query != null) {
@@ -154,8 +148,7 @@ public class ShowInMenuHandler {
         return false;
     }
 
-    private boolean showGallery(MenuItem menuItem, String selectionPath, QueryParameter baseQuery) {
-        String dbgContext = getDbgContext(menuItem, selectionPath);
+    private boolean showGallery(String dbgContext, QueryParameter baseQuery) {
         QueryParameter query = AndroidAlbumUtils.getAsAlbumOrMergedNewQuery(
                 dbgContext, mContext, baseQuery, currentSelectionFilter);
         if (query != null) {
@@ -165,13 +158,12 @@ public class ShowInMenuHandler {
         return false;
     }
 
-    private boolean showMap(MenuItem menuItem, String selectionPath, QueryParameter baseQuery) {
-        String dbgContext = getDbgContext(menuItem, selectionPath);
+    private boolean showMap(String dbgContext, QueryParameter baseQuery) {
         QueryParameter query = AndroidAlbumUtils.getAsAlbumOrMergedNewQuery(
                 dbgContext, mContext, baseQuery, currentSelectionFilter);
         if (query != null) {
             IGeoRectangle area = FotoSql.execGetGeoRectangle(null, mContext, query,
-                    null, "Calculate visible arean", selectionPath);
+                    null, "Calculate visible arean", dbgContext);
             MapGeoPickerActivity.showActivity(dbgContext, mContext, null,
                     query, area, 0);
             return true;
@@ -183,6 +175,6 @@ public class ShowInMenuHandler {
         /**
          * handle menu command show_in_new
          */
-        boolean onShowPopUp(View anchor, View owner, String selectionPath, Object selection, int... idContextMenue);
+        boolean onShowPopUp(View anchor, View owner, String dbgContext, Object selection, int... idContextMenue);
     }
 }

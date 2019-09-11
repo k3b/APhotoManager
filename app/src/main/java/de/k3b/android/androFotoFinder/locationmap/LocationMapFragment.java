@@ -110,7 +110,7 @@ public class LocationMapFragment extends DialogFragment {
     // for debugging
     private static int sId = 1;
     private final String mDebugPrefix;
-    protected final GeoUri mGeoUriEngine = new GeoUri(GeoUri.OPT_DEFAULT);
+    protected final GeoUri mGeoUriEngine = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
 
     protected MapView mMapView;
     private SeekBar mZoomBar;
@@ -204,17 +204,6 @@ public class LocationMapFragment extends DialogFragment {
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         saveLastViewPort(savedInstanceState);
-    }
-
-    public String getCurrentGeoUri() {
-        BoundingBox currentViewPort = this.mMapView.getBoundingBox();
-
-        GeoPoint currentCenter = currentViewPort.getCenterWithDateLine();
-        int currentZoomLevel = (int) this.mMapView.getZoomLevelDouble();
-        String uriCurrentViewport = mGeoUriEngine.toUriString(
-                new GeoPointDto(currentCenter.getLatitude(), currentCenter.getLongitude()
-                        , currentZoomLevel));
-        return uriCurrentViewport;
     }
 
     private void saveLastViewPort(Bundle savedInstanceState) {
@@ -1062,6 +1051,7 @@ public class LocationMapFragment extends DialogFragment {
     public boolean onPopUpClick(MenuItem menuItem, int markerId, IGeoPoint geoPosition) {
         closePopup();
 
+        geoPosition = getGeoPointById(markerId, geoPosition, getClass().getSimpleName(), "onPopUpClick", menuItem);
         if ((showInMenuHandler != null) && (geoPosition != null)
                 && showInMenuHandler.onPopUpClick(menuItem, null, geoPosition.toString())) {
             return true;
@@ -1069,19 +1059,14 @@ public class LocationMapFragment extends DialogFragment {
 
         switch (menuItem.getItemId()) {
             case R.id.cmd_photo:
-                return showPhoto(menuItem, getGeoPointById(markerId, geoPosition, "showPhoto"));
+                return showPhoto(menuItem, geoPosition);
             case R.id.cmd_gallery:
-                return showGallery(menuItem, getGeoPointById(markerId, geoPosition, "showGallery"));
+                return showGallery(menuItem, geoPosition);
             case R.id.cmd_zoom:
-                return zoomToFit(getGeoPointById(markerId, geoPosition, "on cmd zoomToFit"));
+                return zoomToFit(geoPosition);
 
             case R.id.cmd_show_geo_as: {
-                IGeoPoint _geo = getGeoPointById(markerId, geoPosition, "cmd_show_geo_as");
-                GeoPointDto geo = new GeoPointDto(_geo.getLatitude(), _geo.getLongitude(), GeoPointDto.NO_ZOOM);
-                geo.setId("" + markerId);
-                geo.setName("#" + markerId);
-                GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
-                String uri = PARSER.toUriString(geo);
+                String uri = getAsGeoUri(geoPosition, (int) this.mMapView.getZoomLevelDouble(), markerId);
 
                 IntentUtil.cmdStartIntent("show_geo_as", getActivity(), null, uri, null, Intent.ACTION_VIEW, R.string.geo_show_as_menu_title, R.string.geo_picker_err_not_found, 0);
 
@@ -1092,6 +1077,23 @@ public class LocationMapFragment extends DialogFragment {
             default:
                 return false;
         }
+    }
+
+    public String getCurrentGeoUri() {
+        BoundingBox currentViewPort = this.mMapView.getBoundingBox();
+
+        GeoPoint currentCenter = currentViewPort.getCenterWithDateLine();
+        int currentZoomLevel = (int) this.mMapView.getZoomLevelDouble();
+        return getAsGeoUri(currentCenter, currentZoomLevel, 0);
+    }
+
+    private String getAsGeoUri(IGeoPoint geoPoint, int zoomLevel, int markerId) {
+        GeoPointDto geo = new GeoPointDto(geoPoint.getLatitude(), geoPoint.getLongitude(), zoomLevel);
+        if (markerId != 0) {
+            geo.setId("" + markerId);
+            geo.setName("#" + markerId);
+        }
+        return mGeoUriEngine.toUriString(geo);
     }
 
     protected void closePopup() {

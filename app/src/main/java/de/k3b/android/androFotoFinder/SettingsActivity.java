@@ -153,7 +153,7 @@ public class SettingsActivity extends PreferenceActivity {
 
         prefs.putBoolean("debugEnabledJpgMetaIo", LibGlobal.debugEnabledJpgMetaIo);
         prefs.putBoolean("debugEnabledJpg", LibGlobal.debugEnabledJpg);
-        prefs.putBoolean("debugEnabledCallContext", ActivityWithCallContext.isCallContextEnabled);
+        // prefs.putBoolean("debugEnabledCallContext", ActivityWithCallContext.isCallContextEnabled);
 
         prefs.putBoolean("datePickerUseDecade", LibGlobal.datePickerUseDecade);
 
@@ -215,7 +215,7 @@ public class SettingsActivity extends PreferenceActivity {
         Global.locked                           = getPref(prefs, "locked", Global.locked);
         Global.passwordHash                     = getPref(prefs, "passwordHash", Global.passwordHash);
 
-        ActivityWithCallContext.isCallContextEnabled = getPref(prefs, "debugEnabledCallContext", ActivityWithCallContext.isCallContextEnabled);
+        // ActivityWithCallContext.isCallContextEnabled = getPref(prefs, "debugEnabledCallContext", ActivityWithCallContext.isCallContextEnabled);
         LibGlobal.debugEnabledJpg = getPref(prefs, "debugEnabledJpg", LibGlobal.debugEnabledJpg);
         LibGlobal.debugEnabledJpgMetaIo     = getPref(prefs, "debugEnabledJpgMetaIo", LibGlobal.debugEnabledJpgMetaIo);
 

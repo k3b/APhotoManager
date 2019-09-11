@@ -22,6 +22,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
+
+import de.k3b.android.androFotoFinder.Global;
 
 /**
  * An activity that memorizes the activity call stack (parent Activities) for debugging purposes.
@@ -52,8 +55,8 @@ public class ActivityWithCallContext extends Activity {
      */
     private String parentCallContext = "";
 
-    protected static void addContext(String debugContext, Intent targetIntent, Activity context) {
-        if ((targetIntent != null) && (context != null)) {
+    public static void addContext(String debugContext, Intent targetIntent, Activity context) {
+        if ((isCallContextEnabled) && (targetIntent != null) && (context != null)) {
             CharSequence caller = (context instanceof ActivityWithCallContext)
                     ? ((ActivityWithCallContext) context).getCallContext()
                     : getCallerDescription(context);
@@ -61,6 +64,9 @@ public class ActivityWithCallContext extends Activity {
                 targetIntent.putExtra(PARAM_CALLSTACK, caller + "\n\t[" + debugContext + "]");
             } else {
                 targetIntent.putExtra(PARAM_CALLSTACK, caller);
+            }
+            if (Global.debugEnabled) {
+                Log.d(Global.LOG_CONTEXT, caller + ":" + targetIntent.toUri(Intent.URI_INTENT_SCHEME));
             }
         }
     }
@@ -127,9 +133,7 @@ public class ActivityWithCallContext extends Activity {
 
     /** called by all variants of startActivity(ForResult): add context to call.*/
     private void startActivityForResultImpl(Intent intent, int requestCode, Bundle options) {
-        if (isCallContextEnabled) {
-            addContext(additionalCallContext, intent, this);
-        }
+        addContext(additionalCallContext, intent, this);
         additionalCallContext = "";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             super.startActivityForResult(intent, requestCode, options);
