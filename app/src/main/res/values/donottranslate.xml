@@ -30,11 +30,6 @@ this program. If not, see <http://www.gnu.org/licenses/>
 	<string name="settings_debug_map_title" translatable="false">LogCat geo map</string>
     <string name="settings_debug_zip" translatable="false">LogCat zip-file</string>
 
-	<!--
-    <string name="settings_debug_enable_call_context_title" translatable="false">Record Activty Callstack</string>
-    <string name="settings_debug_enable_call_context_summary" translatable="false">... to show Parent-Activity calls in LogCat Crashlog</string>
-	-->
-
 	<!-- #108 Zip-file export/backup will be implemented later
         <string name="lbl_change_history" translatable="false">ChangeHistory.csv</string>
         <string name="lbl_apm_file" translatable="false">.apm</string>

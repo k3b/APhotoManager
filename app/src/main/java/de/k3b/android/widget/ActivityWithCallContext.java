@@ -40,7 +40,7 @@ public class ActivityWithCallContext extends Activity {
     /**
      * set to false to disable CallContext for privacy reasons
      */
-    public static Boolean isCallContextEnabled = true;
+    public static final Boolean isCallContextEnabled = true;
 
     /** what the current activity is doing. This will become part of the callstack when a child activity is invoked */
     public static String additionalCallContext = "";
