@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -55,12 +55,32 @@
         android:visible="true"
         android:orderInCategory="10"
         android:showAsAction="never" />
-		
+
+
     <item android:id="@+id/cmd_photo" android:title="@string/show_photo"
         android:orderInCategory="50" android:showAsAction="never" android:visible="true" />
+    <item
+        android:id="@+id/cmd_photo_base"
+        android:orderInCategory="50"
+        android:showAsAction="never"
+        android:title="@string/show_photo"
+        android:visible="false" />
     <item android:id="@+id/cmd_gallery" android:title="@string/show_in_gallery_menu_title"
         android:orderInCategory="50" android:showAsAction="never" android:visible="true" />
-		
+    <item
+        android:id="@+id/cmd_gallery_base"
+        android:orderInCategory="50"
+        android:showAsAction="never"
+        android:title="@string/show_in_gallery_menu_title"
+        android:visible="false" />
+
+    <item
+        android:id="@+id/cmd_show_geo_as"
+        android:orderInCategory="200"
+        android:showAsAction="never"
+        android:title="@string/geo_show_as_menu_title"
+        android:visible="true" />
+
     <item android:id="@+id/cmd_settings" android:title="@string/settings_title"
         android:orderInCategory="500" android:showAsAction="never" android:visible="true" />
 

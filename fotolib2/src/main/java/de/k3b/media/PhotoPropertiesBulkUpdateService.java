@@ -50,7 +50,7 @@ public class PhotoPropertiesBulkUpdateService {
                 if (exif.getExif() != null) {
                     sb.append(exif.getExif().getDebugString(" "));
                 } else {
-                    sb.append(PhotoPropertiesUtil.toString(exif, false, null, PhotoPropertiesUtil.FieldID.path));
+                    sb.append(PhotoPropertiesFormatter.format(exif, false, null, PhotoPropertiesFormatter.FieldID.path));
                 }
             }
         }
@@ -65,7 +65,7 @@ public class PhotoPropertiesBulkUpdateService {
     public PhotoPropertiesUpdateHandler saveLatLon(File filePath, Double latitude, Double longitude) {
         IPhotoProperties changedData = new PhotoPropertiesDTO().setLatitudeLongitude(latitude, longitude);
         PhotoPropertiesDiffCopy metaDiffCopy = new PhotoPropertiesDiffCopy(true, true)
-                .setDiff(changedData, PhotoPropertiesUtil.FieldID.latitude_longitude);
+                .setDiff(changedData, PhotoPropertiesFormatter.FieldID.latitude_longitude);
         PhotoPropertiesUpdateHandler exif = applyChanges(filePath, null, 0, false, metaDiffCopy);
         metaDiffCopy.close();
         return exif;
@@ -99,7 +99,7 @@ public class PhotoPropertiesBulkUpdateService {
                     }
                 }
 
-                List<PhotoPropertiesUtil.FieldID> changed = metaDiffCopy.applyChanges(exif);
+                List<PhotoPropertiesFormatter.FieldID> changed = metaDiffCopy.applyChanges(exif);
 
                 if (!sameFile || (changed != null)) {
                     debugExif(sb, "assign ", exif, inFilePath);

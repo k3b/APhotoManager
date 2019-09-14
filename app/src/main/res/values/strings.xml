@@ -128,6 +128,8 @@
     <string name="share_err_to_many">Too many items selected to share at once</string>
     <string name="share_menu_title">Share/Send</string>
     <string name="show_in_gallery_menu_title">Show in new gallery</string>
+    <string name="show_in_new_menu_title">Show in ....</string>
+
     <string name="slideshow_menu_title">Slideshow</string>
     <string name="sort_by_date">Date</string>
     <string name="sort_by_folder">Folder</string>

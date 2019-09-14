@@ -205,6 +205,8 @@ public class IntentUtil implements Common {
                     : Intent.createChooser(outIntent, parentActivity.getText(idChooserCaption));
 
             ActivityWithCallContext.additionalCallContext = debugContext;
+            ActivityWithCallContext.addContext(debugContext, execIntent, parentActivity);
+
             if (idActivityResultRequestCode == 0) {
                 parentActivity.startActivity(execIntent);
             } else {
@@ -217,6 +219,8 @@ public class IntentUtil implements Common {
 
     public static void startActivity(String debugContext, Activity context, int requestCode, Intent intent) {
         ActivityWithCallContext.additionalCallContext = debugContext;
+        ActivityWithCallContext.addContext(debugContext, intent, context);
+
         if (requestCode != 0) {
             context.startActivityForResult(intent, requestCode);
         } else {

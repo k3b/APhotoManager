@@ -39,6 +39,11 @@ public interface Common {
     /** detail: offset in in the resultset to be shown */
     String EXTRA_POSITION = "de.k3b.extra.OFFSET";
 
+    /**
+     * map: initial visible area in geo-map
+     */
+    String EXTRA_ZOOM_TO = "de.k3b.extra.ZOOM_TO";
+
     /** gallery,geoEdit,picker: app title for picker */
     String EXTRA_TITLE = Intent.EXTRA_TITLE;
 

@@ -25,6 +25,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import de.k3b.LibGlobal;
 
@@ -33,19 +34,22 @@ import de.k3b.LibGlobal;
  */
 public class DirectoryFormatter {
     private static final int INTDECADE_LEN = 3;
+    private static final TimeZone TIME_ZONE = TimeZone.getTimeZone("UTC");
 
     /**
+     * converts from datePath to Date from,to
+     *
      * "/2001/01/16" => 2001-01-16 - 2001-01-17
      * "/2001/01/" => 2001-01-01 - 2001-02-01
      * "/2001/" => 2001-01-01 - 2002-01-01
      */
-    public static void getDates(String selectedAbsolutePath, Date from, Date to) {
+    public static void parseDatesPath(String datePath, Date fromResult, Date toResult) {
         Integer year = null;
         Integer month = null;
         Integer day = null;
         Integer decade = (LibGlobal.datePickerUseDecade) ? null : Integer.MIN_VALUE;
 
-        String parts[] = selectedAbsolutePath.split(Directory.PATH_DELIMITER);
+        String parts[] = datePath.split(Directory.PATH_DELIMITER);
 
         for (String part : parts) {
             if ((part != null) && ((part.length() > 0))) {
@@ -70,14 +74,16 @@ public class DirectoryFormatter {
 
         if (yearFrom != 0) {
             if ((year != null) && (yearFrom == 1970)) {
-                from.setTime(0);
-                to.setTime(0);
+                fromResult.setTime(0);
+                toResult.setTime(0);
             } else {
                 int monthFrom = (month != null) ? month.intValue() : 1;
                 int dayFrom = (day != null) ? day.intValue() : 1;
 
                 GregorianCalendar cal = new GregorianCalendar(yearFrom, monthFrom - 1, dayFrom, 0, 0, 0);
-                from.setTime(cal.getTimeInMillis());
+                cal.setTimeZone(TIME_ZONE);
+
+                fromResult.setTime(cal.getTimeInMillis());
 
                 int field = GregorianCalendar.YEAR;
                 int increment = 10;
@@ -86,7 +92,7 @@ public class DirectoryFormatter {
                 if (day != null) field = GregorianCalendar.DAY_OF_MONTH;
 
                 cal.add(field, increment);
-                to.setTime(cal.getTimeInMillis());
+                toResult.setTime(cal.getTimeInMillis());
             }
         }
     }
@@ -112,20 +118,28 @@ public class DirectoryFormatter {
     }
 
     public static String formatLatLon(Double latOrLon) {
+        if (Double.isNaN(latOrLon)) return "";
         if (latOrLon == null) return "0";
         return formatLatLon(latOrLon.doubleValue());
     }
 
-    public static CharSequence formatLatLon(Double... latOrLons) {
+    public static CharSequence formatLatLon(double... latOrLons) {
         StringBuilder result = new StringBuilder();
-        for (Double latOrLon : latOrLons)
-            result.append(formatLatLon(latOrLon)).append(" ");
+        boolean useComma = true;
+        for (Double latOrLon : latOrLons) {
+            result.append(formatLatLon(latOrLon)).append(useComma ? "," : ";");
+            useComma = !useComma;
+        }
         return result;
     }
 
     public static String formatLatLon(double latOrLon) {
-        if ((latOrLon <= 0.0000005) && (latOrLon >= -0.0000005)) return "0";
+        if (is0(latOrLon)) return "0";
         return latLonFormatter6.format(latOrLon);
+    }
+
+    protected static boolean is0(double latOrLon) {
+        return (latOrLon <= 0.0000005) && (latOrLon >= -0.0000005);
     }
 
     private static int getInt(double ll, int factor) {
@@ -208,30 +222,31 @@ public class DirectoryFormatter {
         return stringWithYear.substring(posOfYear, posOfYear + INTDECADE_LEN)  + "0*";
     }
 
-    public static String getDatePath(final boolean withDecade, long dateFrom, long dateTo) {
+    public static String formatDatePath(final boolean withDecade, long dateFrom, long dateTo) {
         // special cases if null, empty or only one value
         if (dateFrom == 0) dateFrom = dateTo;
         if (dateTo == 0) dateTo = dateFrom;
         if (dateTo == 0) return null;
 
-        final long diffTage = Math.abs (dateTo - dateFrom) / (1000 * 60 * 60 * 24);
+        final long diffDays = Math.abs(dateTo - dateFrom) / (1000 * 60 * 60 * 24);
 
         final Calendar date = Calendar.getInstance(); // TimeZone.getTimeZone("UTC"));
+        date.setTimeZone(TIME_ZONE);
         date.setTimeInMillis(dateFrom);
         final int year = date.get(Calendar.YEAR);
 
         final StringBuilder result = new StringBuilder();
-        if ((withDecade) && (diffTage < 3800)) {
+        if ((withDecade) && (diffDays < 3800)) {
             result.append("/").append(year / 10).append("0*");
         }
-        if (diffTage < 380) {
+        if (diffDays < 380) {
             result.append("/").append(year);
         }
-        if (diffTage < 40) {
+        if (diffDays < 40) {
             final int month = date.get(Calendar.MONTH) + 1;
             result.append("/").append(n2(month) );
         }
-        if (diffTage <= 2) {
+        if (diffDays <= 2) {
             final int day = date.get(Calendar.DAY_OF_MONTH);
             result.append("/").append(n2(day));
         }

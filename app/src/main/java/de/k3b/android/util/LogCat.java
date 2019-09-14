@@ -113,9 +113,12 @@ public abstract class LogCat implements Thread.UncaughtExceptionHandler {
         }
     }
 
+    /**
+     * Thread.UncaughtExceptionHandler.uncaughtException is called when an app component is crashing:
+     * there is an exception that is not handled by the app
+     */
     @Override
     public void uncaughtException(Thread thread, Throwable ex) {
-
         try {
             // Do your stuff with the exception
             Log.e(mTags[0],"LogCat.uncaughtException " + ex, ex);

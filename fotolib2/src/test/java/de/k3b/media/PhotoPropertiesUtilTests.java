@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 by k3b.
+ * Copyright (c) 2016-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -119,7 +119,7 @@ public class PhotoPropertiesUtilTests {
         item1.setDescription(null);
         item2.setDescription(null);
 
-        List<PhotoPropertiesUtil.FieldID> result = PhotoPropertiesUtil.getChanges(item1, item2);
+        List<MediaFormatter.FieldID> result = PhotoPropertiesUtil.getChanges(item1, item2);
         Assert.assertEquals(ListUtils.toString(result), 4, result.size());
     }
 
@@ -131,7 +131,7 @@ public class PhotoPropertiesUtilTests {
         item1.setTitle("some title");
         item1.setLatitudeLongitude(99.0,99.0);
 
-        List<PhotoPropertiesUtil.FieldID> result = PhotoPropertiesUtil.getChanges(null, item1);
+        List<MediaFormatter.FieldID> result = PhotoPropertiesUtil.getChanges(null, item1);
         Assert.assertEquals(ListUtils.toString(result), 3, result.size());
     }
 

@@ -31,7 +31,8 @@
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent" android:layout_height="wrap_content">
+    android:layout_width="fill_parent" android:layout_height="wrap_content"
+    tools:context="de.k3b.android.androFotoFinder.backup.BackupActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -39,13 +40,13 @@
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
         android:paddingBottom="@dimen/activity_vertical_margin"
-        tools:context="de.k3b.android.androFotoFinder.backup.BackupActivity">
-
+        >
         <!-- -->
 
         <TextView android:id="@+id/lbl_zip_out"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+
             android:text="@string/lbl_zip_out"
             android:textAppearance="?android:attr/textAppearanceLarge"
             />
@@ -67,7 +68,8 @@
             android:layout_alignLeft="@+id/edit_zip_dir"
             android:layout_alignStart="@+id/edit_zip_dir"
             android:layout_below="@+id/lbl_zip_out"
-            android:layout_toLeftOf="@+id/cmd_lon_from_history"
+            android:layout_toStartOf="@+id/cmd_zip_name_history"
+            android:layout_toLeftOf="@+id/cmd_zip_name_history"
             android:ems="10"
             android:inputType="text" />
 
@@ -118,6 +120,7 @@
             android:layout_alignTop="@+id/cmd_zip_dir"
             android:layout_toEndOf="@+id/lbl_zip_dir"
             android:layout_toLeftOf="@+id/cmd_zip_dir_history"
+            android:layout_toStartOf="@+id/cmd_zip_dir_history"
             android:layout_toRightOf="@+id/lbl_zip_dir"
             android:ellipsize="end"
             android:inputType="text"
@@ -217,6 +220,7 @@
             android:layout_below="@+id/line_zip_modified"
 
             android:layout_toLeftOf="@+id/cmd_time"
+            android:layout_toStartOf="@+id/cmd_time"
             android:text="@string/btn_popup"
 
             />
@@ -269,7 +273,7 @@
         <Button android:id="@+id/cmd_filter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/edit_date_modified_from"
+            android:layout_below="@+id/lbl_filter"
             android:layout_toRightOf="@+id/cmd_zip_dir_history"
             android:layout_toEndOf="@+id/cmd_zip_dir_history"
             android:layout_alignParentEnd="true"
@@ -289,9 +293,8 @@
         <EditText android:id="@+id/edit_filter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/edit_date_modified_from"
+            android:layout_below="@+id/lbl_filter"
             android:enabled="false"
-            android:layout_alignBottom="@+id/cmd_filter"
             android:layout_toEndOf="@+id/lbl_zip_dir"
             android:layout_toLeftOf="@+id/cmd_zip_dir_history"
             android:layout_toRightOf="@+id/lbl_zip_dir"
@@ -299,12 +302,24 @@
             android:ems="10"
             android:inputType="numberDecimal|numberSigned" />
 
+        <TextView
+            android:id="@+id/lbl_exif_filter_details"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/edit_filter"
+            android:layout_marginStart="@dimen/value_indent"
+            android:layout_marginLeft="@dimen/value_indent"
+            android:layout_marginEnd="@dimen/value_indent"
+            android:layout_marginRight="@dimen/value_indent"
+            android:text="@string/preview_message_format"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
         <!-- -->
 
         <View android:id="@+id/line_filter_what"
             android:layout_height="2dp"
             android:layout_width="fill_parent"
-            android:layout_below="@+id/edit_filter"
+            android:layout_below="@+id/lbl_exif_filter_details"
             android:background="#c0c0c0"
             android:layout_marginBottom="@dimen/line_margin"
             android:layout_marginTop="@dimen/line_margin"
@@ -352,6 +367,34 @@
             android:layout_alignParentRight="true"
             android:text="@string/lbl_apm_file" />
         < ! - - -->
+
+        <TextView android:id="@+id/lbl_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/line_filter_what"
+
+            />
+        <Button android:id="@+id/cmd_cancel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            android:text="@android:string/cancel"
+            android:layout_below="@+id/lbl_status"
+            android:layout_alignParentLeft="true"
+            />
+
+        <ProgressBar android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            android:layout_below="@+id/cmd_cancel"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            />
 
     </RelativeLayout>
 </ScrollView>

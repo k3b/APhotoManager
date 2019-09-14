@@ -5,6 +5,7 @@ import java.io.File;
 import de.k3b.io.FileProcessor;
 import de.k3b.io.IItemSaver;
 
+/** Translates every affected file (jpg/xmp) of {@link #save(IPhotoProperties)} to  fileSaver.save(File) */
 public class PhotoProperties2ExistingFileSaver implements IItemSaver<IPhotoProperties> {
     private final IItemSaver<File> fileSaver;
     public PhotoProperties2ExistingFileSaver(IItemSaver<File> fileSaver) {
@@ -27,7 +28,9 @@ public class PhotoProperties2ExistingFileSaver implements IItemSaver<IPhotoPrope
     private int saveFiles(File... files) {
         int processed = 0;
         for (File f: files) {
-            if ((f != null) && (f.exists()) && f.canRead() && this.fileSaver.save(f))  processed++;
+            if ((f != null) && (f.exists()) && f.canRead() && this.fileSaver.save(f)) {
+                processed++;
+            }
         }
         return processed;
     }

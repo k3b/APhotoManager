@@ -50,18 +50,21 @@ import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.List;
+
 import de.k3b.LibGlobal;
-import de.k3b.android.androFotoFinder.FotoGalleryActivity;
+import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.PhotoAutoprocessingEditActivity;
+import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
-import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailMetaDialogBuilder;
-import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoThumbSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
-import de.k3b.android.androFotoFinder.Global;
-import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.ClipboardUtil;
 import de.k3b.android.util.FileManagerUtil;
@@ -70,20 +73,17 @@ import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.AlbumFile;
-import de.k3b.io.GalleryFilterParameter;
-import de.k3b.io.ListUtils;
-import de.k3b.io.VISIBILITY;
-import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.Directory;
 import de.k3b.io.DirectoryNavigator;
 import de.k3b.io.FileUtils;
+import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
+import de.k3b.io.IGalleryFilter;
+import de.k3b.io.ListUtils;
 import de.k3b.io.OSDirectory;
 import de.k3b.io.StringUtils;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.List;
+import de.k3b.io.VISIBILITY;
+import de.k3b.io.collections.SelectedFiles;
 
 /**
  * A fragment with a Listing of Directories to be picked.
@@ -95,47 +95,10 @@ import java.util.List;
  * {@link OnDirectoryInteractionListener} interface
  * to handle interaction events.
  */
-public class DirectoryPickerFragment extends DialogFragment implements DirectoryGui {
-    /** executer for background task, that updates status-message and stops if cancel is pressed */
-    private abstract class AsyncTaskEx<Params> extends AsyncTask<Params, Integer,Integer> {
-        private final int mProgressMessageResourceId;
-
-        AsyncTaskEx(int progressMessageResourceId) {
-
-            mProgressMessageResourceId = progressMessageResourceId;
-        }
-
-        @Override
-        protected void onProgressUpdate(Integer... values) {
-            // values: progressPos,progressCount
-            super.onProgressUpdate(values);
-            StringBuilder message = new StringBuilder();
-            message
-                    .append(getActivity().getString(mProgressMessageResourceId))
-                    .append(": ").append(values[0])
-                    .append(" / ").append(values[1]);
-            setStatusMessage(message.toString());
-            if (Global.debugEnabled) {
-                Log.d(Global.LOG_CONTEXT, message.toString());
-            }
-        }
-
-        @Override protected void onCancelled() {
-            onDirectoryCancel();
-        }
-
-        @Override protected void onPostExecute(Integer result) {
-            String message = getActivity().getString(mProgressMessageResourceId) +
-                    ": " + result;
-            Toast.makeText(getActivity(), message,
-                    Toast.LENGTH_LONG).show();
-            onDirectoryCancel();
-        }
-
-    }
-
+public class DirectoryPickerFragment extends DialogFragment
+        implements DirectoryGui, ShowInMenuHandler.PickerContext {
     private static final String TAG = "DirFragment";
-    private static final java.lang.String INSTANCE_STATE_CONTEXT_MENU = "contextmenu";
+    private static final java.lang.String INSTANCE_STATE_CONTEXT_MENU = "contextmenuIds";
 
     // public state
     protected IDirectory mCurrentSelection = null;
@@ -163,6 +126,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     private int mDirTypId = 0;
     protected int mTitleId = 0;
 
+    protected QueryParameter baseQuery = null;
     // api to fragment owner or null
     private OnDirectoryInteractionListener mDirectoryListener = null;
     private OnDirectoryPickListener mDirectoryPickListener = null;
@@ -172,14 +136,13 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     private final String debugPrefix;
     private ImageView mImage;
     private int mLastIconID = -1;
-    private int mContextMenue = 0;
+    private int[] mContextMenue = null;
 
     // not null when renumber dialog is open.
     private AsyncTask mSubTask = null;
     private AlertDialog mSubDialog = null;
-
-    // onsorted generated by ide-s autocomplete
-
+    private WeakReference<View> anchor;
+    private ShowInMenuHandler showInMenuHandler = null;
 
     public DirectoryPickerFragment() {
         // Required empty public constructor
@@ -196,7 +159,11 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         return this;
     }
 
-    public DirectoryPickerFragment setContextMenuId(int contextMenuId) {
+    public void setBaseQuery(QueryParameter baseQuery) {
+        this.baseQuery = baseQuery;
+    }
+
+    public DirectoryPickerFragment setContextMenuId(int... contextMenuId) {
         mContextMenue = contextMenuId;
         return this;
     }
@@ -211,7 +178,10 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                              Bundle savedInstanceState) {
 
         if (savedInstanceState != null) {
-            this.mContextMenue = savedInstanceState.getInt(INSTANCE_STATE_CONTEXT_MENU, this.mContextMenue);
+            int[] ids = savedInstanceState.getIntArray(INSTANCE_STATE_CONTEXT_MENU);
+            if ((ids != null) && (ids.length > 0)) {
+                this.mContextMenue = ids;
+            }
         }
 
         // Inflate the layout for this fragment
@@ -230,12 +200,14 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             }
         };
 
-        if (this.mContextMenue != 0) {
+        if (this.mContextMenue != null) {
             mPathButtonLongClickHandler = new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
                     showPathBarAnimation = false;
-                    onShowPopUp(v, (IDirectory) v.getTag());
+                    final IDirectory directory = (IDirectory) v.getTag();
+                    String selectionPath = (directory == null) ? null : directory.getAbsolute();
+                    onShowPopUp(v, v, selectionPath, directory, mContextMenue);
                     return true;
                 }
             };
@@ -268,7 +240,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             }
         });
 
-        if (mContextMenue != 0) {
+        if (mContextMenue != null) {
             mTreeView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                 @Override
                 public boolean onItemLongClick(AdapterView<?> parent, View view, int flatPosition, long id) {
@@ -276,7 +248,9 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
                     int group = ExpandableListView.getPackedPositionGroup(packedPos);
                     int child = ExpandableListView.getPackedPositionChild(packedPos);
                     IDirectory directory = (child != -1) ? mNavigation.getChild(group, child) : mNavigation.getGroup(group);
-                    onShowPopUp(view, directory);
+                    mTreeView.setSelectedChild(group, child, false);
+                    String selectionPath = (directory == null) ? null : directory.getAbsolute();
+                    onShowPopUp(view, mTreeView, selectionPath, directory, mContextMenue);
                     return false;
                 }
             });
@@ -320,13 +294,15 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         }
 
         mCmdPopup = null;
-        if (mContextMenue != 0) {
+        if (mContextMenue != null) {
             mCmdPopup = (Button) view.findViewById(R.id.cmd_popup);
             if (mCmdPopup != null) {
                 mCmdPopup.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        onShowPopUp(mCmdPopup, mCurrentSelection);
+                        String selectionPath = (mCurrentSelection == null) ? null : mCurrentSelection.getAbsolute();
+
+                        onShowPopUp(mCmdPopup, mCmdPopup, selectionPath, mCurrentSelection, mContextMenue);
                     }
                 });
                 mCmdPopup.setVisibility(View.VISIBLE);
@@ -344,22 +320,49 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         }
     }
 
+    // interface PickerContext
     /** called via pathBar-Button-LongClick, tree-item-LongClick, popUp-button */
-    private void onShowPopUp(View anchor, IDirectory selection) {
-        PopupMenu popup = onCreatePopupMenu(anchor, selection);
+    @Override
+    public boolean onShowPopUp(View anchor, View owner, String selectionPath, Object selection, int... idContextMenue) {
+        return onShowPopUp(anchor, owner, selectionPath, (IDirectory) selection, idContextMenue);
+    }
 
-        if (popup != null) {
-            popup.show();
+    private boolean onShowPopUp(View anchor, View owner, String selectionPath, IDirectory selection, int... idContextMenue) {
+
+        if (idContextMenue != null) {
+            if (owner != null) {
+                this.anchor = new WeakReference<View>(owner);
+            }
+
+            if ((anchor == null) && (this.anchor != null) && (this.anchor.get() != null)) {
+                anchor = this.anchor.get();
+            }
+            if (mTreeView == anchor) {
+                if (mTreeView.getSelectedView() != null) {
+                    anchor = mTreeView.getSelectedView();
+                }
+            }
+
+            PopupMenu popup = onCreatePopupMenu(anchor, selection, idContextMenue);
+
+            if (popup != null) {
+                popup.show();
+            }
         }
+        return true;
     }
 
     @NonNull
-    private PopupMenu onCreatePopupMenu(View anchor, IDirectory selection) {
+    private PopupMenu onCreatePopupMenu(View anchor, IDirectory selection, int... idContextMenue) {
         PopupMenu popup = new PopupMenu(getActivity(), anchor);
         popup.setOnMenuItemClickListener(popUpListener);
         MenuInflater inflater = popup.getMenuInflater();
         Menu menu = popup.getMenu();
-        inflater.inflate(this.mContextMenue, menu);
+        for (int id : idContextMenue) {
+            if (id != 0) {
+                inflater.inflate(id, menu);
+            }
+        }
         if (selection != null) {
             String absoluteSelectedPath = selection.getAbsolute();
             boolean isAlbumFile = AlbumFile.isQueryFile(absoluteSelectedPath);
@@ -376,7 +379,14 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
 
             setMenuVisibility(menu, android.R.id.copy, !isAlbumFile);
 
+            IGalleryFilter currentSelectionAsFilter = getCurrentSelectionAsFilter(selection, this.mDirTypId);
+            this.showInMenuHandler = new ShowInMenuHandler(mContext, this, baseQuery,
+                    currentSelectionAsFilter, mDirTypId);
+            if (selection != null) {
+                showInMenuHandler.fixMenuOpenIn(selection.getAbsolute(), menu);
+            }
         }
+
         return popup;
     }
 
@@ -398,11 +408,15 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
 
     protected boolean onPopUpClick(MenuItem menuItem, IDirectory popUpSelection) {
         this.mLastPopUpSelection = popUpSelection;
+        if ((showInMenuHandler != null) && (popUpSelection != null)
+                && showInMenuHandler.onPopUpClick(menuItem, popUpSelection, popUpSelection.getAbsolute())) {
+            return true;
+        }
         switch (menuItem.getItemId()) {
             case R.id.cmd_mk_dir:
                 return onCreateSubDirQuestion(popUpSelection);
             case R.id.cmd_apm_edit:
-                return onEditApm(popUpSelection);
+                return onEditApm(menuItem, popUpSelection);
             case android.R.id.copy:
                 return onCopy(popUpSelection);
 
@@ -414,14 +428,10 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
             case R.id.action_edit:
                 return onEdit(popUpSelection);
 
-            case R.id.cmd_photo:
-                return showPhoto(popUpSelection, mDirTypId);
-            case R.id.cmd_gallery:
-                return showGallery(popUpSelection, mDirTypId);
             case R.id.cmd_filemanager:
                 return FileManagerUtil.showInFilemanager(getActivity(), popUpSelection.getAbsolute());
             case R.id.action_details:
-                return showDirInfo(popUpSelection);
+                return showDirInfo(baseQuery, popUpSelection);
             case R.id.cmd_fix_link:
                 return fixLinks(popUpSelection);
             case R.id.cmd_folder_hide_images:
@@ -452,10 +462,10 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         return ClipboardUtil.addDirToClipboard(this.getActivity(), path);
     }
 
-    private boolean onEditApm(IDirectory selection) {
+    private boolean onEditApm(MenuItem menuItem, IDirectory selection) {
         String path = (selection == null) ? null : selection.getAbsolute();
         if (!StringUtils.isNullOrEmpty(path)) {
-            PhotoAutoprocessingEditActivity.showActivity("[5]", getActivity(),
+            PhotoAutoprocessingEditActivity.showActivity("[5]" + " menu " + menuItem.getTitle(), getActivity(),
                     null, path, getSrcFotos(), R.id.cmd_apm_edit);
             return true;
         }
@@ -683,62 +693,42 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
         return false;
     }
 
-    private boolean showDirInfo(IDirectory selectedDir) {
+    private boolean showDirInfo(QueryParameter baseQuery, IDirectory selectedDir) {
         String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
+        String sql = (baseQuery != null) ? baseQuery.toSqlString() : null;
+        CharSequence statistics = TagSql.getStatisticsMessage(this.getActivity(), R.string.show_photo, baseQuery);
         if (pathFilter != null) {
 
-            ImageDetailMetaDialogBuilder.createImageDetailDialog(
+
+            final Dialog dlg = ImageDetailMetaDialogBuilder.createImageDetailDialog(
                     this.getActivity(),
+                    getActivity().getTitle().toString(),
                     pathFilter,
+                    sql,
+                    statistics,
                     FotoThumbSql.formatDirStatistic(this.getActivity(), pathFilter)
-            ).show();
+            );
+            dlg.show();
+            // setAutoClose(null, dlg, null);
             return true;
         }
         return false;
     }
 
-    private QueryParameter getSelectionQuery(String dbgContext, IDirectory selectedDir, int dirTypId) {
-        String pathFilter = (selectedDir != null) ? selectedDir.getAbsolute() : null;
-        QueryParameter query = null;
-        if (pathFilter != null) {
-            if(dirTypId == FotoSql.QUERY_TYPE_GROUP_ALBUM) {
-                String pathWithWildcard = (AlbumFile.isQueryFile(pathFilter)) ? pathFilter : pathFilter + "/%";
-                query = AndroidAlbumUtils.getQueryFromUri(dbgContext, getActivity(), Uri.fromFile(new File(pathWithWildcard)), null);
-            } else {
-                GalleryFilterParameter filterParameter = new GalleryFilterParameter();
-                FotoSql.set(filterParameter, pathFilter, dirTypId);
-                return AndroidAlbumUtils.getAsMergedNewQueryParameter(null, filterParameter);
-            }
-        }
-        return query;
-
-    }
-    private boolean showPhoto(IDirectory selectedDir, int dirTypId) {
-        QueryParameter query = getSelectionQuery("showPhoto", selectedDir, dirTypId);
-        if (query != null) {
-            String dbgContext = "[6]"+FotoSql.getName(mContext,dirTypId) + ":" + selectedDir;
-
-            FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
-            ImageDetailActivityViewPager.showActivity(dbgContext, this.getActivity(), null, 0, query, 0);
-            return true;
-        }
-        return false;
-    }
-
-    private boolean showGallery(IDirectory selectedDir, int dirTypId) {
-        String dbgContext = "[7]"+FotoSql.getName(mContext,dirTypId) + ":" + selectedDir;
-        QueryParameter query = getSelectionQuery(dbgContext, selectedDir, dirTypId);
-        if (query != null) {
-            FotoGalleryActivity.showActivity(dbgContext, this.getActivity(), query, 0);
-            return true;
-        }
-        return false;
+    private IGalleryFilter getCurrentSelectionAsFilter(IDirectory selection,
+                                                       int dirTypId) {
+        String selectionPath = selection.getAbsolute();
+        GalleryFilterParameter filterParameter = new GalleryFilterParameter();
+        FotoSql.set(filterParameter, selectionPath, dirTypId);
+        return filterParameter;
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(INSTANCE_STATE_CONTEXT_MENU, mContextMenue);
+        if (mContextMenue != null) {
+            outState.putIntArray(INSTANCE_STATE_CONTEXT_MENU, mContextMenue);
+        }
     }
 
     private void onDirectoryCancel() {
@@ -784,6 +774,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     }
 
     @Override public void onDestroy() {
+        showInMenuHandler = null;
         mLastPopUpSelection = null;
         closeAll();
         super.onDestroy();
@@ -816,6 +807,7 @@ public class DirectoryPickerFragment extends DialogFragment implements Directory
     public void onDetach() {
         super.onDetach();
         mDirectoryListener = null;
+        showInMenuHandler = null;
     }
 
     /*********************** gui interaction *******************************************/

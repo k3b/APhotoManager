@@ -41,8 +41,6 @@ import android.view.Window;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
-// import com.squareup.leakcanary.RefWatcher;
-
 import org.osmdroid.api.IGeoPoint;
 
 import java.io.File;
@@ -52,10 +50,10 @@ import java.util.List;
 
 import de.k3b.android.androFotoFinder.AffUtils;
 import de.k3b.android.androFotoFinder.Common;
-import de.k3b.android.androFotoFinder.PhotoPropertiesEditActivity;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.LockScreen;
+import de.k3b.android.androFotoFinder.PhotoPropertiesEditActivity;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.SettingsActivity;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
@@ -68,31 +66,33 @@ import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.FileManagerUtil;
 import de.k3b.android.util.IntentUtil;
+import de.k3b.android.util.OsUtils;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScannerAsyncTask;
-import de.k3b.android.util.OsUtils;
 import de.k3b.android.widget.AboutDialogPreference;
+import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.Dialogs;
-import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
-import de.k3b.io.FileProcessor;
-import de.k3b.io.collections.SelectedFiles;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.io.GeoUri;
+import de.k3b.io.FileProcessor;
 import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.StringUtils;
+import de.k3b.io.collections.SelectedFiles;
 import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.tagDB.Tag;
+
+// import com.squareup.leakcanary.RefWatcher;
 
 /**
  * Shows a zoomable imagee.<br>
  * Swipe left/right to show previous/next image.
  */
 
-public class ImageDetailActivityViewPager extends LocalizedActivity implements Common, TagsPickerFragment.ITagsPicker {
+public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs implements Common, TagsPickerFragment.ITagsPicker {
     private static final String INSTANCE_STATE_MODIFY_COUNT = "mModifyCount";
     private static final String INSTANCE_STATE_LAST_SCROLL_POSITION = "lastScrollPosition";
     /** #70: remember on config change (screen rotation) */
@@ -351,7 +351,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
      * @param imageDetailQuery if != null set initial filter to new FotoGalleryActivity
      * @param requestCode if != 0 start for result. else start without result
      */
-    public static void showActivity(String debugContext, Activity context, Uri imageUri, int position, QueryParameter imageDetailQuery, int requestCode) {
+    public static void showActivity(String debugContext, Activity context, Uri imageUri,
+                                    int position, QueryParameter imageDetailQuery, int requestCode) {
         Intent intent;
         //Create intent
         intent = new Intent(context, ImageDetailActivityViewPager.class);
@@ -889,22 +890,22 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
         boolean reloadContext = true;
         boolean result = true;
         boolean slideShowStarted = mSlideShowStarted;
 
         onGuiTouched();
-        if (LockScreen.onOptionsItemSelected(this, item)) {
+        if (LockScreen.onOptionsItemSelected(this, menuItem)) {
             mMustReplaceMenue       = true;
             this.invalidateOptionsMenu();
             return true;
         }
-        if (mFileCommands.onOptionsItemSelected(item, getCurrentFoto())) {
+        if (mFileCommands.onOptionsItemSelected(menuItem, getCurrentFoto())) {
             mModifyCount++;
         } else {
             // Handle presses on the action bar items
-            switch (item.getItemId()) {
+            switch (menuItem.getItemId()) {
                 case R.id.action_details:
                     cmdShowDetails(getCurrentFilePath(), getCurrentImageId());
                     break;
@@ -946,7 +947,7 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                     result =  onRenameDirQueston(getCurrentFoto(), getCurrentImageId(), getCurrentFilePath(), null);
                     break;
                 case R.id.menu_exif:
-                    result =  onEditExif(getCurrentFoto(), getCurrentImageId(), getCurrentFilePath());
+                    result = onEditExif(menuItem, getCurrentFoto(), getCurrentImageId(), getCurrentFilePath());
                     break;
 
                 case R.id.cmd_gallery: {
@@ -959,13 +960,15 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                         // int callBackId = (PhotoPropertiesMediaFilesScanner.isNoMedia(dirPath,PhotoPropertiesMediaFilesScanner.DEFAULT_SCAN_DEPTH)) ? NOMEDIA_GALLERY : 0;
 
                         QueryParameter query = TagSql.filter2NewQuery(this.mFilter);
-                        FotoGalleryActivity.showActivity("[13]" + dirPath, this, query, 0);
+                        FotoGalleryActivity.showActivity(" menu " + menuItem.getTitle() + "[13]" + dirPath,
+                                this, query, 0);
                     }
                     break;
                 }
 
                 case R.id.cmd_show_geo:
-                    MapGeoPickerActivity.showActivity("[14]", this, getCurrentFoto(), null, 0);
+                    MapGeoPickerActivity.showActivity(" menu " + menuItem.getTitle(),
+                            this, getCurrentFoto(), null, null, 0);
                     break;
 
                 case R.id.cmd_show_geo_as: {
@@ -987,7 +990,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
                 case R.id.cmd_edit_geo: {
                     SelectedFiles selectedItem = getCurrentFoto();
-                    GeoEditActivity.showActivity("[15]:"+selectedItem, this, selectedItem, GeoEditActivity.RESULT_ID);
+                    GeoEditActivity.showActivity(" menu " + menuItem.getTitle() + " " + selectedItem,
+                            this, selectedItem, GeoEditActivity.RESULT_ID);
                     break;
                 }
                 case R.id.cmd_edit_tags: {
@@ -1015,12 +1019,12 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
                     break;
 
                 default:
-                    result =  super.onOptionsItemSelected(item);
+                    result = super.onOptionsItemSelected(menuItem);
             }
         }
 
         if (reloadContext) {
-            setContextMode(item.getTitle());
+            setContextMode(menuItem.getTitle());
         }
 
         return result;
@@ -1066,9 +1070,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     private void cmdShowDetails(String fullFilePath, long currentImageId) {
 
-        StringBuilder countMsg = (mGalleryContentQuery == null) ? null : StringUtils.appendMessage(null,
-                getString(R.string.show_photo),
-                TagSql.getCount(this, mGalleryContentQuery));
+        CharSequence countMsg = TagSql.getStatisticsMessage(this, R.string.show_photo,
+                mGalleryContentQuery);
 
         ImageDetailMetaDialogBuilder.createImageDetailDialog(this, fullFilePath, currentImageId,
                 mGalleryContentQuery,
@@ -1084,14 +1087,16 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
             mDestDirPicker.defineDirectoryNavigation(OsUtils.getRootOSDirectory(null),
                     (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
                     lastCopyToPath);
-            mDestDirPicker.setContextMenuId(LockScreen.isLocked(this) ? 0 :  R.menu.menu_context_osdir);
+            mDestDirPicker.setContextMenuId(LockScreen.isLocked(this) ? 0 : R.menu.menu_context_pick_osdir);
+            mDestDirPicker.setBaseQuery(mGalleryContentQuery);
             mDestDirPicker.show(this.getFragmentManager(), "osdirimage");
         }
         return false;
     }
 
-    private boolean onEditExif(SelectedFiles currentFoto, final long fotoId, final String fotoPath) {
-        PhotoPropertiesEditActivity.showActivity("[16]:", this, null, fotoPath, currentFoto, 0, true);
+    private boolean onEditExif(MenuItem menuItem, SelectedFiles currentFoto, final long fotoId, final String fotoPath) {
+        PhotoPropertiesEditActivity.showActivity(" menu " + menuItem.getTitle(),
+                this, null, fotoPath, currentFoto, 0, true);
         return true;
     }
     private boolean onRenameDirQueston(final SelectedFiles currentFoto, final long fotoId, final String fotoPath, final String _newName) {
@@ -1160,6 +1165,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
         dlg.setAffectedNames(mTagWorflow.getWorkflow().getAffected());
         dlg.setAddNames(new ArrayList<String>());
         dlg.setRemoveNames(new ArrayList<String>());
+        dlg.setBaseQuery(mGalleryContentQuery);
+        setAutoClose(dlg, null, null);
         dlg.show(getFragmentManager(), "editTags");
         return true;
     }
@@ -1184,8 +1191,8 @@ public class ImageDetailActivityViewPager extends LocalizedActivity implements C
 
     /** called by {@link TagsPickerFragment} */
     @Override
-    public boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag) {
-        return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, this, mGalleryContentQuery);
+    public boolean onTagPopUpClick(MenuItem menuItem, int menuItemItemId, Tag selectedTag) {
+        return TagsPickerFragment.handleMenuShow(mCurrentDialogFragment, menuItem, selectedTag.getName());
     }
 
     protected SelectedFiles getCurrentFoto() {

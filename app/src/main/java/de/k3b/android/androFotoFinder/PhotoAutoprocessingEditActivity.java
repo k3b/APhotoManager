@@ -52,20 +52,22 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import de.k3b.android.androFotoFinder.media.AndroidLabelGenerator;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.ClipboardUtil;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
+import de.k3b.io.DateUtil;
 import de.k3b.io.ListUtils;
 import de.k3b.io.PhotoAutoprocessingDto;
-import de.k3b.io.collections.SelectedFiles;
-import de.k3b.io.DateUtil;
 import de.k3b.io.RuleFileNameProcessor;
 import de.k3b.io.StringUtils;
+import de.k3b.io.collections.SelectedFiles;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.PhotoPropertiesAsString;
 import de.k3b.media.PhotoPropertiesDTO;
+import de.k3b.media.PhotoPropertiesFormatter;
 import de.k3b.media.PhotoPropertiesUtil;
 
 /**
@@ -98,9 +100,13 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     private File exampleSrcfile;
     private Date exampleDate;
 
-    public static void showActivity(String debugContext, Activity context, PhotoAutoprocessingDto workflow,
-                                    String directoryOrApmFileUrl
-            , SelectedFiles selectedFiles, int requestCode) {
+    private PhotoPropertiesFormatter.ILabelGenerator mLabelGenerator;
+
+    public static void showActivity(String debugContext, Activity context,
+                                    PhotoAutoprocessingDto workflow,
+                                    String directoryOrApmFileUrl,
+                                    SelectedFiles selectedFiles,
+                                    int requestCode) {
         final Intent intent = new Intent().setClass(context,
                 PhotoAutoprocessingEditActivity.class);
 
@@ -128,7 +134,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     protected void onCreate(Bundle savedInstanceState) {
         Global.debugMemory(mDebugPrefix, "onCreate");
         super.onCreate(savedInstanceState);
-
+        this.mLabelGenerator = new AndroidLabelGenerator(getApplicationContext(), "\n");
         Intent intent = getIntent();
         mSelectedFiles = getSelectedFiles("onCreate ", intent, false);
 
@@ -255,9 +261,10 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
                     mCurrentAutoprocessingData.getOutDir(), exampleResultFileName));
 
             IPhotoProperties mediaChanges = mCurrentAutoprocessingData.getMediaDefaults();
-            String exifChange = null;
+            CharSequence exifChange = null;
             if (mediaChanges != null) {
-                exifChange = PhotoPropertiesUtil.toString(mediaChanges, false, mLabelGenerator, PhotoPropertiesUtil.FieldID.clasz);
+                exifChange = PhotoPropertiesFormatter.format(mediaChanges,
+                        false, mLabelGenerator, PhotoPropertiesFormatter.FieldID.clasz);
             }
             mExifChanges.setText(exifChange);
         } finally {
@@ -370,17 +377,17 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
         });
         mExifChanges = (TextView) findViewById(R.id.lbl_exif_changes);
 
-        Button cmd = (Button) findViewById(R.id.cmd_pick_exif);
+        final Button cmd = (Button) findViewById(R.id.cmd_pick_exif);
         cmd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onPickExif();
+                onPickExif(" cmd " + cmd.getText());
             }
         });
         cmd.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                return onReInferExifAndPick();
+                return onReInferExifAndPick(" cmd " + cmd.getText());
             }
         });
 
@@ -517,9 +524,9 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     /**
      * cmd exif press: schow exif editor
      */
-    private void onPickExif() {
+    private void onPickExif(String debugContext) {
         fromGui();
-        PhotoPropertiesEditActivity.showActivity("[4]", this, mCurrentAutoprocessingData.getMediaDefaults(),
+        PhotoPropertiesEditActivity.showActivity(debugContext, this, mCurrentAutoprocessingData.getMediaDefaults(),
                 null, getSelectedFiles(mDebugPrefix+"EditExif-", getIntent(),
                         false),
                 EXIF_EDIT_RESULT_ID, false);
@@ -528,7 +535,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     /**
      * #132: cmd exif long-press: infer exif from selected and schow exif editor
      */
-    private boolean onReInferExifAndPick() {
+    private boolean onReInferExifAndPick(String debugContext) {
         fromGui();
         IPhotoProperties currentMediaDefaults = mCurrentAutoprocessingData.getMediaDefaults();
 
@@ -545,7 +552,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
             inferedMediaDefaults.setTags(tags);
         }
 
-        PhotoPropertiesEditActivity.showActivity("[4]", this, currentMediaDefaults,
+        PhotoPropertiesEditActivity.showActivity(debugContext, this, currentMediaDefaults,
                 null, selectedFiles,
                 EXIF_EDIT_RESULT_ID, false);
         return true;
@@ -607,7 +614,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_edit_common, menu);
-        getMenuInflater().inflate(R.menu.menu_autoprocessing, menu);
+        getMenuInflater().inflate(R.menu.menu_copy_paste, menu);
 
         MenuItem item = menu.findItem(android.R.id.paste);
         final File clipboardDir = ClipboardUtil.getClipboardDir(this);
@@ -723,37 +730,5 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
         toGui();
     }
 
-    /**
-     * implement resource based labels for PhotoPropertiesUtil.toString(...)
-     */
-    private PhotoPropertiesUtil.ILabelGenerator mLabelGenerator = new PhotoPropertiesUtil.ILabelGenerator() {
-        @Override
-        public String get(PhotoPropertiesUtil.FieldID id) {
-            switch (id) {
-                case dateTimeTaken:
-                    return getString2(R.string.lbl_date);
-                case title:
-                    return getString2(R.string.lbl_title);
-                case description:
-                    return getString2(R.string.lbl_description);
-                case latitude_longitude:
-                    return getString2(R.string.lbl_latitude_short) + "/" + getString(R.string.lbl_longitude_short) + " ";
-                case rating:
-                    return getString2(R.string.lbl_rating);
-                case visibility:
-                    return getString2(R.string.lbl_image_visibility);
-                case tags:
-                    return getString2(R.string.lbl_tag);
-                case path:
-                case clasz:
-                    return null;
-            }
-            return null;
-        }
-    };
-
-    public final String getString2(int resId) {
-        return "\n" + getString(resId) + " ";
-    }
 }
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-Copyright (C) 2014-2018 k3b
+Copyright (C) 2014-2019 k3b
 
 This file is part of "A Photo Manager" (https://github.com/k3b/AndroFotoFinder/)
 
@@ -144,6 +144,7 @@ this program. If not, see <http://www.gnu.org/licenses/>
         <CheckBoxPreference android:key="debugEnabledJpg"
             android:defaultValue="false"
             android:title="@string/settings_debug_jpg_title" />
+
         <CheckBoxPreference android:key="debugEnabledJpgMetaIo"
             android:defaultValue="false"
             android:title="@string/settings_debug_meta_io" />
@@ -158,6 +159,7 @@ this program. If not, see <http://www.gnu.org/licenses/>
             android:defaultValue="false"
             android:title="@string/settings_debug_title"
             android:summary="@string/settings_debug_summary" />
+
         <Preference
             android:key="debugClearLog"
             android:title="@string/settings_debug_clear_title" />

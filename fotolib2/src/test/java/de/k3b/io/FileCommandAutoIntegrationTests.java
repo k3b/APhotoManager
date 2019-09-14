@@ -40,7 +40,8 @@ import de.k3b.media.IPhotoProperties;
 import de.k3b.media.PhotoPropertiesBulkUpdateService;
 import de.k3b.media.PhotoPropertiesDTO;
 import de.k3b.media.PhotoPropertiesDiffCopy;
-import de.k3b.media.PhotoPropertiesUtil;
+import de.k3b.media.PhotoPropertiesFormatter;
+import de.k3b.media.MediaFormatter.FieldID;
 import de.k3b.transactionlog.TransactionLoggerBase;
 
 /**
@@ -261,8 +262,8 @@ public class FileCommandAutoIntegrationTests {
 
         ExifInterfaceEx result = new ExifInterfaceEx(new File(OUTDIR, newName + ".jpg").getAbsolutePath(), null, null, "");
 
-        String exprected = PhotoPropertiesUtil.toString(exifChanges, false, null, PhotoPropertiesUtil.FieldID.clasz, PhotoPropertiesUtil.FieldID.path);
-        String current = PhotoPropertiesUtil.toString(result, false, null, PhotoPropertiesUtil.FieldID.clasz, PhotoPropertiesUtil.FieldID.path);
+        String exprected = PhotoPropertiesFormatter.format(exifChanges, false, null, FieldID.clasz, FieldID.path).toString();
+        String current = PhotoPropertiesFormatter.format(result, false, null, FieldID.clasz, FieldID.path).toString();
         Assert.assertEquals(exprected, current);
 
     }

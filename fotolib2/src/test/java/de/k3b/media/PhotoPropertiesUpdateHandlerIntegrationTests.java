@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager
  *
@@ -97,7 +97,7 @@ public class PhotoPropertiesUpdateHandlerIntegrationTests {
         PhotoPropertiesUtil.copy(sut, empty, true, true);
 
 //        System.out.printf("exif " + PhotoPropertiesUtil.toString(sut.getExif()));
-        String xmpContent = "xmp " + PhotoPropertiesUtil.toString(sut.getXmp());
+        String xmpContent = "xmp " + PhotoPropertiesFormatter.format(sut.getXmp());
         System.out.printf(xmpContent);
 
 
@@ -122,7 +122,7 @@ public class PhotoPropertiesUpdateHandlerIntegrationTests {
         PhotoPropertiesUtil.copy(sut, value, true, true);
 
 //        System.out.printf("exif " + PhotoPropertiesUtil.toString(sut.getExif()));
-        String xmpContent = "xmp " + PhotoPropertiesUtil.toString(sut.getXmp());
+        String xmpContent = "xmp " + PhotoPropertiesFormatter.format(sut.getXmp());
         System.out.printf(xmpContent);
 
 
@@ -193,25 +193,25 @@ public class PhotoPropertiesUpdateHandlerIntegrationTests {
 
                 IPhotoProperties exif = oldSut.getExif();
                 if (exif != null) {
-                    out.write("old exif " + PhotoPropertiesUtil.toString(exif) + "\n");
+                    out.write("old exif " + PhotoPropertiesFormatter.format(exif) + "\n");
                     out.write(exif.toString() + "\n");
                 }
 
                 exif = oldSut.getXmp();
                 if (exif != null) {
-                    out.write("old xmp " + PhotoPropertiesUtil.toString(exif) + "\n");
+                    out.write("old xmp " + PhotoPropertiesFormatter.format(exif) + "\n");
                     out.write(exif.toString() + "\n");
                 }
 
                 exif = sut.getExif();
                 if (exif != null) {
-                    out.write("new exif " + PhotoPropertiesUtil.toString(exif) + "\n");
+                    out.write("new exif " + PhotoPropertiesFormatter.format(exif) + "\n");
                     out.write(exif.toString() + "\n");
                 }
 
                 exif = sut.getXmp();
                 if (exif != null) {
-                    out.write("new xmp " + PhotoPropertiesUtil.toString(exif) + "\n");
+                    out.write("new xmp " + PhotoPropertiesFormatter.format(exif) + "\n");
                     out.write(exif.toString() + "\n");
                 }
             } catch (IOException e) {
@@ -228,7 +228,9 @@ public class PhotoPropertiesUpdateHandlerIntegrationTests {
     }
 
     private String getMediaString(IPhotoProperties media) {
-        String result = PhotoPropertiesUtil.toString(media, false, null, PhotoPropertiesUtil.FieldID.path, PhotoPropertiesUtil.FieldID.clasz);
+        String result = PhotoPropertiesFormatter
+                .format(media, false, null, MediaFormatter.FieldID.path, MediaFormatter.FieldID.clasz)
+                .toString();
         // ignore runtime type and path
         return result; // .substring(result.indexOf("dateTimeTaken"));
     }

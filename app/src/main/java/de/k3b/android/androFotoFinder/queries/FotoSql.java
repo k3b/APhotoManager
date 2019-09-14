@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -48,17 +48,17 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.DBUtils;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.AlbumFile;
-import de.k3b.io.ListUtils;
-import de.k3b.io.StringUtils;
-import de.k3b.io.VISIBILITY;
-import de.k3b.io.collections.SelectedFiles;
-import de.k3b.io.collections.SelectedItems;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
+import de.k3b.io.ListUtils;
+import de.k3b.io.StringUtils;
+import de.k3b.io.VISIBILITY;
+import de.k3b.io.collections.SelectedFiles;
+import de.k3b.io.collections.SelectedItems;
 
 /**
  * contains all SQL needed to query the android gallery
@@ -97,6 +97,7 @@ public class FotoSql extends FotoSqlBase {
 
     public static final int QUERY_TYPE_GROUP_COPY = 20;
     public static final int QUERY_TYPE_GROUP_MOVE = 21;
+    public static final int QUERY_TYPE_TAG = 60;
 
     public static final int QUERY_TYPE_GROUP_DEFAULT = QUERY_TYPE_GROUP_ALBUM;
     public static final int QUERY_TYPE_DEFAULT = QUERY_TYPE_GALLERY;
@@ -266,6 +267,16 @@ public class FotoSql extends FotoSqlBase {
     /** to avoid cascade delete of linked file when mediaDB-item is deleted
      *  the links are first set to null before delete. */
     private static final String DELETED_FILE_MARKER = null;
+
+    /**
+     * translate from bytes to kilobytes
+     */
+    private static final int SIZE_K = 1024;
+    /**
+     * when image bigger than this translate image size
+     * from bytes to kilobytes, from kilobytes to megabytes, ...
+     */
+    private static final int SIZE_TRANLATION_LIMIT = SIZE_K * 10;
 
     public static final double getGroupFactor(final double _zoomLevel) {
         double zoomLevel = _zoomLevel;
@@ -578,7 +589,7 @@ public class FotoSql extends FotoSqlBase {
         Date from = new Date();
         Date to = new Date();
 
-        DirectoryFormatter.getDates(selectedAbsolutePath, from, to);
+        DirectoryFormatter.parseDatesPath(selectedAbsolutePath, from, to);
 
         if (to.getTime() == 0) {
             newQuery
@@ -661,6 +672,8 @@ public class FotoSql extends FotoSqlBase {
                 return context.getString(R.string.destination_copy);
             case QUERY_TYPE_GROUP_MOVE:
                 return context.getString(R.string.destination_move);
+            case QUERY_TYPE_TAG:
+                return context.getString(R.string.lbl_tag);
             default:
                 return "???";
         }
@@ -704,13 +717,16 @@ public class FotoSql extends FotoSqlBase {
     public static boolean set(GalleryFilterParameter dest, String selectedAbsolutePath, int queryTypeId) {
         switch (queryTypeId) {
             case FotoSql.QUERY_TYPE_GROUP_ALBUM:
+            case FotoSql.QUERY_TYPE_GROUP_MOVE:
+            case FotoSql.QUERY_TYPE_GROUP_COPY:
+            case QUERY_TYPE_GALLERY:
                 dest.setPath(selectedAbsolutePath + "/%");
                 return true;
             case FotoSql.QUERY_TYPE_GROUP_DATE: {
                 Date from = new Date();
                 Date to = new Date();
 
-                DirectoryFormatter.getDates(selectedAbsolutePath, from, to);
+                DirectoryFormatter.parseDatesPath(selectedAbsolutePath, from, to);
                 dest.setDate(from.getTime(), to.getTime());
                 return true;
             }
@@ -718,7 +734,7 @@ public class FotoSql extends FotoSqlBase {
                 Date from = new Date();
                 Date to = new Date();
 
-                DirectoryFormatter.getDates(selectedAbsolutePath, from, to);
+                DirectoryFormatter.parseDatesPath(selectedAbsolutePath, from, to);
                 dest.setDateModified(from.getTime(), to.getTime());
                 return true;
             }
@@ -731,6 +747,8 @@ public class FotoSql extends FotoSqlBase {
                 return true;
             default:break;
         }
+        Log.e(Global.LOG_CONTEXT, "FotoSql.setFilter(queryTypeId = " + queryTypeId + ") : unknown type");
+
         return false;
     }
 
@@ -1274,6 +1292,53 @@ public class FotoSql extends FotoSqlBase {
             if (c != null) c.close();
         }
         return 0;
+    }
+
+    /**
+     * get display string with count and total size
+     * @return {getString(prefixStringId)}: #{count(*)} / {sum(size)} Mb
+     */
+    @Nullable
+    public static CharSequence getStatisticsMessage(Context context, int prefixStringId, QueryParameter query) {
+        if (query == null) return null;
+        String text = context.getString(prefixStringId);
+
+        QueryParameter queryModified = new QueryParameter(query);
+        queryModified
+                .clearColumns()
+                .addColumn("count(*)")
+                .addColumn("sum(" + FotoSql.SQL_COL_SIZE + ")");
+        Cursor c = null;
+
+        try {
+            c = FotoSql.createCursorForQuery(null, "getCount", context, queryModified, null);
+            if (c.moveToNext()) {
+                final long count = c.getLong(0);
+                long size = c.getLong(1);
+                String unit = "b";
+                if (size > SIZE_TRANLATION_LIMIT) {
+                    size /= SIZE_K;
+                    unit = "kb";
+                    if (size > SIZE_TRANLATION_LIMIT) {
+                        size /= SIZE_K;
+                        unit = "Mb";
+                    }
+                }
+                return StringUtils.appendMessage(null,
+                        text,
+                        ": #",
+                        count,
+                        "/",
+                        size,
+                        unit
+                );
+            }
+        } catch (Exception ex) {
+            Log.e(Global.LOG_CONTEXT, "FotoSql.getStatisticsMessage() error :", ex);
+        } finally {
+            if (c != null) c.close();
+        }
+        return null;
     }
 
     @Nullable

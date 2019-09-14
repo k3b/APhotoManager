@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 by k3b.
+ * Copyright (c) 2016-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -143,6 +143,6 @@ public class PhotoPropertiesWrapper implements IPhotoProperties {
 
     @Override
     public String toString() {
-        return PhotoPropertiesUtil.toString(this);
+        return PhotoPropertiesFormatter.format(this).toString();
     }
 }

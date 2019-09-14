@@ -19,11 +19,15 @@
 
 package de.k3b.io;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.sql.Date;
+import java.util.Map;
 
-import static org.junit.Assert.*;
+import de.k3b.media.MediaFormatter;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by k3b on 01.09.2015.
@@ -60,9 +64,20 @@ public class GalleryFilterParameterTest {
     }
 
     @Test
+    public void shouldMergeEmpty() {
+        GalleryFilterParameter parsed
+                = GalleryFilterParameter.parse(FILTER_STRING_FULL_EXAMPLE, new GalleryFilterParameter());
+        GalleryFilterParameter sut = new GalleryFilterParameter().get(parsed);
+        sut.mergeFrom(new GalleryFilterParameter());
+
+        assertEquals(FILTER_STRING_FULL_EXAMPLE, sut.toString());
+    }
+
+    @Test
     public void shouldParseFull() {
-        GalleryFilterParameter filterString = GalleryFilterParameter.parse(FILTER_STRING_FULL_EXAMPLE, new GalleryFilterParameter());
-        GalleryFilterParameter sut = new GalleryFilterParameter().get(filterString);
+        GalleryFilterParameter parsed
+                = GalleryFilterParameter.parse(FILTER_STRING_FULL_EXAMPLE, new GalleryFilterParameter());
+        GalleryFilterParameter sut = new GalleryFilterParameter().get(parsed);
 
 
         assertEquals(FILTER_STRING_FULL_EXAMPLE, sut.toString());
@@ -74,4 +89,27 @@ public class GalleryFilterParameterTest {
         GalleryFilterParameter sut = new GalleryFilterParameter().get(sutParsed);
         assertEquals("noGeoInfo;;2001-02-03,2005-12-31;/some/path/;q,^;a;b;c;notags;3", sut.toString());
     }
+
+    @Test
+    public void shouldFormatFull() {
+        GalleryFilterParameter parsed
+                = GalleryFilterParameter.parse(FILTER_STRING_FULL_EXAMPLE, new GalleryFilterParameter());
+
+        CharSequence formatted = new GalleryFilterFormatter(true, null)
+                .format(parsed);
+        System.out.println(formatted);
+    }
+
+
+    @Test
+    public void shouldMap() {
+        GalleryFilterParameter parsed
+                = GalleryFilterParameter.parse(FILTER_STRING_FULL_EXAMPLE, new GalleryFilterParameter());
+
+        MediaFormatter.ILabelGenerator labelGenerator = new MediaFormatter.DefaultLabelGenerator("", "");
+        Map<CharSequence, Object> map = new GalleryFilterFormatter(false, labelGenerator, MediaFormatter.FieldID.clasz)
+                .asMap(parsed);
+        Assert.assertEquals(parsed.getPath(), map.get(labelGenerator.get(MediaFormatter.FieldID.path)));
+    }
+
 }

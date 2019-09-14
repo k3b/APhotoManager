@@ -21,6 +21,8 @@ package de.k3b.android.androFotoFinder.gallery.cursor;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.ClipData;
 import android.content.ContentResolver;
@@ -30,7 +32,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -50,27 +51,28 @@ import android.widget.Toast;
 
 import org.osmdroid.api.IGeoPoint;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
 import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.AffUtils;
-import de.k3b.android.androFotoFinder.PhotoPropertiesEditActivity;
-import de.k3b.android.androFotoFinder.backup.BackupActivity;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.LockScreen;
+import de.k3b.android.androFotoFinder.OnGalleryInteractionListener;
+import de.k3b.android.androFotoFinder.PhotoPropertiesEditActivity;
+import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.backup.BackupActivity;
 import de.k3b.android.androFotoFinder.directory.DirectoryGui;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailMetaDialogBuilder;
 import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
 import de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity;
-import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.R;
-import de.k3b.android.androFotoFinder.OnGalleryInteractionListener;
+import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.queries.Queryable;
 import de.k3b.android.androFotoFinder.queries.SqlJobTaskBase;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
@@ -79,17 +81,12 @@ import de.k3b.android.androFotoFinder.tagDB.TagWorflow;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.DBUtils;
-import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.OsUtils;
+import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
-import de.k3b.io.ListUtils;
-import de.k3b.io.StringUtils;
-import de.k3b.io.VISIBILITY;
-import de.k3b.io.collections.SelectedFiles;
-import de.k3b.io.collections.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
@@ -97,6 +94,11 @@ import de.k3b.io.Directory;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
+import de.k3b.io.ListUtils;
+import de.k3b.io.StringUtils;
+import de.k3b.io.VISIBILITY;
+import de.k3b.io.collections.SelectedFiles;
+import de.k3b.io.collections.SelectedItems;
 import de.k3b.tagDB.Tag;
 
 /**
@@ -173,7 +175,16 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     /** one of the MODE_VIEW_PICKER_XXXX */
     private int mMode = MODE_VIEW_PICKER_NONE;
 
+    /**
+     * not null while mDestDirPicker is open
+     */
     private MoveOrCopyDestDirPicker mDestDirPicker = null;
+
+    /**
+     * not null while tag picker is open
+     */
+    private WeakReference<TagsPickerFragment> mTagPickerDialog = null;
+
     /**************** construction ******************/
     /**
      * Use this factory method to create a new instance of
@@ -892,7 +903,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             case R.id.cmd_selected_only:
                 return multiSelectionToggle();
             case R.id.cmd_backup:
-                BackupActivity.showActivity(mDebugPrefix, getActivity(), null, selectedFiles, null,
+                BackupActivity.showActivity(" menu " + menuItem.getTitle(),
+                        getActivity(), null, selectedFiles, null,
                         getCurrentQuery(), BackupActivity.REQUEST_BACKUP_ID);
                 return true;
             case R.id.cmd_copy:
@@ -900,16 +912,18 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             case R.id.cmd_move:
                 return cmdMoveOrCopyWithDestDirPicker(true, fileCommands.getLastCopyToPath(), selectedFiles);
             case R.id.cmd_show_geo:
-                MapGeoPickerActivity.showActivity("[10]", this.getActivity(), selectedFiles, null, 0);
+                MapGeoPickerActivity.showActivity(" menu " + menuItem.getTitle(),
+                        this.getActivity(), selectedFiles, null, null, 0);
                 return true;
             case R.id.cmd_edit_geo:
-                GeoEditActivity.showActivity("[11]", this.getActivity(), selectedFiles, GeoEditActivity.RESULT_ID);
+                GeoEditActivity.showActivity(" menu " + menuItem.getTitle(),
+                        this.getActivity(), selectedFiles, GeoEditActivity.RESULT_ID);
                 return true;
             case R.id.cmd_edit_tags: {
                 return tagsShowEditDialog(selectedFiles);
             }
             case R.id.menu_exif:
-                return onEditExif(selectedFiles);
+                return onEditExif(menuItem, selectedFiles);
             case R.id.cmd_selection_add_all:
                 addAllToSelection();
                 return true;
@@ -938,22 +952,17 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 : null;
 
         String files = ((ids != null) && (ids.size() > 0)) ? mAdapter.createSelectedFiles(activity, ids).toString().replace(",","\n") : null;
-        ImageDetailMetaDialogBuilder.createImageDetailDialog(
+        final Dialog dlg = ImageDetailMetaDialogBuilder.createImageDetailDialog(
                 activity,
                 getActivity().getTitle().toString(),
                 this.toString(),
                 ids,
                 files,
                 (mGalleryContentQuery != null) ? mGalleryContentQuery.toSqlString() : null,
-                StringUtils.appendMessage(null,
-                        getString(R.string.show_photo),
-                        TagSql.getCount(activity, mGalleryContentQuery)),
-                subQueryTypName,
-                (mGalleryContentQuery == null) ? null : StringUtils.appendMessage(null,
-                        getString(R.string.show_photo),
-                        TagSql.getCount(activity, mGalleryContentQuery))
-
-        ).show();
+                TagSql.getStatisticsMessage(this.getActivity(), R.string.show_photo, mGalleryContentQuery),
+                subQueryTypName);
+        dlg.show();
+        // setAutoClose(null, dlg, null);
     }
 
     private class TagUpdateTask extends TagTask<List<String>> {
@@ -971,8 +980,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     }
 
-    private boolean onEditExif(SelectedFiles fotos) {
-        PhotoPropertiesEditActivity.showActivity("[12]", getActivity(), null, null, fotos, 0, true);
+    private boolean onEditExif(MenuItem menuItem, SelectedFiles fotos) {
+        PhotoPropertiesEditActivity.showActivity(" menu " + menuItem.getTitle() + "[12]",
+                getActivity(), null, null, fotos, 0, true);
         return true;
     }
 
@@ -985,6 +995,10 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         dlg.setAddNames(new ArrayList<String>());
         dlg.setRemoveNames(new ArrayList<String>());
         dlg.show(getFragmentManager(), "editTags");
+        dlg.setBaseQuery(getCurrentQuery());
+
+        ((FotoGalleryActivity) getActivity()).setAutoClose(dlg, null, null);
+        mTagPickerDialog = new WeakReference<TagsPickerFragment>(dlg);
         return true;
     }
 
@@ -1008,8 +1022,9 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     /** called by {@link TagsPickerFragment} */
     @Override
-    public boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag) {
-        return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, this.getActivity(), null);
+    public boolean onTagPopUpClick(MenuItem menuItem, int menuItemItemId, Tag selectedTag) {
+        if ((mTagPickerDialog == null) || (mTagPickerDialog.get() == null)) return false;
+        return TagsPickerFragment.handleMenuShow(mTagPickerDialog.get(), menuItem, selectedTag.getName());
     }
 
 
@@ -1061,7 +1076,11 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             mDestDirPicker.defineDirectoryNavigation(OsUtils.getRootOSDirectory(null),
                     (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
                     lastCopyToPath);
-            mDestDirPicker.setContextMenuId(LockScreen.isLocked(this.getActivity()) ? 0 :  R.menu.menu_context_osdir);
+            if (!LockScreen.isLocked(this.getActivity())) {
+                mDestDirPicker.setContextMenuId(R.menu.menu_context_pick_osdir);
+            }
+
+            mDestDirPicker.setBaseQuery(getCurrentQuery());
             mDestDirPicker.show(getActivity().getFragmentManager(), "osdir");
         }
         return false;

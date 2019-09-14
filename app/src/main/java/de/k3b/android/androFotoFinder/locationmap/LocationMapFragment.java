@@ -42,7 +42,7 @@ import android.widget.PopupMenu;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
-import org.osmdroid.api.*;
+import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.events.DelayedMapListener;
 import org.osmdroid.events.MapListener;
 import org.osmdroid.events.ScrollEvent;
@@ -50,7 +50,8 @@ import org.osmdroid.events.ZoomEvent;
 import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.*;
+import org.osmdroid.views.overlay.Overlay;
+import org.osmdroid.views.overlay.OverlayManager;
 import org.xml.sax.InputSource;
 
 import java.io.IOException;
@@ -64,13 +65,14 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.LockScreen;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
+import de.k3b.android.androFotoFinder.directory.ShowInMenuHandler;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.osmdroid.ClickableIconOverlay;
 import de.k3b.android.osmdroid.FolderOverlayEx;
 import de.k3b.android.osmdroid.GuestureOverlay;
 import de.k3b.android.osmdroid.IconOverlay;
-import de.k3b.android.osmdroid.ClickableIconOverlay;
 import de.k3b.android.osmdroid.MarkerBubblePopup;
 import de.k3b.android.osmdroid.MarkerEx;
 import de.k3b.android.osmdroid.OsmdroidUtil;
@@ -78,15 +80,16 @@ import de.k3b.android.osmdroid.forge.MapsForgeSupport;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.database.QueryParameter;
-import de.k3b.io.collections.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoInfoHandler;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
 import de.k3b.geo.io.gpx.GpxReaderBase;
+import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
+import de.k3b.io.collections.SelectedItems;
 
 /**
  * A fragment to display Foto locations in a geofrafic map.
@@ -107,7 +110,7 @@ public class LocationMapFragment extends DialogFragment {
     // for debugging
     private static int sId = 1;
     private final String mDebugPrefix;
-    protected final GeoUri mGeoUriEngine = new GeoUri(GeoUri.OPT_DEFAULT);
+    protected final GeoUri mGeoUriEngine = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
 
     protected MapView mMapView;
     private SeekBar mZoomBar;
@@ -130,7 +133,7 @@ public class LocationMapFragment extends DialogFragment {
     // api to fragment owner
     protected OnDirectoryInteractionListener mDirectoryListener;
 
-
+    private ShowInMenuHandler showInMenuHandler = null;
 
     /**
      * setCenterZoom does not work in onCreate() because getHeight() and getWidth() are not calculated yet and return 0;
@@ -161,6 +164,7 @@ public class LocationMapFragment extends DialogFragment {
         saveLastViewPort(null);
         if (mCurrentFotoMarkerLoader != null) mCurrentFotoMarkerLoader.cancel(false);
         mCurrentFotoMarkerLoader = null;
+        showInMenuHandler = null;
 
         if (mFotoMarkerRecycler != null) mFotoMarkerRecycler.empty();
         mSelectedItemsHandler = null;
@@ -190,6 +194,7 @@ public class LocationMapFragment extends DialogFragment {
         }
         mPopup = null;
 
+        showInMenuHandler = null;
         super.onDetach();
         mDirectoryListener = null;
     }
@@ -199,17 +204,6 @@ public class LocationMapFragment extends DialogFragment {
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         saveLastViewPort(savedInstanceState);
-    }
-
-    public String getCurrentGeoUri() {
-        BoundingBox currentViewPort = this.mMapView.getBoundingBox();
-
-        GeoPoint currentCenter = currentViewPort.getCenterWithDateLine();
-        int currentZoomLevel = (int) this.mMapView.getZoomLevelDouble();
-        String uriCurrentViewport = mGeoUriEngine.toUriString(
-                new GeoPointDto(currentCenter.getLatitude(), currentCenter.getLongitude()
-                        , currentZoomLevel));
-        return uriCurrentViewport;
     }
 
     private void saveLastViewPort(Bundle savedInstanceState) {
@@ -494,7 +488,7 @@ public class LocationMapFragment extends DialogFragment {
             Log.i(Global.LOG_CONTEXT, debugContext + rectangle + ";z=" + zoomlevel);
         }
 
-        this.mRootQuery = AndroidAlbumUtils.getAsMergedNewQueryParameter(rootQuery, depricated_rootFilter);
+        this.mRootQuery = AndroidAlbumUtils.getAsMergedNewQuery(rootQuery, depricated_rootFilter);
 
         mSelectedItemsHandler.define(selectedItems);
         if (zoomToFit) {
@@ -1018,51 +1012,88 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     protected   boolean showContextMenu(final View parent, final int markerId,
-                                        final IGeoPoint geoPosition, final Object markerData) {
+                                        final IGeoPoint geoPosition,
+                                        final Object markerData) {
         closePopup();
         MenuInflater inflater = getActivity().getMenuInflater();
 
-        mTempPopupMenuParentView = OsmdroidUtil.openMapPopupView(mMapView, 0, new GeoPoint(geoPosition.getLatitude(), geoPosition.getLongitude()));
+        mTempPopupMenuParentView = OsmdroidUtil.openMapPopupView(mMapView, 0,
+                new GeoPoint(geoPosition.getLatitude(), geoPosition.getLongitude()));
         PopupMenu menu = new PopupMenu(getActivity(), mTempPopupMenuParentView);
 
-        inflater.inflate(LockScreen.isLocked(this.getActivity()) ? R.menu.menu_map_context_locked :  R.menu.menu_map_context, menu.getMenu());
+        GalleryFilterParameter filter = new GalleryFilterParameter();
+        getRectangleFrom(filter, geoPosition);
+
+        if (LockScreen.isLocked(this.getActivity())) {
+            inflater.inflate(R.menu.menu_map_context_locked, menu.getMenu());
+
+        } else {
+            inflater.inflate(R.menu.menu_map_context, menu.getMenu());
+            inflater.inflate(R.menu.menu_context_pick_show_in_new, menu.getMenu());
+        }
+
+        this.showInMenuHandler = new ShowInMenuHandler(getActivity(), null, mRootQuery,
+                filter, FotoSql.QUERY_TYPE_GROUP_PLACE_MAP);
+        if (geoPosition != null) {
+            showInMenuHandler.fixMenuOpenIn(geoPosition.toString(), menu.getMenu());
+        }
 
         menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                closePopup();
-
-                switch (item.getItemId()) {
-                    case R.id.cmd_photo:
-                        return showPhoto(getGeoPointById(markerId, geoPosition, "showPhoto"));
-                    case R.id.cmd_gallery:
-                        return showGallery(getGeoPointById(markerId, geoPosition,"showGallery"));
-                    case R.id.cmd_zoom:
-                        return zoomToFit(getGeoPointById(markerId, geoPosition,"on cmd zoomToFit"));
-
-                    case R.id.cmd_show_geo_as: {
-                        IGeoPoint _geo = getGeoPointById(markerId, geoPosition,"cmd_show_geo_as");
-                        GeoPointDto geo = new GeoPointDto(_geo.getLatitude(), _geo.getLongitude(), GeoPointDto.NO_ZOOM);
-                        geo.setId(""+markerId);
-                        geo.setName("#"+markerId);
-                        GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
-                        String uri = PARSER.toUriString(geo);
-
-                        IntentUtil.cmdStartIntent("show_geo_as", getActivity(), null, uri, null, Intent.ACTION_VIEW, R.string.geo_show_as_menu_title, R.string.geo_picker_err_not_found, 0);
-
-                        return true;
-                    }
-
-
-
-
-                    default:
-                        return false;
-                }
+            public boolean onMenuItemClick(MenuItem menuItem) {
+                return onPopUpClick(menuItem, markerId, geoPosition);
             }
         });
         menu.show();
         return true;
+    }
+
+    public boolean onPopUpClick(MenuItem menuItem, int markerId, IGeoPoint geoPosition) {
+        closePopup();
+
+        geoPosition = getGeoPointById(markerId, geoPosition, getClass().getSimpleName(), "onPopUpClick", menuItem);
+        if ((showInMenuHandler != null) && (geoPosition != null)
+                && showInMenuHandler.onPopUpClick(menuItem, null, geoPosition.toString())) {
+            return true;
+        }
+
+        switch (menuItem.getItemId()) {
+            case R.id.cmd_photo:
+                return showPhoto(menuItem, geoPosition);
+            case R.id.cmd_gallery:
+                return showGallery(menuItem, geoPosition);
+            case R.id.cmd_zoom:
+                return zoomToFit(geoPosition);
+
+            case R.id.cmd_show_geo_as: {
+                String uri = getAsGeoUri(geoPosition, (int) this.mMapView.getZoomLevelDouble(), markerId);
+
+                IntentUtil.cmdStartIntent("show_geo_as", getActivity(), null, uri, null, Intent.ACTION_VIEW, R.string.geo_show_as_menu_title, R.string.geo_picker_err_not_found, 0);
+
+                return true;
+            }
+
+
+            default:
+                return false;
+        }
+    }
+
+    public String getCurrentGeoUri() {
+        BoundingBox currentViewPort = this.mMapView.getBoundingBox();
+
+        GeoPoint currentCenter = currentViewPort.getCenterWithDateLine();
+        int currentZoomLevel = (int) this.mMapView.getZoomLevelDouble();
+        return getAsGeoUri(currentCenter, currentZoomLevel, 0);
+    }
+
+    private String getAsGeoUri(IGeoPoint geoPoint, int zoomLevel, int markerId) {
+        GeoPointDto geo = new GeoPointDto(geoPoint.getLatitude(), geoPoint.getLongitude(), zoomLevel);
+        if (markerId != 0) {
+            geo.setId("" + markerId);
+            geo.setName("#" + markerId);
+        }
+        return mGeoUriEngine.toUriString(geo);
     }
 
     protected void closePopup() {
@@ -1070,44 +1101,52 @@ public class LocationMapFragment extends DialogFragment {
         mTempPopupMenuParentView = null;
     }
 
-    private boolean showPhoto(IGeoPoint geoPosition) {
+    private boolean showPhoto(MenuItem menuItem, IGeoPoint geoPosition) {
         QueryParameter query = getQueryForPositionRectangle(geoPosition);
         FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
 
-        ImageDetailActivityViewPager.showActivity("[17]:" + geoPosition, this.getActivity(), null, 0, query, 0);
+        ImageDetailActivityViewPager.showActivity(" menu " + menuItem.getTitle()
+                + "[17]:" + geoPosition, this.getActivity(), null, 0, query, 0);
         return true;
     }
 
-    private boolean showGallery(IGeoPoint geoPosition) {
-        FotoGalleryActivity.showActivity("[18]:"+geoPosition, this.getActivity(), getQueryForPositionRectangle(geoPosition), 0);
+    private boolean showGallery(MenuItem menuItem, IGeoPoint geoPosition) {
+        FotoGalleryActivity.showActivity(" menu " + menuItem.getTitle() +
+                "[18]:" + geoPosition, this.getActivity(), getQueryForPositionRectangle(geoPosition), 0);
         return true;
     }
 
     private boolean zoomToFit(IGeoPoint geoCenterPoint, Object... dbgContext) {
         QueryParameter baseQuery = getQueryForPositionRectangle(geoCenterPoint);
-        BoundingBox BoundingBox = null;
+        BoundingBox boundingBox = null;
 
         IGeoRectangle fittingRectangle = FotoSql.execGetGeoRectangle(null, this.getActivity(),
                 baseQuery, null, mDebugPrefix, "zoomToFit", dbgContext);
         double delta = getDelta(fittingRectangle);
         if ((geoCenterPoint != null) && (delta < 1e-6)) {
-            BoundingBox = getMarkerBoundingBox(geoCenterPoint);
+            boundingBox = getMarkerBoundingBox(geoCenterPoint);
 
         } else {
-            double enlarge = delta * 0.2;
-            BoundingBox = new BoundingBox(
-                    fittingRectangle.getLatitudeMax()+enlarge,
-                    fittingRectangle.getLogituedMax()+enlarge,
-                    fittingRectangle.getLatitudeMin()-enlarge,
-                    fittingRectangle.getLogituedMin()-enlarge);
+            boundingBox = toBoundingBox(fittingRectangle, delta);
         }
         if (Global.debugEnabledMap) {
             Log.i(Global.LOG_CONTEXT, "zoomToFit(): " + fittingRectangle +
                     " delta " + delta +
-                    " => box " + BoundingBox);
+                    " => box " + boundingBox);
         }
-        zoomToBoundingBox("zoomToFit()", BoundingBox, NO_ZOOM);
+        zoomToBoundingBox("zoomToFit()", boundingBox, NO_ZOOM);
         return true;
+    }
+
+    private BoundingBox toBoundingBox(IGeoRectangle fittingRectangle, double delta) {
+        BoundingBox boundingBox;
+        double enlarge = delta * 0.2;
+        boundingBox = new BoundingBox(
+                fittingRectangle.getLatitudeMax() + enlarge,
+                fittingRectangle.getLogituedMax() + enlarge,
+                fittingRectangle.getLatitudeMin() - enlarge,
+                fittingRectangle.getLogituedMin() - enlarge);
+        return boundingBox;
     }
 
     private double getDelta(IGeoRectangle fittingRectangle) {
@@ -1118,7 +1157,7 @@ public class LocationMapFragment extends DialogFragment {
     }
 
     private QueryParameter getQueryForPositionRectangle(IGeoPoint geoPosition) {
-        QueryParameter result = AndroidAlbumUtils.getAsMergedNewQueryParameter(mRootQuery, null);
+        QueryParameter result = AndroidAlbumUtils.getAsMergedNewQuery(mRootQuery, null);
 
         GeoRectangle rect = getRectangleFrom(new GeoRectangle(), geoPosition);
         FotoSql.addWhereFilterLatLon(result, rect);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -21,6 +21,7 @@ package de.k3b.android.androFotoFinder.locationmap;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -53,16 +54,15 @@ import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.BaseQueryActivity;
 import de.k3b.database.QueryParameter;
-import de.k3b.io.IDirectory;
-import de.k3b.io.StringUtils;
-import de.k3b.io.collections.SelectedFiles;
-import de.k3b.io.collections.SelectedItems;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
+import de.k3b.io.IDirectory;
 import de.k3b.io.IGeoRectangle;
+import de.k3b.io.collections.SelectedFiles;
+import de.k3b.io.collections.SelectedItems;
 
 // BaseQueryActivity LocalizedActivity
 public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
@@ -83,12 +83,15 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
     private boolean mMustReplaceMenue = false;
 
     public static void showActivity(String debugContext, Activity context, SelectedFiles selectedItems,
-                                    QueryParameter query, int requestCode) {
+                                    QueryParameter query, IGeoRectangle zoomTo, int requestCode) {
         Uri initalUri = null;
-        final Intent intent = new Intent().setClass(context,
-                MapGeoPickerActivity.class);
+        Intent intent = new Intent(context, MapGeoPickerActivity.class);
 
         AndroidAlbumUtils.saveFilterAndQuery(context, null, intent, null, null, query);
+
+        if (zoomTo != null) {
+            intent.putExtra(EXTRA_ZOOM_TO, new GeoRectangle().get(zoomTo).toString());
+        }
 
         if (AffUtils.putSelectedFiles(intent, selectedItems)) {
             IGeoPoint initialPoint = FotoSql.execGetPosition(null, context,
@@ -141,13 +144,21 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
 
         mMap = (PickerLocationMapFragment) getFragmentManager().findFragmentById(R.id.fragment_map);
 
-        GeoRectangle rectangle = null;
-        int zoom = OsmdroidUtil.NO_ZOOM;
-        if ((savedInstanceState == null) && (initalZoom != null) && (additionalPointsContentUri == null)) {
-            rectangle = new GeoRectangle();
-            zoom = initalZoom.getZoomMin();
-            rectangle.setLogituedMin(initalZoom.getLongitude()).setLatitudeMin(initalZoom.getLatitude());
-            rectangle.setLogituedMax(initalZoom.getLongitude()).setLatitudeMax(initalZoom.getLatitude());
+        GeoRectangle zoomToRectangle = null;
+
+        int zoomToZoomlevel = OsmdroidUtil.NO_ZOOM;
+
+        if (savedInstanceState == null) {
+            String zoomToArea = intent.getStringExtra(Common.EXTRA_ZOOM_TO);
+            if (zoomToArea != null) {
+                zoomToRectangle = new GalleryFilterParameter();
+                GalleryFilterParameter.parse(zoomToArea, (GalleryFilterParameter) zoomToRectangle);
+            } else if ((initalZoom != null) && (additionalPointsContentUri == null)) {
+                zoomToRectangle = new GeoRectangle();
+                zoomToZoomlevel = initalZoom.getZoomMin();
+                zoomToRectangle.setLogituedMin(initalZoom.getLongitude()).setLatitudeMin(initalZoom.getLatitude());
+                zoomToRectangle.setLogituedMax(initalZoom.getLongitude()).setLatitudeMax(initalZoom.getLatitude());
+            }
         } // else (savedInstanceState != null) restore after rotation. fragment takes care of restoring map pos
 
         final SelectedItems selectedItems = AffUtils.getSelectedItems(intent);
@@ -157,21 +168,22 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
         // for debugging: where does the filter come from
         String dbgFilter = null;
 
-        final boolean zoom2fit = false;
-
         onCreateData(savedInstanceState);
 
         {
             // bugfix: first defineNavigation will not work until map is created completely
             // so wait until then
             // note: delayed params must be final
-            final GeoRectangle _rectangle = rectangle;
-            final int _zoom = zoom;
+            final GeoRectangle _zoomToRectangle = zoomToRectangle;
+            final int _zoomToZoomlevel = zoomToZoomlevel;
+            final boolean _zoom2fit = false;
             mMap.mMapView.addOnFirstLayoutListener(new MapView.OnFirstLayoutListener() {
                 @Override
                 public void onFirstLayout(View v, int left, int top, int right, int bottom) {
                     mMap.defineNavigation(mGalleryQueryParameter.calculateEffectiveGalleryContentQuery(),
-                            null, geoPointFromIntent, _rectangle, _zoom, selectedItems, additionalPointsContentUri, zoom2fit);
+                            null, geoPointFromIntent,
+                            _zoomToRectangle, _zoomToZoomlevel,
+                            selectedItems, additionalPointsContentUri, _zoom2fit);
                 }
             });
         }
@@ -226,11 +238,12 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (LockScreen.onOptionsItemSelected(this, item))
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        if (LockScreen.onOptionsItemSelected(this, menuItem)) {
             return true;
+        }
         // Handle presses on the action bar items
-        switch (item.getItemId()) {
+        switch (menuItem.getItemId()) {
             //cmd_lock
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
@@ -239,31 +252,39 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
                 SettingsActivity.showActivity(this);
                 return true;
 			case R.id.cmd_photo:
-				return showPhoto(mMap.getCurrentGeoRectangle());
+                return showPhoto(menuItem, mMap.getCurrentGeoRectangle());
 			case R.id.cmd_gallery:
-				return showGallery(mMap.getCurrentGeoRectangle());
+                return showGallery(menuItem, mMap.getCurrentGeoRectangle());
             case R.id.action_details:
                 cmdShowDetails();
                 return true;
+            case R.id.cmd_show_geo_as: {
+                String uri = mMap.getCurrentGeoUri();
+                IntentUtil.cmdStartIntent("show_geo_as", this,
+                        null, uri, null, Intent.ACTION_VIEW,
+                        R.string.geo_show_as_menu_title, R.string.geo_picker_err_not_found, 0);
+
+                return true;
+            }
             default:
-                return onOptionsItemSelected(item, AffUtils.getSelectedItems(getIntent()));
+                return onOptionsItemSelected(menuItem, AffUtils.getSelectedItems(getIntent()));
         }
 
     }
 
-    private boolean showPhoto(IGeoRectangle geoArea) {
+    private boolean showPhoto(MenuItem menuItem, IGeoRectangle geoArea) {
         QueryParameter query = new QueryParameter();
         FotoSql.setSort(query, FotoSql.SORT_BY_DATE, false);
         FotoSql.addWhereFilterLatLon(query, geoArea);
 
-        ImageDetailActivityViewPager.showActivity("[19]-"+geoArea, this, null, 0, query, 0);
+        ImageDetailActivityViewPager.showActivity(" menu " + menuItem.getTitle() + "[19]-" + geoArea, this, null, 0, query, 0);
         return true;
     }
 
-    private boolean showGallery(IGeoRectangle geoArea) {
+    private boolean showGallery(MenuItem menuItem, IGeoRectangle geoArea) {
         QueryParameter query = getAsMergedQuery(geoArea);
 
-        FotoGalleryActivity.showActivity("[20]-"+geoArea, this, query, 0);
+        FotoGalleryActivity.showActivity(" menu " + menuItem.getTitle() + "[20]-" + geoArea, this, query, 0);
         return true;
     }
 
@@ -277,16 +298,17 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
         final QueryParameter asMergedQuery = mMap.getCurrentAreaQuery();
 
         CharSequence subQuerymTitle = getValueAsTitle(true);
-        ImageDetailMetaDialogBuilder.createImageDetailDialog(
+        final Dialog dlg = ImageDetailMetaDialogBuilder.createImageDetailDialog(
                 this,
                 getTitle().toString(),
                 asMergedQuery.toSqlString(),
-                StringUtils.appendMessage(null,
-                        getString(R.string.show_photo),
-                        TagSql.getCount(this, asMergedQuery)),
+                TagSql.getStatisticsMessage(this, R.string.show_photo,
+                        asMergedQuery),
                 mMap.getCurrentGeoRectangle() + " ==> " + mMap.getCurrentGeoUri(),
                 subQuerymTitle
-        ).show();
+        );
+        dlg.show();
+        setAutoClose(null, dlg, null);
     }
 
     @Override

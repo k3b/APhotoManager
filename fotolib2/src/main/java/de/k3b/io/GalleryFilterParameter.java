@@ -78,6 +78,19 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
         return this;
     }
 
+    public GalleryFilterParameter mergeFrom(IGalleryFilter src) {
+        if (src != null) {
+            try {
+                copyAlways = false;
+                get(src);
+            } finally {
+                copyAlways = true;
+            }
+        }
+        return this;
+    }
+
+
     /******************** properties **************************/
     @Override
     public String getPath() {
@@ -85,7 +98,10 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
     }
 
     public GalleryFilterParameter setPath(String path) {
-        this.path = path;return this;
+        if (copyAlways || (path != null)) {
+            this.path = path;
+        }
+        return this;
     }
 
     public File getPathFile() {
@@ -99,7 +115,11 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
     }
 
     public GalleryFilterParameter setDateMin(long dateMin) {
-        this.dateMin = dateMin;return this;
+        if (copyAlways || (dateMin != 0)) {
+            this.dateMin = dateMin;
+        }
+
+        return this;
     }
 
     @Override
@@ -108,7 +128,10 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
     }
 
     public GalleryFilterParameter setDateMax(long dateMax) {
-        this.dateMax = dateMax; return this;
+        if (copyAlways || (dateMax != 0)) {
+            this.dateMax = dateMax;
+        }
+        return this;
     }
 
     public GalleryFilterParameter setDate(String min, String max) {
@@ -125,7 +148,10 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
     }
 
     public GalleryFilterParameter setDateModifiedMin(long dateModifiedMin) {
-        this.dateModifiedMin = dateModifiedMin;return this;
+        if (copyAlways || (dateModifiedMin != 0)) {
+            this.dateModifiedMin = dateModifiedMin;
+        }
+        return this;
     }
 
     @Override
@@ -134,7 +160,10 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
     }
 
     public GalleryFilterParameter setDateModifiedMax(long dateModifiedMax) {
-        this.dateModifiedMax = dateModifiedMax; return this;
+        if (copyAlways || (dateModifiedMax != 0)) {
+            this.dateModifiedMax = dateModifiedMax;
+        }
+        return this;
     }
 
     public GalleryFilterParameter setDateModified(String min, String max) {
@@ -151,10 +180,11 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
     }
 
     public GalleryFilterParameter setWithNoTags(boolean withNoTags) {
-        this.withNoTags = withNoTags;
+        if (copyAlways) {
+            this.withNoTags = withNoTags;
+        }
         return this;
     }
-
 
     /** All Tags/Keywords/Categories/VirtualAlbum that the image must contain. ("AND") */
     @Override
@@ -163,7 +193,9 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
     }
 
     public GalleryFilterParameter setTagsAllIncluded(List<String> tagsAllIncluded) {
-        this.tagsAllIncluded = (tagsAllIncluded != null) ? new ArrayList<String>(tagsAllIncluded) : new ArrayList<String>();
+        if (copyAlways || (tagsAllIncluded != null)) {
+            this.tagsAllIncluded = (tagsAllIncluded != null) ? new ArrayList<String>(tagsAllIncluded) : new ArrayList<String>();
+        }
         return this;
     }
 
@@ -174,7 +206,9 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
     }
 
     public GalleryFilterParameter setTagsAllExcluded(List<String> tagsAllExcluded) {
-        this.tagsAllExcluded = (tagsAllExcluded != null) ? new ArrayList<String>(tagsAllExcluded) : new ArrayList<String>();
+        if (copyAlways || (tagsAllExcluded != null)) {
+            this.tagsAllExcluded = (tagsAllExcluded != null) ? new ArrayList<String>(tagsAllExcluded) : new ArrayList<String>();
+        }
         return this;
     }
 
@@ -186,17 +220,21 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
 
     /** match if the text is in path, filename, title, description, tags. Wildcard "%" is allowed. Sub-expressions are seperated by " " */
     public GalleryFilterParameter setInAnyField(String inAnyField) {
-        this.inAnyField = inAnyField;
+        if (copyAlways || (inAnyField != null)) {
+            this.inAnyField = inAnyField;
+        }
         return this;
     }
 
     /** one of the VISIBILITY_.XXXX values */
     public VISIBILITY getVisibility() {return visibility;}
     public GalleryFilterParameter setVisibility(VISIBILITY value) {
-        if ((value.value >= VISIBILITY.DEFAULT.value) && (value.value <= VISIBILITY.MAX.value)) {
-            visibility = value;
-        } else {
-            visibility = VISIBILITY.DEFAULT;
+        if (copyAlways || (value != VISIBILITY.DEFAULT)) {
+            if ((value.value >= VISIBILITY.DEFAULT.value) && (value.value <= VISIBILITY.MAX.value)) {
+                visibility = value;
+            } else {
+                visibility = VISIBILITY.DEFAULT;
+            }
         }
         return this;
     }
@@ -210,7 +248,9 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
     }
 
     public GalleryFilterParameter setSortID(int sortID) {
-        mSortId = sortID;
+        if (copyAlways) {
+            mSortId = sortID;
+        }
         return this;
     }
 
@@ -223,7 +263,9 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
     }
 
     public GalleryFilterParameter setSortAscending(boolean sortAscending) {
-        mSortAscending = sortAscending;
+        if (copyAlways) {
+            mSortAscending = sortAscending;
+        }
         return this;
     }
 
@@ -426,7 +468,9 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
     }
 
     public GalleryFilterParameter setRatingMin(int ratingMin) {
-        this.ratingMin = ratingMin;
+        if (copyAlways || (ratingMin > 0)) {
+            this.ratingMin = ratingMin;
+        }
         return this;
     }
 
@@ -437,10 +481,10 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
 
     /** get Date Min/Max in date picker compatible format */
     public String getDatePath() {
-        return DirectoryFormatter.getDatePath(LibGlobal.datePickerUseDecade, getDateMin(), getDateMax());
+        return DirectoryFormatter.formatDatePath(LibGlobal.datePickerUseDecade, getDateMin(), getDateMax());
     }
     /** get Date Min/Max in date picker compatible format */
     public String getDateModifiedPath() {
-        return DirectoryFormatter.getDatePath(LibGlobal.datePickerUseDecade, getDateModifiedMin(), getDateModifiedMax());
+        return DirectoryFormatter.formatDatePath(LibGlobal.datePickerUseDecade, getDateModifiedMin(), getDateModifiedMax());
     }
 }

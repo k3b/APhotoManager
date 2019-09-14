@@ -1,7 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -20,8 +19,10 @@
  */
  -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/cmd_photo" android:title="@string/show_photo"
-        android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
-    <item android:id="@+id/cmd_gallery" android:title="@string/show_in_gallery_menu_title"
-        android:orderInCategory="100" android:showAsAction="never" android:visible="true" />
+    <!--  menu_edit_common, menu_copy_paste -->
+    <item
+        android:id="@+id/action_details"
+        android:orderInCategory="900"
+        android:showAsAction="never"
+        android:title="@string/details_menu_title" />
 </menu>

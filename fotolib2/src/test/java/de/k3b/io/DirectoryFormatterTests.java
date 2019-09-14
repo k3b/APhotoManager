@@ -24,6 +24,8 @@ import org.junit.Test;
 
 import java.util.Date;
 
+import de.k3b.LibGlobal;
+
 /**
  * Created by k3b on 08.06.2015.
  */
@@ -47,31 +49,31 @@ public class DirectoryFormatterTests {
     }
 
     @Test
-    public void shoudGetLatLonFromRange() {
+    public void shouldParseLatLonFromRange() {
         IGeoRectangle result = DirectoryFormatter.parseLatLon("1.2,2.3;3.4,4.5");
         Assert.assertEquals("1.2,2.3;3.4,4.5", result.toString());
     }
 
     @Test
-    public void shoudGetLatLon10() {
+    public void shouldParseLatLon10() {
         IGeoRectangle result = DirectoryFormatter.parseLatLon(" 130,12");
         Assert.assertEquals("130.0,12.0;140.0,22.0", result.toString());
     }
 
     @Test
-    public void shoudGetLatLon1() {
+    public void shouldParseLatLon1() {
         IGeoRectangle result = DirectoryFormatter.parseLatLon("130,12");
         Assert.assertEquals("130.0,12.0;131.0,13.0", result.toString());
     }
 
     @Test
-    public void shoudGetLatLon0() {
+    public void shouldParseLatLon0() {
         IGeoRectangle result = DirectoryFormatter.parseLatLon("130.0,12.0");
         Assert.assertEquals("130.0,12.0;130.1,12.1", result.toString());
     }
 
     @Test
-    public void shoudGetLatLon00() {
+    public void shouldParseLatLon00() {
         IGeoRectangle result = DirectoryFormatter.parseLatLon("130.00,12.00");
         Assert.assertEquals("130.0,12.0;130.01,12.01", result.toString());
     }
@@ -102,7 +104,73 @@ public class DirectoryFormatterTests {
         Date dateFrom = DateUtil.parseIsoDate(from);
         Date dateTo = DateUtil.parseIsoDate(to);
 
-        Assert.assertEquals(message, expected, DirectoryFormatter.getDatePath(withDecade, dateFrom.getTime(), dateTo.getTime()));
+        Assert.assertEquals(message, expected, DirectoryFormatter.formatDatePath(withDecade, dateFrom.getTime(), dateTo.getTime()));
     }
+
+    @Test
+    public void parseDatesPath() {
+        boolean old = LibGlobal.datePickerUseDecade;
+        LibGlobal.datePickerUseDecade = false;
+        assertParseDatesPath("2001-01-16", "2001-01-17", "/2001/01/16");
+        assertParseDatesPath("2001-01-01", "2001-02-01", "/2001/01/");
+        assertParseDatesPath("2001-01-01", "2002-01-01", "/2001/");
+
+        LibGlobal.datePickerUseDecade = true;
+        assertParseDatesPath("2001-01-01", "2002-01-01", "/2000*/2001/");
+        assertParseDatesPath("2000-01-01", "2010-01-01", "/2000*/");
+
+        LibGlobal.datePickerUseDecade = old;
+    }
+    private void assertParseDatesPath(String expextedFrom, String expectedTo, String datePath) {
+        Date fromResult = new Date();
+        Date toResult = new Date();
+        DirectoryFormatter.parseDatesPath(datePath, fromResult, toResult);
+        String context = datePath + " => " + expextedFrom + " ... " + expectedTo;
+        Assert.assertEquals(context, expextedFrom, DateUtil.toIsoDateString(fromResult));
+        Assert.assertEquals(context, expectedTo, DateUtil.toIsoDateString(toResult));
+    }
+
+
+    @Test
+    public void formatDatePath() {
+        boolean old = LibGlobal.datePickerUseDecade;
+        LibGlobal.datePickerUseDecade = false;
+        assertFormatDatePath("/2001/01/16", "2001-01-16", "2001-01-17");
+        assertFormatDatePath("/2001/01", "2001-01-01", "2001-02-01");
+        assertFormatDatePath("/2001", "2001-01-01", "2002-01-01");
+
+        LibGlobal.datePickerUseDecade = true;
+        assertFormatDatePath("/2000*/2001", "2001-01-01", "2002-01-01");
+        assertFormatDatePath("/2000*", "2000-01-01", "2010-01-01");
+
+        LibGlobal.datePickerUseDecade = old;
+    }
+
+    private void assertFormatDatePath(String expectedDatePath, String from, String to) {
+        Date fromDate = DateUtil.parseIsoDate(from);
+        Date toDate = DateUtil.parseIsoDate(to);
+        String result = DirectoryFormatter.formatDatePath(LibGlobal.datePickerUseDecade,
+                fromDate.getTime(), toDate.getTime());
+        String context = from + " ... " + to + " => " + expectedDatePath;
+        Assert.assertEquals(context, expectedDatePath, result);
+    }
+
+    @Test
+    public void formatLatLon() {
+        Assert.assertEquals("0.123456", 0.123456, 0.123456, 1e-7);
+        boolean old = LibGlobal.datePickerUseDecade;
+        LibGlobal.datePickerUseDecade = false;
+        assertFormatDatePath("/2001/01/16", "2001-01-16", "2001-01-17");
+        assertFormatDatePath("/2001/01", "2001-01-01", "2001-02-01");
+        assertFormatDatePath("/2001", "2001-01-01", "2002-01-01");
+
+        LibGlobal.datePickerUseDecade = true;
+        assertFormatDatePath("/2000*/2001", "2001-01-01", "2002-01-01");
+        assertFormatDatePath("/2000*", "2000-01-01", "2010-01-01");
+
+        LibGlobal.datePickerUseDecade = old;
+    }
+
+
 
 }

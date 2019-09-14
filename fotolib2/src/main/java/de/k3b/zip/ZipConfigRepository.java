@@ -37,6 +37,7 @@ import de.k3b.io.DateUtil;
 import de.k3b.io.FileUtils;
 import de.k3b.io.StringUtils;
 
+/** Parameters that define a backup that can be persisted through a properties-file */
 public class ZipConfigRepository implements IZipConfig {
     private static final Logger logger = LoggerFactory.getLogger(LibZipGlobal.LOG_TAG);
 
@@ -58,6 +59,7 @@ public class ZipConfigRepository implements IZipConfig {
     public ZipConfigRepository load(InputStream inputsteam, Object uri) throws IOException {
         data.clear();
         data.load(inputsteam);
+        FileUtils.close(inputsteam, uri);
         return this;
     }
 

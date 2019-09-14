@@ -62,19 +62,20 @@ import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
-import de.k3b.android.widget.UpdateTask;
 import de.k3b.android.widget.HistoryEditText;
-import de.k3b.io.VISIBILITY;
-import de.k3b.io.collections.SelectedFiles;
+import de.k3b.android.widget.UpdateTask;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
 import de.k3b.io.DateUtil;
 import de.k3b.io.GeoUtil;
 import de.k3b.io.StringUtils;
+import de.k3b.io.VISIBILITY;
+import de.k3b.io.collections.SelectedFiles;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.PhotoPropertiesAsString;
 import de.k3b.media.PhotoPropertiesDiffCopy;
+import de.k3b.media.PhotoPropertiesFormatter;
 import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.tagDB.Tag;
 import de.k3b.tagDB.TagConverter;
@@ -255,7 +256,7 @@ public class PhotoPropertiesEditActivity extends ActivityWithAutoCloseDialogs im
                 edDate                      ,
                 edTagsInclude               ,
                 edLatitude                  ,
-                edLongitude                 );
+                edLongitude).setIncludeEmpty(true);
 
         new HashTagEditWatcher(this, edTitle);
         new HashTagEditWatcher(this, edDescription);
@@ -435,15 +436,16 @@ public class PhotoPropertiesEditActivity extends ActivityWithAutoCloseDialogs im
         String geoUri = PARSER.toUriString(geo);
         final Intent intent = new Intent();
         intent.setAction(Intent.ACTION_PICK);
+
         final Uri parseUri = Uri.parse(geoUri);
         intent.setData(parseUri);
         intent.putExtra(EXTRA_TITLE, getString(R.string.geo_picker_title));
 
         try {
             // #7: allow choosing geo pick from map or from "photo with geo"
-
-            startActivityForResult(Intent.createChooser(intent, getString(R.string.geo_edit_menu_title)), GEO_RESULT_ID);
-            // this.startActivityForResult(intent, RESULT_ID);
+            IntentUtil.startActivity(getString(R.string.geo_picker_title),
+                    this, GEO_RESULT_ID,
+                    Intent.createChooser(intent, getString(R.string.geo_edit_menu_title)));
         } catch (ActivityNotFoundException ex) {
             Toast.makeText(PhotoPropertiesEditActivity.this, R.string.geo_picker_err_not_found,Toast.LENGTH_LONG).show();
         }
@@ -561,8 +563,8 @@ public class PhotoPropertiesEditActivity extends ActivityWithAutoCloseDialogs im
          * called by {@link TagsPickerFragment}
          */
         @Override
-        public boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag) {
-            return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, PhotoPropertiesEditActivity.this, null);
+        public boolean onTagPopUpClick(MenuItem menuItem, int menuItemItemId, Tag selectedTag) {
+            return TagsPickerFragment.handleMenuShow(mCurrentDialogFragment, menuItem, selectedTag.getName());
         }
     }
 
@@ -769,7 +771,7 @@ public class PhotoPropertiesEditActivity extends ActivityWithAutoCloseDialogs im
 
         @Override
         public String toString() {
-            return PhotoPropertiesUtil.toString(this);
+            return PhotoPropertiesFormatter.format(this).toString();
         }
     }
 

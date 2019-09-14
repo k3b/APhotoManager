@@ -56,7 +56,6 @@ import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.osmdroid.OsmdroidUtil;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
-
 import de.k3b.database.QueryParameter;
 import de.k3b.io.AlbumFile;
 import de.k3b.io.Directory;
@@ -88,6 +87,117 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
     protected String mTitleResultCount = "";
 
     protected boolean mHasEmbeddedDirPicker = false;
+
+    private void navigateTo(String selectedAbsolutePath, int queryTypeId) {
+
+        if (selectedAbsolutePath != null) {
+            final GalleryFilterParameter currentSubFilterSettings = this.mGalleryQueryParameter.getCurrentSubFilterSettings();
+            if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_GEO) {
+                final String why = "FotoGalleryActivity.navigateTo tags geo ";
+                Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath + " from "
+                        + DirectoryFormatter.formatLatLon(currentSubFilterSettings.getLatitudeMin()
+                        , currentSubFilterSettings.getLogituedMin()
+                        , currentSubFilterSettings.getLatitudeMax()
+                        , currentSubFilterSettings.getLogituedMax()));
+                currentSubFilterSettings.get(DirectoryFormatter.parseLatLon(selectedAbsolutePath));
+
+                reloadGui(why);
+
+            } else if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_TAG) {
+                final String why = "FotoGalleryActivity.navigateTo tags ";
+                Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath + " from "
+                        + ListUtils.toString(this.mGalleryQueryParameter.getCurrentSubFilterSettings().getTagsAllIncluded()));
+                currentSubFilterSettings.setTagsAllIncluded(new ArrayList<>(ListUtils.fromString(selectedAbsolutePath)));
+
+                reloadGui(why);
+            } else if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_DATE) {
+                final String why = "FotoGalleryActivity.navigateTo date ";
+                Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath + " from " + currentSubFilterSettings.getDatePath());
+
+                Date from = new Date();
+                Date to = new Date();
+                DirectoryFormatter.parseDatesPath(selectedAbsolutePath, from, to);
+
+                currentSubFilterSettings.setDate(from.getTime(), to.getTime());
+                this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_DATE;
+                this.mGalleryQueryParameter.mDirQueryID = queryTypeId;
+                setTitle();
+
+                reloadGui(why);
+            } else if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_DATE_MODIFIED) {
+                final String why = "FotoGalleryActivity.navigateTo date modified";
+                Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath + " from " + currentSubFilterSettings.getDateModifiedPath());
+
+                Date from = new Date();
+                Date to = new Date();
+                DirectoryFormatter.parseDatesPath(selectedAbsolutePath, from, to);
+
+                currentSubFilterSettings.setDateModified(from.getTime(), to.getTime());
+                this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_DATE_MODIFIED;
+                this.mGalleryQueryParameter.mDirQueryID = queryTypeId;
+                setTitle();
+
+                reloadGui(why);
+            } else if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_PATH) {
+                GalleryFilterPathState state = new GalleryFilterPathState()
+                        .load(BaseQueryActivity.this,
+                                null, null);
+                File queryFile = AlbumFile.getExistingQueryFileOrNull(selectedAbsolutePath);
+                if (queryFile != null) {
+                    final String why = "FotoGalleryActivity.navigate to virtual album ";
+                    Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath);
+
+                    QueryParameter albumQuery = AndroidAlbumUtils.getQueryFromUri(mDebugPrefix + " navigateTo ", this, null, Uri.fromFile(queryFile), null);
+                    if (albumQuery != null) {
+                        this.mGalleryQueryParameter.mGalleryContentBaseQuery = albumQuery;
+                        this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_ALBUM;
+                        currentSubFilterSettings.setPath(selectedAbsolutePath);
+
+                        state.setLastPath(queryFile.getParent());
+                        state.setAlbum(Uri.fromFile(queryFile));
+
+                        reloadGui(why);
+                    }
+                } else {
+                    final String why = "FotoGalleryActivity.navigateTo dir ";
+                    Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath + " from " + currentSubFilterSettings.getPath());
+
+                    currentSubFilterSettings.setPath(selectedAbsolutePath + "/%");
+                    this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_PATH;
+                    this.mGalleryQueryParameter.mDirQueryID = queryTypeId;
+                    state.setLastPath(selectedAbsolutePath);
+                    setTitle();
+
+                    reloadGui(why);
+                }
+                state.save(this, null);
+
+            } // if SUB_FILTER_MODE_PATH
+        }
+    }
+
+    // ...path, {album, +tag, ?search, #date, lat+long
+    public CharSequence getValueAsTitle(boolean longName) {
+        if (mGalleryQueryParameter == null) return null;
+        return mGalleryQueryParameter.getValueAsTitle(longName);
+    }
+
+    /**
+     * allows childclass to have their own sharedPreference names
+     */
+    protected String fixSharedPrefSuffix(String statSuffix) {
+        return statSuffix;
+    }
+
+
+    private FolderApi mFolderApi = null;
+
+    private FolderApi getFolderApi() {
+        if (mFolderApi == null) {
+            mFolderApi = new FolderApi();
+        }
+        return mFolderApi;
+    }
 
     /**
      * every thing that belongs to search.
@@ -239,7 +349,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                             Uri uri = Uri.fromFile(new File(path));
                             QueryParameter albumQuery = AndroidAlbumUtils.getQueryFromUri(
                                     mDebugPrefix + " calculateEffectiveGalleryContentQuery ",
-                                    BaseQueryActivity.this, uri, null);
+                                    BaseQueryActivity.this, null, uri, null);
                             if (albumQuery != null) {
                                 result.getWhereFrom(albumQuery, true);
                             } else if (PhotoPropertiesMediaFilesScanner.isNoMedia(path, PhotoPropertiesMediaFilesScanner.DEFAULT_SCAN_DEPTH)) {
@@ -501,24 +611,128 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
         }
     }
 
-    // ...path, {album, +tag, ?search, #date, lat+long
-    public CharSequence getValueAsTitle(boolean longName) {
-        if (mGalleryQueryParameter == null) return null;
-        return mGalleryQueryParameter.getValueAsTitle(longName);
+    abstract protected void defineDirectoryNavigation(IDirectory directoryRoot);
+
+    private void openLatLonPicker(SelectedItems selectedItems) {
+        this.mGalleryQueryParameter.mCurrentSubFilterMode = BaseQueryActivity.GalleryQueryParameter.SUB_FILTER_MODE_GEO;
+
+        final FragmentManager manager = getFragmentManager();
+        LocationMapFragment dialog = new LocationMapFragment();
+        dialog.defineNavigation(this.mGalleryQueryParameter.mGalleryContentBaseQuery,
+                null,
+                this.mGalleryQueryParameter.getCurrentSubFilterSettings(), OsmdroidUtil.NO_ZOOM, selectedItems, null, false);
+
+        dialog.show(manager, DLG_NAVIGATOR_TAG);
+        setAutoClose(dialog, null, null);
     }
 
-    /** allows childclass to have their own sharedPreference names */
-    protected String fixSharedPrefSuffix(String statSuffix) {
-        return statSuffix;
+    private void openFilter(CharSequence debugContext) {
+        GalleryFilterActivity.showActivity("[23] neu " + debugContext, this,
+                null,
+                this.mGalleryQueryParameter.mGalleryContentBaseQuery,
+                null, BaseQueryActivity.resultID);
     }
 
+    private void openTagPicker() {
+        mGalleryQueryParameter.mCurrentSubFilterMode = BaseQueryActivity.GalleryQueryParameter.SUB_FILTER_MODE_TAG;
 
-    private FolderApi mFolderApi = null;
-    private FolderApi getFolderApi() {
-        if (mFolderApi == null) {
-            mFolderApi = new FolderApi();
+        final FragmentManager manager = getFragmentManager();
+        TagsPickerFragment dlg = new TagsPickerFragment();
+        dlg.setFragmentOnwner(this);
+        dlg.setTitleId(R.string.tags_activity_title);
+        dlg.setBaseQuery(this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery());
+        List<String> included = this.mGalleryQueryParameter.getCurrentSubFilterSettings().getTagsAllIncluded();
+        if (included == null) included = new ArrayList<String>();
+        dlg.setAddNames(included);
+        dlg.show(manager, DLG_NAVIGATOR_TAG);
+        setAutoClose(dlg, null, null);
+    }
+
+    /**
+     * called by {@link TagsPickerFragment}
+     */
+    @Override
+    public boolean onCancel(String msg) {
+        return true;
+    }
+
+    /**
+     * called by {@link TagsPickerFragment}
+     */
+    @Override
+    public boolean onOk(List<String> addNames, List<String> removeNames) {
+        Log.d(Global.LOG_CONTEXT, "BaseQueryActivity.navigateTo " + ListUtils.toString(addNames) + " from "
+                + ListUtils.toString(mGalleryQueryParameter.getCurrentSubFilterSettings().getTagsAllIncluded()));
+        mGalleryQueryParameter.mCurrentSubFilterMode = BaseQueryActivity.GalleryQueryParameter.SUB_FILTER_MODE_TAG;
+        mGalleryQueryParameter.getCurrentSubFilterSettings().setTagsAllIncluded(new ArrayList<String>(addNames));
+        reloadGui("navigate to tags");
+        return true;
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        Global.debugMemory(mDebugPrefix, "onCreate");
+        super.onCreate(savedInstanceState);
+        this.getContentResolver().registerContentObserver(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, true, mMediaObserverDirectory);
+        this.getContentResolver().registerContentObserver(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, true, mMediaObserverDirectory);
+    }
+
+    protected void onCreateData(Bundle savedInstanceState) {
+        final Intent intent = getIntent();
+
+        this.mGalleryQueryParameter.loadSettingsAndInstanceState(this, savedInstanceState);
+    }
+
+    /**
+     * OnDirectoryInteractionListener: called when user selects a new directoryRoot
+     */
+    @Override
+    public void onDirectoryPick(String selectedAbsolutePath, int queryTypeId) {
+        if (!this.mHasEmbeddedDirPicker) {
+            navigateTo(selectedAbsolutePath, queryTypeId);
         }
-        return mFolderApi;
+        closeDialogIfNeeded();
+
+    }
+
+    /**
+     * after media db change cached Directories must be recalculated
+     */
+    private final ContentObserver mMediaObserverDirectory = new ContentObserver(null) {
+        @Override
+        public void onChange(boolean selfChange) {
+            invalidateDirectories(mDebugPrefix + "#onChange from mMediaObserverDirectory");
+        }
+    };
+
+    /* OnDirectoryInteractionListener */
+    @Override
+    public void invalidateDirectories(String why) {
+        getFolderApi().invalidateDirectories(why);
+    }
+
+    /**
+     * DirectoryPickerFragment#OnDirectoryInteractionListener: called when user cancels selection of a new directoryRoot
+     */
+    @Override
+    public void onDirectoryCancel(int queryTypeId) {
+        closeDialogIfNeeded();
+    }
+
+    @Override
+    protected void closeDialogIfNeeded() {
+        super.closeDialogIfNeeded();
+        getFolderApi().mDirPicker = null;
+    }
+
+    /**
+     * DirectoryPickerFragment#OnDirectoryInteractionListener: called after the selection in tree has changed
+     */
+    @Override
+    public void onDirectorySelectionChanged(String selectedAbsolutePath, int queryTypeId) {
+        if (this.mHasEmbeddedDirPicker) {
+            navigateTo(selectedAbsolutePath, queryTypeId);
+        }
     }
 
     protected class FolderApi {
@@ -544,18 +758,20 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
         private DirectoryPickerFragment mDirPicker = null;
 
         private void openDatePicker() {
-            openPicker(BaseQueryActivity.GalleryQueryParameter.SUB_FILTER_MODE_DATE, QUERY_TYPE_GROUP_DATE);
+            openPicker(BaseQueryActivity.GalleryQueryParameter.SUB_FILTER_MODE_DATE, QUERY_TYPE_GROUP_DATE,
+                    R.menu.menu_context_pick_show_in_new, R.menu.menu_context_pick_date);
         }
 
         private void openDateModifiedPicker() {
-            openPicker(GalleryQueryParameter.SUB_FILTER_MODE_DATE_MODIFIED, QUERY_TYPE_GROUP_DATE_MODIFIED);
+            openPicker(GalleryQueryParameter.SUB_FILTER_MODE_DATE_MODIFIED, QUERY_TYPE_GROUP_DATE_MODIFIED,
+                    R.menu.menu_context_pick_show_in_new, R.menu.menu_context_pick_date);
         }
 
         private void openFolderPicker() {
-            openPicker(BaseQueryActivity.GalleryQueryParameter.SUB_FILTER_MODE_PATH, QUERY_TYPE_GROUP_ALBUM);
+            openPicker(BaseQueryActivity.GalleryQueryParameter.SUB_FILTER_MODE_PATH, QUERY_TYPE_GROUP_ALBUM, R.menu.menu_context_pick_dir);
         }
 
-        private void openPicker(final int filterMode, int _dirQueryID) {
+        private void openPicker(final int filterMode, int _dirQueryID, int... menuId) {
             mGalleryQueryParameter.mCurrentSubFilterMode = filterMode;
             final Activity context = BaseQueryActivity.this;
 
@@ -611,7 +827,10 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                 final FragmentManager manager = getFragmentManager();
                 DirectoryPickerFragment dirDialog = new DirectoryPickerFragment();
 
-                dirDialog.setContextMenuId(LockScreen.isLocked(context) ? 0 : R.menu.menu_context_dirpicker);
+                if (!LockScreen.isLocked(context)) {
+                    dirDialog.setContextMenuId(menuId);
+                }
+                dirDialog.setBaseQuery(mGalleryQueryParameter.mGalleryContentBaseQuery);
 
                 String initialPath = mGalleryQueryParameter.getCurrentSubFilterSettings().getPath();
 
@@ -724,213 +943,6 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
         }
     }
 
-    abstract protected void defineDirectoryNavigation(IDirectory directoryRoot);
-
-    private void openLatLonPicker(SelectedItems selectedItems) {
-        this.mGalleryQueryParameter.mCurrentSubFilterMode = BaseQueryActivity.GalleryQueryParameter.SUB_FILTER_MODE_GEO;
-
-        final FragmentManager manager = getFragmentManager();
-        LocationMapFragment dialog = new LocationMapFragment();
-        dialog.defineNavigation(this.mGalleryQueryParameter.mGalleryContentBaseQuery,
-                null,
-                this.mGalleryQueryParameter.getCurrentSubFilterSettings(), OsmdroidUtil.NO_ZOOM, selectedItems, null, false);
-
-        dialog.show(manager, DLG_NAVIGATOR_TAG);
-    }
-
-    private void openFilter() {
-        GalleryFilterActivity.showActivity("[23]", this,
-                null,
-                this.mGalleryQueryParameter.mGalleryContentBaseQuery,
-                null, BaseQueryActivity.resultID);
-    }
-
-    private void openTagPicker() {
-        mGalleryQueryParameter.mCurrentSubFilterMode = BaseQueryActivity.GalleryQueryParameter.SUB_FILTER_MODE_TAG;
-
-        final FragmentManager manager = getFragmentManager();
-        TagsPickerFragment dlg = new TagsPickerFragment();
-        dlg.setFragmentOnwner(this);
-        dlg.setTitleId(R.string.tags_activity_title);
-        List<String> included = this.mGalleryQueryParameter.getCurrentSubFilterSettings().getTagsAllIncluded();
-        if (included == null) included = new ArrayList<String>();
-        dlg.setAddNames(included);
-        dlg.show(manager, DLG_NAVIGATOR_TAG);
-    }
-
-    /**
-     * called by {@link TagsPickerFragment}
-     */
-    @Override
-    public boolean onCancel(String msg) {
-        return true;
-    }
-
-    /**
-     * called by {@link TagsPickerFragment}
-     */
-    @Override
-    public boolean onOk(List<String> addNames, List<String> removeNames) {
-        Log.d(Global.LOG_CONTEXT, "BaseQueryActivity.navigateTo " + ListUtils.toString(addNames) + " from "
-                + ListUtils.toString(mGalleryQueryParameter.getCurrentSubFilterSettings().getTagsAllIncluded()));
-        mGalleryQueryParameter.mCurrentSubFilterMode = BaseQueryActivity.GalleryQueryParameter.SUB_FILTER_MODE_TAG;
-        mGalleryQueryParameter.getCurrentSubFilterSettings().setTagsAllIncluded(new ArrayList<String>(addNames));
-        reloadGui("navigate to tags");
-        return true;
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        Global.debugMemory(mDebugPrefix, "onCreate");
-        super.onCreate(savedInstanceState);
-        this.getContentResolver().registerContentObserver(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, true, mMediaObserverDirectory);
-        this.getContentResolver().registerContentObserver(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, true, mMediaObserverDirectory);
-    }
-
-    protected void onCreateData(Bundle savedInstanceState) {
-        final Intent intent = getIntent();
-
-        this.mGalleryQueryParameter.loadSettingsAndInstanceState(this, savedInstanceState);
-    }
-
-    /**
-     * OnDirectoryInteractionListener: called when user selects a new directoryRoot
-     */
-    @Override
-    public void onDirectoryPick(String selectedAbsolutePath, int queryTypeId) {
-        if (!this.mHasEmbeddedDirPicker) {
-            navigateTo(selectedAbsolutePath, queryTypeId);
-        }
-        closeDialogIfNeeded();
-
-    }
-
-    /**
-     * after media db change cached Directories must be recalculated
-     */
-    private final ContentObserver mMediaObserverDirectory = new ContentObserver(null) {
-        @Override
-        public void onChange(boolean selfChange) {
-            invalidateDirectories(mDebugPrefix + "#onChange from mMediaObserverDirectory");
-        }
-    };
-
-    /* OnDirectoryInteractionListener */
-    @Override
-    public void invalidateDirectories(String why) {
-        getFolderApi().invalidateDirectories(why);
-    }
-
-    /**
-     * DirectoryPickerFragment#OnDirectoryInteractionListener: called when user cancels selection of a new directoryRoot
-     */
-    @Override
-    public void onDirectoryCancel(int queryTypeId) {
-        closeDialogIfNeeded();
-    }
-
-    @Override
-    protected void closeDialogIfNeeded() {
-        super.closeDialogIfNeeded();
-        getFolderApi().mDirPicker = null;
-    }
-
-    /** DirectoryPickerFragment#OnDirectoryInteractionListener: called after the selection in tree has changed */
-    @Override
-    public void onDirectorySelectionChanged(String selectedAbsolutePath, int queryTypeId) {
-        if (this.mHasEmbeddedDirPicker) {
-            navigateTo(selectedAbsolutePath, queryTypeId);
-        }
-    }
-
-    private void navigateTo(String selectedAbsolutePath, int queryTypeId) {
-
-        if (selectedAbsolutePath != null) {
-            final GalleryFilterParameter currentSubFilterSettings = this.mGalleryQueryParameter.getCurrentSubFilterSettings();
-            if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_GEO) {
-                final String why = "FotoGalleryActivity.navigateTo tags geo ";
-                Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath + " from "
-                        + DirectoryFormatter.formatLatLon(currentSubFilterSettings.getLatitudeMin()
-                        ,currentSubFilterSettings.getLogituedMin()
-                        ,currentSubFilterSettings.getLatitudeMax()
-                        ,currentSubFilterSettings.getLogituedMax()));
-                currentSubFilterSettings.get(DirectoryFormatter.parseLatLon(selectedAbsolutePath));
-
-                reloadGui(why);
-
-            } else if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_TAG) {
-                final String why = "FotoGalleryActivity.navigateTo tags ";
-                Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath + " from "
-                        + ListUtils.toString(this.mGalleryQueryParameter.getCurrentSubFilterSettings().getTagsAllIncluded()));
-                currentSubFilterSettings.setTagsAllIncluded(new ArrayList<>(ListUtils.fromString(selectedAbsolutePath)));
-
-                reloadGui(why);
-            } else if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_DATE) {
-                final String why = "FotoGalleryActivity.navigateTo date ";
-                Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath + " from " + currentSubFilterSettings.getDatePath());
-
-                Date from = new Date();
-                Date to = new Date();
-                DirectoryFormatter.getDates(selectedAbsolutePath, from, to);
-
-                currentSubFilterSettings.setDate(from.getTime(), to.getTime());
-                this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_DATE;
-                this.mGalleryQueryParameter.mDirQueryID = queryTypeId;
-                setTitle();
-
-                reloadGui(why);
-            } else if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_DATE_MODIFIED) {
-                final String why = "FotoGalleryActivity.navigateTo date modified";
-                Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath + " from " + currentSubFilterSettings.getDateModifiedPath());
-
-                Date from = new Date();
-                Date to = new Date();
-                DirectoryFormatter.getDates(selectedAbsolutePath, from, to);
-
-                currentSubFilterSettings.setDateModified(from.getTime(), to.getTime());
-                this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_DATE_MODIFIED;
-                this.mGalleryQueryParameter.mDirQueryID = queryTypeId;
-                setTitle();
-
-                reloadGui(why);
-            } else if (mGalleryQueryParameter.mCurrentSubFilterMode == GalleryQueryParameter.SUB_FILTER_MODE_PATH) {
-                GalleryFilterPathState state = new GalleryFilterPathState()
-                        .load(BaseQueryActivity.this,
-                                null,null);
-                File queryFile = AlbumFile.getExistingQueryFileOrNull(selectedAbsolutePath);
-                if (queryFile != null) {
-                    final String why = "FotoGalleryActivity.navigate to virtual album ";
-                    Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath);
-
-                    QueryParameter albumQuery = AndroidAlbumUtils.getQueryFromUri(mDebugPrefix + " navigateTo ", this, Uri.fromFile(queryFile), null);
-                    if (albumQuery != null) {
-                        this.mGalleryQueryParameter.mGalleryContentBaseQuery = albumQuery;
-                        this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_ALBUM;
-                        currentSubFilterSettings.setPath(selectedAbsolutePath);
-
-                        state.setLastPath(queryFile.getParent());
-                        state.setAlbum(Uri.fromFile(queryFile));
-
-                        reloadGui(why);
-                    }
-                } else {
-                    final String why = "FotoGalleryActivity.navigateTo dir ";
-                    Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath + " from " + currentSubFilterSettings.getPath());
-
-                    currentSubFilterSettings.setPath(selectedAbsolutePath + "/%");
-                    this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_PATH;
-                    this.mGalleryQueryParameter.mDirQueryID = queryTypeId;
-                    state.setLastPath(selectedAbsolutePath);
-                    setTitle();
-
-                    reloadGui(why);
-                }
-                state.save(this, null);
-
-            } // if SUB_FILTER_MODE_PATH
-        }
-    }
-
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -995,9 +1007,8 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
      * called by {@link TagsPickerFragment}
      */
     @Override
-    public boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag) {
-        return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, this,
-                this.mGalleryQueryParameter.calculateEffectiveGalleryContentQuery());
+    public boolean onTagPopUpClick(MenuItem menuItem, int menuItemItemId, Tag selectedTag) {
+        return TagsPickerFragment.handleMenuShow(mCurrentDialogFragment, menuItem, selectedTag.getName());
     }
 
     @Override
@@ -1014,9 +1025,9 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
         return result;
     }
 
-    protected boolean onOptionsItemSelected(MenuItem item, SelectedItems selectedItems) {
+    protected boolean onOptionsItemSelected(MenuItem menuItem, SelectedItems selectedItems) {
         // Handle presses on the action bar items
-        switch (item.getItemId()) {
+        switch (menuItem.getItemId()) {
             case R.id.cmd_date:
             case R.id.cmd_select_date:
                 getFolderApi().openDatePicker();
@@ -1038,7 +1049,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                 openTagPicker();
                 return true;
             case R.id.cmd_filter:
-                openFilter();
+                openFilter(" menu " + menuItem.getTitle());
                 return true;
             case R.id.cmd_sort_date:
                 this.mGalleryQueryParameter.setSortID(FotoSql.SORT_BY_DATE);
@@ -1078,7 +1089,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                 return true;
 
             default:
-                return super.onOptionsItemSelected(item);
+                return super.onOptionsItemSelected(menuItem);
         }
     }
 
@@ -1118,7 +1129,11 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
             if (StringUtils.isNullOrEmpty(title)) title = getString(R.string.gallery_title);
         }
         if (title != null) {
-            this.setTitle(mTitleResultCount + title);
+            if (hasParentCallContext()) {
+                this.setTitle("<" + mTitleResultCount + title);
+            } else {
+                this.setTitle(mTitleResultCount + title);
+            }
         }
     }
     /*********************** search view *******************/

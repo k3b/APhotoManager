@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -49,10 +49,18 @@ import de.k3b.io.ListUtils;
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class HistoryEditText {
     private static final int NO_ID = -1;
+    private static final int ID_OFFSET = 10;
+    private static final int MENU_COUNT_MAX = 10;
     private final Context mContext;
     private final String mDelimiter;
     private final int mMaxHisotrySize;
     protected final EditorHandler[] mEditorHandlers;
+    private boolean includeEmpty = false;
+
+    public HistoryEditText setIncludeEmpty(boolean includeEmpty) {
+        this.includeEmpty = includeEmpty;
+        return this;
+    }
 
     /** ContextActionBar for one EditText */
     protected class EditorHandler implements View.OnLongClickListener, View.OnClickListener  {
@@ -85,12 +93,12 @@ public class HistoryEditText {
             popup = new PopupMenu(mContext, mEditor);
             Menu root = popup.getMenu();
             int len = items.size();
-            if (len > 10) len = 10;
+            if (len > MENU_COUNT_MAX) len = MENU_COUNT_MAX;
             for (int i = 0; i < len; i++) {
                 String text = items.get(i).trim();
 
-                if ((text != null) && (text.length() > 0)) {
-                    root.add(Menu.NONE, i + 10,Menu.NONE , getCondensed(text));
+                if (text != null) {
+                    root.add(Menu.NONE, i + ID_OFFSET, Menu.NONE, getCondensed(text));
                 }
             }
 
@@ -98,7 +106,7 @@ public class HistoryEditText {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
                     // String text = item.getTitle();
-                    String text = getHistoryItems().get(item.getItemId() - 10);
+                    String text = getHistoryItems().get(item.getItemId() - ID_OFFSET);
                     return onHistoryPick(EditorHandler.this, mEditor, text);
                 }
             });
@@ -107,7 +115,9 @@ public class HistoryEditText {
 
         private List<String> getHistoryItems() {
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
-            return getHistory(sharedPref);
+            List<String> items = getHistory(sharedPref);
+            if (includeEmpty) items = include(items, "");
+            return items;
         }
 
         private CharSequence getCondensed(String text) {
@@ -141,7 +151,7 @@ public class HistoryEditText {
 
         private List<String>  include(List<String>  history_, String newValue) {
             List<String>  history = new ArrayList<String>(history_);
-            if ((newValue != null) && (newValue.length() > 0)) {
+            if (newValue != null) {
                 history.remove(newValue);
                 history.add(0, newValue);
             }

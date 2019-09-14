@@ -23,31 +23,52 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.io.File;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.Date;
 
+import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.media.PhotoPropertiesMediaDBCursor;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.FileUtils;
 import de.k3b.io.IItemSaver;
+import de.k3b.io.IProgessListener;
+import de.k3b.io.VISIBILITY;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.PhotoProperties2ExistingFileSaver;
 import de.k3b.media.PhotoPropertiesCsvStringSaver;
+import de.k3b.zip.CompressJob;
 import de.k3b.zip.IZipConfig;
 import de.k3b.zip.LibZipGlobal;
 import de.k3b.zip.ZipConfigRepository;
+import de.k3b.zip.ZipLog;
+import de.k3b.zip.ZipLogImpl;
+import de.k3b.zip.ZipStorage;
 
 /**
  * #108: Zip-file support: backup-or-copy filtered-or-selected photos to Zip-file.
  * Gui independant service to load/save/execute the backup and it-s parameters
  */
-public class Backup2ZipService {
+public class Backup2ZipService implements IProgessListener, ZipLog {
     private static String mDebugPrefix = "Backup2ZipService: ";
+    private final Context context;
+    private final IZipConfig zipConfig;
+    private final ZipStorage zipStorage;
+    private IProgessListener progessListener = null;
+    private final ZipLog zipLog;
+
+    // set to false (in gui thread) if operation is canceled
+    protected boolean continueProcessing = true;
+
+    // used to translate ZipLog.traceMessage() to become IProgessListener
+    private int lastZipItemNumber = 0;
 
     public static IZipConfig loadZipConfig(Uri uri, Context context) {
         if ((uri != null) && ZipConfigRepository.isZipConfig(uri.toString())) {
@@ -66,25 +87,65 @@ public class Backup2ZipService {
         return null;
     }
 
-    public static IZipConfig execute(IZipConfig zipConfig, ContentResolver contentResolver) {
+    public Backup2ZipService(Context context, IZipConfig zipConfig, ZipStorage zipStorage,
+                             IProgessListener progessListener) {
+
+        this.context = context;
+        this.zipConfig = zipConfig;
+        this.zipStorage = zipStorage;
+        this.zipLog = (LibZipGlobal.debugEnabled) ? new ZipLogImpl(true) : null;
+    }
+
+    public Backup2ZipService setProgessListener(IProgessListener progessListener) {
+        this.progessListener = progessListener;
+        return this;
+    }
+
+    /** Executes add2zip for all found items of found query-result-item of zipConfig */
+    public IZipConfig execute() {
         ZipConfigRepository repo = new ZipConfigRepository(zipConfig);
         final File zipConfigFile = repo.getZipConfigFile();
         if (zipConfigFile != null) {
             QueryParameter filter = getEffectiveQueryParameter(zipConfig);
 
-            final PhotoPropertiesCsvStringSaver csv = new PhotoPropertiesCsvStringSaver();
 
-            /// !!!  todo go on here
-            final IItemSaver<File> file2Zip = null;
-            final PhotoProperties2ExistingFileSaver media2file = new PhotoProperties2ExistingFileSaver(file2Zip);
+            // pipline for (IPhotoProperties item: query(filter)) : csv+=toCsv(item)
+            final PhotoPropertiesCsvStringSaver csvFromQuery = new PhotoPropertiesCsvStringSaver();
 
-            execQuery(filter, contentResolver, csv, media2file);
+            onProgress(0, 0,
+                    "query images " + ((Global.debugEnabledSql) ? filter : ""));
 
-            if (repo.save()) {
-                if (LibZipGlobal.debugEnabled) {
-                    Log.d(LibZipGlobal.LOG_TAG, mDebugPrefix + " Saved as " + repo);
+            if (this.continueProcessing) {
+                final CompressJob job = new ApmZipCompressJob(context, this, "history.log");
+                job.setZipStorage(zipStorage);
+
+                // pipline for (IPhotoProperties item: query(filter)) : Zip+=File(item)
+                /// !!!  todo go on here
+                final IItemSaver<File> file2ZipSaver = new IItemSaver<File>() {
+                    @Override
+                    public boolean save(File item) {
+                        job.addToCompressQue("", item);
+                        return true;
+                    }
+                };
+
+                final PhotoProperties2ExistingFileSaver media2fileZipSaver = new PhotoProperties2ExistingFileSaver(file2ZipSaver);
+
+                execQuery(filter, csvFromQuery, media2fileZipSaver);
+
+                job.addTextToCompressQue("changes.csv", csvFromQuery.toString());
+
+                if (this.continueProcessing) {
+                    // not canceled yet in gui thread
+                    job.compress(false);
                 }
-                return repo;
+
+                if (repo.save()) {
+                    if (LibZipGlobal.debugEnabled) {
+                        Log.d(LibZipGlobal.LOG_TAG, mDebugPrefix + " Saved as " + repo);
+                    }
+                    return repo;
+                }
             }
         }
         return null;
@@ -93,45 +154,70 @@ public class Backup2ZipService {
     /**
      * @return get query without filte-DateModified-min/max and with added zipConfig.getDateModifiedFrom
      */
-    private static QueryParameter getEffectiveQueryParameter(IZipConfig zipConfig) {
+    @NonNull
+    public static QueryParameter getEffectiveQueryParameter(@NonNull IZipConfig zipConfig) {
         QueryParameter filter = QueryParameter.parse(zipConfig.getFilter());
+        if (filter == null) {
+            filter = new QueryParameter();
+            FotoSql.setWhereVisibility(filter, VISIBILITY.DEFAULT);
+        }
+
+        // remove lastModified from filter
         FotoSql.parseDateModifiedMax(filter, true);
         FotoSql.parseDateModifiedMin(filter, true);
+        filter.clearColumns().addColumn(TagSql.SQL_COL_PK
+                , TagSql.SQL_COL_PATH
+                , TagSql.SQL_COL_DATE_TAKEN
+                , TagSql.SQL_COL_EXT_TITLE
+                , TagSql.SQL_COL_EXT_DESCRIPTION
+                , TagSql.SQL_COL_EXT_TAGS
+                , TagSql.SQL_COL_LAT
+                , TagSql.SQL_COL_LON
+                , TagSql.SQL_COL_EXT_RATING
+                , TagSql.SQL_COL_EXT_MEDIA_TYPE);
         final Date dateModifiedFrom = zipConfig.getDateModifiedFrom();
         if (dateModifiedFrom != null) {
             FotoSql.addWhereDateModifiedMinMax(filter, dateModifiedFrom.getTime(), 0);
         }
 
-        filter.clearColumns().addColumn(TagSql.SQL_COL_PK
-                ,TagSql.SQL_COL_PATH
-                ,TagSql.SQL_COL_DATE_TAKEN
-                ,TagSql.SQL_COL_EXT_TITLE
-                ,TagSql.SQL_COL_EXT_DESCRIPTION
-                ,TagSql.SQL_COL_EXT_TAGS
-                ,TagSql.SQL_COL_LAT
-                ,TagSql.SQL_COL_LON
-                ,TagSql.SQL_COL_EXT_RATING
-                ,TagSql.SQL_COL_EXT_MEDIA_TYPE);
-
         return filter;
     }
 
-    private static void execQuery(QueryParameter query, ContentResolver contentResolver,
+    /** calls consumers for each found query-result-item */
+    private void execQuery(QueryParameter query,
                                   IItemSaver<IPhotoProperties>... consumers) {
+        ContentResolver contentResolver = context.getContentResolver();
+
         Cursor cursor = null;
         try {
+            this.onProgress(0,0, "Calculate");
             cursor = contentResolver.query(Uri.parse(query.toFrom()), query.toColumns(),
                     query.toAndroidWhere(), query.toAndroidParameters(), query.toOrderBy());
 
             int itemCount = cursor.getCount();
-            final int expectedCount = itemCount + itemCount;
+
+            onProgress(0,itemCount,
+                    context.getString(R.string.view_context_menu_title) );
 
             PhotoPropertiesMediaDBCursor mediaItem = new PhotoPropertiesMediaDBCursor(cursor);
+
+            int progress = 0;
             while (cursor.moveToNext()) {
                 for (IItemSaver<IPhotoProperties> consumer :  consumers){
                     if (consumer != null) consumer.save(mediaItem);
                 }
+
+                if ((progress % 100) == 0) {
+                    if (!onProgress(0, itemCount, context.getString(R.string.selection_status_format, progress)))
+                    {
+                        // canceled in gui thread
+                        return;
+                    }
+                }
+                progress++;
+
             }
+            onProgress(progress, progress, context.getString(R.string.selection_status_format, progress));
         } catch (Exception ex){
             Log.e(LibZipGlobal.LOG_TAG, mDebugPrefix + query, ex);
             throw new RuntimeException(mDebugPrefix + query + "\n" + ex.getMessage(), ex);
@@ -140,7 +226,53 @@ public class Backup2ZipService {
                 cursor.close();
             }
         }
+    }
 
+    /**
+     * Interface IProgessListener: called every time when command
+     * makes some little progress. Can be mapped to async progress-bar.
+     * return true to continue
+     */
+    @Override
+    public boolean onProgress(int itemcount, int size, String message) {
+        if (progessListener != null) {
+            if (!progessListener.onProgress(itemcount, size, message)) {
+                this.continueProcessing = false;
+            }
+        }
+        return this.continueProcessing;
+    }
 
+    /**
+     * 10 `interface ZipLog-traceMessage` become one `interface onProgress()` message
+     */
+    @Override
+    public String traceMessage(int state, int itemNumber, int itemTotal, String format, Object... params) {
+        if ((itemNumber != 0) && (itemNumber > this.lastZipItemNumber)) {
+            lastZipItemNumber = itemNumber;
+
+            if ((itemNumber % 10) == 0 ) {
+                onProgress(itemNumber, itemTotal, MessageFormat.format(format, params));
+            }
+        }
+        if (zipLog != null) return zipLog.traceMessage(state, itemNumber, itemTotal, format, params);
+        return null;
+    }
+
+    /**
+     * interface ZipLog: adds an errormessage to error-result
+     */
+    @Override
+    public void addError(String errorMessage) {
+        if (zipLog != null) zipLog.addError(errorMessage);
+    }
+
+    /**
+     * interface ZipLog: get last error plus debugLogMessages if available
+     */
+    @Override
+    public String getLastError(boolean detailed) {
+        if (zipLog != null) return zipLog.getLastError(detailed);
+        return null;
     }
 }

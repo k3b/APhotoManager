@@ -33,7 +33,7 @@ import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.io.IProgessListener;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.FileCommands;
-import de.k3b.media.PhotoPropertiesUtil;
+import de.k3b.media.MediaFormatter;
 import de.k3b.media.PhotoPropertiesXmpSegment;
 import de.k3b.media.PhotoPropertiesUpdateHandler;
 import de.k3b.tagDB.Tag;
@@ -124,7 +124,7 @@ public class TagWorflow extends TagProcessor implements IProgessListener {
             if (mustSave) {
                 exif.setTags(currentItemTags);
                 exif.save(dbgSaveReason);
-                TagSql.updateDB(dbgSaveReason, this.context, tagWorflowItemFromDB.path, exif, PhotoPropertiesUtil.FieldID.tags);
+                TagSql.updateDB(dbgSaveReason, this.context, tagWorflowItemFromDB.path, exif, MediaFormatter.FieldID.tags);
 
                 // update tag repository
                 TagRepository.getInstance().includeTagNamesIfNotFound(currentItemTags);

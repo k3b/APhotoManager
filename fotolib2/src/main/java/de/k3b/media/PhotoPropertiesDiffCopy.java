@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 by k3b.
+ * Copyright (c) 2017-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -26,7 +26,7 @@ import java.util.List;
 
 import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
-import de.k3b.media.PhotoPropertiesUtil.FieldID;
+import de.k3b.media.MediaFormatter.FieldID;
 
 import de.k3b.tagDB.TagProcessor;
 import de.k3b.tagDB.TagRepository;
@@ -276,7 +276,7 @@ public class PhotoPropertiesDiffCopy {
         StringBuilder result = new StringBuilder();
         result.append(this.getClass().getSimpleName()).append(":");
         if (this.numberOfChangedFields > 0) {
-            result.append(PhotoPropertiesUtil.toString(this.newData,true, null, EnumSet.complementOf(this.diffSet)));
+            result.append(PhotoPropertiesFormatter.format(this.newData,true, null, EnumSet.complementOf(this.diffSet)));
 
             if (this.titleAppend != null) result.append(" title+=").append(this.titleAppend);
             if (this.descriptionAppend != null) result.append(" description+=").append(this.descriptionAppend);

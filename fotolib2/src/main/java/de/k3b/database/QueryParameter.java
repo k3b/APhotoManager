@@ -317,8 +317,7 @@ public class QueryParameter {
         Helper.append(result, "\nFROM ", mFrom, "", "\n\t", "");
         if (mID != 0) result.append("\n\tQUERY-TYPE-ID\n\t\t").append(mID);
         Helper.append(result, "\nSELECT ", mColumns, "", "\n\t", "");
-        Helper.append(result, "\nWHERE ", mWhere, "", "\n\t", "");
-        Helper.append(result, "\n\tWHERE-PARAMETERS ", mParameters, "", "\n\t\t", "");
+        toParsableWhere(result);
         Helper.append(result, "\nGROUP-BY ", mGroupBy, "", "\n\t", "");
         Helper.append(result, "\nHAVING ", mHaving, "", "\n\t", "");
         Helper.append(result, "\n\tHAVING-PARAMETERS ", mHavingParameters, "", "\n\t\t", "");
@@ -329,6 +328,12 @@ public class QueryParameter {
         if (result.length() == 0) return null;
 
         return result.toString();
+    }
+
+    public StringBuilder toParsableWhere(StringBuilder result) {
+        Helper.append(result, "\nWHERE ", mWhere, "", "\n\t", "");
+        Helper.append(result, "\n\tWHERE-PARAMETERS ", mParameters, "", "\n\t\t", "");
+        return result;
     }
 
     private static final String PARSER_KEYWORDS = ";FROM;QUERY-TYPE-ID;SELECT;WHERE;WHERE-PARAMETERS;GROUP-BY;HAVING;HAVING-PARAMETERS;ORDER-BY;";

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -29,32 +29,34 @@ import java.io.Closeable;
 import de.k3b.io.FileUtils;
 
 /**
- * An activity that automatically closes pop-dialogs on rotation/destruction
+ * An activity that automatically closes pop-dialogs
+ * that where registered with {@link #setAutoClose(DialogFragment, Dialog, Closeable)}
+ * on rotation/destruction
  *
  * Created by k3b on 21.06.2017.
  */
 
 public class ActivityWithAutoCloseDialogs extends LocalizedActivity {
-    private DialogFragment mDlg;
+    protected DialogFragment mCurrentDialogFragment;
     private Closeable mCloseable;
-    private DialogInterface mDlg1;
+    private DialogInterface mCurrentDialog;
 
     protected void closeDialogIfNeeded() {
         // close dialog. else crash in onResume
-        if (mDlg1 != null) mDlg1.dismiss();
+        if (mCurrentDialog != null) mCurrentDialog.dismiss();
 
-        if (mDlg != null) { // && (mDlg.isVisible()) ){
-            mDlg.onDestroyView();
+        if (mCurrentDialogFragment != null) { // && (mCurrentDialogFragment.isVisible()) ){
+            mCurrentDialogFragment.onDestroyView();
         }
-        if (mCloseable != null) { // && (mDlg.isVisible()) ){
+        if (mCloseable != null) { // && (mCurrentDialogFragment.isVisible()) ){
             FileUtils.close(mCloseable, this.getClass().getSimpleName());
         }
         setAutoClose(null, null, null);
     }
 
-    protected void setAutoClose(DialogFragment dlg, Dialog dlg1, Closeable closeable) {
-        mDlg1 = dlg1;
-        mDlg = dlg;
+    public void setAutoClose(DialogFragment dialogFragment, Dialog dialog, Closeable closeable) {
+        mCurrentDialog = dialog;
+        this.mCurrentDialogFragment = dialogFragment;
         this.mCloseable = closeable;
     }
 
@@ -75,14 +77,13 @@ public class ActivityWithAutoCloseDialogs extends LocalizedActivity {
 
     /**
      * Call back from sub-activities.<br/>
-     * Process Change StartTime (longpress start), Select StopTime before stop
-     * (longpress stop) or filter change for detailReport
      */
     @Override
     protected void onActivityResult(final int requestCode,
                                     final int resultCode, final Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
-        if (mDlg != null) mDlg.onActivityResult(requestCode, resultCode, intent);
+        if (mCurrentDialogFragment != null)
+            mCurrentDialogFragment.onActivityResult(requestCode, resultCode, intent);
     }
 }

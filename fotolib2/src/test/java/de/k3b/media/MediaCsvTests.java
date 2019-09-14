@@ -39,13 +39,12 @@ import de.k3b.io.DateUtil;
 public class MediaCsvTests {
 
     public static String createTestCsv(int... ids) {
-        StringWriter result = new StringWriter();
-        PhotoPropertiesCsvSaver saver = new PhotoPropertiesCsvSaver(new PrintWriter(result));
+        PhotoPropertiesCsvSaver saver = new PhotoPropertiesCsvStringSaver();
         for (int id : ids) {
             PhotoPropertiesDTO item = TestUtil.createTestMediaDTO(id);
             saver.save(item);
         }
-        return result.toString();
+        return saver.toString();
     }
 
     private static class Sut extends CsvLoader<PhotoPropertiesCsvItem> {

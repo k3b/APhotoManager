@@ -26,20 +26,18 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 
 import de.k3b.LibGlobal;
-import de.k3b.io.DateUtil;
 import de.k3b.io.FileUtils;
 import de.k3b.io.GeoUtil;
 import de.k3b.io.ListUtils;
 import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
-import de.k3b.tagDB.TagConverter;
 
+import de.k3b.media.MediaFormatter.FieldID;
 /**
  * Created by k3b on 10.10.2016.
  */
@@ -61,21 +59,6 @@ public class PhotoPropertiesUtil {
     public static final int IMG_TYPE_NON_JPG    = 0x0010; // png, gif, ...
     public static final int IMG_TYPE_PRIVATE    = 0x1000; // jpg-p
 
-    /**
-     * used to identify a member of IPhotoProperties
-     */
-    public enum FieldID {
-        path,
-        dateTimeTaken,
-        title,
-        description,
-        latitude_longitude,
-        rating,
-        tags,
-        clasz,
-        visibility,
-    }
-
 
     // Translate exif-orientation code (0..8) to EXIF_ORIENTATION_CODE_2_ROTATION_DEGREES (clockwise)
     // http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/EXIF.html
@@ -89,66 +72,6 @@ public class PhotoPropertiesUtil {
             90,    // 6 = Rotate 90 CW
             270,   // 7 = (!) Mirror horizontal and rotate 90 CW
             270};  // 8 = Rotate 270 CW
-
-    /** translates FieldID to text. In android this is implemented via resource id  */
-    public interface ILabelGenerator {
-        String get(FieldID id);
-    }
-
-    private static final ILabelGenerator defaultLabeler = new ILabelGenerator() {
-        @Override
-        public String get(FieldID id) {
-            return " " + id + " ";
-        }
-    };
-
-    public static String toString(IPhotoProperties item) {
-        return toString(item, true, null, (EnumSet<FieldID>) null);
-    }
-
-    public static String toString(IPhotoProperties item, boolean includeEmpty, ILabelGenerator labeler, FieldID... _excludes) {
-        return toString(item, includeEmpty, labeler, toEnumSet(_excludes));
-    }
-
-    public static String toString(IPhotoProperties item, boolean includeEmpty, ILabelGenerator _labeler, EnumSet<FieldID> excludes) {
-        if (item == null) return "";
-
-        ILabelGenerator labeler = (_labeler == null) ? defaultLabeler : _labeler;
-        StringBuilder result = new StringBuilder();
-        add(result, includeEmpty, excludes, FieldID.clasz, item.getClass().getSimpleName(), ":");
-        add(result, includeEmpty, excludes, FieldID.path, labeler, item.getPath());
-        add(result, includeEmpty, excludes, FieldID.dateTimeTaken, labeler, DateUtil.toIsoDateTimeString(item.getDateTimeTaken()));
-        add(result, includeEmpty, excludes, FieldID.title, labeler, item.getTitle());
-        add(result, includeEmpty, excludes, FieldID.description, labeler, item.getDescription());
-        add(result, includeEmpty, excludes, FieldID.latitude_longitude, labeler, GeoUtil.toCsvStringLatLon(item.getLatitude()));
-        // longitude used same flag as latitude but no label of it-s own
-        add(result, includeEmpty, excludes, FieldID.latitude_longitude, ", ", GeoUtil.toCsvStringLatLon(item.getLongitude()));
-        add(result, includeEmpty, excludes, FieldID.rating, labeler, item.getRating());
-        add(result, includeEmpty, excludes, FieldID.visibility, labeler, item.getVisibility());
-        add(result, includeEmpty, excludes, FieldID.tags, labeler, TagConverter.asDbString(null, item.getTags()));
-        return result.toString();
-    }
-
-    public static EnumSet<FieldID> toEnumSet(FieldID... _excludes) {
-        return ((_excludes == null) || (_excludes.length == 0)) ? null : EnumSet.copyOf(Arrays.asList(_excludes));
-    }
-
-    private static void add(StringBuilder result, boolean includeEmpty,
-                            final EnumSet<FieldID> excludes, FieldID item,
-                            ILabelGenerator labeler, Object value) {
-        add(result, includeEmpty, excludes, item, labeler.get(item), value);
-    }
-
-    private static void add(StringBuilder result, boolean includeEmpty,
-                            final EnumSet<FieldID> excludes, FieldID item, String name, Object value) {
-        if (name != null) {
-            if ((includeEmpty) || (value != null)) {
-                if ((excludes == null) || (!excludes.contains(item))) {
-                    result.append(name).append(value);
-                }
-            }
-        }
-    }
 
     /** copy content from source to destination. @return number of copied properties */
     public static int copy(IPhotoProperties destination, IPhotoProperties source,
@@ -172,7 +95,7 @@ public class PhotoPropertiesUtil {
      * @return possible empy list of FieldID-s of modified properties
      */
     public static List<FieldID>  copySpecificProperties(IPhotoProperties destination, IPhotoProperties source,
-                                                        boolean overwriteExisting, final EnumSet<FieldID> fields2copy) {
+                                                                       boolean overwriteExisting, final EnumSet<FieldID> fields2copy) {
         List<FieldID> collectedChanges = new ArrayList<FieldID>();
 
         copyImpl(destination, source, false, overwriteExisting, overwriteExisting, fields2copy, collectedChanges, (FieldID[]) null);
@@ -215,7 +138,7 @@ public class PhotoPropertiesUtil {
 
         if (source != null) {
             boolean simulateDoNotCopy = (destination == null) || _simulateDoNotCopy;
-            final EnumSet<FieldID>  allowSetNulls = toEnumSet(_allowSetNulls);
+            final EnumSet<FieldID>  allowSetNulls = MediaFormatter.toEnumSet(_allowSetNulls);
             String sValue;
 
             sValue = source.getPath();

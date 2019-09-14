@@ -1,0 +1,3 @@
+Changes from 0.7.5 to ????
+#108 new: menu Backup Photos to zipfile:
+Translation updates: ???

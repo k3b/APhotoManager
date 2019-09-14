@@ -29,18 +29,22 @@ import de.k3b.io.IItemSaver;
  * Created by k3b on 13.10.2016.
  */
 
+/** Transfers {@link IPhotoProperties} - items as csv to a writer via {@link #save(IPhotoProperties)} */
 public class PhotoPropertiesCsvSaver implements IItemSaver<IPhotoProperties> {
     private PrintWriter printer;
     private final PhotoPropertiesCsvItem csvLine;
 
     public PhotoPropertiesCsvSaver(PrintWriter printer) {
-        setPrinter(printer);
         csvLine = new PhotoPropertiesCsvItem();
-        defineHeader(PhotoPropertiesCsvItem.MEDIA_CSV_STANDARD_HEADER);
+        setPrinter(printer);
     }
 
     protected PhotoPropertiesCsvSaver setPrinter(PrintWriter printer) {
         this.printer = printer;
+
+        if (this.printer != null) {
+            defineHeader(PhotoPropertiesCsvItem.MEDIA_CSV_STANDARD_HEADER);
+        }
         return this;
     }
 

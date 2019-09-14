@@ -20,6 +20,7 @@
 package de.k3b.android.androFotoFinder;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.Intent;
@@ -62,13 +63,13 @@ import de.k3b.android.widget.BaseQueryActivity;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.AlbumFile;
-import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
 import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
+import de.k3b.media.MediaFormatter;
 import de.k3b.tagDB.Tag;
 
 /**
@@ -254,11 +255,11 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        // Handle action bar menuItem clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        int id = menuItem.getItemId();
 
         switch (id) {
             case R.id.cmd_cancel:
@@ -278,11 +279,13 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                 return true;
 
             case R.id.cmd_gallery:
-                FotoGalleryActivity.showActivity("[2]", this, getAsMergedQuery(), 0);
+                FotoGalleryActivity.showActivity(" menu " + menuItem.getTitle(),
+                        this, getAsMergedQuery(), 0);
                         // TagSql.filter2NewQuery(getAsGalleryFilter()), 0);
                 return true;
             case R.id.cmd_show_geo: {
-                MapGeoPickerActivity.showActivity("[3]", this, null, getAsMergedQuery(), 0);
+                MapGeoPickerActivity.showActivity(" menu " + menuItem.getTitle(),
+                        this, null, getAsMergedQuery(), null, 0);
                 return true;
             }
             case R.id.action_details:
@@ -300,7 +303,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
 
                 return true;
             default:
-                return super.onOptionsItemSelected(item);
+                return super.onOptionsItemSelected(menuItem);
         }
     }
 
@@ -325,7 +328,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
     }
 
     private QueryParameter getAsMergedQuery() {
-        return AndroidAlbumUtils.getAsMergedNewQueryParameter(mQueryWithoutFilter, getAsGalleryFilter());
+        return AndroidAlbumUtils.getAsMergedNewQuery(mQueryWithoutFilter, getAsGalleryFilter());
     }
 
     @Override
@@ -482,7 +485,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                     mLatitudeFrom, mLatitudeTo, mLongitudeFrom, mLongitudeTo,
                     mAny             ,
                     mTagsInclude     ,
-                    mTagsExclude);
+                    mTagsExclude).setIncludeEmpty(true);
         }
 
         protected void showVisibility(VISIBILITY visibility) {
@@ -663,17 +666,13 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
 
         @Override
         public IGalleryFilter get(IGeoRectangle src) {
-            mLongitudeFrom  .setText(convertLL(src.getLogituedMin()));
-            mLongitudeTo    .setText(convertLL(src.getLogituedMax()));
-            mLatitudeFrom   .setText(convertLL(src.getLatitudeMin()));
-            mLatitudeTo     .setText(convertLL(src.getLatitudeMax()));
+            mLongitudeFrom.setText(MediaFormatter.convertLL(src.getLogituedMin()));
+            mLongitudeTo.setText(MediaFormatter.convertLL(src.getLogituedMax()));
+            mLatitudeFrom.setText(MediaFormatter.convertLL(src.getLatitudeMin()));
+            mLatitudeTo.setText(MediaFormatter.convertLL(src.getLatitudeMax()));
             return this;
         }
         /************* local helper *****************/
-        private String convertLL(double latLon) {
-            if (Double.isNaN(latLon)) return "";
-            return DirectoryFormatter.formatLatLon(latLon);
-        }
 
         private String convertDate(long dateMin) {
             if (dateMin == 0) return "";
@@ -729,14 +728,14 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
     private void cmdShowDetails() {
         final QueryParameter asMergedQuery = getAsMergedQuery();
 
-        ImageDetailMetaDialogBuilder.createImageDetailDialog(
+        final Dialog dlg = ImageDetailMetaDialogBuilder.createImageDetailDialog(
                 this,
                 getTitle().toString(),
                 asMergedQuery.toSqlString(),
-                StringUtils.appendMessage(null,
-                        getString(R.string.show_photo),
-                        TagSql.getCount(this, asMergedQuery))
-        ).show();
+                TagSql.getStatisticsMessage(this, R.string.show_photo, asMergedQuery)
+        );
+        dlg.show();
+        setAutoClose(null, dlg, null);
     }
 
     private void clearFilter() {
@@ -796,7 +795,9 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             dlg.setTitleId(idTitle);
             dlg.setAddNames(mFilter.getTagsAllIncluded());
             dlg.setRemoveNames(mFilter.getTagsAllExcluded());
+            dlg.setBaseQuery(getAsMergedQuery());
             dlg.show(manager, DLG_NAVIGATOR_TAG);
+
             setAutoClose(dlg, null, null);
         }
     }
@@ -820,8 +821,8 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
 
     /** called by {@link TagsPickerFragment} */
     @Override
-    public boolean onTagPopUpClick(int menuItemItemId, Tag selectedTag) {
-        return TagsPickerFragment.handleMenuShow(menuItemItemId, selectedTag, this, getAsMergedQuery());
+    public boolean onTagPopUpClick(MenuItem menuItem, int menuItemItemId, Tag selectedTag) {
+        return TagsPickerFragment.handleMenuShow(mCurrentDialogFragment, menuItem, selectedTag.getName());
     }
 
     private void showLatLonPicker() {
@@ -872,17 +873,18 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             final FragmentManager manager = getFragmentManager();
             DirectoryPickerFragment dlg = new DirectoryPickerFragment();
 
-            int menuResId = 0; // no menu in app lock mode
             if (!LockScreen.isLocked(this)) {
-                menuResId = R.menu.menu_context_dirpicker;
                 if ((queryId == FotoSql.QUERY_TYPE_GROUP_DATE) || (queryId == FotoSql.QUERY_TYPE_GROUP_DATE)) {
-                    menuResId = R.menu.menu_context_datepicker;
+                    dlg.setContextMenuId(R.menu.menu_context_pick_show_in_new, R.menu.menu_context_pick_date);
+                } else {
+                    dlg.setContextMenuId(R.menu.menu_context_pick_dir);
                 }
             }
-            dlg.setContextMenuId(menuResId);
 
+            dlg.setBaseQuery(getAsMergedQuery());
             dlg.defineDirectoryNavigation(dirInfo.directoryRoot, dirInfo.queryId, dirInfo.currentPath);
             dlg.show(manager, DLG_NAVIGATOR_TAG);
+
             mDirPicker = dlg;
 
             setAutoClose(dlg, null, null);
@@ -903,7 +905,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             // selection was an album file
             final String selectedAlbumPath = selectedAlbumFile.getPath();
             setQueryAndFilter(AndroidAlbumUtils.getQueryFromUri(mDebugPrefix + ".onDirectoryPick loading album "
-                    + selectedAlbumPath, this, Uri.fromFile(selectedAlbumFile), null));
+                    + selectedAlbumPath, this, null, Uri.fromFile(selectedAlbumFile), null));
             mGalleryFilterPathState.setAlbum(Uri.fromFile(selectedAlbumFile));
             mGalleryFilterPathState.setLastPath(selectedAlbumFile.getParent());
             mLastSelectedAlbumDir = selectedAlbumPath; //??electedAlbumFile.getParent();

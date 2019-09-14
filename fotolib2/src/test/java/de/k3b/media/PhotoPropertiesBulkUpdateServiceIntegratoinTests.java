@@ -1,20 +1,5 @@
-package de.k3b.media;
-
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.EnumSet;
-
-import de.k3b.LibGlobal;
-import de.k3b.TestUtil;
-import de.k3b.io.FileUtils;
-
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager
  *
@@ -31,6 +16,21 @@ import de.k3b.io.FileUtils;
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
+
+package de.k3b.media;
+
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.EnumSet;
+
+import de.k3b.LibGlobal;
+import de.k3b.TestUtil;
+import de.k3b.io.FileUtils;
 
 
 /**
@@ -71,7 +71,7 @@ public class PhotoPropertiesBulkUpdateServiceIntegratoinTests {
 
         PhotoPropertiesDTO testData = TestUtil.createTestMediaDTO(4);
         new PhotoPropertiesBulkUpdateService(null).applyChanges(testJpg,
-                null, 0, false, new PhotoPropertiesDiffCopy(true, true).setDiff(testData, EnumSet.allOf(PhotoPropertiesUtil.FieldID.class)));
+                null, 0, false, new PhotoPropertiesDiffCopy(true, true).setDiff(testData, EnumSet.allOf(MediaFormatter.FieldID.class)));
 
         // LOGGER.info(sutRead.toString());
 
