@@ -48,7 +48,7 @@
     <!-- image commands always available -->
     <item android:id="@+id/cmd_backup"
         android:title="@string/backup_title"
-        android:visible="true"
+        android:visible="false"
         android:orderInCategory="41"
         android:showAsAction="never" />
 
