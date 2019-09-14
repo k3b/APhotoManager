@@ -24,7 +24,7 @@ import android.os.AsyncTask;
 import android.widget.Toast;
 
 import java.io.Closeable;
-import java.io.IOException;
+import java.lang.ref.WeakReference;
 
 import de.k3b.android.androFotoFinder.R;
 
@@ -36,11 +36,12 @@ import de.k3b.android.androFotoFinder.R;
 
 abstract public class AsyncTaskWithProgressDialog<param> extends AsyncTask<param, String, Integer>
                     implements Closeable{
-    protected Activity parent;
+    private WeakReference<Activity> activity;
+
     protected ProgressDialog dlg = null;
-    public AsyncTaskWithProgressDialog(Activity parent, int idResourceTitle) {
-        this.parent = parent;
-        dlg = new ProgressDialog(parent);
+    public AsyncTaskWithProgressDialog(Activity activity, int idResourceTitle) {
+        this.setActivity(activity);
+        dlg = new ProgressDialog(activity);
         dlg.setTitle(idResourceTitle);
     }
     protected void onProgressUpdate(String... values) {
@@ -53,8 +54,11 @@ abstract public class AsyncTaskWithProgressDialog<param> extends AsyncTask<param
     @Override
     protected void onPostExecute(Integer itemCount) {
         super.onPostExecute(itemCount);
-        String message = parent.getString(R.string.image_success_update_format, itemCount);
-        Toast.makeText(parent, message, Toast.LENGTH_LONG).show();
+        Activity activity = getActivity();
+        if (activity != null) {
+            String message = activity.getString(R.string.image_success_update_format, itemCount);
+            Toast.makeText(activity, message, Toast.LENGTH_LONG).show();
+        }
 
         destroy();
     }
@@ -73,7 +77,7 @@ abstract public class AsyncTaskWithProgressDialog<param> extends AsyncTask<param
             dlg.dismiss();
         }
         dlg = null;
-        parent = null;
+        setActivity(null);
     }
 
     /** periodically called while work in progress.  */
@@ -92,4 +96,12 @@ abstract public class AsyncTaskWithProgressDialog<param> extends AsyncTask<param
         publishProgress(msg.toString());
     }
 
+    protected Activity getActivity() {
+        if (activity == null) return null;
+        return activity.get();
+    }
+
+    private void setActivity(Activity activity) {
+        this.activity = (activity != null) ? new WeakReference<>(activity) : null;
+    }
 }

@@ -47,10 +47,12 @@ public class UpdateTask extends AsyncTaskWithProgressDialog<SelectedFiles> imple
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, mDebugPrefix + " onPostExecute " + itemCount);
         }
-        Activity parent = this.parent;
+        Activity parent = this.getActivity();
         super.onPostExecute(itemCount);
-        parent.setResult(EXIF_RESULT_ID, parent.getIntent());
-        parent.finish();
+        if (parent != null) {
+            parent.setResult(EXIF_RESULT_ID, parent.getIntent());
+            parent.finish();
+        }
     }
 
     @Override
