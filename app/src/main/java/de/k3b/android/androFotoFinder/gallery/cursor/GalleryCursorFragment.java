@@ -968,8 +968,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
     private class TagUpdateTask extends TagTask<List<String>> {
 
         TagUpdateTask(SelectedFiles fotos) {
-            super(getActivity(),R.string.tags_activity_title);
-            this.getWorkflow().init(getActivity(), fotos, null);
+            super(GalleryCursorFragment.this.getActivity(),R.string.tags_activity_title);
+            this.getWorkflow().init(GalleryCursorFragment.this.getActivity(), fotos, null);
 
         }
 

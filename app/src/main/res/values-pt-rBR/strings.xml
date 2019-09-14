@@ -22,19 +22,19 @@
  */
  -->
 <resources>
-    <string name="about_summary">Sobre um Gerenciador de Fotos%1$s</string>
-    <string name="area_menu_title">Selecione a área do mapa</string>
-    <string name="background">Fundo</string>
+    <string name="about_summary">Sobre \"Um Gerenciador de Fotos%1$s\"</string>
+    <string name="area_menu_title">Filtro de Área de Mapa</string>
+    <string name="background">Plano de fundo</string>
     <string name="bookmark">Álbum</string>
-    <string name="bookmark_delete_answer_format">Marcador deletado %1$s.</string>
-    <string name="bookmark_delete_error_format">O marcador não pode ser deletado %1$s.</string>
-    <string name="bookmark_delete_question">Deletar o marcador?</string>
+    <string name="bookmark_delete_answer_format">Álbum excluído %1$s.</string>
+    <string name="bookmark_delete_error_format">Não é possível excluir o álbum %1$s.</string>
+    <string name="bookmark_delete_question">Excluir este álbum?</string>
     <string name="bookmark_file_comment_format">Gerado em %3$s com \'%1$s\' Versão %2$s. Veja https://github.com/k3b/APhotoManager/wiki/intentapi#sql para mais detalhes</string>
-    <string name="bookmark_save_as_menu_title">Salvar como &#8230;</string>
-    <string name="btn_change">Mudar</string>
+    <string name="bookmark_save_as_menu_title">Salvar álbum como &#8230;</string>
+    <string name="btn_change">Alterar</string>
     <string name="btn_pause">Pausar</string>
-    <string name="copy_result_format">Arquivos %1$d/%2$d copiados</string>
-    <string name="delete_menu_title">Deletar</string>
+    <string name="copy_result_format">%1$d/%2$d arquivos copiados</string>
+    <string name="delete_menu_title">Excluir</string>
     <string name="delete_question_message_format">"Você tem certeza de que quer deletar esses arquivos permanentemente?
 %1$s
 
@@ -91,7 +91,7 @@ Não é possível \'%2$s.\'"</string>
     <string name="scanner_dir_question">Onde começar a verificação?</string>
     <string name="scanner_err_busy">Não é possível processar arquivos de fotos enquanto o leitor de mídia do Android estiver ocupado. Tente novamente mais tarde.</string>
     <string name="scanner_menu_title">Scanner de mídia</string>
-    <string name="scanner_update_result_format">%1$d Itens de mídia atualizados</string>
+    <string name="scanner_update_result_format">Atualizado %1$d itens do banco de dados de mídia</string>
     <string name="selection_status_format">%1$d Selecionado</string>
     <string name="selection_none_hint">Selecione a pasta para carregar fotos e clique em ok</string>
     <string name="selected_only_menu_title">Apenas selecionado</string>
