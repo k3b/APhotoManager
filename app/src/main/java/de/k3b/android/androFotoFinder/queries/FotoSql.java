@@ -1276,6 +1276,32 @@ public class FotoSql extends FotoSqlBase {
     }
 
     @Nullable
+    public static String getMinFolder(Context context, QueryParameter query,
+                                      boolean removeLastModifiedFromFilter) {
+        QueryParameter queryModified = new QueryParameter(query);
+        queryModified.clearColumns().addColumn("min(" + SQL_EXPR_FOLDER + ")");
+
+        if (removeLastModifiedFromFilter) {
+            parseDateModifiedMin(queryModified, true);
+            parseDateModifiedMax(queryModified, true);
+        }
+
+        Cursor c = null;
+
+        try {
+            c = FotoSql.createCursorForQuery(null, "getCount", context, queryModified, null);
+            if (c.moveToNext()) {
+                return c.getString(0);
+            }
+        } catch (Exception ex) {
+            Log.e(Global.LOG_CONTEXT, "FotoSql.getMinFolder() error :", ex);
+        } finally {
+            if (c != null) c.close();
+        }
+        return null;
+    }
+
+    @Nullable
     public static long getCount(Context context, QueryParameter query) {
         QueryParameter queryModified = new QueryParameter(query);
         queryModified.clearColumns().addColumn("count(*)");

@@ -61,6 +61,7 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
     private final Context context;
     private final IZipConfig zipConfig;
     private final ZipStorage zipStorage;
+    private final Date backupDate;
     private IProgessListener progessListener = null;
     private final ZipLog zipLog;
 
@@ -88,11 +89,14 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
     }
 
     public Backup2ZipService(Context context, IZipConfig zipConfig, ZipStorage zipStorage,
-                             IProgessListener progessListener) {
+                             Date backupDate) {
 
         this.context = context;
         this.zipConfig = zipConfig;
         this.zipStorage = zipStorage;
+
+        //!!! after success add this date into config before save
+        this.backupDate = backupDate;
         this.zipLog = (LibZipGlobal.debugEnabled) ? new ZipLogImpl(true) : null;
     }
 

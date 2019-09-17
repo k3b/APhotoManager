@@ -27,6 +27,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.k3b.android.androFotoFinder.Global;
@@ -60,9 +61,10 @@ public class BackupAsyncTask extends AsyncTask<Object, ProgressData, IZipConfig>
     // last known number of items to be processed
     private int lastSize = 0;
 
-    public BackupAsyncTask(Context context, ZipConfigDto mZipConfigData, ZipStorage zipStorage) {
+    public BackupAsyncTask(Context context, ZipConfigDto mZipConfigData, ZipStorage zipStorage,
+                           Date backupDate) {
         this.service = new Backup2ZipService(context.getApplicationContext(),
-                mZipConfigData, zipStorage, null);
+                mZipConfigData, zipStorage, backupDate);
     }
 
     public void setContext(Activity activity, ProgressBar progressBar, TextView status) {

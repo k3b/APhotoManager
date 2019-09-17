@@ -46,8 +46,10 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -71,9 +73,11 @@ import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.DateUtil;
+import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterFormatter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
+import de.k3b.io.ListUtils;
 import de.k3b.io.StringUtils;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.media.MediaFormatter;
@@ -235,11 +239,12 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
             }
         }
         loadGuiFromData();
+        gui.updateHistory();
     }
 
     @Override
     protected void onDestroy() {
-        enableBackupAsyncTask(false);
+        setBackupAsyncTaskProgessReceiver(null);
         super.onDestroy();
     }
 
@@ -257,15 +262,6 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
             public void onClick(View v) {
                 String path = gui.getZipDir();
                 pickDir(true, path,R.string.lbl_zip_dir);
-            }
-        });
-
-        cmd = (Button) findViewById(R.id.cmd_zip_rel_path);
-        cmd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String path = gui.getZipRelPath();
-                pickDir(false, path, R.string.lbl_zip_rel_path);
             }
         });
 
@@ -341,6 +337,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
     private void onExifChanged(String modifiedQuery) {
         mZipConfigData.setFilter((modifiedQuery != null) ? modifiedQuery : "");
         loadGuiFromData();
+        gui.updateHistory();
     }
 
     private final DateTimeApi mDateTimeApi = new DateTimeApi();
@@ -561,6 +558,80 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         }
     }
 
+    @Override
+    protected void onPause() {
+        setBackupAsyncTaskProgessReceiver(null);
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        setBackupAsyncTaskProgessReceiver(this);
+        Global.debugMemory(mDebugPrefix, "onResume");
+        super.onResume();
+
+    }
+
+    private void setBackupAsyncTaskProgessReceiver(Activity progressReceiver) {
+        if (backupAsyncTask != null) {
+            final ProgressBar progressBar = (ProgressBar) this.findViewById(R.id.progressBar);
+            final TextView status = (TextView) this.findViewById(R.id.lbl_status);
+            final Button cancel = (Button) this.findViewById(R.id.cmd_cancel);
+
+            final boolean isActive = BackupAsyncTask.isActive(backupAsyncTask);
+            final boolean running = (progressReceiver != null) && isActive;
+            setVisibility(running, progressBar, cancel);
+
+            if (running) {
+                backupAsyncTask.setContext(this, progressBar, status);
+                cancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        backupAsyncTask.cancel(false);
+                    }
+                });
+
+            } else {
+                backupAsyncTask.setContext(null, null, null);
+                cancel.setOnClickListener(null);
+                if (!isActive) {
+                    backupAsyncTask = null;
+                }
+            }
+        }
+    }
+
+    /**
+     * save exif changes back to image and database
+     */
+    private boolean onBakupOk() {
+        Date backupDate = new Date();
+        saveGuiToData();
+        gui.mHistory.saveHistory();
+
+        final String zipDir = mZipConfigData.getZipDir();
+        final String zipName = ZipConfigDto.getZipFileName(mZipConfigData, backupDate);
+        ZipStorage zipStorage = getCurrentStorage(this, zipDir, zipName);
+
+        backupAsyncTask = new BackupAsyncTask(this, mZipConfigData, zipStorage,
+                backupDate);
+        setBackupAsyncTaskProgessReceiver(this);
+        backupAsyncTask.execute();
+
+        return true;
+    }
+
+    private void setVisibility(boolean visible, View... views) {
+        for (View v : views) {
+            if (v != null) v.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+        }
+    }
+
+    private void clearFilter() {
+        mZipConfigData = new ZipConfigDto(null);
+        loadGuiFromData();
+    }
+
     private class Gui implements IZipConfig {
         private static final String FILTER_DELIMITER = "\n\n\n\n@--!@--!@--!\n\n\n\n";
         private final EditText editDateModifiedFrom;
@@ -608,6 +679,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
                     if (chagend) {
                         if (editText.getId() == R.id.edit_filter) {
                             showExifFilterDetails(gui);
+                            updateHistory();
                         }
                     }
 
@@ -623,8 +695,42 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
             showExifFilterDetails(src);
         }
 
+        public void updateHistory() {
+            updateHistory(getEffectiveQueryParameter(this));
+        }
+
+        private void updateHistory(QueryParameter query) {
+            List<String> paths = new ArrayList<String>();
+            List<String> filenames = new ArrayList<String>();
+
+            String minFolder = FotoSql.getMinFolder(getApplicationContext(), query, true);
+            updateHistory(FileUtils.getDir(minFolder), filenames, paths, 1);
+
+            String queryFolder = FotoSql.getFilePath(query, false);
+            if ((queryFolder != null) && (queryFolder.startsWith("/"))) {
+                updateHistory(FileUtils.getDir(queryFolder), filenames, paths, 1);
+            }
+
+            mHistory.addHistory(0, ListUtils.asStringArray(filenames));
+            mHistory.addHistory(2, ListUtils.asStringArray(paths));
+        }
+
+        private void updateHistory(File dir, List<String> filenames, List<String> paths, int recursion) {
+            if (dir != null) {
+                if (recursion > 0) {
+                    updateHistory(dir.getParentFile(), filenames, paths, recursion - 1);
+                }
+                include(filenames, dir.getName());
+                include(paths, dir.getAbsolutePath());
+            }
+        }
+
+        private void include(List<String> names, String name) {
+            if (!StringUtils.isNullOrEmpty(name) && !names.contains(name)) names.add(name);
+        }
+
         public void showExifFilterDetails(IZipConfig src) {
-            QueryParameter query = Backup2ZipService.getEffectiveQueryParameter(src);
+            QueryParameter query = getEffectiveQueryParameter(src);
 
             StringBuilder result = new StringBuilder();
             CharSequence details = formatter.format(TagSql.parseQueryEx(query, true));
@@ -636,6 +742,10 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
             }
 
             exifFilterDetails.setText(result.toString());
+        }
+
+        public QueryParameter getEffectiveQueryParameter(IZipConfig src) {
+            return Backup2ZipService.getEffectiveQueryParameter(src);
         }
 
         private boolean fromGui(IZipConfig dest) {
@@ -714,77 +824,6 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
             }
             return "";
         }
-    }
-
-    @Override
-    protected void onPause() {
-        enableBackupAsyncTask(false);
-        super.onPause();
-    }
-
-    @Override
-    protected void onResume() {
-        enableBackupAsyncTask(true);
-        Global.debugMemory(mDebugPrefix, "onResume");
-        super.onResume();
-
-    }
-
-    private void enableBackupAsyncTask(boolean enable) {
-        if (backupAsyncTask != null) {
-            final ProgressBar progressBar = (ProgressBar) this.findViewById(R.id.progressBar);
-            final TextView status = (TextView) this.findViewById(R.id.lbl_status);
-            final Button cancel = (Button) this.findViewById(R.id.cmd_cancel);
-
-            final boolean isActive = BackupAsyncTask.isActive(backupAsyncTask);
-            final boolean running = enable && isActive;
-            setVisibility(running, progressBar, cancel);
-
-            if (running) {
-                backupAsyncTask.setContext(this, progressBar, status);
-                cancel.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        backupAsyncTask.cancel(false);
-                    }
-                });
-
-            } else {
-                backupAsyncTask.setContext(null, null, null);
-                cancel.setOnClickListener(null);
-                if (!isActive) {
-                    backupAsyncTask = null;
-                }
-            }
-        }
-    }
-
-    private void setVisibility(boolean visible, View... views) {
-        for (View v : views) {
-            if (v != null) v.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
-        }
-    }
-
-    private void clearFilter() {
-        mZipConfigData = new ZipConfigDto(null);
-        loadGuiFromData();
-    }
-
-    /** save exif changes back to image and database */
-    private boolean onBakupOk() {
-        boolean ok = false;
-        Activity ctx = this;
-        saveGuiToData();
-        gui.mHistory.saveHistory();
-
-        ZipStorage zipStorage = getCurrentStorage(this, mZipConfigData.getZipDir(), mZipConfigData.getZipName());
-
-        ///!!! TODO do in background with async task and gui update ...
-        backupAsyncTask = new BackupAsyncTask(this, mZipConfigData, zipStorage);
-        enableBackupAsyncTask(true);
-        backupAsyncTask.execute();
-
-        return true;
     }
 
     public static ZipStorage getCurrentStorage(Context context, String zipDir, String baseFileName) {

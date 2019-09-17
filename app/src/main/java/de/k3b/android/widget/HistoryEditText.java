@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,7 +36,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import de.k3b.android.androFotoFinder.Global;
 import de.k3b.io.ListUtils;
+import de.k3b.io.StringUtils;
 
 /**
  * Add history-popup to a list of EditText+ImageButton pairs.
@@ -60,6 +63,69 @@ public class HistoryEditText {
     public HistoryEditText setIncludeEmpty(boolean includeEmpty) {
         this.includeEmpty = includeEmpty;
         return this;
+    }
+
+    public void addHistory(int hisotryIndex, String... values) {
+        if ((hisotryIndex >= 0) && (hisotryIndex < mEditorHandlers.length) && (values != null) && (values.length > 0)) {
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
+            SharedPreferences.Editor edit = sharedPref.edit();
+
+            mEditorHandlers[hisotryIndex].include(sharedPref, edit, values);
+            edit.apply();
+        } else {
+            Log.w(Global.LOG_CONTEXT, StringUtils.appendMessage(null,
+                    "Cannot add",
+                    getClass().getSimpleName(),
+                    "addHistory(",
+                    hisotryIndex,
+                    values,
+                    ")")
+                    .toString());
+        }
+    }
+
+    /**
+     * define history function for these editors
+     */
+    public HistoryEditText(Context context, int[] cmdIds, EditText... editors) {
+        this(context, context.getClass().getSimpleName() + "_history_", "';'", 8, cmdIds, editors);
+    }
+
+    /**
+     * define history function for these editors
+     */
+    public HistoryEditText(Context context, String settingsPrefix, String delimiter, int maxHisotrySize, int[] cmdIds, EditText... editors) {
+
+        this.mContext = context;
+        this.mDelimiter = delimiter;
+        this.mMaxHisotrySize = maxHisotrySize;
+        mEditorHandlers = new EditorHandler[editors.length];
+
+        for (int i = 0; i < editors.length; i++) {
+            mEditorHandlers[i] = createHandler(settingsPrefix + i, editors[i], getId(cmdIds, i));
+        }
+    }
+
+    protected EditorHandler createHandler(String id, EditText editor, int cmdId) {
+        return new EditorHandler(id, editor, cmdId);
+    }
+
+    private int getId(int[] ids, int offset) {
+        if ((ids != null) && (offset >= 0) && (offset < ids.length)) return ids[offset];
+        return NO_ID;
+    }
+
+    /**
+     * include current editor-content to history and save to settings
+     */
+    public void saveHistory() {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences.Editor edit = sharedPref.edit();
+
+        for (EditorHandler instance : mEditorHandlers) {
+            instance.saveHistory(sharedPref, edit);
+        }
+        edit.apply();
     }
 
     /** ContextActionBar for one EditText */
@@ -134,8 +200,12 @@ public class HistoryEditText {
         }
 
         protected void saveHistory(SharedPreferences sharedPref, SharedPreferences.Editor edit) {
+            include(sharedPref, edit, mEditor.getText().toString().trim());
+        }
+
+        private void include(SharedPreferences sharedPref, SharedPreferences.Editor edit, String... additionalValues) {
             List<String> history = getHistory(sharedPref);
-            history = include(history, mEditor.getText().toString().trim());
+            history = include(history, additionalValues);
             String result = toString(history);
             edit.putString(mId, result);
         }
@@ -149,21 +219,26 @@ public class HistoryEditText {
             return ListUtils.toString(mDelimiter, list);
         }
 
-        private List<String>  include(List<String>  history_, String newValue) {
-            List<String>  history = new ArrayList<String>(history_);
-            if (newValue != null) {
-                history.remove(newValue);
-                history.add(0, newValue);
-            }
+        private List<String> include(List<String> history_, String... newValues) {
+            if ((newValues != null) && (newValues.length > 0)) {
+                List<String> history = new ArrayList<String>(history_);
+                for (String newValue : newValues) {
+                    if (newValue != null) {
+                        history.remove(newValue);
+                        history.add(0, newValue);
+                    }
+                }
 
-            int len = history.size();
+                int len = history.size();
 
-            // forget oldest entries if maxHisotrySize is reached
-            while (len > mMaxHisotrySize) {
-                len--;
-                history.remove(len);
+                // forget oldest entries if maxHisotrySize is reached
+                while (len > mMaxHisotrySize) {
+                    len--;
+                    history.remove(len);
+                }
+                return history;
             }
-            return history;
+            return history_;
         }
 
         @Override
@@ -180,44 +255,6 @@ public class HistoryEditText {
             showHistory();
             return true;
         }
-    }
-
-    /** define history function for these editors */
-    public HistoryEditText(Context context, int[] cmdIds, EditText... editors) {
-        this(context, context.getClass().getSimpleName() + "_history_","';'",  8, cmdIds, editors);
-    }
-
-    /** define history function for these editors */
-    public HistoryEditText(Context context, String settingsPrefix, String delimiter, int maxHisotrySize, int[] cmdIds, EditText... editors) {
-
-        this.mContext = context;
-        this.mDelimiter = delimiter;
-        this.mMaxHisotrySize = maxHisotrySize;
-        mEditorHandlers = new EditorHandler[editors.length];
-
-        for (int i = 0; i < editors.length; i++) {
-            mEditorHandlers[i] = createHandler(settingsPrefix+i, editors[i], getId(cmdIds, i));
-        }
-    }
-
-    protected EditorHandler createHandler(String id, EditText editor, int cmdId) {
-        return new EditorHandler(id,editor, cmdId);
-    }
-
-    private int getId(int[] ids, int offset) {
-        if ((ids != null) && (offset >= 0) && (offset < ids.length) ) return ids[offset];
-        return NO_ID;
-    }
-
-    /** include current editor-content to history and save to settings */
-    public void saveHistory() {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
-        SharedPreferences.Editor edit = sharedPref.edit();
-
-        for (EditorHandler instance: mEditorHandlers) {
-            instance.saveHistory(sharedPref, edit);
-        }
-        edit.apply();
     }
 
     @Override

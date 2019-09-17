@@ -22,10 +22,28 @@ import java.util.Date;
 
 /** Parameters that define a backup*/
 public interface IZipConfig {
+    /**
+     * for incremental backup: all files changes since this date. Null means full backup.
+     */
     Date getDateModifiedFrom();
-    String getZipRelPath    ();
-    String getZipName       ();
-    String getZipDir        ();
+
+    /** if not empty: create subfolders in zip relative to this path.
+     * Example zipRelPath='/DCIM/'
+     * means that '/DCIM/subfolder/file.jpg'
+     *      becomes 'subfolder/file.jpg' in zip file
+     */
+    String getZipRelPath();
+
+    /** basename of output zip-file without path and witout fileextension.
+     * Example if zipName='myBackup' with zipDir='/path/to/dir' the created
+     * zipfile will be "/path/to/dir/myBackup-20191224-123456.zip' when the backup
+     * is taken at 2019-12-24 at 12:34:56*/
+    String getZipName();
+
+    /** uri to output directory (witout filename) where to store the output zip-file. */
+    String getZipDir();
+
+    /** string representation of filter to be applied to find photos to back up to zip. */
     String getFilter        ();
 
     void setDateModifiedFrom(Date value);
