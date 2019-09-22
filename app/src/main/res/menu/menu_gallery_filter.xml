@@ -46,6 +46,13 @@
         android:title="@string/geo_show_menu_title"
         android:visible="false" />
 
+    <item
+        android:id="@+id/cmd_backup"
+        android:orderInCategory="401"
+        android:showAsAction="never"
+        android:title="@string/backup_title"
+        android:visible="true" />
+
     <item android:id="@+id/action_details" android:title="@string/details_menu_title"
         android:orderInCategory="900" android:showAsAction="never" />
 

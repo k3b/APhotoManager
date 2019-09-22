@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Locale;
 
 import de.k3b.LibGlobal;
+import de.k3b.android.androFotoFinder.backup.BackupActivity;
 import de.k3b.android.androFotoFinder.directory.DirectoryLoaderTask;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailMetaDialogBuilder;
@@ -288,6 +289,11 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                         this, null, getAsMergedQuery(), null, 0);
                 return true;
             }
+            case R.id.cmd_backup:
+                BackupActivity.showActivity(" menu " + menuItem.getTitle(),
+                        this, null, null, null,
+                        getAsMergedQuery(), BackupActivity.REQUEST_BACKUP_ID);
+                return true;
             case R.id.action_details:
                 cmdShowDetails();
                 return true;
