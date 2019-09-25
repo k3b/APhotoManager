@@ -47,8 +47,17 @@ public class FileNameUtil {
         }
 
         // replace illegal chars with "_"
-        replace(result, "_", "/", "\\", ":", " ", "?", "*", "&", ">", "<" , "|", "'", "\"", "__");
+        replace(result, "_", "/", "\\", ":", " ", "?", "*", "&", "%", ">", "<", "|", "'", "\"", "__");
         return result.toString();
+    }
+
+    public static String getWithoutWildcard(String path) {
+        if ((path == null) || (path.length() == 0)) return null;
+        if (path.endsWith("%")) {
+            // remove sql wildcard at end of name
+            return path.substring(0, path.length() - 1);
+        }
+        return path;
     }
 
     /** replaces all occurences of illegalValues in result by replacement */

@@ -292,7 +292,9 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             case R.id.cmd_backup:
                 BackupActivity.showActivity(" menu " + menuItem.getTitle(),
                         this, null, null, null,
-                        getAsMergedQuery(), BackupActivity.REQUEST_BACKUP_ID);
+                        getAsMergedQuery(),
+                        mFilterValue.getPath(),
+                        BackupActivity.REQUEST_BACKUP_ID);
                 return true;
             case R.id.action_details:
                 cmdShowDetails();

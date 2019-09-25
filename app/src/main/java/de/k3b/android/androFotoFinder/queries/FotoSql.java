@@ -1327,7 +1327,7 @@ public class FotoSql extends FotoSqlBase {
     @Nullable
     public static CharSequence getStatisticsMessage(Context context, int prefixStringId, QueryParameter query) {
         if (query == null) return null;
-        String text = context.getString(prefixStringId);
+        String text = (prefixStringId == 0) ? null : context.getString(prefixStringId);
 
         QueryParameter queryModified = new QueryParameter(query);
         queryModified

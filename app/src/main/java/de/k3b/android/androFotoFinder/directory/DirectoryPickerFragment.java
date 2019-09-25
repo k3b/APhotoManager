@@ -496,13 +496,15 @@ public class DirectoryPickerFragment extends DialogFragment
     }
 
     private boolean onBackup(MenuItem menuItem, IDirectory dir) {
-        IGalleryFilter currentSelectionAsFilter = getCurrentSelectionAsFilter(dir, this.mDirTypId);
-        String dbgContext = " menu " + menuItem.getTitle();
-        QueryParameter query = AndroidAlbumUtils.getAsAlbumOrMergedNewQuery(
-                dbgContext, mContext, baseQuery, currentSelectionAsFilter);
-        BackupActivity.showActivity(dbgContext,
-                mContext, null, null, null,
-                query, BackupActivity.REQUEST_BACKUP_ID);
+        if ((menuItem != null) && (dir != null)) {
+            IGalleryFilter currentSelectionAsFilter = getCurrentSelectionAsFilter(dir, this.mDirTypId);
+            String dbgContext = " menu " + menuItem.getTitle();
+            QueryParameter query = AndroidAlbumUtils.getAsAlbumOrMergedNewQuery(
+                    dbgContext, mContext, baseQuery, currentSelectionAsFilter);
+            BackupActivity.showActivity(dbgContext,
+                    mContext, null, null, null,
+                    query, dir.getAbsolute(), BackupActivity.REQUEST_BACKUP_ID);
+        }
         return true;
     }
 

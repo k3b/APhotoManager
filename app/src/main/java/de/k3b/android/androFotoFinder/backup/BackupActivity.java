@@ -45,6 +45,8 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -85,6 +87,7 @@ import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.zip.IZipConfig;
 import de.k3b.zip.LibZipGlobal;
 import de.k3b.zip.ZipConfigDto;
+import de.k3b.zip.ZipConfigRepository;
 import de.k3b.zip.ZipStorage;
 import de.k3b.zip.ZipStorageFile;
 
@@ -125,24 +128,32 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
     public static void showActivity(String debugContext, Activity context,
                                     Uri uri, SelectedFiles selectedFiles,
                                     IGalleryFilter filter, QueryParameter query,
-                                    int requestCode) {
+                                    String selectedRelDir, int requestCode) {
         final Intent intent = new Intent().setClass(context,
                 BackupActivity.class);
 
         intent.setAction(Intent.ACTION_EDIT);
 
         IZipConfig config = Backup2ZipService.loadZipConfig(uri, context);
-        QueryParameter mergedQuery = null;
-        // intent.putExtra()
+        File selectedRelDirFile = FileUtils.createFile(selectedRelDir);
+        final String zipName = (selectedRelDirFile == null) ? null : selectedRelDirFile.getName();
+        if (null == config) {
+            config = getPreviousZipConfig(null, zipName);
+        }
         if (null == config) {
             config = new ZipConfigDto(null);
-            mergedQuery = getQuery(debugContext, context,
+            QueryParameter mergedQuery = getQuery(debugContext, context,
                     uri, selectedFiles, filter, query);
+            if (mergedQuery != null) {
+                config.setFilter(mergedQuery.toReParseableString(null));
+            }
+
+            if (selectedRelDirFile != null) {
+                config.setZipRelPath(selectedRelDirFile.getPath());
+                config.setZipName(zipName);
+            }
         }
 
-        if (mergedQuery != null) {
-            config.setFilter(mergedQuery.toReParseableString(null));
-        }
 
         if (config != null) {
             intent.putExtra(STATE_ZIP_CONFIG, (Serializable) config);
@@ -153,6 +164,45 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         }
 
         IntentUtil.startActivity(debugContext, context, requestCode, intent);
+    }
+
+    private static IZipConfig getPreviousZipConfig(Activity context, String zipName) {
+        if (zipName != null) {
+            File repositoryFile = ZipConfigRepository.getZipConfigFile(zipName);
+            if ((repositoryFile != null) && (repositoryFile.exists())) {
+                try {
+                    IZipConfig repo = new ZipConfigRepository(null).load(new FileInputStream(repositoryFile), repositoryFile);
+                    if (repo != null) {
+                        if (context != null) {
+                            showStatistics(context, repo, zipName);
+                        }
+                        // ZipConfigDto is serializable and ZipConfigRepository is not.
+                        return new ZipConfigDto(repo);
+                    }
+                } catch (IOException ignore) {
+                }
+            }
+        }
+        return null;
+    }
+
+    private static void showStatistics(Activity context, IZipConfig config, String messagePrefix) {
+        final QueryParameter asMergedQuery
+                = Backup2ZipService.getEffectiveQueryParameter(config);
+        CharSequence statistics = TagSql.getStatisticsMessage(context, 0, asMergedQuery);
+
+        if (messagePrefix != null) {
+            Toast.makeText(context, messagePrefix + statistics, Toast.LENGTH_LONG).show();
+        }
+
+        final TextView status = (TextView) context.findViewById(R.id.lbl_status);
+        if (status != null) {
+            status.setText(statistics);
+        }
+    }
+
+    private void showCurrentStatistics() {
+        showStatistics(this, gui, null);
     }
 
     /**
@@ -234,6 +284,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
             IZipConfig config = Backup2ZipService.loadZipConfig(uri, this);
             if (config != null) {
                 mZipConfigData.loadFrom(config);
+                showStatistics(this, config, null);
             } else {
                 mZipConfigData.loadFrom((IZipConfig) intent.getSerializableExtra(STATE_ZIP_CONFIG));
             }
@@ -338,6 +389,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         mZipConfigData.setFilter((modifiedQuery != null) ? modifiedQuery : "");
         loadGuiFromData();
         gui.updateHistory();
+        showCurrentStatistics();
     }
 
     private final DateTimeApi mDateTimeApi = new DateTimeApi();
@@ -677,9 +729,19 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
                     final boolean result = super.onHistoryPick(editorHandler, editText, text);
 
                     if (chagend) {
-                        if (editText.getId() == R.id.edit_filter) {
+                        if (editText.equals(editFilter)) {
                             showExifFilterDetails(gui);
                             updateHistory();
+                            showCurrentStatistics();
+                        }
+                        if (editText.equals(editDateModifiedFrom)) {
+                            showCurrentStatistics();
+                        }
+                        if (editText.equals(editZipName)) {
+                            IZipConfig config = getPreviousZipConfig(BackupActivity.this, text);
+                            if (config != null) {
+                                toGui(config);
+                            }
                         }
                     }
 

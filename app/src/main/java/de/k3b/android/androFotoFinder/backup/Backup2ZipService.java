@@ -40,11 +40,13 @@ import de.k3b.database.QueryParameter;
 import de.k3b.io.FileUtils;
 import de.k3b.io.IItemSaver;
 import de.k3b.io.IProgessListener;
+import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.PhotoProperties2ExistingFileSaver;
 import de.k3b.media.PhotoPropertiesCsvStringSaver;
 import de.k3b.zip.CompressJob;
+import de.k3b.zip.FileCompressItem;
 import de.k3b.zip.IZipConfig;
 import de.k3b.zip.LibZipGlobal;
 import de.k3b.zip.ZipConfigRepository;
@@ -122,6 +124,10 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
             if (this.continueProcessing) {
                 final CompressJob job = new ApmZipCompressJob(context, this, "history.log");
                 job.setZipStorage(zipStorage);
+                String zipRelPath = zipConfig.getZipRelPath();
+                if (!StringUtils.isNullOrEmpty(zipRelPath)) {
+                    FileCompressItem.setZipRelPath(new File(zipRelPath));
+                }
 
                 // pipline for (IPhotoProperties item: query(filter)) : Zip+=File(item)
                 /// !!!  todo go on here
@@ -144,6 +150,7 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
                     job.compress(false);
                 }
 
+                repo.setDateModifiedFrom(this.backupDate);
                 if (repo.save()) {
                     if (LibZipGlobal.debugEnabled) {
                         Log.d(LibZipGlobal.LOG_TAG, mDebugPrefix + " Saved as " + repo);

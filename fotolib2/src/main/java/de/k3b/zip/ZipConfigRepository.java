@@ -18,13 +18,10 @@
  */
 package de.k3b.zip;
 
-import com.drew.tools.FileUtil;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -84,13 +81,20 @@ public class ZipConfigRepository implements IZipConfig {
         return false;
     }
 
-    public File getZipConfigFile() {
+    public static File getZipConfigFile(String zipName) {
+        if (zipName == null) return null;
+
         File zipFileDir = LibGlobal.zipFileDir;
-        String fileName = FileUtils.replaceExtension(this.getZipName(),FILE_SUFFIX);
+        String fileName = FileUtils.replaceExtension(zipName, FILE_SUFFIX);
         if ((zipFileDir == null) || (fileName == null)) return null;
 
         File configFile = new File(zipFileDir, fileName);
         return configFile;
+    }
+
+    public File getZipConfigFile() {
+        final String zipName = this.getZipName();
+        return getZipConfigFile(zipName);
     }
 
     @Override

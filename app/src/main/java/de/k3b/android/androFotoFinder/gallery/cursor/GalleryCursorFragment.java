@@ -905,7 +905,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             case R.id.cmd_backup:
                 BackupActivity.showActivity(" menu " + menuItem.getTitle(),
                         getActivity(), null, selectedFiles, null,
-                        getCurrentQuery(), BackupActivity.REQUEST_BACKUP_ID);
+                        getCurrentQuery(), null, BackupActivity.REQUEST_BACKUP_ID);
                 return true;
             case R.id.cmd_copy:
                 return cmdMoveOrCopyWithDestDirPicker(false, fileCommands.getLastCopyToPath(), selectedFiles);
