@@ -45,6 +45,7 @@ import de.k3b.io.VISIBILITY;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.PhotoProperties2ExistingFileSaver;
 import de.k3b.media.PhotoPropertiesCsvStringSaver;
+import de.k3b.zip.CompressItem;
 import de.k3b.zip.CompressJob;
 import de.k3b.zip.FileCompressItem;
 import de.k3b.zip.IZipConfig;
@@ -134,7 +135,13 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
                 final IItemSaver<File> file2ZipSaver = new IItemSaver<File>() {
                     @Override
                     public boolean save(File item) {
-                        job.addToCompressQue("", item);
+                        CompressItem compressItem = job.addToCompressQue("", item);
+                        /*
+                        if (PhotoPropertiesUtil.isImage(item.getName(), PhotoPropertiesUtil.IMG_TYPE_COMPRESSED)) {
+                            // performance improvement: jpg-s should not be compressed
+                            compressItem.setDoCompress(false);
+                        }
+                        */
                         return true;
                     }
                 };

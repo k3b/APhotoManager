@@ -35,6 +35,7 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.io.IProgessListener;
 import de.k3b.zip.IZipConfig;
 import de.k3b.zip.LibZipGlobal;
+import de.k3b.zip.ProgressFormatter;
 import de.k3b.zip.ZipConfigDto;
 import de.k3b.zip.ZipStorage;
 
@@ -58,6 +59,7 @@ public class BackupAsyncTask extends AsyncTask<Object, ProgressData, IZipConfig>
     private TextView status;
     private AtomicBoolean isActive = new AtomicBoolean(true);
 
+    private final ProgressFormatter formatter;
     // last known number of items to be processed
     private int lastSize = 0;
 
@@ -65,6 +67,8 @@ public class BackupAsyncTask extends AsyncTask<Object, ProgressData, IZipConfig>
                            Date backupDate) {
         this.service = new Backup2ZipService(context.getApplicationContext(),
                 mZipConfigData, zipStorage, backupDate);
+
+        formatter = new ProgressFormatter();
     }
 
     public void setContext(Activity activity, ProgressBar progressBar, TextView status) {
@@ -95,8 +99,12 @@ public class BackupAsyncTask extends AsyncTask<Object, ProgressData, IZipConfig>
 
             if (LibZipGlobal.debugEnabled || Global.debugEnabled) {
                 Log.d(LibZipGlobal.LOG_TAG, activity.getClass().getSimpleName() + ": " +
-                                activity.getText(R.string.backup_title) + " " +
-                                iZipConfig.toString());
+                        formatter.format(lastSize, lastSize)
+                );
+                Log.d(LibZipGlobal.LOG_TAG, activity.getClass().getSimpleName() + ": " +
+                        activity.getText(R.string.backup_title) + " " +
+                        iZipConfig.toString()
+                );
             }
 
             setContext(null, null, null);
@@ -136,16 +144,18 @@ public class BackupAsyncTask extends AsyncTask<Object, ProgressData, IZipConfig>
     /** called from {@link AsyncTask} in gui task */
     @Override
     protected void onProgressUpdate(ProgressData... values) {
+        final ProgressData progressData = values[0];
         if (mProgressBar != null) {
-            int size = values[0].size;
+            int size = progressData.size;
             if ((size != 0) && (size > lastSize)) {
                 mProgressBar.setMax(size);
                 lastSize = size;
             }
-            mProgressBar.setProgress(values[0].itemcount);
+            mProgressBar.setProgress(progressData.itemcount);
         }
         if (this.status != null) {
-            this.status.setText(values[0].message);
+            this.status.setText(formatter.format(progressData.itemcount, progressData.size));
+            //  values[0].message);
         }
     }
 }
