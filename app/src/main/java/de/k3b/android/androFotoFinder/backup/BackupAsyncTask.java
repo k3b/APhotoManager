@@ -39,6 +39,10 @@ import de.k3b.zip.ProgressFormatter;
 import de.k3b.zip.ZipConfigDto;
 import de.k3b.zip.ZipStorage;
 
+/**
+ * ProgressData: Text that can be displayed as progress message
+ * in owning Activity. Translated from android independant {@link de.k3b.io.IProgessListener}
+ */
 class ProgressData {
     final int itemcount;
     final int size;
@@ -51,6 +55,10 @@ class ProgressData {
     }
 }
 
+/**
+ * Async ancapsulation of
+ * {@link de.k3b.android.androFotoFinder.backup.Backup2ZipService}
+ */
 public class BackupAsyncTask extends AsyncTask<Object, ProgressData, IZipConfig> implements IProgessListener {
 
     private final Backup2ZipService service;
@@ -71,6 +79,14 @@ public class BackupAsyncTask extends AsyncTask<Object, ProgressData, IZipConfig>
         formatter = new ProgressFormatter();
     }
 
+    /**
+     * (Re-)Attach owning Activity to BackupAsyncTask
+     * (i.e. after Device rotation
+     *
+     * @param activity    new owner
+     * @param progressBar To be updated while compression task is running
+     * @param status      To be updated while compression task is running
+     */
     public void setContext(Activity activity, ProgressBar progressBar, TextView status) {
         this.activity = activity;
         mProgressBar = progressBar;

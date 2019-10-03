@@ -19,18 +19,14 @@
  
 package de.k3b.android.androFotoFinder.backup;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.provider.DocumentFile;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Menu;
@@ -89,7 +85,6 @@ import de.k3b.zip.LibZipGlobal;
 import de.k3b.zip.ZipConfigDto;
 import de.k3b.zip.ZipConfigRepository;
 import de.k3b.zip.ZipStorage;
-import de.k3b.zip.ZipStorageFile;
 
 /**
  * #108: Zip-file support: backup-or-copy filtered-or-selected photos to Zip-file.
@@ -100,13 +95,16 @@ import de.k3b.zip.ZipStorageFile;
  *  * else intent.Extra[STATE_ZIP_CONFIG]
  */
 public class BackupActivity extends ActivityWithAutoCloseDialogs implements Common {
-    /** document tree supported since andrid-5.0. For older devices use folder picker */
-    public static final boolean USE_DOCUMENT_PROVIDER = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP);
-
     private static final int REQUEST_ID_PICK_ZIP_OUT_DIR = 1234;
 
     public static final int REQUEST_BACKUP_ID = 99289;
     public static final int REQUEST_ID_PICK_EXIF = 99293;
+
+    /**
+     * shows progress dialog while backup is running
+     */
+    private static final int REQUEST_ID_BACKUP_PROGRESS = 99294; //  0==deactivated
+
     private static final String STATE_ZIP_CONFIG = "zip_config";
     private static String mDebugPrefix = "BackupActivity: ";
 
@@ -370,6 +368,12 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
                 }
                 break;
 
+            case REQUEST_ID_BACKUP_PROGRESS:
+                //!!!
+                if (resultCode == Activity.RESULT_OK) {
+                }
+                break;
+
             default:
                 break;
         }
@@ -485,7 +489,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
 
     private boolean pickDir(boolean outDir, String lastCopyToPath, int titleId) {
         if (AndroidFileCommands.canProcessFile(this, false)) {
-            if (USE_DOCUMENT_PROVIDER) {
+            if (BackupProgressActivity.USE_DOCUMENT_PROVIDER) {
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
                 intent.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                         | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
@@ -657,19 +661,22 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
      * save exif changes back to image and database
      */
     private boolean onBakupOk() {
-        Date backupDate = new Date();
         saveGuiToData();
         gui.mHistory.saveHistory();
 
-        final String zipDir = mZipConfigData.getZipDir();
-        final String zipName = ZipConfigDto.getZipFileName(mZipConfigData, backupDate);
-        ZipStorage zipStorage = getCurrentStorage(this, zipDir, zipName);
+        if (REQUEST_ID_BACKUP_PROGRESS != 0) {
+            BackupProgressActivity.showActivity(this, mZipConfigData, REQUEST_ID_BACKUP_PROGRESS);
+        } else {
+            Date backupDate = new Date();
+            final String zipDir = mZipConfigData.getZipDir();
+            final String zipName = ZipConfigDto.getZipFileName(mZipConfigData, backupDate);
+            ZipStorage zipStorage = BackupProgressActivity.getCurrentStorage(this, zipDir, zipName);
 
-        backupAsyncTask = new BackupAsyncTask(this, mZipConfigData, zipStorage,
-                backupDate);
-        setBackupAsyncTaskProgessReceiver(this);
-        backupAsyncTask.execute();
-
+            backupAsyncTask = new BackupAsyncTask(this, mZipConfigData, zipStorage,
+                    backupDate);
+            setBackupAsyncTaskProgessReceiver(this);
+            backupAsyncTask.execute();
+        }
         return true;
     }
 
@@ -886,37 +893,6 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
             }
             return "";
         }
-    }
-
-    public static ZipStorage getCurrentStorage(Context context, String zipDir, String baseFileName) {
-        if (USE_DOCUMENT_PROVIDER) {
-            DocumentFile docDir = getDocFile(context, zipDir);
-            return new de.k3b.android.zip.ZipStorageDocumentFile(context, docDir, baseFileName);
-
-        } else {
-            File absoluteZipFile = new File(zipDir, baseFileName);
-            return new ZipStorageFile(absoluteZipFile.getAbsolutePath());
-        }
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private static DocumentFile getDocFile(Context context, @NonNull String dir ) {
-        DocumentFile docDir = null;
-
-        if (dir.indexOf(":") >= 0) {
-            Uri uri = Uri.parse(dir);
-
-            if ("file".equals(uri.getScheme())) {
-                File fileDir = new File(uri.getPath());
-                docDir = DocumentFile.fromFile(fileDir);
-            } else {
-                docDir = DocumentFile.fromTreeUri(context, uri);
-            }
-        } else {
-            docDir = DocumentFile.fromFile(new File(dir));
-        }
-        return docDir;
-
     }
 
 }

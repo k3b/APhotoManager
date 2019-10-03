@@ -251,7 +251,10 @@
                 <data android:pathPattern=".*\\.apm"/>
             </intent-filter>
         </activity>
-
+        <activity
+            android:name=".backup.BackupProgressActivity"
+            android:icon="@drawable/rule"
+            android:label="@string/backup_title"></activity>
         <activity android:name=".backup.BackupActivity"
             android:icon="@drawable/rule"
             android:label="@string/backup_title">
