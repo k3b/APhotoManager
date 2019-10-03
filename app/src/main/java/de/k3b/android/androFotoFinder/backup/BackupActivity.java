@@ -35,7 +35,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -84,7 +83,6 @@ import de.k3b.zip.IZipConfig;
 import de.k3b.zip.LibZipGlobal;
 import de.k3b.zip.ZipConfigDto;
 import de.k3b.zip.ZipConfigRepository;
-import de.k3b.zip.ZipStorage;
 
 /**
  * #108: Zip-file support: backup-or-copy filtered-or-selected photos to Zip-file.
@@ -103,13 +101,10 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
     /**
      * shows progress dialog while backup is running
      */
-    private static final int REQUEST_ID_BACKUP_PROGRESS = 99294; //  0==deactivated
+    private static final int REQUEST_ID_BACKUP_PROGRESS = 99294;
 
     private static final String STATE_ZIP_CONFIG = "zip_config";
     private static String mDebugPrefix = "BackupActivity: ";
-
-    // != null while async backup is running
-    private static BackupAsyncTask backupAsyncTask = null;
 
     private Gui gui = null;
     private SelectedFiles mSelectedFiles;
@@ -193,6 +188,10 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
             Toast.makeText(context, messagePrefix + statistics, Toast.LENGTH_LONG).show();
         }
 
+        showStatus(context, statistics);
+    }
+
+    private static void showStatus(Activity context, CharSequence statistics) {
         final TextView status = (TextView) context.findViewById(R.id.lbl_status);
         if (status != null) {
             status.setText(statistics);
@@ -291,12 +290,6 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         gui.updateHistory();
     }
 
-    @Override
-    protected void onDestroy() {
-        setBackupAsyncTaskProgessReceiver(null);
-        super.onDestroy();
-    }
-
     /**
      * load layout and bind layout members
      */
@@ -371,6 +364,23 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
             case REQUEST_ID_BACKUP_PROGRESS:
                 //!!!
                 if (resultCode == Activity.RESULT_OK) {
+                    if (LibZipGlobal.debugEnabled || Global.debugEnabled) {
+                        Log.d(LibZipGlobal.LOG_TAG, mDebugPrefix + "close as zip completed ok");
+                    }
+                    finish();
+                } else {
+                    String errorMessage = (intent != null) ? intent.getStringExtra(Common.EXTRA_TITLE) : null;
+                    if (errorMessage != null) {
+                        Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
+                        if (LibZipGlobal.debugEnabled || Global.debugEnabled) {
+                            Log.d(LibZipGlobal.LOG_TAG, mDebugPrefix + " " + errorMessage);
+                        }
+
+                        showStatus(this, errorMessage);
+                    }
+
+                    // save file again to undo changes in file done backup process
+                    new ZipConfigRepository(mZipConfigData).save();
                 }
                 break;
 
@@ -615,46 +625,10 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
     }
 
     @Override
-    protected void onPause() {
-        setBackupAsyncTaskProgessReceiver(null);
-        super.onPause();
-    }
-
-    @Override
     protected void onResume() {
-        setBackupAsyncTaskProgessReceiver(this);
         Global.debugMemory(mDebugPrefix, "onResume");
         super.onResume();
 
-    }
-
-    private void setBackupAsyncTaskProgessReceiver(Activity progressReceiver) {
-        if (backupAsyncTask != null) {
-            final ProgressBar progressBar = (ProgressBar) this.findViewById(R.id.progressBar);
-            final TextView status = (TextView) this.findViewById(R.id.lbl_status);
-            final Button cancel = (Button) this.findViewById(R.id.cmd_cancel);
-
-            final boolean isActive = BackupAsyncTask.isActive(backupAsyncTask);
-            final boolean running = (progressReceiver != null) && isActive;
-            setVisibility(running, progressBar, cancel);
-
-            if (running) {
-                backupAsyncTask.setContext(this, progressBar, status);
-                cancel.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        backupAsyncTask.cancel(false);
-                    }
-                });
-
-            } else {
-                backupAsyncTask.setContext(null, null, null);
-                cancel.setOnClickListener(null);
-                if (!isActive) {
-                    backupAsyncTask = null;
-                }
-            }
-        }
     }
 
     /**
@@ -664,26 +638,8 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         saveGuiToData();
         gui.mHistory.saveHistory();
 
-        if (REQUEST_ID_BACKUP_PROGRESS != 0) {
-            BackupProgressActivity.showActivity(this, mZipConfigData, REQUEST_ID_BACKUP_PROGRESS);
-        } else {
-            Date backupDate = new Date();
-            final String zipDir = mZipConfigData.getZipDir();
-            final String zipName = ZipConfigDto.getZipFileName(mZipConfigData, backupDate);
-            ZipStorage zipStorage = BackupProgressActivity.getCurrentStorage(this, zipDir, zipName);
-
-            backupAsyncTask = new BackupAsyncTask(this, mZipConfigData, zipStorage,
-                    backupDate);
-            setBackupAsyncTaskProgessReceiver(this);
-            backupAsyncTask.execute();
-        }
+        BackupProgressActivity.showActivity(this, mZipConfigData, REQUEST_ID_BACKUP_PROGRESS);
         return true;
-    }
-
-    private void setVisibility(boolean visible, View... views) {
-        for (View v : views) {
-            if (v != null) v.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
-        }
     }
 
     private void clearFilter() {

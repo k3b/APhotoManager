@@ -368,24 +368,5 @@
             android:layout_below="@+id/line_filter_what"
 
             />
-        <Button android:id="@+id/cmd_cancel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="invisible"
-            android:text="@android:string/cancel"
-            android:layout_below="@+id/lbl_status"
-            android:layout_alignParentLeft="true"
-            />
-
-        <ProgressBar android:id="@+id/progressBar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="invisible"
-            android:layout_below="@+id/cmd_cancel"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
-            />
-
     </RelativeLayout>
 </ScrollView>

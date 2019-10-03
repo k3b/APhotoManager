@@ -21,15 +21,16 @@ package de.k3b.android.androFotoFinder.backup;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.io.IProgessListener;
@@ -108,11 +109,6 @@ public class BackupAsyncTask extends AsyncTask<Object, ProgressData, IZipConfig>
     protected void onPostExecute(IZipConfig iZipConfig) {
         super.onPostExecute(iZipConfig);
         if (activity != null) {
-            activity.setResult(Activity.RESULT_OK);
-            activity.finish();
-
-            Toast.makeText(activity, iZipConfig.toString(), Toast.LENGTH_LONG).show();
-
             if (LibZipGlobal.debugEnabled || Global.debugEnabled) {
                 Log.d(LibZipGlobal.LOG_TAG, activity.getClass().getSimpleName() + ": " +
                         formatter.format(lastSize, lastSize)
@@ -123,21 +119,33 @@ public class BackupAsyncTask extends AsyncTask<Object, ProgressData, IZipConfig>
                 );
             }
 
-            setContext(null, null, null);
+            finish(Activity.RESULT_OK, null);
         }
+    }
+
+    private void finish(int resultCode, CharSequence message) {
+        if (message != null) {
+            Intent intent = new Intent();
+            intent.putExtra(Common.EXTRA_TITLE, message);
+            activity.setResult(resultCode, intent);
+        } else {
+            activity.setResult(resultCode);
+        }
+        activity.finish();
+
+        setContext(null, null, null);
+
     }
 
     /** called on error */
     @Override
     protected void onCancelled() {
         if (activity != null) {
-            Toast.makeText(activity, activity.getText(android.R.string.cancel), Toast.LENGTH_LONG).show();
-
             if (LibZipGlobal.debugEnabled || Global.debugEnabled) {
                 Log.d(LibZipGlobal.LOG_TAG, activity.getClass().getSimpleName() + ": " + activity.getText(android.R.string.cancel));
             }
 
-            setContext(null, null, null);
+            finish(Activity.RESULT_CANCELED, activity.getText(android.R.string.cancel));
         }
     }
 
