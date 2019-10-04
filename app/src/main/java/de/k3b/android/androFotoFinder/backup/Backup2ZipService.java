@@ -67,7 +67,7 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
     private final Date backupDate;
     private IProgessListener progessListener = null;
     private final ZipLog zipLog;
-
+    private CompressJob job = null;
     // set to false (in gui thread) if operation is canceled
     protected boolean continueProcessing = true;
 
@@ -108,7 +108,11 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
         return this;
     }
 
-    /** Executes add2zip for all found items of found query-result-item of zipConfig */
+    /**
+     * Executes add2zip for all found items of found query-result-item of zipConfig.
+     *
+     * @return config used oder null if there is an error.
+     */
     public IZipConfig execute() {
         ZipConfigRepository repo = new ZipConfigRepository(zipConfig);
         final File zipConfigFile = repo.getZipConfigFile();
@@ -123,7 +127,7 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
                     "query images " + ((Global.debugEnabledSql) ? filter : ""));
 
             if (this.continueProcessing) {
-                final CompressJob job = new ApmZipCompressJob(context, this, "history.log");
+                job = new ApmZipCompressJob(context, this, "history.log");
                 job.setZipStorage(zipStorage);
                 String zipRelPath = zipConfig.getZipRelPath();
                 if (!StringUtils.isNullOrEmpty(zipRelPath)) {
@@ -131,7 +135,6 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
                 }
 
                 // pipline for (IPhotoProperties item: query(filter)) : Zip+=File(item)
-                /// !!!  todo go on here
                 final IItemSaver<File> file2ZipSaver = new IItemSaver<File>() {
                     @Override
                     public boolean save(File item) {
@@ -154,15 +157,20 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
 
                 if (this.continueProcessing) {
                     // not canceled yet in gui thread
-                    job.compress(false);
-                }
-
-                repo.setDateModifiedFrom(this.backupDate);
-                if (repo.save()) {
-                    if (LibZipGlobal.debugEnabled) {
-                        Log.d(LibZipGlobal.LOG_TAG, mDebugPrefix + " Saved as " + repo);
+                    if (job.compress(false) < 0) {
+                        this.continueProcessing = false;
                     }
-                    return repo;
+                }
+                this.job = null;
+
+                if (this.continueProcessing) {
+                    repo.setDateModifiedFrom(this.backupDate);
+                    if (repo.save()) {
+                        if (LibZipGlobal.debugEnabled) {
+                            Log.d(LibZipGlobal.LOG_TAG, mDebugPrefix + " Saved as " + repo);
+                        }
+                        return repo;
+                    }
                 }
             }
         }
@@ -292,5 +300,10 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
     public String getLastError(boolean detailed) {
         if (zipLog != null) return zipLog.getLastError(detailed);
         return null;
+    }
+
+    public void cancel() {
+        this.continueProcessing = false;
+        if (this.job != null) job.cancel();
     }
 }

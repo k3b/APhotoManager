@@ -62,6 +62,7 @@ class ProgressData {
  */
 public class BackupAsyncTask extends AsyncTask<Object, ProgressData, IZipConfig> implements IProgessListener {
 
+    private final String mDebugPrefix = "BackupAsyncTask ";
     private final Backup2ZipService service;
     private Activity activity;
     private ProgressBar mProgressBar = null;
@@ -84,11 +85,15 @@ public class BackupAsyncTask extends AsyncTask<Object, ProgressData, IZipConfig>
      * (Re-)Attach owning Activity to BackupAsyncTask
      * (i.e. after Device rotation
      *
+     * @param why
      * @param activity    new owner
      * @param progressBar To be updated while compression task is running
      * @param status      To be updated while compression task is running
      */
-    public void setContext(Activity activity, ProgressBar progressBar, TextView status) {
+    public void setContext(String why, Activity activity, ProgressBar progressBar, TextView status) {
+        if (LibZipGlobal.debugEnabled) {
+            Log.d(LibZipGlobal.LOG_TAG, mDebugPrefix + why + " setContext " + activity);
+        }
         this.activity = activity;
         mProgressBar = progressBar;
         this.status = status;
@@ -99,6 +104,8 @@ public class BackupAsyncTask extends AsyncTask<Object, ProgressData, IZipConfig>
     protected IZipConfig doInBackground(Object... voids) {
         try {
             return this.service.execute();
+        } catch (Exception ex) {
+            return null;
         } finally {
             this.isActive.set(false);
         }
@@ -106,8 +113,8 @@ public class BackupAsyncTask extends AsyncTask<Object, ProgressData, IZipConfig>
 
     /** called on success */
     @Override
-    protected void onPostExecute(IZipConfig iZipConfig) {
-        super.onPostExecute(iZipConfig);
+    protected void onPostExecute(IZipConfig zipConfig) {
+        super.onPostExecute(zipConfig);
         if (activity != null) {
             if (LibZipGlobal.debugEnabled || Global.debugEnabled) {
                 Log.d(LibZipGlobal.LOG_TAG, activity.getClass().getSimpleName() + ": " +
@@ -115,15 +122,21 @@ public class BackupAsyncTask extends AsyncTask<Object, ProgressData, IZipConfig>
                 );
                 Log.d(LibZipGlobal.LOG_TAG, activity.getClass().getSimpleName() + ": " +
                         activity.getText(R.string.backup_title) + " " +
-                        iZipConfig.toString()
+                        zipConfig
                 );
             }
 
-            finish(Activity.RESULT_OK, null);
+            if (zipConfig != null) {
+                finish(" onPostExecute ok ", Activity.RESULT_OK, null);
+            } else {
+                CharSequence lastError = (this.service != null) ? this.service.getLastError(LibZipGlobal.debugEnabled) : null;
+                if (lastError == null) lastError = activity.getText(android.R.string.cancel);
+                finish(" onPostExecute not ok ", Activity.RESULT_CANCELED, lastError);
+            }
         }
     }
 
-    private void finish(int resultCode, CharSequence message) {
+    private void finish(String why, int resultCode, CharSequence message) {
         if (message != null) {
             Intent intent = new Intent();
             intent.putExtra(Common.EXTRA_TITLE, message);
@@ -133,7 +146,7 @@ public class BackupAsyncTask extends AsyncTask<Object, ProgressData, IZipConfig>
         }
         activity.finish();
 
-        setContext(null, null, null);
+        setContext(why + mDebugPrefix + " finish ", null, null, null);
 
     }
 
@@ -145,7 +158,7 @@ public class BackupAsyncTask extends AsyncTask<Object, ProgressData, IZipConfig>
                 Log.d(LibZipGlobal.LOG_TAG, activity.getClass().getSimpleName() + ": " + activity.getText(android.R.string.cancel));
             }
 
-            finish(Activity.RESULT_CANCELED, activity.getText(android.R.string.cancel));
+            finish(mDebugPrefix + " onCancelled ", Activity.RESULT_CANCELED, activity.getText(android.R.string.cancel));
         }
     }
 
@@ -162,7 +175,15 @@ public class BackupAsyncTask extends AsyncTask<Object, ProgressData, IZipConfig>
     @Override
     public boolean onProgress(int itemcount, int size, String message) {
         publishProgress(new ProgressData(itemcount, size, message));
-        return !this.isCancelled();
+
+        final boolean cancelled = this.isCancelled();
+        if (cancelled) {
+            if (this.service != null) this.service.cancel();
+            if (LibZipGlobal.debugEnabled) {
+                Log.d(LibZipGlobal.LOG_TAG, mDebugPrefix + " cancel backup pressed ");
+            }
+        }
+        return !cancelled;
     }
 
     /** called from {@link AsyncTask} in gui task */

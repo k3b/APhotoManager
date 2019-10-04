@@ -42,7 +42,6 @@
         android:id="@+id/lbl_status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="hallo welt\nzeile\nzeile\nzeile\nzeile"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <View

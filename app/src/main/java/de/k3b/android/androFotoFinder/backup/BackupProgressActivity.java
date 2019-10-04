@@ -149,7 +149,7 @@ public class BackupProgressActivity extends LocalizedActivity {
 
             backupAsyncTask = new BackupAsyncTask(this, new ZipConfigDto(mZipConfigData), zipStorage,
                     backupDate);
-            setBackupAsyncTaskProgessReceiver(this);
+            setBackupAsyncTaskProgessReceiver(mDebugPrefix + "onCreate create backupAsyncTask ", this);
             backupAsyncTask.execute();
         }
 
@@ -167,13 +167,13 @@ public class BackupProgressActivity extends LocalizedActivity {
 
     @Override
     protected void onDestroy() {
-        setBackupAsyncTaskProgessReceiver(null);
+        setBackupAsyncTaskProgessReceiver(mDebugPrefix + "onDestroy ", null);
         super.onDestroy();
     }
 
     @Override
     protected void onResume() {
-        setBackupAsyncTaskProgessReceiver(this);
+        setBackupAsyncTaskProgessReceiver(mDebugPrefix + "onResume ", this);
         Global.debugMemory(mDebugPrefix, "onResume");
         super.onResume();
 
@@ -182,28 +182,38 @@ public class BackupProgressActivity extends LocalizedActivity {
     /**
      * (Re-)Connects this activity back with static backupAsyncTask
      */
-    private void setBackupAsyncTaskProgessReceiver(Activity progressReceiver) {
+    private void setBackupAsyncTaskProgessReceiver(String why, Activity progressReceiver) {
+        boolean isActive = BackupAsyncTask.isActive(backupAsyncTask);
+        boolean running = (progressReceiver != null) && isActive;
+
+        String debugContext = why + mDebugPrefix + " setBackupAsyncTaskProgessReceiver isActive=" + isActive +
+                ", running=" + running +
+                " ";
+
         if (backupAsyncTask != null) {
             final ProgressBar progressBar = (ProgressBar) this.findViewById(R.id.progressBar);
             final TextView status = (TextView) this.findViewById(R.id.lbl_status);
-            final Button cancel = (Button) this.findViewById(R.id.cmd_cancel);
+            final Button buttonCancel = (Button) this.findViewById(R.id.cmd_cancel);
 
-            final boolean isActive = BackupAsyncTask.isActive(backupAsyncTask);
-            final boolean running = (progressReceiver != null) && isActive;
-            // setVisibility(running, progressBar, cancel);
+            // setVisibility(running, progressBar, buttonCancel);
 
             if (running) {
-                backupAsyncTask.setContext(this, progressBar, status);
-                cancel.setOnClickListener(new View.OnClickListener() {
+                backupAsyncTask.setContext(debugContext, this, progressBar, status);
+                final String _debugContext = debugContext;
+                buttonCancel.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        if (LibZipGlobal.debugEnabled) {
+                            Log.d(LibZipGlobal.LOG_TAG, mDebugPrefix + " button Cancel backup pressed initialized by " + _debugContext);
+                        }
                         backupAsyncTask.cancel(false);
+                        buttonCancel.setVisibility(View.INVISIBLE);
                     }
                 });
 
             } else {
-                backupAsyncTask.setContext(null, null, null);
-                cancel.setOnClickListener(null);
+                backupAsyncTask.setContext(debugContext, null, null, null);
+                buttonCancel.setOnClickListener(null);
                 if (!isActive) {
                     backupAsyncTask = null;
                 }
