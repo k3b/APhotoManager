@@ -24,7 +24,9 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.text.format.DateFormat;
@@ -70,6 +72,7 @@ import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.DateUtil;
+import de.k3b.io.FileNameUtil;
 import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterFormatter;
 import de.k3b.io.IDirectory;
@@ -159,7 +162,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         IntentUtil.startActivity(debugContext, context, requestCode, intent);
     }
 
-    private static IZipConfig getPreviousZipConfig(Activity context, String zipName) {
+    private static IZipConfig getPreviousZipConfig(BackupActivity context, String zipName) {
         if (zipName != null) {
             File repositoryFile = ZipConfigRepository.getZipConfigFile(zipName);
             if ((repositoryFile != null) && (repositoryFile.exists())) {
@@ -179,7 +182,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         return null;
     }
 
-    private static void showStatistics(Activity context, IZipConfig config, String messagePrefix) {
+    private static void showStatistics(BackupActivity context, IZipConfig config, String messagePrefix) {
         final QueryParameter asMergedQuery
                 = Backup2ZipService.getEffectiveQueryParameter(config);
         CharSequence statistics = TagSql.getStatisticsMessage(context, 0, asMergedQuery);
@@ -188,6 +191,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
             Toast.makeText(context, messagePrefix + statistics, Toast.LENGTH_LONG).show();
         }
 
+        context.gui.resetBackgroundColor();
         showStatus(context, statistics);
     }
 
@@ -635,6 +639,12 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
      * save exif changes back to image and database
      */
     private boolean onBakupOk() {
+        CharSequence error = gui.validate();
+        if (error != null) {
+            Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+            showStatus(this, error);
+            return false;
+        }
         saveGuiToData();
         gui.mHistory.saveHistory();
 
@@ -707,6 +717,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
                             }
                         }
                     }
+                    resetBackgroundColor();
 
                     return result;
                 }
@@ -796,12 +807,15 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
 
         @Override
         public String getZipName() {
-            return editZipName.getText().toString();
+            // remove illegal chars
+            final String result = FileNameUtil.createFileName(editZipName.getText().toString().trim(), null);
+            return result;
         }
 
         @Override
         public String getZipDir() {
-            return editZipDir.getText().toString();
+            final String result = editZipDir.getText().toString().trim();
+            return result;
         }
 
         @Override
@@ -848,6 +862,37 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
                 return filter + FILTER_DELIMITER + value;
             }
             return "";
+        }
+
+        public void resetBackgroundColor() {
+            setBackgroundColor(false, editZipName, editZipDir);
+        }
+
+        private void setBackgroundColor(boolean yellowIfError, EditText... edits) {
+            for (EditText edit : edits) {
+                if ((yellowIfError) && edit.getText().toString().trim().length() == 0) {
+                    edit.setBackgroundColor(Color.YELLOW);
+                } else {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        edit.setBackground(editFilter.getBackground());
+                    } else {
+                        edit.setBackgroundColor(Color.WHITE);
+                    }
+                }
+            }
+        }
+
+        public CharSequence validate() {
+            setBackgroundColor(true, editZipName, editZipDir);
+
+            StringBuilder error = new StringBuilder();
+            if (getZipName().length() == 0)
+                error.append(getString(R.string.lbl_zip_name)).append("? ");
+            if (getZipDir().length() == 0)
+                error.append(getString(R.string.lbl_zip_dir)).append("?");
+
+            if (error.length() == 0) return null;
+            return error;
         }
     }
 
