@@ -52,6 +52,11 @@ public class IntentUtil implements Common {
 
     /** either file: or content-uri. If content-uri translate to file uri */
     public static String getFilePath(Context context, Uri uri) {
+        File result = getExistingFileOrNull(context, uri);
+        return (null == result) ? null : result.getAbsolutePath();
+    }
+
+    public static File getExistingFileOrNull(Context context, Uri uri) {
         // Uri uri = IntentUtil.getUri(intent);
         String path = null;
         if (uri != null) {
@@ -75,15 +80,9 @@ public class IntentUtil implements Common {
 
             // #118 app specific content uri convert from //storage/emulated/0/DCIM/... to /storage/emulated/0/DCIM/
             if ((path != null) && (path.startsWith("//"))) path = path.substring(1);
-            final File file = getExistingFileOrNull(path);
-
-            if (file == null) {
-                path = null;
-                Log.i(Global.LOG_CONTEXT, "Cannot translate from '" + uri +
-                        "' to local file");
-            }
+            return getExistingFileOrNull(path);
         }
-        return path;
+        return null;
     }
 
     /** get uri from data. if there is no data from EXTRA_STREAM */

@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,7 +39,7 @@ import de.k3b.io.StringUtils;
 public class ZipConfigRepository implements IZipConfig {
     private static final Logger logger = LoggerFactory.getLogger(LibZipGlobal.LOG_TAG);
 
-    private static final String FILE_SUFFIX = ".zip.apm.config";
+    public static final String FILE_SUFFIX = ".zip.apm.config";
     private Properties data = new Properties();
 
     /** added to every serialized item if != null. Example "Generated on 2015-10-19 with myApp Version 0815." */
@@ -81,17 +82,6 @@ public class ZipConfigRepository implements IZipConfig {
         return false;
     }
 
-    public static File getZipConfigFile(String zipName) {
-        if (zipName == null) return null;
-
-        File zipFileDir = LibGlobal.zipFileDir;
-        String fileName = FileUtils.replaceExtension(zipName, FILE_SUFFIX);
-        if ((zipFileDir == null) || (fileName == null)) return null;
-
-        File configFile = new File(zipFileDir, fileName);
-        return configFile;
-    }
-
     public File getZipConfigFile() {
         final String zipName = this.getZipName();
         return getZipConfigFile(zipName);
@@ -127,5 +117,32 @@ public class ZipConfigRepository implements IZipConfig {
 
     private String get(String key) {
         return data.getProperty(key);
+    }
+
+    public static IZipConfig getZipConfigOrNull(String zipName) {
+        if (zipName != null) {
+            File repositoryFile = getZipConfigFile(zipName);
+            if ((repositoryFile != null) && (repositoryFile.exists())) {
+                try {
+                    IZipConfig repo = new ZipConfigRepository(null).load(new FileInputStream(repositoryFile), repositoryFile);
+                    if (repo != null) {
+                        return new ZipConfigDto(repo);
+                    }
+                } catch (IOException ignore) {
+                }
+            }
+        }
+        return null;
+    }
+
+    public static File getZipConfigFile(String zipName) {
+        if (zipName == null) return null;
+
+        File zipFileDir = LibGlobal.zipFileDir;
+        String fileName = FileUtils.replaceExtension(zipName, ZipConfigRepository.FILE_SUFFIX);
+        if ((zipFileDir == null) || (fileName == null)) return null;
+
+        File configFile = new File(zipFileDir, fileName);
+        return configFile;
     }
 }

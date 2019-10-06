@@ -27,7 +27,6 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.io.File;
-import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.Date;
 
@@ -37,7 +36,6 @@ import de.k3b.android.androFotoFinder.media.PhotoPropertiesMediaDBCursor;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.database.QueryParameter;
-import de.k3b.io.FileUtils;
 import de.k3b.io.IItemSaver;
 import de.k3b.io.IProgessListener;
 import de.k3b.io.StringUtils;
@@ -73,23 +71,6 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
 
     // used to translate ZipLog.traceMessage() to become IProgessListener
     private int lastZipItemNumber = 0;
-
-    public static IZipConfig loadZipConfig(Uri uri, Context context) {
-        if ((uri != null) && ZipConfigRepository.isZipConfig(uri.toString())) {
-            InputStream inputsteam = null;
-            try {
-                inputsteam = context.getContentResolver().openInputStream(uri);
-                return new ZipConfigRepository(null).load(inputsteam, uri);
-            } catch (Exception ex) {
-                // file not found or no permission
-                Log.w(LibZipGlobal.LOG_TAG, mDebugPrefix + context.getClass().getSimpleName()
-                            + "-loadZipConfig(" + uri + ") failed " + ex.getClass().getSimpleName(), ex);
-            } finally {
-                FileUtils.close(inputsteam, uri);
-            }
-        }
-        return null;
-    }
 
     public Backup2ZipService(Context context, IZipConfig zipConfig, ZipStorage zipStorage,
                              Date backupDate) {

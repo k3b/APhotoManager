@@ -88,7 +88,11 @@ public class HistoryEditText {
      * define history function for these editors
      */
     public HistoryEditText(Context context, int[] cmdIds, EditText... editors) {
-        this(context, context.getClass().getSimpleName() + "_history_", "';'", 8, cmdIds, editors);
+        this(context, getEditIdPrefix(context), "';'", 8, cmdIds, editors);
+    }
+
+    public static String getEditIdPrefix(Context context) {
+        return context.getClass().getSimpleName() + "_history_";
     }
 
     /**
@@ -128,6 +132,10 @@ public class HistoryEditText {
         edit.apply();
     }
 
+    protected String formatMenuItemText(String historyId, String itemText) {
+        return itemText;
+    }
+
     /** ContextActionBar for one EditText */
     protected class EditorHandler implements View.OnLongClickListener, View.OnClickListener  {
         private final EditText mEditor;
@@ -161,7 +169,7 @@ public class HistoryEditText {
             int len = items.size();
             if (len > MENU_COUNT_MAX) len = MENU_COUNT_MAX;
             for (int i = 0; i < len; i++) {
-                String text = items.get(i).trim();
+                String text = formatMenuItemText(mId, items.get(i).trim());
 
                 if (text != null) {
                     root.add(Menu.NONE, i + ID_OFFSET, Menu.NONE, getCondensed(text));

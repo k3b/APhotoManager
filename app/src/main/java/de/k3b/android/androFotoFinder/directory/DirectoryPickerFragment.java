@@ -62,7 +62,6 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.backup.BackupActivity;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailMetaDialogBuilder;
-import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoThumbSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
@@ -499,11 +498,9 @@ public class DirectoryPickerFragment extends DialogFragment
         if ((menuItem != null) && (dir != null)) {
             IGalleryFilter currentSelectionAsFilter = getCurrentSelectionAsFilter(dir, this.mDirTypId);
             String dbgContext = " menu " + menuItem.getTitle();
-            QueryParameter query = AndroidAlbumUtils.getAsAlbumOrMergedNewQuery(
-                    dbgContext, mContext, baseQuery, currentSelectionAsFilter);
             BackupActivity.showActivity(dbgContext,
-                    mContext, null, null, null,
-                    query, dir.getAbsolute(), BackupActivity.REQUEST_BACKUP_ID);
+                    mContext, null, currentSelectionAsFilter,
+                    baseQuery, BackupActivity.REQUEST_BACKUP_ID);
         }
         return true;
     }

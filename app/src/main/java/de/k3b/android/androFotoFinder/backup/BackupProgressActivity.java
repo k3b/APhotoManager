@@ -58,7 +58,7 @@ public class BackupProgressActivity extends LocalizedActivity {
      */
     public static final boolean USE_DOCUMENT_PROVIDER = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP);
 
-    private static final String EXTRA_STATE_ZIP_CONFIG = "zip_config";
+    protected static final String EXTRA_STATE_ZIP_CONFIG = "zip_config";
     private static String mDebugPrefix = "BuProgressActivity: ";
 
     // != null while async backup is running
