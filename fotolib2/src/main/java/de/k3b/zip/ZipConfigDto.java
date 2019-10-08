@@ -23,7 +23,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import de.k3b.io.FileNameUtil;
-import de.k3b.io.FileUtils;
 
 public class ZipConfigDto implements IZipConfig, Serializable {
     private static final String ZIP_FILE_NAME_SUFFIX = ".yyyyMMdd-HHmmss";
@@ -78,11 +77,7 @@ public class ZipConfigDto implements IZipConfig, Serializable {
     }
 
     public static String fixZipBaseName(String zipName) {
-        if (zipName != null) {
-            // remove illegal chars or file extension
-            return FileNameUtil.createFileName(FileUtils.replaceExtension(zipName, ""), "");
-        }
-        return null;
+        return FileNameUtil.createFileNameWitoutExtension(zipName);
     }
 
     @Override

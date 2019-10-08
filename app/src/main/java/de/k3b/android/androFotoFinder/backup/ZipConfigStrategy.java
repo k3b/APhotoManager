@@ -110,7 +110,7 @@ public class ZipConfigStrategy {
                 config.setFilter(merged.toReParseableString());
             }
 
-            String path = FileNameUtil.getWithoutWildcard(FileUtils.fixPath(FotoSql.getFilePath(merged, false)));
+            String path = FileNameUtil.fixPath(FotoSql.getFilePath(merged, false));
             if (path != null) {
                 if (StringUtils.isNullOrEmpty(config.getZipRelPath())) {
                     config.setZipRelPath(path);

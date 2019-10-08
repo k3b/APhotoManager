@@ -24,7 +24,12 @@ package de.k3b.io;
  */
 public class FileNameUtil {
 
-    /** converts baseName to a valid filename. If it has no file-extension then defaultExtension is added */
+    /**
+     * converts baseName to a valid filename by replacing illegal chars.
+     * If it has no file-extension then defaultExtension is added
+     *
+     * @param defaultExtension the new extension, excluding the dot. null means no extension.
+     */
     public static String createFileName(String baseName, String defaultExtension) {
         StringBuilder result = new StringBuilder(baseName);
 
@@ -51,12 +56,31 @@ public class FileNameUtil {
         return result.toString();
     }
 
+    /**
+     * converts baseName to a valid filename by replacing illegal chars.
+     */
+    public static String createFileNameWitoutExtension(String fileNameCandidate) {
+        if (fileNameCandidate != null) {
+            // remove illegal chars or file extension
+            return FileNameUtil.createFileName(FileUtils.replaceExtension(fileNameCandidate, ""), null);
+        }
+        return null;
+    }
+
     public static String getWithoutWildcard(String path) {
         if ((path == null) || (path.length() == 0)) return null;
         if (path.endsWith("%")) {
             // remove sql wildcard at end of name
             return path.substring(0, path.length() - 1);
         }
+        return path;
+    }
+
+    /**
+     * converts filePath to a valid path by removing potential sql-wildcards and android specigic "//"
+     */
+    public static String fixPath(String filePath) {
+        String path = FileNameUtil.getWithoutWildcard(FileUtils.fixPath(filePath));
         return path;
     }
 

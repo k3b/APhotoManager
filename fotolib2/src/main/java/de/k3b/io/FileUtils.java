@@ -174,7 +174,11 @@ public class FileUtils {
         return result.toString();
     }
 
-    /** replaceExtension("/path/to/image.jpg", ".xmp") becomes "/path/to/image.xmp" */
+    /**
+     * replaceExtension("/path/to/image.jpg", ".xmp") becomes "/path/to/image.xmp"
+     *
+     * @param extension the new extension, including the dot. "" means no extension.
+     */
     public static String replaceExtension(String path, String extension) {
         if (path == null) return null;
         int ext = path.lastIndexOf(".");
