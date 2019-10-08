@@ -35,6 +35,20 @@ package de.k3b.android.androFotoFinder.backup;
 
 This is a PlantUML diagram
 
+
+@startuml
+title Backup to Zip
+
+[*] --> Gallery
+[*] --> Filter
+[*] --> DirPicker
+
+Gallery --> Backup_to_zip : < selected\n files
+Gallery --> Backup_to_zip : current\n filter
+Filter --> Backup_to_zip
+DirPicker --> Backup_to_zip : contextmenu\n current directory
+@enduml
+
 @startuml
 title Backup to Zip
 
