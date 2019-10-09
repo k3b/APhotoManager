@@ -100,9 +100,14 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
         if (zipConfigFile != null) {
             QueryParameter filter = getEffectiveQueryParameter(zipConfig);
 
+            String zipRelPath = zipConfig.getZipRelPath();
 
             // pipline for (IPhotoProperties item: query(filter)) : csv+=toCsv(item)
             final PhotoPropertiesCsvStringSaver csvFromQuery = new PhotoPropertiesCsvStringSaver();
+
+            if (!StringUtils.isNullOrEmpty(zipRelPath)) {
+                csvFromQuery.setCompressFilePathMode(zipRelPath);
+            }
 
             onProgress(0, 0,
                     "query images " + ((Global.debugEnabledSql) ? filter : ""));
@@ -110,7 +115,6 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
             if (this.continueProcessing) {
                 job = new ApmZipCompressJob(context, this, "history.log");
                 job.setZipStorage(zipStorage);
-                String zipRelPath = zipConfig.getZipRelPath();
                 if (!StringUtils.isNullOrEmpty(zipRelPath)) {
                     FileCompressItem.setZipRelPath(new File(zipRelPath));
                 }

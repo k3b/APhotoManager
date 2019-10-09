@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2018 by k3b.
+ * Copyright (c) 2016-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -22,15 +22,15 @@ package de.k3b.media;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 
-import de.k3b.csv2db.csv.CsvLoader;
 import de.k3b.TestUtil;
+import de.k3b.csv2db.csv.CsvLoader;
 import de.k3b.io.DateUtil;
+import de.k3b.io.FileNameUtil;
 
 /**
  * Created by k3b on 11.10.2016.
@@ -119,4 +119,24 @@ public class MediaCsvTests {
         System.out.println(csv);
 
     }
+
+    @Test
+    public void shouldCreateCsvWithRelPath() {
+        PhotoPropertiesCsvSaver sut = new PhotoPropertiesCsvStringSaver()
+                .setCompressFilePathMode("/path/");
+        sut.save(createDir("/path/a/1.txt"));
+        sut.save(createDir("/other/b/2.txt"));
+        sut.save(createDir("3.txt"));
+
+        // if run unter ms windows
+        String result = sut.toString().replace('\\', '/');
+        Assert.assertTrue(result, result.contains("a/1.txt\n" +
+                "2.txt\n" +
+                "3.txt"));
+    }
+
+    private IPhotoProperties createDir(String s) {
+        return new PhotoPropertiesDTO().setPath(FileNameUtil.getCanonicalPath(new File(s)));
+    }
+
 }
