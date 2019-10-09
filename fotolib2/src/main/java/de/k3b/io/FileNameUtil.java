@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 by k3b.
+ * Copyright (c) 2018-2019 by k3b.
  *
  * This file is part of #APhotoManager (https://github.com/k3b/APhotoManager/)
  *              and #toGoZip (https://github.com/k3b/ToGoZip/).
@@ -18,6 +18,8 @@
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
 package de.k3b.io;
+
+import java.io.File;
 
 /**
  * Created by k3b on 17.02.2015.
@@ -93,5 +95,32 @@ public class FileNameUtil {
                 found = result.indexOf(illegalValue);
             }
         }
+    }
+
+
+    /**
+     * so that files are comparable
+     */
+    public static String getCanonicalPath(File zipRelPath) {
+        File canonicalFile = FileUtils.tryGetCanonicalFile(zipRelPath);
+        if (canonicalFile != null) {
+            return FileUtils.fixPath(canonicalFile.getAbsolutePath());
+        }
+        return null;
+    }
+
+    /**
+     * @return either srcFile without leading relativeToPath or null if srcFile is not relative to relativeToPath
+     */
+    public static String makePathRelative(String relativeToPath, File srcFile) {
+        String result = null;
+        if (!StringUtils.isNullOrEmpty(relativeToPath)) {
+            String srcPath = getCanonicalPath(srcFile);
+            boolean match = srcPath.toLowerCase().startsWith(relativeToPath);
+            if (match) {
+                result = srcPath.substring(relativeToPath.length() + 1);
+            }
+        }
+        return result;
     }
 }
