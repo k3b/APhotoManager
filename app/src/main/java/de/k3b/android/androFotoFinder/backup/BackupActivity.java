@@ -43,6 +43,7 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.Serializable;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -628,6 +629,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
                     editFilter) {
 
                 private final String historyFilter = getEditIdPrefix(BackupActivity.this) + 4;
+                private final String historyZipDir = getEditIdPrefix(BackupActivity.this) + 3;
 
                 @Override
                 protected boolean onHistoryPick(EditorHandler editorHandler, EditText editText, String text) {
@@ -659,6 +661,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
 
                 @Override
                 protected String formatMenuItemText(String historyId, String itemText) {
+                    final int ItemLenLimit = 25;
                     if (historyFilter.compareTo(historyId) == 0) {
                         QueryParameter query = QueryParameter.parse(itemText);
                         String details = formatter.format(TagSql.parseQueryEx(query, true)).toString();
@@ -668,6 +671,16 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
                                     .replace(DCIM_ROOT, "");
                         }
                     }
+
+                    if (historyZipDir.compareTo(historyId) == 0) {
+                        // make document-uri more readable
+                        itemText = URLDecoder.decode(itemText);
+                    }
+                    if (itemText.length() > ItemLenLimit) {
+                        // show only last 30 chars
+                        return "..." + itemText.substring(itemText.length() - ItemLenLimit);
+                    }
+
                     return super.formatMenuItemText(historyId, itemText);
                 }
             }.setIncludeEmpty(true);
