@@ -17,7 +17,7 @@ public class StringFormatResourceTests {
         if (Global.debugEnabled && LibGlobal.debugEnabled)
         Log.i(Global.LOG_CONTEXT,ListUtils.toString("\n\t"
                 ,"testing some translations with parameters"
-                ,AndroFotoFinderApp.getBookMarkComment(context)
+                , AndroFotoFinderApp.getGetTeaserText(context, null)
                 ,AndroidFileCommands.getModifyMessage(context, AndroidFileCommands.OP_DELETE, 5, 15)
                 ,context.getString(R.string.folder_hide_images_question_message_format, "param")
                 ,context.getString(R.string.global_err_sql_message_format, "param", "param2")

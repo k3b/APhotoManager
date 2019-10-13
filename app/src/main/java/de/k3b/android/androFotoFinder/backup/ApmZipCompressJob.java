@@ -29,7 +29,7 @@ public class ApmZipCompressJob extends CompressJob {
 
     /** footer added to text collector. null means no text. */
     @Override protected String getTextFooter() {
-        String result = AndroFotoFinderApp.getBookMarkComment(this.context); // "Collected with ToGoZip version ...";
+        String result = "# " + AndroFotoFinderApp.getGetTeaserText(this.context, AndroFotoFinderApp.LINK_URL_CSV); // "Collected with ToGoZip version ...";
 
         final String versionName = GuiUtil.getAppVersionName(context);
         if (versionName != null) {
