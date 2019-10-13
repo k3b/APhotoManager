@@ -25,9 +25,36 @@ public class ProgressFormatterTest {
 
     @Test
     public void format() {
+
         long t3_15 = 3 * 60 + 15;
 
-        Assert.assertEquals("1/60  00:03:15/03:15:00", ProgressFormatter.format(t3_15, 1, 60).toString());
-        Assert.assertEquals("60/60  00:03:15/00:03:15", ProgressFormatter.format(t3_15, 60, 60).toString());
+        int durationLoopingStart = 0;
+        int countLoopingStart = 0;
+
+        int first = 1;
+        int last = 60;
+
+        Assert.assertEquals("a", "1/60  00:03:15/03:15:00", ProgressFormatter.format(t3_15,
+                first + countLoopingStart, last + countLoopingStart, durationLoopingStart, countLoopingStart).toString());
+
+        Assert.assertEquals("b", "60/60  00:03:15/00:03:15", ProgressFormatter.format(t3_15,
+                last + countLoopingStart, last + countLoopingStart, durationLoopingStart, countLoopingStart).toString());
+
+        durationLoopingStart = 1;
+        countLoopingStart = 100;
+
+        Assert.assertEquals("c", "101/160  00:03:16/03:15:01", ProgressFormatter.format(t3_15,
+                first + countLoopingStart, last + countLoopingStart, durationLoopingStart, countLoopingStart).toString());
+        Assert.assertEquals("d", "160/160  00:03:16/00:03:16", ProgressFormatter.format(t3_15,
+                last + countLoopingStart, last + countLoopingStart, durationLoopingStart, countLoopingStart).toString());
+
+        durationLoopingStart = 3600;
+        countLoopingStart = 100;
+
+        Assert.assertEquals("e", "101/160  01:03:15/04:15:00", ProgressFormatter.format(t3_15,
+                first + countLoopingStart, last + countLoopingStart, durationLoopingStart, countLoopingStart).toString());
+        Assert.assertEquals("f", "160/160  01:03:15/01:03:15", ProgressFormatter.format(t3_15,
+                last + countLoopingStart, last + countLoopingStart, durationLoopingStart, countLoopingStart).toString());
+
     }
 }

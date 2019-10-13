@@ -20,29 +20,43 @@ package de.k3b.zip;
 
 import java.util.Date;
 
+/**
+ * Displayed Textmessage with progress information while "Backup to zip" is active
+ * <p>
+ * Example: 870/1126 00:00:17/00:00:22
+ * Meaning 870 of 1126 files processed; 0 hours o minutes and 17 seconds of estimated 22 seconds
+ */
 public class ProgressFormatter {
-    private final long startTime;
+    private final long timeStart;
+
+    // xxxLooping is set when count parameter in format is not 0 for the first time
+    private long timeLoopingStart;
+    private long countLoopingStart;
+    private long durationLoopingStart;
 
     public ProgressFormatter() {
-        this(new Date());
-    }
-
-    protected ProgressFormatter(Date startTime) {
-        this.startTime = startTime.getTime();
+        this.timeStart = nowInMillisecs();
     }
 
     /**
-     * scope protexted to ease unittesting
+     * scope protected to ease unittesting
+     *
+     * @param durationInSecondsSinceLoopStart time spend excluding durationLoopingStart
+     * @param count how many items have already been processed (including countLoopingStart)
+     * @param total (how many item will be processed)
+     * @param durationLoopingStart (how much time has gone by before estimated total calculation started)
+     * @param countLoopingStart (how many items where processed before estimated total calculation started)
+     * @return formatted string
      */
-    protected static CharSequence format(long durationInSeconds, int count, int total) {
+    protected static CharSequence format(long durationInSecondsSinceLoopStart, int count, int total, long durationLoopingStart, long countLoopingStart) {
         StringBuilder result = new StringBuilder();
 
         result.append(count).append("/").append(total);
 
-        if (durationInSeconds > 10) {
-            long totalSeconds = (durationInSeconds * total / count);
-            addTime(result, "  ", durationInSeconds);
-            addTime(result, "/", totalSeconds);
+        if ((count > countLoopingStart) && (durationInSecondsSinceLoopStart > 10)) {
+            long totalSeconds = ((durationInSecondsSinceLoopStart) * (total - countLoopingStart) / (count - countLoopingStart));
+            addTime(result, "  ", durationInSecondsSinceLoopStart + durationLoopingStart);
+            addTime(result, "/", totalSeconds + durationLoopingStart);
         }
         return result;
     }
@@ -67,7 +81,21 @@ public class ProgressFormatter {
     }
 
     public CharSequence format(int count, int total) {
-        long durationInSeconds = (new Date().getTime() - startTime) / 1000;
-        return format(durationInSeconds, count, total);
+        long now = nowInMillisecs();
+        long durationInSecondsSinceLoopStart = 0;
+
+        if (count > 0) {
+            if (this.countLoopingStart == 0) {
+                this.countLoopingStart = count;
+                this.timeLoopingStart = now;
+                this.durationLoopingStart = (now - timeStart) / 1000;
+            }
+            durationInSecondsSinceLoopStart = (now - durationLoopingStart) / 1000;
+        }
+        return format(durationInSecondsSinceLoopStart, count, total, this.durationLoopingStart, this.countLoopingStart);
+    }
+
+    protected long nowInMillisecs() {
+        return new Date().getTime();
     }
 }
