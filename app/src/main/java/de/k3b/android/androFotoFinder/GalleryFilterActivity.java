@@ -36,6 +36,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RatingBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -408,6 +409,11 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         // refWatcher.watch(this);
     }
 
+    private void toGui(IGalleryFilter gf) {
+        mFilterValue.get(gf);
+        mFilterValue.showAdditionalSqlWhere();
+    }
+
     /** gui content seen as IGalleryFilter */
     private class FilterValue implements IGalleryFilter {
         final private java.text.DateFormat isoDateformatter = new SimpleDateFormat(
@@ -431,6 +437,8 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         private EditText mAny            ;
         private EditText mTagsInclude    ;
         private EditText mTagsExclude    ;
+        private TextView mAdditionalSqlWhere;
+
         private VISIBILITY mVisibility = VISIBILITY.DEFAULT;
 
         FilterValue() {
@@ -451,6 +459,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             this.mRatingBar = (RatingBar ) findViewById(R.id.ratingBar);
             this.mPublic        = (CheckBox) findViewById(R.id.chk_public);
             this.mPrivate       = (CheckBox) findViewById(R.id.chk_private);
+            mAdditionalSqlWhere = (TextView) findViewById(R.id.lbl_additional_sql_where);
 
             mWithNoGeoInfo.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -493,6 +502,19 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
                     mAny             ,
                     mTagsInclude     ,
                     mTagsExclude).setIncludeEmpty(true);
+        }
+
+        protected void showAdditionalSqlWhere() {
+
+            if ((mQueryWithoutFilter != null) && (mQueryWithoutFilter.hasWhere())) {
+                QueryParameter query = mQueryWithoutFilter;
+                StringBuilder result = new StringBuilder();
+                query.toParsableWhere(result);
+                mAdditionalSqlWhere.setText(result);
+
+            } else {
+                mAdditionalSqlWhere.setText("");
+            }
         }
 
         protected void showVisibility(VISIBILITY visibility) {
@@ -713,10 +735,6 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             return new GalleryFilterParameter().get(this).toString();
         }
 
-    }
-
-    private void toGui(IGalleryFilter gf) {
-        mFilterValue.get(gf);
     }
 
     private boolean fromGui(IGalleryFilter dest) {

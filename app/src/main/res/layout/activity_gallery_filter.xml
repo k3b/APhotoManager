@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -44,6 +44,8 @@
         lbl_date_modified
             edit_date_modified_from
             edit_date_modified_to
+
+        lbl_additional_sql_where (additional sql where if present)
 
  -->
 <ScrollView
@@ -622,6 +624,12 @@
             android:inputType="date" />
         <!--  lbl_any + edit_any + cmd_any_history + cmd_any -->
 
+        <TextView
+            android:id="@+id/lbl_additional_sql_where"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/edit_date_modified_to"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
 
     </RelativeLayout>
 </ScrollView>
