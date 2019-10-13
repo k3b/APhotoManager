@@ -15,6 +15,7 @@ import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.AlbumFile;
 import de.k3b.io.FileNameUtil;
 import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
@@ -26,6 +27,9 @@ import de.k3b.zip.LibZipGlobal;
 import de.k3b.zip.ZipConfigDto;
 import de.k3b.zip.ZipConfigRepository;
 
+/**
+ * infer existing or new ZipConfig from current context (intent)
+ */
 public class ZipConfigStrategy {
     private static String mDebugPrefix = "ZipConfigStrategy ";
 
@@ -45,12 +49,15 @@ public class ZipConfigStrategy {
                                          IGalleryFilter filter, QueryParameter query) {
         String dbgSource = null;
         IZipConfig config = null;
+        boolean inferPath = true;
+
         if ((selectedFiles != null) && (selectedFiles.size() > 0)) {
             config = new ZipConfigDto(null);
             config.setZipName(getSelectedFilesName(context));
             QueryParameter queryWithIds = new QueryParameter(FotoSql.queryDetail);
             FotoSql.setWhereSelectionPks(queryWithIds, selectedFiles.toIdString());
-            inferMissingParameters(config, queryWithIds, null);
+            inferPath = false;
+            inferMissingParameters(config, queryWithIds, null, inferPath);
             dbgSource = "create '" + config.getZipName() + "' from selection " + selectedFiles.toIdString();
             new ZipConfigRepository(config).save();
         }
@@ -62,30 +69,32 @@ public class ZipConfigStrategy {
             if (null == config) {
                 config = loadOrCreateFromExistingAlbumUri(context, uri);
                 dbgSource = "load or create '" + config.getZipName() + "' from Existing Album Uri " + uri;
+                inferPath = false;
             }
             if (null == config) {
-                config = loadOrCreateFromExistingFileDirUri(context, uri);
+                config = loadOrCreateFromExistingFileDirUri(context, uri, inferPath);
                 dbgSource = "load or create '" + config.getZipName() + "' from Existing file Uri " + uri;
             }
         }
 
         if (config == null) {
             config = new ZipConfigDto(null);
-            inferMissingParameters(config, query, filter);
+            inferMissingParameters(config, query, filter, inferPath);
             dbgSource = "create '" + config.getZipName() + "' from query+filter ";
+        }
+
+        if (LibZipGlobal.debugEnabled) {
+            Log.d(LibZipGlobal.LOG_TAG, mDebugPrefix + context.getClass().getSimpleName()
+                    + ": getOrCreate(" + dbgSource + ")");
         }
 
         if (!(config instanceof Serializable)) {
             return new ZipConfigDto(config);
         }
-        if (LibZipGlobal.debugEnabled) {
-            Log.d(LibZipGlobal.LOG_TAG, mDebugPrefix + context.getClass().getSimpleName()
-                    + ": getOrCreate(" + dbgSource + ")");
-        }
         return config;
     }
 
-    private static IZipConfig loadOrCreateFromExistingFileDirUri(Activity context, Uri uri) {
+    private static IZipConfig loadOrCreateFromExistingFileDirUri(Activity context, Uri uri, boolean inferPath) {
         IZipConfig config = null;
         if (uri != null) {
             File file = IntentUtil.getExistingFileOrNull(context, uri);
@@ -96,14 +105,22 @@ public class ZipConfigStrategy {
                 if (config == null) {
                     config = new ZipConfigDto(null);
                     GalleryFilterParameter uriPathfilter = new GalleryFilterParameter().setPath(file.getAbsolutePath() + "/%");
-                    inferMissingParameters(config, null, uriPathfilter);
+                    inferMissingParameters(config, null, uriPathfilter, inferPath);
                 }
             }
         }
         return config;
     }
 
-    private static void inferMissingParameters(IZipConfig config, QueryParameter baseQuery, IGalleryFilter filter) {
+    private static void inferMissingParameters(IZipConfig config, QueryParameter baseQuery, IGalleryFilter filter, boolean inferPath) {
+        String albumFile = null;
+        if ((filter != null) && (AlbumFile.isQueryFile(filter.getPath()))) {
+            albumFile = filter.getPath();
+            if (StringUtils.isNullOrEmpty(config.getZipName())) {
+                config.setZipName(new File(AlbumFile.fixPath(albumFile)).getName());
+            }
+            filter = new GalleryFilterParameter().get(filter).setPath(null);
+        }
         QueryParameter merged = getAsMergedQuery(baseQuery, filter);
         if ((merged != null) && merged.hasWhere()) {
             if (StringUtils.isNullOrEmpty(config.getFilter())) {
@@ -112,7 +129,7 @@ public class ZipConfigStrategy {
 
             String path = FileNameUtil.fixPath(FotoSql.getFilePath(merged, false));
             if (path != null) {
-                if (StringUtils.isNullOrEmpty(config.getZipRelPath())) {
+                if (inferPath && StringUtils.isNullOrEmpty(config.getZipRelPath())) {
                     config.setZipRelPath(path);
                 }
                 if (StringUtils.isNullOrEmpty(config.getZipName())) {
@@ -146,7 +163,7 @@ public class ZipConfigStrategy {
 
             if (config == null) {
                 config = new ZipConfigDto(null);
-                inferMissingParameters(config, album, null);
+                inferMissingParameters(config, album, null, false);
                 if (!StringUtils.isNullOrEmpty(zipName)) {
                     config.setZipName(zipName);
                 }

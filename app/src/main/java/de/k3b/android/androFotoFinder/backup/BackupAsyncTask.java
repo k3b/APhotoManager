@@ -76,7 +76,7 @@ public class BackupAsyncTask extends AsyncTask<Object, ProgressData, IZipConfig>
     public BackupAsyncTask(Context context, ZipConfigDto mZipConfigData, ZipStorage zipStorage,
                            Date backupDate) {
         this.service = new Backup2ZipService(context.getApplicationContext(),
-                mZipConfigData, zipStorage, backupDate);
+                mZipConfigData, zipStorage, backupDate, BackupOptions.ALL);
 
         formatter = new ProgressFormatter();
     }

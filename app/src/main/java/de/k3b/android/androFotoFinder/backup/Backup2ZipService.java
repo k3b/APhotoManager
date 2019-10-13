@@ -53,6 +53,7 @@ import de.k3b.zip.ZipLog;
 import de.k3b.zip.ZipLogImpl;
 import de.k3b.zip.ZipStorage;
 
+
 /**
  * #108: Zip-file support: backup-or-copy filtered-or-selected photos to Zip-file.
  * Gui independant service to load/save/execute the backup and it-s parameters
@@ -63,6 +64,7 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
     private final IZipConfig zipConfig;
     private final ZipStorage zipStorage;
     private final Date backupDate;
+    private final int jobOptions;
     private IProgessListener progessListener = null;
     private final ZipLog zipLog;
     private CompressJob job = null;
@@ -73,7 +75,7 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
     private int lastZipItemNumber = 0;
 
     public Backup2ZipService(Context context, IZipConfig zipConfig, ZipStorage zipStorage,
-                             Date backupDate) {
+                             Date backupDate, int jobOptions) {
 
         this.context = context;
         this.zipConfig = zipConfig;
@@ -81,6 +83,7 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
 
         //!!! after success add this date into config before save
         this.backupDate = backupDate;
+        this.jobOptions = jobOptions;
         this.zipLog = (LibZipGlobal.debugEnabled) ? new ZipLogImpl(true) : null;
     }
 
@@ -103,9 +106,11 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
             String zipRelPath = zipConfig.getZipRelPath();
 
             // pipline for (IPhotoProperties item: query(filter)) : csv+=toCsv(item)
-            final PhotoPropertiesCsvStringSaver csvFromQuery = new PhotoPropertiesCsvStringSaver();
+            final PhotoPropertiesCsvStringSaver csvFromQuery = (BackupOptions.allOf(jobOptions, BackupOptions.PROPERTIES_AS_CSV))
+                    ? new PhotoPropertiesCsvStringSaver()
+                    : null;
 
-            if (!StringUtils.isNullOrEmpty(zipRelPath)) {
+            if ((csvFromQuery != null) && !StringUtils.isNullOrEmpty(zipRelPath)) {
                 csvFromQuery.setCompressFilePathMode(zipRelPath);
             }
 
@@ -119,26 +124,32 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
                     FileCompressItem.setZipRelPath(new File(zipRelPath));
                 }
 
-                // pipline for (IPhotoProperties item: query(filter)) : Zip+=File(item)
-                final IItemSaver<File> file2ZipSaver = new IItemSaver<File>() {
-                    @Override
-                    public boolean save(File item) {
-                        CompressItem compressItem = job.addToCompressQue("", item);
+                PhotoProperties2ExistingFileSaver media2fileZipSaver = null;
+                boolean addPhotos = BackupOptions.allOf(jobOptions, BackupOptions.PHOTOS_WITH_EXISTING_XMP);
+                if (addPhotos) {
+                    // pipline for (IPhotoProperties item: query(filter)) : Zip+=File(item)
+                    final IItemSaver<File> file2ZipSaver = new IItemSaver<File>() {
+                        @Override
+                        public boolean save(File item) {
+                            CompressItem compressItem = job.addToCompressQue("", item);
                         /*
                         if (PhotoPropertiesUtil.isImage(item.getName(), PhotoPropertiesUtil.IMG_TYPE_COMPRESSED)) {
                             // performance improvement: jpg-s should not be compressed
                             compressItem.setDoCompress(false);
                         }
                         */
-                        return true;
-                    }
-                };
+                            return true;
+                        }
+                    };
 
-                final PhotoProperties2ExistingFileSaver media2fileZipSaver = new PhotoProperties2ExistingFileSaver(file2ZipSaver);
+                    media2fileZipSaver = new PhotoProperties2ExistingFileSaver(file2ZipSaver);
+                }
 
                 execQuery(filter, csvFromQuery, media2fileZipSaver);
 
-                job.addTextToCompressQue("changes.csv", csvFromQuery.toString());
+                if (csvFromQuery != null) {
+                    job.addTextToCompressQue("changes.csv", csvFromQuery.toString());
+                }
 
                 if (this.continueProcessing) {
                     // not canceled yet in gui thread
