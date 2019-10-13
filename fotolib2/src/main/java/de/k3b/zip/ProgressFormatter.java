@@ -84,13 +84,13 @@ public class ProgressFormatter {
         long now = nowInMillisecs();
         long durationInSecondsSinceLoopStart = 0;
 
-        if (count > 0) {
+        if ((count > 0) && (count != total)) {
             if (this.countLoopingStart == 0) {
                 this.countLoopingStart = count;
                 this.timeLoopingStart = now;
                 this.durationLoopingStart = (now - timeStart) / 1000;
             }
-            durationInSecondsSinceLoopStart = (now - durationLoopingStart) / 1000;
+            durationInSecondsSinceLoopStart = (now - this.timeLoopingStart) / 1000;
         }
         return format(durationInSecondsSinceLoopStart, count, total, this.durationLoopingStart, this.countLoopingStart);
     }
