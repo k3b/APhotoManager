@@ -2,7 +2,7 @@
 <!--
 /* string values containing translatable HTML pages
  *
- * Translation to Dutch by Klaas Swart (verydutch) 2018-11-29 .
+ * Translation to Dutch by Klaas Swart (verydutch) 2018-11 and T-v-Gerwen 2019-09 .
  *
  * This file is part of "A Photo Manager" (A(ndro)FotoFinder).
  *
@@ -22,34 +22,34 @@
  -->
 <resources>
   <string name="about_content_about"><![CDATA["
-<h1>A Photo Manager</h1>
-  <br />
+<h1>A Photo Manager (Een Foto Beheerder)</h1>
+<br />
 
-Beheer van lokale foto's: vinden/kopieren/Exif-bewerken en weergave in galerij of op kaart. Beschikt over
+Beheer van lokale foto's: zoeken/kopieren/Exif-bewerken en weergave in galerij of op kaart.
+
+Beschikt over:
 
 <ul>
-<li>Snelzoeken foto's door labels(keywords), (sub-) map, geo-, titel, datum...
-</li><li>Resultaat weergeven in de galerij of landkaarten van OpenStreetMap.
-</li><li>Detail weergave functies zoomen, jatten voor volgende/vorige beeld.
-</li><li>Ingebouwd bestandsbheer voor foto's: zoeken, sorteren, weergeven, kopiëren, verwijderen, delen,....
-</li><li>Exif-metadata bewerken: datum, titel, beschrijving, labels(keywords), geo, rating,...
-</li><li>Optionele map-regel gebaseerde autoprocessing: foto's worden automatisch gewijzigd en krijgen geo, labels, titel,... als  je kopieert/verplaatst
-</li><li>Markeer beelden als 'Particulier' om ze te verbergen voor andere Galerij-Apps en andere foto-apps.
-</li><li>In 'bescherme/vastgepinde modus' worden potentieel gevaarlijke app-opdrachten als bewerken/kopieren/verwijderen/delen/instellingen/ 'afbeelding wijzigen' uitgeschakeld, zodat je veilig je telefoon uit handen kunt geven
-</li><li>Kan grote beeldcollecties (20000 + beelden in 1000 + omslagen) hanteren.
-</li><li>Maakt gebruik van Androids afbeeldinginhoud-provider. Geen eerste afbeelding scan nodig.
-</li><li>Uitgebreide mediascanner voor Exif, IPTC, XMP
-</li>
+<li>Snelzoeken foto's met labels (keywords), (sub-)map, datum, geo, titel, ...</li>
+<li>Resultaat weergeven in galerij of op landkaarten van OpenStreetMap.</li>
+<li>Detail weergavefuncties: zoomen, vegen voor volgende/vorige beeld.</li>
+<li>Ingebouwd bestandsbeheer voor foto's: zoeken, sorteren, weergeven, kopieren, verwijderen, delen,....</li>
+<li>Bewerk Exif-metadata: datum, titel, beschrijving, label(keyword), geo, waardering,...</li>
+<li>Optioneel automatisch, 'map-regel' gebaseerd, foto's hernoemen en geo, labels, titel,... geven bij kopieren/verplaatsen</li>
+<li>Markeer beelden als 'Particulier' om ze te verbergen voor andere galerij-/foto-apps.</li>
+<li>In "beschermde/vastgepinde modus" worden potentieel gevaarlijke app-opdrachten als bewerken/kopieren/verwijderen/delen/instellingen/"afbeelding wijzigen" uitgeschakeld, zodat je veilig je telefoon uit handen kunt geven</li>
+<li>Kan grote beeldcollecties (20000 + beelden in 1000+ mappen) hanteren.</li>
+<li>Gebruikt Androids afbeeldingsinhoud-provider. Vereist geen initiele scan van afbeeldingen.</li>
+<li>Uitgebreide fotomediascanner voor Exif, IPTC, XMP</li>
 </ul>
 
 Vereiste Android machtigingen:
 
 <ul>
-<li>INTERNET: om kaartgegevens te downloaden van Open Streetmap Server 
-</li><li>ACCESS_NETWORK_STATE en ACCESS_WIFI_STATE: controleren of wifi/internet on line is voor start download geodata
-</li><li>WRITE_EXTERNAL_STORAGE voor cache voor gedownloade kaartgegevens in lokale bestandssysteem en voor foto behandeling
-</li><li>READ_LOGS voor lezen en opslaan mogelijke crash-logs in een tekstbestand.
-</li>
+<li>INTERNET: om kaartgegevens van OpenStreetMap Server  te downloaden</li>
+<li>ACCESS_NETWORK_STATE en ACCESS_WIFI_STATE: controleren of wifi/internet online is om download geodata te starten</li>
+<li>WRITE_EXTERNAL_STORAGE cache voor gedownloade kaartdata  en voor foto behandeling</li>
+<li>READ_LOGS voor lezen en opslaan mogelijke crash-logs in een tekstbestand.</li>
 </ul>
 <br />
 "]]></string>
