@@ -279,5 +279,10 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
     < ! - - what type of data should be saven ? - - >
     <string name="lbl_what">What: </string>
 -->
+
+    <!-- #153: a more powerfull multiselection move/rename that has rule based rename plus apply exif-property changes -->
+    <string name="move_rename_exif_menu_title">Move+Rename+Exif</string>
+    <string name="rename_exif_menu_title">Rename+Exif</string>
+
 </resources>
 
