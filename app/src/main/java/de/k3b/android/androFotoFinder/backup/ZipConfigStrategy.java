@@ -112,6 +112,9 @@ public class ZipConfigStrategy {
         return config;
     }
 
+    /**
+     * config/query/filter has been successfully loaded. Add missing fields to config from query/filter.
+     */
     private static void inferMissingParameters(IZipConfig config, QueryParameter baseQuery, IGalleryFilter filter, boolean inferPath) {
         String albumFile = null;
         if ((filter != null) && (AlbumFile.isQueryFile(filter.getPath()))) {
