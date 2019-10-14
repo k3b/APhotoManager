@@ -1053,7 +1053,7 @@ public class LocationMapFragment extends DialogFragment {
 
         geoPosition = getGeoPointById(markerId, geoPosition, getClass().getSimpleName(), "onPopUpClick", menuItem);
         if ((showInMenuHandler != null) && (geoPosition != null)
-                && showInMenuHandler.onPopUpClick(menuItem, null, geoPosition.toString())) {
+                && showInMenuHandler.onPopUpClick(menuItem, geoPosition, geoPosition.toString())) {
             return true;
         }
 

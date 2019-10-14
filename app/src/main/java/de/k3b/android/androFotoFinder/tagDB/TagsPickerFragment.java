@@ -108,7 +108,8 @@ public class TagsPickerFragment extends DialogFragment implements ShowInMenuHand
 
     public static boolean handleMenuShow(DialogFragment currentDialogFragment, MenuItem menuItem, String selectionPath) {
         if (currentDialogFragment instanceof TagsPickerFragment) {
-            return ((TagsPickerFragment) currentDialogFragment).showInMenuHandler.onPopUpClick(menuItem, null, selectionPath);
+            return ((TagsPickerFragment) currentDialogFragment).showInMenuHandler.onPopUpClick(menuItem, selectionPath,
+                    selectionPath);
         }
         return false;
     }
@@ -423,10 +424,14 @@ public class TagsPickerFragment extends DialogFragment implements ShowInMenuHand
      * interface PickerContext
      */
     @Override
-    public boolean onShowPopUp(View anchor, View owner, String selectionPath, Object selection, int... idContextMenue) {
-        Tag selectedTag = (Tag) selection;
-        if ((selectedTag == null) && (selectionPath != null))
-            selectedTag = new Tag().setName(selectionPath);
+    public boolean onShowPopUp(View anchor, View owner, String dbgContext, Object selection, int... idContextMenue) {
+        Tag selectedTag = null;
+
+        if (selection instanceof Tag) {
+            selectedTag = (Tag) selection;
+        } else if (selection instanceof String) {
+            selectedTag = new Tag().setName((String) selection);
+        }
         onShowPopUp(anchor, owner, selectedTag, idContextMenue);
         return true;
     }
