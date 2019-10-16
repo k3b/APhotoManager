@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
@@ -70,17 +69,11 @@ public class PhotoAutoprocessingDto {
         File apm = getApmFile();
         properties.clear();
         if (apm.exists() && apm.isFile() && apm.canRead()) {
-            FileInputStream inputStream = null;
-            try {
-                inputStream = new FileInputStream(apm);
-                properties.load(inputStream);
-                if (LibGlobal.debugEnabled) {
-                    logger.debug(this.getClass().getSimpleName() + ": loaded from " + apm + ":" + this);
-                }
-                return this;
-            } finally {
-                FileUtils.close(inputStream,"PhotoAutoprocessingDto.load(" + apm + ")");
+            properties.load(apm);
+            if (LibGlobal.debugEnabled) {
+                logger.debug(this.getClass().getSimpleName() + ": loaded from " + apm + ":" + this);
             }
+            return this;
         }
         return null;
     }

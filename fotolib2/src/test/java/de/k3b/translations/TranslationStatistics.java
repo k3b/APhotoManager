@@ -246,18 +246,14 @@ public class TranslationStatistics {
 
     public TranslationStatistics() {
         Date fileLimitDate = null;
-        InputStream inputStream = null;
 
         try {
-            inputStream = new FileInputStream(iniFile);
-            lastLocales.load(inputStream);
+            lastLocales.load(iniFile);
 
             fileLimitDate = getModifyDateProperty("ignore");
 
             readCountryTimeStatistics(country2History, gitFile);
         } catch (IOException ex) {
-        } finally {
-            FileUtils.close(inputStream,"TranslationStatistics.load(" + iniFile + ")");
         }
         this.fileLimitDate = fileLimitDate;
     }

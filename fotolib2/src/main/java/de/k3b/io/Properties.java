@@ -1,6 +1,8 @@
 package de.k3b.io;
 
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -11,6 +13,17 @@ import java.io.Writer;
 public class Properties extends java.util.Properties {
 
     private static final String FILE_ENCODING = "UTF-8";
+
+    public synchronized void load(File file) throws IOException {
+        InputStream inputStream = null;
+
+        try {
+            inputStream = new FileInputStream(file);
+            load(inputStream);
+        } finally {
+            FileUtils.close(inputStream, file);
+        }
+    }
 
     @Override
     public synchronized void load(InputStream inputStream) throws IOException {
