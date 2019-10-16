@@ -25,9 +25,9 @@ import android.os.Bundle;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.io.Properties;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
 

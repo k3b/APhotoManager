@@ -28,13 +28,11 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,6 +46,7 @@ import javax.xml.xpath.XPathFactory;
 import de.k3b.io.DateUtil;
 import de.k3b.io.FileUtils;
 import de.k3b.io.ListUtils;
+import de.k3b.io.Properties;
 
 /**
  * Creates a translation statistics in Markdown-format for the app from
@@ -247,10 +246,10 @@ public class TranslationStatistics {
 
     public TranslationStatistics() {
         Date fileLimitDate = null;
-        InputStreamReader inputStream = null;
+        InputStream inputStream = null;
 
         try {
-            inputStream = new InputStreamReader(new FileInputStream(iniFile), "UTF-8");
+            inputStream = new FileInputStream(iniFile);
             lastLocales.load(inputStream);
 
             fileLimitDate = getModifyDateProperty("ignore");

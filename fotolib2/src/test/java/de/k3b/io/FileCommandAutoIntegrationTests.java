@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
-import java.util.Properties;
 
 import de.k3b.LibGlobal;
 import de.k3b.TestUtil;
@@ -37,11 +36,11 @@ import de.k3b.io.collections.SelectedFiles;
 import de.k3b.media.ExifInterface;
 import de.k3b.media.ExifInterfaceEx;
 import de.k3b.media.IPhotoProperties;
+import de.k3b.media.MediaFormatter.FieldID;
 import de.k3b.media.PhotoPropertiesBulkUpdateService;
 import de.k3b.media.PhotoPropertiesDTO;
 import de.k3b.media.PhotoPropertiesDiffCopy;
 import de.k3b.media.PhotoPropertiesFormatter;
-import de.k3b.media.MediaFormatter.FieldID;
 import de.k3b.transactionlog.TransactionLoggerBase;
 
 /**

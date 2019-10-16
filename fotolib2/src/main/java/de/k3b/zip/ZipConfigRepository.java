@@ -28,11 +28,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
-import java.util.Properties;
 
 import de.k3b.LibGlobal;
 import de.k3b.io.DateUtil;
 import de.k3b.io.FileUtils;
+import de.k3b.io.Properties;
 import de.k3b.io.StringUtils;
 
 /** Parameters that define a backup that can be persisted through a properties-file */
