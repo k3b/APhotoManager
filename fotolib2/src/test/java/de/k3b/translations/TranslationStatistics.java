@@ -22,22 +22,18 @@ package de.k3b.translations;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
-import de.k3b.io.DateUtil;
-import de.k3b.io.FileUtils;
-import de.k3b.io.ListUtils;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,6 +44,10 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+
+import de.k3b.io.DateUtil;
+import de.k3b.io.FileUtils;
+import de.k3b.io.ListUtils;
 
 /**
  * Creates a translation statistics in Markdown-format for the app from
@@ -247,9 +247,10 @@ public class TranslationStatistics {
 
     public TranslationStatistics() {
         Date fileLimitDate = null;
-        FileInputStream inputStream = null;
+        InputStreamReader inputStream = null;
+
         try {
-            inputStream = new FileInputStream(iniFile);
+            inputStream = new InputStreamReader(new FileInputStream(iniFile), "UTF-8");
             lastLocales.load(inputStream);
 
             fileLimitDate = getModifyDateProperty("ignore");
