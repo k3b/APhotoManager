@@ -275,8 +275,4 @@ Verstecken kann über das 'Media-Scanner' Gallery-Menü rückgängig gemacht wer
       <string name="lbl_what">What: </string>
   -->
 
-  <!-- #153: a more powerfull multiselection move/rename that has rule based rename plus apply exif-property changes -->
-  <string name="move_rename_exif_menu_title">Verschieben+Umbenennen+Exif</string>
-  <string name="rename_exif_menu_title">Umbenennen+Exif</string>
-
 </resources>
