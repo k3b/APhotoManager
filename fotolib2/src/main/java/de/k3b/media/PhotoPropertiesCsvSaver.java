@@ -19,11 +19,14 @@
 
 package de.k3b.media;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.util.Arrays;
 
 import de.k3b.csv2db.csv.CsvItem;
+import de.k3b.io.FileNameUtil;
 import de.k3b.io.IItemSaver;
+import de.k3b.io.StringUtils;
 
 /**
  * Created by k3b on 13.10.2016.
@@ -33,6 +36,12 @@ import de.k3b.io.IItemSaver;
 public class PhotoPropertiesCsvSaver implements IItemSaver<IPhotoProperties> {
     private PrintWriter printer;
     private final PhotoPropertiesCsvItem csvLine;
+
+    /**
+     * if not null file adds will be relative to this path if file is below this path
+     */
+    private String pathRelativeTo = null;
+    private boolean compressFilePath = false;
 
     public PhotoPropertiesCsvSaver(PrintWriter printer) {
         csvLine = new PhotoPropertiesCsvItem();
@@ -48,12 +57,36 @@ public class PhotoPropertiesCsvSaver implements IItemSaver<IPhotoProperties> {
         return this;
     }
 
+    public PhotoPropertiesCsvSaver setCompressFilePathMode(String pathRelativeTo) {
+        this.compressFilePath = true;
+        if (!StringUtils.isNullOrEmpty(pathRelativeTo)) {
+            this.pathRelativeTo = FileNameUtil.getCanonicalPath(new File(pathRelativeTo)).toLowerCase();
+        } else {
+            this.pathRelativeTo = null;
+        }
+        return this;
+    }
+
+    protected String convertPath(String path) {
+        String result = null;
+        if (path != null) {
+            final File pathAsFile = new File(path);
+            if (pathRelativeTo != null) {
+                result = FileNameUtil.makePathRelative(pathRelativeTo, pathAsFile);
+            }
+            if (result == null) result = pathAsFile.getName();
+        }
+        return result;
+    }
     @Override
     public boolean save(IPhotoProperties item) {
         if (item != null) {
             csvLine.clear();
             PhotoPropertiesUtil.copy(csvLine, item, true, true);
             if (!csvLine.isEmpty()) {
+                if (compressFilePath) {
+                    csvLine.setPath(convertPath(csvLine.getPath()));
+                }
                 this.printer.write(csvLine.toString());
                 this.printer.write(CsvItem.DEFAULT_CHAR_LINE_DELIMITER);
                 return true;

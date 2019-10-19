@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 by k3b.
+ * Copyright (c) 2018-2019 by k3b.
  *
  * This file is part of #APhotoManager (https://github.com/k3b/APhotoManager/)
  *              and #toGoZip (https://github.com/k3b/ToGoZip/).
@@ -22,6 +22,8 @@ package de.k3b.io;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.File;
+
 /**
  * Created by k3b on 17.02.2015.
  */
@@ -37,6 +39,40 @@ public class FileNameUtilTests {
     public void shouldRemoveIllegalWithExistingExtension() {
         String result = FileNameUtil.createFileName("...hello:world.jpeg...", "jpg");
         Assert.assertEquals("hello_world.jpeg", result);
+    }
+
+    /**
+     * Encapsulates call to sut calculateZipEntryName to Calculates the path within the zip file.
+     *
+     * @param zipRelPath if not empty paths are caclulated relative to this directory. Mus have trailing "/".
+     * @param srcFile    full path to source file
+     * @return
+     */
+    private static String sutExec_makePathRelative(String zipRelPath, File srcFile) {
+        String result = FileNameUtil.makePathRelative(
+                FileNameUtil.getCanonicalPath(new File(zipRelPath)).toLowerCase(), srcFile);
+
+        // fix windows path seperator
+        return fixPathDelimiter(result);
+    }
+
+    private static String fixPathDelimiter(String result) {
+        if (result == null) return null;
+        return result.replaceAll("\\\\", "/");
+    }
+
+    @Test
+    public void shouldCalculateRelPath() {
+        File srcFile = new File("/path/to/my/source/File.txt");
+
+        Assert.assertEquals("happy case1 with trailing '/'", "source/File.txt",
+                sutExec_makePathRelative("/path/to/my/", srcFile));
+        Assert.assertEquals("happy case2 without trailing '/'", "source/File.txt",
+                sutExec_makePathRelative("/path/to/my", srcFile));
+        Assert.assertEquals("case doesn-t matter", "source/File.txt",
+                sutExec_makePathRelative("/path/To/my/", srcFile));
+        Assert.assertEquals("outside rel path", null,
+                sutExec_makePathRelative("/path/to/other/", srcFile));
     }
 
 }

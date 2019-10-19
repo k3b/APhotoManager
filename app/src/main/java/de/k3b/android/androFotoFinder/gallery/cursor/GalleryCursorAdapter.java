@@ -24,7 +24,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,14 +34,15 @@ import android.widget.TextView;
 import java.io.File;
 
 import de.k3b.android.androFotoFinder.AffUtils;
+import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.Global;
-import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.DBUtils;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
+import de.k3b.media.PhotoPropertiesUtil;
 
 /**
  * CursorAdapter that queries MediaStore.Images.Media.EXTERNAL_CONTENT_URI
@@ -130,9 +130,6 @@ public class GalleryCursorAdapter extends CursorAdapter  {
             imageSize = DBUtils.getLong(cursor, FotoSql.SQL_COL_SIZE, 0);
         }
 
-        // either code 0..8 or rotation angle 0, 90, 180, 270
-        int exifOrientationCode = DBUtils.getInt(cursor, FotoSql.SQL_COL_ORIENTATION, 0);
-
         holder.filter = DBUtils.getString(cursor, FotoSql.SQL_COL_WHERE_PARAM, null);
 
         String description = DBUtils.getString(cursor, FotoSql.SQL_COL_DISPLAY_TEXT, "");
@@ -145,16 +142,25 @@ public class GalleryCursorAdapter extends CursorAdapter  {
         holder.imageID = imageID;
 
         if (uri != null) {
+
             if ((imageSize > 0) && (imageSize <= Global.imageDetailThumbnailIfBiggerThan)) {
                 try {
                     // #53, #83 Optimisation: no need for thumbnail - saves cache memory but may throw OutOfMemoryError
+                    // rotation angle either code (i.e 6 = 90) or angle0, 90, 180, 270
                     Bitmap bitmap = HugeImageLoader.loadImage(new File(uri), MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION);
-                    holder.image.setImageBitmap(ThumbNailUtils.rotateBitmap(bitmap, exifOrientationCode));
+                    holder.image.setImageBitmap(bitmap);
+                    int rotationAngle = DBUtils.getInt(cursor, FotoSql.SQL_COL_ORIENTATION, 0);
+                    rotationAngle = PhotoPropertiesUtil.exifOrientationCode2RotationDegrees(rotationAngle, rotationAngle);
+                    holder.image.setRotation(rotationAngle);
                 } catch (OutOfMemoryError err) {
+                    // universalimageloader takes care of rotaion handling
+                    holder.image.setRotation(0);
                     ThumbNailUtils.getThumb(uri, holder.image);
                 }
 
             } else {
+                // universalimageloader takes care of rotaion handling
+                holder.image.setRotation(0);
                 ThumbNailUtils.getThumb(uri, holder.image);
             }
             if (Global.debugEnabledViewItem)

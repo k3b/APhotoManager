@@ -99,7 +99,8 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
             startTimestamp = new Date().getTime();
         }
         PhotoPropertiesXmpSegment xmp = PhotoPropertiesXmpSegment.loadXmpSidecarContentOrNull(absoluteJpgInPath, dbg_context);
-        if ((xmp == null) && (createXmpIfNotExist || PhotoPropertiesUtil.isImage(absoluteJpgInPath, PhotoPropertiesUtil.IMG_TYPE_NON_JPG))) {
+        if ((xmp == null) && (createXmpIfNotExist || PhotoPropertiesUtil.isImage(absoluteJpgInPath,
+                PhotoPropertiesUtil.IMG_TYPE_COMPRESSED_NON_JPG | PhotoPropertiesUtil.IMG_TYPE_UNCOMPRESSED_NON_JPG))) {
             PhotoPropertiesImageReader jpg = new PhotoPropertiesImageReader().load(absoluteJpgInPath,null,null,
                     dbg_context + " xmp-file not found. create/extract from jpg ");
 

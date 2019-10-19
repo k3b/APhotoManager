@@ -1,3 +1,6 @@
-Changes from 0.7.5 to ????
-#108 new: menu Backup Photos to zipfile:
-Translation updates: ???
+Changes from 0.7.5 to 0.8.0
+#108 new: Incremental Backup of Photos to a Zip File
+#129 Bugfix: Show images with wrong rotation (Exif-Orientation-Flag)
+#152 Bugfix: Tag-Picker-ShowInNew set wrong tag filter parameters
+new: The Filter-View shows additional filter parameters from virtual-album-files '*.album'
+Translation updates: de, ja, nl, ru

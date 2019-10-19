@@ -36,7 +36,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.GalleryFilterPathState;
@@ -50,6 +49,7 @@ import de.k3b.io.AlbumFile;
 import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IGalleryFilter;
+import de.k3b.io.Properties;
 import de.k3b.io.StringUtils;
 import de.k3b.tagDB.TagProcessor;
 

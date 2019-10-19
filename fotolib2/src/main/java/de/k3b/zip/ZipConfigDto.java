@@ -19,9 +19,14 @@
 package de.k3b.zip;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import de.k3b.io.FileNameUtil;
+
 public class ZipConfigDto implements IZipConfig, Serializable {
+    private static final String ZIP_FILE_NAME_SUFFIX = ".yyyyMMdd-HHmmss";
+
     private Date   dateModifiedFrom     ;
     private String zipRelPath           ;
     private String zipName              ;
@@ -71,9 +76,13 @@ public class ZipConfigDto implements IZipConfig, Serializable {
         return zipName;
     }
 
+    public static String fixZipBaseName(String zipName) {
+        return FileNameUtil.createFileNameWitoutExtension(zipName);
+    }
+
     @Override
     public void setZipName(String zipName) {
-        this.zipName = zipName;
+        this.zipName = fixZipBaseName(zipName);
     }
 
     @Override
@@ -94,5 +103,26 @@ public class ZipConfigDto implements IZipConfig, Serializable {
     @Override
     public void setFilter(String filter) {
         this.filter = filter;
+    }
+
+    /**
+     * get zip file name with basename, datetime suffix, fileextension but witout directory path..
+     * Example if zipName='myBackup' with zipDir='/path/to/dir' the created
+     * zipfile will be "/path/to/dir/myBackup-20191224-123456.zip' when the backup
+     * is taken at 2019-12-24 at 12:34:56
+     */
+    public static String getZipFileName(IZipConfig config, Date modificationDateTime) {
+        StringBuilder zipFileName = new StringBuilder()
+                .append(config.getZipName())
+                .append(getDateString(config.getDateModifiedFrom()))
+                .append(getDateString(modificationDateTime))
+                .append(".zip");
+        return zipFileName.toString();
+
+    }
+
+    private static String getDateString(Date modificationDateTime) {
+        if (modificationDateTime == null) return ".-";
+        return new SimpleDateFormat(ZIP_FILE_NAME_SUFFIX).format(modificationDateTime);
     }
 }

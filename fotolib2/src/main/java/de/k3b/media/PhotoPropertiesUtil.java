@@ -36,7 +36,6 @@ import de.k3b.io.GeoUtil;
 import de.k3b.io.ListUtils;
 import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
-
 import de.k3b.media.MediaFormatter.FieldID;
 /**
  * Created by k3b on 10.10.2016.
@@ -56,9 +55,11 @@ public class PhotoPropertiesUtil {
     /** types of images currently supported */
     public static final int IMG_TYPE_ALL        = 0xffff;
     public static final int IMG_TYPE_JPG        = 0x0001; // jp(e)g
-    public static final int IMG_TYPE_NON_JPG    = 0x0010; // png, gif, ...
+    public static final int IMG_TYPE_COMPRESSED_NON_JPG = 0x0010; // png, gif, ...
+    public static final int IMG_TYPE_UNCOMPRESSED_NON_JPG = 0x0020; // BMP, TIFF, ...
     public static final int IMG_TYPE_PRIVATE    = 0x1000; // jpg-p
 
+    public static final int IMG_TYPE_COMPRESSED = IMG_TYPE_JPG | IMG_TYPE_COMPRESSED_NON_JPG | IMG_TYPE_PRIVATE;
 
     // Translate exif-orientation code (0..8) to EXIF_ORIENTATION_CODE_2_ROTATION_DEGREES (clockwise)
     // http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/EXIF.html
@@ -299,8 +300,13 @@ public class PhotoPropertiesUtil {
             return true;
         }
 
-        if ((IMG_TYPE_NON_JPG == (imageTypeFlags & IMG_TYPE_NON_JPG)) &&
-                (lcPath.endsWith(".gif") || lcPath.endsWith(".png") || lcPath.endsWith(".tiff") || lcPath.endsWith(".bmp"))) {
+        if ((IMG_TYPE_COMPRESSED_NON_JPG == (imageTypeFlags & IMG_TYPE_COMPRESSED_NON_JPG)) &&
+                (lcPath.endsWith(".gif") || lcPath.endsWith(".png"))) {
+            return true;
+        }
+
+        if ((IMG_TYPE_UNCOMPRESSED_NON_JPG == (imageTypeFlags & IMG_TYPE_UNCOMPRESSED_NON_JPG)) &&
+                (lcPath.endsWith(".tiff") || lcPath.endsWith(".bmp"))) {
             return true;
         }
 

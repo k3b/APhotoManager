@@ -27,7 +27,6 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.io.File;
-import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.Date;
 
@@ -37,20 +36,23 @@ import de.k3b.android.androFotoFinder.media.PhotoPropertiesMediaDBCursor;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.database.QueryParameter;
-import de.k3b.io.FileUtils;
 import de.k3b.io.IItemSaver;
 import de.k3b.io.IProgessListener;
+import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.PhotoProperties2ExistingFileSaver;
 import de.k3b.media.PhotoPropertiesCsvStringSaver;
+import de.k3b.zip.CompressItem;
 import de.k3b.zip.CompressJob;
+import de.k3b.zip.FileCompressItem;
 import de.k3b.zip.IZipConfig;
 import de.k3b.zip.LibZipGlobal;
 import de.k3b.zip.ZipConfigRepository;
 import de.k3b.zip.ZipLog;
 import de.k3b.zip.ZipLogImpl;
 import de.k3b.zip.ZipStorage;
+
 
 /**
  * #108: Zip-file support: backup-or-copy filtered-or-selected photos to Zip-file.
@@ -61,38 +63,27 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
     private final Context context;
     private final IZipConfig zipConfig;
     private final ZipStorage zipStorage;
+    private final Date backupDate;
+    private final int jobOptions;
     private IProgessListener progessListener = null;
     private final ZipLog zipLog;
-
+    private CompressJob job = null;
     // set to false (in gui thread) if operation is canceled
     protected boolean continueProcessing = true;
 
     // used to translate ZipLog.traceMessage() to become IProgessListener
     private int lastZipItemNumber = 0;
 
-    public static IZipConfig loadZipConfig(Uri uri, Context context) {
-        if ((uri != null) && ZipConfigRepository.isZipConfig(uri.toString())) {
-            InputStream inputsteam = null;
-            try {
-                inputsteam = context.getContentResolver().openInputStream(uri);
-                return new ZipConfigRepository(null).load(inputsteam, uri);
-            } catch (Exception ex) {
-                // file not found or no permission
-                Log.w(LibZipGlobal.LOG_TAG, mDebugPrefix + context.getClass().getSimpleName()
-                            + "-loadZipConfig(" + uri + ") failed " + ex.getClass().getSimpleName(), ex);
-            } finally {
-                FileUtils.close(inputsteam, uri);
-            }
-        }
-        return null;
-    }
-
     public Backup2ZipService(Context context, IZipConfig zipConfig, ZipStorage zipStorage,
-                             IProgessListener progessListener) {
+                             Date backupDate, int jobOptions) {
 
         this.context = context;
         this.zipConfig = zipConfig;
         this.zipStorage = zipStorage;
+
+        //!!! after success add this date into config before save
+        this.backupDate = backupDate;
+        this.jobOptions = jobOptions;
         this.zipLog = (LibZipGlobal.debugEnabled) ? new ZipLogImpl(true) : null;
     }
 
@@ -101,50 +92,81 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
         return this;
     }
 
-    /** Executes add2zip for all found items of found query-result-item of zipConfig */
+    /**
+     * Executes add2zip for all found items of found query-result-item of zipConfig.
+     *
+     * @return config used oder null if there is an error.
+     */
     public IZipConfig execute() {
         ZipConfigRepository repo = new ZipConfigRepository(zipConfig);
         final File zipConfigFile = repo.getZipConfigFile();
         if (zipConfigFile != null) {
             QueryParameter filter = getEffectiveQueryParameter(zipConfig);
 
+            String zipRelPath = zipConfig.getZipRelPath();
 
             // pipline for (IPhotoProperties item: query(filter)) : csv+=toCsv(item)
-            final PhotoPropertiesCsvStringSaver csvFromQuery = new PhotoPropertiesCsvStringSaver();
+            final PhotoPropertiesCsvStringSaver csvFromQuery = (BackupOptions.allOf(jobOptions, BackupOptions.PROPERTIES_AS_CSV))
+                    ? new PhotoPropertiesCsvStringSaver()
+                    : null;
+
+            if ((csvFromQuery != null) && !StringUtils.isNullOrEmpty(zipRelPath)) {
+                csvFromQuery.setCompressFilePathMode(zipRelPath);
+            }
 
             onProgress(0, 0,
                     "query images " + ((Global.debugEnabledSql) ? filter : ""));
 
             if (this.continueProcessing) {
-                final CompressJob job = new ApmZipCompressJob(context, this, "history.log");
+                job = new ApmZipCompressJob(context, this, "history.log");
                 job.setZipStorage(zipStorage);
+                if (!StringUtils.isNullOrEmpty(zipRelPath)) {
+                    FileCompressItem.setZipRelPath(new File(zipRelPath));
+                }
 
-                // pipline for (IPhotoProperties item: query(filter)) : Zip+=File(item)
-                /// !!!  todo go on here
-                final IItemSaver<File> file2ZipSaver = new IItemSaver<File>() {
-                    @Override
-                    public boolean save(File item) {
-                        job.addToCompressQue("", item);
-                        return true;
-                    }
-                };
+                PhotoProperties2ExistingFileSaver media2fileZipSaver = null;
+                boolean addPhotos = BackupOptions.allOf(jobOptions, BackupOptions.PHOTOS_WITH_EXISTING_XMP);
+                if (addPhotos) {
+                    // pipline for (IPhotoProperties item: query(filter)) : Zip+=File(item)
+                    final IItemSaver<File> file2ZipSaver = new IItemSaver<File>() {
+                        @Override
+                        public boolean save(File item) {
+                            CompressItem compressItem = job.addToCompressQue("", item);
+                        /*
+                        if (PhotoPropertiesUtil.isImage(item.getName(), PhotoPropertiesUtil.IMG_TYPE_COMPRESSED)) {
+                            // performance improvement: jpg-s should not be compressed
+                            compressItem.setDoCompress(false);
+                        }
+                        */
+                            return true;
+                        }
+                    };
 
-                final PhotoProperties2ExistingFileSaver media2fileZipSaver = new PhotoProperties2ExistingFileSaver(file2ZipSaver);
+                    media2fileZipSaver = new PhotoProperties2ExistingFileSaver(file2ZipSaver);
+                }
 
                 execQuery(filter, csvFromQuery, media2fileZipSaver);
 
-                job.addTextToCompressQue("changes.csv", csvFromQuery.toString());
+                if (csvFromQuery != null) {
+                    job.addTextToCompressQue("changes.csv", csvFromQuery.toString());
+                }
 
                 if (this.continueProcessing) {
                     // not canceled yet in gui thread
-                    job.compress(false);
-                }
-
-                if (repo.save()) {
-                    if (LibZipGlobal.debugEnabled) {
-                        Log.d(LibZipGlobal.LOG_TAG, mDebugPrefix + " Saved as " + repo);
+                    if (job.compress(false) < 0) {
+                        this.continueProcessing = false;
                     }
-                    return repo;
+                }
+                this.job = null;
+
+                if (this.continueProcessing) {
+                    repo.setDateModifiedFrom(this.backupDate);
+                    if (repo.save()) {
+                        if (LibZipGlobal.debugEnabled) {
+                            Log.d(LibZipGlobal.LOG_TAG, mDebugPrefix + " Saved as " + repo);
+                        }
+                        return repo;
+                    }
                 }
             }
         }
@@ -274,5 +296,10 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
     public String getLastError(boolean detailed) {
         if (zipLog != null) return zipLog.getLastError(detailed);
         return null;
+    }
+
+    public void cancel() {
+        this.continueProcessing = false;
+        if (this.job != null) job.cancel();
     }
 }

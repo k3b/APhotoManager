@@ -259,5 +259,20 @@ Verstecken kann über das 'Media-Scanner' Gallery-Menü rückgängig gemacht wer
     -->
 
   <string name="settings_bookmark_dir_title">Ordner für Lesezeichen</string>
-  
+
+  <!-- #108: Backup to Zip-file -->
+  <string name="backup_title">Datensicherung in Zip-Datei</string>
+
+  <string name="lbl_zip_out">Wohin: Ausgabe Zip</string>
+  <string name="lbl_zip_name">Datei</string>
+  <string name="lbl_zip_dir">Ordner</string>
+  <string name="lbl_zip_rel_path">Erzeuge Zip-Ordner unterhalb</string>
+
+  <!-- when should backup start ? -->
+  <string name="lbl_when">Wan: </string>
+  <!-- #108 Zip-file export/backup will be implemented later
+      < ! - - what type of data should be saven ? - - >
+      <string name="lbl_what">What: </string>
+  -->
+
 </resources>

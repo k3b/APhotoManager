@@ -60,6 +60,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.PhotoAutoprocessingEditActivity;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
+import de.k3b.android.androFotoFinder.backup.BackupActivity;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailMetaDialogBuilder;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoThumbSql;
@@ -428,6 +429,8 @@ public class DirectoryPickerFragment extends DialogFragment
             case R.id.action_edit:
                 return onEdit(popUpSelection);
 
+            case R.id.cmd_backup:
+                return onBackup(menuItem, popUpSelection);
             case R.id.cmd_filemanager:
                 return FileManagerUtil.showInFilemanager(getActivity(), popUpSelection.getAbsolute());
             case R.id.action_details:
@@ -488,6 +491,17 @@ public class DirectoryPickerFragment extends DialogFragment
             dlg.yesNoQuestion(mContext, mContext.getString(R.string.folder_hide_images_menu_title),
                     mContext.getString(R.string.folder_hide_images_question_message_format, path));
         } // else toast "cannot process because scanner is active"
+        return true;
+    }
+
+    private boolean onBackup(MenuItem menuItem, IDirectory dir) {
+        if ((menuItem != null) && (dir != null)) {
+            IGalleryFilter currentSelectionAsFilter = getCurrentSelectionAsFilter(dir, this.mDirTypId);
+            String dbgContext = " menu " + menuItem.getTitle();
+            BackupActivity.showActivity(dbgContext,
+                    mContext, null, currentSelectionAsFilter,
+                    baseQuery, BackupActivity.REQUEST_BACKUP_ID);
+        }
         return true;
     }
 

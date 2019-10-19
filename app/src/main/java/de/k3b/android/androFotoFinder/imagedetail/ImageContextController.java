@@ -27,19 +27,16 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.Global;
@@ -49,6 +46,7 @@ import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.SqlTemplateEngine;
 import de.k3b.io.FileUtils;
+import de.k3b.io.Properties;
 
 /**
  * #70: Handles optional extra context specific detail text that can be displayed in
@@ -116,11 +114,11 @@ public abstract class ImageContextController {
         File propFile = getPropertiesFile();
 
         if (propFile.exists()) {
-            Reader br = null;
+            InputStream br = null;
 
             try {
 
-                br = new BufferedReader(new InputStreamReader(new FileInputStream(propFile), "UTF-8"));
+                br = new FileInputStream(propFile);
                 properties.load(br);
 
             } catch (IOException ex) {

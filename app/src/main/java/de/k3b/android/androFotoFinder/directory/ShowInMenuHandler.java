@@ -81,13 +81,13 @@ public class ShowInMenuHandler {
     }
 
     /** handle show-in-xxx-menu-itmes-click events. @return false if not handled */
-    public boolean onPopUpClick(MenuItem menuItem, IDirectory popUpSelection, String _dbgContext) {
-        String dbgContext = getDbgContext(menuItem, _dbgContext);
+    public boolean onPopUpClick(MenuItem menuItem, Object popUpSelectionAsObject, String popUpSelectionAsString) {
+        String dbgContext = getDbgContext(menuItem, popUpSelectionAsString);
 
         switch (menuItem.getItemId()) {
             case R.id.cmd_show_in_new:
                 if (pickerContext != null) {
-                    return pickerContext.onShowPopUp(null, null, dbgContext, popUpSelection,
+                    return pickerContext.onShowPopUp(null, null, dbgContext, popUpSelectionAsObject,
                             R.menu.menu_context_pick_show_in_new);
                 }
                 break;

@@ -57,7 +57,7 @@ public class SelectedFiles  {
     public SelectedFiles(String[] fileNameList, Long[] ids, Date[] datesPhotoTaken) {
         mFileNames = fileNameList;
         if (mFileNames != null) {
-            for (int i = mFileNames.length -1; i >= 0; i--) {
+            for (int i = size() - 1; i >= 0; i--) {
                 mFileNames[i] = reomoveApostrophes(mFileNames[i]);
             }
         }

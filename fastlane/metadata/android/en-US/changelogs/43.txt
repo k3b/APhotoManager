@@ -3,3 +3,4 @@ Changes from 0.7.4 to 0.7.5
 show-Details dialog displays quantity and total megabytes of current selected photos
 Improved crash log file androFotofinder.logcat-xxxxxx.txt
 Translation updates: pt-BR
+#145: fixed potential memory leaks in AsyncTask

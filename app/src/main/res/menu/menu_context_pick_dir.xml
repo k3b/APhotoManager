@@ -50,6 +50,13 @@
         android:showAsAction="never" />
 
     <item
+        android:id="@+id/cmd_backup"
+        android:orderInCategory="20"
+        android:showAsAction="never"
+        android:title="@string/backup_title"
+        android:visible="true" />
+
+    <item
         android:id="@+id/cmd_show_in_new"
         android:orderInCategory="100"
         android:showAsAction="never"

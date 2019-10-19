@@ -61,6 +61,21 @@ public class AndroFotoFinderApp extends Application {
     private LogCat mCrashSaveToFile = null;
 
 
+    public static final String LINK_URL_SQL = "https://github.com/k3b/APhotoManager/wiki/intentapi#sql";
+    public static final String LINK_URL_ZIP_CONFIG = "https://github.com/k3b/APhotoManager/wiki/Backup-to-zip#TechnicalDetails";
+    public static final String LINK_URL_CSV = "https://github.com/k3b/APhotoManager/wiki/Backup-to-zip#csv";
+    public static final String LINK_URL_AUTOPROCESSING = "https://github.com/k3b/APhotoManager/wiki/AutoProcessing#TechnicalDetails";
+
+    public static String getGetTeaserText(Context context, String linkUrlForDetails) {
+        final String result = context.getString(R.string.bookmark_file_comment_format,
+                context.getString(R.string.app_name),
+                GuiUtil.getAppVersionName(context),
+                new Date().toString());
+        if (linkUrlForDetails != null)
+            return result.replace(LINK_URL_SQL, linkUrlForDetails);
+        return result;
+    }
+
     /*
         private RefWatcher refWatcher;
 
@@ -88,9 +103,9 @@ public class AndroFotoFinderApp extends Application {
         SettingsActivity.prefs2Global(this);
 
         // create sensible defaults for andorid-independant files from android string resources
-        QueryParameter.sFileComment = getBookMarkComment(this);
-        PhotoAutoprocessingDto.sFileComment = getBookMarkComment(this);
-        ZipConfigRepository.sFileComment = PhotoAutoprocessingDto.sFileComment;
+        QueryParameter.sFileComment = getGetTeaserText(this, null);
+        PhotoAutoprocessingDto.sFileComment = getGetTeaserText(this, LINK_URL_AUTOPROCESSING);
+        ZipConfigRepository.sFileComment = "# " + getGetTeaserText(this, LINK_URL_ZIP_CONFIG);
 
         QueryParameter.sParserDefaultFrom = FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE.toString();
         QueryParameter.sParserDefaultQueryTypeId = FotoSql.QUERY_TYPE_DEFAULT;
@@ -153,13 +168,6 @@ public class AndroFotoFinderApp extends Application {
         FotoSql.deleteMediaWithNullPath(this);
 
         Log.i(Global.LOG_CONTEXT, getAppId() + " created");
-    }
-
-    public static String getBookMarkComment(Context context) {
-        return context.getString(R.string.bookmark_file_comment_format,
-                context.getString(R.string.app_name),
-                GuiUtil.getAppVersionName(context),
-                new Date().toString());
     }
 
     @NonNull

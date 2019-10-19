@@ -150,7 +150,9 @@ public class StringUtils {
             result.append("(");
             for (final Object param : parameters) {
                 if (param != null) {
-                    if (param instanceof Object[]) {
+                    if (param instanceof String[]) {
+                        append(result, (String[]) param);
+                    } else if (param instanceof Object[]) {
                         append(result, (Object[]) param);
                     } else if (param instanceof Exception) {
                         Exception ex = (Exception) param;

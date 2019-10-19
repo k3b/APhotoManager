@@ -904,7 +904,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 return multiSelectionToggle();
             case R.id.cmd_backup:
                 BackupActivity.showActivity(" menu " + menuItem.getTitle(),
-                        getActivity(), null, selectedFiles, null,
+                        getActivity(), selectedFiles, null,
                         getCurrentQuery(), BackupActivity.REQUEST_BACKUP_ID);
                 return true;
             case R.id.cmd_copy:

@@ -48,9 +48,9 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.DBUtils;
 import de.k3b.android.util.GarbageCollector;
-import de.k3b.media.PhotoPropertiesBulkUpdateService;
 import de.k3b.android.util.MenuUtils;
 import de.k3b.android.util.ResourceUtils;
+import de.k3b.media.PhotoPropertiesBulkUpdateService;
 
 /**
  * Adapter for android.support.v4.view.ViewPager that allows swiping next/previous image.<br>
@@ -92,7 +92,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter {
                 .showImageOnFail(R.drawable.image_loading)
                 .cacheInMemory(false)
                 .cacheOnDisk(true)
-                .considerExifParams(true)
+                .considerExifParams(false)
                 .bitmapConfig(Bitmap.Config.ARGB_8888)
                 .displayer(new SimpleBitmapDisplayer())
                 .build();

@@ -22,10 +22,6 @@ package de.k3b.translations;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
-import de.k3b.io.DateUtil;
-import de.k3b.io.FileUtils;
-import de.k3b.io.ListUtils;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,8 +33,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,6 +42,11 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+
+import de.k3b.io.DateUtil;
+import de.k3b.io.FileUtils;
+import de.k3b.io.ListUtils;
+import de.k3b.io.Properties;
 
 /**
  * Creates a translation statistics in Markdown-format for the app from
@@ -247,17 +246,14 @@ public class TranslationStatistics {
 
     public TranslationStatistics() {
         Date fileLimitDate = null;
-        FileInputStream inputStream = null;
+
         try {
-            inputStream = new FileInputStream(iniFile);
-            lastLocales.load(inputStream);
+            lastLocales.load(iniFile);
 
             fileLimitDate = getModifyDateProperty("ignore");
 
             readCountryTimeStatistics(country2History, gitFile);
         } catch (IOException ex) {
-        } finally {
-            FileUtils.close(inputStream,"TranslationStatistics.load(" + iniFile + ")");
         }
         this.fileLimitDate = fileLimitDate;
     }
