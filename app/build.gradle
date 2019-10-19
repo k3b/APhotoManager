@@ -55,9 +55,10 @@ android {
         // 0.7.3.190424 (41)    mapsforge-v5, filter date-last-modified, Fix getContent, exif-TAG_DATETIME, Translation ja, nl, ru, pt-br, uk
         // 0.7.4.190801 (42)    hotfix to reallow openstreetmap online map download
         // 0.7.5.190916 (43)    Drill Down Search via Picker context-show-in-new
+        // 0.8.0.191021 (44)    Backup to zip
 
-        versionCode = 43
-        versionName = '0.7.5.190916'
+        versionCode = 44
+        versionName = '0.8.0.191021'
 
 		// all supported locales
 		// resConfigs "ar","de","es","fr","hi","in","it","ja","nl","pl","ro","ru","tr","uk","zz","pt-rBR","zh-rCN","zh-rTW"

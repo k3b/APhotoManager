@@ -7,6 +7,7 @@ Highlights:
 * [Virtual Albums](https://github.com/k3b/APhotoManager/wiki/Bookmarks) filesystem-folder indepenant,
 * management:  on-move automatically [rename photo-files](https://github.com/k3b/AndroFotoFinder/wiki/AutoProcessing) and/or [add metadata](https://github.com/k3b/AndroFotoFinder/wiki/AutoProcessing),
 * find, sort, view, copy, delete, set gps exif data, set [tags(keywords)](https://github.com/k3b/APhotoManager/wiki/Tags), send, ... .
+* [Incremental Backup of Photos to a Zip File](https://github.com/k3b/APhotoManager/wiki/Backup-to-zip) (new in 0.8.0)
 * available in [many languages](https://github.com/k3b/APhotoManager/issues/21)
 
 Privacy:
