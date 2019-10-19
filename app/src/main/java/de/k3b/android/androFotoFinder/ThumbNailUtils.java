@@ -21,7 +21,6 @@ package de.k3b.android.androFotoFinder;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Matrix;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -38,7 +37,7 @@ import java.io.File;
 import java.io.IOException;
 
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.media.PhotoPropertiesUtil;
+import de.k3b.io.StringUtils;
 
 /**
  * Service facade hiding com.nostra13.universalimageloader
@@ -108,44 +107,24 @@ public class ThumbNailUtils {
 
     public static void getThumb(int iconID, ImageView imageView) {
         String uriString = FotoSql.getUriString(iconID);
-        displayImageImpl(uriString, imageView, "iconID:", iconID);
+        displayImageImpl(uriString, imageView, "getThumb iconID:", iconID);
     }
 
-    public static void getThumb(String fullPath, ImageView imageView) {
+    public static void getThumb(String fullPath, ImageView imageView, Object... dbgContext) {
 
         if ((imageView != null) && (fullPath != null) && (fullPath.length() > 0)) {
             String uriString = "file://" + fullPath;
-            displayImageImpl(uriString, imageView, "fullPath:" , fullPath);
+            displayImageImpl(uriString, imageView, dbgContext, "getThumb fullPath:", fullPath);
         }
     }
 
-    private static void displayImageImpl(String uriString, ImageView imageView, String debugContext, Object debugParam) {
+    private static void displayImageImpl(String uriString, ImageView imageView, Object... debugParams) {
         if (ThumbNailUtils.DEBUG && Global.debugEnabledViewItem) {
-            Log.i(ThumbNailUtils.LOG_TAG, "displayImageImpl " + uriString +
-                    " because of " + debugContext + debugParam);
+            Log.i(ThumbNailUtils.LOG_TAG,
+                    StringUtils.appendMessage(null, "displayImageImpl"
+                            , uriString, "because of", debugParams).toString());
         }
 
         ImageLoader.getInstance().displayImage(uriString, imageView, mDisplayImageOptions);
     }
-
-    /** @param exifOrientationCode either code 0..8 or rotation angle 0, 90, 180, 270 */
-    public static Bitmap rotateBitmap(Bitmap source, int exifOrientationCode) {
-        if (exifOrientationCode != 0) {
-            int angle = PhotoPropertiesUtil.exifOrientationCode2RotationDegrees(exifOrientationCode, exifOrientationCode);
-
-            if (ThumbNailUtils.DEBUG && Global.debugEnabledViewItem) {
-                Log.i(ThumbNailUtils.LOG_TAG, "rotateBitmap code=" + exifOrientationCode +
-                        " ==> " + angle);
-            }
-
-            if (angle != 0) {
-                Matrix matrix = new Matrix();
-                matrix.postRotate(angle);
-                return Bitmap.createBitmap(source, 0, 0, source.getWidth(),
-                        source.getHeight(), matrix, true);
-            }
-        }
-        return source;
-    }
-
 }

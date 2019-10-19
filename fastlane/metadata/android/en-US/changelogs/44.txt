@@ -2,4 +2,5 @@ Changes from 0.7.5 to ????
 #108 new: menu Backup Photos to zipfile:
 The Filter-View shows additional filter parameters from virtual-album-files '*.album'
 #152: Fix Tag-Picker-ShowInNew set wrong tag filter parameters
+#129: Fixed: Show images with wrong rotation (Exif-Orientation-Flag)
 Translation updates: de, ja, nl, ru

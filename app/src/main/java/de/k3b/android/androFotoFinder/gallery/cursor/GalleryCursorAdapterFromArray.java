@@ -32,12 +32,12 @@ import java.io.File;
 
 import de.k3b.android.androFotoFinder.AdapterArrayHelper;
 import de.k3b.android.androFotoFinder.Global;
-import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
 import de.k3b.media.ExifInterfaceEx;
+import de.k3b.media.PhotoPropertiesUtil;
 
 /**
  * Created by k3b on 30.05.2016.
@@ -110,9 +110,12 @@ public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
             holder.url =  fullPhotoPathFromArray;
 
             final File file = new File(fullPhotoPathFromArray);
-            int exifOrientationCode = ExifInterfaceEx.getOrientationId (fullPhotoPathFromArray);
+            int rotationAngle = ExifInterfaceEx.getOrientationId(fullPhotoPathFromArray);
+            rotationAngle = PhotoPropertiesUtil.exifOrientationCode2RotationDegrees(rotationAngle, rotationAngle);
+            holder.image.setRotation(rotationAngle);
+
             Bitmap bitmap = HugeImageLoader.loadImage(file, 32, 32);
-            holder.image.setImageBitmap(ThumbNailUtils.rotateBitmap(bitmap, exifOrientationCode));
+            holder.image.setImageBitmap(bitmap);
 
             holder.image.setImageURI(Uri.parse(holder.url));
             holder.imageID = this.getImageId(position);
