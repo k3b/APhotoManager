@@ -1,15 +1,24 @@
-Verwalte lokale Photos: Suchen/Kopieren/Exif bearbeiten/Gallerie/Landkarte.
+Gallery app zum Verwalten lokaler Photos: Suchen/Kopieren/Exif bearbeiten/Gallerie/Landkarte.
 
 Merkmale:
 
-* Schnelle Suche per Tags(Suchbegriffe), Datei(unter)ordner, Datum, Geo-Daten ...
+* Schnelle Bildsuche per Tags(Suchbegriffe), Datei(unter)ordner, Datum, Geo-Daten ...
 * Anzeige in Gallerie oder Landkarte (Openstreetmap)
-* Photoansicht mit stufenloser Vergrößerung (Zoom), links/rechts wischen für nächstes/vorheriges Bild.
-* Eingebaute Dateiverwaltung für Bilder: Suchen, Sorieren, Kopieren, Löschen, Teilen/Senden, ... .
-* Exif-Daten bearbeiten: Datum, Titel, Beschreibung, Tags(Suchbegriffe), Geo, Bewerung, ....
-* Verwaltet große Bildersammlungen (15000+ Bilder in 1000+ Ordnern)
+* Unterstützt virtuelle Alben.
+* Eingebaute Dateiverwaltung für Bilder: Kopieren, Löschen, Teilen/Senden, stufenweise Datensicherung (Incremental Backup)... .
+* Bearbeiten von Bildeigenschaften (exif metadata): Datum, Title, Bild-Beschreibung , tags(Suchbegriffe), geo, Bewertung (rating), ....
+* Optional Autoprocessing: Photos können beim Kopieren/Verschieben automatisch umbenannt und mit Tags, Geo, Title, ... versehen werden.
+* Verwaltet große Bildersammlungen (20000+ Bilder in 1000+ Ordnern)
+* Geringer Speicherverbrauch (1.5 MB), arbeitet auch auf alten Antroid-4.0 Geräten mit wenig internen Speicher
 * Funktioniert auch ohne vorherigem media scan (Android native media content-provider).
 * Erweiterter Media-Scanner für Bilder: Exif, IPTC, XMP.
+
+Privacy:
+
+* Bilder als "Privat" markieren und so für andere Bild Programme unsichtbar machen.
+* Tresor-Modus (Vault mode): Wenn aktiviert sind nur noch zuvor ausgewähtle Photos sichtbar und potentiell gefährliche Aktionen (Kopieren, Löschen, Verschieben, Bildauswahl ändern, ...) nicht möglich. So kann das Gerät gefahrlos einem dritten übergeben werden.
+* Photos verbleiben auf dem Gerät dh sie werden nicht auf Server ins internet geladen.
+* Keine Werbung, keine Datensammlung (usertracking), freie (kostenlos, uneingeschränkt nutzbare) Software verfügbar per f-droid.
 
 Android Berechtigungen: :
 
