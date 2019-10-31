@@ -104,7 +104,7 @@ public class ZipConfigStrategy {
                 config = ZipConfigRepository.getZipConfigOrNull(name);
                 if (config == null) {
                     config = new ZipConfigDto(null);
-                    GalleryFilterParameter uriPathfilter = new GalleryFilterParameter().setPath(file.getAbsolutePath() + "/%");
+                    GalleryFilterParameter uriPathfilter = new GalleryFilterParameter().setFolderAndBelow(file.getAbsolutePath());
                     inferMissingParameters(config, null, uriPathfilter, inferPath);
                 }
             }

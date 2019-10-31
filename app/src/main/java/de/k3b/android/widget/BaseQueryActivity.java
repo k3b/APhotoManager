@@ -162,7 +162,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
                     final String why = "FotoGalleryActivity.navigateTo dir ";
                     Log.d(Global.LOG_CONTEXT, why + selectedAbsolutePath + " from " + currentSubFilterSettings.getPath());
 
-                    currentSubFilterSettings.setPath(selectedAbsolutePath + "/%");
+                    currentSubFilterSettings.setFolderAndBelow(selectedAbsolutePath);
                     this.mGalleryQueryParameter.mCurrentSubFilterMode = GalleryQueryParameter.SUB_FILTER_MODE_PATH;
                     this.mGalleryQueryParameter.mDirQueryID = queryTypeId;
                     state.setLastPath(selectedAbsolutePath);

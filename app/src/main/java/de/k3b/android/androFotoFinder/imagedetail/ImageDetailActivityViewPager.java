@@ -631,7 +631,7 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
         File selectedPhoto = new File(path);
         this.mInitialFilePath = path;
         this.mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
-        GalleryFilterParameter filter = new GalleryFilterParameter().setPath(selectedPhoto.getParent() + "/%");
+        GalleryFilterParameter filter = new GalleryFilterParameter().setFolderAndBelow(selectedPhoto.getParent());
         return filter;
     }
 
@@ -955,11 +955,8 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
                     String dirPath = getCurrentFilePath(); // PhotoPropertiesMediaFilesScanner.getDir().getAbsolutePath();
                     if (dirPath != null) {
                         dirPath = FileUtils.getDir(dirPath).getAbsolutePath();
-                        GalleryFilterParameter newFilter = new GalleryFilterParameter();
-                        newFilter.setPath(dirPath);
-                        // int callBackId = (PhotoPropertiesMediaFilesScanner.isNoMedia(dirPath,PhotoPropertiesMediaFilesScanner.DEFAULT_SCAN_DEPTH)) ? NOMEDIA_GALLERY : 0;
+                        QueryParameter query = FotoSql.addWhereFolderWithoutSubfolders(new QueryParameter(FotoSql.queryDetail), dirPath);
 
-                        QueryParameter query = TagSql.filter2NewQuery(this.mFilter);
                         FotoGalleryActivity.showActivity(" menu " + menuItem.getTitle() + "[13]" + dirPath,
                                 this, query, 0);
                     }
