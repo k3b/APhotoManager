@@ -1,0 +1,3 @@
+Changes from 0.8.0 to ????
+
+* Backup to zip: Menu "Show in new gallery" shows photos that would go into the new incremental back
