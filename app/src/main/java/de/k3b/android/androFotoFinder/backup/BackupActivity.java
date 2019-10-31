@@ -151,11 +151,14 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         }
     }
 
-    private void showCurrentStatistics() {
+    private void showCurrentStatistics(boolean withToast) {
         final QueryParameter asMergedQuery
                 = getAsMergedQuery();
         CharSequence statistics = TagSql.getStatisticsMessage(this, 0, asMergedQuery);
 
+        if (withToast) {
+            Toast.makeText(this, statistics, Toast.LENGTH_SHORT).show();
+        }
         gui.resetBackgroundColor();
         showStatus(this, statistics);
     }
@@ -217,7 +220,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         }
         loadGuiFromData();
         gui.updateHistory();
-        showCurrentStatistics();
+        showCurrentStatistics(false);
     }
 
     /**
@@ -333,7 +336,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         mZipConfigData.setFilter((modifiedQuery != null) ? modifiedQuery : "");
         loadGuiFromData();
         gui.updateHistory();
-        showCurrentStatistics();
+        showCurrentStatistics(true);
     }
 
     private final DateTimeApi mDateTimeApi = new DateTimeApi();
@@ -513,7 +516,6 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_edit_common, menu);
-        getMenuInflater().inflate(R.menu.menu_copy_paste, menu);
         getMenuInflater().inflate(R.menu.menu_backup, menu);
 
         AboutDialogPreference.onPrepareOptionsMenu(this, menu);
@@ -640,16 +642,16 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
                         if (editText.equals(editFilter)) {
                             showCurrentExifFilterDetails();
                             updateHistory();
-                            showCurrentStatistics();
+                            showCurrentStatistics(true);
                         }
                         if (editText.equals(editDateModifiedFrom)) {
-                            showCurrentStatistics();
+                            showCurrentStatistics(true);
                         }
                         if (editText.equals(editZipName)) {
                             IZipConfig config = getPreviousZipConfig(BackupActivity.this, text);
                             if (config != null) {
                                 toGui(config);
-                                showCurrentStatistics();
+                                showCurrentStatistics(true);
                             }
                         }
                     }
