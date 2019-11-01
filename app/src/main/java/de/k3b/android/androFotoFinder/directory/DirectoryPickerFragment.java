@@ -469,7 +469,7 @@ public class DirectoryPickerFragment extends DialogFragment
         String path = (selection == null) ? null : selection.getAbsolute();
         if (!StringUtils.isNullOrEmpty(path)) {
             PhotoAutoprocessingEditActivity.showActivity("[5]" + " menu " + menuItem.getTitle(), getActivity(),
-                    null, path, getSrcFotos(), R.id.cmd_apm_edit);
+                    null, path, getSrcFotos(), R.id.cmd_apm_edit, null);
             return true;
         }
         return false;

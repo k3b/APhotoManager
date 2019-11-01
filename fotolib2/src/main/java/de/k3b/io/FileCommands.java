@@ -185,15 +185,14 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
     /**
      * For junit integration test: special internal version with explicit dependencies.
      * move (or copy) sourcefiles (with their xmp-sidecar-files) to destdirfolder.
-     * Executes autoprocessing (#91: rename, add exif) if destdirfolder
-     * contains ".apm"  (autoprocessing data file)
+     * Executes autoprocessing (#91: rename, add exif) if autoProccessData is not null
      * @param move false: copy
      * @param selectedFiles
      * @param destDirFolder where files are moved/copied to
      * @param autoProccessData null or data for auto rename/exif data
      * @param progessListener  */
-    int moveOrCopyFilesTo(boolean move, SelectedFiles selectedFiles, File destDirFolder,
-                          PhotoAutoprocessingDto autoProccessData, IProgessListener progessListener) {
+    public int moveOrCopyFilesTo(boolean move, SelectedFiles selectedFiles, File destDirFolder,
+                                 PhotoAutoprocessingDto autoProccessData, IProgessListener progessListener) {
         boolean doNotRenameIfSourceInDestFolder = false;
         IFileNameProcessor renameProcessor = null;
         PhotoPropertiesDiffCopy exifChanges = null;

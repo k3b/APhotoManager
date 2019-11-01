@@ -62,6 +62,7 @@ import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.LockScreen;
 import de.k3b.android.androFotoFinder.OnGalleryInteractionListener;
+import de.k3b.android.androFotoFinder.PhotoAutoprocessingEditActivity;
 import de.k3b.android.androFotoFinder.PhotoPropertiesEditActivity;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.backup.BackupActivity;
@@ -94,7 +95,9 @@ import de.k3b.io.Directory;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
+import de.k3b.io.IProgessListener;
 import de.k3b.io.ListUtils;
+import de.k3b.io.PhotoAutoprocessingDto;
 import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
@@ -524,6 +527,14 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             mMustReplaceMenue = true;
             getActivity().invalidateOptionsMenu();
         }
+
+        if (resultCode == Activity.RESULT_OK) {
+            switch (requestCode) {
+                case R.id.cmd_rename_multible:
+                    onRenameMultible(PhotoAutoprocessingEditActivity.getAutoprocessingData(intent), AffUtils.getSelectedFiles(intent));
+                    break;
+            }
+        }
     }
 
     @Override
@@ -911,6 +922,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 return cmdMoveOrCopyWithDestDirPicker(false, fileCommands.getLastCopyToPath(), selectedFiles);
             case R.id.cmd_move:
                 return cmdMoveOrCopyWithDestDirPicker(true, fileCommands.getLastCopyToPath(), selectedFiles);
+            case R.id.cmd_rename_multible:
+                return cmdRenameMultible(menuItem, selectedFiles);
             case R.id.cmd_show_geo:
                 MapGeoPickerActivity.showActivity(" menu " + menuItem.getTitle(),
                         this.getActivity(), selectedFiles, null, null, 0);
@@ -1068,6 +1081,29 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             dismiss();
         }
     }
+
+    private boolean cmdRenameMultible(MenuItem menuItem, final SelectedFiles fotos) {
+        /*
+showActivity(String debugContext, Activity context,
+                                    PhotoAutoprocessingDto workflow,
+                                    String directoryOrApmFileUrl,
+                                    SelectedFiles selectedFiles,
+                                    int requestCode)        */
+        PhotoAutoprocessingDto workflow = new PhotoAutoprocessingDto();
+        PhotoAutoprocessingEditActivity.showActivity(
+                "[5]" + " menu " + menuItem.getTitle(), this.getActivity()
+                , workflow, null, fotos, menuItem.getItemId(), menuItem.getTitle().toString());
+        return true;
+    }
+
+    private void onRenameMultible(PhotoAutoprocessingDto autoprocessingData, SelectedFiles selectedFiles) {
+        AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(this.getActivity(), true);
+
+        IProgessListener progessListener = null;
+
+        cmd.moveOrCopyFilesTo(true, selectedFiles, null, autoprocessingData, progessListener);
+    }
+
 
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
         if (AndroidFileCommands.canProcessFile(this.getActivity(), false)) {
