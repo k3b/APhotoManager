@@ -49,7 +49,7 @@
     <item android:id="@+id/cmd_backup"
         android:title="@string/backup_title"
         android:visible="true"
-        android:orderInCategory="41"
+        android:orderInCategory="61"
         android:showAsAction="never" />
 
     <item android:id="@+id/cmd_more"
