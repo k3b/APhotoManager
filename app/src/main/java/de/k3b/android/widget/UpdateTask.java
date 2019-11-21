@@ -7,10 +7,12 @@ package de.k3b.android.widget;
 import android.app.Activity;
 import android.util.Log;
 
+import java.io.File;
+
 import de.k3b.android.androFotoFinder.Global;
-import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.io.IProgessListener;
+import de.k3b.io.PhotoAutoprocessingDto;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.media.PhotoPropertiesDiffCopy;
 
@@ -22,11 +24,31 @@ public class UpdateTask extends AsyncTaskWithProgressDialog<SelectedFiles> imple
     private PhotoPropertiesDiffCopy exifChanges;
     private final AndroidFileCommands cmd;
 
-    public UpdateTask(Activity ctx, AndroidFileCommands cmd,
-               PhotoPropertiesDiffCopy exifChanges) {
-        super(ctx, R.string.exif_menu_title);
+    private boolean move;
+    private File destDirFolder;
+    private PhotoAutoprocessingDto autoProccessData;
+
+    public UpdateTask(int resIdDlgTitle, Activity ctx, AndroidFileCommands cmd,
+                      PhotoPropertiesDiffCopy exifChanges) {
+        this(resIdDlgTitle, ctx, cmd, exifChanges, true, null, null);
+    }
+
+    public UpdateTask(int resIdDlgTitle, Activity ctx, AndroidFileCommands cmd,
+                       boolean move, File destDirFolder,
+                       PhotoAutoprocessingDto autoProccessData) {
+        this(resIdDlgTitle, ctx, cmd, null, move, destDirFolder, autoProccessData);
+    }
+
+    private UpdateTask(int resIdDlgTitle, Activity ctx, AndroidFileCommands cmd,
+                      PhotoPropertiesDiffCopy exifChanges,
+                      boolean move, File destDirFolder,
+                      PhotoAutoprocessingDto autoProccessData) {
+        super(ctx, resIdDlgTitle);
         this.exifChanges = exifChanges;
         this.cmd = cmd;
+        this.move = move;
+        this.autoProccessData = autoProccessData;
+        this.destDirFolder = destDirFolder;
     }
 
     @Override
@@ -36,10 +58,14 @@ public class UpdateTask extends AsyncTaskWithProgressDialog<SelectedFiles> imple
         if (exifChanges != null) {
             SelectedFiles items = params[0];
 
-            return cmd.applyExifChanges(true, exifChanges, items, null);
+            return cmd.applyExifChanges(move, exifChanges, items, this);
+
+        } else {
+            SelectedFiles items = params[0];
+
+            return cmd.moveOrCopyFilesTo(move, items, destDirFolder, autoProccessData, this);
 
         }
-        return 0;
     }
 
     @Override

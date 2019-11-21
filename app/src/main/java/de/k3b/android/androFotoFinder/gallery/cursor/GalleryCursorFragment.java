@@ -87,6 +87,7 @@ import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.Dialogs;
+import de.k3b.android.widget.UpdateTask;
 import de.k3b.database.QueryParameter;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
@@ -95,7 +96,6 @@ import de.k3b.io.Directory;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
-import de.k3b.io.IProgessListener;
 import de.k3b.io.ListUtils;
 import de.k3b.io.PhotoAutoprocessingDto;
 import de.k3b.io.StringUtils;
@@ -187,6 +187,11 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
      * not null while tag picker is open
      */
     private WeakReference<TagsPickerFragment> mTagPickerDialog = null;
+
+    /**
+     * not null while background task is active
+     */
+    private static UpdateTask exifUpdate = null;
 
     /**************** construction ******************/
     /**
@@ -451,6 +456,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         }
 
         requery("onCreateView");
+        updateExifUpdateTask(this.getActivity());
+
         return result;
     }
 
@@ -460,6 +467,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         super.onAttach(activity);
         mFileCommands.setContext(activity);
         mFileCommands.setLogFilePath(mFileCommands.getDefaultLogFile());
+        updateExifUpdateTask(activity);
+
 
         if (Global.debugEnabledMemory) {
             Log.d(Global.LOG_CONTEXT, mDebugPrefix + " - onAttach cmd (" +
@@ -539,6 +548,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     @Override
     public void onDetach() {
+        updateExifUpdateTask(null);
         Global.debugMemory(mDebugPrefix, "onDetach");
         super.onDetach();
         mGalleryListener = null;
@@ -568,6 +578,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     @Override
     public void onDestroy() {
+        updateExifUpdateTask(null);
         Global.debugMemory(mDebugPrefix, "before onDestroy");
 
         mDestDirPicker = null;
@@ -948,7 +959,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 cmdShowDetails();
                 return true;
             case R.id.cmd_scan:
-                return fileCommands.cmdMediaScannerWithQuestion();
+                return fileCommands.cmdMediaScannerWithQuestion(this.getActivity());
 
             default:
                 return super.onOptionsItemSelected(menuItem);
@@ -1099,11 +1110,21 @@ showActivity(String debugContext, Activity context,
     private void onRenameMultible(PhotoAutoprocessingDto autoprocessingData, SelectedFiles selectedFiles) {
         AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(this.getActivity(), true);
 
-        IProgessListener progessListener = null;
+        exifUpdate = new UpdateTask(R.string.exif_menu_title, this.getActivity(), cmd, true, null, autoprocessingData);
+        exifUpdate.execute(selectedFiles);
 
-        cmd.moveOrCopyFilesTo(true, selectedFiles, null, autoprocessingData, progessListener);
     }
 
+    private static void updateExifUpdateTask(Activity activity) {
+        if (exifUpdate != null) {
+            if (exifUpdate.isNotFinishedYet()) {
+                exifUpdate.setActivity(activity);
+            } else {
+                exifUpdate.destroy();
+                exifUpdate = null;
+            }
+        }
+    }
 
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
         if (AndroidFileCommands.canProcessFile(this.getActivity(), false)) {

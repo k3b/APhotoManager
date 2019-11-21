@@ -55,13 +55,14 @@
     <item
         android:id="@+id/cmd_rename_multible"
 
-        android:enabled="false"
-        android:icon="@android:drawable/ic_menu_edit"
+        android:enabled="true"
+        android:visible="true"
 
+        android:icon="@android:drawable/ic_menu_edit"
         android:orderInCategory="51"
         android:showAsAction="never"
         android:title="@string/rename_menu_title"
-        android:visible="false" />
+         />
 
     <item android:id="@+id/cmd_more"
         android:title="@string/more_menu_title"

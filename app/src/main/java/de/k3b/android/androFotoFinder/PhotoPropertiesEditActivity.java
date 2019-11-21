@@ -821,7 +821,7 @@ public class PhotoPropertiesEditActivity extends ActivityWithAutoCloseDialogs im
 
                     if (exifChanges != null) {
                         if (!SYNC_UPDATE_EXIF) {
-                            this.exifUpdate = new UpdateTask(ctx, cmd, exifChanges);
+                            this.exifUpdate = new UpdateTask(R.string.exif_menu_title, ctx, cmd, exifChanges);
                             exifUpdate.execute(items);
                             finish = false;
                         } else {

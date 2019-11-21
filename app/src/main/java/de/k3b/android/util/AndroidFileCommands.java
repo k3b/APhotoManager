@@ -69,7 +69,7 @@ public class AndroidFileCommands extends FileCommands {
     private static final String SETTINGS_KEY_LAST_COPY_TO_PATH = "last_copy_to_path";
     private static final String mDebugPrefix = "AndroidFileCommands.";
     private boolean isInBackground = false;
-    protected Activity mContext; // must be activity because of fragmentManager
+    protected Context mContext;
     private AlertDialog mActiveAlert = null;
     private boolean mHasNoMedia = false;
     private PhotoPropertiesMediaFilesScanner mScanner = null;
@@ -123,17 +123,17 @@ public class AndroidFileCommands extends FileCommands {
         Context context = this.mContext;
         String message = getModifyMessage(context, opCode, modifyCount, itemCount);
         if ((itemCount > 0) && (mScanner != null)) {
-            PhotoPropertiesMediaFilesScannerAsyncTask.updateMediaDBInBackground(mScanner, mContext, message, oldPathNames, newPathNames);
+            PhotoPropertiesMediaFilesScannerAsyncTask.updateMediaDBInBackground(mScanner, context, message, oldPathNames, newPathNames);
         }
 
-        if (false && this.mHasNoMedia && (mContext != null)) {
+        if (false && this.mHasNoMedia && (context != null)) {
             // a nomedia file is affected => must update gui
-            this.mContext.getContentResolver().notifyChange(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, null, false);
+            context.getContentResolver().notifyChange(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, null, false);
             this.mHasNoMedia = false;
         }
 
         if (!isInBackground) {
-            Toast.makeText(mContext, message, Toast.LENGTH_LONG).show();
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -343,7 +343,7 @@ public class AndroidFileCommands extends FileCommands {
         @Override
         protected void onDirectoryPick(IDirectory selection) {
             if ((mParent != null) && (selection != null)) {
-                mParent.onMediaScannerAnswer(selection.getAbsolute());
+                mParent.onMediaScannerAnswer(mContext, selection.getAbsolute());
             }
             dismiss();
         }
@@ -371,15 +371,15 @@ public class AndroidFileCommands extends FileCommands {
 
     }
 
-    public boolean cmdMediaScannerWithQuestion() {
+    public boolean cmdMediaScannerWithQuestion(Activity activity) {
         final RecursivePhotoPropertiesMediaFilesScannerAsyncTask scanner = RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner;
 
         if (scanner != null) {
             // connect gui to already running scanner if possible
             scanner.resumeIfNeccessary(); // if paused resume it.
-            showMediaScannerStatus(scanner);
+            showMediaScannerStatus(scanner, activity);
             return true;
-        } else if (AndroidFileCommands.canProcessFile(mContext, this.isInBackground)) {
+        } else if (AndroidFileCommands.canProcessFile(activity, this.isInBackground)) {
             // show dialog to get start parameter
             MediaScannerDirectoryPickerFragment destDir = new MediaScannerDirectoryPickerFragment();
 
@@ -388,11 +388,11 @@ public class AndroidFileCommands extends FileCommands {
             destDir.defineDirectoryNavigation(OsUtils.getRootOSDirectory(null),
                     FotoSql.QUERY_TYPE_UNDEFINED,
                     getLastCopyToPath());
-            if (!LockScreen.isLocked(mContext)) {
+            if (!LockScreen.isLocked(activity)) {
                 destDir.setContextMenuId(R.menu.menu_context_pick_osdir);
             }
 
-            destDir.show(mContext.getFragmentManager(), "scannerPick");
+            destDir.show(activity.getFragmentManager(), "scannerPick");
 
             return true;
         }
@@ -400,8 +400,8 @@ public class AndroidFileCommands extends FileCommands {
     }
 
     /** answer from "which directory to start scanner from"? */
-    private void onMediaScannerAnswer(String scanRootDir) {
-        if  ((AndroidFileCommands.canProcessFile(mContext, this.isInBackground)) || (RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner == null)){
+    private void onMediaScannerAnswer(Activity activity, String scanRootDir) {
+        if  ((AndroidFileCommands.canProcessFile(activity, this.isInBackground)) || (RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner == null)){
 
             // remove ".nomedia" file from scan root
             File nomedia = new File(scanRootDir, PhotoPropertiesMediaFilesScanner.MEDIA_IGNORE_FILENAME);
@@ -415,10 +415,10 @@ public class AndroidFileCommands extends FileCommands {
                 Log.i(Global.LOG_CONTEXT, mDebugPrefix + "onMediaScannerAnswer start scanning " + scanRootDir);
             }
 
-            final String message = mContext.getString(R.string.scanner_menu_title);
+            final String message = activity.getString(R.string.scanner_menu_title);
             final RecursivePhotoPropertiesMediaFilesScannerAsyncTask scanner = (RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner != null)
                     ? RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner :
-                    new RecursivePhotoPropertiesMediaFilesScannerAsyncTask(mScanner, mContext, message);
+                    new RecursivePhotoPropertiesMediaFilesScannerAsyncTask(mScanner, activity, message);
             synchronized (this) {
                 if (RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner == null) {
                     RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner = scanner;
@@ -426,13 +426,13 @@ public class AndroidFileCommands extends FileCommands {
                 } // else scanner is already running
             }
 
-            showMediaScannerStatus(RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner);
+            showMediaScannerStatus(RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner, activity);
         }
     }
 
-    private void showMediaScannerStatus(RecursivePhotoPropertiesMediaFilesScannerAsyncTask mediaScanner) {
+    private void showMediaScannerStatus(RecursivePhotoPropertiesMediaFilesScannerAsyncTask mediaScanner, Activity activity) {
         if (mediaScanner != null) {
-            mediaScanner.showStatusDialog(mContext);
+            mediaScanner.showStatusDialog(activity);
         }
     }
 
@@ -484,9 +484,10 @@ public class AndroidFileCommands extends FileCommands {
         return 0;
     }
 
-    public AndroidFileCommands setContext(Activity mContext) {
-        this.mContext = mContext;
-        if (mContext != null) {
+    public AndroidFileCommands setContext(Activity activity) {
+        this.mContext = null;
+        if (activity != null) {
+            this.mContext = activity.getApplicationContext();
             closeLogFile();
             mScanner = PhotoPropertiesMediaFilesScanner.getInstance(mContext);
         }
