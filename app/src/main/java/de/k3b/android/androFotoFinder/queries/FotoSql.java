@@ -135,7 +135,8 @@ public class FotoSql extends FotoSqlBase {
 
     // only works with api >= 16
     public static final String SQL_COL_MAX_WITH =
-            (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+            // #155: android10 incompatibility: check if the sqLite-max() function is the problem
+            (false && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN))
                 ? "max(" + MediaStore.Images.Media.WIDTH + "," +
                                                 MediaStore.Images.Media.HEIGHT +")"
                 : "1024";
