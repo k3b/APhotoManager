@@ -187,7 +187,7 @@ public class MediaImageDbReplacement {
         Cursor c = null;
         ContentValues contentValues = new ContentValues();
         try {
-            c = ContentProviderMediaExecuter.createCursorForQuery(null, "execGetFotoPaths(pathFilter)", context,
+            c = ContentProviderMediaImpl.createCursorForQuery(null, "execGetFotoPaths(pathFilter)", context,
                     query, null);
             while (c.moveToNext()) {
                 getContentValues(c, contentValues);

@@ -62,7 +62,6 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.backup.BackupActivity;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailMetaDialogBuilder;
-import de.k3b.android.androFotoFinder.queries.ContentProviderMediaExecuter;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoThumbSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
@@ -545,7 +544,7 @@ public class DirectoryPickerFragment extends DialogFragment
         }
 
         // delete from database
-        if (FotoSql.deleteMedia("delete album", getActivity(),
+        if (FotoSql.deleteMedia("delete album",
                 ListUtils.toStringList(file.getAbsolutePath()),false) > 0) {
             deleteSuccess = true;
         }
@@ -664,11 +663,11 @@ public class DirectoryPickerFragment extends DialogFragment
                     if (!canonicalPath.endsWith("/")) canonicalPath+="/";
 
                     String sqlWhereLink = FotoSql.SQL_COL_PATH + " like '" + linkPath + "%'";
-                    SelectedFiles linkFiles = FotoSql.getSelectedfiles(context, sqlWhereLink, VISIBILITY.PRIVATE_PUBLIC);
+                    SelectedFiles linkFiles = FotoSql.getSelectedfiles(sqlWhereLink, VISIBILITY.PRIVATE_PUBLIC);
 
                     String sqlWhereCanonical = FotoSql.SQL_COL_PATH + " in (" + linkFiles.toString() + ")";
                     sqlWhereCanonical = sqlWhereCanonical.replace(linkPath,canonicalPath);
-                    SelectedFiles canonicalFiles = FotoSql.getSelectedfiles(context, sqlWhereCanonical, VISIBILITY.PRIVATE_PUBLIC);
+                    SelectedFiles canonicalFiles = FotoSql.getSelectedfiles(sqlWhereCanonical, VISIBILITY.PRIVATE_PUBLIC);
                     HashMap<String, String> link2canonical = new HashMap<String, String>();
                     for(String cann : canonicalFiles.getFileNames()) {
                         link2canonical.put(linkPath + cann.substring(canonicalPath.length()), cann);
@@ -693,9 +692,9 @@ public class DirectoryPickerFragment extends DialogFragment
                         if (cann == null) {
                             // rename linkFile to canonicalFile
                             updateValues.put(FotoSql.SQL_COL_PATH, canonicalPath + lin.substring(linkPath.length()));
-                            ContentProviderMediaExecuter.execUpdate("fixLinks", context, linkIds[i].intValue(), updateValues);
+                            FotoSql.getMediaDBApi().execUpdate("fixLinks", linkIds[i].intValue(), updateValues);
                         } else {
-                            ContentProviderMediaExecuter.deleteMedia("DirectoryPickerFragment.fixLinks", context, FotoSql.FILTER_COL_PK, new String[]{linkIds[i].toString()}, true);
+                            FotoSql.getMediaDBApi().deleteMedia("DirectoryPickerFragment.fixLinks", FotoSql.FILTER_COL_PK, new String[]{linkIds[i].toString()}, true);
                         }
                     }
                     PhotoPropertiesMediaFilesScanner.notifyChanges(context, "Fixed link/canonical duplicates");

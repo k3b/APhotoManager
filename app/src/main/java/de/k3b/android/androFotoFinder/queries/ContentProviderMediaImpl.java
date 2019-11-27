@@ -35,7 +35,10 @@ import de.k3b.database.QueryParameter;
 import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
 
-public class ContentProviderMediaExecuter {
+/**
+ * Static Implementation of Context.getContentResolver()-ContentProvider based media api
+ */
+public class ContentProviderMediaImpl {
     public static Cursor createCursorForQuery(
             StringBuilder out_debugMessage, String dbgContext, final Context context,
             QueryParameter parameters, VISIBILITY visibility) {

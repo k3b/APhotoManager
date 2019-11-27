@@ -30,12 +30,12 @@ import java.util.List;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.util.AndroidFileCommands;
+import de.k3b.io.FileCommands;
 import de.k3b.io.IProgessListener;
 import de.k3b.io.collections.SelectedFiles;
-import de.k3b.io.FileCommands;
 import de.k3b.media.MediaFormatter;
-import de.k3b.media.PhotoPropertiesXmpSegment;
 import de.k3b.media.PhotoPropertiesUpdateHandler;
+import de.k3b.media.PhotoPropertiesXmpSegment;
 import de.k3b.tagDB.Tag;
 import de.k3b.tagDB.TagConverter;
 import de.k3b.tagDB.TagProcessor;
@@ -124,7 +124,7 @@ public class TagWorflow extends TagProcessor implements IProgessListener {
             if (mustSave) {
                 exif.setTags(currentItemTags);
                 exif.save(dbgSaveReason);
-                TagSql.updateDB(dbgSaveReason, this.context, tagWorflowItemFromDB.path, exif, MediaFormatter.FieldID.tags);
+                TagSql.updateDB(dbgSaveReason, tagWorflowItemFromDB.path, exif, MediaFormatter.FieldID.tags);
 
                 // update tag repository
                 TagRepository.getInstance().includeTagNamesIfNotFound(currentItemTags);
@@ -181,8 +181,10 @@ public class TagWorflow extends TagProcessor implements IProgessListener {
         return null;
     }
 
-    /** same as {@link TagSql#loadTagWorflowItems(Context, String, List)} but can be overwritten for unittests. */
+    /**
+     * same as {@link TagSql#loadTagWorflowItems(String, List)} but can be overwritten for unittests.
+     */
     protected List<TagSql.TagWorflowItem> loadTagWorflowItems(Context context, String selectedItems, List<Tag> anyOfTags) {
-        return TagSql.loadTagWorflowItems(context, selectedItems, anyOfTags);
+        return TagSql.loadTagWorflowItems(selectedItems, anyOfTags);
     }
 }

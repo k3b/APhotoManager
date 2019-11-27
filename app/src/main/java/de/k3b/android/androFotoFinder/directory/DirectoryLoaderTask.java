@@ -28,7 +28,6 @@ import android.util.Log;
 import java.util.List;
 
 import de.k3b.android.androFotoFinder.Global;
-import de.k3b.android.androFotoFinder.queries.ContentProviderMediaExecuter;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.Directory;
@@ -102,8 +101,8 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
             }
 
             try {
-                cursor = ContentProviderMediaExecuter.createCursorForQuery(
-                        null, "ZipExecute", context,
+                cursor = FotoSql.getMediaDBApi().createCursorForQuery(
+                        null, "ZipExecute",
                         queryParameters, null);
 
                 int itemCount = cursor.getCount();

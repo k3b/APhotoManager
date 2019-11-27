@@ -33,7 +33,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import de.k3b.android.androFotoFinder.queries.ContentProviderMediaExecuter;
+import de.k3b.android.androFotoFinder.queries.ContentProviderMediaImpl;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.database.QueryParameter;
@@ -138,7 +138,7 @@ public class ImageDetailMetaDialogBuilder {
 
             if (currentImageId != 0) {
 
-                ContentValues dbContent = ContentProviderMediaExecuter.getDbContent(context, currentImageId);
+                ContentValues dbContent = ContentProviderMediaImpl.getDbContent(context, currentImageId);
                 if (dbContent != null) {
                     result.append(NL).append(line).append(NL);
                     result.append(NL).append(TagSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE).append(NL).append(NL);

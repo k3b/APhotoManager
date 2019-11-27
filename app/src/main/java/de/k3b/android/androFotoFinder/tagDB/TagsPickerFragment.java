@@ -580,14 +580,14 @@ public class TagsPickerFragment extends DialogFragment implements ShowInMenuHand
 
         List<Tag> rootList = new ArrayList<Tag>();
         rootList.add(item);
-        final int rootTagReferenceCount = TagSql.getTagRefCount(getActivity(), rootList);
+        final int rootTagReferenceCount = TagSql.getTagRefCount(rootList);
 
         List<Tag> children = item.getChildren(loadTagRepositoryItems(false), true, false);
 
         if (children != null) rootList.addAll(children);
         final int allTagReferenceCount = (children == null)
                 ? rootTagReferenceCount
-                : TagSql.getTagRefCount(getActivity(), rootList);
+                : TagSql.getTagRefCount(rootList);
 
         if (children == null) {
             chkDeleteChildren.setVisibility(View.GONE);
@@ -690,7 +690,7 @@ public class TagsPickerFragment extends DialogFragment implements ShowInMenuHand
 
                 List<Tag> rootList = new ArrayList<Tag>();
                 rootList.add(tag);
-                final int rootTagReferenceCount = TagSql.getTagRefCount(getActivity(), rootList);
+                final int rootTagReferenceCount = TagSql.getTagRefCount(rootList);
 
                 chkUpdatePhotos.setText(getString(R.string.tags_update_photos) + " (" +
                         rootTagReferenceCount + ")");

@@ -20,7 +20,6 @@
 package de.k3b.android.androFotoFinder.tagDB;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -34,7 +33,6 @@ import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.media.PhotoPropertiesMediaDBContentValues;
 import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
-import de.k3b.android.androFotoFinder.queries.ContentProviderMediaExecuter;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.database.QueryParameter;
@@ -259,7 +257,7 @@ public class TagSql extends FotoSql {
         }
     }
 
-    public static int fixPrivate(Context context) {
+    public static int fixPrivate() {
         // update ... set media_type=1001 where media_type=1 and tags like '%;PRIVATE;%'
         ContentValues values = new ContentValues();
         values.put(SQL_COL_EXT_MEDIA_TYPE, MEDIA_TYPE_IMAGE_PRIVATE);
@@ -273,7 +271,7 @@ public class TagSql extends FotoSql {
                             PhotoPropertiesUtil.IMG_TYPE_PRIVATE + "'"));
         }
         where.append(")");
-        return ContentProviderMediaExecuter.exexUpdateImpl("Fix visibility private", context,
+        return getMediaDBApi().exexUpdateImpl("Fix visibility private",
                 values, where.toString(), new String[] {"%;" + VISIBILITY.TAG_PRIVATE +
                 ";%"});
     }
@@ -332,7 +330,7 @@ public class TagSql extends FotoSql {
      * @param allowSetNulls     if one of these columns are null, the set null is copied, too
      * @return number of changed db items
      */
-    public static int updateDB(String dbgContext, Context context, String oldFullJpgFilePath,
+    public static int updateDB(String dbgContext, String oldFullJpgFilePath,
                                PhotoPropertiesUpdateHandler jpg, MediaFormatter.FieldID... allowSetNulls) {
         if ((jpg != null) && (!PhotoPropertiesMediaFilesScanner.isNoMedia(oldFullJpgFilePath))) {
             ContentValues dbValues = new ContentValues();
@@ -358,7 +356,7 @@ public class TagSql extends FotoSql {
                 TagSql.setXmpFileModifyDate(dbValues, xmpFilelastModified);
                 TagSql.setFileModifyDate(dbValues, newFullJpgFilePath);
 
-                return TagSql.execUpdate(dbgContext, context, oldFullJpgFilePath,
+                return TagSql.execUpdate(dbgContext, oldFullJpgFilePath,
                         TagSql.EXT_LAST_EXT_SCAN_UNKNOWN, dbValues, VISIBILITY.PRIVATE_PUBLIC);
             }
 
@@ -368,21 +366,21 @@ public class TagSql extends FotoSql {
     }
 
 
-    public static int execUpdate(String dbgContext, Context context, String path, long xmpFileDate, ContentValues values, VISIBILITY visibility) {
+    public static int execUpdate(String dbgContext, String path, long xmpFileDate, ContentValues values, VISIBILITY visibility) {
         if ((!Global.Media.enableXmpNone) || (xmpFileDate == EXT_LAST_EXT_SCAN_UNKNOWN)) {
-            return ContentProviderMediaExecuter.execUpdate(dbgContext, context, path, values, visibility);
+            return getMediaDBApi().execUpdate(dbgContext, path, values, visibility);
         }
-        return ContentProviderMediaExecuter.exexUpdateImpl(dbgContext, context, values, FILTER_EXPR_PATH_LIKE_XMP_DATE, new String[]{path, Long.toString(xmpFileDate)});
+        return getMediaDBApi().exexUpdateImpl(dbgContext, values, FILTER_EXPR_PATH_LIKE_XMP_DATE, new String[]{path, Long.toString(xmpFileDate)});
     }
 
     /** return how many photos exist that have one or more tags from list */
-    public static int getTagRefCount(Context context, List<Tag> tags) {
+    public static int getTagRefCount(List<Tag> tags) {
         QueryParameter query = new QueryParameter()
                 .addColumn("count(*)").addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME);
         if (addWhereAnyOfTags(query, tags) > 0) {
             Cursor c = null;
             try {
-                c = ContentProviderMediaExecuter.createCursorForQuery(null, "getTagRefCount", context, query, VISIBILITY.PRIVATE_PUBLIC);
+                c = getMediaDBApi().createCursorForQuery(null, "getTagRefCount", query, VISIBILITY.PRIVATE_PUBLIC);
                 if (c.moveToFirst()) {
                     return c.getInt(0);
                 }
@@ -412,12 +410,11 @@ public class TagSql extends FotoSql {
 
     /**
      * converts selectedItemPks and/or anyOfTags to TagWorflowItem-s
-     * @param context
      * @param selectedItemPks if not null list of comma seperated item-pks
      * @param anyOfTags if not null list of tag-s where at least one oft the tag must be in the photo.
      * @return
      */
-    public static List<TagWorflowItem> loadTagWorflowItems(Context context, String selectedItemPks, List<Tag> anyOfTags) {
+    public static List<TagWorflowItem> loadTagWorflowItems(String selectedItemPks, List<Tag> anyOfTags) {
         QueryParameter query = new QueryParameter()
                 .addColumn(TagSql.SQL_COL_PK, TagSql.SQL_COL_PATH, TagSql.SQL_COL_EXT_TAGS, TagSql.SQL_COL_EXT_XMP_LAST_MODIFIED_DATE);
 
@@ -436,7 +433,7 @@ public class TagSql extends FotoSql {
 
         if (filterCount > 0) {
             try {
-                c = ContentProviderMediaExecuter.createCursorForQuery(null, "loadTagWorflowItems", context, query, VISIBILITY.PRIVATE_PUBLIC);
+                c = getMediaDBApi().createCursorForQuery(null, "loadTagWorflowItems", query, VISIBILITY.PRIVATE_PUBLIC);
                 if (c.moveToFirst()) {
                     do {
                         result.add(new TagWorflowItem(c.getLong(0), c.getString(1), TagConverter.fromString(c.getString(2)),

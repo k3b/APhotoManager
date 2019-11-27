@@ -65,8 +65,8 @@ public abstract class SqlJobTaskBase extends AsyncTask<QueryParameter, Integer, 
 
         Cursor cursor = null;
         try {
-            cursor = ContentProviderMediaExecuter.createCursorForQuery(
-                    null, "SqlJobTask", mContext,
+            cursor = FotoSql.getMediaDBApi().createCursorForQuery(
+                    null, "SqlJobTask",
                     query, null);
 
             int itemCount = cursor.getCount();

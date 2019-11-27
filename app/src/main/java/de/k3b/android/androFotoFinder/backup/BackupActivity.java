@@ -496,7 +496,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
                 if (itemCount > 0) {
                     if ((mustLoadIDs) && (ids == null)) {
                         ids = new Long[itemCount];
-                        Map<String, Long> idMap = FotoSql.execGetPathIdMap(this, fileNames);
+                        Map<String, Long> idMap = FotoSql.execGetPathIdMap(fileNames);
 
                         for (int i = 0; i < itemCount; i++) {
                             ids[i] = idMap.get(fileNames[i]);
@@ -702,7 +702,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
 
             paths.add(DCIM_ROOT);
 
-            String minFolder = FotoSql.getMinFolder(getApplicationContext(), query, true);
+            String minFolder = FotoSql.getMinFolder(query, true);
             updateHistory(FileUtils.getDir(minFolder), filenames, paths, 1);
 
             String queryFolder = FotoSql.getFilePath(query, false);

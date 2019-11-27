@@ -38,6 +38,7 @@ import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoSqlBase;
+import de.k3b.android.androFotoFinder.queries.MediaDBContentprovider;
 import de.k3b.android.osmdroid.forge.MapsForgeSupport;
 import de.k3b.android.util.LogCat;
 import de.k3b.android.widget.ActivityWithCallContext;
@@ -93,6 +94,9 @@ public class AndroFotoFinderApp extends Application {
         // StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().detectAll().penaltyDialog().build());
         // StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyDeath().build());
         FotoSqlBase.init();
+
+        /// #155: todo: depending on android-api version set IMediaDBApi
+        FotoSql.setMediaDBApi(new MediaDBContentprovider(this));
 
         super.onCreate();
 
@@ -165,7 +169,7 @@ public class AndroFotoFinderApp extends Application {
         // #60: configure some of the mapsforge settings first
         MapsForgeSupport.createInstance(this);
 
-        FotoSql.deleteMediaWithNullPath(this);
+        FotoSql.deleteMediaWithNullPath();
 
         Log.i(Global.LOG_CONTEXT, getAppId() + " created");
     }

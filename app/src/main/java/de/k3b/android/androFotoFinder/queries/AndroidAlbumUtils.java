@@ -155,7 +155,7 @@ public class AndroidAlbumUtils implements Common {
 
                     QueryParameter query = QueryParameter.load(context.getContentResolver().openInputStream(uri));
                     if (query != null) {
-                        Map<String, Long> found = FotoSql.execGetPathIdMap(context, path);
+                        Map<String, Long> found = FotoSql.execGetPathIdMap(path);
                         if ((found == null) || (found.size() == 0)) {
                             AndroidAlbumUtils.albumMediaScan(dbgContext + " not found mediadb => ", context, new File(path), 1);
                         }
@@ -368,7 +368,7 @@ public class AndroidAlbumUtils implements Common {
             ContentValues values = new ContentValues();
             String newAbsolutePath = PhotoPropertiesMediaFilesScanner.setFileFields(values, fileToBeScannedAndInserted);
             values.put(FotoSql.SQL_COL_EXT_MEDIA_TYPE, FotoSql.MEDIA_TYPE_ALBUM_FILE);
-            ContentProviderMediaExecuter.insertOrUpdateMediaDatabase(dbgContext, context, newAbsolutePath, values, null, 1l);
+            FotoSql.getMediaDBApi().insertOrUpdateMediaDatabase(dbgContext, newAbsolutePath, values, null, 1l);
         }
     }
 
@@ -381,7 +381,7 @@ public class AndroidAlbumUtils implements Common {
         int result = 0;
         if (root != null) {
             List<String> currentFiles = AlbumFile.getFilePaths(null, root, subDirLevels);
-            List<String> databaseFiles = FotoSql.getAlbumFiles(context, FileUtils.tryGetCanonicalPath(root, null), subDirLevels);
+            List<String> databaseFiles = FotoSql.getAlbumFiles(FileUtils.tryGetCanonicalPath(root, null), subDirLevels);
 
             List<String> added = new ArrayList<String>();
             List<String> removed = new ArrayList<String>();
@@ -392,7 +392,7 @@ public class AndroidAlbumUtils implements Common {
                 result++;
             }
 
-            result += FotoSql.deleteMedia(dbgMessage + "delete-obsolete", context, removed, false);
+            result += FotoSql.deleteMedia(dbgMessage + "delete-obsolete", removed, false);
         }
         return result;
     }

@@ -19,7 +19,6 @@
  
 package de.k3b.android.androFotoFinder.queries;
 
-import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.CursorLoader;
@@ -279,6 +278,16 @@ public class FotoSql extends FotoSqlBase {
      * from bytes to kilobytes, from kilobytes to megabytes, ...
      */
     private static final int SIZE_TRANLATION_LIMIT = SIZE_K * 10;
+
+    private static IMediaDBApi mediaDBApi;
+
+    public static IMediaDBApi getMediaDBApi() {
+        return FotoSql.mediaDBApi;
+    }
+
+    public static void setMediaDBApi(IMediaDBApi mediaDBApi) {
+        FotoSql.mediaDBApi = mediaDBApi;
+    }
 
     public static final double getGroupFactor(final double _zoomLevel) {
         double zoomLevel = _zoomLevel;
@@ -755,10 +764,16 @@ public class FotoSql extends FotoSqlBase {
     }
 
 	/** converts content-Uri-with-id to full path */
-    public static String execGetFotoPath(Context context, Uri uriWithID) {
+    public static String execGetFotoPath(Uri uriWithID) {
         Cursor c = null;
         try {
-            c = ContentProviderMediaExecuter.createCursorForQuery(null, "execGetFotoPath(uri)", context, uriWithID.toString(), null, null, null, FotoSql.SQL_COL_PATH);
+            c = mediaDBApi.createCursorForQuery(
+                    null,
+                    "execGetFotoPath(uri)",
+                    uriWithID.toString(),
+                    null,
+                    null, null,
+                    FotoSql.SQL_COL_PATH);
             if (c.moveToFirst()) {
                 return DBUtils.getString(c,FotoSql.SQL_COL_PATH, null);
             }
@@ -771,14 +786,20 @@ public class FotoSql extends FotoSqlBase {
     }
 
 	/** search for all full-image-file-paths that matches pathfilter  */
-    public static List<String> execGetFotoPaths(Context context, String pathFilter) {
+    public static List<String> execGetFotoPaths(String pathFilter) {
         ArrayList<String> result = new ArrayList<String>();
 
         Cursor c = null;
         try {
-            c = ContentProviderMediaExecuter.createCursorForQuery(null, "execGetFotoPaths(pathFilter)", context, SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
-                        FotoSql.SQL_COL_PATH + " like ? and " + FILTER_EXPR_PRIVATE_PUBLIC,
-                        new String[]{pathFilter}, FotoSql.SQL_COL_PATH, FotoSql.SQL_COL_PATH);
+            QueryParameter query = new QueryParameter()
+                    .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
+                    .addWhere(FotoSql.SQL_COL_PATH + " like ? and " + FILTER_EXPR_PRIVATE_PUBLIC, pathFilter)
+                    .addColumn(FotoSql.SQL_COL_PATH)
+                    .addOrderBy(FotoSql.SQL_COL_PATH);
+            c = mediaDBApi.createCursorForQuery(
+                    null,
+                    "execGetFotoPaths(pathFilter)",
+                    query, null);
             while (c.moveToNext()) {
                 result.add(c.getString(0));
             }
@@ -794,7 +815,7 @@ public class FotoSql extends FotoSqlBase {
         return result;
     }
 
-    public static IGeoRectangle execGetGeoRectangle(StringBuilder out_debugMessage, Context context, QueryParameter baseQuery,
+    public static IGeoRectangle execGetGeoRectangle(StringBuilder out_debugMessage, QueryParameter baseQuery,
                                                     SelectedItems selectedItems, Object... dbgContext) {
         StringBuilder debugMessage = (out_debugMessage == null)
                 ? StringUtils.createDebugMessage(Global.debugEnabledSql, dbgContext)
@@ -823,7 +844,7 @@ public class FotoSql extends FotoSqlBase {
         GeoRectangle result = null;
         Cursor c = null;
         try {
-            c = ContentProviderMediaExecuter.createCursorForQuery(debugMessage, "execGetGeoRectangle", context, query, VISIBILITY.PRIVATE_PUBLIC);
+            c = mediaDBApi.createCursorForQuery(debugMessage, "execGetGeoRectangle", query, VISIBILITY.PRIVATE_PUBLIC);
             if (c.moveToFirst()) {
                 result = new GeoRectangle();
                 result.setLatitude(c.getDouble(0), c.getDouble(1));
@@ -846,7 +867,7 @@ public class FotoSql extends FotoSqlBase {
     }
 
     /** gets IGeoPoint either from file if fullPath is not null else from db via id */
-    public static IGeoPoint execGetPosition(StringBuilder out_debugMessage, Context context,
+    public static IGeoPoint execGetPosition(StringBuilder out_debugMessage,
                                             String fullPath, long id, Object... dbgContext) {
         StringBuilder debugMessage = (out_debugMessage == null) ? StringUtils.createDebugMessage(Global.debugEnabledSql, dbgContext) : out_debugMessage;
         QueryParameter query = new QueryParameter()
@@ -867,7 +888,7 @@ public class FotoSql extends FotoSqlBase {
         GeoPoint result = null;
         Cursor c = null;
         try {
-            c = ContentProviderMediaExecuter.createCursorForQuery(debugMessage, "execGetPosition", context, query, VISIBILITY.PRIVATE_PUBLIC);
+            c = mediaDBApi.createCursorForQuery(debugMessage, "execGetPosition", query, VISIBILITY.PRIVATE_PUBLIC);
             if (c.moveToFirst()) {
                 result = new GeoPoint(c.getDouble(0),c.getDouble(1));
                 return result;
@@ -889,7 +910,7 @@ public class FotoSql extends FotoSqlBase {
     /**
      * @return returns a hashmap filename => mediaID
      */
-    public static Map<String, Long> execGetPathIdMap(Context context, String... fileNames) {
+    public static Map<String, Long> execGetPathIdMap(String... fileNames) {
         Map<String, Long> result = new HashMap<String, Long>();
 
         String whereFileNames = getWhereInFileNames(fileNames);
@@ -902,7 +923,7 @@ public class FotoSql extends FotoSqlBase {
 
             Cursor c = null;
             try {
-                c = ContentProviderMediaExecuter.createCursorForQuery(null, "execGetPathIdMap", context, query, null);
+                c = mediaDBApi.createCursorForQuery(null, "execGetPathIdMap", query, null);
                 while (c.moveToNext()) {
                     result.put(c.getString(1),c.getLong(0));
                 }
@@ -941,7 +962,7 @@ public class FotoSql extends FotoSqlBase {
      *    "/storage/sdcard0/testFolder/image.jpg" becomes "/storage/sdcard0/renamedFolder/image.jpg"
      * @return number of updated items
      */
-    public static int execRenameFolder(Context context, String pathOld, String pathNew) {
+    public static int execRenameFolder(String pathOld, String pathNew) {
         final String dbgContext = "FotoSql.execRenameFolder('" +
                 pathOld + "' => '" + pathNew + "')";
         // sql update file set path = newBegin + substing(path, begin+len) where path like newBegin+'%'
@@ -961,7 +982,7 @@ public class FotoSql extends FotoSqlBase {
                 .addWhere(SQL_COL_EXT_MEDIA_TYPE + " IS NOT NULL")
                 ;
 
-        SelectedFiles selectedFiles= getSelectedfiles(context, queryAffectedFiles, sqlColNewPathAlias, null);
+        SelectedFiles selectedFiles = getSelectedfiles(queryAffectedFiles, sqlColNewPathAlias, null);
 
         String[] paths = selectedFiles.getFileNames();
         Long[] ids = selectedFiles.getIds();
@@ -972,7 +993,7 @@ public class FotoSql extends FotoSqlBase {
         for (int i = 0; i < ids.length; i++) {
             values.put(SQL_COL_PATH, paths[i]);
             selectionArgs[0] = ids[i].toString();
-            if (ContentProviderMediaExecuter.exexUpdateImpl(_dbgContext, context, values, FILTER_COL_PK, selectionArgs) < 0)
+            if (mediaDBApi.exexUpdateImpl(_dbgContext, values, FILTER_COL_PK, selectionArgs) < 0)
                 return -1;
             _dbgContext = null;
         }
@@ -995,21 +1016,21 @@ public class FotoSql extends FotoSqlBase {
         return loader;
     }
 
-    public static int execDeleteByPath(String dbgContext, Activity context, String parentDirString, VISIBILITY visibility) {
-        int delCount = ContentProviderMediaExecuter.deleteMedia(dbgContext, context, getFilterExprPathLikeWithVisibility(visibility), new String[]{parentDirString + "/%"}, true);
+    public static int execDeleteByPath(String dbgContext, String parentDirString, VISIBILITY visibility) {
+        int delCount = mediaDBApi.deleteMedia(dbgContext, getFilterExprPathLikeWithVisibility(visibility), new String[]{parentDirString + "/%"}, true);
         return delCount;
     }
 
-    public static int deleteMedia(String dbgContext, Context context, List<String> pathsToBeRemoved,
+    public static int deleteMedia(String dbgContext, List<String> pathsToBeRemoved,
                                   boolean preventDeleteImageFile) {
         if ((pathsToBeRemoved != null) && (pathsToBeRemoved.size() > 0)) {
             String whereDelete = SQL_COL_PATH + " in ('" + ListUtils.toString("','", pathsToBeRemoved) + "')";
-            return ContentProviderMediaExecuter.deleteMedia(dbgContext, context, whereDelete, null, preventDeleteImageFile);
+            return mediaDBApi.deleteMedia(dbgContext, whereDelete, null, preventDeleteImageFile);
         }
         return 0;
     }
 
-    public static int deleteMediaWithNullPath(Context context) {
+    public static int deleteMediaWithNullPath() {
         /// delete where SQL_COL_PATH + " is null" throws null pointer exception
         QueryParameter wherePathIsNull = new QueryParameter();
         wherePathIsNull.addWhere(SQL_COL_PATH + " is null");
@@ -1017,13 +1038,13 @@ public class FotoSql extends FotoSqlBase {
 
         // return deleteMedia("delete without path (_data = null)", context, wherePathIsNull.toAndroidWhere(), null, false);
 
-        SelectedFiles filesWitoutPath = getSelectedfiles(context, wherePathIsNull, FotoSql.SQL_COL_PATH, VISIBILITY.PRIVATE_PUBLIC);
+        SelectedFiles filesWitoutPath = getSelectedfiles(wherePathIsNull, FotoSql.SQL_COL_PATH, VISIBILITY.PRIVATE_PUBLIC);
         String pksAsString = filesWitoutPath.toIdString();
         if ((pksAsString != null) && (pksAsString.length() > 0)) {
             QueryParameter whereInIds = new QueryParameter();
             FotoSql.setWhereSelectionPks(whereInIds, pksAsString);
 
-            return ContentProviderMediaExecuter.deleteMedia("delete without path (_data = null)", context, whereInIds.toAndroidWhere(), null, true);
+            return mediaDBApi.deleteMedia("delete without path (_data = null)", whereInIds.toAndroidWhere(), null, true);
         }
         return 0;
     }
@@ -1058,17 +1079,17 @@ public class FotoSql extends FotoSqlBase {
         return SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME + "/" + imageID;
     }
 
-    public static SelectedFiles getSelectedfiles(Context context, String sqlWhere, VISIBILITY visibility) {
+    public static SelectedFiles getSelectedfiles(String sqlWhere, VISIBILITY visibility) {
         QueryParameter query = new QueryParameter(FotoSql.queryChangePath);
         query.addWhere(sqlWhere);
         query.addOrderBy(FotoSql.SQL_COL_PATH);
 
-        return getSelectedfiles(context, query, FotoSql.SQL_COL_PATH, visibility);
+        return getSelectedfiles(query, FotoSql.SQL_COL_PATH, visibility);
 
     }
 
     @Nullable
-    public static String getMinFolder(Context context, QueryParameter query,
+    public static String getMinFolder(QueryParameter query,
                                       boolean removeLastModifiedFromFilter) {
         QueryParameter queryModified = new QueryParameter(query);
         queryModified.clearColumns().addColumn("min(" + SQL_EXPR_FOLDER + ")");
@@ -1081,7 +1102,7 @@ public class FotoSql extends FotoSqlBase {
         Cursor c = null;
 
         try {
-            c = ContentProviderMediaExecuter.createCursorForQuery(null, "getCount", context, queryModified, null);
+            c = mediaDBApi.createCursorForQuery(null, "getCount", queryModified, null);
             if (c.moveToNext()) {
                 return c.getString(0);
             }
@@ -1094,13 +1115,13 @@ public class FotoSql extends FotoSqlBase {
     }
 
     @Nullable
-    public static long getCount(Context context, QueryParameter query) {
+    public static long getCount(QueryParameter query) {
         QueryParameter queryModified = new QueryParameter(query);
         queryModified.clearColumns().addColumn("count(*)");
         Cursor c = null;
 
         try {
-            c = ContentProviderMediaExecuter.createCursorForQuery(null, "getCount", context, queryModified, null);
+            c = mediaDBApi.createCursorForQuery(null, "getCount", queryModified, null);
             if (c.moveToNext()) {
                 return c.getLong(0);
             }
@@ -1129,7 +1150,7 @@ public class FotoSql extends FotoSqlBase {
         Cursor c = null;
 
         try {
-            c = ContentProviderMediaExecuter.createCursorForQuery(null, "getCount", context, queryModified, null);
+            c = mediaDBApi.createCursorForQuery(null, "getCount", queryModified, null);
             if (c.moveToNext()) {
                 final long count = c.getLong(0);
                 long size = c.getLong(1);
@@ -1160,12 +1181,12 @@ public class FotoSql extends FotoSqlBase {
     }
 
     @Nullable
-    private static SelectedFiles getSelectedfiles(Context context, QueryParameter query, String colnameForPath, VISIBILITY visibility) {
+    private static SelectedFiles getSelectedfiles(QueryParameter query, String colnameForPath, VISIBILITY visibility) {
         SelectedFiles result = null;
         Cursor c = null;
 
         try {
-            c = ContentProviderMediaExecuter.createCursorForQuery(null, "getSelectedfiles", context, query, visibility);
+            c = mediaDBApi.createCursorForQuery(null, "getSelectedfiles", query, visibility);
             int len = c.getCount();
             Long[] ids = new Long[len];
             String[] paths = new String[len];
@@ -1199,13 +1220,13 @@ public class FotoSql extends FotoSqlBase {
     }
 
     /** converts internal ID-list to string array of filenNames via media database. */
-    public static List<String> getFileNames(Context context, SelectedItems items, List<Long> ids, List<String> paths, List<Date> datesPhotoTaken) {
+    public static List<String> getFileNames(SelectedItems items, List<Long> ids, List<String> paths, List<Date> datesPhotoTaken) {
         if (!items.isEmpty()) {
             // query ordered by DatePhotoTaken so that lower rename-numbers correspond to older images.
             QueryParameter parameters = new QueryParameter(queryAutoRename);
             setWhereSelectionPks(parameters, items);
 
-            List<String> result = getFileNamesImpl(context, parameters, ids, paths, datesPhotoTaken);
+            List<String> result = getFileNamesImpl(parameters, ids, paths, datesPhotoTaken);
             int size = result.size();
 
             if (size > 0) {
@@ -1217,13 +1238,13 @@ public class FotoSql extends FotoSqlBase {
     }
 
     /** converts internal ID-list to string array of filenNames via media database. */
-    public static String[] getFileNames(Context context, String pksAsListString , List<Long> ids, List<String> paths, List<Date> datesPhotoTaken) {
+    public static String[] getFileNames(String pksAsListString, List<Long> ids, List<String> paths, List<Date> datesPhotoTaken) {
         if ((pksAsListString != null) && !pksAsListString.isEmpty()) {
             // query ordered by DatePhotoTaken so that lower rename-numbers correspond to older images.
             QueryParameter parameters = new QueryParameter(queryAutoRename);
             setWhereSelectionPks(parameters, pksAsListString);
 
-            List<String> result = getFileNamesImpl(context, parameters, ids, paths, datesPhotoTaken);
+            List<String> result = getFileNamesImpl(parameters, ids, paths, datesPhotoTaken);
             int size = result.size();
 
             if (size > 0) {
@@ -1233,13 +1254,13 @@ public class FotoSql extends FotoSqlBase {
         return null;
     }
 
-    private static List<String> getFileNamesImpl(Context context, QueryParameter parameters, List<Long> ids, List<String> paths, List<Date> datesPhotoTaken) {
+    private static List<String> getFileNamesImpl(QueryParameter parameters, List<Long> ids, List<String> paths, List<Date> datesPhotoTaken) {
         List<String> result = (paths != null) ? paths : new ArrayList<String>();
 
         Cursor cursor = null;
 
         try {
-            cursor = ContentProviderMediaExecuter.createCursorForQuery(null, "getFileNames", context, parameters, VISIBILITY.PRIVATE_PUBLIC);
+            cursor = mediaDBApi.createCursorForQuery(null, "getFileNames", parameters, VISIBILITY.PRIVATE_PUBLIC);
 
             int colPath = cursor.getColumnIndex(SQL_COL_DISPLAY_TEXT);
             if (colPath == -1) colPath = cursor.getColumnIndex(SQL_COL_PATH);
@@ -1294,8 +1315,8 @@ public class FotoSql extends FotoSqlBase {
         return parameters;
     }
 
-    public static List<String> getAlbumFiles(Context context, String path, int subDirLevels) {
-        SelectedFiles databaseFiles = FotoSql.getSelectedfiles(context,
+    public static List<String> getAlbumFiles(String path, int subDirLevels) {
+        SelectedFiles databaseFiles = FotoSql.getSelectedfiles(
                 SQL_COL_PATH +" like '" + path +  "/%" + AlbumFile.SUFFIX_VALBUM + "' OR " +
                 SQL_COL_PATH +" like '" + path +  "/%" + AlbumFile.SUFFIX_QUERY + "'", null);
         String[] fileNames = (databaseFiles == null) ? null : databaseFiles.getFileNames();
@@ -1314,10 +1335,10 @@ public class FotoSql extends FotoSqlBase {
         return paths;
     }
 
-    public static int execRename(Context context, String oldFullPath, String newFullPath) {
+    public static int execRename(String oldFullPath, String newFullPath) {
         ContentValues values = new ContentValues();
         values.put(SQL_COL_PATH, newFullPath);
-        return ContentProviderMediaExecuter.execUpdate("rename file", context, oldFullPath,
+        return mediaDBApi.execUpdate("rename file", oldFullPath,
                 values, null);
     }
 

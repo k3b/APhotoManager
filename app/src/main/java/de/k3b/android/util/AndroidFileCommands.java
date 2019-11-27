@@ -42,7 +42,6 @@ import de.k3b.android.androFotoFinder.LockScreen;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.media.AndroidPhotoPropertiesBulkUpdateService;
-import de.k3b.android.androFotoFinder.queries.ContentProviderMediaExecuter;
 import de.k3b.android.androFotoFinder.queries.DatabaseHelper;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
@@ -219,9 +218,9 @@ public class AndroidFileCommands extends FileCommands {
             boolean isDir = srcDirFile.isDirectory();
             if (srcDirFile.renameTo(destDirFile)) {
                 if (isDir) {
-                    modifyCount = FotoSql.execRenameFolder(this.mContext, srcDirFile.getAbsolutePath() + "/", destDirFile.getAbsolutePath() + "/");
+                    modifyCount = FotoSql.execRenameFolder(srcDirFile.getAbsolutePath() + "/", destDirFile.getAbsolutePath() + "/");
                 } else {
-                    modifyCount = FotoSql.execRename(mContext, srcDirFile.getAbsolutePath(), destDirFile.getAbsolutePath());
+                    modifyCount = FotoSql.execRename(srcDirFile.getAbsolutePath(), destDirFile.getAbsolutePath());
                 }
                 if (modifyCount < 0) {
                     destDirFile.renameTo(srcDirFile); // error: undo change
@@ -329,7 +328,7 @@ public class AndroidFileCommands extends FileCommands {
             QueryParameter where = new QueryParameter();
             FotoSql.setWhereSelectionPks (where, fotos.toIdString());
 
-            ContentProviderMediaExecuter.deleteMedia("AndroidFileCommands.deleteFiles", mContext, where.toAndroidWhere(), null, true);
+            FotoSql.getMediaDBApi().deleteMedia("AndroidFileCommands.deleteFiles", where.toAndroidWhere(), null, true);
         }
         return deleteCount;
     }
@@ -469,7 +468,7 @@ public class AndroidFileCommands extends FileCommands {
                     }
                     File file = files[i];
                     PhotoPropertiesUpdateHandler jpg = createWorkflow(null, dbgContext).saveLatLon(file, latitude, longitude);
-                    resultFile += TagSql.updateDB(dbgContext, applicationContext,
+                    resultFile += TagSql.updateDB(dbgContext,
                             file.getAbsolutePath(), jpg, MediaFormatter.FieldID.latitude_longitude);
                     itemcount++;
                     addTransactionLog(selectedItems.getId(i), file.getAbsolutePath(), now, MediaTransactionLogEntryType.GPS, latLong);

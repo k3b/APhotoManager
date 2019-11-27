@@ -33,7 +33,6 @@ import java.util.HashMap;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
-import de.k3b.android.androFotoFinder.queries.ContentProviderMediaExecuter;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.osmdroid.ClickableIconOverlay;
 import de.k3b.android.osmdroid.IconFactory;
@@ -96,8 +95,8 @@ public abstract class MarkerLoaderTask<MARKER extends ClickableIconOverlay> exte
 
         Cursor cursor = null;
         try {
-            cursor = ContentProviderMediaExecuter.createCursorForQuery(
-                    null, "MakerLoader", mContext,
+            cursor = FotoSql.getMediaDBApi().createCursorForQuery(
+                    null, "MakerLoader",
                     queryParameters, null);
 
             int itemCount = cursor.getCount();

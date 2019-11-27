@@ -31,7 +31,6 @@ import java.util.Date;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.media.PhotoPropertiesMediaDBCursor;
-import de.k3b.android.androFotoFinder.queries.ContentProviderMediaExecuter;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.database.QueryParameter;
@@ -210,8 +209,8 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
         Cursor cursor = null;
         try {
             this.onProgress(0,0, "Calculate");
-            cursor = ContentProviderMediaExecuter.createCursorForQuery(
-                    null, "ZipExecute", context,
+            cursor = FotoSql.getMediaDBApi().createCursorForQuery(
+                    null, "ZipExecute",
                     query, null);
 
             int itemCount = cursor.getCount();
