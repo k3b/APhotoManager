@@ -22,13 +22,13 @@ package de.k3b.android.androFotoFinder.directory;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import java.util.List;
 
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.queries.ContentProviderMediaExecuter;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.Directory;
@@ -102,8 +102,9 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
             }
 
             try {
-                cursor = context.getContentResolver().query(Uri.parse(queryParameters.toFrom()), queryParameters.toColumns(),
-                        queryParameters.toAndroidWhere(), queryParameters.toAndroidParameters(), queryParameters.toOrderBy());
+                cursor = ContentProviderMediaExecuter.createCursorForQuery(
+                        null, "ZipExecute", context,
+                        queryParameters, null);
 
                 int itemCount = cursor.getCount();
                 final int expectedCount = itemCount + itemCount;

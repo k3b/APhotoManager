@@ -62,6 +62,7 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.backup.BackupActivity;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailMetaDialogBuilder;
+import de.k3b.android.androFotoFinder.queries.ContentProviderMediaExecuter;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoThumbSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
@@ -692,9 +693,9 @@ public class DirectoryPickerFragment extends DialogFragment
                         if (cann == null) {
                             // rename linkFile to canonicalFile
                             updateValues.put(FotoSql.SQL_COL_PATH, canonicalPath + lin.substring(linkPath.length()));
-                            FotoSql.execUpdate("fixLinks", context, linkIds[i].intValue() ,updateValues);
+                            ContentProviderMediaExecuter.execUpdate("fixLinks", context, linkIds[i].intValue(), updateValues);
                         } else {
-                            FotoSql.deleteMedia("DirectoryPickerFragment.fixLinks", context, FotoSql.FILTER_COL_PK, new String[] {linkIds[i].toString()}, true);
+                            ContentProviderMediaExecuter.deleteMedia("DirectoryPickerFragment.fixLinks", context, FotoSql.FILTER_COL_PK, new String[]{linkIds[i].toString()}, true);
                         }
                     }
                     PhotoPropertiesMediaFilesScanner.notifyChanges(context, "Fixed link/canonical duplicates");

@@ -19,11 +19,9 @@
 
 package de.k3b.android.androFotoFinder.tagDB;
 
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.provider.MediaStore;
 import android.util.Log;
 
@@ -36,6 +34,7 @@ import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.media.PhotoPropertiesMediaDBContentValues;
 import de.k3b.android.androFotoFinder.queries.AndroidAlbumUtils;
+import de.k3b.android.androFotoFinder.queries.ContentProviderMediaExecuter;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.database.QueryParameter;
@@ -61,7 +60,6 @@ public class TagSql extends FotoSql {
     public static final String SQL_COL_EXT_TAGS = MediaStore.Video.Media.TAGS;
 
     public static final String SQL_COL_EXT_DESCRIPTION = MediaStore.Images.Media.DESCRIPTION;
-    public static final String SQL_COL_EXT_TITLE = MediaStore.Images.Media.TITLE;
 
     /** The date & time when last non standard media-scan took place
      *  <P>Type: INTEGER (long) as milliseconds since jan 1, 1970</P> */
@@ -275,7 +273,7 @@ public class TagSql extends FotoSql {
                             PhotoPropertiesUtil.IMG_TYPE_PRIVATE + "'"));
         }
         where.append(")");
-        return exexUpdateImpl("Fix visibility private", context,
+        return ContentProviderMediaExecuter.exexUpdateImpl("Fix visibility private", context,
                 values, where.toString(), new String[] {"%;" + VISIBILITY.TAG_PRIVATE +
                 ";%"});
     }
@@ -327,25 +325,6 @@ public class TagSql extends FotoSql {
         }
     }
 
-    public static ContentValues getDbContent(Context context, final long id) {
-        ContentResolver resolver = context.getContentResolver();
-
-        Cursor c = null;
-        try {
-            c = resolver.query(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, new String[]{"*"}, FILTER_COL_PK, new String[]{"" + id}, null);
-            if (c.moveToNext()) {
-                ContentValues values = new ContentValues();
-                DatabaseUtils.cursorRowToContentValues(c, values);
-                return values;
-            }
-        } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, "FotoSql.getDbContent(id=" + id + ") failed", ex);
-        } finally {
-            if (c != null) c.close();
-        }
-        return null;
-    }
-
     /**
      * Copies non null content of jpg to existing media database item.
      *
@@ -391,9 +370,9 @@ public class TagSql extends FotoSql {
 
     public static int execUpdate(String dbgContext, Context context, String path, long xmpFileDate, ContentValues values, VISIBILITY visibility) {
         if ((!Global.Media.enableXmpNone) || (xmpFileDate == EXT_LAST_EXT_SCAN_UNKNOWN)) {
-            return execUpdate(dbgContext, context, path, values, visibility);
+            return ContentProviderMediaExecuter.execUpdate(dbgContext, context, path, values, visibility);
         }
-        return exexUpdateImpl(dbgContext, context, values, FILTER_EXPR_PATH_LIKE_XMP_DATE, new String[]{path, Long.toString(xmpFileDate)});
+        return ContentProviderMediaExecuter.exexUpdateImpl(dbgContext, context, values, FILTER_EXPR_PATH_LIKE_XMP_DATE, new String[]{path, Long.toString(xmpFileDate)});
     }
 
     /** return how many photos exist that have one or more tags from list */
@@ -403,7 +382,7 @@ public class TagSql extends FotoSql {
         if (addWhereAnyOfTags(query, tags) > 0) {
             Cursor c = null;
             try {
-                c = createCursorForQuery(null, "getTagRefCount", context, query, VISIBILITY.PRIVATE_PUBLIC);
+                c = ContentProviderMediaExecuter.createCursorForQuery(null, "getTagRefCount", context, query, VISIBILITY.PRIVATE_PUBLIC);
                 if (c.moveToFirst()) {
                     return c.getInt(0);
                 }
@@ -457,7 +436,7 @@ public class TagSql extends FotoSql {
 
         if (filterCount > 0) {
             try {
-                c = createCursorForQuery(null, "loadTagWorflowItems", context, query, VISIBILITY.PRIVATE_PUBLIC);
+                c = ContentProviderMediaExecuter.createCursorForQuery(null, "loadTagWorflowItems", context, query, VISIBILITY.PRIVATE_PUBLIC);
                 if (c.moveToFirst()) {
                     do {
                         result.add(new TagWorflowItem(c.getLong(0), c.getString(1), TagConverter.fromString(c.getString(2)),

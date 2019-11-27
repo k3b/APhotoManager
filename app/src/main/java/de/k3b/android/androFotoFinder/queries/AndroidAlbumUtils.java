@@ -368,7 +368,7 @@ public class AndroidAlbumUtils implements Common {
             ContentValues values = new ContentValues();
             String newAbsolutePath = PhotoPropertiesMediaFilesScanner.setFileFields(values, fileToBeScannedAndInserted);
             values.put(FotoSql.SQL_COL_EXT_MEDIA_TYPE, FotoSql.MEDIA_TYPE_ALBUM_FILE);
-            FotoSql.insertOrUpdateMediaDatabase(dbgContext, context, newAbsolutePath, values, null, 1l);
+            ContentProviderMediaExecuter.insertOrUpdateMediaDatabase(dbgContext, context, newAbsolutePath, values, null, 1l);
         }
     }
 

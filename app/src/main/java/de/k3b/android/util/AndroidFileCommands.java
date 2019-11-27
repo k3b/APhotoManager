@@ -42,6 +42,7 @@ import de.k3b.android.androFotoFinder.LockScreen;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.media.AndroidPhotoPropertiesBulkUpdateService;
+import de.k3b.android.androFotoFinder.queries.ContentProviderMediaExecuter;
 import de.k3b.android.androFotoFinder.queries.DatabaseHelper;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
@@ -328,7 +329,7 @@ public class AndroidFileCommands extends FileCommands {
             QueryParameter where = new QueryParameter();
             FotoSql.setWhereSelectionPks (where, fotos.toIdString());
 
-            FotoSql.deleteMedia("AndroidFileCommands.deleteFiles", mContext, where.toAndroidWhere(), null, true);
+            ContentProviderMediaExecuter.deleteMedia("AndroidFileCommands.deleteFiles", mContext, where.toAndroidWhere(), null, true);
         }
         return deleteCount;
     }

@@ -71,6 +71,7 @@ import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailMetaDialogBuilder;
 import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
 import de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity;
+import de.k3b.android.androFotoFinder.queries.ContentProviderMediaExecuter;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.queries.Queryable;
@@ -1416,7 +1417,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
                 String sqlWhere = query.toAndroidWhere(); //  + " OR " + FotoSql.SQL_COL_PATH + " is null";
                 try {
-                    delCount = FotoSql.deleteMedia(mDebugPrefix + "onDuplicatesFound", activity, sqlWhere, null, true);
+                    delCount = ContentProviderMediaExecuter.deleteMedia(mDebugPrefix + "onDuplicatesFound", activity, sqlWhere, null, true);
                 } catch (Exception ex) {
                     Log.w(Global.LOG_CONTEXT, "deleteMedia via update failed for 'where " + sqlWhere +
                             "'.");

@@ -19,7 +19,6 @@
 
 package de.k3b.android.androFotoFinder.queries;
 
-import android.app.Activity;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -37,11 +36,19 @@ import de.k3b.android.util.DatabaseContext;
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION_1_TransactionLog = 1;
+    public static final int DATABASE_VERSION_2_MEDIA_DB_COPY = 2;
 
-    public static final int DATABASE_VERSION = DatabaseHelper.DATABASE_VERSION_1_TransactionLog;
+    public static final int DATABASE_VERSION = DatabaseHelper.DATABASE_VERSION_2_MEDIA_DB_COPY;
 
     public DatabaseHelper(final Context context, final String databaseName) {
         super(context, databaseName, null, DatabaseHelper.DATABASE_VERSION);
+    }
+
+    public static SQLiteDatabase getWritableDatabase(Context context) {
+        if (instance == null) {
+            instance = new DatabaseHelper(new DatabaseContext(context), "APhotoManager");
+        }
+        return instance.getWritableDatabase();
     }
 
     /**
@@ -51,7 +58,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(final SQLiteDatabase db) {
         db.execSQL(TransactionLogSql.CREATE_TABLE);
 
-        this.version3Upgrade_TIMESLICE_WITH_NOTES(db);
+        this.version2Upgrade_MediDbCopy(db);
     }
 
     @Override
@@ -59,24 +66,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                           final int newVersion) {
         Log.w(this.getClass().toString(), "Upgrading database from version "
                 + oldVersion + " to " + newVersion + ". (Old data is kept.)");
-        if (oldVersion < DatabaseHelper.DATABASE_VERSION_1_TransactionLog) {
-            this.version3Upgrade_TIMESLICE_WITH_NOTES(db);
+        if (oldVersion < DatabaseHelper.DATABASE_VERSION_2_MEDIA_DB_COPY) {
+            this.version2Upgrade_MediDbCopy(db);
         }
-    }
-
-    private void version3Upgrade_TIMESLICE_WITH_NOTES(final SQLiteDatabase db) {
-        // added timeslice.notes
-        /*
-        db.execSQL("ALTER TABLE " + TransactionLogSql.TABLE
-                + " ADD COLUMN " + TransactionLogSql.COL_NOTES + " TEXT");
-        */
     }
 
     private static DatabaseHelper instance = null;
-    public static SQLiteDatabase getWritableDatabase(Activity context) {
-        if (instance == null) {
-            instance = new DatabaseHelper(new DatabaseContext(context), "APhotoManager");
+
+    private void version2Upgrade_MediDbCopy(final SQLiteDatabase db) {
+        for (String sql : MediaImageDbReplacement.DDL) {
+            db.execSQL(sql);
         }
-        return instance.getWritableDatabase();
     }
 }
