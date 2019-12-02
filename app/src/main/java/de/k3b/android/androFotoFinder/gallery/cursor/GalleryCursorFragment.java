@@ -71,6 +71,7 @@ import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.imagedetail.ImageDetailMetaDialogBuilder;
 import de.k3b.android.androFotoFinder.locationmap.GeoEditActivity;
 import de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity;
+import de.k3b.android.androFotoFinder.queries.CursorLoaderWithException;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.queries.Queryable;
@@ -231,7 +232,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
             final Activity context = getActivity();
             if (data == null) {
-                FotoSql.CursorLoaderWithException loader = (FotoSql.CursorLoaderWithException) _loader;
+                CursorLoaderWithException loader = (CursorLoaderWithException) _loader;
                 String title;
                 String message = context.getString(R.string.global_err_sql_message_format, loader.getException().getMessage(), loader.getQuery().toSqlString());
                 if (loader.getException() != null) {

@@ -22,6 +22,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.CancellationSignal;
 
 import de.k3b.database.QueryParameter;
 import de.k3b.io.VISIBILITY;
@@ -39,28 +40,28 @@ public class MediaDBContentprovider implements IMediaDBApi {
     @Override
     public Cursor createCursorForQuery(
             StringBuilder out_debugMessage, String dbgContext,
-            QueryParameter parameters, VISIBILITY visibility) {
+            QueryParameter parameters, VISIBILITY visibility, CancellationSignal cancellationSignal) {
         return ContentProviderMediaImpl.createCursorForQuery(
-                out_debugMessage, dbgContext, context, parameters, visibility);
+                out_debugMessage, dbgContext, context, parameters, visibility, cancellationSignal);
     }
 
     @Override
     public Cursor createCursorForQuery(StringBuilder out_debugMessage, String dbgContext, final String from, final String sqlWhereStatement,
                                        final String[] sqlWhereParameters, final String sqlSortOrder,
-                                       final String... sqlSelectColums) {
+                                       CancellationSignal cancellationSignal, final String... sqlSelectColums) {
         return ContentProviderMediaImpl.createCursorForQuery(
                 out_debugMessage, dbgContext, context, from, sqlWhereStatement,
-                sqlWhereParameters, sqlSortOrder, sqlSelectColums);
+                sqlWhereParameters, sqlSortOrder, null, sqlSelectColums);
     }
 
     @Override
     public int execUpdate(String dbgContext, long id, ContentValues values) {
-        return ContentProviderMediaImpl.execUpdate(dbgContext, context, id, values);
+        return exexUpdateImpl(dbgContext, values, FotoSql.FILTER_COL_PK, new String[]{Long.toString(id)});
     }
 
     @Override
     public int execUpdate(String dbgContext, String path, ContentValues values, VISIBILITY visibility) {
-        return ContentProviderMediaImpl.execUpdate(dbgContext, context, path, values, visibility);
+        return exexUpdateImpl(dbgContext, values, FotoSql.getFilterExprPathLikeWithVisibility(visibility), new String[]{path});
     }
 
     @Override

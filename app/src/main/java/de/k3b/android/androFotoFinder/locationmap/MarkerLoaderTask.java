@@ -97,7 +97,7 @@ public abstract class MarkerLoaderTask<MARKER extends ClickableIconOverlay> exte
         try {
             cursor = FotoSql.getMediaDBApi().createCursorForQuery(
                     null, "MakerLoader",
-                    queryParameters, null);
+                    queryParameters, null, null);
 
             int itemCount = cursor.getCount();
             final int expectedCount = itemCount + itemCount;

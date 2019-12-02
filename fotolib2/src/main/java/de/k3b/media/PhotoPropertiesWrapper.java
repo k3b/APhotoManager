@@ -29,7 +29,6 @@ import de.k3b.io.VISIBILITY;
  *
  * Created by k3b on 09.10.2016.
  */
-
 public class PhotoPropertiesWrapper implements IPhotoProperties {
     protected final IPhotoProperties readChild;
     protected final IPhotoProperties writeChild;

@@ -21,14 +21,22 @@ package de.k3b.android.androFotoFinder.queries;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
+import android.os.Build;
+import android.os.CancellationSignal;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import java.sql.Date;
 
+import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.AlbumFile;
+import de.k3b.io.StringUtils;
+import de.k3b.io.VISIBILITY;
 
 import static de.k3b.android.androFotoFinder.queries.FotoSql.QUERY_TYPE_UNDEFINED;
 import static de.k3b.android.androFotoFinder.queries.FotoSql.SQL_COL_DATE_ADDED;
@@ -53,167 +61,398 @@ import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_EXT_XMP_LAST_M
  * Since Android-10 (api 29) using sqLite functions as content-provider-columns is not possible anymore.
  * Therefore apm uses a copy of contentprovider MediaStore.Images with same column names.
  */
-public class MediaImageDbReplacement {
+public class MediaImageDbReplacement implements IMediaDBApi {
+    private static final String MODUL_NAME = ContentProviderMediaImpl.class.getName();
+    private final SQLiteDatabase db;
+
+    public MediaImageDbReplacement(SQLiteDatabase db) {
+        this.db = db;
+    }
+
+    @Override
+    public Cursor createCursorForQuery(StringBuilder out_debugMessage, String dbgContext,
+                                       QueryParameter parameters, VISIBILITY visibility,
+                                       CancellationSignal cancellationSignal) {
+        if (visibility != null) FotoSql.setWhereVisibility(parameters, visibility);
+        return createCursorForQuery(out_debugMessage, dbgContext,
+                parameters.toWhere(), parameters.toAndroidParameters(),
+                parameters.toGroupBy(), parameters.toHaving(),
+                parameters.toOrderBy(),
+                cancellationSignal, parameters.toColumns()
+        );
+    }
+
+    @Override
+    public Cursor createCursorForQuery(StringBuilder out_debugMessage, String dbgContext, String from,
+                                       String sqlWhereStatement, String[] sqlWhereParameters,
+                                       String sqlSortOrder, CancellationSignal cancellationSignal,
+                                       String... sqlSelectColums) {
+        return createCursorForQuery(out_debugMessage, dbgContext,
+                sqlWhereStatement, sqlWhereParameters,
+                null, null,
+                sqlSortOrder, cancellationSignal, sqlSelectColums);
+    }
+
     /**
-     * SQL to create copy of contentprovider MediaStore.Images.
-     * copied from android-4.4 android database. Removed columns not used
+     * every cursor query should go through this. adds logging if enabled
      */
-    public static final String[] DDL = new String[]{
-            "CREATE TABLE \"files\" (\n" +
-                    "\t_id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
-                    "\t_size INTEGER,\n" +
-                    "\tdate_added INTEGER,\n" +
-                    "\tdate_modified INTEGER,\n" +
-                    "\tdatetaken INTEGER,\n" +
-                    "\torientation INTEGER,\n" +
-                    "\tduration INTEGER,\n" +
-                    "\tbookmark INTEGER,\n" +
-                    "\tmedia_type INTEGER,\n" +
-                    "\twidth INTEGER,\n" +
-                    "\theight INTEGER,\n" +
+    private Cursor createCursorForQuery(StringBuilder out_debugMessage, String dbgContext,
+                                        String sqlWhereStatement, String[] selectionArgs, String groupBy,
+                                        String having, String sqlSortOrder,
+                                        CancellationSignal cancellationSignal, final String... sqlSelectColums) {
+        Cursor query = null;
 
-                    "\t_data TEXT UNIQUE COLLATE NOCASE,\n" +
-                    "\ttitle TEXT,\n" +
-                    "\tdescription TEXT,\n" +
-                    "\t_display_name TEXT,\n" +
-                    "\tmime_type TEXT,\n" +
-                    "\ttags TEXT,\n" +
+        Exception excpetion = null;
+        try {
 
-                    "\tlatitude DOUBLE,\n" +
-                    "\tlongitude DOUBLE\n" +
-                    "\t )",
-            "CREATE INDEX media_type_index ON files(media_type)",
-            "CREATE INDEX path_index ON files(_data)",
-            "CREATE INDEX sort_index ON files(datetaken ASC, _id ASC)",
-            "CREATE INDEX title_idx ON files(title)",
-            "CREATE INDEX titlekey_index ON files(title_key)",
-            "CREATE INDEX media_type_index ON files(media_type)",
-    };
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                query = db.query(false, Impl.table, sqlSelectColums, sqlWhereStatement, selectionArgs,
+                        groupBy, having, sqlSortOrder, null, cancellationSignal);
+            } else {
+                query = db.query(false, Impl.table, sqlSelectColums, sqlWhereStatement, selectionArgs,
+                        groupBy, having, sqlSortOrder, null);
+            }
 
-    public static final String table = "files";
-    // same colum order as in DDL
-    private static final String[] USED_MEDIA_COLUMNS = new String[]{
-            // INTEGER 0 .. 10
-            SQL_COL_PK,
-            SQL_COL_DATE_ADDED,
-            SQL_COL_LAST_MODIFIED,
-            SQL_COL_SIZE,
-            SQL_COL_DATE_TAKEN,
-            SQL_COL_ORIENTATION,
-            SQL_COL_EXT_XMP_LAST_MODIFIED_DATE, // duration
-            SQL_COL_EXT_RATING, // bookmark
-            SQL_COL_EXT_MEDIA_TYPE,
-            MediaStore.MediaColumns.WIDTH,
-            MediaStore.MediaColumns.HEIGHT,
-
-            // TEXT 11 .. 16
-            SQL_COL_PATH, // _data
-            SQL_COL_EXT_TITLE,
-            SQL_COL_EXT_DESCRIPTION,
-            SQL_COL__IMPL_DISPLAY_NAME,
-            MediaStore.MediaColumns.MIME_TYPE,
-            SQL_COL_EXT_TAGS,
-
-            // DOUBLE 17..18
-            SQL_COL_LAT,
-            SQL_COL_LON,
-    };
-
-    private static final int intMin = 0;
-    private static final int intMax = 10;
-    private static final int txtMin = 11;
-    private static final int txtMax = 16;
-    private static final int dblMin = 17;
-    private static final int dblMax = 18;
-
-    private static final int colID = 0;
-    private static final int colDATE_ADDED = 1;
-    private static final int colLAST_MODIFIED = 2;
-    private static final String FILTER_EXPR_AFFECTED_FILES
-            = "(" + FotoSql.FILTER_EXPR_PRIVATE_PUBLIC
-            + " OR " + SQL_COL_PATH + " like '%" + AlbumFile.SUFFIX_VALBUM + "' "
-            + " OR " + SQL_COL_PATH + " like '%" + AlbumFile.SUFFIX_QUERY + "' "
-            + ")";
-    private static final QueryParameter queryGetAllColumns = new QueryParameter()
-            .setID(QUERY_TYPE_UNDEFINED)
-            .addColumn(USED_MEDIA_COLUMNS)
-            .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
-            .addWhere(FILTER_EXPR_AFFECTED_FILES);
-
-    private static boolean isLomg(int index) {
-        return index >= intMin && index <= intMax;
-    }
-
-    // private Object get(Cursor cursor, columIndex)
-
-    private static boolean isString(int index) {
-        return index >= txtMin && index <= txtMax;
-    }
-
-    private static boolean isDouble(int index) {
-        return index >= dblMin && index <= dblMax;
-    }
-
-    private static ContentValues getContentValues(Cursor cursor, ContentValues destination) {
-        destination.clear();
-        int colCount = cursor.getColumnCount();
-        String columnName;
-        for (int i = 0; i < colCount; i++) {
-            columnName = cursor.getColumnName(i);
-            if (cursor.isNull(i)) {
-                destination.putNull(columnName);
-            } else if (isLomg(i)) {
-                destination.put(columnName, cursor.getLong(i));
-            } else if (isString(i)) {
-                destination.put(columnName, cursor.getString(i));
-            } else if (isDouble(i)) {
-                destination.put(columnName, cursor.getDouble(i));
+        } catch (Exception ex) {
+            excpetion = ex;
+        } finally {
+            if ((excpetion != null) || Global.debugEnabledSql || (out_debugMessage != null)) {
+                StringBuilder message = StringUtils.appendMessage(out_debugMessage, excpetion,
+                        dbgContext, MODUL_NAME +
+                                ".createCursorForQuery:\n",
+                        QueryParameter.toString(sqlSelectColums, null, Impl.table, sqlWhereStatement,
+                                selectionArgs, sqlSortOrder, query.getCount()));
+                if (out_debugMessage == null) {
+                    Log.i(Global.LOG_CONTEXT, message.toString(), excpetion);
+                } // else logging is done by caller
             }
         }
-        return destination;
+
+        return query;
     }
 
-    public static int updateMedaiCopy(Context context, SQLiteDatabase db, Date lastUpdate) {
-        int changeCount = 0;
+    @Override
+    public int execUpdate(String dbgContext, long id, ContentValues values) {
+        return exexUpdateImpl(dbgContext, values, FotoSql.FILTER_COL_PK, new String[]{Long.toString(id)});
+    }
 
-        QueryParameter query = queryGetAllColumns;
-        long _lastUpdate = (lastUpdate != null) ? (lastUpdate.getTime() / 1000L) : 0L;
+    @Override
+    public int execUpdate(String dbgContext, String path, ContentValues values, VISIBILITY visibility) {
+        return exexUpdateImpl(dbgContext, values, FotoSql.getFilterExprPathLikeWithVisibility(visibility), new String[]{path});
+    }
 
-        if (_lastUpdate != 0) {
-            query = new QueryParameter().getFrom(queryGetAllColumns);
-            FotoSql.addWhereDateModifiedMinMax(query, _lastUpdate, 0);
-            // FotoSql.createCursorForQuery()
-        }
-        Cursor c = null;
-        ContentValues contentValues = new ContentValues();
+    @Override
+    public int exexUpdateImpl(String dbgContext, ContentValues values, String sqlWhere, String[] selectionArgs) {
+        int result = -1;
+        Exception excpetion = null;
         try {
-            c = ContentProviderMediaImpl.createCursorForQuery(null, "execGetFotoPaths(pathFilter)", context,
-                    query, null);
-            while (c.moveToNext()) {
-                getContentValues(c, contentValues);
-                save(db, c, contentValues, _lastUpdate);
+            result = db.update(Impl.table, values, sqlWhere, selectionArgs);
+        } catch (Exception ex) {
+            excpetion = ex;
+        } finally {
+            if ((excpetion != null) || ((dbgContext != null) && (Global.debugEnabledSql || LibGlobal.debugEnabledJpg))) {
+                Log.i(Global.LOG_CONTEXT, dbgContext + ":" +
+                        MODUL_NAME +
+                        ".exexUpdate " + excpetion + "\n" +
+                        QueryParameter.toString(null, values.toString(), FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
+                                sqlWhere, selectionArgs, null, result), excpetion);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * return id of inserted item
+     *
+     * @param dbgContext
+     * @param dbUpdateFilterJpgFullPathName
+     * @param values
+     * @param visibility
+     * @param updateSuccessValue
+     */
+    @Override
+    public Long insertOrUpdateMediaDatabase(String dbgContext, String dbUpdateFilterJpgFullPathName,
+                                            ContentValues values, VISIBILITY visibility, Long updateSuccessValue) {
+        Long result = updateSuccessValue;
+
+        int modifyCount = execUpdate(dbgContext, dbUpdateFilterJpgFullPathName,
+                values, visibility);
+
+        if (modifyCount == 0) {
+            // update failed (probably becauce oldFullPathName not found. try insert it.
+            FotoSql.addDateAdded(values);
+
+            Uri uriWithId = execInsert(dbgContext, values);
+            result = FotoSql.getId(uriWithId);
+        }
+        return result;
+    }
+
+    /**
+     * every database insert should go through this. adds logging if enabled
+     *
+     * @param dbgContext
+     * @param values
+     */
+    @Override
+    public Uri execInsert(String dbgContext, ContentValues values) {
+        long result = 0;
+        Exception excpetion = null;
+        try {
+            // on my android-4.4 insert with media_type=1001 (private) does insert with media_type=1 (image)
+            result = db.insert(Impl.table, null, values);
+        } catch (Exception ex) {
+            excpetion = ex;
+        } finally {
+            if ((excpetion != null) || Global.debugEnabledSql || LibGlobal.debugEnabledJpg) {
+                Log.i(Global.LOG_CONTEXT, dbgContext + ":" +
+                        MODUL_NAME +
+                        ".execInsert " + excpetion + " " +
+                        values.toString() + " => " + result + " " + excpetion, excpetion);
+            }
+        }
+        return Uri.parse("content://apm/photo/" + result);
+    }
+
+    /**
+     * Deletes media items specified by where with the option to prevent cascade delete of the image.
+     *
+     * @param dbgContext
+     * @param where
+     * @param selectionArgs
+     * @param preventDeleteImageFile
+     */
+    @Override
+    public int deleteMedia(String dbgContext, String where, String[] selectionArgs, boolean preventDeleteImageFile) {
+        String[] lastSelectionArgs = selectionArgs;
+        String lastUsedWhereClause = where;
+        int delCount = 0;
+        try {
+            if (preventDeleteImageFile) {
+                // set SQL_COL_PATH empty so sql-delete cannot cascade delete the referenced image-file via delete trigger
+                ContentValues values = new ContentValues();
+                values.put(FotoSql.SQL_COL_PATH, FotoSql.DELETED_FILE_MARKER);
+                values.put(FotoSql.SQL_COL_EXT_MEDIA_TYPE, 0); // so it will not be shown as image any more
+                exexUpdateImpl(dbgContext + "-a: " +
+                                MODUL_NAME +
+                                ".deleteMedia: ",
+                        values, lastUsedWhereClause, lastSelectionArgs);
+
+                lastUsedWhereClause = FotoSql.SQL_COL_PATH + " is null";
+                lastSelectionArgs = null;
+                delCount = db.delete(Impl.table, lastUsedWhereClause, lastSelectionArgs);
+                if (Global.debugEnabledSql || LibGlobal.debugEnabledJpg) {
+                    Log.i(Global.LOG_CONTEXT, dbgContext + "-b: " +
+                            MODUL_NAME +
+                            ".deleteMedia delete\n" +
+                            QueryParameter.toString(null, null, FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
+                                    lastUsedWhereClause, lastSelectionArgs, null, delCount));
+                }
+            } else {
+                delCount = db.delete(Impl.table, lastUsedWhereClause, lastSelectionArgs);
+                if (Global.debugEnabledSql || LibGlobal.debugEnabledJpg) {
+                    Log.i(Global.LOG_CONTEXT, dbgContext + ": " +
+                            MODUL_NAME +
+                            ".deleteMedia\ndelete " +
+                            QueryParameter.toString(null, null,
+                                    FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
+                                    lastUsedWhereClause, lastSelectionArgs, null, delCount));
+                }
             }
         } catch (Exception ex) {
-            // Log.e(Global.LOG_CONTEXT, "FotoSql.execGetFotoPaths() Cannot get path from: " + FotoSql.SQL_COL_PATH + " like '" + pathFilter +"'", ex);
+            // null pointer exception when delete matches not items??
+            final String msg = dbgContext + ": Exception in " +
+                    MODUL_NAME +
+                    ".deleteMedia:\n" +
+                    QueryParameter.toString(null, null, FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
+                            lastUsedWhereClause, lastSelectionArgs, null, -1)
+                    + " : " + ex.getMessage();
+            Log.e(Global.LOG_CONTEXT, msg, ex);
+
+        }
+        return delCount;
+    }
+
+    @Override
+    public ContentValues getDbContent(long id) {
+        Cursor c = null;
+        try {
+            c = this.createCursorForQuery(null, "getDbContent",
+                    Impl.table, FotoSql.FILTER_COL_PK, new String[]{"" + id}, null, null, "*");
+            if (c.moveToNext()) {
+                ContentValues values = new ContentValues();
+                DatabaseUtils.cursorRowToContentValues(c, values);
+                return values;
+            }
+        } catch (Exception ex) {
+            Log.e(Global.LOG_CONTEXT, MODUL_NAME +
+                    ".getDbContent(id=" + id + ") failed", ex);
         } finally {
             if (c != null) c.close();
         }
-
-        if (Global.debugEnabled) {
-            // Log.d(Global.LOG_CONTEXT, "FotoSql.execGetFotoPaths() result count=" + result.size());
-        }
-        return 0;
+        return null;
     }
 
-    private static void save(SQLiteDatabase db, Cursor c, ContentValues contentValues, long lastUpdate) {
-        boolean isNew = (c.getLong(colDATE_ADDED) > lastUpdate);
+    public static class Impl {
+        /**
+         * SQL to create copy of contentprovider MediaStore.Images.
+         * copied from android-4.4 android database. Removed columns not used
+         */
+        public static final String[] DDL = new String[]{
+                "CREATE TABLE \"files\" (\n" +
+                        "\t_id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
+                        "\t_size INTEGER,\n" +
+                        "\tdate_added INTEGER,\n" +
+                        "\tdate_modified INTEGER,\n" +
+                        "\tdatetaken INTEGER,\n" +
+                        "\torientation INTEGER,\n" +
+                        "\tduration INTEGER,\n" +
+                        "\tbookmark INTEGER,\n" +
+                        "\tmedia_type INTEGER,\n" +
+                        "\twidth INTEGER,\n" +
+                        "\theight INTEGER,\n" +
 
-        if (isNew) {
-            db.insert(table, null, contentValues);
-        } else {
-            String[] params = new String[]{"" + c.getLong(colID)};
-            contentValues.remove(SQL_COL_PK);
-            db.update(table, contentValues, FotoSql.FILTER_COL_PK, params);
+                        "\t_data TEXT UNIQUE COLLATE NOCASE,\n" +
+                        "\ttitle TEXT,\n" +
+                        "\tdescription TEXT,\n" +
+                        "\t_display_name TEXT,\n" +
+                        "\tmime_type TEXT,\n" +
+                        "\ttags TEXT,\n" +
+
+                        "\tlatitude DOUBLE,\n" +
+                        "\tlongitude DOUBLE\n" +
+                        "\t )",
+                "CREATE INDEX media_type_index ON files(media_type)",
+                "CREATE INDEX path_index ON files(_data)",
+                "CREATE INDEX sort_index ON files(datetaken ASC, _id ASC)",
+                "CREATE INDEX title_idx ON files(title)",
+        };
+
+        public static final String table = "files";
+        // same colum order as in DDL
+        private static final String[] USED_MEDIA_COLUMNS = new String[]{
+                // INTEGER 0 .. 10
+                SQL_COL_PK,
+                SQL_COL_DATE_ADDED,
+                SQL_COL_LAST_MODIFIED,
+                SQL_COL_SIZE,
+                SQL_COL_DATE_TAKEN,
+                SQL_COL_ORIENTATION,
+                SQL_COL_EXT_XMP_LAST_MODIFIED_DATE, // duration
+                SQL_COL_EXT_RATING, // bookmark
+                SQL_COL_EXT_MEDIA_TYPE,
+                MediaStore.MediaColumns.WIDTH,
+                MediaStore.MediaColumns.HEIGHT,
+
+                // TEXT 11 .. 16
+                SQL_COL_PATH, // _data
+                SQL_COL_EXT_TITLE,
+                SQL_COL_EXT_DESCRIPTION,
+                SQL_COL__IMPL_DISPLAY_NAME,
+                MediaStore.MediaColumns.MIME_TYPE,
+                SQL_COL_EXT_TAGS,
+
+                // DOUBLE 17..18
+                SQL_COL_LAT,
+                SQL_COL_LON,
+        };
+
+        private static final int intMin = 0;
+        private static final int intMax = 10;
+        private static final int txtMin = 11;
+        private static final int txtMax = 16;
+        private static final int dblMin = 17;
+        private static final int dblMax = 18;
+
+        private static final int colID = 0;
+        private static final int colDATE_ADDED = 1;
+        private static final int colLAST_MODIFIED = 2;
+        private static final String FILTER_EXPR_AFFECTED_FILES
+                = "(" + FotoSql.FILTER_EXPR_PRIVATE_PUBLIC
+                + " OR " + SQL_COL_PATH + " like '%" + AlbumFile.SUFFIX_VALBUM + "' "
+                + " OR " + SQL_COL_PATH + " like '%" + AlbumFile.SUFFIX_QUERY + "' "
+                + ")";
+        private static final QueryParameter queryGetAllColumns = new QueryParameter()
+                .setID(QUERY_TYPE_UNDEFINED)
+                .addColumn(USED_MEDIA_COLUMNS)
+                .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
+                .addWhere(FILTER_EXPR_AFFECTED_FILES);
+
+        private static boolean isLomg(int index) {
+            return index >= intMin && index <= intMax;
+        }
+
+        // private Object get(Cursor cursor, columIndex)
+
+        private static boolean isString(int index) {
+            return index >= txtMin && index <= txtMax;
+        }
+
+        private static boolean isDouble(int index) {
+            return index >= dblMin && index <= dblMax;
+        }
+
+        private static ContentValues getContentValues(Cursor cursor, ContentValues destination) {
+            destination.clear();
+            int colCount = cursor.getColumnCount();
+            String columnName;
+            for (int i = 0; i < colCount; i++) {
+                columnName = cursor.getColumnName(i);
+                if (cursor.isNull(i)) {
+                    destination.putNull(columnName);
+                } else if (isLomg(i)) {
+                    destination.put(columnName, cursor.getLong(i));
+                } else if (isString(i)) {
+                    destination.put(columnName, cursor.getString(i));
+                } else if (isDouble(i)) {
+                    destination.put(columnName, cursor.getDouble(i));
+                }
+            }
+            return destination;
+        }
+
+        public static int updateMedaiCopy(Context context, SQLiteDatabase db, Date lastUpdate) {
+            int changeCount = 0;
+
+            QueryParameter query = queryGetAllColumns;
+            long _lastUpdate = (lastUpdate != null) ? (lastUpdate.getTime() / 1000L) : 0L;
+
+            if (_lastUpdate != 0) {
+                query = new QueryParameter().getFrom(queryGetAllColumns);
+                FotoSql.addWhereDateModifiedMinMax(query, _lastUpdate, 0);
+                // FotoSql.createCursorForQuery()
+            }
+            Cursor c = null;
+            ContentValues contentValues = new ContentValues();
+            try {
+                c = ContentProviderMediaImpl.createCursorForQuery(null, "execGetFotoPaths(pathFilter)", context,
+                        query, null, null);
+                while (c.moveToNext()) {
+                    getContentValues(c, contentValues);
+                    save(db, c, contentValues, _lastUpdate);
+                }
+            } catch (Exception ex) {
+                // Log.e(Global.LOG_CONTEXT, "FotoSql.execGetFotoPaths() Cannot get path from: " + FotoSql.SQL_COL_PATH + " like '" + pathFilter +"'", ex);
+            } finally {
+                if (c != null) c.close();
+            }
+
+            if (Global.debugEnabled) {
+                // Log.d(Global.LOG_CONTEXT, "FotoSql.execGetFotoPaths() result count=" + result.size());
+            }
+            return 0;
+        }
+
+        private static void save(SQLiteDatabase db, Cursor c, ContentValues contentValues, long lastUpdate) {
+            boolean isNew = (c.getLong(colDATE_ADDED) > lastUpdate);
+
+            if (isNew) {
+                db.insert(table, null, contentValues);
+            } else {
+                String[] params = new String[]{"" + c.getLong(colID)};
+                contentValues.remove(SQL_COL_PK);
+                db.update(table, contentValues, FotoSql.FILTER_COL_PK, params);
+            }
         }
     }
 }

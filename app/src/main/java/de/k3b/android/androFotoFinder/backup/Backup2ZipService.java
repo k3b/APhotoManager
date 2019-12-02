@@ -211,7 +211,7 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
             this.onProgress(0,0, "Calculate");
             cursor = FotoSql.getMediaDBApi().createCursorForQuery(
                     null, "ZipExecute",
-                    query, null);
+                    query, null, null);
 
             int itemCount = cursor.getCount();
 

@@ -103,7 +103,7 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
             try {
                 cursor = FotoSql.getMediaDBApi().createCursorForQuery(
                         null, "ZipExecute",
-                        queryParameters, null);
+                        queryParameters, null, null);
 
                 int itemCount = cursor.getCount();
                 final int expectedCount = itemCount + itemCount;

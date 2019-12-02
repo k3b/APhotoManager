@@ -380,7 +380,7 @@ public class TagSql extends FotoSql {
         if (addWhereAnyOfTags(query, tags) > 0) {
             Cursor c = null;
             try {
-                c = getMediaDBApi().createCursorForQuery(null, "getTagRefCount", query, VISIBILITY.PRIVATE_PUBLIC);
+                c = getMediaDBApi().createCursorForQuery(null, "getTagRefCount", query, VISIBILITY.PRIVATE_PUBLIC, null);
                 if (c.moveToFirst()) {
                     return c.getInt(0);
                 }
@@ -433,7 +433,7 @@ public class TagSql extends FotoSql {
 
         if (filterCount > 0) {
             try {
-                c = getMediaDBApi().createCursorForQuery(null, "loadTagWorflowItems", query, VISIBILITY.PRIVATE_PUBLIC);
+                c = getMediaDBApi().createCursorForQuery(null, "loadTagWorflowItems", query, VISIBILITY.PRIVATE_PUBLIC, null);
                 if (c.moveToFirst()) {
                     do {
                         result.add(new TagWorflowItem(c.getLong(0), c.getString(1), TagConverter.fromString(c.getString(2)),

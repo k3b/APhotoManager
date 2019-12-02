@@ -74,7 +74,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static DatabaseHelper instance = null;
 
     private void version2Upgrade_MediDbCopy(final SQLiteDatabase db) {
-        for (String sql : MediaImageDbReplacement.DDL) {
+        for (String sql : MediaImageDbReplacement.Impl.DDL) {
             db.execSQL(sql);
         }
     }

@@ -21,7 +21,6 @@ package de.k3b.android.androFotoFinder.queries;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -773,7 +772,7 @@ public class FotoSql extends FotoSqlBase {
                     uriWithID.toString(),
                     null,
                     null, null,
-                    FotoSql.SQL_COL_PATH);
+                    null, FotoSql.SQL_COL_PATH);
             if (c.moveToFirst()) {
                 return DBUtils.getString(c,FotoSql.SQL_COL_PATH, null);
             }
@@ -799,7 +798,7 @@ public class FotoSql extends FotoSqlBase {
             c = mediaDBApi.createCursorForQuery(
                     null,
                     "execGetFotoPaths(pathFilter)",
-                    query, null);
+                    query, null, null);
             while (c.moveToNext()) {
                 result.add(c.getString(0));
             }
@@ -844,7 +843,7 @@ public class FotoSql extends FotoSqlBase {
         GeoRectangle result = null;
         Cursor c = null;
         try {
-            c = mediaDBApi.createCursorForQuery(debugMessage, "execGetGeoRectangle", query, VISIBILITY.PRIVATE_PUBLIC);
+            c = mediaDBApi.createCursorForQuery(debugMessage, "execGetGeoRectangle", query, VISIBILITY.PRIVATE_PUBLIC, null);
             if (c.moveToFirst()) {
                 result = new GeoRectangle();
                 result.setLatitude(c.getDouble(0), c.getDouble(1));
@@ -888,7 +887,7 @@ public class FotoSql extends FotoSqlBase {
         GeoPoint result = null;
         Cursor c = null;
         try {
-            c = mediaDBApi.createCursorForQuery(debugMessage, "execGetPosition", query, VISIBILITY.PRIVATE_PUBLIC);
+            c = mediaDBApi.createCursorForQuery(debugMessage, "execGetPosition", query, VISIBILITY.PRIVATE_PUBLIC, null);
             if (c.moveToFirst()) {
                 result = new GeoPoint(c.getDouble(0),c.getDouble(1));
                 return result;
@@ -923,7 +922,7 @@ public class FotoSql extends FotoSqlBase {
 
             Cursor c = null;
             try {
-                c = mediaDBApi.createCursorForQuery(null, "execGetPathIdMap", query, null);
+                c = mediaDBApi.createCursorForQuery(null, "execGetPathIdMap", query, null, null);
                 while (c.moveToNext()) {
                     result.put(c.getString(1),c.getLong(0));
                 }
@@ -1010,9 +1009,9 @@ public class FotoSql extends FotoSqlBase {
     }
 
     @NonNull
-    public static CursorLoader createCursorLoader(Context context, final QueryParameter query) {
+    public static CursorLoaderWithException createCursorLoader(Context context, final QueryParameter query) {
         FotoSql.setWhereVisibility(query, VISIBILITY.DEFAULT);
-        final CursorLoader loader = new CursorLoaderWithException(context, query);
+        final CursorLoaderWithException loader = new CursorLoaderWithException(context, query);
         return loader;
     }
 
@@ -1102,7 +1101,7 @@ public class FotoSql extends FotoSqlBase {
         Cursor c = null;
 
         try {
-            c = mediaDBApi.createCursorForQuery(null, "getCount", queryModified, null);
+            c = mediaDBApi.createCursorForQuery(null, "getCount", queryModified, null, null);
             if (c.moveToNext()) {
                 return c.getString(0);
             }
@@ -1121,7 +1120,7 @@ public class FotoSql extends FotoSqlBase {
         Cursor c = null;
 
         try {
-            c = mediaDBApi.createCursorForQuery(null, "getCount", queryModified, null);
+            c = mediaDBApi.createCursorForQuery(null, "getCount", queryModified, null, null);
             if (c.moveToNext()) {
                 return c.getLong(0);
             }
@@ -1150,7 +1149,7 @@ public class FotoSql extends FotoSqlBase {
         Cursor c = null;
 
         try {
-            c = mediaDBApi.createCursorForQuery(null, "getCount", queryModified, null);
+            c = mediaDBApi.createCursorForQuery(null, "getCount", queryModified, null, null);
             if (c.moveToNext()) {
                 final long count = c.getLong(0);
                 long size = c.getLong(1);
@@ -1186,7 +1185,7 @@ public class FotoSql extends FotoSqlBase {
         Cursor c = null;
 
         try {
-            c = mediaDBApi.createCursorForQuery(null, "getSelectedfiles", query, visibility);
+            c = mediaDBApi.createCursorForQuery(null, "getSelectedfiles", query, visibility, null);
             int len = c.getCount();
             Long[] ids = new Long[len];
             String[] paths = new String[len];
@@ -1260,7 +1259,7 @@ public class FotoSql extends FotoSqlBase {
         Cursor cursor = null;
 
         try {
-            cursor = mediaDBApi.createCursorForQuery(null, "getFileNames", parameters, VISIBILITY.PRIVATE_PUBLIC);
+            cursor = mediaDBApi.createCursorForQuery(null, "getFileNames", parameters, VISIBILITY.PRIVATE_PUBLIC, null);
 
             int colPath = cursor.getColumnIndex(SQL_COL_DISPLAY_TEXT);
             if (colPath == -1) colPath = cursor.getColumnIndex(SQL_COL_PATH);
@@ -1340,38 +1339,6 @@ public class FotoSql extends FotoSqlBase {
         values.put(SQL_COL_PATH, newFullPath);
         return mediaDBApi.execUpdate("rename file", oldFullPath,
                 values, null);
-    }
-
-    public static class CursorLoaderWithException extends CursorLoader {
-        private final QueryParameter query;
-        private Exception mException;
-
-        public CursorLoaderWithException(Context context, QueryParameter query) {
-            super(context, Uri.parse(query.toFrom()), query.toColumns(), query.toAndroidWhere(), query.toAndroidParameters(), query.toOrderBy());
-            this.query = query;
-        }
-
-        @Override
-        public Cursor loadInBackground() {
-            mException = null;
-            try {
-                Cursor result = super.loadInBackground();
-                return result;
-            } catch (Exception ex) {
-                final String msg = "FotoSql.createCursorLoader()#loadInBackground failed:\n\t" + query.toSqlString();
-                Log.e(Global.LOG_CONTEXT, msg, ex);
-                mException = ex;
-                return null;
-            }
-        }
-
-        public QueryParameter getQuery() {
-            return query;
-        }
-
-        public Exception getException() {
-            return mException;
-        }
     }
 }
 

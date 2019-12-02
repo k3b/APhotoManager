@@ -25,6 +25,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.net.Uri;
+import android.os.Build;
+import android.os.CancellationSignal;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -39,35 +41,44 @@ import de.k3b.io.VISIBILITY;
  * Static Implementation of Context.getContentResolver()-ContentProvider based media api
  */
 public class ContentProviderMediaImpl {
+    private static final String MODUL_NAME = ContentProviderMediaImpl.class.getName();
+
     public static Cursor createCursorForQuery(
             StringBuilder out_debugMessage, String dbgContext, final Context context,
-            QueryParameter parameters, VISIBILITY visibility) {
+            QueryParameter parameters, VISIBILITY visibility, CancellationSignal cancellationSignal) {
         if (visibility != null) FotoSql.setWhereVisibility(parameters, visibility);
         return createCursorForQuery(out_debugMessage, dbgContext, context, parameters.toFrom(),
                 parameters.toAndroidWhere(),
                 parameters.toAndroidParameters(), parameters.toOrderBy(),
-                parameters.toColumns()
+                cancellationSignal, parameters.toColumns()
         );
     }
 
     /**
      * every cursor query should go through this. adds logging if enabled
      */
-    static Cursor createCursorForQuery(StringBuilder out_debugMessage, String dbgContext, final Context context, final String from, final String sqlWhereStatement,
-                                       final String[] sqlWhereParameters, final String sqlSortOrder,
-                                       final String... sqlSelectColums) {
+    static Cursor createCursorForQuery(
+            StringBuilder out_debugMessage, String dbgContext, final Context context,
+            final String from, final String sqlWhereStatement,
+            final String[] sqlWhereParameters, final String sqlSortOrder,
+            CancellationSignal cancellationSignal, final String... sqlSelectColums) {
         ContentResolver resolver = context.getContentResolver();
         Cursor query = null;
 
         Exception excpetion = null;
         try {
-            query = resolver.query(Uri.parse(from), sqlSelectColums, sqlWhereStatement, sqlWhereParameters, sqlSortOrder);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                query = resolver.query(Uri.parse(from), sqlSelectColums, sqlWhereStatement, sqlWhereParameters, sqlSortOrder, cancellationSignal);
+            } else {
+                query = resolver.query(Uri.parse(from), sqlSelectColums, sqlWhereStatement, sqlWhereParameters, sqlSortOrder);
+            }
         } catch (Exception ex) {
             excpetion = ex;
         } finally {
             if ((excpetion != null) || Global.debugEnabledSql || (out_debugMessage != null)) {
                 StringBuilder message = StringUtils.appendMessage(out_debugMessage, excpetion,
-                        dbgContext, "FotoSql.createCursorForQuery:\n",
+                        dbgContext, MODUL_NAME +
+                                ".createCursorForQuery:\n",
                         QueryParameter.toString(sqlSelectColums, null, from, sqlWhereStatement,
                                 sqlWhereParameters, sqlSortOrder, query.getCount()));
                 if (out_debugMessage == null) {
@@ -77,10 +88,6 @@ public class ContentProviderMediaImpl {
         }
 
         return query;
-    }
-
-    public static int execUpdate(String dbgContext, Context context, long id, ContentValues values) {
-        return exexUpdateImpl(dbgContext, context, values, FotoSql.FILTER_COL_PK, new String[]{Long.toString(id)});
     }
 
     public static int execUpdate(String dbgContext, Context context, String path, ContentValues values, VISIBILITY visibility) {
@@ -101,7 +108,9 @@ public class ContentProviderMediaImpl {
             excpetion = ex;
         } finally {
             if ((excpetion != null) || ((dbgContext != null) && (Global.debugEnabledSql || LibGlobal.debugEnabledJpg))) {
-                Log.i(Global.LOG_CONTEXT, dbgContext + ":FotoSql.exexUpdate " + excpetion + "\n" +
+                Log.i(Global.LOG_CONTEXT, dbgContext + ":" +
+                        MODUL_NAME +
+                        ".exexUpdate " + excpetion + "\n" +
                         QueryParameter.toString(null, values.toString(), FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
                                 sqlWhere, selectionArgs, null, result), excpetion);
             }
@@ -146,7 +155,9 @@ public class ContentProviderMediaImpl {
             excpetion = ex;
         } finally {
             if ((excpetion != null) || Global.debugEnabledSql || LibGlobal.debugEnabledJpg) {
-                Log.i(Global.LOG_CONTEXT, dbgContext + ":FotoSql.execInsert " + excpetion + " " +
+                Log.i(Global.LOG_CONTEXT, dbgContext + ":" +
+                        MODUL_NAME +
+                        ".execInsert " + excpetion + " " +
                         values.toString() + " => " + result + " " + excpetion, excpetion);
             }
         }
@@ -166,7 +177,9 @@ public class ContentProviderMediaImpl {
                 ContentValues values = new ContentValues();
                 values.put(FotoSql.SQL_COL_PATH, FotoSql.DELETED_FILE_MARKER);
                 values.put(FotoSql.SQL_COL_EXT_MEDIA_TYPE, 0); // so it will not be shown as image any more
-                exexUpdateImpl(dbgContext + "-a: FotoSql.deleteMedia: ",
+                exexUpdateImpl(dbgContext + "-a: " +
+                                MODUL_NAME +
+                                ".deleteMedia: ",
                         context, values, lastUsedWhereClause, lastSelectionArgs);
 
                 lastUsedWhereClause = FotoSql.SQL_COL_PATH + " is null";
@@ -174,7 +187,9 @@ public class ContentProviderMediaImpl {
                 delCount = context.getContentResolver()
                         .delete(FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, lastUsedWhereClause, lastSelectionArgs);
                 if (Global.debugEnabledSql || LibGlobal.debugEnabledJpg) {
-                    Log.i(Global.LOG_CONTEXT, dbgContext + "-b: FotoSql.deleteMedia delete\n" +
+                    Log.i(Global.LOG_CONTEXT, dbgContext + "-b: " +
+                            MODUL_NAME +
+                            ".deleteMedia delete\n" +
                             QueryParameter.toString(null, null, FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
                                     lastUsedWhereClause, lastSelectionArgs, null, delCount));
                 }
@@ -182,7 +197,9 @@ public class ContentProviderMediaImpl {
                 delCount = context.getContentResolver()
                         .delete(FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, lastUsedWhereClause, lastSelectionArgs);
                 if (Global.debugEnabledSql || LibGlobal.debugEnabledJpg) {
-                    Log.i(Global.LOG_CONTEXT, dbgContext + ": FotoSql.deleteMedia\ndelete " +
+                    Log.i(Global.LOG_CONTEXT, dbgContext + ": " +
+                            MODUL_NAME +
+                            ".deleteMedia\ndelete " +
                             QueryParameter.toString(null, null,
                                     FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
                                     lastUsedWhereClause, lastSelectionArgs, null, delCount));
@@ -190,7 +207,9 @@ public class ContentProviderMediaImpl {
             }
         } catch (Exception ex) {
             // null pointer exception when delete matches not items??
-            final String msg = dbgContext + ": Exception in FotoSql.deleteMedia:\n" +
+            final String msg = dbgContext + ": Exception in " +
+                    MODUL_NAME +
+                    ".deleteMedia:\n" +
                     QueryParameter.toString(null, null, FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
                             lastUsedWhereClause, lastSelectionArgs, null, -1)
                     + " : " + ex.getMessage();
@@ -207,7 +226,8 @@ public class ContentProviderMediaImpl {
      * @return number of updated items
      */
     private static int _del_execRenameFolder_batch_not_working(Context context, String pathOld, String pathNew) {
-        final String dbgContext = "FotoSql.execRenameFolder('" +
+        final String dbgContext = MODUL_NAME +
+                ".execRenameFolder('" +
                 pathOld + "' => '" + pathNew + "')";
         // sql update file set path = newBegin + substing(path, begin+len) where path like newBegin+'%'
         // public static final String SQL_EXPR_FOLDER = "substr(" + SQL_COL_PATH + ",1,length(" + SQL_COL_PATH + ") - length(" + MediaStore.Images.Media.DISPLAY_NAME + "))";
@@ -229,7 +249,7 @@ public class ContentProviderMediaImpl {
 
         Cursor c = null;
         try {
-            c = createCursorForQuery(null, dbgContext, context, queryAffectedFiles, null);
+            c = createCursorForQuery(null, dbgContext, context, queryAffectedFiles, null, null);
             int pkColNo = c.getColumnIndex(FotoSql.SQL_COL_PK);
             int pathColNo = c.getColumnIndex(sqlColNewPathAlias);
 
@@ -271,7 +291,8 @@ public class ContentProviderMediaImpl {
                 return values;
             }
         } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, "FotoSql.getDbContent(id=" + id + ") failed", ex);
+            Log.e(Global.LOG_CONTEXT, MODUL_NAME +
+                    ".getDbContent(id=" + id + ") failed", ex);
         } finally {
             if (c != null) c.close();
         }

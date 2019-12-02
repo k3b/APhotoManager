@@ -300,7 +300,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
 
             Cursor c = null;
             try {
-                c = FotoSql.getMediaDBApi().createCursorForQuery(null, "renameInMediaDatabase", query, VISIBILITY.PRIVATE_PUBLIC);
+                c = FotoSql.getMediaDBApi().createCursorForQuery(null, "renameInMediaDatabase", query, VISIBILITY.PRIVATE_PUBLIC, null);
                 int pkColNo = c.getColumnIndex(FotoSql.SQL_COL_PK);
                 int pathColNo = c.getColumnIndex(FotoSql.SQL_COL_PATH);
                 while (c.moveToNext()) {

@@ -21,6 +21,7 @@ package de.k3b.android.androFotoFinder.queries;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.CancellationSignal;
 
 import de.k3b.database.QueryParameter;
 import de.k3b.io.VISIBILITY;
@@ -31,11 +32,11 @@ import de.k3b.io.VISIBILITY;
 public interface IMediaDBApi {
     Cursor createCursorForQuery(
             StringBuilder out_debugMessage, String dbgContext,
-            QueryParameter parameters, VISIBILITY visibility);
+            QueryParameter parameters, VISIBILITY visibility, CancellationSignal cancellationSignal);
 
     Cursor createCursorForQuery(StringBuilder out_debugMessage, String dbgContext, final String from, final String sqlWhereStatement,
                                 final String[] sqlWhereParameters, final String sqlSortOrder,
-                                final String... sqlSelectColums);
+                                CancellationSignal cancellationSignal, final String... sqlSelectColums);
 
     int execUpdate(String dbgContext, long id, ContentValues values);
 

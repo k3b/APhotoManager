@@ -124,6 +124,11 @@ public class Global {
     public static boolean initialImageDetailResolutionHigh = false; // false: MediaStore.Images.Thumbnails.MINI_KIND; true: FULL_SCREEN_KIND;
     public static boolean mapsForgeEnabled = false;
 
+    // #155: fix android10 incompatibility
+    // Build.VERSION_CODES.??ANDROID10?? = 29
+    //!!!
+    public static final boolean useMediaImageDbReplacement = true;
+//  public static final boolean useMediaImageDbReplacement = (Build.VERSION.SDK_INT >= 29);
     /** map with blue selection markers: how much to area to increase */
     public static final double mapMultiselectionBoxIncreaseByProcent = 100.0;
     /** map with blue selection markers: minimum size of zoom box in degrees */
