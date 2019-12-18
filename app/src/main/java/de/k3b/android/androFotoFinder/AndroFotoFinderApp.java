@@ -21,6 +21,7 @@ package de.k3b.android.androFotoFinder;
 
 import android.app.Application;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -36,9 +37,14 @@ import java.util.Date;
 import de.k3b.LibGlobal;
 import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
+import de.k3b.android.androFotoFinder.queries.DatabaseHelper;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoSqlBase;
+import de.k3b.android.androFotoFinder.queries.IMediaDBApi;
 import de.k3b.android.androFotoFinder.queries.MediaDBContentprovider;
+import de.k3b.android.androFotoFinder.queries.MediaDBUpdater;
+import de.k3b.android.androFotoFinder.queries.MediaImageDbReplacement;
+import de.k3b.android.androFotoFinder.queries.MergedMediaDB;
 import de.k3b.android.osmdroid.forge.MapsForgeSupport;
 import de.k3b.android.util.LogCat;
 import de.k3b.android.widget.ActivityWithCallContext;
@@ -58,6 +64,11 @@ import uk.co.senab.photoview.gestures.CupcakeGestureDetector;
  */
 public class AndroFotoFinderApp extends Application {
     private static String fileNamePrefix = "androFotofinder.logcat-";
+    private static MediaDBUpdater mediaDbUpdater = null;
+
+    public static MediaDBUpdater getMediaDbUpdater() {
+        return mediaDbUpdater;
+    }
 
     private LogCat mCrashSaveToFile = null;
 
@@ -77,6 +88,35 @@ public class AndroFotoFinderApp extends Application {
         return result;
     }
 
+    public static void setMediaImageDbReplacement(Context context, boolean useMediaImageDbReplacement) {
+        final IMediaDBApi oldMediaDBApi = FotoSql.getMediaDBApi();
+        if ((oldMediaDBApi == null) || (Global.useMediaImageDbReplacement != useMediaImageDbReplacement)) {
+            Global.useMediaImageDbReplacement = useMediaImageDbReplacement;
+
+            final MediaDBContentprovider mediaDBContentprovider = new MediaDBContentprovider(context);
+
+            if (Global.useMediaImageDbReplacement) {
+                final SQLiteDatabase writableDatabase = DatabaseHelper.getWritableDatabase(context);
+                final MediaImageDbReplacement mediaImageDbReplacement = new MediaImageDbReplacement(writableDatabase);
+                FotoSql.setMediaDBApi(new MergedMediaDB(mediaImageDbReplacement, mediaDBContentprovider));
+
+                AndroFotoFinderApp.mediaDbUpdater = new MediaDBUpdater(context, writableDatabase);
+
+                if (FotoSql.getCount(new QueryParameter().addWhere("1 = 1")) == 0) {
+                    // database is empty; reload from Contentprovider
+                    AndroFotoFinderApp.mediaDbUpdater.rebuild(context, null);
+                }
+            } else {
+                if ((oldMediaDBApi != null) && (AndroFotoFinderApp.mediaDbUpdater != null)) {
+                    // switching from mediaImageDbReplacement to Contentprovider
+                    AndroFotoFinderApp.mediaDbUpdater.clearMediaCopy();
+                }
+                FotoSql.setMediaDBApi(mediaDBContentprovider);
+                AndroFotoFinderApp.mediaDbUpdater = null;
+            }
+        }
+    }
+
     /*
         private RefWatcher refWatcher;
 
@@ -94,9 +134,6 @@ public class AndroFotoFinderApp extends Application {
         // StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().detectAll().penaltyDialog().build());
         // StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyDeath().build());
         FotoSqlBase.init();
-
-        /// #155: todo: depending on android-api version set IMediaDBApi
-        FotoSql.setMediaDBApi(new MediaDBContentprovider(this));
 
         super.onCreate();
 

@@ -332,7 +332,7 @@ public class QueryParameter {
     }
 
     public String toWhere() {
-        return Helper.toCommaSeperatedFieldListOrNull(mWhere);
+        return Helper.toSeperatedFieldListOrNull(mWhere, " AND ");
     }
 
     public String toHaving() {
@@ -510,7 +510,7 @@ public class QueryParameter {
             return result;
         }
 
-        private static boolean append(StringBuilder result, String blockPrefix, List<String> list, String delimiter, String before, String after) {
+        private static boolean append(StringBuilder result, String blockPrefix, List<String> list, String seperator, String before, String after) {
             if (isNotEmpty(list)) {
                 if (blockPrefix != null) {
                     result.append(blockPrefix);
@@ -519,8 +519,8 @@ public class QueryParameter {
                 boolean first = true;
                 int listSize = list.size();
                 for (int i = 0; i < listSize; i++) {
-                    if ((delimiter != null) && (!first)) {
-                        result.append(delimiter);
+                    if ((seperator != null) && (!first)) {
+                        result.append(seperator);
                     }
 
                     if (before != null) result.append(before);
@@ -575,9 +575,13 @@ public class QueryParameter {
         }
 
         private static String toCommaSeperatedFieldListOrNull(List<String> list) {
+            return toSeperatedFieldListOrNull(list, ", ");
+        }
+
+        private static String toSeperatedFieldListOrNull(List<String> list, String seperator) {
             if (isNotEmpty(list)) {
                 StringBuilder result = new StringBuilder();
-                append(result, null, list, ", ", null, null);
+                append(result, null, list, seperator, null, null);
                 return result.toString();
             }
             return null;

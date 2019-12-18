@@ -44,8 +44,8 @@ import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.BaseQueryActivity;
 import de.k3b.database.QueryParameter;
-import de.k3b.io.collections.SelectedItems;
 import de.k3b.io.IDirectory;
+import de.k3b.io.collections.SelectedItems;
 
 /**
  * Gallery: Show zeoro or more images in a grid optionally filtered by a
@@ -167,6 +167,11 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
 
             inflater.inflate(R.menu.menu_gallery_non_selected_only, menu);
             inflater.inflate(R.menu.menu_gallery_non_multiselect, menu);
+
+            if (Global.useMediaImageDbReplacement) {
+                inflater.inflate(R.menu.menu_ao10, menu);
+            }
+
             /*
             getActionBar().setListNavigationCallbacks();
             MenuItem sorter = menu.getItem(R.id.cmd_sort);
@@ -201,6 +206,9 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
                 return true;
             case R.id.cmd_about:
                 AboutDialogPreference.createAboutDialog(this).show();
+                return true;
+            case R.id.cmd_db_reload:
+                AndroFotoFinderApp.getMediaDbUpdater().rebuild(this, null);
                 return true;
             case R.id.cmd_more:
                 new Handler().postDelayed(new Runnable() {

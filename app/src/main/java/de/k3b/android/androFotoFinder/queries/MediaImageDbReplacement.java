@@ -23,6 +23,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 import android.net.Uri;
 import android.os.Build;
 import android.os.CancellationSignal;
@@ -33,8 +34,10 @@ import java.sql.Date;
 
 import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.R;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.AlbumFile;
+import de.k3b.io.IProgessListener;
 import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
 
@@ -117,11 +120,12 @@ public class MediaImageDbReplacement implements IMediaDBApi {
             excpetion = ex;
         } finally {
             if ((excpetion != null) || Global.debugEnabledSql || (out_debugMessage != null)) {
+                final int count = (query == null) ? 0 : query.getCount();
                 StringBuilder message = StringUtils.appendMessage(out_debugMessage, excpetion,
                         dbgContext, MODUL_NAME +
                                 ".createCursorForQuery:\n",
                         QueryParameter.toString(sqlSelectColums, null, Impl.table, sqlWhereStatement,
-                                selectionArgs, sqlSortOrder, query.getCount()));
+                                selectionArgs, sqlSortOrder, count));
                 if (out_debugMessage == null) {
                     Log.i(Global.LOG_CONTEXT, message.toString(), excpetion);
                 } // else logging is done by caller
@@ -299,6 +303,7 @@ public class MediaImageDbReplacement implements IMediaDBApi {
          * copied from android-4.4 android database. Removed columns not used
          */
         public static final String[] DDL = new String[]{
+                "DROP TABLE IF EXISTS \"files\"",
                 "CREATE TABLE \"files\" (\n" +
                         "\t_id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
                         "\t_size INTEGER,\n" +
@@ -392,6 +397,78 @@ public class MediaImageDbReplacement implements IMediaDBApi {
             return index >= dblMin && index <= dblMax;
         }
 
+        private static String getSqlInsertWithParams() {
+            StringBuilder sql = new StringBuilder();
+
+            sql.append("INSERT INTO ").append(table).append("(").append(USED_MEDIA_COLUMNS[0]);
+            for (int i = 1; i < USED_MEDIA_COLUMNS.length; i++) {
+                sql.append(", ").append(USED_MEDIA_COLUMNS[i]);
+            }
+            sql.append(") VALUES (?");
+            for (int i = 1; i < USED_MEDIA_COLUMNS.length; i++) {
+                sql.append(", ?");
+            }
+            sql.append(")");
+            return sql.toString();
+        }
+
+        private static String getSqlUpdateWithParams() {
+            StringBuilder sql = new StringBuilder();
+
+            sql.append("UPDATE ").append(table).append(" SET ");
+            for (int i = 1; i < USED_MEDIA_COLUMNS.length; i++) {
+                if (i > 1) sql.append(", ");
+                sql.append(USED_MEDIA_COLUMNS[i]).append("=?");
+            }
+            sql.append(" WHERE ").append(USED_MEDIA_COLUMNS[0]).append("=?");
+            return sql.toString();
+        }
+
+        private static int bindAndExecUpdate(Cursor c, SQLiteStatement sql) {
+            sql.clearBindings();
+
+            // sql where
+            sql.bindLong(dblMax + 1, c.getLong(intMin));
+
+            for (int i = intMin + 1; i <= intMax; i++) {
+                if (!c.isNull(i)) {
+                    sql.bindLong(i, c.getLong(i));
+                }
+            }
+            for (int i = txtMin; i <= txtMax; i++) {
+                if (!c.isNull(i)) {
+                    sql.bindString(i, c.getString(i));
+                }
+            }
+            for (int i = dblMin; i <= dblMax; i++) {
+                if (!c.isNull(i)) {
+                    sql.bindDouble(i, c.getDouble(i));
+                }
+            }
+            return sql.executeUpdateDelete();
+        }
+
+        private static void bindAndExecInsert(Cursor c, SQLiteStatement sql) {
+            sql.clearBindings();
+
+            for (int i = intMin; i <= intMax; i++) {
+                if (!c.isNull(i)) {
+                    sql.bindLong(i + 1, c.getLong(i));
+                }
+            }
+            for (int i = txtMin; i <= txtMax; i++) {
+                if (!c.isNull(i)) {
+                    sql.bindString(i + 1, c.getString(i));
+                }
+            }
+            for (int i = dblMin; i <= dblMax; i++) {
+                if (!c.isNull(i)) {
+                    sql.bindDouble(i + 1, c.getDouble(i));
+                }
+            }
+            sql.executeInsert();
+        }
+
         private static ContentValues getContentValues(Cursor cursor, ContentValues destination) {
             destination.clear();
             int colCount = cursor.getColumnCount();
@@ -411,8 +488,18 @@ public class MediaImageDbReplacement implements IMediaDBApi {
             return destination;
         }
 
-        public static int updateMedaiCopy(Context context, SQLiteDatabase db, Date lastUpdate) {
-            int changeCount = 0;
+        public static void clearMedaiCopy(SQLiteDatabase db) {
+            try {
+                db.execSQL("DROP TABLE " + table);
+            } catch (Exception ex) {
+                // Log.e(Global.LOG_CONTEXT, "FotoSql.execGetFotoPaths() Cannot get path from: " + FotoSql.SQL_COL_PATH + " like '" + pathFilter +"'", ex);
+            } finally {
+            }
+        }
+
+
+        public static int updateMedaiCopy(Context context, SQLiteDatabase db, Date lastUpdate, IProgessListener progessListener) {
+            int progress = 0;
 
             QueryParameter query = queryGetAllColumns;
             long _lastUpdate = (lastUpdate != null) ? (lastUpdate.getTime() / 1000L) : 0L;
@@ -423,24 +510,63 @@ public class MediaImageDbReplacement implements IMediaDBApi {
                 // FotoSql.createCursorForQuery()
             }
             Cursor c = null;
-            ContentValues contentValues = new ContentValues();
+            SQLiteStatement sqlInsert = null;
+            SQLiteStatement sqlUpdate = null;
+            SQLiteStatement lastSql = null;
+            boolean isUpdate = false;
+            // ContentValues contentValues = new ContentValues();
             try {
-                c = ContentProviderMediaImpl.createCursorForQuery(null, "execGetFotoPaths(pathFilter)", context,
+                db.beginTransaction(); // Performance boost: all db-inserts/updates in one transaction
+
+                if (progessListener != null) progessListener.onProgress(progress, 0,
+                        context.getString(R.string.load_db_menu_title));
+
+                c = ContentProviderMediaImpl.createCursorForQuery(null, "updateMedaiCopy", context,
                         query, null, null);
+                int itemCount = c.getCount();
+
+                sqlInsert = db.compileStatement(getSqlInsertWithParams());
+                sqlUpdate = db.compileStatement(getSqlUpdateWithParams());
                 while (c.moveToNext()) {
-                    getContentValues(c, contentValues);
-                    save(db, c, contentValues, _lastUpdate);
+                    // getContentValues(c, contentValues);
+
+                    isUpdate = (c.getLong(colDATE_ADDED) <= _lastUpdate);
+
+                    if (isUpdate) {
+                        lastSql = sqlUpdate;
+                        isUpdate = bindAndExecUpdate(c, sqlUpdate) > 0;
+                        // 0 affected update rows: must insert
+                    }
+
+                    if (!isUpdate) {
+                        lastSql = sqlInsert;
+                        bindAndExecInsert(c, sqlInsert);
+                    }
+
+                    lastSql = null;
+                    // save(db, c, contentValues, _lastUpdate);
+                    if ((progessListener != null) && (progress % 100) == 0) {
+                        if (!progessListener.onProgress(progress, itemCount, context.getString(R.string.scanner_update_result_format, progress))) {
+                            // canceled in gui thread
+                            return -progress;
+                        }
+                    }
+                    progress++;
                 }
+                db.setTransactionSuccessful(); // This commits the transaction if there were no exceptions
             } catch (Exception ex) {
-                // Log.e(Global.LOG_CONTEXT, "FotoSql.execGetFotoPaths() Cannot get path from: " + FotoSql.SQL_COL_PATH + " like '" + pathFilter +"'", ex);
+                Log.e(Global.LOG_CONTEXT, "MediaImageDbReplacement.updateMedaiCopy cannot insert/update: " + lastSql + " from " + c, ex);
             } finally {
+                sqlInsert.close();
+                sqlUpdate.close();
+                db.endTransaction();
                 if (c != null) c.close();
             }
 
             if (Global.debugEnabled) {
                 // Log.d(Global.LOG_CONTEXT, "FotoSql.execGetFotoPaths() result count=" + result.size());
             }
-            return 0;
+            return progress;
         }
 
         private static void save(SQLiteDatabase db, Cursor c, ContentValues contentValues, long lastUpdate) {

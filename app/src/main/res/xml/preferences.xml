@@ -126,6 +126,12 @@ this program. If not, see <http://www.gnu.org/licenses/>
 
     <PreferenceCategory android:title="@string/settings_group_debug_title"
 		android:key="pref_category_debug">
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="useMediaImageDbReplacement"
+            android:summary="Experimental"
+            android:title="TEST Android-10ff Workaround" />
+
         <CheckBoxPreference android:key="debugEnabledSql"
             android:defaultValue="false"
             android:title="@string/settings_debug_sql_title"

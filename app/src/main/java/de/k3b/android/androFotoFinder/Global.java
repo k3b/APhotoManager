@@ -127,7 +127,8 @@ public class Global {
     // #155: fix android10 incompatibility
     // Build.VERSION_CODES.??ANDROID10?? = 29
     //!!!
-    public static final boolean useMediaImageDbReplacement = true;
+    public static boolean useMediaImageDbReplacement = true;
+
 //  public static final boolean useMediaImageDbReplacement = (Build.VERSION.SDK_INT >= 29);
     /** map with blue selection markers: how much to area to increase */
     public static final double mapMultiselectionBoxIncreaseByProcent = 100.0;

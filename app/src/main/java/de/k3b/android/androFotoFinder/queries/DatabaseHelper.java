@@ -51,6 +51,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return instance.getWritableDatabase();
     }
 
+    public static void version2Upgrade_RecreateMediDbCopy(final SQLiteDatabase db) {
+        for (String sql : MediaImageDbReplacement.Impl.DDL) {
+            db.execSQL(sql);
+        }
+    }
+
     /**
      * called if database doesn-t exist yet
      */
@@ -58,8 +64,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(final SQLiteDatabase db) {
         db.execSQL(TransactionLogSql.CREATE_TABLE);
 
-        this.version2Upgrade_MediDbCopy(db);
+        this.version2Upgrade_RecreateMediDbCopy(db);
     }
+
+    private static DatabaseHelper instance = null;
 
     @Override
     public void onUpgrade(final SQLiteDatabase db, final int oldVersion,
@@ -67,15 +75,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Log.w(this.getClass().toString(), "Upgrading database from version "
                 + oldVersion + " to " + newVersion + ". (Old data is kept.)");
         if (oldVersion < DatabaseHelper.DATABASE_VERSION_2_MEDIA_DB_COPY) {
-            this.version2Upgrade_MediDbCopy(db);
-        }
-    }
-
-    private static DatabaseHelper instance = null;
-
-    private void version2Upgrade_MediDbCopy(final SQLiteDatabase db) {
-        for (String sql : MediaImageDbReplacement.Impl.DDL) {
-            db.execSQL(sql);
+            this.version2Upgrade_RecreateMediDbCopy(db);
         }
     }
 }
