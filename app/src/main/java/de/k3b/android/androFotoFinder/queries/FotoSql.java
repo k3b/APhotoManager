@@ -62,6 +62,7 @@ import de.k3b.io.collections.SelectedItems;
  * Created by k3b on 04.06.2015.
  */
 public class FotoSql extends FotoSqlBase {
+    public static final String LOG_TAG = Global.LOG_CONTEXT + "-sql";
 
     public static final int SORT_BY_DATE_OLD = 1;
     public static final int SORT_BY_NAME_OLD = 2;
@@ -298,7 +299,7 @@ public class FotoSql extends FotoSqlBase {
         }
 
         if (Global.debugEnabled) {
-            Log.e(Global.LOG_CONTEXT, "FotoSql.getGroupFactor(" + _zoomLevel + ") => " + result);
+            Log.e(FotoSql.LOG_TAG, "FotoSql.getGroupFactor(" + _zoomLevel + ") => " + result);
         }
 
         return result;
@@ -632,7 +633,7 @@ public class FotoSql extends FotoSqlBase {
             case QUERY_TYPE_GROUP_MOVE:
                 return null;
             default:
-                Log.e(Global.LOG_CONTEXT, "FotoSql.getQuery(" + queryID + "): unknown ID");
+                Log.e(FotoSql.LOG_TAG, "FotoSql.getQuery(" + queryID + "): unknown ID");
                 return null;
         }
     }
@@ -757,7 +758,7 @@ public class FotoSql extends FotoSqlBase {
                 return true;
             default:break;
         }
-        Log.e(Global.LOG_CONTEXT, "FotoSql.setFilter(queryTypeId = " + queryTypeId + ") : unknown type");
+        Log.e(FotoSql.LOG_TAG, "FotoSql.setFilter(queryTypeId = " + queryTypeId + ") : unknown type");
 
         return false;
     }
@@ -777,7 +778,7 @@ public class FotoSql extends FotoSqlBase {
                 return DBUtils.getString(c,FotoSql.SQL_COL_PATH, null);
             }
         } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, "FotoSql.execGetFotoPath() Cannot get path from " + uriWithID, ex);
+            Log.e(FotoSql.LOG_TAG, "FotoSql.execGetFotoPath() Cannot get path from " + uriWithID, ex);
         } finally {
             if (c != null) c.close();
         }
@@ -803,13 +804,13 @@ public class FotoSql extends FotoSqlBase {
                 result.add(c.getString(0));
             }
         } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, "FotoSql.execGetFotoPaths() Cannot get path from: " + FotoSql.SQL_COL_PATH + " like '" + pathFilter +"'", ex);
+            Log.e(FotoSql.LOG_TAG, "FotoSql.execGetFotoPaths() Cannot get path from: " + FotoSql.SQL_COL_PATH + " like '" + pathFilter + "'", ex);
         } finally {
             if (c != null) c.close();
         }
 
         if (Global.debugEnabled) {
-            Log.d(Global.LOG_CONTEXT, "FotoSql.execGetFotoPaths() result count=" + result.size());
+            Log.d(FotoSql.LOG_TAG, "FotoSql.execGetFotoPaths() result count=" + result.size());
         }
         return result;
     }
@@ -852,13 +853,13 @@ public class FotoSql extends FotoSqlBase {
                 return result;
             }
         } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, "FotoSql.execGetGeoRectangle(): error executing " + query, ex);
+            Log.e(FotoSql.LOG_TAG, "FotoSql.execGetGeoRectangle(): error executing " + query, ex);
         } finally {
             if (c != null) c.close();
             if (debugMessage != null) {
                 StringUtils.appendMessage(debugMessage,  "result", result);
                 if (out_debugMessage == null) {
-                    Log.i(Global.LOG_CONTEXT, debugMessage.toString());
+                    Log.i(FotoSql.LOG_TAG, debugMessage.toString());
                 }
             }
         }
@@ -893,13 +894,13 @@ public class FotoSql extends FotoSqlBase {
                 return result;
             }
         } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, "FotoSql.execGetPosition: error executing " + query, ex);
+            Log.e(FotoSql.LOG_TAG, "FotoSql.execGetPosition: error executing " + query, ex);
         } finally {
             if (c != null) c.close();
             if (debugMessage != null) {
                 StringUtils.appendMessage(debugMessage,  "result", result);
                 if (out_debugMessage == null) {
-                    Log.i(Global.LOG_CONTEXT, debugMessage.toString());
+                    Log.i(FotoSql.LOG_TAG, debugMessage.toString());
                 } // else logging by caller
             }
         }
@@ -927,7 +928,7 @@ public class FotoSql extends FotoSqlBase {
                     result.put(c.getString(1),c.getLong(0));
                 }
             } catch (Exception ex) {
-                Log.e(Global.LOG_CONTEXT, "FotoSql.execGetPathIdMap: error executing " + query, ex);
+                Log.e(FotoSql.LOG_TAG, "FotoSql.execGetPathIdMap: error executing " + query, ex);
             } finally {
                 if (c != null) c.close();
             }
@@ -1062,7 +1063,7 @@ public class FotoSql extends FotoSqlBase {
             try {
                 imageID = (idString == null) ? null : Long.valueOf(idString);
             } catch (NumberFormatException e) {
-                Log.e(Global.LOG_CONTEXT, "FotoSql.getId(" + uriWithId + ") => " + e.getMessage());
+                Log.e(FotoSql.LOG_TAG, "FotoSql.getId(" + uriWithId + ") => " + e.getMessage());
             }
         }
         return imageID;
@@ -1106,7 +1107,7 @@ public class FotoSql extends FotoSqlBase {
                 return c.getString(0);
             }
         } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, "FotoSql.getMinFolder() error :", ex);
+            Log.e(FotoSql.LOG_TAG, "FotoSql.getMinFolder() error :", ex);
         } finally {
             if (c != null) c.close();
         }
@@ -1125,7 +1126,7 @@ public class FotoSql extends FotoSqlBase {
                 return c.getLong(0);
             }
         } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, "FotoSql.getCount() error :", ex);
+            Log.e(FotoSql.LOG_TAG, "FotoSql.getCount() error :", ex);
         } finally {
             if (c != null) c.close();
         }
@@ -1172,7 +1173,7 @@ public class FotoSql extends FotoSqlBase {
                 );
             }
         } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, "FotoSql.getStatisticsMessage() error :", ex);
+            Log.e(FotoSql.LOG_TAG, "FotoSql.getStatisticsMessage() error :", ex);
         } finally {
             if (c != null) c.close();
         }
@@ -1200,13 +1201,13 @@ public class FotoSql extends FotoSqlBase {
 
             result = new SelectedFiles(paths, ids, null);
         } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, "FotoSql.getSelectedfiles() error :", ex);
+            Log.e(FotoSql.LOG_TAG, "FotoSql.getSelectedfiles() error :", ex);
         } finally {
             if (c != null) c.close();
         }
 
         if (Global.debugEnabled) {
-            Log.d(Global.LOG_CONTEXT, "FotoSql.getSelectedfiles result count=" + ((result != null) ? result.size():0));
+            Log.d(FotoSql.LOG_TAG, "FotoSql.getSelectedfiles result count=" + ((result != null) ? result.size() : 0));
         }
 
         return result;

@@ -65,6 +65,8 @@ import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_EXT_XMP_LAST_M
  * Therefore apm uses a copy of contentprovider MediaStore.Images with same column names.
  */
 public class MediaImageDbReplacement implements IMediaDBApi {
+    public static final String LOG_TAG = FotoSql.LOG_TAG + "DB";
+
     private static final String MODUL_NAME = ContentProviderMediaImpl.class.getName();
     private final SQLiteDatabase db;
 
@@ -127,7 +129,7 @@ public class MediaImageDbReplacement implements IMediaDBApi {
                         QueryParameter.toString(sqlSelectColums, null, Impl.table, sqlWhereStatement,
                                 selectionArgs, sqlSortOrder, count));
                 if (out_debugMessage == null) {
-                    Log.i(Global.LOG_CONTEXT, message.toString(), excpetion);
+                    Log.i(LOG_TAG, message.toString(), excpetion);
                 } // else logging is done by caller
             }
         }
@@ -155,7 +157,7 @@ public class MediaImageDbReplacement implements IMediaDBApi {
             excpetion = ex;
         } finally {
             if ((excpetion != null) || ((dbgContext != null) && (Global.debugEnabledSql || LibGlobal.debugEnabledJpg))) {
-                Log.i(Global.LOG_CONTEXT, dbgContext + ":" +
+                Log.i(LOG_TAG, dbgContext + ":" +
                         MODUL_NAME +
                         ".exexUpdate " + excpetion + "\n" +
                         QueryParameter.toString(null, values.toString(), FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
@@ -209,7 +211,7 @@ public class MediaImageDbReplacement implements IMediaDBApi {
             excpetion = ex;
         } finally {
             if ((excpetion != null) || Global.debugEnabledSql || LibGlobal.debugEnabledJpg) {
-                Log.i(Global.LOG_CONTEXT, dbgContext + ":" +
+                Log.i(LOG_TAG, dbgContext + ":" +
                         MODUL_NAME +
                         ".execInsert " + excpetion + " " +
                         values.toString() + " => " + result + " " + excpetion, excpetion);
@@ -246,7 +248,7 @@ public class MediaImageDbReplacement implements IMediaDBApi {
                 lastSelectionArgs = null;
                 delCount = db.delete(Impl.table, lastUsedWhereClause, lastSelectionArgs);
                 if (Global.debugEnabledSql || LibGlobal.debugEnabledJpg) {
-                    Log.i(Global.LOG_CONTEXT, dbgContext + "-b: " +
+                    Log.i(LOG_TAG, dbgContext + "-b: " +
                             MODUL_NAME +
                             ".deleteMedia delete\n" +
                             QueryParameter.toString(null, null, FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
@@ -255,7 +257,7 @@ public class MediaImageDbReplacement implements IMediaDBApi {
             } else {
                 delCount = db.delete(Impl.table, lastUsedWhereClause, lastSelectionArgs);
                 if (Global.debugEnabledSql || LibGlobal.debugEnabledJpg) {
-                    Log.i(Global.LOG_CONTEXT, dbgContext + ": " +
+                    Log.i(LOG_TAG, dbgContext + ": " +
                             MODUL_NAME +
                             ".deleteMedia\ndelete " +
                             QueryParameter.toString(null, null,
@@ -271,7 +273,7 @@ public class MediaImageDbReplacement implements IMediaDBApi {
                     QueryParameter.toString(null, null, FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
                             lastUsedWhereClause, lastSelectionArgs, null, -1)
                     + " : " + ex.getMessage();
-            Log.e(Global.LOG_CONTEXT, msg, ex);
+            Log.e(LOG_TAG, msg, ex);
 
         }
         return delCount;
@@ -289,7 +291,7 @@ public class MediaImageDbReplacement implements IMediaDBApi {
                 return values;
             }
         } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, MODUL_NAME +
+            Log.e(LOG_TAG, MODUL_NAME +
                     ".getDbContent(id=" + id + ") failed", ex);
         } finally {
             if (c != null) c.close();
@@ -492,7 +494,7 @@ public class MediaImageDbReplacement implements IMediaDBApi {
             try {
                 db.execSQL("DROP TABLE " + table);
             } catch (Exception ex) {
-                // Log.e(Global.LOG_CONTEXT, "FotoSql.execGetFotoPaths() Cannot get path from: " + FotoSql.SQL_COL_PATH + " like '" + pathFilter +"'", ex);
+                // Log.e(LOG_TAG, "FotoSql.execGetFotoPaths() Cannot get path from: " + FotoSql.SQL_COL_PATH + " like '" + pathFilter +"'", ex);
             } finally {
             }
         }
@@ -500,6 +502,7 @@ public class MediaImageDbReplacement implements IMediaDBApi {
 
         public static int updateMedaiCopy(Context context, SQLiteDatabase db, Date lastUpdate, IProgessListener progessListener) {
             int progress = 0;
+            java.util.Date startTime = new java.util.Date();
 
             QueryParameter query = queryGetAllColumns;
             long _lastUpdate = (lastUpdate != null) ? (lastUpdate.getTime() / 1000L) : 0L;
@@ -514,6 +517,9 @@ public class MediaImageDbReplacement implements IMediaDBApi {
             SQLiteStatement sqlUpdate = null;
             SQLiteStatement lastSql = null;
             boolean isUpdate = false;
+            int itemCount = 0;
+            int insertCout = 0;
+            int updateCount = 0;
             // ContentValues contentValues = new ContentValues();
             try {
                 db.beginTransaction(); // Performance boost: all db-inserts/updates in one transaction
@@ -521,9 +527,9 @@ public class MediaImageDbReplacement implements IMediaDBApi {
                 if (progessListener != null) progessListener.onProgress(progress, 0,
                         context.getString(R.string.load_db_menu_title));
 
-                c = ContentProviderMediaImpl.createCursorForQuery(null, "updateMedaiCopy", context,
+                c = ContentProviderMediaImpl.createCursorForQuery(null, "updateMedaiCopy-source", context,
                         query, null, null);
-                int itemCount = c.getCount();
+                itemCount = c.getCount();
 
                 sqlInsert = db.compileStatement(getSqlInsertWithParams());
                 sqlUpdate = db.compileStatement(getSqlUpdateWithParams());
@@ -533,12 +539,14 @@ public class MediaImageDbReplacement implements IMediaDBApi {
                     isUpdate = (c.getLong(colDATE_ADDED) <= _lastUpdate);
 
                     if (isUpdate) {
+                        updateCount++;
                         lastSql = sqlUpdate;
                         isUpdate = bindAndExecUpdate(c, sqlUpdate) > 0;
                         // 0 affected update rows: must insert
                     }
 
                     if (!isUpdate) {
+                        insertCout++;
                         lastSql = sqlInsert;
                         bindAndExecInsert(c, sqlInsert);
                     }
@@ -554,8 +562,25 @@ public class MediaImageDbReplacement implements IMediaDBApi {
                     progress++;
                 }
                 db.setTransactionSuccessful(); // This commits the transaction if there were no exceptions
+                if (Global.debugEnabledSql) {
+                    java.util.Date endTime = new java.util.Date();
+                    final String message = "MediaImageDbReplacement.updateMedaiCopy(inserted:" + insertCout +
+                            ", updated:" + updateCount +
+                            ", toal:" + progress +
+                            " / " + itemCount +
+                            ") in " + ((endTime.getTime() - startTime.getTime()) / 1000) +
+                            " Secs";
+                    Log.i(LOG_TAG, message);
+                }
             } catch (Exception ex) {
-                Log.e(Global.LOG_CONTEXT, "MediaImageDbReplacement.updateMedaiCopy cannot insert/update: " + lastSql + " from " + c, ex);
+                java.util.Date endTime = new java.util.Date();
+                final String message = "MediaImageDbReplacement.updateMedaiCopy(inserted:" + insertCout +
+                        ", updated:" + updateCount +
+                        ", toal:" + progress +
+                        " / " + itemCount +
+                        ") in " + ((endTime.getTime() - startTime.getTime()) / 1000) +
+                        " Secs";
+                Log.e(LOG_TAG, "Cannot insert/update: " + lastSql + " from " + c + " in " + message, ex);
             } finally {
                 sqlInsert.close();
                 sqlUpdate.close();
@@ -564,7 +589,7 @@ public class MediaImageDbReplacement implements IMediaDBApi {
             }
 
             if (Global.debugEnabled) {
-                // Log.d(Global.LOG_CONTEXT, "FotoSql.execGetFotoPaths() result count=" + result.size());
+                // Log.d(LOG_TAG, "FotoSql.execGetFotoPaths() result count=" + result.size());
             }
             return progress;
         }

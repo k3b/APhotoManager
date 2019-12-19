@@ -41,6 +41,7 @@ import de.k3b.io.VISIBILITY;
  * Static Implementation of Context.getContentResolver()-ContentProvider based media api
  */
 public class ContentProviderMediaImpl {
+    public static final String LOG_TAG = FotoSql.LOG_TAG + "Content";
     private static final String MODUL_NAME = ContentProviderMediaImpl.class.getName();
 
     public static Cursor createCursorForQuery(
@@ -82,7 +83,7 @@ public class ContentProviderMediaImpl {
                         QueryParameter.toString(sqlSelectColums, null, from, sqlWhereStatement,
                                 sqlWhereParameters, sqlSortOrder, query.getCount()));
                 if (out_debugMessage == null) {
-                    Log.i(Global.LOG_CONTEXT, message.toString(), excpetion);
+                    Log.i(LOG_TAG, message.toString(), excpetion);
                 } // else logging is done by caller
             }
         }
@@ -108,7 +109,7 @@ public class ContentProviderMediaImpl {
             excpetion = ex;
         } finally {
             if ((excpetion != null) || ((dbgContext != null) && (Global.debugEnabledSql || LibGlobal.debugEnabledJpg))) {
-                Log.i(Global.LOG_CONTEXT, dbgContext + ":" +
+                Log.i(LOG_TAG, dbgContext + ":" +
                         MODUL_NAME +
                         ".exexUpdate " + excpetion + "\n" +
                         QueryParameter.toString(null, values.toString(), FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
@@ -155,7 +156,7 @@ public class ContentProviderMediaImpl {
             excpetion = ex;
         } finally {
             if ((excpetion != null) || Global.debugEnabledSql || LibGlobal.debugEnabledJpg) {
-                Log.i(Global.LOG_CONTEXT, dbgContext + ":" +
+                Log.i(LOG_TAG, dbgContext + ":" +
                         MODUL_NAME +
                         ".execInsert " + excpetion + " " +
                         values.toString() + " => " + result + " " + excpetion, excpetion);
@@ -187,7 +188,7 @@ public class ContentProviderMediaImpl {
                 delCount = context.getContentResolver()
                         .delete(FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, lastUsedWhereClause, lastSelectionArgs);
                 if (Global.debugEnabledSql || LibGlobal.debugEnabledJpg) {
-                    Log.i(Global.LOG_CONTEXT, dbgContext + "-b: " +
+                    Log.i(LOG_TAG, dbgContext + "-b: " +
                             MODUL_NAME +
                             ".deleteMedia delete\n" +
                             QueryParameter.toString(null, null, FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
@@ -197,7 +198,7 @@ public class ContentProviderMediaImpl {
                 delCount = context.getContentResolver()
                         .delete(FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, lastUsedWhereClause, lastSelectionArgs);
                 if (Global.debugEnabledSql || LibGlobal.debugEnabledJpg) {
-                    Log.i(Global.LOG_CONTEXT, dbgContext + ": " +
+                    Log.i(LOG_TAG, dbgContext + ": " +
                             MODUL_NAME +
                             ".deleteMedia\ndelete " +
                             QueryParameter.toString(null, null,
@@ -213,7 +214,7 @@ public class ContentProviderMediaImpl {
                     QueryParameter.toString(null, null, FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
                             lastUsedWhereClause, lastSelectionArgs, null, -1)
                     + " : " + ex.getMessage();
-            Log.e(Global.LOG_CONTEXT, msg, ex);
+            Log.e(LOG_TAG, msg, ex);
 
         }
         return delCount;
@@ -262,7 +263,7 @@ public class ContentProviderMediaImpl {
                         .build());
             }
         } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, dbgContext + "-getAffected error :", ex);
+            Log.e(LOG_TAG, dbgContext + "-getAffected error :", ex);
             return -1;
         } finally {
             if (c != null) c.close();
@@ -273,7 +274,7 @@ public class ContentProviderMediaImpl {
         } catch (Exception ex) {
             // java.lang.IllegalArgumentException: Unknown authority content://media/external/file
             // i assume not batch support for file
-            Log.e(Global.LOG_CONTEXT, dbgContext + "-updateAffected error :", ex);
+            Log.e(LOG_TAG, dbgContext + "-updateAffected error :", ex);
             return -1;
         }
         return ops.size();
@@ -291,7 +292,7 @@ public class ContentProviderMediaImpl {
                 return values;
             }
         } catch (Exception ex) {
-            Log.e(Global.LOG_CONTEXT, MODUL_NAME +
+            Log.e(LOG_TAG, MODUL_NAME +
                     ".getDbContent(id=" + id + ") failed", ex);
         } finally {
             if (c != null) c.close();

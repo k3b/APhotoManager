@@ -19,6 +19,7 @@
  
 package de.k3b.android.androFotoFinder;
 
+import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -37,6 +38,7 @@ import java.util.Date;
 import de.k3b.LibGlobal;
 import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
+import de.k3b.android.androFotoFinder.queries.ContentProviderMediaImpl;
 import de.k3b.android.androFotoFinder.queries.DatabaseHelper;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoSqlBase;
@@ -155,7 +157,10 @@ public class AndroFotoFinderApp extends Application {
         mCrashSaveToFile = new LogCat(Global.LOG_CONTEXT, HugeImageLoader.LOG_TAG,
                 PhotoViewAttacher.LOG_TAG, CupcakeGestureDetector.LOG_TAG,
                 LibGlobal.LOG_TAG, ThumbNailUtils.LOG_TAG, IMapView.LOGTAG,
-                ExifInterface.LOG_TAG, PhotoPropertiesImageReader.LOG_TAG) {
+                ExifInterface.LOG_TAG, PhotoPropertiesImageReader.LOG_TAG,
+                FotoSql.LOG_TAG,
+                MediaImageDbReplacement.LOG_TAG,
+                ContentProviderMediaImpl.LOG_TAG) {
 
             @Override
             public void uncaughtException(Thread thread, Throwable ex) {
@@ -165,13 +170,14 @@ public class AndroFotoFinderApp extends Application {
                 super.uncaughtException(thread, ex);
             }
 
-            public void saveToFile() {
+            public void saveToFile(Activity activity) {
                 final File logFile = getOutpuFile();
                 String message = (logFile != null)
                         ? "saving errorlog ('LocCat') to " + logFile.getAbsolutePath()
                         : "Saving errorlog ('LocCat') is disabled. See Settings 'Diagnostics' for details";
                 Log.e(Global.LOG_CONTEXT, message);
-                Toast.makeText(AndroFotoFinderApp.this , message, Toast.LENGTH_LONG).show();
+                final Context context = (activity != null) ? activity : AndroFotoFinderApp.this;
+                Toast.makeText(context, message, Toast.LENGTH_LONG).show();
 
                 saveLogCat(logFile, null, mTags);
             }
@@ -226,9 +232,9 @@ public class AndroFotoFinderApp extends Application {
         super.onTerminate();
     }
 
-    public void saveToFile() {
+    public void saveToFile(Activity activity) {
         if (mCrashSaveToFile != null) {
-            mCrashSaveToFile.saveToFile();
+            mCrashSaveToFile.saveToFile(activity);
         }
     }
     public void clear() {

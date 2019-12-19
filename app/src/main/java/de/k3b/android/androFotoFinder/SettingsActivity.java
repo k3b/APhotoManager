@@ -427,7 +427,7 @@ public class SettingsActivity extends PreferenceActivity {
 
     private void onDebugSaveLogCat() {
         Log.e(Global.LOG_CONTEXT, "SettingsActivity-SaveLogCat(): " + ActivityWithCallContext.readCallContext(getIntent()));
-        ((AndroFotoFinderApp) getApplication()).saveToFile();
+        ((AndroFotoFinderApp) getApplication()).saveToFile(this);
     }
 
     private void onTranslate() {
