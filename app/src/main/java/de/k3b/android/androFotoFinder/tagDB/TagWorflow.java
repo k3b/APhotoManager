@@ -29,6 +29,8 @@ import java.util.Date;
 import java.util.List;
 
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.queries.IMediaDBApi;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.io.FileCommands;
 import de.k3b.io.IProgessListener;
@@ -78,21 +80,27 @@ public class TagWorflow extends TagProcessor implements IProgessListener {
 
     /** execute the updates for all affected files in the Workflow. */
     public int updateTags(List<String> addedTags, List<String> removedTags) {
-        int itemCount = 0;
-        if (items != null) {
-            int progressCountDown = 0;
-            int total = items.size();
-            for (TagSql.TagWorflowItem item : items) {
-                itemCount+=updateTags(item, addedTags, removedTags);
-                progressCountDown--;
-                if (progressCountDown < 0) {
-                    progressCountDown = 10;
-                    if (!onProgress(itemCount, total, item.path)) break;
-                }
-            } // for each image
+        final IMediaDBApi mediaDBApi = FotoSql.getMediaDBApi();
+        try {
+            mediaDBApi.beginTransaction(); // Performance boost: all db-inserts/updates in one transaction
+            int itemCount = 0;
+            if (items != null) {
+                int progressCountDown = 0;
+                int total = items.size();
+                for (TagSql.TagWorflowItem item : items) {
+                    itemCount += updateTags(item, addedTags, removedTags);
+                    progressCountDown--;
+                    if (progressCountDown < 0) {
+                        progressCountDown = 10;
+                        if (!onProgress(itemCount, total, item.path)) break;
+                    }
+                } // for each image
+            }
+            mediaDBApi.setTransactionSuccessful();
+            return itemCount;
+        } finally {
+            mediaDBApi.endTransaction();
         }
-
-        return itemCount;
     }
 
     /** update one file if tags change or xmp does not exist yet: xmp-sidecar-file, media-db and batch */

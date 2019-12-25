@@ -44,6 +44,7 @@ import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.media.AndroidPhotoPropertiesBulkUpdateService;
 import de.k3b.android.androFotoFinder.queries.DatabaseHelper;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.queries.IMediaDBApi;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.transactionlog.TransactionLogSql;
 import de.k3b.database.QueryParameter;
@@ -55,6 +56,7 @@ import de.k3b.io.IProgessListener;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.media.MediaFormatter;
 import de.k3b.media.PhotoPropertiesBulkUpdateService;
+import de.k3b.media.PhotoPropertiesDiffCopy;
 import de.k3b.media.PhotoPropertiesUpdateHandler;
 import de.k3b.transactionlog.MediaTransactionLogEntryType;
 import de.k3b.transactionlog.TransactionLoggerBase;
@@ -249,6 +251,21 @@ public class AndroidFileCommands extends FileCommands {
             //     public int moveOrCopyFilesTo(boolean move, SelectedFiles selectedFiles, File destDirFolder, IProgessListener progessListener) {
 
             moveOrCopyFilesTo(move, selectedFiles, destDirFolder, null);
+        }
+    }
+
+    @Override
+    protected int moveOrCopyFiles(final boolean move, String what, PhotoPropertiesDiffCopy exifChanges,
+                                  SelectedFiles fotos, File[] destFiles,
+                                  IProgessListener progessListener) {
+        IMediaDBApi api = FotoSql.getMediaDBApi();
+        try {
+            api.beginTransaction();
+            int result = super.moveOrCopyFiles(move, what, exifChanges, fotos, destFiles, progessListener);
+            api.setTransactionSuccessful();
+            return result;
+        } finally {
+            api.endTransaction();
         }
     }
 

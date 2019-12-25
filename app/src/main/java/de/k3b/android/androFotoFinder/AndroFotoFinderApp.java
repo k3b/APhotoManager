@@ -50,6 +50,7 @@ import de.k3b.android.androFotoFinder.queries.MergedMediaDB;
 import de.k3b.android.osmdroid.forge.MapsForgeSupport;
 import de.k3b.android.util.LogCat;
 import de.k3b.android.widget.ActivityWithCallContext;
+import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.PhotoAutoprocessingDto;
 import de.k3b.media.ExifInterface;
@@ -93,6 +94,10 @@ public class AndroFotoFinderApp extends Application {
     public static void setMediaImageDbReplacement(Context context, boolean useMediaImageDbReplacement) {
         final IMediaDBApi oldMediaDBApi = FotoSql.getMediaDBApi();
         if ((oldMediaDBApi == null) || (Global.useMediaImageDbReplacement != useMediaImageDbReplacement)) {
+
+            // menu must be recreated
+            LocalizedActivity.setMustRecreate();
+
             Global.useMediaImageDbReplacement = useMediaImageDbReplacement;
 
             final MediaDBContentprovider mediaDBContentprovider = new MediaDBContentprovider(context);

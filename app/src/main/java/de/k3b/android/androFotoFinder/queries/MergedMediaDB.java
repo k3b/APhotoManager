@@ -35,7 +35,7 @@ public class MergedMediaDB extends MediaDBApiWrapper {
     private final IMediaDBApi contentProvider;
 
     public MergedMediaDB(IMediaDBApi database, IMediaDBApi contentProvider) {
-        super(database, contentProvider);
+        super(database, contentProvider, database);
         this.database = database;
         this.contentProvider = contentProvider;
     }

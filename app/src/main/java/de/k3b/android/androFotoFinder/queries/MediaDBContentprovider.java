@@ -103,4 +103,30 @@ public class MediaDBContentprovider implements IMediaDBApi {
     public ContentValues getDbContent(final long id) {
         return ContentProviderMediaImpl.getDbContent(context, id);
     }
+
+    @Override
+    public long getCurrentUpdateId() {
+        return 0;
+    }
+
+    @Override
+    public boolean mustRequery(long updateId) {
+        return false;
+    }
+
+    @Override
+    public void beginTransaction() {
+
+    }
+
+    @Override
+    public void setTransactionSuccessful() {
+
+    }
+
+    @Override
+    public void endTransaction() {
+
+    }
+
 }

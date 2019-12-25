@@ -67,6 +67,9 @@ import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_EXT_XMP_LAST_M
 public class MediaImageDbReplacement implements IMediaDBApi {
     public static final String LOG_TAG = FotoSql.LOG_TAG + "DB";
 
+    // #155
+    public static final boolean debugEnabledSqlRefresh = true;
+
     private static final String MODUL_NAME = ContentProviderMediaImpl.class.getName();
     private final SQLiteDatabase db;
 
@@ -147,25 +150,7 @@ public class MediaImageDbReplacement implements IMediaDBApi {
         return exexUpdateImpl(dbgContext, values, FotoSql.getFilterExprPathLikeWithVisibility(visibility), new String[]{path});
     }
 
-    @Override
-    public int exexUpdateImpl(String dbgContext, ContentValues values, String sqlWhere, String[] selectionArgs) {
-        int result = -1;
-        Exception excpetion = null;
-        try {
-            result = db.update(Impl.table, values, sqlWhere, selectionArgs);
-        } catch (Exception ex) {
-            excpetion = ex;
-        } finally {
-            if ((excpetion != null) || ((dbgContext != null) && (Global.debugEnabledSql || LibGlobal.debugEnabledJpg))) {
-                Log.i(LOG_TAG, dbgContext + ":" +
-                        MODUL_NAME +
-                        ".exexUpdate " + excpetion + "\n" +
-                        QueryParameter.toString(null, values.toString(), FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
-                                sqlWhere, selectionArgs, null, result), excpetion);
-            }
-        }
-        return result;
-    }
+    private static String currentUpdateReason = null;
 
     /**
      * return id of inserted item
@@ -194,6 +179,52 @@ public class MediaImageDbReplacement implements IMediaDBApi {
         return result;
     }
 
+    private static long currentUpdateId = 1;
+
+    @Override
+    public int exexUpdateImpl(String dbgContext, ContentValues values, String sqlWhere, String[] selectionArgs) {
+        int result = -1;
+        Exception excpetion = null;
+        try {
+            result = db.update(Impl.table, values, sqlWhere, selectionArgs);
+            if (result != 0) {
+                currentUpdateId++;
+                currentUpdateReason = dbgContext;
+            }
+        } catch (Exception ex) {
+            excpetion = ex;
+        } finally {
+            if ((excpetion != null) || ((dbgContext != null) && (Global.debugEnabledSql || LibGlobal.debugEnabledJpg))) {
+                Log.i(LOG_TAG, dbgContext + ":" +
+                        MODUL_NAME +
+                        ".exexUpdate " + excpetion + "\n" +
+                        QueryParameter.toString(null, values.toString(), FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
+                                sqlWhere, selectionArgs, null, result), excpetion);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public ContentValues getDbContent(long id) {
+        Cursor c = null;
+        try {
+            c = this.createCursorForQuery(null, "getDbContent",
+                    Impl.table, FotoSql.FILTER_COL_PK, new String[]{"" + id}, null, null, "*");
+            if (c.moveToNext()) {
+                ContentValues values = new ContentValues();
+                DatabaseUtils.cursorRowToContentValues(c, values);
+                return values;
+            }
+        } catch (Exception ex) {
+            Log.e(LOG_TAG, MODUL_NAME +
+                    ".getDbContent(id=" + id + ") failed", ex);
+        } finally {
+            if (c != null) c.close();
+        }
+        return null;
+    }
+
     /**
      * every database insert should go through this. adds logging if enabled
      *
@@ -207,6 +238,11 @@ public class MediaImageDbReplacement implements IMediaDBApi {
         try {
             // on my android-4.4 insert with media_type=1001 (private) does insert with media_type=1 (image)
             result = db.insert(Impl.table, null, values);
+            if (result > 0) {
+                currentUpdateId++;
+                currentUpdateReason = dbgContext;
+            }
+
         } catch (Exception ex) {
             excpetion = ex;
         } finally {
@@ -265,6 +301,11 @@ public class MediaImageDbReplacement implements IMediaDBApi {
                                     lastUsedWhereClause, lastSelectionArgs, null, delCount));
                 }
             }
+            if (delCount > 0) {
+                currentUpdateId++;
+                currentUpdateReason = dbgContext;
+            }
+
         } catch (Exception ex) {
             // null pointer exception when delete matches not items??
             final String msg = dbgContext + ": Exception in " +
@@ -280,25 +321,33 @@ public class MediaImageDbReplacement implements IMediaDBApi {
     }
 
     @Override
-    public ContentValues getDbContent(long id) {
-        Cursor c = null;
-        try {
-            c = this.createCursorForQuery(null, "getDbContent",
-                    Impl.table, FotoSql.FILTER_COL_PK, new String[]{"" + id}, null, null, "*");
-            if (c.moveToNext()) {
-                ContentValues values = new ContentValues();
-                DatabaseUtils.cursorRowToContentValues(c, values);
-                return values;
-            }
-        } catch (Exception ex) {
-            Log.e(LOG_TAG, MODUL_NAME +
-                    ".getDbContent(id=" + id + ") failed", ex);
-        } finally {
-            if (c != null) c.close();
-        }
-        return null;
+    public long getCurrentUpdateId() {
+        return currentUpdateId;
     }
 
+    @Override
+    public boolean mustRequery(long updateId) {
+        final boolean modified = currentUpdateId != updateId;
+        if (modified && MediaImageDbReplacement.debugEnabledSqlRefresh) {
+            Log.i(MediaImageDbReplacement.LOG_TAG, "mustRequery: true because of " + currentUpdateReason);
+        }
+        return modified;
+    }
+
+    @Override
+    public void beginTransaction() {
+        db.beginTransaction();
+    }
+
+    @Override
+    public void setTransactionSuccessful() {
+        db.setTransactionSuccessful();
+    }
+
+    @Override
+    public void endTransaction() {
+        db.endTransaction();
+    }
     public static class Impl {
         /**
          * SQL to create copy of contentprovider MediaStore.Images.

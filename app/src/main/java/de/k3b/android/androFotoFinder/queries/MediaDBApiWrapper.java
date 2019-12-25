@@ -35,6 +35,7 @@ import de.k3b.media.IPhotoProperties;
 public class MediaDBApiWrapper implements IMediaDBApi {
     protected final IMediaDBApi readChild;
     protected final IMediaDBApi writeChild;
+    protected final IMediaDBApi transactionChild;
 
     /**
      * count the non path write calls
@@ -42,12 +43,13 @@ public class MediaDBApiWrapper implements IMediaDBApi {
     private int modifyCount = 0;
 
     public MediaDBApiWrapper(IMediaDBApi child) {
-        this(child, child);
+        this(child, child, child);
     }
 
-    public MediaDBApiWrapper(IMediaDBApi readChild, IMediaDBApi writeChild) {
+    public MediaDBApiWrapper(IMediaDBApi readChild, IMediaDBApi writeChild, IMediaDBApi transactionChild) {
         this.readChild = readChild;
         this.writeChild = writeChild;
+        this.transactionChild = transactionChild;
     }
 
     @Override
@@ -111,5 +113,30 @@ public class MediaDBApiWrapper implements IMediaDBApi {
     @Override
     public ContentValues getDbContent(long id) {
         return readChild.getDbContent(id);
+    }
+
+    @Override
+    public long getCurrentUpdateId() {
+        return transactionChild.getCurrentUpdateId();
+    }
+
+    @Override
+    public boolean mustRequery(long updateId) {
+        return transactionChild.mustRequery(updateId);
+    }
+
+    @Override
+    public void beginTransaction() {
+        transactionChild.beginTransaction();
+    }
+
+    @Override
+    public void setTransactionSuccessful() {
+        transactionChild.setTransactionSuccessful();
+    }
+
+    @Override
+    public void endTransaction() {
+        transactionChild.endTransaction();
     }
 }

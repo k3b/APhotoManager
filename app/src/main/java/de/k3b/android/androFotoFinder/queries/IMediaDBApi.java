@@ -63,4 +63,14 @@ public interface IMediaDBApi {
     int deleteMedia(String dbgContext, String where, String[] selectionArgs, boolean preventDeleteImageFile);
 
     ContentValues getDbContent(long id);
+
+    long getCurrentUpdateId();
+
+    boolean mustRequery(long updateId);
+
+    void beginTransaction();
+
+    void setTransactionSuccessful();
+
+    void endTransaction();
 }
