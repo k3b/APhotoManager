@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 by k3b.
+ * Copyright (c) 2016-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -50,17 +50,13 @@ public class PhotoPropertiesMediaFilesScannerAsyncTask extends AsyncTask<String[
         return mScanner.updateMediaDatabase_Android42(mContext, pathNames[0], pathNames[1]);
     }
 
-    @Override
-    protected void onPostExecute(Integer modifyCount) {
-        super.onPostExecute(modifyCount);
-        String message = this.mContext.getString(R.string.scanner_update_result_format, modifyCount);
-        Toast.makeText(this.mContext, message, Toast.LENGTH_LONG).show();
-        if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, CONTEXT + "A42 scanner finished: " + message);
-        }
-
+    private static void notifyIfThereAreChanges(Integer modifyCount, Context context, String why) {
         if (modifyCount > 0) {
-            PhotoPropertiesMediaFilesScanner.notifyChanges(mContext, mWhy);
+            PhotoPropertiesMediaFilesScanner.notifyChanges(context, why);
+            if (DataChangeNotifyer.dataChangedListener != null) {
+                DataChangeNotifyer.dataChangedListener.onNotifyDataChanged();
+            }
+
         }
     }
 
@@ -73,10 +69,20 @@ public class PhotoPropertiesMediaFilesScannerAsyncTask extends AsyncTask<String[
         } else {
             // Continute in background task
             int modifyCount = scanner.updateMediaDatabase_Android42(context.getApplicationContext(), oldPathNames, newPathNames);
-            if (modifyCount > 0) {
-                PhotoPropertiesMediaFilesScanner.notifyChanges(context, why + " within current non-gui-task");
-            }
+            notifyIfThereAreChanges(modifyCount, context, why + " within current non-gui-task");
         }
+    }
+
+    @Override
+    protected void onPostExecute(Integer modifyCount) {
+        super.onPostExecute(modifyCount);
+        String message = this.mContext.getString(R.string.scanner_update_result_format, modifyCount);
+        Toast.makeText(this.mContext, message, Toast.LENGTH_LONG).show();
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, CONTEXT + "A42 scanner finished: " + message);
+        }
+
+        notifyIfThereAreChanges(modifyCount, mContext, mWhy);
     }
 
     /** return true if this is executed in the gui thread */

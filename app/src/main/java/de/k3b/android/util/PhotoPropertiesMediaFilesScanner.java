@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -45,6 +45,7 @@ import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.media.PhotoPropertiesMediaDBContentValues;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.queries.IMediaDBApi;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.database.QueryParameter;
 import de.k3b.geo.api.GeoPointDto;
@@ -159,19 +160,27 @@ abstract public class PhotoPropertiesMediaFilesScanner {
     }
 
     public int updateMediaDatabase_Android42(Context context, String[] oldPathNames, String... newPathNames) {
-        final boolean hasNew = excludeNomediaFiles(newPathNames) > 0;
-        final boolean hasOld = excludeNomediaFiles(oldPathNames) > 0;
-        int result = 0;
+        IMediaDBApi api = FotoSql.getMediaDBApi();
+        try {
+            api.beginTransaction();
+            final boolean hasNew = excludeNomediaFiles(newPathNames) > 0;
+            final boolean hasOld = excludeNomediaFiles(oldPathNames) > 0;
+            int result = 0;
 
-        if (hasNew && hasOld) {
-            result = renameInMediaDatabase(context, oldPathNames, newPathNames);
-        } else if (hasOld) {
-            result = deleteInMediaDatabase(context, oldPathNames);
-        } if (hasNew) {
-            result = insertIntoMediaDatabase(context, newPathNames);
+            if (hasNew && hasOld) {
+                result = renameInMediaDatabase(context, oldPathNames, newPathNames);
+            } else if (hasOld) {
+                result = deleteInMediaDatabase(context, oldPathNames);
+            }
+            if (hasNew) {
+                result = insertIntoMediaDatabase(context, newPathNames);
+            }
+            TagSql.fixPrivate();
+            api.setTransactionSuccessful();
+            return result;
+        } finally {
+            api.endTransaction();
         }
-        TagSql.fixPrivate();
-        return result;
     }
 
     /**
@@ -275,7 +284,10 @@ abstract public class PhotoPropertiesMediaFilesScanner {
                 String newPathName = newPathNames[i];
 
                 if ((oldPathName != null) && (newPathName != null)) {
-                    old2NewFileNames.put(oldPathName, newPathName);
+                    //!!! ?seiteneffekt update other fields?
+                    if (oldPathName.compareToIgnoreCase(newPathName) != 0) {
+                        old2NewFileNames.put(oldPathName, newPathName);
+                    }
                 } else if (oldPathName != null) {
                     deleteFileNames.add(oldPathName);
                 } else if (newPathName != null) {

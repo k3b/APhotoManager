@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -37,6 +37,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.util.Date;
 
+import de.k3b.android.androFotoFinder.AndroidTransactionLogger;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.LockScreen;
 import de.k3b.android.androFotoFinder.R;
@@ -44,7 +45,6 @@ import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
 import de.k3b.android.androFotoFinder.media.AndroidPhotoPropertiesBulkUpdateService;
 import de.k3b.android.androFotoFinder.queries.DatabaseHelper;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.queries.IMediaDBApi;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.transactionlog.TransactionLogSql;
 import de.k3b.database.QueryParameter;
@@ -258,15 +258,9 @@ public class AndroidFileCommands extends FileCommands {
     protected int moveOrCopyFiles(final boolean move, String what, PhotoPropertiesDiffCopy exifChanges,
                                   SelectedFiles fotos, File[] destFiles,
                                   IProgessListener progessListener) {
-        IMediaDBApi api = FotoSql.getMediaDBApi();
-        try {
-            api.beginTransaction();
-            int result = super.moveOrCopyFiles(move, what, exifChanges, fotos, destFiles, progessListener);
-            api.setTransactionSuccessful();
-            return result;
-        } finally {
-            api.endTransaction();
-        }
+        int result = super.moveOrCopyFiles(move, what, exifChanges, fotos, destFiles, progessListener);
+        // api.setTransactionSuccessful();
+        return result;
     }
 
     @NonNull
@@ -572,6 +566,10 @@ public class AndroidFileCommands extends FileCommands {
         return new AndroidPhotoPropertiesBulkUpdateService(mContext, logger, dbgContext);
     }
 
+    @Override
+    protected TransactionLoggerBase createTransactionLogger(long now) {
+        return new AndroidTransactionLogger(this, now);
+    }
 
     /** adds android database specific logging to base implementation */
     @Override
@@ -587,6 +585,9 @@ public class AndroidFileCommands extends FileCommands {
                 ContentValues values = TransactionLogSql.set(null, currentMediaID, fileFullPath, modificationDate,
                         mediaTransactionLogEntryType, commandData);
                 db.insert(TransactionLogSql.TABLE, null, values);
+                if (Global.debugEnabledSql) {
+                    Log.i(FotoSql.LOG_TAG, "addTransactionLog: " + values);
+                }
             }
         }
     }

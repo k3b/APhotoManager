@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -334,18 +334,30 @@ public class MediaImageDbReplacement implements IMediaDBApi {
         return modified;
     }
 
+    private static int transactionNumber = 0;
+
     @Override
     public void beginTransaction() {
+        if (Global.debugEnabledSql) {
+            Log.i(LOG_TAG, "beginTransaction #" + (++transactionNumber));
+        }
+
         db.beginTransaction();
     }
 
     @Override
     public void setTransactionSuccessful() {
+        if (Global.debugEnabledSql) {
+            Log.i(LOG_TAG, "setTransactionSuccessful #" + transactionNumber);
+        }
         db.setTransactionSuccessful();
     }
 
     @Override
     public void endTransaction() {
+        if (Global.debugEnabledSql) {
+            Log.i(LOG_TAG, "endTransaction #" + transactionNumber);
+        }
         db.endTransaction();
     }
     public static class Impl {
