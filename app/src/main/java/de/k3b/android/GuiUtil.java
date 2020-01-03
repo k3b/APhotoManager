@@ -19,8 +19,12 @@
  
 package de.k3b.android;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.preference.PreferenceManager;
+
+import de.k3b.android.androFotoFinder.R;
 
 /**
  * gui utils
@@ -35,5 +39,18 @@ public class GuiUtil {
         } catch (final NameNotFoundException e) {
         }
         return null;
+    }
+    public static void setTheme(Activity act) {
+        final String theme = PreferenceManager.getDefaultSharedPreferences(act).getString("user_theme", "Light");
+        switch (theme) {
+            case "Light":
+                act.setTheme(R.style.AppTheme_Light);
+                break;
+            case "Dark":
+                act.setTheme(R.style.AppTheme_Dark);
+                break;
+            default:
+                throw new RuntimeException("Invalid theme selected");
+        }
     }
 }

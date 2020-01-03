@@ -39,6 +39,7 @@ import android.widget.Toast;
 import java.io.File;
 
 import de.k3b.LibGlobal;
+import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScannerExifInterface;
@@ -62,6 +63,7 @@ public class SettingsActivity extends PreferenceActivity {
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
+        GuiUtil.setTheme(this); // this activity doesn't extent ActivityWithCallContext
         LocalizedActivity.fixLocale(this);	// #21: Support to change locale at runtime
         super.onCreate(savedInstanceState);
 

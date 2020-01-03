@@ -80,4 +80,14 @@
         <item>00000</item>
     </string-array>
 
+    <string-array name="pref_available_themes" translatable="false">
+        <item>Light</item>
+        <item>Dark</item>
+    </string-array>
+
+    <string-array name="pref_themes_names" translatable="true">
+        <item>@string/theme_light</item>
+        <item>@string/theme_dark</item>
+    </string-array>
+
 </resources>

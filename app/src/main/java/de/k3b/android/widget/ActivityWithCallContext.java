@@ -24,11 +24,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
+import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.Global;
 
 /**
  * An activity that memorizes the activity call stack (parent Activities) for debugging purposes.
- *
+ * <p>
  * Created by k3b on 25.08.2018.
  */
 public class ActivityWithCallContext extends Activity {
@@ -42,7 +43,9 @@ public class ActivityWithCallContext extends Activity {
      */
     public static final Boolean isCallContextEnabled = true;
 
-    /** what the current activity is doing. This will become part of the callstack when a child activity is invoked */
+    /**
+     * what the current activity is doing. This will become part of the callstack when a child activity is invoked
+     */
     public static String additionalCallContext = "";
 
     /**
@@ -73,6 +76,7 @@ public class ActivityWithCallContext extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        GuiUtil.setTheme(this); // Almost every activity extends this so use this to set theme
         super.onCreate(savedInstanceState);
 
         if (isCallContextEnabled) {
@@ -93,6 +97,7 @@ public class ActivityWithCallContext extends Activity {
     public boolean hasParentCallContext() {
         return this.parentCallContext.length() > 0;
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -110,7 +115,9 @@ public class ActivityWithCallContext extends Activity {
         return parentCallContext + "\n=> " + getCallerDescription(this);
     }
 
-    /** called by all variants of startActivity(ForResult): add context to call.*/
+    /**
+     * called by all variants of startActivity(ForResult): add context to call.
+     */
     @Override
     public void startActivityForResult(Intent intent, int requestCode, Bundle options) {
         startActivityForResultImpl(intent, requestCode, options);
@@ -131,7 +138,9 @@ public class ActivityWithCallContext extends Activity {
         startActivityForResultImpl(intent, -1, null);
     }
 
-    /** called by all variants of startActivity(ForResult): add context to call.*/
+    /**
+     * called by all variants of startActivity(ForResult): add context to call.
+     */
     private void startActivityForResultImpl(Intent intent, int requestCode, Bundle options) {
         addContext(additionalCallContext, intent, this);
         additionalCallContext = "";
