@@ -207,7 +207,7 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
             this.invalidateOptionsMenu();
             return true;
         }
-        if (mFileCommands.onOptionsItemSelected(menuItem, getCurrentFoto())) {
+        if (mFileCommands.onOptionsItemSelected(menuItem, getCurrentFoto(), this)) {
             mModifyCount++;
         } else {
             // Handle presses on the action bar items

@@ -173,12 +173,12 @@ public class AndroidFileCommands extends FileCommands {
 
     }
 
-    public boolean onOptionsItemSelected(final MenuItem item, final SelectedFiles selectedFileNames) {
+    public boolean onOptionsItemSelected(final MenuItem item, final SelectedFiles selectedFileNames, DataChangeNotifyer.DataChangedListener dataChangedListener) {
         if ((selectedFileNames != null) && (selectedFileNames.size() > 0)) {
             // Handle item selection
             switch (item.getItemId()) {
                 case R.id.cmd_delete:
-                    return cmdDeleteFileWithQuestion(selectedFileNames);
+                    return cmdDeleteFileWithQuestion(selectedFileNames, dataChangedListener);
                 default:break;
             }
         }
@@ -276,7 +276,8 @@ public class AndroidFileCommands extends FileCommands {
         edit.apply();
     }
 
-    public boolean cmdDeleteFileWithQuestion(final SelectedFiles fotos) {
+    public boolean cmdDeleteFileWithQuestion(final SelectedFiles fotos,
+                                             final DataChangeNotifyer.DataChangedListener dataChangedListener) {
         String[] pathNames = fotos.getFileNames();
         String errorMessage = checkWriteProtected(R.string.delete_menu_title, SelectedFiles.getFiles(pathNames));
 
@@ -307,6 +308,9 @@ public class AndroidFileCommands extends FileCommands {
                                         final int id) {
                                     mActiveAlert = null;
                                     deleteFiles(fotos, null);
+                                    if (dataChangedListener != null) {
+                                        dataChangedListener.onNotifyDataChanged();
+                                    }
                                 }
                             }
                     )

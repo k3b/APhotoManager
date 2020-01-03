@@ -438,7 +438,7 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
         // workaround fragment lifecycle is newFragment.attach oldFragment.detach.
         // this makes shure that the visible fragment has commands
         MoveOrCopyDestDirPicker.sFileCommands = mFileCommands;
-
+        requeryIfDataHasChanged();
     }
 
     /**
@@ -835,7 +835,7 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
         AndroidFileCommands fileCommands = mFileCommands;
 
         final SelectedFiles selectedFiles = this.mAdapter.createSelectedFiles(getActivity(), this.mSelectedItems);
-        if ((mSelectedItems != null) && (fileCommands.onOptionsItemSelected(menuItem, selectedFiles))) {
+        if ((mSelectedItems != null) && (fileCommands.onOptionsItemSelected(menuItem, selectedFiles, this))) {
             return true;
         }
         switch (menuItem.getItemId()) {
