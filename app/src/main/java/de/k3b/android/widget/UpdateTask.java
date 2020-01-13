@@ -24,7 +24,7 @@ import android.util.Log;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.queries.IMediaDBApi;
+import de.k3b.android.androFotoFinder.queries.IMediaRepositoryApi;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.io.IProgessListener;
 import de.k3b.io.collections.SelectedFiles;
@@ -57,7 +57,7 @@ public class UpdateTask extends AsyncTaskWithProgressDialog<SelectedFiles> imple
                 result = cmd.applyExifChanges(true, exifChanges, items, null);
             } else {
                 // disabled: does not work because of overlapping transactions
-                IMediaDBApi api = FotoSql.getMediaDBApi();
+                IMediaRepositoryApi api = FotoSql.getMediaDBApi();
                 try {
                     api.beginTransaction();
                     result = cmd.applyExifChanges(true, exifChanges, items, null);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -40,9 +40,9 @@ import de.k3b.io.VISIBILITY;
 /**
  * Static Implementation of Context.getContentResolver()-ContentProvider based media api
  */
-public class ContentProviderMediaImpl {
+public class MediaContentproviderRepositoryImpl {
     public static final String LOG_TAG = FotoSql.LOG_TAG + "Content";
-    private static final String MODUL_NAME = ContentProviderMediaImpl.class.getName();
+    private static final String MODUL_NAME = MediaContentproviderRepositoryImpl.class.getName();
 
     public static Cursor createCursorForQuery(
             StringBuilder out_debugMessage, String dbgContext, final Context context,

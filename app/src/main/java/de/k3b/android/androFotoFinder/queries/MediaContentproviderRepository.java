@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 by k3b.
+ * Copyright (c) 2019-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -28,12 +28,14 @@ import de.k3b.database.QueryParameter;
 import de.k3b.io.VISIBILITY;
 
 /**
+ * Access Media Data through Android media contentprovider.
+ *
  * Implementation of Context.getContentResolver()-ContentProvider based media api
  */
-public class MediaDBContentprovider implements IMediaDBApi {
+public class MediaContentproviderRepository implements IMediaRepositoryApi {
     private final Context context;
 
-    public MediaDBContentprovider(final Context context) {
+    public MediaContentproviderRepository(final Context context) {
         this.context = context;
     }
 
@@ -41,7 +43,7 @@ public class MediaDBContentprovider implements IMediaDBApi {
     public Cursor createCursorForQuery(
             StringBuilder out_debugMessage, String dbgContext,
             QueryParameter parameters, VISIBILITY visibility, CancellationSignal cancellationSignal) {
-        return ContentProviderMediaImpl.createCursorForQuery(
+        return MediaContentproviderRepositoryImpl.createCursorForQuery(
                 out_debugMessage, dbgContext, context, parameters, visibility, cancellationSignal);
     }
 
@@ -49,7 +51,7 @@ public class MediaDBContentprovider implements IMediaDBApi {
     public Cursor createCursorForQuery(StringBuilder out_debugMessage, String dbgContext, final String from, final String sqlWhereStatement,
                                        final String[] sqlWhereParameters, final String sqlSortOrder,
                                        CancellationSignal cancellationSignal, final String... sqlSelectColums) {
-        return ContentProviderMediaImpl.createCursorForQuery(
+        return MediaContentproviderRepositoryImpl.createCursorForQuery(
                 out_debugMessage, dbgContext, context, from, sqlWhereStatement,
                 sqlWhereParameters, sqlSortOrder, null, sqlSelectColums);
     }
@@ -66,7 +68,7 @@ public class MediaDBContentprovider implements IMediaDBApi {
 
     @Override
     public int exexUpdateImpl(String dbgContext, ContentValues values, String sqlWhere, String[] selectionArgs) {
-        return ContentProviderMediaImpl.exexUpdateImpl(dbgContext, context, values, sqlWhere, selectionArgs);
+        return MediaContentproviderRepositoryImpl.exexUpdateImpl(dbgContext, context, values, sqlWhere, selectionArgs);
     }
 
     /**
@@ -77,7 +79,7 @@ public class MediaDBContentprovider implements IMediaDBApi {
                                             String dbUpdateFilterJpgFullPathName,
                                             ContentValues values, VISIBILITY visibility,
                                             Long updateSuccessValue) {
-        return ContentProviderMediaImpl.insertOrUpdateMediaDatabase(dbgContext, context,
+        return MediaContentproviderRepositoryImpl.insertOrUpdateMediaDatabase(dbgContext, context,
                 dbUpdateFilterJpgFullPathName,
                 values, visibility,
                 updateSuccessValue);
@@ -88,7 +90,7 @@ public class MediaDBContentprovider implements IMediaDBApi {
      */
     @Override
     public Uri execInsert(String dbgContext, ContentValues values) {
-        return ContentProviderMediaImpl.execInsert(dbgContext, context, values);
+        return MediaContentproviderRepositoryImpl.execInsert(dbgContext, context, values);
     }
 
     /**
@@ -96,12 +98,12 @@ public class MediaDBContentprovider implements IMediaDBApi {
      */
     @Override
     public int deleteMedia(String dbgContext, String where, String[] selectionArgs, boolean preventDeleteImageFile) {
-        return ContentProviderMediaImpl.deleteMedia(dbgContext, context, where, selectionArgs, preventDeleteImageFile);
+        return MediaContentproviderRepositoryImpl.deleteMedia(dbgContext, context, where, selectionArgs, preventDeleteImageFile);
     }
 
     @Override
     public ContentValues getDbContent(final long id) {
-        return ContentProviderMediaImpl.getDbContent(context, id);
+        return MediaContentproviderRepositoryImpl.getDbContent(context, id);
     }
 
     @Override

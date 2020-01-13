@@ -45,7 +45,7 @@ import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.media.PhotoPropertiesMediaDBContentValues;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.queries.IMediaDBApi;
+import de.k3b.android.androFotoFinder.queries.IMediaRepositoryApi;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.database.QueryParameter;
 import de.k3b.geo.api.GeoPointDto;
@@ -160,7 +160,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
     }
 
     public int updateMediaDatabase_Android42(Context context, String[] oldPathNames, String... newPathNames) {
-        IMediaDBApi api = FotoSql.getMediaDBApi();
+        IMediaRepositoryApi api = FotoSql.getMediaDBApi();
         try {
             api.beginTransaction();
             final boolean hasNew = excludeNomediaFiles(newPathNames) > 0;

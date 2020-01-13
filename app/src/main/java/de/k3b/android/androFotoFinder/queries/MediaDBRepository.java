@@ -61,19 +61,21 @@ import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_EXT_TAGS;
 import static de.k3b.android.androFotoFinder.tagDB.TagSql.SQL_COL_EXT_XMP_LAST_MODIFIED_DATE;
 
 /**
+ * Access Media Data through stand alone database-table.
+ *
  * Since Android-10 (api 29) using sqLite functions as content-provider-columns is not possible anymore.
  * Therefore apm uses a copy of contentprovider MediaStore.Images with same column names.
  */
-public class MediaImageDbReplacement implements IMediaDBApi {
+public class MediaDBRepository implements IMediaRepositoryApi {
     public static final String LOG_TAG = FotoSql.LOG_TAG + "DB";
 
     // #155
     public static final boolean debugEnabledSqlRefresh = true;
 
-    private static final String MODUL_NAME = ContentProviderMediaImpl.class.getName();
+    private static final String MODUL_NAME = MediaContentproviderRepositoryImpl.class.getName();
     private final SQLiteDatabase db;
 
-    public MediaImageDbReplacement(SQLiteDatabase db) {
+    public MediaDBRepository(SQLiteDatabase db) {
         this.db = db;
     }
 
@@ -328,8 +330,8 @@ public class MediaImageDbReplacement implements IMediaDBApi {
     @Override
     public boolean mustRequery(long updateId) {
         final boolean modified = currentUpdateId != updateId;
-        if (modified && MediaImageDbReplacement.debugEnabledSqlRefresh) {
-            Log.i(MediaImageDbReplacement.LOG_TAG, "mustRequery: true because of " + currentUpdateReason);
+        if (modified && MediaDBRepository.debugEnabledSqlRefresh) {
+            Log.i(MediaDBRepository.LOG_TAG, "mustRequery: true because of " + currentUpdateReason);
         }
         return modified;
     }
@@ -588,7 +590,7 @@ public class MediaImageDbReplacement implements IMediaDBApi {
                 if (progessListener != null) progessListener.onProgress(progress, 0,
                         context.getString(R.string.load_db_menu_title));
 
-                c = ContentProviderMediaImpl.createCursorForQuery(null, "updateMedaiCopy-source", context,
+                c = MediaContentproviderRepositoryImpl.createCursorForQuery(null, "updateMedaiCopy-source", context,
                         query, null, null);
                 itemCount = c.getCount();
 
@@ -625,7 +627,7 @@ public class MediaImageDbReplacement implements IMediaDBApi {
                 db.setTransactionSuccessful(); // This commits the transaction if there were no exceptions
                 if (Global.debugEnabledSql) {
                     java.util.Date endTime = new java.util.Date();
-                    final String message = "MediaImageDbReplacement.updateMedaiCopy(inserted:" + insertCout +
+                    final String message = "MediaDBRepository.updateMedaiCopy(inserted:" + insertCout +
                             ", updated:" + updateCount +
                             ", toal:" + progress +
                             " / " + itemCount +
@@ -635,7 +637,7 @@ public class MediaImageDbReplacement implements IMediaDBApi {
                 }
             } catch (Exception ex) {
                 java.util.Date endTime = new java.util.Date();
-                final String message = "MediaImageDbReplacement.updateMedaiCopy(inserted:" + insertCout +
+                final String message = "MediaDBRepository.updateMedaiCopy(inserted:" + insertCout +
                         ", updated:" + updateCount +
                         ", toal:" + progress +
                         " / " + itemCount +

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 by k3b.
+ * Copyright (c) 2019-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -28,25 +28,25 @@ import de.k3b.io.VISIBILITY;
 import de.k3b.media.IPhotoProperties;
 
 /**
- * (Default) Implementation of {@link IMediaDBApi} to forward all methods to an inner child {@link IPhotoProperties}.
+ * (Default) Implementation of {@link IMediaRepositoryApi} to forward all methods to an inner child {@link IPhotoProperties}.
  * <p>
  * Created by k3b on 30.11.2019.
  */
-public class MediaDBApiWrapper implements IMediaDBApi {
-    protected final IMediaDBApi readChild;
-    protected final IMediaDBApi writeChild;
-    protected final IMediaDBApi transactionChild;
+public class MediaRepositoryApiWrapper implements IMediaRepositoryApi {
+    protected final IMediaRepositoryApi readChild;
+    protected final IMediaRepositoryApi writeChild;
+    protected final IMediaRepositoryApi transactionChild;
 
     /**
      * count the non path write calls
      */
     private int modifyCount = 0;
 
-    public MediaDBApiWrapper(IMediaDBApi child) {
+    public MediaRepositoryApiWrapper(IMediaRepositoryApi child) {
         this(child, child, child);
     }
 
-    public MediaDBApiWrapper(IMediaDBApi readChild, IMediaDBApi writeChild, IMediaDBApi transactionChild) {
+    public MediaRepositoryApiWrapper(IMediaRepositoryApi readChild, IMediaRepositoryApi writeChild, IMediaRepositoryApi transactionChild) {
         this.readChild = readChild;
         this.writeChild = writeChild;
         this.transactionChild = transactionChild;

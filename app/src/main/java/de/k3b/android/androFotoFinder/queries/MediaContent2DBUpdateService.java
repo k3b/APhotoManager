@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 by k3b.
+ * Copyright (c) 2019-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -19,33 +19,53 @@
 package de.k3b.android.androFotoFinder.queries;
 
 import android.content.Context;
+import android.database.ContentObserver;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.widget.Toast;
 
 import java.util.Date;
 
 import de.k3b.io.IProgessListener;
 
-public class MediaDBUpdater {
+/**
+ * #155: takes care that chages from
+ * {@link MediaContentproviderRepository} are transfered to {@link MediaDBRepository}
+ */
+public class MediaContent2DBUpdateService {
     private final Context context;
     private final SQLiteDatabase writableDatabase;
 
-    public MediaDBUpdater(Context context, SQLiteDatabase writableDatabase) {
+    // called when image-/file-mediacontent has changed to indicate that data must
+    // be loaded from content-provider to content-copy
+    private static final ContentObserver mMediaObserverDirectory = new ContentObserver(null) {
+
+        // ignore version with 3rd param: int userId
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            super.onChange(selfChange, uri);
+
+        }
+    };
+
+    public MediaContent2DBUpdateService(Context context, SQLiteDatabase writableDatabase) {
         this.context = context;
         this.writableDatabase = writableDatabase;
+    }
+
+    public void clearMediaCopy() {
+        DatabaseHelper.version2Upgrade_RecreateMediDbCopy(writableDatabase);
     }
 
     public void rebuild(Context context, IProgessListener progessListener) {
         long start = new Date().getTime();
         clearMediaCopy();
-        MediaImageDbReplacement.Impl.updateMedaiCopy(context, writableDatabase, null, progessListener);
+        MediaDBRepository.Impl.updateMedaiCopy(context, writableDatabase, null, progessListener);
         start = (new Date().getTime() - start) / 1000;
         final String text = "load db " + start + " secs";
         Toast.makeText(context, text, Toast.LENGTH_LONG).show();
         if (progessListener != null) progessListener.onProgress(0, 0, text);
     }
 
-    public void clearMediaCopy() {
-        DatabaseHelper.version2Upgrade_RecreateMediDbCopy(writableDatabase);
-    }
+
 }

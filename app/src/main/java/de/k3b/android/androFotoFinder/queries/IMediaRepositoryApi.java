@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 by k3b.
+ * Copyright (c) 2019-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -27,9 +27,9 @@ import de.k3b.database.QueryParameter;
 import de.k3b.io.VISIBILITY;
 
 /**
- * media database api
+ * RepositoryApi for media database access.
  */
-public interface IMediaDBApi {
+public interface IMediaRepositoryApi {
     Cursor createCursorForQuery(
             StringBuilder out_debugMessage, String dbgContext,
             QueryParameter parameters, VISIBILITY visibility, CancellationSignal cancellationSignal);

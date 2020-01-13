@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 by k3b.
+ * Copyright (c) 2017-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -30,7 +30,7 @@ import java.util.List;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.androFotoFinder.queries.IMediaDBApi;
+import de.k3b.android.androFotoFinder.queries.IMediaRepositoryApi;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.io.FileCommands;
 import de.k3b.io.IProgessListener;
@@ -80,7 +80,7 @@ public class TagWorflow extends TagProcessor implements IProgessListener {
 
     /** execute the updates for all affected files in the Workflow. */
     public int updateTags(List<String> addedTags, List<String> removedTags) {
-        final IMediaDBApi mediaDBApi = FotoSql.getMediaDBApi();
+        final IMediaRepositoryApi mediaDBApi = FotoSql.getMediaDBApi();
         try {
             mediaDBApi.beginTransaction(); // Performance boost: all db-inserts/updates in one transaction
             int itemCount = 0;

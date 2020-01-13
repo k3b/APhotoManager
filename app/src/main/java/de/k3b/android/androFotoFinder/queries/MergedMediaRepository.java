@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 by k3b.
+ * Copyright (c) 2019-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -30,11 +30,11 @@ import de.k3b.io.VISIBILITY;
  * Since Android-10 (api 29) using sqLite functions as content-provider-columns is not possible anymore.
  * Therefore apm uses a copy of contentprovider MediaStore.Images with same column names and same pk.
  */
-public class MergedMediaDB extends MediaDBApiWrapper {
-    private final IMediaDBApi database;
-    private final IMediaDBApi contentProvider;
+public class MergedMediaRepository extends MediaRepositoryApiWrapper {
+    private final IMediaRepositoryApi database;
+    private final IMediaRepositoryApi contentProvider;
 
-    public MergedMediaDB(IMediaDBApi database, IMediaDBApi contentProvider) {
+    public MergedMediaRepository(IMediaRepositoryApi database, IMediaRepositoryApi contentProvider) {
         super(database, contentProvider, database);
         this.database = database;
         this.contentProvider = contentProvider;

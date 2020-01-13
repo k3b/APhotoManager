@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -279,13 +279,13 @@ public class FotoSql extends FotoSqlBase {
      */
     private static final int SIZE_TRANLATION_LIMIT = SIZE_K * 10;
 
-    private static IMediaDBApi mediaDBApi;
+    private static IMediaRepositoryApi mediaDBApi;
 
-    public static IMediaDBApi getMediaDBApi() {
+    public static IMediaRepositoryApi getMediaDBApi() {
         return FotoSql.mediaDBApi;
     }
 
-    public static void setMediaDBApi(IMediaDBApi mediaDBApi) {
+    public static void setMediaDBApi(IMediaRepositoryApi mediaDBApi) {
         FotoSql.mediaDBApi = mediaDBApi;
     }
 

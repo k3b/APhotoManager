@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -52,7 +52,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public static void version2Upgrade_RecreateMediDbCopy(final SQLiteDatabase db) {
-        for (String sql : MediaImageDbReplacement.Impl.DDL) {
+        for (String sql : MediaDBRepository.Impl.DDL) {
             db.execSQL(sql);
         }
     }
