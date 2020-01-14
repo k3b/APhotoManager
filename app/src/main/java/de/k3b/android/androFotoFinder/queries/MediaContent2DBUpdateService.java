@@ -33,6 +33,7 @@ import de.k3b.io.IProgessListener;
  * {@link MediaContentproviderRepository} are transfered to {@link MediaDBRepository}
  */
 public class MediaContent2DBUpdateService {
+    public static MediaContent2DBUpdateService instance = null;
     private final Context context;
     private final SQLiteDatabase writableDatabase;
 

@@ -172,7 +172,7 @@ public class SettingsActivity extends PreferenceActivity {
         LibGlobal.preferLongXmpFormat       = getPref(prefs, "xmp_file_schema_long", LibGlobal.preferLongXmpFormat);
 
         Global.mapsForgeEnabled                 = getPref(prefs, "mapsForgeEnabled", Global.mapsForgeEnabled);
-        AndroFotoFinderApp.setMediaImageDbReplacement(context, getPref(prefs, "useMediaImageDbReplacement", Global.useMediaImageDbReplacement));
+        AndroFotoFinderApp.setMediaImageDbReplacement(context.getApplicationContext(), getPref(prefs, "useMediaImageDbReplacement", Global.useMediaImageDbReplacement));
 
         Global.imageDetailThumbnailIfBiggerThan = getPref(prefs, "imageDetailThumbnailIfBiggerThan"     , Global.imageDetailThumbnailIfBiggerThan);
 

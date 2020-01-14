@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -41,6 +42,7 @@ import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
 import de.k3b.android.androFotoFinder.queries.DatabaseHelper;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoSqlBase;
+import de.k3b.android.androFotoFinder.queries.GlobalMediaContentObserver;
 import de.k3b.android.androFotoFinder.queries.IMediaRepositoryApi;
 import de.k3b.android.androFotoFinder.queries.MediaContent2DBUpdateService;
 import de.k3b.android.androFotoFinder.queries.MediaContentproviderRepository;
@@ -67,10 +69,9 @@ import uk.co.senab.photoview.gestures.CupcakeGestureDetector;
  */
 public class AndroFotoFinderApp extends Application {
     private static String fileNamePrefix = "androFotofinder.logcat-";
-    private static MediaContent2DBUpdateService mediaContent2DbUpdateService = null;
 
     public static MediaContent2DBUpdateService getMediaContent2DbUpdateService() {
-        return mediaContent2DbUpdateService;
+        return MediaContent2DBUpdateService.instance;
     }
 
     private LogCat mCrashSaveToFile = null;
@@ -107,21 +108,24 @@ public class AndroFotoFinderApp extends Application {
                 final MediaDBRepository mediaDBRepository = new MediaDBRepository(writableDatabase);
                 FotoSql.setMediaDBApi(new MergedMediaRepository(mediaDBRepository, mediaContentproviderRepository));
 
-                AndroFotoFinderApp.mediaContent2DbUpdateService = new MediaContent2DBUpdateService(context, writableDatabase);
+                MediaContent2DBUpdateService.instance = new MediaContent2DBUpdateService(context, writableDatabase);
 
                 if (FotoSql.getCount(new QueryParameter().addWhere("1 = 1")) == 0) {
                     // database is empty; reload from Contentprovider
-                    AndroFotoFinderApp.mediaContent2DbUpdateService.rebuild(context, null);
+                    MediaContent2DBUpdateService.instance.rebuild(context, null);
                 }
 
+                context.getApplicationContext().getContentResolver().registerContentObserver(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, true, GlobalMediaContentObserver.getInstance(context));
+                context.getApplicationContext().getContentResolver().registerContentObserver(MediaStore.Files.getContentUri("external"), true, GlobalMediaContentObserver.getInstance(context));
 
             } else {
-                if ((oldMediaDBApi != null) && (AndroFotoFinderApp.mediaContent2DbUpdateService != null)) {
+                context.getApplicationContext().getContentResolver().unregisterContentObserver(GlobalMediaContentObserver.getInstance(context));
+                if ((oldMediaDBApi != null) && (MediaContent2DBUpdateService.instance != null)) {
                     // switching from mediaImageDbReplacement to Contentprovider
-                    AndroFotoFinderApp.mediaContent2DbUpdateService.clearMediaCopy();
+                    MediaContent2DBUpdateService.instance.clearMediaCopy();
                 }
                 FotoSql.setMediaDBApi(mediaContentproviderRepository);
-                AndroFotoFinderApp.mediaContent2DbUpdateService = null;
+                MediaContent2DBUpdateService.instance = null;
             }
         }
     }
