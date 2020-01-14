@@ -1,5 +1,3 @@
-Gallery app zum Verwalten lokaler Photos: Suchen/Kopieren/Exif bearbeiten/Gallerie/Landkarte.
-
 Merkmale:
 
 * Schnelle Bildsuche per Tags(Suchbegriffe), Datei(unter)ordner, Datum, Geo-Daten ...

@@ -35,8 +35,6 @@
   <!-- This becomes .../fastlane/metadata/android/full_description.txt.
     See https://f-droid.org/docs/Build_Metadata_Reference/#Description -->
   <string name="full_description"><![CDATA["
-    管理本地照片: 查找/复制/编辑Exif信息并在图库或地图上展示照片。     
-
     功能特色:
 
     * 快速查找照片的标签 (关键词)，(子) 文件夹， 日期， 位置， 标题，......

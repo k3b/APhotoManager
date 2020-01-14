@@ -1,5 +1,3 @@
-Beheer van lokale foto's: zoeken/kopieren/Exif-bewerken en weergave in galerij of op kaart.
-
 Beschikt over:
 
 * Snelzoeken foto's met labels (keywords), (sub-)map, datum, geo, titel, ...

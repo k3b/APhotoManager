@@ -36,8 +36,6 @@
   <!-- This becomes .../fastlane/metadata/android/full_description.txt.
     See https://f-droid.org/docs/Build_Metadata_Reference/#Description -->
   <string name="full_description"><![CDATA["
-    Gérez vos photos locales : Trouvez / Copiez / Éditez les EXIF et affichez vos photos dans la Gallerie ou une Carte.
-
     Fonctionnalités :
 
     * Trouvez rapidement vos photos par mot-clé, (sous-)dossier, date, géolocalisation, titre ...

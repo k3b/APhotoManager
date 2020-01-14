@@ -33,8 +33,6 @@
   <!-- This becomes .../fastlane/metadata/android/full_description.txt.
     See https://f-droid.org/docs/Build_Metadata_Reference/#Description -->
   <string name="full_description"><![CDATA["
- ローカルの写真を管理: Exifの検索/コピー/編集、ギャラリーや地図に表示します。
-
  機能:
 
  * タグ(キーワード)、(サブ)フォルダー、日付、地理、タイトル、 ...で高速に写真を検索します

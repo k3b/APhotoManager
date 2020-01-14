@@ -36,8 +36,6 @@
     <!-- This becomes .../fastlane/metadata/android/full_description.txt.
     See https://f-droid.org/docs/Build_Metadata_Reference/#Description -->
     <string name="full_description"><![CDATA["
-    Beheer van lokale foto's: zoeken/kopieren/Exif-bewerken en weergave in galerij of op kaart. 
-
     Beschikt over:
 
     * Snelzoeken foto's met labels (keywords), (sub-)map, datum, geo, titel, ...

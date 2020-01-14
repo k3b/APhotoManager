@@ -34,8 +34,7 @@
   <string name="short_description">Mengelola foto lokal: menemukan/Copy/Edit-Exif dan Tampilkan di galeri atau peta.</string>
   <!-- This becomes .../fastlane/metadata/android/full_description.txt.
     See https://f-droid.org/docs/Build_Metadata_Reference/#Description -->
-  <string name="full_description"><![CDATA["Mengelola foto lokal: Temukan / Copy / Edit-Exif dan tampilkan di Galeri atau Peta.
-
+  <string name="full_description"><![CDATA["
     Fitur:
 
     * Cepat cari foto dengan tag (kata kunci), (sub-) folder, tanggal, geo, judul, ...

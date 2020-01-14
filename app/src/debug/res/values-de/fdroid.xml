@@ -34,8 +34,6 @@
     <!-- This becomes .../fastlane/metadata/android/full_description.txt.
     See https://f-droid.org/docs/Build_Metadata_Reference/#Description -->
 	<string name="full_description"><![CDATA["
-Gallery app zum Verwalten lokaler Photos: Suchen/Kopieren/Exif bearbeiten/Gallerie/Landkarte.
-
 Merkmale:
 
 * Schnelle Bildsuche per Tags(Suchbegriffe), Datei(unter)ordner, Datum, Geo-Daten ...

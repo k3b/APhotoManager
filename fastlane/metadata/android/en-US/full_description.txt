@@ -1,5 +1,3 @@
-Photo Gallery app to manage local photos:
-
 Features:
 
 * Fast find photos by tags(keywords), (sub-)folder, date, geo , title, ...
