@@ -1,5 +1,3 @@
-Mengelola foto lokal: Temukan / Copy / Edit-Exif dan tampilkan di Galeri atau Peta.
-
 Fitur:
 
 * Cepat cari foto dengan tag (kata kunci), (sub-) folder, tanggal, geo, judul, ...

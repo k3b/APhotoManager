@@ -1,5 +1,3 @@
-    Gestiona fotos locales: Encontrar/Copiar/Editar-Exif y mostrar en galería o Mapa.
-
     Características:
 
     * Encontrar rápido fotos por etiquetas(palabras claves), (sub-)carpeta, fecha, mapa geográfico, título, ...

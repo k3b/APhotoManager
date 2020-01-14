@@ -62,6 +62,7 @@ import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.LockScreen;
 import de.k3b.android.androFotoFinder.OnGalleryInteractionListener;
+import de.k3b.android.androFotoFinder.PhotoAutoprocessingEditActivity;
 import de.k3b.android.androFotoFinder.PhotoPropertiesEditActivity;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.backup.BackupActivity;
@@ -86,6 +87,7 @@ import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.Dialogs;
+import de.k3b.android.widget.UpdateTask;
 import de.k3b.database.QueryParameter;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
@@ -95,6 +97,7 @@ import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.ListUtils;
+import de.k3b.io.PhotoAutoprocessingDto;
 import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
@@ -184,6 +187,11 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
      * not null while tag picker is open
      */
     private WeakReference<TagsPickerFragment> mTagPickerDialog = null;
+
+    /**
+     * not null while background task is active
+     */
+    private static UpdateTask exifUpdate = null;
 
     /**************** construction ******************/
     /**
@@ -448,6 +456,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         }
 
         requery("onCreateView");
+        updateExifUpdateTask(this.getActivity());
+
         return result;
     }
 
@@ -457,6 +467,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
         super.onAttach(activity);
         mFileCommands.setContext(activity);
         mFileCommands.setLogFilePath(mFileCommands.getDefaultLogFile());
+        updateExifUpdateTask(activity);
+
 
         if (Global.debugEnabledMemory) {
             Log.d(Global.LOG_CONTEXT, mDebugPrefix + " - onAttach cmd (" +
@@ -524,10 +536,19 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             mMustReplaceMenue = true;
             getActivity().invalidateOptionsMenu();
         }
+
+        if (resultCode == Activity.RESULT_OK) {
+            switch (requestCode) {
+                case R.id.cmd_rename_multible:
+                    onRenameMultible(PhotoAutoprocessingEditActivity.getAutoprocessingData(intent), AffUtils.getSelectedFiles(intent));
+                    break;
+            }
+        }
     }
 
     @Override
     public void onDetach() {
+        updateExifUpdateTask(null);
         Global.debugMemory(mDebugPrefix, "onDetach");
         super.onDetach();
         mGalleryListener = null;
@@ -557,6 +578,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
 
     @Override
     public void onDestroy() {
+        updateExifUpdateTask(null);
         Global.debugMemory(mDebugPrefix, "before onDestroy");
 
         mDestDirPicker = null;
@@ -911,6 +933,8 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 return cmdMoveOrCopyWithDestDirPicker(false, fileCommands.getLastCopyToPath(), selectedFiles);
             case R.id.cmd_move:
                 return cmdMoveOrCopyWithDestDirPicker(true, fileCommands.getLastCopyToPath(), selectedFiles);
+            case R.id.cmd_rename_multible:
+                return cmdRenameMultible(menuItem, selectedFiles);
             case R.id.cmd_show_geo:
                 MapGeoPickerActivity.showActivity(" menu " + menuItem.getTitle(),
                         this.getActivity(), selectedFiles, null, null, 0);
@@ -935,7 +959,7 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
                 cmdShowDetails();
                 return true;
             case R.id.cmd_scan:
-                return fileCommands.cmdMediaScannerWithQuestion();
+                return fileCommands.cmdMediaScannerWithQuestion(this.getActivity());
 
             default:
                 return super.onOptionsItemSelected(menuItem);
@@ -1066,6 +1090,39 @@ public class GalleryCursorFragment extends Fragment  implements Queryable, Direc
             // super.onDirectoryPick(selection);
             sFileCommands.onMoveOrCopyDirectoryPick(getMove(), getSrcFotos(), selection);
             dismiss();
+        }
+    }
+
+    private boolean cmdRenameMultible(MenuItem menuItem, final SelectedFiles fotos) {
+        /*
+showActivity(String debugContext, Activity context,
+                                    PhotoAutoprocessingDto workflow,
+                                    String directoryOrApmFileUrl,
+                                    SelectedFiles selectedFiles,
+                                    int requestCode)        */
+        PhotoAutoprocessingDto workflow = new PhotoAutoprocessingDto();
+        PhotoAutoprocessingEditActivity.showActivity(
+                "[5]" + " menu " + menuItem.getTitle(), this.getActivity()
+                , workflow, null, fotos, menuItem.getItemId(), menuItem.getTitle().toString());
+        return true;
+    }
+
+    private void onRenameMultible(PhotoAutoprocessingDto autoprocessingData, SelectedFiles selectedFiles) {
+        AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(this.getActivity(), true);
+
+        exifUpdate = new UpdateTask(R.string.exif_menu_title, this.getActivity(), cmd, true, null, autoprocessingData);
+        exifUpdate.execute(selectedFiles);
+
+    }
+
+    private static void updateExifUpdateTask(Activity activity) {
+        if (exifUpdate != null) {
+            if (exifUpdate.isNotFinishedYet()) {
+                exifUpdate.setActivity(activity);
+            } else {
+                exifUpdate.destroy();
+                exifUpdate = null;
+            }
         }
     }
 

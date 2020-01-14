@@ -1,5 +1,3 @@
-Gérez vos photos locales : Trouvez / Copiez / Éditez les Exif et affichez vos photos dans la Galerie ou sur une Carte.
-
 Fonctionnalités :
 
 * Trouvez rapidement vos photos par tag(mot-clé), (sous-)dossier, date, géolocalisation, titre...

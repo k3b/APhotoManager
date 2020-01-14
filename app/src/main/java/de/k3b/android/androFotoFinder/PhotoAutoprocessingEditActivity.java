@@ -25,6 +25,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -44,7 +45,6 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -52,12 +52,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.media.AndroidLabelGenerator;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.ClipboardUtil;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
+import de.k3b.android.widget.HistoryEditText;
 import de.k3b.io.DateUtil;
 import de.k3b.io.ListUtils;
 import de.k3b.io.PhotoAutoprocessingDto;
@@ -82,6 +84,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     private static final int EXIF_EDIT_RESULT_ID = 86441;
     private static final String PREF_LAST_RENAME_DATE_PATTERN = "LastRenameDatePattern";
     private static final String PREF_LAST_RENAME_NUMBER_PATTERN = "LastRenameNumberPattern";
+    private static final String EXTRA_RENAME_MULTIBLE = "ExtraRenameMultible";
 
     /**
      * current modified value of the first selected file
@@ -101,23 +104,31 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     private Date exampleDate;
 
     private PhotoPropertiesFormatter.ILabelGenerator mLabelGenerator;
+    private HistoryEditText mHistory;
+
 
     public static void showActivity(String debugContext, Activity context,
                                     PhotoAutoprocessingDto workflow,
                                     String directoryOrApmFileUrl,
                                     SelectedFiles selectedFiles,
-                                    int requestCode) {
+                                    int requestCode, String dialogTitle) {
         final Intent intent = new Intent().setClass(context,
                 PhotoAutoprocessingEditActivity.class);
 
         intent.setAction(Intent.ACTION_EDIT);
 
-        if (workflow != null) {
-            intent.putExtra(SETTINGS_KEY, workflow.toSerializable());
-        }
+        putAutoprocessing(intent, workflow);
 
         if (directoryOrApmFileUrl != null) {
             intent.setData(Uri.parse(directoryOrApmFileUrl));
+        }
+
+        if (dialogTitle != null) {
+            intent.putExtra(EXTRA_TITLE, dialogTitle);
+        }
+
+        if (requestCode == R.id.cmd_rename_multible) {
+            intent.putExtra(EXTRA_RENAME_MULTIBLE, true);
         }
 
         AffUtils.putSelectedFiles(intent, selectedFiles);
@@ -130,12 +141,31 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
         IntentUtil.startActivity(debugContext, context, requestCode, intent);
     }
 
+    public static void putAutoprocessing(Intent intent, PhotoAutoprocessingDto workflow) {
+        if (workflow != null) {
+            intent.putExtra(SETTINGS_KEY, workflow);
+        }
+    }
+
+    public static PhotoAutoprocessingDto getAutoprocessingData(Intent intent) {
+        if (intent != null) {
+            return (PhotoAutoprocessingDto) intent.getSerializableExtra(SETTINGS_KEY);
+        }
+        return null;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Global.debugMemory(mDebugPrefix, "onCreate");
         super.onCreate(savedInstanceState);
+
         this.mLabelGenerator = new AndroidLabelGenerator(getApplicationContext(), "\n");
         Intent intent = getIntent();
+        CharSequence title = (intent == null) ? null : intent.getStringExtra(EXTRA_TITLE);
+
+        if (title != null) {
+            this.setTitle(title);
+        }
         mSelectedFiles = getSelectedFiles("onCreate ", intent, false);
 
         // Edit dir or edit ".apm"
@@ -146,9 +176,11 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
 
         mCurrentAutoprocessingData = null;
         if (savedInstanceState != null) {
-            final Serializable settingsAsSerializable = savedInstanceState.getSerializable(SETTINGS_KEY);
-            mCurrentAutoprocessingData = PhotoAutoprocessingDto.load(settingsAsSerializable);
+            mCurrentAutoprocessingData = (PhotoAutoprocessingDto) savedInstanceState.getSerializable(SETTINGS_KEY);
+        } else {
+            mCurrentAutoprocessingData = getAutoprocessingData(intent);
         }
+
         if ((mCurrentAutoprocessingData == null) && (mCurrentOutDir != null)) {
             try {
                 mCurrentAutoprocessingData = new PhotoAutoprocessingDto();
@@ -157,6 +189,10 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
                 onFatalError(mDebugPrefix + "Cannot load .apm from " + mCurrentAutoprocessingData, e);
                 return;
             }
+        }
+
+        if ((mCurrentOutDir == null) && (mSelectedFiles != null) && (mSelectedFiles.size() > 0)) {
+            mCurrentOutDir = mSelectedFiles.getFile(0).getParentFile().getAbsoluteFile();
         }
 
         if (Global.debugEnabled) {
@@ -168,7 +204,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
                     nl, mCurrentAutoprocessingData));
         }
 
-        if ((mCurrentOutDir == null) || (mCurrentAutoprocessingData == null)) {
+        if ((mCurrentAutoprocessingData == null) || (mCurrentOutDir == null)) {
             onFatalError(mDebugPrefix + "Missing Intent.data parameter. intent="
                     + intent.toUri(Intent.URI_INTENT_SCHEME), null);
             return;
@@ -191,7 +227,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
                 : getExampleDate(RuleFileNameProcessor.getFile(this.exampleSrcfile));
 
 
-        defineGui();
+        defineGui(intent.getBooleanExtra(EXTRA_RENAME_MULTIBLE, false));
         toGui();
     }
 
@@ -229,7 +265,6 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     /** to avoid endless recursion toGui() ... TextView.setText ... afterTextChanged ... toGui() */
     private int inToGuiCount = 0;
 
-
     private void toGui() {
         String numberFormat = mCurrentAutoprocessingData.getNumberFormat();
         final String namePart = mCurrentAutoprocessingData.getName();
@@ -241,32 +276,36 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
             select(mSpinnerDatePattern, dateFormat);
             select(mSpinnerNumberPattern, numberFormat);
 
-            String exampleResultFileName = createExampleResultFileName(dateFormat, namePart, numberFormat);
+            if (mPreview != null) {
+                String exampleResultFileName = createExampleResultFileName(dateFormat, namePart, numberFormat);
 
-            // !!! where to get "copy"/"move" from?
-            String photoOperation = ""; // getString(R.string.move_menu_title);
+                // !!! where to get "copy"/"move" from?
+                String photoOperation = ""; // getString(R.string.move_menu_title);
 
-            // %1$s %2$d Photos\n\t%3$s (%4$s), ...\nTo %5$s\n\t%6$s
+                // %1$s %2$d Photos\n\t%3$s (%4$s), ...\nTo %5$s\n\t%6$s
         /*
             Copy 5 Photos
 				hello.jpg (2017-08-02), ...
 			To .../path/toFile/
 				1708NewName0001.jpg
         */
-            mPreview.setText(getString(R.string.preview_message_format,
-                    photoOperation,
-                    mSelectedFiles.size(),
-                    (exampleSrcfile == null) ? null : exampleSrcfile.getName(),
-                    DateUtil.toIsoDateString(exampleDate),
-                    mCurrentAutoprocessingData.getOutDir(), exampleResultFileName));
-
-            IPhotoProperties mediaChanges = mCurrentAutoprocessingData.getMediaDefaults();
-            CharSequence exifChange = null;
-            if (mediaChanges != null) {
-                exifChange = PhotoPropertiesFormatter.format(mediaChanges,
-                        false, mLabelGenerator, PhotoPropertiesFormatter.FieldID.clasz);
+                mPreview.setText(getString(R.string.preview_message_format,
+                        photoOperation,
+                        mSelectedFiles.size(),
+                        (exampleSrcfile == null) ? null : exampleSrcfile.getName(),
+                        DateUtil.toIsoDateString(exampleDate),
+                        mCurrentAutoprocessingData.getOutDir(), exampleResultFileName));
             }
-            mExifChanges.setText(exifChange);
+
+            if (mExifChanges != null) {
+                IPhotoProperties mediaChanges = mCurrentAutoprocessingData.getMediaDefaults();
+                CharSequence exifChange = null;
+                if (mediaChanges != null) {
+                    exifChange = PhotoPropertiesFormatter.format(mediaChanges,
+                            false, mLabelGenerator, PhotoPropertiesFormatter.FieldID.clasz);
+                }
+                mExifChanges.setText(exifChange);
+            }
         } finally {
             inToGuiCount--;
         }
@@ -301,7 +340,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         fromGui();
-        savedInstanceState.putSerializable(SETTINGS_KEY, mCurrentAutoprocessingData.toSerializable());
+        savedInstanceState.putSerializable(SETTINGS_KEY, mCurrentAutoprocessingData);
         if (Global.debugEnabled) {
             Log.d(Global.LOG_CONTEXT, mDebugPrefix
                     + " onSaveInstanceState " + savedInstanceState);
@@ -313,8 +352,12 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     /**
      * load layout and bind layout members
      */
-    private void defineGui() {
-        setContentView(R.layout.activity_photo_workflow_edit);
+    private void defineGui(boolean rename) {
+        @LayoutRes int layoutID = rename ? R.layout.activity_rename_multible : R.layout.activity_photo_workflow_edit;
+        if (LibGlobal.debugEnabledJpg && Global.debugEnabled) {
+            layoutID = R.layout.activity_photo_workflow_edit_dbg;
+        }
+        setContentView(layoutID);
 
         mPreview = (TextView) findViewById(R.id.lbl_preview);
         mSpinnerDatePattern = (Spinner) findViewById(R.id.sp_date_pattern);
@@ -378,18 +421,20 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
         mExifChanges = (TextView) findViewById(R.id.lbl_exif_changes);
 
         final Button cmd = (Button) findViewById(R.id.cmd_pick_exif);
-        cmd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onPickExif(" cmd " + cmd.getText());
-            }
-        });
-        cmd.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                return onReInferExifAndPick(" cmd " + cmd.getText());
-            }
-        });
+        if (cmd != null) {
+            cmd.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onPickExif(" cmd " + cmd.getText());
+                }
+            });
+            cmd.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    return onReInferExifAndPick(" cmd " + cmd.getText());
+                }
+            });
+        }
 
         findViewById(R.id.cmd_file_name_pattern_history).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -398,6 +443,9 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
             }
         });
 
+        mHistory = new HistoryEditText(this, new int[]{
+                R.id.cmd_file_name_base_history},
+                mEditName).setIncludeEmpty(true);
     }
 
     private List<Pattern> createDatePatterns() {
@@ -716,9 +764,17 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
     private void onOk() {
         fromGui();
         try {
-            mCurrentAutoprocessingData.save();
-            saveLastFilePattern(mCurrentAutoprocessingData.getDateFormat(), mCurrentAutoprocessingData.getNumberFormat());
-            setResult(Activity.RESULT_OK, null);
+            mHistory.saveHistory();
+            Intent resultIntent = null;
+            if (getAutoprocessingData(getIntent()) != null) {
+                resultIntent = new Intent();
+                AffUtils.putSelectedFiles(resultIntent, this.mSelectedFiles);
+                putAutoprocessing(resultIntent, mCurrentAutoprocessingData);
+            } else {
+                mCurrentAutoprocessingData.save();
+                saveLastFilePattern(mCurrentAutoprocessingData.getDateFormat(), mCurrentAutoprocessingData.getNumberFormat());
+            }
+            setResult(Activity.RESULT_OK, resultIntent);
         } catch (IOException e) {
             onFatalError("onOk()-save()", e);
         }

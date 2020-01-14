@@ -53,6 +53,7 @@ import java.util.TimeZone;
 
 import de.k3b.android.androFotoFinder.AffUtils;
 import de.k3b.android.androFotoFinder.Common;
+import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.GalleryFilterActivity;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
@@ -140,23 +141,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
 
     private static IZipConfig getPreviousZipConfig(BackupActivity context, String zipName) {
         IZipConfig config = ZipConfigRepository.getZipConfigOrNull(zipName);
-        if (config != null) {
-            showStatistics(context, config, zipName);
-        }
         return config;
-    }
-
-    private static void showStatistics(BackupActivity context, IZipConfig config, String messagePrefix) {
-        final QueryParameter asMergedQuery
-                = Backup2ZipService.getEffectiveQueryParameter(config);
-        CharSequence statistics = TagSql.getStatisticsMessage(context, 0, asMergedQuery);
-
-        if (messagePrefix != null) {
-            Toast.makeText(context, messagePrefix + statistics, Toast.LENGTH_LONG).show();
-        }
-
-        context.gui.resetBackgroundColor();
-        showStatus(context, statistics);
     }
 
     private static void showStatus(Activity context, CharSequence statistics) {
@@ -166,13 +151,20 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         }
     }
 
-    private void showCurrentStatistics() {
-        showStatistics(this, gui, null);
+    private void showCurrentStatistics(boolean withToast) {
+        final QueryParameter asMergedQuery
+                = getAsMergedQuery();
+        CharSequence statistics = TagSql.getStatisticsMessage(this, 0, asMergedQuery);
+
+        if (withToast) {
+            Toast.makeText(this, statistics, Toast.LENGTH_SHORT).show();
+        }
+        gui.resetBackgroundColor();
+        showStatus(this, statistics);
     }
 
     private void cmdShowDetails() {
-        final QueryParameter asMergedQuery
-                = Backup2ZipService.getEffectiveQueryParameter(this.gui);
+        final QueryParameter asMergedQuery = getAsMergedQuery();
         String sql = (asMergedQuery != null) ? asMergedQuery.toSqlString() : null;
 
         final Dialog dlg = ImageDetailMetaDialogBuilder.createImageDetailDialog(
@@ -183,6 +175,10 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         );
         dlg.show();
         setAutoClose(null, dlg, null);
+    }
+
+    private QueryParameter getAsMergedQuery() {
+        return Backup2ZipService.getEffectiveQueryParameter(this.gui);
     }
 
     private ZipConfigDto mZipConfigData = new ZipConfigDto(null);
@@ -224,7 +220,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         }
         loadGuiFromData();
         gui.updateHistory();
-        showCurrentStatistics();
+        showCurrentStatistics(false);
     }
 
     /**
@@ -340,7 +336,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
         mZipConfigData.setFilter((modifiedQuery != null) ? modifiedQuery : "");
         loadGuiFromData();
         gui.updateHistory();
-        showCurrentStatistics();
+        showCurrentStatistics(true);
     }
 
     private final DateTimeApi mDateTimeApi = new DateTimeApi();
@@ -453,7 +449,7 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
                 dlg.setContextMenuId(R.menu.menu_context_pick_osdir);
                 dlg.setTitleId(titleId);
                 dlg.show(this.getFragmentManager(), "osdir");
-                dlg.setBaseQuery(Backup2ZipService.getEffectiveQueryParameter(gui));
+                dlg.setBaseQuery(getAsMergedQuery());
                 setAutoClose(dlg, null, null);
             }
         }
@@ -520,7 +516,6 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_edit_common, menu);
-        getMenuInflater().inflate(R.menu.menu_copy_paste, menu);
         getMenuInflater().inflate(R.menu.menu_backup, menu);
 
         AboutDialogPreference.onPrepareOptionsMenu(this, menu);
@@ -555,7 +550,12 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
             case R.id.action_details:
                 cmdShowDetails();
                 return true;
-
+            case R.id.cmd_gallery:
+                FotoGalleryActivity.showActivity(
+                        item.getTitle().toString(), this,
+                        getAsMergedQuery().clearColumns().addColumn(FotoSql.DEFAULT_GALLERY_COLUMNS),
+                        0);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -640,17 +640,18 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
 
                     if (chagend) {
                         if (editText.equals(editFilter)) {
-                            showExifFilterDetails(gui);
+                            showCurrentExifFilterDetails();
                             updateHistory();
-                            showCurrentStatistics();
+                            showCurrentStatistics(true);
                         }
                         if (editText.equals(editDateModifiedFrom)) {
-                            showCurrentStatistics();
+                            showCurrentStatistics(true);
                         }
                         if (editText.equals(editZipName)) {
                             IZipConfig config = getPreviousZipConfig(BackupActivity.this, text);
                             if (config != null) {
                                 toGui(config);
+                                showCurrentStatistics(true);
                             }
                         }
                     }
@@ -689,11 +690,11 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
 
         private void toGui(IZipConfig src) {
             ZipConfigDto.copy(this, src);
-            showExifFilterDetails(src);
+            showCurrentExifFilterDetails();
         }
 
         public void updateHistory() {
-            updateHistory(getEffectiveQueryParameter(this));
+            updateHistory(getAsMergedQuery());
         }
 
         private void updateHistory(QueryParameter query) {
@@ -728,8 +729,8 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
             if (!StringUtils.isNullOrEmpty(name) && !names.contains(name)) names.add(name);
         }
 
-        public void showExifFilterDetails(IZipConfig src) {
-            QueryParameter query = getEffectiveQueryParameter(src);
+        public void showCurrentExifFilterDetails() {
+            QueryParameter query = getAsMergedQuery();
 
             StringBuilder result = new StringBuilder();
             CharSequence details = formatter.format(TagSql.parseQueryEx(query, true));
@@ -741,10 +742,6 @@ public class BackupActivity extends ActivityWithAutoCloseDialogs implements Comm
             }
 
             exifFilterDetails.setText(result.toString());
-        }
-
-        public QueryParameter getEffectiveQueryParameter(IZipConfig src) {
-            return Backup2ZipService.getEffectiveQueryParameter(src);
         }
 
         private boolean fromGui(IZipConfig dest) {

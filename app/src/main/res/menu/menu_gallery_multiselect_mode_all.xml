@@ -49,8 +49,20 @@
     <item android:id="@+id/cmd_backup"
         android:title="@string/backup_title"
         android:visible="true"
-        android:orderInCategory="41"
+        android:orderInCategory="61"
         android:showAsAction="never" />
+    <!-- !!! -->
+    <item
+        android:id="@+id/cmd_rename_multible"
+
+        android:enabled="true"
+        android:visible="true"
+
+        android:icon="@android:drawable/ic_menu_edit"
+        android:orderInCategory="51"
+        android:showAsAction="never"
+        android:title="@string/rename_menu_title"
+         />
 
     <item android:id="@+id/cmd_more"
         android:title="@string/more_menu_title"

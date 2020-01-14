@@ -531,6 +531,14 @@ public class FotoSql extends FotoSqlBase {
         }
     }
 
+    public static QueryParameter addWhereFolderWithoutSubfolders(QueryParameter resultQuery, String absoluteFolderPath) {
+        if ((resultQuery != null) && (absoluteFolderPath != null)) {
+            if (!absoluteFolderPath.endsWith("/")) absoluteFolderPath += "/";
+            resultQuery.addWhere(SQL_EXPR_FOLDER + " =  ?", absoluteFolderPath);
+        }
+        return resultQuery;
+    }
+
     public static void addWhereFilterLatLon(QueryParameter query, double latitudeMin, double latitudeMax, double logituedMin, double logituedMax) {
         if (!Double.isNaN(latitudeMin)) query.addWhere(FILTER_EXPR_LAT_MIN, DirectoryFormatter.formatLatLon(latitudeMin));
         if (!Double.isNaN(latitudeMax)) query.addWhere(FILTER_EXPR_LAT_MAX, DirectoryFormatter.formatLatLon(latitudeMax));
@@ -720,7 +728,7 @@ public class FotoSql extends FotoSqlBase {
             case FotoSql.QUERY_TYPE_GROUP_MOVE:
             case FotoSql.QUERY_TYPE_GROUP_COPY:
             case QUERY_TYPE_GALLERY:
-                dest.setPath(selectedAbsolutePath + "/%");
+                dest.setFolderAndBelow(selectedAbsolutePath);
                 return true;
             case FotoSql.QUERY_TYPE_GROUP_DATE: {
                 Date from = new Date();

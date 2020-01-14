@@ -1,15 +1,22 @@
-Manage local photos: Find/Copy/Edit-Exif and show in Gallery or Map.
-
 Features:
 
 * Fast find photos by tags(keywords), (sub-)folder, date, geo , title, ...
 * Display result in gallery or geographic map from openstreetmap.
-* Detail view features zooming, swiping for next/previous image.
-* Buildin file manager for photos: find, sort, view, copy, delete, send, ... .
+* Filemanagement: copy, move, rename, delete, send, Incremental Photo Backup, ... .
+* Support for Virtual Albums.
 * Edit exif metadata: date, title, description, tags(keywords), geo, rating, ....
+* AutoProcessing:  on-move automatically rename photo-files and/or add metadata,
 * Can handle big image collections (20000+ images in 1000+ folders).
+* Small memory footprint (1.5 MB), Works on old low-memory android 4.0 devices
 * Uses Android's image content-provider. No initial image scan neccessary.
 * Extended photo media scanner for Exif, IPTC, XMP
+
+Privacy:
+
+* Can hide photos from other gallery-apps/image-pickers.
+* Vault mode: If enabled unwanted photos cannot be seen and dangerous operations (i.e. delete) are prohibited. This way you can safely hand over your device to someone else.
+* Photos are kept on local device. No upload to third party.
+* No adds, no usertracking, free open source, available on f-droid
 
 Required Android Permissions:
 

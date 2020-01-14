@@ -36,13 +36,13 @@ import de.k3b.android.androFotoFinder.R;
 
 abstract public class AsyncTaskWithProgressDialog<param> extends AsyncTask<param, String, Integer>
                     implements Closeable{
+    private final int idResourceTitle;
     private WeakReference<Activity> activity;
 
     protected ProgressDialog dlg = null;
     public AsyncTaskWithProgressDialog(Activity activity, int idResourceTitle) {
+        this.idResourceTitle = idResourceTitle;
         this.setActivity(activity);
-        dlg = new ProgressDialog(activity);
-        dlg.setTitle(idResourceTitle);
     }
     protected void onProgressUpdate(String... values) {
         if (dlg != null) {
@@ -73,10 +73,6 @@ abstract public class AsyncTaskWithProgressDialog<param> extends AsyncTask<param
         destroy();
     }
     public void destroy() {
-        if ((dlg != null) && dlg.isShowing()) {
-            dlg.dismiss();
-        }
-        dlg = null;
         setActivity(null);
     }
 
@@ -101,7 +97,26 @@ abstract public class AsyncTaskWithProgressDialog<param> extends AsyncTask<param
         return activity.get();
     }
 
-    private void setActivity(Activity activity) {
-        this.activity = (activity != null) ? new WeakReference<>(activity) : null;
+    public void setActivity(Activity activity) {
+        boolean isActive = isNotFinishedYet();
+
+        if (isActive && (activity == getActivity())) {
+            // no change
+            return;
+        }
+        this.activity = (isActive && (activity != null)) ? new WeakReference<>(activity) : null;
+        if ((dlg != null) && dlg.isShowing()) {
+            dlg.dismiss();
+        }
+        dlg = null;
+
+        if ((activity != null) && isActive) {
+            dlg = new ProgressDialog(activity);
+            dlg.setTitle(idResourceTitle);
+        }
+    }
+
+    public boolean isNotFinishedYet() {
+        return (getStatus() != Status.FINISHED) && !isCancelled();
     }
 }

@@ -39,7 +39,7 @@ import de.k3b.media.PhotoPropertiesAsString;
  * Created by k3b on 04.08.2017.
  */
 
-public class PhotoAutoprocessingDto {
+public class PhotoAutoprocessingDto implements Serializable {
     private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
 
     /** added to every serialized item if != null. Example "Generated on 2015-10-19 with myApp Version 0815." */
@@ -147,14 +147,6 @@ public class PhotoAutoprocessingDto {
             logger.debug(PhotoAutoprocessingDto.class.getSimpleName() + ": load De-Serialize:" + photoAutoprocessingDto);
         }
         return photoAutoprocessingDto;
-    }
-
-    /** Android support: to persist state and to transfer activites via intent */
-    public Serializable toSerializable() {
-        if (this.properties != null) {
-            this.properties.put(KEY_OUT_DIR, (this.outDir == null) ? null : this.outDir.toString());
-        }
-        return this.properties;
     }
 
     /** DateFormat part for {@link RuleFileNameProcessor} */

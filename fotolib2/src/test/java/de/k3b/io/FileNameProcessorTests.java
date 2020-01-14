@@ -23,7 +23,10 @@ import org.junit.Test;
 
 import java.io.File;
 import java.util.Date;
-import static org.mockito.Mockito.*;
+
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 /**
  * #93: rule based file renaming
@@ -75,6 +78,14 @@ public class FileNameProcessorTests {
         RuleFileNameProcessor sut = spy(new RuleFileNameProcessor(null, "Hello", null, X_FAKE_OUTPUT_DIR));
         registerFakeFiles(sut, "Hello.jpg", "Hello1.jpg", "Hello2.jpg.xmp", "Hello3.xmp");
         File outFile = sut.getNextFile(new File(X_FAKE_INPUT_DIR, "1234.jpg"),null,0);
+        Assert.assertEquals("Hello4.jpg", outFile.getName());
+    }
+
+    @Test
+    public void shouldGetNextFreeFileNoOutDir() {
+        RuleFileNameProcessor sut = spy(new RuleFileNameProcessor(null, "Hello", null, null));
+        registerFakeFiles(sut, "Hello.jpg", "Hello1.jpg", "Hello2.jpg.xmp", "Hello3.xmp");
+        File outFile = sut.getNextFile(new File(X_FAKE_OUTPUT_DIR, "1234.jpg"), null, 0);
         Assert.assertEquals("Hello4.jpg", outFile.getName());
     }
 

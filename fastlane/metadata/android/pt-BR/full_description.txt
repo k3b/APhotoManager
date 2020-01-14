@@ -1,4 +1,4 @@
-Gerenciar fotos locais: Localizar/Copiar/Editar-Exif e mostrar na Galeria ou Mapa. ​​Recursos:
+​​Recursos:
 
  * Rápido encontrar fotos por tags (palavras-chave), (sub) pasta, data, geo, título,...
  * Exibir resultado em  galeria ou mapa geográfico a partir do openstreetmap.
