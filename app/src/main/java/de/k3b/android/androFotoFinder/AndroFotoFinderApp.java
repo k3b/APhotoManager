@@ -23,7 +23,6 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -51,6 +50,7 @@ import de.k3b.android.androFotoFinder.queries.MediaDBRepository;
 import de.k3b.android.androFotoFinder.queries.MergedMediaRepository;
 import de.k3b.android.osmdroid.forge.MapsForgeSupport;
 import de.k3b.android.util.LogCat;
+import de.k3b.android.util.PhotoChangeNotifyer;
 import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
@@ -115,11 +115,10 @@ public class AndroFotoFinderApp extends Application {
                     MediaContent2DBUpdateService.instance.rebuild(context, null);
                 }
 
-                context.getApplicationContext().getContentResolver().registerContentObserver(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, true, GlobalMediaContentObserver.getInstance(context));
-                context.getApplicationContext().getContentResolver().registerContentObserver(MediaStore.Files.getContentUri("external"), true, GlobalMediaContentObserver.getInstance(context));
+                PhotoChangeNotifyer.registerContentObserver(context, GlobalMediaContentObserver.getInstance(context));
 
             } else {
-                context.getApplicationContext().getContentResolver().unregisterContentObserver(GlobalMediaContentObserver.getInstance(context));
+                PhotoChangeNotifyer.unregisterContentObserver(context, GlobalMediaContentObserver.getInstance(context));
                 if ((oldMediaDBApi != null) && (MediaContent2DBUpdateService.instance != null)) {
                     // switching from mediaImageDbReplacement to Contentprovider
                     MediaContent2DBUpdateService.instance.clearMediaCopy();

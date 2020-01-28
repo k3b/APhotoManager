@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 by k3b.
+ * Copyright (c) 2018-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -20,7 +20,6 @@
 package de.k3b.android.androFotoFinder.directory;
 
 import android.app.Activity;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,11 +28,8 @@ import android.widget.EditText;
 
 import java.io.File;
 
-import de.k3b.android.androFotoFinder.AffUtils;
 import de.k3b.android.androFotoFinder.R;
-import de.k3b.android.androFotoFinder.imagedetail.ImageDetailActivityViewPager;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.OsUtils;
 import de.k3b.io.AlbumFile;
 import de.k3b.io.FileUtils;
@@ -41,7 +37,6 @@ import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirOrVirtualAlbumFile;
 import de.k3b.io.OSDirectory;
 import de.k3b.io.StringUtils;
-import de.k3b.io.collections.SelectedFiles;
 
 /**
  * a picker with a fale name field and a directory picker.
@@ -132,7 +127,7 @@ public abstract class SaveAsPickerFragment extends DirectoryPickerFragment {
             // close dialog and return to caller
             super.onDirectoryPick(result);
             onFilePick(new File(result.getAbsolute()));
-            this.notifyDataSetChanged();
+            this.notifyPhotoChanged();
             dismiss();
         }
     }

@@ -53,8 +53,8 @@ public class PhotoPropertiesMediaFilesScannerAsyncTask extends AsyncTask<String[
     private static void notifyIfThereAreChanges(Integer modifyCount, Context context, String why) {
         if (modifyCount > 0) {
             PhotoPropertiesMediaFilesScanner.notifyChanges(context, why);
-            if (DataChangeNotifyer.dataChangedListener != null) {
-                DataChangeNotifyer.dataChangedListener.onNotifyDataChanged();
+            if (PhotoChangeNotifyer.photoChangedListener != null) {
+                PhotoChangeNotifyer.photoChangedListener.onNotifyPhotoChanged();
             }
 
         }

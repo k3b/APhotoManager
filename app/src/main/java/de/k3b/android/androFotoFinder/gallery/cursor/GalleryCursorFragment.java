@@ -82,8 +82,8 @@ import de.k3b.android.androFotoFinder.tagDB.TagWorflow;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.DBUtils;
-import de.k3b.android.util.DataChangeNotifyer;
 import de.k3b.android.util.OsUtils;
+import de.k3b.android.util.PhotoChangeNotifyer;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.AboutDialogPreference;
@@ -121,7 +121,7 @@ import de.k3b.tagDB.Tag;
  *   if (view-non-select) menu_gallery_non_selected_only + menu_gallery_non_multiselect
  */
 public class GalleryCursorFragment extends Fragment implements Queryable, DirectoryGui, Common,
-        TagsPickerFragment.ITagsPicker, DataChangeNotifyer.DataChangedListener {
+        TagsPickerFragment.ITagsPicker, PhotoChangeNotifyer.PhotoChangedListener {
     private static final String INSTANCE_STATE_LAST_VISIBLE_POSITION = "lastVisiblePosition";
     private static final String INSTANCE_STATE_SELECTED_ITEM_IDS = "selectedItems";
     private static final String INSTANCE_STATE_OLD_TITLE = "oldTitle";
@@ -209,7 +209,7 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
         return mSelectedItems;
     }
 
-    public void onNotifyDataChanged() {
+    public void onNotifyPhotoChanged() {
         requeryIfDataHasChanged();
     }
 
@@ -243,7 +243,7 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
 
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
         if (AndroidFileCommands.canProcessFile(this.getActivity(), false)) {
-            DataChangeNotifyer.setDataChangedListener(this);
+            PhotoChangeNotifyer.setPhotoChangedListener(this);
             mDestDirPicker = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
             mDestDirPicker.defineDirectoryNavigation(OsUtils.getRootOSDirectory(null),
@@ -551,7 +551,7 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
             protected void onPostExecute(SelectedItems selectedItems) {
                 if (!isCancelled()) {
                     onMissingDisplayNamesComplete(mStatus);
-                    onNotifyDataChanged();
+                    onNotifyPhotoChanged();
                 }
             }
         };
@@ -935,7 +935,7 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
                     } else {
                         onDuplicatesFound(null, mStatus);
                     }
-                    onNotifyDataChanged();
+                    onNotifyPhotoChanged();
                 } else {
                     if (mStatus != null) {
                         mStatus.append("\nTask canceled");
@@ -1039,109 +1039,8 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
         }
     }
 
-    class LocalCursorLoader implements LoaderManager.LoaderCallbacks<Cursor> {
-        /**
-         * called by LoaderManager.getLoader(ACTIVITY_ID) to (re)create loader
-         * that attaches to last query/cursor if it still exist i.e. after rotation
-         */
-        @Override
-        public Loader<Cursor> onCreateLoader(int aLoaderID, Bundle bundle) {
-            if (loaderID == aLoaderID) {
-                QueryParameter query = getCurrentQuery();
-                mRequeryInstanceCount++;
-                if (Global.debugEnabledSql) {
-                    Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onCreateLoader"
-                            + getDebugContext() +
-                            " : query = " + query);
-                }
-                return FotoSql.createCursorLoader(getActivity().getApplicationContext(), query);
-            }
-
-            // An invalid id was passed in
-            return null;
-        }
-
-        /**
-         * called after media db content has changed
-         */
-        @Override
-        public void onLoadFinished(Loader<Cursor> _loader, Cursor data) {
-            mLastVisiblePosition = mGalleryView.getLastVisiblePosition();
-
-            final Activity context = getActivity();
-            if (data == null) {
-                CursorLoaderWithException loader = (CursorLoaderWithException) _loader;
-                String title;
-                String message = context.getString(R.string.global_err_sql_message_format, loader.getException().getMessage(), loader.getQuery().toSqlString());
-                if (loader.getException() != null) {
-                    if (0 != loader.getQuery().toSqlString().compareTo(getCurrentQuery(FotoSql.queryDetail).toSqlString())) {
-                        // query is not default query. revert to default query
-                        mGalleryContentQuery = FotoSql.queryDetail;
-                        requery("requery after query-errror");
-                        title = context.getString(R.string.global_err_sql_title_reload);
-                    } else {
-                        title = context.getString(R.string.global_err_system);
-                        context.finish();
-                    }
-                    Dialogs.messagebox(context, title, message);
-                    return;
-                }
-            }
-
-            mUpdateId = FotoSql.getMediaDBApi().getCurrentUpdateId();
-            // do change the data
-            mAdapter.swapCursor(data);
-
-            if (mLastVisiblePosition > 0) {
-                mGalleryView.smoothScrollToPosition(mLastVisiblePosition);
-                mLastVisiblePosition = -1;
-            }
-
-            final int resultCount = (data == null) ? 0 : data.getCount();
-            if (Global.debugEnabled) {
-                Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onLoadFinished"
-                        + getDebugContext() +
-                        " fount " + resultCount + " rows");
-            }
-
-            // do change the data
-            mAdapter.notifyDataSetChanged();
-
-            if (mLastVisiblePosition > 0) {
-                mGalleryView.smoothScrollToPosition(mLastVisiblePosition);
-                mLastVisiblePosition = -1;
-            }
-
-            // show the changes
-
-            if (context instanceof OnGalleryInteractionListener) {
-                ((OnGalleryInteractionListener) context).setResultCount(resultCount);
-            }
-            multiSelectionReplaceTitleIfNecessary();
-        }
-
-        /**
-         * called by LoaderManager. after search criteria were changed or if activity is destroyed.
-         */
-        @Override
-        public void onLoaderReset(Loader<Cursor> loader) {
-            if (Global.debugEnabled) {
-                Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onLoaderReset" + getDebugContext());
-            }
-            // rember position where we have to scroll to after refreshLocal is finished.
-            mLastVisiblePosition = mGalleryView.getLastVisiblePosition();
-
-            mAdapter.swapCursor(null);
-            mAdapter.notifyDataSetChanged();
-        }
-
-        @NonNull
-        protected String getDebugContext() {
-            return "(@" + loaderID + ", #" + mRequeryInstanceCount +
-                    ", LastVisiblePosition=" + mLastVisiblePosition +
-//                    ",  Path='" + mInitialFilePath +
-                    "')";
-        }
+    public void notifyPhotoChanged() {
+        PhotoChangeNotifyer.notifyPhotoChanged(this.getActivity(), this.mAdapter);
     }
 
     private boolean onPickOk() {
@@ -1415,25 +1314,109 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
         }
     }
 
-    private class TagUpdateTask extends TagTask<List<String>> {
-
-        TagUpdateTask(SelectedFiles fotos) {
-            super(GalleryCursorFragment.this.getActivity(), R.string.tags_activity_title);
-            this.getWorkflow().init(GalleryCursorFragment.this.getActivity(), fotos, null);
-
-        }
-
+    class LocalCursorLoader implements LoaderManager.LoaderCallbacks<Cursor> {
+        /**
+         * called by LoaderManager.getLoader(ACTIVITY_ID) to (re)create loader
+         * that attaches to last query/cursor if it still exist i.e. after rotation
+         */
         @Override
-        protected Integer doInBackground(List<String>... params) {
-            return getWorkflow().updateTags(params[0], params[1]);
+        public Loader<Cursor> onCreateLoader(int aLoaderID, Bundle bundle) {
+            if (loaderID == aLoaderID) {
+                QueryParameter query = getCurrentQuery();
+                mRequeryInstanceCount++;
+                if (Global.debugEnabledSql) {
+                    Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onCreateLoader"
+                            + getDebugContext() +
+                            " : query = " + query);
+                }
+                return FotoSql.createCursorLoader(getActivity().getApplicationContext(), query);
+            }
+
+            // An invalid id was passed in
+            return null;
         }
 
+        /**
+         * called after media db content has changed
+         */
         @Override
-        protected void onPostExecute(Integer itemCount) {
-            super.onPostExecute(itemCount);
-            onNotifyDataChanged();
+        public void onLoadFinished(Loader<Cursor> _loader, Cursor data) {
+            mLastVisiblePosition = mGalleryView.getLastVisiblePosition();
+
+            final Activity context = getActivity();
+            if (data == null) {
+                CursorLoaderWithException loader = (CursorLoaderWithException) _loader;
+                String title;
+                String message = context.getString(R.string.global_err_sql_message_format, loader.getException().getMessage(), loader.getQuery().toSqlString());
+                if (loader.getException() != null) {
+                    if (0 != loader.getQuery().toSqlString().compareTo(getCurrentQuery(FotoSql.queryDetail).toSqlString())) {
+                        // query is not default query. revert to default query
+                        mGalleryContentQuery = FotoSql.queryDetail;
+                        requery("requery after query-errror");
+                        title = context.getString(R.string.global_err_sql_title_reload);
+                    } else {
+                        title = context.getString(R.string.global_err_system);
+                        context.finish();
+                    }
+                    Dialogs.messagebox(context, title, message);
+                    return;
+                }
+            }
+
+            mUpdateId = FotoSql.getMediaDBApi().getCurrentUpdateId();
+            // do change the data
+            mAdapter.swapCursor(data);
+
+            if (mLastVisiblePosition > 0) {
+                mGalleryView.smoothScrollToPosition(mLastVisiblePosition);
+                mLastVisiblePosition = -1;
+            }
+
+            final int resultCount = (data == null) ? 0 : data.getCount();
+            if (Global.debugEnabled) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onLoadFinished"
+                        + getDebugContext() +
+                        " fount " + resultCount + " rows");
+            }
+
+            // do change the data
+            notifyPhotoChanged();
+
+            if (mLastVisiblePosition > 0) {
+                mGalleryView.smoothScrollToPosition(mLastVisiblePosition);
+                mLastVisiblePosition = -1;
+            }
+
+            // show the changes
+
+            if (context instanceof OnGalleryInteractionListener) {
+                ((OnGalleryInteractionListener) context).setResultCount(resultCount);
+            }
+            multiSelectionReplaceTitleIfNecessary();
         }
 
+        /**
+         * called by LoaderManager. after search criteria were changed or if activity is destroyed.
+         */
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+            if (Global.debugEnabled) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onLoaderReset" + getDebugContext());
+            }
+            // rember position where we have to scroll to after refreshLocal is finished.
+            mLastVisiblePosition = mGalleryView.getLastVisiblePosition();
+
+            mAdapter.swapCursor(null);
+            notifyPhotoChanged();
+        }
+
+        @NonNull
+        protected String getDebugContext() {
+            return "(@" + loaderID + ", #" + mRequeryInstanceCount +
+                    ", LastVisiblePosition=" + mLastVisiblePosition +
+//                    ",  Path='" + mInitialFilePath +
+                    "')";
+        }
     }
 
     /** is called when removeDuplicates() found duplicates */
@@ -1510,6 +1493,27 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
             mSelectedItems.add(imageID);
             return true;
         }
+    }
+
+    private class TagUpdateTask extends TagTask<List<String>> {
+
+        TagUpdateTask(SelectedFiles fotos) {
+            super(GalleryCursorFragment.this.getActivity(), R.string.tags_activity_title);
+            this.getWorkflow().init(GalleryCursorFragment.this.getActivity(), fotos, null);
+
+        }
+
+        @Override
+        protected Integer doInBackground(List<String>... params) {
+            return getWorkflow().updateTags(params[0], params[1]);
+        }
+
+        @Override
+        protected void onPostExecute(Integer itemCount) {
+            super.onPostExecute(itemCount);
+            onNotifyPhotoChanged();
+        }
+
     }
 
 }

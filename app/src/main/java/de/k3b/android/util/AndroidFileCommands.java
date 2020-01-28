@@ -173,12 +173,12 @@ public class AndroidFileCommands extends FileCommands {
 
     }
 
-    public boolean onOptionsItemSelected(final MenuItem item, final SelectedFiles selectedFileNames, DataChangeNotifyer.DataChangedListener dataChangedListener) {
+    public boolean onOptionsItemSelected(final MenuItem item, final SelectedFiles selectedFileNames, PhotoChangeNotifyer.PhotoChangedListener photoChangedListener) {
         if ((selectedFileNames != null) && (selectedFileNames.size() > 0)) {
             // Handle item selection
             switch (item.getItemId()) {
                 case R.id.cmd_delete:
-                    return cmdDeleteFileWithQuestion(selectedFileNames, dataChangedListener);
+                    return cmdDeleteFileWithQuestion(selectedFileNames, photoChangedListener);
                 default:break;
             }
         }
@@ -277,7 +277,7 @@ public class AndroidFileCommands extends FileCommands {
     }
 
     public boolean cmdDeleteFileWithQuestion(final SelectedFiles fotos,
-                                             final DataChangeNotifyer.DataChangedListener dataChangedListener) {
+                                             final PhotoChangeNotifyer.PhotoChangedListener photoChangedListener) {
         String[] pathNames = fotos.getFileNames();
         String errorMessage = checkWriteProtected(R.string.delete_menu_title, SelectedFiles.getFiles(pathNames));
 
@@ -308,8 +308,8 @@ public class AndroidFileCommands extends FileCommands {
                                         final int id) {
                                     mActiveAlert = null;
                                     deleteFiles(fotos, null);
-                                    if (dataChangedListener != null) {
-                                        dataChangedListener.onNotifyDataChanged();
+                                    if (photoChangedListener != null) {
+                                        photoChangedListener.onNotifyPhotoChanged();
                                     }
                                 }
                             }

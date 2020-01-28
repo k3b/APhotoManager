@@ -64,10 +64,10 @@ import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagTask;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.util.AndroidFileCommands;
-import de.k3b.android.util.DataChangeNotifyer;
 import de.k3b.android.util.FileManagerUtil;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.OsUtils;
+import de.k3b.android.util.PhotoChangeNotifyer;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScannerAsyncTask;
 import de.k3b.android.widget.AboutDialogPreference;
@@ -94,7 +94,7 @@ import de.k3b.tagDB.Tag;
  */
 
 public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs implements Common, TagsPickerFragment.ITagsPicker,
-        DataChangeNotifyer.DataChangedListener {
+        PhotoChangeNotifyer.PhotoChangedListener {
     private static final String INSTANCE_STATE_MODIFY_COUNT = "mModifyCount";
     private static final String INSTANCE_STATE_LAST_SCROLL_POSITION = "lastScrollPosition";
     /** #70: remember on config change (screen rotation) */
@@ -250,7 +250,7 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
                     result = cmdMoveOrCopyWithDestDirPicker(true, mFileCommands.getLastCopyToPath(), getCurrentFoto());
                     break;
                 case R.id.menu_item_rename:
-                    DataChangeNotifyer.setDataChangedListener(this);
+                    PhotoChangeNotifyer.setPhotoChangedListener(this);
                     result = onRenameQueston(getCurrentFoto(), getCurrentImageId(), getCurrentFilePath(), null);
                     break;
                 case R.id.menu_exif:
@@ -566,7 +566,7 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
         unhideActionBar(DISABLE_HIDE_ACTIONBAR, "onPause");
         Global.debugMemory(mDebugPrefix, "onPause");
         startStopSlideShow(false);
-        DataChangeNotifyer.setDataChangedListener(null); // notify triggererd in onResume
+        PhotoChangeNotifyer.setPhotoChangedListener(null); // notify triggererd in onResume
         super.onPause();
     }
 
@@ -682,7 +682,7 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
             errorMessage = getString(R.string.image_err_file_exists_format, dest.getAbsoluteFile());
         }
 
-        DataChangeNotifyer.setDataChangedListener(this);
+        PhotoChangeNotifyer.setPhotoChangedListener(this);
         if (errorMessage != null) {
             // dest-file already exists
             Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
@@ -914,7 +914,7 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
 
     private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
         if (AndroidFileCommands.canProcessFile(this, false)) {
-            DataChangeNotifyer.setDataChangedListener(this);
+            PhotoChangeNotifyer.setPhotoChangedListener(this);
             mDestDirPicker = MoveOrCopyDestDirPicker.newInstance(move, fotos);
 
             mDestDirPicker.defineDirectoryNavigation(OsUtils.getRootOSDirectory(null),
@@ -1009,7 +1009,7 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
         return true;
     }
 
-    public void onNotifyDataChanged() {
+    public void onNotifyPhotoChanged() {
         requeryIfDataHasChanged();
     }
 
@@ -1041,7 +1041,7 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
         dlg.setRemoveNames(new ArrayList<String>());
         dlg.setBaseQuery(mGalleryContentQuery);
         setAutoClose(dlg, null, null);
-        DataChangeNotifyer.setDataChangedListener(this);
+        PhotoChangeNotifyer.setPhotoChangedListener(this);
         dlg.show(getFragmentManager(), "editTags");
         return true;
     }
@@ -1184,6 +1184,41 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
         }
     }
 
+    public void notifyPhotoChanged() {
+        PhotoChangeNotifyer.notifyPhotoChanged(this, this.mAdapter);
+    }
+
+    class LocalFileCommands extends AndroidFileCommands {
+        @Override
+        protected void onPostProcess(String what, int opCode, SelectedFiles selectedFiles, int modifyCount, int itemCount, String[] oldPathNames, String[] newPathNames) {
+            mInitialFilePath = null;
+            switch (opCode) {
+                case OP_MOVE:
+                case OP_RENAME:
+                    if ((newPathNames != null) && (newPathNames.length > 0)) {
+                        // so selection will be restored to this after load complete
+                        mInitialFilePath = newPathNames[0];
+                    }
+                    break;
+                case OP_COPY:
+                    if ((oldPathNames != null) && (oldPathNames.length > 0)) {
+                        // so selection will be restored to this after load complete
+                        mInitialFilePath = oldPathNames[0];
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            super.onPostProcess(what, opCode, selectedFiles, modifyCount, itemCount, oldPathNames, newPathNames);
+
+            if ((opCode == OP_RENAME) || (opCode == OP_MOVE) || (opCode == OP_DELETE) || (opCode == OP_RENAME)) {
+                reloadIfDataHasChanged();
+            }
+        }
+
+    }
+
     public static class MoveOrCopyDestDirPicker extends DirectoryPickerFragment {
         protected static AndroidFileCommands sFileCommands = null;
 
@@ -1233,41 +1268,42 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
             mModifyCount++; // copy or move initiated
             getActivity().setResult((mModifyCount == 0) ? RESULT_NOCHANGE : RESULT_CHANGE);
 
-            DataChangeNotifyer.setDataChangedListener(((ImageDetailActivityViewPager) getActivity()));
+            PhotoChangeNotifyer.setPhotoChangedListener(((ImageDetailActivityViewPager) getActivity()));
             sFileCommands.onMoveOrCopyDirectoryPick(getMove(), getSrcFotos(), selection);
             dismiss();
         }
     }
 
-    class LocalFileCommands extends AndroidFileCommands {
-        @Override
-        protected void onPostProcess(String what, int opCode, SelectedFiles selectedFiles, int modifyCount, int itemCount, String[] oldPathNames, String[] newPathNames) {
-            mInitialFilePath = null;
-            switch (opCode) {
-                case OP_MOVE:
-                case OP_RENAME:
-                    if ((newPathNames != null) && (newPathNames.length > 0)) {
-                        // so selection will be restored to this after load complete
-                        mInitialFilePath = newPathNames[0];
-                    }
-                    break;
-                case OP_COPY:
-                    if ((oldPathNames != null) && (oldPathNames.length > 0)) {
-                        // so selection will be restored to this after load complete
-                        mInitialFilePath = oldPathNames[0];
-                    }
-                    break;
-                default:
-                    break;
-            }
+    private class TagUpdateTask extends TagTask<List<String>> {
 
-            super.onPostProcess(what, opCode, selectedFiles, modifyCount, itemCount, oldPathNames, newPathNames);
+        TagUpdateTask(SelectedFiles fotos) {
+            super(ImageDetailActivityViewPager.this, R.string.tags_activity_title);
+            this.getWorkflow().init(ImageDetailActivityViewPager.this, fotos, null);
 
-            if ((opCode == OP_RENAME) || (opCode == OP_MOVE) || (opCode == OP_DELETE) || (opCode == OP_RENAME)) {
-                reloadIfDataHasChanged();
-            }
         }
 
+        @Override
+        protected Integer doInBackground(List<String>... params) {
+            return getWorkflow().updateTags(params[0], params[1]);
+        }
+
+        @Override
+        protected void onPostExecute(Integer itemCount) {
+            super.onPostExecute(itemCount);
+            reloadIfDataHasChanged();
+        }
+    }
+
+    /**
+     * #70: adds/removes/replases contextColumnExpression
+     */
+    private static void addContextColumn(QueryParameter query, String contextColumnExpression) {
+        if (query != null) {
+            query.removeFirstColumnThatContains(CONTEXT_COLUMN_ALIAS);
+            if ((contextColumnExpression != null) && (contextColumnExpression.trim().length() > 0)) {
+                query.addColumn(contextColumnExpression + CONTEXT_COLUMN_ALIAS);
+            }
+        }
     }
 
     /**
@@ -1323,7 +1359,7 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
             }
 
             // do change the data
-            mAdapter.notifyDataSetChanged();
+            notifyPhotoChanged();
             mViewPager.setAdapter(mAdapter);
 
             // show the changes
@@ -1342,7 +1378,7 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
                 Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onLoaderReset" +
                         getDebugContext());
             }
-            mAdapter.notifyDataSetChanged();
+            notifyPhotoChanged();
         }
 
         @NonNull
@@ -1351,36 +1387,6 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
                     + ", mScrollPosition=" + mInitialScrollPosition +
                     ",  Path='" + mInitialFilePath +
                     "')";
-        }
-    }
-
-    private class TagUpdateTask extends TagTask<List<String>> {
-
-        TagUpdateTask(SelectedFiles fotos) {
-            super(ImageDetailActivityViewPager.this, R.string.tags_activity_title);
-            this.getWorkflow().init(ImageDetailActivityViewPager.this, fotos, null);
-
-        }
-
-        @Override
-        protected Integer doInBackground(List<String>... params) {
-            return getWorkflow().updateTags(params[0], params[1]);
-        }
-
-        @Override
-        protected void onPostExecute(Integer itemCount) {
-            super.onPostExecute(itemCount);
-            reloadIfDataHasChanged();
-        }
-    }
-
-    /** #70: adds/removes/replases contextColumnExpression */
-    private static void addContextColumn(QueryParameter query, String contextColumnExpression) {
-        if (query != null) {
-            query.removeFirstColumnThatContains(CONTEXT_COLUMN_ALIAS);
-            if ((contextColumnExpression != null) && (contextColumnExpression.trim().length() > 0)) {
-                query.addColumn(contextColumnExpression + CONTEXT_COLUMN_ALIAS);
-            }
         }
     }
 }

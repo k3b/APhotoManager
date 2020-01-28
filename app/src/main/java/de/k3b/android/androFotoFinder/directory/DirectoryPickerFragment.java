@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -70,6 +70,7 @@ import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.ClipboardUtil;
 import de.k3b.android.util.FileManagerUtil;
 import de.k3b.android.util.IntentUtil;
+import de.k3b.android.util.PhotoChangeNotifyer;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
@@ -456,8 +457,8 @@ public class DirectoryPickerFragment extends DialogFragment
         }
     }
 
-    public void notifyDataSetChanged() {
-        if (this.mAdapter != null) this.mAdapter.notifyDataSetChanged();
+    public void notifyPhotoChanged() {
+        PhotoChangeNotifyer.notifyPhotoChanged(this.getActivity(), this.mAdapter);
     }
 
     private boolean onCopy(IDirectory selection) {
@@ -607,7 +608,7 @@ public class DirectoryPickerFragment extends DialogFragment
         } else {
             // update dirpicker
             srcDir.rename(srcDirFile.getName(), newFolderName);
-            notifyDataSetChanged();
+            notifyPhotoChanged();
         }
     }
 

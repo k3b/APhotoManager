@@ -55,6 +55,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.osmdroid.OsmdroidUtil;
+import de.k3b.android.util.PhotoChangeNotifyer;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.AlbumFile;
@@ -673,8 +674,8 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
     protected void onCreate(Bundle savedInstanceState) {
         Global.debugMemory(mDebugPrefix, "onCreate");
         super.onCreate(savedInstanceState);
-        this.getContentResolver().registerContentObserver(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI, true, mMediaObserverDirectory);
-        this.getContentResolver().registerContentObserver(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, true, mMediaObserverDirectory);
+        PhotoChangeNotifyer.registerContentObserver(this, mMediaObserverDirectory);
+
     }
 
     protected void onCreateData(Bundle savedInstanceState) {
@@ -966,7 +967,7 @@ public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs im
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        this.getContentResolver().unregisterContentObserver(mMediaObserverDirectory);
+        PhotoChangeNotifyer.unregisterContentObserver(this, mMediaObserverDirectory);
         this.mGalleryQueryParameter.mGalleryContentBaseQuery = null;
         invalidateDirectories(mDebugPrefix + "#onDestroy");
     }

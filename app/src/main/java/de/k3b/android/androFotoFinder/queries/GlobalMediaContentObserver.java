@@ -24,7 +24,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.util.Log;
 
-import de.k3b.android.util.DataChangeNotifyer;
+import de.k3b.android.util.PhotoChangeNotifyer;
 
 /**
  * collect notifications that media content has changed
@@ -34,13 +34,13 @@ public class GlobalMediaContentObserver extends ContentObserver {
     private static Handler delayedChangeNotifiyHandler = null;
     private static Runnable delayedRunner = null;
     private static Context appContext;
-    private static DataChangeNotifyer.DataChangedListener dataChangedListener = null;
+    private static PhotoChangeNotifyer.PhotoChangedListener photoChangedListener = null;
 
     private GlobalMediaContentObserver() {
         super(null);
     }
 
-    public static GlobalMediaContentObserver getInstance(Context appContext) {
+    public static GlobalMediaContentObserver getInstance(final Context appContext) {
         if (instance == null) {
             GlobalMediaContentObserver.appContext = appContext;
 
@@ -72,12 +72,12 @@ public class GlobalMediaContentObserver extends ContentObserver {
      *
      * @param appContext
      */
-    private void onExternalDataChangeCompleted(Context appContext) {
+    private static void onExternalDataChangeCompleted(Context appContext) {
         Log.d(MediaDBRepository.LOG_TAG, "Media content changed ");
         // todo fix database
 
-        if (dataChangedListener != null) {
-            dataChangedListener.onNotifyDataChanged();
+        if (photoChangedListener != null) {
+            photoChangedListener.onNotifyPhotoChanged();
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 by k3b.
+ * Copyright (c) 2017-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -843,10 +843,10 @@ public class TagsPickerFragment extends DialogFragment implements ShowInMenuHand
                 }
             }
             mDataAdapter.notifyDataSetInvalidated();
-            mDataAdapter.notifyDataSetChanged();
+            notifyDataSetChanged();
             mDataAdapter.reloadList();
             TagRepository.getInstance().save();
-            mDataAdapter.notifyDataSetChanged();
+            notifyDataSetChanged();
         }
         return changeCount;
     }
@@ -860,7 +860,7 @@ public class TagsPickerFragment extends DialogFragment implements ShowInMenuHand
             mDataAdapter.reloadList();
         }
         TagRepository.getInstance().save();
-        mDataAdapter.notifyDataSetChanged();
+        notifyDataSetChanged();
     }
 
     private boolean onPaste(Tag currentMenuSelection) {
@@ -939,5 +939,9 @@ public class TagsPickerFragment extends DialogFragment implements ShowInMenuHand
 
     private void refreshCounter() {
         TagsPickerFragment.this.mDataAdapter.getCount();
+    }
+
+    public void notifyDataSetChanged() {
+        mDataAdapter.notifyDataSetChanged();
     }
 }
