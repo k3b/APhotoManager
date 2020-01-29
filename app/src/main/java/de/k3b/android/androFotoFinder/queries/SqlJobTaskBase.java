@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -21,7 +21,6 @@ package de.k3b.android.androFotoFinder.queries;
 
 import android.app.Activity;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -66,8 +65,9 @@ public abstract class SqlJobTaskBase extends AsyncTask<QueryParameter, Integer, 
 
         Cursor cursor = null;
         try {
-            cursor = mContext.getContentResolver().query(Uri.parse(query.toFrom()), query.toColumns(),
-                    query.toAndroidWhere(), query.toAndroidParameters(), query.toOrderBy());
+            cursor = FotoSql.getMediaDBApi().createCursorForQuery(
+                    null, "SqlJobTask",
+                    query, null, null);
 
             int itemCount = cursor.getCount();
             final int expectedCount = itemCount + itemCount;

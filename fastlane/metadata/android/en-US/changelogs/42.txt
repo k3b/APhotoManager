@@ -1,2 +1,4 @@
 Changes from 0.7.3 to 0.7.4
-Translation updates: pt-BR
+
+* #143 hotfix to reallow openstreetmap online map download
+* Translation updates: pt-BR

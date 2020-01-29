@@ -25,7 +25,7 @@ dependencies {
     // compile 'com.adobe.xmp:xmpcore:6.1.10' // update for drewnoakes:metadata-extractor requires java-8 compiler does not run on my android-4.4.
     compile 'com.adobe.xmp:xmpcore:5.1.2' // current version for drewnoakes:metadata-extractor
 
-    // https://github.com/drewnoakes/metadata-extractor/wiki/GettingStarted licence: http://www.apache.org/licenses/LICENSE-2.0
+    // https://github.com/drewnoakes/metadata-extractor/wiki/GettingStarted licence: https://www.apache.org/licenses/LICENSE-2.0
     // 2.10.1 includes more recent xmpcore that generates java-8 bytecode not supported by android yet
     compile ('com.drewnoakes:metadata-extractor:2.10.1') { transitive = false } // 2.8.1
 

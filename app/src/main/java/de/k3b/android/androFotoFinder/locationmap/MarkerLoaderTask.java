@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -22,7 +22,6 @@ package de.k3b.android.androFotoFinder.locationmap;
 import android.app.Activity;
 import android.database.Cursor;
 import android.graphics.drawable.BitmapDrawable;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -35,8 +34,8 @@ import java.util.HashMap;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
-import de.k3b.android.osmdroid.IconFactory;
 import de.k3b.android.osmdroid.ClickableIconOverlay;
+import de.k3b.android.osmdroid.IconFactory;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.database.QueryParameter;
 
@@ -96,8 +95,9 @@ public abstract class MarkerLoaderTask<MARKER extends ClickableIconOverlay> exte
 
         Cursor cursor = null;
         try {
-            cursor = mContext.getContentResolver().query(Uri.parse(queryParameters.toFrom()), queryParameters.toColumns(),
-                    queryParameters.toAndroidWhere(), queryParameters.toAndroidParameters(), queryParameters.toOrderBy());
+            cursor = FotoSql.getMediaDBApi().createCursorForQuery(
+                    null, "MakerLoader",
+                    queryParameters, null, null);
 
             int itemCount = cursor.getCount();
             final int expectedCount = itemCount + itemCount;

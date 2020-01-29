@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -70,6 +70,7 @@ import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.ClipboardUtil;
 import de.k3b.android.util.FileManagerUtil;
 import de.k3b.android.util.IntentUtil;
+import de.k3b.android.util.PhotoChangeNotifyer;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
@@ -456,8 +457,8 @@ public class DirectoryPickerFragment extends DialogFragment
         }
     }
 
-    public void notifyDataSetChanged() {
-        if (this.mAdapter != null) this.mAdapter.notifyDataSetChanged();
+    public void notifyPhotoChanged() {
+        PhotoChangeNotifyer.notifyPhotoChanged(this.getActivity(), this.mAdapter);
     }
 
     private boolean onCopy(IDirectory selection) {
@@ -544,7 +545,7 @@ public class DirectoryPickerFragment extends DialogFragment
         }
 
         // delete from database
-        if (FotoSql.deleteMedia("delete album", getActivity(),
+        if (FotoSql.deleteMedia("delete album",
                 ListUtils.toStringList(file.getAbsolutePath()),false) > 0) {
             deleteSuccess = true;
         }
@@ -607,7 +608,7 @@ public class DirectoryPickerFragment extends DialogFragment
         } else {
             // update dirpicker
             srcDir.rename(srcDirFile.getName(), newFolderName);
-            notifyDataSetChanged();
+            notifyPhotoChanged();
         }
     }
 
@@ -663,11 +664,11 @@ public class DirectoryPickerFragment extends DialogFragment
                     if (!canonicalPath.endsWith("/")) canonicalPath+="/";
 
                     String sqlWhereLink = FotoSql.SQL_COL_PATH + " like '" + linkPath + "%'";
-                    SelectedFiles linkFiles = FotoSql.getSelectedfiles(context, sqlWhereLink, VISIBILITY.PRIVATE_PUBLIC);
+                    SelectedFiles linkFiles = FotoSql.getSelectedfiles(sqlWhereLink, VISIBILITY.PRIVATE_PUBLIC);
 
                     String sqlWhereCanonical = FotoSql.SQL_COL_PATH + " in (" + linkFiles.toString() + ")";
                     sqlWhereCanonical = sqlWhereCanonical.replace(linkPath,canonicalPath);
-                    SelectedFiles canonicalFiles = FotoSql.getSelectedfiles(context, sqlWhereCanonical, VISIBILITY.PRIVATE_PUBLIC);
+                    SelectedFiles canonicalFiles = FotoSql.getSelectedfiles(sqlWhereCanonical, VISIBILITY.PRIVATE_PUBLIC);
                     HashMap<String, String> link2canonical = new HashMap<String, String>();
                     for(String cann : canonicalFiles.getFileNames()) {
                         link2canonical.put(linkPath + cann.substring(canonicalPath.length()), cann);
@@ -692,9 +693,9 @@ public class DirectoryPickerFragment extends DialogFragment
                         if (cann == null) {
                             // rename linkFile to canonicalFile
                             updateValues.put(FotoSql.SQL_COL_PATH, canonicalPath + lin.substring(linkPath.length()));
-                            FotoSql.execUpdate("fixLinks", context, linkIds[i].intValue() ,updateValues);
+                            FotoSql.getMediaDBApi().execUpdate("fixLinks", linkIds[i].intValue(), updateValues);
                         } else {
-                            FotoSql.deleteMedia("DirectoryPickerFragment.fixLinks", context, FotoSql.FILTER_COL_PK, new String[] {linkIds[i].toString()}, true);
+                            FotoSql.getMediaDBApi().deleteMedia("DirectoryPickerFragment.fixLinks", FotoSql.FILTER_COL_PK, new String[]{linkIds[i].toString()}, true);
                         }
                     }
                     PhotoPropertiesMediaFilesScanner.notifyChanges(context, "Fixed link/canonical duplicates");

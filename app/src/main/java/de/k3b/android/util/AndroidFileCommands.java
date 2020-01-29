@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -37,6 +37,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.util.Date;
 
+import de.k3b.android.androFotoFinder.AndroidTransactionLogger;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.LockScreen;
 import de.k3b.android.androFotoFinder.R;
@@ -55,6 +56,7 @@ import de.k3b.io.IProgessListener;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.media.MediaFormatter;
 import de.k3b.media.PhotoPropertiesBulkUpdateService;
+import de.k3b.media.PhotoPropertiesDiffCopy;
 import de.k3b.media.PhotoPropertiesUpdateHandler;
 import de.k3b.transactionlog.MediaTransactionLogEntryType;
 import de.k3b.transactionlog.TransactionLoggerBase;
@@ -171,12 +173,12 @@ public class AndroidFileCommands extends FileCommands {
 
     }
 
-    public boolean onOptionsItemSelected(final MenuItem item, final SelectedFiles selectedFileNames) {
+    public boolean onOptionsItemSelected(final MenuItem item, final SelectedFiles selectedFileNames, PhotoChangeNotifyer.PhotoChangedListener photoChangedListener) {
         if ((selectedFileNames != null) && (selectedFileNames.size() > 0)) {
             // Handle item selection
             switch (item.getItemId()) {
                 case R.id.cmd_delete:
-                    return cmdDeleteFileWithQuestion(selectedFileNames);
+                    return cmdDeleteFileWithQuestion(selectedFileNames, photoChangedListener);
                 default:break;
             }
         }
@@ -218,9 +220,9 @@ public class AndroidFileCommands extends FileCommands {
             boolean isDir = srcDirFile.isDirectory();
             if (srcDirFile.renameTo(destDirFile)) {
                 if (isDir) {
-                    modifyCount = FotoSql.execRenameFolder(this.mContext, srcDirFile.getAbsolutePath() + "/", destDirFile.getAbsolutePath() + "/");
+                    modifyCount = FotoSql.execRenameFolder(srcDirFile.getAbsolutePath() + "/", destDirFile.getAbsolutePath() + "/");
                 } else {
-                    modifyCount = FotoSql.execRename(mContext, srcDirFile.getAbsolutePath(), destDirFile.getAbsolutePath());
+                    modifyCount = FotoSql.execRename(srcDirFile.getAbsolutePath(), destDirFile.getAbsolutePath());
                 }
                 if (modifyCount < 0) {
                     destDirFile.renameTo(srcDirFile); // error: undo change
@@ -252,6 +254,15 @@ public class AndroidFileCommands extends FileCommands {
         }
     }
 
+    @Override
+    protected int moveOrCopyFiles(final boolean move, String what, PhotoPropertiesDiffCopy exifChanges,
+                                  SelectedFiles fotos, File[] destFiles,
+                                  IProgessListener progessListener) {
+        int result = super.moveOrCopyFiles(move, what, exifChanges, fotos, destFiles, progessListener);
+        // api.setTransactionSuccessful();
+        return result;
+    }
+
     @NonNull
     public String getLastCopyToPath() {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
@@ -265,7 +276,8 @@ public class AndroidFileCommands extends FileCommands {
         edit.apply();
     }
 
-    public boolean cmdDeleteFileWithQuestion(final SelectedFiles fotos) {
+    public boolean cmdDeleteFileWithQuestion(final SelectedFiles fotos,
+                                             final PhotoChangeNotifyer.PhotoChangedListener photoChangedListener) {
         String[] pathNames = fotos.getFileNames();
         String errorMessage = checkWriteProtected(R.string.delete_menu_title, SelectedFiles.getFiles(pathNames));
 
@@ -296,6 +308,9 @@ public class AndroidFileCommands extends FileCommands {
                                         final int id) {
                                     mActiveAlert = null;
                                     deleteFiles(fotos, null);
+                                    if (photoChangedListener != null) {
+                                        photoChangedListener.onNotifyPhotoChanged();
+                                    }
                                 }
                             }
                     )
@@ -328,7 +343,7 @@ public class AndroidFileCommands extends FileCommands {
             QueryParameter where = new QueryParameter();
             FotoSql.setWhereSelectionPks (where, fotos.toIdString());
 
-            FotoSql.deleteMedia("AndroidFileCommands.deleteFiles", mContext, where.toAndroidWhere(), null, true);
+            FotoSql.getMediaDBApi().deleteMedia("AndroidFileCommands.deleteFiles", where.toAndroidWhere(), null, true);
         }
         return deleteCount;
     }
@@ -468,7 +483,7 @@ public class AndroidFileCommands extends FileCommands {
                     }
                     File file = files[i];
                     PhotoPropertiesUpdateHandler jpg = createWorkflow(null, dbgContext).saveLatLon(file, latitude, longitude);
-                    resultFile += TagSql.updateDB(dbgContext, applicationContext,
+                    resultFile += TagSql.updateDB(dbgContext,
                             file.getAbsolutePath(), jpg, MediaFormatter.FieldID.latitude_longitude);
                     itemcount++;
                     addTransactionLog(selectedItems.getId(i), file.getAbsolutePath(), now, MediaTransactionLogEntryType.GPS, latLong);
@@ -556,6 +571,10 @@ public class AndroidFileCommands extends FileCommands {
         return new AndroidPhotoPropertiesBulkUpdateService(mContext, logger, dbgContext);
     }
 
+    @Override
+    protected TransactionLoggerBase createTransactionLogger(long now) {
+        return new AndroidTransactionLogger(this, now);
+    }
 
     /** adds android database specific logging to base implementation */
     @Override
@@ -571,6 +590,9 @@ public class AndroidFileCommands extends FileCommands {
                 ContentValues values = TransactionLogSql.set(null, currentMediaID, fileFullPath, modificationDate,
                         mediaTransactionLogEntryType, commandData);
                 db.insert(TransactionLogSql.TABLE, null, values);
+                if (Global.debugEnabledSql) {
+                    Log.i(FotoSql.LOG_TAG, "addTransactionLog: " + values);
+                }
             }
         }
     }

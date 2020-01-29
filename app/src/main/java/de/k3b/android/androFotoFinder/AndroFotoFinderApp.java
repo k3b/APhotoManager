@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -19,8 +19,10 @@
  
 package de.k3b.android.androFotoFinder;
 
+import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
@@ -36,11 +38,21 @@ import java.util.Date;
 import de.k3b.LibGlobal;
 import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
+import de.k3b.android.androFotoFinder.queries.DatabaseHelper;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoSqlBase;
+import de.k3b.android.androFotoFinder.queries.GlobalMediaContentObserver;
+import de.k3b.android.androFotoFinder.queries.IMediaRepositoryApi;
+import de.k3b.android.androFotoFinder.queries.MediaContent2DBUpdateService;
+import de.k3b.android.androFotoFinder.queries.MediaContentproviderRepository;
+import de.k3b.android.androFotoFinder.queries.MediaContentproviderRepositoryImpl;
+import de.k3b.android.androFotoFinder.queries.MediaDBRepository;
+import de.k3b.android.androFotoFinder.queries.MergedMediaRepository;
 import de.k3b.android.osmdroid.forge.MapsForgeSupport;
 import de.k3b.android.util.LogCat;
+import de.k3b.android.util.PhotoChangeNotifyer;
 import de.k3b.android.widget.ActivityWithCallContext;
+import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.PhotoAutoprocessingDto;
 import de.k3b.media.ExifInterface;
@@ -58,6 +70,10 @@ import uk.co.senab.photoview.gestures.CupcakeGestureDetector;
 public class AndroFotoFinderApp extends Application {
     private static String fileNamePrefix = "androFotofinder.logcat-";
 
+    public static MediaContent2DBUpdateService getMediaContent2DbUpdateService() {
+        return MediaContent2DBUpdateService.instance;
+    }
+
     private LogCat mCrashSaveToFile = null;
 
 
@@ -74,6 +90,43 @@ public class AndroFotoFinderApp extends Application {
         if (linkUrlForDetails != null)
             return result.replace(LINK_URL_SQL, linkUrlForDetails);
         return result;
+    }
+
+    public static void setMediaImageDbReplacement(Context context, boolean useMediaImageDbReplacement) {
+        final IMediaRepositoryApi oldMediaDBApi = FotoSql.getMediaDBApi();
+        if ((oldMediaDBApi == null) || (Global.useAo10MediaImageDbReplacement != useMediaImageDbReplacement)) {
+
+            // menu must be recreated
+            LocalizedActivity.setMustRecreate();
+
+            Global.useAo10MediaImageDbReplacement = useMediaImageDbReplacement;
+
+            final MediaContentproviderRepository mediaContentproviderRepository = new MediaContentproviderRepository(context);
+
+            if (Global.useAo10MediaImageDbReplacement) {
+                final SQLiteDatabase writableDatabase = DatabaseHelper.getWritableDatabase(context);
+                final MediaDBRepository mediaDBRepository = new MediaDBRepository(writableDatabase);
+                FotoSql.setMediaDBApi(new MergedMediaRepository(mediaDBRepository, mediaContentproviderRepository));
+
+                MediaContent2DBUpdateService.instance = new MediaContent2DBUpdateService(context, writableDatabase);
+
+                if (FotoSql.getCount(new QueryParameter().addWhere("1 = 1")) == 0) {
+                    // database is empty; reload from Contentprovider
+                    MediaContent2DBUpdateService.instance.rebuild(context, null);
+                }
+
+                PhotoChangeNotifyer.registerContentObserver(context, GlobalMediaContentObserver.getInstance(context));
+
+            } else {
+                PhotoChangeNotifyer.unregisterContentObserver(context, GlobalMediaContentObserver.getInstance(context));
+                if ((oldMediaDBApi != null) && (MediaContent2DBUpdateService.instance != null)) {
+                    // switching from mediaImageDbReplacement to Contentprovider
+                    MediaContent2DBUpdateService.instance.clearMediaCopy();
+                }
+                FotoSql.setMediaDBApi(mediaContentproviderRepository);
+                MediaContent2DBUpdateService.instance = null;
+            }
+        }
     }
 
     /*
@@ -114,7 +167,10 @@ public class AndroFotoFinderApp extends Application {
         mCrashSaveToFile = new LogCat(Global.LOG_CONTEXT, HugeImageLoader.LOG_TAG,
                 PhotoViewAttacher.LOG_TAG, CupcakeGestureDetector.LOG_TAG,
                 LibGlobal.LOG_TAG, ThumbNailUtils.LOG_TAG, IMapView.LOGTAG,
-                ExifInterface.LOG_TAG, PhotoPropertiesImageReader.LOG_TAG) {
+                ExifInterface.LOG_TAG, PhotoPropertiesImageReader.LOG_TAG,
+                FotoSql.LOG_TAG,
+                MediaDBRepository.LOG_TAG,
+                MediaContentproviderRepositoryImpl.LOG_TAG) {
 
             @Override
             public void uncaughtException(Thread thread, Throwable ex) {
@@ -124,13 +180,14 @@ public class AndroFotoFinderApp extends Application {
                 super.uncaughtException(thread, ex);
             }
 
-            public void saveToFile() {
+            public void saveToFile(Activity activity) {
                 final File logFile = getOutpuFile();
                 String message = (logFile != null)
                         ? "saving errorlog ('LocCat') to " + logFile.getAbsolutePath()
                         : "Saving errorlog ('LocCat') is disabled. See Settings 'Diagnostics' for details";
                 Log.e(Global.LOG_CONTEXT, message);
-                Toast.makeText(AndroFotoFinderApp.this , message, Toast.LENGTH_LONG).show();
+                final Context context = (activity != null) ? activity : AndroFotoFinderApp.this;
+                Toast.makeText(context, message, Toast.LENGTH_LONG).show();
 
                 saveLogCat(logFile, null, mTags);
             }
@@ -165,7 +222,7 @@ public class AndroFotoFinderApp extends Application {
         // #60: configure some of the mapsforge settings first
         MapsForgeSupport.createInstance(this);
 
-        FotoSql.deleteMediaWithNullPath(this);
+        FotoSql.deleteMediaWithNullPath();
 
         Log.i(Global.LOG_CONTEXT, getAppId() + " created");
     }
@@ -185,9 +242,9 @@ public class AndroFotoFinderApp extends Application {
         super.onTerminate();
     }
 
-    public void saveToFile() {
+    public void saveToFile(Activity activity) {
         if (mCrashSaveToFile != null) {
-            mCrashSaveToFile.saveToFile();
+            mCrashSaveToFile.saveToFile(activity);
         }
     }
     public void clear() {

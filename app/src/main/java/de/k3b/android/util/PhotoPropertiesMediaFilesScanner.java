@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -45,6 +45,7 @@ import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.media.PhotoPropertiesMediaDBContentValues;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.queries.IMediaRepositoryApi;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.database.QueryParameter;
 import de.k3b.geo.api.GeoPointDto;
@@ -52,9 +53,9 @@ import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.io.FileUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.media.IPhotoProperties;
+import de.k3b.media.PhotoPropertiesChainReader;
 import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.media.PhotoPropertiesXmpSegment;
-import de.k3b.media.PhotoPropertiesChainReader;
 import de.k3b.tagDB.TagRepository;
 
 /**
@@ -75,15 +76,15 @@ abstract public class PhotoPropertiesMediaFilesScanner {
     protected static final String DB_LATITUDE = MediaStore.Images.Media.LATITUDE;
     */
 
-    private static final String DB_SIZE = MediaStore.MediaColumns.SIZE;
+    protected static final String DB_TITLE = FotoSql.SQL_COL_EXT_TITLE;
     private static final String DB_WIDTH = MediaStore.MediaColumns.WIDTH;
     private static final String DB_HEIGHT = MediaStore.MediaColumns.HEIGHT;
     private static final String DB_MIME_TYPE = MediaStore.MediaColumns.MIME_TYPE;
 
     protected static final String DB_ORIENTATION = MediaStore.Images.Media.ORIENTATION;
-    protected static final String DB_TITLE = MediaStore.MediaColumns.TITLE;
+    protected static final String DB_DATA = FotoSql.SQL_COL_PATH; // _data
     protected static final String DB_DISPLAY_NAME = MediaStore.MediaColumns.DISPLAY_NAME;
-    protected static final String DB_DATA = MediaStore.MediaColumns.DATA;
+    private static final String DB_SIZE = FotoSql.SQL_COL_SIZE;
 
     public static final int DEFAULT_SCAN_DEPTH = 22;
     public static final String MEDIA_IGNORE_FILENAME = FileUtils.MEDIA_IGNORE_FILENAME; //  MediaStore.MEDIA_IGNORE_FILENAME;
@@ -149,7 +150,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
                 if (Global.debugEnabled) {
                     Log.i(Global.LOG_CONTEXT, CONTEXT + " hideFolderMedia: delete from media db " + path + "/**");
                 }
-                result = FotoSql.execDeleteByPath(CONTEXT + " hideFolderMedia", context, path, VISIBILITY.PRIVATE_PUBLIC);
+                result = FotoSql.execDeleteByPath(CONTEXT + " hideFolderMedia", path, VISIBILITY.PRIVATE_PUBLIC);
                 if (result > 0) {
                     PhotoPropertiesMediaFilesScanner.notifyChanges(context, "hide " + path + "/**");
                 }
@@ -159,19 +160,27 @@ abstract public class PhotoPropertiesMediaFilesScanner {
     }
 
     public int updateMediaDatabase_Android42(Context context, String[] oldPathNames, String... newPathNames) {
-        final boolean hasNew = excludeNomediaFiles(newPathNames) > 0;
-        final boolean hasOld = excludeNomediaFiles(oldPathNames) > 0;
-        int result = 0;
+        IMediaRepositoryApi api = FotoSql.getMediaDBApi();
+        try {
+            api.beginTransaction();
+            final boolean hasNew = excludeNomediaFiles(newPathNames) > 0;
+            final boolean hasOld = excludeNomediaFiles(oldPathNames) > 0;
+            int result = 0;
 
-        if (hasNew && hasOld) {
-            result = renameInMediaDatabase(context, oldPathNames, newPathNames);
-        } else if (hasOld) {
-            result = deleteInMediaDatabase(context, oldPathNames);
-        } if (hasNew) {
-            result = insertIntoMediaDatabase(context, newPathNames);
+            if (hasNew && hasOld) {
+                result = renameInMediaDatabase(context, oldPathNames, newPathNames);
+            } else if (hasOld) {
+                result = deleteInMediaDatabase(context, oldPathNames);
+            }
+            if (hasNew) {
+                result = insertIntoMediaDatabase(context, newPathNames);
+            }
+            TagSql.fixPrivate();
+            api.setTransactionSuccessful();
+            return result;
+        } finally {
+            api.endTransaction();
         }
-        TagSql.fixPrivate(context);
-        return result;
     }
 
     /**
@@ -207,7 +216,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
                 Log.i(Global.LOG_CONTEXT, CONTEXT + "A42 scanner starting with " + newPathNames.length + " files " + newPathNames[0] + "...");
             }
 
-            Map<String, Long> inMediaDb = FotoSql.execGetPathIdMap(context.getApplicationContext(), newPathNames);
+            Map<String, Long> inMediaDb = FotoSql.execGetPathIdMap(newPathNames);
 
             for (String fileName : newPathNames) {
                 if (fileName != null) {
@@ -232,8 +241,8 @@ abstract public class PhotoPropertiesMediaFilesScanner {
         if ((currentJpgFile != null) && currentJpgFile.exists() && currentJpgFile.canRead()) {
             ContentValues values = createDefaultContentValues();
             getExifFromFile(values, currentJpgFile);
-            Long result = FotoSql.insertOrUpdateMediaDatabase(
-                    dbgContext, context, dbUpdateFilterJpgFullPathName,
+            Long result = FotoSql.getMediaDBApi().insertOrUpdateMediaDatabase(
+                    dbgContext, dbUpdateFilterJpgFullPathName,
                     values, VISIBILITY.PRIVATE_PUBLIC, updateSuccessValue);
 
             return result;
@@ -248,7 +257,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
         if ((oldPathNames != null) && (oldPathNames.length > 0)) {
             String sqlWhere = FotoSql.getWhereInFileNames(oldPathNames);
             try {
-                modifyCount = FotoSql.deleteMedia(CONTEXT + "deleteInMediaDatabase", context, sqlWhere, null, true);
+                modifyCount = FotoSql.getMediaDBApi().deleteMedia(CONTEXT + "deleteInMediaDatabase", sqlWhere, null, true);
                 if (Global.debugEnabled) {
                     Log.d(Global.LOG_CONTEXT, CONTEXT + "deleteInMediaDatabase(len=" + oldPathNames.length + ", files='" + oldPathNames[0] + "'...) result count=" + modifyCount);
                 }
@@ -275,7 +284,10 @@ abstract public class PhotoPropertiesMediaFilesScanner {
                 String newPathName = newPathNames[i];
 
                 if ((oldPathName != null) && (newPathName != null)) {
-                    old2NewFileNames.put(oldPathName, newPathName);
+                    //!!! ?seiteneffekt update other fields?
+                    if (oldPathName.compareToIgnoreCase(newPathName) != 0) {
+                        old2NewFileNames.put(oldPathName, newPathName);
+                    }
                 } else if (oldPathName != null) {
                     deleteFileNames.add(oldPathName);
                 } else if (newPathName != null) {
@@ -300,7 +312,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
 
             Cursor c = null;
             try {
-                c = FotoSql.createCursorForQuery(null, "renameInMediaDatabase", context, query, VISIBILITY.PRIVATE_PUBLIC);
+                c = FotoSql.getMediaDBApi().createCursorForQuery(null, "renameInMediaDatabase", query, VISIBILITY.PRIVATE_PUBLIC, null);
                 int pkColNo = c.getColumnIndex(FotoSql.SQL_COL_PK);
                 int pathColNo = c.getColumnIndex(FotoSql.SQL_COL_PATH);
                 while (c.moveToNext()) {
@@ -431,7 +443,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
         String oldAbsolutePath = cursor.getString(columnIndexPath);
         int id = cursor.getInt(columnIndexPk);
         setPathRelatedFieldsIfNeccessary(values, newAbsolutePath, oldAbsolutePath);
-        return FotoSql.execUpdate("updatePathRelatedFields", context, id, values);
+        return FotoSql.getMediaDBApi().execUpdate("updatePathRelatedFields", id, values);
     }
 
     /** sets the path related fields */
@@ -463,7 +475,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
         if ((file != null) && file.exists() && file.canRead()) {
             ContentValues values = createDefaultContentValues();
             getExifFromFile(values, file);
-            return FotoSql.execUpdate(dbgContext, context, id, values);
+            return FotoSql.getMediaDBApi().execUpdate(dbgContext, id, values);
         }
 		return 0;
     }
@@ -487,7 +499,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
             FotoSql.addDateAdded(values);
 
             getExifFromFile(values, file);
-            return (null != FotoSql.execInsert(dbgContext, context, values)) ? 1 : 0;
+            return (null != FotoSql.getMediaDBApi().execInsert(dbgContext, values)) ? 1 : 0;
         }
 		return 0;
     }

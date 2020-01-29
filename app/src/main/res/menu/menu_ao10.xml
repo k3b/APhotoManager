@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/cmd_db_reload"
+        android:orderInCategory="9900"
+        android:showAsAction="never"
+        android:title="@string/load_db_menu_title"
+        android:visible="true" />
+
+</menu>

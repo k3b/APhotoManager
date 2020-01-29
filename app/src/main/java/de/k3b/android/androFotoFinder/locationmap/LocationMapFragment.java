@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2019 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -1120,7 +1120,7 @@ public class LocationMapFragment extends DialogFragment {
         QueryParameter baseQuery = getQueryForPositionRectangle(geoCenterPoint);
         BoundingBox boundingBox = null;
 
-        IGeoRectangle fittingRectangle = FotoSql.execGetGeoRectangle(null, this.getActivity(),
+        IGeoRectangle fittingRectangle = FotoSql.execGetGeoRectangle(null,
                 baseQuery, null, mDebugPrefix, "zoomToFit", dbgContext);
         double delta = getDelta(fittingRectangle);
         if ((geoCenterPoint != null) && (delta < 1e-6)) {
@@ -1194,7 +1194,7 @@ public class LocationMapFragment extends DialogFragment {
 
     private IGeoPoint getGeoPointById(int markerId, IGeoPoint notFoundValue, Object... dbgContext) {
         if (markerId != NO_MARKER_ID) {
-            IGeoPoint pos = FotoSql.execGetPosition(null, this.getActivity(),
+            IGeoPoint pos = FotoSql.execGetPosition(null,
                     null, markerId, mDebugPrefix, "getGeoPointById", dbgContext);
             if (pos != null) {
                 return pos;

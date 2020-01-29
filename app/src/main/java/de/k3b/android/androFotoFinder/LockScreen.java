@@ -28,6 +28,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import de.k3b.android.util.MenuUtils;
+import de.k3b.android.widget.LocalizedActivity;
 
 /**
  * #105: Management of app locking (aka Android "Screen"-pinning, "Kiosk Mode", "LockTask")
@@ -52,6 +53,7 @@ public class LockScreen {
                         Global.locked = true;
                         SettingsActivity.global2Prefs(parent.getApplication());
                     }
+                    LocalizedActivity.setMustRecreate();
                 }
                 return true;
             case R.id.cmd_app_unpin2:
@@ -59,6 +61,7 @@ public class LockScreen {
                 Global.locked = false;
                 SettingsActivity.global2Prefs(parent.getApplication());
                 parent.invalidateOptionsMenu();
+                LocalizedActivity.setMustRecreate();
                 return true;
         }
         return false;
