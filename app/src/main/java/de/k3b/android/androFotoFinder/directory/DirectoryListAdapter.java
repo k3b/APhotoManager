@@ -32,9 +32,9 @@ import android.widget.TextView;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.util.PhotoChangeNotifyer;
 import de.k3b.io.AlbumFile;
 import de.k3b.io.Directory;
-import de.k3b.io.FileUtils;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IExpandableListViewNavigation;
 
@@ -42,7 +42,8 @@ import de.k3b.io.IExpandableListViewNavigation;
  * Maps android independent IExpandableListViewNavigation to android specific ExpandableListAdapter so it can be viewed in ExpandableList
  */
 
-public class DirectoryListAdapter extends BaseExpandableListAdapter implements IExpandableListViewNavigation<Object, Object> {
+public class DirectoryListAdapter extends BaseExpandableListAdapter implements
+        IExpandableListViewNavigation<Object, Object>, PhotoChangeNotifyer.PhotoChangedListener {
 
 
     private LayoutInflater inflater;
@@ -218,5 +219,13 @@ public class DirectoryListAdapter extends BaseExpandableListAdapter implements I
 
         Directory.appendCount(result, directory, options);
         return Html.fromHtml(result.toString());
+    }
+
+    /**
+     * PhotoChangeNotifyer.PhotoChangedListener
+     **/
+    @Override
+    public void onNotifyPhotoChanged() {
+        notifyDataSetChanged();
     }
 }

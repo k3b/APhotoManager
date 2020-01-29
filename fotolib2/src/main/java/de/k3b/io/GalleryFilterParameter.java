@@ -97,11 +97,21 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
         return path;
     }
 
+    /**
+     * sets a path filter expression which may contain sql wildcards
+     */
     public GalleryFilterParameter setPath(String path) {
         if (copyAlways || (path != null)) {
             this.path = path;
         }
         return this;
+    }
+
+    /**
+     * Photos from this folder (and sub-folders) will be seen
+     */
+    public GalleryFilterParameter setFolderAndBelow(String folder) {
+        return setPath(folder + "/%");
     }
 
     public File getPathFile() {

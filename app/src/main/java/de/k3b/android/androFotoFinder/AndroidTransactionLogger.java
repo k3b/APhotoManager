@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -19,8 +19,6 @@
 
 package de.k3b.android.androFotoFinder;
 
-import android.app.Activity;
-
 import java.io.Closeable;
 import java.io.IOException;
 
@@ -37,7 +35,7 @@ import de.k3b.transactionlog.TransactionLoggerBase;
 public class AndroidTransactionLogger extends TransactionLoggerBase implements Closeable {
     private AndroidFileCommands execLog;
 
-    public AndroidTransactionLogger(Activity ctx, long now, AndroidFileCommands execLog) {
+    public AndroidTransactionLogger(AndroidFileCommands execLog, long now) {
         super(execLog, now);
 
         this.execLog = execLog;

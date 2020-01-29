@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -40,6 +40,7 @@ import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.DBUtils;
+import de.k3b.android.util.PhotoChangeNotifyer;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
 import de.k3b.media.PhotoPropertiesUtil;
@@ -60,7 +61,7 @@ import de.k3b.media.PhotoPropertiesUtil;
 * 
  * Created by k3b on 02.06.2015.
  */
-public class GalleryCursorAdapter extends CursorAdapter  {
+public class GalleryCursorAdapter extends CursorAdapter implements PhotoChangeNotifyer.PhotoChangedListener {
     private static final int MAX_IMAGE_DIMENSION = HugeImageLoader.getMaxTextureSize();
 
     // Identifies a particular Loader or a LoaderManager being used in this component
@@ -232,6 +233,14 @@ public class GalleryCursorAdapter extends CursorAdapter  {
     public long getImageId(int position) {
         Cursor cursor = getCursorAt(position);
         return DBUtils.getLong(cursor, FotoSql.SQL_COL_PK, 0);
+    }
+
+    /**
+     * PhotoChangeNotifyer.PhotoChangedListener
+     **/
+    @Override
+    public void onNotifyPhotoChanged() {
+        notifyDataSetChanged();
     }
 
 }

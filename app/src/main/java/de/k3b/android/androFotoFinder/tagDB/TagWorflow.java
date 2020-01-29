@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 by k3b.
+ * Copyright (c) 2017-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -29,13 +29,15 @@ import java.util.Date;
 import java.util.List;
 
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.queries.IMediaRepositoryApi;
 import de.k3b.android.util.AndroidFileCommands;
+import de.k3b.io.FileCommands;
 import de.k3b.io.IProgessListener;
 import de.k3b.io.collections.SelectedFiles;
-import de.k3b.io.FileCommands;
 import de.k3b.media.MediaFormatter;
-import de.k3b.media.PhotoPropertiesXmpSegment;
 import de.k3b.media.PhotoPropertiesUpdateHandler;
+import de.k3b.media.PhotoPropertiesXmpSegment;
 import de.k3b.tagDB.Tag;
 import de.k3b.tagDB.TagConverter;
 import de.k3b.tagDB.TagProcessor;
@@ -78,21 +80,27 @@ public class TagWorflow extends TagProcessor implements IProgessListener {
 
     /** execute the updates for all affected files in the Workflow. */
     public int updateTags(List<String> addedTags, List<String> removedTags) {
-        int itemCount = 0;
-        if (items != null) {
-            int progressCountDown = 0;
-            int total = items.size();
-            for (TagSql.TagWorflowItem item : items) {
-                itemCount+=updateTags(item, addedTags, removedTags);
-                progressCountDown--;
-                if (progressCountDown < 0) {
-                    progressCountDown = 10;
-                    if (!onProgress(itemCount, total, item.path)) break;
-                }
-            } // for each image
+        final IMediaRepositoryApi mediaDBApi = FotoSql.getMediaDBApi();
+        try {
+            mediaDBApi.beginTransaction(); // Performance boost: all db-inserts/updates in one transaction
+            int itemCount = 0;
+            if (items != null) {
+                int progressCountDown = 0;
+                int total = items.size();
+                for (TagSql.TagWorflowItem item : items) {
+                    itemCount += updateTags(item, addedTags, removedTags);
+                    progressCountDown--;
+                    if (progressCountDown < 0) {
+                        progressCountDown = 10;
+                        if (!onProgress(itemCount, total, item.path)) break;
+                    }
+                } // for each image
+            }
+            mediaDBApi.setTransactionSuccessful();
+            return itemCount;
+        } finally {
+            mediaDBApi.endTransaction();
         }
-
-        return itemCount;
     }
 
     /** update one file if tags change or xmp does not exist yet: xmp-sidecar-file, media-db and batch */
@@ -124,7 +132,7 @@ public class TagWorflow extends TagProcessor implements IProgessListener {
             if (mustSave) {
                 exif.setTags(currentItemTags);
                 exif.save(dbgSaveReason);
-                TagSql.updateDB(dbgSaveReason, this.context, tagWorflowItemFromDB.path, exif, MediaFormatter.FieldID.tags);
+                TagSql.updateDB(dbgSaveReason, tagWorflowItemFromDB.path, exif, MediaFormatter.FieldID.tags);
 
                 // update tag repository
                 TagRepository.getInstance().includeTagNamesIfNotFound(currentItemTags);
@@ -181,8 +189,10 @@ public class TagWorflow extends TagProcessor implements IProgessListener {
         return null;
     }
 
-    /** same as {@link TagSql#loadTagWorflowItems(Context, String, List)} but can be overwritten for unittests. */
+    /**
+     * same as {@link TagSql#loadTagWorflowItems(String, List)} but can be overwritten for unittests.
+     */
     protected List<TagSql.TagWorflowItem> loadTagWorflowItems(Context context, String selectedItems, List<Tag> anyOfTags) {
-        return TagSql.loadTagWorflowItems(context, selectedItems, anyOfTags);
+        return TagSql.loadTagWorflowItems(selectedItems, anyOfTags);
     }
 }

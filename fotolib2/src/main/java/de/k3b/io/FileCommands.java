@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -185,15 +185,14 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
     /**
      * For junit integration test: special internal version with explicit dependencies.
      * move (or copy) sourcefiles (with their xmp-sidecar-files) to destdirfolder.
-     * Executes autoprocessing (#91: rename, add exif) if destdirfolder
-     * contains ".apm"  (autoprocessing data file)
+     * Executes autoprocessing (#91: rename, add exif) if autoProccessData is not null
      * @param move false: copy
      * @param selectedFiles
      * @param destDirFolder where files are moved/copied to
      * @param autoProccessData null or data for auto rename/exif data
      * @param progessListener  */
-    int moveOrCopyFilesTo(boolean move, SelectedFiles selectedFiles, File destDirFolder,
-                          PhotoAutoprocessingDto autoProccessData, IProgessListener progessListener) {
+    public int moveOrCopyFilesTo(boolean move, SelectedFiles selectedFiles, File destDirFolder,
+                                 PhotoAutoprocessingDto autoProccessData, IProgessListener progessListener) {
         boolean doNotRenameIfSourceInDestFolder = false;
         IFileNameProcessor renameProcessor = null;
         PhotoPropertiesDiffCopy exifChanges = null;
@@ -274,7 +273,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                 int pos = 0;
                 long now = new Date().getTime();
                 MediaTransactionLogEntryType moveOrCopyCommand = (move) ? MediaTransactionLogEntryType.MOVE : MediaTransactionLogEntryType.COPY;
-                TransactionLoggerBase logger = (exifChanges == null) ? null : new TransactionLoggerBase(this, now);
+                TransactionLoggerBase logger = (exifChanges == null) ? null : createTransactionLogger(now);
                 boolean sameFile;
 
                 while (pos < fileCount) {
@@ -371,6 +370,10 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
             }
         }
         return itemCount;
+    }
+
+    protected TransactionLoggerBase createTransactionLogger(long now) {
+        return new TransactionLoggerBase(this, now);
     }
 
     private PhotoAutoprocessingDto getPhotoAutoprocessingDto(File destDirFolder) {

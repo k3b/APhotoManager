@@ -54,6 +54,7 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 import uk.co.senab.photoview.log.LogManager;
 
 public class SettingsActivity extends PreferenceActivity {
+    private static final String PREF_KEY_USE_MEDIA_IMAGE_DB_REPLACEMENT = "useMediaImageDbReplacement";
     private static Boolean sOldEnableNonStandardIptcMediaScanner = null;
     private SharedPreferences prefsInstance = null;
     private ListPreference defaultLocalePreference;  // #21: Support to change locale at runtime
@@ -170,6 +171,9 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putBoolean("xmp_file_schema_long", LibGlobal.preferLongXmpFormat);
 
         prefs.putBoolean("mapsForgeEnabled", Global.mapsForgeEnabled);
+        if (Global.allow_emulate_ao10) {
+            prefs.putBoolean(PREF_KEY_USE_MEDIA_IMAGE_DB_REPLACEMENT, Global.useAo10MediaImageDbReplacement);
+        }
 
         prefs.putBoolean("locked", Global.locked);
         prefs.putString("passwordHash", Global.passwordHash);
@@ -244,7 +248,12 @@ public class SettingsActivity extends PreferenceActivity {
 
         Global.mapsForgeEnabled                 = getPref(prefs, "mapsForgeEnabled", Global.mapsForgeEnabled);
 
-                
+        boolean useAo10MediaImageDbReplacement = Global.useAo10MediaImageDbReplacement;
+        if (Global.allow_emulate_ao10) {
+            useAo10MediaImageDbReplacement = getPref(prefs, PREF_KEY_USE_MEDIA_IMAGE_DB_REPLACEMENT, Global.useAo10MediaImageDbReplacement);
+        }
+        AndroFotoFinderApp.setMediaImageDbReplacement(context.getApplicationContext(), useAo10MediaImageDbReplacement);
+
         Global.imageDetailThumbnailIfBiggerThan = getPref(prefs, "imageDetailThumbnailIfBiggerThan"     , Global.imageDetailThumbnailIfBiggerThan);
 
         Global.maxSelectionMarkersInMap         = getPref(prefs, "maxSelectionMarkersInMap"     , Global.maxSelectionMarkersInMap);
@@ -285,6 +294,85 @@ public class SettingsActivity extends PreferenceActivity {
         */
 
         fixDefaults(context, previousCacheRoot, previousMapsForgeDir);
+    }
+
+    @Override
+    public void onPause() {
+        prefs2Global(this);
+        super.onPause();
+    }
+
+    @Override
+    protected void onCreate(final Bundle savedInstanceState) {
+        LocalizedActivity.fixLocale(this);    // #21: Support to change locale at runtime
+        super.onCreate(savedInstanceState);
+
+        if (Global.debugEnabled) {
+            // todo create junit integration tests with arabic locale from this.
+            StringFormatResourceTests.test(this);
+        }
+
+        final Intent intent = getIntent();
+        if (Global.debugEnabled && (intent != null)) {
+            Log.d(Global.LOG_CONTEXT, "SettingsActivity onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
+        }
+
+        this.addPreferencesFromResource(R.xml.preferences);
+        if (Global.allow_emulate_ao10) {
+            this.addPreferencesFromResource(R.xml.preferences_ao10_test);
+        }
+        prefsInstance = PreferenceManager
+                .getDefaultSharedPreferences(this);
+        global2Prefs(this.getApplication());
+
+        // #21: Support to change locale at runtime
+        defaultLocalePreference =
+                (ListPreference) findPreference(Global.PREF_KEY_USER_LOCALE);
+        defaultLocalePreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                setLanguage((String) newValue);
+                LocalizedActivity.recreate(SettingsActivity.this);
+                return true; // change is allowed
+            }
+        });
+
+        mediaUpdateStrategyPreference =
+                (ListPreference) findPreference("mediaUpdateStrategy");
+        mediaUpdateStrategyPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                LibGlobal.mediaUpdateStrategy = (String) newValue;
+                setPref(LibGlobal.mediaUpdateStrategy, mediaUpdateStrategyPreference, R.array.pref_media_update_strategy_names);
+                return true;
+            }
+        });
+        setPref(LibGlobal.mediaUpdateStrategy, mediaUpdateStrategyPreference, R.array.pref_media_update_strategy_names);
+
+        findPreference("debugClearLog").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                onDebugClearLogCat();
+                return false; // donot close
+            }
+        });
+        findPreference("debugSaveLog").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                onDebugSaveLogCat();
+                return false; // donot close
+            }
+        });
+        findPreference("translate").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                onTranslate();
+                return false; // donot close
+            }
+        });
+
+        // #21: Support to change locale at runtime
+        updateSummary();
     }
 
     private static void fixDefaults(Context context, File previousCacheRoot, File previousMapsForgeDir) {
@@ -427,7 +515,7 @@ public class SettingsActivity extends PreferenceActivity {
 
     private void onDebugSaveLogCat() {
         Log.e(Global.LOG_CONTEXT, "SettingsActivity-SaveLogCat(): " + ActivityWithCallContext.readCallContext(getIntent()));
-        ((AndroFotoFinderApp) getApplication()).saveToFile();
+        ((AndroFotoFinderApp) getApplication()).saveToFile(this);
     }
 
     private void onTranslate() {

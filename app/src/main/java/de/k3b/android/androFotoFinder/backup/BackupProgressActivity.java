@@ -29,9 +29,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.provider.DocumentFile;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.io.File;
@@ -42,7 +39,8 @@ import java.util.Date;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.IntentUtil;
-import de.k3b.android.widget.LocalizedActivity;
+import de.k3b.android.widget.ProgressActivity;
+import de.k3b.android.widget.ProgressableAsyncTask;
 import de.k3b.zip.IZipConfig;
 import de.k3b.zip.LibZipGlobal;
 import de.k3b.zip.ZipConfigDto;
@@ -52,7 +50,7 @@ import de.k3b.zip.ZipStorageFile;
 /**
  * #108: Showing progress while backup/compression-to-zip is executed
  */
-public class BackupProgressActivity extends LocalizedActivity {
+public class BackupProgressActivity extends ProgressActivity<IZipConfig> {
     /**
      * document tree supported since andrid-5.0. For older devices use folder picker
      */
@@ -62,7 +60,7 @@ public class BackupProgressActivity extends LocalizedActivity {
     private static String mDebugPrefix = "BuProgressActivity: ";
 
     // != null while async backup is running
-    private static BackupAsyncTask backupAsyncTask = null;
+    private static ProgressableAsyncTask<IZipConfig> asyncTask = null;
     private static Date backupDate = null;
 
     private IZipConfig mZipConfigData = null;
@@ -123,7 +121,17 @@ public class BackupProgressActivity extends LocalizedActivity {
 
     }
 
-/*
+    @Override
+    protected ProgressableAsyncTask<IZipConfig> getAsyncTask() {
+        return asyncTask;
+    }
+
+    @Override
+    protected void setAsyncTask(ProgressableAsyncTask<IZipConfig> asyncTask) {
+        BackupProgressActivity.asyncTask = asyncTask;
+    }
+
+    /*
     @Override
     protected void onPause() {
         setBackupAsyncTaskProgessReceiver(null);
@@ -141,16 +149,16 @@ public class BackupProgressActivity extends LocalizedActivity {
 
         mZipConfigData = (IZipConfig) intent.getSerializableExtra(EXTRA_STATE_ZIP_CONFIG);
 
-        if (backupAsyncTask == null) {
+        if (getAsyncTask() == null) {
             backupDate = new Date();
             final String zipDir = mZipConfigData.getZipDir();
             final String zipName = ZipConfigDto.getZipFileName(mZipConfigData, backupDate);
             ZipStorage zipStorage = getCurrentStorage(this, zipDir, zipName);
 
-            backupAsyncTask = new BackupAsyncTask(this, new ZipConfigDto(mZipConfigData), zipStorage,
-                    backupDate);
-            setBackupAsyncTaskProgessReceiver(mDebugPrefix + "onCreate create backupAsyncTask ", this);
-            backupAsyncTask.execute();
+            setAsyncTask(new BackupAsyncTask(this, new ZipConfigDto(mZipConfigData), zipStorage,
+                    backupDate));
+            setAsyncTaskProgessReceiver(mDebugPrefix + "onCreate create asyncTask ", this);
+            getAsyncTask().execute();
         }
 
         final TextView lblContext = (TextView) findViewById(R.id.lbl_context);
@@ -165,60 +173,5 @@ public class BackupProgressActivity extends LocalizedActivity {
         lblContext.setText(contextMessage);
     }
 
-    @Override
-    protected void onDestroy() {
-        setBackupAsyncTaskProgessReceiver(mDebugPrefix + "onDestroy ", null);
-        super.onDestroy();
-    }
-
-    @Override
-    protected void onResume() {
-        setBackupAsyncTaskProgessReceiver(mDebugPrefix + "onResume ", this);
-        Global.debugMemory(mDebugPrefix, "onResume");
-        super.onResume();
-
-    }
-
-    /**
-     * (Re-)Connects this activity back with static backupAsyncTask
-     */
-    private void setBackupAsyncTaskProgessReceiver(String why, Activity progressReceiver) {
-        boolean isActive = BackupAsyncTask.isActive(backupAsyncTask);
-        boolean running = (progressReceiver != null) && isActive;
-
-        String debugContext = why + mDebugPrefix + " setBackupAsyncTaskProgessReceiver isActive=" + isActive +
-                ", running=" + running +
-                " ";
-
-        if (backupAsyncTask != null) {
-            final ProgressBar progressBar = (ProgressBar) this.findViewById(R.id.progressBar);
-            final TextView status = (TextView) this.findViewById(R.id.lbl_status);
-            final Button buttonCancel = (Button) this.findViewById(R.id.cmd_cancel);
-
-            // setVisibility(running, progressBar, buttonCancel);
-
-            if (running) {
-                backupAsyncTask.setContext(debugContext, this, progressBar, status);
-                final String _debugContext = debugContext;
-                buttonCancel.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (LibZipGlobal.debugEnabled) {
-                            Log.d(LibZipGlobal.LOG_TAG, mDebugPrefix + " button Cancel backup pressed initialized by " + _debugContext);
-                        }
-                        backupAsyncTask.cancel(false);
-                        buttonCancel.setVisibility(View.INVISIBLE);
-                    }
-                });
-
-            } else {
-                backupAsyncTask.setContext(debugContext, null, null, null);
-                buttonCancel.setOnClickListener(null);
-                if (!isActive) {
-                    backupAsyncTask = null;
-                }
-            }
-        }
-    }
 }
 

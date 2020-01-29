@@ -19,12 +19,12 @@
 
 package de.k3b.android.androFotoFinder.media;
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.app.Activity;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -206,7 +206,7 @@ public class PhotoPropertiesMediaDBCsvImportActivity extends Activity {
 
                 TagSql.setFileModifyDate(dbValues, new Date().getTime() / 1000);
 
-                mUpdateCount += TagSql.execUpdate(dbgContext, PhotoPropertiesMediaDBCsvImportActivity.this, path, xmlLastFileModifyDate, dbValues, VISIBILITY.PRIVATE_PUBLIC);
+                mUpdateCount += TagSql.execUpdate(dbgContext, path, xmlLastFileModifyDate, dbValues, VISIBILITY.PRIVATE_PUBLIC);
                 mItemCount++;
             }
         }

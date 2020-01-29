@@ -122,7 +122,7 @@ public class AffUtils {
             List<String> paths = new ArrayList<String>();
             List<Date> datesPhotoTaken = new ArrayList<Date>();
 
-            if (FotoSql.getFileNames(context, items, ids, paths, datesPhotoTaken) != null) {
+            if (FotoSql.getFileNames(items, ids, paths, datesPhotoTaken) != null) {
                 return new SelectedFiles(paths.toArray(new String[paths.size()]), ids.toArray(new Long[ids.size()]), datesPhotoTaken.toArray(new Date[datesPhotoTaken.size()]));
             }
         }

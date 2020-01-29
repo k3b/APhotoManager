@@ -34,8 +34,6 @@
   <!-- This becomes .../fastlane/metadata/android/full_description.txt.
     See https://f-droid.org/docs/Build_Metadata_Reference/#Description -->
   <string name="full_description"><![CDATA["
-    Керування локальними фотографіями: Шукати/Копіювати/Змінювати-Exif та показувати в Галереї або на Карті.
-
     Особливості:
 
     * Швидко знаходьте фотографії за тегами(ключові слова), (під-)папку, дату, географію, назву, ...

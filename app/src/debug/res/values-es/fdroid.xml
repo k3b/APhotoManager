@@ -37,8 +37,6 @@
   <!-- This becomes .../fastlane/metadata/android/full_description.txt.
     See https://f-droid.org/docs/Build_Metadata_Reference/#Description -->
   <string name="full_description"><![CDATA["
-    Gestiona fotos locales: Encontrar/Copiar/Editar-Exif y mostrar en galería o Mapa.
-
     Características:
 
     * Encontrar rápido fotos por etiquetas(palabras claves), (sub-)carpeta, fecha, mapa geográfico, título, ...

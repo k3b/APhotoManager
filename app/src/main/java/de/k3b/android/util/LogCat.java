@@ -19,6 +19,7 @@
  
 package de.k3b.android.util;
 
+import android.app.Activity;
 import android.util.Log;
 
 import java.io.File;
@@ -57,7 +58,7 @@ public abstract class LogCat implements Thread.UncaughtExceptionHandler {
         Thread.setDefaultUncaughtExceptionHandler(this);
     }
 
-    public abstract void saveToFile();
+    public abstract void saveToFile(Activity activity);
 
     protected void saveLogCat(File logFile, OutputStream outputStream, String[] tags) {
         StringBuilder cmdline = new StringBuilder();
@@ -122,7 +123,7 @@ public abstract class LogCat implements Thread.UncaughtExceptionHandler {
         try {
             // Do your stuff with the exception
             Log.e(mTags[0],"LogCat.uncaughtException " + ex, ex);
-            saveToFile();
+            saveToFile(null);
         } catch (Exception e) {
             /* Ignore */
         } finally {

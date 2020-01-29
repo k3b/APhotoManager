@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright 2011, 2012 Chris Banes.
- * Copyright (c) 2015-2019 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -67,6 +67,7 @@ import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.FileManagerUtil;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.OsUtils;
+import de.k3b.android.util.PhotoChangeNotifyer;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScannerAsyncTask;
 import de.k3b.android.widget.AboutDialogPreference;
@@ -92,7 +93,8 @@ import de.k3b.tagDB.Tag;
  * Swipe left/right to show previous/next image.
  */
 
-public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs implements Common, TagsPickerFragment.ITagsPicker {
+public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs implements Common, TagsPickerFragment.ITagsPicker,
+        PhotoChangeNotifyer.PhotoChangedListener {
     private static final String INSTANCE_STATE_MODIFY_COUNT = "mModifyCount";
     private static final String INSTANCE_STATE_LAST_SCROLL_POSITION = "lastScrollPosition";
     /** #70: remember on config change (screen rotation) */
@@ -165,180 +167,52 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
     // if not null this one image that cannot be translated to a file uri will be shown
     private Uri imageUri  = null;
 
-    /** executes sql to load image detail data in a background task that may survive
-     * conriguration change (i.e. device rotation) */
-    class LocalCursorLoader implements LoaderManager.LoaderCallbacks<Cursor> {
-        /** incremented every time a new curster/query is generated */
-        private int mRequeryInstanceCount = 0;
+    long mUpdateId = FotoSql.getMediaDBApi().getCurrentUpdateId();
 
-        /** called by LoaderManager.getLoader(ACTIVITY_ID) to (re)create loader
-         * that attaches to last query/cursor if it still exist i.e. after rotation */
-        @Override
-        public Loader<Cursor> onCreateLoader(int loaderID, Bundle bundle) {
-            switch (loaderID) {
-                case ACTIVITY_ID:
-                    mRequeryInstanceCount++;
-                    mWaitingForMediaScannerResult = false;
-                    if (Global.debugEnabledSql) {
-                        Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onCreateLoader" +
-                                getDebugContext() +
-                                " : query = " + mGalleryContentQuery);
-                    }
-                    return FotoSql.createCursorLoader(getApplicationContext(), mGalleryContentQuery);
-                default:
-                    // An invalid id was passed in
-                    return null;
+    private static int updateIncompleteMediaDatabase(String debugPrefix, Context context, String why, File dirToScan) {
+        if (dirToScan == null) return 0;
+
+        String dbPathSearch = null;
+        ArrayList<String> missing = new ArrayList<String>();
+        dbPathSearch = dirToScan.getPath() + "/%";
+        List<String> known = FotoSql.execGetFotoPaths(dbPathSearch);
+        File[] existing = dirToScan.listFiles();
+
+        if (existing != null) {
+            for (File file : existing) {
+                String found = file.getAbsolutePath();
+                if (PhotoPropertiesUtil.isImage(found, PhotoPropertiesUtil.IMG_TYPE_ALL) && !known.contains(found)) {
+                    missing.add(found);
+                }
             }
         }
 
-        /** called after media db content has changed */
-        @Override
-        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-            // to be restored after refreshLocal if there is no mInitialFilePath
-            if ((mInitialScrollPosition == NO_INITIAL_SCROLL_POSITION) && (mViewPager != null)) {
-                mInitialScrollPosition = mViewPager.getCurrentItem();
+        if (Global.debugEnabled) {
+            StringBuilder message = new StringBuilder();
+            message.append(debugPrefix).append("updateIncompleteMediaDatabase('")
+                    .append(dbPathSearch).append("') : \n\t");
+
+            for (String s : missing) {
+                message.append(s).append("; ");
             }
-            // do change the data
-            mAdapter.swapCursor(data);
-
-            // restore position is invalid
-            final int newItemCount = mAdapter.getCount();
-
-            if (((newItemCount == 0)) || (mInitialScrollPosition >= newItemCount)) mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
-
-            if (Global.debugEnabledSql) {
-                Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onLoadFinished" +
-                        getDebugContext() +
-                        " found " + ((data == null) ? 0 : newItemCount) + " rows");
-            }
-
-            // do change the data
-            mAdapter.notifyDataSetChanged();
-            mViewPager.setAdapter(mAdapter);
-
-            // show the changes
-            onLoadCompleted();
+            Log.d(Global.LOG_CONTEXT, message.toString());
         }
 
-        /** called by LoaderManager. after search criteria were changed or if activity is destroyed. */
-        @Override
-        public void onLoaderReset(Loader<Cursor> loader) {
-            // rember position where we have to scroll to after refreshLocal is finished.
-            mInitialScrollPosition = mViewPager.getCurrentItem();
-            mAdapter.swapCursor(null);
-            if (Global.debugEnabledSql) {
-                Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onLoaderReset" +
-                        getDebugContext());
-            }
-            mAdapter.notifyDataSetChanged();
-        }
-
-        @NonNull
-        private String getDebugContext() {
-            return "(#" + mRequeryInstanceCount
-                    + ", mScrollPosition=" + mInitialScrollPosition +
-                    ",  Path='" + mInitialFilePath +
-                    "')";
-        }
+        PhotoPropertiesMediaFilesScannerAsyncTask scanner = new PhotoPropertiesMediaFilesScannerAsyncTask(PhotoPropertiesMediaFilesScanner.getInstance(context), context, why);
+        scanner.execute(null, missing.toArray(new String[missing.size()]));
+        return missing.size();
     }
 
-    class LocalFileCommands extends AndroidFileCommands {
-        @Override
-        protected void onPostProcess(String what, int opCode, SelectedFiles selectedFiles, int modifyCount, int itemCount, String[] oldPathNames, String[] newPathNames) {
-            mInitialFilePath = null;
-            switch (opCode) {
-                case OP_MOVE:
-                case OP_RENAME:
-                    if ((newPathNames!= null) && (newPathNames.length > 0)) {
-                        // so selection will be restored to this after load complete
-                        mInitialFilePath = newPathNames[0];
-                    }
-                    break;
-                case OP_COPY:
-                    if ((oldPathNames!= null) && (oldPathNames.length > 0)) {
-                        // so selection will be restored to this after load complete
-                        mInitialFilePath = oldPathNames[0];
-                    }
-                    break;
-                default:break;
-            }
-
-            super.onPostProcess(what, opCode, selectedFiles, modifyCount, itemCount, oldPathNames, newPathNames);
-
-            if ((opCode == OP_RENAME) || (opCode == OP_MOVE) || (opCode == OP_DELETE)) {
-                refreshIfNecessary();
+    /**
+     * #70: adds/removes/replases contextColumnExpression
+     */
+    private static void addContextColumn(QueryParameter query, String contextColumnExpression) {
+        if (query != null) {
+            query.removeFirstColumnThatContains(CONTEXT_COLUMN_ALIAS);
+            if ((contextColumnExpression != null) && (contextColumnExpression.trim().length() > 0)) {
+                query.addColumn(contextColumnExpression + CONTEXT_COLUMN_ALIAS);
             }
         }
-
-    }
-
-    public static class MoveOrCopyDestDirPicker extends DirectoryPickerFragment {
-        protected static AndroidFileCommands sFileCommands = null;
-
-        public static MoveOrCopyDestDirPicker newInstance(boolean move, final SelectedFiles srcFotos) {
-            MoveOrCopyDestDirPicker f = new MoveOrCopyDestDirPicker();
-
-            // Supply index input as an argument.
-            Bundle args = new Bundle();
-            args.putBoolean("move", move);
-            AffUtils.putSelectedFiles(args, srcFotos);
-            f.setArguments(args);
-
-            return f;
-        }
-
-        /* do not use activity callback */
-        @Override
-        protected void setDirectoryListener(Activity activity) {/* do not use activity callback */}
-
-        public boolean getMove() {
-            return getArguments().getBoolean("move", false);
-        }
-
-        public SelectedFiles getSrcFotos() {
-            return AffUtils.getSelectedFiles(getArguments());
-        }
-
-        /**
-         * To be overwritten to check if a path can be picked.
-         *
-         * @param path to be checked if it cannot be handled
-         * @return null if no error else error message with the reason why it cannot be selected
-         */
-        @Override
-        protected String getStatusErrorMessage(String path) {
-            String errorMessage = (sFileCommands == null) ? null : sFileCommands.checkWriteProtected(0, new File(path));
-            if (errorMessage != null) {
-                int pos = errorMessage.indexOf('\n');
-                return (pos > 0) ? errorMessage.substring(0,pos) : errorMessage;
-            }
-            return super.getStatusErrorMessage(path);
-        }
-
-        @Override
-        protected void onDirectoryPick(IDirectory selection) {
-            // super.onDirectoryPick(selection);
-            mModifyCount++; // copy or move initiated
-            getActivity().setResult((mModifyCount == 0) ? RESULT_NOCHANGE : RESULT_CHANGE);
-
-            sFileCommands.onMoveOrCopyDirectoryPick(getMove(), getSrcFotos(), selection);
-            dismiss();
-        }
-    }
-
-    private class TagUpdateTask extends TagTask<List<String>> {
-
-        TagUpdateTask(SelectedFiles fotos) {
-            super(ImageDetailActivityViewPager.this,R.string.tags_activity_title);
-            this.getWorkflow().init(ImageDetailActivityViewPager.this, fotos, null);
-
-        }
-
-        @Override
-        protected Integer doInBackground(List<String>... params) {
-            return getWorkflow().updateTags(params[0], params[1]);
-        }
-
     }
 
     /**
@@ -535,10 +409,10 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
     }
 
     @Override
-    protected void onActivityResult(final int requestCode,
-                                    final int resultCode, final Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-        if (mDestDirPicker != null) mDestDirPicker.onActivityResult(requestCode,resultCode,intent);
+    protected void onResume() {
+        unhideActionBar(Global.actionBarHideTimeInMilliSecs, "onResume");
+        Global.debugMemory(mDebugPrefix, "onResume");
+        super.onResume();
 
         final boolean locked = LockScreen.isLocked(this);
         if (this.locked != locked) {
@@ -547,20 +421,17 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
             invalidateOptionsMenu();
         }
 
-        if (requestCode == ACTION_RESULT_FORWARD) {
-            // forward result from child-activity to parent-activity
-            setResult(resultCode, intent);
-            finish();
-        } else if (requestCode == ACTION_RESULT_MUST_MEDIA_SCAN) {
-            // #64 after edit the content might have been changed. update media DB.
-            String orgiginalFileToScan = getCurrentFilePath();
+        if (Global.debugEnabledMemory) {
+            Log.d(Global.LOG_CONTEXT, mDebugPrefix + " - onResume cmd (" +
+                    MoveOrCopyDestDirPicker.sFileCommands + ") => (" + mFileCommands +
+                    ")");
 
-            if (orgiginalFileToScan != null) {
-                PhotoPropertiesMediaFilesScanner.getInstance(this).updateMediaDatabase_Android42(this, null, orgiginalFileToScan);
-            }
         }
 
-        refreshIfNecessary();
+        // workaround fragment lifecycle is newFragment.attach oldFragment.detach.
+        // this makes shure that the visible fragment has commands
+        MoveOrCopyDestDirPicker.sFileCommands = mFileCommands;
+        reloadIfDataHasChanged();
     }
 
     private static boolean mustForward(Intent intent) {
@@ -631,7 +502,7 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
         File selectedPhoto = new File(path);
         this.mInitialFilePath = path;
         this.mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
-        GalleryFilterParameter filter = new GalleryFilterParameter().setPath(selectedPhoto.getParent() + "/%");
+        GalleryFilterParameter filter = new GalleryFilterParameter().setFolderAndBelow(selectedPhoto.getParent());
         return filter;
     }
 
@@ -651,18 +522,11 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
 */
 
     @Override
-    protected void onPause () {
-        unhideActionBar(DISABLE_HIDE_ACTIONBAR, "onPause");
-        Global.debugMemory(mDebugPrefix, "onPause");
-        startStopSlideShow(false);
-        super.onPause();
-    }
-
-    @Override
-    protected void onResume () {
-        unhideActionBar(Global.actionBarHideTimeInMilliSecs, "onResume");
-        Global.debugMemory(mDebugPrefix, "onResume");
-        super.onResume();
+    protected void onActivityResult(final int requestCode,
+                                    final int resultCode, final Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+        if (mDestDirPicker != null)
+            mDestDirPicker.onActivityResult(requestCode, resultCode, intent);
 
         final boolean locked = LockScreen.isLocked(this);
         if (this.locked != locked) {
@@ -671,16 +535,29 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
             invalidateOptionsMenu();
         }
 
-        if (Global.debugEnabledMemory) {
-            Log.d(Global.LOG_CONTEXT, mDebugPrefix + " - onResume cmd (" +
-                    MoveOrCopyDestDirPicker.sFileCommands + ") => (" + mFileCommands +
-                    ")");
+        if (requestCode == ACTION_RESULT_FORWARD) {
+            // forward result from child-activity to parent-activity
+            setResult(resultCode, intent);
+            finish();
+        } else if (requestCode == ACTION_RESULT_MUST_MEDIA_SCAN) {
+            // #64 after edit the content might have been changed. update media DB.
+            String orgiginalFileToScan = getCurrentFilePath();
 
+            if (orgiginalFileToScan != null) {
+                PhotoPropertiesMediaFilesScanner.getInstance(this).updateMediaDatabase_Android42(this, null, orgiginalFileToScan);
+            }
         }
 
-        // workaround fragment lifecycle is newFragment.attach oldFragment.detach.
-        // this makes shure that the visible fragment has commands
-        MoveOrCopyDestDirPicker.sFileCommands = mFileCommands;
+        reloadIfDataHasChanged();
+    }
+
+    @Override
+    protected void onPause() {
+        unhideActionBar(DISABLE_HIDE_ACTIONBAR, "onPause");
+        Global.debugMemory(mDebugPrefix, "onPause");
+        startStopSlideShow(false);
+        PhotoChangeNotifyer.setPhotoChangedListener(null); // notify triggererd in onResume
+        super.onPause();
     }
 
     @Override
@@ -760,16 +637,6 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
         }
     }
 
-    private void refreshIfNecessary() {
-        if ((mAdapter != null) && (mViewPager != null) && (mAdapter.isInArrayMode())) {
-            mAdapter.refreshLocal();
-            mViewPager.setAdapter(mAdapter);
-
-            // show the changes
-            onLoadCompleted();
-        }
-    }
-
     /**
      * gets called if no file is found by a db-query or if jpgFullFilePath is not found in media db
      * return false; activity must me closed
@@ -794,38 +661,43 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
         return false;
     }
 
-    private static int updateIncompleteMediaDatabase(String debugPrefix, Context context, String why, File dirToScan) {
-        if (dirToScan == null) return 0;
+    private void onRenameAnswer(SelectedFiles currentFoto, final long fotoId, final String fotoSourcePath, String newFileName) {
+        File src = new File(fotoSourcePath);
+        File dest = new File(src.getParentFile(), newFileName);
 
-        String dbPathSearch = null;
-        ArrayList<String> missing = new ArrayList<String>();
-        dbPathSearch = dirToScan.getPath() + "/%";
-        List<String> known = FotoSql.execGetFotoPaths(context, dbPathSearch);
-        File[] existing = dirToScan.listFiles();
+        File srcXmpShort = FileProcessor.getSidecar(src, false);
+        boolean hasSideCarShort = ((srcXmpShort != null) && (mFileCommands.osFileExists(srcXmpShort)));
+        File srcXmpLong = FileProcessor.getSidecar(src, true);
+        boolean hasSideCarLong = ((srcXmpLong != null) && (mFileCommands.osFileExists(srcXmpLong)));
 
-        if (existing != null) {
-            for (File file : existing) {
-                String found = file.getAbsolutePath();
-                if (PhotoPropertiesUtil.isImage(found, PhotoPropertiesUtil.IMG_TYPE_ALL) && !known.contains(found)) {
-                    missing.add(found);
-                }
-            }
+        File destXmpShort = FileProcessor.getSidecar(dest, false);
+        File destXmpLong = FileProcessor.getSidecar(dest, true);
+
+        if (src.equals(dest)) return; // new name == old name ==> nothing to do
+
+        String errorMessage = null;
+        if (hasSideCarShort && mFileCommands.osFileExists(destXmpShort)) {
+            errorMessage = getString(R.string.image_err_file_exists_format, destXmpShort.getAbsoluteFile());
+        }
+        if (hasSideCarLong && mFileCommands.osFileExists(destXmpLong)) {
+            errorMessage = getString(R.string.image_err_file_exists_format, destXmpLong.getAbsoluteFile());
+        }
+        if (mFileCommands.osFileExists(dest)) {
+            errorMessage = getString(R.string.image_err_file_exists_format, dest.getAbsoluteFile());
         }
 
-        if (Global.debugEnabled) {
-            StringBuilder message = new StringBuilder();
-            message.append(debugPrefix).append("updateIncompleteMediaDatabase('")
-                    .append(dbPathSearch).append("') : \n\t");
-
-            for(String s : missing) {
-                message.append(s).append("; ");
-            }
-            Log.d(Global.LOG_CONTEXT, message.toString());
+        PhotoChangeNotifyer.setPhotoChangedListener(this);
+        if (errorMessage != null) {
+            // dest-file already exists
+            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
+            onRenameQueston(currentFoto, fotoId, fotoSourcePath, newFileName);
+        } else if (mFileCommands.rename(currentFoto, dest, null)) {
+            mModifyCount++;
+        } else {
+            // rename failed
+            errorMessage = getString(R.string.image_err_file_rename_format, src.getAbsoluteFile());
+            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
         }
-
-        PhotoPropertiesMediaFilesScannerAsyncTask scanner = new PhotoPropertiesMediaFilesScannerAsyncTask(PhotoPropertiesMediaFilesScanner.getInstance(context), context, why);
-        scanner.execute(null, missing.toArray(new String[missing.size()]));
-        return missing.size();
     }
 
     @Override
@@ -889,146 +761,39 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
         return super.onPrepareOptionsMenu(menu);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem menuItem) {
-        boolean reloadContext = true;
-        boolean result = true;
-        boolean slideShowStarted = mSlideShowStarted;
-
-        onGuiTouched();
-        if (LockScreen.onOptionsItemSelected(this, menuItem)) {
-            mMustReplaceMenue       = true;
-            this.invalidateOptionsMenu();
-            return true;
-        }
-        if (mFileCommands.onOptionsItemSelected(menuItem, getCurrentFoto())) {
-            mModifyCount++;
-        } else {
-            // Handle presses on the action bar items
-            switch (menuItem.getItemId()) {
-                case R.id.action_details:
-                    cmdShowDetails(getCurrentFilePath(), getCurrentImageId());
-                    break;
-
-                case R.id.action_view_context_mode:
-                    pickContextDefinition();
-                    break;
-                case R.id.cmd_filemanager:
-                    FileManagerUtil.showInFilemanager(this, getCurrentDir());
-                    break;
+    private boolean onRenameQueston(final SelectedFiles currentFoto, final long fotoId, final String fotoPath, final String _newName) {
+        if (AndroidFileCommands.canProcessFile(this, false)) {
+            final String newName = (_newName == null)
+                    ? new File(getCurrentFilePath()).getName()
+                    : _newName;
 
 
-                case R.id.action_slideshow:
-                    reloadContext = false;
-                    // only if not started
-                    if (!slideShowStarted) startStopSlideShow(true);
-                    break;
-
-                case R.id.action_edit:
-                    // #64: (not) open editor via chooser
-                    IntentUtil.cmdStartIntent("edit", this, getCurrentFilePath(), null, null,
-                            Intent.ACTION_EDIT,
-                            (Global.showEditChooser) ? R.string.edit_chooser_title : 0,
-                            R.string.edit_err_editor_not_found, ACTION_RESULT_MUST_MEDIA_SCAN);
-                    break;
-
-                case R.id.menu_item_share:
-                    reloadContext = false;
-                    IntentUtil.cmdStartIntent("share", this, null, null, getCurrentFilePath(), Intent.ACTION_SEND, R.string.share_menu_title, R.string.share_err_not_found, 0);
-                    break;
-
-                case R.id.cmd_copy:
-                    result = cmdMoveOrCopyWithDestDirPicker(false, mFileCommands.getLastCopyToPath(), getCurrentFoto());
-                    break;
-                case R.id.cmd_move:
-                    result =  cmdMoveOrCopyWithDestDirPicker(true, mFileCommands.getLastCopyToPath(), getCurrentFoto());
-                    break;
-                case R.id.menu_item_rename:
-                    result =  onRenameDirQueston(getCurrentFoto(), getCurrentImageId(), getCurrentFilePath(), null);
-                    break;
-                case R.id.menu_exif:
-                    result = onEditExif(menuItem, getCurrentFoto(), getCurrentImageId(), getCurrentFilePath());
-                    break;
-
-                case R.id.cmd_gallery: {
-                    reloadContext = false;
-                    String dirPath = getCurrentFilePath(); // PhotoPropertiesMediaFilesScanner.getDir().getAbsolutePath();
-                    if (dirPath != null) {
-                        dirPath = FileUtils.getDir(dirPath).getAbsolutePath();
-                        GalleryFilterParameter newFilter = new GalleryFilterParameter();
-                        newFilter.setPath(dirPath);
-                        // int callBackId = (PhotoPropertiesMediaFilesScanner.isNoMedia(dirPath,PhotoPropertiesMediaFilesScanner.DEFAULT_SCAN_DEPTH)) ? NOMEDIA_GALLERY : 0;
-
-                        QueryParameter query = TagSql.filter2NewQuery(this.mFilter);
-                        FotoGalleryActivity.showActivity(" menu " + menuItem.getTitle() + "[13]" + dirPath,
-                                this, query, 0);
+            Dialogs dialog = new Dialogs() {
+                @Override
+                protected void onDialogResult(String newFileName, Object... parameters) {
+                    if (newFileName != null) {
+                        onRenameAnswer(currentFoto, (Long) parameters[0], (String) parameters[1], newFileName);
                     }
-                    break;
                 }
-
-                case R.id.cmd_show_geo:
-                    MapGeoPickerActivity.showActivity(" menu " + menuItem.getTitle(),
-                            this, getCurrentFoto(), null, null, 0);
-                    break;
-
-                case R.id.cmd_show_geo_as: {
-                    final long imageId = getCurrentImageId();
-                    IGeoPoint _geo = FotoSql.execGetPosition(null, this,
-                            null, imageId, mDebugPrefix, "on cmd_show_geo_as");
-                    final String currentFilePath = getCurrentFilePath();
-                    GeoPointDto geo = new GeoPointDto(_geo.getLatitude(), _geo.getLongitude(), GeoPointDto.NO_ZOOM);
-
-                    geo.setDescription(currentFilePath);
-                    geo.setId(""+imageId);
-                    geo.setName("#"+imageId);
-                    GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
-                    String uri = PARSER.toUriString(geo);
-
-                    IntentUtil.cmdStartIntent("cmd_show_geo_as", this, null, uri, null, Intent.ACTION_VIEW, R.string.geo_show_as_menu_title, R.string.geo_picker_err_not_found, 0);
-                    break;
-                }
-
-                case R.id.cmd_edit_geo: {
-                    SelectedFiles selectedItem = getCurrentFoto();
-                    GeoEditActivity.showActivity(" menu " + menuItem.getTitle() + " " + selectedItem,
-                            this, selectedItem, GeoEditActivity.RESULT_ID);
-                    break;
-                }
-                case R.id.cmd_edit_tags: {
-                    SelectedFiles selectedItem = getCurrentFoto();
-                    tagsShowEditDialog(selectedItem);
-                    break;
-                }
-
-                case R.id.cmd_about:
-                    reloadContext = false;
-                    AboutDialogPreference.createAboutDialog(this).show();
-                    break;
-                case R.id.cmd_settings:
-                    reloadContext = false;
-                    SettingsActivity.showActivity(this);
-                    break;
-                case R.id.cmd_more:
-                    reloadContext = false;
-                    new Handler().postDelayed(new Runnable() {
-                        public void run() {
-                            // reopen after some delay
-                            openOptionsMenu();
-                        }
-                    }, 200);
-                    break;
-
-                default:
-                    result = super.onOptionsItemSelected(menuItem);
-            }
+            };
+            dialog.editFileName(this, getString(R.string.rename_menu_title), newName, fotoId, fotoPath);
         }
+        return true;
+    }
 
-        if (reloadContext) {
-            setContextMode(menuItem.getTitle());
+    private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
+        if (AndroidFileCommands.canProcessFile(this, false)) {
+            PhotoChangeNotifyer.setPhotoChangedListener(this);
+            mDestDirPicker = MoveOrCopyDestDirPicker.newInstance(move, fotos);
+
+            mDestDirPicker.defineDirectoryNavigation(OsUtils.getRootOSDirectory(null),
+                    (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
+                    lastCopyToPath);
+            mDestDirPicker.setContextMenuId(LockScreen.isLocked(this) ? 0 : R.menu.menu_context_pick_osdir);
+            mDestDirPicker.setBaseQuery(mGalleryContentQuery);
+            mDestDirPicker.show(this.getFragmentManager(), "osdirimage");
         }
-
-        return result;
-
+        return false;
     }
 
     private static final int SLIDESHOW_HANDLER_ID = 2;
@@ -1080,18 +845,144 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
 
     }
 
-    private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
-        if (AndroidFileCommands.canProcessFile(this, false)) {
-            mDestDirPicker = MoveOrCopyDestDirPicker.newInstance(move, fotos);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        boolean reloadContext = true;
+        boolean result = true;
+        boolean slideShowStarted = mSlideShowStarted;
 
-            mDestDirPicker.defineDirectoryNavigation(OsUtils.getRootOSDirectory(null),
-                    (move) ? FotoSql.QUERY_TYPE_GROUP_MOVE : FotoSql.QUERY_TYPE_GROUP_COPY,
-                    lastCopyToPath);
-            mDestDirPicker.setContextMenuId(LockScreen.isLocked(this) ? 0 : R.menu.menu_context_pick_osdir);
-            mDestDirPicker.setBaseQuery(mGalleryContentQuery);
-            mDestDirPicker.show(this.getFragmentManager(), "osdirimage");
+        onGuiTouched();
+        if (LockScreen.onOptionsItemSelected(this, menuItem)) {
+            mMustReplaceMenue = true;
+            this.invalidateOptionsMenu();
+            return true;
         }
-        return false;
+        if (mFileCommands.onOptionsItemSelected(menuItem, getCurrentFoto(), this)) {
+            mModifyCount++;
+        } else {
+            // Handle presses on the action bar items
+            switch (menuItem.getItemId()) {
+                case R.id.action_details:
+                    cmdShowDetails(getCurrentFilePath(), getCurrentImageId());
+                    break;
+
+                case R.id.action_view_context_mode:
+                    pickContextDefinition();
+                    break;
+                case R.id.cmd_filemanager:
+                    FileManagerUtil.showInFilemanager(this, getCurrentDir());
+                    break;
+
+
+                case R.id.action_slideshow:
+                    reloadContext = false;
+                    // only if not started
+                    if (!slideShowStarted) startStopSlideShow(true);
+                    break;
+
+                case R.id.action_edit:
+                    // #64: (not) open editor via chooser
+                    IntentUtil.cmdStartIntent("edit", this, getCurrentFilePath(), null, null,
+                            Intent.ACTION_EDIT,
+                            (Global.showEditChooser) ? R.string.edit_chooser_title : 0,
+                            R.string.edit_err_editor_not_found, ACTION_RESULT_MUST_MEDIA_SCAN);
+                    break;
+
+                case R.id.menu_item_share:
+                    reloadContext = false;
+                    IntentUtil.cmdStartIntent("share", this, null, null, getCurrentFilePath(), Intent.ACTION_SEND, R.string.share_menu_title, R.string.share_err_not_found, 0);
+                    break;
+
+                case R.id.cmd_copy:
+                    result = cmdMoveOrCopyWithDestDirPicker(false, mFileCommands.getLastCopyToPath(), getCurrentFoto());
+                    break;
+                case R.id.cmd_move:
+                    result = cmdMoveOrCopyWithDestDirPicker(true, mFileCommands.getLastCopyToPath(), getCurrentFoto());
+                    break;
+                case R.id.menu_item_rename:
+                    PhotoChangeNotifyer.setPhotoChangedListener(this);
+                    result = onRenameQueston(getCurrentFoto(), getCurrentImageId(), getCurrentFilePath(), null);
+                    break;
+                case R.id.menu_exif:
+                    result = onEditExif(menuItem, getCurrentFoto(), getCurrentImageId(), getCurrentFilePath());
+                    break;
+
+                case R.id.cmd_gallery: {
+                    reloadContext = false;
+                    String dirPath = getCurrentFilePath(); // PhotoPropertiesMediaFilesScanner.getDir().getAbsolutePath();
+                    if (dirPath != null) {
+                        dirPath = FileUtils.getDir(dirPath).getAbsolutePath();
+
+                        QueryParameter query = FotoSql.addWhereFolderWithoutSubfolders(new QueryParameter(FotoSql.queryDetail), dirPath);
+                        FotoGalleryActivity.showActivity(" menu " + menuItem.getTitle() + "[13]" + dirPath,
+                                this, query, 0);
+                    }
+                    break;
+                }
+
+                case R.id.cmd_show_geo:
+                    MapGeoPickerActivity.showActivity(" menu " + menuItem.getTitle(),
+                            this, getCurrentFoto(), null, null, 0);
+                    break;
+
+                case R.id.cmd_show_geo_as: {
+                    final long imageId = getCurrentImageId();
+                    IGeoPoint _geo = FotoSql.execGetPosition(null,
+                            null, imageId, mDebugPrefix, "on cmd_show_geo_as");
+                    final String currentFilePath = getCurrentFilePath();
+                    GeoPointDto geo = new GeoPointDto(_geo.getLatitude(), _geo.getLongitude(), GeoPointDto.NO_ZOOM);
+
+                    geo.setDescription(currentFilePath);
+                    geo.setId("" + imageId);
+                    geo.setName("#" + imageId);
+                    GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
+                    String uri = PARSER.toUriString(geo);
+
+                    IntentUtil.cmdStartIntent("cmd_show_geo_as", this, null, uri, null, Intent.ACTION_VIEW, R.string.geo_show_as_menu_title, R.string.geo_picker_err_not_found, 0);
+                    break;
+                }
+
+                case R.id.cmd_edit_geo: {
+                    SelectedFiles selectedItem = getCurrentFoto();
+                    GeoEditActivity.showActivity(" menu " + menuItem.getTitle() + " " + selectedItem,
+                            this, selectedItem, GeoEditActivity.RESULT_ID);
+                    break;
+                }
+                case R.id.cmd_edit_tags: {
+                    SelectedFiles selectedItem = getCurrentFoto();
+                    tagsShowEditDialog(selectedItem);
+                    break;
+                }
+
+                case R.id.cmd_about:
+                    reloadContext = false;
+                    AboutDialogPreference.createAboutDialog(this).show();
+                    break;
+                case R.id.cmd_settings:
+                    reloadContext = false;
+                    SettingsActivity.showActivity(this);
+                    break;
+                case R.id.cmd_more:
+                    reloadContext = false;
+                    new Handler().postDelayed(new Runnable() {
+                        public void run() {
+                            // reopen after some delay
+                            openOptionsMenu();
+                        }
+                    }, 200);
+                    break;
+
+                default:
+                    result = super.onOptionsItemSelected(menuItem);
+            }
+        }
+
+        if (reloadContext) {
+            setContextMode(menuItem.getTitle());
+        }
+
+        return result;
+
     }
 
     private boolean onEditExif(MenuItem menuItem, SelectedFiles currentFoto, final long fotoId, final String fotoPath) {
@@ -1099,6 +990,50 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
                 this, null, fotoPath, currentFoto, 0, true);
         return true;
     }
+
+    /**
+     * #70: Gui has changed ContextExpression
+     *
+     * @param modeName                   property name. if starting with "auto"  then the image detail quick-botton is redefined.
+     * @param contextSqlColumnExpression if not empy the result of this expression is shown as context data in image detail view.
+     */
+    private void onDefineContext(String modeName, String contextSqlColumnExpression) {
+        addContextColumn(mGalleryContentQuery, contextSqlColumnExpression);
+        if ((mGalleryContentQuery != null)
+                && (0 != StringUtils.compare(contextSqlColumnExpression, mContextColumnExpression))
+                && (this.mAdapter != null)) {
+            // sql detail expression has changed and initialization has completed: requery
+
+            this.mContextColumnExpression = contextSqlColumnExpression; // prevent executing again
+            requery();
+        }
+        this.mContextColumnExpression = contextSqlColumnExpression; // prevent executing again
+
+        if (modeName != null) {
+            this.mContextName = modeName;
+            if (this.mAdapter != null) {
+                this.mAdapter.setIconResourceName(modeName);
+            }
+        }
+
+    }
+
+    public void onNotifyPhotoChanged() {
+        requeryIfDataHasChanged();
+    }
+
+    private void reloadIfDataHasChanged() {
+        if ((mAdapter != null) && (mViewPager != null) && (mAdapter.isInArrayMode())) {
+            mAdapter.refreshLocal();
+            mViewPager.setAdapter(mAdapter);
+
+            // show the changes
+            onLoadCompleted();
+        } else {
+            requeryIfDataHasChanged();
+        }
+    }
+
     private boolean onRenameDirQueston(final SelectedFiles currentFoto, final long fotoId, final String fotoPath, final String _newName) {
         if (AndroidFileCommands.canProcessFile(this, false)) {
             final String newName = (_newName == null)
@@ -1157,6 +1092,12 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
         }
     }
 
+    private void requeryIfDataHasChanged() {
+        if (FotoSql.getMediaDBApi().mustRequery(mUpdateId)) {
+            requery();
+        }
+    }
+
     private boolean tagsShowEditDialog(SelectedFiles fotos) {
         mTagWorflow = new TagUpdateTask(fotos);
         TagsPickerFragment dlg = new TagsPickerFragment();
@@ -1167,6 +1108,7 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
         dlg.setRemoveNames(new ArrayList<String>());
         dlg.setBaseQuery(mGalleryContentQuery);
         setAutoClose(dlg, null, null);
+        PhotoChangeNotifyer.setPhotoChangedListener(this);
         dlg.show(getFragmentManager(), "editTags");
         return true;
     }
@@ -1297,45 +1239,215 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
         }
     }
 
-    /**
-     * #70: Gui has changed ContextExpression
-     * @param modeName property name. if starting with "auto"  then the image detail quick-botton is redefined.
-     * @param contextSqlColumnExpression if not empy the result of this expression is shown as context data in image detail view.
-     */
-    private void onDefineContext(String modeName, String contextSqlColumnExpression) {
-        addContextColumn(mGalleryContentQuery, contextSqlColumnExpression);
-        if ((mGalleryContentQuery != null)
-                && (0 != StringUtils.compare(contextSqlColumnExpression, mContextColumnExpression))
-                && (this.mAdapter != null)) {
-            // sql detail expression has changed and initialization has completed: requery
-
-            this.mContextColumnExpression = contextSqlColumnExpression; // prevent executing again
-            if (mCurorLoader == null) {
-                // query has not been initialized
-                mCurorLoader = new LocalCursorLoader();
-                getLoaderManager().initLoader(ACTIVITY_ID, null, mCurorLoader);
-            } else {
-                // query has changed
-                getLoaderManager().restartLoader(ACTIVITY_ID, null, this.mCurorLoader);
-            }
+    private void requery() {
+        mUpdateId = FotoSql.getMediaDBApi().getCurrentUpdateId();
+        if (mCurorLoader == null) {
+            // query has not been initialized
+            mCurorLoader = new LocalCursorLoader();
+            getLoaderManager().initLoader(ACTIVITY_ID, null, mCurorLoader);
+        } else {
+            // query has changed
+            getLoaderManager().restartLoader(ACTIVITY_ID, null, this.mCurorLoader);
         }
-        this.mContextColumnExpression = contextSqlColumnExpression; // prevent executing again
+    }
 
-        if (modeName != null) {
-            this.mContextName = modeName;
-            if (this.mAdapter != null) {
-                this.mAdapter.setIconResourceName(modeName);
+    public void notifyPhotoChanged() {
+        PhotoChangeNotifyer.notifyPhotoChanged(this, this.mAdapter);
+    }
+
+    public static class MoveOrCopyDestDirPicker extends DirectoryPickerFragment {
+        protected static AndroidFileCommands sFileCommands = null;
+
+        public static MoveOrCopyDestDirPicker newInstance(boolean move, final SelectedFiles srcFotos) {
+            MoveOrCopyDestDirPicker f = new MoveOrCopyDestDirPicker();
+
+            // Supply index input as an argument.
+            Bundle args = new Bundle();
+            args.putBoolean("move", move);
+            AffUtils.putSelectedFiles(args, srcFotos);
+            f.setArguments(args);
+
+            return f;
+        }
+
+        /* do not use activity callback */
+        @Override
+        protected void setDirectoryListener(Activity activity) {/* do not use activity callback */}
+
+        public boolean getMove() {
+            return getArguments().getBoolean("move", false);
+        }
+
+        public SelectedFiles getSrcFotos() {
+            return AffUtils.getSelectedFiles(getArguments());
+        }
+
+        /**
+         * To be overwritten to check if a path can be picked.
+         *
+         * @param path to be checked if it cannot be handled
+         * @return null if no error else error message with the reason why it cannot be selected
+         */
+        @Override
+        protected String getStatusErrorMessage(String path) {
+            String errorMessage = (sFileCommands == null) ? null : sFileCommands.checkWriteProtected(0, new File(path));
+            if (errorMessage != null) {
+                int pos = errorMessage.indexOf('\n');
+                return (pos > 0) ? errorMessage.substring(0, pos) : errorMessage;
+            }
+            return super.getStatusErrorMessage(path);
+        }
+
+        @Override
+        protected void onDirectoryPick(IDirectory selection) {
+            // super.onDirectoryPick(selection);
+            mModifyCount++; // copy or move initiated
+            getActivity().setResult((mModifyCount == 0) ? RESULT_NOCHANGE : RESULT_CHANGE);
+
+            PhotoChangeNotifyer.setPhotoChangedListener(((ImageDetailActivityViewPager) getActivity()));
+            sFileCommands.onMoveOrCopyDirectoryPick(getMove(), getSrcFotos(), selection);
+            dismiss();
+        }
+    }
+
+    class LocalFileCommands extends AndroidFileCommands {
+        @Override
+        protected void onPostProcess(String what, int opCode, SelectedFiles selectedFiles, int modifyCount, int itemCount, String[] oldPathNames, String[] newPathNames) {
+            mInitialFilePath = null;
+            switch (opCode) {
+                case OP_MOVE:
+                case OP_RENAME:
+                    if ((newPathNames != null) && (newPathNames.length > 0)) {
+                        // so selection will be restored to this after load complete
+                        mInitialFilePath = newPathNames[0];
+                    }
+                    break;
+                case OP_COPY:
+                    if ((oldPathNames != null) && (oldPathNames.length > 0)) {
+                        // so selection will be restored to this after load complete
+                        mInitialFilePath = oldPathNames[0];
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            super.onPostProcess(what, opCode, selectedFiles, modifyCount, itemCount, oldPathNames, newPathNames);
+
+            if ((opCode == OP_RENAME) || (opCode == OP_MOVE) || (opCode == OP_DELETE) || (opCode == OP_RENAME)) {
+                reloadIfDataHasChanged();
             }
         }
 
     }
-    /** #70: adds/removes/replases contextColumnExpression */
-    private static void addContextColumn(QueryParameter query, String contextColumnExpression) {
-        if (query != null) {
-            query.removeFirstColumnThatContains(CONTEXT_COLUMN_ALIAS);
-            if ((contextColumnExpression != null) && (contextColumnExpression.trim().length() > 0)) {
-                query.addColumn(contextColumnExpression + CONTEXT_COLUMN_ALIAS);
+
+    private class TagUpdateTask extends TagTask<List<String>> {
+
+        TagUpdateTask(SelectedFiles fotos) {
+            super(ImageDetailActivityViewPager.this, R.string.tags_activity_title);
+            this.getWorkflow().init(ImageDetailActivityViewPager.this, fotos, null);
+
+        }
+
+        @Override
+        protected Integer doInBackground(List<String>... params) {
+            return getWorkflow().updateTags(params[0], params[1]);
+        }
+
+        @Override
+        protected void onPostExecute(Integer itemCount) {
+            super.onPostExecute(itemCount);
+            reloadIfDataHasChanged();
+        }
+    }
+
+    /**
+     * executes sql to load image detail data in a background task that may survive
+     * conriguration change (i.e. device rotation)
+     */
+    class LocalCursorLoader implements LoaderManager.LoaderCallbacks<Cursor> {
+        /**
+         * incremented every time a new curster/query is generated
+         */
+        private int mRequeryInstanceCount = 0;
+
+        /**
+         * called by LoaderManager.getLoader(ACTIVITY_ID) to (re)create loader
+         * that attaches to last query/cursor if it still exist i.e. after rotation
+         */
+        @Override
+        public Loader<Cursor> onCreateLoader(int loaderID, Bundle bundle) {
+            switch (loaderID) {
+                case ACTIVITY_ID:
+                    mRequeryInstanceCount++;
+                    mWaitingForMediaScannerResult = false;
+                    if (Global.debugEnabledSql) {
+                        Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onCreateLoader" +
+                                getDebugContext() +
+                                " : query = " + mGalleryContentQuery);
+                    }
+                    return FotoSql.createCursorLoader(getApplicationContext(), mGalleryContentQuery);
+                default:
+                    // An invalid id was passed in
+                    return null;
             }
+        }
+
+        /**
+         * called after media db content has changed
+         */
+        @Override
+        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            // to be restored after refreshLocal if there is no mInitialFilePath
+            if ((mInitialScrollPosition == NO_INITIAL_SCROLL_POSITION) && (mViewPager != null)) {
+                mInitialScrollPosition = mViewPager.getCurrentItem();
+            }
+            // do change the data
+            mUpdateId = FotoSql.getMediaDBApi().getCurrentUpdateId();
+            mAdapter.swapCursor(data);
+            // currentUpdateId
+
+            // restore position is invalid
+            final int newItemCount = mAdapter.getCount();
+
+            if (((newItemCount == 0)) || (mInitialScrollPosition >= newItemCount))
+                mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
+
+            if (Global.debugEnabledSql) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onLoadFinished" +
+                        getDebugContext() +
+                        " found " + ((data == null) ? 0 : newItemCount) + " rows");
+            }
+
+            // do change the data
+            notifyPhotoChanged();
+            mViewPager.setAdapter(mAdapter);
+
+            // show the changes
+            onLoadCompleted();
+        }
+
+        /**
+         * called by LoaderManager. after search criteria were changed or if activity is destroyed.
+         */
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+            // rember position where we have to scroll to after refreshLocal is finished.
+            mInitialScrollPosition = mViewPager.getCurrentItem();
+            mAdapter.swapCursor(null);
+            if (Global.debugEnabledSql) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + " onLoaderReset" +
+                        getDebugContext());
+            }
+            notifyPhotoChanged();
+        }
+
+        @NonNull
+        private String getDebugContext() {
+            return "(#" + mRequeryInstanceCount
+                    + ", mScrollPosition=" + mInitialScrollPosition +
+                    ",  Path='" + mInitialFilePath +
+                    "')";
         }
     }
 }

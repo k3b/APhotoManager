@@ -55,7 +55,7 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
 
     /**
      * filename = outDir+dateFormat+name+numberFormat+fileExtension.
-     * @param outDir
+     * @param outDir . If null use directory where source file lives in.
      */
     public RuleFileNameProcessor(File outDir) {
         this.mOutDir = outDir;
@@ -68,7 +68,7 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
      * @param name          fix part of filename
      * @param numberFormat null or numberformat.
  *                      Example "000" always at least 3 digits
-     * @param outDir
+     * @param outDir  If null use directory where source file lives in.
      */
     public RuleFileNameProcessor(String dateFormat, String name, String numberFormat, File outDir) {
         this(outDir);
@@ -184,10 +184,11 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
     @Override
     public File getNextFile(File sourceFile, Date sourceFileDate, int firstFileInstanceNumber) {
         String name = getFile(sourceFile).getName();
+        File outDir = (this.mOutDir != null) ? this.mOutDir : sourceFile.getParentFile();
 
         if (!mustRename(name)) {
 			// no rename rule or file already matches rules
-			File result = new File(this.mOutDir, name);
+            File result = new File(outDir, name);
 
             // usecase: apply auto where inFile is already in outdir: no modification
             if ((sourceFile != null) && sourceFile.equals(result)) return result;
@@ -210,13 +211,13 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
         File result = null;
         int tryCount = 0;
         do {
-            result = new File(this.mOutDir, generateFileName(dateFormatted, mNextFileInstanceNumber, fileExtension));
+            result = new File(outDir, generateFileName(dateFormatted, mNextFileInstanceNumber, fileExtension));
             mNextFileInstanceNumber++;
             if (!fileOrSidecarExists(result)) return result; // filename not in use yet
             tryCount++;
         } while (tryCount < 32000);
 
-        final String msg = getClass().getSimpleName() + ".mustRename@" + this.mOutDir
+        final String msg = getClass().getSimpleName() + ".mustRename@" + outDir
                 + ": Cannot generate new unused Filename " + result;
         logger.warn(msg);
 
