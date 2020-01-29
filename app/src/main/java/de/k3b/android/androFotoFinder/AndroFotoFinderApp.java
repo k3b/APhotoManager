@@ -94,16 +94,16 @@ public class AndroFotoFinderApp extends Application {
 
     public static void setMediaImageDbReplacement(Context context, boolean useMediaImageDbReplacement) {
         final IMediaRepositoryApi oldMediaDBApi = FotoSql.getMediaDBApi();
-        if ((oldMediaDBApi == null) || (Global.useMediaImageDbReplacement != useMediaImageDbReplacement)) {
+        if ((oldMediaDBApi == null) || (Global.useAo10MediaImageDbReplacement != useMediaImageDbReplacement)) {
 
             // menu must be recreated
             LocalizedActivity.setMustRecreate();
 
-            Global.useMediaImageDbReplacement = useMediaImageDbReplacement;
+            Global.useAo10MediaImageDbReplacement = useMediaImageDbReplacement;
 
             final MediaContentproviderRepository mediaContentproviderRepository = new MediaContentproviderRepository(context);
 
-            if (Global.useMediaImageDbReplacement) {
+            if (Global.useAo10MediaImageDbReplacement) {
                 final SQLiteDatabase writableDatabase = DatabaseHelper.getWritableDatabase(context);
                 final MediaDBRepository mediaDBRepository = new MediaDBRepository(writableDatabase);
                 FotoSql.setMediaDBApi(new MergedMediaRepository(mediaDBRepository, mediaContentproviderRepository));

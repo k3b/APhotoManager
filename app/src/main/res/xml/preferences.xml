@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-Copyright (C) 2014-2019 k3b
+Copyright (C) 2014-2020 k3b
 
 This file is part of "A Photo Manager" (https://github.com/k3b/AndroFotoFinder/)
 
@@ -126,12 +126,6 @@ this program. If not, see <http://www.gnu.org/licenses/>
 
     <PreferenceCategory android:title="@string/settings_group_debug_title"
 		android:key="pref_category_debug">
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="useMediaImageDbReplacement"
-            android:summary="Experimental"
-            android:title="TEST Android-10ff Workaround" />
-
         <CheckBoxPreference android:key="debugEnabledSql"
             android:defaultValue="false"
             android:title="@string/settings_debug_sql_title"

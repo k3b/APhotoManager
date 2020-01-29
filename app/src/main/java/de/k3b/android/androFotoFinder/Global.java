@@ -20,6 +20,7 @@
 package de.k3b.android.androFotoFinder;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
@@ -124,16 +125,22 @@ public class Global {
     public static boolean initialImageDetailResolutionHigh = false; // false: MediaStore.Images.Thumbnails.MINI_KIND; true: FULL_SCREEN_KIND;
     public static boolean mapsForgeEnabled = false;
 
+    // #155: Feature-Toggel: set to false while android10 incompatibility is not fixed
+    public final static boolean allow_emulate_ao10 = !isAndroid10OrAbove() && false;
     // #155: fix android10 incompatibility
     // Build.VERSION_CODES.??ANDROID10?? = 29
-    //!!!
-    public static boolean useMediaImageDbReplacement = true;
+    public static boolean useAo10MediaImageDbReplacement = isAndroid10OrAbove();
 
-//  public static final boolean useMediaImageDbReplacement = (Build.VERSION.SDK_INT >= 29);
     /** map with blue selection markers: how much to area to increase */
     public static final double mapMultiselectionBoxIncreaseByProcent = 100.0;
     /** map with blue selection markers: minimum size of zoom box in degrees */
     public static final double mapMultiselectionBoxIncreaseMinSizeInDegrees = 0.01;
+
+    private static boolean isAndroid10OrAbove() {
+        // #155: fix android10 incompatibility
+        // Build.VERSION_CODES.??ANDROID10?? = 29
+        return Build.VERSION.SDK_INT >= 29;
+    }
 
     public static void debugMemory(String modul, String message) {
         if (Global.debugEnabledMemory) {

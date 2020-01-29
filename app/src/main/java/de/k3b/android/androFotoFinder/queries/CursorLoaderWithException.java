@@ -63,7 +63,7 @@ public class CursorLoaderWithException extends AsyncTaskLoader<Cursor> {
         try {
             Cursor cursor;
 
-            cursor = FotoSql.getMediaDBApi().createCursorForQuery(null, "loadader", this.query, null, mCancellationSignal);
+            cursor = FotoSql.getMediaDBApi().createCursorForQuery(null, "loader", this.query, null, mCancellationSignal);
             if (cursor != null) {
                 try {
                     // Ensure the cursor window is filled.

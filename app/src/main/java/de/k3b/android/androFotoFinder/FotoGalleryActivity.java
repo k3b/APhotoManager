@@ -168,7 +168,7 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
             inflater.inflate(R.menu.menu_gallery_non_selected_only, menu);
             inflater.inflate(R.menu.menu_gallery_non_multiselect, menu);
 
-            if (Global.useMediaImageDbReplacement) {
+            if (Global.useAo10MediaImageDbReplacement) {
                 inflater.inflate(R.menu.menu_ao10, menu);
             }
 

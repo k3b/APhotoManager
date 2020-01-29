@@ -53,6 +53,7 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 import uk.co.senab.photoview.log.LogManager;
 
 public class SettingsActivity extends PreferenceActivity {
+    private static final String PREF_KEY_USE_MEDIA_IMAGE_DB_REPLACEMENT = "useMediaImageDbReplacement";
     private static Boolean sOldEnableNonStandardIptcMediaScanner = null;
     private SharedPreferences prefsInstance = null;
     private ListPreference defaultLocalePreference;  // #21: Support to change locale at runtime
@@ -92,7 +93,9 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putBoolean("xmp_file_schema_long", LibGlobal.preferLongXmpFormat);
 
         prefs.putBoolean("mapsForgeEnabled", Global.mapsForgeEnabled);
-        prefs.putBoolean("useMediaImageDbReplacement", Global.useMediaImageDbReplacement);
+        if (Global.allow_emulate_ao10) {
+            prefs.putBoolean(PREF_KEY_USE_MEDIA_IMAGE_DB_REPLACEMENT, Global.useAo10MediaImageDbReplacement);
+        }
 
         prefs.putBoolean("locked", Global.locked);
         prefs.putString("passwordHash", Global.passwordHash);
@@ -172,7 +175,12 @@ public class SettingsActivity extends PreferenceActivity {
         LibGlobal.preferLongXmpFormat       = getPref(prefs, "xmp_file_schema_long", LibGlobal.preferLongXmpFormat);
 
         Global.mapsForgeEnabled                 = getPref(prefs, "mapsForgeEnabled", Global.mapsForgeEnabled);
-        AndroFotoFinderApp.setMediaImageDbReplacement(context.getApplicationContext(), getPref(prefs, "useMediaImageDbReplacement", Global.useMediaImageDbReplacement));
+
+        boolean useAo10MediaImageDbReplacement = Global.useAo10MediaImageDbReplacement;
+        if (Global.allow_emulate_ao10) {
+            useAo10MediaImageDbReplacement = getPref(prefs, PREF_KEY_USE_MEDIA_IMAGE_DB_REPLACEMENT, Global.useAo10MediaImageDbReplacement);
+        }
+        AndroFotoFinderApp.setMediaImageDbReplacement(context.getApplicationContext(), useAo10MediaImageDbReplacement);
 
         Global.imageDetailThumbnailIfBiggerThan = getPref(prefs, "imageDetailThumbnailIfBiggerThan"     , Global.imageDetailThumbnailIfBiggerThan);
 
@@ -232,7 +240,9 @@ public class SettingsActivity extends PreferenceActivity {
         }
 
         this.addPreferencesFromResource(R.xml.preferences);
-        this.addPreferencesFromResource(R.xml.preferences);
+        if (Global.allow_emulate_ao10) {
+            this.addPreferencesFromResource(R.xml.preferences_ao10_test);
+        }
         prefsInstance = PreferenceManager
                 .getDefaultSharedPreferences(this);
         global2Prefs(this.getApplication());
