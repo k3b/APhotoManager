@@ -77,7 +77,7 @@
         android:icon="@drawable/foto_gallery"
         android:label="@string/app_name"
         android:largeHeap="true"
-        android:theme="@style/AppTheme"
+        android:theme="@style/AppTheme.Light"
         >
         <activity android:name=".FotoGalleryActivity"
             android:icon="@drawable/foto_gallery"

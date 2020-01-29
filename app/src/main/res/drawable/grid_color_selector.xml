@@ -23,6 +23,5 @@
 
     <item android:drawable="@color/blue" android:state_pressed="true" />
     <item android:drawable="@color/blue" android:state_selected="true" />
-    <item android:drawable="@color/white" />
 
 </selector>
