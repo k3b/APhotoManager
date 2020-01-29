@@ -15,7 +15,7 @@ android {
         // fdroid-release 'de.k3b.android.androFotoFinder'
         // main-develop-branch 'de.k3b.android.androFotoFinder.dev'
         // applicationId 'de.k3b.android.androFotoFinder'
-        applicationId 'de.k3b.android.androFotoFinder'
+        applicationId 'de.k3b.android.androFotoFinder.dev'
 
         minSdkVersion 14		// Android 4.0 Ice Cream Sandwich (API 14); Android 4.4 KitKat (API 19);  Android 5.0 Lollipop (API 21); 
 								// Android 6.0 Marshmallow (API 23); Android 7.0 Nougat (API 24)
