@@ -124,6 +124,7 @@ Não é possível \'%2$s.\'"</string>
     <string name="share_err_to_many">Muitos itens selecionados para compartilhar de uma vez</string>
     <string name="share_menu_title">Compartilhar/Enviar</string>
     <string name="show_in_gallery_menu_title">Mostrar na nova galeria</string>
+    <string name="show_in_new_menu_title">Mostrar em ....</string>
     <string name="slideshow_menu_title">Apresentação de slides</string>
     <string name="sort_by_date">Data</string>
     <string name="sort_by_folder">Pasta</string>
