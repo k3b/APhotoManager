@@ -8,14 +8,14 @@
         <item>@string/settings_media_update_strategy_xmp</item>
     </string-array>
     <!-- encoded J=jpeg; X=xmp; C=create; _=false -->
-    <string-array name="pref_media_update_strategy_values" translatable="false">
+    <string-array name="pref_media_update_strategy_value_keys" translatable="false">
         <item>JXC</item>
         <item>JX</item>
         <item>J</item>
         <item>XC</item>
     </string-array>
 
-    <!-- #21: which gui language to use ? pref_locale_names must correspond with pref_locale_values -->
+    <!-- #21: which gui language to use ? pref_locale_names must correspond with pref_locale_value_keys -->
     <string-array name="pref_locale_names" translatable="false">
         <item>@string/settings_locale_os_language</item>
         <item>العربية (Arabic)</item> 
@@ -38,7 +38,7 @@
         <item>Українська (Ukrainian)</item>
         <item>(For Translators)</item>
     </string-array>
-    <string-array name="pref_locale_values" translatable="false">
+    <string-array name="pref_locale_value_keys" translatable="false">
         <item></item>
         <item>ar</item>
 		<item>zh-CN</item>
@@ -81,14 +81,12 @@
     </string-array>
 
     <!-- #162: Theme support: R.array.pref_themes_xxx must be in same order -->
-    <string-array name="pref_themes_values" translatable="false">
-        <item>Light</item>
-        <item>Dark</item>
-    </string-array>
-
     <string-array name="pref_themes_names" translatable="true">
         <item>@string/theme_light</item>
         <item>@string/theme_dark</item>
     </string-array>
-
+    <string-array name="pref_themes_value_keys" translatable="false">
+        <item>Light</item>
+        <item>Dark</item>
+    </string-array>
 </resources>

@@ -22,7 +22,12 @@ package de.k3b.android.util;
 import android.app.Activity;
 import android.content.Context;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
+import java.util.Arrays;
+import java.util.List;
+
+import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 
 /**
@@ -31,12 +36,32 @@ import de.k3b.android.androFotoFinder.R;
 public class UserTheme {
     public static final String PREF_KEY_USER_THEME = "user_theme";
 
+    private static List<String> themeKeyList = null;
+    private static int[] themeResIds = new int[]{R.style.AppTheme_Light, R.style.AppTheme_Dark};
     public static void setTheme(Activity act) {
         final String themeKey = getThemeKey(act);
-        int themeID = ("Dark".compareTo(themeKey) != 0)
-                ? R.style.AppTheme_Light
-                : R.style.AppTheme_Dark;
+        int themeID = getThemeID(act, themeKey);
         act.setTheme(themeID);
+    }
+
+    public static int getThemeID(Activity act, String themeKey) {
+        if (themeKeyList == null) {
+            themeKeyList = Arrays.asList(act.getResources().getStringArray(R.array.pref_themes_value_keys));
+            if (themeKeyList.size() != themeResIds.length)
+                throw new IllegalStateException("resource arrays pref_themes_xxx must have same size and order");
+        }
+
+        int index = 0;
+        if ((themeKey != null) && !themeKey.isEmpty()) {
+            index = themeKeyList.indexOf(themeKey);
+
+            if (index < 0) {
+                Log.e(Global.LOG_CONTEXT, "theme resource key " + themeKey +
+                        " not found in " + themeKeyList);
+                index = 0;
+            }
+        }
+        return themeResIds[index];
     }
 
     public static String getThemeKey(Context context) {

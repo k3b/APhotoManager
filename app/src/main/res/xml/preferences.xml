@@ -29,25 +29,25 @@ this program. If not, see <http://www.gnu.org/licenses/>
         <ListPreference
             android:defaultValue=""
             android:entries="@array/pref_locale_names"
-            android:entryValues="@array/pref_locale_values"
+            android:entryValues="@array/pref_locale_value_keys"
             android:key="user_locale"
             android:negativeButtonText="@null"
             android:positiveButtonText="@null"
             android:title="@string/settings_locale_title" />
 
-        <ListPreference
-            android:defaultValue="Light"
-            android:entries="@array/pref_themes_names"
-            android:entryValues="@array/pref_themes_values"
-            android:key="user_theme"
-            android:negativeButtonText="@null"
-            android:positiveButtonText="@null"
-            android:title="@string/settings_theme" />
-
         <Preference
             android:key="translate"
             android:summary="@string/settings_translate_summary"
             android:title="@string/settings_translate_title" />
+
+        <ListPreference
+            android:defaultValue="Light"
+            android:entries="@array/pref_themes_names"
+            android:entryValues="@array/pref_themes_value_keys"
+            android:key="user_theme"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:title="@string/settings_theme" />
 
         <de.k3b.android.widget.AboutDialogPreference
             android:key="about"
@@ -109,7 +109,7 @@ this program. If not, see <http://www.gnu.org/licenses/>
         android:title="@string/edit_menu_title">
         <ListPreference
             android:entries="@array/pref_media_update_strategy_names"
-            android:entryValues="@array/pref_media_update_strategy_values"
+            android:entryValues="@array/pref_media_update_strategy_value_keys"
             android:key="mediaUpdateStrategy"
             android:negativeButtonText="@null"
             android:positiveButtonText="@null"

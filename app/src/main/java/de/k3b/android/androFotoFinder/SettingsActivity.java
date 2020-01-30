@@ -110,11 +110,11 @@ public class SettingsActivity extends PreferenceActivity {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 LibGlobal.mediaUpdateStrategy = (String) newValue;
-                setPref(LibGlobal.mediaUpdateStrategy, mediaUpdateStrategyPreference, R.array.pref_media_update_strategy_names);
+                setPrefSummayFromKey(LibGlobal.mediaUpdateStrategy, mediaUpdateStrategyPreference, R.array.pref_media_update_strategy_names);
                 return true;
             }
         });
-        setPref(LibGlobal.mediaUpdateStrategy, mediaUpdateStrategyPreference, R.array.pref_media_update_strategy_names);
+        setPrefSummayFromKey(LibGlobal.mediaUpdateStrategy, mediaUpdateStrategyPreference, R.array.pref_media_update_strategy_names);
 
         findPreference("debugClearLog").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -421,16 +421,20 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     private void setUserTheme(String newValue) {
-        setPref(UserTheme.PREF_KEY_USER_THEME, this.themePreference, R.array.pref_themes_names);
-        LocalizedActivity.setMustRecreate();
+        if (setPrefSummayFromKey(newValue, this.themePreference, R.array.pref_themes_names)) {
+            LocalizedActivity.setMustRecreate();
+        }
     }
 
     // #21: Support to change locale at runtime
     private void setLanguage(String languageKey) {
-        setPref(languageKey, defaultLocalePreference, R.array.pref_locale_names);
+        setPrefSummayFromKey(languageKey, defaultLocalePreference, R.array.pref_locale_names);
     }
 
-    private void setPref(String key, ListPreference listPreference, int arrayResourceId) {
+    /**
+     * @return true if existing listPreference.summary was modified
+     */
+    private boolean setPrefSummayFromKey(String key, ListPreference listPreference, int arrayResourceId) {
         int index = listPreference.findIndexOfValue(key);
         String summary = "";
 
@@ -440,8 +444,11 @@ public class SettingsActivity extends PreferenceActivity {
                 summary = names[index];
             }
         }
-        listPreference.setSummary(summary);
 
+        CharSequence oldSummary = listPreference.getSummary();
+        listPreference.setSummary(summary);
+        return ((oldSummary != null) && (oldSummary.length() > 0)
+                && (summary != null) && !summary.contentEquals(oldSummary));
     }
 
     private void onDebugClearLogCat() {
