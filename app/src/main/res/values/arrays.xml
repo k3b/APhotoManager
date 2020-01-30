@@ -80,8 +80,9 @@
         <item>00000</item>
     </string-array>
 
+    <!-- #162: Theme support: R.array.pref_themes_xxx must be in same order -->
     <string-array name="pref_themes_values" translatable="false">
-        <item>Lgiht</item>
+        <item>Light</item>
         <item>Dark</item>
     </string-array>
 

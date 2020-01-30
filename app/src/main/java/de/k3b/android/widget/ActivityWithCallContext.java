@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 by k3b.
+ * Copyright (c) 2018-2020 by k3b.
  *
  * This file is part of AndroFotoFinder and of ToGoZip.
  *
@@ -24,7 +24,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
-import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.Global;
 
 /**
@@ -76,7 +75,6 @@ public class ActivityWithCallContext extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        GuiUtil.setTheme(this); // Almost every activity extends this so use this to set theme
         super.onCreate(savedInstanceState);
 
         if (isCallContextEnabled) {

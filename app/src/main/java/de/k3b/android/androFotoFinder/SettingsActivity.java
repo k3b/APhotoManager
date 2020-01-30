@@ -39,11 +39,11 @@ import android.widget.Toast;
 import java.io.File;
 
 import de.k3b.LibGlobal;
-import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScannerExifInterface;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScannerImageMetaReader;
+import de.k3b.android.util.UserTheme;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.LocalizedActivity;
@@ -65,8 +65,7 @@ public class SettingsActivity extends PreferenceActivity {
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
-        GuiUtil.setTheme(this); // this activity doesn't extent ActivityWithCallContext
-        LocalizedActivity.fixLocale(this);	// #21: Support to change locale at runtime
+        LocalizedActivity.fixThemeAndLocale(this);    // #21: Support to change locale at runtime
         super.onCreate(savedInstanceState);
 
         if (Global.debugEnabled) {
@@ -96,7 +95,7 @@ public class SettingsActivity extends PreferenceActivity {
             }
         });
 
-        themePreference = (ListPreference) findPreference(GuiUtil.PREF_KEY_USER_THEME);
+        themePreference = (ListPreference) findPreference(UserTheme.PREF_KEY_USER_THEME);
         themePreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -415,16 +414,16 @@ public class SettingsActivity extends PreferenceActivity {
         final String languageKey = prefsInstance.getString(Global.PREF_KEY_USER_LOCALE, "");
         setLanguage(languageKey);
 
-        setUserTheme(GuiUtil.getTheme(this));
+        setUserTheme(UserTheme.getThemeKey(this));
         AboutDialogPreference about =
                 (AboutDialogPreference) findPreference("about");
         about.setTitle(AboutDialogPreference.getAboutTitle(this));
     }
 
     private void setUserTheme(String newValue) {
-        setPref(GuiUtil.PREF_KEY_USER_THEME, this.themePreference, R.array.pref_themes_names);
+        setPref(UserTheme.PREF_KEY_USER_THEME, this.themePreference, R.array.pref_themes_names);
+        LocalizedActivity.setMustRecreate();
     }
-
 
     // #21: Support to change locale at runtime
     private void setLanguage(String languageKey) {

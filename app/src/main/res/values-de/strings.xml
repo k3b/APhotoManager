@@ -275,4 +275,12 @@ Verstecken kann über das 'Media-Scanner' Gallery-Menü rückgängig gemacht wer
       <string name="lbl_what">What: </string>
   -->
 
+    <!-- #162: Theme support -->
+    <string name="settings_theme">Farbschema</string>
+    <string name="theme_light">Hell (Holo light)</string>
+    <string name="theme_dark">Dunkel (Holo dark)</string>
+
+    <!-- #155: android10 -->
+    <string name="load_db_menu_title">Photo.Datenbank (neu) laden</string>
+
 </resources>

@@ -280,6 +280,7 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
     <string name="lbl_what">What: </string>
 -->
 
+    <!-- #162: Theme support -->
     <string name="settings_theme">Theme</string>
     <string name="theme_light">Holo light</string>
     <string name="theme_dark">Holo dark</string>

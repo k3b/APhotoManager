@@ -19,20 +19,13 @@
  
 package de.k3b.android;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.preference.PreferenceManager;
-
-import de.k3b.android.androFotoFinder.R;
 
 /**
  * gui utils
  */
 public class GuiUtil {
-
-    public static final String PREF_KEY_USER_THEME = "user_theme";
-
     public static String getAppVersionName(final Context context) {
         try {
 
@@ -43,21 +36,5 @@ public class GuiUtil {
         }
         return null;
     }
-    public static void setTheme(Activity act) {
-        final String theme = getTheme(act);
-        switch (theme) {
-            case "Light":
-                act.setTheme(R.style.AppTheme_Light);
-                break;
-            case "Dark":
-                act.setTheme(R.style.AppTheme_Dark);
-                break;
-            default:
-                throw new RuntimeException("Invalid theme '" + theme+ "' selected");
-        }
-    }
 
-    public static String getTheme(Context context) {
-        return PreferenceManager.getDefaultSharedPreferences(context).getString(PREF_KEY_USER_THEME, "Light");
-    }
 }

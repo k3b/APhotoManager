@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder and of ToGoZip.
  *
@@ -32,6 +32,7 @@ import android.preference.PreferenceManager;
 import java.util.Locale;
 
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.util.UserTheme;
 
 /**
  * An activity that can change the locale (language) of its content.
@@ -57,17 +58,16 @@ public abstract class LocalizedActivity extends ActivityWithCallContext {
         LocalizedActivity.currentRecreationId++;
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        fixLocale(this);
-        super.onCreate(savedInstanceState);
-    }
-
     /**
      * Set Activity-s locale to SharedPreferences-setting.
      * Must be called before
      */
-    public static void fixLocale(Context context) {
+    public static void fixThemeAndLocale(Activity context) {
+        UserTheme.setTheme(context);
+        fixLocale(context);
+    }
+
+    private static void fixLocale(Context context) {
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(context);
         String language = prefs.getString(Global.PREF_KEY_USER_LOCALE, "");
@@ -92,6 +92,12 @@ public abstract class LocalizedActivity extends ActivityWithCallContext {
                 localizedActivity.recreationId = LocalizedActivity.currentRecreationId;
             }
         }
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        fixThemeAndLocale(this);
+        super.onCreate(savedInstanceState);
     }
 
     @Override
