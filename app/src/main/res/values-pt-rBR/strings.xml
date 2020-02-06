@@ -240,4 +240,8 @@ Você pode desfazer a ocultação chamando o leitor mediascanner do menu da gale
     < ! - - what type of data should be saven ? - - >
     <string name="lbl_what">What: </string>
 -->
+    <!-- #162: Theme support -->
+    <string name="settings_category_appearance_title">Interface</string>
+    <string name="dark_theme_title">Noite</string>
+    <string name="light_theme_title">Dia</string>
 </resources>

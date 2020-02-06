@@ -234,4 +234,8 @@ onzichtbaar voor de mediadatabase, de galerij apps en de mediascanner. De bestan
     < ! - - what type of data should be saven ? - - >
     <string name="lbl_what">What: </string>
 -->
+    <!-- #162: Theme support -->
+    <string name="settings_category_appearance_title">Uiterlijk</string>
+    <string name="light_theme_title">Licht</string>
+    <string name="dark_theme_title">Donker</string>
 </resources>

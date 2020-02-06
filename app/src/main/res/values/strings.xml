@@ -281,9 +281,9 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
 -->
 
     <!-- #162: Theme support -->
-    <string name="settings_theme">Theme</string>
-    <string name="theme_light">Holo light</string>
-    <string name="theme_dark">Holo dark</string>
+    <string name="settings_category_appearance_title">Appearance</string>
+    <string name="light_theme_title">Light</string>
+    <string name="dark_theme_title">Dark</string>
 
     <!-- #155: android10 -->
     <string name="load_db_menu_title">(Re)Load Media Database</string>

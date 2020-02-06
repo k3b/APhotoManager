@@ -224,4 +224,9 @@ https://github.com/k3b/APhotoManager/wiki/intentapi#sql لمزيد من التف
 	note: with ver 0.7.0 'bookmark' will become 'virtual album'
     -->
   <string name="settings_bookmark_dir_title">مجلد العلامات المرجعية</string>
+
+  <!-- #162: Theme support -->
+  <string name="settings_category_appearance_title">المظهر</string>
+  <string name="dark_theme_title">مظلم</string>
+  <string name="light_theme_title">مضيء</string>
 </resources>

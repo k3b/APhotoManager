@@ -76,4 +76,8 @@ https://github.com/k3b/APhotoManager/wiki/intentapi#sql</string>
   <string name="sort_menu_title">Sorteaza</string>
   <string name="update_result_format">Fisiere apdatate %1$d/%2$d</string>
   <string name="zoom_to_fit_menu_title">Renuntare marire Renuntare la zum</string>
+  <!-- #162: Theme support -->
+  <string name="settings_category_appearance_title">Aspect</string>
+  <string name="dark_theme_title">Întunecat</string>
+  <string name="light_theme_title">Luminos</string>
 </resources>

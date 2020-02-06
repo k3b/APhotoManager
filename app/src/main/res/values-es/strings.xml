@@ -226,4 +226,8 @@ Usted puede hacerlos visibles de nuevo llamando al escáner multimedia desde el 
 	note: with ver 0.7.0 'bookmark' will become 'virtual album'
     -->
   <string name="settings_bookmark_dir_title">Carpeta de marcadores</string>
+  <!-- #162: Theme support -->
+  <string name="settings_category_appearance_title">Apariencia</string>
+  <string name="dark_theme_title">Oscuro</string>
+  <string name="light_theme_title">Claro</string>
 </resources>

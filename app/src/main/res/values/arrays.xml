@@ -82,8 +82,8 @@
 
     <!-- #162: Theme support: R.array.pref_themes_xxx must be in same order -->
     <string-array name="pref_themes_names" translatable="true">
-        <item>@string/theme_light</item>
-        <item>@string/theme_dark</item>
+        <item>@string/light_theme_title</item>
+        <item>@string/dark_theme_title</item>
     </string-array>
     <string-array name="pref_themes_value_keys" translatable="false">
         <item>Light</item>

@@ -195,4 +195,9 @@ Anda bisa membatalkan persembunyian dengan menghubungi mediascanner dari menu ga
 				1708NewName0001.jpg -->
   <string name="preview_message_format">"%1$s %2$d Foto\n\t%3$s \nTo %5$s\n\t%6$s (%4$s),"</string>
   <!--  depricated tags_update_result_format use image_success_update_format instead -->
+  <!-- #162: Theme support -->
+  <string name="settings_category_appearance_title">Tampilan</string>
+  <string name="dark_theme_title">Gelap</string>
+  <string name="light_theme_title">Terang</string>
+
 </resources>

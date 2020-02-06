@@ -237,4 +237,8 @@
     < ! - - what type of data should be saven ? - - >
     <string name="lbl_what">What: </string>
 -->
+    <!-- #162: Theme support -->
+    <string name="settings_category_appearance_title">外観</string>
+    <string name="dark_theme_title">グレー</string>
+    <string name="light_theme_title">ホワイト</string>
 </resources>
