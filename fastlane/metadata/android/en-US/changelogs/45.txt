@@ -4,4 +4,5 @@ Changes from 0.8.0 to ????
 * Backup to zip: Menu "Show in new gallery" shows photos that would go into the new incremental backup
 * Bugfix Image-View: menu command **Show in new Gallery** filter was not set to directory of the current image anymore
 * Minor Bug fixes: #157
-* translation updates pt
+* translation updates pt, ja
+* APhotoManager is not Android-10 (api-29) ready yet.
