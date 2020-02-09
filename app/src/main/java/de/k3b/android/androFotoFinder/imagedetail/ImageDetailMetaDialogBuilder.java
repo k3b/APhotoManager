@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -33,13 +33,14 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import de.k3b.android.androFotoFinder.queries.MediaContentproviderRepositoryImpl;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.widget.ActivityWithCallContext;
-import de.k3b.io.DateUtil;
-import de.k3b.media.ExifInterfaceEx;
 import de.k3b.database.QueryParameter;
-import de.k3b.media.PhotoPropertiesImageReader;
+import de.k3b.io.DateUtil;
 import de.k3b.io.FileCommands;
+import de.k3b.media.ExifInterfaceEx;
+import de.k3b.media.PhotoPropertiesImageReader;
 import de.k3b.media.XmpSegment;
 
 /**
@@ -137,7 +138,7 @@ public class ImageDetailMetaDialogBuilder {
 
             if (currentImageId != 0) {
 
-                ContentValues dbContent = TagSql.getDbContent(context, currentImageId);
+                ContentValues dbContent = MediaContentproviderRepositoryImpl.getDbContent(context, currentImageId);
                 if (dbContent != null) {
                     result.append(NL).append(line).append(NL);
                     result.append(NL).append(TagSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE).append(NL).append(NL);

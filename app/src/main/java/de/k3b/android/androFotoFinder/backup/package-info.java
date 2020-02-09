@@ -26,7 +26,7 @@
  * * {@link de.k3b.android.androFotoFinder.backup.Backup2ZipService} : Collects Files to backed up from database via Filter
  * * {@link de.k3b.android.androFotoFinder.backup.ApmZipCompressJob} : Executes the compression (with android specific Filesystem)
  * * {@link de.k3b.zip.CompressJob} : Executes the compression (with android independant implementation)
- * * {@link de.k3b.android.androFotoFinder.backup.ProgressData} : Data containing compression progress
+ * * {@link de.k3b.android.androFotoFinder.backup.BackupProgressActivity} : Data containing compression progress
  * * {@link de.k3b.io.IProgessListener} : android independant compression progress
  **/
 package de.k3b.android.androFotoFinder.backup;

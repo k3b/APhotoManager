@@ -19,10 +19,8 @@
 
 package de.k3b.android.androFotoFinder.backup;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
-import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -208,13 +206,12 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
     /** calls consumers for each found query-result-item */
     private void execQuery(QueryParameter query,
                                   IItemSaver<IPhotoProperties>... consumers) {
-        ContentResolver contentResolver = context.getContentResolver();
-
         Cursor cursor = null;
         try {
             this.onProgress(0,0, "Calculate");
-            cursor = contentResolver.query(Uri.parse(query.toFrom()), query.toColumns(),
-                    query.toAndroidWhere(), query.toAndroidParameters(), query.toOrderBy());
+            cursor = FotoSql.getMediaDBApi().createCursorForQuery(
+                    null, "ZipExecute",
+                    query, null, null);
 
             int itemCount = cursor.getCount();
 

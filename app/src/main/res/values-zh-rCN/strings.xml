@@ -226,4 +226,8 @@
 	note: with ver 0.7.0 'bookmark' will become 'virtual album'
     -->
   <string name="settings_bookmark_dir_title">书签文件夹</string>
+    <!-- #162: Theme support -->
+    <string name="settings_category_appearance_title">外观</string>
+    <string name="dark_theme_title">灰暗</string>
+    <string name="light_theme_title">明亮</string>
 </resources>

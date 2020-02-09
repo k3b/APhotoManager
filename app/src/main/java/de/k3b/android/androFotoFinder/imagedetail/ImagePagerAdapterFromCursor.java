@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -49,6 +49,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.DBUtils;
 import de.k3b.android.util.GarbageCollector;
 import de.k3b.android.util.MenuUtils;
+import de.k3b.android.util.PhotoChangeNotifyer;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.media.PhotoPropertiesBulkUpdateService;
 
@@ -58,7 +59,7 @@ import de.k3b.media.PhotoPropertiesBulkUpdateService;
  * Translates between position in ViewPager and content page content with image
  * Created by k3b on 04.07.2015.
  */
-public class ImagePagerAdapterFromCursor extends PagerAdapter {
+public class ImagePagerAdapterFromCursor extends PagerAdapter implements PhotoChangeNotifyer.PhotoChangedListener {
     private static final int MAX_IMAGE_DIMENSION = HugeImageLoader.getMaxTextureSize();
 
     /** colum alias for optinal sql expression to show ContextDetails */
@@ -462,5 +463,13 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter {
     }
     public void setContext(MenuItem context) {
         if (mImageButtonController != null) mImageButtonController.setContext(context);
+    }
+
+    /**
+     * PhotoChangeNotifyer.PhotoChangedListener
+     **/
+    @Override
+    public void onNotifyPhotoChanged() {
+        notifyDataSetChanged();
     }
 }

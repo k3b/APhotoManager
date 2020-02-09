@@ -40,4 +40,8 @@
   <!-- new in 0.6.3 edit exif images can have visibility private or public -->
   <!-- #105 Appplication-pinning, aka "Kiosk Mode", "LockTask": disable dangerous menu-items -->
   <!--  depricated tags_update_result_format use image_success_update_format instead -->
+    <!-- #162: Theme support -->
+    <string name="settings_category_appearance_title">दिखावट</string>
+    <string name="dark_theme_title">काला</string>
+    <string name="light_theme_title">हलका</string>
 </resources>

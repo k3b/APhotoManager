@@ -277,12 +277,7 @@ public class QueryParameter {
     }
 
     public String toOrderBy() {
-        StringBuilder result = new StringBuilder();
-        if (!Helper.append(result, null, mOrderBy, ", ", "", "")) {
-            return null;
-        }
-
-        return result.toString();
+        return Helper.toCommaSeperatedFieldListOrNull(mOrderBy);
     }
 
     /************************** end properties *********************/
@@ -334,6 +329,18 @@ public class QueryParameter {
         Helper.append(result, "\nWHERE ", mWhere, "", "\n\t", "");
         Helper.append(result, "\n\tWHERE-PARAMETERS ", mParameters, "", "\n\t\t", "");
         return result;
+    }
+
+    public String toWhere() {
+        return Helper.toSeperatedFieldListOrNull(mWhere, " AND ");
+    }
+
+    public String toHaving() {
+        return Helper.toCommaSeperatedFieldListOrNull(mHaving);
+    }
+
+    public String toGroupBy() {
+        return Helper.toCommaSeperatedFieldListOrNull(mGroupBy);
     }
 
     private static final String PARSER_KEYWORDS = ";FROM;QUERY-TYPE-ID;SELECT;WHERE;WHERE-PARAMETERS;GROUP-BY;HAVING;HAVING-PARAMETERS;ORDER-BY;";
@@ -503,7 +510,7 @@ public class QueryParameter {
             return result;
         }
 
-        private static boolean append(StringBuilder result, String blockPrefix, List<String> list, String delimiter, String before, String after) {
+        private static boolean append(StringBuilder result, String blockPrefix, List<String> list, String seperator, String before, String after) {
             if (isNotEmpty(list)) {
                 if (blockPrefix != null) {
                     result.append(blockPrefix);
@@ -512,13 +519,13 @@ public class QueryParameter {
                 boolean first = true;
                 int listSize = list.size();
                 for (int i = 0; i < listSize; i++) {
-                    if (!first) {
-                        result.append(delimiter);
+                    if ((seperator != null) && (!first)) {
+                        result.append(seperator);
                     }
 
-                    result.append(before);
+                    if (before != null) result.append(before);
                     result.append(list.get(i));
-                    result.append(after);
+                    if (after != null) result.append(after);
                     first = false;
                 }
                 return true;
@@ -565,6 +572,19 @@ public class QueryParameter {
                 return true;
             }
             return false;
+        }
+
+        private static String toCommaSeperatedFieldListOrNull(List<String> list) {
+            return toSeperatedFieldListOrNull(list, ", ");
+        }
+
+        private static String toSeperatedFieldListOrNull(List<String> list, String seperator) {
+            if (isNotEmpty(list)) {
+                StringBuilder result = new StringBuilder();
+                append(result, null, list, seperator, null, null);
+                return result.toString();
+            }
+            return null;
         }
 
         private static boolean isNotEmpty(List<String> list) {

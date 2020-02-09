@@ -94,7 +94,7 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
         }
 
         if (AffUtils.putSelectedFiles(intent, selectedItems)) {
-            IGeoPoint initialPoint = FotoSql.execGetPosition(null, context,
+            IGeoPoint initialPoint = FotoSql.execGetPosition(null,
                     null, selectedItems.getId(0), context, mDebugPrefix, "showActivity");
             if (initialPoint != null) {
                 GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);

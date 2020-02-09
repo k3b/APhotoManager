@@ -414,6 +414,19 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
         mFilterValue.showAdditionalSqlWhere();
     }
 
+    private boolean fromGui(IGalleryFilter dest) {
+        try {
+            if (dest != null) {
+                dest.get(mFilterValue);
+            }
+            return true;
+        } catch (RuntimeException ex) {
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + ex.getMessage(), ex);
+            Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
+            return false;
+        }
+    }
+
     /** gui content seen as IGalleryFilter */
     private class FilterValue implements IGalleryFilter {
         final private java.text.DateFormat isoDateformatter = new SimpleDateFormat(
@@ -727,7 +740,7 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             try {
                 return this.isoDateformatter.parse(string).getTime();
             } catch (Exception ex) {
-                throw new RuntimeException(getString(R.string.filter_err_invalid_date_format, string), ex);
+                throw new IllegalArgumentException(getString(R.string.filter_err_invalid_date_format, string));
             }
         }
 
@@ -735,19 +748,6 @@ public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
             return new GalleryFilterParameter().get(this).toString();
         }
 
-    }
-
-    private boolean fromGui(IGalleryFilter dest) {
-        try {
-            if (dest != null) {
-                dest.get(mFilterValue);
-            }
-            return true;
-        } catch (RuntimeException ex) {
-            Log.e(Global.LOG_CONTEXT, mDebugPrefix + ex.getMessage(), ex);
-            Toast.makeText(this, ex.getMessage(), Toast.LENGTH_LONG).show();
-            return false;
-        }
     }
 
     private void cmdShowDetails() {

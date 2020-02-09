@@ -1,8 +1,22 @@
-package de.k3b.android.widget;
-
-/**
- * Created by EVE on 20.11.2017.
+/*
+ * Copyright (c) 2017-2020 by k3b.
+ *
+ * This file is part of AndroFotoFinder / #APhotoManager.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
  */
+package de.k3b.android.widget;
 
 import android.app.Activity;
 import android.util.Log;
@@ -10,6 +24,8 @@ import android.util.Log;
 import java.io.File;
 
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.queries.IMediaRepositoryApi;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.io.IProgessListener;
 import de.k3b.io.PhotoAutoprocessingDto;
@@ -34,15 +50,15 @@ public class UpdateTask extends AsyncTaskWithProgressDialog<SelectedFiles> imple
     }
 
     public UpdateTask(int resIdDlgTitle, Activity ctx, AndroidFileCommands cmd,
-                       boolean move, File destDirFolder,
-                       PhotoAutoprocessingDto autoProccessData) {
+                      boolean move, File destDirFolder,
+                      PhotoAutoprocessingDto autoProccessData) {
         this(resIdDlgTitle, ctx, cmd, null, move, destDirFolder, autoProccessData);
     }
 
     private UpdateTask(int resIdDlgTitle, Activity ctx, AndroidFileCommands cmd,
-                      PhotoPropertiesDiffCopy exifChanges,
-                      boolean move, File destDirFolder,
-                      PhotoAutoprocessingDto autoProccessData) {
+                       PhotoPropertiesDiffCopy exifChanges,
+                       boolean move, File destDirFolder,
+                       PhotoAutoprocessingDto autoProccessData) {
         super(ctx, resIdDlgTitle);
         this.exifChanges = exifChanges;
         this.cmd = cmd;
@@ -55,17 +71,27 @@ public class UpdateTask extends AsyncTaskWithProgressDialog<SelectedFiles> imple
     protected Integer doInBackground(SelectedFiles... params) {
         publishProgress("...");
 
+        int result = 0;
+        SelectedFiles items = params[0];
         if (exifChanges != null) {
-            SelectedFiles items = params[0];
 
-            return cmd.applyExifChanges(move, exifChanges, items, this);
-
+            if (true) {
+                result = cmd.applyExifChanges(move, exifChanges, items, null);
+            } else {
+                // disabled: does not work because of overlapping transactions
+                IMediaRepositoryApi api = FotoSql.getMediaDBApi();
+                try {
+                    api.beginTransaction();
+                    result = cmd.applyExifChanges(true, exifChanges, items, null);
+                    api.setTransactionSuccessful();
+                } finally {
+                    api.endTransaction();
+                }
+            }
         } else {
-            SelectedFiles items = params[0];
-
-            return cmd.moveOrCopyFilesTo(move, items, destDirFolder, autoProccessData, this);
-
+            result = cmd.moveOrCopyFilesTo(move, items, destDirFolder, autoProccessData, this);
         }
+        return result;
     }
 
     @Override

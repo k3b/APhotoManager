@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder and of ToGoZip.
  *
@@ -32,6 +32,7 @@ import android.preference.PreferenceManager;
 import java.util.Locale;
 
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.util.UserTheme;
 
 /**
  * An activity that can change the locale (language) of its content.
@@ -41,31 +42,32 @@ import de.k3b.android.androFotoFinder.Global;
  * Created by k3b on 07.01.2016.
  */
 public abstract class LocalizedActivity extends ActivityWithCallContext {
+    /**
+     * if this.recreationId != LocalizedActivity.currentRecreationId : activity must be recreated in on resume
+     */
+    private static int currentRecreationId = 0;
+    private int recreationId = 0;
+
     /** if myLocale != Locale.Default : activity must be recreated in on resume */
     private Locale myLocale = null;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        fixLocale(this);
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        // Locale has changed by other Activity ?
-        if ((myLocale != null) && (myLocale.getLanguage() != Locale.getDefault().getLanguage())) {
-            myLocale = null;
-            recreate(LocalizedActivity.this);
-        }
+    /**
+     * All activities will be recreated in on resume. I.E. after basic configuration change.
+     */
+    public static void setMustRecreate() {
+        LocalizedActivity.currentRecreationId++;
     }
 
     /**
      * Set Activity-s locale to SharedPreferences-setting.
      * Must be called before
      */
-    public static void fixLocale(Context context) {
+    public static void fixThemeAndLocale(Activity context) {
+        UserTheme.setTheme(context);
+        fixLocale(context);
+    }
+
+    private static void fixLocale(Context context) {
         final SharedPreferences prefs = PreferenceManager
                 .getDefaultSharedPreferences(context);
         String language = prefs.getString(Global.PREF_KEY_USER_LOCALE, "");
@@ -85,9 +87,33 @@ public abstract class LocalizedActivity extends ActivityWithCallContext {
             // recreate();
 
             if (context instanceof LocalizedActivity) {
-                ((LocalizedActivity) context).myLocale = locale;
+                final LocalizedActivity localizedActivity = (LocalizedActivity) context;
+                localizedActivity.myLocale = locale;
+                localizedActivity.recreationId = LocalizedActivity.currentRecreationId;
             }
         }
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        fixThemeAndLocale(this);
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Locale has changed by other Activity ?
+        if (mustRecreate()) {
+            myLocale = null;
+            recreate(LocalizedActivity.this);
+        }
+    }
+
+    protected boolean mustRecreate() {
+        return ((this.recreationId != LocalizedActivity.currentRecreationId) ||
+                (this.myLocale != null) && (this.myLocale.getLanguage() != Locale.getDefault().getLanguage()));
     }
 
     /** force all open activity to recreate */

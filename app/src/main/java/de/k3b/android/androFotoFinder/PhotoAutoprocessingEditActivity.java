@@ -639,7 +639,7 @@ public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialog
             if (itemCount > 0) {
                 if ((mustLoadIDs) && (ids == null)) {
                     ids = new Long[itemCount];
-                    Map<String, Long> idMap = FotoSql.execGetPathIdMap(this, fileNames);
+                    Map<String, Long> idMap = FotoSql.execGetPathIdMap(fileNames);
 
                     for (int i = 0; i < itemCount; i++) {
                         ids[i] = idMap.get(fileNames[i]);

@@ -147,8 +147,8 @@
     <!--Removed ObsoleteLayoutParam: layout_alignParentTop-->
   </HorizontalScrollView>
 
-  <GridView android:orientation="horizontal"
-    android:background="#f0f0f0"
+
+    <GridView android:orientation="horizontal"
     android:id="@+id/gridView"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"

@@ -1,4 +1,7 @@
 Changes from 0.8.0 to ????
 
+* #162 implemented by vinceh121: In the settings under "Appearance" you can change the app-s between dark and light display
 * Backup to zip: Menu "Show in new gallery" shows photos that would go into the new incremental backup
 * Bugfix Image-View: menu command **Show in new Gallery** filter was not set to directory of the current image anymore
+* Minor Bug fixes: #157
+* translation updates pt

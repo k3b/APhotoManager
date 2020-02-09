@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -273,7 +273,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                 int pos = 0;
                 long now = new Date().getTime();
                 MediaTransactionLogEntryType moveOrCopyCommand = (move) ? MediaTransactionLogEntryType.MOVE : MediaTransactionLogEntryType.COPY;
-                TransactionLoggerBase logger = (exifChanges == null) ? null : new TransactionLoggerBase(this, now);
+                TransactionLoggerBase logger = (exifChanges == null) ? null : createTransactionLogger(now);
                 boolean sameFile;
 
                 while (pos < fileCount) {
@@ -370,6 +370,10 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
             }
         }
         return itemCount;
+    }
+
+    protected TransactionLoggerBase createTransactionLogger(long now) {
+        return new TransactionLoggerBase(this, now);
     }
 
     private PhotoAutoprocessingDto getPhotoAutoprocessingDto(File destDirFolder) {

@@ -43,6 +43,7 @@ import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScannerExifInterface;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScannerImageMetaReader;
+import de.k3b.android.util.UserTheme;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.LocalizedActivity;
@@ -53,88 +54,14 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 import uk.co.senab.photoview.log.LogManager;
 
 public class SettingsActivity extends PreferenceActivity {
+    private static final String PREF_KEY_USE_MEDIA_IMAGE_DB_REPLACEMENT = "useMediaImageDbReplacement";
     private static Boolean sOldEnableNonStandardIptcMediaScanner = null;
     private SharedPreferences prefsInstance = null;
     private ListPreference defaultLocalePreference;  // #21: Support to change locale at runtime
     private ListPreference mediaUpdateStrategyPreference;
+    private ListPreference themePreference;  // #21: Support to change locale at runtime
 
     private int INSTALL_REQUEST_CODE = 1927;
-
-    @Override
-    protected void onCreate(final Bundle savedInstanceState) {
-        LocalizedActivity.fixLocale(this);	// #21: Support to change locale at runtime
-        super.onCreate(savedInstanceState);
-
-        if (Global.debugEnabled) {
-            // todo create junit integration tests with arabic locale from this.
-            StringFormatResourceTests.test(this);
-        }
-
-        final Intent intent = getIntent();
-        if (Global.debugEnabled && (intent != null)){
-            Log.d(Global.LOG_CONTEXT, "SettingsActivity onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
-        }
-
-        this.addPreferencesFromResource(R.xml.preferences);
-        prefsInstance = PreferenceManager
-                .getDefaultSharedPreferences(this);
-        global2Prefs(this.getApplication());
-
-		// #21: Support to change locale at runtime
-        defaultLocalePreference =
-                (ListPreference) findPreference(Global.PREF_KEY_USER_LOCALE);
-        defaultLocalePreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                setLanguage((String) newValue);
-                LocalizedActivity.recreate(SettingsActivity.this);
-                return true; // change is allowed
-            }
-        });
-
-        mediaUpdateStrategyPreference =
-                (ListPreference) findPreference("mediaUpdateStrategy");
-        mediaUpdateStrategyPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-                LibGlobal.mediaUpdateStrategy = (String) newValue;
-                setPref(LibGlobal.mediaUpdateStrategy, mediaUpdateStrategyPreference, R.array.pref_media_update_strategy_names);
-                return true;
-            }
-        });
-        setPref(LibGlobal.mediaUpdateStrategy, mediaUpdateStrategyPreference, R.array.pref_media_update_strategy_names);
-
-        findPreference("debugClearLog").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                onDebugClearLogCat();
-                return false; // donot close
-            }
-        });
-        findPreference("debugSaveLog").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                onDebugSaveLogCat();
-                return false; // donot close
-            }
-        });
-        findPreference("translate").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                onTranslate();
-                return false; // donot close
-            }
-        });
-		
-		// #21: Support to change locale at runtime
-        updateSummary();
-    }
-
-    @Override
-    public void onPause() {
-        prefs2Global(this);
-        super.onPause();
-    }
 
     public static void global2Prefs(Context context) {
         fixDefaults(context, null, null);
@@ -168,6 +95,9 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putBoolean("xmp_file_schema_long", LibGlobal.preferLongXmpFormat);
 
         prefs.putBoolean("mapsForgeEnabled", Global.mapsForgeEnabled);
+        if (Global.allow_emulate_ao10) {
+            prefs.putBoolean(PREF_KEY_USE_MEDIA_IMAGE_DB_REPLACEMENT, Global.useAo10MediaImageDbReplacement);
+        }
 
         prefs.putBoolean("locked", Global.locked);
         prefs.putString("passwordHash", Global.passwordHash);
@@ -242,7 +172,12 @@ public class SettingsActivity extends PreferenceActivity {
 
         Global.mapsForgeEnabled                 = getPref(prefs, "mapsForgeEnabled", Global.mapsForgeEnabled);
 
-                
+        boolean useAo10MediaImageDbReplacement = Global.useAo10MediaImageDbReplacement;
+        if (Global.allow_emulate_ao10) {
+            useAo10MediaImageDbReplacement = getPref(prefs, PREF_KEY_USE_MEDIA_IMAGE_DB_REPLACEMENT, Global.useAo10MediaImageDbReplacement);
+        }
+        AndroFotoFinderApp.setMediaImageDbReplacement(context.getApplicationContext(), useAo10MediaImageDbReplacement);
+
         Global.imageDetailThumbnailIfBiggerThan = getPref(prefs, "imageDetailThumbnailIfBiggerThan"     , Global.imageDetailThumbnailIfBiggerThan);
 
         Global.maxSelectionMarkersInMap         = getPref(prefs, "maxSelectionMarkersInMap"     , Global.maxSelectionMarkersInMap);
@@ -283,6 +218,91 @@ public class SettingsActivity extends PreferenceActivity {
         */
 
         fixDefaults(context, previousCacheRoot, previousMapsForgeDir);
+    }
+
+    @Override
+    protected void onCreate(final Bundle savedInstanceState) {
+        LocalizedActivity.fixThemeAndLocale(this);    // #21: Support to change locale at runtime
+        super.onCreate(savedInstanceState);
+
+        if (Global.debugEnabled) {
+            // todo create junit integration tests with arabic locale from this.
+            StringFormatResourceTests.test(this);
+        }
+
+        final Intent intent = getIntent();
+        if (Global.debugEnabled && (intent != null)) {
+            Log.d(Global.LOG_CONTEXT, "SettingsActivity onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
+        }
+
+        this.addPreferencesFromResource(R.xml.preferences);
+        prefsInstance = PreferenceManager
+                .getDefaultSharedPreferences(this);
+        global2Prefs(this.getApplication());
+
+        // #21: Support to change locale at runtime
+        defaultLocalePreference =
+                (ListPreference) findPreference(Global.PREF_KEY_USER_LOCALE);
+        defaultLocalePreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                setLanguage((String) newValue);
+                LocalizedActivity.recreate(SettingsActivity.this);
+                return true; // change is allowed
+            }
+        });
+
+        themePreference = (ListPreference) findPreference(UserTheme.PREF_KEY_USER_THEME);
+        themePreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                setUserTheme((String) newValue);
+                LocalizedActivity.recreate(SettingsActivity.this);
+                return true; // change is allowed
+            }
+        });
+        mediaUpdateStrategyPreference =
+                (ListPreference) findPreference("mediaUpdateStrategy");
+        mediaUpdateStrategyPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                LibGlobal.mediaUpdateStrategy = (String) newValue;
+                setPrefSummayFromKey(LibGlobal.mediaUpdateStrategy, mediaUpdateStrategyPreference, R.array.pref_media_update_strategy_names);
+                return true;
+            }
+        });
+        setPrefSummayFromKey(LibGlobal.mediaUpdateStrategy, mediaUpdateStrategyPreference, R.array.pref_media_update_strategy_names);
+
+        findPreference("debugClearLog").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                onDebugClearLogCat();
+                return false; // donot close
+            }
+        });
+        findPreference("debugSaveLog").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                onDebugSaveLogCat();
+                return false; // donot close
+            }
+        });
+        findPreference("translate").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                onTranslate();
+                return false; // donot close
+            }
+        });
+
+        // #21: Support to change locale at runtime
+        updateSummary();
+    }
+
+    @Override
+    public void onPause() {
+        prefs2Global(this);
+        super.onPause();
     }
 
     private static void fixDefaults(Context context, File previousCacheRoot, File previousMapsForgeDir) {
@@ -393,17 +413,28 @@ public class SettingsActivity extends PreferenceActivity {
     private void updateSummary() {
         final String languageKey = prefsInstance.getString(Global.PREF_KEY_USER_LOCALE, "");
         setLanguage(languageKey);
+
+        setUserTheme(UserTheme.getThemeKey(this));
         AboutDialogPreference about =
                 (AboutDialogPreference) findPreference("about");
         about.setTitle(AboutDialogPreference.getAboutTitle(this));
     }
 
-	// #21: Support to change locale at runtime
-    private void setLanguage(String languageKey) {
-        setPref(languageKey, defaultLocalePreference, R.array.pref_locale_names);
+    private void setUserTheme(String newValue) {
+        if (setPrefSummayFromKey(newValue, this.themePreference, R.array.pref_themes_names)) {
+            LocalizedActivity.setMustRecreate();
+        }
     }
 
-    private void setPref(String key, ListPreference listPreference, int arrayResourceId) {
+    // #21: Support to change locale at runtime
+    private void setLanguage(String languageKey) {
+        setPrefSummayFromKey(languageKey, defaultLocalePreference, R.array.pref_locale_names);
+    }
+
+    /**
+     * @return true if existing listPreference.summary was modified
+     */
+    private boolean setPrefSummayFromKey(String key, ListPreference listPreference, int arrayResourceId) {
         int index = listPreference.findIndexOfValue(key);
         String summary = "";
 
@@ -413,8 +444,11 @@ public class SettingsActivity extends PreferenceActivity {
                 summary = names[index];
             }
         }
-        listPreference.setSummary(summary);
 
+        CharSequence oldSummary = listPreference.getSummary();
+        listPreference.setSummary(summary);
+        return ((oldSummary != null) && (oldSummary.length() > 0)
+                && (summary != null) && !summary.contentEquals(oldSummary));
     }
 
     private void onDebugClearLogCat() {
@@ -425,7 +459,7 @@ public class SettingsActivity extends PreferenceActivity {
 
     private void onDebugSaveLogCat() {
         Log.e(Global.LOG_CONTEXT, "SettingsActivity-SaveLogCat(): " + ActivityWithCallContext.readCallContext(getIntent()));
-        ((AndroFotoFinderApp) getApplication()).saveToFile();
+        ((AndroFotoFinderApp) getApplication()).saveToFile(this);
     }
 
     private void onTranslate() {

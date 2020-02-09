@@ -65,7 +65,7 @@ public class IntentUtil implements Common {
                 path = uri.getPath();
             } else if ("content".equals(scheme)) {
                 // try to translate via media db
-                path = FotoSql.execGetFotoPath(context, uri);
+                path = FotoSql.execGetFotoPath(uri);
                 if (path != null) {
                     if (Global.debugEnabled) {
                         Log.i(Global.LOG_CONTEXT, "Translate from '" + uri +

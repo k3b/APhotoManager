@@ -134,7 +134,7 @@ public class ShowInMenuHandler {
         QueryParameter query = AndroidAlbumUtils.getAsAlbumOrMergedNewQuery(
                 dbgContext, mContext, baseQuery, filter);
         if (query == null) return 0;
-        return FotoSql.getCount(mContext, query);
+        return FotoSql.getCount(query);
     }
 
     private boolean showPhoto(String dbgContext, QueryParameter baseQuery) {
@@ -162,7 +162,7 @@ public class ShowInMenuHandler {
         QueryParameter query = AndroidAlbumUtils.getAsAlbumOrMergedNewQuery(
                 dbgContext, mContext, baseQuery, currentSelectionFilter);
         if (query != null) {
-            IGeoRectangle area = FotoSql.execGetGeoRectangle(null, mContext, query,
+            IGeoRectangle area = FotoSql.execGetGeoRectangle(null, query,
                     null, "Calculate visible arean", dbgContext);
             MapGeoPickerActivity.showActivity(dbgContext, mContext, null,
                     query, area, 0);

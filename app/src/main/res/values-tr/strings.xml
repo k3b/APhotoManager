@@ -181,4 +181,8 @@
   <!-- #93: edit-exif: image title, description, rating -->
   <string name="sort_by_file_size">Boyut</string>
   <!-- new in 0.6.3 edit exif images can have visibility private or public -->
+    <!-- #162: Theme support -->
+    <string name="settings_category_appearance_title">Görünüm</string>
+    <string name="dark_theme_title">Koyu</string>
+    <string name="light_theme_title">Açık</string>
 </resources>
