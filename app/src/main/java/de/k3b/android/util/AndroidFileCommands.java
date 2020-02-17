@@ -173,12 +173,12 @@ public class AndroidFileCommands extends FileCommands {
 
     }
 
-    public boolean onOptionsItemSelected(final MenuItem item, final SelectedFiles selectedFileNames, PhotoChangeNotifyer.PhotoChangedListener photoChangedListener) {
+    public boolean onOptionsItemSelected(Activity activity, final MenuItem item, final SelectedFiles selectedFileNames, PhotoChangeNotifyer.PhotoChangedListener photoChangedListener) {
         if ((selectedFileNames != null) && (selectedFileNames.size() > 0)) {
             // Handle item selection
             switch (item.getItemId()) {
                 case R.id.cmd_delete:
-                    return cmdDeleteFileWithQuestion(selectedFileNames, photoChangedListener);
+                    return cmdDeleteFileWithQuestion(activity, selectedFileNames, photoChangedListener);
                 default:break;
             }
         }
@@ -276,14 +276,14 @@ public class AndroidFileCommands extends FileCommands {
         edit.apply();
     }
 
-    public boolean cmdDeleteFileWithQuestion(final SelectedFiles fotos,
+    public boolean cmdDeleteFileWithQuestion(Activity activity, final SelectedFiles fotos,
                                              final PhotoChangeNotifyer.PhotoChangedListener photoChangedListener) {
         String[] pathNames = fotos.getFileNames();
         String errorMessage = checkWriteProtected(R.string.delete_menu_title, SelectedFiles.getFiles(pathNames));
 
         if (errorMessage != null) {
             if (!isInBackground) {
-                Toast.makeText(this.mContext, errorMessage, Toast.LENGTH_LONG).show();
+                Toast.makeText(activity, errorMessage, Toast.LENGTH_LONG).show();
             }
         } else {
             StringBuilder names = new StringBuilder();
@@ -293,7 +293,7 @@ public class AndroidFileCommands extends FileCommands {
             final String message = mContext
                     .getString(R.string.delete_question_message_format, names.toString());
 
-            final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
             final String title = mContext.getText(R.string.delete_question_title)
                     .toString();
 
@@ -463,10 +463,10 @@ public class AndroidFileCommands extends FileCommands {
 
             if (errorMessage != null) {
                 if (!isInBackground) {
-                    Toast.makeText(this.mContext, errorMessage, Toast.LENGTH_LONG).show();
+                    Toast.makeText(mContext, errorMessage, Toast.LENGTH_LONG).show();
                 }
             } else if (files != null) {
-                Context applicationContext = this.mContext.getApplicationContext();
+                Context applicationContext = this.mContext;
                 int itemcount = 0;
                 int countdown = 0;
                 int maxCount = files.length+1;
@@ -534,7 +534,7 @@ public class AndroidFileCommands extends FileCommands {
     @Override
     protected boolean canProcessFile(int opCode) {
         if (opCode != OP_UPDATE) {
-            return AndroidFileCommands.canProcessFile(this.mContext, this.isInBackground);
+            return AndroidFileCommands.canProcessFile(mContext, this.isInBackground);
         }
         return true;
     }
