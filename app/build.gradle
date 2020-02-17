@@ -60,9 +60,10 @@ android {
         // 0.7.5.190916 (43)    Drill Down Search via Picker context-show-in-new
         // 0.8.0.191021 (44)    Backup to zip
         // 0.8.1.200212 (45)    Theme Support
+        // 0.8.1.200218 (46)    Bugfix Delete Image
 
-        versionCode = 45
-        versionName = '0.8.1.200212'
+        versionCode = 46
+        versionName = '0.8.1.200218'
 
 		// all supported locales
 		// resConfigs "ar","de","es","fr","hi","in","it","ja","nl","pl","ro","ru","tr","uk","zz","pt-rBR","zh-rCN","zh-rTW"

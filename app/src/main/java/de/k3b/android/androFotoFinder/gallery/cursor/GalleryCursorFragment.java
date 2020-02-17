@@ -859,7 +859,7 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
         AndroidFileCommands fileCommands = mFileCommands;
 
         final SelectedFiles selectedFiles = this.mAdapter.createSelectedFiles(getActivity(), this.mSelectedItems);
-        if ((mSelectedItems != null) && (fileCommands.onOptionsItemSelected(menuItem, selectedFiles, this))) {
+        if ((mSelectedItems != null) && (fileCommands.onOptionsItemSelected(getActivity(), menuItem, selectedFiles, this))) {
             return true;
         }
         switch (menuItem.getItemId()) {
