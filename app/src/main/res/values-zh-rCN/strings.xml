@@ -5,6 +5,7 @@
  * Translation to Chinese Simplified (zh-CN) via Crowdin:
  *  * 2017 by Liu Feng (pitumaomao)
  *  * 2018 by Forbidden (cptbl00dra1n)
+ *  * 2020 by Xu Eric (spice2wolf)
  *
  * This file is part of "A Photo Manager" (A(ndro)FotoFinder).
  *
@@ -37,8 +38,8 @@
   <string name="copy_result_format">已复制%1$d/%2$d 文件</string>
   <string name="delete_menu_title">删除</string>
   <string name="delete_question_message_format">"是否确实要永久删除这些文件？
-%1$s 
-  
+%1$s
+
 此操作无法撤销。"</string>
   <string name="delete_question_title">刪除照片？</string>
   <string name="delete_result_format">已删除%1$d/%2$d 文件</string>
@@ -123,6 +124,7 @@
   <string name="share_err_to_many">一次选择共享的项目太多</string>
   <string name="share_menu_title">共享/发送</string>
   <string name="show_in_gallery_menu_title">在新图库中显示</string>
+  <string name="show_in_new_menu_title">显示在......</string>
   <string name="slideshow_menu_title">播放幻灯片</string>
   <string name="sort_by_date">日期</string>
   <string name="sort_by_folder">目录</string>
@@ -144,13 +146,13 @@
   <string name="geo_picker_from_photo_title">从地图中获取地理信息</string>
   <string name="geo_picker_from_map_title">从地图中获取地理信息</string>
   <string name="folder_hide_images_menu_title">隐藏图像</string>
-  <string name="folder_hide_images_question_message_format">"你确定？ 
+  <string name="folder_hide_images_question_message_format">"你确定？
 
-你想要使 
+你想要使
 
-%1$s 
+%1$s
 
-下面的所有媒体文件 （照片，视频，音频等），对系统多媒体库、图片应用和媒体文件扫描服务不可见？ 
+下面的所有媒体文件 （照片，视频，音频等），对系统多媒体库、图片应用和媒体文件扫描服务不可见？
 
 您可以撤消此隐藏操作，方法是在系统图片应用菜单调用媒体文件扫描服务."</string>
   <string name="filter_path_hint">部分目录名或文件名。%= 通配符</string>
@@ -194,10 +196,10 @@
   <string name="lbl_file_name_pattern">文件名模板：</string>
   <string name="lbl_exif">EXIF</string>
   <!-- i.e.
-            Copy 5 Photos
-				hello.jpg (2017-08-02), ...
-			To .../path/toFile/
-				1708NewName0001.jpg -->
+          Copy 5 Photos
+              hello.jpg (2017-08-02), ...
+          To .../path/toFile/
+              1708NewName0001.jpg -->
   <string name="preview_message_format">"%1$s %2$d 照片\n\t%3$s (%4$s), …\n至%5$s\n\t%6$s"</string>
   <!-- new in 0.6.3 additional sorting options -->
   <string name="sort_by_file_size">大小</string>
@@ -219,15 +221,29 @@
   <!-- #115: Virtual album -->
   <string name="filter_menu_title_album">编辑虚拟相册</string>
   <!--  depricated tags_update_result_format
-			replaced by android.R.string.xxx @android:string/xxx : btn_cancel btn_no btn_yes btn_okcopy_menu_title
+          replaced by android.R.string.xxx @android:string/xxx : btn_cancel btn_no btn_yes btn_okcopy_menu_title
 
-    sperate boomark picker is deprecated. now open via folder picker
-        <string name="bookmark_load_from_menu_title">Load album from &#8230;</string><br/>
-	note: with ver 0.7.0 'bookmark' will become 'virtual album'
-    -->
+  sperate boomark picker is deprecated. now open via folder picker
+      <string name="bookmark_load_from_menu_title">Load album from &#8230;</string>
+  note: with ver 0.7.0 'bookmark' will become 'virtual album'
+  -->
   <string name="settings_bookmark_dir_title">书签文件夹</string>
+  <!-- #108: Backup to Zip-file -->
+  <string name="backup_title">备份到zip文件</string>
+  <string name="lbl_zip_out">Zip文件输出路径</string>
+  <string name="lbl_zip_name">文件</string>
+  <string name="lbl_zip_dir">文件夹</string>
+  <string name="lbl_zip_rel_path">在下方生成Zip子文件夹</string>
+  <!-- when should backup start ? -->
+  <string name="lbl_when">何时： </string>
+  <!-- #108 Zip-file export/backup will be implemented later
+  < ! - - what type of data should be saven ? - - >
+  <string name="lbl_what">What: </string>
+-->
   <!-- #162: Theme support -->
   <string name="settings_category_appearance_title">外观</string>
-  <string name="dark_theme_title">灰暗</string>
-  <string name="light_theme_title">明亮</string>
+  <string name="light_theme_title">浅色</string>
+  <string name="dark_theme_title">暗色</string>
+  <!-- #155: android10 -->
+  <string name="load_db_menu_title">(重新)加载媒体数据库</string>
 </resources>
