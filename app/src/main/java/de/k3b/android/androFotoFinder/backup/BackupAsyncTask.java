@@ -95,7 +95,7 @@ public class BackupAsyncTask extends ProgressableAsyncTask<IZipConfig> implement
 
     @Override
     public boolean onProgress(int itemcount, int size, String message) {
-        boolean result = onProgress(itemcount, size, message);
+        boolean result = super.onProgress(itemcount, size, message);
         if (isCancelled()) {
             if (this.service != null) this.service.cancel();
         }
