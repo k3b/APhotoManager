@@ -1,0 +1,3 @@
+* #168: Bugfix crash in "incremental backup to zip-file"
+* translation updates nl, ru, zh-CN
+* APhotoManager is not Android-10 (api-29) ready yet.
