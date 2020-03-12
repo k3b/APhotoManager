@@ -3,7 +3,7 @@
 <!--
 /*
  * Translation to Dutch by keunes(may ... september 2016), ookikgavertalen(2017-09-08),
- *      Klaas Swart (verydutch) 2018/11 ... 2019/09 , T-v-Gerwen 2019-09
+ *      Klaas Swart (verydutch) 2018/11 ... 2020/03 , T-v-Gerwen 2019-09
  *
  * This file is part of "A Photo Manager" (A(ndro)FotoFinder).
  *
@@ -235,7 +235,9 @@ onzichtbaar voor de mediadatabase, de galerij apps en de mediascanner. De bestan
     <string name="lbl_what">What: </string>
 -->
     <!-- #162: Theme support -->
-    <string name="settings_category_appearance_title">Uiterlijk</string>
+    <string name="settings_category_appearance_title">Themakleur</string>
     <string name="light_theme_title">Licht</string>
     <string name="dark_theme_title">Donker</string>
+    <!-- #155: android10 -->
+    <string name="load_db_menu_title">(Her)Laad Mediadatabase</string>
 </resources>
