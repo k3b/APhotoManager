@@ -19,8 +19,6 @@
 
 package de.k3b.android.widget;
 
-import android.Manifest;
-
 /**
  * Manage permission
  * * write to external-storage and
@@ -28,9 +26,10 @@ import android.Manifest;
  */
 public abstract class FilePermissionActivity extends PermissionBaseActivity {
     private void t() {
+/*
         super.requestPermisson(Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 "To %s the app needs write permission.",
                 (_this, result) -> onSaveChangesWithGrant(_this, result));
-
+*/
     }
 }
