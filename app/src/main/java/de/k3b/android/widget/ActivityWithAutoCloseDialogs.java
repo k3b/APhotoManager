@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 by k3b.
+ * Copyright (c) 2017-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -36,7 +36,7 @@ import de.k3b.io.FileUtils;
  * Created by k3b on 21.06.2017.
  */
 
-public class ActivityWithAutoCloseDialogs extends LocalizedActivity {
+public abstract class ActivityWithAutoCloseDialogs extends LocalizedActivity {
     protected DialogFragment mCurrentDialogFragment;
     private Closeable mCloseable;
     private DialogInterface mCurrentDialog;

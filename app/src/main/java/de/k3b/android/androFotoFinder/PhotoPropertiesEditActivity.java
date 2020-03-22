@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 by k3b.
+ * Copyright (c) 2017-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -61,7 +61,6 @@ import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.AboutDialogPreference;
-import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.android.widget.UpdateTask;
 import de.k3b.geo.api.GeoPointDto;
@@ -86,7 +85,7 @@ import de.k3b.tagDB.TagConverter;
  * Modes: if IPhotoProperties is not null edit exif data witout modifying any jpg file.
  * Modes: else if data-url/SelectedFiles is not null: modify the referenced jpg files.
  */
-public class PhotoPropertiesEditActivity extends ActivityWithAutoCloseDialogs implements Common {
+public class PhotoPropertiesEditActivity extends BaseActivity implements Common {
     private static final boolean SYNC_UPDATE_EXIF = false; // for sync debugging. false: asynch task
     private static final String mDebugPrefix = "ExifEdit-";
     private static final String DLG_NAVIGATOR_TAG = mDebugPrefix;
@@ -380,7 +379,7 @@ public class PhotoPropertiesEditActivity extends ActivityWithAutoCloseDialogs im
                 finish();
                 return true;
             case R.id.cmd_ok:
-                onOk();
+                onSaveChanges();
                 return true;
             case R.id.cmd_clear:
                 clearFilter();
@@ -796,7 +795,7 @@ public class PhotoPropertiesEditActivity extends ActivityWithAutoCloseDialogs im
     }
 
     /** save exif changes back to image and database */
-    private void onOk() {
+    private void onSaveChanges() {
         Activity ctx = this;
         saveGuiToExif("onOk (finish)");
         mHistory.saveHistory();

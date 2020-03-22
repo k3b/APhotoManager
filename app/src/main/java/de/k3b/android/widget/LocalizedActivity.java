@@ -35,7 +35,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.util.UserTheme;
 
 /**
- * An activity that can change the locale (language) of its content.
+ * An activity that can change the locale (language) and translation of its content at runtime.
  *
  * Inspired by http://stackoverflow.com/questions/13181847/change-the-locale-at-runtime
  *

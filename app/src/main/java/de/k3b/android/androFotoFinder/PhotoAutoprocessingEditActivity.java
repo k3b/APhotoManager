@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 by k3b.
+ * Copyright (c) 2017-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -58,7 +58,6 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.ClipboardUtil;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.AboutDialogPreference;
-import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.io.DateUtil;
 import de.k3b.io.ListUtils;
@@ -78,7 +77,7 @@ import de.k3b.media.PhotoPropertiesUtil;
  * * filename schemata for copied/moved files
  * * default properties that every photot should receive.
  */
-public class PhotoAutoprocessingEditActivity extends ActivityWithAutoCloseDialogs implements Common {
+public class PhotoAutoprocessingEditActivity extends BaseActivity implements Common {
     private static final String mDebugPrefix = "AutoProcEdit-";
     private static final String SETTINGS_KEY = "AutoProcEditCurrent-";
     private static final int EXIF_EDIT_RESULT_ID = 86441;

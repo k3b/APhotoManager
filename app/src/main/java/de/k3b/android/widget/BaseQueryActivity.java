@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -41,6 +41,7 @@ import java.util.Date;
 import java.util.List;
 
 import de.k3b.LibGlobal;
+import de.k3b.android.androFotoFinder.BaseActivity;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.GalleryFilterActivity;
 import de.k3b.android.androFotoFinder.GalleryFilterPathState;
@@ -70,11 +71,12 @@ import de.k3b.io.collections.SelectedItems;
 import de.k3b.tagDB.Tag;
 
 /**
- * All that is is needed for to have a base-filter plus a sub-filter
+ * An activity that can have a filtered collection of photos based on
+ * a base-filter plus a sub-filter
  *
  * Created by k3b on 10.07.2018.
  */
-public abstract class BaseQueryActivity  extends ActivityWithAutoCloseDialogs implements Common, DirectoryPickerFragment.OnDirectoryInteractionListener,
+public abstract class BaseQueryActivity extends BaseActivity implements Common, DirectoryPickerFragment.OnDirectoryInteractionListener,
         LocationMapFragment.OnDirectoryInteractionListener,
         TagsPickerFragment.ITagsPicker {
     protected static final String mDebugPrefix = "GalleryA-";

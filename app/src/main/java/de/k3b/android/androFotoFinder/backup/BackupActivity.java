@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 by k3b.
+ * Copyright (c) 2018-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -52,6 +52,7 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import de.k3b.android.androFotoFinder.AffUtils;
+import de.k3b.android.androFotoFinder.BaseActivity;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.GalleryFilterActivity;
@@ -68,7 +69,6 @@ import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.OsUtils;
 import de.k3b.android.widget.AboutDialogPreference;
-import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.DateUtil;
@@ -95,7 +95,7 @@ import de.k3b.zip.ZipConfigRepository;
  *  * uri = intent.getData() load file via file-uri
  *  * else intent.Extra[EXTRA_STATE_ZIP_CONFIG]
  */
-public class BackupActivity extends ActivityWithAutoCloseDialogs implements Common {
+public class BackupActivity extends BaseActivity implements Common {
     private static final int REQUEST_ID_PICK_ZIP_OUT_DIR = 1234;
 
     public static final int REQUEST_BACKUP_ID = 99289;

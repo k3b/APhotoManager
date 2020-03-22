@@ -31,7 +31,7 @@ import de.k3b.android.androFotoFinder.Global;
  * <p>
  * Created by k3b on 25.08.2018.
  */
-public class ActivityWithCallContext extends Activity {
+public abstract class ActivityWithCallContext extends Activity {
     /**
      * the CallContext is an intent-extra with this name
      */

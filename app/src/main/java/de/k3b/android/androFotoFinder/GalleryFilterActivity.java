@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -60,7 +60,6 @@ import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.osmdroid.OsmdroidUtil;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.AboutDialogPreference;
-import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.BaseQueryActivity;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.database.QueryParameter;
@@ -79,7 +78,7 @@ import de.k3b.tagDB.Tag;
  *
  * Defines a gui for global foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.
  */
-public class GalleryFilterActivity extends ActivityWithAutoCloseDialogs
+public class GalleryFilterActivity extends BaseActivity
         implements Common, DirectoryPickerFragment.OnDirectoryInteractionListener,
         LocationMapFragment.OnDirectoryInteractionListener,
         TagsPickerFragment.ITagsPicker

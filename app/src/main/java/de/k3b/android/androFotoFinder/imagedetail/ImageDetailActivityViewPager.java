@@ -49,6 +49,7 @@ import java.util.Date;
 import java.util.List;
 
 import de.k3b.android.androFotoFinder.AffUtils;
+import de.k3b.android.androFotoFinder.BaseActivity;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.FotoGalleryActivity;
 import de.k3b.android.androFotoFinder.Global;
@@ -71,7 +72,6 @@ import de.k3b.android.util.PhotoChangeNotifyer;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScannerAsyncTask;
 import de.k3b.android.widget.AboutDialogPreference;
-import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.QueryParameter;
@@ -93,7 +93,7 @@ import de.k3b.tagDB.Tag;
  * Swipe left/right to show previous/next image.
  */
 
-public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs implements Common, TagsPickerFragment.ITagsPicker,
+public class ImageDetailActivityViewPager extends BaseActivity implements Common, TagsPickerFragment.ITagsPicker,
         PhotoChangeNotifyer.PhotoChangedListener {
     private static final String INSTANCE_STATE_MODIFY_COUNT = "mModifyCount";
     private static final String INSTANCE_STATE_LAST_SCROLL_POSITION = "lastScrollPosition";
@@ -1283,7 +1283,7 @@ public class ImageDetailActivityViewPager extends ActivityWithAutoCloseDialogs i
         }
 
         /**
-         * To be overwritten to check if a path can be picked.
+         * To be overwritten to check if a path can be picked for writing.
          *
          * @param path to be checked if it cannot be handled
          * @return null if no error else error message with the reason why it cannot be selected
