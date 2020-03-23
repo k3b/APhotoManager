@@ -20,7 +20,9 @@
 package de.k3b.android.widget;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -37,8 +39,10 @@ import de.k3b.android.androFotoFinder.R;
  * * write to sdcard/usbstick,....
  */
 public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialogs {
+    private static final int REQUEST_ID_SD_ROOT_DIR = 2001;
 
     private static final int REQUEST_ID_WRITE_EXTERNAL_STORAGE = 2000;
+    private static Uri fileRootUri = null;
     private static final String PERMISSION_WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
     @Override
@@ -49,10 +53,25 @@ public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialog
                 != PackageManager.PERMISSION_GRANTED) {
             requestPermission(PERMISSION_WRITE_EXTERNAL_STORAGE, REQUEST_ID_WRITE_EXTERNAL_STORAGE);
         } else {
-            onCreateEx(savedInstanceState);
+            askForDirectoryRoot();
         }
     }
 
+    protected void askForDirectoryRoot() {
+        // Not enough to access sd-card via file :-(
+        if (false && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN
+                && fileRootUri == null) {
+
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+            intent.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+            startActivityForResult(intent, REQUEST_ID_SD_ROOT_DIR);
+        } else {
+            onCreateEx(null);
+        }
+
+    }
     protected abstract void onCreateEx(Bundle savedInstanceState);
 
     /**
@@ -66,7 +85,7 @@ public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialog
                         && (grantResults.length > 0)
                         && (grantResults[0] == PackageManager.PERMISSION_GRANTED);
                 if (success) {
-                    onCreateEx(null);
+                    askForDirectoryRoot();
                 } else {
                     Log.i(Global.LOG_CONTEXT, this.getClass().getSimpleName()
                             + ": " + getText(R.string.permission_error));
@@ -79,6 +98,15 @@ public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialog
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_ID_SD_ROOT_DIR && resultCode == RESULT_OK) {
+            fileRootUri = data.getData();
+            onCreateEx(null);
+        }
+    }
+
 
     protected void requestPermission(final String permission, final int requestCode) {
         ActivityCompat.requestPermissions(this, new String[]{permission}, requestCode);

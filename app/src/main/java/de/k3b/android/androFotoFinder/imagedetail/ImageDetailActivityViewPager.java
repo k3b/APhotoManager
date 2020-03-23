@@ -241,7 +241,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
     }
 
     @Override
-    protected void onCreateEx(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         this.mWaitingForMediaScannerResult = false;
 
         // #17: let actionbar overlap image so there is no need to resize main view item
@@ -249,6 +249,10 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR_OVERLAY);
 
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void onCreateEx(Bundle savedInstanceState) {
         SettingsActivity.prefs2Global(this);
         Intent intent = getIntent();
 
