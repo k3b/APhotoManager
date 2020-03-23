@@ -55,4 +55,6 @@ public interface Common {
 
     /** detail,geoEdit:  Activity.onActivityResult() - resultCode:  one or more photo-files were modified. caller must invalidate cached files/directories. */
     int RESULT_CHANGE = Activity.RESULT_OK;
+
+    int RESULT_NO_PERMISSIONS = -22;
 }

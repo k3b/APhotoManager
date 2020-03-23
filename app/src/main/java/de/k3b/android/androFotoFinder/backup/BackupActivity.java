@@ -200,9 +200,7 @@ public class BackupActivity extends BaseActivity implements Common {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        Global.debugMemory(mDebugPrefix, "onCreate");
-        super.onCreate(savedInstanceState);
+    protected void onCreateEx(Bundle savedInstanceState) {
         defineGui();
 
         if (savedInstanceState != null) {

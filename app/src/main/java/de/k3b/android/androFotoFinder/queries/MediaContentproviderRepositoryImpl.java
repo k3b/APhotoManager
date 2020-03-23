@@ -77,11 +77,12 @@ public class MediaContentproviderRepositoryImpl {
             excpetion = ex;
         } finally {
             if ((excpetion != null) || Global.debugEnabledSql || (out_debugMessage != null)) {
+                final int count = (query == null) ? 0 : query.getCount();
                 StringBuilder message = StringUtils.appendMessage(out_debugMessage, excpetion,
                         dbgContext, MODUL_NAME +
                                 ".createCursorForQuery:\n",
                         QueryParameter.toString(sqlSelectColums, null, from, sqlWhereStatement,
-                                sqlWhereParameters, sqlSortOrder, query.getCount()));
+                                sqlWhereParameters, sqlSortOrder, count));
                 if (out_debugMessage == null) {
                     Log.i(LOG_TAG, message.toString(), excpetion);
                 } // else logging is done by caller

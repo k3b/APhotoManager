@@ -19,17 +19,68 @@
 
 package de.k3b.android.widget;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.util.Log;
+import android.widget.Toast;
+
+import de.k3b.android.androFotoFinder.Common;
+import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.androFotoFinder.R;
+
 /**
  * Manage permission
  * * write to external-storage and
  * * write to sdcard/usbstick,....
  */
-public abstract class FilePermissionActivity extends PermissionBaseActivity {
-    private void t() {
-/*
-        super.requestPermisson(Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                "To %s the app needs write permission.",
-                (_this, result) -> onSaveChangesWithGrant(_this, result));
-*/
+public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialogs {
+
+    private static final int REQUEST_ID_WRITE_EXTERNAL_STORAGE = 2000;
+    private static final String PERMISSION_WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN
+                && ActivityCompat.checkSelfPermission(this, PERMISSION_WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermission(PERMISSION_WRITE_EXTERNAL_STORAGE, REQUEST_ID_WRITE_EXTERNAL_STORAGE);
+        } else {
+            onCreateEx(savedInstanceState);
+        }
+    }
+
+    protected abstract void onCreateEx(Bundle savedInstanceState);
+
+    /**
+     * Callback received when a permissions request has been completed.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_ID_WRITE_EXTERNAL_STORAGE: {
+                final boolean success = (grantResults != null)
+                        && (grantResults.length > 0)
+                        && (grantResults[0] == PackageManager.PERMISSION_GRANTED);
+                if (success) {
+                    onCreateEx(null);
+                } else {
+                    Log.i(Global.LOG_CONTEXT, this.getClass().getSimpleName()
+                            + ": " + getText(R.string.permission_error));
+                    Toast.makeText(this, R.string.permission_error, Toast.LENGTH_LONG).show();
+                    setResult(Common.RESULT_NO_PERMISSIONS, null);
+                    finish();
+                }
+                return;
+            }
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    protected void requestPermission(final String permission, final int requestCode) {
+        ActivityCompat.requestPermissions(this, new String[]{permission}, requestCode);
     }
 }

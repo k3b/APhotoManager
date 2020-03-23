@@ -19,17 +19,17 @@
 
 package de.k3b.android.androFotoFinder;
 
+import android.os.Bundle;
+
 import de.k3b.android.widget.ActivityWithAutoCloseDialogs;
 import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.BaseQueryActivity;
 import de.k3b.android.widget.FilePermissionActivity;
 import de.k3b.android.widget.LocalizedActivity;
-import de.k3b.android.widget.PermissionBaseActivity;
 
 /**
  * Nearly all activities are inherited from {@link BaseActivity}.
  * * {@link FilePermissionActivity} manage permission write to external-storage and to sdcard
- * * {@link PermissionBaseActivity} can Ask for permission
  * * {@link ActivityWithAutoCloseDialogs} Automatically closes pop-dialogs
  * * {@link LocalizedActivity} Change the locale (language) and translation of its content at runtime
  * * {@link ActivityWithCallContext} memorizes the activity call stack (parent Activities) for debugging purposes.
@@ -39,4 +39,9 @@ import de.k3b.android.widget.PermissionBaseActivity;
  * ** {@link de.k3b.android.androFotoFinder.locationmap.MapGeoPickerActivity}
  */
 public abstract class BaseActivity extends FilePermissionActivity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        Global.debugMemory(Global.LOG_CONTEXT, "onCreate " + getClass().getSimpleName());
+        super.onCreate(savedInstanceState);
+    }
 }

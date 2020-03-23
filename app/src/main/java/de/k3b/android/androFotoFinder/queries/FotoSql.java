@@ -62,6 +62,7 @@ import de.k3b.io.collections.SelectedItems;
  * Created by k3b on 04.06.2015.
  */
 public class FotoSql extends FotoSqlBase {
+    private static boolean firstRun = true;
     public static final String LOG_TAG = Global.LOG_CONTEXT + "-sql";
 
     public static final int SORT_BY_DATE_OLD = 1;
@@ -282,6 +283,10 @@ public class FotoSql extends FotoSqlBase {
     private static IMediaRepositoryApi mediaDBApi;
 
     public static IMediaRepositoryApi getMediaDBApi() {
+        if ((firstRun) && (FotoSql.mediaDBApi != null)) {
+            firstRun = false;
+            FotoSql.deleteMediaWithNullPath();
+        }
         return FotoSql.mediaDBApi;
     }
 
@@ -1047,12 +1052,14 @@ public class FotoSql extends FotoSqlBase {
         // return deleteMedia("delete without path (_data = null)", context, wherePathIsNull.toAndroidWhere(), null, false);
 
         SelectedFiles filesWitoutPath = getSelectedfiles(wherePathIsNull, FotoSql.SQL_COL_PATH, VISIBILITY.PRIVATE_PUBLIC);
-        String pksAsString = filesWitoutPath.toIdString();
-        if ((pksAsString != null) && (pksAsString.length() > 0)) {
-            QueryParameter whereInIds = new QueryParameter();
-            FotoSql.setWhereSelectionPks(whereInIds, pksAsString);
+        if (filesWitoutPath != null) {
+            String pksAsString = filesWitoutPath.toIdString();
+            if ((pksAsString != null) && (pksAsString.length() > 0)) {
+                QueryParameter whereInIds = new QueryParameter();
+                FotoSql.setWhereSelectionPks(whereInIds, pksAsString);
 
-            return mediaDBApi.deleteMedia("delete without path (_data = null)", whereInIds.toAndroidWhere(), null, true);
+                return mediaDBApi.deleteMedia("delete without path (_data = null)", whereInIds.toAndroidWhere(), null, true);
+            }
         }
         return 0;
     }

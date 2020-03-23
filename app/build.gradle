@@ -21,7 +21,7 @@ android {
 								// Android 6.0 Marshmallow (API 23); Android 7.0 Nougat (API 24)
         maxSdkVersion 28        // #155: android-10=api29
 
-        targetSdkVersion 21
+        targetSdkVersion 28
 
 		// non-fdroid release
         // appXXX are defined in gradle.properties

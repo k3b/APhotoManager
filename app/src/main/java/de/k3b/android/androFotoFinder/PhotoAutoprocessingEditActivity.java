@@ -154,10 +154,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        Global.debugMemory(mDebugPrefix, "onCreate");
-        super.onCreate(savedInstanceState);
-
+    protected void onCreateEx(Bundle savedInstanceState) {
         this.mLabelGenerator = new AndroidLabelGenerator(getApplicationContext(), "\n");
         Intent intent = getIntent();
         CharSequence title = (intent == null) ? null : intent.getStringExtra(EXTRA_TITLE);

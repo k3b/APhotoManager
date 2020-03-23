@@ -139,9 +139,7 @@ public class GalleryFilterActivity extends BaseActivity
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        Global.debugMemory(mDebugPrefix, "onCreate");
-        super.onCreate(savedInstanceState);
+    protected void onCreateEx(Bundle savedInstanceState) {
         final Intent intent = getIntent();
 
         mGalleryFilterPathState = new GalleryFilterPathState().load(this, intent,

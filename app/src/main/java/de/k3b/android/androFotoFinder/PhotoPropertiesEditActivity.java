@@ -173,9 +173,7 @@ public class PhotoPropertiesEditActivity extends BaseActivity implements Common 
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        Global.debugMemory(mDebugPrefix, "onCreate");
-        super.onCreate(savedInstanceState);
+    protected void onCreateEx(Bundle savedInstanceState) {
         setContentView(R.layout.activity_exif_edit);
 
         edTitle = (EditText) findViewById(R.id.edit_title);

@@ -89,9 +89,7 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        Global.debugMemory(mDebugPrefix, "onCreate");
-        super.onCreate(savedInstanceState);
+    protected void onCreateEx(Bundle savedInstanceState) {
         final Intent intent = getIntent();
 
         if (BuildConfig.DEBUG) {
