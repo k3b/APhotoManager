@@ -73,7 +73,10 @@ public class OsUtils {
         if (root.getChildren().size() == 0) {
             // on android-5.0 an newer root access is not allowed.
             // i.e. /storage/emulated/0
-            File externalRoot = Environment.getExternalStorageDirectory();
+            File externalRoot = new File("/storage");
+            if (externalRoot.listFiles().length == 0) {
+                externalRoot = Environment.getExternalStorageDirectory();
+            }
             if (externalRoot != null) {
                 root = createOsDirectory(externalRoot, factory);
             }
