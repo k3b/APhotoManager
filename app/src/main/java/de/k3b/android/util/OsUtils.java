@@ -39,7 +39,19 @@ public class OsUtils {
         // i.e. /mnt
         File mountRoot = (extDir == null) ? null :extDir.getParentFile();
 
-        return  (mountRoot != null) ? mountRoot.listFiles() : null;
+        File[] files = (mountRoot != null) ? mountRoot.listFiles() : null;
+        if (((files == null) || (files.length == 0)) && (mountRoot != null)) {
+            // getExternalStorageDirectory = /storage/emulated/0 ==> /storage if emulated is protected
+            mountRoot = mountRoot.getParentFile();
+            files = (mountRoot != null) ? mountRoot.listFiles() : null;
+            for (int i = files.length - 1; i >= 0; i--) {
+                if (files[i].getName().compareToIgnoreCase("emulated") == 0) {
+                    // emulated is protected so use emulated/0 instead
+                    files[i] = new File(mountRoot.getAbsolutePath() + "/emulated/0");
+                }
+            }
+        }
+        return files;
     }
 
     private static boolean isAllowed(File mountFile) {
@@ -81,6 +93,7 @@ public class OsUtils {
                 root = createOsDirectory(externalRoot, factory);
             }
         }
+        root.addChildDirs(OsUtils.getExternalStorageDirFiles());
         return root;
     }
 

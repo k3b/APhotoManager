@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager
  *
@@ -125,26 +125,32 @@ public class OSDirectory implements IDirectory {
     @Override
     public List<IDirectory> getChildren() {
         if ((mCurrent != null) && (mChilden == null)) {
-            mChilden = new ArrayList<IDirectory>();
             File[] files = mCurrent.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    if ((file != null)
-                            && !file.isHidden()
-                            && !file.getName().startsWith(".")
-                            && !FileUtils.isSymlinkDir(file,true)
-                            // && file.canWrite() // bugfix: must be visible because writeprotected parentdir may contain writeenabled subdirs
-                            ) {
-                        if (isDirectory(file)) {
-                            mChilden.add(createOsDirectory(file, this, null));
-                        }
+            addChildDirs(files);
+        }
+        return mChilden;
+    }
+
+    public void addChildDirs(File... files) {
+        if (mChilden == null) {
+            mChilden = new ArrayList<IDirectory>();
+        }
+        if (files != null) {
+            for (File file : files) {
+                if ((file != null)
+                        && !file.isHidden()
+                        && !file.getName().startsWith(".")
+                        && !FileUtils.isSymlinkDir(file, true)
+                    // && file.canWrite() // bugfix: must be visible because writeprotected parentdir may contain writeenabled subdirs
+                ) {
+                    if (isDirectory(file)) {
+                        mChilden.add(createOsDirectory(file, this, null));
+                    }
 //                    } else if (LibGlobal.debugEnabled) {
 //                        logger.debug(FileUtils.getDebugString("OSDirectory.getChildren() rejected ", file));
-                    }
                 }
             }
         }
-        return mChilden;
     }
 
     protected boolean isDirectory(File file) {
