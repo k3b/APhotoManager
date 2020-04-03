@@ -29,7 +29,11 @@ import java.io.File;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.transactionlog.MediaTransactionLogEntryType;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 /**
  * Created by k3b on 06.08.2015.
  */
@@ -40,6 +44,10 @@ public class FileCommandTests {
 
     MediaTransactionLogEntryType lastMediaTransactionLogEntryType;
     class FileCommandsWithFakeTransactionLog extends FileCommands {
+        FileCommandsWithFakeTransactionLog() {
+            super(new FileApi());
+        }
+
         @Override public void addTransactionLog(
                 long currentMediaID, String fileFullPath, long modificationDate,
                 MediaTransactionLogEntryType mediaTransactionLogEntryType, String commandData) {

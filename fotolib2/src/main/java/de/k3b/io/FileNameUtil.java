@@ -20,6 +20,7 @@
 package de.k3b.io;
 
 import java.io.File;
+import java.util.regex.Pattern;
 
 /**
  * Created by k3b on 17.02.2015.
@@ -123,4 +124,21 @@ public class FileNameUtil {
         }
         return result;
     }
+
+    private static final String DIR_PATTERN_ROOT_CANDIDATE = "^0|[A-Za-z0-9]{4}-[A-Za-z0-9]{4}$";
+//    private static final String DIR_PATTERN_SD_USB = "^/storage/[A-Za-z0-9]{4}-[A-Za-z0-9]{4}$";
+//    private static final String DIR_PATTERN_INTERRN = "^/storage/emulated/0$";
+
+    private static final Pattern rootDirCandidatePattern = Pattern.compile(DIR_PATTERN_ROOT_CANDIDATE);
+//    private static final Pattern rootDirSdUsbPattern = Pattern.compile(DIR_PATTERN_SD_USB);
+//    private static final Pattern rootDirInternPattern = Pattern.compile(DIR_PATTERN_INTERRN);
+
+    public static File getAnddroidRootDir(File file) {
+        while ((file != null) && (!rootDirCandidatePattern.matcher(file.getName()).matches())) {
+            file = file.getParentFile();
+        }
+        return file;
+    }
+
+
 }

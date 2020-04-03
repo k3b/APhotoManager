@@ -1457,7 +1457,7 @@ showActivity(String debugContext, Activity context,
                         title = context.getString(R.string.global_err_system);
                         context.finish();
                     }
-                    Dialogs.messagebox(context, title, message);
+                    Dialogs.messagebox(context, title, message, null);
                     return;
                 }
             }

@@ -78,6 +78,7 @@ public class AndroidFileCommands extends FileCommands {
 
     public AndroidFileCommands() {
         // setLogFilePath(getDefaultLogFile());
+        super(new AndroidFileApi());
         setContext(null);
     }
 
@@ -218,14 +219,14 @@ public class AndroidFileCommands extends FileCommands {
         if (destDirFile != null) {
             destDirFile.getParentFile().mkdirs();
             boolean isDir = srcDirFile.isDirectory();
-            if (srcDirFile.renameTo(destDirFile)) {
+            if (osRenameTo(srcDirFile, destDirFile)) {
                 if (isDir) {
                     modifyCount = FotoSql.execRenameFolder(srcDirFile.getAbsolutePath() + "/", destDirFile.getAbsolutePath() + "/");
                 } else {
                     modifyCount = FotoSql.execRename(srcDirFile.getAbsolutePath(), destDirFile.getAbsolutePath());
                 }
                 if (modifyCount < 0) {
-                    destDirFile.renameTo(srcDirFile); // error: undo change
+                    osRenameTo(destDirFile, srcDirFile); // error: undo change
                     return -1;
                 } else {
                     long now = new Date().getTime();

@@ -59,6 +59,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
     public static final int OP_DELETE = 3;
     public static final int OP_RENAME = 4;
     public static final int OP_UPDATE = 5;
+    private final FileApi fileApi;
 
     protected ArrayList<String> mModifiedDestFiles;
     protected ArrayList<String> mModifiedSrcFiles;
@@ -66,7 +67,8 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
     // may be set while looping over items to inform client over progress
     private IProgessListener progessListener;
 
-    public FileCommands() {
+    public FileCommands(FileApi fileApi) {
+        this.fileApi = fileApi;
         setLogFilePath(null);
     }
 
@@ -445,7 +447,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
 
     /** can be replaced by mock/stub in unittests */
     protected boolean osFileMove(File dest, File source) {
-        if (source.renameTo(dest)) {
+        if (osRenameTo(dest, source)) {
             // move within same mountpoint
             if (LibGlobal.debugEnabledJpg) {
                 logger.info("osFileMove(rename) '" + source
@@ -475,6 +477,10 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
             }
         }
         return false;
+    }
+
+    protected boolean osRenameTo(File dest, File source) {
+        return this.fileApi.osRenameTo(dest, source);
     }
 
     /**

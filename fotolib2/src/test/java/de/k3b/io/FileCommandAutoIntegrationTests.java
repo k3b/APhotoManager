@@ -293,7 +293,7 @@ public class FileCommandAutoIntegrationTests {
     }
 
     private FileCommands createFileCommands(String outFileBaseName) {
-        FileCommands result = new FileCommands() {
+        FileCommands result = new FileCommands(new FileApi()) {
             public PhotoPropertiesBulkUpdateService createWorkflow(TransactionLoggerBase logger, String dbgContext) {
                 return new PhotoPropertiesBulkUpdateService(logger) {
                     protected long updateMediaDB(long id, String oldJpgAbsolutePath, File newJpgFile) {

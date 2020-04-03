@@ -198,19 +198,26 @@ public abstract class Dialogs {
 
         fixLayout(alertDialog, textView);
     }
-	public static void messagebox(Activity parent, final String title, String question, final Object... parameters) {
+
+	public static Dialog messagebox(Activity parent, String title, String question,
+									DialogInterface.OnClickListener onClickListener) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(parent);
 		builder.setTitle(title);
 		final TextView textView = new TextView(parent);
 		textView.setText(question);
 		builder.setView(textView);
-		builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.dismiss();
-			}
-		});
+
+		if (onClickListener == null) {
+			onClickListener = new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();
+				}
+			};
+		}
+		builder.setPositiveButton(android.R.string.ok, onClickListener);
 		AlertDialog alertDialog = builder.create();
 		alertDialog.show();
+		return alertDialog;
 	}
 }

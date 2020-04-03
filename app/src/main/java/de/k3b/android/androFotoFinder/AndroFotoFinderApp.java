@@ -54,6 +54,7 @@ import de.k3b.android.util.PhotoChangeNotifyer;
 import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.FileApi;
 import de.k3b.io.PhotoAutoprocessingDto;
 import de.k3b.media.ExifInterface;
 import de.k3b.media.PhotoPropertiesImageReader;
@@ -169,7 +170,7 @@ public class AndroFotoFinderApp extends Application {
                 LibGlobal.LOG_TAG, ThumbNailUtils.LOG_TAG, IMapView.LOGTAG,
                 ExifInterface.LOG_TAG, PhotoPropertiesImageReader.LOG_TAG,
                 FotoSql.LOG_TAG,
-                MediaDBRepository.LOG_TAG,
+                MediaDBRepository.LOG_TAG, FileApi.TAG,
                 MediaContentproviderRepositoryImpl.LOG_TAG) {
 
             @Override
