@@ -55,36 +55,6 @@ public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialog
     private static File currentRootFileRequest = null;
     private DocumentFileTranslator documentFileTranslator = null;
 
-    private static void requestRootUriDialog(
-            final FilePermissionActivity parent, final File rootFile,
-            final String title, final String message,
-            final IOnDirectoryPermissionGrantedHandler permissionGrantedHandler) {
-        if ((title != null) || (message != null)) {
-            Dialog dialog = Dialogs.messagebox(parent, title, message, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    execRequestRootUri(parent, rootFile, permissionGrantedHandler);
-                    dialog.dismiss();
-                }
-            });
-            parent.setAutoClose(null, dialog, null);
-        } else {
-            execRequestRootUri(parent, rootFile, permissionGrantedHandler);
-        }
-    }
-
-    private static void execRequestRootUri(
-            FilePermissionActivity parent,
-            File rootFile, IOnDirectoryPermissionGrantedHandler permissionGrantedHandler) {
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-        intent.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-        currentPermissionGrantedHandler = permissionGrantedHandler;
-        currentRootFileRequest = rootFile;
-        parent.startActivityForResult(intent, REQUEST_ROOT_DIR);
-    }
-
     // workflow onCreate() => requestPermission(PERMISSION_WRITE_EXTERNAL_STORAGE) => onRequestPermissionsResult() => abstract onCreateEx()
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,45 +97,52 @@ public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialog
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    // requestDocumentDirWithPermissionsOrNull -> requestRootUriDialog -> execRequestRootUri
-    // -> onActivityResult -> onRootUriResult -> IOnDirectoryPermissionGrantedHandler.afterGrant()
-
     protected abstract void onCreateEx(Bundle savedInstanceState);
+
+    protected static void requestRootUriDialog(
+            final FilePermissionActivity parent, final File rootFile,
+            final CharSequence title, final CharSequence message,
+            final IOnDirectoryPermissionGrantedHandler permissionGrantedHandler) {
+        if ((title != null) || (message != null)) {
+            Dialog dialog = Dialogs.messagebox(parent, title, message, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    execRequestRootUri(parent, rootFile, permissionGrantedHandler);
+                    dialog.dismiss();
+                }
+            });
+            parent.setAutoClose(null, dialog, null);
+        } else {
+            execRequestRootUri(parent, rootFile, permissionGrantedHandler);
+        }
+    }
+
+    private static void execRequestRootUri(
+            FilePermissionActivity parent,
+            File rootFile, IOnDirectoryPermissionGrantedHandler permissionGrantedHandler) {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+        intent.setFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        currentPermissionGrantedHandler = permissionGrantedHandler;
+        currentRootFileRequest = rootFile;
+        parent.startActivityForResult(intent, REQUEST_ROOT_DIR);
+    }
 
     /**
      * @param dirs where the permissions are needed.
-     * @return array of corresponding dirs or
-     * null if permission is not ready yet.
-     * permissionGrantedHandler will be called when permission is available
+     * @return null if all permissions are granted or
+     * the root file that has not permissions yet.
      */
-    protected DocumentFile[] requestDocumentDirWithPermissionsOrNull(
-            IOnDirectoryPermissionGrantedHandler permissionGrantedHandler,
-            File... dirs) {
-        DocumentFile[] result = new DocumentFile[dirs.length];
+    protected File getMissingRootDirFileOrNull(File... dirs) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             for (int i = dirs.length - 1; i >= 0; i--) {
-                if (null == (result[i] = getDocumentFileTranslator().getOrCreateDirectory(dirs[i]))) {
-                    File root = FileNameUtil.getAnddroidRootDir(dirs[i]);
-                    requestRootUriDialog(this, root,
-                            getString(R.string.permission_error),
-                            getString(R.string.select_folder_root_rationale),
-                            permissionGrantedHandler);
-                    return null;
+                if (null == getOrCreateDirectory(dirs[i])) {
+                    return FileNameUtil.getAnddroidRootDir(dirs[i]);
                 }
             }
-        } else { // old android does not support request permission
-            for (int i = dirs.length - 1; i >= 0; i--) {
-                result[i] = DocumentFile.fromFile(dirs[i]);
-            }
         }
-        return result;
-    }
-
-    private DocumentFileTranslator getDocumentFileTranslator() {
-        if (this.documentFileTranslator == null) {
-            this.documentFileTranslator = DocumentFileTranslator.create(this);
-        }
-        return this.documentFileTranslator;
+        return null;
     }
 
     protected void __del_askForDirectoryRoot() {
@@ -178,6 +155,34 @@ public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialog
             onCreateEx(null);
         }
 
+    }
+
+    protected DocumentFile getOrCreateDirectory(File dir) {
+        if ((dir != null) && dir.exists() && dir.isFile()) dir = dir.getParentFile();
+        final DocumentFile documentFiledir = getDocumentFileTranslator().getOrCreateDirectory(dir);
+        if (DocumentFileTranslator.debugDocFile) {
+            Uri uri = (documentFiledir != null) ? documentFiledir.getUri() : null;
+            Log.d(DocumentFileTranslator.TAG, this.getClass().getSimpleName() + "getOrCreateDirectory(" + dir +
+                    ") -> " + uri);
+        }
+
+        return documentFiledir;
+    }
+
+    public DocumentFileTranslator getDocumentFileTranslator() {
+        if (this.documentFileTranslator == null) {
+            this.documentFileTranslator = DocumentFileTranslator.create(this);
+        }
+        return this.documentFileTranslator;
+    }
+
+    // ... -> requestRootUriDialog -> execRequestRootUri
+    // -> onActivityResult -> onRootUriResult -> IOnDirectoryPermissionGrantedHandler.afterGrant()
+    protected void requestRootUriDialog(File root, final CharSequence title, IOnDirectoryPermissionGrantedHandler permissionGrantedHandler) {
+        requestRootUriDialog(this, root,
+                title,
+                getString(R.string.select_folder_root_rationale),
+                permissionGrantedHandler);
     }
 
     @Override
@@ -197,9 +202,11 @@ public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialog
         currentPermissionGrantedHandler = null;
         currentRootFileRequest = null;
 
-        if ((rootFile == null) && (permissionGrantedHandler != null) && (documentRootUri != null)) {
+        if ((rootFile != null) && (documentRootUri != null)) {
             getDocumentFileTranslator().addRoot(rootFile, DocumentFile.fromTreeUri(this, documentRootUri));
-            permissionGrantedHandler.afterGrant(this);
+            if (permissionGrantedHandler != null) {
+                permissionGrantedHandler.afterGrant(this);
+            }
         }
     }
 

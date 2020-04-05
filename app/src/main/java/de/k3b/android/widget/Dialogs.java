@@ -103,47 +103,27 @@ public abstract class Dialogs {
 		dialog.show();
 	}
 
-	public AlertDialog editFileName(Activity parent, String title, String name, final Object... parameters) {
+	public static Dialog messagebox(
+			Activity parent, CharSequence title,
+			CharSequence question,
+			DialogInterface.OnClickListener onClickListener) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(parent);
-		builder.setTitle(title); // R.string.cmd_save_bookmark_as);
-		View content = onCreateContentView(parent);
+		builder.setTitle(title);
+		final TextView textView = new TextView(parent);
+		textView.setText(question);
+		builder.setView(textView);
 
-		final EditText edit = (EditText) content.findViewById(R.id.edName);
-
-		if (name != null) {
-			edit.setText(name);
-
-			// select text without extension
-			int selectLen = name.lastIndexOf(".");
-			if (selectLen == -1) selectLen = name.length();
-			edit.setSelection(0, selectLen);
+		if (onClickListener == null) {
+			onClickListener = new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.dismiss();
+				}
+			};
 		}
-
-		// on my android 4.4 cellphone i have SHOW_AS_ACTION_ALWAYS|SHOW_AS_ACTION_WITH_TEXT.
-		// Consequence: not enough space so show cut/copy actions - they are not reachable.
-		// This will fix it
-		MenuUtils.changeShowAsActionFlags(edit, SHOW_AS_ACTION_IF_ROOM, android.R.id.copy, android.R.id.cut, android.R.id.selectAll);
-
-		builder.setView(content);
-		builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				onDialogResult(null);
-				dialog.dismiss();
-			}
-		});
-		builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				onDialogResult(edit.getText().toString(), parameters);
-				dialog.dismiss();
-			}
-		});
+		builder.setPositiveButton(android.R.string.ok, onClickListener);
 		AlertDialog alertDialog = builder.create();
 		alertDialog.show();
-
-		fixLayout(alertDialog, edit);
-		setEditFocus(alertDialog, edit);
 		return alertDialog;
 	}
 
@@ -199,25 +179,47 @@ public abstract class Dialogs {
         fixLayout(alertDialog, textView);
     }
 
-	public static Dialog messagebox(Activity parent, String title, String question,
-									DialogInterface.OnClickListener onClickListener) {
+	public AlertDialog editFileName(Activity parent, CharSequence title, String name, final Object... parameters) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(parent);
-		builder.setTitle(title);
-		final TextView textView = new TextView(parent);
-		textView.setText(question);
-		builder.setView(textView);
+		builder.setTitle(title); // R.string.cmd_save_bookmark_as);
+		View content = onCreateContentView(parent);
 
-		if (onClickListener == null) {
-			onClickListener = new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					dialog.dismiss();
-				}
-			};
+		final EditText edit = (EditText) content.findViewById(R.id.edName);
+
+		if (name != null) {
+			edit.setText(name);
+
+			// select text without extension
+			int selectLen = name.lastIndexOf(".");
+			if (selectLen == -1) selectLen = name.length();
+			edit.setSelection(0, selectLen);
 		}
-		builder.setPositiveButton(android.R.string.ok, onClickListener);
+
+		// on my android 4.4 cellphone i have SHOW_AS_ACTION_ALWAYS|SHOW_AS_ACTION_WITH_TEXT.
+		// Consequence: not enough space so show cut/copy actions - they are not reachable.
+		// This will fix it
+		MenuUtils.changeShowAsActionFlags(edit, SHOW_AS_ACTION_IF_ROOM, android.R.id.copy, android.R.id.cut, android.R.id.selectAll);
+
+		builder.setView(content);
+		builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				onDialogResult(null);
+				dialog.dismiss();
+			}
+		});
+		builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				onDialogResult(edit.getText().toString(), parameters);
+				dialog.dismiss();
+			}
+		});
 		AlertDialog alertDialog = builder.create();
 		alertDialog.show();
+
+		fixLayout(alertDialog, edit);
+		setEditFocus(alertDialog, edit);
 		return alertDialog;
 	}
 }

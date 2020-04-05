@@ -290,8 +290,6 @@ You can undo hiding by calling the mediascanner from gallery-menu."</string>
 
     <!-- #169: sd-card-saf-write-permission support -->
     <string name="permission_error">Missing permisions</string>
-    <string name="select_folder_root_rationale">Please choose the top folder %1$s that contains %2$s on the next screen, to grant write permission</string>
-    <string name="select_folder_root_error">Wrong folder selected.</string>
-
+    <string name="select_folder_root_rationale">On the next screen, please choose the top folder\n of SD-Card or USB-Stick to grant write permission</string>
 </resources>
 

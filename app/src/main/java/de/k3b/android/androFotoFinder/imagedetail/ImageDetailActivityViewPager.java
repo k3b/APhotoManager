@@ -64,7 +64,6 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagTask;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
-import de.k3b.android.util.AndroidFileApi;
 import de.k3b.android.util.AndroidFileCommands;
 import de.k3b.android.util.FileManagerUtil;
 import de.k3b.android.util.IntentUtil;
@@ -75,6 +74,7 @@ import de.k3b.android.util.PhotoPropertiesMediaFilesScannerAsyncTask;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.Dialogs;
+import de.k3b.android.widget.FilePermissionActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.io.GeoUri;
@@ -664,79 +664,62 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
         return false;
     }
 
-    private void onRenameFileAnswer(final SelectedFiles currentFoto, final long fotoId,
+    private void onRenameFileAnswer(final CharSequence title, final SelectedFiles currentFoto, final long fotoId,
                                     final String fotoSourcePath, final String newFileName) {
         File src = new File(fotoSourcePath);
-        try {
-            File dest = new File(src.getParentFile(), newFileName);
+        File dest = new File(src.getParentFile(), newFileName);
 
-            File srcXmpShort = FileProcessor.getSidecar(src, false);
-            boolean hasSideCarShort = ((srcXmpShort != null) && (mFileCommands.osFileExists(srcXmpShort)));
-            File srcXmpLong = FileProcessor.getSidecar(src, true);
-            boolean hasSideCarLong = ((srcXmpLong != null) && (mFileCommands.osFileExists(srcXmpLong)));
+        File srcXmpShort = FileProcessor.getSidecar(src, false);
+        boolean hasSideCarShort = ((srcXmpShort != null) && (mFileCommands.osFileExists(srcXmpShort)));
+        File srcXmpLong = FileProcessor.getSidecar(src, true);
+        boolean hasSideCarLong = ((srcXmpLong != null) && (mFileCommands.osFileExists(srcXmpLong)));
 
-            File destXmpShort = FileProcessor.getSidecar(dest, false);
-            File destXmpLong = FileProcessor.getSidecar(dest, true);
+        File destXmpShort = FileProcessor.getSidecar(dest, false);
+        File destXmpLong = FileProcessor.getSidecar(dest, true);
 
-            if (src.equals(dest)) return; // new name == old name ==> nothing to do
+        if (src.equals(dest)) return; // new name == old name ==> nothing to do
 
-            String errorMessage = null;
-            if (hasSideCarShort && mFileCommands.osFileExists(destXmpShort)) {
-                errorMessage = getString(R.string.image_err_file_exists_format, destXmpShort.getAbsoluteFile());
-            }
-            if (hasSideCarLong && mFileCommands.osFileExists(destXmpLong)) {
-                errorMessage = getString(R.string.image_err_file_exists_format, destXmpLong.getAbsoluteFile());
-            }
-            if (mFileCommands.osFileExists(dest)) {
-                errorMessage = getString(R.string.image_err_file_exists_format, dest.getAbsoluteFile());
-            }
+        String errorMessage = null;
+        if (hasSideCarShort && mFileCommands.osFileExists(destXmpShort)) {
+            errorMessage = getString(R.string.image_err_file_exists_format, destXmpShort.getAbsoluteFile());
+        }
+        if (hasSideCarLong && mFileCommands.osFileExists(destXmpLong)) {
+            errorMessage = getString(R.string.image_err_file_exists_format, destXmpLong.getAbsoluteFile());
+        }
+        if (mFileCommands.osFileExists(dest)) {
+            errorMessage = getString(R.string.image_err_file_exists_format, dest.getAbsoluteFile());
+        }
 
-            PhotoChangeNotifyer.setPhotoChangedListener(this);
-            if (errorMessage != null) {
-                // dest-file already exists
-                Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
-                onRenameFileQueston(currentFoto, fotoId, fotoSourcePath, newFileName);
-            } else if (osRenameTo(dest, currentFoto)) {
-                mModifyCount++;
-            } else {
-                // rename failed
-                errorMessage = getString(R.string.image_err_file_rename_format, src.getAbsoluteFile());
-                Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
-            }
-        } catch (AndroidFileApi.PermissionException ex) {
-            //!!! TODO
-            /*
-            requestWritePermission(src, new IOnDirectoryPermissionGrantedHandler() {
-                @Override
-                public void afterGrant(FilePermissionActivity activity) {
-                    ((ImageDetailActivityViewPager) activity).onRenameFileAnswer(currentFoto, fotoId, fotoSourcePath, newFileName);
-                }
-            });
-             */
+        PhotoChangeNotifyer.setPhotoChangedListener(this);
+        if (errorMessage != null) {
+            // dest-file already exists
+            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
+            onRenameFileQueston(title, currentFoto, fotoId, fotoSourcePath, newFileName);
+        } else if (osRenameTo(title, dest, currentFoto)) {
+            mModifyCount++;
+        } else {
+            // rename failed
+            errorMessage = getString(R.string.image_err_file_rename_format, src.getAbsoluteFile());
+            Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
         }
     }
 
-    private boolean osRenameTo(final File dest, final SelectedFiles currentFoto) {
-        boolean done = mFileCommands.rename(currentFoto, dest, null);
-/*
-        if (!done) {
-            File oldFile = currentFoto.getFile(0);
-            DocumentFile[] dirs = requestDocumentDirWithPermissionsOrNull(
+    private boolean osRenameTo(final CharSequence title, final File dest, final SelectedFiles currentFoto) {
+        // close rename dialog to allow messagebox that prepares to ask
+        closeDialogIfNeeded();
+        File missingRoot = getMissingRootDirFileOrNull(currentFoto.getFiles());
+        if (missingRoot == null) {
+            return mFileCommands.setContext(this).rename(currentFoto, dest, null);
+        } else {
+            requestRootUriDialog(missingRoot, title,
                     new IOnDirectoryPermissionGrantedHandler() {
                         @Override
                         public void afterGrant(FilePermissionActivity activity) {
-                            ((ImageDetailActivityViewPager) activity).osRenameTo(dest, currentFoto);
+                            ((ImageDetailActivityViewPager) activity).osRenameTo(title, dest, currentFoto);
                         }
-                    }, oldFile);
-
-            if (dirs != null) {
-                done = dirs[0].renameTo(dest.getName());
-                return true;
-                !!!
-            }
+                    });
+            return false;
         }
- */
-        return done;
     }
 
     @Override
@@ -800,7 +783,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
         return super.onPrepareOptionsMenu(menu);
     }
 
-    private boolean onRenameFileQueston(final SelectedFiles currentFoto, final long fotoId, final String fotoPath, final String _newName) {
+    private boolean onRenameFileQueston(final CharSequence title, final SelectedFiles currentFoto, final long fotoId, final String fotoPath, final String _newName) {
         if (AndroidFileCommands.canProcessFile(this, false)) {
             final String newName = (_newName == null)
                     ? new File(getCurrentFilePath()).getName()
@@ -811,16 +794,16 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
                 @Override
                 protected void onDialogResult(String newFileName, Object... parameters) {
                     if (newFileName != null) {
-                        onRenameFileAnswer(currentFoto, (Long) parameters[0], (String) parameters[1], newFileName);
+                        onRenameFileAnswer(title, currentFoto, (Long) parameters[0], (String) parameters[1], newFileName);
                     }
                 }
             };
-            dialog.editFileName(this, getString(R.string.rename_menu_title), newName, fotoId, fotoPath);
+            dialog.editFileName(this, title, newName, fotoId, fotoPath);
         }
         return true;
     }
 
-    private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
+    private boolean cmdMoveOrCopyWithDestDirPicker(CharSequence title, final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
         if (AndroidFileCommands.canProcessFile(this, false)) {
             PhotoChangeNotifyer.setPhotoChangedListener(this);
             mDestDirPicker = MoveOrCopyDestDirPicker.newInstance(move, fotos);
@@ -933,14 +916,14 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
                     break;
 
                 case R.id.cmd_copy:
-                    result = cmdMoveOrCopyWithDestDirPicker(false, mFileCommands.getLastCopyToPath(), getCurrentFoto());
+                    result = cmdMoveOrCopyWithDestDirPicker(menuItem.getTitle(), false, mFileCommands.getLastCopyToPath(), getCurrentFoto());
                     break;
                 case R.id.cmd_move:
-                    result = cmdMoveOrCopyWithDestDirPicker(true, mFileCommands.getLastCopyToPath(), getCurrentFoto());
+                    result = cmdMoveOrCopyWithDestDirPicker(menuItem.getTitle(), true, mFileCommands.getLastCopyToPath(), getCurrentFoto());
                     break;
                 case R.id.menu_item_rename:
                     PhotoChangeNotifyer.setPhotoChangedListener(this);
-                    result = onRenameFileQueston(getCurrentFoto(), getCurrentImageId(), getCurrentFilePath(), null);
+                    result = onRenameFileQueston(menuItem.getTitle(), getCurrentFoto(), getCurrentImageId(), getCurrentFilePath(), null);
                     break;
                 case R.id.menu_exif:
                     result = onEditExif(menuItem, getCurrentFoto(), getCurrentImageId(), getCurrentFilePath());
@@ -1074,7 +1057,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
     }
 
     //TODO implementation not completed yet
-    private boolean onRenameDirQueston(final SelectedFiles currentFoto, final long fotoId, final String fotoPath, final String _newName) {
+    private boolean onRenameDirQueston(final CharSequence title, final SelectedFiles currentFoto, final long fotoId, final String fotoPath, final String _newName) {
         if (AndroidFileCommands.canProcessFile(this, false)) {
             final String newName = (_newName == null)
                     ? new File(getCurrentFilePath()).getName()
@@ -1085,7 +1068,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
                 @Override
                 protected void onDialogResult(String newFileName, Object... parameters) {
                     if (newFileName != null) {
-                        onRenameSubDirAnswer(currentFoto, (Long) parameters[0], (String) parameters[1], newFileName);
+                        onRenameSubDirAnswer(title, currentFoto, (Long) parameters[0], (String) parameters[1], newFileName);
                     }
                 }
             };
@@ -1094,7 +1077,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
         return true;
     }
 
-    private void onRenameSubDirAnswer(SelectedFiles currentFoto, final long fotoId, final String fotoSourcePath, String newFileName) {
+    private void onRenameSubDirAnswer(final CharSequence title, SelectedFiles currentFoto, final long fotoId, final String fotoSourcePath, String newFileName) {
         File src = new File(fotoSourcePath);
         File dest = new File(src.getParentFile(), newFileName);
 
@@ -1122,8 +1105,8 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
         if (errorMessage != null) {
             // dest-file already exists
             Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
-            onRenameDirQueston(currentFoto, fotoId, fotoSourcePath, newFileName);
-        } else if (osRenameTo(dest, currentFoto)) {
+            onRenameDirQueston(title, currentFoto, fotoId, fotoSourcePath, newFileName);
+        } else if (osRenameTo(title, dest, currentFoto)) {
             mModifyCount++;
         } else {
             // rename failed

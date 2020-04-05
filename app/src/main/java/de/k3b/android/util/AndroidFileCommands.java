@@ -506,6 +506,7 @@ public class AndroidFileCommands extends FileCommands {
             this.mContext = activity.getApplicationContext();
             closeLogFile();
             mScanner = PhotoPropertiesMediaFilesScanner.getInstance(mContext);
+            ((AndroidFileApi) this.fileApi).setContext(activity);
         }
 
         return this;

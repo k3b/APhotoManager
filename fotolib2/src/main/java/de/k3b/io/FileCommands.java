@@ -59,7 +59,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
     public static final int OP_DELETE = 3;
     public static final int OP_RENAME = 4;
     public static final int OP_UPDATE = 5;
-    private final FileApi fileApi;
+    protected final FileApi fileApi;
 
     protected ArrayList<String> mModifiedDestFiles;
     protected ArrayList<String> mModifiedSrcFiles;

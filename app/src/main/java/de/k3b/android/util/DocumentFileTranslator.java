@@ -21,6 +21,7 @@ package de.k3b.android.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v4.provider.DocumentFile;
 import android.util.Log;
@@ -39,31 +40,29 @@ public class DocumentFileTranslator {
     private static final String SAFROOTPREF_KEY_SAF_ROOT_PREFIX = "safroot-";
     private static DocumentFileTranslator rootsettings = null;
     private final Context context;
+    public static final boolean debugDocFile = true;
+
     /**
      * Mapping from known File to DocumentFile translation
      */
     private final Map<File, DocumentFile> dirCache = new HashMap<>();
     private PrefIO prefIO = null;
+    private static final File internalRootCandidate = new File("/storage/emulated/0");
+    // for debugging
+    private static int id = 1;
+    private String mDebugPrefix;
 
-    private DocumentFileTranslator(Context context) {
+    private DocumentFileTranslator(Context context, String namePrefix) {
+        mDebugPrefix = namePrefix + "DocumentFileTranslator#" + (id++) + " ";
         this.context = context;
-        if (rootsettings == null) {
-            rootsettings = new DocumentFileTranslator(context.getApplicationContext());
-            rootsettings.loadFromPrefs();
-        }
     }
 
     public static DocumentFileTranslator create(Context context) {
-        return new DocumentFileTranslator(context).init();
-    }
-
-    private DocumentFileTranslator init() {
-        if (this != rootsettings) {
-            for (Map.Entry<File, DocumentFile> enty : dirCache.entrySet()) {
-                add(enty.getKey(), enty.getValue());
-            }
+        if (rootsettings == null) {
+            rootsettings = new DocumentFileTranslator(context.getApplicationContext(), "Root-");
+            rootsettings.loadFromPrefs();
         }
-        return this;
+        return new DocumentFileTranslator(context, "").init();
     }
 
     private void loadFromPrefs() {
@@ -71,15 +70,20 @@ public class DocumentFileTranslator {
         prefIO.loadFromPrefs();
     }
 
-    /**
-     * add mapping from file-sdcard, -usbstick, -networkstorage to documentFileDirRoot
-     *
-     * @param directory
-     * @param documentFileDir
-     * @return
-     */
-    public DocumentFileTranslator add(File directory, DocumentFile documentFileDir) {
-        dirCache.put(directory, documentFileDir);
+    private static File getInternalStorageRoot() {
+        File dir = internalRootCandidate;
+        if (!dir.exists()) dir = Environment.getExternalStorageDirectory();
+        if ((dir != null) && dir.exists() && dir.isDirectory() && dir.canWrite()) return dir;
+
+        return null;
+    }
+
+    private DocumentFileTranslator init() {
+        if ((rootsettings != null) && (this != rootsettings)) {
+            for (Map.Entry<File, DocumentFile> enty : rootsettings.dirCache.entrySet()) {
+                add(enty.getKey(), enty.getValue());
+            }
+        }
         return this;
     }
 
@@ -99,47 +103,31 @@ public class DocumentFileTranslator {
         return dirCache.get(fileOrDir);
     }
 
-    /**
-     * corresponds to {@link File#mkdirs()} if directory does not exist.
-     *
-     * @return the found or created directory
-     */
-    public DocumentFile getOrCreateDirectory(File directory) {
-        DocumentFile result = null;
-        if (directory != null) {
-            result = getFromCache(directory);
-            if (result == null) {
-                DocumentFile parent = getOrCreateDirectory(directory.getParentFile());
-                if ((parent != null) && parent.isDirectory()) {
-                    result = parent.createDirectory(directory.getName());
-
-                    if (result != null) {
-                        add(directory, result);
-                    }
-                }
-            }
+    private boolean add(String fileUri, String docfileUri) {
+        if ((fileUri != null) && (docfileUri != null)) {
+            add(new File(fileUri), DocumentFile.fromTreeUri(context, Uri.parse(docfileUri)));
+            return true;
         }
-        return result;
+        return false;
     }
 
-    public DocumentFile getDocumentFileOrDir(File fileOrDir, boolean isDir) {
-        DocumentFile result = null;
-        final String context = "getDocumentFile('" + fileOrDir.getAbsolutePath() +
-                "') ";
-        try {
-            result = getDocumentFileOrDirImpl(fileOrDir);
-            if (result == null) {
-                Log.i(TAG, context + "not found");
+    /**
+     * add mapping from file-sdcard, -usbstick, -networkstorage to documentFileDirRoot
+     *
+     * @param directory
+     * @param documentFileDir
+     * @return
+     */
+    public DocumentFileTranslator add(File directory, DocumentFile documentFileDir) {
+        if ((documentFileDir != null) && documentFileDir.isDirectory()) {
+            if (debugDocFile) {
+                Uri uri = (documentFileDir != null) ? documentFileDir.getUri() : null;
+                Log.d(TAG, mDebugPrefix + "dirCache.put(" + directory +
+                        " -> " + uri + ")");
             }
-        } catch (Exception ex) {
-            Log.w(TAG, context, ex);
-
+            dirCache.put(directory, documentFileDir);
         }
-        if ((result != null) && (result.isDirectory() != isDir)) {
-            Log.i(TAG, context + "wrong type isDirectory=" + result.isDirectory());
-            return null;
-        }
-        return result;
+        return this;
     }
 
     private DocumentFile getDocumentFileOrDirImpl(File fileOrDir) {
@@ -156,6 +144,53 @@ public class DocumentFileTranslator {
                     }
                 }
             }
+        }
+        return result;
+    }
+
+    /**
+     * corresponds to {@link File#mkdirs()} if directory does not exist.
+     *
+     * @return the found or created directory
+     */
+    public DocumentFile getOrCreateDirectory(File directory) {
+        DocumentFile result = null;
+        if (directory != null) {
+            result = getFromCache(directory);
+            if (result == null) {
+                DocumentFile parent = getOrCreateDirectory(directory.getParentFile());
+                if ((parent != null) && parent.isDirectory()) {
+                    result = parent.findFile(directory.getName());
+
+                    if (result == null) {
+                        result = parent.createDirectory(directory.getName());
+                    }
+
+                    if (result != null) {
+                        add(directory, result);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    public DocumentFile getDocumentFileOrDir(File fileOrDir, boolean isDir) {
+        DocumentFile result = null;
+        final String context = mDebugPrefix + "getDocumentFile('" + fileOrDir.getAbsolutePath() +
+                "') ";
+        try {
+            result = getDocumentFileOrDirImpl(fileOrDir);
+            if (result == null) {
+                Log.i(TAG, context + "not found");
+            }
+        } catch (Exception ex) {
+            Log.w(TAG, context, ex);
+
+        }
+        if ((result != null) && (result.isDirectory() != isDir)) {
+            Log.i(TAG, context + "wrong type isDirectory=" + result.isDirectory());
+            return null;
         }
         return result;
     }
@@ -178,7 +213,7 @@ public class DocumentFileTranslator {
                 edit.remove(getPrefKeyFile(id));
                 edit.remove(getPrefKeyDocfile(id));
             } catch (Exception ex) {
-                Log.e(TAG, "err saveToPrefs(" + dirCache + ")", ex);
+                Log.e(TAG, mDebugPrefix + "err saveToPrefs(" + dirCache + ")", ex);
             } finally {
                 edit.commit();
             }
@@ -200,6 +235,15 @@ public class DocumentFileTranslator {
             int id = 0;
             String docfileUri = null;
             String fileUri = null;
+
+            File root = getInternalStorageRoot();
+            if (root != null) {
+                root = root.getAbsoluteFile();
+                DocumentFile docRoot = DocumentFile.fromFile(root);
+                if ((docRoot != null) && docRoot.exists() && docRoot.isDirectory() && docRoot.canWrite()) {
+                    add(root, docRoot);
+                }
+            }
             try {
                 final SharedPreferences prefs = PreferenceManager
                         .getDefaultSharedPreferences(context);
@@ -210,18 +254,11 @@ public class DocumentFileTranslator {
                     id++;
                 } while (add(fileUri, docfileUri));
             } catch (Exception ex) {
-                Log.e(TAG, "err loadFromPrefs(" + getPrefKey(id, "-") + "," + fileUri +
+                Log.e(TAG, mDebugPrefix + "err loadFromPrefs(" + getPrefKey(id, "-") + "," + fileUri +
                         ", " + docfileUri + ")", ex);
             }
 
         }
 
-        private boolean add(String fileUri, String docfileUri) {
-            if ((fileUri != null) && (docfileUri != null)) {
-                DocumentFileTranslator.this.add(new File(fileUri), DocumentFile.fromTreeUri(context, Uri.parse(docfileUri)));
-                return true;
-            }
-            return false;
-        }
     }
 }
