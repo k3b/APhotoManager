@@ -24,6 +24,7 @@
         <item>Deutsch (German)</item>
         <item>English</item>
         <item>Espanol (Spanish)</item>
+        <item>Euskara (Basque)</item>
         <item>Français (French)</item>
         <item>हिंदी (Hindi)</item>
         <item>Indonesia (Indonesian)</item>
@@ -46,6 +47,7 @@
         <item>de</item>
         <item>en</item>
         <item>es</item>
+        <item>eu</item>
         <item>fr</item>
         <item>hi</item>
         <item>in</item> <!-- iso uses "id" but java uses "in" -->
