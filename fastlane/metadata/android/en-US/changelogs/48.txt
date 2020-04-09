@@ -1,4 +1,4 @@
 * #169: Add sd-card-saf-write-permission support
 * new translation eu (Basque)
-* translation updates de
+* translation updates de, pt-BR
 * APhotoManager is not Android-10 (api-29) ready yet.
