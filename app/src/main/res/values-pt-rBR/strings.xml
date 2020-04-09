@@ -3,7 +3,7 @@
 <!--
 /*
  * Translation to pt-BR by 2017: thiagonkami, 2017: Nana13, 2018-19: Lucas Magalhães (whoisroot),
- *      2019: Leonardo Lima (LeonardodeLima); 2019: chacal_exodius
+ *      2019: Leonardo Lima (LeonardodeLima); 2019-2020: chacal_exodius
  *
  * This file is part of "A Photo Manager" (A(ndro)FotoFinder).
  *
@@ -22,6 +22,7 @@
  */
  -->
 <resources>
+
     <string name="about_summary">Sobre \"Um Gerenciador de Fotos%1$s\"</string>
     <string name="area_menu_title">Filtro de Área de Mapa</string>
     <string name="background">Plano de fundo</string>
@@ -241,7 +242,9 @@ Você pode desfazer a ocultação chamando o leitor mediascanner do menu da gale
     <string name="lbl_what">What: </string>
 -->
     <!-- #162: Theme support -->
-    <string name="settings_category_appearance_title">Interface</string>
-    <string name="dark_theme_title">Noite</string>
-    <string name="light_theme_title">Dia</string>
+    <string name="settings_category_appearance_title">Aparência</string>
+    <string name="light_theme_title">Claro</string>
+    <string name="dark_theme_title">Escuro</string>
+    <!-- #155: android10 -->
+    <string name="load_db_menu_title">(Re)Carregar Banco de Dados de Mídia</string>
 </resources>
