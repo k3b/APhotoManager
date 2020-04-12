@@ -37,6 +37,10 @@ import java.util.Map;
  */
 public class DocumentFileTranslator {
     public static final String TAG = "k3b.DocFileUtils";
+
+    // used by android.support.v4.provider.DocumentFile
+    public static final String TAG_DOCFILE = "DocumentFile";
+
     private static final String SAFROOTPREF_KEY_SAF_ROOT_PREFIX = "safroot-";
     private static DocumentFileTranslator rootsettings = null;
     private final Context context;

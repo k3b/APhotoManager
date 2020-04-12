@@ -723,7 +723,7 @@ public abstract class BaseQueryActivity extends BaseActivity implements Common, 
     }
 
     @Override
-    protected void closeDialogIfNeeded() {
+    public void closeDialogIfNeeded() {
         super.closeDialogIfNeeded();
         getFolderApi().mDirPicker = null;
     }

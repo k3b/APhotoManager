@@ -47,6 +47,7 @@ import de.k3b.android.androFotoFinder.queries.DatabaseHelper;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.transactionlog.TransactionLogSql;
+import de.k3b.android.widget.FilePermissionActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
@@ -174,12 +175,12 @@ public class AndroidFileCommands extends FileCommands {
 
     }
 
-    public boolean onOptionsItemSelected(Activity activity, final MenuItem item, final SelectedFiles selectedFileNames, PhotoChangeNotifyer.PhotoChangedListener photoChangedListener) {
+    public boolean onOptionsItemSelected(FilePermissionActivity activity, final MenuItem item, final SelectedFiles selectedFileNames, PhotoChangeNotifyer.PhotoChangedListener photoChangedListener) {
         if ((selectedFileNames != null) && (selectedFileNames.size() > 0)) {
             // Handle item selection
             switch (item.getItemId()) {
                 case R.id.cmd_delete:
-                    return cmdDeleteFileWithQuestion(activity, selectedFileNames, photoChangedListener);
+                    return cmdDeleteFileWithQuestion(item.getTitle(), activity, selectedFileNames, photoChangedListener);
                 default:break;
             }
         }
@@ -277,10 +278,25 @@ public class AndroidFileCommands extends FileCommands {
         edit.apply();
     }
 
-    public boolean cmdDeleteFileWithQuestion(Activity activity, final SelectedFiles fotos,
-                                             final PhotoChangeNotifyer.PhotoChangedListener photoChangedListener) {
+    private boolean cmdDeleteFileWithQuestion(final CharSequence title, FilePermissionActivity activity, final SelectedFiles fotos,
+                                              final PhotoChangeNotifyer.PhotoChangedListener photoChangedListener) {
         String[] pathNames = fotos.getFileNames();
-        String errorMessage = checkWriteProtected(R.string.delete_menu_title, SelectedFiles.getFiles(pathNames));
+        activity.closeDialogIfNeeded();
+        File missingRoot = activity.getMissingRootDirFileOrNull(fotos.getFiles());
+        if (missingRoot != null) {
+            activity.requestRootUriDialog(missingRoot, title,
+                    new FilePermissionActivity.IOnDirectoryPermissionGrantedHandler() {
+                        @Override
+                        public void afterGrant(FilePermissionActivity activity) {
+                            cmdDeleteFileWithQuestion(title, activity, fotos, photoChangedListener);
+                        }
+                    });
+            return false;
+        }
+
+        //!!! how to distinguish between sd writeprotected and file writeprotected
+        // String errorMessage = checkWriteProtected(R.string.delete_menu_title, SelectedFiles.getFiles(pathNames));
+        String errorMessage = null;
 
         if (errorMessage != null) {
             if (!isInBackground) {
@@ -295,10 +311,10 @@ public class AndroidFileCommands extends FileCommands {
                     .getString(R.string.delete_question_message_format, names.toString());
 
             final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-            final String title = mContext.getText(R.string.delete_question_title)
+            final String titleQuestion = mContext.getText(R.string.delete_question_title)
                     .toString();
 
-            builder.setTitle(title + pathNames.length);
+            builder.setTitle(titleQuestion + pathNames.length);
             builder.setMessage(message)
                     .setCancelable(false)
                     .setPositiveButton(android.R.string.yes,

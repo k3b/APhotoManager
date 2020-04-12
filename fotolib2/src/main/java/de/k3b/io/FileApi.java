@@ -32,4 +32,8 @@ public class FileApi {
         return (source != null) && (dest != null) && source.renameTo(dest);
     }
 
+    protected boolean osDeleteFile(File file) {
+        return (file != null) && (file.canWrite()) && file.delete();
+    }
+
 }

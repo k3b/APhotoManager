@@ -89,6 +89,7 @@ import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.Dialogs;
+import de.k3b.android.widget.FilePermissionActivity;
 import de.k3b.android.widget.UpdateTask;
 import de.k3b.database.QueryParameter;
 import de.k3b.geo.api.GeoPointDto;
@@ -859,7 +860,9 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
         AndroidFileCommands fileCommands = mFileCommands;
 
         final SelectedFiles selectedFiles = this.mAdapter.createSelectedFiles(getActivity(), this.mSelectedItems);
-        if ((mSelectedItems != null) && (fileCommands.onOptionsItemSelected(getActivity(), menuItem, selectedFiles, this))) {
+        if ((mSelectedItems != null)
+                && (fileCommands.onOptionsItemSelected(
+                (FilePermissionActivity) getActivity(), menuItem, selectedFiles, this))) {
             return true;
         }
         switch (menuItem.getItemId()) {

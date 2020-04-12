@@ -41,7 +41,7 @@ public abstract class ActivityWithAutoCloseDialogs extends LocalizedActivity {
     private Closeable mCloseable;
     private DialogInterface mCurrentDialog;
 
-    protected void closeDialogIfNeeded() {
+    public void closeDialogIfNeeded() {
         // close dialog. else crash in onResume
         if (mCurrentDialog != null) mCurrentDialog.dismiss();
 

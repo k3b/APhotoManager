@@ -21,6 +21,7 @@ package de.k3b.android.widget;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -55,6 +56,8 @@ public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialog
     private static File currentRootFileRequest = null;
     private DocumentFileTranslator documentFileTranslator = null;
 
+    public static void init(Context context) {
+    }
     // workflow onCreate() => requestPermission(PERMISSION_WRITE_EXTERNAL_STORAGE) => onRequestPermissionsResult() => abstract onCreateEx()
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,7 +137,7 @@ public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialog
      * @return null if all permissions are granted or
      * the root file that has not permissions yet.
      */
-    protected File getMissingRootDirFileOrNull(File... dirs) {
+    public File getMissingRootDirFileOrNull(File... dirs) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             for (int i = dirs.length - 1; i >= 0; i--) {
                 if (null == getOrCreateDirectory(dirs[i])) {
@@ -178,7 +181,7 @@ public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialog
 
     // ... -> requestRootUriDialog -> execRequestRootUri
     // -> onActivityResult -> onRootUriResult -> IOnDirectoryPermissionGrantedHandler.afterGrant()
-    protected void requestRootUriDialog(File root, final CharSequence title, IOnDirectoryPermissionGrantedHandler permissionGrantedHandler) {
+    public void requestRootUriDialog(File root, final CharSequence title, IOnDirectoryPermissionGrantedHandler permissionGrantedHandler) {
         requestRootUriDialog(this, root,
                 title,
                 getString(R.string.select_folder_root_rationale),

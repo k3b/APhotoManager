@@ -708,9 +708,8 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
         // close rename dialog to allow messagebox that prepares to ask
         closeDialogIfNeeded();
         File missingRoot = getMissingRootDirFileOrNull(currentFoto.getFiles());
-        if (missingRoot == null) {
-            return mFileCommands.setContext(this).rename(currentFoto, dest, null);
-        } else {
+        if (missingRoot != null) {
+            // ask for needed permissions
             requestRootUriDialog(missingRoot, title,
                     new IOnDirectoryPermissionGrantedHandler() {
                         @Override
@@ -720,6 +719,9 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
                     });
             return false;
         }
+
+        // needed permissions available: Go on
+        return mFileCommands.setContext(this).rename(currentFoto, dest, null);
     }
 
     @Override

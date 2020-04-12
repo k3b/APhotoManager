@@ -58,25 +58,17 @@ public class AndroidFileApi extends FileApi {
     }
 
     protected boolean osRenameTo(File dest, File source) {
-        final String context = this.getClass().getSimpleName() +
+        String context = this.getClass().getSimpleName() +
                 ".osRenameTo(" + dest + " <== " + source + ")";
         if ((source != null) && (dest != null)) {
             if (dest.getParentFile().equals(source.getParentFile())) {
                 Boolean result = null;
                 try {
-                    DocumentFile documentFile = DocumentFile.fromFile(source);
-                    if (!documentFile.canWrite()) {
-                        if (source.isDirectory()) {
-                            documentFile = getOrCreateDirectory(source);
-                        } else {
-                            DocumentFile dir = getOrCreateDirectory(source.getParentFile());
-                            DocumentFile found = dir.findFile(source.getName());
-                            if (found != null) {
-                                documentFile = found;
-                            }
-                        }
+                    DocumentFile documentFile = geWritabletDocumentFile(source);
+                    context += FastDocumentFileTranslator.toUriDebugString(documentFile);
+                    if (documentFile != null) {
+                        result = documentFile.renameTo(dest.getName());
                     }
-                    result = documentFile.renameTo(dest.getName());
                     return result;
                 } finally {
                     if (Global.debugEnabled) {
@@ -89,4 +81,43 @@ public class AndroidFileApi extends FileApi {
         Log.w(TAG, context + " move between different directories is not implemented yet");
         return super.osRenameTo(dest, source);
     }
+
+    protected boolean osDeleteFile(File file) {
+        String context = this.getClass().getSimpleName() +
+                ".osDeleteFile(" + file + ")";
+        if (file != null) {
+            Boolean result = null;
+            try {
+                DocumentFile documentFile = geWritabletDocumentFile(file);
+                context += FastDocumentFileTranslator.toUriDebugString(documentFile);
+                if (documentFile != null) {
+                    result = documentFile.delete();
+                }
+                return result;
+            } finally {
+                if (Global.debugEnabled) {
+                    Log.d(TAG, context + " ==> " + result);
+                }
+            }
+        }
+
+        return super.osDeleteFile(file);
+    }
+
+    private DocumentFile geWritabletDocumentFile(File file) {
+        DocumentFile documentFile = DocumentFile.fromFile(file);
+        if (!documentFile.canWrite()) {
+            if (file.isDirectory()) {
+                documentFile = getOrCreateDirectory(file);
+            } else {
+                DocumentFile dir = getOrCreateDirectory(file.getParentFile());
+                DocumentFile found = dir.findFile(file.getName());
+                if (found != null) {
+                    documentFile = found;
+                }
+            }
+        }
+        return documentFile;
+    }
+
 }

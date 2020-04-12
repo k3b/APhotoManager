@@ -528,9 +528,8 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
         return result;
     }
 
-    /** to be replaced by mock/stub in unittests */
     protected boolean osDeleteFile(File file) {
-        final boolean result = file.delete();
+        final boolean result = fileApi.osDeleteFile(file);
         if (LibGlobal.debugEnabledJpg) logger.info("osDeleteFile '" + file + "' success=" + result);
         return result;
     }

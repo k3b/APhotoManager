@@ -49,9 +49,11 @@ import de.k3b.android.androFotoFinder.queries.MediaContentproviderRepositoryImpl
 import de.k3b.android.androFotoFinder.queries.MediaDBRepository;
 import de.k3b.android.androFotoFinder.queries.MergedMediaRepository;
 import de.k3b.android.osmdroid.forge.MapsForgeSupport;
+import de.k3b.android.util.DocumentFileTranslator;
 import de.k3b.android.util.LogCat;
 import de.k3b.android.util.PhotoChangeNotifyer;
 import de.k3b.android.widget.ActivityWithCallContext;
+import de.k3b.android.widget.FilePermissionActivity;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.FileApi;
@@ -149,6 +151,7 @@ public class AndroFotoFinderApp extends Application {
         FotoSqlBase.init();
 
         super.onCreate();
+        FilePermissionActivity.init(this);
 
         LibGlobal.appName = getString(R.string.app_name);
         LibGlobal.appVersion = GuiUtil.getAppVersionName(this);
@@ -171,7 +174,8 @@ public class AndroFotoFinderApp extends Application {
                 ExifInterface.LOG_TAG, PhotoPropertiesImageReader.LOG_TAG,
                 FotoSql.LOG_TAG,
                 MediaDBRepository.LOG_TAG, FileApi.TAG,
-                MediaContentproviderRepositoryImpl.LOG_TAG) {
+                MediaContentproviderRepositoryImpl.LOG_TAG,
+                DocumentFileTranslator.TAG, DocumentFileTranslator.TAG_DOCFILE) {
 
             @Override
             public void uncaughtException(Thread thread, Throwable ex) {

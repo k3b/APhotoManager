@@ -964,7 +964,7 @@ public class GalleryFilterActivity extends BaseActivity
     public void onDirectoryCancel(int queryTypeId) {closeDialogIfNeeded();}
 
     @Override
-    protected void closeDialogIfNeeded() {
+    public void closeDialogIfNeeded() {
         super.closeDialogIfNeeded();
         mDirPicker = null;
     }
