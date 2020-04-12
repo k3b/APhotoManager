@@ -22,7 +22,7 @@ package de.k3b.android.androFotoFinder;
 import java.io.Closeable;
 import java.io.IOException;
 
-import de.k3b.android.util.AndroidFileCommands;
+import de.k3b.android.io.AndroidFileCommands;
 import de.k3b.transactionlog.MediaTransactionLogEntryType;
 import de.k3b.transactionlog.TransactionLoggerBase;
 

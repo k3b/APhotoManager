@@ -146,7 +146,7 @@ public class FileCommandAutoIntegrationTests {
         int changes = sut.moveOrCopyFilesTo(true, selectedFiles, OUTDIR,
                 autoProccessData, null);
 
-        ExifInterfaceEx result = new ExifInterfaceEx(inFile.getAbsolutePath(), null, null, "");
+        ExifInterfaceEx result = ExifInterfaceEx.create(inFile.getAbsolutePath(), null, null, "");
 
         Assert.assertEquals(tagAdded, true, result.getTags().contains(tagAdded));
 
@@ -206,7 +206,7 @@ public class FileCommandAutoIntegrationTests {
         int changes = sut.moveOrCopyFilesTo(true, selectedFiles, OUTDIR,
                 autoProccessData, null);
 
-        ExifInterfaceEx result = new ExifInterfaceEx(inFile.getAbsolutePath(), null, null, "");
+        ExifInterfaceEx result = ExifInterfaceEx.create(inFile.getAbsolutePath(), null, null, "");
 
         Assert.assertEquals(tagAdded, true, result.getTags().contains(tagAdded));
 
@@ -259,7 +259,7 @@ public class FileCommandAutoIntegrationTests {
         assertFileExist(true, newName + ".jpg");
         assertFileExist(false, originalName + ".jpg"); // do not rename
 
-        ExifInterfaceEx result = new ExifInterfaceEx(new File(OUTDIR, newName + ".jpg").getAbsolutePath(), null, null, "");
+        ExifInterfaceEx result = ExifInterfaceEx.create(new File(OUTDIR, newName + ".jpg").getAbsolutePath(), null, null, "");
 
         String exprected = PhotoPropertiesFormatter.format(exifChanges, false, null, FieldID.clasz, FieldID.path).toString();
         String current = PhotoPropertiesFormatter.format(result, false, null, FieldID.clasz, FieldID.path).toString();

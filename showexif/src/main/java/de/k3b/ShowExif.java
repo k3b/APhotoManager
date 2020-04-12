@@ -55,7 +55,7 @@ public class ShowExif {
         try {
             PhotoPropertiesXmpSegment xmp = PhotoPropertiesXmpSegment.loadXmpSidecarContentOrNull(fileName, dbg_context);
 
-            ExifInterfaceEx exif = new ExifInterfaceEx(fileName, null, xmp, dbg_context);
+            ExifInterfaceEx exif = ExifInterfaceEx.create(fileName, null, xmp, dbg_context);
             PhotoPropertiesImageReader jpg = new PhotoPropertiesImageReader().load(fileName, null, xmp, dbg_context);
             show(jpg, debug);
             if (exif.isValidJpgExifFormat()) show(exif, debug);

@@ -44,7 +44,7 @@ public class PhotoPropertiesMediaFilesScannerExifInterface extends PhotoProperti
     protected IPhotoProperties loadNonMediaValues(ContentValues destinationValues, String absoluteJpgPath, IPhotoProperties xmpContent) {
         ExifInterfaceEx exif = null;
         try {
-            exif = new ExifInterfaceEx(absoluteJpgPath, null, xmpContent, "PhotoPropertiesMediaFilesScannerExifInterface.loadNonMediaValues");
+            exif = ExifInterfaceEx.create(absoluteJpgPath, null, xmpContent, "PhotoPropertiesMediaFilesScannerExifInterface.loadNonMediaValues");
             if (!exif.isValidJpgExifFormat()) exif = null;
         } catch (IOException ex) {
             // exif is null
@@ -61,7 +61,7 @@ public class PhotoPropertiesMediaFilesScannerExifInterface extends PhotoProperti
     public IGeoPointInfo getPositionFromFile(String absoluteJpgPath, String id) {
         ExifInterfaceEx exif = null;
         try {
-            exif = new ExifInterfaceEx(absoluteJpgPath, null, null, "PhotoPropertiesMediaFilesScannerExifInterface.getPositionFromFile");
+            exif = ExifInterfaceEx.create(absoluteJpgPath, null, null, "PhotoPropertiesMediaFilesScannerExifInterface.getPositionFromFile");
             if (!exif.isValidJpgExifFormat()) exif = null;
         } catch (IOException ex) {
             // exif is null

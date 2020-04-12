@@ -17,7 +17,7 @@
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
 
-package de.k3b.android.util;
+package de.k3b.android.io;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -47,6 +47,11 @@ import de.k3b.android.androFotoFinder.queries.DatabaseHelper;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.transactionlog.TransactionLogSql;
+import de.k3b.android.util.OsUtils;
+import de.k3b.android.util.PhotoChangeNotifyer;
+import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
+import de.k3b.android.util.PhotoPropertiesMediaFilesScannerAsyncTask;
+import de.k3b.android.util.RecursivePhotoPropertiesMediaFilesScannerAsyncTask;
 import de.k3b.android.widget.FilePermissionActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.DirectoryFormatter;
@@ -385,7 +390,7 @@ public class AndroidFileCommands extends FileCommands {
             super.onPause();
 
             // else the java.lang.InstantiationException: can't instantiate
-            // class de.k3b.android.util.AndroidFileCommands$MediaScannerDirectoryPickerFragment;
+            // class de.k3b.android.io.AndroidFileCommands$MediaScannerDirectoryPickerFragment;
             // no empty constructor
             // on orientation change
             dismiss();

@@ -56,7 +56,7 @@ import java.util.TimeZone;
 import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
-import de.k3b.android.util.AndroidFileCommands;
+import de.k3b.android.io.AndroidFileCommands;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.ResourceUtils;

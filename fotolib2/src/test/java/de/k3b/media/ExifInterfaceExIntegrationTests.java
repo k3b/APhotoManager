@@ -20,9 +20,9 @@
 package de.k3b.media;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -140,7 +140,7 @@ public class ExifInterfaceExIntegrationTests {
 
     public static IPhotoProperties getMeta(String fileName) throws IOException {
         InputStream inputStream = TestUtil.getResourceInputStream(fileName);
-        IPhotoProperties result = new ExifInterfaceEx(fileName, inputStream, null, "JUnit");
+        IPhotoProperties result = ExifInterfaceEx.create(fileName, inputStream, null, "JUnit");
         return result;
     }
 

@@ -220,7 +220,7 @@ public class PhotoPropertiesBulkUpdateService {
      */
     public static int getRotationFromExifOrientation(String fullPathToImageFile, InputStream inputStream) {
         try {
-            ExifInterfaceEx exif = new ExifInterfaceEx(fullPathToImageFile, inputStream, null, "getRotationFromExifOrientation");
+            ExifInterfaceEx exif = ExifInterfaceEx.create(fullPathToImageFile, inputStream, null, "getRotationFromExifOrientation");
             if (exif.isValidJpgExifFormat()) {
 
                 return PhotoPropertiesUtil.exifOrientationCode2RotationDegrees(exif.getAttributeInt(ExifInterfaceEx.TAG_ORIENTATION, 0), 0);

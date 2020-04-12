@@ -66,7 +66,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoThumbSql;
 import de.k3b.android.androFotoFinder.queries.FotoViewerParameter;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
-import de.k3b.android.util.AndroidFileCommands;
+import de.k3b.android.io.AndroidFileCommands;
 import de.k3b.android.util.ClipboardUtil;
 import de.k3b.android.util.FileManagerUtil;
 import de.k3b.android.util.IntentUtil;

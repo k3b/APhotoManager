@@ -81,7 +81,7 @@ import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagTask;
 import de.k3b.android.androFotoFinder.tagDB.TagWorflow;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
-import de.k3b.android.util.AndroidFileCommands;
+import de.k3b.android.io.AndroidFileCommands;
 import de.k3b.android.util.DBUtils;
 import de.k3b.android.util.OsUtils;
 import de.k3b.android.util.PhotoChangeNotifyer;

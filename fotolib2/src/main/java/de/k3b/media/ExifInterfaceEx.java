@@ -37,7 +37,6 @@ import java.util.TimeZone;
 import de.k3b.LibGlobal;
 import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
-
 import de.k3b.media.MediaFormatter.FieldID;
 /**
  * Thin Wrapper around Android-s ExifInterface to read/write exif data from jpg file
@@ -68,13 +67,19 @@ public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
 	/** if not null content of xmp sidecar file */
     private final IPhotoProperties xmpExtern;
 
+    protected static Factory factory = new Factory() {
+        public ExifInterfaceEx create(String absoluteJpgPath, InputStream in, IPhotoProperties xmpExtern, String dbg_context) throws IOException {
+            return new ExifInterfaceEx(absoluteJpgPath, in, xmpExtern, dbg_context);
+        }
+    };
+
     /**
      * Reads Exif tags from the specified JPEG file.
      *  @param absoluteJpgPath
      * @param xmpExtern if not null content of xmp sidecar file
      * @param dbg_context
      */
-    public ExifInterfaceEx(String absoluteJpgPath, InputStream in, IPhotoProperties xmpExtern, String dbg_context) throws IOException {
+    protected ExifInterfaceEx(String absoluteJpgPath, InputStream in, IPhotoProperties xmpExtern, String dbg_context) throws IOException {
         super(absoluteJpgPath, in);
         setFilelastModified(mExifFile);
 
@@ -86,6 +91,18 @@ public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
         }
         // Log.d(LOG_TAG, msg);
 
+    }
+
+    public static ExifInterfaceEx create(String absoluteJpgPath, InputStream in, IPhotoProperties xmpExtern, String dbg_context) throws IOException {
+        return factory.create(absoluteJpgPath, in, xmpExtern, dbg_context);
+    }
+
+    public static int getOrientationId(String fullPath) {
+        try {
+            return ExifInterfaceEx.create(fullPath, null, null, "getOrientationId").getOrientationId();
+        } catch (IOException e) {
+        }
+        return 0;
     }
 
     protected ExifInterfaceEx() {super();xmpExtern=null; mDbg_context = "";}
@@ -380,12 +397,8 @@ public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
         return this;
     }
 
-    public static int getOrientationId(String fullPath) {
-        try {
-            return new ExifInterfaceEx(fullPath, null, null, "getOrientationId").getOrientationId();
-        } catch (IOException e) {
-        }
-        return 0;
+    protected interface Factory {
+        ExifInterfaceEx create(String absoluteJpgPath, InputStream in, IPhotoProperties xmpExtern, String dbg_context) throws IOException;
     }
 
     /** return the image orinentation as id (one of the ORIENTATION_ROTATE_XXX constants) */

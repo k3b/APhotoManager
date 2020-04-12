@@ -1,7 +1,7 @@
 // library/src/main/java/hendrawd/storageutil/library/StorageUtil.java
 // https://github.com/hendrawd/StorageUtil/blob/master/library/src/main/java/hendrawd/storageutil/library/StorageUtil.java
 
-package de.k3b.android.util;
+package de.k3b.android.io;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

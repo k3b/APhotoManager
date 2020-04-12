@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
-package de.k3b.android.util;
+package de.k3b.android.io;
 
 import android.app.Activity;
 import android.content.Context;
@@ -27,6 +27,7 @@ import android.util.Log;
 import java.io.File;
 
 import de.k3b.android.androFotoFinder.Global;
+import de.k3b.android.util.FastDocumentFileTranslator;
 import de.k3b.android.widget.FilePermissionActivity;
 import de.k3b.io.FileApi;
 

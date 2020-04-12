@@ -38,7 +38,7 @@ import java.io.File;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
-import de.k3b.android.util.DocumentFileTranslator;
+import de.k3b.android.io.DocumentFileTranslator;
 import de.k3b.io.FileNameUtil;
 
 /**

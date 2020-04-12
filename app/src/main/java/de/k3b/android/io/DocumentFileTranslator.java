@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
-package de.k3b.android.util;
+package de.k3b.android.io;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -27,6 +27,9 @@ import android.support.v4.provider.DocumentFile;
 import android.util.Log;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -197,6 +200,25 @@ public class DocumentFileTranslator {
             return null;
         }
         return result;
+    }
+
+    public InputStream openInputStream(File in) throws FileNotFoundException {
+        if (in != null) {
+            DocumentFile doc = getDocumentFileOrDir(in, false);
+            if (doc != null) {
+                return context.getContentResolver().openInputStream(doc.getUri());
+            }
+        }
+        return null;
+    }
+
+    protected OutputStream createOutputStream(String mime, File outFile) throws FileNotFoundException {
+        DocumentFile dir = (outFile != null) ? getDocumentFileOrDir(outFile.getParentFile(), true) : null;
+        DocumentFile doc = (dir != null) ? dir.createFile(mime, outFile.getName()) : null;
+        if (doc != null) {
+            return context.getContentResolver().openOutputStream(doc.getUri());
+        }
+        return null;
     }
 
     private class PrefIO {
