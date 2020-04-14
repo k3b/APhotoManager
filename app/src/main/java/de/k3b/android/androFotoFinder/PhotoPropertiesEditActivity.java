@@ -61,6 +61,7 @@ import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.AboutDialogPreference;
+import de.k3b.android.widget.FilePermissionActivity;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.android.widget.UpdateTask;
 import de.k3b.geo.api.GeoPointDto;
@@ -98,6 +99,7 @@ public class PhotoPropertiesEditActivity extends BaseActivity implements Common 
     private static final String SETTINGS_KEY = "PhotoPropertiesEditActivity-";
     private static final String SETTINGS_KEY_INITIAL = "ExifEditActivityInitial-";
     private static final GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
+    private static final boolean EXEC_IN_BACKGROUND = true;
 
     /** current modified value of the first selected file */
     private PhotoPropertiesAsString mCurrentData;
@@ -794,7 +796,6 @@ public class PhotoPropertiesEditActivity extends BaseActivity implements Common 
 
     /** save exif changes back to image and database */
     private void onSaveChanges() {
-        Activity ctx = this;
         saveGuiToExif("onOk (finish)");
         mHistory.saveHistory();
         boolean finish = true;
@@ -812,21 +813,10 @@ public class PhotoPropertiesEditActivity extends BaseActivity implements Common 
                 if ((items != null) && (items.size() > 0)) {
 
                     //!!! todo #93: this code also in
-                    AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(this, true);
-
                     PhotoPropertiesDiffCopy exifChanges = new PhotoPropertiesDiffCopy(true, true).setDiff(mInitialData, mCurrentData);
 
                     if (exifChanges != null) {
-                        if (!SYNC_UPDATE_EXIF) {
-                            this.exifUpdate = new UpdateTask(R.string.exif_menu_title, ctx, cmd, exifChanges);
-                            exifUpdate.execute(items);
-                            finish = false;
-                        } else {
-                            // for debugging: sync debugging is easier
-                            cmd.applyExifChanges(true, exifChanges, items, null);
-
-                            this.setResult(EXIF_RESULT_ID, intent);
-                        }
+                        finish = execExifUpdate(items, exifChanges);
                     } // else  no changes, nothing to do
                 } // if there are selected items
             } // if save mode
@@ -835,6 +825,43 @@ public class PhotoPropertiesEditActivity extends BaseActivity implements Common 
         if (finish) {
             finish();
         }
+    }
+
+    private boolean execExifUpdate(final SelectedFiles items, final PhotoPropertiesDiffCopy exifChanges) {
+        boolean finish = true;
+
+        closeDialogIfNeeded();
+
+        File missingRoot = getMissingRootDirFileOrNull(items.getFiles());
+        if (missingRoot != null) {
+            // missing write permissions. Request from user
+            requestRootUriDialog(missingRoot, getText(R.string.exif_menu_title),
+                    new IOnDirectoryPermissionGrantedHandler() {
+                        @Override
+                        public void afterGrant(FilePermissionActivity activity) {
+                            // recursion: after grant do it again
+                            ((PhotoPropertiesEditActivity) activity).execExifUpdate(items, exifChanges);
+                        }
+                    });
+            return false;
+        }
+
+        AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(this, EXEC_IN_BACKGROUND)
+                .setContext(this);
+
+        Intent intent = getIntent();
+        Activity ctx = this;
+        if (!SYNC_UPDATE_EXIF) {
+            this.exifUpdate = new UpdateTask(R.string.exif_menu_title, ctx, cmd, exifChanges);
+            exifUpdate.execute(items);
+            finish = false;
+        } else {
+            // for debugging: sync debugging is easier
+            cmd.applyExifChanges(true, exifChanges, items, null);
+
+            this.setResult(EXIF_RESULT_ID, intent);
+        }
+        return finish;
     }
 
     @Override

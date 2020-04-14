@@ -49,6 +49,7 @@ import de.k3b.android.androFotoFinder.queries.MediaContentproviderRepositoryImpl
 import de.k3b.android.androFotoFinder.queries.MediaDBRepository;
 import de.k3b.android.androFotoFinder.queries.MergedMediaRepository;
 import de.k3b.android.io.DocumentFileTranslator;
+import de.k3b.android.io.ExifInterfaceExAndroid;
 import de.k3b.android.osmdroid.forge.MapsForgeSupport;
 import de.k3b.android.util.LogCat;
 import de.k3b.android.util.PhotoChangeNotifyer;
@@ -152,6 +153,7 @@ public class AndroFotoFinderApp extends Application {
 
         super.onCreate();
         FilePermissionActivity.init(this);
+        ExifInterfaceExAndroid.initFactory();
 
         LibGlobal.appName = getString(R.string.app_name);
         LibGlobal.appVersion = GuiUtil.getAppVersionName(this);
