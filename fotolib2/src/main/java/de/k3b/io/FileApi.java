@@ -26,7 +26,7 @@ import java.io.File;
  * File api abstraction based on android independand {@link File} API
  */
 public class FileApi {
-    public static final String TAG = "k3b FILE";
+    public static final String TAG = "k3b.FileApi";
 
     protected boolean osRenameTo(File dest, File source) {
         return (source != null) && (dest != null) && source.renameTo(dest);

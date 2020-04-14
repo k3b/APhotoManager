@@ -287,7 +287,8 @@ public class AndroidFileCommands extends FileCommands {
                                               final PhotoChangeNotifyer.PhotoChangedListener photoChangedListener) {
         String[] pathNames = fotos.getFileNames();
         activity.closeDialogIfNeeded();
-        File missingRoot = activity.getMissingRootDirFileOrNull(fotos.getFiles());
+        File missingRoot = activity.getMissingRootDirFileOrNull(
+                "AndroidFileCommands.cmdDeleteFileWithQuestion", fotos.getFiles());
         if (missingRoot != null) {
             activity.requestRootUriDialog(missingRoot, title,
                     new FilePermissionActivity.IOnDirectoryPermissionGrantedHandler() {
@@ -297,6 +298,10 @@ public class AndroidFileCommands extends FileCommands {
                         }
                     });
             return false;
+        }
+
+        if (DocumentFileTranslator.debugDocFile) {
+            Log.i(FilePermissionActivity.TAG, "AndroidFileCommands.cmdDeleteFileWithQuestion.do");
         }
 
         //!!! how to distinguish between sd writeprotected and file writeprotected

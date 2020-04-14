@@ -57,6 +57,7 @@ import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.io.AndroidFileCommands;
+import de.k3b.android.io.DocumentFileTranslator;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.ResourceUtils;
@@ -832,7 +833,8 @@ public class PhotoPropertiesEditActivity extends BaseActivity implements Common 
 
         closeDialogIfNeeded();
 
-        File missingRoot = getMissingRootDirFileOrNull(items.getFiles());
+        File missingRoot = getMissingRootDirFileOrNull(
+                "PhotoPropertiesEditActivity.execExifUpdate", items.getFiles());
         if (missingRoot != null) {
             // missing write permissions. Request from user
             requestRootUriDialog(missingRoot, getText(R.string.exif_menu_title),
@@ -844,6 +846,10 @@ public class PhotoPropertiesEditActivity extends BaseActivity implements Common 
                         }
                     });
             return false;
+        }
+
+        if (DocumentFileTranslator.debugDocFile) {
+            Log.i(FilePermissionActivity.TAG, "PhotoPropertiesEditActivity.execExifUpdate.do");
         }
 
         AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(this, EXEC_IN_BACKGROUND)

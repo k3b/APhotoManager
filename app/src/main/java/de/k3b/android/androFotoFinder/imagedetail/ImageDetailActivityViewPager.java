@@ -65,6 +65,7 @@ import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagTask;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.io.AndroidFileCommands;
+import de.k3b.android.io.DocumentFileTranslator;
 import de.k3b.android.util.FileManagerUtil;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.OsUtils;
@@ -707,7 +708,8 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
     private boolean osRenameTo(final CharSequence title, final File dest, final SelectedFiles currentFoto) {
         // close rename dialog to allow messagebox that prepares to ask
         closeDialogIfNeeded();
-        File missingRoot = getMissingRootDirFileOrNull(currentFoto.getFiles());
+        File missingRoot = getMissingRootDirFileOrNull(
+                "ImageDetailActivityViewPager.osRenameTo", currentFoto.getFiles());
         if (missingRoot != null) {
             // ask for needed permissions
             requestRootUriDialog(missingRoot, title,
@@ -719,6 +721,11 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
                     });
             return false;
         }
+
+        if (DocumentFileTranslator.debugDocFile) {
+            Log.i(FilePermissionActivity.TAG, "PhotoPropertiesEditActivity.execExifUpdate.do");
+        }
+
 
         // needed permissions available: Go on
         return mFileCommands.setContext(this).rename(currentFoto, dest, null);

@@ -105,6 +105,29 @@ public class AndroidFileApi extends FileApi {
         return super.osDeleteFile(file);
     }
 
+    public static boolean isValidExistingWritable(DocumentFile documentFile) {
+        return (documentFile != null) && documentFile.exists() && documentFile.canWrite();
+    }
+
+    //-------------------
+    // tools
+
+    public static boolean isValidExistingWritable(File file) {
+        return (file != null) && file.exists() && file.canWrite();
+    }
+
+    public static String toUriDebugString(Object docfileUri) {
+        if (docfileUri != null) {
+            if (docfileUri instanceof DocumentFile) {
+                return docfileUri.getClass().getSimpleName() + ":"
+                        + toUriDebugString(((DocumentFile) docfileUri).getUri());
+            }
+            return docfileUri.getClass().getSimpleName() + ":"
+                    + docfileUri.toString();
+        }
+        return "";
+    }
+
     private DocumentFile geWritabletDocumentFile(File file) {
         DocumentFile documentFile = DocumentFile.fromFile(file);
         if (!documentFile.canWrite()) {
@@ -112,13 +135,15 @@ public class AndroidFileApi extends FileApi {
                 documentFile = getOrCreateDirectory(file);
             } else {
                 DocumentFile dir = getOrCreateDirectory(file.getParentFile());
-                DocumentFile found = dir.findFile(file.getName());
-                if (found != null) {
-                    documentFile = found;
-                }
+                documentFile = (dir != null) ? dir.findFile(file.getName()) : null;
+            }
+            if (DocumentFileTranslator.debugDocFile) {
+                Log.i(TAG, this.documentFileTranslator + ":geWritabletDocumentFile(" + file +
+                        ") ==> " + documentFile);
             }
         }
         return documentFile;
     }
+
 
 }

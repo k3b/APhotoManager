@@ -39,13 +39,12 @@ import java.util.Map;
  * @// TODO: 25.03.2020 update cache if rename or delete dir
  */
 public class DocumentFileTranslator {
-    public static final String TAG = "k3b.DocFileUtils";
+    public static final String TAG = "k3b.DocFileTranslator";
 
     // used by android.support.v4.provider.DocumentFile
     public static final String TAG_DOCFILE = "DocumentFile";
 
     private static final String SAFROOTPREF_KEY_SAF_ROOT_PREFIX = "safroot-";
-    private static DocumentFileTranslator rootsettings = null;
     private final Context context;
     public static final boolean debugDocFile = true;
 
@@ -53,28 +52,38 @@ public class DocumentFileTranslator {
      * Mapping from known File to DocumentFile translation
      */
     private final Map<File, DocumentFile> dirCache = new HashMap<>();
-    private PrefIO prefIO = null;
     private static final File internalRootCandidate = new File("/storage/emulated/0");
     // for debugging
     private static int id = 1;
     private String mDebugPrefix;
+    private static Root root = null;
 
     private DocumentFileTranslator(Context context, String namePrefix) {
         mDebugPrefix = namePrefix + "DocumentFileTranslator#" + (id++) + " ";
-        this.context = context;
+        this.context = context.getApplicationContext();
     }
 
     public static DocumentFileTranslator create(Context context) {
-        if (rootsettings == null) {
-            rootsettings = new DocumentFileTranslator(context.getApplicationContext(), "Root-");
-            rootsettings.loadFromPrefs();
+        if (root == null) {
+            root = new Root(context.getApplicationContext());
+
         }
         return new DocumentFileTranslator(context, "").init();
     }
 
-    private void loadFromPrefs() {
-        prefIO = new PrefIO();
-        prefIO.loadFromPrefs();
+    private DocumentFileTranslator init() {
+        File rootFile = getInternalStorageRoot();
+        if (rootFile != null) {
+            rootFile = rootFile.getAbsoluteFile();
+            DocumentFile docRoot = DocumentFile.fromFile(rootFile);
+            if ((docRoot != null) && docRoot.exists() && docRoot.isDirectory() && docRoot.canWrite()) {
+                add(rootFile, docRoot);
+            }
+        }
+        for (Map.Entry<String, String> enty : root.dir2uri.entrySet()) {
+            add(new File(enty.getKey()), DocumentFile.fromTreeUri(context, Uri.parse(enty.getValue())));
+        }
+        return this;
     }
 
     private static File getInternalStorageRoot() {
@@ -85,37 +94,26 @@ public class DocumentFileTranslator {
         return null;
     }
 
-    private DocumentFileTranslator init() {
-        if ((rootsettings != null) && (this != rootsettings)) {
-            for (Map.Entry<File, DocumentFile> enty : rootsettings.dirCache.entrySet()) {
-                add(enty.getKey(), enty.getValue());
-            }
+    public DocumentFileTranslator addRoot(File directory, Uri documentRootUri) {
+        if (root.add(directory.getAbsolutePath(), documentRootUri.toString())) {
+            add(directory, DocumentFile.fromTreeUri(context, documentRootUri));
         }
         return this;
     }
 
-    public DocumentFileTranslator addRoot(File directory, DocumentFile documentFileDir) {
-        add(directory, documentFileDir);
-        if (prefIO != null) {
-            // i am root so save data
-            prefIO.saveToPrefs();
-        } else {
-            rootsettings.addRoot(directory, documentFileDir);
+    public boolean isKnownRoot(File candidate) {
+        if (candidate != null) {
+            for (String rootFile : root.dir2uri.keySet()) {
+                if (candidate.getAbsolutePath().startsWith(rootFile)) {
+                    return true;
+                }
+            }
         }
-
-        return this;
+        return false;
     }
 
     protected DocumentFile getFromCache(File fileOrDir) {
         return dirCache.get(fileOrDir);
-    }
-
-    private boolean add(String fileUri, String docfileUri) {
-        if ((fileUri != null) && (docfileUri != null)) {
-            add(new File(fileUri), DocumentFile.fromTreeUri(context, Uri.parse(docfileUri)));
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -221,7 +219,60 @@ public class DocumentFileTranslator {
         return null;
     }
 
-    private class PrefIO {
+    @Override
+    public String toString() {
+        final StringBuilder result = new StringBuilder().append(mDebugPrefix).append("[")
+                .append(dirCache.size()).append("]: ").append(root);
+        return result.toString();
+    }
+
+    private static class Root {
+        private final Context context;
+        private Map<String, String> dir2uri = new HashMap<>();
+
+        public Root(Context context) {
+            this.context = context.getApplicationContext();
+            String fileUri = null;
+            String docfileUri = null;
+            try {
+                final SharedPreferences prefs = PreferenceManager
+                        .getDefaultSharedPreferences(this.context);
+
+                do {
+                    fileUri = prefs.getString(getPrefKeyFile(id), null);
+                    docfileUri = prefs.getString(getPrefKeyDocfile(id), null);
+                    id++;
+                } while (add(fileUri, docfileUri));
+            } catch (Exception ex) {
+                Log.e(TAG, "err DocumentFileTranslator.Root(" + getPrefKey(id, "-") + "," + fileUri +
+                        ", " + docfileUri + ") " + ex.getMessage(), ex);
+            }
+            if (debugDocFile) {
+                Log.i(TAG, "DocumentFileTranslator.Root.loaded(" + this + ")");
+            }
+        }
+
+        private static String getPrefKey(int id, String suffix) {
+            return SAFROOTPREF_KEY_SAF_ROOT_PREFIX + id + suffix;
+        }
+
+        private static String getPrefKeyDocfile(int id) {
+            return getPrefKey(id, "-docfile");
+        }
+
+        private static String getPrefKeyFile(int id) {
+            return getPrefKey(id, "-file");
+        }
+
+        public boolean add(String fileUri, String docfileUri) {
+            if ((fileUri != null) && (docfileUri != null)) {
+                dir2uri.put(fileUri, docfileUri);
+                saveToPrefs();
+                return true;
+            }
+            return false;
+        }
+
         private void saveToPrefs() {
             final SharedPreferences prefs = PreferenceManager
                     .getDefaultSharedPreferences(context);
@@ -231,59 +282,31 @@ public class DocumentFileTranslator {
             try {
                 int id = 0;
 
-                for (Map.Entry<File, DocumentFile> enty : dirCache.entrySet()) {
-                    edit.putString(getPrefKeyFile(id), enty.getKey().getAbsolutePath());
-                    edit.putString(getPrefKeyDocfile(id), enty.getValue().getUri().toString());
+                for (Map.Entry<String, String> enty : dir2uri.entrySet()) {
+                    edit.putString(getPrefKeyFile(id), enty.getKey());
+                    edit.putString(getPrefKeyDocfile(id), enty.getValue());
                     id++;
                 }
                 edit.remove(getPrefKeyFile(id));
                 edit.remove(getPrefKeyDocfile(id));
             } catch (Exception ex) {
-                Log.e(TAG, mDebugPrefix + "err saveToPrefs(" + dirCache + ")", ex);
+                Log.e(TAG, "err saveToPrefs(" + dir2uri + ")", ex);
             } finally {
                 edit.commit();
-            }
-        }
-
-        private String getPrefKeyDocfile(int id) {
-            return getPrefKey(id, "-docfile");
-        }
-
-        private String getPrefKeyFile(int id) {
-            return getPrefKey(id, "-file");
-        }
-
-        private String getPrefKey(int id, String suffix) {
-            return SAFROOTPREF_KEY_SAF_ROOT_PREFIX + id + suffix;
-        }
-
-        private void loadFromPrefs() {
-            int id = 0;
-            String docfileUri = null;
-            String fileUri = null;
-
-            File root = getInternalStorageRoot();
-            if (root != null) {
-                root = root.getAbsoluteFile();
-                DocumentFile docRoot = DocumentFile.fromFile(root);
-                if ((docRoot != null) && docRoot.exists() && docRoot.isDirectory() && docRoot.canWrite()) {
-                    add(root, docRoot);
+                if (debugDocFile) {
+                    Log.i(TAG, "DocumentFileTranslator.Root.saveToPrefs(" + this + ")");
                 }
-            }
-            try {
-                final SharedPreferences prefs = PreferenceManager
-                        .getDefaultSharedPreferences(context);
 
-                do {
-                    fileUri = prefs.getString(getPrefKeyFile(id), null);
-                    docfileUri = prefs.getString(getPrefKeyDocfile(id), null);
-                    id++;
-                } while (add(fileUri, docfileUri));
-            } catch (Exception ex) {
-                Log.e(TAG, mDebugPrefix + "err loadFromPrefs(" + getPrefKey(id, "-") + "," + fileUri +
-                        ", " + docfileUri + ")", ex);
             }
+        }
 
+        @Override
+        public String toString() {
+            final StringBuilder result = new StringBuilder().append("[");
+            for (Map.Entry<String, String> enty : dir2uri.entrySet()) {
+                result.append(enty.getKey()).append(" -> ").append(enty.getValue()).append(" ");
+            }
+            return result.append("]").toString();
         }
 
     }

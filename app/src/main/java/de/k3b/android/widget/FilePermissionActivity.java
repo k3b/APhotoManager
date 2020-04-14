@@ -29,7 +29,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.provider.DocumentFile;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -48,6 +47,7 @@ import de.k3b.io.FileNameUtil;
  */
 public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialogs {
     private static final int REQUEST_ROOT_DIR = 2001;
+    public static final String TAG = "k3b.FilePermAct";
     private static IOnDirectoryPermissionGrantedHandler currentPermissionGrantedHandler = null;
 
     private static final int REQUEST_ID_WRITE_EXTERNAL_STORAGE = 2000;
@@ -133,43 +133,28 @@ public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialog
     }
 
     /**
+     *
+     * @param dbgContext
      * @param dirs where the permissions are needed.
      * @return null if all permissions are granted or
      * the root file that has not permissions yet.
      */
-    public File getMissingRootDirFileOrNull(File... dirs) {
+    public File getMissingRootDirFileOrNull(String dbgContext, File... dirs) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             for (int i = dirs.length - 1; i >= 0; i--) {
-                if (null == getOrCreateDirectory(dirs[i])) {
-                    return FileNameUtil.getAnddroidRootDir(dirs[i]);
+                final File dir = dirs[i];
+                if (!getDocumentFileTranslator().isKnownRoot(dir)) {
+                    final File anddroidRootDir = FileNameUtil.getAnddroidRootDir(dir);
+                    if (DocumentFileTranslator.debugDocFile) {
+                        Log.i(TAG, dbgContext + ":" + this.documentFileTranslator
+                                + ":getMissingRootDirFileOrNull(" + dir
+                                + ") needs " + anddroidRootDir);
+                    }
+                    return anddroidRootDir;
                 }
             }
         }
         return null;
-    }
-
-    protected void __del_askForDirectoryRoot() {
-        // Not enough to access sd-card via file :-(
-        if (false && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN
-                && fileRootUri == null) {
-
-            // requestRootUri();
-        } else {
-            onCreateEx(null);
-        }
-
-    }
-
-    protected DocumentFile getOrCreateDirectory(File dir) {
-        if ((dir != null) && dir.exists() && dir.isFile()) dir = dir.getParentFile();
-        final DocumentFile documentFiledir = getDocumentFileTranslator().getOrCreateDirectory(dir);
-        if (DocumentFileTranslator.debugDocFile) {
-            Uri uri = (documentFiledir != null) ? documentFiledir.getUri() : null;
-            Log.d(DocumentFileTranslator.TAG, this.getClass().getSimpleName() + "getOrCreateDirectory(" + dir +
-                    ") -> " + uri);
-        }
-
-        return documentFiledir;
     }
 
     public DocumentFileTranslator getDocumentFileTranslator() {
@@ -206,7 +191,7 @@ public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialog
         currentRootFileRequest = null;
 
         if ((rootFile != null) && (documentRootUri != null)) {
-            getDocumentFileTranslator().addRoot(rootFile, DocumentFile.fromTreeUri(this, documentRootUri));
+            getDocumentFileTranslator().addRoot(rootFile, documentRootUri);
             if (permissionGrantedHandler != null) {
                 permissionGrantedHandler.afterGrant(this);
             }

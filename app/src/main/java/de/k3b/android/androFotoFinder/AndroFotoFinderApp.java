@@ -175,9 +175,10 @@ public class AndroFotoFinderApp extends Application {
                 LibGlobal.LOG_TAG, ThumbNailUtils.LOG_TAG, IMapView.LOGTAG,
                 ExifInterface.LOG_TAG, PhotoPropertiesImageReader.LOG_TAG,
                 FotoSql.LOG_TAG,
-                MediaDBRepository.LOG_TAG, FileApi.TAG,
+                MediaDBRepository.LOG_TAG,
                 MediaContentproviderRepositoryImpl.LOG_TAG,
-                DocumentFileTranslator.TAG, DocumentFileTranslator.TAG_DOCFILE) {
+                DocumentFileTranslator.TAG, DocumentFileTranslator.TAG_DOCFILE,
+                FilePermissionActivity.TAG, FileApi.TAG) {
 
             @Override
             public void uncaughtException(Thread thread, Throwable ex) {
