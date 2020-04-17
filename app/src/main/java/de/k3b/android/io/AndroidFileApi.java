@@ -27,7 +27,6 @@ import android.util.Log;
 import java.io.File;
 
 import de.k3b.android.androFotoFinder.Global;
-import de.k3b.android.util.FastDocumentFileTranslator;
 import de.k3b.android.widget.FilePermissionActivity;
 import de.k3b.io.FileApi;
 
@@ -66,7 +65,7 @@ public class AndroidFileApi extends FileApi {
                 Boolean result = null;
                 try {
                     DocumentFile documentFile = geWritabletDocumentFile(source);
-                    context += FastDocumentFileTranslator.toUriDebugString(documentFile);
+                    context += AndroidFileApi.toUriDebugString(documentFile);
                     if (documentFile != null) {
                         result = documentFile.renameTo(dest.getName());
                     }
@@ -90,7 +89,7 @@ public class AndroidFileApi extends FileApi {
             Boolean result = null;
             try {
                 DocumentFile documentFile = geWritabletDocumentFile(file);
-                context += FastDocumentFileTranslator.toUriDebugString(documentFile);
+                context += AndroidFileApi.toUriDebugString(documentFile);
                 if (documentFile != null) {
                     result = documentFile.delete();
                 }
