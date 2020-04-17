@@ -1,9 +1,3 @@
-### todo.md
-
-# bashscript or py script to generate fastlane/web content from fdroid.xml
-
-## example
-
 input :
 
 * ~/StudioProjects/APhotoManager/app/src/debug/res/values-de/fdroid.xml
@@ -11,8 +5,6 @@ input :
 potential output
 
 * ~/StudioProjects/APhotoManager/fastlane/metadata/android/de-DE/full_description.txt
-* ~/StudioProjects/APhotoManager/fastlane/metadata/android/de-DE/full_description.html
-* ~/StudioProjects/APhotoManager/fastlane/metadata/android/de-DE/full_description.md
 * 
 * ~/StudioProjects/APhotoManager.wiki/home_de.html
 * ~/StudioProjects/APhotoManager.wiki/home_de.md

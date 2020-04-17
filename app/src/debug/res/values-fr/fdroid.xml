@@ -36,23 +36,23 @@
   <!-- This becomes .../fastlane/metadata/android/full_description.txt.
     See https://f-droid.org/docs/Build_Metadata_Reference/#Description -->
   <string name="full_description"><![CDATA["
-    Fonctionnalités :
+Fonctionnalités :
 
-    * Trouvez rapidement vos photos par mot-clé, (sous-)dossier, date, géolocalisation, titre ...
-    * Affichez les résultats dans la Galerie ou une carte géographique d'OpenStreetMap.
-    * Les fonctions d'affichage permettent de zoomer, de faire un glisser afin passer aux images suivantes ou précédente.
-    * Gestionnaire de fichiers intégré pour les photos: trouver, trier, afficher, copier, supprimer, envoyer...
-    * Éditez les métadonnées EXIF : date, titre, description, tag(mot-clé), géolocalisation, évaluation...
-    * Peut manipuler de grandes collections d'images (+ de 20000 images dans + de 1000 dossiers).
-    * Utilise le gestionnaire d'image natif d'Android. Aucune initialisation nécessaire.
-    * Scan étendu d'images pour les formats EXIF, IPTC, XMP
+* Trouvez rapidement vos photos par mot-clé, (sous-)dossier, date, géolocalisation, titre ...
+* Affichez les résultats dans la Galerie ou une carte géographique d'OpenStreetMap.
+* Les fonctions d'affichage permettent de zoomer, de faire un glisser afin passer aux images suivantes ou précédente.
+* Gestionnaire de fichiers intégré pour les photos: trouver, trier, afficher, copier, supprimer, envoyer...
+* Éditez les métadonnées EXIF : date, titre, description, tag(mot-clé), géolocalisation, évaluation...
+* Peut manipuler de grandes collections d'images (+ de 20000 images dans + de 1000 dossiers).
+* Utilise le gestionnaire d'image natif d'Android. Aucune initialisation nécessaire.
+* Scan étendu d'images pour les formats EXIF, IPTC, XMP
 
-    Permissions Android nécessaires:
+Permissions Android nécessaires:
 
-    * INTERNET : Pour télécharger les données cartographiques à partir du serveur OpenStreetMap
-    * ACCESS_NETWORK_STATE et ACCESS_WIFI_STATE : pour savoir si le Wi-Fi/Internet est activé pour commencer à télécharger des  données cartographiques.
-    * WRITE_EXTERNAL_STORAGE : pour mettre en cache les données cartographiques téléchargées dans le système de fichiers local , ceci dans le but d’effectuer certaines opérations plus rapidement.
-    * READ_LOGS : Afin de lire et d'enregistrer des traces dans un fichier texte en cas de crache potentiels l'application.
-    .
+* INTERNET : Pour télécharger les données cartographiques à partir du serveur OpenStreetMap
+* ACCESS_NETWORK_STATE et ACCESS_WIFI_STATE : pour savoir si le Wi-Fi/Internet est activé pour commencer à télécharger des  données cartographiques.
+* WRITE_EXTERNAL_STORAGE : pour mettre en cache les données cartographiques téléchargées dans le système de fichiers local , ceci dans le but d’effectuer certaines opérations plus rapidement.
+* READ_LOGS : Afin de lire et d'enregistrer des traces dans un fichier texte en cas de crache potentiels l'application.
+.
 "]]></string>
 </resources>

@@ -4,9 +4,9 @@
 # License: GPLv3 or later
 # source: 2020-04-16 https://github.com/grote/Transportr/blob/master/fastlane/rename_screenshots.py
 
+import glob
 import os
 import re
-import glob
 
 METADATA_PATH = 'metadata/android'
 GLOB = '/*/images/phoneScreenshots/*.png'

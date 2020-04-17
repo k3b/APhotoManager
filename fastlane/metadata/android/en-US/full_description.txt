@@ -1,27 +1,29 @@
-Features:
-
-* Fast find photos by tags(keywords), (sub-)folder, date, geo , title, ...
-* Display result in gallery or geographic map from openstreetmap.
-* Filemanagement: copy, move, rename, delete, send, Incremental Photo Backup, ... .
-* Support for Virtual Albums.
-* Edit exif metadata: date, title, description, tags(keywords), geo, rating, ....
-* AutoProcessing:  on-move automatically rename photo-files and/or add metadata,
-* Can handle big image collections (20000+ images in 1000+ folders).
-* Small memory footprint (1.5 MB), Works on old low-memory android 4.0 devices
-* Uses Android's image content-provider. No initial image scan neccessary.
-* Extended photo media scanner for Exif, IPTC, XMP
-
-Privacy:
-
-* Can hide photos from other gallery-apps/image-pickers.
-* Vault mode: If enabled unwanted photos cannot be seen and dangerous operations (i.e. delete) are prohibited. This way you can safely hand over your device to someone else.
-* Photos are kept on local device. No upload to third party.
-* No adds, no usertracking, free open source, available on f-droid
-
-Required Android Permissions:
-
-* INTERNET: to download map data from Open Streetmap Server
-* ACCESS_NETWORK_STATE and ACCESS_WIFI_STATE: to find out if wifi/internet is online to start downloaded geodata
-* WRITE_EXTERNAL_STORAGE to cache downloaded map data in local file system and to do file operations with the photos
-* READ_LOGS to read and save potential crash-logs to a textfile.
-.
+<p>Photo Gallery app to manage local photos:</p>
+<p>Features:</p>
+<ul>
+<li>Fast find photos by tags(keywords), (sub-)folder, date, geo , title, ...</li>
+<li>Display result in gallery or geographic map from openstreetmap.</li>
+<li>Filemanagement: copy, move, rename, delete, send, Incremental Photo Backup, ... .</li>
+<li>Support for Virtual Albums.</li>
+<li>Edit exif metadata: date, title, description, tags(keywords), geo, rating, ....</li>
+<li>AutoProcessing:  on-move automatically rename photo-files and/or add metadata,</li>
+<li>Can handle big image collections (20000+ images in 1000+ folders).</li>
+<li>Small memory footprint (1.5 MB), Works on old low-memory android 4.0 devices</li>
+<li>Uses Android's image content-provider. No initial image scan neccessary.</li>
+<li>Extended photo media scanner for Exif, IPTC, XMP</li>
+</ul>
+<p>Privacy:</p>
+<ul>
+<li>Can hide photos from other gallery-apps/image-pickers.</li>
+<li>Vault mode: If enabled unwanted photos cannot be seen and dangerous operations (i.e. delete) are prohibited. This way you can safely hand over your device to someone else.</li>
+<li>Photos are kept on local device. No upload to third party.</li>
+<li>No adds, no usertracking, free open source, available on f-droid</li>
+</ul>
+<p>Required Android Permissions:</p>
+<ul>
+<li>INTERNET: to download map data from Open Streetmap Server</li>
+<li>ACCESS_NETWORK_STATE and ACCESS_WIFI_STATE: to find out if wifi/internet is online to start downloaded geodata</li>
+<li>WRITE_EXTERNAL_STORAGE to cache downloaded map data in local file system and to do file operations with the photos</li>
+<li>READ_LOGS to read and save potential crash-logs to a textfile.
+.</li>
+</ul>

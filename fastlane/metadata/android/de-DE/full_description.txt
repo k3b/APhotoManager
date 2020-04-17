@@ -1,27 +1,29 @@
-Merkmale:
-
-* Schnelle Bildsuche per Tags(Suchbegriffe), Datei(unter)ordner, Datum, Geo-Daten ...
-* Anzeige in Gallerie oder Landkarte (Openstreetmap)
-* Unterstützt virtuelle Alben.
-* Eingebaute Dateiverwaltung für Bilder: Kopieren, Löschen, Teilen/Senden, stufenweise Datensicherung (Incremental Backup)... .
-* Bearbeiten von Bildeigenschaften (exif metadata): Datum, Title, Bild-Beschreibung , tags(Suchbegriffe), geo, Bewertung (rating), ....
-* Optional Autoprocessing: Photos können beim Kopieren/Verschieben automatisch umbenannt und mit Tags, Geo, Title, ... versehen werden.
-* Verwaltet große Bildersammlungen (20000+ Bilder in 1000+ Ordnern)
-* Geringer Speicherverbrauch (1.5 MB), arbeitet auch auf alten Antroid-4.0 Geräten mit wenig internen Speicher
-* Funktioniert auch ohne vorherigem media scan (Android native media content-provider).
-* Erweiterter Media-Scanner für Bilder: Exif, IPTC, XMP.
-
-Privacy:
-
-* Bilder als "Privat" markieren und so für andere Bild Programme unsichtbar machen.
-* Tresor-Modus (Vault mode): Wenn aktiviert sind nur noch zuvor ausgewähtle Photos sichtbar und potentiell gefährliche Aktionen (Kopieren, Löschen, Verschieben, Bildauswahl ändern, ...) nicht möglich. So kann das Gerät gefahrlos einem dritten übergeben werden.
-* Photos verbleiben auf dem Gerät dh sie werden nicht auf Server ins internet geladen.
-* Keine Werbung, keine Datensammlung (usertracking), freie (kostenlos, uneingeschränkt nutzbare) Software verfügbar per f-droid.
-
-Android Berechtigungen: :
-
-* INTERNET: Download Landkarten von Openstreetmap.
-* ACCESS_NETWORK_STATE und ACCESS_WIFI_STATE: Feststellen ob wifi/internet verfügbar ist für Landkarten download.
-* WRITE_EXTERNAL_STORAGE Zwichenspeichern von Landkarten und Dateioperationen mit Bildern.
-* READ_LOGS Speichere Programmabsturz-Infos in lokaler Textdatei.
-.
+<p>Fotogalerie-App zum Verwalten lokaler Fotos:</p>
+<p>Merkmale:</p>
+<ul>
+<li>Schnelle Bildersuche nach Tags (Schlagworten), Datei(unter)ordner, Datum, Geo-Daten ...</li>
+<li>Anzeige der Ergebnisse in Galerie oder auf Landkarte (Openstreetmap)</li>
+<li>Dateiverwaltung: kopieren, verschieben, umbenennen, löschen, versenden, inkrementelle Fotosicherung ... .</li>
+<li>Unterstützung virtueller Alben.</li>
+<li>Bearbeitung der Bildeigenschaften (Exif-Daten): Datum, Titel, Beschreibung, Tags (Schlagworte), Geodaten, Bewertung, ....</li>
+<li>Automatische Fotoverarbeitung: automatisches Umbenennen und/oder Hinzufügen von Metadaten beim Kopieren/Verschieben von Fotodateien.</li>
+<li>Verwaltet große Sammlungen (mehr als 20000 Bilder in über 1000 Ordnern)</li>
+<li>Geringer Speicherverbrauch (1,5 MB), arbeitet auch auf alten Android-4.0-Geräten mit kleinem Speicher</li>
+<li>Verwendet Image Content Provider von Android. Kein Scanvorgang nötig.</li>
+<li>Erweiterter Media-Scanner für Bilder: Exif, IPTC, XMP.</li>
+</ul>
+<p>Datenschutz:</p>
+<ul>
+<li>Bilder als "Privat" markieren und so für andere Bildprogramme unsichtbar machen.</li>
+<li>Tresor-Modus (Vault mode): Bei Aktivierung sind nur noch zuvor ausgewählte Fotos sichtbar und gefährliche Aktionen (z. B. Löschen) nicht möglich. So kann das Gerät gefahrlos einem Dritten übergeben werden.</li>
+<li>Fotos verbleiben auf dem Gerät, d. h. sie werden nicht auf Server im Internet geladen.</li>
+<li>Keine Werbung, kein Sammeln von Nutzerdaten (Tracking), freie quelloffene Software, erhältlich bei F-Droid.</li>
+</ul>
+<p>Android-Berechtigungen: :</p>
+<ul>
+<li>INTERNET: zum Download von Openstreetmap-Karten</li>
+<li>ACCESS_NETWORK_STATE und ACCESS_WIFI_STATE: zur Bestimmung der WLAN-/Internetverfügbarkeit für den Karten-Download</li>
+<li>WRITE_EXTERNAL_STORAGE: zum Zwichenspeichern von Landkarten und Durchführung von Fotodatei-Operationen</li>
+<li>READ_LOGS: zum Protokollieren von Absturzursachen in lokaler Textdatei
+.</li>
+</ul>

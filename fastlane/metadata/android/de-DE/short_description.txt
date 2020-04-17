@@ -1,1 +1,1 @@
-Verwalte lokale Photos: Suchen/Kopieren/Exif bearbeiten/Gallerie/Landkarte.
+Verwalte lokale Fotos: Suchen/Kopieren/Exif bearbeiten/Galerie/Landkarte.
