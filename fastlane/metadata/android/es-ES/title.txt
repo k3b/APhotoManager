@@ -1,1 +1,1 @@
-A Photo Manager (Manejador de fotos)
+A Photo Manager (Manejador de foto)

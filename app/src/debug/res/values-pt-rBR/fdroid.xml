@@ -36,24 +36,24 @@
     <!-- This becomes .../fastlane/metadata/android/full_description.txt.
     See https://f-droid.org/docs/Build_Metadata_Reference/#Description -->
     <string name="full_description"><![CDATA["
- Recursos:
- * Rápido encontrar fotos por tags (palavras-chave), (sub) pasta, data, geo, título,...
- * Exibir resultado em  galeria ou mapa geográfico a partir do openstreetmap.
- * Recursos de exibição de detalhes ampliando, deslizando para a imagem seguinte/anterior.
- * Gerenciador de arquivos Buildin para fotos: localizar, classificar, visualizar, copiar, excluir, enviar,...
- * Editar metadados exif: data,  título, descrição, tags (palavras-chave), geo, classificação,...
- * Autoprocessamento baseado em regras de pasta opcional: As fotos são automaticamente renomeadas e recebem tags, geo, title, ... quando você copia/move-as
- * Marcar imagens como  "PRIVADO" para ocultá-los de outros aplicativos da Galeria e seletores de imagens.
- * No "Modo Protegido/Fixado", comandos de aplicativos potencialmente perigosos, como editar/copiar/excluir/compartilhar/configurações/ "alterar seleção de imagem", são desativados para que você possa  entregar seu telefone para outra pessoa
- * Pode manipular grandes coleções de imagens (mais de 20000 imagens em mais de 1.000 pastas).
- * Usa o provedor de conteúdo de imagem do Android.
-  * Scanner de mídia de foto estendida para Exif, IPTC, XMP
+Recursos:
+* Rápido encontrar fotos por tags (palavras-chave), (sub) pasta, data, geo, título,...
+* Exibir resultado em  galeria ou mapa geográfico a partir do openstreetmap.
+* Recursos de exibição de detalhes ampliando, deslizando para a imagem seguinte/anterior.
+* Gerenciador de arquivos Buildin para fotos: localizar, classificar, visualizar, copiar, excluir, enviar,...
+* Editar metadados exif: data,  título, descrição, tags (palavras-chave), geo, classificação,...
+* Autoprocessamento baseado em regras de pasta opcional: As fotos são automaticamente renomeadas e recebem tags, geo, title, ... quando você copia/move-as
+* Marcar imagens como  "PRIVADO" para ocultá-los de outros aplicativos da Galeria e seletores de imagens.
+* No "Modo Protegido/Fixado", comandos de aplicativos potencialmente perigosos, como editar/copiar/excluir/compartilhar/configurações/ "alterar seleção de imagem", são desativados para que você possa  entregar seu telefone para outra pessoa
+* Pode manipular grandes coleções de imagens (mais de 20000 imagens em mais de 1.000 pastas).
+* Usa o provedor de conteúdo de imagem do Android.
+* Scanner de mídia de foto estendida para Exif, IPTC, XMP
 
- Exigido Android Permissões:
+Exigido Android Permissões:
 
- * INTERNET: para baixar dados do mapa do Open Streetmap Server
- * ACCESS_NETWORK_STATE e ACCESS_WIFI_STATE: para descobrir se wifi / internet está online para iniciar o download geodata
- * WRITE_EXTERNAL_STORAGE para cache baixado do mapa  dados no sistema de arquivos local e para fazer operações de arquivo com as fotos
- * READ_LOGS para ler e salvar registros de falhas em potencial em um arquivo de texto.  .
+* INTERNET: para baixar dados do mapa do Open Streetmap Server
+* ACCESS_NETWORK_STATE e ACCESS_WIFI_STATE: para descobrir se wifi / internet está online para iniciar o download geodata
+* WRITE_EXTERNAL_STORAGE para cache baixado do mapa  dados no sistema de arquivos local e para fazer operações de arquivo com as fotos
+* READ_LOGS para ler e salvar registros de falhas em potencial em um arquivo de texto.  .
   "]]></string>
 </resources>
