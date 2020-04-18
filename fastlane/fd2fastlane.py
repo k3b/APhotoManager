@@ -12,16 +12,33 @@ import os
 import re
 from xml.etree import ElementTree
 
+#--------------------------------------
+# configuration: set constant to None if you do not want to use the featrue
+
+# if not None replace title becomes DEFAULT_APP_TITLE (translation)
 DEFAULT_APP_TITLE = "A Photo Manager"
 
 # all paths are relativ to [root]/fastlane/*.py
+
+# mandatory: translations come from [prj]/app/src/debug/res/values-[locale]/fdroid.xml
 FD_SRC_PATH_ROOT = '../app/src/debug/res'
-APP_OUT_RES_ROOT = '../app/src/main/res'
+
+# mandatory: fastlane data is written to [prj]/fastlane/metadata/android/*/*.txt
 FASTLANE_OUT_ROOT = 'metadata/android'
+
+# if not null markdown in full_description is written to [prj]/app/src/main/res/values-[locale]/html-pages.xml
+APP_OUT_RES_ROOT = '../app/src/main/res'
+
+# if not null markdown in full_description is written to [prj]/../AndroFotoFinder.wiki/[locale]-home.md
 WIKI_OUT_ROOT = '../../AndroFotoFinder.wiki'
+
 DEFAULT_LANG = 'en-US'
 
+#--------------------------------------
+
 # translate android-locale to fastlane locale
+# if not in this list defaults to 2 letter iso
+# example '-eu' will become 'eu'
 LANG_ANDROID_TO_FASTLANE = {
     '': 'en-US',
     '-ar': 'ar-SA',
@@ -42,7 +59,9 @@ LANG_ANDROID_TO_FASTLANE = {
     '-ta': 'ta-IN',
 }
 
-# translate android-locale to fastlane locale
+# translate android-locale to wiki locale
+# if not in this list defaults to 2 letter iso
+# example '-eu' will become 'eu'
 LANG_ANDROID_TO_WIKI = {
     '': '',
     '-pt-rBR': 'pt',
@@ -55,7 +74,7 @@ REGEX_ANDROID_LOCALE = re.compile(r'.*[/\\]values([^/\\]*)[/\\]fdroid\.xml', re.
 
 
 def save_to_wiki_homepage(title, short_description, full_description, android_locale):
-    if len(android_locale) > 0:
+    if ((len(WIKI_OUT_ROOT) > 0) and (len(android_locale) > 0)):
         label = f'<!--!!generated from .../values{android_locale}/fdroid.xml!!-->';
         homepate_locale = translate_locale(android_locale, LANG_ANDROID_TO_WIKI)
         filename = homepate_locale + '-home.md'
@@ -92,7 +111,7 @@ def generate_wiki_homepage(label, title, short_description, full_description):
 
 
 def save_to_app_about(title, short_description, full_description, android_locale):
-    if len(android_locale) > 0:
+    if (len(APP_OUT_RES_ROOT) > 0) and (len(android_locale) > 0):
         label = f'<!--!!generated from .../values{android_locale}/fdroid.xml!!-->';
         dir = os.path.join(APP_OUT_RES_ROOT, "values" + android_locale)
         filename = "html-pages.xml"
@@ -146,7 +165,7 @@ def process_translation(fdroid_xml, android_locale):
         # print(android_locale + '\t' + fastlane_locale + '\t' + fdroid_xml)
         root = ElementTree.parse(fdroid_xml).getroot()
         title = getElementText(root, './/string[@name="title"]', 50, fdroid_xml)
-        if len(title) > 0 and title.find(DEFAULT_APP_TITLE) < 0:
+        if len(DEFAULT_APP_TITLE) > 0 and len(title) > 0 and title.find(DEFAULT_APP_TITLE) < 0:
             title = DEFAULT_APP_TITLE + " (" + title + ")"
 
         short_description = getElementText(root, './/string[@name="short_description"]', 80,
