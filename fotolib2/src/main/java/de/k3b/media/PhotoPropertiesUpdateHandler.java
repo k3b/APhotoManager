@@ -54,6 +54,14 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
     private boolean deleteOriginalAfterFinish; // true: after save original jpg/mxp are deleted (move instead of copy)
     private long    dbgLoadEndTimestamp;
 
+    private PhotoPropertiesUpdateHandler(
+            IPhotoProperties readChild, IPhotoProperties writeChild,
+            ExifInterfaceEx exif, PhotoPropertiesXmpSegment xmp) {
+        super(readChild, writeChild);
+        this.exif = exif;
+        this.xmp = xmp;
+    }
+
     /**
      * public api: Factory to create PhotoPropertiesUpdateHandler. Settings/ Internal state determine
      * configuration for PhotoPropertiesUpdateHandler.
@@ -66,9 +74,9 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
      * @return                      new loaded instance
      * @throws IOException
      */
-    public static PhotoPropertiesUpdateHandler create(String absoluteJpgInPath, String absoluteJpgOutPath,
-                                                      boolean deleteOriginalAfterFinish, String dbg_context)
-            throws IOException {
+    public static PhotoPropertiesUpdateHandler create(
+            String absoluteJpgInPath, String absoluteJpgOutPath,
+            boolean deleteOriginalAfterFinish, String dbg_context) throws IOException {
         return create(absoluteJpgInPath, absoluteJpgOutPath, deleteOriginalAfterFinish, dbg_context,
                 LibGlobal.mediaUpdateStrategy.contains("J"),    // write jpg file
                 LibGlobal.mediaUpdateStrategy.contains("X"),    // write xmp file
@@ -90,9 +98,10 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
      * @return                      new loaded instance
      * @throws IOException
      */
-    public static PhotoPropertiesUpdateHandler create(String absoluteJpgInPath, String absoluteJpgOutPath,
-                                                      boolean deleteOriginalAfterFinish, String dbg_context,
-                                                      boolean writeJpg, boolean writeXmp, boolean createXmpIfNotExist)
+    protected static PhotoPropertiesUpdateHandler create(
+            String absoluteJpgInPath, String absoluteJpgOutPath,
+            boolean deleteOriginalAfterFinish, String dbg_context,
+            boolean writeJpg, boolean writeXmp, boolean createXmpIfNotExist)
             throws IOException {
         long    startTimestamp = 0;
         if (LibGlobal.debugEnabledJpgMetaIo) {
@@ -162,13 +171,6 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
         return result;
     }
 
-    private PhotoPropertiesUpdateHandler(IPhotoProperties readChild, IPhotoProperties writeChild, ExifInterfaceEx exif, PhotoPropertiesXmpSegment xmp)
-    {
-        super(readChild, writeChild);
-        this.exif = exif;
-        this.xmp = xmp;
-    }
-
     public void setAbsoluteJpgOutPath(String absoluteJpgOutPath) {
         this.absoluteJpgOutPath = absoluteJpgOutPath;
     }
@@ -233,7 +235,9 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
         return changedFiles;
     }
 
-    private int copyReplaceIfExist(String absoluteJpgInPath, String outJpgFullPath, boolean longFormat, String dbg_context) throws IOException {
+    private int copyReplaceIfExist(
+            String absoluteJpgInPath, String outJpgFullPath,
+            boolean longFormat, String dbg_context) throws IOException {
         int changedFiles = 0;
         File xmpInFile = FileCommands.getExistingSidecarOrNull(absoluteJpgInPath, longFormat);
         if (xmpInFile != null) {
@@ -245,9 +249,10 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
         return changedFiles;
     }
 
-    private int saveXmp(PhotoPropertiesXmpSegment xmp,
-                        String outFullJpgPath,
-                        boolean isLongFileName, String dbg_context) throws IOException {
+    private int saveXmp(
+            PhotoPropertiesXmpSegment xmp,
+            String outFullJpgPath,
+            boolean isLongFileName, String dbg_context) throws IOException {
         File xmpOutFile = FileCommands.getSidecar(outFullJpgPath, isLongFileName);
         xmp.save(xmpOutFile, LibGlobal.debugEnabledJpgMetaIo, dbg_context);
         return 1;

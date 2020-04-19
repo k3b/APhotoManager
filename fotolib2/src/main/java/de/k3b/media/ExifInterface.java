@@ -1,7 +1,7 @@
 // ExifInterface source code from android-6 - special version without jni
 /*
  * Copyright (C) 2007 The Android Open Source Project under the Apache License, Version 2.0
- * Copyright (C) 2016-2019 by k3b under the GPL-v3+.
+ * Copyright (C) 2016-2020 by k3b under the GPL-v3+.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -29,9 +29,7 @@ import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,8 +65,6 @@ import de.k3b.io.IFile;
 public class ExifInterface {
     // public to allow error filtering
     public static final String LOG_TAG = "ExifInterface";
-
-    private static final boolean OLD_API = false;
 
     private static final Logger logger = LoggerFactory.getLogger(LOG_TAG);
 
@@ -1139,12 +1135,8 @@ public class ExifInterface {
         mExifFile = (filename != null) ? fileFacade.convert(new File(filename)) : null;
         if (in == null) {
             InputStream inputStream = null;
-            try {
-                inputStream = createInputStream(mExifFile);
-                loadAttributes(inputStream);
-            } finally {
-                closeQuietly(inputStream);
-            }
+            inputStream = createInputStream(mExifFile);
+            loadAttributes(inputStream);
         } else {
             loadAttributes(in);
 
@@ -1445,6 +1437,7 @@ public class ExifInterface {
             logWarn( "Invalid image.", e);
             validJpgExifFormat = false;
         } finally {
+            closeQuietly(in);
             if (DEBUG_INTERNAL) {
                 logDebug(this.toString());
             }
@@ -1516,7 +1509,6 @@ public class ExifInterface {
 
         // Keep the thumbnail in memory
         mThumbnailBytes = getThumbnail(inFile);
-        IFile renamedInFile = inFile;
 
         boolean overwriteOriginal = inFile.equals(currentOutFile);
 
@@ -1527,33 +1519,25 @@ public class ExifInterface {
             currentOutFile = outFile.getParentFile().create(tempName, outFile.getMime());
         }
 
-        InputStream in = null;
-        OutputStream out = null;
-
-        try {
-            in = createInputStream(renamedInFile);
-            out = createOutputStream(outFile);
-
-            saveJpegAttributes(in, out, mThumbnailBytes);
-        } finally {
-            closeQuietly(in);
-            closeQuietly(out);
-        }
+        saveJpegAttributes(
+                createInputStream(inFile), createOutputStream(currentOutFile), mThumbnailBytes);
 
         // all exif writing is done successfully
-        if (overwriteOriginal) {
+        if (overwriteOriginal && currentOutFile.exists()) {
             // cleanup
             String savedOriginalName = originalName + ".old.jpg";
             IFile previousFailedOverwriteOriginal = inFile.getParentFile().findExisting(savedOriginalName);
             if (previousFailedOverwriteOriginal != null) {
-                logDebug(String.format("delete old %s", previousFailedOverwriteOriginal));
+                if (DEBUG_INTERNAL) {
+                    logDebug(String.format("delete old %s", previousFailedOverwriteOriginal));
+                }
                 previousFailedOverwriteOriginal.delete();
             }
             renameOrThrow(inFile, savedOriginalName);
             renameOrThrow(currentOutFile, originalName);
         }
 
-        if (deleteInFileOnFinish || overwriteOriginal) {
+        if ((deleteInFileOnFinish || overwriteOriginal) && inFile.exists()) {
             deleteFile(inFile);
         }
 
@@ -1654,28 +1638,30 @@ public class ExifInterface {
             return getThumbnail(in);
         } catch (IOException e) {
             // Couldn't get a thumbnail image.
-        } finally {
-            closeQuietly(in);
         }
         return null;
     }
 
     public byte[] getThumbnail(InputStream in) throws IOException {
-        if (!mHasThumbnail) {
-            return null;
+        try {
+            if (!mHasThumbnail) {
+                return null;
+            }
+            if (mThumbnailBytes != null) {
+                return mThumbnailBytes;
+            }
+            if (in.skip(mThumbnailOffset) != mThumbnailOffset) {
+                throw new IOException("Corrupted image");
+            }
+            byte[] buffer = new byte[mThumbnailLength];
+            if (in.read(buffer) != mThumbnailLength) {
+                throw new IOException("Corrupted image");
+            }
+            mThumbnailBytes = buffer;
+            return buffer;
+        } finally {
+            closeQuietly(in);
         }
-        if (mThumbnailBytes != null) {
-            return mThumbnailBytes;
-        }
-        if (in.skip(mThumbnailOffset) != mThumbnailOffset) {
-            throw new IOException("Corrupted image");
-        }
-        byte[] buffer = new byte[mThumbnailLength];
-        if (in.read(buffer) != mThumbnailLength) {
-            throw new IOException("Corrupted image");
-        }
-        mThumbnailBytes = buffer;
-        return buffer;
     }
 
     private void closeQuietly(Closeable in) {
@@ -1825,126 +1811,139 @@ public class ExifInterface {
         if (DEBUG_INTERNAL) {
             logDebug( "getJpegAttributes starting with: " + inputStream);
         }
-        DataInputStream dataInputStream = new DataInputStream(inputStream);
-        byte marker;
-        int bytesRead = 0;
-        if ((marker = dataInputStream.readByte()) != MARKER) {
-            throw new IOException("Invalid marker: " + Integer.toHexString(marker & 0xff));
-        }
-        ++bytesRead;
-        if (dataInputStream.readByte() != MARKER_SOI) {
-            throw new IOException("Invalid marker: " + Integer.toHexString(marker & 0xff));
-        }
-        ++bytesRead;
-        while (true) {
-            marker = dataInputStream.readByte();
-            if (marker != MARKER) {
-                throw new IOException("Invalid marker:" + Integer.toHexString(marker & 0xff));
+        DataInputStream dataInputStream = null;
+        try {
+            dataInputStream = new DataInputStream(inputStream);
+            byte marker;
+            int bytesRead = 0;
+            if ((marker = dataInputStream.readByte()) != MARKER) {
+                throw new IOException("Invalid marker: " + Integer.toHexString(marker & 0xff));
             }
             ++bytesRead;
-            marker = dataInputStream.readByte();
-            if (DEBUG_INTERNAL) {
-                logDebug( "Found JPEG segment indicator: " + Integer.toHexString(marker & 0xff));
+            if (dataInputStream.readByte() != MARKER_SOI) {
+                throw new IOException("Invalid marker: " + Integer.toHexString(marker & 0xff));
             }
             ++bytesRead;
-            // EOI indicates the end of an image and in case of SOS, JPEG image stream starts and
-            // the image data will terminate right after.
-            if (marker == MARKER_EOI || marker == MARKER_SOS) {
-                break;
-            }
-            int length = dataInputStream.readUnsignedShort() - 2;
-            bytesRead += 2;
-            if (DEBUG_INTERNAL) {
-                logDebug( "JPEG segment: " + Integer.toHexString(marker & 0xff) + " (length: "
-                        + (length + 2) + ")");
-            }
-            if (length < 0) {
-                throw new IOException("Invalid length");
-            }
-            switch (marker) {
-                case MARKER_APP1: {
-                    if (DEBUG_INTERNAL) {
-                        logDebug( "MARKER_APP1");
-                    }
-                    if (length < 6) {
-                        // Skip if it's not an EXIF APP1 segment.
+            while (true) {
+                marker = dataInputStream.readByte();
+                if (marker != MARKER) {
+                    throw new IOException("Invalid marker:" + Integer.toHexString(marker & 0xff));
+                }
+                ++bytesRead;
+                marker = dataInputStream.readByte();
+                if (DEBUG_INTERNAL) {
+                    logDebug("Found JPEG segment indicator: " + Integer.toHexString(marker & 0xff));
+                }
+                ++bytesRead;
+                // EOI indicates the end of an image and in case of SOS, JPEG image stream starts and
+                // the image data will terminate right after.
+                if (marker == MARKER_EOI || marker == MARKER_SOS) {
+                    break;
+                }
+                int length = dataInputStream.readUnsignedShort() - 2;
+                bytesRead += 2;
+                if (DEBUG_INTERNAL) {
+                    logDebug("JPEG segment: " + Integer.toHexString(marker & 0xff) + " (length: "
+                            + (length + 2) + ")");
+                }
+                if (length < 0) {
+                    throw new IOException("Invalid length");
+                }
+                switch (marker) {
+                    case MARKER_APP1: {
+                        if (DEBUG_INTERNAL) {
+                            logDebug("MARKER_APP1");
+                        }
+                        if (length < 6) {
+                            // Skip if it's not an EXIF APP1 segment.
+                            break;
+                        }
+                        byte[] identifier = new byte[6];
+                        if (inputStream.read(identifier) != 6) {
+                            throw new IOException("Invalid exif");
+                        }
+                        bytesRead += 6;
+                        length -= 6;
+                        if (!Arrays.equals(identifier, IDENTIFIER_EXIF_APP1)) {
+                            // Skip if it's not an EXIF APP1 segment.
+                            break;
+                        }
+                        if (length <= 0) {
+                            throw new IOException("Invalid exif");
+                        }
+                        if (DEBUG_INTERNAL) {
+                            logDebug("readExifSegment with a byte array (length: " + length + ")");
+                        }
+                        byte[] bytes = new byte[length];
+                        if (dataInputStream.read(bytes) != length) {
+                            throw new IOException("Invalid exif");
+                        }
+                        readExifSegment(bytes, bytesRead);
+                        bytesRead += length;
+                        length = 0;
                         break;
                     }
-                    byte[] identifier = new byte[6];
-                    if (inputStream.read(identifier) != 6) {
-                        throw new IOException("Invalid exif");
-                    }
-                    bytesRead += 6;
-                    length -= 6;
-                    if (!Arrays.equals(identifier, IDENTIFIER_EXIF_APP1)) {
-                        // Skip if it's not an EXIF APP1 segment.
+                    case MARKER_COM: {
+                        byte[] bytes = new byte[length];
+                        if (dataInputStream.read(bytes) != length) {
+                            throw new IOException("Invalid exif");
+                        }
+                        length = 0;
+                        if (getAttribute(TAG_USER_COMMENT) == null) {
+                            setAttribute(IFD_EXIF_HINT, TAG_USER_COMMENT, ExifAttribute.createString(
+                                    EXIF_TAG_USER_COMMENT,
+                                    decodePrefixString(bytes.length, bytes, ASCII)));
+                        }
                         break;
                     }
-                    if (length <= 0) {
-                        throw new IOException("Invalid exif");
+                    case MARKER_SOF0:
+                    case MARKER_SOF1:
+                    case MARKER_SOF2:
+                    case MARKER_SOF3:
+                    case MARKER_SOF5:
+                    case MARKER_SOF6:
+                    case MARKER_SOF7:
+                    case MARKER_SOF9:
+                    case MARKER_SOF10:
+                    case MARKER_SOF11:
+                    case MARKER_SOF13:
+                    case MARKER_SOF14:
+                    case MARKER_SOF15: {
+                        if (dataInputStream.skipBytes(1) != 1) {
+                            throw new IOException("Invalid SOFx");
+                        }
+                        setAttribute(IFD_TIFF_HINT, TAG_IMAGE_LENGTH, ExifAttribute.createULong(EXIF_TAG_IMAGE_LENGTH,
+                                dataInputStream.readUnsignedShort(), mExifByteOrder));
+                        setAttribute(IFD_TIFF_HINT, TAG_IMAGE_WIDTH, ExifAttribute.createULong(EXIF_TAG_IMAGE_WIDTH,
+                                dataInputStream.readUnsignedShort(), mExifByteOrder));
+                        length -= 5;
+                        break;
                     }
-                    if (DEBUG_INTERNAL) {
-                        logDebug( "readExifSegment with a byte array (length: " + length + ")");
+                    default: {
+                        break;
                     }
-                    byte[] bytes = new byte[length];
-                    if (dataInputStream.read(bytes) != length) {
-                        throw new IOException("Invalid exif");
-                    }
-                    readExifSegment(bytes, bytesRead);
-                    bytesRead += length;
-                    length = 0;
-                    break;
                 }
-                case MARKER_COM: {
-                    byte[] bytes = new byte[length];
-                    if (dataInputStream.read(bytes) != length) {
-                        throw new IOException("Invalid exif");
-                    }
-                    length = 0;
-                    if (getAttribute(TAG_USER_COMMENT) == null) {
-                        setAttribute(IFD_EXIF_HINT, TAG_USER_COMMENT,ExifAttribute.createString(
-                                EXIF_TAG_USER_COMMENT,
-                                decodePrefixString(bytes.length, bytes,ASCII)));
-                    }
-                    break;
+                if (length < 0) {
+                    throw new IOException("Invalid length");
                 }
-                case MARKER_SOF0:
-                case MARKER_SOF1:
-                case MARKER_SOF2:
-                case MARKER_SOF3:
-                case MARKER_SOF5:
-                case MARKER_SOF6:
-                case MARKER_SOF7:
-                case MARKER_SOF9:
-                case MARKER_SOF10:
-                case MARKER_SOF11:
-                case MARKER_SOF13:
-                case MARKER_SOF14:
-                case MARKER_SOF15: {
-                    if (dataInputStream.skipBytes(1) != 1) {
-                        throw new IOException("Invalid SOFx");
-                    }
-                    setAttribute(IFD_TIFF_HINT, TAG_IMAGE_LENGTH, ExifAttribute.createULong(EXIF_TAG_IMAGE_LENGTH,
-                            dataInputStream.readUnsignedShort(), mExifByteOrder));
-                    setAttribute(IFD_TIFF_HINT, TAG_IMAGE_WIDTH, ExifAttribute.createULong(EXIF_TAG_IMAGE_WIDTH,
-                            dataInputStream.readUnsignedShort(), mExifByteOrder));
-                    length -= 5;
-                    break;
+                if (dataInputStream.skipBytes(length) != length) {
+                    throw new IOException("Invalid JPEG segment");
                 }
-                default: {
-                    break;
-                }
+                bytesRead += length;
             }
-            if (length < 0) {
-                throw new IOException("Invalid length");
-            }
-            if (dataInputStream.skipBytes(length) != length) {
-                throw new IOException("Invalid JPEG segment");
-            }
-            bytesRead += length;
+        } finally {
+            closeQuietly(dataInputStream);
         }
     }
-    // Stores a new JPEG image with EXIF attributes into a given output stream.
+
+    /**
+     * Stores a new JPEG image with EXIF attributes into a given output stream.
+     *
+     * @param inputStream  where jpg data comes from. will be closed on exit
+     * @param outputStream where jpg data goes to. will be closed on exit
+     * @param thumbnail    if not null will be stored as output-jpg-exif-thumbnail
+     * @throws IOException
+     */
     public void saveJpegAttributes(InputStream inputStream, OutputStream outputStream, byte[] thumbnail)
             throws IOException {
         // See JPEG File Interchange Format Specification page 5.
@@ -1952,91 +1951,97 @@ public class ExifInterface {
             logDebug( "saveJpegAttributes starting with (inputStream: " + inputStream
                     + ", outputStream: " + outputStream + ")");
         }
-        DataInputStream dataInputStream = new DataInputStream(inputStream);
-        ByteOrderAwarenessDataOutputStream dataOutputStream =
-                new ByteOrderAwarenessDataOutputStream(outputStream, ByteOrder.BIG_ENDIAN);
-        if (dataInputStream.readByte() != MARKER) {
-            throw new IOException("Invalid marker");
-        }
-        dataOutputStream.writeByte(MARKER);
-        if (dataInputStream.readByte() != MARKER_SOI) {
-            throw new IOException("Invalid marker");
-        }
-        dataOutputStream.writeByte(MARKER_SOI);
-        // Write EXIF APP1 segment
-        dataOutputStream.writeByte(MARKER);
-        dataOutputStream.writeByte(MARKER_APP1);
-
-        writeExifSegment(dataOutputStream, 6, thumbnail);
-        byte[] bytes = new byte[4096];
-        while (true) {
-            byte marker = dataInputStream.readByte();
-            if (marker != MARKER) {
+        DataInputStream dataInputStream = null;
+        ByteOrderAwarenessDataOutputStream dataOutputStream = null;
+        try {
+            dataInputStream = new DataInputStream(inputStream);
+            dataOutputStream = new ByteOrderAwarenessDataOutputStream(outputStream, ByteOrder.BIG_ENDIAN);
+            if (dataInputStream.readByte() != MARKER) {
                 throw new IOException("Invalid marker");
             }
-            marker = dataInputStream.readByte();
-            switch (marker) {
-                case MARKER_APP1: {
-                    int length = dataInputStream.readUnsignedShort() - 2;
-                    if (length < 0) {
-                        throw new IOException("Invalid length");
-                    }
-                    byte[] identifier = new byte[6];
-                    if (length >= 6) {
-                        if (dataInputStream.read(identifier) != 6) {
-                            throw new IOException("Invalid exif");
+            dataOutputStream.writeByte(MARKER);
+            if (dataInputStream.readByte() != MARKER_SOI) {
+                throw new IOException("Invalid marker");
+            }
+            dataOutputStream.writeByte(MARKER_SOI);
+            // Write EXIF APP1 segment
+            dataOutputStream.writeByte(MARKER);
+            dataOutputStream.writeByte(MARKER_APP1);
+
+            writeExifSegment(dataOutputStream, 6, thumbnail);
+            byte[] bytes = new byte[4096];
+            while (true) {
+                byte marker = dataInputStream.readByte();
+                if (marker != MARKER) {
+                    throw new IOException("Invalid marker");
+                }
+                marker = dataInputStream.readByte();
+                switch (marker) {
+                    case MARKER_APP1: {
+                        int length = dataInputStream.readUnsignedShort() - 2;
+                        if (length < 0) {
+                            throw new IOException("Invalid length");
                         }
-                        if (Arrays.equals(identifier, IDENTIFIER_EXIF_APP1)) {
-                            // Skip the original EXIF APP1 segment.
-                            if (dataInputStream.skip(length - 6) != length - 6) {
-                                throw new IOException("Invalid length");
+                        byte[] identifier = new byte[6];
+                        if (length >= 6) {
+                            if (dataInputStream.read(identifier) != 6) {
+                                throw new IOException("Invalid exif");
                             }
-                            break;
+                            if (Arrays.equals(identifier, IDENTIFIER_EXIF_APP1)) {
+                                // Skip the original EXIF APP1 segment.
+                                if (dataInputStream.skip(length - 6) != length - 6) {
+                                    throw new IOException("Invalid length");
+                                }
+                                break;
+                            }
                         }
+                        // Copy non-EXIF APP1 segment.
+                        dataOutputStream.writeByte(MARKER);
+                        dataOutputStream.writeByte(marker);
+                        dataOutputStream.writeUnsignedShort(length + 2);
+                        if (length >= 6) {
+                            length -= 6;
+                            dataOutputStream.write(identifier);
+                        }
+                        int read;
+                        while (length > 0 && (read = dataInputStream.read(
+                                bytes, 0, Math.min(length, bytes.length))) >= 0) {
+                            dataOutputStream.write(bytes, 0, read);
+                            length -= read;
+                        }
+                        break;
                     }
-                    // Copy non-EXIF APP1 segment.
-                    dataOutputStream.writeByte(MARKER);
-                    dataOutputStream.writeByte(marker);
-                    dataOutputStream.writeUnsignedShort(length + 2);
-                    if (length >= 6) {
-                        length -= 6;
-                        dataOutputStream.write(identifier);
+                    case MARKER_EOI:
+                    case MARKER_SOS: {
+                        dataOutputStream.writeByte(MARKER);
+                        dataOutputStream.writeByte(marker);
+                        // Copy all the remaining data
+                        streamCopy(dataInputStream, dataOutputStream);
+                        return;
                     }
-                    int read;
-                    while (length > 0 && (read = dataInputStream.read(
-                            bytes, 0, Math.min(length, bytes.length))) >= 0) {
-                        dataOutputStream.write(bytes, 0, read);
-                        length -= read;
+                    default: {
+                        // Copy JPEG segment
+                        dataOutputStream.writeByte(MARKER);
+                        dataOutputStream.writeByte(marker);
+                        int length = dataInputStream.readUnsignedShort();
+                        dataOutputStream.writeUnsignedShort(length);
+                        length -= 2;
+                        if (length < 0) {
+                            throw new IOException("Invalid length");
+                        }
+                        int read;
+                        while (length > 0 && (read = dataInputStream.read(
+                                bytes, 0, Math.min(length, bytes.length))) >= 0) {
+                            dataOutputStream.write(bytes, 0, read);
+                            length -= read;
+                        }
+                        break;
                     }
-                    break;
-                }
-                case MARKER_EOI:
-                case MARKER_SOS: {
-                    dataOutputStream.writeByte(MARKER);
-                    dataOutputStream.writeByte(marker);
-                    // Copy all the remaining data
-                    streamCopy(dataInputStream, dataOutputStream);
-                    return;
-                }
-                default: {
-                    // Copy JPEG segment
-                    dataOutputStream.writeByte(MARKER);
-                    dataOutputStream.writeByte(marker);
-                    int length = dataInputStream.readUnsignedShort();
-                    dataOutputStream.writeUnsignedShort(length);
-                    length -= 2;
-                    if (length < 0) {
-                        throw new IOException("Invalid length");
-                    }
-                    int read;
-                    while (length > 0 && (read = dataInputStream.read(
-                            bytes, 0, Math.min(length, bytes.length))) >= 0) {
-                        dataOutputStream.write(bytes, 0, read);
-                        length -= read;
-                    }
-                    break;
                 }
             }
+        } finally {
+            closeQuietly(dataOutputStream);
+            closeQuietly(dataInputStream);
         }
     }
 
@@ -2434,6 +2439,7 @@ public class ExifInterface {
         dataOutputStream.setByteOrder(ByteOrder.BIG_ENDIAN);
         return totalSize;
     }
+
     /**
      * Determines the data format of EXIF entry value.
      *
@@ -2789,19 +2795,14 @@ public class ExifInterface {
 
     //------------- File api to be overwritten for android specific DocumentFile implementation
     protected InputStream createInputStream(IFile exifFile) throws FileNotFoundException {
-        if (OLD_API) return new FileInputStream(((FileFacade) exifFile).getFile());
         return exifFile.openInputStream();
     }
 
     protected OutputStream createOutputStream(IFile outFile) throws FileNotFoundException {
-        if (OLD_API) return new FileOutputStream(((FileFacade) outFile).getFile());
-        return mExifFile.openOutputStream();
+        return outFile.openOutputStream();
     }
 
     protected boolean renameTo(IFile originalInFile, IFile renamedInFile) {
-        if (OLD_API) {
-            return ((FileFacade) originalInFile).getFile().renameTo(((FileFacade) renamedInFile).getFile());
-        }
         return originalInFile.renameTo(renamedInFile.getName());
     }
 
@@ -2811,30 +2812,5 @@ public class ExifInterface {
 
     protected boolean deleteFile(IFile renamedInFile) {
         return renamedInFile.delete();
-    }
-
-    @Deprecated
-    protected InputStream createInputStream(File exifFile) throws FileNotFoundException {
-        return new FileInputStream(exifFile);
-    }
-
-    @Deprecated
-    protected OutputStream createOutputStream(File outFile) throws FileNotFoundException {
-        return new FileOutputStream(outFile);
-    }
-
-    @Deprecated
-    protected boolean renameTo(File originalInFile, File renamedInFile) {
-        return originalInFile.renameTo(renamedInFile);
-    }
-
-    @Deprecated
-    protected String getAbsolutePath(File inFile) {
-        return inFile.getAbsolutePath();
-    }
-
-    @Deprecated
-    protected boolean deleteFile(File file) {
-        return file.delete();
     }
 }

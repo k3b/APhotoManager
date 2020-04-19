@@ -34,7 +34,7 @@ replacement (aka man-in-the-middle-attack to
 add support for Android DocumentFile
  */
 public class FileFacade implements IFile {
-    private final java.io.File file;
+    private java.io.File file;
 
     public FileFacade(java.io.File file) {
         this.file = file;
@@ -64,14 +64,22 @@ public class FileFacade implements IFile {
     @Deprecated
     @Override
     public boolean renameTo(IFile newName) {
-        return file.renameTo(((FileFacade) newName).file);
+        return renameImpl(((FileFacade) newName).file);
     }
 
     @Override
     public boolean renameTo(String newName) {
         File newFile = new File(this.file.getParentFile(), newName);
-        final boolean result = this.file.renameTo(newFile);
+        final boolean result = renameImpl(newFile);
         return result;
+    }
+
+    private boolean renameImpl(File newFile) {
+        final boolean success = this.file.renameTo(newFile);
+        if (success) {
+            this.file = newFile;
+        }
+        return success;
     }
 
     @Override

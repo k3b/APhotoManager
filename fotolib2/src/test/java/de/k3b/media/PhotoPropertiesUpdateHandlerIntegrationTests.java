@@ -53,8 +53,7 @@ public class PhotoPropertiesUpdateHandlerIntegrationTests {
     }
 
     @Test
-    public void emptyWriteEmptyExifXmpCreate() throws IOException
-    {
+    public void emptyWriteEmptyExifXmpCreate() throws IOException {
         ExifInterfaceEx.fixDateOnSave = false;
 
         File out = new File(OUTDIR,"emptyWriteEmptyExifXmpCreate.jpg");
@@ -80,8 +79,7 @@ public class PhotoPropertiesUpdateHandlerIntegrationTests {
     }
 
     @Test
-    public void existingWriteEmptyExifXmp() throws IOException
-    {
+    public void existingWriteEmptyExifXmp() throws IOException {
         // workaround UserComment=null is not implemented
         ExifInterfaceEx.useUserComment = false;
         ExifInterfaceEx.fixDateOnSave = false;
@@ -111,13 +109,14 @@ public class PhotoPropertiesUpdateHandlerIntegrationTests {
     }
 
     @Test
-    public void existingWriteValueExifXmpCreate() throws IOException
-    {
+    public void existingWriteValueExifXmpCreate() throws IOException {
         File out = new File(OUTDIR,"existingWriteValueExifXmpCreate.jpg");
         TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_JPG_WITH_EXIF, out);
 
-        PhotoPropertiesUpdateHandler sut = PhotoPropertiesUpdateHandler.create(out.getAbsolutePath(), null, false, "JUnit"
-                , true, true, true); //exif, xmp, create
+        PhotoPropertiesUpdateHandler sut = PhotoPropertiesUpdateHandler.create(
+                out.getAbsolutePath(), null,
+                false, "JUnit",
+                true, true, true); //exif, xmp, create
         PhotoPropertiesDTO value = createTestValue();
         PhotoPropertiesUtil.copy(sut, value, true, true);
 
@@ -141,8 +140,7 @@ public class PhotoPropertiesUpdateHandlerIntegrationTests {
 
 
     @Test
-    public void emptyWriteValuesXmpCreate() throws IOException
-    {
+    public void emptyWriteValuesXmpCreate() throws IOException {
         File out = new File(OUTDIR,"emptyWriteValuesXmpCreate.jpg");
         TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_JPG_WITH_NO_EXIF, out);
 
@@ -162,8 +160,7 @@ public class PhotoPropertiesUpdateHandlerIntegrationTests {
     }
 
     @Test
-    public void emptyWriteValuesExifOnly() throws IOException
-    {
+    public void emptyWriteValuesExifOnly() throws IOException {
         File out = new File(OUTDIR,"emptyWriteValuesExifOnly.jpg");
         TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_JPG_WITH_NO_EXIF, out);
 
@@ -182,7 +179,9 @@ public class PhotoPropertiesUpdateHandlerIntegrationTests {
         // logger.info(sut.toString());
     }
 
-    private void assertEqual(File file, PhotoPropertiesDTO expectedExif, PhotoPropertiesDTO expectedXmp, PhotoPropertiesUpdateHandler oldSut) throws IOException {
+    private void assertEqual(
+            File file, PhotoPropertiesDTO expectedExif, PhotoPropertiesDTO expectedXmp,
+            PhotoPropertiesUpdateHandler oldSut) throws IOException {
         PhotoPropertiesUpdateHandler sut = PhotoPropertiesUpdateHandler.create(file.getAbsolutePath(), null, false, "JUnit-check"
                 , true, true, false); //exif, xmp, create
 

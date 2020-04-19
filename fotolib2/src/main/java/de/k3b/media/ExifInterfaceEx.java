@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.TimeZone;
 
 import de.k3b.LibGlobal;
-import de.k3b.io.FileFacade;
 import de.k3b.io.IFile;
 import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
@@ -109,15 +108,6 @@ public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
 
     protected ExifInterfaceEx() {super();xmpExtern=null; mDbg_context = "";}
 
-    /**
-     * @deprecated use {@link #saveAttributes(IFile, IFile, boolean)} instead
-     */
-    @Deprecated
-    @Override
-    public void saveAttributes(File inFile, File outFile, boolean deleteInFileOnFinish) throws IOException {
-        saveAttributes(fileFacade.convert(inFile), fileFacade.convert(outFile), deleteInFileOnFinish);
-    }
-
     @Override
     public void saveAttributes(IFile inFile, IFile outFile, boolean deleteInFileOnFinish) throws IOException {
         fixDateTakenIfNeccessary(inFile);
@@ -133,11 +123,6 @@ public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
             logger.debug(mDbg_context + " saveJpegAttributes: " + getPath());
         }
         super.saveJpegAttributes(inputStream, outputStream, thumbnail);
-    }
-
-    @Override
-    protected boolean deleteFile(File file) {
-        return deleteFile(new FileFacade(file));
     }
 
     @Override
