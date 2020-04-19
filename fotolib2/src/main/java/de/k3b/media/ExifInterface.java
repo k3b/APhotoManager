@@ -52,6 +52,10 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.k3b.io.Converter;
+import de.k3b.io.FileFacade;
+import de.k3b.io.IFile;
+
 /**
  * This is a class for reading and writing Exif tags in a JPEG file.
  * It is based on ExifInterface of android-6 version.
@@ -64,9 +68,17 @@ public class ExifInterface {
     // public to allow error filtering
     public static final String LOG_TAG = "ExifInterface";
 
+    private static final boolean OLD_API = false;
+
     private static final Logger logger = LoggerFactory.getLogger(LOG_TAG);
 
     private static final boolean DEBUG_INTERNAL = false;
+    protected static Converter<File, IFile> fileFacade = new Converter<File, IFile>() {
+        @Override
+        public IFile convert(File file) {
+            return new FileFacade(file);
+        }
+    };
 
     // public to allow global settings to enable/disable
     public static boolean DEBUG = false;
@@ -1098,8 +1110,7 @@ public class ExifInterface {
     }
 
     private boolean validJpgExifFormat = true;
-
-    protected File mExifFile = null;
+    protected IFile mExifFile = null;
 
     //!!! tagname => tagvalue(with assoziated tagdefinition)
     protected final HashMap<String, ExifAttribute>[] mAttributes = new HashMap[EXIF_TAGS.length];
@@ -1120,11 +1131,12 @@ public class ExifInterface {
     public ExifInterface(String filename) throws IOException {
         this(filename, null);
     }
+
     public ExifInterface(String filename, InputStream in) throws IOException {
         if (filename == null) {
             throw new IllegalArgumentException("filename cannot be null");
         }
-        mExifFile = (filename != null) ? new File(filename) : null;
+        mExifFile = (filename != null) ? fileFacade.convert(new File(filename)) : null;
         if (in == null) {
             InputStream inputStream = null;
             try {
@@ -1488,28 +1500,37 @@ public class ExifInterface {
         saveAttributes(mExifFile, mExifFile, true);
     }
 
+    /**
+     * @deprecated use {@link #saveAttributes(IFile, IFile, boolean)} instead
+     */
+    @Deprecated
     public void saveAttributes(File inFile, File outFile, boolean deleteInFileOnFinish) throws IOException {
+        saveAttributes(fileFacade.convert(inFile), fileFacade.convert(outFile), deleteInFileOnFinish);
+    }
+
+    public void saveAttributes(IFile inFile, IFile outFile, boolean deleteInFileOnFinish) throws IOException {
+        String debugContext = String.format("%s.saveAttributes(%s=>%s,deleteInFileOnFinish=%s)", this.getClass().getSimpleName(), inFile, outFile, deleteInFileOnFinish);
+        IFile currentOutFile = outFile;
         fixAttributes();
+
 
         // Keep the thumbnail in memory
         mThumbnailBytes = getThumbnail(inFile);
-        File renamedInFile = inFile;
+        IFile renamedInFile = inFile;
 
-        boolean overwriteOriginal = inFile.equals(outFile);
+        boolean overwriteOriginal = inFile.equals(currentOutFile);
 
+        String originalName = inFile.getName();
         if (overwriteOriginal) {
-            // Move the original file to temporary file.
-            renamedInFile = new File(getAbsolutePath(inFile) + ".tmp.jpg");
-            File originalInFile = inFile;
-            if (!renameTo(originalInFile, renamedInFile)) {
-                throw new IOException("Could'nt rename sourcefile from " + inFile +
-                        " to " + getAbsolutePath(renamedInFile));
-            }
+            String tempName = originalName + ".new.jpg";
+            logDebug(String.format("%s: overwrite original:\n\twriting to %s", debugContext, tempName));
+            currentOutFile = outFile.getParentFile().create(tempName, outFile.getMime());
         }
+
         InputStream in = null;
         OutputStream out = null;
+
         try {
-            // Save the new file.
             in = createInputStream(renamedInFile);
             out = createOutputStream(outFile);
 
@@ -1517,13 +1538,36 @@ public class ExifInterface {
         } finally {
             closeQuietly(in);
             closeQuietly(out);
-
-            if (deleteInFileOnFinish || overwriteOriginal) {
-                deleteFile(renamedInFile);
-            }
         }
+
+        // all exif writing is done successfully
+        if (overwriteOriginal) {
+            // cleanup
+            String savedOriginalName = originalName + ".old.jpg";
+            IFile previousFailedOverwriteOriginal = inFile.getParentFile().findExisting(savedOriginalName);
+            if (previousFailedOverwriteOriginal != null) {
+                logDebug(String.format("delete old %s", previousFailedOverwriteOriginal));
+                previousFailedOverwriteOriginal.delete();
+            }
+            renameOrThrow(inFile, savedOriginalName);
+            renameOrThrow(currentOutFile, originalName);
+        }
+
+        if (deleteInFileOnFinish || overwriteOriginal) {
+            deleteFile(inFile);
+        }
+
         // Discard the thumbnail in memory
         mThumbnailBytes = null;
+    }
+
+    private void renameOrThrow(IFile file, String newName) throws IOException {
+        logDebug(String.format("rename %s to %s", file, newName));
+
+        if (!file.renameTo(newName)) {
+            throw new IOException("Could'nt rename sourcefile from " + file +
+                    " to " + newName);
+        }
     }
 
     /** repairs wrong/missing attributes */
@@ -1582,7 +1626,21 @@ public class ExifInterface {
         return getThumbnail(mExifFile);
     }
 
+    /**
+     * @deprecated use {@link #saveAttributes(IFile, IFile, boolean)} instead
+     */
+    @Deprecated
     public byte[] getThumbnail(File inFile) {
+        if (!mHasThumbnail) {
+            return null;
+        }
+        if (mThumbnailBytes != null) {
+            return mThumbnailBytes;
+        }
+        return getThumbnail(fileFacade.convert(inFile));
+    }
+
+    public byte[] getThumbnail(IFile inFile) {
         if (!mHasThumbnail) {
             return null;
         }
@@ -2730,23 +2788,53 @@ public class ExifInterface {
     }
 
     //------------- File api to be overwritten for android specific DocumentFile implementation
+    protected InputStream createInputStream(IFile exifFile) throws FileNotFoundException {
+        if (OLD_API) return new FileInputStream(((FileFacade) exifFile).getFile());
+        return exifFile.openInputStream();
+    }
+
+    protected OutputStream createOutputStream(IFile outFile) throws FileNotFoundException {
+        if (OLD_API) return new FileOutputStream(((FileFacade) outFile).getFile());
+        return mExifFile.openOutputStream();
+    }
+
+    protected boolean renameTo(IFile originalInFile, IFile renamedInFile) {
+        if (OLD_API) {
+            return ((FileFacade) originalInFile).getFile().renameTo(((FileFacade) renamedInFile).getFile());
+        }
+        return originalInFile.renameTo(renamedInFile.getName());
+    }
+
+    protected String getAbsolutePath(IFile inFile) {
+        return inFile.getAbsolutePath();
+    }
+
+    protected boolean deleteFile(IFile renamedInFile) {
+        return renamedInFile.delete();
+    }
+
+    @Deprecated
     protected InputStream createInputStream(File exifFile) throws FileNotFoundException {
         return new FileInputStream(exifFile);
     }
 
+    @Deprecated
     protected OutputStream createOutputStream(File outFile) throws FileNotFoundException {
         return new FileOutputStream(outFile);
     }
 
+    @Deprecated
     protected boolean renameTo(File originalInFile, File renamedInFile) {
         return originalInFile.renameTo(renamedInFile);
     }
 
+    @Deprecated
     protected String getAbsolutePath(File inFile) {
         return inFile.getAbsolutePath();
     }
 
-    protected boolean deleteFile(File renamedInFile) {
-        return renamedInFile.delete();
+    @Deprecated
+    protected boolean deleteFile(File file) {
+        return file.delete();
     }
 }

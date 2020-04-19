@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.TimeZone;
 
 import de.k3b.LibGlobal;
+import de.k3b.io.FileFacade;
+import de.k3b.io.IFile;
 import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.media.MediaFormatter.FieldID;
@@ -107,8 +109,17 @@ public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
 
     protected ExifInterfaceEx() {super();xmpExtern=null; mDbg_context = "";}
 
+    /**
+     * @deprecated use {@link #saveAttributes(IFile, IFile, boolean)} instead
+     */
+    @Deprecated
     @Override
     public void saveAttributes(File inFile, File outFile, boolean deleteInFileOnFinish) throws IOException {
+        saveAttributes(fileFacade.convert(inFile), fileFacade.convert(outFile), deleteInFileOnFinish);
+    }
+
+    @Override
+    public void saveAttributes(IFile inFile, IFile outFile, boolean deleteInFileOnFinish) throws IOException {
         fixDateTakenIfNeccessary(inFile);
         super.saveAttributes(inFile, outFile, deleteInFileOnFinish);
         setFilelastModified(outFile);
@@ -126,6 +137,11 @@ public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
 
     @Override
     protected boolean deleteFile(File file) {
+        return deleteFile(new FileFacade(file));
+    }
+
+    @Override
+    protected boolean deleteFile(IFile file) {
         boolean result = super.deleteFile(file);
         if (result && LibGlobal.debugEnabledJpg || LibGlobal.debugEnabledJpgMetaIo) {
             logger.debug(mDbg_context + " deleteFile: " + file);
@@ -133,7 +149,15 @@ public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
         return result;
     }
 
-    private void fixDateTakenIfNeccessary(File inFile) {
+    /**
+     * @deprecated use {@link #fixDateTakenIfNeccessary(IFile)} instead
+     */
+    @Deprecated
+    protected void fixDateTakenIfNeccessary(File inFile) {
+        fixDateTakenIfNeccessary(fileFacade.convert(inFile));
+    }
+
+    protected void fixDateTakenIfNeccessary(IFile inFile) {
         // donot fix in unittests
         if (ExifInterfaceEx.fixDateOnSave && (null == getDateTimeTaken()) && (inFile != null)) {
             long lastModified = inFile.lastModified();
@@ -165,7 +189,7 @@ public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
 
     @Override
     public IPhotoProperties setPath(String filePath) {
-        mExifFile = (filePath != null) ? new File(filePath) : null;
+        mExifFile = (filePath != null) ? fileFacade.convert(new File(filePath)) : null;
         if (xmpExtern != null) xmpExtern.setPath(filePath);
         return this;
     }
@@ -441,8 +465,16 @@ public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
         }
     }
 
-    /** when xmp sidecar file was last modified or 0 */
+    /**
+     * @deprecated use {@link #setFilelastModified(IFile)} instead
+     */
+    @Deprecated
     public void setFilelastModified(File file) {
+        setFilelastModified(fileFacade.convert(file));
+    }
+
+    /** when xmp sidecar file was last modified or 0 */
+    public void setFilelastModified(IFile file) {
         if (file != null) this.filelastModified = file.lastModified();
     }
 

@@ -80,16 +80,16 @@ public class PhotoPropertiesBulkUpdateService {
                 : null;
         File outFile = (outFilePath != null) ? new File(outFilePath) : inFilePath;
         if ((inFilePath != null) && outFile.getParentFile().canWrite()) {
-            PhotoPropertiesUpdateHandler exif = null;
+            PhotoPropertiesUpdateHandler exifHandler = null;
             try {
                 long lastModified = inFilePath.lastModified();
-                exif = PhotoPropertiesUpdateHandler.create (inFilePath.getAbsolutePath(), outFilePath, false, "PhotoPropertiesUpdateHandler:");
-                debugExif(sb, "old", exif, inFilePath);
-                List<String> oldTags = exif.getTags();
+                exifHandler = PhotoPropertiesUpdateHandler.create(inFilePath.getAbsolutePath(), outFilePath, false, "PhotoPropertiesUpdateHandler:");
+                debugExif(sb, "old", exifHandler, inFilePath);
+                List<String> oldTags = exifHandler.getTags();
 
                 boolean sameFile = (outFile.equals(inFilePath));
 
-                File newOutFile = handleVisibility(metaDiffCopy.getVisibility(), outFile, exif);
+                File newOutFile = handleVisibility(metaDiffCopy.getVisibility(), outFile, exifHandler);
                 if (newOutFile != null) {
                     outFile = newOutFile;
                     outFilePath = outFile.getAbsolutePath();
@@ -99,12 +99,12 @@ public class PhotoPropertiesBulkUpdateService {
                     }
                 }
 
-                List<PhotoPropertiesFormatter.FieldID> changed = metaDiffCopy.applyChanges(exif);
+                List<PhotoPropertiesFormatter.FieldID> changed = metaDiffCopy.applyChanges(exifHandler);
 
                 if (!sameFile || (changed != null)) {
-                    debugExif(sb, "assign ", exif, inFilePath);
+                    debugExif(sb, "assign ", exifHandler, inFilePath);
 
-                    exif.save("PhotoPropertiesUpdateHandler save");
+                    exifHandler.save("PhotoPropertiesUpdateHandler save");
 
                     if (LibGlobal.preserveJpgFileModificationDate) {
                         // preseve file modification date
@@ -127,7 +127,7 @@ public class PhotoPropertiesBulkUpdateService {
                         }
                         transactionLogger.set(id, outFilePath);
                         if ((changed != null) && (changed.size() > 0)) {
-                            transactionLogger.addChanges(exif, EnumSet.copyOf(changed), oldTags);
+                            transactionLogger.addChanges(exifHandler, EnumSet.copyOf(changed), oldTags);
                         }
                     }
 
@@ -143,17 +143,17 @@ public class PhotoPropertiesBulkUpdateService {
                     }
                 } else {
                     if (sb != null) sb.append("no changes ");
-                    exif = null;
+                    exifHandler = null;
                 }
 
                 if (sb != null) {
                     PhotoPropertiesBulkUpdateService.logger.info(sb.toString());
                 }
-                return exif;
+                return exifHandler;
             } catch (IOException e) {
                 if (sb == null) {
                     sb = createDebugStringBuilder(inFilePath);
-                    debugExif(sb, "err content", exif, inFilePath);
+                    debugExif(sb, "err content", exifHandler, inFilePath);
                 }
 
                 sb.append("error='").append(e.getMessage()).append("' ");
