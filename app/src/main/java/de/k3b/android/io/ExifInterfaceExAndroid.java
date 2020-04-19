@@ -19,16 +19,10 @@
 
 package de.k3b.android.io;
 
-import android.support.v4.provider.DocumentFile;
-
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 import de.k3b.android.widget.FilePermissionActivity;
-import de.k3b.io.IFile;
 import de.k3b.media.ExifInterfaceEx;
 import de.k3b.media.IPhotoProperties;
 
@@ -60,70 +54,4 @@ public class ExifInterfaceExAndroid extends ExifInterfaceEx {
         documentFileTranslator = activity.getDocumentFileTranslator();
     }
 
-    /**
-     * @deprecated use {@link #saveAttributes(IFile, IFile, boolean)} instead
-     */
-    @Deprecated
-    @Override
-    public void saveAttributes(File inFile, File outFile, boolean deleteInFileOnFinish) throws IOException {
-        super.saveAttributes(inFile, outFile, deleteInFileOnFinish);
-    }
-
-    public void saveAttributes(IFile inFile, IFile outFile, boolean deleteInFileOnFinish) throws IOException {
-        throw new RuntimeException("not implemented yet");
-        // super.saveAttributes(inFile, outFile, deleteInFileOnFinish);
-    }
-
-    /**
-     * @deprecated use {@link #fixDateTakenIfNeccessary(IFile)} instead
-     */
-    @Deprecated
-    @Override
-    protected void fixDateTakenIfNeccessary(File inFile) {
-        super.fixDateTakenIfNeccessary(inFile);
-    }
-
-    protected void fixDateTakenIfNeccessary(IFile inFile) {
-        throw new RuntimeException("not implemented yet");
-    }
-
-    /**
-     * @deprecated use {@link #setFilelastModified(IFile)} instead
-     */
-    @Deprecated
-    @Override
-    public void setFilelastModified(File file) {
-        super.setFilelastModified(file);
-
-    }
-
-    public void setFilelastModified(IFile file) {
-        throw new RuntimeException("not implemented yet");
-    }
-
-    //------------- File api to be overwritten for android specific DocumentFile implementation
-    protected InputStream createInputStream(File exifFile) throws FileNotFoundException {
-        return documentFileTranslator.openInputStream(exifFile);
-    }
-
-    protected OutputStream createOutputStream(File outFile) throws FileNotFoundException {
-        return documentFileTranslator.createOutputStream(MIMNE, outFile);
-    }
-
-    protected boolean renameTo(File originalInFile, File renamedInFile) {
-        return getDocumentFileOrDir(originalInFile, false).renameTo(renamedInFile.getName());
-    }
-
-    protected String getAbsolutePath(File inFile) {
-        return inFile.getAbsolutePath();
-    }
-
-    protected boolean deleteFile(File file) {
-        return getDocumentFileOrDir(file, false).delete();
-    }
-
-    // -----
-    private DocumentFile getDocumentFileOrDir(File fileOrDir, boolean isDir) {
-        return documentFileTranslator.getDocumentFileOrDir(fileOrDir, isDir);
-    }
 }

@@ -18,6 +18,7 @@
  */
 package de.k3b.android.io;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -180,7 +181,15 @@ public class DocumentFileTranslator {
         return result;
     }
 
-    public DocumentFile getDocumentFileOrDir(File fileOrDir, boolean isDir) {
+    /**
+     * gets existing DocumentFile that correspondws to fileOrDir
+     * or null if not exists or no write permissions
+     *
+     * @param fileOrDir where DocumentFile is searched for
+     * @param isDir     if null: return null if isDir is matchning
+     * @return DocumentFile or null
+     */
+    public DocumentFile getDocumentFileOrDir(File fileOrDir, Boolean isDir) {
         DocumentFile result = null;
         final String context = mDebugPrefix + "getDocumentFile('" + fileOrDir.getAbsolutePath() +
                 "') ";
@@ -193,7 +202,9 @@ public class DocumentFileTranslator {
             Log.w(TAG, context, ex);
 
         }
-        if ((result != null) && (result.isDirectory() != isDir)) {
+
+
+        if ((result != null) && (isDir != null) && (result.isDirectory() != isDir)) {
             Log.i(TAG, context + "wrong type isDirectory=" + result.isDirectory());
             return null;
         }
@@ -204,19 +215,34 @@ public class DocumentFileTranslator {
         if (in != null) {
             DocumentFile doc = getDocumentFileOrDir(in, false);
             if (doc != null) {
-                return context.getContentResolver().openInputStream(doc.getUri());
+                return getContentResolver().openInputStream(doc.getUri());
             }
         }
         return null;
     }
 
-    protected OutputStream createOutputStream(String mime, File outFile) throws FileNotFoundException {
-        DocumentFile dir = (outFile != null) ? getDocumentFileOrDir(outFile.getParentFile(), true) : null;
-        DocumentFile doc = (dir != null) ? dir.createFile(mime, outFile.getName()) : null;
+    public InputStream openInputStream(DocumentFile doc) throws FileNotFoundException {
         if (doc != null) {
-            return context.getContentResolver().openOutputStream(doc.getUri());
+            return getContentResolver().openInputStream(doc.getUri());
         }
         return null;
+    }
+
+    public OutputStream createOutputStream(String mime, File outFile) throws FileNotFoundException {
+        DocumentFile dir = (outFile != null) ? getDocumentFileOrDir(outFile.getParentFile(), true) : null;
+        DocumentFile doc = (dir != null) ? dir.createFile(mime, outFile.getName()) : null;
+        return createOutputStream(doc);
+    }
+
+    public OutputStream createOutputStream(DocumentFile doc) throws FileNotFoundException {
+        if (doc != null) {
+            return getContentResolver().openOutputStream(doc.getUri());
+        }
+        return null;
+    }
+
+    public ContentResolver getContentResolver() {
+        return context.getContentResolver();
     }
 
     @Override

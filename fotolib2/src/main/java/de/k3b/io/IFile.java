@@ -30,6 +30,8 @@ import java.io.OutputStream;
  * and android specific de.k3b.android.io....
  */
 public interface IFile {
+    public static final String TAG = "k3b.File";
+
     @Deprecated
     boolean renameTo(IFile newName);
 
@@ -71,7 +73,7 @@ public interface IFile {
 
     IFile[] listFiles();
 
-    void copy(IFile targetFullPath, boolean deleteSourceWhenSuccess) throws IOException;
+    boolean copy(IFile targetFullPath, boolean deleteSourceWhenSuccess) throws IOException;
 
     OutputStream openOutputStream() throws FileNotFoundException;
 

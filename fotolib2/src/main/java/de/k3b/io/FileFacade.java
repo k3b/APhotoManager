@@ -29,30 +29,31 @@ import java.io.OutputStream;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
-/* de.k3b.io.File have the same methods as java.io.File so it may become a
-replacement (aka man-in-the-middle-attack to
-add support for Android DocumentFile
+/**
+ * {@link FileFacade} has the same methods as {@link File} so it may become a
+ * replacement (aka man-in-the-middle-attack to
+ * add support for Android DocumentFile
  */
 public class FileFacade implements IFile {
-    private java.io.File file;
+    private File file;
 
-    public FileFacade(java.io.File file) {
+    public FileFacade(File file) {
         this.file = file;
     }
 
     public FileFacade(String absolutPath) {
-        this(new java.io.File(absolutPath));
+        this(new File(absolutPath));
     }
 
     public FileFacade(FileFacade parent, String newFolderName) {
-        this(new java.io.File(parent.file, newFolderName));
+        this(new File(parent.file, newFolderName));
     }
 
     public FileFacade(String parent, String newFolderName) {
-        this(new java.io.File(parent, newFolderName));
+        this(new File(parent, newFolderName));
     }
 
-    public static FileFacade[] get(java.io.File[] files) {
+    public static FileFacade[] get(File[] files) {
         FileFacade f[] = new FileFacade[files.length];
         for (int i = 0; i < files.length; i++) {
             f[i] = new FileFacade(files[i]);
@@ -177,11 +178,12 @@ public class FileFacade implements IFile {
     }
 
     @Override
-    public void copy(IFile targetFullPath, boolean deleteSourceWhenSuccess) throws IOException {
-        copyImpl((FileFacade) targetFullPath, deleteSourceWhenSuccess);
+    public boolean copy(IFile targetFullPath, boolean deleteSourceWhenSuccess) throws IOException {
+        return copyImpl((FileFacade) targetFullPath, deleteSourceWhenSuccess);
     }
 
-    private void copyImpl(FileFacade targetFullPath, boolean deleteSourceWhenSuccess) throws IOException {
+    private boolean copyImpl(FileFacade targetFullPath, boolean deleteSourceWhenSuccess) throws IOException {
+        boolean success = true;
         FileChannel in = null;
         FileChannel out = null;
         try {
@@ -189,14 +191,15 @@ public class FileFacade implements IFile {
             out = new FileOutputStream((targetFullPath).file).getChannel();
             long size = in.size();
             MappedByteBuffer buf = in.map(FileChannel.MapMode.READ_ONLY, 0, size);
-            out.write(buf);
+            success = size == out.write(buf);
         } finally {
             FileUtils.close(in, "_osFileCopy-close");
             FileUtils.close(out, "_osFileCopy-close");
         }
-        if (deleteSourceWhenSuccess) {
+        if (success && deleteSourceWhenSuccess) {
             this.delete();
         }
+        return success;
     }
 
     @Override
@@ -233,7 +236,11 @@ public class FileFacade implements IFile {
         return String.format("%s: %s", this.getClass().getSimpleName(), file.getAbsoluteFile());
     }
 
-    public File getFile() {
+    protected File getFile() {
         return file;
+    }
+
+    protected void setFile(File file) {
+        this.file = file;
     }
 }
