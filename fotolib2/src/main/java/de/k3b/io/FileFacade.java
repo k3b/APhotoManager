@@ -88,10 +88,12 @@ public class FileFacade implements IFile {
     }
 
     public static IFile convert(File file) {
+        if (file == null) return null;
         return fileFacade.convert(file);
     }
 
     public static IFile convert(String filePath) {
+        if (filePath == null) return null;
         return convert(new File(filePath));
     }
 

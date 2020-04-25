@@ -60,6 +60,8 @@ import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.HistoryEditText;
 import de.k3b.io.DateUtil;
+import de.k3b.io.FileFacade;
+import de.k3b.io.IFile;
 import de.k3b.io.ListUtils;
 import de.k3b.io.PhotoAutoprocessingDto;
 import de.k3b.io.RuleFileNameProcessor;
@@ -88,7 +90,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
     /**
      * current modified value of the first selected file
      */
-    private File mCurrentOutDir = null;
+    private IFile mCurrentOutDir = null;
     private PhotoAutoprocessingDto mCurrentAutoprocessingData;
     private SelectedFiles mSelectedFiles;
 
@@ -99,7 +101,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
     private EditText mEditName;
     private Spinner mSpinnerNumberPattern;
     private TextView mExifChanges;
-    private File exampleSrcfile;
+    private IFile exampleSrcfile;
     private Date exampleDate;
 
     private PhotoPropertiesFormatter.ILabelGenerator mLabelGenerator;
@@ -165,7 +167,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
         mSelectedFiles = getSelectedFiles("onCreate ", intent, false);
 
         // Edit dir or edit ".apm"
-        mCurrentOutDir = IntentUtil.getFile(intent.getData());
+        mCurrentOutDir = FileFacade.convert(IntentUtil.getFile(intent.getData()));
         if (mCurrentOutDir != null) {
             if (mCurrentOutDir.isFile()) mCurrentOutDir = mCurrentOutDir.getParentFile();
         }
@@ -188,7 +190,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
         }
 
         if ((mCurrentOutDir == null) && (mSelectedFiles != null) && (mSelectedFiles.size() > 0)) {
-            mCurrentOutDir = mSelectedFiles.getFile(0).getParentFile().getAbsoluteFile();
+            mCurrentOutDir = mSelectedFiles.getIFile(0).getParentFile();
         }
 
         if (Global.debugEnabled) {
@@ -214,7 +216,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
             PhotoPropertiesAsString exampleExif = PhotoPropertiesUtil.inferAutoprocessingExifDefaults(new PhotoPropertiesAsString(), mSelectedFiles.getFiles());
             mCurrentAutoprocessingData.setMediaDefaults(exampleExif);
         }
-        this.exampleSrcfile = RuleFileNameProcessor.getFile(mSelectedFiles.getFile(0));
+        this.exampleSrcfile = RuleFileNameProcessor.getFile(mSelectedFiles.getIFile(0));
 
         final Date[] datesPhotoTaken = mSelectedFiles.getDatesPhotoTaken();
 
@@ -310,7 +312,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
     private String createExampleResultFileName(String dateFormat, String baseName, String numberFormat) {
         mProcessor.set(dateFormat, baseName, numberFormat);
 
-        File file = mProcessor.getNextFile(null, exampleDate, StringUtils.isNullOrEmpty(numberFormat) ? 0 : 1);
+        IFile file = mProcessor.getNextFile(null, exampleDate, StringUtils.isNullOrEmpty(numberFormat) ? 0 : 1);
         if(file != null) return file.getName();
         return null;
     }
@@ -456,7 +458,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
         return result;
     }
 
-    private Date getExampleDate(File exampleSrcfile) {
+    private Date getExampleDate(IFile exampleSrcfile) {
         Date exampleValue = null;
         if ((mCurrentAutoprocessingData != null) && (mCurrentAutoprocessingData.getMediaDefaults() != null)) {
             exampleValue = mCurrentAutoprocessingData.getMediaDefaults().getDateTimeTaken();
@@ -619,38 +621,40 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
 
         if (result == null) {
             String path = IntentUtil.getFilePath(this, IntentUtil.getUri(intent));
-            File rootDirFile = new File(path);
-            String[] fileNames = rootDirFile.list(PhotoPropertiesUtil.JPG_FILENAME_FILTER);
+            IFile rootDirFile = FileFacade.convert(path);
 
-            int itemCount = (fileNames != null) ? fileNames.length : 0;
-
-            // convert to absolute paths
-            String parentDirString = rootDirFile.getAbsolutePath();
-            for (int i = 0; i < itemCount; i++) {
-                fileNames[i] = parentDirString + "/" + fileNames[i];
-            }
-
-            Long[] ids = null;
-
-            if (itemCount > 0) {
-                if ((mustLoadIDs) && (ids == null)) {
-                    ids = new Long[itemCount];
-                    Map<String, Long> idMap = FotoSql.execGetPathIdMap(fileNames);
-
-                    for (int i = 0; i < itemCount; i++) {
-                        ids[i] = idMap.get(fileNames[i]);
+            IFile[] files = rootDirFile.listFiles();
+            if (files != null) {
+                String fileNames[] = new String[files.length];
+                int itemCount = 0;
+                for (int i = 0; i < files.length; i++) {
+                    if (PhotoPropertiesUtil.isImage(files[i].getName(), PhotoPropertiesUtil.IMG_TYPE_ALL)) {
+                        fileNames[itemCount++] = files[i].getAbsolutePath();
                     }
                 }
 
+                Long[] ids = null;
+
+                if (itemCount > 0) {
+                    if ((mustLoadIDs) && (ids == null)) {
+                        ids = new Long[itemCount];
+                        Map<String, Long> idMap = FotoSql.execGetPathIdMap(fileNames);
+
+                        for (int i = 0; i < itemCount; i++) {
+                            ids[i] = idMap.get(fileNames[i]);
+                        }
+                    }
+
+                }
+                result = new SelectedFiles(fileNames,
+                        ids, null);
             }
-            result = new SelectedFiles(fileNames,
-                    ids, null);
-        }
 
-        if (Global.debugEnabled && (intent != null)) {
-            Log.d(Global.LOG_CONTEXT, mDebugPrefix + dbgContext + intent.toUri(Intent.URI_INTENT_SCHEME));
-        }
+            if (Global.debugEnabled && (intent != null)) {
+                Log.d(Global.LOG_CONTEXT, mDebugPrefix + dbgContext + intent.toUri(Intent.URI_INTENT_SCHEME));
+            }
 
+        }
         return result;
     }
 
@@ -661,8 +665,8 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
         getMenuInflater().inflate(R.menu.menu_copy_paste, menu);
 
         MenuItem item = menu.findItem(android.R.id.paste);
-        final File clipboardDir = ClipboardUtil.getClipboardDir(this);
-        final File apmFile = (clipboardDir == null) ? null : PhotoAutoprocessingDto.getApmFile(clipboardDir);
+        final IFile clipboardDir = FileFacade.convert(ClipboardUtil.getClipboardDir(this));
+        final IFile apmFile = (clipboardDir == null) ? null : PhotoAutoprocessingDto.getApmFile(clipboardDir);
         if ((item != null) && (apmFile != null) && apmFile.exists()) {
             item.setVisible(true);
         }
@@ -702,7 +706,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
                 return true;
 
             case android.R.id.copy:
-                return ClipboardUtil.addDirToClipboard(this, mCurrentOutDir);
+                return ClipboardUtil.addDirToClipboard(this, mCurrentOutDir.getFile());
             case android.R.id.paste:
                 return onPaste();
             default:
@@ -720,7 +724,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
                     toGui();
                     return true;
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
