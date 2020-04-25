@@ -1090,7 +1090,7 @@ showActivity(String debugContext, Activity context,
     private void onRenameMultible(PhotoAutoprocessingDto autoprocessingData, SelectedFiles selectedFiles) {
         AndroidFileCommands cmd = AndroidFileCommands.createFileCommand(this.getActivity(), true);
 
-        exifUpdate = new UpdateTask(R.string.exif_menu_title, this.getActivity(), cmd, true, null, autoprocessingData);
+        exifUpdate = new UpdateTask(R.string.exif_menu_title, this.getActivity(), cmd, true, autoprocessingData);
         exifUpdate.execute(selectedFiles);
 
     }

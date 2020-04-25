@@ -22,7 +22,6 @@ package de.k3b.media;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
@@ -126,7 +125,7 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
             // xmp should have the same data as exif/iptc
             PhotoPropertiesUtil.copyNonEmpty(xmp, jpg);
             if ((absoluteJpgInPath != null) && (xmp.getDateTimeTaken() == null)) {
-                IFile in = FileFacade.convert(new File(absoluteJpgInPath));
+                IFile in = FileFacade.convert(absoluteJpgInPath);
                 if (in.exists() && in.isFile()) {
                     long lastModified = in.lastModified();
                     if (lastModified != 0) {
@@ -268,7 +267,7 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
 
         if (exif != null) {
             if (!isSameFile) {
-                exif.saveAttributes(FileFacade.convert(new File(inJpgFullPath)), FileFacade.convert(new File(outJpgFullPath)),
+                exif.saveAttributes(FileFacade.convert(inJpgFullPath), FileFacade.convert(outJpgFullPath),
                         this.deleteOriginalAfterFinish);
             } else {
                 exif.saveAttributes();

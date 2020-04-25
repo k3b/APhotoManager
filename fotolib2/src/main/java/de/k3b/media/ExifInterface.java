@@ -1125,7 +1125,7 @@ public class ExifInterface {
         if (filename == null) {
             throw new IllegalArgumentException("filename cannot be null");
         }
-        mExifFile = (filename != null) ? FileFacade.convert(new File(filename)) : null;
+        mExifFile = (filename != null) ? FileFacade.convert(filename) : null;
         if (in == null) {
             InputStream inputStream = null;
             inputStream = createInputStream(mExifFile);

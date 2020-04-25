@@ -38,9 +38,7 @@ import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.io.DocumentFileTranslator;
-import de.k3b.io.FileFacade;
 import de.k3b.io.FileNameUtil;
-import de.k3b.io.IFile;
 
 /**
  * Manage permission
@@ -134,10 +132,6 @@ public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialog
         parent.startActivityForResult(intent, REQUEST_ROOT_DIR);
     }
 
-    @Deprecated
-    public File getMissingRootDirFileOrNull(String dbgContext, File... dirs) {
-        return getMissingRootDirFileOrNull(dbgContext, FileFacade.get(dirs)).getFile();
-    }
     /**
      *
      * @param dbgContext
@@ -145,12 +139,12 @@ public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialog
      * @return null if all permissions are granted or
      * the root file that has not permissions yet.
      */
-    public IFile getMissingRootDirFileOrNull(String dbgContext, IFile... dirs) {
+    public File getMissingRootDirFileOrNull(String dbgContext, File... dirs) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             for (int i = dirs.length - 1; i >= 0; i--) {
-                final IFile dir = dirs[i];
+                final File dir = dirs[i];
                 if (!getDocumentFileTranslator().isKnownRoot(dir)) {
-                    final IFile anddroidRootDir = FileNameUtil.getAnddroidRootDir(dir);
+                    final File anddroidRootDir = FileNameUtil.getAnddroidRootDir(dir);
                     if (DocumentFileTranslator.debugDocFile) {
                         Log.i(TAG, dbgContext + ":" + this.documentFileTranslator
                                 + ":getMissingRootDirFileOrNull(" + dir

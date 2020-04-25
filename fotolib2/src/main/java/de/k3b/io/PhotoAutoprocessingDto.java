@@ -22,7 +22,6 @@ package de.k3b.io;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -103,7 +102,7 @@ public class PhotoAutoprocessingDto implements Serializable {
         if (content instanceof Properties) {
             Properties properties = (Properties) content;
             String outDir = properties.getProperty(KEY_OUT_DIR);
-            photoAutoprocessingDto = new PhotoAutoprocessingDto((outDir != null) ? FileFacade.convert(new File(outDir)) : null, properties);
+            photoAutoprocessingDto = new PhotoAutoprocessingDto((outDir != null) ? FileFacade.convert(outDir) : null, properties);
         }
         if (LibGlobal.debugEnabled) {
             logger.debug(PhotoAutoprocessingDto.class.getSimpleName() + ": load De-Serialize:" + photoAutoprocessingDto);

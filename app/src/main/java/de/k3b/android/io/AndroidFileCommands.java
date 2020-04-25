@@ -56,8 +56,10 @@ import de.k3b.android.widget.FilePermissionActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileCommands;
+import de.k3b.io.FileFacade;
 import de.k3b.io.FileUtils;
 import de.k3b.io.IDirectory;
+import de.k3b.io.IFile;
 import de.k3b.io.IProgessListener;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.media.MediaFormatter;
@@ -211,8 +213,8 @@ public class AndroidFileCommands extends FileCommands {
         return null;
     }
 
-    public boolean rename(SelectedFiles selectedFiles, File dest, IProgessListener progessListener) {
-        int result = moveOrCopyFiles(true, "rename", null, selectedFiles, new File[]{dest}, progessListener);
+    public boolean rename(SelectedFiles selectedFiles, IFile dest, IProgessListener progessListener) {
+        int result = moveOrCopyFiles(true, "rename", null, selectedFiles, new IFile[]{dest}, progessListener);
         return (result != 0);
     }
 
@@ -251,7 +253,7 @@ public class AndroidFileCommands extends FileCommands {
     public void onMoveOrCopyDirectoryPick(boolean move, SelectedFiles selectedFiles, IDirectory destFolder) {
         if (destFolder != null) {
             String copyToPath = destFolder.getAbsolute();
-            File destDirFolder = new File(copyToPath);
+            IFile destDirFolder = FileFacade.convert(copyToPath);
 
             setLastCopyToPath(copyToPath);
 

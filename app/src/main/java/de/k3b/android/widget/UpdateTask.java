@@ -21,12 +21,11 @@ package de.k3b.android.widget;
 import android.app.Activity;
 import android.util.Log;
 
-import java.io.File;
-
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.IMediaRepositoryApi;
 import de.k3b.android.io.AndroidFileCommands;
+import de.k3b.io.IFile;
 import de.k3b.io.IProgessListener;
 import de.k3b.io.PhotoAutoprocessingDto;
 import de.k3b.io.collections.SelectedFiles;
@@ -41,7 +40,7 @@ public class UpdateTask extends AsyncTaskWithProgressDialog<SelectedFiles> imple
     private final AndroidFileCommands cmd;
 
     private boolean move;
-    private File destDirFolder;
+    private IFile destDirFolder;
     private PhotoAutoprocessingDto autoProccessData;
 
     public UpdateTask(int resIdDlgTitle, Activity ctx, AndroidFileCommands cmd,
@@ -50,14 +49,14 @@ public class UpdateTask extends AsyncTaskWithProgressDialog<SelectedFiles> imple
     }
 
     public UpdateTask(int resIdDlgTitle, Activity ctx, AndroidFileCommands cmd,
-                      boolean move, File destDirFolder,
+                      boolean move,
                       PhotoAutoprocessingDto autoProccessData) {
-        this(resIdDlgTitle, ctx, cmd, null, move, destDirFolder, autoProccessData);
+        this(resIdDlgTitle, ctx, cmd, null, move, null, autoProccessData);
     }
 
     private UpdateTask(int resIdDlgTitle, Activity ctx, AndroidFileCommands cmd,
                        PhotoPropertiesDiffCopy exifChanges,
-                       boolean move, File destDirFolder,
+                       boolean move, IFile destDirFolder,
                        PhotoAutoprocessingDto autoProccessData) {
         super(ctx, resIdDlgTitle);
         this.exifChanges = exifChanges;

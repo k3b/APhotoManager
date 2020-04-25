@@ -22,7 +22,6 @@ package de.k3b.io;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -46,7 +45,7 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
     private String mName;
     private String mNumberFormat;
     private final DecimalFormat mNumberFormatter = new DecimalFormat();
-    private static final IFile sSomeExampleSourceFile = FileFacade.convert(new File("/a/Xxxxxxxx.jpg"));
+    private static final IFile sSomeExampleSourceFile = FileFacade.convert("/a/Xxxxxxxx.jpg");
 
     // optimisationn as long as lastDateFormatted does not changed nextFileInstanceNumber is recycled
     private String mLastDateFormatted = null;

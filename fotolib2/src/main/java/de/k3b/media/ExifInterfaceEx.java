@@ -175,7 +175,7 @@ public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
 
     @Override
     public IPhotoProperties setPath(String filePath) {
-        mExifFile = (filePath != null) ? FileFacade.convert(new File(filePath)) : null;
+        mExifFile = (filePath != null) ? FileFacade.convert(filePath) : null;
         if (xmpExtern != null) xmpExtern.setPath(filePath);
         return this;
     }

@@ -91,6 +91,10 @@ public class FileFacade implements IFile {
         return fileFacade.convert(file);
     }
 
+    public static IFile convert(String filePath) {
+        return convert(new File(filePath));
+    }
+
     public static void setFileFacade(Converter<File, IFile> fileFacade) {
         FileFacade.fileFacade = fileFacade;
     }

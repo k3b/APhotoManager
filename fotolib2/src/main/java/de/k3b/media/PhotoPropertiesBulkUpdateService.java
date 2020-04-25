@@ -94,7 +94,7 @@ public class PhotoPropertiesBulkUpdateService {
         StringBuilder sb = (LibGlobal.debugEnabled)
                 ? createDebugStringBuilder(inFilePath)
                 : null;
-        IFile outFile = (outFilePath != null) ? FileFacade.convert(new File(outFilePath)) : inFilePath;
+        IFile outFile = (outFilePath != null) ? FileFacade.convert(outFilePath) : inFilePath;
         if ((inFilePath != null) && outFile.getParentFile().canWrite()) {
             PhotoPropertiesUpdateHandler exifHandler = null;
             try {
@@ -218,7 +218,7 @@ public class PhotoPropertiesBulkUpdateService {
                     transactionLogger.addChangesCopyMove(true, newAbsoluteOutPath, "handleVisibility");
                 }
                 exif.setAbsoluteJpgOutPath(newAbsoluteOutPath);
-                return FileFacade.convert(new File(newAbsoluteOutPath));
+                return FileFacade.convert(newAbsoluteOutPath);
             }
         }
         return null;

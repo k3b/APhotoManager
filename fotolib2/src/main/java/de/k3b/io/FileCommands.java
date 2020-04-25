@@ -416,7 +416,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                             String modifiedOutPath = exifProcessor.getAbsoluteJpgOutPath();
                             if (null != modifiedOutPath) {
                                 // destFile might have renamed it-s extension for private images
-                                destFile = FileFacade.convert(new File(modifiedOutPath));
+                                destFile = FileFacade.convert(modifiedOutPath);
                                 sameFile = (sourceFile != null) && sourceFile.equals(destFile);
                             }
 

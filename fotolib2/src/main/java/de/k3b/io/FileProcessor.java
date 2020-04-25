@@ -184,7 +184,7 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
 
         @Deprecated
         public XmpFile(String absolutePath, boolean longFormat) {
-            this(FileFacade.convert(new File(absolutePath)), longFormat);
+            this(FileFacade.convert(absolutePath), longFormat);
         }
 
         public XmpFile(IFile file, boolean longFormat) {

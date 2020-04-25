@@ -26,7 +26,6 @@ import android.content.ContentValues;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,6 +38,8 @@ import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.DateUtil;
 import de.k3b.io.FileCommands;
+import de.k3b.io.FileFacade;
+import de.k3b.io.IFile;
 import de.k3b.media.ExifInterfaceEx;
 import de.k3b.media.PhotoPropertiesImageReader;
 import de.k3b.media.XmpSegment;
@@ -129,12 +130,12 @@ public class ImageDetailMetaDialogBuilder {
         try {
             getExifInfo_android(result, filepath);
 
-            File jpegFile = new File(filepath);
+            IFile jpegFile = FileFacade.convert(filepath);
             addExif(result, jpegFile);
 
             // #84 show long and short xmp file
-            addXmp(result, FileCommands.getSidecar(filepath, true));
-            addXmp(result, FileCommands.getSidecar(filepath, false));
+            addXmp(result, FileCommands.getSidecar(jpegFile, true));
+            addXmp(result, FileCommands.getSidecar(jpegFile, false));
 
             if (currentImageId != 0) {
 
@@ -184,11 +185,12 @@ public class ImageDetailMetaDialogBuilder {
     }
 
     private static String line = "------------------";
-    private static void addExif(StringBuilder builder, File file) throws IOException {
+
+    private static void addExif(StringBuilder builder, IFile file) throws IOException {
         if (file.exists()) {
             builder.append(NL).append(file).append(NL).append(NL);
 
-            PhotoPropertiesImageReader meta = new PhotoPropertiesImageReader().load(file.getAbsolutePath(),null, null, "ImageDetailMetaDialogBuilder");
+            PhotoPropertiesImageReader meta = new PhotoPropertiesImageReader().load(file.getAbsolutePath(), file.openInputStream(), null, "ImageDetailMetaDialogBuilder");
             if (meta != null) builder.append(meta.toString());
             builder.append(NL).append(line).append(NL);
         } else {
@@ -196,7 +198,7 @@ public class ImageDetailMetaDialogBuilder {
         }
     }
 
-    private static void addXmp(StringBuilder builder, File file) throws IOException {
+    private static void addXmp(StringBuilder builder, IFile file) throws IOException {
         if (file.exists()) {
             XmpSegment meta = new XmpSegment();
             meta.load(file, "ImageDetailMetaDialogBuilder");
