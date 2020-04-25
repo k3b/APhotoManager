@@ -142,7 +142,7 @@ public class FileFacade implements IFile {
 
     @Override
     public boolean canRead() {
-        return canRead();
+        return file.canRead();
     }
 
     @Override
