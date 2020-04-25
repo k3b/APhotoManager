@@ -53,15 +53,6 @@ public class AndroidFileFacade extends FileFacade {
         AndroidFileFacade.documentFileTranslator = documentFileTranslator;
     }
 
-    public static AndroidFileFacade[] get(File[] files) {
-        AndroidFileFacade f[] = new AndroidFileFacade[files.length];
-        for (int i = 0; i < files.length; i++) {
-            f[i] = new AndroidFileFacade(files[i]);
-        }
-
-        return f;
-    }
-
     @Override
     public boolean renameTo(IFile newName) {
         if (exists() && !newName.exists()) {
@@ -71,7 +62,7 @@ public class AndroidFileFacade extends FileFacade {
             }
 
             if (copyImpl((AndroidFileFacade) newName, true)) {
-                setFile(((AndroidFileFacade) newName).getFile());
+                setFile(newName.getFile());
                 return true;
             }
         }

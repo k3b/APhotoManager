@@ -22,6 +22,9 @@ package de.k3b.io.collections;
 import java.io.File;
 import java.util.Date;
 
+import de.k3b.io.FileFacade;
+import de.k3b.io.IFile;
+
 /**
  * The Multi-selection data for all photo commands.
  * Unmodifyable list of file names and optional their IDs.
@@ -105,6 +108,11 @@ public class SelectedFiles  {
         return result;
     }
 
+    public IFile[] getIFiles() {
+        return FileFacade.get(getFiles());
+    }
+
+    @Deprecated
     public File[] getFiles() {
         return SelectedFiles.getFiles(getFileNames());
     }

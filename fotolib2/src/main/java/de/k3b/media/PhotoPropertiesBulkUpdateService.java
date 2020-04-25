@@ -29,7 +29,9 @@ import java.util.EnumSet;
 import java.util.List;
 
 import de.k3b.LibGlobal;
+import de.k3b.io.FileFacade;
 import de.k3b.io.FileProcessor;
+import de.k3b.io.IFile;
 import de.k3b.io.VISIBILITY;
 import de.k3b.transactionlog.TransactionLoggerBase;
 
@@ -42,7 +44,7 @@ public class PhotoPropertiesBulkUpdateService {
     private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
     private final TransactionLoggerBase transactionLogger;
 
-    private StringBuilder debugExif(StringBuilder sb, String context, PhotoPropertiesUpdateHandler exif, File filePath) {
+    private StringBuilder debugExif(StringBuilder sb, String context, PhotoPropertiesUpdateHandler exif, IFile filePath) {
         if (sb != null) {
             sb.append("\n\t").append(context).append("\t: ");
 
@@ -62,7 +64,13 @@ public class PhotoPropertiesBulkUpdateService {
 
         this.transactionLogger = transactionLogger;
     }
+
+    @Deprecated
     public PhotoPropertiesUpdateHandler saveLatLon(File filePath, Double latitude, Double longitude) {
+        return saveLatLon(FileFacade.convert(filePath), latitude, longitude);
+    }
+
+    public PhotoPropertiesUpdateHandler saveLatLon(IFile filePath, Double latitude, Double longitude) {
         IPhotoProperties changedData = new PhotoPropertiesDTO().setLatitudeLongitude(latitude, longitude);
         PhotoPropertiesDiffCopy metaDiffCopy = new PhotoPropertiesDiffCopy(true, true)
                 .setDiff(changedData, PhotoPropertiesFormatter.FieldID.latitude_longitude);
@@ -71,14 +79,22 @@ public class PhotoPropertiesBulkUpdateService {
         return exif;
     }
 
-    /** writes either (changes + _affectedFields) or metaDiffCopy to jpg/xmp-filePath.
-     * Returns new values or null if no change. */
+    @Deprecated
     public PhotoPropertiesUpdateHandler applyChanges(File inFilePath, String outFilePath,
+                                                     long id, boolean deleteOriginalWhenFinished, PhotoPropertiesDiffCopy metaDiffCopy) {
+        return applyChanges(FileFacade.convert(inFilePath), outFilePath, id, deleteOriginalWhenFinished, metaDiffCopy);
+    }
+
+    /**
+     * writes either (changes + _affectedFields) or metaDiffCopy to jpg/xmp-filePath.
+     * Returns new values or null if no change.
+     */
+    public PhotoPropertiesUpdateHandler applyChanges(IFile inFilePath, String outFilePath,
                                                      long id, boolean deleteOriginalWhenFinished, PhotoPropertiesDiffCopy metaDiffCopy) {
         StringBuilder sb = (LibGlobal.debugEnabled)
                 ? createDebugStringBuilder(inFilePath)
                 : null;
-        File outFile = (outFilePath != null) ? new File(outFilePath) : inFilePath;
+        IFile outFile = (outFilePath != null) ? FileFacade.convert(new File(outFilePath)) : inFilePath;
         if ((inFilePath != null) && outFile.getParentFile().canWrite()) {
             PhotoPropertiesUpdateHandler exifHandler = null;
             try {
@@ -89,7 +105,7 @@ public class PhotoPropertiesBulkUpdateService {
 
                 boolean sameFile = (outFile.equals(inFilePath));
 
-                File newOutFile = handleVisibility(metaDiffCopy.getVisibility(), outFile, exifHandler);
+                IFile newOutFile = handleVisibility(metaDiffCopy.getVisibility(), outFile, exifHandler);
                 if (newOutFile != null) {
                     outFile = newOutFile;
                     outFilePath = outFile.getAbsolutePath();
@@ -132,7 +148,7 @@ public class PhotoPropertiesBulkUpdateService {
                     }
 
                     if (!sameFile && deleteOriginalWhenFinished) {
-                        File delete = FileProcessor.getSidecar(inFilePath, false);
+                        IFile delete = FileProcessor.getSidecar(inFilePath, false);
                         deleteFile(delete);
 
                         delete = FileProcessor.getSidecar(inFilePath, true);
@@ -171,7 +187,12 @@ public class PhotoPropertiesBulkUpdateService {
         }
     }
 
+    @Deprecated
     protected void deleteFile(File delete) {
+        deleteFile(FileFacade.convert(delete));
+    }
+
+    protected void deleteFile(IFile delete) {
         if ((delete != null) && delete.exists()) {
             delete.delete();
             if (LibGlobal.debugEnabledJpg) {
@@ -180,8 +201,12 @@ public class PhotoPropertiesBulkUpdateService {
         }
     }
 
-    /** return modified out file or null if filename must not change due to visibility rule */
     protected File handleVisibility(VISIBILITY newVisibility, File outFile, PhotoPropertiesUpdateHandler exif) {
+        return handleVisibility(newVisibility, FileFacade.convert(outFile), exif).getFile();
+
+    }
+    /** return modified out file or null if filename must not change due to visibility rule */
+    protected IFile handleVisibility(VISIBILITY newVisibility, IFile outFile, PhotoPropertiesUpdateHandler exif) {
         if (LibGlobal.renamePrivateJpg) {
             final String oldAbsoluteOutPath = (outFile == null) ? null : outFile.getAbsolutePath();
             String newAbsoluteOutPath = PhotoPropertiesUtil.getModifiedPath(oldAbsoluteOutPath, newVisibility);
@@ -193,18 +218,22 @@ public class PhotoPropertiesBulkUpdateService {
                     transactionLogger.addChangesCopyMove(true, newAbsoluteOutPath, "handleVisibility");
                 }
                 exif.setAbsoluteJpgOutPath(newAbsoluteOutPath);
-                return new File(newAbsoluteOutPath);
+                return FileFacade.convert(new File(newAbsoluteOutPath));
             }
         }
         return null;
     }
 
-    /** todo overwrite in android class to implement update media db */
+    @Deprecated
     protected long updateMediaDB(long id, String oldJpgAbsolutePath, File newJpgFile) {
+        return updateMediaDB(id, oldJpgAbsolutePath, FileFacade.convert(newJpgFile));
+    }
+    /** todo overwrite in android class to implement update media db */
+    protected long updateMediaDB(long id, String oldJpgAbsolutePath, IFile newJpgFile) {
         return id;
     }
 
-    private StringBuilder createDebugStringBuilder(File filePath) {
+    private StringBuilder createDebugStringBuilder(IFile filePath) {
         if(filePath != null) {
             return new StringBuilder("Set Exif to file='").append(filePath.getAbsolutePath()).append("'\n\t");
         }

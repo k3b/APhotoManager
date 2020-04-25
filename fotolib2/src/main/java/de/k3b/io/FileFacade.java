@@ -35,7 +35,14 @@ import java.nio.channels.FileChannel;
  * add support for Android DocumentFile
  */
 public class FileFacade implements IFile {
+    private static Converter<File, IFile> fileFacade = new Converter<File, IFile>() {
+        @Override
+        public IFile convert(File file) {
+            return new FileFacade(file);
+        }
+    };
     private File file;
+
 
     public FileFacade(File file) {
         this.file = file;
@@ -53,13 +60,32 @@ public class FileFacade implements IFile {
         this(new File(parent, newFolderName));
     }
 
-    public static FileFacade[] get(File[] files) {
-        FileFacade f[] = new FileFacade[files.length];
+    public static IFile[] get(File[] files) {
+        IFile f[] = new FileFacade[files.length];
         for (int i = 0; i < files.length; i++) {
-            f[i] = new FileFacade(files[i]);
+            f[i] = convert(files[i]);
         }
 
         return f;
+    }
+
+    /**
+     * gets existing file from parent or create it if not found
+     */
+    public static IFile getOrCreateChild(IFile parent, String name, String mime) {
+        IFile result = parent.findExisting(name);
+        if (result == null) {
+            result = parent.create(name, mime);
+        }
+        return result;
+    }
+
+    public static IFile convert(File file) {
+        return fileFacade.convert(file);
+    }
+
+    public static void setFileFacade(Converter<File, IFile> fileFacade) {
+        FileFacade.fileFacade = fileFacade;
     }
 
     @Deprecated
@@ -97,7 +123,7 @@ public class FileFacade implements IFile {
     public IFile findExisting(String name) {
         final File candidate = new File(this.file, name);
         if (candidate.exists()) {
-            return new FileFacade(candidate);
+            return convert(candidate);
         }
         return null;
     }
@@ -139,7 +165,7 @@ public class FileFacade implements IFile {
 
     @Override
     public IFile getCanonicalFile() {
-        return new FileFacade(FileUtils.tryGetCanonicalFile(file));
+        return convert(FileUtils.tryGetCanonicalFile(file));
     }
 
     @Override
@@ -149,7 +175,7 @@ public class FileFacade implements IFile {
 
     @Override
     public IFile getParentFile() {
-        return new FileFacade(file.getParentFile());
+        return convert(file.getParentFile());
     }
 
     @Override
@@ -165,6 +191,11 @@ public class FileFacade implements IFile {
     @Override
     public long lastModified() {
         return file.lastModified();
+    }
+
+    @Override
+    public void setLastModified(long fileTime) {
+        file.setLastModified(fileTime);
     }
 
     @Override
@@ -228,7 +259,7 @@ public class FileFacade implements IFile {
 
     @Override
     public IFile create(String name, String mime) {
-        return new FileFacade(new File(file, name));
+        return convert(new File(file, name));
     }
 
     @Override
@@ -236,7 +267,7 @@ public class FileFacade implements IFile {
         return String.format("%s: %s", this.getClass().getSimpleName(), file.getAbsoluteFile());
     }
 
-    protected File getFile() {
+    public File getFile() {
         return file;
     }
 

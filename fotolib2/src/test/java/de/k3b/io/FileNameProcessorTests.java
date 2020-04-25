@@ -160,9 +160,11 @@ public class FileNameProcessorTests {
     private static void registerFakeFiles(RuleFileNameProcessor sut, String... filenames) {
         if (filenames.length == 0) {
             doReturn(false).when(sut).osFileExists(any(File.class));
+            doReturn(false).when(sut).osFileExists(any(IFile.class));
         } else {
             for (String filename : filenames) {
                 doReturn(true).when(sut).osFileExists(new File(X_FAKE_OUTPUT_DIR, filename));
+                doReturn(true).when(sut).osFileExists(new FileFacade(new File(X_FAKE_OUTPUT_DIR, filename)));
             }
         }
     }

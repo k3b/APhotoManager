@@ -28,8 +28,10 @@ import java.util.Date;
 
 import de.k3b.LibGlobal;
 import de.k3b.io.FileCommands;
+import de.k3b.io.FileFacade;
 import de.k3b.io.FileProcessor;
 import de.k3b.io.FileUtils;
+import de.k3b.io.IFile;
 
 /**
  * Represents content of exactly one jpg-exif-file with corresponding xmp-file that can be modified
@@ -124,7 +126,7 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
             // xmp should have the same data as exif/iptc
             PhotoPropertiesUtil.copyNonEmpty(xmp, jpg);
             if ((absoluteJpgInPath != null) && (xmp.getDateTimeTaken() == null)) {
-                File in = new File(absoluteJpgInPath);
+                IFile in = FileFacade.convert(new File(absoluteJpgInPath));
                 if (in.exists() && in.isFile()) {
                     long lastModified = in.lastModified();
                     if (lastModified != 0) {
@@ -239,7 +241,7 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
             String absoluteJpgInPath, String outJpgFullPath,
             boolean longFormat, String dbg_context) throws IOException {
         int changedFiles = 0;
-        File xmpInFile = FileCommands.getExistingSidecarOrNull(absoluteJpgInPath, longFormat);
+        IFile xmpInFile = FileCommands.getExistingSidecarOrNull(absoluteJpgInPath, longFormat);
         if (xmpInFile != null) {
             FileUtils.copyReplace(
                     xmpInFile, FileCommands.getSidecar(outJpgFullPath, longFormat),
@@ -253,7 +255,7 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
             PhotoPropertiesXmpSegment xmp,
             String outFullJpgPath,
             boolean isLongFileName, String dbg_context) throws IOException {
-        File xmpOutFile = FileCommands.getSidecar(outFullJpgPath, isLongFileName);
+        IFile xmpOutFile = FileCommands.getSidecar(outFullJpgPath, isLongFileName);
         xmp.save(xmpOutFile, LibGlobal.debugEnabledJpgMetaIo, dbg_context);
         return 1;
     }
@@ -266,7 +268,7 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
 
         if (exif != null) {
             if (!isSameFile) {
-                exif.saveAttributes(new File(inJpgFullPath), new File(outJpgFullPath),
+                exif.saveAttributes(FileFacade.convert(new File(inJpgFullPath)), FileFacade.convert(new File(outJpgFullPath)),
                         this.deleteOriginalAfterFinish);
             } else {
                 exif.saveAttributes();

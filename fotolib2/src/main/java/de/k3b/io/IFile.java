@@ -19,6 +19,7 @@
  */
 package de.k3b.io;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,6 +68,7 @@ public interface IFile {
 
     String getName();
 
+    void setLastModified(long fileTime);
     long lastModified();
 
     boolean mkdirs();
@@ -85,4 +87,6 @@ public interface IFile {
      * overwrite existing
      */
     IFile create(String name, String mime);
+
+    File getFile();
 }

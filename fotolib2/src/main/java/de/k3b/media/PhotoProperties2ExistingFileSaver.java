@@ -2,13 +2,16 @@ package de.k3b.media;
 
 import java.io.File;
 
+import de.k3b.io.FileFacade;
 import de.k3b.io.FileProcessor;
+import de.k3b.io.IFile;
 import de.k3b.io.IItemSaver;
 
 /** Translates every affected file (jpg/xmp) of {@link #save(IPhotoProperties)} to  fileSaver.save(File) */
 public class PhotoProperties2ExistingFileSaver implements IItemSaver<IPhotoProperties> {
-    private final IItemSaver<File> fileSaver;
-    public PhotoProperties2ExistingFileSaver(IItemSaver<File> fileSaver) {
+    private final IItemSaver<IFile> fileSaver;
+
+    public PhotoProperties2ExistingFileSaver(IItemSaver<IFile> fileSaver) {
         this.fileSaver = fileSaver;
     }
 
@@ -17,7 +20,7 @@ public class PhotoProperties2ExistingFileSaver implements IItemSaver<IPhotoPrope
         if (item != null) {
             String path = item.getPath();
             if (path != null) {
-                return saveFiles(new File(path),
+                return saveFiles(FileFacade.convert(new File(path)),
                         FileProcessor.getExistingSidecarOrNull(path, true),
                         FileProcessor.getExistingSidecarOrNull(path, false)) > 0;
             }
@@ -25,9 +28,9 @@ public class PhotoProperties2ExistingFileSaver implements IItemSaver<IPhotoPrope
         return false;
     }
 
-    private int saveFiles(File... files) {
+    private int saveFiles(IFile... files) {
         int processed = 0;
-        for (File f: files) {
+        for (IFile f : files) {
             if ((f != null) && (f.exists()) && f.canRead() && this.fileSaver.save(f)) {
                 processed++;
             }

@@ -50,7 +50,6 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.k3b.io.Converter;
 import de.k3b.io.FileFacade;
 import de.k3b.io.IFile;
 
@@ -69,12 +68,6 @@ public class ExifInterface {
     private static final Logger logger = LoggerFactory.getLogger(LOG_TAG);
 
     private static final boolean DEBUG_INTERNAL = false;
-    protected static Converter<File, IFile> fileFacade = new Converter<File, IFile>() {
-        @Override
-        public IFile convert(File file) {
-            return new FileFacade(file);
-        }
-    };
 
     // public to allow global settings to enable/disable
     public static boolean DEBUG = false;
@@ -1132,7 +1125,7 @@ public class ExifInterface {
         if (filename == null) {
             throw new IllegalArgumentException("filename cannot be null");
         }
-        mExifFile = (filename != null) ? fileFacade.convert(new File(filename)) : null;
+        mExifFile = (filename != null) ? FileFacade.convert(new File(filename)) : null;
         if (in == null) {
             InputStream inputStream = null;
             inputStream = createInputStream(mExifFile);
@@ -1498,7 +1491,7 @@ public class ExifInterface {
      */
     @Deprecated
     public void saveAttributes(File inFile, File outFile, boolean deleteInFileOnFinish) throws IOException {
-        saveAttributes(fileFacade.convert(inFile), fileFacade.convert(outFile), deleteInFileOnFinish);
+        saveAttributes(FileFacade.convert(inFile), FileFacade.convert(outFile), deleteInFileOnFinish);
     }
 
     public void saveAttributes(IFile inFile, IFile outFile, boolean deleteInFileOnFinish) throws IOException {
@@ -1621,7 +1614,7 @@ public class ExifInterface {
         if (mThumbnailBytes != null) {
             return mThumbnailBytes;
         }
-        return getThumbnail(fileFacade.convert(inFile));
+        return getThumbnail(FileFacade.convert(inFile));
     }
 
     public byte[] getThumbnail(IFile inFile) {

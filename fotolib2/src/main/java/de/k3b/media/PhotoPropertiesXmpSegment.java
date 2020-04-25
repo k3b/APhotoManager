@@ -35,9 +35,10 @@ import java.util.List;
 import de.k3b.LibGlobal;
 import de.k3b.io.DateUtil;
 import de.k3b.io.FileCommands;
+import de.k3b.io.FileFacade;
 import de.k3b.io.GeoUtil;
+import de.k3b.io.IFile;
 import de.k3b.io.VISIBILITY;
-
 import de.k3b.media.MediaFormatter.FieldID;
 /**
  * {@link XmpSegment} that implements {@link IPhotoProperties} to read/write xmp.
@@ -198,13 +199,19 @@ public class PhotoPropertiesXmpSegment extends XmpSegment implements IPhotoPrope
         return this;
     }
 
+    @Deprecated
     @Override
     public XmpSegment save(File file, boolean humanReadable, String dbg_context) throws FileNotFoundException {
+        return save(FileFacade.convert(file), humanReadable, dbg_context);
+    }
+
+    @Override
+    public XmpSegment save(IFile file, boolean humanReadable, String dbg_context) throws FileNotFoundException {
         fixAttributes(file);
         return super.save(file, humanReadable, dbg_context);
     }
 
-    private void fixAttributes(File file) {
+    private void fixAttributes(IFile file) {
         if (getPropertyAsString("   fixAttributes OriginalFileName", PhotoPropertiesXmpFieldDefinition.OriginalFileName) == null) {
             setProperty(file.getName(), PhotoPropertiesXmpFieldDefinition.OriginalFileName);
         }

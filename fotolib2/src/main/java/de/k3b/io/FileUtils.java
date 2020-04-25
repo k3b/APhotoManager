@@ -28,9 +28,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,8 +56,13 @@ public class FileUtils {
         return internalReadFile(new BufferedReader(new InputStreamReader(file)), file);
     }
 
+    @Deprecated
     public static String readFile(File file) throws IOException {
-        return internalReadFile(new BufferedReader(new FileReader(file)), file);
+        return readFile(FileFacade.convert(file));
+    }
+
+    public static String readFile(IFile file) throws IOException {
+        return internalReadFile(new BufferedReader(new InputStreamReader(file.openInputStream())), file);
     }
 
     public static String readFile(InputStream is, byte[] buffer) throws IOException {
@@ -76,9 +78,13 @@ public class FileUtils {
      * helper to copy stream-data
      */
     public static void copyStream(OutputStream outputStream, InputStream inputStream, byte[] buffer) throws IOException {
-        for (int read = inputStream.read(buffer); read > -1; read = inputStream
-                .read(buffer)) {
-            outputStream.write(buffer, 0, read);
+        try {
+            for (int read = inputStream.read(buffer); read > -1; read = inputStream
+                    .read(buffer)) {
+                outputStream.write(buffer, 0, read);
+            }
+        } finally {
+            close(inputStream, null);
         }
     }
 
@@ -86,12 +92,15 @@ public class FileUtils {
         StringBuilder sb = new StringBuilder();
         String line = br.readLine();
 
-        while (line != null) {
-            sb.append(line);
-            sb.append("\n");
-            line = br.readLine();
+        try {
+            while (line != null) {
+                sb.append(line);
+                sb.append("\n");
+                line = br.readLine();
+            }
+        } finally {
+            close(br, source);
         }
-        close(br, source);
         return sb.toString();
     }
 
@@ -249,13 +258,17 @@ public class FileUtils {
         delete(file, fileExt);
     }
 
-    // Delete the file or if it's a directory, all files in the directory
     public static void delete(File file, final String fileExt) {
+        delete(FileFacade.convert(file), fileExt);
+    }
+
+    // Delete the file or if it's a directory, all files in the directory
+    public static void delete(IFile file, final String fileExt) {
         if (file.exists()) {
             //check if the file is a directory
             if (file.isDirectory()) {
-                File[] files = file.listFiles();
-                for(File f:files){
+                IFile[] files = file.listFiles();
+                for (IFile f : files) {
                     //call deletion of file individually
                     delete(f, fileExt);
                 }
@@ -284,14 +297,19 @@ public class FileUtils {
         copyReplace(new File(sourcePath), new File(destinationPath), deleteOriginalAfterFinish, what);
     }
 
+    @Deprecated
     public static void copyReplace(File inFile, File outFile, boolean deleteOriginalAfterFinish, String what) throws IOException {
+        copyReplace(FileFacade.convert(inFile), FileFacade.convert(outFile), deleteOriginalAfterFinish, what);
+    }
+
+    public static void copyReplace(IFile inFile, IFile outFile, boolean deleteOriginalAfterFinish, String what) throws IOException {
         if (logger.isDebugEnabled()) {
             logger.debug(DBG_CONTEXT + what + (deleteOriginalAfterFinish ? "-move" : "-copy") + ": " + inFile +
                     " ==> " + outFile);
         }
         InputStream sourceStream = null;
         try {
-            sourceStream = new FileInputStream(inFile);
+            sourceStream = inFile.openInputStream();
             copyReplace(sourceStream, outFile);
 
             if(deleteOriginalAfterFinish && inFile.exists()) inFile.delete();
@@ -300,10 +318,15 @@ public class FileUtils {
         }
     }
 
+    @Deprecated
     public static void copyReplace(InputStream sourceStream, File destinationFile) throws IOException {
+        copyReplace(sourceStream, FileFacade.convert(destinationFile));
+    }
+
+    public static void copyReplace(InputStream sourceStream, IFile destinationFile) throws IOException {
         if (destinationFile.exists()) destinationFile.delete();
         destinationFile.getParentFile().mkdirs();
-        FileOutputStream result = new FileOutputStream(destinationFile);
+        OutputStream result = destinationFile.openOutputStream();
         FileUtils.copy(sourceStream, result);
         result.flush();
         FileUtils.close(result, destinationFile);
@@ -330,21 +353,32 @@ public class FileUtils {
         return path;
     }
 
+    @Deprecated
     public static File getFirstExistingDir(File root) {
+        return getFirstExistingDir(FileFacade.convert(root)).getFile();
+    }
+
+    public static IFile getFirstExistingDir(IFile root) {
         while ((root != null) && (!root.exists() || !root.isDirectory())) {
             root = root.getParentFile();
         }
         return root;
     }
 
+    @Deprecated
     public static File getFirstNonExistingFile(File parentDir, String newFilePrefix, int number, String newFileSuffix) {
+        return getFirstNonExistingFile(FileFacade.convert(parentDir), newFilePrefix, number, newFileSuffix).getFile();
+    }
+
+    public static IFile getFirstNonExistingFile(IFile parentDir, String newFilePrefix, int number, String newFileSuffix) {
         if (parentDir == null) return null;
 
         parentDir.mkdirs();
-        File candidate = new File(parentDir, newFilePrefix + newFileSuffix);
+        final String mime = "*/*";
+        IFile candidate = parentDir.create(newFilePrefix + newFileSuffix, mime);
         while (candidate.exists()) {
             number ++;
-            candidate = new File(parentDir, newFilePrefix + number + newFileSuffix);
+            candidate = parentDir.create(newFilePrefix + number + newFileSuffix, mime);
         }
         return candidate;
     }

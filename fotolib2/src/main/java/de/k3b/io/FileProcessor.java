@@ -28,35 +28,48 @@ import java.io.File;
 public class FileProcessor extends FileCommandLogger implements IFileCommandLogger {
     private static final String EXT_SIDECAR = ".xmp";
 
+    /// TODO what is mime for XMP
+    private static final String XMP_MINE = "*/*";
+
     /** if not null: all logging goes through this */
     private IFileCommandLogger internalLogger = null;
 
     // private static final String LOG_FILE_ENCODING = "UTF-8";
-    /** can be replaced by mock/stub in unittests */
-    public boolean osFileExists(File file) {
-        return file.exists();
-    }
 
-    protected boolean fileOrSidecarExists(File file) {
-        if (file == null) return false;
-
-        return osFileExists(file) || osFileExists(FileCommands.getSidecar(file, false))  || osFileExists(FileCommands.getSidecar(file, true));
-    }
+    @Deprecated
     public static boolean isSidecar(File file) {
         if (file == null) return false;
-        return isSidecar(file.getAbsolutePath());
+        return isSidecar(file.getName());
     }
 
-    public static boolean isSidecar(String name) {
-        if (name == null) return false;
-        return name.toLowerCase().endsWith(EXT_SIDECAR);
+    public static boolean isSidecar(IFile file) {
+        if (file == null) return false;
+        return isSidecar(file.getName());
     }
 
-    public static File getSidecar(File file, boolean longFormat) {
+    @Deprecated
+    public static IFile getSidecar(File file, boolean longFormat) {
+        return getSidecar(FileFacade.convert(file), longFormat);
+    }
+
+    public static IFile getSidecar(IFile file, boolean longFormat) {
         if (file == null) return null;
-        return getSidecar(file.getAbsolutePath(), longFormat);
+        String name = file.getName();
+        return getSidecar(file.getParentFile(), name, longFormat);
     }
 
+    public static XmpFile getSidecar(IFile parent, String name, boolean longFormat) {
+        XmpFile result;
+        if (longFormat) {
+            result = new XmpFile(FileFacade.getOrCreateChild(parent, name + EXT_SIDECAR, XMP_MINE), longFormat);
+        } else {
+            result = new XmpFile(FileFacade.getOrCreateChild(parent, FileUtils.replaceExtension(name, EXT_SIDECAR), XMP_MINE), longFormat);
+        }
+        return result;
+
+    }
+
+    @Deprecated
     public static XmpFile getSidecar(String absolutePath, boolean longFormat) {
         XmpFile result;
         if (longFormat) {
@@ -67,28 +80,40 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
         return result;
     }
 
-    public static class XmpFile extends File {
-        /** true: file.jpg.xmp; false: file.xmp */
-        private final boolean longFormat;
-        private boolean hasAlsoOtherFormat = false;
+    public static boolean isSidecar(String name) {
+        if (name == null) return false;
+        return name.toLowerCase().endsWith(EXT_SIDECAR);
+    }
 
-        public XmpFile(String absolutePath, boolean longFormat) {
-            super(absolutePath);
-            this.longFormat = longFormat;
-        }
+    /**
+     * can be replaced by mock/stub in unittests
+     */
+    @Deprecated
+    public boolean osFileExists(File file) {
+        return osFileExists(FileFacade.convert(file));
+    }
 
-        /** true: file.jpg.xmp; false: file.xmp */
-        public boolean isLongFormat() {
-            return longFormat;
-        }
+    public boolean osFileExists(IFile file) {
+        return file.exists();
+    }
 
-        public boolean isHasAlsoOtherFormat() {
-            return hasAlsoOtherFormat;
-        }
+    @Deprecated
+    protected boolean fileOrSidecarExists(File file) {
+        return fileOrSidecarExists(FileFacade.convert(file));
+    }
 
-        public void setHasAlsoOtherFormat(boolean hasAlsoOtherFormat) {
-            this.hasAlsoOtherFormat = hasAlsoOtherFormat;
-        }
+    protected boolean fileOrSidecarExists(IFile file) {
+        if (file == null) return false;
+
+        IFile parent = file.getParentFile();
+        String name = file.getName();
+        return file.exists() || FileCommands.getSidecar(parent, name, false).exists()
+                || FileCommands.getSidecar(parent, name, true).exists();
+    }
+
+    @Deprecated
+    public File renameDuplicate(File file) {
+        return FileFacade.convert(file).getFile();
     }
 
     public static XmpFile getExistingSidecarOrNull(String absolutePath) {
@@ -116,14 +141,16 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
     /**
      * @return file if rename is not neccessary else File with new name
      */
-    public File renameDuplicate(File file) {
+    public IFile renameDuplicate(IFile file) {
         if (!fileOrSidecarExists(file)) {
             // rename is not neccessary
             return file;
         }
 
+        IFile parent = file.getParentFile();
 
-        String filename = file.getAbsolutePath();
+        String mime = file.getMime();
+        String filename = file.getName();
         String extension = ")";
         int extensionPosition = filename.lastIndexOf(".");
         if (extensionPosition >= 0) {
@@ -133,13 +160,50 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
         int id = 0;
         while (true) {
             id++;
-            String candidatePath = filename + id + extension;
-            File candidate = new File(candidatePath);
+            String candidateName = filename + id + extension;
+            IFile candidate = parent.create(candidateName, mime);
             if (!fileOrSidecarExists(candidate)) {
-                log("rem renamed from '", filename, "' to '", candidatePath,"'");
+                log("rem renamed from '", filename, "' to '", candidateName,"'");
                 return candidate;
             }
 
+        }
+    }
+
+    public static class XmpFile extends FileWrapper {
+        /**
+         * true: file.jpg.xmp; false: file.xmp
+         */
+        private final boolean longFormat;
+        private boolean hasAlsoOtherFormat = false;
+
+        public XmpFile(IFile parent, String name, String mime, boolean longFormat) {
+            this(FileFacade.getOrCreateChild(parent, name, mime), longFormat);
+        }
+
+        @Deprecated
+        public XmpFile(String absolutePath, boolean longFormat) {
+            this(FileFacade.convert(new File(absolutePath)), longFormat);
+        }
+
+        public XmpFile(IFile file, boolean longFormat) {
+            super(file);
+            this.longFormat = longFormat;
+        }
+
+        /**
+         * true: file.jpg.xmp; false: file.xmp
+         */
+        public boolean isLongFormat() {
+            return longFormat;
+        }
+
+        public boolean isHasAlsoOtherFormat() {
+            return hasAlsoOtherFormat;
+        }
+
+        public void setHasAlsoOtherFormat(boolean hasAlsoOtherFormat) {
+            this.hasAlsoOtherFormat = hasAlsoOtherFormat;
         }
     }
 

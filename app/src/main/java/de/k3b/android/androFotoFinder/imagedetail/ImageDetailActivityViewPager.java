@@ -79,10 +79,12 @@ import de.k3b.android.widget.FilePermissionActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.io.GeoUri;
+import de.k3b.io.FileFacade;
 import de.k3b.io.FileProcessor;
 import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
+import de.k3b.io.IFile;
 import de.k3b.io.StringUtils;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.media.PhotoPropertiesUtil;
@@ -121,6 +123,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
     /** if smaller that these millisecs then the actionbar autohide is disabled */
     private static final int DISABLE_HIDE_ACTIONBAR = 700;
     private static final int NOMEDIA_GALLERY = 8227;
+    private static final String MIME = "*/*";
 
     // how many changes have been made. if != 0 parent activity must invalidate cached data
     private static int mModifyCount = 0;
@@ -667,28 +670,28 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
 
     private void onRenameFileAnswer(final CharSequence title, final SelectedFiles currentFoto, final long fotoId,
                                     final String fotoSourcePath, final String newFileName) {
-        File src = new File(fotoSourcePath);
-        File dest = new File(src.getParentFile(), newFileName);
+        IFile src = FileFacade.convert(new File(fotoSourcePath));
+        IFile dest = src.getParentFile().create(newFileName, src.getMime());
 
-        File srcXmpShort = FileProcessor.getSidecar(src, false);
+        IFile srcXmpShort = FileProcessor.getSidecar(src, false);
         boolean hasSideCarShort = ((srcXmpShort != null) && (mFileCommands.osFileExists(srcXmpShort)));
-        File srcXmpLong = FileProcessor.getSidecar(src, true);
+        IFile srcXmpLong = FileProcessor.getSidecar(src, true);
         boolean hasSideCarLong = ((srcXmpLong != null) && (mFileCommands.osFileExists(srcXmpLong)));
 
-        File destXmpShort = FileProcessor.getSidecar(dest, false);
-        File destXmpLong = FileProcessor.getSidecar(dest, true);
+        IFile destXmpShort = FileProcessor.getSidecar(dest, false);
+        IFile destXmpLong = FileProcessor.getSidecar(dest, true);
 
         if (src.equals(dest)) return; // new name == old name ==> nothing to do
 
         String errorMessage = null;
         if (hasSideCarShort && mFileCommands.osFileExists(destXmpShort)) {
-            errorMessage = getString(R.string.image_err_file_exists_format, destXmpShort.getAbsoluteFile());
+            errorMessage = getString(R.string.image_err_file_exists_format, destXmpShort.getAbsolutePath());
         }
         if (hasSideCarLong && mFileCommands.osFileExists(destXmpLong)) {
-            errorMessage = getString(R.string.image_err_file_exists_format, destXmpLong.getAbsoluteFile());
+            errorMessage = getString(R.string.image_err_file_exists_format, destXmpLong.getAbsolutePath());
         }
         if (mFileCommands.osFileExists(dest)) {
-            errorMessage = getString(R.string.image_err_file_exists_format, dest.getAbsoluteFile());
+            errorMessage = getString(R.string.image_err_file_exists_format, dest.getAbsolutePath());
         }
 
         PhotoChangeNotifyer.setPhotoChangedListener(this);
@@ -700,16 +703,16 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
             mModifyCount++;
         } else {
             // rename failed
-            errorMessage = getString(R.string.image_err_file_rename_format, src.getAbsoluteFile());
+            errorMessage = getString(R.string.image_err_file_rename_format, src.getAbsolutePath());
             Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
         }
     }
 
-    private boolean osRenameTo(final CharSequence title, final File dest, final SelectedFiles currentFoto) {
+    private boolean osRenameTo(final CharSequence title, final IFile dest, final SelectedFiles currentFoto) {
         // close rename dialog to allow messagebox that prepares to ask
         closeDialogIfNeeded();
-        File missingRoot = getMissingRootDirFileOrNull(
-                "ImageDetailActivityViewPager.osRenameTo", currentFoto.getFiles());
+        IFile missingRoot = getMissingRootDirFileOrNull(
+                "ImageDetailActivityViewPager.osRenameTo", currentFoto.getIFiles());
         if (missingRoot != null) {
             // ask for needed permissions
             requestRootUriDialog(missingRoot, title,
@@ -1090,22 +1093,22 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
         File src = new File(fotoSourcePath);
         File dest = new File(src.getParentFile(), newFileName);
 
-        File srcXmpShort = FileProcessor.getSidecar(src, false);
+        IFile srcXmpShort = FileProcessor.getSidecar(src, false);
         boolean hasSideCarShort = ((srcXmpShort != null) && (mFileCommands.osFileExists(srcXmpShort)));
-        File srcXmpLong = FileProcessor.getSidecar(src, true);
+        IFile srcXmpLong = FileProcessor.getSidecar(src, true);
         boolean hasSideCarLong = ((srcXmpLong != null) && (mFileCommands.osFileExists(srcXmpLong)));
 
-        File destXmpShort = FileProcessor.getSidecar(dest, false);
-        File destXmpLong = FileProcessor.getSidecar(dest, true);
+        IFile destXmpShort = FileProcessor.getSidecar(dest, false);
+        IFile destXmpLong = FileProcessor.getSidecar(dest, true);
 
         if (src.equals(dest)) return; // new name == old name ==> nothing to do
 
         String errorMessage = null;
         if (hasSideCarShort && mFileCommands.osFileExists(destXmpShort)) {
-            errorMessage = getString(R.string.image_err_file_exists_format, destXmpShort.getAbsoluteFile());
+            errorMessage = getString(R.string.image_err_file_exists_format, destXmpShort.getAbsolutePath());
         }
         if (hasSideCarLong && mFileCommands.osFileExists(destXmpLong)) {
-            errorMessage = getString(R.string.image_err_file_exists_format, destXmpLong.getAbsoluteFile());
+            errorMessage = getString(R.string.image_err_file_exists_format, destXmpLong.getAbsolutePath());
         }
         if (mFileCommands.osFileExists(dest)) {
             errorMessage = getString(R.string.image_err_file_exists_format, dest.getAbsoluteFile());

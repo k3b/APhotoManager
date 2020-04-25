@@ -23,11 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -130,34 +126,32 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
     }
 
     /**
-     * @return true if file was deleted or does not exist (any more)
+     *
+     * @param sourceFullPath the path of the file that shall be copied including the file name with ending
+     * @param targetFullPath the path of the file  that shall be written to without filename
+     *
+     * Copies a file from the sourceFullPath path to the target path.
      */
-    protected boolean deleteFileWithSidecar(File file) {
-        boolean result = false;
-
-        if (file != null) {
-            File sidecar = getSidecar(file, false);
-            if (osFileExists(sidecar)) {
-                osDeleteFile(sidecar); // dont care if delete was successfull
+    private static boolean _osFileCopy(IFile targetFullPath, IFile sourceFullPath, FileCommands owner) {
+        boolean result = true;
+        try {
+            result = sourceFullPath.copy(targetFullPath, false);
+        } catch (Throwable e) {
+            result = false;
+            if (owner != null) {
+                owner.onException(e, "_osFileCopy", sourceFullPath, targetFullPath);
             }
-            sidecar = getSidecar(file, true);
-            if (osFileExists(sidecar)) {
-                osDeleteFile(sidecar); // dont care if delete was successfull
-            }
-
-            if (osFileExists(file)) {
-                if (!osDeleteFile(file)) {
-                    log("rem file exists. delete failed : ", file.getAbsolutePath());
-                } else {
-                    result = true; // was deleted
-                }
-            } else {
-                log("rem file '", file.getAbsolutePath(), "' does not exist");
-                result = true; // it is gone
-            }
-            log(MediaTransactionLogEntryType.DELETE.getCommand(file.getAbsolutePath(),""));
+        }
+        if (LibGlobal.debugEnabledJpg) {
+            logger.info("osFileCopy '" + sourceFullPath
+                    + "' => '" + targetFullPath + "' success=" + result);
         }
         return result;
+    }
+
+    @Deprecated
+    protected boolean deleteFileWithSidecar(File file) {
+        return deleteFileWithSidecar(FileFacade.convert(file));
     }
 
     /**
@@ -239,9 +233,92 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
         return result;
     }
 
-    /** does the copying and/or apply exif changes. also used by unittesting */
+    /**
+     * @return true if file was deleted or does not exist (any more)
+     */
+    protected boolean deleteFileWithSidecar(IFile file) {
+        boolean result = false;
+
+        if (file != null) {
+            IFile sidecar = getSidecar(file, false);
+            if (osFileExists(sidecar)) {
+                osDeleteFile(sidecar); // dont care if delete was successfull
+            }
+            sidecar = getSidecar(file, true);
+            if (osFileExists(sidecar)) {
+                osDeleteFile(sidecar); // dont care if delete was successfull
+            }
+
+            if (osFileExists(file)) {
+                if (!osDeleteFile(file)) {
+                    log("rem file exists. delete failed : ", file.getAbsolutePath());
+                } else {
+                    result = true; // was deleted
+                }
+            } else {
+                log("rem file '", file.getAbsolutePath(), "' does not exist");
+                result = true; // it is gone
+            }
+            log(MediaTransactionLogEntryType.DELETE.getCommand(file.getAbsolutePath(), ""));
+        }
+        return result;
+    }
+
+    @Deprecated
     protected int moveOrCopyFiles(final boolean move, String what, PhotoPropertiesDiffCopy exifChanges,
                                   SelectedFiles fotos, File[] destFiles,
+                                  IProgessListener progessListener) {
+        return moveOrCopyFiles(move, what, exifChanges, fotos, FileFacade.get(destFiles), progessListener);
+    }
+
+    protected TransactionLoggerBase createTransactionLogger(long now) {
+        return new TransactionLoggerBase(this, now);
+    }
+
+    private PhotoAutoprocessingDto getPhotoAutoprocessingDto(File destDirFolder) {
+        PhotoAutoprocessingDto autoProccessData = null;
+        try {
+            autoProccessData = new PhotoAutoprocessingDto().load(destDirFolder);
+        } catch (IOException e) {
+            log("cannot load .apm file for '", destDirFolder, "'. ", e.getMessage());
+            autoProccessData = null;
+        }
+        return autoProccessData;
+    }
+
+    public PhotoPropertiesBulkUpdateService createWorkflow(TransactionLoggerBase logger, String dbgContext) {
+        return new PhotoPropertiesBulkUpdateService(logger);
+    }
+
+    private File[] createDestFiles(IFileNameProcessor renameProcessor, File destDirFolder, Date[] datesLastModified, File... sourceFiles) {
+        File[] result = new File[sourceFiles.length];
+
+        int pos = 0;
+        File destFile;
+        for (File srcFile : sourceFiles) {
+            if (renameProcessor != null) {
+                destFile = renameProcessor.getNextFile(srcFile, getRenameSourceFileDate(srcFile, datesLastModified, pos), -1);
+            } else {
+                destFile = new File(destDirFolder, srcFile.getName());
+            }
+            result[pos++] = destFile;
+        }
+
+        return result;
+    }
+
+    private Date getRenameSourceFileDate(File srcFile, Date[] datesLastModified, int pos) {
+        if ((datesLastModified != null) && (pos >= 0) && (pos < datesLastModified.length)) {
+            return datesLastModified[pos];
+        }
+        return new Date(srcFile.lastModified());
+    }
+
+    /**
+     * does the copying and/or apply exif changes. also used by unittesting
+     */
+    protected int moveOrCopyFiles(final boolean move, String what, PhotoPropertiesDiffCopy exifChanges,
+                                  SelectedFiles fotos, IFile[] destFiles,
                                   IProgessListener progessListener) {
         long    startTimestamp = 0;
         if (LibGlobal.debugEnabledJpgMetaIo) {
@@ -259,7 +336,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                 int fileCount = destFiles.length;
 
                 Long[] ids = fotos.getIds();
-                File[] sourceFiles = fotos.getFiles();
+                IFile[] sourceFiles = fotos.getIFiles();
 
                 mModifiedSrcFiles = (move) ? new ArrayList<String>() : null;
                 mModifiedDestFiles = new ArrayList<String>();
@@ -279,8 +356,8 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                 boolean sameFile;
 
                 while (pos < fileCount) {
-                    File sourceFile = FileUtils.tryGetCanonicalFile(sourceFiles[pos]);
-                    File destFile = FileUtils.tryGetCanonicalFile(destFiles[pos]);
+                    IFile sourceFile = sourceFiles[pos];
+                    IFile destFile = destFiles[pos].getCanonicalFile();
                     Long id = ids[pos];
 
                     boolean deleteOriginalAfterFinish = move;
@@ -290,7 +367,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                         if (!onProgress(itemcount, maxCount, (sourceFile == null) ? null : sourceFile.toString())) break;
                     }
 
-                    File destRenamed;
+                    IFile destRenamed;
                     sameFile = (sourceFile != null) && sourceFile.equals(destFile);
                     if ((exifChanges != null) && sameFile) {
                         // copy/move with exif changes ==> exif changes only
@@ -299,8 +376,8 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                         destRenamed = renameDuplicate(destFile);
                     }
 
-                    final String sourcePath = FileUtils.tryGetCanonicalPath(sourceFile, null);
-                    final String destPath = FileUtils.tryGetCanonicalPath(destRenamed, null);
+                    final String sourcePath = sourceFile.getCanonicalPath();
+                    final String destPath = destRenamed.getCanonicalPath();
                     if ((sourcePath != null) && (destPath != null)) {
 
                         if (exifChanges == null) {
@@ -308,18 +385,18 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                             if (osFileMoveOrCopy(move, destRenamed, sourceFile)) itemCount++;
 
 
-                            File sourceSidecar = getSidecar(sourceFile, false);
+                            IFile sourceSidecar = getSidecar(sourceFile, false);
                             if (osFileExists(sourceSidecar)) {
-                                File destSidecar = getSidecar(destRenamed, false);
+                                IFile destSidecar = getSidecar(destRenamed, false);
                                 if (osFileMoveOrCopy(move, destSidecar, sourceSidecar)) itemCount++;
                             }
 
                             sourceSidecar = getSidecar(sourceFile, true);
                             if (osFileExists(sourceSidecar)) {
-                                File destSidecar = getSidecar(destRenamed, true);
+                                IFile destSidecar = getSidecar(destRenamed, true);
                                 if (osFileMoveOrCopy(move, destSidecar, sourceSidecar)) itemCount++;
                             }
-                            addTransactionLog(id, sourceFile.getPath(), now, moveOrCopyCommand, destFile.getPath());
+                            addTransactionLog(id, sourceFile.getAbsolutePath(), now, moveOrCopyCommand, destFile.getAbsolutePath());
                         } else { // else move/copy with simultanious exif changes
                             PhotoPropertiesDiffCopy mediaDiffCopy = exifChanges;
                             // new style move/copy image with sidecarfile(s) with exif autoprocessing
@@ -327,7 +404,8 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                             // for the log the file has already been copied/moved
                             logger.set(id, sourcePath);
 
-                            PhotoPropertiesUpdateHandler exifProcessor = createWorkflow(logger, what).applyChanges(sourceFile, destPath, id, move, mediaDiffCopy);
+                            PhotoPropertiesUpdateHandler exifProcessor = createWorkflow(logger, what)
+                                    .applyChanges(sourceFile, destPath, id, move, mediaDiffCopy);
 
                             if (exifProcessor == null) break; // error
 
@@ -339,7 +417,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                             String modifiedOutPath = exifProcessor.getAbsoluteJpgOutPath();
                             if (null != modifiedOutPath) {
                                 // destFile might have renamed it-s extension for private images
-                                destFile = new File(modifiedOutPath);
+                                destFile = FileFacade.convert(new File(modifiedOutPath));
                                 sameFile = (sourceFile != null) && sourceFile.equals(destFile);
                             }
 
@@ -374,51 +452,15 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
         return itemCount;
     }
 
-    protected TransactionLoggerBase createTransactionLogger(long now) {
-        return new TransactionLoggerBase(this, now);
-    }
-
-    private PhotoAutoprocessingDto getPhotoAutoprocessingDto(File destDirFolder) {
-        PhotoAutoprocessingDto autoProccessData = null;
-        try {
-            autoProccessData = new PhotoAutoprocessingDto().load(destDirFolder);
-        } catch (IOException e) {
-            log("cannot load .apm file for '", destDirFolder, "'. ", e.getMessage());
-            autoProccessData = null;
-        }
-        return autoProccessData;
-    }
-
-    public PhotoPropertiesBulkUpdateService createWorkflow(TransactionLoggerBase logger, String dbgContext) {
-        return new PhotoPropertiesBulkUpdateService(logger);
-    }
-
-    private File[] createDestFiles(IFileNameProcessor renameProcessor, File destDirFolder, Date[] datesLastModified, File... sourceFiles) {
-        File[] result = new File[sourceFiles.length];
-
-        int pos = 0;
-        File destFile;
-        for(File srcFile : sourceFiles) {
-            if (renameProcessor != null) {
-                destFile = renameProcessor.getNextFile(srcFile, getRenameSourceFileDate(srcFile, datesLastModified, pos), -1);
-            } else {
-                destFile = new File(destDirFolder, srcFile.getName());
-            }
-            result[pos++] = destFile;
-        }
-
-        return result;
-    }
-
-    private Date getRenameSourceFileDate(File srcFile, Date[] datesLastModified, int pos) {
-        if ((datesLastModified != null) && (pos >= 0) && (pos < datesLastModified.length)) {
-            return datesLastModified[pos];
-        }
-        return new Date(srcFile.lastModified());
-    }
-
-    /** executes os specific move or copy operation and updates the list of modified files */
+    @Deprecated
     protected boolean osFileMoveOrCopy(boolean move, File dest, File source) {
+        return osFileMoveOrCopy(move, FileFacade.convert(dest), FileFacade.convert(source));
+    }
+
+    /**
+     * executes os specific move or copy operation and updates the list of modified files
+     */
+    protected boolean osFileMoveOrCopy(boolean move, IFile dest, IFile source) {
         boolean result = false;
         long fileTime = source.lastModified();
 
@@ -438,15 +480,22 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
         return result;
     }
 
-    private void addProcessedFiles(boolean move, File dest, File source) {
+    private void addProcessedFiles(boolean move, IFile dest, IFile source) {
         mModifiedDestFiles.add(dest.getAbsolutePath());
         if (move) {
             mModifiedSrcFiles.add(source.getAbsolutePath());
         }
     }
 
-    /** can be replaced by mock/stub in unittests */
+    @Deprecated
     protected boolean osFileMove(File dest, File source) {
+        return osFileMove(FileFacade.convert(dest), FileFacade.convert(source));
+    }
+
+    /**
+     * can be replaced by mock/stub in unittests
+     */
+    protected boolean osFileMove(IFile dest, IFile source) {
         if (osRenameTo(dest, source)) {
             // move within same mountpoint
             if (LibGlobal.debugEnabledJpg) {
@@ -479,8 +528,18 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
         return false;
     }
 
+    @Deprecated
     protected boolean osRenameTo(File dest, File source) {
-        return this.fileApi.osRenameTo(dest, source);
+        return osRenameTo(FileFacade.convert(dest), FileFacade.convert(source));
+    }
+
+    protected boolean osRenameTo(IFile dest, IFile source) {
+        return source.renameTo(dest);
+    }
+
+    @Deprecated
+    protected boolean osFileCopy(File targetFullPath, File sourceFullPath) {
+        return osFileCopy(FileFacade.convert(targetFullPath), FileFacade.convert(sourceFullPath));
     }
 
     /**
@@ -490,52 +549,31 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
      *
      * Copies a file from the sourceFullPath path to the target path.
      */
-    protected boolean osFileCopy(File targetFullPath, File sourceFullPath) {
+    protected boolean osFileCopy(IFile targetFullPath, IFile sourceFullPath) {
         return _osFileCopy(targetFullPath, sourceFullPath, this);
     }
 
-    /**
-     *
-     * @param sourceFullPath the path of the file that shall be copied including the file name with ending
-     * @param targetFullPath the path of the file  that shall be written to without filename
-     *
-     * Copies a file from the sourceFullPath path to the target path.
-     */
-    private static boolean _osFileCopy(File targetFullPath, File sourceFullPath, FileCommands owner) {
-        boolean result = true;
-
-        FileChannel in = null;
-        FileChannel out = null;
-        try {
-            in = new FileInputStream(sourceFullPath).getChannel();
-            out = new FileOutputStream(targetFullPath).getChannel();
-            long size = in.size();
-            MappedByteBuffer buf = in.map(FileChannel.MapMode.READ_ONLY, 0,	size);
-            out.write(buf);
-        } catch (Throwable e) {
-            result = false;
-            if (owner != null) {
-                owner.onException(e, "_osFileCopy", sourceFullPath, targetFullPath);
-            }
-        } finally {
-            FileUtils.close(in,"_osFileCopy-close");
-            FileUtils.close(out,"_osFileCopy-close");
-        }
-        if (LibGlobal.debugEnabledJpg) {
-            logger.info("osFileCopy '" + sourceFullPath
-                    + "' => '" + targetFullPath + "' success=" + result);
-        }
-        return result;
+    @Deprecated
+    protected boolean osDeleteFile(File file) {
+        return osDeleteFile(FileFacade.convert(file));
     }
 
-    protected boolean osDeleteFile(File file) {
-        final boolean result = fileApi.osDeleteFile(file);
+    protected boolean osDeleteFile(IFile file) {
+        final boolean result = file.delete();
         if (LibGlobal.debugEnabledJpg) logger.info("osDeleteFile '" + file + "' success=" + result);
         return result;
     }
 
     /** to be replaced by mock/stub in unittests */
+    @Deprecated
     protected boolean osCreateDirIfNeccessary(File destDirFolder) {
+        return osCreateDirIfNeccessary(FileFacade.convert(destDirFolder));
+    }
+
+    /**
+     * to be replaced by mock/stub in unittests
+     */
+    protected boolean osCreateDirIfNeccessary(IFile destDirFolder) {
         return destDirFolder.mkdirs() || destDirFolder.isDirectory();
     }
 

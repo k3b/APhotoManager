@@ -34,9 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -45,7 +43,9 @@ import java.util.Date;
 import java.util.List;
 
 import de.k3b.LibGlobal;
+import de.k3b.io.FileFacade;
 import de.k3b.io.FileUtils;
+import de.k3b.io.IFile;
 import de.k3b.tagDB.TagConverter;
 
 /**
@@ -59,6 +59,7 @@ public class XmpSegment {
     private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
     // public: can be changed in settings dialog
     public  static boolean DEBUG = false;
+
 
     private XMPMeta xmpMeta = null;
     private static XMPSchemaRegistry registry = XMPMetaFactory.getSchemaRegistry();
@@ -225,10 +226,15 @@ public class XmpSegment {
         return this;
     }
 
+    @Deprecated
     public XmpSegment load(File file, String dbg_context) throws FileNotFoundException {
-        FileInputStream stream = null;
+        return load(FileFacade.convert(file), dbg_context);
+    }
+
+    public XmpSegment load(IFile file, String dbg_context) throws FileNotFoundException {
+        InputStream stream = null;
         try {
-            stream = new FileInputStream(file);
+            stream = file.openInputStream();
             setXmpMeta(XMPMetaFactory.parse(stream), dbg_context + " file:" + file);
         } catch (XMPException e) {
             onError("->XmpSegment.load " + file, e);
@@ -236,7 +242,7 @@ public class XmpSegment {
             // workaround: my android-4.2 tahblet cannot re-read it-s xmp without trailing "\n"
             if ((file != null) && file.exists()) {
                 try {
-                    setXmpMeta(XMPMetaFactory.parse(FileUtils.streamFromStringContent(FileUtils.readFile(file) + "\n")), XmpSegment.dbg_context);
+                    setXmpMeta(XMPMetaFactory.parse(FileUtils.streamFromStringContent(FileUtils.readFile(file.openInputStream()) + "\n")), XmpSegment.dbg_context);
                 } catch (IOException e1) {
                     onError("->XmpSegment.load-via-string " + file, e);
                 } catch (XMPException e1) {
@@ -250,17 +256,21 @@ public class XmpSegment {
         return this;
     }
 
+    @Deprecated
     public XmpSegment save(File file, boolean humanReadable, String dbg_context) throws FileNotFoundException {
-        FileOutputStream stream = null;
+        return save(FileFacade.convert(file), humanReadable, dbg_context);
+    }
+
+    public XmpSegment save(IFile file, boolean humanReadable, String dbg_context) throws FileNotFoundException {
+        OutputStream stream = null;
         try {
-            stream = new FileOutputStream(file);
+            stream = file.openOutputStream();
             save(stream, humanReadable, dbg_context + file);
         } finally {
             FileUtils.close(stream, file);
             setFilelastModified(file);
         }
         return this;
-
     }
 
     public XmpSegment save(OutputStream os, boolean humanReadable, String dbg_context) {
@@ -331,7 +341,12 @@ public class XmpSegment {
     }
 
     /** when xmp sidecar file was last modified or 0 */
+    @Deprecated
     public void setFilelastModified(File file) {
+        setFilelastModified(FileFacade.convert(file));
+    }
+
+    public void setFilelastModified(IFile file) {
         if (file != null) this.filelastModified = file.lastModified() / 1000; // File/Date has millisecs
     }
 

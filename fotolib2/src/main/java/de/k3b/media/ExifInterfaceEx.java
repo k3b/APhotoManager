@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 import de.k3b.LibGlobal;
+import de.k3b.io.FileFacade;
 import de.k3b.io.IFile;
 import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
@@ -139,7 +140,7 @@ public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
      */
     @Deprecated
     protected void fixDateTakenIfNeccessary(File inFile) {
-        fixDateTakenIfNeccessary(fileFacade.convert(inFile));
+        fixDateTakenIfNeccessary(FileFacade.convert(inFile));
     }
 
     protected void fixDateTakenIfNeccessary(IFile inFile) {
@@ -174,7 +175,7 @@ public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
 
     @Override
     public IPhotoProperties setPath(String filePath) {
-        mExifFile = (filePath != null) ? fileFacade.convert(new File(filePath)) : null;
+        mExifFile = (filePath != null) ? FileFacade.convert(new File(filePath)) : null;
         if (xmpExtern != null) xmpExtern.setPath(filePath);
         return this;
     }
@@ -455,7 +456,7 @@ public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
      */
     @Deprecated
     public void setFilelastModified(File file) {
-        setFilelastModified(fileFacade.convert(file));
+        setFilelastModified(FileFacade.convert(file));
     }
 
     /** when xmp sidecar file was last modified or 0 */

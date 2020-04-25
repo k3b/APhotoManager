@@ -28,10 +28,12 @@ import java.io.Reader;
 
 import de.k3b.csv2db.csv.CsvReader;
 import de.k3b.io.DateUtil;
+import de.k3b.io.FileFacade;
 import de.k3b.io.FileUtils;
+import de.k3b.io.IFile;
 import de.k3b.io.VISIBILITY;
-import de.k3b.media.PhotoPropertiesImageReaderIntegrationTests;
 import de.k3b.media.PhotoPropertiesDTO;
+import de.k3b.media.PhotoPropertiesImageReaderIntegrationTests;
 import de.k3b.tagDB.TagConverter;
 
 public class TestUtil {
@@ -83,6 +85,10 @@ public class TestUtil {
     }
 
     public static File saveTestResourceAs(String resourceName, File destination) throws IOException {
+        return saveTestResourceAs(resourceName, FileFacade.convert(destination)).getFile();
+    }
+
+    public static IFile saveTestResourceAs(String resourceName, IFile destination) throws IOException {
         InputStream sourceStream = getResourceInputStream(resourceName);
 
         FileUtils.copyReplace(sourceStream, destination);

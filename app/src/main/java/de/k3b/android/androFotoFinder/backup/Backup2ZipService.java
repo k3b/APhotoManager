@@ -34,6 +34,8 @@ import de.k3b.android.androFotoFinder.media.PhotoPropertiesMediaDBCursor;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.database.QueryParameter;
+import de.k3b.io.FileFacade;
+import de.k3b.io.IFile;
 import de.k3b.io.IItemSaver;
 import de.k3b.io.IProgessListener;
 import de.k3b.io.StringUtils;
@@ -126,10 +128,10 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
                 boolean addPhotos = BackupOptions.allOf(jobOptions, BackupOptions.PHOTOS_WITH_EXISTING_XMP);
                 if (addPhotos) {
                     // pipline for (IPhotoProperties item: query(filter)) : Zip+=File(item)
-                    final IItemSaver<File> file2ZipSaver = new IItemSaver<File>() {
+                    final IItemSaver<IFile> file2ZipSaver = new IItemSaver<IFile>() {
                         @Override
-                        public boolean save(File item) {
-                            CompressItem compressItem = job.addToCompressQue("", item);
+                        public boolean save(IFile item) {
+                            CompressItem compressItem = addCompressItem((FileFacade) item);
                         /*
                         if (PhotoPropertiesUtil.isImage(item.getName(), PhotoPropertiesUtil.IMG_TYPE_COMPRESSED)) {
                             // performance improvement: jpg-s should not be compressed
@@ -169,6 +171,12 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
             }
         }
         return null;
+    }
+
+    // TODO add IFile to job
+    @Deprecated
+    public CompressItem addCompressItem(FileFacade item) {
+        return job.addToCompressQue("", item.getFile());
     }
 
     /**

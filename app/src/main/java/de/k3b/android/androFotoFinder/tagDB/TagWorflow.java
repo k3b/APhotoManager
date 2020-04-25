@@ -33,6 +33,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.IMediaRepositoryApi;
 import de.k3b.android.io.AndroidFileCommands;
 import de.k3b.io.FileCommands;
+import de.k3b.io.IFile;
 import de.k3b.io.IProgessListener;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.media.MediaFormatter;
@@ -65,7 +66,7 @@ public class TagWorflow extends TagProcessor implements IProgessListener {
         this.items = loadTagWorflowItems(context, (selectedItems == null) ? null : selectedItems.toIdString(), anyOfTags);
         for (TagSql.TagWorflowItem item : items) {
             List<String> tags = item.tags;
-            File xmpFile = FileCommands.getExistingSidecarOrNull(item.path);
+            IFile xmpFile = FileCommands.getExistingSidecarOrNull(item.path);
             if ((xmpFile != null) && xmpFile.exists() && (item.xmpLastModifiedDate < xmpFile.lastModified())){ // || (tags == null) || (tags.size() == 0)) {
                 // xmp has been updated since last db update.
                 tags = loadTags(xmpFile);
@@ -170,13 +171,13 @@ public class TagWorflow extends TagProcessor implements IProgessListener {
         return true;
     }
 
-    private List<String> loadTags(File xmpFile) {
+    private List<String> loadTags(IFile xmpFile) {
         PhotoPropertiesXmpSegment xmp = loadXmp(xmpFile);
         return (xmp == null) ? null : xmp.getTags();
     }
 
     @NonNull
-    private PhotoPropertiesXmpSegment loadXmp(File xmpFile) {
+    private PhotoPropertiesXmpSegment loadXmp(IFile xmpFile) {
         if ((xmpFile != null) && (xmpFile.exists())) {
             try {
                 PhotoPropertiesXmpSegment xmp = new PhotoPropertiesXmpSegment();
