@@ -57,7 +57,6 @@ import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.FilePermissionActivity;
 import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.database.QueryParameter;
-import de.k3b.io.FileApi;
 import de.k3b.io.IFile;
 import de.k3b.io.PhotoAutoprocessingDto;
 import de.k3b.media.ExifInterface;
@@ -179,7 +178,7 @@ public class AndroFotoFinderApp extends Application {
                 MediaDBRepository.LOG_TAG,
                 MediaContentproviderRepositoryImpl.LOG_TAG,
                 DocumentFileTranslator.TAG, DocumentFileTranslator.TAG_DOCFILE,
-                FilePermissionActivity.TAG, FileApi.TAG, IFile.TAG) {
+                FilePermissionActivity.TAG, IFile.TAG) {
 
             @Override
             public void uncaughtException(Thread thread, Throwable ex) {

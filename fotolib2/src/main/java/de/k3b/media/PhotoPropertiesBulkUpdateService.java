@@ -187,11 +187,6 @@ public class PhotoPropertiesBulkUpdateService {
         }
     }
 
-    @Deprecated
-    protected void deleteFile(File delete) {
-        deleteFile(FileFacade.convert(delete));
-    }
-
     protected void deleteFile(IFile delete) {
         if ((delete != null) && delete.exists()) {
             delete.delete();
@@ -224,10 +219,6 @@ public class PhotoPropertiesBulkUpdateService {
         return null;
     }
 
-    @Deprecated
-    protected long updateMediaDB(long id, String oldJpgAbsolutePath, File newJpgFile) {
-        return updateMediaDB(id, oldJpgAbsolutePath, FileFacade.convert(newJpgFile));
-    }
     /** todo overwrite in android class to implement update media db */
     protected long updateMediaDB(long id, String oldJpgAbsolutePath, IFile newJpgFile) {
         return id;

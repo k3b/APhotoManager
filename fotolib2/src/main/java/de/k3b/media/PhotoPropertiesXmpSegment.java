@@ -26,7 +26,6 @@ import com.adobe.xmp.impl.XMPDateTimeImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.OutputStream;
 import java.util.Date;
@@ -35,7 +34,6 @@ import java.util.List;
 import de.k3b.LibGlobal;
 import de.k3b.io.DateUtil;
 import de.k3b.io.FileCommands;
-import de.k3b.io.FileFacade;
 import de.k3b.io.GeoUtil;
 import de.k3b.io.IFile;
 import de.k3b.io.VISIBILITY;
@@ -197,12 +195,6 @@ public class PhotoPropertiesXmpSegment extends XmpSegment implements IPhotoPrope
         }
 
         return this;
-    }
-
-    @Deprecated
-    @Override
-    public XmpSegment save(File file, boolean humanReadable, String dbg_context) throws FileNotFoundException {
-        return save(FileFacade.convert(file), humanReadable, dbg_context);
     }
 
     @Override

@@ -37,20 +37,9 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
 
     // private static final String LOG_FILE_ENCODING = "UTF-8";
 
-    @Deprecated
-    public static boolean isSidecar(File file) {
-        if (file == null) return false;
-        return isSidecar(file.getName());
-    }
-
     public static boolean isSidecar(IFile file) {
         if (file == null) return false;
         return isSidecar(file.getName());
-    }
-
-    @Deprecated
-    public static IFile getSidecar(File file, boolean longFormat) {
-        return getSidecar(FileFacade.convert(file), longFormat);
     }
 
     public static IFile getSidecar(IFile file, boolean longFormat) {

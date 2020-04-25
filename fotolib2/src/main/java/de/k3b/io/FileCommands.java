@@ -55,7 +55,6 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
     public static final int OP_DELETE = 3;
     public static final int OP_RENAME = 4;
     public static final int OP_UPDATE = 5;
-    protected final FileApi fileApi;
 
     protected ArrayList<String> mModifiedDestFiles;
     protected ArrayList<String> mModifiedSrcFiles;
@@ -63,8 +62,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
     // may be set while looping over items to inform client over progress
     private IProgessListener progessListener;
 
-    public FileCommands(FileApi fileApi) {
-        this.fileApi = fileApi;
+    public FileCommands() {
         setLogFilePath(null);
     }
 
@@ -147,11 +145,6 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                     + "' => '" + targetFullPath + "' success=" + result);
         }
         return result;
-    }
-
-    @Deprecated
-    protected boolean deleteFileWithSidecar(File file) {
-        return deleteFileWithSidecar(FileFacade.convert(file));
     }
 
     /**
@@ -451,11 +444,6 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
         return itemCount;
     }
 
-    @Deprecated
-    protected boolean osFileMoveOrCopy(boolean move, File dest, File source) {
-        return osFileMoveOrCopy(move, FileFacade.convert(dest), FileFacade.convert(source));
-    }
-
     /**
      * executes os specific move or copy operation and updates the list of modified files
      */
@@ -484,11 +472,6 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
         if (move) {
             mModifiedSrcFiles.add(source.getAbsolutePath());
         }
-    }
-
-    @Deprecated
-    protected boolean osFileMove(File dest, File source) {
-        return osFileMove(FileFacade.convert(dest), FileFacade.convert(source));
     }
 
     /**
@@ -536,11 +519,6 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
         return source.renameTo(dest);
     }
 
-    @Deprecated
-    protected boolean osFileCopy(File targetFullPath, File sourceFullPath) {
-        return osFileCopy(FileFacade.convert(targetFullPath), FileFacade.convert(sourceFullPath));
-    }
-
     /**
      *
      * @param sourceFullPath the path of the file that shall be copied including the file name with ending
@@ -552,21 +530,10 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
         return _osFileCopy(targetFullPath, sourceFullPath, this);
     }
 
-    @Deprecated
-    protected boolean osDeleteFile(File file) {
-        return osDeleteFile(FileFacade.convert(file));
-    }
-
     protected boolean osDeleteFile(IFile file) {
         final boolean result = file.delete();
         if (LibGlobal.debugEnabledJpg) logger.info("osDeleteFile '" + file + "' success=" + result);
         return result;
-    }
-
-    /** to be replaced by mock/stub in unittests */
-    @Deprecated
-    protected boolean osCreateDirIfNeccessary(File destDirFolder) {
-        return osCreateDirIfNeccessary(FileFacade.convert(destDirFolder));
     }
 
     /**

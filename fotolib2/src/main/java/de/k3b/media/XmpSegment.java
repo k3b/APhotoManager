@@ -33,7 +33,6 @@ import com.adobe.xmp.properties.XMPPropertyInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,7 +42,6 @@ import java.util.Date;
 import java.util.List;
 
 import de.k3b.LibGlobal;
-import de.k3b.io.FileFacade;
 import de.k3b.io.FileUtils;
 import de.k3b.io.IFile;
 import de.k3b.tagDB.TagConverter;
@@ -226,11 +224,6 @@ public class XmpSegment {
         return this;
     }
 
-    @Deprecated
-    public XmpSegment load(File file, String dbg_context) throws FileNotFoundException {
-        return load(FileFacade.convert(file), dbg_context);
-    }
-
     public XmpSegment load(IFile file, String dbg_context) throws FileNotFoundException {
         InputStream stream = null;
         try {
@@ -254,11 +247,6 @@ public class XmpSegment {
             setFilelastModified(file);
         }
         return this;
-    }
-
-    @Deprecated
-    public XmpSegment save(File file, boolean humanReadable, String dbg_context) throws FileNotFoundException {
-        return save(FileFacade.convert(file), humanReadable, dbg_context);
     }
 
     public XmpSegment save(IFile file, boolean humanReadable, String dbg_context) throws FileNotFoundException {
@@ -341,11 +329,6 @@ public class XmpSegment {
     }
 
     /** when xmp sidecar file was last modified or 0 */
-    @Deprecated
-    public void setFilelastModified(File file) {
-        setFilelastModified(FileFacade.convert(file));
-    }
-
     public void setFilelastModified(IFile file) {
         if (file != null) this.filelastModified = file.lastModified() / 1000; // File/Date has millisecs
     }

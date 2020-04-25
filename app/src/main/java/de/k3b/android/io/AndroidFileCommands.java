@@ -86,7 +86,7 @@ public class AndroidFileCommands extends FileCommands {
 
     public AndroidFileCommands() {
         // setLogFilePath(getDefaultLogFile());
-        super(new AndroidFileApi());
+        super();
         setContext(null);
     }
 
@@ -534,7 +534,6 @@ public class AndroidFileCommands extends FileCommands {
             this.mContext = activity.getApplicationContext();
             closeLogFile();
             mScanner = PhotoPropertiesMediaFilesScanner.getInstance(mContext);
-            ((AndroidFileApi) this.fileApi).setContext(activity);
         }
 
         return this;

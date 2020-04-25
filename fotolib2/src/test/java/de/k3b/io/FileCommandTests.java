@@ -45,7 +45,7 @@ public class FileCommandTests {
     MediaTransactionLogEntryType lastMediaTransactionLogEntryType;
     class FileCommandsWithFakeTransactionLog extends FileCommands {
         FileCommandsWithFakeTransactionLog() {
-            super(new FileApi());
+            super();
         }
 
         @Override public void addTransactionLog(
