@@ -18,7 +18,6 @@
  */
 package de.k3b.io;
 
-import java.io.File;
 import java.util.Date;
 
 /**
@@ -33,5 +32,5 @@ public interface IFileNameProcessor {
      * @param firstFileInstanceNumber  number where numbering starts with. -1 : auto
      * @return next absoulte renamed file.
      */
-    File getNextFile(File sourceFile, Date sourceFileDate, int firstFileInstanceNumber);
+    IFile getNextFile(IFile sourceFile, Date sourceFileDate, int firstFileInstanceNumber);
 }

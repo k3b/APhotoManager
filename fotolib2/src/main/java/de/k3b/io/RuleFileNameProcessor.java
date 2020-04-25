@@ -46,18 +46,18 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
     private String mName;
     private String mNumberFormat;
     private final DecimalFormat mNumberFormatter = new DecimalFormat();
-    private final File mOutDir;
+    private static final IFile sSomeExampleSourceFile = FileFacade.convert(new File("/a/Xxxxxxxx.jpg"));
 
     // optimisationn as long as lastDateFormatted does not changed nextFileInstanceNumber is recycled
     private String mLastDateFormatted = null;
     private int mNextFileInstanceNumber = 0;
-    private static final File sSomeExampleSourceFile = new File("/a/Xxxxxxxx.jpg");
+    private final IFile mOutDir;
 
     /**
      * filename = outDir+dateFormat+name+numberFormat+fileExtension.
      * @param outDir . If null use directory where source file lives in.
      */
-    public RuleFileNameProcessor(File outDir) {
+    public RuleFileNameProcessor(IFile outDir) {
         this.mOutDir = outDir;
     }
     /**
@@ -70,7 +70,7 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
  *                      Example "000" always at least 3 digits
      * @param outDir  If null use directory where source file lives in.
      */
-    public RuleFileNameProcessor(String dateFormat, String name, String numberFormat, File outDir) {
+    public RuleFileNameProcessor(String dateFormat, String name, String numberFormat, IFile outDir) {
         this(outDir);
         set(dateFormat, name, numberFormat);
     }
@@ -78,11 +78,11 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
     /**
      * Fix Autoprocessing/PhotoAutoprocessingDto renaming rules that contain source file direcory names.
      */
-    public RuleFileNameProcessor(RuleFileNameProcessor ancestor, File newDir) {
+    public RuleFileNameProcessor(RuleFileNameProcessor ancestor, IFile newDir) {
         this(newDir);
         if (ancestor != null) {
             String name = ancestor.mName;
-            final File oldDir = ancestor.mOutDir;
+            final IFile oldDir = ancestor.mOutDir;
             if ((newDir != null) && (!StringUtils.isNullOrEmpty(name) & (oldDir != null)
                     && (newDir != oldDir))) {
                 name = replace(name,ancestor.getDirBaseName(),this.getDirBaseName());
@@ -175,6 +175,28 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
         return (!filenameWithoutPath.contains(this.mName));
     }
 
+    public static IFile getFile(IFile _file) {
+        return (_file != null) ? _file : sSomeExampleSourceFile;
+    }
+
+    /**
+     * Fix Autoprocessing/PhotoAutoprocessingDto renaming rules that contain source file direcory names.
+     */
+    public static String translateName(RuleFileNameProcessor srcData, IFile outDir) {
+        RuleFileNameProcessor translated = new RuleFileNameProcessor(srcData, outDir);
+        return translated.mName;
+    }
+
+    @Override
+    public String toString() {
+        return ListUtils.toString(" ", this.getClass().getSimpleName(), mDateFormat, mName, mNumberFormat, ": +", mNextFileInstanceNumber);
+    }
+
+    public String getDirBaseName() {
+        if (mOutDir != null) return getBaseName(mOutDir.getName());
+        return null;
+    }
+
     /**
      * Calculate next free file name for sourceFile. Sourcefiles should be ordered asc by sourceFileDate
      *
@@ -182,13 +204,13 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
      * @return next absoulte renamed file.
      */
     @Override
-    public File getNextFile(File sourceFile, Date sourceFileDate, int firstFileInstanceNumber) {
+    public IFile getNextFile(IFile sourceFile, Date sourceFileDate, int firstFileInstanceNumber) {
         String name = getFile(sourceFile).getName();
-        File outDir = (this.mOutDir != null) ? this.mOutDir : sourceFile.getParentFile();
+        IFile outDir = (this.mOutDir != null) ? this.mOutDir : sourceFile.getParentFile();
 
         if (!mustRename(name)) {
 			// no rename rule or file already matches rules
-            File result = new File(outDir, name);
+            IFile result = outDir.create(name, UNKNOWN_MIME);
 
             // usecase: apply auto where inFile is already in outdir: no modification
             if ((sourceFile != null) && sourceFile.equals(result)) return result;
@@ -208,10 +230,10 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
         }
         // else reuse mNextFileInstanceNumber for the same date
         mLastDateFormatted = dateFormatted;
-        File result = null;
+        IFile result = null;
         int tryCount = 0;
         do {
-            result = new File(outDir, generateFileName(dateFormatted, mNextFileInstanceNumber, fileExtension));
+            result = outDir.create(generateFileName(dateFormatted, mNextFileInstanceNumber, fileExtension), UNKNOWN_MIME);
             mNextFileInstanceNumber++;
             if (!fileOrSidecarExists(result)) return result; // filename not in use yet
             tryCount++;
@@ -223,26 +245,6 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
 
         // give up after a lot of tries.
         throw new IllegalArgumentException(msg);
-    }
-
-    public static File getFile(File _file) {
-        return (_file != null) ? _file : sSomeExampleSourceFile;
-    }
-
-    @Override
-    public String toString() {
-        return ListUtils.toString(" ", this.getClass().getSimpleName(),  mDateFormat, mName, mNumberFormat, ": +", mNextFileInstanceNumber);
-    }
-
-    public String getDirBaseName() {
-        if (mOutDir != null) return getBaseName(mOutDir.getName());
-        return null;
-    }
-
-    public String getParentDirBaseName() {
-        File parent = (mOutDir != null) ? mOutDir.getParentFile() : null;
-        if (parent != null) return getBaseName(parent.getName());
-        return null;
     }
 
     /** Get name without leading numbers. i.e. getBaseName("01701Test001") ==> "Test". package to allow unittesting */
@@ -265,11 +267,9 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
         return result;
     }
 
-    /**
-     * Fix Autoprocessing/PhotoAutoprocessingDto renaming rules that contain source file direcory names.
-     */
-    public static String translateName(RuleFileNameProcessor srcData, File outDir) {
-        RuleFileNameProcessor translated = new RuleFileNameProcessor(srcData, outDir);
-        return translated.mName;
+    public String getParentDirBaseName() {
+        IFile parent = (mOutDir != null) ? mOutDir.getParentFile() : null;
+        if (parent != null) return getBaseName(parent.getName());
+        return null;
     }
 }

@@ -172,7 +172,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
      * @param selectedFiles
      * @param destDirFolder where files are moved/copied to
      * @param progessListener  */
-    public int moveOrCopyFilesTo(boolean move, SelectedFiles selectedFiles, File destDirFolder, IProgessListener progessListener) {
+    public int moveOrCopyFilesTo(boolean move, SelectedFiles selectedFiles, IFile destDirFolder, IProgessListener progessListener) {
         PhotoAutoprocessingDto autoProccessData = (!LibGlobal.apmEnabled) ? null : getPhotoAutoprocessingDto(destDirFolder);
 
         return moveOrCopyFilesTo(move, selectedFiles, destDirFolder, autoProccessData, progessListener);
@@ -187,7 +187,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
      * @param destDirFolder where files are moved/copied to
      * @param autoProccessData null or data for auto rename/exif data
      * @param progessListener  */
-    public int moveOrCopyFilesTo(boolean move, SelectedFiles selectedFiles, File destDirFolder,
+    public int moveOrCopyFilesTo(boolean move, SelectedFiles selectedFiles, IFile destDirFolder,
                                  PhotoAutoprocessingDto autoProccessData, IProgessListener progessListener) {
         boolean doNotRenameIfSourceInDestFolder = false;
         IFileNameProcessor renameProcessor = null;
@@ -218,11 +218,11 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
      */
     int moveOrCopyFilesTo(boolean move,
                           PhotoPropertiesDiffCopy exifChanges, SelectedFiles selectedFiles, IFileNameProcessor renameProcessor,
-                          File destDirFolder, IProgessListener progessListener) {
+                          IFile destDirFolder, IProgessListener progessListener) {
         int result = 0;
         if (canProcessFile(move ? OP_MOVE : OP_COPY)) {
             if (osCreateDirIfNeccessary(destDirFolder)) {
-                File[] destFiles = createDestFiles(renameProcessor, destDirFolder, selectedFiles.getDatesPhotoTaken() , selectedFiles.getFiles());
+                IFile[] destFiles = createDestFiles(renameProcessor, destDirFolder, selectedFiles.getDatesPhotoTaken(), selectedFiles.getIFiles());
 
                 result = moveOrCopyFiles(move, (move ? "mov" : "copy"), exifChanges, selectedFiles, destFiles, progessListener);
 
@@ -275,7 +275,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
         return new TransactionLoggerBase(this, now);
     }
 
-    private PhotoAutoprocessingDto getPhotoAutoprocessingDto(File destDirFolder) {
+    private PhotoAutoprocessingDto getPhotoAutoprocessingDto(IFile destDirFolder) {
         PhotoAutoprocessingDto autoProccessData = null;
         try {
             autoProccessData = new PhotoAutoprocessingDto().load(destDirFolder);
@@ -290,16 +290,16 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
         return new PhotoPropertiesBulkUpdateService(logger);
     }
 
-    private File[] createDestFiles(IFileNameProcessor renameProcessor, File destDirFolder, Date[] datesLastModified, File... sourceFiles) {
-        File[] result = new File[sourceFiles.length];
+    private IFile[] createDestFiles(IFileNameProcessor renameProcessor, IFile destDirFolder, Date[] datesLastModified, IFile... sourceFiles) {
+        IFile[] result = new IFile[sourceFiles.length];
 
         int pos = 0;
-        File destFile;
-        for (File srcFile : sourceFiles) {
+        IFile destFile;
+        for (IFile srcFile : sourceFiles) {
             if (renameProcessor != null) {
                 destFile = renameProcessor.getNextFile(srcFile, getRenameSourceFileDate(srcFile, datesLastModified, pos), -1);
             } else {
-                destFile = new File(destDirFolder, srcFile.getName());
+                destFile = destDirFolder.create(srcFile.getName(), srcFile.getMime());
             }
             result[pos++] = destFile;
         }
@@ -307,7 +307,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
         return result;
     }
 
-    private Date getRenameSourceFileDate(File srcFile, Date[] datesLastModified, int pos) {
+    private Date getRenameSourceFileDate(IFile srcFile, Date[] datesLastModified, int pos) {
         if ((datesLastModified != null) && (pos >= 0) && (pos < datesLastModified.length)) {
             return datesLastModified[pos];
         }

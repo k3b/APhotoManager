@@ -20,7 +20,6 @@
 package de.k3b.io;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -44,11 +43,11 @@ public class FileCommandLogger implements IFileCommandLogger {
         if (mLogFilePath != null) {
             OutputStream stream = null;
             try {
-                File logFile = new File(mLogFilePath);
+                IFile logFile = FileFacade.convert(new File(mLogFilePath));
                 if (logFile.exists()) {
                     // open existing in append mode
                     long ageInHours = (new Date().getTime() - logFile.lastModified()) / (1000 * 60 * 60);
-                    stream = new FileOutputStream(logFile, true);
+                    stream = logFile.openOutputStream();
                     mLogFile = new PrintWriter(stream, true);
 
                     if (ageInHours > 15) {
@@ -57,7 +56,7 @@ public class FileCommandLogger implements IFileCommandLogger {
                     }
                 } else {
                     // create new
-                    mLogFile = new PrintWriter(logFile, "UTF-8");
+                    mLogFile = new PrintWriter(logFile.openOutputStream());
                     log("rem " , new Date());
                 }
             } catch (Throwable e) {

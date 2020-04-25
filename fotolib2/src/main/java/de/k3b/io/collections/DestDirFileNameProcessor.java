@@ -22,7 +22,9 @@ package de.k3b.io.collections;
 import java.io.File;
 import java.util.Date;
 
+import de.k3b.io.FileFacade;
 import de.k3b.io.FileProcessor;
+import de.k3b.io.IFile;
 import de.k3b.io.IFileNameProcessor;
 
 /**
@@ -30,10 +32,14 @@ import de.k3b.io.IFileNameProcessor;
  */
 
 public class DestDirFileNameProcessor  extends FileProcessor implements IFileNameProcessor {
-    private final File destDirFolder;
+    private final IFile destDirFolder;
     private final boolean doNotRenameIfSourceInDestFolder;
 
     public DestDirFileNameProcessor(File destDirFolder, boolean doNotRenameIfSourceInDestFolder) {
+        this(FileFacade.convert(destDirFolder), doNotRenameIfSourceInDestFolder);
+    }
+
+    public DestDirFileNameProcessor(IFile destDirFolder, boolean doNotRenameIfSourceInDestFolder) {
         this.destDirFolder = destDirFolder;
         this.doNotRenameIfSourceInDestFolder = doNotRenameIfSourceInDestFolder;
     }
@@ -46,11 +52,11 @@ public class DestDirFileNameProcessor  extends FileProcessor implements IFileNam
      * @param firstFileInstanceNumber number where numbering starts with. -1 : auto  @return next absoulte renamed file.
      */
     @Override
-    public File getNextFile(File sourceFile, Date sourceFileDate, int firstFileInstanceNumber) {
+    public IFile getNextFile(IFile sourceFile, Date sourceFileDate, int firstFileInstanceNumber) {
         // usecase: apply auto where inFile is already in outdir.
         if (doNotRenameIfSourceInDestFolder && this.destDirFolder.equals(sourceFile.getParentFile())) return sourceFile;
 
-        File dest = renameDuplicate(new File(this.destDirFolder, sourceFile.getName()));
+        IFile dest = renameDuplicate(this.destDirFolder.create(sourceFile.getName(), UNKNOWN_MIME));
         return dest;
     }
 }

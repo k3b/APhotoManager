@@ -23,8 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
 
 import de.k3b.LibGlobal;
@@ -53,29 +53,19 @@ public class PhotoAutoprocessingDto implements Serializable {
     private static final String KEY_OUT_DIR         = "outDir";
 
     private final Properties properties;
-    private File outDir;
+    private IFile outDir;
 
     public PhotoAutoprocessingDto() {
         this(null, new Properties());
     }
 
-    public PhotoAutoprocessingDto(File outDir, Properties properties) {
+    public PhotoAutoprocessingDto(IFile outDir, Properties properties) {
         this.outDir = outDir;
         this.properties = properties;
     }
 
-    public PhotoAutoprocessingDto load(File outDir) throws IOException {
-        this.outDir = outDir;
-        File apm = getApmFile();
-        properties.clear();
-        if (apm.exists() && apm.isFile() && apm.canRead()) {
-            properties.load(apm);
-            if (LibGlobal.debugEnabled) {
-                logger.debug(this.getClass().getSimpleName() + ": loaded from " + apm + ":" + this);
-            }
-            return this;
-        }
-        return null;
+    public static IFile getApmFile(IFile outDir) {
+        return outDir.create(RuleFileNameProcessor.APM_FILE_NAME, null);
     }
 
     public void paste(PhotoAutoprocessingDto newData) {
@@ -105,18 +95,44 @@ public class PhotoAutoprocessingDto implements Serializable {
         return null;
     }
 
-    private File getApmFile() {
-        return getApmFile(this.outDir);
+    /**
+     * Android support: to persist state and to transfer activites via intent.
+     */
+    public static PhotoAutoprocessingDto load(Serializable content) {
+        PhotoAutoprocessingDto photoAutoprocessingDto = null;
+        if (content instanceof Properties) {
+            Properties properties = (Properties) content;
+            String outDir = properties.getProperty(KEY_OUT_DIR);
+            photoAutoprocessingDto = new PhotoAutoprocessingDto((outDir != null) ? FileFacade.convert(new File(outDir)) : null, properties);
+        }
+        if (LibGlobal.debugEnabled) {
+            logger.debug(PhotoAutoprocessingDto.class.getSimpleName() + ": load De-Serialize:" + photoAutoprocessingDto);
+        }
+        return photoAutoprocessingDto;
     }
 
-    public static File getApmFile(File outDir) {
-        return new File(outDir, RuleFileNameProcessor.APM_FILE_NAME);
+    public PhotoAutoprocessingDto load(IFile outDir) throws IOException {
+        this.outDir = outDir;
+        IFile apm = getApmFile();
+        properties.clear();
+        if (apm.exists() && apm.isFile() && apm.canRead()) {
+            properties.load(apm.openInputStream());
+            if (LibGlobal.debugEnabled) {
+                logger.debug(this.getClass().getSimpleName() + ": loaded from " + apm + ":" + this);
+            }
+            return this;
+        }
+        return null;
+    }
+
+    private IFile getApmFile() {
+        return getApmFile(this.outDir);
     }
 
     /** if has no data the file is deleted */
     public void save() throws IOException {
-        File apm = getApmFile();
-        FileOutputStream stream = null;
+        IFile apm = getApmFile();
+        OutputStream stream = null;
         if (isEmpty()) {
             if (LibGlobal.debugEnabled) {
                 logger.debug(this.getClass().getSimpleName() + ": save delete empty " + apm + ":" + this);
@@ -127,26 +143,12 @@ public class PhotoAutoprocessingDto implements Serializable {
                 if (LibGlobal.debugEnabled) {
                     logger.debug(this.getClass().getSimpleName() + ": save to " + apm + ":" + this);
                 }
-                stream = new FileOutputStream(apm);
+                stream = apm.openOutputStream();
                 properties.store(stream, PhotoAutoprocessingDto.sFileComment);
             } finally {
                 FileUtils.close(stream, "PhotoAutoprocessingDto.load(" + apm + ")");
             }
         }
-    }
-
-    /** Android support: to persist state and to transfer activites via intent.  */
-    public static PhotoAutoprocessingDto load(Serializable content) {
-        PhotoAutoprocessingDto photoAutoprocessingDto = null;
-        if (content instanceof Properties ) {
-            Properties properties = (Properties) content;
-            String outDir = properties.getProperty(KEY_OUT_DIR);
-            photoAutoprocessingDto = new PhotoAutoprocessingDto((outDir != null) ? new File(outDir) : null, properties);
-        }
-        if (LibGlobal.debugEnabled) {
-            logger.debug(PhotoAutoprocessingDto.class.getSimpleName() + ": load De-Serialize:" + photoAutoprocessingDto);
-        }
-        return photoAutoprocessingDto;
     }
 
     /** DateFormat part for {@link RuleFileNameProcessor} */
@@ -182,10 +184,11 @@ public class PhotoAutoprocessingDto implements Serializable {
         return this;
     }
 
-    public File getOutDir() {
+    public IFile getOutDir() {
         return outDir;
     }
-    public PhotoAutoprocessingDto setOutDir(File outDir) {
+
+    public PhotoAutoprocessingDto setOutDir(IFile outDir) {
         this.outDir = outDir;
         return this;
     }

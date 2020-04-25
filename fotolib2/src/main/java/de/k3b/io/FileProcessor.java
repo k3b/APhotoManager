@@ -26,6 +26,7 @@ import java.io.File;
  */
 
 public class FileProcessor extends FileCommandLogger implements IFileCommandLogger {
+    protected static final String UNKNOWN_MIME = null;
     private static final String EXT_SIDECAR = ".xmp";
 
     /// TODO what is mime for XMP
@@ -111,11 +112,6 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
                 || FileCommands.getSidecar(parent, name, true).exists();
     }
 
-    @Deprecated
-    public File renameDuplicate(File file) {
-        return FileFacade.convert(file).getFile();
-    }
-
     public static XmpFile getExistingSidecarOrNull(String absolutePath) {
         XmpFile result = null;
         if (absolutePath != null) {
@@ -138,8 +134,13 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
         return result;
     }
 
+    @Deprecated
+    public File renameDuplicate(File file) {
+        return FileFacade.convert(file).getFile();
+    }
+
     /**
-     * @return file if rename is not neccessary else File with new name
+     * @return file if rename is not neccessary else IFile with new name
      */
     public IFile renameDuplicate(IFile file) {
         if (!fileOrSidecarExists(file)) {

@@ -38,8 +38,8 @@ import static org.mockito.Mockito.verify;
  * Created by k3b on 06.08.2015.
  */
 public class FileCommandTests {
-    private static final File X_FAKE_OUTPUT_DIR = new File("/fakeOutputDir").getAbsoluteFile();
-    private static final File X_FAKE_INPUT_DIR = new File("/fakeInputDir").getAbsoluteFile();
+    private static final IFile X_FAKE_OUTPUT_DIR = FileFacade.convert(new File("/fakeOutputDir").getAbsoluteFile());
+    private static final IFile X_FAKE_INPUT_DIR = FileFacade.convert(new File("/fakeInputDir").getAbsoluteFile());
     private FileCommands sut;
 
     MediaTransactionLogEntryType lastMediaTransactionLogEntryType;
@@ -63,6 +63,26 @@ public class FileCommandTests {
         lastMediaTransactionLogEntryType = null;
     }
 
+    /**
+     * these files exist in source-dir and in dest-dir
+     */
+    private static void registerFakeFiles(FileProcessor sut, String... filenames) {
+        if (filenames.length == 0) {
+            doReturn(false).when(sut).osFileExists(any(File.class));
+        } else {
+            for (String filename : filenames) {
+                //doReturn(true).when(sut).osFileExists(new File(X_FAKE_OUTPUT_DIR, filename));
+                doReturn(true).when(sut).osFileExists(createTestFile(X_FAKE_OUTPUT_DIR, filename));
+                //doReturn(true).when(sut).osFileExists(new File(X_FAKE_INPUT_DIR, filename));
+                doReturn(true).when(sut).osFileExists(createTestFile(X_FAKE_INPUT_DIR, filename));
+            }
+        }
+    }
+
+    private static IFile createTestFile(IFile destDir, String name) {
+        return destDir.create(name, null);
+    }
+
     @Test
     public void shouldCopy() {
         registerFakeFiles(sut);
@@ -71,38 +91,7 @@ public class FileCommandTests {
         sut.moveOrCopyFilesTo(false, selectedFiles, X_FAKE_OUTPUT_DIR, null);
 
         Assert.assertEquals("MediaTransactionLogEntryType", MediaTransactionLogEntryType.COPY, lastMediaTransactionLogEntryType);
-        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a.jpg"), createTestFile(X_FAKE_OUTPUT_DIR, "a.jpg"));
-    }
-
-    @Test
-    public void shouldCopyWitRenameExistingMultiple() {
-        registerFakeFiles(sut, "a.jpg", "b.png", "b(1).png");
-        SelectedFiles selectedFiles = createTestSelectedFiles(X_FAKE_INPUT_DIR, "a.jpg", "b.png");
-
-        sut.moveOrCopyFilesTo(false, selectedFiles, X_FAKE_OUTPUT_DIR, null);
-
-        Assert.assertEquals("MediaTransactionLogEntryType", MediaTransactionLogEntryType.COPY, lastMediaTransactionLogEntryType);
-        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "a(1).jpg"), createTestFile(X_FAKE_INPUT_DIR, "a.jpg"));
-        verify(sut).osFileMoveOrCopy(false, new File(X_FAKE_OUTPUT_DIR, "b(2).png"), createTestFile(X_FAKE_INPUT_DIR, "b.png"));
-    }
-
-    @Test
-    public void shouldMoveExistingWithXmp() {
-        registerFakeFiles(sut, "a.jpg", "a.xmp", "a.jpg.xmp"); // a(3) is next possible
-
-        File destFile = new File(X_FAKE_OUTPUT_DIR, "a.jpg");
-
-        // do not rename duplicate
-        Mockito.doReturn(destFile).when(sut).renameDuplicate(destFile);
-
-        SelectedFiles selectedFiles = createTestSelectedFiles(X_FAKE_INPUT_DIR, "a.jpg");
-
-        sut.moveOrCopyFilesTo(true, selectedFiles, X_FAKE_OUTPUT_DIR, null);
-
-        Assert.assertEquals("MediaTransactionLogEntryType", MediaTransactionLogEntryType.MOVE, lastMediaTransactionLogEntryType);
-        verify(sut).osFileMoveOrCopy(true, new File(X_FAKE_OUTPUT_DIR, "a.jpg"), createTestFile(X_FAKE_INPUT_DIR, "a.jpg"));
-        verify(sut).osFileMoveOrCopy(true, new File(X_FAKE_OUTPUT_DIR, "a.xmp"), createTestFile(X_FAKE_INPUT_DIR, "a.xmp"));
-        verify(sut).osFileMoveOrCopy(true, new File(X_FAKE_OUTPUT_DIR, "a.jpg.xmp"), createTestFile(X_FAKE_INPUT_DIR, "a.jpg.xmp"));
+        verify(sut).osFileMoveOrCopy(false, createTestFile(X_FAKE_OUTPUT_DIR, "a.jpg"), createTestFile(X_FAKE_OUTPUT_DIR, "a.jpg"));
     }
 
     @Test
@@ -118,25 +107,38 @@ public class FileCommandTests {
         verify(sut).osDeleteFile(createTestFile(X_FAKE_OUTPUT_DIR, "a.jpg.xmp"));
     }
 
-    /** these files exist in source-dir and in dest-dir */
-    private static void registerFakeFiles(FileProcessor sut, String... filenames) {
-        if (filenames.length == 0) {
-            doReturn(false).when(sut).osFileExists(any(File.class));
-        } else {
-            for (String filename : filenames) {
-                doReturn(true).when(sut).osFileExists(new File(X_FAKE_OUTPUT_DIR, filename));
-                doReturn(true).when(sut).osFileExists(createTestFile(X_FAKE_OUTPUT_DIR, filename));
-                doReturn(true).when(sut).osFileExists(new File(X_FAKE_INPUT_DIR, filename));
-                doReturn(true).when(sut).osFileExists(createTestFile(X_FAKE_INPUT_DIR, filename));
-            }
-        }
+    @Test
+    public void shouldCopyWitRenameExistingMultiple() {
+        registerFakeFiles(sut, "a.jpg", "b.png", "b(1).png");
+        SelectedFiles selectedFiles = createTestSelectedFiles(X_FAKE_INPUT_DIR, "a.jpg", "b.png");
+
+        sut.moveOrCopyFilesTo(false, selectedFiles, X_FAKE_OUTPUT_DIR, null);
+
+        Assert.assertEquals("MediaTransactionLogEntryType", MediaTransactionLogEntryType.COPY, lastMediaTransactionLogEntryType);
+        verify(sut).osFileMoveOrCopy(false, createTestFile(X_FAKE_OUTPUT_DIR, "a(1).jpg"), createTestFile(X_FAKE_INPUT_DIR, "a.jpg"));
+        verify(sut).osFileMoveOrCopy(false, createTestFile(X_FAKE_OUTPUT_DIR, "b(2).png"), createTestFile(X_FAKE_INPUT_DIR, "b.png"));
     }
 
-    private static File createTestFile(File destDir, String name) {
-        return new File(destDir, name);
+    @Test
+    public void shouldMoveExistingWithXmp() {
+        registerFakeFiles(sut, "a.jpg", "a.xmp", "a.jpg.xmp"); // a(3) is next possible
+
+        IFile destFile = createTestFile(X_FAKE_OUTPUT_DIR, "a.jpg");
+
+        // do not rename duplicate
+        Mockito.doReturn(destFile).when(sut).renameDuplicate(destFile);
+
+        SelectedFiles selectedFiles = createTestSelectedFiles(X_FAKE_INPUT_DIR, "a.jpg");
+
+        sut.moveOrCopyFilesTo(true, selectedFiles, X_FAKE_OUTPUT_DIR, null);
+
+        Assert.assertEquals("MediaTransactionLogEntryType", MediaTransactionLogEntryType.MOVE, lastMediaTransactionLogEntryType);
+        verify(sut).osFileMoveOrCopy(true, createTestFile(X_FAKE_OUTPUT_DIR, "a.jpg"), createTestFile(X_FAKE_INPUT_DIR, "a.jpg"));
+        verify(sut).osFileMoveOrCopy(true, createTestFile(X_FAKE_OUTPUT_DIR, "a.xmp"), createTestFile(X_FAKE_INPUT_DIR, "a.xmp"));
+        verify(sut).osFileMoveOrCopy(true, createTestFile(X_FAKE_OUTPUT_DIR, "a.jpg.xmp"), createTestFile(X_FAKE_INPUT_DIR, "a.jpg.xmp"));
     }
 
-    private SelectedFiles createTestSelectedFiles(File destDir, String... fileNames) {
+    private SelectedFiles createTestSelectedFiles(IFile destDir, String... fileNames) {
         String[] paths = new String[fileNames.length];
         Long[] ids = new Long[fileNames.length];
         int pos = 0;
