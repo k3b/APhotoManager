@@ -43,6 +43,13 @@ public class FileFacade implements IFile {
     };
     private File file;
 
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof File) return this.file.equals(o);
+        if (o instanceof FileFacade) return this.file.equals(((FileFacade) o).file);
+        if (o instanceof FileWrapper) return equals(((FileWrapper) o).child);
+        return super.equals(o);
+    }
 
     public FileFacade(File file) {
         this.file = file;

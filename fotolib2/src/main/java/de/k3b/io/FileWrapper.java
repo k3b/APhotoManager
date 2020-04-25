@@ -7,7 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class FileWrapper implements IFile {
-    private final IFile child;
+    protected final IFile child;
 
     public FileWrapper(IFile child) {
         this.child = child;
@@ -146,5 +146,10 @@ public class FileWrapper implements IFile {
     @Override
     public File getFile() {
         return child.getFile();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return child.equals(o);
     }
 }
