@@ -92,7 +92,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                 openLogfile();
                 onPreProcess(dbgContext, OP_DELETE, fotos, fileNames, null);
                 for (int i = 0; i < maxCount; i++) {
-                    File file = fotos.getFile(i);
+                    IFile file = fotos.getIFile(i);
                     countdown--;
                     if (countdown <= 0) {
                         countdown = itemsPerProgress;
@@ -383,7 +383,6 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                         if (exifChanges == null) {
                             // old style move/copy image with sidecarfile(s)
                             if (osFileMoveOrCopy(move, destRenamed, sourceFile)) itemCount++;
-
 
                             IFile sourceSidecar = getSidecar(sourceFile, false);
                             if (osFileExists(sourceSidecar)) {

@@ -192,6 +192,10 @@ public class SelectedFiles  {
         return null;
     }
 
+    public IFile getIFile(int i) {
+        return FileFacade.convert(getFile(i));
+    }
+
     public Long getId(int i) {
         if ((i >= 0) && (i < mIds.length)) return mIds[i];
         return null;

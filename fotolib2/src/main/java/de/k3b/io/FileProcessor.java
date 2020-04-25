@@ -108,8 +108,8 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
 
         IFile parent = file.getParentFile();
         String name = file.getName();
-        return file.exists() || FileCommands.getSidecar(parent, name, false).exists()
-                || FileCommands.getSidecar(parent, name, true).exists();
+        return osFileExists(file) || osFileExists(FileCommands.getSidecar(parent, name, false))
+                || osFileExists(FileCommands.getSidecar(parent, name, true));
     }
 
     public static XmpFile getExistingSidecarOrNull(String absolutePath) {
