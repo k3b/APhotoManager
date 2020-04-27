@@ -33,7 +33,10 @@
   <string name="btn_pause">Duraklat</string>
   <string name="copy_result_format">%1$d/%2$d dosya kopyalandı</string>
   <string name="delete_menu_title">Sil</string>
-  <string name="delete_question_message_format">Bu dosyaları kalıcı olarak silmek istediğinize emin misiniz? %1$s  Bu işlem geri alınamaz.</string>
+  <string name="delete_question_message_format">"Bu dosyaları kalıcı olarak silmek istediğinize emin misiniz?
+%1$s
+
+Bu işlem geri alınamaz."</string>
   <string name="delete_question_title">Fotoğraf(lar) silinsin mi?</string>
   <string name="delete_result_format">%1$d/%2$d dosya silindi</string>
   <string name="destination_copy">Kopyalama hedefi</string>

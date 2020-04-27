@@ -34,7 +34,10 @@
   <string name="btn_pause">Pausatu</string>
   <string name="copy_result_format">%1$d/%2$d fitxategi kopiatuta</string>
   <string name="delete_menu_title">Ezabatu</string>
-  <string name="delete_question_message_format">\"Ziur behin betiko ezabatu nahi dituzula fitxategi hauek?</string>
+  <string name="delete_question_message_format">\"Ziur behin betiko ezabatu nahi dituzula fitxategi hauek?
+	%1$s
+
+	Esta operación no puede deshacerse."</string>
   <string name="delete_question_title">Ezabatu argazkia(k)?</string>
   <string name="delete_result_format">%1$d/%2$d fitxategi ezabatuta</string>
   <string name="destination_copy">Kopiatu xedea</string>

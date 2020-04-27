@@ -33,7 +33,10 @@
   <string name="btn_pause">Jeda</string>
   <string name="copy_result_format">Menyalin file %1$d%2$d</string>
   <string name="delete_menu_title">Hapus</string>
-  <string name="delete_question_message_format">"Apakah Anda yakin ingin menghapus secara permanen berkas-berkas ini? %1$s operasi ini tidak dapat dikembalikan."</string>
+  <string name="delete_question_message_format">"Apakah Anda yakin ingin menghapus secara permanen berkas-berkas ini?
+%1$s
+
+operasi ini tidak dapat dikembalikan."</string>
   <string name="delete_question_title">Hapus foto?</string>
   <string name="delete_result_format">Menghapus berkas %1$d/%2$d</string>
   <string name="destination_copy">Tujuan salinan</string>

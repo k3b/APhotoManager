@@ -34,7 +34,10 @@
   <string name="btn_pause">Pausa</string>
   <string name="copy_result_format">Copiati %1$d/%2$d file</string>
   <string name="delete_menu_title">Elimina</string>
-  <string name="delete_question_message_format">Sei sicuro di volere eliminare in modo definitivo questi file?    %1$sQuesta operazione non può essere annullata.</string>
+  <string name="delete_question_message_format">"Sei sicuro di volere eliminare in modo definitivo questi file?
+%1$s
+
+Questa operazione non può essere annullata.</string>
   <string name="delete_question_title">Eliminare la/le foto?</string>
   <string name="delete_result_format">Eliminati %1$d/%2$d file</string>
   <string name="destination_copy">Copia destinazione</string>
