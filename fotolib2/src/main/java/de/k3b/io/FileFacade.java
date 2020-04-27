@@ -142,7 +142,7 @@ public class FileFacade implements IFile {
 
     @Override
     public boolean exists() {
-        return file != null && file.exists() && file.length() > 0;
+        return file != null && file.exists();
     }
 
     @Override
@@ -275,9 +275,17 @@ public class FileFacade implements IFile {
         return new FileInputStream(file);
     }
 
+    /**
+     * @return null if file already exist
+     */
     @Override
     public IFile create(String name) {
-        return convert("create", new File(file, name));
+        final File file = new File(this.file, name);
+        if (!file.exists()) {
+            return convert("create", file);
+        }
+        logger.error("create " + this + "/" + name + " failed already exists");
+        return null;
     }
 
     @Override

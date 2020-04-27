@@ -20,6 +20,8 @@
 package de.k3b.android.io;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.provider.DocumentFile;
 import android.util.Log;
 
@@ -43,6 +45,11 @@ public class AndroidFileFacade extends FileFacade {
     public static final String LOG_TAG = "k3b.AndFileFacade";
 
     private static DocumentFileTranslator documentFileTranslator = null;
+
+    /**
+     * null means: DocumentFile does not exist (yet)
+     */
+    @Nullable
     private DocumentFile androidFile;
 
     private static final Converter<File, IFile> androidFileFacadeImpl = new Converter<File, IFile>() {
@@ -65,21 +72,21 @@ public class AndroidFileFacade extends FileFacade {
         }
     }
 
-    private AndroidFileFacade(DocumentFile parentFile, File parentFile1) {
+    private AndroidFileFacade(@Nullable DocumentFile parentFile, @NonNull File parentFile1) {
         super(parentFile1);
         androidFile = parentFile;
     }
 
-    public AndroidFileFacade(File file) {
-        this(documentFileTranslator.getDocumentFileOrDir(file, null), file);
+    public AndroidFileFacade(@NonNull File file) {
+        this(getDocumentFileOrDirOrNull(file), file);
     }
 
-    public static void setContext(DocumentFileTranslator documentFileTranslator) {
-        AndroidFileFacade.documentFileTranslator = documentFileTranslator;
+    public static DocumentFile getDocumentFileOrDirOrNull(@NonNull File file) {
+        return documentFileTranslator.getDocumentFileOrDirOrNull(file, null);
     }
 
     @Override
-    public boolean renameTo(IFile newName) {
+    public boolean renameTo(@NonNull IFile newName) {
         if (exists() && !newName.exists()) {
             if (getParentFile().equals(newName.getParentFile())) {
                 // same directory
@@ -95,7 +102,7 @@ public class AndroidFileFacade extends FileFacade {
         return false;
     }
 
-    private boolean copyImpl(AndroidFileFacade targetFullPath, boolean deleteSourceWhenSuccess) {
+    private boolean copyImpl(@NonNull AndroidFileFacade targetFullPath, boolean deleteSourceWhenSuccess) {
         InputStream in = null;
         OutputStream out = null;
         try {
@@ -116,7 +123,7 @@ public class AndroidFileFacade extends FileFacade {
     }
 
     @Override
-    public boolean renameTo(String newName) {
+    public boolean renameTo(@NonNull String newName) {
         if (exists() && androidFile.renameTo(newName)) {
             setFile(new File(getFile().getParentFile(), newName));
             return true;
@@ -137,14 +144,16 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public boolean exists() {
-        return (androidFile != null) && androidFile.exists() && (androidFile.length() > 0);
+        return (androidFile != null) && androidFile.exists();
     }
 
     @Override
     public IFile findExisting(String name) {
-        DocumentFile doc = androidFile.findFile(name);
-        if (doc != null) {
-            return new AndroidFileFacade(doc, new File(getFile(), name));
+        if (androidFile != null) {
+            DocumentFile doc = androidFile.findFile(name);
+            if (doc != null) {
+                return new AndroidFileFacade(doc, new File(getFile(), name));
+            }
         }
         return null;
     }
@@ -185,17 +194,27 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public IFile getParentFile() {
-        return new AndroidFileFacade(androidFile.getParentFile(), getFile().getParentFile());
+        if (androidFile != null) {
+            return new AndroidFileFacade(androidFile.getParentFile(), getFile().getParentFile());
+        } else {
+            return super.getParentFile();
+        }
     }
 
     @Override
     public String getName() {
-        return androidFile.getName();
+        if (androidFile != null) {
+            return androidFile.getName();
+        }
+        return super.getName();
     }
 
     @Override
     public long lastModified() {
-        return androidFile.lastModified();
+        if (androidFile != null) {
+            return androidFile.lastModified();
+        }
+        return 0;
     }
 
     @Override
@@ -205,11 +224,14 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public IFile[] listFiles() {
-        return get(androidFile.listFiles());
+        if (androidFile != null) {
+            return get(androidFile.listFiles());
+        }
+        return new IFile[0];
     }
 
     @Override
-    public boolean copy(IFile targetFullPath, boolean deleteSourceWhenSuccess) throws IOException {
+    public boolean copy(@NonNull IFile targetFullPath, boolean deleteSourceWhenSuccess) throws IOException {
         return copyImpl((AndroidFileFacade) targetFullPath, deleteSourceWhenSuccess);
     }
 
@@ -224,16 +246,26 @@ public class AndroidFileFacade extends FileFacade {
     }
 
     /**
-     * overwrite existing
-     *  @param name
-     *
+     * @return null if file already exist
      */
     @Override
     public IFile create(String name) {
-        if (null == findExisting(name)) {
-            return new AndroidFileFacade(androidFile.createFile(null, name), new File(getFile(), name));
+        if (androidFile == null) {
+            androidFile = documentFileTranslator.getOrCreateDirectory(getFile());
+            if (FileFacade.debugLogFacade) {
+                Log.i(LOG_TAG, "created dir(s) " + this);
+            }
         }
-        Log.e(LOG_TAG, "create " + this + "/" + name + " failed");
+        if (null == findExisting(name)) {
+            final File newFile = new File(getFile(), name);
+            DocumentFile newDoc = androidFile.createFile(null, name); // new AndroidFileFacade(androidFile.createFile(null, name), newFile);
+            final AndroidFileFacade result = new AndroidFileFacade(newDoc, newFile);
+            if (FileFacade.debugLogFacade) {
+                Log.i(LOG_TAG, "created file " + result);
+            }
+            return result;
+        }
+        Log.e(LOG_TAG, "create " + this + "/" + name + " failed already exists");
         return null;
     }
 

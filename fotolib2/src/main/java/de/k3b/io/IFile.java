@@ -80,7 +80,7 @@ public interface IFile {
     InputStream openInputStream() throws FileNotFoundException;
 
     /**
-     * overwrite existing
+     * @return null if file already exist
      */
     IFile create(String name);
 

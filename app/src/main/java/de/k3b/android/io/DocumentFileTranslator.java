@@ -190,36 +190,29 @@ public class DocumentFileTranslator {
      * @param isDir     if null: return null if isDir is matchning
      * @return DocumentFile or null
      */
-    public DocumentFile getDocumentFileOrDir(File fileOrDir, Boolean isDir) {
+    public DocumentFile getDocumentFileOrDirOrNull(File fileOrDir, Boolean isDir) {
         DocumentFile result = null;
-        final String context = mDebugPrefix + "getDocumentFile('" + fileOrDir.getAbsolutePath() +
-                "') ";
+        final String context = FileFacade.debugLogFacade ? (mDebugPrefix + "getDocumentFile('" + fileOrDir.getAbsolutePath() +
+                "') ") : null;
         try {
             result = getDocumentFileOrDirImpl(fileOrDir);
-            if (result == null) {
+            if ((context != null) && (result == null)) {
                 Log.i(TAG, context + "not found");
             }
         } catch (Exception ex) {
-            Log.w(TAG, context, ex);
+            Log.w(TAG, mDebugPrefix + "getDocumentFile('" + fileOrDir.getAbsolutePath() +
+                    "') ", ex);
 
         }
 
 
         if ((result != null) && (isDir != null) && (result.isDirectory() != isDir)) {
-            Log.i(TAG, context + "wrong type isDirectory=" + result.isDirectory());
+            if (context != null) {
+                Log.i(TAG, context + "wrong type isDirectory=" + result.isDirectory());
+            }
             return null;
         }
         return result;
-    }
-
-    public InputStream openInputStream(File in) throws FileNotFoundException {
-        if (in != null) {
-            DocumentFile doc = getDocumentFileOrDir(in, false);
-            if (doc != null) {
-                return getContentResolver().openInputStream(doc.getUri());
-            }
-        }
-        return null;
     }
 
     public InputStream openInputStream(DocumentFile doc) throws FileNotFoundException {
@@ -227,12 +220,6 @@ public class DocumentFileTranslator {
             return getContentResolver().openInputStream(doc.getUri());
         }
         return null;
-    }
-
-    public OutputStream createOutputStream(String mime, File outFile) throws FileNotFoundException {
-        DocumentFile dir = (outFile != null) ? getDocumentFileOrDir(outFile.getParentFile(), true) : null;
-        DocumentFile doc = (dir != null) ? dir.createFile(mime, outFile.getName()) : null;
-        return createOutputStream(doc);
     }
 
     public OutputStream createOutputStream(DocumentFile doc) throws FileNotFoundException {
