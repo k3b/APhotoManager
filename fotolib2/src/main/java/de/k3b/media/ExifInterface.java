@@ -1509,7 +1509,7 @@ public class ExifInterface {
         if (overwriteOriginal) {
             String tempName = originalName + ".new.jpg";
             logDebug(String.format("%s: overwrite original:\n\twriting to %s", debugContext, tempName));
-            currentOutFile = outFile.getParentFile().create(tempName, outFile.getMime());
+            currentOutFile = outFile.getParentFile().create(tempName);
         }
 
         saveJpegAttributes(

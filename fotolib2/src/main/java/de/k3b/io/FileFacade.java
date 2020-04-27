@@ -44,7 +44,7 @@ public class FileFacade implements IFile {
     private static Converter<File, IFile> fileFacade = new Converter<File, IFile>() {
         @Override
         public IFile convert(String dbgContext, File file) {
-            final FileFacade result = new FileFacade(file);
+            final IFile result = new FileFacade(file);
             if (debugLogFacade) {
                 logger.info(dbgContext + " convert => " + result);
             }
@@ -89,13 +89,13 @@ public class FileFacade implements IFile {
     /**
      * gets existing file from parent or create it if not found
      */
-    public static IFile getOrCreateChild(String dbgContext, IFile parent, String name, String mime) {
+    public static IFile getOrCreateChild(String dbgContext, IFile parent, String name) {
         IFile result = parent.findExisting(name);
         if (result == null) {
-            result = parent.create(name, mime);
+            result = parent.create(name);
         }
         if (debugLogFacade) {
-            logger.info(dbgContext + " getOrCreateChild(" + name + "mime=" + mime + ") => " + result);
+            logger.info(dbgContext + " getOrCreateChild(" + name + ") => " + result);
         }
         return result;
     }
@@ -142,7 +142,7 @@ public class FileFacade implements IFile {
 
     @Override
     public boolean exists() {
-        return file.exists();
+        return file != null && file.exists() && file.length() > 0;
     }
 
     @Override
@@ -275,16 +275,8 @@ public class FileFacade implements IFile {
         return new FileInputStream(file);
     }
 
-    /**
-     * android DocumentFile specific, not supported in non-android
-     */
     @Override
-    public String getMime() {
-        return null;
-    }
-
-    @Override
-    public IFile create(String name, String mime) {
+    public IFile create(String name) {
         return convert("create", new File(file, name));
     }
 

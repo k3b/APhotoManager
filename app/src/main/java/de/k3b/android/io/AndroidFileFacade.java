@@ -19,6 +19,7 @@
  */
 package de.k3b.android.io;
 
+import android.content.Context;
 import android.support.v4.provider.DocumentFile;
 import android.util.Log;
 
@@ -28,6 +29,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import de.k3b.android.widget.FilePermissionActivity;
+import de.k3b.io.Converter;
 import de.k3b.io.FileFacade;
 import de.k3b.io.FileUtils;
 import de.k3b.io.IFile;
@@ -37,10 +40,30 @@ import de.k3b.io.IFile;
  * but is implemented through Android specific {@link DocumentFile}
  */
 public class AndroidFileFacade extends FileFacade {
-    public static final String LOG_LOG_TAG = "k3b.AndFileFacade";
+    public static final String LOG_TAG = "k3b.AndFileFacade";
 
     private static DocumentFileTranslator documentFileTranslator = null;
     private DocumentFile androidFile;
+
+    private static final Converter<File, IFile> androidFileFacadeImpl = new Converter<File, IFile>() {
+        @Override
+        public IFile convert(String dbgContext, File file) {
+            final IFile result = new AndroidFileFacade(file);
+            if (debugLogFacade) {
+                Log.i(LOG_TAG, " convert => " + result);
+            }
+            return result;
+        }
+    };
+
+    public static void initFactory(Context context) {
+        setFileFacade(androidFileFacadeImpl);
+
+        if (context instanceof FilePermissionActivity) {
+            FilePermissionActivity activity = (FilePermissionActivity) context;
+            documentFileTranslator = activity.getDocumentFileTranslator();
+        }
+    }
 
     private AndroidFileFacade(DocumentFile parentFile, File parentFile1) {
         super(parentFile1);
@@ -114,7 +137,7 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public boolean exists() {
-        return (androidFile != null) && (androidFile.exists());
+        return (androidFile != null) && androidFile.exists() && (androidFile.length() > 0);
     }
 
     @Override
@@ -200,22 +223,15 @@ public class AndroidFileFacade extends FileFacade {
         return documentFileTranslator.openInputStream(androidFile);
     }
 
-    @Override
-    public String getMime() {
-        notImplemented();
-        return null;
-    }
-
     /**
      * overwrite existing
+     *  @param name
      *
-     * @param name
-     * @param mime
      */
     @Override
-    public IFile create(String name, String mime) {
+    public IFile create(String name) {
         if (null == findExisting(name)) {
-            return new AndroidFileFacade(androidFile.createFile(mime, name), new File(getFile(), name));
+            return new AndroidFileFacade(androidFile.createFile(null, name), new File(getFile(), name));
         }
         Log.e(LOG_TAG, "create " + this + "/" + name + " failed");
         return null;

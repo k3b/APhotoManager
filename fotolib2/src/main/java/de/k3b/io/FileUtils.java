@@ -375,10 +375,10 @@ public class FileUtils {
 
         parentDir.mkdirs();
         final String mime = "*/*";
-        IFile candidate = parentDir.create(newFilePrefix + newFileSuffix, mime);
+        IFile candidate = parentDir.create(newFilePrefix + newFileSuffix);
         while (candidate.exists()) {
             number ++;
-            candidate = parentDir.create(newFilePrefix + number + newFileSuffix, mime);
+            candidate = parentDir.create(newFilePrefix + number + newFileSuffix);
         }
         return candidate;
     }

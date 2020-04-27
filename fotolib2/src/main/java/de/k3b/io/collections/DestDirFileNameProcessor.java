@@ -56,7 +56,7 @@ public class DestDirFileNameProcessor  extends FileProcessor implements IFileNam
         // usecase: apply auto where inFile is already in outdir.
         if (doNotRenameIfSourceInDestFolder && this.destDirFolder.equals(sourceFile.getParentFile())) return sourceFile;
 
-        IFile dest = renameDuplicate(this.destDirFolder.create(sourceFile.getName(), UNKNOWN_MIME));
+        IFile dest = renameDuplicate(this.destDirFolder.create(sourceFile.getName()));
         return dest;
     }
 }

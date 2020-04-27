@@ -21,7 +21,6 @@ package de.k3b.android.widget;
 
 import android.Manifest;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -37,6 +36,7 @@ import java.io.File;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.io.AndroidFileFacade;
 import de.k3b.android.io.DocumentFileTranslator;
 import de.k3b.io.FileFacade;
 import de.k3b.io.FileNameUtil;
@@ -57,8 +57,8 @@ public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialog
     private static File currentRootFileRequest = null;
     private DocumentFileTranslator documentFileTranslator = null;
 
-    public static void init(Context context) {
-    }
+    protected abstract void onCreateEx(Bundle savedInstanceState);
+
     // workflow onCreate() => requestPermission(PERMISSION_WRITE_EXTERNAL_STORAGE) => onRequestPermissionsResult() => abstract onCreateEx()
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +70,12 @@ public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialog
         } else {
             onCreateEx(null);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        AndroidFileFacade.initFactory(this);
     }
 
     private void requestPermission(final String permission, final int requestCode) {
@@ -100,8 +106,6 @@ public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialog
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
-
-    protected abstract void onCreateEx(Bundle savedInstanceState);
 
     protected static void requestRootUriDialog(
             final FilePermissionActivity parent, final File rootFile,

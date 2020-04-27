@@ -294,7 +294,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
             if (renameProcessor != null) {
                 destFile = renameProcessor.getNextFile(srcFile, getRenameSourceFileDate(srcFile, datesLastModified, pos), -1);
             } else {
-                destFile = destDirFolder.create(srcFile.getName(), srcFile.getMime());
+                destFile = destDirFolder.create(srcFile.getName());
             }
             result[pos++] = destFile;
         }

@@ -134,13 +134,8 @@ public class FileWrapper implements IFile {
     }
 
     @Override
-    public String getMime() {
-        return child.getMime();
-    }
-
-    @Override
-    public IFile create(String name, String mime) {
-        return child.create(name, mime);
+    public IFile create(String name) {
+        return child.create(name);
     }
 
     @Override
@@ -151,5 +146,10 @@ public class FileWrapper implements IFile {
     @Override
     public boolean equals(Object o) {
         return child.equals(o);
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "@" + child.toString();
     }
 }

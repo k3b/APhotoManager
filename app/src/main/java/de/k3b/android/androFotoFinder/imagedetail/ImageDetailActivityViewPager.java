@@ -670,12 +670,12 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
     private void onRenameFileAnswer(final CharSequence title, final SelectedFiles currentFoto, final long fotoId,
                                     final String fotoSourcePath, final String newFileName) {
         IFile src = FileFacade.convert("ImageDetailActivityViewPager.onRenameFileAnswer", fotoSourcePath);
-        IFile dest = src.getParentFile().create(newFileName, src.getMime());
+        IFile dest = src.getParentFile().create(newFileName);
 
         IFile srcXmpShort = FileProcessor.getSidecar(src, false);
-        boolean hasSideCarShort = ((srcXmpShort != null) && (mFileCommands.osFileExists(srcXmpShort)));
+        boolean hasSideCarShort = ((srcXmpShort != null) && srcXmpShort.exists());
         IFile srcXmpLong = FileProcessor.getSidecar(src, true);
-        boolean hasSideCarLong = ((srcXmpLong != null) && (mFileCommands.osFileExists(srcXmpLong)));
+        boolean hasSideCarLong = ((srcXmpLong != null) && srcXmpLong.exists());
 
         IFile destXmpShort = FileProcessor.getSidecar(dest, false);
         IFile destXmpLong = FileProcessor.getSidecar(dest, true);
@@ -683,13 +683,13 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
         if (src.equals(dest)) return; // new name == old name ==> nothing to do
 
         String errorMessage = null;
-        if (hasSideCarShort && mFileCommands.osFileExists(destXmpShort)) {
+        if (hasSideCarShort && destXmpShort.exists()) {
             errorMessage = getString(R.string.image_err_file_exists_format, destXmpShort.getAbsolutePath());
         }
-        if (hasSideCarLong && mFileCommands.osFileExists(destXmpLong)) {
+        if (hasSideCarLong && destXmpLong.exists()) {
             errorMessage = getString(R.string.image_err_file_exists_format, destXmpLong.getAbsolutePath());
         }
-        if (mFileCommands.osFileExists(dest)) {
+        if (dest.exists()) {
             errorMessage = getString(R.string.image_err_file_exists_format, dest.getAbsolutePath());
         }
 
@@ -1090,7 +1090,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
 
     private void onRenameSubDirAnswer(final CharSequence title, SelectedFiles currentFoto, final long fotoId, final String fotoSourcePath, String newFileName) {
         IFile src = FileFacade.convert("ImageDetailActivityViewPager.onRenameSubDirAnswer", fotoSourcePath);
-        IFile dest = src.getParentFile().create(newFileName, src.getMime());
+        IFile dest = src.getParentFile().create(newFileName);
 
         IFile srcXmpShort = FileProcessor.getSidecar(src, false);
         boolean hasSideCarShort = ((srcXmpShort != null) && (mFileCommands.osFileExists(srcXmpShort)));

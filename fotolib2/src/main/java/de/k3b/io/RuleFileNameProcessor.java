@@ -209,7 +209,7 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
 
         if (!mustRename(name)) {
 			// no rename rule or file already matches rules
-            IFile result = outDir.create(name, UNKNOWN_MIME);
+            IFile result = outDir.create(name);
 
             // usecase: apply auto where inFile is already in outdir: no modification
             if ((sourceFile != null) && sourceFile.equals(result)) return result;
@@ -232,7 +232,7 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
         IFile result = null;
         int tryCount = 0;
         do {
-            result = outDir.create(generateFileName(dateFormatted, mNextFileInstanceNumber, fileExtension), UNKNOWN_MIME);
+            result = outDir.create(generateFileName(dateFormatted, mNextFileInstanceNumber, fileExtension));
             mNextFileInstanceNumber++;
             if (!fileOrSidecarExists(result)) return result; // filename not in use yet
             tryCount++;

@@ -79,12 +79,10 @@ public interface IFile {
 
     InputStream openInputStream() throws FileNotFoundException;
 
-    String getMime();
-
     /**
      * overwrite existing
      */
-    IFile create(String name, String mime);
+    IFile create(String name);
 
     File getFile();
 }

@@ -153,7 +153,7 @@ public class AndroFotoFinderApp extends Application {
         FotoSqlBase.init();
 
         super.onCreate();
-        FilePermissionActivity.init(this);
+        AndroidFileFacade.initFactory(this);
         ExifInterfaceExAndroid.initFactory();
 
         LibGlobal.appName = getString(R.string.app_name);

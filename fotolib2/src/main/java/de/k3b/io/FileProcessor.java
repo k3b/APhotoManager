@@ -26,7 +26,6 @@ import java.io.File;
  */
 
 public class FileProcessor extends FileCommandLogger implements IFileCommandLogger {
-    protected static final String UNKNOWN_MIME = null;
     private static final String EXT_SIDECAR = ".xmp";
 
     /// TODO what is mime for XMP
@@ -51,9 +50,9 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
     public static XmpFile getSidecar(IFile parent, String name, boolean longFormat) {
         XmpFile result;
         if (longFormat) {
-            result = new XmpFile(FileFacade.getOrCreateChild("FileProcessor.getSidecar", parent, name + EXT_SIDECAR, XMP_MINE), longFormat);
+            result = new XmpFile(FileFacade.getOrCreateChild("FileProcessor.getSidecar", parent, name + EXT_SIDECAR), longFormat);
         } else {
-            result = new XmpFile(FileFacade.getOrCreateChild("FileProcessor.getSidecar", parent, FileUtils.replaceExtension(name, EXT_SIDECAR), XMP_MINE), longFormat);
+            result = new XmpFile(FileFacade.getOrCreateChild("FileProcessor.getSidecar", parent, FileUtils.replaceExtension(name, EXT_SIDECAR)), longFormat);
         }
         return result;
 
@@ -139,7 +138,6 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
 
         IFile parent = file.getParentFile();
 
-        String mime = file.getMime();
         String filename = file.getName();
         String extension = ")";
         int extensionPosition = filename.lastIndexOf(".");
@@ -151,7 +149,7 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
         while (true) {
             id++;
             String candidateName = filename + id + extension;
-            IFile candidate = parent.create(candidateName, mime);
+            IFile candidate = parent.create(candidateName);
             if (!fileOrSidecarExists(candidate)) {
                 log("rem renamed from '", filename, "' to '", candidateName,"'");
                 return candidate;
@@ -168,7 +166,7 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
         private boolean hasAlsoOtherFormat = false;
 
         public XmpFile(IFile parent, String name, String mime, boolean longFormat) {
-            this(FileFacade.getOrCreateChild("FileProcessor.XmpFile()", parent, name, mime), longFormat);
+            this(FileFacade.getOrCreateChild("FileProcessor.XmpFile()", parent, name), longFormat);
         }
 
         @Deprecated
