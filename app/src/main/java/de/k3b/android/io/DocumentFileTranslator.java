@@ -34,6 +34,8 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.k3b.io.FileFacade;
+
 /**
  * Handles Translation from File to android specific DocumentFileUtils
  *
@@ -47,7 +49,6 @@ public class DocumentFileTranslator {
 
     private static final String SAFROOTPREF_KEY_SAF_ROOT_PREFIX = "safroot-";
     private final Context context;
-    public static final boolean debugDocFile = true;
 
     /**
      * Mapping from known File to DocumentFile translation
@@ -126,7 +127,7 @@ public class DocumentFileTranslator {
      */
     public DocumentFileTranslator add(File directory, DocumentFile documentFileDir) {
         if ((documentFileDir != null) && documentFileDir.isDirectory()) {
-            if (debugDocFile) {
+            if (FileFacade.debugLogFacade) {
                 Uri uri = (documentFileDir != null) ? documentFileDir.getUri() : null;
                 Log.d(TAG, mDebugPrefix + "dirCache.put(" + directory +
                         " -> " + uri + ")");
@@ -273,7 +274,7 @@ public class DocumentFileTranslator {
                 Log.e(TAG, "err DocumentFileTranslator.Root(" + getPrefKey(id, "-") + "," + fileUri +
                         ", " + docfileUri + ") " + ex.getMessage(), ex);
             }
-            if (debugDocFile) {
+            if (FileFacade.debugLogFacade) {
                 Log.i(TAG, "DocumentFileTranslator.Root.loaded(" + this + ")");
             }
         }
@@ -319,7 +320,7 @@ public class DocumentFileTranslator {
                 Log.e(TAG, "err saveToPrefs(" + dir2uri + ")", ex);
             } finally {
                 edit.commit();
-                if (debugDocFile) {
+                if (FileFacade.debugLogFacade) {
                     Log.i(TAG, "DocumentFileTranslator.Root.saveToPrefs(" + this + ")");
                 }
 

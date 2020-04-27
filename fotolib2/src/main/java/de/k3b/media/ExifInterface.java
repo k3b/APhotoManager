@@ -1125,7 +1125,7 @@ public class ExifInterface {
         if (filename == null) {
             throw new IllegalArgumentException("filename cannot be null");
         }
-        mExifFile = (filename != null) ? FileFacade.convert(filename) : null;
+        mExifFile = (filename != null) ? FileFacade.convert("ExifInterface()", filename) : null;
         if (in == null) {
             InputStream inputStream = null;
             inputStream = createInputStream(mExifFile);
@@ -1491,7 +1491,7 @@ public class ExifInterface {
      */
     @Deprecated
     public void saveAttributes(File inFile, File outFile, boolean deleteInFileOnFinish) throws IOException {
-        saveAttributes(FileFacade.convert(inFile), FileFacade.convert(outFile), deleteInFileOnFinish);
+        saveAttributes(FileFacade.convert("ExifInterface.saveAttributes in", inFile), FileFacade.convert("ExifInterface.saveAttributes out", outFile), deleteInFileOnFinish);
     }
 
     public void saveAttributes(IFile inFile, IFile outFile, boolean deleteInFileOnFinish) throws IOException {
@@ -1614,7 +1614,7 @@ public class ExifInterface {
         if (mThumbnailBytes != null) {
             return mThumbnailBytes;
         }
-        return getThumbnail(FileFacade.convert(inFile));
+        return getThumbnail(FileFacade.convert("ExifInterface.getThumbnail", inFile));
     }
 
     public byte[] getThumbnail(IFile inFile) {

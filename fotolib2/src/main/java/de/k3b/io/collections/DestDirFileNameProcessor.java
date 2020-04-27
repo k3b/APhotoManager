@@ -36,7 +36,7 @@ public class DestDirFileNameProcessor  extends FileProcessor implements IFileNam
     private final boolean doNotRenameIfSourceInDestFolder;
 
     public DestDirFileNameProcessor(File destDirFolder, boolean doNotRenameIfSourceInDestFolder) {
-        this(FileFacade.convert(destDirFolder), doNotRenameIfSourceInDestFolder);
+        this(FileFacade.convert("DestDirFileNameProcessor()", destDirFolder), doNotRenameIfSourceInDestFolder);
     }
 
     public DestDirFileNameProcessor(IFile destDirFolder, boolean doNotRenameIfSourceInDestFolder) {

@@ -130,7 +130,7 @@ public class ImageDetailMetaDialogBuilder {
         try {
             getExifInfo_android(result, filepath);
 
-            IFile jpegFile = FileFacade.convert(filepath);
+            IFile jpegFile = FileFacade.convert("ImageDetailMetaDialogBuilder.appendExifInfo", filepath);
             addExif(result, jpegFile);
 
             // #84 show long and short xmp file

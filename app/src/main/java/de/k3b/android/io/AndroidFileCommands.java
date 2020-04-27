@@ -253,7 +253,7 @@ public class AndroidFileCommands extends FileCommands {
     public void onMoveOrCopyDirectoryPick(boolean move, SelectedFiles selectedFiles, IDirectory destFolder) {
         if (destFolder != null) {
             String copyToPath = destFolder.getAbsolute();
-            IFile destDirFolder = FileFacade.convert(copyToPath);
+            IFile destDirFolder = FileFacade.convert("AndroidFileCommands.onMoveOrCopyDirectoryPick", copyToPath);
 
             setLastCopyToPath(copyToPath);
 
@@ -302,7 +302,7 @@ public class AndroidFileCommands extends FileCommands {
             return false;
         }
 
-        if (DocumentFileTranslator.debugDocFile) {
+        if (FileFacade.debugLogFacade) {
             Log.i(FilePermissionActivity.TAG, "AndroidFileCommands.cmdDeleteFileWithQuestion.do");
         }
 

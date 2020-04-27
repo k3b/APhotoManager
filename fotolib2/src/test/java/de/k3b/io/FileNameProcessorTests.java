@@ -34,8 +34,8 @@ import static org.mockito.Mockito.spy;
  */
 
 public class FileNameProcessorTests {
-    private static final IFile X_FAKE_OUTPUT_DIR = FileFacade.convert(new File("/fakeOutputDir").getAbsoluteFile());
-    private static final IFile X_FAKE_INPUT_DIR = FileFacade.convert(new File("/fakeInputDir").getAbsoluteFile());
+    private static final IFile X_FAKE_OUTPUT_DIR = FileFacade.convert(null, new File("/fakeOutputDir").getAbsoluteFile());
+    private static final IFile X_FAKE_INPUT_DIR = FileFacade.convert(null, new File("/fakeInputDir").getAbsoluteFile());
 
     @Test
     public void shouldExpandDateTimeInfo() {
@@ -166,10 +166,10 @@ public class FileNameProcessorTests {
     public void shouldFixRuleOnFileChange() {
         RuleFileNameProcessor ancestor = new RuleFileNameProcessor(
                 null,"Crete-habour", null,
-                FileFacade.convert(new File("/DCIM/2007Crete/habour/"))
+                FileFacade.convert(null, new File("/DCIM/2007Crete/habour/"))
         );
 
-        String newName = RuleFileNameProcessor.translateName(ancestor, FileFacade.convert(new File("/DCIM/2008Teneriffe/beach/")));
+        String newName = RuleFileNameProcessor.translateName(ancestor, FileFacade.convert(null, new File("/DCIM/2008Teneriffe/beach/")));
 
         Assert.assertEquals("Teneriffe-beach", newName);
     }

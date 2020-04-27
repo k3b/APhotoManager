@@ -65,7 +65,6 @@ import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.androFotoFinder.tagDB.TagTask;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.io.AndroidFileCommands;
-import de.k3b.android.io.DocumentFileTranslator;
 import de.k3b.android.util.FileManagerUtil;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.OsUtils;
@@ -670,7 +669,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
 
     private void onRenameFileAnswer(final CharSequence title, final SelectedFiles currentFoto, final long fotoId,
                                     final String fotoSourcePath, final String newFileName) {
-        IFile src = FileFacade.convert(fotoSourcePath);
+        IFile src = FileFacade.convert("ImageDetailActivityViewPager.onRenameFileAnswer", fotoSourcePath);
         IFile dest = src.getParentFile().create(newFileName, src.getMime());
 
         IFile srcXmpShort = FileProcessor.getSidecar(src, false);
@@ -725,7 +724,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
             return false;
         }
 
-        if (DocumentFileTranslator.debugDocFile) {
+        if (FileFacade.debugLogFacade) {
             Log.i(FilePermissionActivity.TAG, "PhotoPropertiesEditActivity.execExifUpdate.do");
         }
 
@@ -1090,7 +1089,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
     }
 
     private void onRenameSubDirAnswer(final CharSequence title, SelectedFiles currentFoto, final long fotoId, final String fotoSourcePath, String newFileName) {
-        IFile src = FileFacade.convert(fotoSourcePath);
+        IFile src = FileFacade.convert("ImageDetailActivityViewPager.onRenameSubDirAnswer", fotoSourcePath);
         IFile dest = src.getParentFile().create(newFileName, src.getMime());
 
         IFile srcXmpShort = FileProcessor.getSidecar(src, false);

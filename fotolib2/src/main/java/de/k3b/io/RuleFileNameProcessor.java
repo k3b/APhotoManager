@@ -45,7 +45,7 @@ public class RuleFileNameProcessor extends FileProcessor implements IFileNamePro
     private String mName;
     private String mNumberFormat;
     private final DecimalFormat mNumberFormatter = new DecimalFormat();
-    private static final IFile sSomeExampleSourceFile = FileFacade.convert("/a/Xxxxxxxx.jpg");
+    private static final IFile sSomeExampleSourceFile = FileFacade.convert("RuleFileNameProcessor.sample", "/a/Xxxxxxxx.jpg");
 
     // optimisationn as long as lastDateFormatted does not changed nextFileInstanceNumber is recycled
     private String mLastDateFormatted = null;

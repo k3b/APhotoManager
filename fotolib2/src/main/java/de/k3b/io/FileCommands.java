@@ -49,6 +49,7 @@ import de.k3b.transactionlog.TransactionLoggerBase;
  */
 public class FileCommands extends FileProcessor implements  Cloneable, IProgessListener {
     private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
+    private static final String mDebugPrefix = "FileCommands-";
 
     public static final int OP_COPY = 1;
     public static final int OP_MOVE = 2;
@@ -261,7 +262,8 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
     protected int moveOrCopyFiles(final boolean move, String what, PhotoPropertiesDiffCopy exifChanges,
                                   SelectedFiles fotos, File[] destFiles,
                                   IProgessListener progessListener) {
-        return moveOrCopyFiles(move, what, exifChanges, fotos, FileFacade.get(destFiles), progessListener);
+        return moveOrCopyFiles(move, what, exifChanges, fotos,
+                FileFacade.get("FileCommands.moveOrCopyFiles", destFiles), progessListener);
     }
 
     protected TransactionLoggerBase createTransactionLogger(long now) {
@@ -409,7 +411,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                             String modifiedOutPath = exifProcessor.getAbsoluteJpgOutPath();
                             if (null != modifiedOutPath) {
                                 // destFile might have renamed it-s extension for private images
-                                destFile = FileFacade.convert(modifiedOutPath);
+                                destFile = FileFacade.convert("FileCommands.moveOrCopyFiles dest", modifiedOutPath);
                                 sameFile = (sourceFile != null) && sourceFile.equals(destFile);
                             }
 
@@ -512,7 +514,9 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
 
     @Deprecated
     protected boolean osRenameTo(File dest, File source) {
-        return osRenameTo(FileFacade.convert(dest), FileFacade.convert(source));
+        return osRenameTo(
+                FileFacade.convert(mDebugPrefix + "osRenameTo dest", dest),
+                FileFacade.convert(mDebugPrefix + "osRenameTo src", source));
     }
 
     protected boolean osRenameTo(IFile dest, IFile source) {

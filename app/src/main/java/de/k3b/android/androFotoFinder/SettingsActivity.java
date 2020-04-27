@@ -47,6 +47,7 @@ import de.k3b.android.util.UserTheme;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.LocalizedActivity;
+import de.k3b.io.FileFacade;
 import de.k3b.tagDB.TagRepository;
 import de.k3b.zip.LibZipGlobal;
 import io.github.lonamiwebs.stringlate.utilities.Api;
@@ -174,6 +175,7 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putBoolean("xmp_file_schema_long", LibGlobal.preferLongXmpFormat);
 
         prefs.putBoolean("mapsForgeEnabled", Global.mapsForgeEnabled);
+        prefs.putBoolean("debugLogFacade", FileFacade.debugLogFacade);
         if (Global.allow_emulate_ao10) {
             prefs.putBoolean(PREF_KEY_USE_MEDIA_IMAGE_DB_REPLACEMENT, Global.useAo10MediaImageDbReplacement);
         }
@@ -249,7 +251,9 @@ public class SettingsActivity extends PreferenceActivity {
         Global.clearSelectionAfterCommand       = getPref(prefs, "clearSelectionAfterCommand", Global.clearSelectionAfterCommand);
         LibGlobal.preferLongXmpFormat       = getPref(prefs, "xmp_file_schema_long", LibGlobal.preferLongXmpFormat);
 
-        Global.mapsForgeEnabled                 = getPref(prefs, "mapsForgeEnabled", Global.mapsForgeEnabled);
+        Global.mapsForgeEnabled = getPref(prefs, "mapsForgeEnabled", Global.mapsForgeEnabled);
+        FileFacade.debugLogFacade = getPref(prefs, "debugLogFacade", FileFacade.debugLogFacade);
+
 
         boolean useAo10MediaImageDbReplacement = Global.useAo10MediaImageDbReplacement;
         if (Global.allow_emulate_ao10) {

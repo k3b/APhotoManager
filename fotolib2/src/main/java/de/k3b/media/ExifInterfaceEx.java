@@ -140,7 +140,7 @@ public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
      */
     @Deprecated
     protected void fixDateTakenIfNeccessary(File inFile) {
-        fixDateTakenIfNeccessary(FileFacade.convert(inFile));
+        fixDateTakenIfNeccessary(FileFacade.convert("ExifInterfaceEx.fixDateTakenIfNeccessary", inFile));
     }
 
     protected void fixDateTakenIfNeccessary(IFile inFile) {
@@ -175,7 +175,7 @@ public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
 
     @Override
     public IPhotoProperties setPath(String filePath) {
-        mExifFile = (filePath != null) ? FileFacade.convert(filePath) : null;
+        mExifFile = (filePath != null) ? FileFacade.convert("ExifInterfaceEx.setPath", filePath) : null;
         if (xmpExtern != null) xmpExtern.setPath(filePath);
         return this;
     }
@@ -456,7 +456,7 @@ public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
      */
     @Deprecated
     public void setFilelastModified(File file) {
-        setFilelastModified(FileFacade.convert(file));
+        setFilelastModified(FileFacade.convert("ExifInterfaceEx.setFilelastModified", file));
     }
 
     /** when xmp sidecar file was last modified or 0 */

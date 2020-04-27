@@ -85,7 +85,7 @@ public class TestUtil {
     }
 
     public static File saveTestResourceAs(String resourceName, File destination) throws IOException {
-        return saveTestResourceAs(resourceName, FileFacade.convert(destination)).getFile();
+        return saveTestResourceAs(resourceName, FileFacade.convert("saveTestResourceAs", destination)).getFile();
     }
 
     public static IFile saveTestResourceAs(String resourceName, IFile destination) throws IOException {

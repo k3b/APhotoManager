@@ -109,7 +109,7 @@ public class SelectedFiles  {
     }
 
     public IFile[] getIFiles() {
-        return FileFacade.get(getFiles());
+        return FileFacade.get("SelectedFiles.getIFiles", getFiles());
     }
 
     @Deprecated
@@ -193,7 +193,7 @@ public class SelectedFiles  {
     }
 
     public IFile getIFile(int i) {
-        return FileFacade.convert(getFile(i));
+        return FileFacade.convert("SelectedFiles.getFile", getFile(i));
     }
 
     public Long getId(int i) {

@@ -37,6 +37,8 @@ import de.k3b.io.IFile;
  * but is implemented through Android specific {@link DocumentFile}
  */
 public class AndroidFileFacade extends FileFacade {
+    public static final String LOG_LOG_TAG = "k3b.AndFileFacade";
+
     private static DocumentFileTranslator documentFileTranslator = null;
     private DocumentFile androidFile;
 
@@ -66,7 +68,7 @@ public class AndroidFileFacade extends FileFacade {
                 return true;
             }
         }
-        Log.e(TAG, "renameTo " + this + " -> " + newName + " failed");
+        Log.e(LOG_TAG, "renameTo " + this + " -> " + newName + " failed");
         return false;
     }
 
@@ -78,7 +80,7 @@ public class AndroidFileFacade extends FileFacade {
             out = targetFullPath.openOutputStream();
             FileUtils.copy(in, out);
         } catch (IOException ex) {
-            Log.e(TAG, "copyImpl " + this + " -> " + targetFullPath + " failed", ex);
+            Log.e(LOG_TAG, "copyImpl " + this + " -> " + targetFullPath + " failed", ex);
             return false;
         } finally {
             FileUtils.close(in, this);
@@ -97,7 +99,7 @@ public class AndroidFileFacade extends FileFacade {
             return true;
         }
 
-        Log.e(TAG, "renameTo " + this + " -> " + newName + " failed");
+        Log.e(LOG_TAG, "renameTo " + this + " -> " + newName + " failed");
         return false;
     }
 
@@ -215,7 +217,7 @@ public class AndroidFileFacade extends FileFacade {
         if (null == findExisting(name)) {
             return new AndroidFileFacade(androidFile.createFile(mime, name), new File(getFile(), name));
         }
-        Log.e(TAG, "create " + this + "/" + name + " failed");
+        Log.e(LOG_TAG, "create " + this + "/" + name + " failed");
         return null;
     }
 

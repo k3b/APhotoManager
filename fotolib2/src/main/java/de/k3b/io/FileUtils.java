@@ -58,7 +58,7 @@ public class FileUtils {
 
     @Deprecated
     public static String readFile(File file) throws IOException {
-        return readFile(FileFacade.convert(file));
+        return readFile(FileFacade.convert(" readFile via File ", file));
     }
 
     public static String readFile(IFile file) throws IOException {
@@ -259,7 +259,7 @@ public class FileUtils {
     }
 
     public static void delete(File file, final String fileExt) {
-        delete(FileFacade.convert(file), fileExt);
+        delete(FileFacade.convert(" delete via File ", file), fileExt);
     }
 
     // Delete the file or if it's a directory, all files in the directory
@@ -299,7 +299,7 @@ public class FileUtils {
 
     @Deprecated
     public static void copyReplace(File inFile, File outFile, boolean deleteOriginalAfterFinish, String what) throws IOException {
-        copyReplace(FileFacade.convert(inFile), FileFacade.convert(outFile), deleteOriginalAfterFinish, what);
+        copyReplace(FileFacade.convert(" copyReplace via File ", inFile), FileFacade.convert(null, outFile), deleteOriginalAfterFinish, what);
     }
 
     public static void copyReplace(IFile inFile, IFile outFile, boolean deleteOriginalAfterFinish, String what) throws IOException {
@@ -320,7 +320,7 @@ public class FileUtils {
 
     @Deprecated
     public static void copyReplace(InputStream sourceStream, File destinationFile) throws IOException {
-        copyReplace(sourceStream, FileFacade.convert(destinationFile));
+        copyReplace(sourceStream, FileFacade.convert(" copyReplace via File ", destinationFile));
     }
 
     public static void copyReplace(InputStream sourceStream, IFile destinationFile) throws IOException {
@@ -355,7 +355,7 @@ public class FileUtils {
 
     @Deprecated
     public static File getFirstExistingDir(File root) {
-        return getFirstExistingDir(FileFacade.convert(root)).getFile();
+        return getFirstExistingDir(FileFacade.convert(" getFirstExistingDir via File ", root)).getFile();
     }
 
     public static IFile getFirstExistingDir(IFile root) {
@@ -367,7 +367,7 @@ public class FileUtils {
 
     @Deprecated
     public static File getFirstNonExistingFile(File parentDir, String newFilePrefix, int number, String newFileSuffix) {
-        return getFirstNonExistingFile(FileFacade.convert(parentDir), newFilePrefix, number, newFileSuffix).getFile();
+        return getFirstNonExistingFile(FileFacade.convert(" getFirstNonExistingFile via File ", parentDir), newFilePrefix, number, newFileSuffix).getFile();
     }
 
     public static IFile getFirstNonExistingFile(IFile parentDir, String newFilePrefix, int number, String newFileSuffix) {

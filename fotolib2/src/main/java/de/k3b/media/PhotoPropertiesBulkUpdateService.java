@@ -67,7 +67,7 @@ public class PhotoPropertiesBulkUpdateService {
 
     @Deprecated
     public PhotoPropertiesUpdateHandler saveLatLon(File filePath, Double latitude, Double longitude) {
-        return saveLatLon(FileFacade.convert(filePath), latitude, longitude);
+        return saveLatLon(FileFacade.convert("PhotoPropertiesBulkUpdateService.saveLatLon", filePath), latitude, longitude);
     }
 
     public PhotoPropertiesUpdateHandler saveLatLon(IFile filePath, Double latitude, Double longitude) {
@@ -82,7 +82,7 @@ public class PhotoPropertiesBulkUpdateService {
     @Deprecated
     public PhotoPropertiesUpdateHandler applyChanges(File inFilePath, String outFilePath,
                                                      long id, boolean deleteOriginalWhenFinished, PhotoPropertiesDiffCopy metaDiffCopy) {
-        return applyChanges(FileFacade.convert(inFilePath), outFilePath, id, deleteOriginalWhenFinished, metaDiffCopy);
+        return applyChanges(FileFacade.convert("PhotoPropertiesBulkUpdateService.applyChanges", inFilePath), outFilePath, id, deleteOriginalWhenFinished, metaDiffCopy);
     }
 
     /**
@@ -94,7 +94,7 @@ public class PhotoPropertiesBulkUpdateService {
         StringBuilder sb = (LibGlobal.debugEnabled)
                 ? createDebugStringBuilder(inFilePath)
                 : null;
-        IFile outFile = (outFilePath != null) ? FileFacade.convert(outFilePath) : inFilePath;
+        IFile outFile = (outFilePath != null) ? FileFacade.convert("PhotoPropertiesBulkUpdateService.applyChanges", outFilePath) : inFilePath;
         if ((inFilePath != null) && outFile.getParentFile().canWrite()) {
             PhotoPropertiesUpdateHandler exifHandler = null;
             try {
@@ -197,7 +197,7 @@ public class PhotoPropertiesBulkUpdateService {
     }
 
     protected File handleVisibility(VISIBILITY newVisibility, File outFile, PhotoPropertiesUpdateHandler exif) {
-        return handleVisibility(newVisibility, FileFacade.convert(outFile), exif).getFile();
+        return handleVisibility(newVisibility, FileFacade.convert("PhotoPropertiesBulkUpdateService.handleVisibility", outFile), exif).getFile();
 
     }
     /** return modified out file or null if filename must not change due to visibility rule */
@@ -213,7 +213,7 @@ public class PhotoPropertiesBulkUpdateService {
                     transactionLogger.addChangesCopyMove(true, newAbsoluteOutPath, "handleVisibility");
                 }
                 exif.setAbsoluteJpgOutPath(newAbsoluteOutPath);
-                return FileFacade.convert(newAbsoluteOutPath);
+                return FileFacade.convert("PhotoPropertiesBulkUpdateService.handleVisibility", newAbsoluteOutPath);
             }
         }
         return null;

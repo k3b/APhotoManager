@@ -31,8 +31,6 @@ import java.io.OutputStream;
  * and android specific de.k3b.android.io....
  */
 public interface IFile {
-    public static final String TAG = "k3b.File";
-
     @Deprecated
     boolean renameTo(IFile newName);
 

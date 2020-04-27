@@ -38,6 +38,7 @@ import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.io.DocumentFileTranslator;
+import de.k3b.io.FileFacade;
 import de.k3b.io.FileNameUtil;
 
 /**
@@ -145,7 +146,7 @@ public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialog
                 final File dir = dirs[i];
                 if (!getDocumentFileTranslator().isKnownRoot(dir)) {
                     final File anddroidRootDir = FileNameUtil.getAnddroidRootDir(dir);
-                    if (DocumentFileTranslator.debugDocFile) {
+                    if (FileFacade.debugLogFacade) {
                         Log.i(TAG, dbgContext + ":" + this.documentFileTranslator
                                 + ":getMissingRootDirFileOrNull(" + dir
                                 + ") needs " + anddroidRootDir);

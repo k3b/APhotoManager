@@ -51,9 +51,9 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
     public static XmpFile getSidecar(IFile parent, String name, boolean longFormat) {
         XmpFile result;
         if (longFormat) {
-            result = new XmpFile(FileFacade.getOrCreateChild(parent, name + EXT_SIDECAR, XMP_MINE), longFormat);
+            result = new XmpFile(FileFacade.getOrCreateChild("FileProcessor.getSidecar", parent, name + EXT_SIDECAR, XMP_MINE), longFormat);
         } else {
-            result = new XmpFile(FileFacade.getOrCreateChild(parent, FileUtils.replaceExtension(name, EXT_SIDECAR), XMP_MINE), longFormat);
+            result = new XmpFile(FileFacade.getOrCreateChild("FileProcessor.getSidecar", parent, FileUtils.replaceExtension(name, EXT_SIDECAR), XMP_MINE), longFormat);
         }
         return result;
 
@@ -80,7 +80,7 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
      */
     @Deprecated
     public boolean osFileExists(File file) {
-        return osFileExists(FileFacade.convert(file));
+        return osFileExists(FileFacade.convert(getClass().getSimpleName() + " osFileExists via File ", file));
     }
 
     public boolean osFileExists(IFile file) {
@@ -89,7 +89,7 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
 
     @Deprecated
     protected boolean fileOrSidecarExists(File file) {
-        return fileOrSidecarExists(FileFacade.convert(file));
+        return fileOrSidecarExists(FileFacade.convert(getClass().getSimpleName() + " fileOrSidecarExists via File ", file));
     }
 
     protected boolean fileOrSidecarExists(IFile file) {
@@ -125,7 +125,7 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
 
     @Deprecated
     public File renameDuplicate(File file) {
-        return FileFacade.convert(file).getFile();
+        return FileFacade.convert(getClass().getSimpleName() + " renameDuplicate via File ", file).getFile();
     }
 
     /**
@@ -168,12 +168,12 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
         private boolean hasAlsoOtherFormat = false;
 
         public XmpFile(IFile parent, String name, String mime, boolean longFormat) {
-            this(FileFacade.getOrCreateChild(parent, name, mime), longFormat);
+            this(FileFacade.getOrCreateChild("FileProcessor.XmpFile()", parent, name, mime), longFormat);
         }
 
         @Deprecated
         public XmpFile(String absolutePath, boolean longFormat) {
-            this(FileFacade.convert(absolutePath), longFormat);
+            this(FileFacade.convert("FileProcessor.XmpFile.absolutePath", absolutePath), longFormat);
         }
 
         public XmpFile(IFile file, boolean longFormat) {

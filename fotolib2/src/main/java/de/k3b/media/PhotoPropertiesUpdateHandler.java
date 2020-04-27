@@ -125,7 +125,7 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
             // xmp should have the same data as exif/iptc
             PhotoPropertiesUtil.copyNonEmpty(xmp, jpg);
             if ((absoluteJpgInPath != null) && (xmp.getDateTimeTaken() == null)) {
-                IFile in = FileFacade.convert(absoluteJpgInPath);
+                IFile in = FileFacade.convert("PhotoPropertiesUpdateHandler.create", absoluteJpgInPath);
                 if (in.exists() && in.isFile()) {
                     long lastModified = in.lastModified();
                     if (lastModified != 0) {
@@ -267,7 +267,9 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
 
         if (exif != null) {
             if (!isSameFile) {
-                exif.saveAttributes(FileFacade.convert(inJpgFullPath), FileFacade.convert(outJpgFullPath),
+                exif.saveAttributes(
+                        FileFacade.convert("PhotoPropertiesUpdateHandler.transferExif in", inJpgFullPath),
+                        FileFacade.convert("PhotoPropertiesUpdateHandler.transferExif out", outJpgFullPath),
                         this.deleteOriginalAfterFinish);
             } else {
                 exif.saveAttributes();

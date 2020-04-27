@@ -42,7 +42,7 @@ public class FileCommandLogger implements IFileCommandLogger {
         if (mLogFilePath != null) {
             OutputStream stream = null;
             try {
-                IFile logFile = FileFacade.convert(mLogFilePath);
+                IFile logFile = FileFacade.convert("FileCommandLogger.openLogfile", mLogFilePath);
                 if (logFile.exists()) {
                     // open existing in append mode
                     long ageInHours = (new Date().getTime() - logFile.lastModified()) / (1000 * 60 * 60);

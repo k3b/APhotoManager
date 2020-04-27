@@ -19,6 +19,9 @@
  */
 package de.k3b.io;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -35,10 +38,17 @@ import java.nio.channels.FileChannel;
  * add support for Android DocumentFile
  */
 public class FileFacade implements IFile {
+    public static final String LOG_TAG = "k3b.FileFacade";
+    private static final Logger logger = LoggerFactory.getLogger(LOG_TAG);
+    public static boolean debugLogFacade = false;
     private static Converter<File, IFile> fileFacade = new Converter<File, IFile>() {
         @Override
-        public IFile convert(File file) {
-            return new FileFacade(file);
+        public IFile convert(String dbgContext, File file) {
+            final FileFacade result = new FileFacade(file);
+            if (debugLogFacade) {
+                logger.info(dbgContext + " convert => " + result);
+            }
+            return result;
         }
     };
     private File file;
@@ -67,10 +77,10 @@ public class FileFacade implements IFile {
         this(new File(parent, newFolderName));
     }
 
-    public static IFile[] get(File[] files) {
+    public static IFile[] get(String dbgContext, File[] files) {
         IFile f[] = new FileFacade[files.length];
         for (int i = 0; i < files.length; i++) {
-            f[i] = convert(files[i]);
+            f[i] = convert(dbgContext, files[i]);
         }
 
         return f;
@@ -79,22 +89,25 @@ public class FileFacade implements IFile {
     /**
      * gets existing file from parent or create it if not found
      */
-    public static IFile getOrCreateChild(IFile parent, String name, String mime) {
+    public static IFile getOrCreateChild(String dbgContext, IFile parent, String name, String mime) {
         IFile result = parent.findExisting(name);
         if (result == null) {
             result = parent.create(name, mime);
         }
+        if (debugLogFacade) {
+            logger.info(dbgContext + " getOrCreateChild(" + name + "mime=" + mime + ") => " + result);
+        }
         return result;
     }
 
-    public static IFile convert(File file) {
+    public static IFile convert(String dbgContext, File file) {
         if (file == null) return null;
-        return fileFacade.convert(file);
+        return fileFacade.convert(dbgContext, file);
     }
 
-    public static IFile convert(String filePath) {
+    public static IFile convert(String dbgContext, String filePath) {
         if (filePath == null) return null;
-        return convert(new File(filePath));
+        return convert(dbgContext, new File(filePath));
     }
 
     public static void setFileFacade(Converter<File, IFile> fileFacade) {
@@ -136,7 +149,7 @@ public class FileFacade implements IFile {
     public IFile findExisting(String name) {
         final File candidate = new File(this.file, name);
         if (candidate.exists()) {
-            return convert(candidate);
+            return convert("findExisting", candidate);
         }
         return null;
     }
@@ -178,7 +191,7 @@ public class FileFacade implements IFile {
 
     @Override
     public IFile getCanonicalFile() {
-        return convert(FileUtils.tryGetCanonicalFile(file));
+        return convert("getCanonicalFile", FileUtils.tryGetCanonicalFile(file));
     }
 
     @Override
@@ -188,7 +201,7 @@ public class FileFacade implements IFile {
 
     @Override
     public IFile getParentFile() {
-        return convert(file.getParentFile());
+        return convert("getParentFile", file.getParentFile());
     }
 
     @Override
@@ -218,7 +231,7 @@ public class FileFacade implements IFile {
 
     @Override
     public IFile[] listFiles() {
-        return get(file.listFiles());
+        return get(null, file.listFiles());
     }
 
     @Override
@@ -272,7 +285,7 @@ public class FileFacade implements IFile {
 
     @Override
     public IFile create(String name, String mime) {
-        return convert(new File(file, name));
+        return convert("create", new File(file, name));
     }
 
     @Override
@@ -281,6 +294,9 @@ public class FileFacade implements IFile {
     }
 
     public File getFile() {
+        if (debugLogFacade) {
+            logger.info("getFile() " + file + " from " + this);
+        }
         return file;
     }
 

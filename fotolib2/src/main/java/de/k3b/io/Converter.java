@@ -26,5 +26,5 @@ package de.k3b.io;
  * @param <FROM>
  */
 public interface Converter<FROM, TO> {
-    public TO convert(FROM from);
+    public TO convert(String dbgContext, FROM from);
 }

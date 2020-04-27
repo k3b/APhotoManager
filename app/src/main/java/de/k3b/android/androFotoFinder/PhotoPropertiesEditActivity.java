@@ -57,7 +57,6 @@ import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagsPickerFragment;
 import de.k3b.android.io.AndroidFileCommands;
-import de.k3b.android.io.DocumentFileTranslator;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.ResourceUtils;
@@ -69,6 +68,7 @@ import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoUri;
 import de.k3b.io.DateUtil;
+import de.k3b.io.FileFacade;
 import de.k3b.io.GeoUtil;
 import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
@@ -848,7 +848,7 @@ public class PhotoPropertiesEditActivity extends BaseActivity implements Common 
             return false;
         }
 
-        if (DocumentFileTranslator.debugDocFile) {
+        if (FileFacade.debugLogFacade) {
             Log.i(FilePermissionActivity.TAG, "PhotoPropertiesEditActivity.execExifUpdate.do");
         }
 

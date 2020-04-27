@@ -167,7 +167,8 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
         mSelectedFiles = getSelectedFiles("onCreate ", intent, false);
 
         // Edit dir or edit ".apm"
-        mCurrentOutDir = FileFacade.convert(IntentUtil.getFile(intent.getData()));
+        mCurrentOutDir = FileFacade.convert(mDebugPrefix + " mCurrentOutDir",
+                IntentUtil.getFile(intent.getData()));
         if (mCurrentOutDir != null) {
             if (mCurrentOutDir.isFile()) mCurrentOutDir = mCurrentOutDir.getParentFile();
         }
@@ -621,7 +622,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
 
         if (result == null) {
             String path = IntentUtil.getFilePath(this, IntentUtil.getUri(intent));
-            IFile rootDirFile = FileFacade.convert(path);
+            IFile rootDirFile = FileFacade.convert("PhotoAutoprocessingEditActivity.getSelectedFiles", path);
 
             IFile[] files = rootDirFile.listFiles();
             if (files != null) {
@@ -665,7 +666,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
         getMenuInflater().inflate(R.menu.menu_copy_paste, menu);
 
         MenuItem item = menu.findItem(android.R.id.paste);
-        final IFile clipboardDir = FileFacade.convert(ClipboardUtil.getClipboardDir(this));
+        final IFile clipboardDir = FileFacade.convert(mDebugPrefix + " getClipboardDir", ClipboardUtil.getClipboardDir(this));
         final IFile apmFile = (clipboardDir == null) ? null : PhotoAutoprocessingDto.getApmFile(clipboardDir);
         if ((item != null) && (apmFile != null) && apmFile.exists()) {
             item.setVisible(true);

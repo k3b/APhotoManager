@@ -38,8 +38,8 @@ import static org.mockito.Mockito.verify;
  * Created by k3b on 06.08.2015.
  */
 public class FileCommandTests {
-    private static final IFile X_FAKE_OUTPUT_DIR = FileFacade.convert(new File("/fakeOutputDir").getAbsoluteFile());
-    private static final IFile X_FAKE_INPUT_DIR = FileFacade.convert(new File("/fakeInputDir").getAbsoluteFile());
+    private static final IFile X_FAKE_OUTPUT_DIR = FileFacade.convert(null, new File("/fakeOutputDir").getAbsoluteFile());
+    private static final IFile X_FAKE_INPUT_DIR = FileFacade.convert(null, new File("/fakeInputDir").getAbsoluteFile());
     private FileCommands sut;
 
     MediaTransactionLogEntryType lastMediaTransactionLogEntryType;

@@ -18,7 +18,7 @@ public class PhotoProperties2ExistingFileSaver implements IItemSaver<IPhotoPrope
         if (item != null) {
             String path = item.getPath();
             if (path != null) {
-                return saveFiles(FileFacade.convert(path),
+                return saveFiles(FileFacade.convert("PhotoProperties2ExistingFileSaver.save", path),
                         FileProcessor.getExistingSidecarOrNull(path, true),
                         FileProcessor.getExistingSidecarOrNull(path, false)) > 0;
             }

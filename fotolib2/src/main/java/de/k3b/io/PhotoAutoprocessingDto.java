@@ -102,7 +102,8 @@ public class PhotoAutoprocessingDto implements Serializable {
         if (content instanceof Properties) {
             Properties properties = (Properties) content;
             String outDir = properties.getProperty(KEY_OUT_DIR);
-            photoAutoprocessingDto = new PhotoAutoprocessingDto((outDir != null) ? FileFacade.convert(outDir) : null, properties);
+            photoAutoprocessingDto = new PhotoAutoprocessingDto((outDir != null)
+                    ? FileFacade.convert("PhotoAutoprocessingDto load", outDir) : null, properties);
         }
         if (LibGlobal.debugEnabled) {
             logger.debug(PhotoAutoprocessingDto.class.getSimpleName() + ": load De-Serialize:" + photoAutoprocessingDto);
