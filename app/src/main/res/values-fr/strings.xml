@@ -34,7 +34,10 @@
   <string name="btn_pause">Suspendre</string>
   <string name="copy_result_format">%1$d/%2$d fichiers copiés</string>
   <string name="delete_menu_title">Supprimer</string>
-  <string name="delete_question_message_format">Êtes-vous sûr de que vouloir supprimer définitivement ces fichiers	  ?%1$s,	  cette opération n\'est pas réversible.</string>
+  <string name="delete_question_message_format">"Êtes-vous sûr de que vouloir supprimer définitivement ces fichiers?
+%1$s,
+
+cette opération n\'est pas réversible."</string>
   <string name="delete_question_title">Supprimer les photo(s) ?</string>
   <string name="delete_result_format">supprimer les fichiers %1$d/%2$d</string>
   <string name="destination_copy">Destination de la copie</string>
