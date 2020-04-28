@@ -237,36 +237,20 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public OutputStream openOutputStream() throws FileNotFoundException {
+        if (androidFile == null) {
+            final DocumentFile documentFileParent = documentFileTranslator.getOrCreateDirectory(getFile().getParentFile());
+            androidFile = documentFileParent.createFile(null, getFile().getName());
+            if (FileFacade.debugLogFacade) {
+                Log.i(LOG_TAG, "created for openOutputStream " + this);
+            }
+
+        }
         return documentFileTranslator.createOutputStream(androidFile);
     }
 
     @Override
     public InputStream openInputStream() throws FileNotFoundException {
         return documentFileTranslator.openInputStream(androidFile);
-    }
-
-    /**
-     * @return null if file already exist
-     */
-    @Override
-    public IFile create(String name) {
-        if (androidFile == null) {
-            androidFile = documentFileTranslator.getOrCreateDirectory(getFile());
-            if (FileFacade.debugLogFacade) {
-                Log.i(LOG_TAG, "created dir(s) " + this);
-            }
-        }
-        if (null == findExisting(name)) {
-            final File newFile = new File(getFile(), name);
-            DocumentFile newDoc = androidFile.createFile(null, name); // new AndroidFileFacade(androidFile.createFile(null, name), newFile);
-            final AndroidFileFacade result = new AndroidFileFacade(newDoc, newFile);
-            if (FileFacade.debugLogFacade) {
-                Log.i(LOG_TAG, "created file " + result);
-            }
-            return result;
-        }
-        Log.e(LOG_TAG, "create " + this + "/" + name + " failed already exists");
-        return null;
     }
 
     private IFile[] get(DocumentFile[] docs) {

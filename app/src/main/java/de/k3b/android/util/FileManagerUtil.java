@@ -22,11 +22,9 @@ package de.k3b.android.util;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.provider.DocumentsContract;
-import android.provider.DocumentsProvider;
 
 import java.io.File;
 import java.util.List;
@@ -42,6 +40,7 @@ public class FileManagerUtil {
                     ? Uri.parse(path)
                     : Uri.fromFile(new File(path));
 
+            //TODO might throw android.os.FileUriExposedException
             Intent startIntent = new Intent();
             startIntent.setAction(Intent.ACTION_VIEW);
 

@@ -275,17 +275,10 @@ public class FileFacade implements IFile {
         return new FileInputStream(file);
     }
 
-    /**
-     * @return null if file already exist
-     */
     @Override
     public IFile create(String name) {
         final File file = new File(this.file, name);
-        if (!file.exists()) {
-            return convert("create", file);
-        }
-        logger.error("create " + this + "/" + name + " failed already exists");
-        return null;
+        return convert("create", file);
     }
 
     @Override
