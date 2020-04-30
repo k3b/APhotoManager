@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
-import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.File;
@@ -51,6 +50,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.k3b.io.FileFacade;
+import de.k3b.io.FileUtils;
 import de.k3b.io.IFile;
 
 /**
@@ -1121,7 +1121,11 @@ public class ExifInterface {
         this(filename, null);
     }
 
-    public ExifInterface(String filename, InputStream in) throws IOException {
+    public ExifInterface(IFile file) throws IOException {
+        this(file.getAbsolutePath(), file.openInputStream());
+    }
+
+    protected ExifInterface(String filename, InputStream in) throws IOException {
         if (filename == null) {
             throw new IllegalArgumentException("filename cannot be null");
         }
@@ -1430,7 +1434,7 @@ public class ExifInterface {
             logWarn( "Invalid image.", e);
             validJpgExifFormat = false;
         } finally {
-            closeQuietly(in);
+            FileUtils.close(in, null);
             if (DEBUG_INTERNAL) {
                 logDebug(this.toString());
             }
@@ -1487,6 +1491,8 @@ public class ExifInterface {
     }
 
     /**
+     * Old File based implementation.
+     *
      * @deprecated use {@link #saveAttributes(IFile, IFile, boolean)} instead
      */
     @Deprecated
@@ -1499,37 +1505,21 @@ public class ExifInterface {
         IFile currentOutFile = outFile;
         fixAttributes();
 
-
         // Keep the thumbnail in memory
         mThumbnailBytes = getThumbnail(inFile);
 
         boolean overwriteOriginal = inFile.equals(currentOutFile);
 
-        String originalName = inFile.getName();
         if (overwriteOriginal) {
-            String tempName = originalName + ".new.jpg";
-            logDebug(String.format("%s: overwrite original:\n\twriting to %s", debugContext, tempName));
-            currentOutFile = outFile.getParentFile().create(tempName);
+            final String tempName = inFile.getName() + ".tmp";
+            renameOrThrow(inFile, tempName);
+            inFile = inFile.getParentFile().create(tempName);
         }
 
         saveJpegAttributes(
                 createInputStream(inFile), createOutputStream(currentOutFile), mThumbnailBytes);
 
         // all exif writing is done successfully
-        if (overwriteOriginal && currentOutFile.exists()) {
-            // cleanup
-            String savedOriginalName = originalName + ".old.jpg";
-            IFile previousFailedOverwriteOriginal = inFile.getParentFile().findExisting(savedOriginalName);
-            if (previousFailedOverwriteOriginal != null) {
-                if (DEBUG_INTERNAL) {
-                    logDebug(String.format("delete old %s", previousFailedOverwriteOriginal));
-                }
-                previousFailedOverwriteOriginal.delete();
-            }
-            renameOrThrow(inFile, savedOriginalName);
-            renameOrThrow(currentOutFile, originalName);
-        }
-
         if ((deleteInFileOnFinish || overwriteOriginal) && inFile.exists()) {
             deleteFile(inFile);
         }
@@ -1653,16 +1643,7 @@ public class ExifInterface {
             mThumbnailBytes = buffer;
             return buffer;
         } finally {
-            closeQuietly(in);
-        }
-    }
-
-    private void closeQuietly(Closeable in) {
-        if (in != null) {
-            try {
-                in.close();
-            } catch (IOException e) {
-            }
+            FileUtils.close(in, in);
         }
     }
 
@@ -1925,7 +1906,7 @@ public class ExifInterface {
                 bytesRead += length;
             }
         } finally {
-            closeQuietly(dataInputStream);
+            FileUtils.close(dataInputStream, null);
         }
     }
 
@@ -2033,8 +2014,8 @@ public class ExifInterface {
                 }
             }
         } finally {
-            closeQuietly(dataOutputStream);
-            closeQuietly(dataInputStream);
+            FileUtils.close(dataOutputStream, null);
+            FileUtils.close(dataInputStream, null);
         }
     }
 

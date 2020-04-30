@@ -85,4 +85,6 @@ public interface IFile {
     IFile create(String name);
 
     File getFile();
+
+    long length();
 }

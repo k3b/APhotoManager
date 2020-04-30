@@ -144,6 +144,11 @@ public class FileWrapper implements IFile {
     }
 
     @Override
+    public long length() {
+        return child.length();
+    }
+
+    @Override
     public boolean equals(Object o) {
         return child.equals(o);
     }

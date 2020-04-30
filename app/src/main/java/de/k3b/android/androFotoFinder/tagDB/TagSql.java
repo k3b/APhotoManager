@@ -37,6 +37,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.GalleryFilterParameter;
+import de.k3b.io.IFile;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
@@ -393,21 +394,6 @@ public class TagSql extends FotoSql {
         return 0;
     }
 
-    static class TagWorflowItem {
-        public final long id;
-        public final long xmpLastModifiedDate;
-        public final String path;
-        public final List<String> tags;
-        public boolean xmpMoreRecentThanSql = false;
-
-        public TagWorflowItem(long id, String path, List<String> tags, long xmpLastModifiedDate) {
-            this.tags = tags;
-            this.path = path;
-            this.id = id;
-            this.xmpLastModifiedDate = xmpLastModifiedDate;
-        }
-    }
-
     /**
      * converts selectedItemPks and/or anyOfTags to TagWorflowItem-s
      * @param selectedItemPks if not null list of comma seperated item-pks
@@ -437,7 +423,7 @@ public class TagSql extends FotoSql {
                 if (c.moveToFirst()) {
                     do {
                         result.add(new TagWorflowItem(c.getLong(0), c.getString(1), TagConverter.fromString(c.getString(2)),
-                                c.getLong(3)));
+                                c.getLong(3), null));
                     } while (c.moveToNext());
                 }
             } catch (Exception ex) {
@@ -449,6 +435,23 @@ public class TagSql extends FotoSql {
             Log.e(Global.LOG_CONTEXT, "TagSql.loadTagWorflowItems(): error no items because no filter in " + query);
         }
         return result;
+    }
+
+    static class TagWorflowItem {
+        public final long id;
+        public final long xmpLastModifiedDate;
+        public final String path;
+        public final List<String> tags;
+        public boolean xmpMoreRecentThanSql = false;
+        public final IFile file;
+
+        public TagWorflowItem(long id, String path, List<String> tags, long xmpLastModifiedDate, IFile file) {
+            this.tags = tags;
+            this.path = path;
+            this.id = id;
+            this.xmpLastModifiedDate = xmpLastModifiedDate;
+            this.file = file;
+        }
     }
 
 }

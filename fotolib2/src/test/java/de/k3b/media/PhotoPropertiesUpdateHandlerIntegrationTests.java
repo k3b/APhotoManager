@@ -34,6 +34,7 @@ import de.k3b.LibGlobal;
 import de.k3b.TestUtil;
 import de.k3b.io.FileCommands;
 import de.k3b.io.FileUtils;
+import de.k3b.io.IFile;
 import de.k3b.io.VISIBILITY;
 
 /**
@@ -42,7 +43,7 @@ import de.k3b.io.VISIBILITY;
 
 public class PhotoPropertiesUpdateHandlerIntegrationTests {
     private static final Logger logger = LoggerFactory.getLogger(PhotoPropertiesUpdateHandlerIntegrationTests.class);
-    private static final File OUTDIR = new File(TestUtil.OUTDIR_ROOT, "PhotoPropertiesUpdateHandlerIntegrationTests");
+    private static final IFile OUTDIR = TestUtil.OUTDIR_ROOT.create("PhotoPropertiesUpdateHandlerIntegrationTests");
 
     @BeforeClass
     public static void initDirectories() {
@@ -56,10 +57,10 @@ public class PhotoPropertiesUpdateHandlerIntegrationTests {
     public void emptyWriteEmptyExifXmpCreate() throws IOException {
         ExifInterfaceEx.fixDateOnSave = false;
 
-        File out = new File(OUTDIR,"emptyWriteEmptyExifXmpCreate.jpg");
+        IFile out = OUTDIR.create("emptyWriteEmptyExifXmpCreate.jpg");
         TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_JPG_WITH_NO_EXIF, out);
 
-        PhotoPropertiesUpdateHandler sut = PhotoPropertiesUpdateHandler.create(out.getAbsolutePath(), null, false, "JUnit"
+        PhotoPropertiesUpdateHandler sut = PhotoPropertiesUpdateHandler.create(out, null, false, "JUnit"
                 , true, true, true); //exif, xmp, create
         PhotoPropertiesDTO empty = new PhotoPropertiesDTO();
         empty.setVisibility(VISIBILITY.PUBLIC); // not complete empty since it is public visible
@@ -84,11 +85,11 @@ public class PhotoPropertiesUpdateHandlerIntegrationTests {
         ExifInterfaceEx.useUserComment = false;
         ExifInterfaceEx.fixDateOnSave = false;
 
-        File out = new File(OUTDIR,"existingWriteEmptyExifXmp.jpg");
+        IFile out = OUTDIR.create("existingWriteEmptyExifXmp.jpg");
         TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_JPG_WITH_EXIF, out);
         TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_XMP_WITH_EXIF, FileCommands.getSidecar(out.getAbsolutePath(), false));
 
-        PhotoPropertiesUpdateHandler sut = PhotoPropertiesUpdateHandler.create(out.getAbsolutePath(), null, false, "JUnit"
+        PhotoPropertiesUpdateHandler sut = PhotoPropertiesUpdateHandler.create(out, null, false, "JUnit"
                 , true, true, true); //exif, xmp, create
         PhotoPropertiesDTO empty = new PhotoPropertiesDTO();
         empty.setVisibility(VISIBILITY.PUBLIC); // not complete empty since it is public visible
@@ -110,11 +111,11 @@ public class PhotoPropertiesUpdateHandlerIntegrationTests {
 
     @Test
     public void existingWriteValueExifXmpCreate() throws IOException {
-        File out = new File(OUTDIR,"existingWriteValueExifXmpCreate.jpg");
+        IFile out = OUTDIR.create("existingWriteValueExifXmpCreate.jpg");
         TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_JPG_WITH_EXIF, out);
 
         PhotoPropertiesUpdateHandler sut = PhotoPropertiesUpdateHandler.create(
-                out.getAbsolutePath(), null,
+                out, null,
                 false, "JUnit",
                 true, true, true); //exif, xmp, create
         PhotoPropertiesDTO value = createTestValue();
@@ -141,10 +142,10 @@ public class PhotoPropertiesUpdateHandlerIntegrationTests {
 
     @Test
     public void emptyWriteValuesXmpCreate() throws IOException {
-        File out = new File(OUTDIR,"emptyWriteValuesXmpCreate.jpg");
+        IFile out = OUTDIR.create("emptyWriteValuesXmpCreate.jpg");
         TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_JPG_WITH_NO_EXIF, out);
 
-        PhotoPropertiesUpdateHandler sut = PhotoPropertiesUpdateHandler.create(out.getAbsolutePath(), null, false, "JUnit"
+        PhotoPropertiesUpdateHandler sut = PhotoPropertiesUpdateHandler.create(out, null, false, "JUnit"
                 , false, true, true); //exif, xmp, create
         PhotoPropertiesDTO values = createTestValue();
         PhotoPropertiesUtil.copy(sut, values, true, true);
@@ -161,10 +162,10 @@ public class PhotoPropertiesUpdateHandlerIntegrationTests {
 
     @Test
     public void emptyWriteValuesExifOnly() throws IOException {
-        File out = new File(OUTDIR,"emptyWriteValuesExifOnly.jpg");
+        IFile out = OUTDIR.create("emptyWriteValuesExifOnly.jpg");
         TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_JPG_WITH_NO_EXIF, out);
 
-        PhotoPropertiesUpdateHandler sut = PhotoPropertiesUpdateHandler.create(out.getAbsolutePath(), null, false, "JUnit"
+        PhotoPropertiesUpdateHandler sut = PhotoPropertiesUpdateHandler.create(out, null, false, "JUnit"
                 , true, false, false); //exif, xmp, create
         PhotoPropertiesDTO values = createTestValue();
         PhotoPropertiesUtil.copy(sut, values, true, true);
@@ -180,9 +181,9 @@ public class PhotoPropertiesUpdateHandlerIntegrationTests {
     }
 
     private void assertEqual(
-            File file, PhotoPropertiesDTO expectedExif, PhotoPropertiesDTO expectedXmp,
+            IFile file, PhotoPropertiesDTO expectedExif, PhotoPropertiesDTO expectedXmp,
             PhotoPropertiesUpdateHandler oldSut) throws IOException {
-        PhotoPropertiesUpdateHandler sut = PhotoPropertiesUpdateHandler.create(file.getAbsolutePath(), null, false, "JUnit-check"
+        PhotoPropertiesUpdateHandler sut = PhotoPropertiesUpdateHandler.create(file, null, false, "JUnit-check"
                 , true, true, false); //exif, xmp, create
 
         if (oldSut != null) {

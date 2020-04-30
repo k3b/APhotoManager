@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -41,7 +41,7 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
         return isSidecar(file.getName());
     }
 
-    public static IFile getSidecar(IFile file, boolean longFormat) {
+    public static XmpFile getSidecar(IFile file, boolean longFormat) {
         if (file == null) return null;
         String name = file.getName();
         return getSidecar(file.getParentFile(), name, longFormat);
@@ -50,9 +50,9 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
     public static XmpFile getSidecar(IFile parent, String name, boolean longFormat) {
         XmpFile result;
         if (longFormat) {
-            result = new XmpFile(FileFacade.getOrCreateChild("FileProcessor.getSidecar", parent, name + EXT_SIDECAR), longFormat);
+            result = new XmpFile(parent.create(name + EXT_SIDECAR), longFormat);
         } else {
-            result = new XmpFile(FileFacade.getOrCreateChild("FileProcessor.getSidecar", parent, FileUtils.replaceExtension(name, EXT_SIDECAR)), longFormat);
+            result = new XmpFile(parent.create(FileUtils.replaceExtension(name, EXT_SIDECAR)), longFormat);
         }
         return result;
 
@@ -77,18 +77,8 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
     /**
      * can be replaced by mock/stub in unittests
      */
-    @Deprecated
-    public boolean osFileExists(File file) {
-        return osFileExists(FileFacade.convert(getClass().getSimpleName() + " osFileExists via File ", file));
-    }
-
     public boolean osFileExists(IFile file) {
         return file.exists();
-    }
-
-    @Deprecated
-    protected boolean fileOrSidecarExists(File file) {
-        return fileOrSidecarExists(FileFacade.convert(getClass().getSimpleName() + " fileOrSidecarExists via File ", file));
     }
 
     protected boolean fileOrSidecarExists(IFile file) {
@@ -100,7 +90,12 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
                 || osFileExists(FileCommands.getSidecar(parent, name, true));
     }
 
+    @Deprecated
     public static XmpFile getExistingSidecarOrNull(String absolutePath) {
+        return getExistingSidecarOrNull(FileFacade.convert("getExistingSidecarOrNull from File", absolutePath));
+    }
+
+    public static XmpFile getExistingSidecarOrNull(IFile absolutePath) {
         XmpFile result = null;
         if (absolutePath != null) {
             XmpFile resultLong = getExistingSidecarOrNull(absolutePath, true);
@@ -116,7 +111,13 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
         return result;
     }
 
+    @Deprecated
     public static XmpFile getExistingSidecarOrNull(String absolutePath, boolean longFormat) {
+        return getExistingSidecarOrNull(FileFacade.convert("getExistingSidecarOrNull from path", absolutePath), longFormat);
+
+    }
+
+    public static XmpFile getExistingSidecarOrNull(IFile absolutePath, boolean longFormat) {
         XmpFile result = getSidecar(absolutePath, longFormat);
         if ((result == null) || !result.exists() || !result.isFile()) return null;
         return result;
@@ -166,7 +167,7 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
         private boolean hasAlsoOtherFormat = false;
 
         public XmpFile(IFile parent, String name, String mime, boolean longFormat) {
-            this(FileFacade.getOrCreateChild("FileProcessor.XmpFile()", parent, name), longFormat);
+            this(parent.create(name), longFormat);
         }
 
         @Deprecated

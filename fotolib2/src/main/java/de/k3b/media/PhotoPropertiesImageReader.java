@@ -36,7 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -44,6 +43,8 @@ import java.util.List;
 
 import de.k3b.LibGlobal;
 import de.k3b.io.DateUtil;
+import de.k3b.io.FileUtils;
+import de.k3b.io.IFile;
 import de.k3b.io.ListUtils;
 import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
@@ -68,7 +69,7 @@ public class PhotoPropertiesImageReader implements IPhotoProperties, Closeable {
     private static final String checksum3 = "d.3.nri.tlDUis";
     private static final String checksum4 = "ekbadodui.Btl";
 
-    private String mFilename = null;
+    private IFile mFilename = null;
     private IPhotoProperties mExternalXmpDir;
     private PhotoPropertiesXmpSegment mInternalXmpDir;
     private Metadata mMetadata = null;
@@ -101,29 +102,24 @@ public class PhotoPropertiesImageReader implements IPhotoProperties, Closeable {
 
     /**
      * Reads Meta data from the specified inputStream (if not null) or File(filename).
+     * closes stream when done
      */
-    public PhotoPropertiesImageReader load(String filename, InputStream inputStream, IPhotoProperties externalXmpContent, String _dbg_context) throws IOException {
+    public PhotoPropertiesImageReader load(IFile jpegFile, InputStream inputStream, IPhotoProperties externalXmpContent, String _dbg_context) throws IOException {
         mInitExecuted = false;
-        mFilename = filename;
+        mFilename = jpegFile;
         mExternalXmpDir = externalXmpContent;
         this.dbg_context = _dbg_context + "->PhotoPropertiesImageReader(" + mFilename+ ") ";
 
         Metadata metadata = null;
-        File jpegFile = (inputStream == null) ? new File(filename) : null;
         try {
-            if (inputStream != null) {
-                // so proguard can eleminate support for gif, png and other image formats
-                metadata = JpegMetadataReader.readMetadata(inputStream);
-                // metadata = ImageMetadataReader.readMetadata(inputStream);
-            } else {
-                metadata = JpegMetadataReader.readMetadata(jpegFile);
-                // metadata = ImageMetadataReader.readMetadata(jpegFile);
-            }
-            // IptcDirectory.TAG_ARM_VERSION
+            if (inputStream == null) inputStream = jpegFile.openInputStream();
+            metadata = JpegMetadataReader.readMetadata(inputStream);
         } catch (ImageProcessingException e) {
             logger.error(dbg_context +" Error open file " + e.getMessage(), e);
 
             metadata = null;
+        } finally {
+            FileUtils.close(inputStream, jpegFile);
         }
         mMetadata = metadata;
 
@@ -147,7 +143,7 @@ public class PhotoPropertiesImageReader implements IPhotoProperties, Closeable {
 
     @Override
     public String getPath() {
-        return mFilename;
+        return (mFilename == null) ? null : mFilename.getAbsolutePath();
     }
 
     @Override

@@ -26,11 +26,11 @@ package de.k3b.media;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
 import de.k3b.TestUtil;
+import de.k3b.io.IFile;
 import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
 
@@ -188,11 +188,11 @@ public class PhotoPropertiesUtilTests {
     }
 
     /***** Integrationtests via file system *********/
-    private static final File INDIR = new File(TestUtil.OUTDIR_ROOT, "PhotoPropertiesUtilTests");
+    private static final IFile INDIR = TestUtil.OUTDIR_ROOT.create("PhotoPropertiesUtilTests");
 
     @Test
     public void shouldInferAutoprocessingExifDefaultsFromExistingFiles() throws IOException {
-        File[] jpgFilesToAnalyse = TestUtil.saveTestResourcesIn(INDIR,
+        IFile[] jpgFilesToAnalyse = TestUtil.saveTestResourcesIn(INDIR,
                 TestUtil.TEST_FILE_JPG_WITH_NO_EXIF,
                 TestUtil.TEST_FILE_JPG_WITH_EXIF);
         PhotoPropertiesAsString result = PhotoPropertiesUtil.inferAutoprocessingExifDefaults(new PhotoPropertiesAsString(),

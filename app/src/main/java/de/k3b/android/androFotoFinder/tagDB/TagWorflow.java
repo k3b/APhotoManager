@@ -23,7 +23,6 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
@@ -33,6 +32,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.IMediaRepositoryApi;
 import de.k3b.android.io.AndroidFileCommands;
 import de.k3b.io.FileCommands;
+import de.k3b.io.FileFacade;
 import de.k3b.io.IFile;
 import de.k3b.io.IProgessListener;
 import de.k3b.io.collections.SelectedFiles;
@@ -112,7 +112,9 @@ public class TagWorflow extends TagProcessor implements IProgessListener {
 
         List<String> currentItemTags = tagWorflowItemFromDB.tags;
         try {
-            PhotoPropertiesUpdateHandler exif = PhotoPropertiesUpdateHandler.create (tagWorflowItemFromDB.path, null, false, "updateTags:");
+            PhotoPropertiesUpdateHandler exif = PhotoPropertiesUpdateHandler.create(
+                    FileFacade.convert("updateTags from db", tagWorflowItemFromDB.path),
+                    null, false, "updateTags:");
             List<String> tagsDbPlusFile = getUpdated(currentItemTags, exif.getTags(), null);
             if (tagsDbPlusFile != null) {
                 mustSave = true;

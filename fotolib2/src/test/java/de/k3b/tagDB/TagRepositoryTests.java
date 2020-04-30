@@ -25,13 +25,13 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 import de.k3b.TestUtil;
+import de.k3b.io.IFile;
 import de.k3b.io.ListUtils;
 
 /**
@@ -41,8 +41,8 @@ import de.k3b.io.ListUtils;
 public class TagRepositoryTests {
     // Obtain a logger instance
     private static final Logger LOGGER = LoggerFactory.getLogger(TagRepositoryTests.class);
-    private static final File OUTDIR = new File(TestUtil.OUTDIR_ROOT, "TagRepositoryTests");
-    private File repositoryFile = null;
+    private static final IFile OUTDIR = TestUtil.OUTDIR_ROOT.create("TagRepositoryTests");
+    private IFile repositoryFile = null;
 
     @BeforeClass
     public static void initDirectories() {
@@ -57,7 +57,7 @@ public class TagRepositoryTests {
     }
 
     private TagRepository createUnsavedRepo(String name, int numberOfItems) {
-        this.repositoryFile = new File(OUTDIR, name + "-repo.txt");
+        this.repositoryFile = OUTDIR.create(name + "-repo.txt");
         repositoryFile.delete();
 
         TagRepository result = new TagRepository(this.repositoryFile);

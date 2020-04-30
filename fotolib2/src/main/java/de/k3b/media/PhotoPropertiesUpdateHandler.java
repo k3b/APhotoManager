@@ -50,8 +50,8 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
 
     private ExifInterfaceEx exif;   // not null if exif changes are written to jpg file
     private PhotoPropertiesXmpSegment xmp;    // not null if exif changes are written to xmp sidecar file.
-    private String absoluteJpgInPath; // where changes are read from.
-    private String absoluteJpgOutPath; // where changes are written to. Null meanst same as input
+    private IFile jpgInFile; // where changes are read from.
+    private IFile jpgOutFile; // where changes are written to. Null meanst same as input
     private boolean deleteOriginalAfterFinish; // true: after save original jpg/mxp are deleted (move instead of copy)
     private long    dbgLoadEndTimestamp;
 
@@ -68,17 +68,17 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
      * configuration for PhotoPropertiesUpdateHandler.
      *
      *
-     * @param absoluteJpgInPath     where data is read from
-     * @param absoluteJpgOutPath    where data changes are written to. Null means same as absoluteJpgInPath.
+     * @param jpgInFile     where data is read from
+     * @param jpgOutFile    where data changes are written to. Null means same as jpgInFile.
      * @param deleteOriginalAfterFinish true: after save original jpg/mxp are deleted (move instead of copy)
      * @param dbg_context           for debug log: who called this
      * @return                      new loaded instance
      * @throws IOException
      */
     public static PhotoPropertiesUpdateHandler create(
-            String absoluteJpgInPath, String absoluteJpgOutPath,
+            IFile jpgInFile, IFile jpgOutFile,
             boolean deleteOriginalAfterFinish, String dbg_context) throws IOException {
-        return create(absoluteJpgInPath, absoluteJpgOutPath, deleteOriginalAfterFinish, dbg_context,
+        return create(jpgInFile, jpgOutFile, deleteOriginalAfterFinish, dbg_context,
                 LibGlobal.mediaUpdateStrategy.contains("J"),    // write jpg file
                 LibGlobal.mediaUpdateStrategy.contains("X"),    // write xmp file
                 LibGlobal.mediaUpdateStrategy.contains("C")    // create xmp if it does not exist
@@ -89,8 +89,8 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
      * Used by junit tests with no dependency to internal state: factory to create PhotoPropertiesUpdateHandler.
      *
      *
-     * @param absoluteJpgInPath     where data is read from
-     * @param absoluteJpgOutPath    where data changes are written to. Null means same as absoluteJpgInPath.
+     * @param jpgInFile     where data is read from
+     * @param jpgOutFile    where data changes are written to. Null means same as jpgInFile.
      * @param deleteOriginalAfterFinish true: after save original jpg/mxp are deleted (move instead of copy)
      * @param dbg_context           for debug log: who called this
      * @param writeJpg              true: exif changes go into jpg
@@ -100,7 +100,7 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
      * @throws IOException
      */
     protected static PhotoPropertiesUpdateHandler create(
-            String absoluteJpgInPath, String absoluteJpgOutPath,
+            IFile jpgInFile, IFile jpgOutFile,
             boolean deleteOriginalAfterFinish, String dbg_context,
             boolean writeJpg, boolean writeXmp, boolean createXmpIfNotExist)
             throws IOException {
@@ -108,10 +108,10 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
         if (LibGlobal.debugEnabledJpgMetaIo) {
             startTimestamp = new Date().getTime();
         }
-        PhotoPropertiesXmpSegment xmp = PhotoPropertiesXmpSegment.loadXmpSidecarContentOrNull(absoluteJpgInPath, dbg_context);
-        if ((xmp == null) && (createXmpIfNotExist || PhotoPropertiesUtil.isImage(absoluteJpgInPath,
+        PhotoPropertiesXmpSegment xmp = PhotoPropertiesXmpSegment.loadXmpSidecarContentOrNull(jpgInFile, dbg_context);
+        if ((xmp == null) && (createXmpIfNotExist || PhotoPropertiesUtil.isImage(jpgInFile,
                 PhotoPropertiesUtil.IMG_TYPE_COMPRESSED_NON_JPG | PhotoPropertiesUtil.IMG_TYPE_UNCOMPRESSED_NON_JPG))) {
-            PhotoPropertiesImageReader jpg = new PhotoPropertiesImageReader().load(absoluteJpgInPath,null,null,
+            PhotoPropertiesImageReader jpg = new PhotoPropertiesImageReader().load(jpgInFile, null, null,
                     dbg_context + " xmp-file not found. create/extract from jpg ");
 
             // #124: fix can be null for gif/png
@@ -124,8 +124,8 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
 
             // xmp should have the same data as exif/iptc
             PhotoPropertiesUtil.copyNonEmpty(xmp, jpg);
-            if ((absoluteJpgInPath != null) && (xmp.getDateTimeTaken() == null)) {
-                IFile in = FileFacade.convert("PhotoPropertiesUpdateHandler.create", absoluteJpgInPath);
+            if ((jpgInFile != null) && (xmp.getDateTimeTaken() == null)) {
+                IFile in = jpgInFile;
                 if (in.exists() && in.isFile()) {
                     long lastModified = in.lastModified();
                     if (lastModified != 0) {
@@ -137,9 +137,9 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
 
             }
         }
-        ExifInterfaceEx exif = ExifInterfaceEx.create(absoluteJpgInPath, null, xmp, dbg_context);
+        ExifInterfaceEx exif = ExifInterfaceEx.create(jpgInFile, xmp, dbg_context);
         if (exif.isValidJpgExifFormat()) {
-            exif.setPath(absoluteJpgInPath);
+            exif.setPath(jpgInFile.getAbsolutePath());
         } else {
             exif = null;
 
@@ -161,8 +161,8 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
 
         }
 
-        result.absoluteJpgOutPath = (absoluteJpgOutPath != null) ? absoluteJpgOutPath : absoluteJpgInPath;
-        result.absoluteJpgInPath = absoluteJpgInPath;
+        result.jpgOutFile = (jpgOutFile != null) ? jpgOutFile : jpgInFile;
+        result.jpgInFile = jpgInFile;
         result.deleteOriginalAfterFinish = deleteOriginalAfterFinish;
         if (LibGlobal.debugEnabledJpgMetaIo) {
             result.dbgLoadEndTimestamp = new Date().getTime();
@@ -172,12 +172,12 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
         return result;
     }
 
-    public void setAbsoluteJpgOutPath(String absoluteJpgOutPath) {
-        this.absoluteJpgOutPath = absoluteJpgOutPath;
+    public String getAbsoluteJpgOutPath() {
+        return this.jpgOutFile.getAbsolutePath();
     }
 
-    public String getAbsoluteJpgOutPath() {
-        return this.absoluteJpgOutPath;
+    public void setAbsoluteJpgOutPath(IFile jpgOutFile) {
+        this.jpgOutFile = jpgOutFile;
     }
 
     public int save(String dbg_context)  throws IOException {
@@ -203,10 +203,10 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
     private int transferXmp(String dbg_context) throws IOException {
         int changedFiles = 0;
 
-        String inJpgFullPath = this.getPath();
-        if (inJpgFullPath == null) inJpgFullPath = this.absoluteJpgInPath;
-        String outJpgFullPath = (this.absoluteJpgOutPath == null) ? inJpgFullPath : this.absoluteJpgOutPath;
-        boolean isSameFile = (outJpgFullPath.compareTo(inJpgFullPath) == 0);
+        IFile inJpgFullPath = FileFacade.convert("", this.getPath());
+        if (inJpgFullPath == null) inJpgFullPath = this.jpgInFile;
+        IFile outJpgFullPath = (this.jpgOutFile == null) ? inJpgFullPath : this.jpgOutFile;
+        boolean isSameFile = outJpgFullPath.equals(inJpgFullPath);
 
         if (xmp != null) {
             // copy/move via modifying xmp(s)
@@ -237,10 +237,10 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
     }
 
     private int copyReplaceIfExist(
-            String absoluteJpgInPath, String outJpgFullPath,
+            IFile jpgInFile, IFile outJpgFullPath,
             boolean longFormat, String dbg_context) throws IOException {
         int changedFiles = 0;
-        IFile xmpInFile = FileCommands.getExistingSidecarOrNull(absoluteJpgInPath, longFormat);
+        IFile xmpInFile = FileCommands.getExistingSidecarOrNull(jpgInFile, longFormat);
         if (xmpInFile != null) {
             FileUtils.copyReplace(
                     xmpInFile, FileCommands.getSidecar(outJpgFullPath, longFormat),
@@ -252,28 +252,32 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
 
     private int saveXmp(
             PhotoPropertiesXmpSegment xmp,
-            String outFullJpgPath,
+            IFile outFullJpgPath,
             boolean isLongFileName, String dbg_context) throws IOException {
         IFile xmpOutFile = FileCommands.getSidecar(outFullJpgPath, isLongFileName);
         xmp.save(xmpOutFile, LibGlobal.debugEnabledJpgMetaIo, dbg_context);
         return 1;
     }
 
+    /**
+     * transfers from jpgInFile to jpgOutFile while updating exif
+     */
     private int transferExif(String dbg_context) throws IOException {
-        String inJpgFullPath = this.getPath();
-        if (inJpgFullPath == null) inJpgFullPath = this.absoluteJpgInPath;
-        String outJpgFullPath = (this.absoluteJpgOutPath == null) ? inJpgFullPath : this.absoluteJpgOutPath;
-        boolean isSameFile = (outJpgFullPath.compareTo(inJpgFullPath) == 0);
+        IFile inJpgFullPath = FileFacade.convert("", this.getPath());
+
+        if (inJpgFullPath == null) {
+            inJpgFullPath = this.jpgInFile;
+        }
+
+        IFile outJpgFullPath = (this.jpgOutFile == null) ? inJpgFullPath : this.jpgOutFile;
+
+        boolean isSameFile = outJpgFullPath.equals(inJpgFullPath);
 
         if (exif != null) {
-            if (!isSameFile) {
-                exif.saveAttributes(
-                        FileFacade.convert("PhotoPropertiesUpdateHandler.transferExif in", inJpgFullPath),
-                        FileFacade.convert("PhotoPropertiesUpdateHandler.transferExif out", outJpgFullPath),
-                        this.deleteOriginalAfterFinish);
-            } else {
-                exif.saveAttributes();
-            }
+            exif.saveAttributes(
+                    inJpgFullPath,
+                    outJpgFullPath,
+                    this.deleteOriginalAfterFinish);
         } else if (!isSameFile) {
             // changes are NOT written to exif. Do File copy instead.
             FileUtils.copyReplace(inJpgFullPath, outJpgFullPath, this.deleteOriginalAfterFinish, dbg_context + "-transferExif");

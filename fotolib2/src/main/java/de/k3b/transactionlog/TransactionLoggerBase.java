@@ -30,6 +30,7 @@ import de.k3b.LibGlobal;
 import de.k3b.io.DateUtil;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.FileProcessor;
+import de.k3b.io.IFile;
 import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.media.IPhotoProperties;
@@ -49,14 +50,15 @@ public class TransactionLoggerBase implements Closeable {
     protected boolean mustCloseLog = false;
 
     protected long id;
-    protected String path;
+    protected IFile path;
     protected final long now;
 
     public TransactionLoggerBase(FileProcessor execLog, long now) {
         this.execLog = execLog;
         this.now = now;
     }
-    public TransactionLoggerBase set(long id, String path) {
+
+    public TransactionLoggerBase set(long id, IFile path) {
         this.id = id;
         this.path = path;
         return this;
@@ -106,16 +108,16 @@ public class TransactionLoggerBase implements Closeable {
         }
     }
 
-    public void addChangesCopyMove(boolean move, String newFullPath, String debugContext) {
-        if (this.path.compareToIgnoreCase(newFullPath) != 0) {
+    public void addChangesCopyMove(boolean move, IFile newFullPath, String debugContext) {
+        if (!this.path.equals(newFullPath)) {
             if (!move) {
                 addComment(debugContext, "copy image #", this.id);
             }
 
             addChanges(move ? MediaTransactionLogEntryType.MOVE : MediaTransactionLogEntryType.COPY,
-                    newFullPath, true);
+                    newFullPath.getAbsolutePath(), true);
             if (move) {
-                String oldPath = this.path;
+                String oldPath = this.path.getAbsolutePath();
                 // id remains the same but path has changed
                 set(this.id, newFullPath);
                 addComment(debugContext, "image #", this.id, " was renamed from ", oldPath);
@@ -131,6 +133,6 @@ public class TransactionLoggerBase implements Closeable {
 
     /** android specific logging is implemented in AndroidTransactionLogger in Override */
     protected void addChanges(MediaTransactionLogEntryType command, String parameter, boolean quoteParam) {
-        execLog.log(command.getCommand(path,parameter));
+        execLog.log(command.getCommand(path.getAbsolutePath(), parameter));
     }
 }

@@ -23,9 +23,9 @@ import com.drew.metadata.exif.ExifDirectoryBase;
 import com.drew.metadata.iptc.IptcDirectory;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,7 +120,7 @@ public class PhotoPropertiesImageReaderIntegrationTests {
 
     public static PhotoPropertiesImageReader getMeta(String fileName) throws IOException {
         InputStream inputStream = TestUtil.getResourceInputStream(fileName);
-        PhotoPropertiesImageReader result = new PhotoPropertiesImageReader().load(fileName, inputStream, null, "JUnit");
+        PhotoPropertiesImageReader result = new PhotoPropertiesImageReader().load(null, inputStream, null, "JUnit");
         return result;
     }
 

@@ -109,7 +109,9 @@ public class FileUtils {
 			try {			
 				stream.close();
 			} catch (IOException e) {
-                logger.warn(DBG_CONTEXT + "Error close " + source, e);
+                if (source != null) {
+                    logger.warn(DBG_CONTEXT + "Error close " + source, e);
+                }
 			}
 		}
 	}
@@ -326,18 +328,24 @@ public class FileUtils {
     public static void copyReplace(InputStream sourceStream, IFile destinationFile) throws IOException {
         if (destinationFile.exists()) destinationFile.delete();
         destinationFile.getParentFile().mkdirs();
-        OutputStream result = destinationFile.openOutputStream();
-        FileUtils.copy(sourceStream, result);
-        result.flush();
-        FileUtils.close(result, destinationFile);
+        FileUtils.copy(sourceStream, destinationFile.openOutputStream());
     }
 
-    public static void copy(InputStream is, OutputStream os) throws IOException {
-        byte[] buffer = new byte[10240]; // 10k buffer
-        int bytesRead = -1;
+    /**
+     * copy all from is to os and closes the streams when done
+     */
+    public static void copy(InputStream in, OutputStream out) throws IOException {
+        try {
+            byte[] buffer = new byte[10240]; // 10k buffer
+            int bytesRead = -1;
 
-        while((bytesRead = is.read(buffer)) != -1) {
-            os.write(buffer, 0, bytesRead);
+            while ((bytesRead = in.read(buffer)) != -1) {
+                out.write(buffer, 0, bytesRead);
+            }
+            out.flush();
+        } finally {
+            FileUtils.close(in, "copy-close src");
+            FileUtils.close(out, "copy-close dest");
         }
     }
 

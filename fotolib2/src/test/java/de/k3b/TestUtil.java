@@ -38,7 +38,7 @@ import de.k3b.tagDB.TagConverter;
 
 public class TestUtil {
     // where unittest-files are processed
-    public static final File OUTDIR_ROOT = new File("./build/test-results/metafiles");
+    public static final IFile OUTDIR_ROOT = FileFacade.convert("", new File("./build/test-results/metafiles"));
 
     // these test files exist as embedded resources
     public static final String TEST_FILE_JPG_WITH_EXIF = "test-WitExtraData.jpg";
@@ -92,17 +92,16 @@ public class TestUtil {
         InputStream sourceStream = getResourceInputStream(resourceName);
 
         FileUtils.copyReplace(sourceStream, destination);
-        FileUtils.close(sourceStream,resourceName);
         destination.setLastModified(DateUtil.parseIsoDate("1972-03-04T05:06:07").getTime());
         return destination;
     }
 
-    public static File[] saveTestResourcesIn(File destinationFolder, String... resourceNames) throws IOException {
-        File[] result = new File[resourceNames.length];
+    public static IFile[] saveTestResourcesIn(IFile destinationFolder, String... resourceNames) throws IOException {
+        IFile[] result = new IFile[resourceNames.length];
 
         for(int i = 0; i <resourceNames.length; i++) {
             String resourceName = resourceNames[i];
-            result[i] = saveTestResourceAs(resourceName, new File(destinationFolder, resourceName));
+            result[i] = saveTestResourceAs(resourceName, destinationFolder.create(resourceName));
         }
         return result;
     }

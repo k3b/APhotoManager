@@ -37,6 +37,7 @@ public class SelectedFiles  {
     private final String[] mFileNames;
     private final Long[] mIds;
     private final Date[] mDatesPhotoTaken;
+    private IFile[] files = null;
 
     public static String[] getFileNameList(String fileNameListAsString) {
         return (fileNameListAsString != null) ? fileNameListAsString.split(DELIMITER) : null;
@@ -92,7 +93,7 @@ public class SelectedFiles  {
     }
 
     /** convert String array of path-s to array of Files */
-    public static File[] getFiles(String[] fileNames) {
+    private static File[] getFiles(String[] fileNames) {
         // getFileNames();
         if ((fileNames == null) || (fileNames.length == 0)) return null;
 
@@ -109,7 +110,10 @@ public class SelectedFiles  {
     }
 
     public IFile[] getIFiles() {
-        return FileFacade.get("SelectedFiles.getIFiles", getFiles());
+        if (files == null) {
+            files = FileFacade.get("SelectedFiles.getIFiles", getFiles());
+        }
+        return files;
     }
 
     @Deprecated

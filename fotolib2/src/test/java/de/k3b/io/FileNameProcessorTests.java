@@ -70,7 +70,6 @@ public class FileNameProcessorTests {
      */
     private static void registerFakeFiles(RuleFileNameProcessor sut, String... filenames) {
         if (filenames.length == 0) {
-            doReturn(false).when(sut).osFileExists(any(File.class));
             doReturn(false).when(sut).osFileExists(any(IFile.class));
         } else {
             for (String filename : filenames) {

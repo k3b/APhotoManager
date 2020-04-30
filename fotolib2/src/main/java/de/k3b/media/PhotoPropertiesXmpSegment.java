@@ -34,6 +34,7 @@ import java.util.List;
 import de.k3b.LibGlobal;
 import de.k3b.io.DateUtil;
 import de.k3b.io.FileCommands;
+import de.k3b.io.FileFacade;
 import de.k3b.io.GeoUtil;
 import de.k3b.io.IFile;
 import de.k3b.io.VISIBILITY;
@@ -223,7 +224,12 @@ public class PhotoPropertiesXmpSegment extends XmpSegment implements IPhotoPrope
         return this;
     }
 
+    @Deprecated
     public static PhotoPropertiesXmpSegment loadXmpSidecarContentOrNull(String absoluteJpgPath, String _dbg_context) {
+        return loadXmpSidecarContentOrNull(FileFacade.convert(dbg_context, absoluteJpgPath), _dbg_context);
+    }
+
+    public static PhotoPropertiesXmpSegment loadXmpSidecarContentOrNull(IFile absoluteJpgPath, String _dbg_context) {
         PhotoPropertiesXmpSegment xmpContent = null;
         FileCommands.XmpFile xmpFile = FileCommands.getExistingSidecarOrNull(absoluteJpgPath);
         String dbg_context = _dbg_context + " loadXmpSidecarContent(" + xmpFile + "): ";

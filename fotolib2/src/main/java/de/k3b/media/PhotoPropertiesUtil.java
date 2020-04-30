@@ -31,8 +31,10 @@ import java.util.EnumSet;
 import java.util.List;
 
 import de.k3b.LibGlobal;
+import de.k3b.io.FileFacade;
 import de.k3b.io.FileUtils;
 import de.k3b.io.GeoUtil;
+import de.k3b.io.IFile;
 import de.k3b.io.ListUtils;
 import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
@@ -290,6 +292,10 @@ public class PhotoPropertiesUtil {
     }
     */
 
+    public static boolean isImage(IFile file, int imageTypeFlags) {
+        return isImage(file.getName(), imageTypeFlags);
+    }
+
     /** return true if path is "*.jp(e)g" */
     public static boolean isImage(String path, int imageTypeFlags) {
         if (path == null) return false;
@@ -355,12 +361,19 @@ public class PhotoPropertiesUtil {
         return notFoundValue;
     }
 
-    /** loads IPhotoProperties from jpg and corresponding xmp */
     public static IPhotoProperties loadExifAndXmp(String fileName, String dbg_context) {
-        try {
-            PhotoPropertiesXmpSegment xmp = PhotoPropertiesXmpSegment.loadXmpSidecarContentOrNull(fileName, dbg_context);
+        return loadExifAndXmp(FileFacade.convert(dbg_context, fileName), dbg_context);
+    }
 
-            PhotoPropertiesImageReader jpg = new PhotoPropertiesImageReader().load(fileName, null, xmp, dbg_context);
+    /**
+     * loads IPhotoProperties from jpg and corresponding xmp
+     */
+    public static IPhotoProperties loadExifAndXmp(IFile jpgFile, String dbg_context) {
+        try {
+
+            PhotoPropertiesXmpSegment xmp = PhotoPropertiesXmpSegment.loadXmpSidecarContentOrNull(jpgFile, dbg_context);
+
+            PhotoPropertiesImageReader jpg = new PhotoPropertiesImageReader().load(jpgFile, jpgFile.openInputStream(), xmp, dbg_context);
 
             return jpg;
         } catch (IOException ex) {
@@ -370,13 +383,36 @@ public class PhotoPropertiesUtil {
     }
 
     /** #132: reads lat,lon,description,tags from files until tags and lat/long are found */
+    @Deprecated
     public static <T extends IPhotoProperties> T inferAutoprocessingExifDefaults(T result, File... files) {
-        return inferAutoprocessingExifDefaults(result, files, null,null,null, null);
+        return inferAutoprocessingExifDefaults(result,
+                FileFacade.get("inferAutoprocessingExifDefaults from files", files),
+                null, null, null, null);
+    }
+
+    public static <T extends IPhotoProperties> T inferAutoprocessingExifDefaults(T result, IFile... files) {
+        return inferAutoprocessingExifDefaults(result, files,
+                null, null, null, null);
+    }
+
+    @Deprecated
+    public static <T extends IPhotoProperties> T inferAutoprocessingExifDefaults(T result,
+                                                                                 File[] files,
+                                                                                 Double latitude,
+                                                                                 Double longitude,
+                                                                                 String description,
+                                                                                 List<String> _tags) {
+        return inferAutoprocessingExifDefaults(result,
+                FileFacade.get("inferAutoprocessingExifDefaults from files", files),
+                latitude,
+                longitude,
+                description,
+                _tags);
     }
 
     /** #132: reads lat,lon,description,tags from files until tags and lat/long are found */
     public static <T extends IPhotoProperties> T inferAutoprocessingExifDefaults(T result,
-                                                                                 File[] files,
+                                                                                 IFile[] files,
                                                                                  Double latitude,
                                                                                  Double longitude,
                                                                                  String description,
@@ -386,10 +422,10 @@ public class PhotoPropertiesUtil {
         int exampleCount = files.length;
         int index = 0;
         while ((index < exampleCount) && ((latitude == null) || (longitude == null)  || (tags.size() == 0))) {
-            File exampleFile = files[index++];
+            IFile exampleFile = files[index++];
 
             if ((exampleFile != null) && (exampleFile.exists())) {
-                IPhotoProperties example = PhotoPropertiesUtil.loadExifAndXmp(exampleFile.getPath(),"infer defaults for autoprocessing");
+                IPhotoProperties example = PhotoPropertiesUtil.loadExifAndXmp(exampleFile, "infer defaults for autoprocessing");
                 if (example != null) {
                     ListUtils.include(tags, example.getTags());
                     latitude = GeoUtil.getValue(example.getLatitude(), latitude);

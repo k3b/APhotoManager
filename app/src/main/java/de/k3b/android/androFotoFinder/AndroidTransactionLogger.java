@@ -44,7 +44,7 @@ public class AndroidTransactionLogger extends TransactionLoggerBase implements C
     @Override
     protected void addChanges(MediaTransactionLogEntryType command, String parameter, boolean quoteParam) {
         super.addChanges(command, parameter, quoteParam);
-        execLog.addTransactionLog(id, path, now, command, parameter);
+        execLog.addTransactionLog(id, path.getAbsolutePath(), now, command, parameter);
     }
 
     @Override

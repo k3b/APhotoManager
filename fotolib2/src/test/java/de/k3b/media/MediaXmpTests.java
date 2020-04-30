@@ -26,13 +26,14 @@ import org.junit.Test;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.TimeZone;
 
 import de.k3b.LibGlobal;
 import de.k3b.TestUtil;
+import de.k3b.io.IFile;
 
 /**
  * Created by k3b on 24.10.2016.
@@ -42,7 +43,7 @@ public class MediaXmpTests {
     // D:\prj\eve\android\prj\fotos-android.wrk\FotoGallery\FotoGallery\fotolib2\src\test\resources\testdata
     // test-WitExtraData.xmp
     private static final String RESOURCES_ROOT = "testdata/";
-    private static final File OUTDIR = new File(TestUtil.OUTDIR_ROOT, "MediaXmpTests");
+    private static final IFile OUTDIR = TestUtil.OUTDIR_ROOT.create("MediaXmpTests");
 
     @BeforeClass
     public static void initDirectories() {
@@ -111,12 +112,12 @@ public class MediaXmpTests {
         PhotoPropertiesUtil.copy(sut, content, true, true);
 
         OUTDIR.mkdirs();
-        File outFile = new File(OUTDIR, "shouldSaveAsXmp.xmp");
-        FileOutputStream fos = new FileOutputStream(outFile);
+        IFile outFile = OUTDIR.create("shouldSaveAsXmp.xmp");
+        OutputStream fos = outFile.openOutputStream();
         sut.save(fos, true, "JUnit");
         fos.close();
 
-        FileInputStream fis = new FileInputStream(outFile);
+        InputStream fis = outFile.openInputStream();
         sut = new PhotoPropertiesXmpSegment();
         sut.load(fis, "JUnit");
         fis.close();

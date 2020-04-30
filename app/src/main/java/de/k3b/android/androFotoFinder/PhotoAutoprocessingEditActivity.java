@@ -214,7 +214,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
 
         // if there are no MediaDefaults yet infer them from selected files
         if (mCurrentAutoprocessingData.getMediaDefaults() == null) {
-            PhotoPropertiesAsString exampleExif = PhotoPropertiesUtil.inferAutoprocessingExifDefaults(new PhotoPropertiesAsString(), mSelectedFiles.getFiles());
+            PhotoPropertiesAsString exampleExif = PhotoPropertiesUtil.inferAutoprocessingExifDefaults(new PhotoPropertiesAsString(), mSelectedFiles.getIFiles());
             mCurrentAutoprocessingData.setMediaDefaults(exampleExif);
         }
         this.exampleSrcfile = RuleFileNameProcessor.getFile(mSelectedFiles.getIFile(0));
@@ -629,7 +629,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
                 String fileNames[] = new String[files.length];
                 int itemCount = 0;
                 for (int i = 0; i < files.length; i++) {
-                    if (PhotoPropertiesUtil.isImage(files[i].getName(), PhotoPropertiesUtil.IMG_TYPE_ALL)) {
+                    if (PhotoPropertiesUtil.isImage(files[i], PhotoPropertiesUtil.IMG_TYPE_ALL)) {
                         fileNames[itemCount++] = files[i].getAbsolutePath();
                     }
                 }

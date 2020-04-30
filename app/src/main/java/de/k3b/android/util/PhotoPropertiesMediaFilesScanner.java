@@ -34,6 +34,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -50,7 +51,9 @@ import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.database.QueryParameter;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
+import de.k3b.io.FileFacade;
 import de.k3b.io.FileUtils;
+import de.k3b.io.IFile;
 import de.k3b.io.VISIBILITY;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.PhotoPropertiesChainReader;
@@ -333,58 +336,73 @@ abstract public class PhotoPropertiesMediaFilesScanner {
     }
 
     /** updates values with current values of file */
+    @Deprecated
     public PhotoPropertiesMediaDBContentValues getExifFromFile(File jpgFile) {
         return getExifFromFile(createDefaultContentValues(), jpgFile);
     }
 
-    /** updates values with current values of file. */
+    public PhotoPropertiesMediaDBContentValues getExifFromFile(IFile jpgFile) {
+        return getExifFromFile(createDefaultContentValues(), jpgFile);
+    }
+
+    @Deprecated
     protected PhotoPropertiesMediaDBContentValues getExifFromFile(ContentValues values, File jpgFile) {
-        String absoluteJpgPath = FileUtils.tryGetCanonicalPath(jpgFile, jpgFile.getAbsolutePath());
+        return getExifFromFile(values, FileFacade.convert("getExifFromFile from file", jpgFile));
+    }
 
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true; // only need with/height but not content
-        BitmapFactory.decodeFile(absoluteJpgPath, options);
-        int mHeight = options.outHeight;
-        int mWidth = options.outWidth;
-        String imageType = options.outMimeType;
+    /** updates values with current values of file. */
+    protected PhotoPropertiesMediaDBContentValues getExifFromFile(ContentValues values, IFile jpgFile) {
+        try {
+            String absoluteJpgPath = jpgFile.getCanonicalPath();
 
-        PhotoPropertiesXmpSegment xmpContent = PhotoPropertiesXmpSegment.loadXmpSidecarContentOrNull(absoluteJpgPath, "getExifFromFile");
-        final long xmpFilelastModified = getXmpFilelastModified(xmpContent);
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true; // only need with/height but not content
+            BitmapFactory.decodeStream(jpgFile.openInputStream(), null, options);
+            int mHeight = options.outHeight;
+            int mWidth = options.outWidth;
+            String imageType = options.outMimeType;
 
-        values.put(FotoSql.SQL_COL_LAST_MODIFIED, jpgFile.lastModified() / 1000);
-        values.put(DB_SIZE, jpgFile.length());
+            PhotoPropertiesXmpSegment xmpContent = PhotoPropertiesXmpSegment.loadXmpSidecarContentOrNull(jpgFile, "getExifFromFile");
+            final long xmpFilelastModified = getXmpFilelastModified(xmpContent);
 
-        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) && mWidth > 0 && mHeight > 0) {
-            values.put(DB_WIDTH, mWidth);
-            values.put(DB_HEIGHT, mHeight);
+            values.put(FotoSql.SQL_COL_LAST_MODIFIED, jpgFile.lastModified() / 1000);
+            values.put(DB_SIZE, jpgFile.length());
+
+            if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) && mWidth > 0 && mHeight > 0) {
+                values.put(DB_WIDTH, mWidth);
+                values.put(DB_HEIGHT, mHeight);
+            }
+            values.put(DB_MIME_TYPE, imageType);
+
+            TagSql.setXmpFileModifyDate(values, xmpFilelastModified);
+
+            IPhotoProperties exif = loadNonMediaValues(values, absoluteJpgPath, xmpContent);
+
+            IPhotoProperties src = null;
+            if (exif == null) {
+                src = xmpContent;
+            } else {
+                // (!writeExif) prefer read from xmp value before exif value
+                src = (LibGlobal.mediaUpdateStrategy.contains("J"))
+                        ? exif
+                        : new PhotoPropertiesChainReader(xmpContent, exif);
+            }
+            PhotoPropertiesMediaDBContentValues dest = new PhotoPropertiesMediaDBContentValues().set(values, null);
+
+            if (src != null) {
+                // image has valid exif
+                getExifValues(dest, src);
+
+                updateTagRepository(src.getTags());
+            }
+
+            setPathRelatedFieldsIfNeccessary(values, absoluteJpgPath, null);
+
+            return dest;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
-        values.put(DB_MIME_TYPE, imageType);
-
-        TagSql.setXmpFileModifyDate(values, xmpFilelastModified);
-
-        IPhotoProperties exif = loadNonMediaValues(values, absoluteJpgPath, xmpContent);
-
-        IPhotoProperties src = null;
-        if (exif == null) {
-            src = xmpContent;
-        } else {
-            // (!writeExif) prefer read from xmp value before exif value
-            src = (LibGlobal.mediaUpdateStrategy.contains("J"))
-                    ? exif
-                    : new PhotoPropertiesChainReader(xmpContent, exif);
-        }
-        PhotoPropertiesMediaDBContentValues dest = new PhotoPropertiesMediaDBContentValues().set(values, null);
-
-        if (src != null) {
-            // image has valid exif
-            getExifValues(dest, jpgFile, src);
-
-            updateTagRepository(src.getTags());
-        }
-
-        setPathRelatedFieldsIfNeccessary(values, absoluteJpgPath, null);
-
-        return dest;
+        return null;
     }
 
     private void updateTagRepository(List<String> tags) {
@@ -426,7 +444,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
     abstract protected IPhotoProperties loadNonMediaValues(ContentValues destinationValues, String absoluteJpgPath, IPhotoProperties xmpContent);
 
     /** @return number of copied properties */
-    protected int getExifValues(PhotoPropertiesMediaDBContentValues dest, File file, IPhotoProperties src) {
+    protected int getExifValues(PhotoPropertiesMediaDBContentValues dest, IPhotoProperties src) {
         return PhotoPropertiesUtil.copyNonEmpty(dest, src);
     }
 

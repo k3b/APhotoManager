@@ -185,7 +185,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
         if (existing != null) {
             for (File file : existing) {
                 String found = file.getAbsolutePath();
-                if (PhotoPropertiesUtil.isImage(found, PhotoPropertiesUtil.IMG_TYPE_ALL) && !known.contains(found)) {
+                if (PhotoPropertiesUtil.isImage(file, PhotoPropertiesUtil.IMG_TYPE_ALL) && !known.contains(found)) {
                     missing.add(found);
                 }
             }

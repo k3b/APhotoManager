@@ -24,9 +24,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.List;
 
 import de.k3b.LibGlobal;
+import de.k3b.io.IFile;
 
 /**
  * Persistence for all known tags.
@@ -55,7 +56,7 @@ public class TagRepository {
     private static TagRepository sInstance = null;
 
     /** Where data is loaded from/saved to */
-    private final File mFile;
+    private final IFile mFile;
 
     /** The items contained in this repository */
     protected List<Tag> mItemList = null;
@@ -64,7 +65,7 @@ public class TagRepository {
     private Tag mImportRoot = null;
 
     /** Connect repository to a {@link File}. */
-    public TagRepository(File file) {
+    public TagRepository(IFile file) {
         this.mFile = file;
     }
 
@@ -77,11 +78,11 @@ public class TagRepository {
     }
 
     /** move repository to different file/directory. Merge old with existing new. */
-    public static void setInstance(File parentDir) {
+    public static void setInstance(IFile parentDir) {
         if (parentDir == null) throw new IllegalArgumentException("TagRepository.setInstance(null)");
 
         List<Tag> old = null;
-        File newFile = new File(parentDir, DB_NAME);
+        IFile newFile = parentDir.create(DB_NAME);
         if (TagRepository.sInstance != null){
             if (TagRepository.sInstance.mFile.equals(newFile)) return; // no change: nothing to do
 
@@ -206,7 +207,7 @@ public class TagRepository {
             mItemList = new ArrayList<>();
             if (this.mFile.exists()) {
                 try {
-                    load(mItemList, new FileReader(this.mFile));
+                    load(mItemList, new InputStreamReader(this.mFile.openInputStream()));
 
                     sortByFullPathIgnoreCase();
                 } catch (IOException e) {
@@ -269,7 +270,7 @@ public class TagRepository {
 
                 logger.debug(dbg_context + "save(): " + mItemList.size() + " items to " + this.mFile);
 
-                save(mItemList, new FileWriter(this.mFile, false), INDENT);
+                save(mItemList, new PrintWriter(this.mFile.openOutputStream(), false), INDENT);
             }
         } catch (IOException e) {
             e.printStackTrace();

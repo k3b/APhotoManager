@@ -24,13 +24,13 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.EnumSet;
 
 import de.k3b.LibGlobal;
 import de.k3b.TestUtil;
 import de.k3b.io.FileUtils;
+import de.k3b.io.IFile;
 
 
 /**
@@ -42,7 +42,7 @@ public class PhotoPropertiesBulkUpdateServiceIntegratoinTests {
     // Obtain a logger instance
     private static final Logger LOGGER = LoggerFactory.getLogger(PhotoPropertiesBulkUpdateServiceIntegratoinTests.class);
     private static final String SUT_CLASS_NAME = PhotoPropertiesBulkUpdateServiceIntegratoinTests.class.getSimpleName();
-    private static final File OUTDIR = new File(TestUtil.OUTDIR_ROOT, SUT_CLASS_NAME).getAbsoluteFile();
+    private static final IFile OUTDIR = TestUtil.OUTDIR_ROOT.create(SUT_CLASS_NAME);
 
     @BeforeClass
     public static void initDirectories() {
@@ -60,6 +60,12 @@ public class PhotoPropertiesBulkUpdateServiceIntegratoinTests {
         LibGlobal.preserveJpgFileModificationDate = false;
     }
 
+    private static IFile copy(String resourceName, String fileNameDest) throws IOException {
+        final IFile sutFile = OUTDIR.create(fileNameDest);
+        TestUtil.saveTestResourceAs(resourceName, sutFile);
+        return sutFile;
+    }
+
     @Test
     public void shouldUpdateExistingExifWithCreateXmp() throws IOException
     {
@@ -67,7 +73,7 @@ public class PhotoPropertiesBulkUpdateServiceIntegratoinTests {
         String fileNameSrc = TestUtil.TEST_FILE_JPG_WITH_EXIF;
         String fileNameDest = "shouldUpdateExistingExifWithCreateXmp.jpg";
 
-        File testJpg = copy(fileNameSrc, fileNameDest);
+        IFile testJpg = copy(fileNameSrc, fileNameDest);
 
         PhotoPropertiesDTO testData = TestUtil.createTestMediaDTO(4);
         new PhotoPropertiesBulkUpdateService(null).applyChanges(testJpg,
@@ -75,12 +81,6 @@ public class PhotoPropertiesBulkUpdateServiceIntegratoinTests {
 
         // LOGGER.info(sutRead.toString());
 
-    }
-
-    private static File copy(String resourceName, String fileNameDest) throws IOException {
-        final File sutFile = new File(OUTDIR, fileNameDest);
-        TestUtil.saveTestResourceAs(resourceName, sutFile);
-        return sutFile;
     }
 
 }

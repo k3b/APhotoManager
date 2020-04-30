@@ -396,10 +396,10 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                             // new style move/copy image with sidecarfile(s) with exif autoprocessing
 
                             // for the log the file has already been copied/moved
-                            logger.set(id, sourcePath);
+                            logger.set(id, sourceFile);
 
                             PhotoPropertiesUpdateHandler exifProcessor = createWorkflow(logger, what)
-                                    .applyChanges(sourceFile, destPath, id, move, mediaDiffCopy);
+                                    .applyChanges(sourceFile, destRenamed, id, move, mediaDiffCopy);
 
                             if (exifProcessor == null) break; // error
 

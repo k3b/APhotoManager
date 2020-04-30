@@ -26,8 +26,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -36,6 +34,7 @@ import java.util.HashMap;
 import de.k3b.LibGlobal;
 import de.k3b.TestUtil;
 import de.k3b.io.FileUtils;
+import de.k3b.io.IFile;
 
 /**
  * Created by k3b on 06.04.2017.
@@ -45,7 +44,7 @@ import de.k3b.io.FileUtils;
 public class ExifInterfaceIntegrationTests {
     // Obtain a logger instance
     private static final Logger LOGGER = LoggerFactory.getLogger(ExifInterfaceIntegrationTests.class);
-    private static final File OUTDIR = new File(TestUtil.OUTDIR_ROOT, "ExifInterfaceIntegrationTests").getAbsoluteFile();
+    private static final IFile OUTDIR = TestUtil.OUTDIR_ROOT.create("ExifInterfaceIntegrationTests");
     private static final HashMap<String, String> testItems = new HashMap<String, String>();
 
 	private static final String specialChars = "\r\n日本人 (Japanese)\n" + 
@@ -164,8 +163,8 @@ public class ExifInterfaceIntegrationTests {
     private ExifInterface assertUpdateSameAsAfterWrite(String fileNameDest, String fileNameSrc, HashMap<String, String> testItems) throws IOException {
         InputStream inputStream = PhotoPropertiesImageReaderIntegrationTests.class.getResourceAsStream("images/" + fileNameSrc);
 
-        final File sutFile = new File(OUTDIR, fileNameDest);
-        OutputStream outputStream = new FileOutputStream(sutFile);
+        final IFile sutFile = OUTDIR.create(fileNameDest);
+        OutputStream outputStream = sutFile.openOutputStream();
 
         ExifInterface sutWrite = new ExifInterface(sutFile.getAbsolutePath(), inputStream);
         for(String key : testItems.keySet()) {

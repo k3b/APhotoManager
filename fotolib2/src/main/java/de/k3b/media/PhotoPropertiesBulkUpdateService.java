@@ -82,24 +82,24 @@ public class PhotoPropertiesBulkUpdateService {
     @Deprecated
     public PhotoPropertiesUpdateHandler applyChanges(File inFilePath, String outFilePath,
                                                      long id, boolean deleteOriginalWhenFinished, PhotoPropertiesDiffCopy metaDiffCopy) {
-        return applyChanges(FileFacade.convert("PhotoPropertiesBulkUpdateService.applyChanges", inFilePath), outFilePath, id, deleteOriginalWhenFinished, metaDiffCopy);
+        return applyChanges(FileFacade.convert("PhotoPropertiesBulkUpdateService.applyChanges in", inFilePath), FileFacade.convert("PhotoPropertiesBulkUpdateService.applyChanges out", outFilePath), id, deleteOriginalWhenFinished, metaDiffCopy);
     }
 
     /**
      * writes either (changes + _affectedFields) or metaDiffCopy to jpg/xmp-filePath.
      * Returns new values or null if no change.
      */
-    public PhotoPropertiesUpdateHandler applyChanges(IFile inFilePath, String outFilePath,
+    public PhotoPropertiesUpdateHandler applyChanges(IFile inFilePath, IFile outFile,
                                                      long id, boolean deleteOriginalWhenFinished, PhotoPropertiesDiffCopy metaDiffCopy) {
         StringBuilder sb = (LibGlobal.debugEnabled)
                 ? createDebugStringBuilder(inFilePath)
                 : null;
-        IFile outFile = (outFilePath != null) ? FileFacade.convert("PhotoPropertiesBulkUpdateService.applyChanges", outFilePath) : inFilePath;
+        if (outFile == null) outFile = inFilePath;
         if ((inFilePath != null) && outFile.getParentFile().canWrite()) {
             PhotoPropertiesUpdateHandler exifHandler = null;
             try {
                 long lastModified = inFilePath.lastModified();
-                exifHandler = PhotoPropertiesUpdateHandler.create(inFilePath.getAbsolutePath(), outFilePath, false, "PhotoPropertiesUpdateHandler:");
+                exifHandler = PhotoPropertiesUpdateHandler.create(inFilePath, outFile, false, "PhotoPropertiesUpdateHandler:");
                 debugExif(sb, "old", exifHandler, inFilePath);
                 List<String> oldTags = exifHandler.getTags();
 
@@ -108,7 +108,6 @@ public class PhotoPropertiesBulkUpdateService {
                 IFile newOutFile = handleVisibility(metaDiffCopy.getVisibility(), outFile, exifHandler);
                 if (newOutFile != null) {
                     outFile = newOutFile;
-                    outFilePath = outFile.getAbsolutePath();
                     if (sameFile) {
                         sameFile = false;
                         deleteOriginalWhenFinished = true;
@@ -130,7 +129,7 @@ public class PhotoPropertiesBulkUpdateService {
                     id = updateMediaDB(id, inFilePath.getAbsolutePath(), outFile);
 
                     if (sb != null) {
-                        PhotoPropertiesUpdateHandler exifVerify = PhotoPropertiesUpdateHandler.create (inFilePath.getAbsolutePath(),
+                        PhotoPropertiesUpdateHandler exifVerify = PhotoPropertiesUpdateHandler.create(inFilePath,
                                 null, false, "dbg in PhotoPropertiesUpdateHandler", true, true, false);
                         debugExif(sb, "new ", exifVerify, inFilePath);
                     }
@@ -139,9 +138,9 @@ public class PhotoPropertiesBulkUpdateService {
                     if(transactionLogger != null) {
                         if (!sameFile) {
                             // first log copy/move. copy  may change databaseID
-                            transactionLogger.addChangesCopyMove(deleteOriginalWhenFinished, outFilePath, "applyChanges");
+                            transactionLogger.addChangesCopyMove(deleteOriginalWhenFinished, outFile, "applyChanges");
                         }
-                        transactionLogger.set(id, outFilePath);
+                        transactionLogger.set(id, outFile);
                         if ((changed != null) && (changed.size() > 0)) {
                             transactionLogger.addChanges(exifHandler, EnumSet.copyOf(changed), oldTags);
                         }
@@ -202,18 +201,21 @@ public class PhotoPropertiesBulkUpdateService {
     }
     /** return modified out file or null if filename must not change due to visibility rule */
     protected IFile handleVisibility(VISIBILITY newVisibility, IFile outFile, PhotoPropertiesUpdateHandler exif) {
+        final String dbgContext = "PhotoPropertiesBulkUpdateService.handleVisibility";
         if (LibGlobal.renamePrivateJpg) {
             final String oldAbsoluteOutPath = (outFile == null) ? null : outFile.getAbsolutePath();
             String newAbsoluteOutPath = PhotoPropertiesUtil.getModifiedPath(oldAbsoluteOutPath, newVisibility);
 
             if (newAbsoluteOutPath != null) {
                 String sourcePath = exif.getPath();
+                final IFile newOutFile = FileFacade.convert(dbgContext, newAbsoluteOutPath);
                 if ((sourcePath != null) && (sourcePath.compareTo(oldAbsoluteOutPath) == 0)) {
                     // original intend was "change in same file" so add to log that filename has changed (rename/move)
-                    transactionLogger.addChangesCopyMove(true, newAbsoluteOutPath, "handleVisibility");
+                    transactionLogger.addChangesCopyMove(
+                            true, newOutFile, dbgContext);
                 }
-                exif.setAbsoluteJpgOutPath(newAbsoluteOutPath);
-                return FileFacade.convert("PhotoPropertiesBulkUpdateService.handleVisibility", newAbsoluteOutPath);
+                exif.setAbsoluteJpgOutPath(newOutFile);
+                return newOutFile;
             }
         }
         return null;

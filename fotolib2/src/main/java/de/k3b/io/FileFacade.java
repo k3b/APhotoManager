@@ -29,8 +29,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 
 /**
  * {@link FileFacade} has the same methods as {@link File} so it may become a
@@ -62,7 +60,7 @@ public class FileFacade implements IFile {
     }
 
     public FileFacade(File file) {
-        this.file = file;
+        this.file = file.getAbsoluteFile();
     }
 
     public FileFacade(String absolutPath) {
@@ -86,20 +84,6 @@ public class FileFacade implements IFile {
         return f;
     }
 
-    /**
-     * gets existing file from parent or create it if not found
-     */
-    public static IFile getOrCreateChild(String dbgContext, IFile parent, String name) {
-        IFile result = parent.findExisting(name);
-        if (result == null) {
-            result = parent.create(name);
-        }
-        if (debugLogFacade) {
-            logger.info(dbgContext + " getOrCreateChild(" + name + ") => " + result);
-        }
-        return result;
-    }
-
     public static IFile convert(String dbgContext, File file) {
         if (file == null) return null;
         return fileFacade.convert(dbgContext, file);
@@ -117,7 +101,7 @@ public class FileFacade implements IFile {
     @Deprecated
     @Override
     public boolean renameTo(IFile newName) {
-        return renameImpl(((FileFacade) newName).file);
+        return renameImpl(newName.getFile());
     }
 
     @Override
@@ -129,9 +113,6 @@ public class FileFacade implements IFile {
 
     private boolean renameImpl(File newFile) {
         final boolean success = this.file.renameTo(newFile);
-        if (success) {
-            this.file = newFile;
-        }
         return success;
     }
 
@@ -240,23 +221,11 @@ public class FileFacade implements IFile {
     }
 
     private boolean copyImpl(FileFacade targetFullPath, boolean deleteSourceWhenSuccess) throws IOException {
-        boolean success = true;
-        FileChannel in = null;
-        FileChannel out = null;
-        try {
-            in = new FileInputStream(file).getChannel();
-            out = new FileOutputStream((targetFullPath).file).getChannel();
-            long size = in.size();
-            MappedByteBuffer buf = in.map(FileChannel.MapMode.READ_ONLY, 0, size);
-            success = size == out.write(buf);
-        } finally {
-            FileUtils.close(in, "_osFileCopy-close");
-            FileUtils.close(out, "_osFileCopy-close");
-        }
-        if (success && deleteSourceWhenSuccess) {
+        FileUtils.copy(this.openInputStream(), targetFullPath.openOutputStream());
+        if (deleteSourceWhenSuccess) {
             this.delete();
         }
-        return success;
+        return true;
     }
 
     @Override
@@ -277,8 +246,13 @@ public class FileFacade implements IFile {
 
     @Override
     public IFile create(String name) {
-        final File file = new File(this.file, name);
+        final File file = new File(this.file, name).getAbsoluteFile();
         return convert("create", file);
+    }
+
+    @Override
+    public long length() {
+        return file.length();
     }
 
     @Override
@@ -286,6 +260,7 @@ public class FileFacade implements IFile {
         return String.format("%s: %s", this.getClass().getSimpleName(), file.getAbsoluteFile());
     }
 
+    @Override
     public File getFile() {
         if (debugLogFacade) {
             logger.info("getFile() " + file + " from " + this);

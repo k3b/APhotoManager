@@ -69,12 +69,6 @@ public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
 	/** if not null content of xmp sidecar file */
     private final IPhotoProperties xmpExtern;
 
-    protected static Factory factory = new Factory() {
-        public ExifInterfaceEx create(String absoluteJpgPath, InputStream in, IPhotoProperties xmpExtern, String dbg_context) throws IOException {
-            return new ExifInterfaceEx(absoluteJpgPath, in, xmpExtern, dbg_context);
-        }
-    };
-
     /**
      * Reads Exif tags from the specified JPEG file.
      *  @param absoluteJpgPath
@@ -95,8 +89,12 @@ public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
 
     }
 
+    public static ExifInterfaceEx create(IFile absoluteJpgPath, IPhotoProperties xmpExtern, String dbg_context) throws IOException {
+        return new ExifInterfaceEx(absoluteJpgPath.getAbsolutePath(), absoluteJpgPath.openInputStream(), xmpExtern, dbg_context);
+    }
+
     public static ExifInterfaceEx create(String absoluteJpgPath, InputStream in, IPhotoProperties xmpExtern, String dbg_context) throws IOException {
-        return factory.create(absoluteJpgPath, in, xmpExtern, dbg_context);
+        return new ExifInterfaceEx(absoluteJpgPath, in, xmpExtern, dbg_context);
     }
 
     public static int getOrientationId(String fullPath) {
