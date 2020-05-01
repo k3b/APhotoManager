@@ -141,18 +141,6 @@ public class AndroidFileFacade extends FileFacade {
     }
 
     @Override
-    public IFile findExisting(String name) {
-        final DocumentFile androidFile = getAndroidFile();
-        if (androidFile != null) {
-            DocumentFile doc = androidFile.findFile(name);
-            if (doc != null) {
-                return new AndroidFileFacade(doc, new File(getFile(), name));
-            }
-        }
-        return null;
-    }
-
-    @Override
     public boolean canWrite() {
         final DocumentFile androidFile = getAndroidFile();
         return (androidFile != null) && androidFile.canWrite();

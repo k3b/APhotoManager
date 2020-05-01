@@ -29,6 +29,8 @@ import java.io.File;
 import java.util.Locale;
 
 import de.k3b.android.util.MenuUtils;
+import de.k3b.io.FileFacade;
+import de.k3b.io.IFile;
 
 /**
  * Global Settings used throughout the app.
@@ -89,9 +91,9 @@ public class Global {
     private static final File externalStorageDirectory = Environment.getExternalStorageDirectory();
 
     /** defines the filesystem's directory where [Bookmark files](Bookmarks) are stored and loaded from. */
-    public static File reportDir = (externalStorageDirectory == null)
+    public static IFile reportDir = (externalStorageDirectory == null)
             ? null
-            : new File(externalStorageDirectory, "databases/sql");
+            : FileFacade.convert("", new File(externalStorageDirectory, "databases/sql"));
     public static final String reportExt = ".query";
 
     /** defines the filesystem's directory where crash reports are written to. */

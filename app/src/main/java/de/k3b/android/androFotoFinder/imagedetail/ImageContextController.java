@@ -28,9 +28,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
@@ -46,6 +43,7 @@ import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.SqlTemplateEngine;
 import de.k3b.io.FileUtils;
+import de.k3b.io.IFile;
 import de.k3b.io.Properties;
 
 /**
@@ -105,20 +103,20 @@ public abstract class ImageContextController {
                 R.menu.menu_image_detail_text_context, names);
     }
 
-    private static File getPropertiesFile() {
-        return new File(Global.reportDir, DEFINITION_FILE);
+    private static IFile getPropertiesFile() {
+        return Global.reportDir.create(DEFINITION_FILE);
     }
 
     protected Properties loadFromFile() {
         final Properties properties = new Properties();
-        File propFile = getPropertiesFile();
+        IFile propFile = getPropertiesFile();
 
         if (propFile.exists()) {
             InputStream br = null;
 
             try {
 
-                br = new FileInputStream(propFile);
+                br = propFile.openInputStream();
                 properties.load(br);
 
             } catch (IOException ex) {
@@ -132,7 +130,7 @@ public abstract class ImageContextController {
         return properties;
     }
 
-    protected void saveToFile(File propFile, Properties properties) {
+    protected void saveToFile(IFile propFile, Properties properties) {
         includeMissingKeys(properties);
 
         Writer br = null;
@@ -143,7 +141,7 @@ public abstract class ImageContextController {
                     mContext.getString(R.string.app_name),
                     GuiUtil.getAppVersionName(mContext));
 
-            br = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(propFile), "UTF-8"));
+            br = new BufferedWriter(new OutputStreamWriter(propFile.openOutputStream(), "UTF-8"));
             br.write(header);
             br.write("\n");
             properties.store(br, null);
@@ -157,11 +155,11 @@ public abstract class ImageContextController {
     }
 
     /** opens text editor with the properties file */
-    private boolean onEdit(String key, String value, File file) {
+    private boolean onEdit(String key, String value, IFile file) {
         Global.reportDir.mkdirs();
         saveToFile(file, loadFromFile());
         Intent sendIntent = new Intent();
-        IntentUtil.setDataAndTypeAndNormalize(sendIntent, Uri.fromFile(file), "text/plain");
+        IntentUtil.setDataAndTypeAndNormalize(sendIntent, Uri.fromFile(file.getFile()), "text/plain");
         sendIntent.setAction(Intent.ACTION_EDIT);
         mContext.startActivity(sendIntent);
         return true;

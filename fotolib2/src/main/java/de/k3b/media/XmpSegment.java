@@ -224,31 +224,6 @@ public class XmpSegment {
         return this;
     }
 
-    public XmpSegment load(IFile file, String dbg_context) throws FileNotFoundException {
-        InputStream stream = null;
-        try {
-            stream = file.openInputStream();
-            setXmpMeta(XMPMetaFactory.parse(stream), dbg_context + " file:" + file);
-        } catch (XMPException e) {
-            onError("->XmpSegment.load " + file, e);
-
-            // workaround: my android-4.2 tahblet cannot re-read it-s xmp without trailing "\n"
-            if ((file != null) && file.exists()) {
-                try {
-                    setXmpMeta(XMPMetaFactory.parse(FileUtils.streamFromStringContent(FileUtils.readFile(file.openInputStream()) + "\n")), XmpSegment.dbg_context);
-                } catch (IOException e1) {
-                    onError("->XmpSegment.load-via-string " + file, e);
-                } catch (XMPException e1) {
-                    onError("->XmpSegment.load-via-string " + file, e);
-                }
-            }
-        } finally {
-            FileUtils.close(stream, file);
-            setFilelastModified(file);
-        }
-        return this;
-    }
-
     public XmpSegment save(IFile file, boolean humanReadable, String dbg_context) throws FileNotFoundException {
         OutputStream stream = null;
         try {

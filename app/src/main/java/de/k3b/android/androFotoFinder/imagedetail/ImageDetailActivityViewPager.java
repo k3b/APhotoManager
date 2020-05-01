@@ -79,12 +79,12 @@ import de.k3b.database.QueryParameter;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.io.GeoUri;
 import de.k3b.io.FileFacade;
-import de.k3b.io.FileProcessor;
 import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IFile;
 import de.k3b.io.StringUtils;
+import de.k3b.io.XmpFile;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.tagDB.Tag;
@@ -173,19 +173,19 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
 
     long mUpdateId = FotoSql.getMediaDBApi().getCurrentUpdateId();
 
-    private static int updateIncompleteMediaDatabase(String debugPrefix, Context context, String why, File dirToScan) {
+    private static int updateIncompleteMediaDatabase(String debugPrefix, Context context, String why, IFile dirToScan) {
         if (dirToScan == null) return 0;
 
         String dbPathSearch = null;
         ArrayList<String> missing = new ArrayList<String>();
-        dbPathSearch = dirToScan.getPath() + "/%";
+        dbPathSearch = dirToScan.getAbsolutePath() + "/%";
         List<String> known = FotoSql.execGetFotoPaths(dbPathSearch);
-        File[] existing = dirToScan.listFiles();
+        IFile[] existing = dirToScan.listFiles();
 
         if (existing != null) {
-            for (File file : existing) {
+            for (IFile file : existing) {
                 String found = file.getAbsolutePath();
-                if (PhotoPropertiesUtil.isImage(file, PhotoPropertiesUtil.IMG_TYPE_ALL) && !known.contains(found)) {
+                if (PhotoPropertiesUtil.isImage(found, PhotoPropertiesUtil.IMG_TYPE_ALL) && !known.contains(found)) {
                     missing.add(found);
                 }
             }
@@ -649,7 +649,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
      */
     private boolean checkForIncompleteMediaDatabase(String jpgFullFilePath, String why) {
         if (!PhotoPropertiesMediaFilesScanner.isNoMedia(jpgFullFilePath, PhotoPropertiesMediaFilesScanner.DEFAULT_SCAN_DEPTH)) {
-            File fileToLoad = (jpgFullFilePath != null) ? new File(jpgFullFilePath) : null;
+            IFile fileToLoad = FileFacade.convert("checkForIncompleteMediaDatabase " + why, jpgFullFilePath);
 
             if ((!this.mWaitingForMediaScannerResult) && (fileToLoad != null) && (fileToLoad.exists()) && (fileToLoad.canRead())) {
                 // file exists => must update media database
@@ -672,13 +672,13 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
         IFile src = FileFacade.convert("ImageDetailActivityViewPager.onRenameFileAnswer", fotoSourcePath);
         IFile dest = src.getParentFile().create(newFileName);
 
-        IFile srcXmpShort = FileProcessor.getSidecar(src, false);
+        IFile srcXmpShort = XmpFile.getSidecar(src, false);
         boolean hasSideCarShort = ((srcXmpShort != null) && srcXmpShort.exists());
-        IFile srcXmpLong = FileProcessor.getSidecar(src, true);
+        IFile srcXmpLong = XmpFile.getSidecar(src, true);
         boolean hasSideCarLong = ((srcXmpLong != null) && srcXmpLong.exists());
 
-        IFile destXmpShort = FileProcessor.getSidecar(dest, false);
-        IFile destXmpLong = FileProcessor.getSidecar(dest, true);
+        IFile destXmpShort = XmpFile.getSidecar(dest, false);
+        IFile destXmpLong = XmpFile.getSidecar(dest, true);
 
         if (src.equals(dest)) return; // new name == old name ==> nothing to do
 
@@ -1092,13 +1092,13 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
         IFile src = FileFacade.convert("ImageDetailActivityViewPager.onRenameSubDirAnswer", fotoSourcePath);
         IFile dest = src.getParentFile().create(newFileName);
 
-        IFile srcXmpShort = FileProcessor.getSidecar(src, false);
+        IFile srcXmpShort = XmpFile.getSidecar(src, false);
         boolean hasSideCarShort = ((srcXmpShort != null) && (mFileCommands.osFileExists(srcXmpShort)));
-        IFile srcXmpLong = FileProcessor.getSidecar(src, true);
+        IFile srcXmpLong = XmpFile.getSidecar(src, true);
         boolean hasSideCarLong = ((srcXmpLong != null) && (mFileCommands.osFileExists(srcXmpLong)));
 
-        IFile destXmpShort = FileProcessor.getSidecar(dest, false);
-        IFile destXmpLong = FileProcessor.getSidecar(dest, true);
+        IFile destXmpShort = XmpFile.getSidecar(dest, false);
+        IFile destXmpLong = XmpFile.getSidecar(dest, true);
 
         if (src.equals(dest)) return; // new name == old name ==> nothing to do
 

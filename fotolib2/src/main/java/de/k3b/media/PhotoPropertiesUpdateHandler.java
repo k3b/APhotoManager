@@ -26,11 +26,10 @@ import java.io.IOException;
 import java.util.Date;
 
 import de.k3b.LibGlobal;
-import de.k3b.io.FileCommands;
 import de.k3b.io.FileFacade;
-import de.k3b.io.FileProcessor;
 import de.k3b.io.FileUtils;
 import de.k3b.io.IFile;
+import de.k3b.io.XmpFile;
 
 /**
  * Represents content of exactly one jpg-exif-file with corresponding xmp-file that can be modified
@@ -45,7 +44,8 @@ import de.k3b.io.IFile;
  * Created by k3b on 21.04.2017.
  */
 
-public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper implements IPhotoProperties {
+public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper
+        implements IPhotoProperties, IPhotoPropertyFileWriter {
     private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
 
     private ExifInterfaceEx exif;   // not null if exif changes are written to jpg file
@@ -219,12 +219,13 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
 
             if (xmp.isHasAlsoOtherFormat()) {
                 changedFiles += saveXmp(xmp, outJpgFullPath, !isLongFormat, dbg_context);
-                if (!isSameFile && this.deleteOriginalAfterFinish) FileProcessor.getSidecar(inJpgFullPath, !isLongFormat).delete();
+                if (!isSameFile && this.deleteOriginalAfterFinish)
+                    XmpFile.getSidecar(inJpgFullPath, !isLongFormat).delete();
             }
 
             if (this.deleteOriginalAfterFinish && !isSameFile) {
                 // if xmp-file does not exist, nothing happens :-)
-                FileProcessor.getSidecar(inJpgFullPath, isLongFormat).delete();
+                XmpFile.getSidecar(inJpgFullPath, isLongFormat).delete();
             }
         } else {
             if (!isSameFile) {
@@ -240,10 +241,10 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
             IFile jpgInFile, IFile outJpgFullPath,
             boolean longFormat, String dbg_context) throws IOException {
         int changedFiles = 0;
-        IFile xmpInFile = FileCommands.getExistingSidecarOrNull(jpgInFile, longFormat);
+        IFile xmpInFile = XmpFile.getExistingSidecarOrNull(jpgInFile, longFormat);
         if (xmpInFile != null) {
             FileUtils.copyReplace(
-                    xmpInFile, FileCommands.getSidecar(outJpgFullPath, longFormat),
+                    xmpInFile, XmpFile.getSidecar(outJpgFullPath, longFormat),
                     this.deleteOriginalAfterFinish, dbg_context);
             changedFiles++;
         }
@@ -254,7 +255,7 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper impleme
             PhotoPropertiesXmpSegment xmp,
             IFile outFullJpgPath,
             boolean isLongFileName, String dbg_context) throws IOException {
-        IFile xmpOutFile = FileCommands.getSidecar(outFullJpgPath, isLongFileName);
+        IFile xmpOutFile = XmpFile.getSidecar(outFullJpgPath, isLongFileName);
         xmp.save(xmpOutFile, LibGlobal.debugEnabledJpgMetaIo, dbg_context);
         return 1;
     }

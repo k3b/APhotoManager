@@ -189,7 +189,7 @@ public class SettingsActivity extends PreferenceActivity {
         prefs.putString("actionBarHideTimeInMilliSecs", "" + Global.actionBarHideTimeInMilliSecs);
         prefs.putString("pickHistoryMax", "" + Global.pickHistoryMax);
 
-        prefs.putString("reportDir", (Global.reportDir != null) ? Global.reportDir.getAbsolutePath() : null);
+        prefs.putString("reportDir", Global.reportDir.getAbsolutePath());
         prefs.putString("logCatDir", (Global.logCatDir != null) ? Global.logCatDir.getAbsolutePath() : null);
         prefs.putString("thumbCacheRoot", (Global.thumbCacheRoot != null) ? Global.thumbCacheRoot.getAbsolutePath() : null);
         prefs.putString("mapsForgeDir", (Global.mapsForgeDir != null) ? Global.mapsForgeDir.getAbsolutePath() : null);
@@ -268,7 +268,7 @@ public class SettingsActivity extends PreferenceActivity {
         Global.actionBarHideTimeInMilliSecs     = getPref(prefs, "actionBarHideTimeInMilliSecs" , Global.actionBarHideTimeInMilliSecs);
         Global.pickHistoryMax = getPref(prefs, "pickHistoryMax"               , Global.pickHistoryMax);
 
-        Global.reportDir                        = getPref(prefs, "reportDir", Global.reportDir);
+        Global.reportDir = FileFacade.convert("reportDir", getPref(prefs, "reportDir", Global.reportDir.getAbsolutePath()));
         LibGlobal.zipFileDir                    = Global.reportDir;
 
         Global.logCatDir                        = getPref(prefs, "logCatDir", Global.logCatDir);

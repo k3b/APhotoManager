@@ -33,11 +33,11 @@ import java.util.List;
 
 import de.k3b.LibGlobal;
 import de.k3b.io.DateUtil;
-import de.k3b.io.FileCommands;
 import de.k3b.io.FileFacade;
 import de.k3b.io.GeoUtil;
 import de.k3b.io.IFile;
 import de.k3b.io.VISIBILITY;
+import de.k3b.io.XmpFile;
 import de.k3b.media.MediaFormatter.FieldID;
 /**
  * {@link XmpSegment} that implements {@link IPhotoProperties} to read/write xmp.
@@ -45,7 +45,8 @@ import de.k3b.media.MediaFormatter.FieldID;
  * Created by k3b on 20.10.2016.
  */
 
-public class PhotoPropertiesXmpSegment extends XmpSegment implements IPhotoProperties {
+public class PhotoPropertiesXmpSegment extends XmpSegment
+        implements IPhotoProperties, IPhotoPropertyFileWriter, IPhotoPropertyFileReader {
     private static final String dbg_context = "PhotoPropertiesXmpSegment: ";
     private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
 
@@ -229,14 +230,14 @@ public class PhotoPropertiesXmpSegment extends XmpSegment implements IPhotoPrope
         return loadXmpSidecarContentOrNull(FileFacade.convert(dbg_context, absoluteJpgPath), _dbg_context);
     }
 
-    public static PhotoPropertiesXmpSegment loadXmpSidecarContentOrNull(IFile absoluteJpgPath, String _dbg_context) {
+    public static PhotoPropertiesXmpSegment loadXmpSidecarContentOrNull(IFile jpgFile, String _dbg_context) {
         PhotoPropertiesXmpSegment xmpContent = null;
-        FileCommands.XmpFile xmpFile = FileCommands.getExistingSidecarOrNull(absoluteJpgPath);
+        XmpFile xmpFile = XmpFile.getExistingSidecarOrNull(jpgFile);
         String dbg_context = _dbg_context + " loadXmpSidecarContent(" + xmpFile + "): ";
         if ((xmpFile != null) && xmpFile.isFile() && xmpFile.exists() && xmpFile.canRead()) {
             xmpContent = new PhotoPropertiesXmpSegment();
             try {
-                xmpContent.load(xmpFile, dbg_context);
+                xmpContent.load(xmpFile.openInputStream(), dbg_context);
                 xmpContent.setLongFormat(xmpFile.isLongFormat());
                 xmpContent.setHasAlsoOtherFormat(xmpFile.isHasAlsoOtherFormat());
             } catch (FileNotFoundException e) {
@@ -249,6 +250,11 @@ public class PhotoPropertiesXmpSegment extends XmpSegment implements IPhotoPrope
         }
 
         return xmpContent;
+    }
+
+    @Override
+    public IPhotoProperties load(IFile jpgFile, IPhotoProperties ignore, String dbg_context) {
+        return loadXmpSidecarContentOrNull(jpgFile, dbg_context);
     }
 
 

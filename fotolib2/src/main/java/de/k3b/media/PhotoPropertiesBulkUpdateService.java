@@ -30,9 +30,9 @@ import java.util.List;
 
 import de.k3b.LibGlobal;
 import de.k3b.io.FileFacade;
-import de.k3b.io.FileProcessor;
 import de.k3b.io.IFile;
 import de.k3b.io.VISIBILITY;
+import de.k3b.io.XmpFile;
 import de.k3b.transactionlog.TransactionLoggerBase;
 
 /**
@@ -147,10 +147,10 @@ public class PhotoPropertiesBulkUpdateService {
                     }
 
                     if (!sameFile && deleteOriginalWhenFinished) {
-                        IFile delete = FileProcessor.getSidecar(inFilePath, false);
+                        IFile delete = XmpFile.getSidecar(inFilePath, false);
                         deleteFile(delete);
 
-                        delete = FileProcessor.getSidecar(inFilePath, true);
+                        delete = XmpFile.getSidecar(inFilePath, true);
                         deleteFile(delete);
 
                         delete = inFilePath;

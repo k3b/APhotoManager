@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 by k3b.
+ * Copyright (c) 2017-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -54,7 +54,7 @@ import de.k3b.io.VISIBILITY;
  * Created by k3b on 27.03.2017.
  */
 
-public class PhotoPropertiesImageReader implements IPhotoProperties, Closeable {
+public class PhotoPropertiesImageReader implements IPhotoProperties, IPhotoPropertyFileReader, Closeable {
     // public: used as log filter for crash report
     public  static final String LOG_TAG = "PhotoPropertiesImageReader";
 
@@ -98,6 +98,21 @@ public class PhotoPropertiesImageReader implements IPhotoProperties, Closeable {
 
         }
         return false;
+    }
+
+    @Override
+    public IPhotoProperties load(IFile jpgFile, IPhotoProperties childProperties, String dbg_context) {
+        try {
+            return new PhotoPropertiesImageReader().load(
+                    jpgFile, null, childProperties, dbg_context);
+        } catch (IOException e) {
+            if (LibGlobal.debugEnabledJpgMetaIo) {
+                logger.info(StringUtils.appendMessage(
+                        null, dbg_context, getClass().getSimpleName(), "load failed",
+                        jpgFile, e.getMessage()).toString(), e);
+            }
+        }
+        return null;
     }
 
     /**

@@ -38,6 +38,7 @@ import de.k3b.LibGlobal;
 import de.k3b.io.FileFacade;
 import de.k3b.io.IFile;
 import de.k3b.io.ListUtils;
+import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.media.MediaFormatter.FieldID;
 /**
@@ -47,7 +48,8 @@ import de.k3b.media.MediaFormatter.FieldID;
  * Created by k3b on 08.10.2016.
  */
 
-public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
+public class ExifInterfaceEx extends ExifInterface
+        implements IPhotoProperties, IPhotoPropertyFileWriter, IPhotoPropertyFileReader {
     private static final Logger logger = LoggerFactory.getLogger(LOG_TAG);
 
     private static final SimpleDateFormat sExifDateTimeFormatter;
@@ -67,16 +69,18 @@ public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
 
     private final String mDbg_context;
 	/** if not null content of xmp sidecar file */
-    private final IPhotoProperties xmpExtern;
+    private IPhotoProperties xmpExtern = null;
 
+    public ExifInterfaceEx(IFile jpgFile, String dbg_context) throws IOException {
+        this(null, jpgFile, null, null, dbg_context);
+    }
     /**
-     * Reads Exif tags from the specified JPEG file.
-     *  @param absoluteJpgPath
+     * Reads Exif tags from the specified source.
      * @param xmpExtern if not null content of xmp sidecar file
      * @param dbg_context
      */
-    protected ExifInterfaceEx(String absoluteJpgPath, InputStream in, IPhotoProperties xmpExtern, String dbg_context) throws IOException {
-        super(absoluteJpgPath, in);
+    private ExifInterfaceEx(InputStream in, IFile jpgFile, String absoluteJpgPath, IPhotoProperties xmpExtern, String dbg_context) throws IOException {
+        super(in, null, absoluteJpgPath);
         setFilelastModified(mExifFile);
 
         this.xmpExtern = xmpExtern;
@@ -89,12 +93,12 @@ public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
 
     }
 
-    public static ExifInterfaceEx create(IFile absoluteJpgPath, IPhotoProperties xmpExtern, String dbg_context) throws IOException {
-        return new ExifInterfaceEx(absoluteJpgPath.getAbsolutePath(), absoluteJpgPath.openInputStream(), xmpExtern, dbg_context);
+    public static ExifInterfaceEx create(IFile jpgFile, IPhotoProperties xmpExtern, String dbg_context) throws IOException {
+        return new ExifInterfaceEx(jpgFile.openInputStream(), null, jpgFile.getAbsolutePath(), xmpExtern, dbg_context);
     }
 
     public static ExifInterfaceEx create(String absoluteJpgPath, InputStream in, IPhotoProperties xmpExtern, String dbg_context) throws IOException {
-        return new ExifInterfaceEx(absoluteJpgPath, in, xmpExtern, dbg_context);
+        return new ExifInterfaceEx(in, null, absoluteJpgPath, xmpExtern, dbg_context);
     }
 
     public static int getOrientationId(String fullPath) {
@@ -403,6 +407,20 @@ public class ExifInterfaceEx extends ExifInterface implements IPhotoProperties {
         setAttribute(TAG_WIN_RATING, (value != null) ? value.toString() : null);
         if (xmpExtern != null) xmpExtern.setRating(value);
         return this;
+    }
+
+    @Override
+    public IPhotoProperties load(IFile jpgFile, IPhotoProperties childProperties, String dbg_context) {
+        try {
+            return new ExifInterfaceEx(null, jpgFile, null, childProperties, dbg_context);
+        } catch (IOException e) {
+            if (LibGlobal.debugEnabledJpgMetaIo) {
+                logger.info(StringUtils.appendMessage(
+                        null, dbg_context, getClass().getSimpleName(), "load failed",
+                        jpgFile, e.getMessage()).toString(), e);
+            }
+            return null;
+        }
     }
 
     protected interface Factory {

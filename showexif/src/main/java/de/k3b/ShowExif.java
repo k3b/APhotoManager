@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 by k3b.
+ * Copyright (c) 2017-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -20,12 +20,13 @@ package de.k3b;
 
 import java.io.IOException;
 
+import de.k3b.io.FileFacade;
+import de.k3b.io.IFile;
 import de.k3b.media.ExifInterfaceEx;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.MediaFormatter;
 import de.k3b.media.PhotoPropertiesFormatter;
-import de.k3b.media.PhotoPropertiesImageReader;
-import de.k3b.media.PhotoPropertiesXmpSegment;
+import de.k3b.media.PhotoPropertyFileReader;
 
 /** simple commandline tool to show  */
 public class ShowExif {
@@ -52,14 +53,17 @@ public class ShowExif {
         System.out.println("------");
         System.out.println(fileName);
 
+        final PhotoPropertyFileReader photoPropertyFileReader = new PhotoPropertyFileReader();
         try {
-            PhotoPropertiesXmpSegment xmp = PhotoPropertiesXmpSegment.loadXmpSidecarContentOrNull(fileName, dbg_context);
+            final IFile file = FileFacade.convert(dbg_context, fileName);
+            IPhotoProperties jpg = photoPropertyFileReader.load(file, null, dbg_context);
 
-            ExifInterfaceEx exif = ExifInterfaceEx.create(fileName, null, xmp, dbg_context);
-            PhotoPropertiesImageReader jpg = new PhotoPropertiesImageReader().load(fileName, null, xmp, dbg_context);
+            IPhotoProperties exif = new ExifInterfaceEx(null, null)
+                    .load(file, photoPropertyFileReader.getXmp(), dbg_context);
+            // PhotoPropertiesImageReader jpg = new PhotoPropertiesImageReader().load(fileName, xmp, dbg_context);
             show(jpg, debug);
-            if (exif.isValidJpgExifFormat()) show(exif, debug);
-            show(xmp, debug);
+            show(exif, debug);
+            show(photoPropertyFileReader.getXmp(), debug);
 
         } catch (IOException e) {
             e.printStackTrace();

@@ -234,11 +234,11 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
         boolean result = false;
 
         if (file != null) {
-            IFile sidecar = getSidecar(file, false);
+            IFile sidecar = XmpFile.getSidecar(file, false);
             if (osFileExists(sidecar)) {
                 osDeleteFile(sidecar); // dont care if delete was successfull
             }
-            sidecar = getSidecar(file, true);
+            sidecar = XmpFile.getSidecar(file, true);
             if (osFileExists(sidecar)) {
                 osDeleteFile(sidecar); // dont care if delete was successfull
             }
@@ -379,15 +379,15 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                             // old style move/copy image with sidecarfile(s)
                             if (osFileMoveOrCopy(move, destRenamed, sourceFile)) itemCount++;
 
-                            IFile sourceSidecar = getSidecar(sourceFile, false);
+                            IFile sourceSidecar = XmpFile.getSidecar(sourceFile, false);
                             if (osFileExists(sourceSidecar)) {
-                                IFile destSidecar = getSidecar(destRenamed, false);
+                                IFile destSidecar = XmpFile.getSidecar(destRenamed, false);
                                 if (osFileMoveOrCopy(move, destSidecar, sourceSidecar)) itemCount++;
                             }
 
-                            sourceSidecar = getSidecar(sourceFile, true);
+                            sourceSidecar = XmpFile.getSidecar(sourceFile, true);
                             if (osFileExists(sourceSidecar)) {
-                                IFile destSidecar = getSidecar(destRenamed, true);
+                                IFile destSidecar = XmpFile.getSidecar(destRenamed, true);
                                 if (osFileMoveOrCopy(move, destSidecar, sourceSidecar)) itemCount++;
                             }
                             addTransactionLog(id, sourceFile.getAbsolutePath(), now, moveOrCopyCommand, destFile.getAbsolutePath());

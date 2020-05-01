@@ -45,7 +45,6 @@ import de.k3b.android.util.DBUtils;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.AlbumFile;
 import de.k3b.io.DirectoryFormatter;
-import de.k3b.io.FileCommands;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGalleryFilter;
@@ -53,6 +52,7 @@ import de.k3b.io.IGeoRectangle;
 import de.k3b.io.ListUtils;
 import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
+import de.k3b.io.XmpFile;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
 
@@ -956,7 +956,7 @@ public class FotoSql extends FotoSqlBase {
 
             int count = 0;
             for (String fileName : fileNames) {
-                if ((fileName != null) &&!FileCommands.isSidecar(fileName)) {
+                if ((fileName != null) && !XmpFile.isSidecar(fileName)) {
                     if (count > 0) filter.append(", ");
                     filter.append("'").append(fileName).append("'");
                     count++;

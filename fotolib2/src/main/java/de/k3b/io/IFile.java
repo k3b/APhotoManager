@@ -40,8 +40,6 @@ public interface IFile {
 
     boolean exists();
 
-    IFile findExisting(String name);
-
     boolean canWrite();
 
     boolean canRead();

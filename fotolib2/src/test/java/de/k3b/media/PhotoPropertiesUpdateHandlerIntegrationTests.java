@@ -32,10 +32,10 @@ import java.io.Writer;
 
 import de.k3b.LibGlobal;
 import de.k3b.TestUtil;
-import de.k3b.io.FileCommands;
 import de.k3b.io.FileUtils;
 import de.k3b.io.IFile;
 import de.k3b.io.VISIBILITY;
+import de.k3b.io.XmpFile;
 
 /**
  * Created by k3b on 24.04.2017.
@@ -87,7 +87,7 @@ public class PhotoPropertiesUpdateHandlerIntegrationTests {
 
         IFile out = OUTDIR.create("existingWriteEmptyExifXmp.jpg");
         TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_JPG_WITH_EXIF, out);
-        TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_XMP_WITH_EXIF, FileCommands.getSidecar(out.getAbsolutePath(), false));
+        TestUtil.saveTestResourceAs(TestUtil.TEST_FILE_XMP_WITH_EXIF, XmpFile.getSidecar(out, false));
 
         PhotoPropertiesUpdateHandler sut = PhotoPropertiesUpdateHandler.create(out, null, false, "JUnit"
                 , true, true, true); //exif, xmp, create

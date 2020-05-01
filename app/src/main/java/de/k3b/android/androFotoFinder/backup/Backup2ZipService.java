@@ -99,7 +99,7 @@ public class Backup2ZipService implements IProgessListener, ZipLog {
      */
     public IZipConfig execute() {
         ZipConfigRepository repo = new ZipConfigRepository(zipConfig);
-        final File zipConfigFile = repo.getZipConfigFile();
+        final IFile zipConfigFile = repo.getZipConfigFile();
         if (zipConfigFile != null) {
             QueryParameter filter = getEffectiveQueryParameter(zipConfig);
 

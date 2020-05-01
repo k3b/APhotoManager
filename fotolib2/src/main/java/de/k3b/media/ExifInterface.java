@@ -1117,26 +1117,17 @@ public class ExifInterface {
     /**
      * Reads Exif tags from the specified image file.
      */
-    public ExifInterface(String filename) throws IOException {
-        this(filename, null);
-    }
+    protected ExifInterface(InputStream in, IFile jpgFile, String filename) throws IOException {
+        mExifFile = (jpgFile != null)
+                ? jpgFile
+                : (filename != null)
+                ? FileFacade.convert("ExifInterface()", filename)
+                : null;
 
-    public ExifInterface(IFile file) throws IOException {
-        this(file.getAbsolutePath(), file.openInputStream());
-    }
-
-    protected ExifInterface(String filename, InputStream in) throws IOException {
-        if (filename == null) {
-            throw new IllegalArgumentException("filename cannot be null");
-        }
-        mExifFile = (filename != null) ? FileFacade.convert("ExifInterface()", filename) : null;
-        if (in == null) {
-            InputStream inputStream = null;
-            inputStream = createInputStream(mExifFile);
-            loadAttributes(inputStream);
-        } else {
+        if (in != null) {
             loadAttributes(in);
-
+        } else if (mExifFile != null) {
+            loadAttributes(mExifFile.openInputStream());
         }
     }
 

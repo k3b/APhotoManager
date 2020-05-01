@@ -127,15 +127,6 @@ public class FileFacade implements IFile {
     }
 
     @Override
-    public IFile findExisting(String name) {
-        final File candidate = new File(this.file, name);
-        if (candidate.exists()) {
-            return convert("findExisting", candidate);
-        }
-        return null;
-    }
-
-    @Override
     public boolean canWrite() {
         return file.canWrite();
     }

@@ -21,9 +21,6 @@ package de.k3b.zip;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -32,6 +29,7 @@ import java.util.Date;
 import de.k3b.LibGlobal;
 import de.k3b.io.DateUtil;
 import de.k3b.io.FileUtils;
+import de.k3b.io.IFile;
 import de.k3b.io.Properties;
 import de.k3b.io.StringUtils;
 
@@ -61,30 +59,32 @@ public class ZipConfigRepository implements IZipConfig {
         return this;
     }
 
-    public boolean save() {
-        File configFile = getZipConfigFile();
-
-        if (configFile != null) {
-            OutputStream out = null;
-            try {
-                out = new FileOutputStream(configFile);
-                data.store(out, ZipConfigRepository.sFileComment);
-                return true;
-            } catch (IOException ex) {
-                // file not found or no permission
-                if (LibZipGlobal.debugEnabled) {
-                    logger.warn(ex.getClass().getSimpleName() + ".saveTo(" + configFile + ") failed ", ex);
+    public static IZipConfig getZipConfigOrNull(String zipName) {
+        if (zipName != null) {
+            IFile repositoryFile = getZipConfigFile(zipName);
+            if ((repositoryFile != null) && (repositoryFile.exists())) {
+                try {
+                    IZipConfig repo = new ZipConfigRepository(null)
+                            .load(repositoryFile.openInputStream(), repositoryFile);
+                    if (repo != null) {
+                        return new ZipConfigDto(repo);
+                    }
+                } catch (IOException ignore) {
                 }
-            } finally {
-                FileUtils.close(out, configFile);
             }
         }
-        return false;
+        return null;
     }
 
-    public File getZipConfigFile() {
-        final String zipName = this.getZipName();
-        return getZipConfigFile(zipName);
+    public static IFile getZipConfigFile(String zipName) {
+        if (zipName == null) return null;
+
+        IFile zipFileDir = LibGlobal.zipFileDir;
+        String fileName = FileUtils.replaceExtension(zipName, ZipConfigRepository.FILE_SUFFIX);
+        if ((zipFileDir == null) || (fileName == null)) return null;
+
+        IFile configFile = zipFileDir.create(fileName);
+        return configFile;
     }
 
     @Override
@@ -119,30 +119,29 @@ public class ZipConfigRepository implements IZipConfig {
         return data.getProperty(key);
     }
 
-    public static IZipConfig getZipConfigOrNull(String zipName) {
-        if (zipName != null) {
-            File repositoryFile = getZipConfigFile(zipName);
-            if ((repositoryFile != null) && (repositoryFile.exists())) {
-                try {
-                    IZipConfig repo = new ZipConfigRepository(null).load(new FileInputStream(repositoryFile), repositoryFile);
-                    if (repo != null) {
-                        return new ZipConfigDto(repo);
-                    }
-                } catch (IOException ignore) {
+    public boolean save() {
+        IFile configFile = getZipConfigFile();
+
+        if (configFile != null) {
+            OutputStream out = null;
+            try {
+                out = configFile.openOutputStream();
+                data.store(out, ZipConfigRepository.sFileComment);
+                return true;
+            } catch (IOException ex) {
+                // file not found or no permission
+                if (LibZipGlobal.debugEnabled) {
+                    logger.warn(ex.getClass().getSimpleName() + ".saveTo(" + configFile + ") failed ", ex);
                 }
+            } finally {
+                FileUtils.close(out, configFile);
             }
         }
-        return null;
+        return false;
     }
 
-    public static File getZipConfigFile(String zipName) {
-        if (zipName == null) return null;
-
-        File zipFileDir = LibGlobal.zipFileDir;
-        String fileName = FileUtils.replaceExtension(zipName, ZipConfigRepository.FILE_SUFFIX);
-        if ((zipFileDir == null) || (fileName == null)) return null;
-
-        File configFile = new File(zipFileDir, fileName);
-        return configFile;
+    public IFile getZipConfigFile() {
+        final String zipName = this.getZipName();
+        return getZipConfigFile(zipName);
     }
 }

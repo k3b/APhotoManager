@@ -1,12 +1,13 @@
 package de.k3b.media;
 
 import de.k3b.io.FileFacade;
-import de.k3b.io.FileProcessor;
 import de.k3b.io.IFile;
 import de.k3b.io.IItemSaver;
+import de.k3b.io.XmpFile;
 
 /** Translates every affected file (jpg/xmp) of {@link #save(IPhotoProperties)} to  fileSaver.save(File) */
-public class PhotoProperties2ExistingFileSaver implements IItemSaver<IPhotoProperties> {
+public class PhotoProperties2ExistingFileSaver
+        implements IItemSaver<IPhotoProperties> {
     private final IItemSaver<IFile> fileSaver;
 
     public PhotoProperties2ExistingFileSaver(IItemSaver<IFile> fileSaver) {
@@ -19,8 +20,8 @@ public class PhotoProperties2ExistingFileSaver implements IItemSaver<IPhotoPrope
             String path = item.getPath();
             if (path != null) {
                 return saveFiles(FileFacade.convert("PhotoProperties2ExistingFileSaver.save", path),
-                        FileProcessor.getExistingSidecarOrNull(path, true),
-                        FileProcessor.getExistingSidecarOrNull(path, false)) > 0;
+                        XmpFile.getExistingSidecarOrNull(path, true),
+                        XmpFile.getExistingSidecarOrNull(path, false)) > 0;
             }
         }
         return false;

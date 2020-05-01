@@ -37,9 +37,9 @@ import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.DateUtil;
-import de.k3b.io.FileCommands;
 import de.k3b.io.FileFacade;
 import de.k3b.io.IFile;
+import de.k3b.io.XmpFile;
 import de.k3b.media.ExifInterfaceEx;
 import de.k3b.media.PhotoPropertiesImageReader;
 import de.k3b.media.XmpSegment;
@@ -134,8 +134,8 @@ public class ImageDetailMetaDialogBuilder {
             addExif(result, jpegFile);
 
             // #84 show long and short xmp file
-            addXmp(result, FileCommands.getSidecar(jpegFile, true));
-            addXmp(result, FileCommands.getSidecar(jpegFile, false));
+            addXmp(result, XmpFile.getSidecar(jpegFile, true));
+            addXmp(result, XmpFile.getSidecar(jpegFile, false));
 
             if (currentImageId != 0) {
 
@@ -190,7 +190,8 @@ public class ImageDetailMetaDialogBuilder {
         if (file.exists()) {
             builder.append(NL).append(file).append(NL).append(NL);
 
-            PhotoPropertiesImageReader meta = new PhotoPropertiesImageReader().load(file.getAbsolutePath(), file.openInputStream(), null, "ImageDetailMetaDialogBuilder");
+            PhotoPropertiesImageReader meta = new PhotoPropertiesImageReader().load(
+                    file, file.openInputStream(), null, "ImageDetailMetaDialogBuilder");
             if (meta != null) builder.append(meta.toString());
             builder.append(NL).append(line).append(NL);
         } else {
@@ -201,7 +202,7 @@ public class ImageDetailMetaDialogBuilder {
     private static void addXmp(StringBuilder builder, IFile file) throws IOException {
         if (file.exists()) {
             XmpSegment meta = new XmpSegment();
-            meta.load(file, "ImageDetailMetaDialogBuilder");
+            meta.load(file.openInputStream(), "ImageDetailMetaDialogBuilder");
             builder.append(NL).append(file).append(NL).append(NL);
             meta.appendXmp(null, builder);
             builder.append(NL).append(line).append(NL);

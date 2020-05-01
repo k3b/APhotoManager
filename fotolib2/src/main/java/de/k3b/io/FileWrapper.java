@@ -34,11 +34,6 @@ public class FileWrapper implements IFile {
     }
 
     @Override
-    public IFile findExisting(String name) {
-        return child.findExisting(name);
-    }
-
-    @Override
     public boolean canWrite() {
         return child.canWrite();
     }
