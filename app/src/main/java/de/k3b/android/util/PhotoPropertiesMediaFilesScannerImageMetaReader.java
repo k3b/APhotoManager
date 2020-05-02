@@ -25,6 +25,7 @@ import android.content.Context;
 import java.io.IOException;
 
 import de.k3b.geo.api.IGeoPointInfo;
+import de.k3b.io.FileFacade;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.PhotoPropertiesImageReader;
 
@@ -42,7 +43,7 @@ public class PhotoPropertiesMediaFilesScannerImageMetaReader extends PhotoProper
     protected IPhotoProperties loadNonMediaValues(ContentValues destinationValues, String absoluteJpgPath, IPhotoProperties xmpContent) {
         PhotoPropertiesImageReader exif = null;
         try {
-            exif = new PhotoPropertiesImageReader().load(absoluteJpgPath, null, xmpContent, "PhotoPropertiesMediaFilesScannerImageMetaReader load");
+            exif = new PhotoPropertiesImageReader().load(FileFacade.convert("PhotoPropertiesMediaFilesScannerImageMetaReader loadNonMediaValues", absoluteJpgPath), null, xmpContent, "PhotoPropertiesMediaFilesScannerImageMetaReader load");
         } catch (IOException ex) {
             // exif is null
         }
@@ -58,7 +59,7 @@ public class PhotoPropertiesMediaFilesScannerImageMetaReader extends PhotoProper
     public IGeoPointInfo getPositionFromFile(String absoluteJpgPath, String id) {
         PhotoPropertiesImageReader exif = null;
         try {
-            exif = new PhotoPropertiesImageReader().load(absoluteJpgPath, null, null, "PhotoPropertiesMediaFilesScannerImageMetaReader getPositionFromFile");
+            exif = new PhotoPropertiesImageReader().load(FileFacade.convert("PhotoPropertiesMediaFilesScannerImageMetaReader getPositionFromFile", absoluteJpgPath), null, null, "PhotoPropertiesMediaFilesScannerImageMetaReader getPositionFromFile");
         } catch (IOException ex) {
             // exif is null
         }
