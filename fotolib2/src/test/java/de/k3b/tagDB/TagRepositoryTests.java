@@ -57,7 +57,15 @@ public class TagRepositoryTests {
     }
 
     private TagRepository createUnsavedRepo(String name, int numberOfItems) {
-        this.repositoryFile = OUTDIR.create(name + "-repo.txt");
+        return createUnsavedRepo(OUTDIR, name, numberOfItems);
+    }
+
+    private TagRepository createUnsavedRepo(IFile outdir, String name, int numberOfItems) {
+        String fileName = name;
+        if (fileName.indexOf(".") < 0) {
+            fileName += "-repo.txt";
+        }
+        this.repositoryFile = outdir.create(fileName);
         repositoryFile.delete();
 
         TagRepository result = new TagRepository(this.repositoryFile);
@@ -108,6 +116,28 @@ public class TagRepositoryTests {
                 .delete(createItem(7))
                 .reload();
         Assert.assertEquals(3, items.size());
+    }
+
+    @Test
+    public void shouldMoveRepo() {
+        final String repoFileName = TagRepository.DB_NAME;
+        IFile oldReproFile = createRepoDirWithoutRepo("shouldMoveRepoOld");
+        final TagRepository oldRepo =
+                createUnsavedRepo(oldReproFile, repoFileName, 2).save();
+        TagRepository.setInstance(oldReproFile);
+
+        IFile newReproFile = createRepoDirWithoutRepo("shouldMoveRepoNew");
+
+        TagRepository.setInstance(newReproFile);
+
+        Assert.assertEquals(2, TagRepository.getInstance().load().size());
+    }
+
+    private IFile createRepoDirWithoutRepo(String repoDirName) {
+        IFile oldReproFile = OUTDIR.create(repoDirName);
+        oldReproFile.mkdirs();
+        oldReproFile.create(TagRepository.DB_NAME).delete();
+        return oldReproFile;
     }
 
     @Test
@@ -362,12 +392,5 @@ public class TagRepositoryTests {
 
         found = Tag.findByPath(sut, root, "a/b/c");
         Assert.assertEquals("wrong root", null, found);
-    }
-
-    @Test
-    public void shouldGetPathElements() {
-        String[] pathElemens = TagExpression.getPathElemens("/a");
-        Assert.assertEquals(2, pathElemens.length);
-        Assert.assertEquals("", pathElemens[0]);
     }
 }

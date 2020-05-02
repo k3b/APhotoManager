@@ -20,29 +20,42 @@
 package de.k3b.tagDB;
 
 /**
+ * Parser for Tag Expressions. i.e. /d,a,b,c/c1/c11 adds<br/>
+ *                            d to root,<br/>
+ *                            a,b,c as children to parent and<br/>
+ *                            c gets child c1 and c1 gets child c11.<br/>
+ *
  * Created by k3b on 23.07.2017.
  */
 
 public class TagExpression {
+    private TagExpression() {
+    }
+
+    ;
+
     // i.e. includePaths(...,"a,b/c");
     private static final String DELIMITER_SUB_EXPR = ",;:|";
     static final String DELIMITER_PATH = "\\/";
     private static final String REGEXP_SUB_EXPR = "[" + DELIMITER_SUB_EXPR + "]+";
     private static final String REGEXP_PATH_SPLIT = "[" + DELIMITER_PATH + "]+";
 
+    /**
+     * "a,b/c,d" becomes ["a", "b/c", "d"]
+     */
     static String[] getSubExpressions(String expressions) {
         return (expressions != null) ? expressions.split(REGEXP_SUB_EXPR) : null;
     }
 
+    /** "a/b/c" becomes ["a", "b", "c/] */
     static String[] getPathElemens(String fullPath) {
         return (fullPath != null) ? fullPath.split(REGEXP_PATH_SPLIT) : null;
     }
 
+    /** "x,y,a/b/c" becomes ["a", "b", "c"] */
     public static String[] getPathElemensFromLastExpr(String expressionsString) {
         String[] expressionArray = (expressionsString != null) ? getSubExpressions(expressionsString) : null;
         String[] pathArray = ((expressionArray != null) && (expressionArray.length > 0))  ? getPathElemens(expressionArray[expressionArray.length - 1]) : null;
         return ((pathArray != null) && (pathArray.length > 0)) ? pathArray : null;
     }
-
-
 }

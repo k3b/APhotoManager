@@ -49,7 +49,7 @@ public class TagRepository {
 
     /** Lines starting with char are comments. These lines are not interpreted */
     public static final java.lang.String COMMENT = "#";
-    private static final String DB_NAME = "tagDB.txt";
+    protected static final String DB_NAME = "tagDB.txt";
     private static final String IMPORT_ROOT = "unsorted";
     public static final String INDENT = "\t";
 
@@ -108,24 +108,16 @@ public class TagRepository {
 
     /**
      * make shure that newSubItemsExpression is included in all below parent. Inserts if neccessary.
-     *
-     * @param parent where relative items are added to. if null relative items go to root.
-     * @param childNameExpression i.e. /d,a,b,c/c1/c11 adds d to root, a,b,c as children to parent and c gets child c1 and c1 gets child c11.  @return number of (sub-)tags that where inserted
-     * @return number of (sub-)tags that where inserted
-     */
-    public int includePaths(Tag parent, String childNameExpression) {
-        List<Tag> existingItems = this.load();
-        return includePaths(existingItems, parent, null, childNameExpression);
-    }
-
-    /**
-     * make shure that newSubItemsExpression is included in all below parent. Inserts if neccessary.
      * May add duplicates under different paths.
      *
      * @param all contain all items
      * @param parent where relative items are added to. if null relative items go to root.
      * @param outInsertedFoundTag if not null: return last found/inserted child.
-     * @param childNameExpression i.e. /d,a,b,c/c1/c11 adds d to root, a,b,c as children to parent and c gets child c1 and c1 gets child c11.  @return number of (sub-)tags that where inserted
+     * @param childNameExpression i.e. /d,a,b,c/c1/c11 adds<br/>
+     *                            d to root,<br/>
+     *                            a,b,c as children to parent and<br/>
+     *                            c gets child c1 and c1 gets child c11.<br/>
+     *
      * @return number of (sub-)tags that where inserted
      */
     public static int includePaths(List<Tag> all, Tag parent, Tag outInsertedFoundTag, String childNameExpression) {
@@ -139,9 +131,24 @@ public class TagRepository {
                 firstTarget = null;
 			}
 		}
-		
+
 		return changes;
 	}
+
+    /**
+     * make shure that newSubItemsExpression is included in all below parent. Inserts if neccessary.
+     *
+     * @param parent              where relative items are added to. if null relative items go to root.
+     * @param childNameExpression i.e. /d,a,b,c/c1/c11 adds<br/>
+     *                            d to root,<br/>
+     *                            a,b,c as children to parent and<br/>
+     *                            c gets child c1 and c1 gets child c11.<br/>
+     * @return number of (sub-)tags that where inserted
+     */
+    public int includePaths(Tag parent, String childNameExpression) {
+        List<Tag> existingItems = this.load();
+        return includePaths(existingItems, parent, null, childNameExpression);
+    }
 
     /**
      * make shure that pathToBeIncluded is included in all below _parent.
@@ -205,13 +212,13 @@ public class TagRepository {
     public List<Tag> load() {
         if (mItemList == null) {
             mItemList = new ArrayList<>();
-            if (this.mFile.exists()) {
+            if (this.mFile != null && this.mFile.exists()) {
                 try {
                     load(mItemList, new InputStreamReader(this.mFile.openInputStream()));
 
                     sortByFullPathIgnoreCase();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logError("load",e);
                 }
             }
 
@@ -221,6 +228,12 @@ public class TagRepository {
             // logger.debug(dbg_context + "load() cached value : " + mItemList.size() + " items from " + this.mFile);
         }
         return mItemList;
+    }
+
+    private void logError(String debugContext, Exception ex) {
+        final String msg = getClass().getSimpleName() + "[" + this.mFile +
+                "]:" + debugContext + "  " + ex.getMessage();
+        logger.info(msg, ex);
     }
 
     public void sortByFullPathIgnoreCase() {
@@ -271,12 +284,11 @@ public class TagRepository {
                 logger.debug(dbg_context + "save(): " + mItemList.size() + " items to " + this.mFile);
 
                 save(mItemList, new PrintWriter(this.mFile.openOutputStream(), false), INDENT);
+            } else if (LibGlobal.debugEnabled) {
+                logger.debug(dbg_context + "save(): no items for " + this.mFile);
             }
         } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (LibGlobal.debugEnabled) {
-            logger.debug(dbg_context + "save(): no items for " + this.mFile);
+            logError("save",e);
         }
         return this;
     }
@@ -400,19 +412,6 @@ public class TagRepository {
     /** Returns true if item should be loaded from / saved to repository */
     protected boolean isValid(Tag item) {
         return (item != null);
-    }
-
-    /** Returns true if item.id should be loaded from / saved to repository */
-    private boolean isValidId(String id) {
-        return ((id != null) && (!id.startsWith("#")));
-    }
-
-    public boolean contains(Tag name) {
-        List<Tag> items = load();
-        if (items != null) {
-            return items.contains(name);
-        }
-        return false;
     }
 
     public boolean contains(String name) {

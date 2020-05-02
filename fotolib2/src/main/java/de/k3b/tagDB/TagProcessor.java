@@ -62,19 +62,9 @@ public class TagProcessor {
         return mAffected;
     }
 
-    /** all tags that occoured at least once in {@link #registerExistingTags(List)} call. */
-    private void setAffected(List<String> affected) {
-        this.mAffected = affected;
-    }
-
     /** all tags that occured in all {@link #registerExistingTags(List)} calls */
     public List<String> getAllSet() {
         return mAllSet;
-    }
-
-    /** all tags that occured in all {@link #registerExistingTags(List)} calls */
-    private void setAllSet(List<String> allSet) {
-        this.mAllSet = allSet;
     }
 
     /** calculate the new tags out of added and removed tags. returns null if there is no change neccessary */
