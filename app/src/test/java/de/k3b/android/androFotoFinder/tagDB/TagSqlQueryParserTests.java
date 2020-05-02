@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 by k3b.
+ * Copyright (c) 2017-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -25,7 +25,7 @@ import de.k3b.database.QueryParameter;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.VISIBILITY;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * TagSql unittests with dependencies to android (android database field names),

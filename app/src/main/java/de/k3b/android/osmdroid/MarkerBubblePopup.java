@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2019 by k3b.
+ * Copyright (c) 2016-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -25,15 +25,18 @@ import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
 import android.view.View;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import org.osmdroid.api.IMapView;
+import org.osmdroid.library.R;
 import org.osmdroid.views.MapView;
 
-import de.k3b.android.osmdroid.infowindow.IMarkerInfoData;
-import org.osmdroid.library.R;
-
 import java.lang.ref.WeakReference;
+
+import de.k3b.android.osmdroid.infowindow.IMarkerInfoData;
 
 /**
  * Created by k3b on 12.09.2016.

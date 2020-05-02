@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 by k3b.
+ * Copyright (c) 2018-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *

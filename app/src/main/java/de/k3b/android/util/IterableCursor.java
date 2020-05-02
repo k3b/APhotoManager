@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -18,8 +18,9 @@
  */
 package de.k3b.android.util;
 
-import java.util.Iterator;
 import android.database.Cursor;
+
+import java.util.Iterator;
 
 /** 
 	Iterator that iterates over a Cursor or CursorWrapper.

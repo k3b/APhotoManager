@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2019 by k3b.
+ * Copyright (c) 2018-2020 by k3b.
  *
  * This file is part of #APhotoManager (https://github.com/k3b/APhotoManager/)
  *              and #toGoZip (https://github.com/k3b/ToGoZip/).
@@ -22,7 +22,6 @@ package de.k3b.translations;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.File;
 import java.util.Date;
 
 import de.k3b.io.DateUtil;

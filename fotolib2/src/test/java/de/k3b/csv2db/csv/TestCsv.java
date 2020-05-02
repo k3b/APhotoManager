@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -19,14 +19,16 @@
 
 package de.k3b.csv2db.csv;
 
-import static org.junit.Assert.*;
-
-import java.io.Reader;
-
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.Reader;
+
 import de.k3b.TestUtil;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class TestCsv {
 	@Test

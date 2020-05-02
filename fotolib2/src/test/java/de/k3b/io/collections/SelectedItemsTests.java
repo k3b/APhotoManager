@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -21,9 +21,6 @@ package de.k3b.io.collections;
 
 import org.junit.Assert;
 import org.junit.Test;
-
-import de.k3b.io.collections.SelectedFiles;
-import de.k3b.io.collections.SelectedItems;
 
 /**
  * Created by k3b on 01.08.2015.

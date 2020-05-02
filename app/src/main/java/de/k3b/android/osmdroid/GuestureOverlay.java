@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of LocationMapViewer.
  *

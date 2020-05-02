@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 by k3b.
+ * Copyright (c) 2017-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -30,7 +30,6 @@ import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.io.DateUtil;
 import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
-
 import de.k3b.media.MediaFormatter.FieldID;
 /**
  * Created by k3b on 07.07.2017.

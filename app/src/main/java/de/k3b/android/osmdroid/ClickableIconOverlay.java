@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -23,7 +23,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.view.MotionEvent;
 
-import org.osmdroid.api.*;
+import org.osmdroid.api.IGeoPoint;
 import org.osmdroid.views.MapView;
 import org.osmdroid.views.Projection;
 

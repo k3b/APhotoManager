@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 by k3b.
+ * Copyright (c) 2018-2020 by k3b.
  *
  * This file is part of #APhotoManager (https://github.com/k3b/APhotoManager/)
  *
@@ -19,13 +19,13 @@
 
 package de.k3b.transactionlog;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
-
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * Analyses TransactionLog to generate move/copy/delete script and update-dtos.

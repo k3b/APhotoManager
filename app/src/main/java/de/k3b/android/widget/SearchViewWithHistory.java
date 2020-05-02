@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015-2016 by Miguel Catalan Bañuls
- * Copyright (c) 2018 by k3b.
+ * Copyright (c) 2018-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -57,7 +57,7 @@ import de.k3b.io.StringUtils;
  *
  * ------
  *
- * Changes: (c) 2018 by k3b
+ * Changes: (c) 2018-2020 by k3b
  * * removed voice, styling, ListView with corresponding Adapter;
  * * No more dependency to AppCmpat lib
  * * Removed animation (required AppCompat)

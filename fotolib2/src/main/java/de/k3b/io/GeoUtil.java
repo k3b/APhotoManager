@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 by k3b.
+ * Copyright (c) 2016-2020 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -23,7 +23,6 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
-import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 
 /**

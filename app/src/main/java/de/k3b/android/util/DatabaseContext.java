@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 by k3b.
+ * Copyright (c) 2017-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -19,14 +19,14 @@
 
 package de.k3b.android.util;
 
-import java.io.File;
-
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
 import android.util.Log;
+
+import java.io.File;
 
 public class DatabaseContext extends ContextWrapper {
     private static final String DEBUG_CONTEXT = "DatabaseContext";

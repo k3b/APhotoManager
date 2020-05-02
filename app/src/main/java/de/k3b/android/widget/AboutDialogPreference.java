@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 k3b
+ * Copyright (C) 2011-2020 by k3b
  * 
  * This file is part of de.k3b.android.toGoZip (https://github.com/k3b/ToGoZip/) .
  * 
@@ -39,7 +39,7 @@ import de.k3b.android.androFotoFinder.R;
  * R.string.about_content with placeholders
  * $versionName$ and
  * $about$ (R.string.about_content_about)<br/>
- * Created by k3b on 11.11.2014.
+ * Copyright (C) 2014-2020 by k3b
  */
 public class AboutDialogPreference extends DialogPreference {
     private Context context;

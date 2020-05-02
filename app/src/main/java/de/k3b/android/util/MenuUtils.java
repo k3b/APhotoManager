@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2016 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -18,7 +18,6 @@
  */
 package de.k3b.android.util;
 
-import android.support.annotation.NonNull;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;

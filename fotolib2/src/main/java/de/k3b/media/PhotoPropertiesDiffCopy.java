@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2019 by k3b.
+ * Copyright (c) 2017-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -27,7 +27,6 @@ import java.util.List;
 import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.media.MediaFormatter.FieldID;
-
 import de.k3b.tagDB.TagProcessor;
 import de.k3b.tagDB.TagRepository;
 

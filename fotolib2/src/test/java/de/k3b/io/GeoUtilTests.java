@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 by k3b.
+ * Copyright (c) 2016-2020 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -21,8 +21,6 @@ package de.k3b.io;
 
 import org.junit.Assert;
 import org.junit.Test;
-
-import de.k3b.geo.api.IGeoPointInfo;
 
 /**
  * Created by k3b on 19.10.2016.

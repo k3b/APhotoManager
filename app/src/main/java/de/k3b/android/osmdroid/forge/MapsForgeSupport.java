@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2019 by k3b.
+ * Copyright (c) 2015-2020 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -23,7 +23,6 @@ import android.app.Application;
 
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
 import org.mapsforge.map.android.rendertheme.AssetsRenderTheme;
-import org.mapsforge.map.reader.ReadBuffer;
 import org.mapsforge.map.rendertheme.XmlRenderTheme;
 import org.osmdroid.mapsforge.MapsForgeTileProvider;
 import org.osmdroid.mapsforge.MapsForgeTileSource;

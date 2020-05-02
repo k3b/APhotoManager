@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 by k3b.
+ * Copyright (c) 2017-2020 by k3b.
  *
  * This file is part of #APhotoManager (https://github.com/k3b/APhotoManager/)
  *              and #toGoZip (https://github.com/k3b/ToGoZip/).

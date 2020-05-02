@@ -1,7 +1,7 @@
 package de.k3b.io;
 
 /*
- * Copyright (c) 2019 by k3b.
+ * Copyright (c) 2019-2020 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
