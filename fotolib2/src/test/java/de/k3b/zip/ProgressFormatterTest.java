@@ -24,7 +24,7 @@ import org.junit.Test;
 public class ProgressFormatterTest {
 
     @Test
-    public void format() {
+    public void formatStatistics() {
 
         long t3_15 = 3 * 60 + 15;
 
@@ -56,5 +56,12 @@ public class ProgressFormatterTest {
         Assert.assertEquals("f", "160/160  01:03:15/01:03:15", ProgressFormatter.format(t3_15,
                 last + countLoopingStart, last + countLoopingStart, durationLoopingStart, countLoopingStart).toString());
 
+    }
+
+    @Test
+    public void formatCountTotal() {
+        ProgressFormatter sut = new ProgressFormatter();
+        CharSequence result = sut.format(17, 22);
+        Assert.assertEquals("17/22", result.toString());
     }
 }

@@ -121,8 +121,26 @@ public class ZipConfigDto implements IZipConfig, Serializable {
 
     }
 
+    public static String toString(IZipConfig z) {
+        final String classname = z.getClass().getSimpleName();
+        return classname +
+                "{" +
+                "zipName='" + z.getZipName() + '\'' +
+                ", zipDir='" + z.getZipDir() + '\'' +
+                ", zipRelPath='" + z.getZipRelPath() + '\'' +
+                ", dateModifiedFrom=" + z.getDateModifiedFrom() +
+                ", filter='" + z.getFilter() + '\'' +
+                '}';
+    }
+
+    @Override
+    public String toString() {
+        return toString(this);
+    }
+
     private static String getDateString(Date modificationDateTime) {
         if (modificationDateTime == null) return ".-";
         return new SimpleDateFormat(ZIP_FILE_NAME_SUFFIX).format(modificationDateTime);
     }
+
 }

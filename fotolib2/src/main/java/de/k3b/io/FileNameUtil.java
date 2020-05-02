@@ -49,13 +49,15 @@ public class FileNameUtil {
             len--;
         }
 
+        // replace illegal chars with "_"
+        replace(result, "_",
+                "/", "\\", "..", ":", " ", "?", "*", "&", "%", ">", "<", "|", "'", "\"", "__");
+
         // add extension if there is none
         if ((defaultExtension != null) && (result.indexOf(".") < 0)) {
             result.append(".").append(defaultExtension);
         }
 
-        // replace illegal chars with "_"
-        replace(result, "_", "/", "\\", ":", " ", "?", "*", "&", "%", ">", "<", "|", "'", "\"", "__");
         return result.toString();
     }
 

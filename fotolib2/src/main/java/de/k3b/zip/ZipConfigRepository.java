@@ -63,15 +63,23 @@ public class ZipConfigRepository implements IZipConfig {
         if (zipName != null) {
             IFile repositoryFile = getZipConfigFile(zipName);
             if ((repositoryFile != null) && (repositoryFile.exists())) {
-                try {
-                    IZipConfig repo = new ZipConfigRepository(null)
-                            .load(repositoryFile.openInputStream(), repositoryFile);
-                    if (repo != null) {
-                        return new ZipConfigDto(repo);
-                    }
-                } catch (IOException ignore) {
-                }
+                IZipConfig repo = loadExisting(repositoryFile);
+                if (repo != null) return repo;
             }
+        }
+        return null;
+    }
+
+    protected static IZipConfig loadExisting(IFile repositoryFile) {
+        try {
+            IZipConfig repo = new ZipConfigRepository(null)
+                    .load(repositoryFile.openInputStream(), repositoryFile);
+            if (repo != null) {
+                return new ZipConfigDto(repo);
+            }
+        } catch (IOException ignore) {
+            // file not found or no permission
+            logError(repositoryFile, ignore, "getZipConfigOrNull", null);
         }
         return null;
     }
@@ -119,6 +127,14 @@ public class ZipConfigRepository implements IZipConfig {
         return data.getProperty(key);
     }
 
+    private static void logError(IFile configFile, IOException ex, String dbgContext, Object owner) {
+        if (LibZipGlobal.debugEnabled) {
+            logger.warn(ZipConfigRepository.class.getSimpleName() + "." +
+                    dbgContext +
+                    "(" + configFile + ") failed for " + owner, ex);
+        }
+    }
+
     public boolean save() {
         IFile configFile = getZipConfigFile();
 
@@ -130,9 +146,7 @@ public class ZipConfigRepository implements IZipConfig {
                 return true;
             } catch (IOException ex) {
                 // file not found or no permission
-                if (LibZipGlobal.debugEnabled) {
-                    logger.warn(ex.getClass().getSimpleName() + ".saveTo(" + configFile + ") failed ", ex);
-                }
+                logError(configFile, ex, "saveTo", this);
             } finally {
                 FileUtils.close(out, configFile);
             }
@@ -143,5 +157,10 @@ public class ZipConfigRepository implements IZipConfig {
     public IFile getZipConfigFile() {
         final String zipName = this.getZipName();
         return getZipConfigFile(zipName);
+    }
+
+    @Override
+    public String toString() {
+        return ZipConfigDto.toString(this);
     }
 }

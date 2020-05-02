@@ -38,5 +38,8 @@ public class ZipConfigDtoTest {
 
         String result = ZipConfigDto.getZipFileName(config, backupEndDate);
         Assert.assertEquals("myResultFile.20171206-235959.20191224-153259.zip", result);
+
+        // increase code coverage
+        Assert.assertNotNull(config.toString());
     }
 }
