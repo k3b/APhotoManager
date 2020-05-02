@@ -27,6 +27,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import de.k3b.io.FileUtils;
+
 /**
  * Loads csv content into tags-db
  *
@@ -41,6 +43,7 @@ abstract public class CsvLoader<T extends CsvItem> {
         while (iter.hasNext()) {
             onNextItem(iter.next(), iter.getLineNumner(), iter.getRecordNumber());
         }
+        FileUtils.close(iter, null);
     }
 
     protected void onNextItem(T next, int lineNumber, int recordNumber) {
