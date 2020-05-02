@@ -19,10 +19,8 @@
 
 package de.k3b.io.collections;
 
-import java.io.File;
 import java.util.Date;
 
-import de.k3b.io.FileFacade;
 import de.k3b.io.FileProcessor;
 import de.k3b.io.IFile;
 import de.k3b.io.IFileNameProcessor;
@@ -34,10 +32,6 @@ import de.k3b.io.IFileNameProcessor;
 public class DestDirFileNameProcessor  extends FileProcessor implements IFileNameProcessor {
     private final IFile destDirFolder;
     private final boolean doNotRenameIfSourceInDestFolder;
-
-    public DestDirFileNameProcessor(File destDirFolder, boolean doNotRenameIfSourceInDestFolder) {
-        this(FileFacade.convert("DestDirFileNameProcessor()", destDirFolder), doNotRenameIfSourceInDestFolder);
-    }
 
     public DestDirFileNameProcessor(IFile destDirFolder, boolean doNotRenameIfSourceInDestFolder) {
         this.destDirFolder = destDirFolder;

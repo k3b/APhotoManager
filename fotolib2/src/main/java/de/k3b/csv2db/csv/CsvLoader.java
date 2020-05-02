@@ -22,6 +22,7 @@ package de.k3b.csv2db.csv;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -33,6 +34,8 @@ import java.util.List;
  */
 abstract public class CsvLoader<T extends CsvItem> {
     private boolean mNotCanceled = true;
+    private ArrayList<String> errors = null;
+
     public void load(Reader reader, T item) {
         CsvItemIterator<T> iter = new CsvItemIterator<T>(reader, item);
         while (iter.hasNext()) {
@@ -40,10 +43,29 @@ abstract public class CsvLoader<T extends CsvItem> {
         }
     }
 
-    abstract protected void onNextItem(T next, int lineNumber, int recordNumber);
+    protected void onNextItem(T next, int lineNumber, int recordNumber) {
+        if (next != null) {
+            if (next.getLastErrorColumnNumber() != -1) {
+                addError("[line:" + lineNumber +
+                        ", row:" + recordNumber +
+                        ", col:" + next.getLastErrorColumnNumber() +
+                        "(" + next.getColumnName(next.getLastErrorColumnNumber()) +
+                        ")]:" + next.getLastErrorText());
+            }
+        }
+    }
+
+    private void addError(String message) {
+        if (errors == null) errors = new ArrayList<String>();
+        errors.add(message);
+    }
 
     public void cancel() {
         mNotCanceled = false;
+    }
+
+    public ArrayList<String> getErrors() {
+        return errors;
     }
 
     protected class CsvItemIterator<T extends CsvItem> implements Iterator<T>, Closeable {

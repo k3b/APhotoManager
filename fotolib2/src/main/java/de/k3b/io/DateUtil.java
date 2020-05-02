@@ -38,6 +38,8 @@ public class DateUtil {
     public static final DateFormat IsoDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
     public static final DateFormat IsoDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     public static final DateFormat IsoDateFormat2 = new SimpleDateFormat("yyyyMMdd", Locale.US);
+    // Date format used by exiftool
+    public static final DateFormat ExifDateTimeFormat = new SimpleDateFormat("yyyy:MM:dd' 'HH:mm:ss", Locale.US);
 
     public static final TimeZone UTC = TimeZone.getTimeZone("UTC");
 
@@ -45,6 +47,7 @@ public class DateUtil {
         DateUtil.IsoDateTimeFormat.setTimeZone(UTC);
         DateUtil.IsoDateFormat.setTimeZone(UTC);
         DateUtil.IsoDateFormat2.setTimeZone(UTC);
+        DateUtil.ExifDateTimeFormat.setTimeZone(UTC);
         TimeZone.setDefault(UTC);
     }
 
@@ -52,7 +55,7 @@ public class DateUtil {
         if (dateString == null) return null;
         Date result = IsoDateTimeParser.parse(dateString);
         if (result == null) {
-            result = parseDateTime(dateString, IsoDateTimeFormat, IsoDateFormat, IsoDateFormat2);
+            result = parseDateTime(dateString, IsoDateTimeFormat, ExifDateTimeFormat, IsoDateFormat, IsoDateFormat2);
         }
         return result;
     }

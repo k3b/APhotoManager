@@ -34,7 +34,7 @@ import java.util.Vector;
  */
 public class CsvReader implements Closeable {
 	/** the first occurence in the first line of one othe these chars will become the {@link #fieldDelimiter} */
-	private static final String POSSIBLE_DELIMITER_CHARS = ",;\t";
+	protected static final String POSSIBLE_DELIMITER_CHARS = ",;\t";
 
 	public static final char FIELDLEN_DELIMITER = ':';
 	private static final char CHAR_IGNORE = '\r';

@@ -30,7 +30,6 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.File;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.Date;
@@ -41,7 +40,9 @@ import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.io.AndroidFileCommands;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.csv2db.csv.CsvLoader;
+import de.k3b.io.FileFacade;
 import de.k3b.io.FileUtils;
+import de.k3b.io.IFile;
 import de.k3b.io.VISIBILITY;
 import de.k3b.media.PhotoPropertiesCsvItem;
 import de.k3b.media.PhotoPropertiesUtil;
@@ -138,12 +139,11 @@ public class PhotoPropertiesMediaDBCsvImportActivity extends Activity {
         }
 
         protected String processUri(Uri uri) {
-            File file = IntentUtil.getFile(uri);
-            if (file != null) {
+            IFile csvRootDir = FileFacade.convert(this.getClass().getSimpleName(), IntentUtil.getFile(uri)).getCanonicalFile();
+            if (csvRootDir != null) {
                 Reader reader = null;
                 try {
-                    File csvRootDir = FileUtils.tryGetCanonicalFile(file.getParentFile(), null);
-                    if ((csvRootDir != null) && file.getName().endsWith(".csv")) {
+                    if ((csvRootDir != null) && csvRootDir.getName().endsWith(".csv")) {
                         Log.i(Global.LOG_CONTEXT, DBG_CONTEXT + "start form " + uri.toString());
 
                         reader = new InputStreamReader(getContentResolver().openInputStream(uri));
@@ -234,13 +234,13 @@ public class PhotoPropertiesMediaDBCsvImportActivity extends Activity {
             /**
              * path-s in csv are relative to mCsvRootDir
              */
-            private final File mCsvRootDir;
+            private final IFile mCsvRootDir;
 
             private ContentValues mDbValues = new ContentValues();
             private PhotoPropertiesMediaDBContentValues mMediaValueAdapter = new PhotoPropertiesMediaDBContentValues();
             private Tag mImportRoot = null;
 
-            public MediaCsvLoader(File csvRootDir) {
+            public MediaCsvLoader(IFile csvRootDir) {
                 mCsvRootDir = csvRootDir;
             }
 
@@ -255,11 +255,15 @@ public class PhotoPropertiesMediaDBCsvImportActivity extends Activity {
                         Date fileModifyDate = next.getFileModifyDate();
                         long fileModifyDateMilliSecs = (fileModifyDate != null) ? fileModifyDate.getTime() : TagSql.EXT_LAST_EXT_SCAN_NO_XMP_IN_CSV;
 
-                        String canonicalPath = FileUtils.tryGetCanonicalPath(new File(mCsvRootDir, path), null);
+                        String canonicalPath = mCsvRootDir.create(path).getCanonicalPath();
                         updateDB("MediaCsvLoader.onNextItem", canonicalPath, fileModifyDateMilliSecs, mDbValues);
                         TagRepository.getInstance().includeTagNamesIfNotFound(mMediaValueAdapter.getTags());
+                        if (next.getLastErrorColumnNumber() != -1) {
+                            publishProgress("err " + next.getLastErrorText());
+                        }
                     }
                 }
+                super.onNextItem(next, lineNumber, recordNumber);
             }
 
             /** get or create parent-tag where alle imports are appendend as children */

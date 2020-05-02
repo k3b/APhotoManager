@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.util.Date;
 
 import de.k3b.csv2db.csv.CsvReader;
 import de.k3b.io.DateUtil;
@@ -54,24 +55,30 @@ public class TestUtil {
 		return new CsvReader(TestUtil.createReader(csvSrc));
 	}
 
-	public static PhotoPropertiesDTO createTestMediaDTO(int id) {
+    /**
+     * all properties of {@link de.k3b.media.IPhotoProperties} get a value that depends on id
+     */
+    public static PhotoPropertiesDTO createTestMediaDTO(int id) {
         PhotoPropertiesDTO result = new PhotoPropertiesDTO();
-
         result.setPath("Path" + id);
         result.setTitle("Title" + id);
         result.setDescription("Description" + id);
-        String month = get2DigitString(id, 12);
-        String day = get2DigitString(id, 30);
-        String hour = get2DigitString(id, 24);
-        String minute = get2DigitString(id, 60);
-        result.setDateTimeTaken(DateUtil.parseIsoDate("" + (2000+ id) + "-" + month + "-" + day
-                + "T" + hour + ":" + minute + ":" + minute));
+        result.setDateTimeTaken(createTestDate(id));
         result.setLatitudeLongitude(50 + id + (0.01 * id), 10 + id + (0.01 * id));
         result.setTags(TagConverter.fromString("tagA" + id + TagConverter.TAG_DB_DELIMITER + "tagB" + id));
         result.setRating(Integer.valueOf(id % 6));
 
         result.setVisibility(VISIBILITY.PUBLIC);
         return result;
+    }
+
+    public static Date createTestDate(int id) {
+        String month = get2DigitString(id, 12);
+        String day = get2DigitString(id, 30);
+        String hour = get2DigitString(id, 24);
+        String minute = get2DigitString(id, 60);
+        return DateUtil.parseIsoDate("" + (2000 + id) + "-" + month + "-" + day
+                + "T" + hour + ":" + minute + ":" + minute);
     }
 
     private static String get2DigitString(int value, int div) {

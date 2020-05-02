@@ -24,6 +24,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -35,7 +36,6 @@ import de.k3b.io.FileNameUtil;
 /**
  * Created by k3b on 11.10.2016.
  */
-
 public class MediaCsvTests {
 
     public static String createTestCsv(int... ids) {
@@ -45,37 +45,6 @@ public class MediaCsvTests {
             saver.save(item);
         }
         return saver.toString();
-    }
-
-    private static class Sut extends CsvLoader<PhotoPropertiesCsvItem> {
-        private ArrayList<IPhotoProperties> result = new ArrayList<IPhotoProperties>();
-
-        @Override
-        protected void onNextItem(PhotoPropertiesCsvItem next, int lineNumber, int recordNumber) {
-            if (next != null) {
-                result.add(new PhotoPropertiesDTO(next));
-            }
-        }
-
-        protected List<IPhotoProperties> load(int... ids) {
-            String data = createTestCsv(ids);
-            return load(data);
-        }
-
-        protected List<IPhotoProperties> load(String data) {
-            result.clear();
-            super.load(TestUtil.createReader(data), new PhotoPropertiesCsvItem());
-            return result;
-        }
-    }
-
-    @Test
-    public void shouldLoad1() {
-        TimeZone.setDefault(DateUtil.UTC);
-        Sut sut = new Sut();
-        List<IPhotoProperties> actual = sut.load(1);
-        PhotoPropertiesDTO expected = TestUtil.createTestMediaDTO(1);
-        Assert.assertEquals(expected.toString(), actual.get(0).toString());
     }
 
     @Test
@@ -90,6 +59,45 @@ public class MediaCsvTests {
         List<IPhotoProperties> actual = sut.load(csv);
         Assert.assertEquals("#", 5, actual.size());
         Assert.assertEquals("unquote", "#5", actual.get(4).getTitle());
+        Assert.assertEquals(null, sut.getErrors());
+    }
+
+    @Test
+    public void shouldLoad1() {
+        TimeZone.setDefault(DateUtil.UTC);
+        Sut sut = new Sut();
+        List<IPhotoProperties> actual = sut.load(1);
+        PhotoPropertiesDTO expected = TestUtil.createTestMediaDTO(1);
+        Assert.assertEquals(expected.toString(), actual.get(0).toString());
+    }
+
+    @Test
+    public void shouldLoadDateAsIsoAndAsMillisecs() {
+        final String testDate = "2002-03-05";
+        final Date date = DateUtil.parseIsoDate(testDate);
+        String csv = "Description;CreateDate;c\n"
+                + "iso-date;" + testDate + "\n"
+                + "millisecs-date;" + date.getTime() + "\n"
+                + "secs-date;" + date.getTime() / 1000 + "\n";
+        Sut sut = new Sut();
+        List<IPhotoProperties> actual = sut.load(csv);
+        for (IPhotoProperties item : actual) {
+            Assert.assertEquals(item.getDescription(), date, item.getDateTimeTaken());
+        }
+        Assert.assertEquals("#", 3, actual.size());
+    }
+
+    @Test
+    public void shouldLoadIllegalDateAsNull() {
+        String csv = "Description;CreateDate;c\n"
+                + "not a date;This is not a date\n";
+        Sut sut = new Sut();
+        List<IPhotoProperties> actual = sut.load(csv);
+        for (IPhotoProperties item : actual) {
+            Assert.assertEquals(item.getDescription(), null, item.getDateTimeTaken());
+        }
+        Assert.assertEquals("#", 1, actual.size());
+        Assert.assertNotNull(sut.getErrors());
     }
 
     @Test
@@ -102,7 +110,30 @@ public class MediaCsvTests {
         for(IPhotoProperties item : actual) {
             System.out.println(item.toString());
         }
+        Assert.assertEquals(null, sut.getErrors());
+    }
 
+    private static class Sut extends CsvLoader<PhotoPropertiesCsvItem> {
+        private ArrayList<IPhotoProperties> result = new ArrayList<IPhotoProperties>();
+
+        @Override
+        protected void onNextItem(PhotoPropertiesCsvItem next, int lineNumber, int recordNumber) {
+            if (next != null) {
+                result.add(new PhotoPropertiesDTO(next));
+            }
+            super.onNextItem(next, lineNumber, recordNumber);
+        }
+
+        protected List<IPhotoProperties> load(int... ids) {
+            String data = createTestCsv(ids);
+            return load(data);
+        }
+
+        protected List<IPhotoProperties> load(String data) {
+            result.clear();
+            super.load(TestUtil.createReader(data), new PhotoPropertiesCsvItem());
+            return result;
+        }
     }
 
 

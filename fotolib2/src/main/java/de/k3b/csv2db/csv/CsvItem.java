@@ -19,9 +19,13 @@
 
 package de.k3b.csv2db.csv;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Date;
 import java.util.List;
 
+import de.k3b.LibGlobal;
 import de.k3b.io.DateUtil;
 
 /**
@@ -29,6 +33,8 @@ import de.k3b.io.DateUtil;
  * Created by k3b on 17.10.2016.
  */
 abstract public class CsvItem {
+    private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
+
     public static final char DEFAULT_CHAR_LINE_DELIMITER = '\n';
     public static final String DEFAULT_CSV_FIELD_DELIMITER = ",";
     public static final char CHAR_FIELD_SURROUNDER = '\"';
@@ -41,6 +47,8 @@ abstract public class CsvItem {
 
     private String mFieldDelimiter = DEFAULT_CSV_FIELD_DELIMITER;
     private String mCsvSpecialChars = null;
+    private String lastErrorText = null;
+    private int lastErrorColumnNumber = -1;
 
     public void setHeader(List<String> header) {
         this.header = header;
@@ -52,6 +60,8 @@ abstract public class CsvItem {
                 mCurrentLineFieldValues[i] = null;
             }
         }
+        lastErrorText = null;
+        lastErrorColumnNumber = -1;
     }
 
     public boolean isEmpty() {
@@ -81,11 +91,44 @@ abstract public class CsvItem {
             try {
                 return Integer.valueOf(stringValue);
             } catch (NumberFormatException ex) {
-
+                final String errorContext = debugContext + "getInteger " + ex.getMessage();
+                logInfo(errorContext, columnNumber, ex);
             }
         }
         return null;
     }
+
+    protected Long getLong(String debugContext, int columnNumber) {
+        String stringValue = getString(debugContext, columnNumber);
+        if ((stringValue != null) && (stringValue.length() > 0)) {
+            try {
+                return Long.valueOf(stringValue);
+            } catch (NumberFormatException ex) {
+                logInfo(debugContext + " getLong ", columnNumber, ex);
+            }
+        }
+        return null;
+    }
+
+    private void setLastErrorInfo(int errorColumnNumber, String errorText) {
+        this.lastErrorColumnNumber = errorColumnNumber;
+        this.lastErrorText = errorText;
+    }
+
+    private void logInfo(String debugContext, int columnNumber, Exception ex) {
+        final String msg = getClass().getSimpleName() + ":" + debugContext + " (columnNumber:" + columnNumber +
+                "=" + getColumnName(columnNumber) + ") ";
+        logger.info(msg, ex);
+        if (ex != null) {
+            setLastErrorInfo(columnNumber, msg + ex.getMessage());
+        }
+    }
+
+    public String getColumnName(int columnNumber) {
+        if ((header != null) && !isInvalidIndex(columnNumber)) return header.get(columnNumber);
+        return "";
+    }
+
 
     // last wins
     protected void setDate(Date value, int... columnNumbers) {
@@ -94,24 +137,34 @@ abstract public class CsvItem {
         }
     }
 
-    // first wins
+    /**
+     * first column with content wins. Format either Date (in iso format) or as number (seconds since 0 or millisecs since 1970)
+     */
     protected Date getDate(String debugContext, int... columnNumbers) {
         Date result = null;
 
         for (int columnNumber : columnNumbers) {
             if (columnNumber >= 0) {
                 // if date as string
-                String stringValue = getString(null, columnNumber);
-                result = DateUtil.parseIsoDate(stringValue);
+                String stringValue = getString(debugContext, columnNumber);
+                if (stringValue != null) {
+                    result = DateUtil.parseIsoDate(stringValue);
 
-                if (result == null) {
-                    // if date as integer
-                    Integer intValue = getInteger(null, columnNumber);
-                    if ((intValue != null) && (intValue.intValue() != 0)) {
-                        try {
-                            result = new Date(Long.valueOf(intValue));
-                        } catch (NumberFormatException ex) {
-
+                    // An integer value may have been pared to a valid but inplausible date
+                    if (!isPlausible(result, columnNumber, debugContext, stringValue)) {
+                        result = null;
+                        Long longValue = getLong(debugContext, columnNumber);
+                        if ((longValue != null) && (longValue.intValue() != 0)) {
+                            // try Date as secs since 1970 (unix format)
+                            result = new Date(longValue * 1000);
+                            if (!isPlausible(result, columnNumber, debugContext, stringValue)) {
+                                result = null;
+                                // if date as millisecs (java date)
+                                result = new Date(longValue);
+                                if (!isPlausible(result, columnNumber, debugContext, stringValue)) {
+                                    setLastErrorInfo(columnNumber, "not a date:" + stringValue);
+                                }
+                            }
                         }
                     }
                 }
@@ -119,6 +172,17 @@ abstract public class CsvItem {
             }
         }
         return result;
+    }
+
+    private boolean isPlausible(Date date, int columnNumber, String debugContext, String stringValue) {
+        if (date == null) return false;
+        int year = date.getYear();
+
+        final boolean isPlausible = year >= 0 && year <= 2200;
+        if (!isPlausible && LibGlobal.debugEnabled) {
+            logInfo(debugContext + " : discarding non plausible Date " + DateUtil.toIsoDateTimeString(date) + " from " + stringValue, columnNumber, null);
+        }
+        return isPlausible;
     }
 
     public void setData(String[] line) {
@@ -174,5 +238,13 @@ abstract public class CsvItem {
     public void setFieldDelimiter(String fieldDelimiter) {
         this.mFieldDelimiter = fieldDelimiter;
         this.mCsvSpecialChars = fieldDelimiter + "\r" + DEFAULT_CHAR_LINE_DELIMITER + CHAR_FIELD_SURROUNDER;
+    }
+
+    public String getLastErrorText() {
+        return lastErrorText;
+    }
+
+    public int getLastErrorColumnNumber() {
+        return lastErrorColumnNumber;
     }
 }
