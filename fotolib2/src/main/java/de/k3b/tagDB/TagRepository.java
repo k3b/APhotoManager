@@ -64,9 +64,19 @@ public class TagRepository {
     /** where new, unknown items are added to */
     private Tag mImportRoot = null;
 
-    /** Connect repository to a {@link File}. */
-    public TagRepository(IFile file) {
+    /**
+     * used by unittests to avoid initial loading.
+     */
+    protected TagRepository(IFile file, List<Tag> itemList) {
         this.mFile = file;
+        this.mItemList = itemList;
+    }
+
+    /**
+     * Connect repository to a {@link File}.
+     */
+    public TagRepository(IFile file) {
+        this(file, null);
     }
 
     public static TagRepository getInstance() {
@@ -288,7 +298,8 @@ public class TagRepository {
                 logger.debug(dbg_context + "save(): no items for " + this.mFile);
             }
         } catch (IOException e) {
-            logError("save",e);
+            logError("save", e);
+            return null;
         }
         return this;
     }

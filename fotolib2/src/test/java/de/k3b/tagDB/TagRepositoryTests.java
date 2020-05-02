@@ -22,14 +22,17 @@ package de.k3b.tagDB;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileNotFoundException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.k3b.LibGlobal;
 import de.k3b.TestUtil;
 import de.k3b.io.IFile;
 import de.k3b.io.ListUtils;
@@ -47,6 +50,7 @@ public class TagRepositoryTests {
     @BeforeClass
     public static void initDirectories() {
         OUTDIR.mkdirs();
+        LibGlobal.debugEnabled = false;
     }
 
     private Tag createItem(int id) {
@@ -98,6 +102,21 @@ public class TagRepositoryTests {
         List items = new TagRepository(this.repositoryFile).load();
 
         Assert.assertEquals(3, items.size());
+    }
+
+    @Test
+    public void saveWithError() throws FileNotFoundException {
+        final IFile fileUnwritable = Mockito.mock(IFile.class);
+        Mockito.when(fileUnwritable.openOutputStream()).thenThrow(new FileNotFoundException("junit"));
+        Mockito.when(fileUnwritable.exists()).thenReturn(true);
+
+        List<Tag> existingItems = new ArrayList<>();
+        TagRepository.includePaths(existingItems, null, null, "a");
+
+        TagRepository sut = new TagRepository(fileUnwritable, existingItems);
+
+        LibGlobal.debugEnabled = true;
+        Assert.assertNull(sut.save());
     }
 
     @Test
