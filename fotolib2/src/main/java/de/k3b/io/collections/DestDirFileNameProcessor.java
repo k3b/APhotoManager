@@ -22,8 +22,8 @@ package de.k3b.io.collections;
 import java.util.Date;
 
 import de.k3b.io.FileProcessor;
-import de.k3b.io.IFile;
 import de.k3b.io.IFileNameProcessor;
+import de.k3b.io.filefacade.IFile;
 
 /**
  * Created by k3b on 17.10.2017.

@@ -30,7 +30,7 @@ import java.io.IOException;
 
 import de.k3b.LibGlobal;
 import de.k3b.TestUtil;
-import de.k3b.io.IFile;
+import de.k3b.io.filefacade.IFile;
 
 public class ZipConfigRepositoryTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZipConfigRepositoryTest.class);

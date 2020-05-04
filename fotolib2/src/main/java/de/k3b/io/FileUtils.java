@@ -36,6 +36,8 @@ import java.io.OutputStream;
 import java.util.regex.Pattern;
 
 import de.k3b.LibGlobal;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 
 
 /**

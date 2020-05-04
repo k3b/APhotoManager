@@ -17,13 +17,25 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
-package de.k3b.media;
+package de.k3b.io.filefacade;
 
-import de.k3b.io.filefacade.IFile;
+import org.junit.Assert;
+import org.junit.Test;
 
-/**
- * A Class that is capable to read {@link IPhotoProperties} from an {@link IFile}
- */
-public interface IPhotoPropertyFileReader {
-    IPhotoProperties load(IFile jpgFile, IPhotoProperties childProperties, String dbg_context);
+import java.io.IOException;
+
+import de.k3b.io.FileUtils;
+
+public class StringFileFacadeTest {
+
+    @Test
+    public void copyInputStringToOutputString() throws IOException {
+        final String message = "hello world\n";
+        StringFileFacade in = new StringFileFacade().setInputString(message);
+        StringFileFacade out = new StringFileFacade();
+
+        FileUtils.copy(in.openInputStream(), out.openOutputStream());
+
+        Assert.assertEquals(message, out.getOutputString());
+    }
 }

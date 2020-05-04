@@ -1,9 +1,9 @@
 package de.k3b.media;
 
-import de.k3b.io.FileFacade;
-import de.k3b.io.IFile;
 import de.k3b.io.IItemSaver;
 import de.k3b.io.XmpFile;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 
 /** Translates every affected file (jpg/xmp) of {@link #save(IPhotoProperties)} to  fileSaver.save(File) */
 public class PhotoProperties2ExistingFileSaver

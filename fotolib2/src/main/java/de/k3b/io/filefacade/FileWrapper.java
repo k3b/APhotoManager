@@ -1,4 +1,4 @@
-package de.k3b.io;
+package de.k3b.io.filefacade;
 
 import java.io.File;
 import java.io.FileNotFoundException;

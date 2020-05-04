@@ -19,8 +19,10 @@
  */
 package de.k3b.media;
 
+import de.k3b.io.filefacade.IFile;
+
 /**
- * A Class that is capable to write {@link IPhotoProperties} to an {@link de.k3b.io.IFile}
+ * A Class that is capable to write {@link IPhotoProperties} to an {@link IFile}
  */
 public interface IPhotoPropertyFileWriter {
 }

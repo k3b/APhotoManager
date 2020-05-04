@@ -29,10 +29,10 @@ import java.util.List;
 import de.k3b.LibGlobal;
 import de.k3b.io.DateUtil;
 import de.k3b.io.DirectoryFormatter;
-import de.k3b.io.FileProcessor;
-import de.k3b.io.IFile;
+import de.k3b.io.IFileCommandLogger;
 import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
+import de.k3b.io.filefacade.IFile;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.MediaFormatter.FieldID;
 import de.k3b.tagDB.TagConverter;
@@ -44,7 +44,7 @@ import de.k3b.tagDB.TagProcessor;
  * Created by k3b on 08.07.2017.
  */
 public class TransactionLoggerBase implements Closeable {
-    private FileProcessor execLog;
+    private IFileCommandLogger execLog;
 
     // true if this/super created the logger.
     protected boolean mustCloseLog = false;
@@ -53,7 +53,7 @@ public class TransactionLoggerBase implements Closeable {
     protected IFile path;
     protected final long now;
 
-    public TransactionLoggerBase(FileProcessor execLog, long now) {
+    public TransactionLoggerBase(IFileCommandLogger execLog, long now) {
         this.execLog = execLog;
         this.now = now;
     }
@@ -66,8 +66,8 @@ public class TransactionLoggerBase implements Closeable {
 
     @Override
     public void close() throws IOException {
-        if (mustCloseLog) {
-            execLog.closeAll();
+        if (mustCloseLog && execLog != null) {
+            execLog.close();
         }
         execLog = null;
     }

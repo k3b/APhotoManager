@@ -33,9 +33,9 @@ import java.io.OutputStream;
 
 import de.k3b.android.widget.FilePermissionActivity;
 import de.k3b.io.Converter;
-import de.k3b.io.FileFacade;
 import de.k3b.io.FileUtils;
-import de.k3b.io.IFile;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 
 /**
  * de.k3b.android.io.AndroidFileFacade havs the same methods as java.io.File

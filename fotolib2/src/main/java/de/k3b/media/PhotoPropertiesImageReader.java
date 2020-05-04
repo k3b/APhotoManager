@@ -44,10 +44,10 @@ import java.util.List;
 import de.k3b.LibGlobal;
 import de.k3b.io.DateUtil;
 import de.k3b.io.FileUtils;
-import de.k3b.io.IFile;
 import de.k3b.io.ListUtils;
 import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
+import de.k3b.io.filefacade.IFile;
 
 /**
  * com.drewnoakes:metadata-extractor based reader for image meta data files

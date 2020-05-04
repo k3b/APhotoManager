@@ -31,13 +31,13 @@ import java.util.EnumSet;
 import java.util.List;
 
 import de.k3b.LibGlobal;
-import de.k3b.io.FileFacade;
 import de.k3b.io.FileUtils;
 import de.k3b.io.GeoUtil;
-import de.k3b.io.IFile;
 import de.k3b.io.ListUtils;
 import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 import de.k3b.media.MediaFormatter.FieldID;
 /**
  * Created by k3b on 10.10.2016.

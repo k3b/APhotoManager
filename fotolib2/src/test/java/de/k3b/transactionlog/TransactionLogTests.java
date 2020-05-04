@@ -26,6 +26,19 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.List;
+
+import de.k3b.LibGlobal;
+import de.k3b.TestUtil;
+import de.k3b.io.DateUtil;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.FileFacadeLogger;
+import de.k3b.io.filefacade.IFile;
+import de.k3b.io.filefacade.StringFileFacade;
+import de.k3b.media.MediaFormatter;
+import de.k3b.media.PhotoPropertiesDTO;
 
 /**
  * Analyses TransactionLog to generate move/copy/delete script and update-dtos.
@@ -33,9 +46,9 @@ import java.util.ArrayList;
  * Created by k3b on 21.02.2017.
  */
 
-public class TransactionLogParserTests {
+public class TransactionLogTests {
     @Test
-    public void shouldFindDeleted() throws IOException {
+    public void parseShouldFindDeleted() throws IOException {
         ArrayList<IMediaTransactionLogEntry> items = new ArrayList<IMediaTransactionLogEntry>();
         addItems(items, "a.jpg"
                 , MediaTransactionLogEntryType.GPS.toString(),"gps"
@@ -48,6 +61,38 @@ public class TransactionLogParserTests {
         Assert.assertEquals("data", null, data);
         Assert.assertEquals("bat", "call apmDelete.cmd 'a.jpg'", stringWriter.toString().replace("\"","'").trim());
         fileUpdateBatch.close();
+    }
+
+    // TODO @Test
+    public void shouldWrite() throws IOException {
+        LibGlobal.debugEnabledJpgMetaIo = true;
+        StringFileFacade out = new StringFileFacade();
+        FileFacadeLogger logger = new FileFacadeLogger(out);
+
+        //logger.log(message);
+        // logger.close();
+
+        final int id = 1;
+
+        final long now = DateUtil.parseIsoDate("20071224T12:39").getTime();
+        final TransactionLoggerBase transactionLogger = new TransactionLoggerBase(logger, now);
+        log(transactionLogger, id);
+        transactionLogger.close();
+
+        Assert.assertEquals("", out.getOutputString());
+    }
+
+    protected void log(TransactionLoggerBase transactionLogger, int id) {
+        List<String> oldTags = Arrays.asList("oldA" + id, "oldB" + id);
+        final PhotoPropertiesDTO testMedia = TestUtil.createTestMediaDTO(id);
+        final IFile testFile = FileFacade.convert("junit", testMedia.getPath());
+        transactionLogger.set(id, testFile);
+        transactionLogger.addChanges(testMedia, EnumSet.allOf(MediaFormatter.FieldID.class), oldTags);
+        transactionLogger.addChangesCopyMove(false, FileFacade.convert("junit", testMedia.path + ".newCopy.jpg"), "junit");
+        transactionLogger.addChangesCopyMove(true, FileFacade.convert("junit", testMedia.path + ".newMove.jpg"), "junit");
+        transactionLogger.addChanges(MediaTransactionLogEntryType.DELETE, null, true);
+        transactionLogger.set(id + 100, testFile.getParentFile());
+        transactionLogger.addChanges(MediaTransactionLogEntryType.MOVE_DIR, "/path/to/other/dir", true);
     }
 
     private long currentMediaID = 0;

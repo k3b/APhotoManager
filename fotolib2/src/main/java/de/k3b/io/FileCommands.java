@@ -30,6 +30,8 @@ import java.util.Date;
 import de.k3b.LibGlobal;
 import de.k3b.io.collections.DestDirFileNameProcessor;
 import de.k3b.io.collections.SelectedFiles;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.PhotoPropertiesBulkUpdateService;
 import de.k3b.media.PhotoPropertiesDiffCopy;

@@ -27,6 +27,8 @@ import java.io.OutputStream;
 import java.io.Serializable;
 
 import de.k3b.LibGlobal;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.PhotoPropertiesAsString;
 

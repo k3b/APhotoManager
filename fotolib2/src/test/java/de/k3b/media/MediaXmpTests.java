@@ -33,7 +33,7 @@ import java.util.TimeZone;
 
 import de.k3b.LibGlobal;
 import de.k3b.TestUtil;
-import de.k3b.io.IFile;
+import de.k3b.io.filefacade.IFile;
 
 /**
  * Created by k3b on 24.10.2016.

@@ -24,6 +24,9 @@ import org.junit.Test;
 import java.io.File;
 import java.util.Date;
 
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
+
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;

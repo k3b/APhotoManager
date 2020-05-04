@@ -43,8 +43,8 @@ import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.database.SqlTemplateEngine;
 import de.k3b.io.FileUtils;
-import de.k3b.io.IFile;
 import de.k3b.io.Properties;
+import de.k3b.io.filefacade.IFile;
 
 /**
  * #70: Handles optional extra context specific detail text that can be displayed in

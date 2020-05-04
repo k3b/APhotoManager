@@ -49,9 +49,9 @@ import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.k3b.io.FileFacade;
 import de.k3b.io.FileUtils;
-import de.k3b.io.IFile;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 
 /**
  * This is a class for reading and writing Exif tags in a JPEG file.

@@ -19,10 +19,12 @@
 
 package de.k3b.io;
 
+import java.io.Closeable;
+
 /**
  * Created by k3b on 09.10.2017.
  */
 
-interface IFileCommandLogger {
+public interface IFileCommandLogger extends Closeable {
     IFileCommandLogger log(Object... messages);
 }

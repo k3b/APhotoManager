@@ -25,7 +25,7 @@ import android.content.Context;
 import java.io.IOException;
 
 import de.k3b.geo.api.IGeoPointInfo;
-import de.k3b.io.FileFacade;
+import de.k3b.io.filefacade.FileFacade;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.PhotoPropertiesImageReader;
 

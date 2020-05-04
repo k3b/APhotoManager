@@ -78,14 +78,14 @@ import de.k3b.android.widget.FilePermissionActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.io.GeoUri;
-import de.k3b.io.FileFacade;
 import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
-import de.k3b.io.IFile;
 import de.k3b.io.StringUtils;
 import de.k3b.io.XmpFile;
 import de.k3b.io.collections.SelectedFiles;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 import de.k3b.media.PhotoPropertiesUtil;
 import de.k3b.tagDB.Tag;
 

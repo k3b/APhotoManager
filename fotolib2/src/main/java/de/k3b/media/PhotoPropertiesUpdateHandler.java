@@ -26,10 +26,10 @@ import java.io.IOException;
 import java.util.Date;
 
 import de.k3b.LibGlobal;
-import de.k3b.io.FileFacade;
 import de.k3b.io.FileUtils;
-import de.k3b.io.IFile;
 import de.k3b.io.XmpFile;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 
 /**
  * Represents content of exactly one jpg-exif-file with corresponding xmp-file that can be modified

@@ -47,7 +47,7 @@ import de.k3b.android.util.UserTheme;
 import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.LocalizedActivity;
-import de.k3b.io.FileFacade;
+import de.k3b.io.filefacade.FileFacade;
 import de.k3b.tagDB.TagRepository;
 import de.k3b.zip.LibZipGlobal;
 import io.github.lonamiwebs.stringlate.utilities.Api;

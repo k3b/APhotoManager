@@ -29,9 +29,9 @@ import java.util.Date;
 import de.k3b.LibGlobal;
 import de.k3b.io.DateUtil;
 import de.k3b.io.FileUtils;
-import de.k3b.io.IFile;
 import de.k3b.io.Properties;
 import de.k3b.io.StringUtils;
+import de.k3b.io.filefacade.IFile;
 
 /** Parameters that define a backup that can be persisted through a properties-file */
 public class ZipConfigRepository implements IZipConfig {

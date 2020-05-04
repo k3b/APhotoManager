@@ -35,11 +35,11 @@ import java.util.List;
 import java.util.TimeZone;
 
 import de.k3b.LibGlobal;
-import de.k3b.io.FileFacade;
-import de.k3b.io.IFile;
 import de.k3b.io.ListUtils;
 import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 import de.k3b.media.MediaFormatter.FieldID;
 /**
  * Thin Wrapper around Android-s ExifInterface to read/write exif data from jpg file

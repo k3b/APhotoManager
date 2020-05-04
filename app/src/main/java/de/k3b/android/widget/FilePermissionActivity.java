@@ -38,8 +38,8 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.io.AndroidFileFacade;
 import de.k3b.android.io.DocumentFileTranslator;
-import de.k3b.io.FileFacade;
 import de.k3b.io.FileNameUtil;
+import de.k3b.io.filefacade.FileFacade;
 
 /**
  * Manage permission

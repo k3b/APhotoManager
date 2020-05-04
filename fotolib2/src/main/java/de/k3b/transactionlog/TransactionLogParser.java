@@ -31,7 +31,6 @@ import de.k3b.media.PhotoPropertiesDTO;
  *
  * Created by k3b on 21.02.2017.
  */
-
 public class TransactionLogParser {
     private final Iterator<IMediaTransactionLogEntry> sortedTransactions;
     private final BufferedWriter fileUpdateBatch;

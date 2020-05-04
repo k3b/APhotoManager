@@ -19,6 +19,8 @@
 
 package de.k3b.io;
 
+import de.k3b.io.filefacade.IFile;
+
 /**
  * Created by k3b on 03.08.2017.
  */

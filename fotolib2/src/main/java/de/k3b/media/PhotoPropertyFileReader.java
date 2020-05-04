@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.k3b.LibGlobal;
-import de.k3b.io.IFile;
+import de.k3b.io.filefacade.IFile;
 
 /**
  * Facade to combine-loading jpg + xmp

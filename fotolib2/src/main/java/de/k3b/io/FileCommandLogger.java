@@ -24,6 +24,9 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Date;
 
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
+
 /**
  * Created by k3b on 09.10.2017.
  */
@@ -71,6 +74,11 @@ public class FileCommandLogger implements IFileCommandLogger {
         }
     }
 
+    @Override
+    public void close() throws IOException {
+        closeLogFile();
+    }
+
     public void closeAll() {
         closeLogFile();
     }
@@ -100,5 +108,4 @@ public class FileCommandLogger implements IFileCommandLogger {
         }
         return this;
     }
-
 }

@@ -30,9 +30,9 @@ import java.io.IOException;
 import java.util.List;
 
 import de.k3b.TestUtil;
-import de.k3b.io.IFile;
 import de.k3b.io.ListUtils;
 import de.k3b.io.VISIBILITY;
+import de.k3b.io.filefacade.IFile;
 
 public class PhotoPropertiesUtilTests {
     @Test

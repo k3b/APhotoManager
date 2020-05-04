@@ -29,8 +29,8 @@ import java.io.File;
 import java.util.Locale;
 
 import de.k3b.android.util.MenuUtils;
-import de.k3b.io.FileFacade;
-import de.k3b.io.IFile;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 
 /**
  * Global Settings used throughout the app.

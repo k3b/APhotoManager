@@ -27,6 +27,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import de.k3b.LibGlobal;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 
 /**
  * #93: rule based file renaming for same target directory.

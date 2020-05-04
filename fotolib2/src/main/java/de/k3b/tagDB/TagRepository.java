@@ -34,7 +34,7 @@ import java.util.Collections;
 import java.util.List;
 
 import de.k3b.LibGlobal;
-import de.k3b.io.IFile;
+import de.k3b.io.filefacade.IFile;
 
 /**
  * Persistence for all known tags.

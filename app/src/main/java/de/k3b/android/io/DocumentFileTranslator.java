@@ -34,7 +34,7 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.k3b.io.FileFacade;
+import de.k3b.io.filefacade.FileFacade;
 
 /**
  * Handles Translation from File to android specific DocumentFileUtils

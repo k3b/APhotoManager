@@ -20,8 +20,8 @@ package de.k3b;
 
 import java.io.IOException;
 
-import de.k3b.io.FileFacade;
-import de.k3b.io.IFile;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 import de.k3b.media.ExifInterfaceEx;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.MediaFormatter;

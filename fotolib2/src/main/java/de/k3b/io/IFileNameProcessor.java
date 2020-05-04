@@ -20,6 +20,8 @@ package de.k3b.io;
 
 import java.util.Date;
 
+import de.k3b.io.filefacade.IFile;
+
 /**
  * #93: rule based file renaming for same target directory.
  *

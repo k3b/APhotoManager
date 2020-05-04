@@ -27,6 +27,8 @@ import org.mockito.Mockito;
 import java.io.File;
 
 import de.k3b.io.collections.SelectedFiles;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 import de.k3b.transactionlog.MediaTransactionLogEntryType;
 
 import static org.mockito.Mockito.any;

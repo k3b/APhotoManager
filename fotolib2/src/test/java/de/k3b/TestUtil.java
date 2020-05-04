@@ -29,10 +29,10 @@ import java.util.Date;
 
 import de.k3b.csv2db.csv.CsvReader;
 import de.k3b.io.DateUtil;
-import de.k3b.io.FileFacade;
 import de.k3b.io.FileUtils;
-import de.k3b.io.IFile;
 import de.k3b.io.VISIBILITY;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 import de.k3b.media.PhotoPropertiesDTO;
 import de.k3b.media.PhotoPropertiesImageReaderIntegrationTests;
 import de.k3b.tagDB.TagConverter;
@@ -60,7 +60,7 @@ public class TestUtil {
      */
     public static PhotoPropertiesDTO createTestMediaDTO(int id) {
         PhotoPropertiesDTO result = new PhotoPropertiesDTO();
-        result.setPath("Path" + id);
+        result.setPath("/Path/to/photo/testimage_" + id + ".jpg");
         result.setTitle("Title" + id);
         result.setDescription("Description" + id);
         result.setDateTimeTaken(createTestDate(id));

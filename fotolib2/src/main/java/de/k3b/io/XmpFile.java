@@ -18,6 +18,10 @@
  */
 package de.k3b.io;
 
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.FileWrapper;
+import de.k3b.io.filefacade.IFile;
+
 /**
  *
  */

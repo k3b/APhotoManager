@@ -29,10 +29,10 @@ import java.util.EnumSet;
 import java.util.List;
 
 import de.k3b.LibGlobal;
-import de.k3b.io.FileFacade;
-import de.k3b.io.IFile;
 import de.k3b.io.VISIBILITY;
 import de.k3b.io.XmpFile;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 import de.k3b.transactionlog.TransactionLoggerBase;
 
 /**

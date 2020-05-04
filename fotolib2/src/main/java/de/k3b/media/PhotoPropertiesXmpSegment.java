@@ -33,11 +33,11 @@ import java.util.List;
 
 import de.k3b.LibGlobal;
 import de.k3b.io.DateUtil;
-import de.k3b.io.FileFacade;
 import de.k3b.io.GeoUtil;
-import de.k3b.io.IFile;
 import de.k3b.io.VISIBILITY;
 import de.k3b.io.XmpFile;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 import de.k3b.media.MediaFormatter.FieldID;
 /**
  * {@link XmpSegment} that implements {@link IPhotoProperties} to read/write xmp.

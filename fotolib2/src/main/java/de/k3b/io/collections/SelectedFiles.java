@@ -22,8 +22,8 @@ package de.k3b.io.collections;
 import java.io.File;
 import java.util.Date;
 
-import de.k3b.io.FileFacade;
-import de.k3b.io.IFile;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 
 /**
  * The Multi-selection data for all photo commands.

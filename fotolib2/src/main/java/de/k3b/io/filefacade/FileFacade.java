@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
-package de.k3b.io;
+package de.k3b.io.filefacade;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +29,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import de.k3b.io.Converter;
+import de.k3b.io.FileUtils;
 
 /**
  * {@link FileFacade} has the same methods as {@link File} so it may become a
