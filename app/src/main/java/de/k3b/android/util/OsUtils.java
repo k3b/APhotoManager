@@ -25,6 +25,8 @@ import java.io.File;
 
 import de.k3b.io.FileUtils;
 import de.k3b.io.OSDirectory;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 
 /**
  * Created by k3b on 22.06.2016.
@@ -81,23 +83,27 @@ public class OsUtils {
     public static OSDirectory getRootOSDirectory(OSDirectory factory) {
         // #103: bugfix
         // this works for android-4.4 an earlier and on rooted devices
-        OSDirectory root = createOsDirectory(FileUtils.tryGetCanonicalFile("/"), factory);
-        if (root.getChildren().size() == 0) {
+        File rootFile = FileUtils.tryGetCanonicalFile("/");
+        if (rootFile.listFiles().length == 0) {
             // on android-5.0 an newer root access is not allowed.
             // i.e. /storage/emulated/0
-            File externalRoot = new File("/storage");
-            if (externalRoot.listFiles().length == 0) {
-                externalRoot = Environment.getExternalStorageDirectory();
-            }
-            if (externalRoot != null) {
-                root = createOsDirectory(externalRoot, factory);
+            rootFile = new File("/storage");
+            if (rootFile.listFiles().length == 0) {
+                rootFile = Environment.getExternalStorageDirectory();
+                if (rootFile.listFiles().length == 0) {
+                    rootFile = null;
+                }
             }
         }
-        root.addChildDirs(OsUtils.getExternalStorageDirFiles());
+        OSDirectory root = createOsDirectory(
+                FileFacade.convert("OsUtils getRootOSDirectory", rootFile), factory);
+        root.addChildDirs(
+                FileFacade.get("OsUtils getRootOSDirectory",
+                        OsUtils.getExternalStorageDirFiles()));
         return root;
     }
 
-    private static OSDirectory createOsDirectory(File file, OSDirectory factory) {
+    private static OSDirectory createOsDirectory(IFile file, OSDirectory factory) {
         if (factory != null) return factory.createOsDirectory(file, null, null);
         return new OSDirectory(file, null, null);
     }

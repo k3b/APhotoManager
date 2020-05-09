@@ -22,6 +22,9 @@ package de.k3b.io;
 import java.io.File;
 import java.util.List;
 
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
+
 /**
  * Also add *.album files to sub-directories.
  *
@@ -29,19 +32,19 @@ import java.util.List;
  */
 
 public class OSDirOrVirtualAlbumFile extends OSDirectory {
-    public OSDirOrVirtualAlbumFile(File current, OSDirectory parent, List<IDirectory> childen) {
+    public OSDirOrVirtualAlbumFile(IFile current, OSDirectory parent, List<IDirectory> childen) {
         super(current, parent, childen);
         if (isAlbum(current)) {
             setDirFlags(DIR_FLAG_VIRTUAL_DIR);
         }
     }
 
-    private boolean isAlbum(File candidate) {
+    private boolean isAlbum(IFile candidate) {
         return (candidate != null) && AlbumFile.isQueryFile(candidate.getName());
     }
 
     @Override
-    protected int getCalculateFlags(File directory) {
+    protected int getCalculateFlags(IFile directory) {
         int result;
         if (isAlbum(directory)) {
             result = DIR_FLAG_VIRTUAL_DIR;
@@ -52,14 +55,22 @@ public class OSDirOrVirtualAlbumFile extends OSDirectory {
     }
 
     @Override
-    protected boolean isDirectory(File candidate) {
+    protected boolean isDirectory(IFile candidate) {
         if (super.isDirectory(candidate)) return true;
         return isAlbum(candidate);
     }
 
     /** factory method to be overwrittern by derived classes, if tree should consist of derived classes. */
     @Override
-    public OSDirectory createOsDirectory(File file, IDirectory parent, List<IDirectory> children) {
+    public OSDirectory createOsDirectory(IFile file, IDirectory parent, List<IDirectory> children) {
         return new OSDirOrVirtualAlbumFile(file, (OSDirectory) parent, children);
+    }
+
+    @Deprecated
+    @Override
+    public OSDirectory createOsDirectory(File file, IDirectory parent, List<IDirectory> children) {
+        return new OSDirOrVirtualAlbumFile(
+                FileFacade.convert("deperecated OSDirOrVirtualAlbumFile createOsDirectory", file),
+                (OSDirectory) parent, children);
     }
 }

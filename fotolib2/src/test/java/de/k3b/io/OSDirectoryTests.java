@@ -23,8 +23,10 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.File;
 import java.util.ArrayList;
+
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 
 import static java.lang.System.out;
 import static org.junit.Assert.assertEquals;
@@ -43,7 +45,7 @@ public class OSDirectoryTests {
 
     @Test
     public void shoudFindExisting() {
-        IDirectory found = OSDirectory.find(mRoot, new File("a/b/c"));
+        IDirectory found = OSDirectory.find(mRoot, "a/b/c");
         assertNotNull(found);
         assertEquals(1, found.getChildren().size());
         assertEquals("d", found.getChildren().get(0).getRelPath());
@@ -51,8 +53,9 @@ public class OSDirectoryTests {
 
     @Test
     public void shoudFindCurrentDirIntegrationTest() {
-        mRoot = new OSDirectory(FileUtils.tryGetCanonicalFile(new File("/"), null), null, null);
-        final File currentDir = FileUtils.tryGetCanonicalFile(".");
+        final IFile rootFile = FileFacade.convert("junit", "/").getCanonicalFile();
+        mRoot = new OSDirectory(rootFile, null, null);
+        final IFile currentDir = FileFacade.convert("junit", ".").getCanonicalFile();
         IDirectory found = OSDirectory.find(mRoot, currentDir);
         assertNotNull(found);
         assertEquals(currentDir.getAbsolutePath(), found.getAbsolute());
@@ -61,7 +64,7 @@ public class OSDirectoryTests {
     @Test
     public void shoudFindExistingWithRoot() {
         mRoot = createTestData("/", "a/b/c/d");
-        IDirectory found = OSDirectory.find(mRoot, new File("/a/b/c"));
+        IDirectory found = OSDirectory.find(mRoot, "/a/b/c");
 
         out.println(mRoot.toTreeString());
         assertNotNull(found);
@@ -71,7 +74,7 @@ public class OSDirectoryTests {
 
     @Test
     public void shoudAddDir() {
-        OSDirectory parent = (OSDirectory) OSDirectory.find(mRoot, new File("a/b/c")); // (OSDirectory) OSDirectory.findChildByRelPath(mRoot.getChildren(), "a/b/c");
+        OSDirectory parent = (OSDirectory) OSDirectory.find(mRoot, "a/b/c"); // (OSDirectory) OSDirectory.findChildByRelPath(mRoot.getChildren(), "a/b/c");
         OSDirectory newDir = parent.addChildFolder("d1");
 
         assertEquals(parent.getAbsolute(), newDir.getParent().getAbsolute());
@@ -79,7 +82,7 @@ public class OSDirectoryTests {
 
     @Test
     public void shoudAddPath() {
-        OSDirectory parent = (OSDirectory) OSDirectory.find(mRoot, new File("a/b/c")); // (OSDirectory) OSDirectory.findChildByRelPath(mRoot.getChildren(), "a/b/c");
+        OSDirectory parent = (OSDirectory) OSDirectory.find(mRoot, "a/b/c"); // (OSDirectory) OSDirectory.findChildByRelPath(mRoot.getChildren(), "a/b/c");
         OSDirectory newDir = parent.addChildFolder("d1/e1");
 
         assertEquals(parent.getAbsolute(), newDir.getParent().getParent().getAbsolute());
@@ -87,7 +90,7 @@ public class OSDirectoryTests {
 
     @Test
     public void shoudAddDirWithSub() {
-        OSDirectory parent = (OSDirectory) OSDirectory.find(mRoot, new File("a/b/c"));
+        OSDirectory parent = (OSDirectory) OSDirectory.find(mRoot, "a/b/c");
         OSDirectory newDir = parent.addChildFolder("d/e\\f");
 
         assertEquals(parent.getAbsolute(), newDir.getParent().getParent().getParent().getAbsolute());
@@ -96,7 +99,7 @@ public class OSDirectoryTests {
     @Test
     public void shoudFindNewWithRoot() {
         mRoot = createTestData("/", "a/b/c/d");
-        IDirectory found = OSDirectory.find(mRoot, new File("/q"));
+        IDirectory found = OSDirectory.find(mRoot, "/q");
 
         out.println(mRoot.toTreeString());
         assertNotNull(found);
@@ -105,7 +108,7 @@ public class OSDirectoryTests {
 
     @Test
     public void shoudFindNew() {
-        IDirectory found = OSDirectory.find(mRoot, new File("a/b/c/d2")).getParent();
+        IDirectory found = OSDirectory.find(mRoot, "a/b/c/d2").getParent();
         assertEquals(2, found.getChildren().size());
     }
 
@@ -123,7 +126,7 @@ public class OSDirectoryTests {
 
     @Test
     public void shoudGetParent() {
-        assertEquals(mRoot.getAbsolute(), mRoot.find(new File("a/b")).getParent().getAbsolute());
+        assertEquals(mRoot.getAbsolute(), mRoot.find("a/b").getParent().getAbsolute());
     }
 
     @Test
@@ -170,7 +173,8 @@ public class OSDirectoryTests {
 
 
     private OSDirectory createTestData(String rootName, String elements) {
-        OSDirectory root = new OSDirectory(new File(rootName), null, new ArrayList<IDirectory>());
+        final IFile file = FileFacade.convert("OSDirectoryTests create test data", rootName);
+        OSDirectory root = new OSDirectory(file, null, new ArrayList<IDirectory>());
         root.addChildFolder(elements);
         return root;
     }

@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.k3b.LibGlobal;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 
 /**
  * Operating System Directory with load on demand
@@ -36,7 +38,7 @@ import de.k3b.LibGlobal;
 public class OSDirectory implements IDirectory {
     private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
 
-    private File mCurrent = null;
+    private IFile mCurrent = null;
     private List<IDirectory> mChilden = null;
 
     private OSDirectory mParent = null;
@@ -44,7 +46,7 @@ public class OSDirectory implements IDirectory {
     private int mDirFlags = DIR_FLAG_NONE;
 
     // protected constructor to allow unittesting with fake children
-    public OSDirectory(File current, OSDirectory parent, List<IDirectory> childen) {
+    public OSDirectory(IFile current, OSDirectory parent, List<IDirectory> childen) {
         setCurrent(current);
         mParent = parent;
         mChilden = childen;
@@ -56,33 +58,47 @@ public class OSDirectory implements IDirectory {
         }
     }
 
+    // package to allow unit testing
+    protected static IDirectory find(OSDirectory root, String path) {
+        return find(root, FileFacade.convert("OSDirectory find", path));
+    }
+
+    // protected to allow unit testing
+    protected static IDirectory find(OSDirectory root, IFile file) {
+        if (file == null) return null;
+        if (root.mCurrent.equals(file)) {
+            return root;
+        }
+
+        IDirectory parentDir = find(root, file.getParentFile());
+        if (parentDir == null) return null;
+
+        String name = file.getName();
+        List<IDirectory> children = parentDir.getChildren();
+        OSDirectory result = (OSDirectory) findChildByRelPath(children, name);
+
+        if (result == null) {
+            result = root.createOsDirectory(file, parentDir, null);
+            children.add(result);
+        }
+        return result;
+    }
+
     /** factory method to be overwrittern by derived classes, if tree should consist of derived classes. */
+    @Deprecated
+    @Override
     public OSDirectory createOsDirectory(File file, IDirectory parent, List<IDirectory> children) {
+        return new OSDirectory(
+                FileFacade.convert("deprecated OSDirectory createOsDirectory", file),
+                (OSDirectory) parent, children);
+    }
+
+    public OSDirectory createOsDirectory(IFile file, IDirectory parent, List<IDirectory> children) {
         return new OSDirectory(file, (OSDirectory) parent, children);
     }
 
-    public OSDirectory setCurrent(File current) {
-        destroy();
-        mCurrent = current;
-        setDirFlags(getCalculateFlags(mCurrent));
-        return this;
-    }
-
-    protected int getCalculateFlags(File directory) {
-        int result = 0;
-        if ((directory != null) && (directory.isDirectory())) {
-            if (new File(directory, FileUtils.MEDIA_IGNORE_FILENAME).exists()) {
-                result = DIR_FLAG_NOMEDIA_ROOT;
-            } else if (FileUtils.isHiddenFolder(directory.getAbsolutePath())) {
-                result = DIR_FLAG_NOMEDIA;
-            }
-
-            if (new File(directory, RuleFileNameProcessor.APM_FILE_NAME).exists()) {
-                result |= DIR_FLAG_APM_DIR;
-            }
-        }
-
-        return result;
+    protected IFile getCurrent() {
+        return mCurrent;
     }
 
     /** reloads entry where dirFlag is one of the DIR_FLAG_... values */
@@ -91,10 +107,11 @@ public class OSDirectory implements IDirectory {
         setDirFlags(getCalculateFlags(mCurrent));
     }
 
-    /** #114: update internal data after a folder has been renamed in the gui */
-    @Override
-    public void rename(String oldFolderName, String newFolderName) {
-        this.mCurrent = new File(mCurrent.getParentFile(), newFolderName);
+    public OSDirectory setCurrent(IFile current) {
+        destroy();
+        mCurrent = current;
+        setDirFlags(getCalculateFlags(mCurrent));
+        return this;
     }
 
     @Override
@@ -122,25 +139,50 @@ public class OSDirectory implements IDirectory {
         return (OSDirectory) current;
     }
 
+    protected int getCalculateFlags(IFile directory) {
+        int result = 0;
+        if ((directory != null) && (directory.isDirectory())) {
+            if (directory.create(FileUtils.MEDIA_IGNORE_FILENAME).exists()) {
+                result = DIR_FLAG_NOMEDIA_ROOT;
+            } else if (FileUtils.isHiddenFolder(directory.getAbsolutePath())) {
+                result = DIR_FLAG_NOMEDIA;
+            }
+
+            if (directory.create(RuleFileNameProcessor.APM_FILE_NAME).exists()) {
+                result |= DIR_FLAG_APM_DIR;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * #114: update internal data after a folder has been renamed in the gui
+     */
+    @Override
+    public void rename(String oldFolderName, String newFolderName) {
+        this.mCurrent = mCurrent.getParentFile().create(newFolderName);
+    }
+
     @Override
     public List<IDirectory> getChildren() {
         if ((mCurrent != null) && (mChilden == null)) {
-            File[] files = mCurrent.listFiles();
+            IFile[] files = mCurrent.listFiles();
             addChildDirs(files);
         }
         return mChilden;
     }
 
-    public void addChildDirs(File... files) {
+    public void addChildDirs(IFile... files) {
         if (mChilden == null) {
             mChilden = new ArrayList<IDirectory>();
         }
         if (files != null) {
-            for (File file : files) {
+            for (IFile file : files) {
                 if ((file != null)
                         && !file.isHidden()
                         && !file.getName().startsWith(".")
-                        && !FileUtils.isSymlinkDir(file, true)
+                        && !FileUtils.isSymlinkDir(file.getFile(), true)
                     // && file.canWrite() // bugfix: must be visible because writeprotected parentdir may contain writeenabled subdirs
                 ) {
                     if (isDirectory(file)) {
@@ -153,34 +195,8 @@ public class OSDirectory implements IDirectory {
         }
     }
 
-    protected boolean isDirectory(File file) {
+    protected boolean isDirectory(IFile file) {
         return file.isDirectory();
-    }
-
-    // package to allow unit testing
-    protected IDirectory find(OSDirectory root, String path) {
-        return find(root, FileUtils.tryGetCanonicalFile(path));
-    }
-
-    // protected to allow unit testing
-    protected static IDirectory find(OSDirectory root, File file) {
-        if (file == null) return null;
-        if (root.mCurrent.equals(file)) {
-            return root;
-        }
-
-        IDirectory parentDir = find(root, file.getParentFile());
-        if (parentDir == null) return null;
-
-        String name = file.getName();
-        List<IDirectory> children = parentDir.getChildren();
-        OSDirectory result = (OSDirectory) findChildByRelPath(children, name);
-
-        if (result == null) {
-            result = root.createOsDirectory(file, parentDir, null);
-            children.add(result);
-        }
-        return result;
     }
 
     public static IDirectory findChildByRelPath(List<IDirectory> children, String name) {
@@ -195,10 +211,10 @@ public class OSDirectory implements IDirectory {
     @Override
     public IDirectory find(String path) {
         if (path == null) return null;
-        return find(FileUtils.tryGetCanonicalFile(path));
+        return find(FileFacade.convert("OSDirectory find ", path).getCanonicalFile());
     }
 
-    protected IDirectory find(File file) {
+    protected IDirectory find(IFile file) {
         return find(getRoot(), file);
     }
 
@@ -278,7 +294,7 @@ public class OSDirectory implements IDirectory {
             result = (OSDirectory) findChildByRelPath(children, newCildFolderName);
 
             if (result == null) {
-                File newChildFile = FileUtils.tryGetCanonicalFile(new File(mCurrent, newCildFolderName), null);
+                IFile newChildFile = mCurrent.create(newCildFolderName).getCanonicalFile();
                 result = createOsDirectory(newChildFile, this, grandChilden);
                 if (result != null) {
                     children.add(result);

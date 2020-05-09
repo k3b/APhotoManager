@@ -23,6 +23,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.k3b.io.filefacade.IFile;
+
 /**
  * Class to represent a Directory-Structure where a Directory can have several SubDirectories.
  *
@@ -63,7 +65,21 @@ public class Directory implements IDirectory {
     }
 
     /** factory method to be overwrittern by derived classes, if tree should consist of derived classes. */
+    @Deprecated
+    @Override
     public IDirectory createOsDirectory(File file, IDirectory parent, List<IDirectory> children) {
+        final Directory result = new Directory(file.getName(), parent, 0);
+
+        if (children != null) {
+            for (IDirectory child : children) {
+                addChild(child);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public IDirectory createOsDirectory(IFile file, IDirectory parent, List<IDirectory> children) {
         final Directory result = new Directory(file.getName(), parent, 0);
 
         if (children != null) {

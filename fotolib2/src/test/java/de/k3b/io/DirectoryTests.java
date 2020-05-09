@@ -23,7 +23,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * Created by EVE on 08.06.2015.
+ * Created by k3b on 08.06.2015.
  */
 public class DirectoryTests {
     @Test
