@@ -824,6 +824,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
                     lastCopyToPath);
             mDestDirPicker.setContextMenuId(LockScreen.isLocked(this) ? 0 : R.menu.menu_context_pick_osdir);
             mDestDirPicker.setBaseQuery(mGalleryContentQuery);
+            mDestDirPicker.setOriginalTile(title);
             mDestDirPicker.show(this.getFragmentManager(), "osdirimage");
         }
         return false;
@@ -1289,6 +1290,36 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
         PhotoChangeNotifyer.notifyPhotoChanged(this, this.mAdapter);
     }
 
+    private void onDirectoryPick(final boolean move, final CharSequence title,
+                                 final SelectedFiles srcFotos, final IDirectory selection) {
+        closeDialogIfNeeded();
+        File missingRoot = getMissingRootDirFileOrNull(
+                "ImageDetailActivityViewPager.onDirectoryPick dest", new File(selection.getAbsolute()));
+        if ((missingRoot == null) && move) {
+            missingRoot = getMissingRootDirFileOrNull(
+                    "ImageDetailActivityViewPager.onDirectoryPick src", srcFotos.getFiles());
+        }
+        if (missingRoot != null) {
+            // ask for needed permissions
+            requestRootUriDialog(missingRoot, title,
+                    new FilePermissionActivity.IOnDirectoryPermissionGrantedHandler() {
+                        @Override
+                        public void afterGrant(FilePermissionActivity activity) {
+                            ((ImageDetailActivityViewPager) activity).onDirectoryPick(
+                                    move, title, srcFotos, selection);
+                        }
+                    });
+            return;
+        }
+
+        // super.onDirectoryPick(selection);
+        mModifyCount++; // copy or move initiated
+        setResult((mModifyCount == 0) ? RESULT_NOCHANGE : RESULT_CHANGE);
+
+        PhotoChangeNotifyer.setPhotoChangedListener(this);
+        mFileCommands.onMoveOrCopyDirectoryPick(move, srcFotos, selection);
+    }
+
     public static class MoveOrCopyDestDirPicker extends DirectoryPickerFragment {
         protected static AndroidFileCommands sFileCommands = null;
 
@@ -1332,15 +1363,21 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
             return super.getStatusErrorMessage(path);
         }
 
+        private CharSequence originalTile;
+
         @Override
         protected void onDirectoryPick(IDirectory selection) {
-            // super.onDirectoryPick(selection);
-            mModifyCount++; // copy or move initiated
-            getActivity().setResult((mModifyCount == 0) ? RESULT_NOCHANGE : RESULT_CHANGE);
-
-            PhotoChangeNotifyer.setPhotoChangedListener(((ImageDetailActivityViewPager) getActivity()));
-            sFileCommands.onMoveOrCopyDirectoryPick(getMove(), getSrcFotos(), selection);
+            final ImageDetailActivityViewPager activity = (ImageDetailActivityViewPager) getActivity();
+            activity.onDirectoryPick(getMove(), getOriginalTile(), getSrcFotos(), selection);
             dismiss();
+        }
+
+        public CharSequence getOriginalTile() {
+            return originalTile;
+        }
+
+        public void setOriginalTile(CharSequence originalTile) {
+            this.originalTile = originalTile;
         }
     }
 
