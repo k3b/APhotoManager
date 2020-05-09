@@ -84,13 +84,13 @@ public class OsUtils {
         // #103: bugfix
         // this works for android-4.4 an earlier and on rooted devices
         File rootFile = FileUtils.tryGetCanonicalFile("/");
-        if (rootFile.listFiles().length == 0) {
+        if (!hasChildren(rootFile)) {
             // on android-5.0 an newer root access is not allowed.
             // i.e. /storage/emulated/0
             rootFile = new File("/storage");
-            if (rootFile.listFiles().length == 0) {
+            if (!hasChildren(rootFile)) {
                 rootFile = Environment.getExternalStorageDirectory();
-                if (rootFile.listFiles().length == 0) {
+                if (!hasChildren(rootFile)) {
                     rootFile = null;
                 }
             }
@@ -101,6 +101,11 @@ public class OsUtils {
                 FileFacade.get("OsUtils getRootOSDirectory",
                         OsUtils.getExternalStorageDirFiles()));
         return root;
+    }
+
+    protected static boolean hasChildren(File rootFile) {
+        final File[] files = rootFile.listFiles();
+        return (files != null) && files.length > 0;
     }
 
     private static OSDirectory createOsDirectory(IFile file, OSDirectory factory) {

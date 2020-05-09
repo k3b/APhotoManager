@@ -65,19 +65,6 @@ public class Directory implements IDirectory {
     }
 
     /** factory method to be overwrittern by derived classes, if tree should consist of derived classes. */
-    @Deprecated
-    @Override
-    public IDirectory createOsDirectory(File file, IDirectory parent, List<IDirectory> children) {
-        final Directory result = new Directory(file.getName(), parent, 0);
-
-        if (children != null) {
-            for (IDirectory child : children) {
-                addChild(child);
-            }
-        }
-        return result;
-    }
-
     @Override
     public IDirectory createOsDirectory(IFile file, IDirectory parent, List<IDirectory> children) {
         final Directory result = new Directory(file.getName(), parent, 0);

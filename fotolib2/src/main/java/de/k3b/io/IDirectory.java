@@ -19,7 +19,6 @@
 
 package de.k3b.io;
 
-import java.io.File;
 import java.util.List;
 
 import de.k3b.io.filefacade.IFile;
@@ -40,9 +39,6 @@ public interface IDirectory {
 
     String getRelPath();
     String getAbsolute();
-
-    @Deprecated
-    IDirectory createOsDirectory(File file, IDirectory parent, List<IDirectory> children);
 
     IDirectory createOsDirectory(IFile file, IDirectory parent, List<IDirectory> children);
 

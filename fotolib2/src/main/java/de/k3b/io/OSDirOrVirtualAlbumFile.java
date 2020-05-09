@@ -19,10 +19,8 @@
 
 package de.k3b.io;
 
-import java.io.File;
 import java.util.List;
 
-import de.k3b.io.filefacade.FileFacade;
 import de.k3b.io.filefacade.IFile;
 
 /**
@@ -64,13 +62,5 @@ public class OSDirOrVirtualAlbumFile extends OSDirectory {
     @Override
     public OSDirectory createOsDirectory(IFile file, IDirectory parent, List<IDirectory> children) {
         return new OSDirOrVirtualAlbumFile(file, (OSDirectory) parent, children);
-    }
-
-    @Deprecated
-    @Override
-    public OSDirectory createOsDirectory(File file, IDirectory parent, List<IDirectory> children) {
-        return new OSDirOrVirtualAlbumFile(
-                FileFacade.convert("deperecated OSDirOrVirtualAlbumFile createOsDirectory", file),
-                (OSDirectory) parent, children);
     }
 }

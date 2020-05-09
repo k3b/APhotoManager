@@ -85,14 +85,7 @@ public class OSDirectory implements IDirectory {
     }
 
     /** factory method to be overwrittern by derived classes, if tree should consist of derived classes. */
-    @Deprecated
     @Override
-    public OSDirectory createOsDirectory(File file, IDirectory parent, List<IDirectory> children) {
-        return new OSDirectory(
-                FileFacade.convert("deprecated OSDirectory createOsDirectory", file),
-                (OSDirectory) parent, children);
-    }
-
     public OSDirectory createOsDirectory(IFile file, IDirectory parent, List<IDirectory> children) {
         return new OSDirectory(file, (OSDirectory) parent, children);
     }

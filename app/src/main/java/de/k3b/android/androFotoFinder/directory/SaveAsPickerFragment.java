@@ -37,6 +37,8 @@ import de.k3b.io.IDirectory;
 import de.k3b.io.OSDirOrVirtualAlbumFile;
 import de.k3b.io.OSDirectory;
 import de.k3b.io.StringUtils;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 
 /**
  * a picker with a fale name field and a directory picker.
@@ -109,13 +111,15 @@ public abstract class SaveAsPickerFragment extends DirectoryPickerFragment {
 
         String filenameWithoutExtension = StringUtils.trim(this.edName.getText());
         String fullPath = (selection == null) ? null : selection.getAbsolute();
-        File sel = (StringUtils.isNullOrEmpty(fullPath)) ? null : new File(fullPath);
+        IFile sel = (StringUtils.isNullOrEmpty(fullPath))
+                ? null
+                : FileFacade.convert("SaveAsPickerFragment onDirectoryPick", fullPath);
         if (sel != null) {
             if (sel.isFile()) {
                 result = selection;
             } else if (sel.isDirectory() && !StringUtils.isNullOrEmpty(filenameWithoutExtension)) {
                 final String newName = filenameWithoutExtension + AlbumFile.SUFFIX_VALBUM;
-                final File newFile = new File(sel, newName);
+                final IFile newFile = sel.create(newName);
                 result = selection.find(newFile.getAbsolutePath());
                 if (result == null) {
                     result = selection.createOsDirectory(newFile, selection, null);
