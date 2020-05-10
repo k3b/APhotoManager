@@ -244,6 +244,12 @@ public class DocumentFileTranslator {
         return (root != null) ? root.getRoots() : null;
     }
 
+    public static void clearCache() {
+        if (root != null) {
+            root.dir2uri.clear();
+        }
+    }
+
     private static class Root {
         private final Context context;
         private Map<String, String> dir2uri = new HashMap<>();
@@ -333,6 +339,10 @@ public class DocumentFileTranslator {
 
         public String[] getRoots() {
             return dir2uri.keySet().toArray(new String[dir2uri.size()]);
+        }
+
+        public void clearCache() {
+            dir2uri.clear();
         }
     }
 }

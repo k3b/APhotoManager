@@ -91,14 +91,28 @@ public class OsUtils {
         if (rootDir.getChildren().size() == 0) {
             // load on demand has failed on non rooted device
 
-            rootDir.includeRoot(
-                    FileFacade.convert(context + 2, Environment.getExternalStorageDirectory()), null);
+            // externalStorageFile
+            // android-4.2 : /mnt/sdcard/ + /mnt/extsd/
+            // android-4.4 : /storage/sdcard0/ + /storage/sdcard1/
+            // android-6ff   /storage/emulated/0/ + /storage/1234-5678/
+            final IFile externalStorageFile = FileFacade.convert(context + 2, Environment.getExternalStorageDirectory());
+            final OSDirectory externalStorageDir = rootDir.includeRoot(
+                    externalStorageFile, null);
 
-            String[] roots = DocumentFileTranslator.getRoots();
-            if (roots != null) {
-                for (String path : roots) {
+            String[] knownSafRoots = DocumentFileTranslator.getRoots();
+            if (knownSafRoots != null) {
+                for (String safRoot : knownSafRoots) {
                     rootDir.includeRoot(
-                            FileFacade.convert(context + 2, path), null);
+                            FileFacade.convert(context + 2, safRoot), null);
+                }
+            }
+
+            // legacy support: assume sd-card is sibling to externalStorageFile. (i.e. /mnt/sdcard may also has a sibling /mnt/extsd)
+            final IFile mountRootFile = externalStorageFile.getParentFile();
+            final IFile[] mounts = (mountRootFile == null) ? null : mountRootFile.listFiles();
+            if ((mounts != null) && mounts.length > 1) {
+                for (IFile mnt : mounts) {
+                    rootDir.includeRoot(mnt, null);
                 }
             }
         }

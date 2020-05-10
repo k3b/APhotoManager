@@ -40,6 +40,7 @@ import java.io.File;
 
 import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
+import de.k3b.android.io.DocumentFileTranslator;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScannerExifInterface;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScannerImageMetaReader;
@@ -138,7 +139,20 @@ public class SettingsActivity extends PreferenceActivity {
                 return false; // donot close
             }
         });
-		
+
+        if (FileFacade.debugLogFacade) {
+            this.addPreferencesFromResource(R.xml.preferences_saf169_test);
+            findPreference("debugClearSafCache").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    DocumentFileTranslator.clearCache();
+                    Toast.makeText(SettingsActivity.this, "debugClearSafCache",
+                            Toast.LENGTH_LONG).show();
+                    return true; // do close
+                }
+            });
+        }
+
 		// #21: Support to change locale at runtime
         updateSummary();
     }

@@ -984,7 +984,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
                 }
                 case R.id.cmd_edit_tags: {
                     SelectedFiles selectedItem = getCurrentFoto();
-                    tagsShowEditDialog(selectedItem);
+                    tagsShowEditDialog(menuItem.getTitle(), selectedItem);
                     break;
                 }
 
@@ -1133,7 +1133,23 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
         }
     }
 
-    private boolean tagsShowEditDialog(SelectedFiles fotos) {
+    private boolean tagsShowEditDialog(final CharSequence title, final SelectedFiles fotos) {
+
+        closeDialogIfNeeded();
+        File missingRoot = getMissingRootDirFileOrNull(
+                "ImeDagetailActivityViewPager.tagsShowEditDialog", fotos.getFiles());
+        if (missingRoot != null) {
+            // ask for needed permissions
+            requestRootUriDialog(missingRoot, title,
+                    new FilePermissionActivity.IOnDirectoryPermissionGrantedHandler() {
+                        @Override
+                        public void afterGrant(FilePermissionActivity activity) {
+                            ((ImageDetailActivityViewPager) activity).tagsShowEditDialog(title, fotos);
+                        }
+                    });
+            return false;
+        }
+
         mTagWorflow = new TagUpdateTask(fotos);
         TagsPickerFragment dlg = new TagsPickerFragment();
         dlg.setFragmentOnwner(this);
