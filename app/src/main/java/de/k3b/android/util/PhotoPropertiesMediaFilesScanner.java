@@ -347,7 +347,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
 
     @Deprecated
     protected PhotoPropertiesMediaDBContentValues getExifFromFile(ContentValues values, File jpgFile) {
-        return getExifFromFile(values, FileFacade.convert("getExifFromFile from file", jpgFile));
+        return getExifFromFile(values, FileFacade.convert("PhotoPropertiesMediaFilesScanner getExifFromFile from file", jpgFile));
     }
 
     /** updates values with current values of file. */

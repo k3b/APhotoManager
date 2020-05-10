@@ -282,7 +282,7 @@ public class SettingsActivity extends PreferenceActivity {
         Global.actionBarHideTimeInMilliSecs     = getPref(prefs, "actionBarHideTimeInMilliSecs" , Global.actionBarHideTimeInMilliSecs);
         Global.pickHistoryMax = getPref(prefs, "pickHistoryMax"               , Global.pickHistoryMax);
 
-        Global.reportDir = FileFacade.convert("reportDir", getPref(prefs, "reportDir", Global.reportDir.getAbsolutePath()));
+        Global.reportDir = FileFacade.convert("SettingsActivity pref2Global reportDir", getPref(prefs, "reportDir", Global.reportDir.getAbsolutePath()));
         LibGlobal.zipFileDir                    = Global.reportDir;
 
         Global.logCatDir                        = getPref(prefs, "logCatDir", Global.logCatDir);

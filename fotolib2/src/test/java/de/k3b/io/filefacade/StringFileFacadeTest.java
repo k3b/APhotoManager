@@ -34,7 +34,7 @@ public class StringFileFacadeTest {
         StringFileFacade in = new StringFileFacade().setInputString(message);
         StringFileFacade out = new StringFileFacade();
 
-        FileUtils.copy(in.openInputStream(), out.openOutputStream());
+        FileUtils.copy(in.openInputStream(), out.openOutputStream(), "StringFileFacadeTest");
 
         Assert.assertEquals(message, out.getOutputString());
     }

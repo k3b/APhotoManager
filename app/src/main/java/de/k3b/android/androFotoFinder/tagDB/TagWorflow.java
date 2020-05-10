@@ -113,7 +113,7 @@ public class TagWorflow extends TagProcessor implements IProgessListener {
         List<String> currentItemTags = tagWorflowItemFromDB.tags;
         try {
             PhotoPropertiesUpdateHandler exif = PhotoPropertiesUpdateHandler.create(
-                    FileFacade.convert("updateTags from db", tagWorflowItemFromDB.path),
+                    FileFacade.convert("TagWorflow updateTags from db", tagWorflowItemFromDB.path),
                     null, false, "updateTags:");
             List<String> tagsDbPlusFile = getUpdated(currentItemTags, exif.getTags(), null);
             if (tagsDbPlusFile != null) {

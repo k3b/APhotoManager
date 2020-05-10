@@ -79,7 +79,7 @@ public abstract class LogCat implements Thread.UncaughtExceptionHandler {
             if (outputStream != null) {
                 final InputStream inputStream = process.getInputStream();
                 if (inputStream != null) {
-                    FileUtils.copy(inputStream, outputStream);
+                    FileUtils.copy(inputStream, outputStream, " saveLogCat ");
                     inputStream.close();
                 }
             }

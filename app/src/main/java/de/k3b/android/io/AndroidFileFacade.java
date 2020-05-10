@@ -62,7 +62,7 @@ public class AndroidFileFacade extends FileFacade {
         public IFile convert(String dbgContext, File file) {
             final IFile result = new AndroidFileFacade(file);
             if (debugLogFacade) {
-                Log.i(LOG_TAG, " convert => " + result);
+                Log.i(LOG_TAG, dbgContext + " convert => " + result);
             }
             return result;
         }
@@ -107,10 +107,11 @@ public class AndroidFileFacade extends FileFacade {
     }
 
     private boolean copyImpl(@NonNull AndroidFileFacade targetFullPath, boolean deleteSourceWhenSuccess) {
+        final String dbgContext = "AndroidFileFacade.copyImpl " + this + " -> " + targetFullPath;
         try {
-            FileUtils.copy(openInputStream(), targetFullPath.openOutputStream());
+            FileUtils.copy(openInputStream(), targetFullPath.openOutputStream(), dbgContext);
         } catch (IOException ex) {
-            Log.e(LOG_TAG, "copyImpl " + this + " -> " + targetFullPath + " failed", ex);
+            Log.e(LOG_TAG, dbgContext + " failed", ex);
             return false;
         }
         if (deleteSourceWhenSuccess) {
@@ -239,19 +240,23 @@ public class AndroidFileFacade extends FileFacade {
     @Override
     public OutputStream openOutputStream() throws FileNotFoundException {
         DocumentFile androidFile = getAndroidFile();
+        String context = "openOutputStream overwrite existing ";
         if (androidFile == null) {
             final DocumentFile documentFileParent = documentFileTranslator.getOrCreateDirectory(getFile().getParentFile());
             androidFile = this.androidFile = documentFileParent.createFile(null, getFile().getName());
-            if (FileFacade.debugLogFacade) {
-                Log.i(LOG_TAG, "created for openOutputStream " + this);
-            }
-
+            context = "openOutputStream create new ";
+        }
+        if (FileFacade.debugLogFacade) {
+            Log.i(LOG_TAG, context + this);
         }
         return documentFileTranslator.createOutputStream(androidFile);
     }
 
     @Override
     public InputStream openInputStream() throws FileNotFoundException {
+        if (debugLogFacade) {
+            Log.i(LOG_TAG, "openInputStream " + this);
+        }
         return documentFileTranslator.openInputStream(getAndroidFile());
     }
 

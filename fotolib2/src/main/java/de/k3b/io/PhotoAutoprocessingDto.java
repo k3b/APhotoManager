@@ -194,7 +194,7 @@ public class PhotoAutoprocessingDto implements Serializable {
 
     public IFile getOutDir() {
         if ((this.outDir == null) && (this.persistedOutDir != null)) {
-            this.outDir = FileFacade.convert("getApmFile", persistedOutDir);
+            this.outDir = FileFacade.convert("PhotoAutoprocessingDto getOutDir", persistedOutDir);
         }
         return outDir;
     }

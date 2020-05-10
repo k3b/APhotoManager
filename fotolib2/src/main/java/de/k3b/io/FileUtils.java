@@ -60,7 +60,7 @@ public class FileUtils {
 
     @Deprecated
     public static String readFile(File file) throws IOException {
-        return readFile(FileFacade.convert(" readFile via File ", file));
+        return readFile(FileFacade.convert("FileUtils readFile via File ", file));
     }
 
     public static String readFile(IFile file) throws IOException {
@@ -108,7 +108,10 @@ public class FileUtils {
 
     public static void close(Closeable stream, Object source) {
 		if (stream != null) {
-			try {			
+            try {
+                if (LibGlobal.debugEnabled) {
+                    logger.warn(DBG_CONTEXT + "Closing " + source);
+                }
 				stream.close();
 			} catch (IOException e) {
                 if (source != null) {
@@ -263,7 +266,7 @@ public class FileUtils {
     }
 
     public static void delete(File file, final String fileExt) {
-        delete(FileFacade.convert(" delete via File ", file), fileExt);
+        delete(FileFacade.convert("FileUtils delete via File ", file), fileExt);
     }
 
     // Delete the file or if it's a directory, all files in the directory
@@ -303,7 +306,7 @@ public class FileUtils {
 
     @Deprecated
     public static void copyReplace(File inFile, File outFile, boolean deleteOriginalAfterFinish, String what) throws IOException {
-        copyReplace(FileFacade.convert(" copyReplace via File ", inFile), FileFacade.convert(null, outFile), deleteOriginalAfterFinish, what);
+        copyReplace(FileFacade.convert("FileUtils copyReplace via File ", inFile), FileFacade.convert(null, outFile), deleteOriginalAfterFinish, what);
     }
 
     public static void copyReplace(IFile inFile, IFile outFile, boolean deleteOriginalAfterFinish, String what) throws IOException {
@@ -324,20 +327,27 @@ public class FileUtils {
 
     @Deprecated
     public static void copyReplace(InputStream sourceStream, File destinationFile) throws IOException {
-        copyReplace(sourceStream, FileFacade.convert(" copyReplace via File ", destinationFile));
+        copyReplace(sourceStream, FileFacade.convert("FileUtils copyReplace via File ", destinationFile));
     }
 
     public static void copyReplace(InputStream sourceStream, IFile destinationFile) throws IOException {
         if (destinationFile.exists()) destinationFile.delete();
         destinationFile.getParentFile().mkdirs();
-        FileUtils.copy(sourceStream, destinationFile.openOutputStream());
+        FileUtils.copy(sourceStream, destinationFile.openOutputStream(), " copyReplace ");
+    }
+
+    public static void copy(InputStream in, OutputStream out) throws IOException {
+        copy(in, out, "");
     }
 
     /**
      * copy all from is to os and closes the streams when done
      */
-    public static void copy(InputStream in, OutputStream out) throws IOException {
+    public static void copy(InputStream in, OutputStream out, String dbgContext) throws IOException {
         try {
+            if (LibGlobal.debugEnabled) {
+                logger.debug(DBG_CONTEXT + dbgContext + " copy " + in + "=>" + out);
+            }
             byte[] buffer = new byte[10240]; // 10k buffer
             int bytesRead = -1;
 
@@ -346,8 +356,8 @@ public class FileUtils {
             }
             out.flush();
         } finally {
-            FileUtils.close(in, "copy-close src");
-            FileUtils.close(out, "copy-close dest");
+            FileUtils.close(in, dbgContext + " copy-close src " + in);
+            FileUtils.close(out, dbgContext + " copy-close dest " + out);
         }
     }
 
@@ -365,7 +375,7 @@ public class FileUtils {
 
     @Deprecated
     public static File getFirstExistingDir(File root) {
-        return getFirstExistingDir(FileFacade.convert(" getFirstExistingDir via File ", root)).getFile();
+        return getFirstExistingDir(FileFacade.convert("FileUtils getFirstExistingDir via File ", root)).getFile();
     }
 
     public static IFile getFirstExistingDir(IFile root) {
@@ -377,7 +387,7 @@ public class FileUtils {
 
     @Deprecated
     public static File getFirstNonExistingFile(File parentDir, String newFilePrefix, int number, String newFileSuffix) {
-        return getFirstNonExistingFile(FileFacade.convert(" getFirstNonExistingFile via File ", parentDir), newFilePrefix, number, newFileSuffix).getFile();
+        return getFirstNonExistingFile(FileFacade.convert("FileUtils getFirstNonExistingFile via File ", parentDir), newFilePrefix, number, newFileSuffix).getFile();
     }
 
     public static IFile getFirstNonExistingFile(IFile parentDir, String newFilePrefix, int number, String newFileSuffix) {

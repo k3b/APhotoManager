@@ -622,7 +622,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
 
         if (result == null) {
             String path = IntentUtil.getFilePath(this, IntentUtil.getUri(intent));
-            IFile rootDirFile = FileFacade.convert("PhotoAutoprocessingEditActivity.getSelectedFiles", path);
+            IFile rootDirFile = FileFacade.convert(mDebugPrefix + ".getSelectedFiles", path);
 
             IFile[] files = rootDirFile.listFiles();
             if (files != null) {

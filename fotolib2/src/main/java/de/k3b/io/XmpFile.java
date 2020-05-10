@@ -36,7 +36,7 @@ public class XmpFile extends FileWrapper implements IFile {
 
     @Deprecated
     public XmpFile(String absolutePath, boolean longFormat) {
-        this(FileFacade.convert("FileProcessor.XmpFile.absolutePath", absolutePath), longFormat);
+        this(FileFacade.convert("XmpFile.absolutePath", absolutePath), longFormat);
     }
 
     public XmpFile(IFile file, boolean longFormat) {
@@ -86,7 +86,7 @@ public class XmpFile extends FileWrapper implements IFile {
 
     @Deprecated
     public static XmpFile getExistingSidecarOrNull(String absolutePath) {
-        return getExistingSidecarOrNull(FileFacade.convert("getExistingSidecarOrNull from File", absolutePath));
+        return getExistingSidecarOrNull(FileFacade.convert("XmpFile.getExistingSidecarOrNull from File", absolutePath));
     }
 
     public static XmpFile getExistingSidecarOrNull(IFile absolutePath) {
@@ -107,7 +107,7 @@ public class XmpFile extends FileWrapper implements IFile {
 
     @Deprecated
     public static XmpFile getExistingSidecarOrNull(String absolutePath, boolean longFormat) {
-        return getExistingSidecarOrNull(FileFacade.convert("getExistingSidecarOrNull from path", absolutePath), longFormat);
+        return getExistingSidecarOrNull(FileFacade.convert("XmpFile.getExistingSidecarOrNull from path", absolutePath), longFormat);
 
     }
 

@@ -203,7 +203,7 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper
     private int transferXmp(String dbg_context) throws IOException {
         int changedFiles = 0;
 
-        IFile inJpgFullPath = FileFacade.convert("", this.getPath());
+        IFile inJpgFullPath = FileFacade.convert("PhotoPropertiesUpdateHandler transferXmp", this.getPath());
         if (inJpgFullPath == null) inJpgFullPath = this.jpgInFile;
         IFile outJpgFullPath = (this.jpgOutFile == null) ? inJpgFullPath : this.jpgOutFile;
         boolean isSameFile = outJpgFullPath.equals(inJpgFullPath);
@@ -264,7 +264,7 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper
      * transfers from jpgInFile to jpgOutFile while updating exif
      */
     private int transferExif(String dbg_context) throws IOException {
-        IFile inJpgFullPath = FileFacade.convert("", this.getPath());
+        IFile inJpgFullPath = FileFacade.convert("PhotoPropertiesUpdateHandler transferExif", this.getPath());
 
         if (inJpgFullPath == null) {
             inJpgFullPath = this.jpgInFile;

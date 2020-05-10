@@ -93,7 +93,7 @@ public class Global {
     /** defines the filesystem's directory where [Bookmark files](Bookmarks) are stored and loaded from. */
     public static IFile reportDir = (externalStorageDirectory == null)
             ? null
-            : FileFacade.convert("", new File(externalStorageDirectory, "databases/sql"));
+            : FileFacade.convert("Global reportDir", new File(externalStorageDirectory, "databases/sql"));
     public static final String reportExt = ".query";
 
     /** defines the filesystem's directory where crash reports are written to. */

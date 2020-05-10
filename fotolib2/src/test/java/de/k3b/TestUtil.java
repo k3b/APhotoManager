@@ -39,7 +39,7 @@ import de.k3b.tagDB.TagConverter;
 
 public class TestUtil {
     // where unittest-files are processed
-    public static final IFile OUTDIR_ROOT = FileFacade.convert("", new File("./build/test-results/metafiles"));
+    public static final IFile OUTDIR_ROOT = FileFacade.convert("TestUtil root", new File("./build/test-results/metafiles"));
 
     // these test files exist as embedded resources
     public static final String TEST_FILE_JPG_WITH_EXIF = "test-WitExtraData.jpg";
@@ -92,7 +92,7 @@ public class TestUtil {
     }
 
     public static File saveTestResourceAs(String resourceName, File destination) throws IOException {
-        return saveTestResourceAs(resourceName, FileFacade.convert("saveTestResourceAs", destination)).getFile();
+        return saveTestResourceAs(resourceName, FileFacade.convert("TestUtil saveTestResourceAs", destination)).getFile();
     }
 
     public static IFile saveTestResourceAs(String resourceName, IFile destination) throws IOException {

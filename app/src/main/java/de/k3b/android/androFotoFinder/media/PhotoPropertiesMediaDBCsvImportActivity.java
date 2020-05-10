@@ -139,7 +139,7 @@ public class PhotoPropertiesMediaDBCsvImportActivity extends Activity {
         }
 
         protected String processUri(Uri uri) {
-            IFile csvRootDir = FileFacade.convert(this.getClass().getSimpleName(), IntentUtil.getFile(uri)).getCanonicalFile();
+            IFile csvRootDir = FileFacade.convert("PhotoPropertiesMediaDBCsvImportActivity processUri", IntentUtil.getFile(uri)).getCanonicalFile();
             if (csvRootDir != null) {
                 Reader reader = null;
                 try {

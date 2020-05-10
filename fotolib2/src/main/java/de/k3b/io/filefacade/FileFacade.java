@@ -154,7 +154,7 @@ public class FileFacade implements IFile {
 
     @Override
     public IFile getCanonicalFile() {
-        return convert("getCanonicalFile", FileUtils.tryGetCanonicalFile(file));
+        return convert("FileFacade getCanonicalFile", FileUtils.tryGetCanonicalFile(file));
     }
 
     @Override
@@ -164,7 +164,7 @@ public class FileFacade implements IFile {
 
     @Override
     public IFile getParentFile() {
-        return convert("getParentFile", file.getParentFile());
+        return convert("FileFacade getParentFile", file.getParentFile());
     }
 
     @Override
@@ -203,7 +203,7 @@ public class FileFacade implements IFile {
     }
 
     private boolean copyImpl(FileFacade targetFullPath, boolean deleteSourceWhenSuccess) throws IOException {
-        FileUtils.copy(this.openInputStream(), targetFullPath.openOutputStream());
+        FileUtils.copy(this.openInputStream(), targetFullPath.openOutputStream(), " FileFacade copyImpl ");
         if (deleteSourceWhenSuccess) {
             this.delete();
         }
@@ -229,7 +229,7 @@ public class FileFacade implements IFile {
     @Override
     public IFile create(String name) {
         final File file = new File(this.file, name).getAbsoluteFile();
-        return convert("create", file);
+        return convert("FileFacade create", file);
     }
 
     @Override

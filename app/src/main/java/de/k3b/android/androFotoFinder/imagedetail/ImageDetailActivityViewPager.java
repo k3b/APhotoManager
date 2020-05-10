@@ -649,7 +649,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
      */
     private boolean checkForIncompleteMediaDatabase(String jpgFullFilePath, String why) {
         if (!PhotoPropertiesMediaFilesScanner.isNoMedia(jpgFullFilePath, PhotoPropertiesMediaFilesScanner.DEFAULT_SCAN_DEPTH)) {
-            IFile fileToLoad = FileFacade.convert("checkForIncompleteMediaDatabase " + why, jpgFullFilePath);
+            IFile fileToLoad = FileFacade.convert("ImageDetailActivityViewPager checkForIncompleteMediaDatabase " + why, jpgFullFilePath);
 
             if ((!this.mWaitingForMediaScannerResult) && (fileToLoad != null) && (fileToLoad.exists()) && (fileToLoad.canRead())) {
                 // file exists => must update media database
@@ -1372,7 +1372,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
         @Override
         protected String getStatusErrorMessage(String path) {
             String errorMessage = (sFileCommands == null) ? null : sFileCommands.checkWriteProtected(
-                    0, FileFacade.convert("getStatusErrorMessage", path));
+                    0, FileFacade.convert("ImageDetailActivityViewPager getStatusErrorMessage", path));
             if (errorMessage != null) {
                 int pos = errorMessage.indexOf('\n');
                 return (pos > 0) ? errorMessage.substring(0, pos) : errorMessage;

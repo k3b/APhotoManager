@@ -103,7 +103,7 @@ public class OsUtils {
             if (knownSafRoots != null) {
                 for (String safRoot : knownSafRoots) {
                     rootDir.includeRoot(
-                            FileFacade.convert(context + 2, safRoot), null);
+                            FileFacade.convert(context + 3, safRoot), null);
                 }
             }
 
