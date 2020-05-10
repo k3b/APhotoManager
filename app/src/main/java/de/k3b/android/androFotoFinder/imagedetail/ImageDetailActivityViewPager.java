@@ -1355,7 +1355,8 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
          */
         @Override
         protected String getStatusErrorMessage(String path) {
-            String errorMessage = (sFileCommands == null) ? null : sFileCommands.checkWriteProtected(0, new File(path));
+            String errorMessage = (sFileCommands == null) ? null : sFileCommands.checkWriteProtected(
+                    0, FileFacade.convert("getStatusErrorMessage", path));
             if (errorMessage != null) {
                 int pos = errorMessage.indexOf('\n');
                 return (pos > 0) ? errorMessage.substring(0, pos) : errorMessage;

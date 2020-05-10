@@ -199,10 +199,10 @@ public class AndroidFileCommands extends FileCommands {
      *
      * @return null if no error. else formated error message.
      */
-    public String checkWriteProtected(int resIdAction, final File... filesToBeModified) {
+    public String checkWriteProtected(int resIdAction, final IFile... filesToBeModified) {
         //   <string name="file_err_writeprotected">\'%1$s\' ist schreibgeschützt. \'%2$s\' ist nicht möglich.</string>
         if (filesToBeModified != null) {
-            for (File file : filesToBeModified) {
+            for (IFile file : filesToBeModified) {
                 if ((file != null) && (file.exists()) && (!file.canWrite())) {
                     String action = (resIdAction == 0) ? "" : mContext.getString(resIdAction);
                     // file_err_writeprotected="writeprotected \'%1$s\'.\n\n \'%2$s\' is not possible."
@@ -487,7 +487,7 @@ public class AndroidFileCommands extends FileCommands {
         String dbgContext = "setGeo";
         if (!Double.isNaN(latitude) && !Double.isNaN(longitude) && (selectedItems != null) && (selectedItems.size() > 0)) {
             // in case that current activity is destroyed while running async, applicationContext will allow to finish database operation
-            File[] files = selectedItems.getFiles();
+            IFile[] files = selectedItems.getIFiles();
             String errorMessage = checkWriteProtected(R.string.geo_edit_menu_title, files);
 
             if (errorMessage != null) {
@@ -510,7 +510,7 @@ public class AndroidFileCommands extends FileCommands {
                         countdown = itemsPerProgress;
                         if (!onProgress(itemcount, maxCount, null)) break;
                     }
-                    File file = files[i];
+                    IFile file = files[i];
                     PhotoPropertiesUpdateHandler jpg = createWorkflow(null, dbgContext).saveLatLon(file, latitude, longitude);
                     resultFile += TagSql.updateDB(dbgContext,
                             file.getAbsolutePath(), jpg, MediaFormatter.FieldID.latitude_longitude);
