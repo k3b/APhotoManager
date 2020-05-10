@@ -1071,7 +1071,7 @@ public class LocationMapFragment extends DialogFragment {
             case R.id.cmd_show_geo_as: {
                 String uri = getAsGeoUri(geoPosition, (int) this.mMapView.getZoomLevelDouble(), markerId);
 
-                IntentUtil.cmdStartIntent("show_geo_as", getActivity(), null, uri, null, Intent.ACTION_VIEW, R.string.geo_show_as_menu_title, R.string.geo_picker_err_not_found, 0);
+                IntentUtil.cmdStartIntent("show_geo_as", getActivity(), -1, null, uri, null, Intent.ACTION_VIEW, R.string.geo_show_as_menu_title, R.string.geo_picker_err_not_found, 0);
 
                 return true;
             }

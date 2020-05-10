@@ -26,8 +26,10 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 import java.io.File;
@@ -42,6 +44,8 @@ import de.k3b.io.StringUtils;
  * Created by k3b on 09.09.2015.
  */
 public class IntentUtil implements Common {
+
+    private final static boolean URI_AS_FILE = Build.VERSION.SDK_INT < Build.VERSION_CODES.M;
 
     public static Intent setDataAndTypeAndNormalize(Intent intent, Uri data, String type) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
@@ -150,9 +154,9 @@ public class IntentUtil implements Common {
 
     /**
      * Helper to Execute parent.startActivity(ForResult)()
-     *
-     * @param debugContext
+     *  @param debugContext
      * @param parentActivity    activity used to start and to receive actionResult
+     * @param imageId
      * @param currentFilePath   for setData: null or file-path that also defines the content type.
      * @param currentUri        for setData: null or uri to be procesed (i.e. content:...)
      * @param extraPath         null or uri for EXTRA_STREAM
@@ -162,7 +166,7 @@ public class IntentUtil implements Common {
      * @param idActivityResultRequestCode  if != 0 execute startActivityForResult else startActivity
      */
     public static void cmdStartIntent(String debugContext, Activity parentActivity,
-                                      String currentFilePath, String currentUri,
+                                      long imageId, String currentFilePath, String currentUri,
                                       String extraPath, String action,
                                       int idChooserCaption, int idEditError,
                                       int idActivityResultRequestCode) {
@@ -179,9 +183,24 @@ public class IntentUtil implements Common {
                     .addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         }
         if (currentFilePath != null) {
-            File file = new File(currentFilePath);
-            final Uri uri = Uri.fromFile(file);
-            outIntent.setDataAndType(uri, IntentUtil.getMime(currentFilePath));
+            Uri uri;
+            String mime;
+            if (URI_AS_FILE) {
+                File file = new File(currentFilePath);
+                uri = Uri.fromFile(file);
+                mime = IntentUtil.getMime(currentFilePath);
+            } else {
+                MimeTypeMap map = MimeTypeMap.getSingleton();
+                mime = map.getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(currentFilePath));
+
+                if ((mime != null) && (mime.startsWith("image/"))) {
+                    final Uri baseUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                    uri = Uri.parse(baseUri.toString() + "/" + imageId);
+                } else {
+                    uri = MediaStore.Files.getContentUri("external", imageId);
+                }
+            }
+            outIntent.setDataAndType(uri, mime);
         } else if (currentUri != null) {
             outIntent.setData(Uri.parse(currentUri));
         }

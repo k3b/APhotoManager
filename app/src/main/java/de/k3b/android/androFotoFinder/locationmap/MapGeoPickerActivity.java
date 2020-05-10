@@ -259,7 +259,7 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
             case R.id.cmd_show_geo_as: {
                 String uri = mMap.getCurrentGeoUri();
                 IntentUtil.cmdStartIntent("show_geo_as", this,
-                        null, uri, null, Intent.ACTION_VIEW,
+                        -1, null, uri, null, Intent.ACTION_VIEW,
                         R.string.geo_show_as_menu_title, R.string.geo_picker_err_not_found, 0);
 
                 return true;
