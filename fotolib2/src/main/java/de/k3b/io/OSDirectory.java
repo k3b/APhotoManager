@@ -45,6 +45,11 @@ public class OSDirectory implements IDirectory {
 
     private int mDirFlags = DIR_FLAG_NONE;
 
+    /**
+     * if null use mCurrent.getName()
+     */
+    private String virtualName = null;
+
     // protected constructor to allow unittesting with fake children
     public OSDirectory(IFile current, OSDirectory parent, List<IDirectory> childen) {
         setCurrent(current);
@@ -69,6 +74,9 @@ public class OSDirectory implements IDirectory {
         if (root.mCurrent.equals(file)) {
             return root;
         }
+
+        OSDirectory provider = root.findViaFile(root, file);
+        if (provider != null) return provider;
 
         IDirectory parentDir = find(root, file.getParentFile());
         if (parentDir == null) return null;
@@ -109,6 +117,7 @@ public class OSDirectory implements IDirectory {
 
     @Override
     public String getRelPath() {
+        if (this.virtualName != null) return this.virtualName;
         return mCurrent.getName();
     }
 
@@ -125,7 +134,7 @@ public class OSDirectory implements IDirectory {
     private OSDirectory getRoot() {
         IDirectory current = this;
         IDirectory parent = current.getParent();
-        while (parent != null) {
+        while ((parent != null) && (parent != this)) {
             current = parent;
             parent = current.getParent();
         }
@@ -181,8 +190,19 @@ public class OSDirectory implements IDirectory {
                     if (isDirectory(file)) {
                         mChilden.add(createOsDirectory(file, this, null));
                     }
-//                    } else if (LibGlobal.debugEnabled) {
-//                        logger.debug(FileUtils.getDebugString("OSDirectory.getChildren() rejected ", file));
+                }
+            }
+        }
+    }
+
+    public void addChildDirs(IDirectory... dirs) {
+        if (mChilden == null) {
+            mChilden = new ArrayList<>();
+        }
+        if (dirs != null) {
+            for (IDirectory dir : dirs) {
+                if (!mChilden.contains(dir)) {
+                    mChilden.add(dir);
                 }
             }
         }
@@ -257,6 +277,25 @@ public class OSDirectory implements IDirectory {
         }
     }
 
+    public OSDirectory includeRoot(IFile file, OSDirectory factory) {
+        OSDirectory root = getRoot();
+        OSDirectory candidate = findViaFile(root, file);
+        if (candidate != null) return candidate;
+        if (factory == null) factory = this;
+        OSDirectory result = factory.createOsDirectory(file, root, null);
+        result.virtualName = file.getCanonicalPath();
+        root.addChildDirs(result);
+
+        return result;
+    }
+
+    protected OSDirectory findViaFile(OSDirectory parentDir, IFile file) {
+        for (IDirectory candidate : parentDir.getChildren()) {
+            if (candidate.equals(file)) return (OSDirectory) candidate;
+        }
+        return null;
+    }
+
     /** return the deepest added childFolder */
     public OSDirectory addChildFolder(String newCildFolderName) {
         if ((newCildFolderName != null) && (!newCildFolderName.isEmpty())) {
@@ -295,6 +334,13 @@ public class OSDirectory implements IDirectory {
             }
         }
         return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof OSDirectory) return this.mCurrent.equals(((OSDirectory) o).mCurrent);
+        if (o instanceof IFile) return this.mCurrent.equals(o);
+        return super.equals(o);
     }
 
     /**

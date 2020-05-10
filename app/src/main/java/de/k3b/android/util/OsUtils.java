@@ -23,12 +23,13 @@ import android.os.Environment;
 
 import java.io.File;
 
-import de.k3b.io.FileUtils;
+import de.k3b.android.io.DocumentFileTranslator;
 import de.k3b.io.OSDirectory;
 import de.k3b.io.filefacade.FileFacade;
 import de.k3b.io.filefacade.IFile;
 
 /**
+ * Android sepecific helpers
  * Created by k3b on 22.06.2016.
  */
 public class OsUtils {
@@ -83,29 +84,30 @@ public class OsUtils {
     public static OSDirectory getRootOSDirectory(OSDirectory factory) {
         // #103: bugfix
         // this works for android-4.4 an earlier and on rooted devices
-        File rootFile = FileUtils.tryGetCanonicalFile("/");
-        if (!hasChildren(rootFile)) {
-            // on android-5.0 an newer root access is not allowed.
-            // i.e. /storage/emulated/0
-            rootFile = new File("/storage");
-            if (!hasChildren(rootFile)) {
-                rootFile = Environment.getExternalStorageDirectory();
-                if (!hasChildren(rootFile)) {
-                    rootFile = null;
+        final String context = "OsUtils getRootOSDirectory ";
+        OSDirectory rootDir = createOsDirectory(
+                FileFacade.convert(context + 1, "/"), factory);
+
+        if (rootDir.getChildren().size() == 0) {
+            // load on demand has failed on non rooted device
+
+            rootDir.includeRoot(
+                    FileFacade.convert(context + 2, Environment.getExternalStorageDirectory()), null);
+
+            String[] roots = DocumentFileTranslator.getRoots();
+            if (roots != null) {
+                for (String path : roots) {
+                    rootDir.includeRoot(
+                            FileFacade.convert(context + 2, path), null);
                 }
             }
         }
-        OSDirectory root = createOsDirectory(
-                FileFacade.convert("OsUtils getRootOSDirectory", rootFile), factory);
-        root.addChildDirs(
-                FileFacade.get("OsUtils getRootOSDirectory",
-                        OsUtils.getExternalStorageDirFiles()));
-        return root;
+        return rootDir;
     }
 
-    protected static boolean hasChildren(File rootFile) {
+    protected static int getChildCount(File rootFile) {
         final File[] files = rootFile.listFiles();
-        return (files != null) && files.length > 0;
+        return (files != null) ? files.length : 0;
     }
 
     private static OSDirectory createOsDirectory(IFile file, OSDirectory factory) {

@@ -240,18 +240,29 @@ public class DocumentFileTranslator {
         return result.toString();
     }
 
+    public static String[] getRoots() {
+        return (root != null) ? root.getRoots() : null;
+    }
+
     private static class Root {
         private final Context context;
         private Map<String, String> dir2uri = new HashMap<>();
 
         public Root(Context context) {
             this.context = context.getApplicationContext();
+            loadFromPrefs();
+            if (FileFacade.debugLogFacade) {
+                Log.i(TAG, "DocumentFileTranslator.Root.loaded(" + this + ")");
+            }
+        }
+
+        protected void loadFromPrefs() {
             String fileUri = null;
             String docfileUri = null;
             try {
                 final SharedPreferences prefs = PreferenceManager
                         .getDefaultSharedPreferences(this.context);
-
+                int id = 0;
                 do {
                     fileUri = prefs.getString(getPrefKeyFile(id), null);
                     docfileUri = prefs.getString(getPrefKeyDocfile(id), null);
@@ -260,9 +271,6 @@ public class DocumentFileTranslator {
             } catch (Exception ex) {
                 Log.e(TAG, "err DocumentFileTranslator.Root(" + getPrefKey(id, "-") + "," + fileUri +
                         ", " + docfileUri + ") " + ex.getMessage(), ex);
-            }
-            if (FileFacade.debugLogFacade) {
-                Log.i(TAG, "DocumentFileTranslator.Root.loaded(" + this + ")");
             }
         }
 
@@ -323,5 +331,8 @@ public class DocumentFileTranslator {
             return result.append("]").toString();
         }
 
+        public String[] getRoots() {
+            return dir2uri.keySet().toArray(new String[dir2uri.size()]);
+        }
     }
 }

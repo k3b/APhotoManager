@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import de.k3b.io.filefacade.FileFacade;
@@ -139,10 +140,19 @@ public class OSDirectoryTests {
         assertEquals(null, mRoot.find("DoesReallyNotExist"));
     }
 
+    @Test
+    public void shoudHandleRoot() {
+        FileFacade rootFile = new FileFacade(FileUtils.tryGetCanonicalFile("."));
+        OSDirectory rootDir = new OSDirectory(rootFile, null, null);
+        rootDir.includeRoot(new FileFacade(new File("/storage/emulated/0")), null);
+        rootDir.includeRoot(new FileFacade(new File("/storage/1234-5678")), null);
+        assertEquals("#", 2, rootDir.getChildren().size());
+        assertEquals("path endsWith('1234-5678')", true, rootDir.getChildren().get(1).getRelPath().endsWith("1234-5678"));
+    }
+
     @Ignore("https://stackoverflow.com/questions/48710003/how-to-make-this-junit-test-for-java-memory-leak-pass")
     @Test
-    public void shoudNotMemoryLeak()
-    {
+    public void shoudNotMemoryLeak() {
         Runtime runtime = Runtime.getRuntime();
         // make shure that gc has collected all
         System.gc ();
@@ -168,9 +178,6 @@ public class OSDirectoryTests {
         // this
         assertEquals(memoryUsedAfter, memoryUsedBefore);
     }
-
-
-
 
     private OSDirectory createTestData(String rootName, String elements) {
         final IFile file = FileFacade.convert("OSDirectoryTests create test data", rootName);
