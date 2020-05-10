@@ -143,7 +143,7 @@ public class OSDirectoryTests {
     @Test
     public void shoudHandleRoot() {
         FileFacade rootFile = new FileFacade(FileUtils.tryGetCanonicalFile("."));
-        OSDirectory rootDir = new OSDirectory(rootFile, null, null);
+        OSDirectory rootDir = new OSDirectory(rootFile, null, new ArrayList<IDirectory>());
         rootDir.includeRoot(new FileFacade(new File("/storage/emulated/0")), null);
         rootDir.includeRoot(new FileFacade(new File("/storage/1234-5678")), null);
         assertEquals("#", 2, rootDir.getChildren().size());

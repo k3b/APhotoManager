@@ -66,18 +66,6 @@ public class FileFacade implements IFile {
         this.file = file.getAbsoluteFile();
     }
 
-    public FileFacade(String absolutPath) {
-        this(new File(absolutPath));
-    }
-
-    public FileFacade(FileFacade parent, String newFolderName) {
-        this(new File(parent.file, newFolderName));
-    }
-
-    public FileFacade(String parent, String newFolderName) {
-        this(new File(parent, newFolderName));
-    }
-
     public static IFile[] get(String dbgContext, File[] files) {
         IFile f[] = new FileFacade[files.length];
         for (int i = 0; i < files.length; i++) {

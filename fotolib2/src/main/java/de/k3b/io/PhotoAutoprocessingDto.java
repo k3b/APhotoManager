@@ -22,6 +22,7 @@ package de.k3b.io;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -54,14 +55,19 @@ public class PhotoAutoprocessingDto implements Serializable {
     private static final String KEY_OUT_DIR         = "outDir";
 
     private final Properties properties;
-    private IFile outDir;
+
+    // transient means ingone for Serializable as IFile is not serializable
+    transient private IFile outDir;
+
+    // used to recreate  transient outDir
+    private File persistedOutDir;
 
     public PhotoAutoprocessingDto() {
         this(null, new Properties());
     }
 
     public PhotoAutoprocessingDto(IFile outDir, Properties properties) {
-        this.outDir = outDir;
+        setOutDir(outDir);
         this.properties = properties;
     }
 
@@ -128,7 +134,7 @@ public class PhotoAutoprocessingDto implements Serializable {
     }
 
     private IFile getApmFile() {
-        return getApmFile(this.outDir);
+        return getApmFile(this.getOutDir());
     }
 
     /** if has no data the file is deleted */
@@ -187,11 +193,17 @@ public class PhotoAutoprocessingDto implements Serializable {
     }
 
     public IFile getOutDir() {
+        if ((this.outDir == null) && (this.persistedOutDir != null)) {
+            this.outDir = FileFacade.convert("getApmFile", persistedOutDir);
+        }
         return outDir;
     }
 
     public PhotoAutoprocessingDto setOutDir(IFile outDir) {
         this.outDir = outDir;
+        if (outDir != null) {
+            this.persistedOutDir = outDir.getFile();
+        }
         return this;
     }
 
