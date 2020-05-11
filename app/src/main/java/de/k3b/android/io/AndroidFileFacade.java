@@ -122,7 +122,7 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public boolean renameTo(@NonNull String newName) {
-        if (exists() && getAndroidFile().renameTo(newName)) {
+        if (exists() && getAndroidFile(false).renameTo(newName)) {
             return true;
         }
 
@@ -132,42 +132,42 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public boolean delete() {
-        return exists() && getAndroidFile().delete();
+        return exists() && getAndroidFile(false).delete();
     }
 
     @Override
     public boolean exists() {
-        DocumentFile androidFile = getAndroidFile();
+        DocumentFile androidFile = getAndroidFile(false);
         return (androidFile != null) && androidFile.exists();
     }
 
     @Override
     public boolean canWrite() {
-        final DocumentFile androidFile = getAndroidFile();
+        final DocumentFile androidFile = getAndroidFile(false);
         return (androidFile != null) && androidFile.canWrite();
     }
 
     @Override
     public boolean canRead() {
-        final DocumentFile androidFile = getAndroidFile();
+        final DocumentFile androidFile = getAndroidFile(false);
         return (androidFile != null) && androidFile.canRead();
     }
 
     @Override
     public boolean isFile() {
-        final DocumentFile androidFile = getAndroidFile();
+        final DocumentFile androidFile = getAndroidFile(false);
         return (androidFile != null) && androidFile.isFile();
     }
 
     @Override
     public boolean isDirectory() {
-        final DocumentFile androidFile = getAndroidFile();
+        final DocumentFile androidFile = getAndroidFile(false);
         return (androidFile != null) && androidFile.isDirectory();
     }
 
     @Override
     public boolean isHidden() {
-        final DocumentFile androidFile = getAndroidFile();
+        final DocumentFile androidFile = getAndroidFile(false);
         if ((androidFile != null)) {
             final String name = androidFile.getName();
             return (name == null) || name.startsWith(".");
@@ -182,7 +182,7 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public IFile getParentFile() {
-        final DocumentFile androidFile = getAndroidFile();
+        final DocumentFile androidFile = getAndroidFile(false);
         if (androidFile != null) {
             return new AndroidFileFacade(androidFile.getParentFile(), getFile().getParentFile());
         } else {
@@ -192,7 +192,7 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public String getName() {
-        final DocumentFile androidFile = getAndroidFile();
+        final DocumentFile androidFile = getAndroidFile(false);
         if (androidFile != null) {
             return androidFile.getName();
         }
@@ -201,7 +201,7 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public long lastModified() {
-        final DocumentFile androidFile = getAndroidFile();
+        final DocumentFile androidFile = getAndroidFile(false);
         if (androidFile != null) {
             return androidFile.lastModified();
         }
@@ -216,7 +216,7 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public IFile[] listFiles() {
-        final DocumentFile androidFile = getAndroidFile();
+        final DocumentFile androidFile = getAndroidFile(false);
         if (androidFile != null) {
             return get(androidFile.listFiles());
         }
@@ -225,7 +225,7 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public long length() {
-        final DocumentFile androidFile = getAndroidFile();
+        final DocumentFile androidFile = getAndroidFile(false);
         if (androidFile != null) {
             return androidFile.length();
         }
@@ -239,7 +239,7 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public OutputStream openOutputStream() throws FileNotFoundException {
-        DocumentFile androidFile = getAndroidFile();
+        DocumentFile androidFile = getAndroidFile(false);
         String context = "openOutputStream overwrite existing ";
         if (androidFile == null) {
             final DocumentFile documentFileParent = documentFileTranslator.getOrCreateDirectory(getFile().getParentFile());
@@ -257,7 +257,7 @@ public class AndroidFileFacade extends FileFacade {
         if (debugLogFacade) {
             Log.i(LOG_TAG, "openInputStream " + this);
         }
-        return documentFileTranslator.openInputStream(getAndroidFile());
+        return documentFileTranslator.openInputStream(getAndroidFile(true));
     }
 
     private IFile[] get(DocumentFile[] docs) {
@@ -275,10 +275,11 @@ public class AndroidFileFacade extends FileFacade {
      * implements loads on demand.
      *
      * @return null means: DocumentFile does not exist (yet)
+     * @param forOpenInputStream
      */
     @Nullable
-    private DocumentFile getAndroidFile() {
-        if ((androidFile == null) && androidFileMayExist) {
+    private DocumentFile getAndroidFile(boolean forOpenInputStream) {
+        if ((androidFile == null) && (forOpenInputStream || androidFileMayExist)) {
             androidFile = getDocumentFileOrDirOrNull(getFile());
             androidFileMayExist = false;
         }

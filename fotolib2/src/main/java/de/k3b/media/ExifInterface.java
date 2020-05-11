@@ -1186,9 +1186,12 @@ public class ExifInterface {
         boolean overwriteOriginal = inFile.equals(currentOutFile);
 
         if (overwriteOriginal) {
-            final String tempName = inFile.getName() + ".tmp";
+            final String name = inFile.getName();
+            final String tempName = name + ".tmp";
             renameOrThrow(inFile, tempName);
             inFile = inFile.getParentFile().create(tempName);
+
+            currentOutFile = outFile.getParentFile().create(name);
         }
 
         saveJpegAttributes(

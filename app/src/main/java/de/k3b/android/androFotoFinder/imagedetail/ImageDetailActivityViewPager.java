@@ -1221,6 +1221,12 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
         return null;
     }
 
+    protected IFile getCurrentFile() {
+        IFile file = FileFacade.convert("ImageDetailActivityViewPager.getCurrentFile()", getCurrentFilePath());
+        return file;
+    }
+
+    //
     protected String getCurrentFilePath() {
         if ((mViewPager != null) && (mAdapter != null)) {
             int itemPosition = mViewPager.getCurrentItem();

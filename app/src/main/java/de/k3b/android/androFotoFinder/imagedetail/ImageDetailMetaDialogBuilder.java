@@ -128,9 +128,9 @@ public class ImageDetailMetaDialogBuilder {
 
     private static void appendExifInfo(StringBuilder result, Activity context, String filepath, long currentImageId) {
         try {
-            getExifInfo_android(result, filepath);
-
             IFile jpegFile = FileFacade.convert("ImageDetailMetaDialogBuilder.appendExifInfo", filepath);
+            getExifInfo_android(result, jpegFile);
+
             addExif(result, jpegFile);
 
             // #84 show long and short xmp file
@@ -211,8 +211,8 @@ public class ImageDetailMetaDialogBuilder {
         }
     }
 
-    private static void getExifInfo_android(StringBuilder builder, String filepath) throws IOException {
-        ExifInterfaceEx exif = ExifInterfaceEx.create(filepath, null, null, "ImageDetailMetaDialogBuilder.getExifInfo_android");
+    private static void getExifInfo_android(StringBuilder builder, IFile filepath) throws IOException {
+        ExifInterfaceEx exif = ExifInterfaceEx.create(filepath, null, "ImageDetailMetaDialogBuilder.getExifInfo_android");
 
         builder.append(NL).append(line).append(NL);
         builder.append(NL).append(filepath).append(NL).append(NL);
