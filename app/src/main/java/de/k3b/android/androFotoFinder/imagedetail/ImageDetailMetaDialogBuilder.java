@@ -38,7 +38,6 @@ import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.DateUtil;
 import de.k3b.io.XmpFile;
-import de.k3b.io.filefacade.FileFacade;
 import de.k3b.io.filefacade.IFile;
 import de.k3b.media.ExifInterfaceEx;
 import de.k3b.media.PhotoPropertiesImageReader;
@@ -51,15 +50,15 @@ import de.k3b.media.XmpSegment;
 public class ImageDetailMetaDialogBuilder {
     private static final String NL = "\n";
 
-    public static Dialog createImageDetailDialog(Activity context, String filePath, long imageId,
+    public static Dialog createImageDetailDialog(Activity context, IFile file, long imageId,
                                                  QueryParameter query,
                                                  long offset, Object... moreBlocks) {
         StringBuilder result = new StringBuilder();
         result
                 .append(imageId)
-                .append(":").append(filePath)
+                .append(":").append(file)
                 .append("\n");
-        appendExifInfo(result, context, filePath, imageId);
+        appendExifInfo(result, context, file, imageId);
         appendQueryInfo(result, query, offset);
 
         if ((moreBlocks != null) && (moreBlocks.length > 0)) {
@@ -70,21 +69,7 @@ public class ImageDetailMetaDialogBuilder {
                 }
             }
         }
-        return createImageDetailDialog(context, filePath, result.toString());
-    }
-
-    private static void appendQueryInfo(StringBuilder result, QueryParameter query, long offset) {
-        if (query != null) {
-            result.append(NL).append(line).append(NL);
-            result.append(NL).append("#").append(offset).append(": ").append(query.toSqlString()).append(NL).append(NL);
-        }
-    }
-
-    private static void append(StringBuilder result, String block) {
-        if (block != null) {
-            result.append(NL).append(line).append(NL);
-            result.append(NL).append(block).append(NL);
-        }
+        return createImageDetailDialog(context, file.toString(), result.toString());
     }
 
     public static Dialog createImageDetailDialog(Activity context, String title, String block, Object... moreBlocks) {
@@ -120,15 +105,28 @@ public class ImageDetailMetaDialogBuilder {
         return builder.create();
     }
 
+    private static void appendQueryInfo(StringBuilder result, QueryParameter query, long offset) {
+        if (query != null) {
+            result.append(NL).append(line).append(NL);
+            result.append(NL).append("#").append(offset).append(": ").append(query.toSqlString()).append(NL).append(NL);
+        }
+    }
+
+    private static void append(StringBuilder result, String block) {
+        if (block != null) {
+            result.append(NL).append(line).append(NL);
+            result.append(NL).append(block).append(NL);
+        }
+    }
+
     private static final String dateFields = (","
             + TagSql.SQL_COL_DATE_ADDED + ","
             + TagSql.SQL_COL_EXT_XMP_LAST_MODIFIED_DATE + ","
             + TagSql.SQL_COL_LAST_MODIFIED
             + ",").toLowerCase();
 
-    private static void appendExifInfo(StringBuilder result, Activity context, String filepath, long currentImageId) {
+    private static void appendExifInfo(StringBuilder result, Activity context, IFile jpegFile, long currentImageId) {
         try {
-            IFile jpegFile = FileFacade.convert("ImageDetailMetaDialogBuilder.appendExifInfo", filepath);
             getExifInfo_android(result, jpegFile);
 
             addExif(result, jpegFile);

@@ -867,12 +867,25 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
         mViewPager.setCurrentItem(pos);
     }
 
-    private void cmdShowDetails(String fullFilePath, long currentImageId) {
+    private void cmdShowDetails(final CharSequence title, final IFile file, final long currentImageId) {
 
+        File missingRoot = getMissingRootDirFileOrNull(
+                "ImageDetailActivityViewPager.osRenameTo", file.getFile());
+        if (missingRoot != null) {
+            // ask for needed permissions
+            requestRootUriDialog(missingRoot, title,
+                    new FilePermissionActivity.IOnDirectoryPermissionGrantedHandler() {
+                        @Override
+                        public void afterGrant(FilePermissionActivity activity) {
+                            ((ImageDetailActivityViewPager) activity).cmdShowDetails(title, file, currentImageId);
+                        }
+                    });
+            return;
+        }
         CharSequence countMsg = TagSql.getStatisticsMessage(this, R.string.show_photo,
                 mGalleryContentQuery);
 
-        ImageDetailMetaDialogBuilder.createImageDetailDialog(this, fullFilePath, currentImageId,
+        ImageDetailMetaDialogBuilder.createImageDetailDialog(this, file, currentImageId,
                 mGalleryContentQuery,
                 mViewPager.getCurrentItem(),
                 countMsg).show();
@@ -880,7 +893,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem menuItem) {
+    public boolean onOptionsItemSelected(final MenuItem menuItem) {
         boolean reloadContext = true;
         boolean result = true;
         boolean slideShowStarted = mSlideShowStarted;
@@ -897,7 +910,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
             // Handle presses on the action bar items
             switch (menuItem.getItemId()) {
                 case R.id.action_details:
-                    cmdShowDetails(getCurrentFilePath(), getCurrentImageId());
+                    cmdShowDetails(menuItem.getTitle(), getCurrentFile(), getCurrentImageId());
                     break;
 
                 case R.id.action_view_context_mode:
@@ -1019,7 +1032,20 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
 
     }
 
-    private boolean onEditExif(MenuItem menuItem, SelectedFiles currentFoto, final long fotoId, final String fotoPath) {
+    private boolean onEditExif(final MenuItem menuItem, final SelectedFiles currentFoto, final long fotoId, final String fotoPath) {
+        File missingRoot = getMissingRootDirFileOrNull(
+                "ImageDetailActivityViewPager.osRenameTo", currentFoto.getFiles());
+        if (missingRoot != null) {
+            // ask for needed permissions
+            requestRootUriDialog(missingRoot, menuItem.getTitle(),
+                    new FilePermissionActivity.IOnDirectoryPermissionGrantedHandler() {
+                        @Override
+                        public void afterGrant(FilePermissionActivity activity) {
+                            ((ImageDetailActivityViewPager) activity).onEditExif(menuItem, currentFoto, fotoId, fotoPath);
+                        }
+                    });
+            return false;
+        }
         PhotoPropertiesEditActivity.showActivity(" menu " + menuItem.getTitle(),
                 this, null, fotoPath, currentFoto, 0, true);
         return true;
