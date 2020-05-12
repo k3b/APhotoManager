@@ -36,6 +36,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.Arrays;
 
 import de.k3b.android.androFotoFinder.AffUtils;
@@ -45,8 +46,8 @@ import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.io.AndroidFileCommands;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
+import de.k3b.android.widget.FilePermissionActivity;
 import de.k3b.android.widget.HistoryEditText;
-import de.k3b.android.widget.LocalizedActivity;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.geo.io.GeoPickHistory;
@@ -58,7 +59,7 @@ import de.k3b.io.collections.SelectedItems;
 /**
  * Defines a gui for global foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.
  */
-public class GeoEditActivity extends LocalizedActivity implements Common  {
+public class GeoEditActivity extends FilePermissionActivity implements Common {
     private static final String mDebugPrefix = "GeoEdit-";
 
     public static final int RESULT_ID = 524;
@@ -103,9 +104,8 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreateEx(Bundle savedInstanceState) {
         Global.debugMemory(mDebugPrefix, "onCreate");
-        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_geo_edit);
         onCreateButtos();
 
@@ -359,7 +359,24 @@ public class GeoEditActivity extends LocalizedActivity implements Common  {
         }
     }
 
-    private void setGeo(final double latitude, final double longitude, String id, final SelectedFiles selectedItems) {
+    private void setGeo(final double latitude, final double longitude, final String id, final SelectedFiles selectedItems) {
+        if (selectedItems != null) {
+            File missingRoot = getMissingRootDirFileOrNull(
+                    "GeoEditActivity.setGeo", selectedItems.getFiles());
+            if (missingRoot != null) {
+                CharSequence title = getTitle();
+                // ask for needed permissions
+                requestRootUriDialog(missingRoot, title,
+                        new FilePermissionActivity.IOnDirectoryPermissionGrantedHandler() {
+                            @Override
+                            public void afterGrant(FilePermissionActivity activity) {
+                                ((GeoEditActivity) activity).setGeo(latitude, longitude, id, selectedItems);
+                            }
+                        });
+                return;
+            }
+        }
+
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
         cmdOk.setVisibility(View.INVISIBLE);
         cmdCancel.setVisibility(View.INVISIBLE);
