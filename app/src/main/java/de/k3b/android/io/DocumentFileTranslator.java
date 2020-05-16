@@ -51,6 +51,17 @@ public class DocumentFileTranslator {
     private final Context context;
 
     /**
+     * Livecycle: Is incremented to indicate that {@link #getDirCache()} is invalid and must be reloaded
+     */
+    private static int dirCacheGlobalGeneratetionID = 1;
+
+    /**
+     * Livecycle: {@link #dirCacheGeneratetionID} != {@link #dirCacheGlobalGeneratetionID} means
+     * that the {@link #getDirCache()} is invalid and must be reloaded
+     */
+    private int dirCacheGeneratetionID = dirCacheGlobalGeneratetionID;
+
+    /**
      * Mapping from known File to DocumentFile translation
      */
     private final Map<File, DocumentFile> dirCache = new HashMap<>();
@@ -96,11 +107,16 @@ public class DocumentFileTranslator {
         return null;
     }
 
-    public DocumentFileTranslator addRoot(File directory, Uri documentRootUri) {
-        if (root.add(directory.getAbsolutePath(), documentRootUri.toString())) {
-            add(directory, DocumentFile.fromTreeUri(context, documentRootUri));
+    /**
+     * Livecycle: Indicate that {@link #getDirCache()} is invalid and must be reloaded
+     *
+     * @param eventSourceOrNull the class that initiated the invalidate
+     */
+    public static void invalidate(Object eventSourceOrNull) {
+        if (eventSourceOrNull instanceof DocumentFileTranslator) {
+            ((DocumentFileTranslator) eventSourceOrNull).dirCacheGeneratetionID++;
         }
-        return this;
+        dirCacheGlobalGeneratetionID ++;
     }
 
     public boolean isKnownRoot(File candidate) {
@@ -114,8 +130,26 @@ public class DocumentFileTranslator {
         return false;
     }
 
+    public DocumentFileTranslator addRoot(File directory, Uri documentRootUri) {
+        if (root.add(directory.getAbsolutePath(), documentRootUri.toString())) {
+            add(directory, DocumentFile.fromTreeUri(context, documentRootUri));
+            invalidate(this);
+        }
+        return this;
+    }
+
+    protected Map<File, DocumentFile> getDirCache() {
+        if (dirCacheGeneratetionID != dirCacheGlobalGeneratetionID) {
+            // dirCache was invalidated from outside. Must be re-created
+            dirCache.clear();
+            dirCacheGeneratetionID = dirCacheGlobalGeneratetionID;
+            init();
+        }
+        return dirCache;
+    }
+    
     protected DocumentFile getFromCache(File fileOrDir) {
-        return dirCache.get(fileOrDir);
+        return getDirCache().get(fileOrDir);
     }
 
     /**
@@ -132,7 +166,7 @@ public class DocumentFileTranslator {
                 Log.d(TAG, mDebugPrefix + "dirCache.put(" + directory +
                         " -> " + uri + ")");
             }
-            dirCache.put(directory, documentFileDir);
+            getDirCache().put(directory, documentFileDir);
         }
         return this;
     }
