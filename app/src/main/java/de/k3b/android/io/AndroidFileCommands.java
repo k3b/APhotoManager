@@ -110,16 +110,22 @@ public class AndroidFileCommands extends FileCommands {
         return zipfile;
     }
 
-    /** called before copy/move/rename/delete */
-    @Override
-    protected void onPreProcess(String what, int opCode, SelectedFiles selectedFiles, String[] oldPathNames, String[] newPathNames) {
-        if (Global.debugEnabled) {
-            Log.i(Global.LOG_CONTEXT, mDebugPrefix + "onPreProcess('" + what + "')");
+    /**
+     * android specific: return false if media scanner is active
+     */
+    public static boolean canProcessFile(Context context, boolean isInBackground) {
+        if (!Global.mustCheckMediaScannerRunning) return true; // always allowed. DANGEROUS !!!
+
+        if (context == null) return false; // #139 might have been destroyed after screen rotation
+
+        if (PhotoPropertiesMediaFilesScanner.isScannerActive(context.getContentResolver())) {
+            if (!isInBackground) {
+                Toast.makeText(context, R.string.scanner_err_busy, Toast.LENGTH_LONG).show();
+            }
+            return false;
         }
 
-        // a nomedia file is affected => must update gui
-        this.mHasNoMedia = PhotoPropertiesMediaFilesScanner.isNoMedia(22, oldPathNames) || PhotoPropertiesMediaFilesScanner.isNoMedia(22, newPathNames);
-        super.onPreProcess(what, opCode, selectedFiles, oldPathNames, newPathNames);
+        return (RecursivePhotoPropertiesMediaFilesScannerAsyncTask.getBusyScanner() == null);
     }
 
     /** called for each modified/deleted file */
@@ -560,27 +566,27 @@ public class AndroidFileCommands extends FileCommands {
         return this;
     }
 
+    /**
+     * called before copy/move/rename/delete. Android specific: check for ".nomedia"
+     */
+    @Override
+    protected void onPreProcess(String what, int opCode, SelectedFiles selectedFiles, String[] oldPathNames, String[] newPathNames) {
+        if (Global.debugEnabled) {
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + "onPreProcess('" + what + "')");
+        }
+
+        // a nomedia file is affected => must update gui
+        this.mHasNoMedia = PhotoPropertiesMediaFilesScanner.isNoMedia(22, oldPathNames) || PhotoPropertiesMediaFilesScanner.isNoMedia(22, newPathNames);
+        super.onPreProcess(what, opCode, selectedFiles, oldPathNames, newPathNames);
+    }
+
+    /** android specific: return false if media scanner is active */
     @Override
     protected boolean canProcessFile(int opCode) {
         if (opCode != OP_UPDATE) {
             return AndroidFileCommands.canProcessFile(mContext, this.isInBackground);
         }
         return true;
-    }
-
-    public static boolean canProcessFile(Context context, boolean isInBackground) {
-        if (!Global.mustCheckMediaScannerRunning) return true; // always allowed. DANGEROUS !!!
-
-        if (context == null) return false; // #139 might have been destroyed after screen rotation
-
-        if (PhotoPropertiesMediaFilesScanner.isScannerActive(context.getContentResolver())) {
-            if (!isInBackground) {
-                Toast.makeText(context, R.string.scanner_err_busy, Toast.LENGTH_LONG).show();
-            }
-            return false;
-        }
-
-        return (RecursivePhotoPropertiesMediaFilesScannerAsyncTask.getBusyScanner() == null);
     }
 
     @Override

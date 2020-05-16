@@ -40,7 +40,11 @@ public class FileManagerUtil {
                     ? Uri.parse(path)
                     : Uri.fromFile(new File(path));
 
-            //TODO might throw android.os.FileUriExposedException
+            //  since Android N (API level 24)
+            //TODO !!! might throw android.os.FileUriExposedException
+            // android.os.FileUriExposedException: file:///storage/383A-1E04/DCIM/ExtTest exposed beyond app through Intent.getData()
+            // DISABLE_PROPERTY = "persist.sys.strictmode.disable";
+            // android.os.SystemProperties.
             Intent startIntent = new Intent();
             startIntent.setAction(Intent.ACTION_VIEW);
 

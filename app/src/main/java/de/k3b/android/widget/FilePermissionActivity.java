@@ -34,7 +34,6 @@ import android.widget.Toast;
 import java.io.File;
 
 import de.k3b.android.androFotoFinder.Common;
-import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.io.AndroidFileFacade;
 import de.k3b.android.io.DocumentFileTranslator;
@@ -93,9 +92,13 @@ public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialog
                         && (grantResults.length > 0)
                         && (grantResults[0] == PackageManager.PERMISSION_GRANTED);
                 if (success) {
+                    if (FileFacade.debugLogFacade) {
+                        Log.i(FileFacade.LOG_TAG, this.getClass().getSimpleName()
+                                + ": onRequestPermissionsResult(success) ");
+                    }
                     onCreateEx(null);
                 } else {
-                    Log.i(Global.LOG_CONTEXT, this.getClass().getSimpleName()
+                    Log.i(FileFacade.LOG_TAG, this.getClass().getSimpleName()
                             + ": " + getText(R.string.permission_error));
                     Toast.makeText(this, R.string.permission_error, Toast.LENGTH_LONG).show();
                     setResult(Common.RESULT_NO_PERMISSIONS, null);
@@ -190,6 +193,10 @@ public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialog
     }
 
     private void onRootUriResult(Uri documentRootUri) {
+        if (FileFacade.debugLogFacade) {
+            Log.i(FileFacade.LOG_TAG, this.getClass().getSimpleName()
+                    + ": onRootUriResult(" + documentRootUri + ") ");
+        }
         IOnDirectoryPermissionGrantedHandler permissionGrantedHandler = currentPermissionGrantedHandler;
         File rootFile = currentRootFileRequest;
         currentPermissionGrantedHandler = null;

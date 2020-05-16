@@ -40,10 +40,11 @@ public class FileProcessor extends FileCommandLogger implements IFileCommandLogg
 
     protected boolean fileOrSidecarExists(IFile file) {
         if (file == null) return false;
+        if (osFileExists(file)) return true;
 
         IFile parent = file.getParentFile();
         String name = file.getName();
-        return osFileExists(file) || osFileExists(XmpFile.getSidecar(parent, name, false))
+        return osFileExists(XmpFile.getSidecar(parent, name, false))
                 || osFileExists(XmpFile.getSidecar(parent, name, true));
     }
 

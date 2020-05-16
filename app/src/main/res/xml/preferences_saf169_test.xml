@@ -22,8 +22,8 @@ this program. If not, see <http://www.gnu.org/licenses/>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:key="preferences">
     <PreferenceCategory
-        android:key="pref_category_debug"
-        android:title="@string/settings_group_debug_title">
+        android:key="pref_category_special"
+        android:title="Test Settings">
         <Preference
             android:key="debugClearSafCache"
             android:title="experimental: Clear SAF cache" />

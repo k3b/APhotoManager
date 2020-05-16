@@ -80,6 +80,20 @@ public class SettingsActivity extends PreferenceActivity {
             Log.d(Global.LOG_CONTEXT, "SettingsActivity onCreate " + intent.toUri(Intent.URI_INTENT_SCHEME));
         }
 
+        if (FileFacade.debugLogFacade) {
+            this.addPreferencesFromResource(R.xml.preferences_saf169_test);
+            findPreference("debugClearSafCache").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    DocumentFileTranslator.clearCache();
+                    Toast.makeText(SettingsActivity.this, "debugClearSafCache",
+                            Toast.LENGTH_LONG).show();
+                    finish();
+                    return true; // do close
+                }
+            });
+        }
+
         this.addPreferencesFromResource(R.xml.preferences);
         prefsInstance = PreferenceManager
                 .getDefaultSharedPreferences(this);
@@ -139,19 +153,6 @@ public class SettingsActivity extends PreferenceActivity {
                 return false; // donot close
             }
         });
-
-        if (FileFacade.debugLogFacade) {
-            this.addPreferencesFromResource(R.xml.preferences_saf169_test);
-            findPreference("debugClearSafCache").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    DocumentFileTranslator.clearCache();
-                    Toast.makeText(SettingsActivity.this, "debugClearSafCache",
-                            Toast.LENGTH_LONG).show();
-                    return true; // do close
-                }
-            });
-        }
 
 		// #21: Support to change locale at runtime
         updateSummary();

@@ -51,6 +51,7 @@ import android.widget.Toast;
 
 import org.osmdroid.api.IGeoPoint;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -105,6 +106,7 @@ import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
+import de.k3b.io.filefacade.FileFacade;
 import de.k3b.tagDB.Tag;
 
 /**
@@ -250,7 +252,33 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
         }
     }
 
-    private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, String lastCopyToPath, final SelectedFiles fotos) {
+    private boolean cmdMoveOrCopyWithDestDirPicker(final boolean move, final String lastCopyToPath,
+                                                   final SelectedFiles fotos, final CharSequence title) {
+        final FilePermissionActivity activity = (FilePermissionActivity) getActivity();
+        if (fotos != null) {
+            File missingRoot = activity.getMissingRootDirFileOrNull(
+                    "cmdMoveOrCopyWithDestDirPicker", fotos.getFiles());
+            if (missingRoot != null) {
+                // ask for needed permissions
+                activity.requestRootUriDialog(missingRoot, title,
+                        new FilePermissionActivity.IOnDirectoryPermissionGrantedHandler() {
+                            @Override
+                            public void afterGrant(FilePermissionActivity activity) {
+                                // does not work in frag,emt
+                                mFileCommands.setContext(activity);
+                                if (FileFacade.debugLogFacade) {
+                                    Log.i(FileFacade.LOG_TAG, this.getClass().getSimpleName()
+                                            + ": afterGrant " + activity + "-" + this);
+                                }
+                                cmdMoveOrCopyWithDestDirPicker(move, lastCopyToPath, fotos, title);
+                            }
+                        });
+
+                return false;
+            }
+        }
+
+
         if (AndroidFileCommands.canProcessFile(this.getActivity(), false)) {
             PhotoChangeNotifyer.setPhotoChangedListener(this);
             mDestDirPicker = MoveOrCopyDestDirPicker.newInstance(move, fotos);
@@ -263,7 +291,7 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
             }
 
             mDestDirPicker.setBaseQuery(getCurrentQuery());
-            mDestDirPicker.show(getActivity().getFragmentManager(), "osdir");
+            mDestDirPicker.show(activity.getFragmentManager(), "osdir");
         }
         return false;
     }
@@ -881,9 +909,9 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
                         getCurrentQuery(), BackupActivity.REQUEST_BACKUP_ID);
                 return true;
             case R.id.cmd_copy:
-                return cmdMoveOrCopyWithDestDirPicker(false, fileCommands.getLastCopyToPath(), selectedFiles);
+                return cmdMoveOrCopyWithDestDirPicker(false, fileCommands.getLastCopyToPath(), selectedFiles, menuItem.getTitle());
             case R.id.cmd_move:
-                return cmdMoveOrCopyWithDestDirPicker(true, fileCommands.getLastCopyToPath(), selectedFiles);
+                return cmdMoveOrCopyWithDestDirPicker(true, fileCommands.getLastCopyToPath(), selectedFiles, menuItem.getTitle());
             case R.id.cmd_rename_multible:
                 return cmdRenameMultible(menuItem, selectedFiles);
             case R.id.cmd_show_geo:

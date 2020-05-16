@@ -112,9 +112,14 @@ public class FileUtils {
                 if (LibGlobal.debugEnabled) {
                     logger.warn(DBG_CONTEXT + "Closing " + source);
                 }
+
 				stream.close();
-			} catch (IOException e) {
-                if (source != null) {
+            } catch (Exception e) {
+                // catch IOException and in android also NullPointerException
+                // java.lang.NullPointerException: Attempt to invoke virtual method
+                // 'void java.io.InputStream.close()' on a null object reference
+                // where stream is java.io.FilterInputStream whith child-filter "in" = null
+                if (source != null && LibGlobal.debugEnabled) {
                     logger.warn(DBG_CONTEXT + "Error close " + source, e);
                 }
 			}

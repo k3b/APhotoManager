@@ -254,10 +254,18 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public InputStream openInputStream() throws FileNotFoundException {
-        if (debugLogFacade) {
-            Log.i(LOG_TAG, "openInputStream " + this);
+        final DocumentFile androidFile = getAndroidFile(true);
+        final InputStream resultInputStream = documentFileTranslator.openInputStream(androidFile);
+        if (resultInputStream == null) {
+            final String msg = "openInputStream " + this + " for uri "
+                    + ((androidFile != null) ? androidFile.getUri() : "null") + " returns null";
+            Log.w(LOG_TAG, msg);
+            getAndroidFile(true); // allow debugger to step in
+            throw new FileNotFoundException(msg);
+        } else if (debugLogFacade) {
+            Log.i(LOG_TAG, "openInputStream " + this + " for uri " + androidFile.getUri());
         }
-        return documentFileTranslator.openInputStream(getAndroidFile(true));
+        return resultInputStream;
     }
 
     private IFile[] get(DocumentFile[] docs) {
