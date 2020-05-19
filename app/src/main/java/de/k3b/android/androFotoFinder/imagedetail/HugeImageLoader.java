@@ -12,8 +12,7 @@ import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
 
-import java.io.File;
-
+import de.k3b.io.filefacade.IFile;
 import uk.co.senab.photoview.log.LogManager;
 
 /**
@@ -45,16 +44,16 @@ public class HugeImageLoader {
         return 4096;
     }
 
-    public static Bitmap loadImage(File file, Context context) {
+    public static Bitmap loadImage(IFile file, Context context) {
         WindowManager windowManager = (WindowManager)context.getSystemService(Activity.WINDOW_SERVICE);
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB_MR2) {
-            loadImageOld(file,  windowManager);
+            return loadImageOld(file, windowManager);
         }
         return loadImageHoneycombMr2(file, windowManager);
     }
 
-    private static Bitmap loadImageOld(File file, WindowManager windowManager) {
+    private static Bitmap loadImageOld(IFile file, WindowManager windowManager) {
         final Display display = windowManager.getDefaultDisplay();
         DisplayMetrics displaymetrics = new DisplayMetrics();
         display.getMetrics(displaymetrics);
@@ -62,14 +61,14 @@ public class HugeImageLoader {
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    private static Bitmap loadImageHoneycombMr2(File file, WindowManager windowManager) {
+    private static Bitmap loadImageHoneycombMr2(IFile file, WindowManager windowManager) {
         Point outSize = new Point();
         final Display display = windowManager.getDefaultDisplay();
         display.getSize(outSize);
         return loadImage(file, outSize.x, outSize.y);
     }
 
-    public static Bitmap loadImage(File file, int maxWidth, int maxHeight) {
+    public static Bitmap loadImage(IFile file, int maxWidth, int maxHeight) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(file.getAbsolutePath(), options);

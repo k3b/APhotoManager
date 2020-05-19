@@ -210,7 +210,7 @@ public class ImageDetailMetaDialogBuilder {
     }
 
     private static void getExifInfo_android(StringBuilder builder, IFile filepath) throws IOException {
-        ExifInterfaceEx exif = ExifInterfaceEx.create(filepath, null, "ImageDetailMetaDialogBuilder.getExifInfo_android");
+        ExifInterfaceEx exif = ExifInterfaceEx.create(filepath, null, null, "ImageDetailMetaDialogBuilder.getExifInfo_android");
 
         builder.append(NL).append(line).append(NL);
         builder.append(NL).append(filepath).append(NL).append(NL);

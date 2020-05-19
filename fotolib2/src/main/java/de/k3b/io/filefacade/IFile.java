@@ -58,6 +58,10 @@ public interface IFile {
 
     String getCanonicalPath();
 
+    String getAsUriString();
+
+    void setReadUri(String readUri);
+
     IFile getParentFile();
 
     String getParent();

@@ -30,6 +30,7 @@ import java.util.Date;
 import de.k3b.android.androFotoFinder.AdapterArrayHelper;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
+import de.k3b.io.filefacade.IFile;
 
 /**
  * Purpose: allow viewing images from ".nomedia" folders where no data is available in mediadb/cursor.
@@ -73,8 +74,14 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
 
     @Override
     public String getFullFilePath(int position) {
+        String result = getLocalFullFilePath(position);
+        if (result == null) result = super.getFullFilePath(position);
+        return result;
+    }
+
+    private String getLocalFullFilePath(int position) {
         if (mArrayImpl != null) return mArrayImpl.getFullFilePathfromArray(position);
-        return super.getFullFilePath(position);
+        return null;
     }
 
     /** translates offset in adapter to id of image */
@@ -92,11 +99,10 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
 
     @Override
     public View instantiateItem(ViewGroup container, int position) {
-        final String fullPhotoPath = (mArrayImpl != null) ? mArrayImpl.getFullFilePathfromArray(position) : null;
-        if (fullPhotoPath != null) {
+        IFile file = getFile(position);
+        if (file != null) {
             // special case image from ".nomedia" folder via absolute path not via content: uri
-
-            return createViewWithContent(position, container, fullPhotoPath, "instantiateItemFromArray(#", 32767);
+            return createViewWithContent(position, container, file, "instantiateItemFromArray(#", 32767);
         }
 
         // no array avaliable. Use original cursor baed implementation

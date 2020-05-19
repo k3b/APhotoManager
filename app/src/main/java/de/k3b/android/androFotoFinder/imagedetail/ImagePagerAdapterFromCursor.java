@@ -40,17 +40,19 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.display.SimpleBitmapDisplayer;
 
-import java.io.File;
 import java.util.Date;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.queries.FotoSqlBase;
 import de.k3b.android.util.DBUtils;
 import de.k3b.android.util.GarbageCollector;
 import de.k3b.android.util.MenuUtils;
 import de.k3b.android.util.PhotoChangeNotifyer;
 import de.k3b.android.util.ResourceUtils;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 import de.k3b.media.PhotoPropertiesBulkUpdateService;
 
 /**
@@ -178,6 +180,24 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements PhotoCh
         return DBUtils.getString(cursor,FotoSql.SQL_COL_DISPLAY_TEXT, null);
     }
 
+    public IFile getiFile(int position, String fullFilePath, long imageID) {
+        final IFile file = FileFacade.convert(
+                mDebugPrefix + "getFile(" + position + ")",
+                fullFilePath);
+        if (imageID > 0) {
+            file.setReadUri(FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE + "/" + imageID);
+        }
+        return file;
+    }
+
+    public IFile getFile(int position) {
+        final String fullFilePath = getFullFilePath(position);
+
+        if (fullFilePath == null) return null;
+        long imageID = getImageId(position);
+        return getiFile(position, fullFilePath, imageID);
+    }
+
     /** translates offset in adapter to id of image */
     public long getImageId(int position) {
         Cursor cursor = getCursorAt(position);
@@ -211,7 +231,6 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements PhotoCh
     public View instantiateItem(ViewGroup container, int position) {
         Cursor cursor = getCursorAt(position);
         if (cursor != null) {
-            String fullPhotoPath = getFullFilePath(position);
 
             // determine max(with,height) from db
             // new col id for with since ver 0.6.3
@@ -224,8 +243,9 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements PhotoCh
 
             int size = (colSize >= 0) ? cursor.getInt(colSize) : 32767;
 
-            if (fullPhotoPath != null) {
-                return createViewWithContent(position, container, fullPhotoPath, "instantiateItemFromCursor(#", size);
+            IFile file = getFile(position); // , fullPhotoPath);
+            if (file != null) {
+                return createViewWithContent(position, container, file, "instantiateItemFromCursor(#", size);
             }
 
         }
@@ -260,7 +280,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements PhotoCh
     }
 
     @NonNull
-    protected View createViewWithContent(int position, ViewGroup container, String fullPhotoPath, String debugContext, int size) {
+    protected View createViewWithContent(int position, ViewGroup container, IFile imageFile, String debugContext, int size) {
         final Context context = container.getContext();
 
         final boolean useLayout=true;
@@ -297,8 +317,6 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements PhotoCh
         photoView.setMaximumScale(20);
         photoView.setMediumScale(5);
 
-        final File imageFile = new File(fullPhotoPath);
-
         String loadType;
 
         // if image is big use memoryefficient, fast, low-quality thumbnail (old code)
@@ -312,18 +330,18 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements PhotoCh
                 Bitmap bitmap = HugeImageLoader.loadImage(imageFile, MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION);
                 // rotation is done by photoView
                 photoView.setImageBitmap(bitmap);
-                photoView.setImageReloadFile(null);
+                photoView.setImageReloadFile((IFile) null);
                 photoView.setDebugPrefix(imageFile.getName());
             } catch (OutOfMemoryError err) {
                 loadType = "small image out of memory using thumb ";
                 setImageFromThumbnail(photoView, imageFile);
             }
         }
-        final int rotationInDegrees = PhotoPropertiesBulkUpdateService.getRotationFromExifOrientation(fullPhotoPath, null);
+        final int rotationInDegrees = PhotoPropertiesBulkUpdateService.getRotationFromExifOrientation(imageFile, null);
         if (Global.debugEnabledViewItem) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + debugContext + position +", rotation=" +
                     rotationInDegrees + ", "
-                    + loadType + ") => " + fullPhotoPath + " => " + photoView);
+                    + loadType + ") => " + imageFile + " => " + photoView);
         }
         photoView.setRotationTo(rotationInDegrees);
 
@@ -331,12 +349,12 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements PhotoCh
         return root;
     }
 
-    private void setImageFromThumbnail(PhotoViewEx photoView, File imageFile) {
+    private void setImageFromThumbnail(PhotoViewEx photoView, IFile imageFile) {
         /** k3b 20150913 #10: Faster initial loading: initially the view is loaded with low res image.
          * on first zoom it is reloaded with this uri */
         photoView.setImageReloadFile(imageFile);
 
-        ImageLoader.getInstance().displayImage("file://" + imageFile, photoView, mDisplayImageOptions);
+        ImageLoader.getInstance().displayImage(imageFile.getAsUriString(), photoView, mDisplayImageOptions);
     }
 
     /**

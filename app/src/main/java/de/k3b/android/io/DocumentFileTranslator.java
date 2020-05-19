@@ -134,6 +134,7 @@ public class DocumentFileTranslator {
         if (root.add(directory.getAbsolutePath(), documentRootUri.toString())) {
             add(directory, DocumentFile.fromTreeUri(context, documentRootUri));
             invalidate(this);
+            root.saveToPrefs();
         }
         return this;
     }
@@ -256,6 +257,10 @@ public class DocumentFileTranslator {
         return null;
     }
 
+    public InputStream openInputStream(Uri readUri) throws FileNotFoundException {
+        return context.getContentResolver().openInputStream(readUri);
+    }
+
     public OutputStream createOutputStream(DocumentFile doc) throws FileNotFoundException {
         if (doc != null) {
             return getContentResolver().openOutputStream(doc.getUri());
@@ -329,7 +334,6 @@ public class DocumentFileTranslator {
         public boolean add(String fileUri, String docfileUri) {
             if ((fileUri != null) && (docfileUri != null)) {
                 dir2uri.put(fileUri, docfileUri);
-                saveToPrefs();
                 return true;
             }
             return false;

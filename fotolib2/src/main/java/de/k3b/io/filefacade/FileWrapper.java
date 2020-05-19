@@ -79,6 +79,16 @@ public class FileWrapper implements IFile {
     }
 
     @Override
+    public String getAsUriString() {
+        return child.getAsUriString();
+    }
+
+    @Override
+    public void setReadUri(String readUri) {
+        child.setReadUri(readUri);
+    }
+
+    @Override
     public IFile getParentFile() {
         return child.getParentFile();
     }

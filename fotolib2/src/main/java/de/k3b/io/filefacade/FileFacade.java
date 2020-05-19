@@ -153,6 +153,17 @@ public class FileFacade implements IFile {
     }
 
     @Override
+    public String getAsUriString() {
+        if (file == null) return null;
+        return "file://" + file.getAbsolutePath();
+    }
+
+    @Override
+    public void setReadUri(String readUri) {
+        // not used outside Android
+    }
+
+    @Override
     public IFile getCanonicalFile() {
         return convert("FileFacade getCanonicalFile", FileUtils.tryGetCanonicalFile(file));
     }

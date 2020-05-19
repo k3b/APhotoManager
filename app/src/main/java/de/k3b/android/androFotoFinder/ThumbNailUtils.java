@@ -46,7 +46,7 @@ import de.k3b.io.StringUtils;
  * Created by k3b on 02.07.2016.
  */
 public class ThumbNailUtils {
-    public static final String LOG_TAG = "ImageLoader";
+    public static final String LOG_TAG = "ThumbNailUtils";
     public static final int MAX_CACHE_SIZE_50MB = 50 * 1024 * 1024;
     public static final int MAX_FILE_COUNT = 1024;
     public static boolean DEBUG = false; // in settings via debugEnableLibs

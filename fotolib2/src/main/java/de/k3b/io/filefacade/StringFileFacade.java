@@ -138,6 +138,15 @@ public class StringFileFacade implements IFile {
     }
 
     @Override
+    public String getAsUriString() {
+        return null;
+    }
+
+    @Override
+    public void setReadUri(String readUri) {
+    }
+
+    @Override
     public IFile getParentFile() {
         return null;
     }

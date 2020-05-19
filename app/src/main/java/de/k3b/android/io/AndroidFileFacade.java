@@ -20,6 +20,7 @@
 package de.k3b.android.io;
 
 import android.content.Context;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.provider.DocumentFile;
@@ -51,6 +52,11 @@ public class AndroidFileFacade extends FileFacade {
      */
     @Nullable
     private DocumentFile androidFile = null;
+
+    /**
+     * original android media content URI
+     */
+    private Uri readUri = null;
 
     /**
      * false means do not try to load androidFile again
@@ -191,6 +197,23 @@ public class AndroidFileFacade extends FileFacade {
     }
 
     @Override
+    public String getAsUriString() {
+        if (readUri != null) return readUri.toString();
+
+        final DocumentFile androidFile = getAndroidFile(false);
+        final Uri uri = (androidFile != null) ? androidFile.getUri() : null;
+        if (uri != null) {
+            return uri.toString();
+        }
+        return null;
+    }
+
+    @Override
+    public void setReadUri(String readUri) {
+        this.readUri = (readUri != null) ? Uri.parse(readUri) : null;
+    }
+
+    @Override
     public String getName() {
         final DocumentFile androidFile = getAndroidFile(false);
         if (androidFile != null) {
@@ -254,6 +277,12 @@ public class AndroidFileFacade extends FileFacade {
 
     @Override
     public InputStream openInputStream() throws FileNotFoundException {
+        if ((readUri != null)) {
+            if (debugLogFacade) {
+                Log.i(LOG_TAG, "openInputStream " + this + " for uri " + readUri);
+            }
+            return documentFileTranslator.openInputStream(readUri);
+        }
         final DocumentFile androidFile = getAndroidFile(true);
         final InputStream resultInputStream = documentFileTranslator.openInputStream(androidFile);
         if (resultInputStream == null) {

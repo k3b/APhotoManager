@@ -23,8 +23,7 @@ import android.os.Build;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
-import java.io.File;
-
+import de.k3b.io.filefacade.IFile;
 import de.k3b.media.PhotoPropertiesBulkUpdateService;
 import uk.co.senab.photoview.PhotoView;
 import uk.co.senab.photoview.PhotoViewAttacher;
@@ -66,7 +65,7 @@ public class PhotoViewEx extends PhotoView {
 
     /** k3b 20150913 #10: Faster initial loading: initially the view is loaded with low res image.
      * on first zoom it is reloaded with this uri */
-    public void setImageReloadFile(File file) {
+    public void setImageReloadFile(IFile file) {
         mAttacher.setImageReloadFile(file);
         if (file != null) {
             setDebugPrefix(file.getName());
@@ -82,7 +81,7 @@ public class PhotoViewEx extends PhotoView {
     static class PhotoViewAttacherEx extends PhotoViewAttacher {
         /** k3b 20150913 #10: Faster initial loading: initially the view is loaded with low res image.
          * on first zoom it is reloaded with this uri */
-        private File mImageReloadFile = null;
+        private IFile mImageReloadFile = null;
 
         /** my android 4.4 cannot process images bigger than 4096*4096. -1 means must be calculated from openGL  */
         private static int MAX_IMAGE_DIMENSION = -1; // will be set to 4096
@@ -92,7 +91,7 @@ public class PhotoViewEx extends PhotoView {
         }
         /** k3b 20150913 #10: Faster initial loading: initially the view is loaded with low res image.
          * on first zoom it is reloaded with this uri */
-        public void setImageReloadFile(File imageReloadURI) {
+        public void setImageReloadFile(IFile imageReloadURI) {
             this.mImageReloadFile = imageReloadURI;
             if (imageReloadURI != null) {
                 setDebugPrefix(imageReloadURI.getName());
@@ -117,8 +116,8 @@ public class PhotoViewEx extends PhotoView {
                         if (MAX_IMAGE_DIMENSION < 0) {
                             MAX_IMAGE_DIMENSION = (Build.VERSION.SDK_INT < Build.VERSION_CODES.FROYO) ? 4096 : HugeImageLoader.getMaxTextureSize();
                         }
-                        imageView.setImageBitmap(HugeImageLoader.loadImage(mImageReloadFile.getAbsoluteFile(), MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION));
-                        this.setRotationTo(PhotoPropertiesBulkUpdateService.getRotationFromExifOrientation(mImageReloadFile.getAbsolutePath(), null));
+                        imageView.setImageBitmap(HugeImageLoader.loadImage(mImageReloadFile, MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION));
+                        this.setRotationTo(PhotoPropertiesBulkUpdateService.getRotationFromExifOrientation(mImageReloadFile, null));
 
                     } catch (OutOfMemoryError e) {
                         LogManager.getLogger().e(

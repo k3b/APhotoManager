@@ -93,8 +93,10 @@ public class ExifInterfaceEx extends ExifInterface
 
     }
 
-    public static ExifInterfaceEx create(IFile jpgFile, IPhotoProperties xmpExtern, String dbg_context) throws IOException {
-        return new ExifInterfaceEx(jpgFile.openInputStream(), jpgFile, jpgFile.getAbsolutePath(), xmpExtern, dbg_context);
+    public static ExifInterfaceEx create(IFile jpgFile, InputStream _in, IPhotoProperties xmpExtern, String dbg_context) throws IOException {
+        InputStream in = (_in != null) ? _in : jpgFile.openInputStream();
+        final String absolutePath = (jpgFile != null) ? jpgFile.getAbsolutePath() : null;
+        return new ExifInterfaceEx(in, jpgFile, absolutePath, xmpExtern, dbg_context);
     }
 
     public static ExifInterfaceEx create(String absoluteJpgPath, InputStream in, IPhotoProperties xmpExtern, String dbg_context) throws IOException {

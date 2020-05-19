@@ -236,13 +236,11 @@ public class PhotoPropertiesBulkUpdateService {
     /**
      * Get necessary rotation for image file from exif.
      *
-     * @param fullPathToImageFile The filename.
-     * @param inputStream
      * @return right-rotate (in degrees) image according to exifdata.
      */
-    public static int getRotationFromExifOrientation(String fullPathToImageFile, InputStream inputStream) {
+    public static int getRotationFromExifOrientation(IFile file, InputStream inputStream) {
         try {
-            ExifInterfaceEx exif = ExifInterfaceEx.create(fullPathToImageFile, inputStream, null, "getRotationFromExifOrientation");
+            ExifInterfaceEx exif = ExifInterfaceEx.create(file, inputStream, null, "getRotationFromExifOrientation");
             if (exif.isValidJpgExifFormat()) {
 
                 return PhotoPropertiesUtil.exifOrientationCode2RotationDegrees(exif.getAttributeInt(ExifInterfaceEx.TAG_ORIENTATION, 0), 0);

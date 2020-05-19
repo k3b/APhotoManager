@@ -31,18 +31,19 @@ import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.io.File;
-
 import de.k3b.android.androFotoFinder.AffUtils;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.ThumbNailUtils;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.queries.FotoSqlBase;
 import de.k3b.android.util.DBUtils;
 import de.k3b.android.util.PhotoChangeNotifyer;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 import de.k3b.media.PhotoPropertiesUtil;
 
 /**
@@ -134,7 +135,8 @@ public class GalleryCursorAdapter extends CursorAdapter implements PhotoChangeNo
         holder.filter = DBUtils.getString(cursor, FotoSql.SQL_COL_WHERE_PARAM, null);
 
         String description = DBUtils.getString(cursor, FotoSql.SQL_COL_DISPLAY_TEXT, "");
-        String uri = DBUtils.getString(cursor, FotoSql.SQL_COL_PATH, null);
+
+        String path = DBUtils.getString(cursor, FotoSql.SQL_COL_PATH, null);
         long imageID = DBUtils.getLong(cursor, FotoSql.SQL_COL_PK, 0);
         if (count > 1) description += " (" + count + ")";
         if (gps) description += "#";
@@ -142,13 +144,14 @@ public class GalleryCursorAdapter extends CursorAdapter implements PhotoChangeNo
         holder.icon.setVisibility(((mSelectedItems != null) && (mSelectedItems.contains(imageID))) ? View.VISIBLE : View.GONE);
         holder.imageID = imageID;
 
-        if (uri != null) {
+        if (path != null) {
 
             if ((imageSize > 0) && (imageSize <= Global.imageDetailThumbnailIfBiggerThan)) {
                 try {
                     // #53, #83 Optimisation: no need for thumbnail - saves cache memory but may throw OutOfMemoryError
                     // rotation angle either code (i.e 6 = 90) or angle0, 90, 180, 270
-                    Bitmap bitmap = HugeImageLoader.loadImage(new File(uri), MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION);
+                    final IFile file = getFile(path, imageID);
+                    Bitmap bitmap = HugeImageLoader.loadImage(file, MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION);
                     holder.image.setImageBitmap(bitmap);
                     int rotationAngle = DBUtils.getInt(cursor, FotoSql.SQL_COL_ORIENTATION, 0);
                     rotationAngle = PhotoPropertiesUtil.exifOrientationCode2RotationDegrees(rotationAngle, rotationAngle);
@@ -156,19 +159,27 @@ public class GalleryCursorAdapter extends CursorAdapter implements PhotoChangeNo
                 } catch (OutOfMemoryError err) {
                     // universalimageloader takes care of rotaion handling
                     holder.image.setRotation(0);
-                    ThumbNailUtils.getThumb(uri, holder.image);
+                    ThumbNailUtils.getThumb(path, holder.image);
                 }
 
             } else {
                 // universalimageloader takes care of rotaion handling
                 holder.image.setRotation(0);
-                ThumbNailUtils.getThumb(uri, holder.image);
+                ThumbNailUtils.getThumb(path, holder.image);
             }
             if (Global.debugEnabledViewItem)
                 Log.i(Global.LOG_CONTEXT, mDebugPrefix + "bindView for " + holder);
         } else {
             Log.w(Global.LOG_CONTEXT, mDebugPrefix + "bindView for " + holder + ": no uri found in col " + FotoSql.SQL_COL_PATH);
         }
+    }
+
+    protected IFile getFile(String path, long imageID) {
+        final IFile file = FileFacade.convert(mDebugPrefix, path);
+        if (imageID > 0) {
+            file.setReadUri(FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE + "/" + imageID);
+        }
+        return file;
     }
 
     @Override

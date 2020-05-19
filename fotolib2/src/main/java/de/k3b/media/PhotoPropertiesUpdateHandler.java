@@ -137,7 +137,7 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper
 
             }
         }
-        ExifInterfaceEx exif = ExifInterfaceEx.create(jpgInFile, xmp, dbg_context);
+        ExifInterfaceEx exif = ExifInterfaceEx.create(jpgInFile, null, xmp, dbg_context);
         if (exif.isValidJpgExifFormat()) {
             exif.setPath(jpgInFile.getAbsolutePath());
         } else {
