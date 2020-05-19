@@ -22,6 +22,7 @@ package de.k3b.android.widget;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -103,15 +104,36 @@ public abstract class Dialogs {
 		dialog.show();
 	}
 
+	public static Dialog htmlMessagebox(
+			Context parent, CharSequence title,
+			CharSequence html,
+			DialogInterface.OnClickListener onClickListener) {
+		AlertDialog.Builder builder = createMessageboxBuilder(parent, title, null, onClickListener);
+		WebViewUtil.setHtml(builder, parent, html);
+		AlertDialog alertDialog = builder.create();
+		alertDialog.show();
+		return alertDialog;
+	}
+
 	public static Dialog messagebox(
-			Activity parent, CharSequence title,
+			Context parent, CharSequence title,
 			CharSequence question,
 			DialogInterface.OnClickListener onClickListener) {
+		AlertDialog.Builder builder = createMessageboxBuilder(parent, title, question, onClickListener);
+		AlertDialog alertDialog = builder.create();
+		alertDialog.show();
+		return alertDialog;
+	}
+
+	private static AlertDialog.Builder createMessageboxBuilder(Context parent, CharSequence title, CharSequence question, DialogInterface.OnClickListener onClickListener) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(parent);
-		builder.setTitle(title);
-		final TextView textView = new TextView(parent);
-		textView.setText(question);
-		builder.setView(textView);
+		if (title != null) builder.setTitle(title);
+
+		if (question != null) {
+			final TextView textView = new TextView(parent);
+			textView.setText(question);
+			builder.setView(textView);
+		}
 
 		if (onClickListener == null) {
 			onClickListener = new DialogInterface.OnClickListener() {
@@ -122,9 +144,7 @@ public abstract class Dialogs {
 			};
 		}
 		builder.setPositiveButton(android.R.string.ok, onClickListener);
-		AlertDialog alertDialog = builder.create();
-		alertDialog.show();
-		return alertDialog;
+		return builder;
 	}
 
 	protected View onCreateContentView(Activity parent) {

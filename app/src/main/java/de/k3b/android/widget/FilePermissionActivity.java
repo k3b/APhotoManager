@@ -115,14 +115,24 @@ public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialog
             final CharSequence title, final CharSequence message,
             final IOnDirectoryPermissionGrantedHandler permissionGrantedHandler) {
         if ((title != null) || (message != null)) {
-            Dialog dialog = Dialogs.messagebox(parent, title, message, new DialogInterface.OnClickListener() {
+            final DialogInterface.OnClickListener onClickListener = new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     execRequestRootUri(parent, rootFile, permissionGrantedHandler);
                     dialog.dismiss();
                 }
-            });
+            };
+
+            Dialog dialog;
+            if (false) {
+                dialog = Dialogs.messagebox(parent, title, message, onClickListener);
+            } else {
+                dialog = Dialogs.htmlMessagebox(parent, title, message, onClickListener);
+            }
             parent.setAutoClose(null, dialog, null);
+            /*
+            Dialog dialog = AboutDialogPreference.createDialog(parent, title, message, android.R.string.ok);
+             */
         } else {
             execRequestRootUri(parent, rootFile, permissionGrantedHandler);
         }
@@ -177,7 +187,7 @@ public abstract class FilePermissionActivity extends ActivityWithAutoCloseDialog
     public void requestRootUriDialog(File root, final CharSequence title, IOnDirectoryPermissionGrantedHandler permissionGrantedHandler) {
         requestRootUriDialog(this, root,
                 title,
-                getString(R.string.select_folder_root_rationale),
+                getString(R.string.select_folder_root_rationale, root),
                 permissionGrantedHandler);
     }
 

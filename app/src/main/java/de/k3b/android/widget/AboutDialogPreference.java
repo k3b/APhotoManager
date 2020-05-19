@@ -28,7 +28,6 @@ import android.util.AttributeSet;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
 
 import de.k3b.android.GuiUtil;
@@ -50,7 +49,6 @@ public class AboutDialogPreference extends DialogPreference {
         setDialogTitle(getAboutTitle(context));
         setDialogLayoutResource(R.layout.dialog_about);
         this.context = context;
-
     }
 
     @NonNull
@@ -67,21 +65,7 @@ public class AboutDialogPreference extends DialogPreference {
     }
 
 
-    @Override
-    protected void onBindDialogView(View view) {
-        super.onBindDialogView(view);
-
-        setAboutText(this.context, (WebView) view.findViewById(R.id.content));
-    }
-
-    private static WebView setAboutText(Context context, WebView wv) {
-        final WebSettings settings = wv.getSettings();
-
-        // Fix for "Wrong charset in serbian translations" https://github.com/k3b/LocationMapViewer/issues/5
-        // (for android 2.2) see http://stackoverflow.com/questions/4933069/android-webview-with-garbled-utf-8-characters
-        settings.setDefaultTextEncodingName("utf-8");
-        settings.setBuiltInZoomControls(true);
-
+    private static String getHtml(Context context) {
         String html = context.getResources().getString(R.string.about_content); // "<html><body>some <b>html</b> here</body></html>";
 
         final String versionName = GuiUtil.getAppVersionName(context);
@@ -93,15 +77,7 @@ public class AboutDialogPreference extends DialogPreference {
                 context.getText(R.string.about_translate));
         html = html.replace("$about$",
                 context.getText(R.string.about_content_about));
-
-        // Fix for "Wrong charset in serbian translations" https://github.com/k3b/LocationMapViewer/issues/5
-        // (for android 4.x) see http://stackoverflow.com/questions/4933069/android-webview-with-garbled-utf-8-characters
-        wv.loadData(html, "text/html; charset=utf-8", "UTF-8");
-        wv.setVerticalScrollBarEnabled(true);
-
-        wv.setScrollBarStyle(View.SCROLLBARS_OUTSIDE_OVERLAY);
-        wv.setScrollbarFadingEnabled(false);
-        return wv;
+        return html;
     }
 
     public static Dialog createAboutDialog(Context context) {
@@ -121,10 +97,17 @@ public class AboutDialogPreference extends DialogPreference {
                 }
         );
 
-        final WebView wv =  setAboutText(context, new WebView(context));
-        alert.setView(wv);
+        WebViewUtil.setHtml(alert, context, getHtml(context));
 
         return alert.create();
+    }
+
+    @Override
+    protected void onBindDialogView(View view) {
+        super.onBindDialogView(view);
+
+        String html = getHtml(this.context);
+        WebViewUtil.setHtml((WebView) view.findViewById(R.id.content), html);
     }
 
 
