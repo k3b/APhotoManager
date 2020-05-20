@@ -384,7 +384,7 @@ public class AndroidFileCommands extends FileCommands {
     }
 
     @SuppressLint("ValidFragment")
-    private static class MediaScannerDirectoryPickerFragment extends DirectoryPickerFragment {
+    public static class MediaScannerDirectoryPickerFragment extends DirectoryPickerFragment {
         private AndroidFileCommands mParent = null;
 
         /** do not use activity callback */
