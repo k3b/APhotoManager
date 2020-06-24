@@ -28,6 +28,7 @@ import java.util.List;
 
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.io.Properties;
+import de.k3b.io.collections.ISelectedFiles;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
 
@@ -83,10 +84,10 @@ public class AffUtils {
         return null;
     }
 
-    public static boolean putSelectedFiles(Intent destination, SelectedFiles selectedFiles) {
+    public static boolean putSelectedFiles(Intent destination, ISelectedFiles selectedFiles) {
         if ((destination != null) && (selectedFiles != null) && (selectedFiles.size() > 0)) {
             destination.putExtra(EXTRA_SELECTED_ITEM_IDS, selectedFiles.toIdString());
-            destination.putExtra(EXTRA_SELECTED_ITEM_PATHS, selectedFiles.toString());
+            destination.putExtra(EXTRA_SELECTED_ITEM_PATHS, selectedFiles.toPathListString());
             final String dateString = selectedFiles.toDateString();
             if (dateString != null) destination.putExtra(EXTRA_SELECTED_ITEM_DATES, dateString);
             return true;
@@ -94,10 +95,10 @@ public class AffUtils {
         return false;
     }
 
-    public static boolean putSelectedFiles(Bundle destination, SelectedFiles selectedFiles) {
+    public static boolean putSelectedFiles(Bundle destination, ISelectedFiles selectedFiles) {
         if ((destination != null) && (selectedFiles != null) && (selectedFiles.size() > 0)) {
             destination.putSerializable(EXTRA_SELECTED_ITEM_IDS, selectedFiles.toIdString());
-            destination.putSerializable(EXTRA_SELECTED_ITEM_PATHS, selectedFiles.toString());
+            destination.putSerializable(EXTRA_SELECTED_ITEM_PATHS, selectedFiles.toPathListString());
             final String dateString = selectedFiles.toDateString();
             if (dateString != null) destination.putSerializable(EXTRA_SELECTED_ITEM_DATES, dateString);
             return true;
@@ -105,10 +106,10 @@ public class AffUtils {
         return false;
     }
 
-    public static boolean putSelectedFiles(Properties destination, SelectedFiles selectedFiles) {
+    public static boolean putSelectedFiles(Properties destination, ISelectedFiles selectedFiles) {
         if ((destination != null) && (selectedFiles != null) && (selectedFiles.size() > 0)) {
             destination.put(EXTRA_SELECTED_ITEM_IDS, selectedFiles.toIdString());
-            destination.put(EXTRA_SELECTED_ITEM_PATHS, selectedFiles.toString());
+            destination.put(EXTRA_SELECTED_ITEM_PATHS, selectedFiles.toPathListString());
             final String dateString = selectedFiles.toDateString();
             if (dateString != null) destination.put(EXTRA_SELECTED_ITEM_DATES, dateString);
             return true;

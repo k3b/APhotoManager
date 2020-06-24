@@ -78,7 +78,7 @@ public class FileFacade implements IFile {
     public static IFile[] get(String dbgContext, String[] files) {
         IFile f[] = new FileFacade[files.length];
         for (int i = 0; i < files.length; i++) {
-            f[i] = convert(dbgContext, new File(files[i]));
+            f[i] = convert(dbgContext, files[i]);
         }
 
         return f;
