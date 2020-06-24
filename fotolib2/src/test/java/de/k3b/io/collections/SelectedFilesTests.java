@@ -31,8 +31,8 @@ public class SelectedFilesTests {
         String names = "'b','z','c'";
         String ids = "71,2,3";
         String selectedDates = "2223372036854775807,1223372036854775807,3223372036854775807";
-        SelectedFiles sut = SelectedFiles.create(names, ids, selectedDates);
-        Assert.assertEquals("names", names, sut.toString());
+        ISelectedFiles sut = SelectedFiles.create(names, ids, selectedDates);
+        Assert.assertEquals("names", names, sut.toPathListString());
         Assert.assertEquals("ids", ids, sut.toIdString());
         Assert.assertEquals("dates", selectedDates, sut.toDateString());
     }

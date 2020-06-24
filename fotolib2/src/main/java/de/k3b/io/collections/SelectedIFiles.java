@@ -27,23 +27,22 @@ import de.k3b.io.filefacade.IFile;
 
 /**
  * The Multi-selection data for all photo commands.
- * Unmodifyable list of file names and optional their IDs and dates.
+ * Unmodifyable list of IFiles names and optional their IDs and dates.
  *
  * Created by k3b on 17.05.2016.
  */
-public class SelectedFiles implements ISelectedFiles {
+public class SelectedIFiles implements ISelectedFiles {
     private static final String DELIMITER = ",";
     private static final String SORUNDER = "'";
-    private final String[] mFileNames;
+    private final IFile[] mFileNames;
     private final Long[] mIds;
     private final Date[] mDatesPhotoTaken;
-    private IFile[] files = null;
 
     public static String[] getFileNameList(String fileNameListAsString) {
         return (fileNameListAsString != null) ? fileNameListAsString.split(DELIMITER) : null;
     }
 
-    public static SelectedFiles create(String fileNameListAsString, String idListAsString, String selectedDates) {
+    public static SelectedIFiles create(String fileNameListAsString, String idListAsString, String selectedDates) {
         Date[] dates = null;
         if (selectedDates != null) {
             Long[] dateIds = parseIds(selectedDates);
@@ -55,16 +54,12 @@ public class SelectedFiles implements ISelectedFiles {
                 }
             }
         }
-        return new SelectedFiles(getFileNameList(fileNameListAsString), parseIds(idListAsString), dates);
+        IFile[] files = FileFacade.get("SelectedFiles.getIFiles", getFileNameList(fileNameListAsString));
+        return new SelectedIFiles(files, parseIds(idListAsString), dates);
     }
 
-    public SelectedFiles(String[] fileNameList, Long[] ids, Date[] datesPhotoTaken) {
+    public SelectedIFiles(IFile[] fileNameList, Long[] ids, Date[] datesPhotoTaken) {
         mFileNames = fileNameList;
-        if (mFileNames != null) {
-            for (int i = size() - 1; i >= 0; i--) {
-                mFileNames[i] = reomoveApostrophes(mFileNames[i]);
-            }
-        }
         mIds = ids;
         mDatesPhotoTaken = datesPhotoTaken;
     }
@@ -109,25 +104,24 @@ public class SelectedFiles implements ISelectedFiles {
         return result;
     }
 
-    @Override
     public IFile[] getIFiles() {
-        if (files == null) {
-            files = FileFacade.get("SelectedFiles.getIFiles", getFiles());
-        }
-        return files;
+        return mFileNames;
     }
 
-    @Override
     @Deprecated
     public File[] getFiles() {
-        return SelectedFiles.getFiles(getFileNames());
+        if (mFileNames == null) return null;
+        File[] result = new File[mFileNames.length];
+        for(int i= 0; i < mFileNames.length; i++) {
+            result[i] = (mFileNames[i] == null) ? null : mFileNames[i].getFile();
+        }
+        return result;
     }
 
-    @Override
     public int getNonEmptyNameCount() {
         int result = 0;
         if (mFileNames != null) {
-            for (String item : mFileNames) {
+            for (IFile item : mFileNames) {
                 if (item != null) {
                     result++;
                 }
@@ -136,18 +130,17 @@ public class SelectedFiles implements ISelectedFiles {
         return result;
     }
 
-    /** converts this into komma seperated list of names */
-    @Override
+    /** converts this into komma seperated list of paths */
     public String toPathListString() {
-        String[] mFileNames = this.mFileNames;
+        IFile[] mFileNames = this.mFileNames;
         return toString(SORUNDER, mFileNames);
     }
 
-    public static <T> String toString(String SORUNDER, Date[] values) {
+    public static String toString(String SORUNDER, IFile[] values) {
         if ((values != null) && (values.length > 0)) {
-            Long[] lvalue = new Long[values.length];
+            String[] lvalue = new String[values.length];
             for (int i = 0; i < values.length; i++) {
-                lvalue[i] = (values[i] == null) ? 0 : values[i].getTime();
+                lvalue[i] = (values[i] == null) ? null : values[i].getAbsolutePath();
             }
             return toString(SORUNDER, lvalue);
         }
@@ -173,56 +166,50 @@ public class SelectedFiles implements ISelectedFiles {
     }
 
     /** converts this into komma seperated list of names */
-    @Override
     public String toIdString() {
         return toString("", this.mIds);
     }
 
     /** converts this into komma seperated list of names */
-    @Override
     public String toDateString() {
         return toString("", this.mDatesPhotoTaken);
     }
 
-    @Override
     public int size() {
         return (mFileNames == null) ? 0 : mFileNames.length;
     }
 
-    public String[] getFileNames() {
+    public IFile[] getFileNames() {
         return mFileNames;
     }
 
-    public String getFileName(int i) {
+    public IFile getFileName(int i) {
         if ((mFileNames != null) && (i >= 0) && (i < mFileNames.length)) return mFileNames[i];
         return null;
     }
-    @Override
+
+    @Deprecated
     public File getFile(int i) {
-        String name = getFileName(i);
-        if (name != null) return new File(name);
+        IFile name = getFileName(i);
+        if (name != null) return name.getFile();
         return null;
     }
 
-    @Override
     public IFile getIFile(int i) {
         return FileFacade.convert("SelectedFiles.getFile", getFile(i));
     }
 
-    @Override
     public Long getId(int i) {
         if ((i >= 0) && (i < mIds.length)) return mIds[i];
         return null;
     }
 
-    @Override
     public Long[] getIds() {
         return mIds;
     }
 
     /** needed for AutoRenaming which is based on DatesPhotoTaken.
      * return null if unknwon */
-    @Override
     public Date[] getDatesPhotoTaken() {
         return mDatesPhotoTaken;
     }
