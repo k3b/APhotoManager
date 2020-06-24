@@ -154,7 +154,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
     private int mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
 
     /** if not null: after load cursor scroll to this path */
-    private String mInitialFilePath = null;
+    private IFile mInitialFilePath = null;
 
     /** after 2 secs of user inactive the actionbar is hidden until the screen is touched */
     private Handler mActionBarHideTimer = null;
@@ -202,8 +202,9 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
             Log.d(Global.LOG_CONTEXT, message.toString());
         }
 
-        PhotoPropertiesMediaFilesScannerAsyncTask scanner = new PhotoPropertiesMediaFilesScannerAsyncTask(PhotoPropertiesMediaFilesScanner.getInstance(context), context, why);
-        scanner.execute(null, missing.toArray(new String[missing.size()]));
+        PhotoPropertiesMediaFilesScannerAsyncTask scanner = new PhotoPropertiesMediaFilesScannerAsyncTask(
+                PhotoPropertiesMediaFilesScanner.getInstance(context), context, why);
+        scanner.execute(null, missing.toArray(new IFile[missing.size()]));
         return missing.size();
     }
 
@@ -547,10 +548,11 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
             finish();
         } else if (requestCode == ACTION_RESULT_MUST_MEDIA_SCAN) {
             // #64 after edit the content might have been changed. update media DB.
-            String orgiginalFileToScan = getCurrentFilePath();
+            IFile orgiginalFileToScan = getCurrentFile();
 
             if (orgiginalFileToScan != null) {
-                PhotoPropertiesMediaFilesScanner.getInstance(this).updateMediaDatabase_Android42(this, null, orgiginalFileToScan);
+                PhotoPropertiesMediaFilesScanner.getInstance(this).updateMediaDatabase_Android42(
+                        this, null, orgiginalFileToScan);
             }
         }
 
@@ -1432,7 +1434,9 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
 
     class LocalFileCommands extends AndroidFileCommands {
         @Override
-        protected void onPostProcess(String what, int opCode, SelectedFiles selectedFiles, int modifyCount, int itemCount, String[] oldPathNames, String[] newPathNames) {
+        protected void onPostProcess(
+                String what, int opCode, SelectedFiles selectedFiles, int modifyCount, int itemCount,
+                IFile[] oldPathNames, IFile[] newPathNames) {
             mInitialFilePath = null;
             switch (opCode) {
                 case OP_MOVE:

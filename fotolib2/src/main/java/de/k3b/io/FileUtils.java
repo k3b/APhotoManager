@@ -228,6 +228,11 @@ public class FileUtils {
         return ((file != null) && (!file.isDirectory())) ? file.getParentFile() : file;
     }
 
+    /** return parent of file if path is not a dir. else return file */
+    public static IFile getDir(IFile file) {
+        return ((file != null) && (!file.isDirectory())) ? file.getParentFile() : file;
+    }
+
     /** find cildren by regular expression */
     public static File[] listFiles(File parent, final Pattern fileOrDirThatMustBeInTheRoot) {
         return parent.listFiles(new FilenameFilter() {
@@ -237,6 +242,22 @@ public class FileUtils {
                 return found;
             }
         });
+    }
+    /** return true, if file is in a ".nomedia" dir */
+    public static boolean isNoMedia(IFile path, int maxLevel) {
+        if (path != null) {
+            if (isHiddenFolder(path))
+                return true;
+            IFile file = path.getParentFile();
+            int level = maxLevel;
+            while ((--level >= 0) && (file != null)) {
+                if (file.create(MEDIA_IGNORE_FILENAME).exists()) {
+                    return true;
+                }
+                file = file.getParentFile();
+            }
+        }
+        return false;
     }
 
     /** return true, if file is in a ".nomedia" dir */
@@ -257,8 +278,13 @@ public class FileUtils {
     }
 
     // linux convention: folder names starting with "." are hidden
+    public static boolean isHiddenFolder(IFile path) {
+        return (path != null) && isHiddenFolder(path.getCanonicalPath());
+    }
+
+    // linux convention: folder names starting with "." are hidden
     public static boolean isHiddenFolder(String path) {
-        return (path.contains("/."));
+        return (path != null) && (path.contains("/.") || path.contains("\\."));
     }
 
     public static void delete(String fileName) {

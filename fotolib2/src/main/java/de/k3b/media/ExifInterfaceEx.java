@@ -103,7 +103,7 @@ public class ExifInterfaceEx extends ExifInterface
         return new ExifInterfaceEx(in, null, absoluteJpgPath, xmpExtern, dbg_context);
     }
 
-    public static int getOrientationId(String fullPath) {
+    public static int getOrientationId(IFile fullPath) {
         try {
             return ExifInterfaceEx.create(fullPath, null, null, "getOrientationId").getOrientationId();
         } catch (IOException e) {

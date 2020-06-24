@@ -34,6 +34,8 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         >
+
+        <!-- lblName + edName invisible except in SaveAsPickerFragment -->
         <TextView android:id="@+id/lblName"
             android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="@string/sort_by_name"
@@ -47,6 +49,17 @@
             android:layout_alignParentTop="true"
             android:layout_toRightOf="@+id/lblName" android:layout_alignParentRight="true" android:layout_alignParentEnd="true"
             android:layout_alignBaseline="@+id/lblName" android:visibility="gone"/>
+
+        <!-- chkIncremental invisible except in MediaScannerDirectoryPickerFragment -->
+        <CheckBox
+            android:id="@+id/chkIncremental"
+            android:text="@string/lbl_media_scanner_incremental"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_below="@+id/lblName"
+            />
+
         <HorizontalScrollView
             android:id="@+id/parent_scroller"
             android:layout_width="fill_parent"
@@ -54,7 +67,7 @@
             android:scrollbars="horizontal"
             android:scrollbarSize="2dp"
             android:scrollbarStyle="insideInset"
-            android:layout_below="@+id/lblName"
+            android:layout_below="@+id/chkIncremental"
             >
             <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:id="@+id/parent_owner"

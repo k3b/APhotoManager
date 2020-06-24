@@ -55,6 +55,7 @@ import de.k3b.io.VISIBILITY;
 import de.k3b.io.XmpFile;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
+import de.k3b.io.filefacade.IFile;
 
 /**
  * contains all SQL needed to query the android gallery
@@ -970,6 +971,27 @@ public class FotoSql extends FotoSqlBase {
         return null;
     }
 
+    public static String getWhereInFileNames(IFile... fileNames) {
+        if (fileNames != null) {
+            StringBuilder filter = new StringBuilder();
+            filter.append(SQL_COL_PATH).append(" in (");
+
+            int count = 0;
+            for (IFile fileName : fileNames) {
+                if ((fileName != null) && !XmpFile.isSidecar(fileName)) {
+                    if (count > 0) filter.append(", ");
+                    filter.append("'").append(fileName.getCanonicalPath()).append("'");
+                    count++;
+                }
+            }
+
+            filter.append(")");
+
+            if (count > 0) return filter.toString();
+        }
+        return null;
+    }
+
     /**
      * execRenameFolder(getActivity(),"/storage/sdcard0/testFolder/", "/storage/sdcard0/renamedFolder/")
      *    "/storage/sdcard0/testFolder/image.jpg" becomes "/storage/sdcard0/renamedFolder/image.jpg"
@@ -1355,6 +1377,43 @@ public class FotoSql extends FotoSqlBase {
         values.put(SQL_COL_PATH, newFullPath);
         return mediaDBApi.execUpdate("rename file", oldFullPath,
                 values, null);
+    }
+
+    public static List<String> getPathsOfFolderWithoutSubfolders(String fullFilePath) {
+        final String debugContext = "getPhotosOfDirectoryWithoutSubDirectories " + fullFilePath;
+
+        QueryParameter query = FotoSql.addWhereFolderWithoutSubfolders(new QueryParameter(), fullFilePath);
+        return getPaths(debugContext, query);
+    }
+
+    public static List<String> getPaths(String debugContext, QueryParameter queryFilter) {
+        QueryParameter query = new QueryParameter()
+                .getWhereFrom(queryFilter,true)
+                .addColumn(SQL_COL_PATH)
+                .addOrderBy(SQL_COL_PATH);
+        return getStringList(debugContext, query);
+    }
+
+    public static List<String> getStringList(String debugContext, QueryParameter query) {
+        Cursor cursor = null;
+        List<String> result = new ArrayList<>();
+        try {
+            cursor = getMediaDBApi().createCursorForQuery(null, debugContext, query,
+                    VISIBILITY.PRIVATE_PUBLIC, null);
+            while (cursor.moveToNext()) {
+                String found = cursor.getString(0);
+                result.add(found);
+            }
+
+        } catch (Exception ex) {
+            Log.e(LOG_TAG, debugContext + query, ex);
+            throw new RuntimeException(debugContext + query + "\n" + ex.getMessage(), ex);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+        return result;
     }
 }
 

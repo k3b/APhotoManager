@@ -175,15 +175,14 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements PhotoCh
         return mActivity.getString(R.string.image_loading_at_position_format, position);
     }
 
-    public String getFullFilePath(int position) {
+    public IFile getFullFilePath(int position) {
         Cursor cursor = getCursorAt(position);
-        return DBUtils.getString(cursor,FotoSql.SQL_COL_DISPLAY_TEXT, null);
+        final String patthString = DBUtils.getString(cursor, FotoSql.SQL_COL_DISPLAY_TEXT, null);
+        return FileFacade.convert("getFullFilePath", patthString);
     }
 
-    public IFile getiFile(int position, String fullFilePath, long imageID) {
-        final IFile file = FileFacade.convert(
-                mDebugPrefix + "getFile(" + position + ")",
-                fullFilePath);
+    public IFile getiFile(int position, IFile fullFilePath, long imageID) {
+        final IFile file = fullFilePath;
         if (imageID > 0) {
             file.setReadUri(FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE + "/" + imageID);
         }
@@ -191,7 +190,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements PhotoCh
     }
 
     public IFile getFile(int position) {
-        final String fullFilePath = getFullFilePath(position);
+        final IFile fullFilePath = getFullFilePath(position);
 
         if (fullFilePath == null) return null;
         long imageID = getImageId(position);
@@ -262,7 +261,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements PhotoCh
     }
 
     /** internal helper. return -1 if position is not available */
-    public int getPositionFromPath(String path) {
+    public int getPositionFromPath(IFile path) {
         int result = -1;
         if ((this.mCursor != null) && (path != null)) {
             int index = mCursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT);

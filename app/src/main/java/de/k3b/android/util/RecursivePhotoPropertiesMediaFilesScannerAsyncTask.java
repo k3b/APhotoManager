@@ -34,7 +34,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.androFotoFinder.tagDB.TagSql;
+import de.k3b.database.QueryParameter;
 import de.k3b.io.FileUtils;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 import de.k3b.media.PhotoPropertiesUtil;
 
 /**
@@ -50,6 +55,7 @@ public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPro
      * - current running scanner instance
      * - or reumable instanc */
     public static RecursivePhotoPropertiesMediaFilesScannerAsyncTask sScanner = null;
+    private final boolean incremental;
 
     // statistics displayed in the status dialog
     private String mCurrentFolder = "";
@@ -62,65 +68,80 @@ public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPro
     /** if not null scanner is either
      * - in resume mode (can be started without parameters to resume interrupted scan)
      * - or in pausing mode collecting all canceled scans here to be processed in resumeIfNecessary() */
-    private List<String> mPaused = null;
+    private List<IFile> mPaused = null;
 
-    public RecursivePhotoPropertiesMediaFilesScannerAsyncTask(PhotoPropertiesMediaFilesScanner scanner, Context context, String why) {
+    public RecursivePhotoPropertiesMediaFilesScannerAsyncTask(PhotoPropertiesMediaFilesScanner scanner, Context context, String why, boolean incremental) {
         super(scanner, context, why);
+        this.incremental = incremental;
     }
 
     @Override
-    protected Integer doInBackground(String[]... pathNames) {
+    protected Integer doInBackground(IFile[]... pathNames) {
         // do not call super.doInBackground here because logic is different
         int resultCount = 0;
-        for (String[] pathArray : pathNames) {
+        for (IFile[] pathArray : pathNames) {
             if (pathArray != null) {
-                for (String pathName : pathArray) {
-                    if ((pathName != null) && (pathName.length() > 0)) {
-                        resultCount += scanDirOrFile(new File(pathName));
-                    }
+                for (IFile pathName : pathArray) {
+                    resultCount += scanRoot(pathName);
                 }
             }
         }
         return resultCount;
     }
 
-    private int scanDirOrFile(File file) {
+    private int scanRoot(IFile rootPath) {
         int resultCount = 0;
-        final String fullFilePath = FileUtils.tryGetCanonicalPath(file, null);
+        if ((rootPath != null) && (rootPath.length() > 0)) {
+            if (this.incremental) {
+                List<String> pathsToUpdate = TagSql.getPhotosNeverScanned(rootPath.getAbsolutePath());
+                for (String pathToUpdate : pathsToUpdate) {
+                    resultCount += scanDirOrFile(FileFacade.convert("scanRoot incremental ", pathToUpdate));
+                }
+            }
+
+            resultCount += scanDirOrFile(rootPath);
+        }
+        return resultCount;
+    }
+
+    private int scanDirOrFile(IFile file) {
+        int resultCount = 0;
+        final String fullFilePath = file.getAbsolutePath();
         if (fullFilePath != null) {
             if (!isCancelled()) {
                 if (file.isDirectory()) {
-                    String[] childFileNames = file.list(PhotoPropertiesUtil.JPG_FILENAME_FILTER);
-
-                    if (childFileNames != null) {
-                        // #33
-                        // convert to absolute paths
-                        for (int i = 0; i < childFileNames.length; i++) {
-                            childFileNames[i] = fullFilePath + "/" + childFileNames[i];
-                        }
-                        resultCount += runScanner(fullFilePath, childFileNames);
-                    }
-
-                    File[] subDirs = file.listFiles(new FileFilter() {
-                        @Override
-                        public boolean accept(File file) {
-                            return ((file != null) && (file.isDirectory()) && (!file.getName().startsWith(".")));
-                        }
-                    });
-
-                    if (subDirs != null) {
-                        // #33
-                        for (File subDir : subDirs) {
-                            if (subDir != null) {
-                                resultCount += scanDirOrFile(subDir);
-                            }
-                        }
-                    }
+                    resultCount += scanDir(file, fullFilePath);
                 } else if (PhotoPropertiesUtil.isImage(file.getName(), PhotoPropertiesUtil.IMG_TYPE_ALL)) {
-                    resultCount += runScanner(fullFilePath, fullFilePath);
+                    resultCount += runScanner(fullFilePath, file);
                 }
             } else if (mPaused != null) {
-                mPaused.add(fullFilePath);
+                mPaused.add(file);
+            }
+        }
+        return resultCount;
+    }
+
+    private int scanDir(IFile file, String fullFilePath) {
+        List<String> existing = null;
+        if (incremental) {
+            existing = FotoSql.getPathsOfFolderWithoutSubfolders(file.getAbsolutePath());
+        }
+
+        int resultCount = 0;
+        IFile[] childFileNames = file.listFiles();
+
+        if (childFileNames != null) {
+            resultCount += runScanner(fullFilePath, childFileNames);
+        }
+
+        IFile[] subDirs = file.listFiles();
+
+        if (subDirs != null) {
+            // #33
+            for (IFile subDir : subDirs) {
+                if ((subDir != null) && (subDir.isDirectory()) && (!subDir.getName().startsWith("."))) {
+                    resultCount += scanDirOrFile(subDir);
+                }
             }
         }
         return resultCount;
@@ -130,7 +151,7 @@ public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPro
     public boolean resumeIfNeccessary() {
         if ((getStatus() == AsyncTask.Status.PENDING) && (mPaused != null))
         {
-            execute(mPaused.toArray(new String[mPaused.size()]));
+            execute(mPaused.toArray(new IFile[mPaused.size()]));
             mPaused = null;
             return true;
         }
@@ -138,7 +159,7 @@ public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPro
     }
 
     /** call the original background scanner and update the statistics */
-    private Integer runScanner(String parentPath, String... fileNames) {
+    private Integer runScanner(String parentPath, IFile... fileNames) {
         this.mCurrentFolder = parentPath;
         final Integer resultCount = super.doInBackground(null, fileNames);
         if (resultCount != null) {
@@ -161,7 +182,9 @@ public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPro
     }
 
     private void handleScannerCancel() {
-        final boolean mustCreateResumeScanner = (mPaused != null) && ((this == RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner) || (null == RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner));
+        final boolean mustCreateResumeScanner = (mPaused != null) &&
+                ((this == RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner)
+                        || (null == RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner));
         onStatusDialogEnd(mPaused, false);
 
         if (sScanner == this) {
@@ -169,7 +192,9 @@ public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPro
         }
 
         if (mustCreateResumeScanner) {
-            RecursivePhotoPropertiesMediaFilesScannerAsyncTask newScanner = new RecursivePhotoPropertiesMediaFilesScannerAsyncTask(mScanner, mScanner.mContext,"resumed " + mWhy);
+            RecursivePhotoPropertiesMediaFilesScannerAsyncTask newScanner
+                    = new RecursivePhotoPropertiesMediaFilesScannerAsyncTask(
+                            mScanner, mScanner.mContext,"resumed " + mWhy, incremental);
             newScanner.mPaused = this.mPaused;
             RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner = newScanner;
         }
@@ -207,7 +232,7 @@ public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPro
         builder.setNegativeButton(R.string.btn_pause, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                onStatusDialogEnd(new ArrayList<String>(), true);
+                onStatusDialogEnd(new ArrayList<IFile>(), true);
             }
         });
 
@@ -237,7 +262,7 @@ public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPro
         this.mTimerRunner.run();
     }
 
-    private void onStatusDialogEnd(List<String> pauseState, boolean cancelScanner) {
+    private void onStatusDialogEnd(List<IFile> pauseState, boolean cancelScanner) {
         // no more timer gui updates
         if ((mTimerRunner != null) && (mTimerHandler != null)) {
             mTimerHandler.removeCallbacks(mTimerRunner);

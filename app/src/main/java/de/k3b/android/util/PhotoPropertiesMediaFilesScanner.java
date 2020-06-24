@@ -110,9 +110,9 @@ abstract public class PhotoPropertiesMediaFilesScanner {
         context.getContentResolver().notifyChange(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, null);
     }
 
-    public static boolean isNoMedia(int maxLevel, String[] pathNames) {
+    public static boolean isNoMedia(int maxLevel, IFile[] pathNames) {
         if (pathNames != null) {
-            for(String path : pathNames) {
+            for(IFile path : pathNames) {
                 if (isNoMedia(path, maxLevel)) {
                     return true;
                 }
@@ -123,18 +123,27 @@ abstract public class PhotoPropertiesMediaFilesScanner {
     }
 
     /** return true, if file is in a ".nomedia" dir */
+    public static boolean isNoMedia(IFile path, int maxLevel) {
+        return FileUtils.isNoMedia(path,maxLevel);
+    }
+
+    /** return true, if file is in a ".nomedia" dir */
+    @Deprecated
     public static boolean isNoMedia(String path, int maxLevel) {
         return FileUtils.isNoMedia(path,maxLevel);
     }
 
+    @Deprecated
     public static boolean isNoMedia(String path) {
         return FileUtils.isNoMedia(path, PhotoPropertiesMediaFilesScanner.DEFAULT_SCAN_DEPTH);
     }
 
+    @Deprecated
     public static boolean canHideFolderMedia(String absoluteSelectedPath) {
         return !isNoMedia(absoluteSelectedPath);
     }
 
+    @Deprecated
     public static int hideFolderMedia(Activity context, String path) {
         int result = 0;
         if (canHideFolderMedia(path)) {
@@ -162,7 +171,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
         return result;
     }
 
-    public int updateMediaDatabase_Android42(Context context, String[] oldPathNames, String... newPathNames) {
+    public int updateMediaDatabase_Android42(Context context, IFile[] oldPathNames, IFile... newPathNames) {
         IMediaRepositoryApi api = FotoSql.getMediaDBApi();
         try {
             api.beginTransaction();
@@ -192,12 +201,12 @@ abstract public class PhotoPropertiesMediaFilesScanner {
      *
      * @return number of items left.
      */
-    private int excludeNomediaFiles(String[] fullPathNames) {
+    private int excludeNomediaFiles(IFile[] fullPathNames) {
         int itemsLeft = 0;
         if (fullPathNames != null) {
             // ignore non-jpeg
             for (int i = 0; i < fullPathNames.length; i++) {
-                String fullPathName = fullPathNames[i];
+                IFile fullPathName = fullPathNames[i];
                 if (fullPathName != null) {
                     if (!PhotoPropertiesUtil.isImage(fullPathName, PhotoPropertiesUtil.IMG_TYPE_ALL) || isNoMedia(fullPathName, 22)) {
                         fullPathNames[i] = null;
@@ -279,8 +288,8 @@ abstract public class PhotoPropertiesMediaFilesScanner {
                 Log.i(Global.LOG_CONTEXT, CONTEXT + "renameInMediaDatabase to " + newPathNames.length + " files " + newPathNames[0] + "...");
             }
             Map<String, String> old2NewFileNames = new HashMap<>(oldPathNames.length);
-            ArrayList<String> deleteFileNames = new ArrayList<String>();
-            ArrayList<String> insertFileNames = new ArrayList<String>();
+            ArrayList<String> deleteFileNames = new ArrayList<>();
+            ArrayList<String> insertFileNames = new ArrayList<>();
 
             for (int i = 0; i < oldPathNames.length; i++) {
                 String oldPathName = oldPathNames[i];
@@ -460,7 +469,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
         DatabaseUtils.cursorRowToContentValues(cursor, values);
         String oldAbsolutePath = cursor.getString(columnIndexPath);
         int id = cursor.getInt(columnIndexPk);
-        setPathRelatedFieldsIfNeccessary(values, newAbsolutePath, oldAbsolutePath);
+        setPathRelatedFieldsIfNeccessary(values, newAbsolutePath , oldAbsolutePath);
         return FotoSql.getMediaDBApi().execUpdate("updatePathRelatedFields", id, values);
     }
 

@@ -78,6 +78,7 @@ public class AffUtils {
             if ((selectedIDs != null) && (selectedFiles != null)) {
                 return SelectedFiles.create(selectedFiles, selectedIDs, selectedDates);
             }
+            return null;
         }
         return null;
     }

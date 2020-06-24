@@ -27,11 +27,16 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.Toast;
 
 import java.io.File;
@@ -130,7 +135,9 @@ public class AndroidFileCommands extends FileCommands {
 
     /** called for each modified/deleted file */
     @Override
-    protected void onPostProcess(String what, int opCode, SelectedFiles selectedFiles, int modifyCount, int itemCount, String[] oldPathNames, String[] newPathNames) {
+    protected void onPostProcess(
+            String what, int opCode, SelectedFiles selectedFiles, int modifyCount, int itemCount,
+            IFile[] oldPathNames, IFile[] newPathNames) {
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix
                     + "onPostProcess('" + what + "') => " + modifyCount + "/" + itemCount);
@@ -386,14 +393,38 @@ public class AndroidFileCommands extends FileCommands {
     @SuppressLint("ValidFragment")
     public static class MediaScannerDirectoryPickerFragment extends DirectoryPickerFragment {
         private AndroidFileCommands mParent = null;
+        private CheckBox chkIncremental = null;
 
         /** do not use activity callback */
         @Override protected void setDirectoryListener(Activity activity) {}
 
         @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            View result = super.onCreateView(inflater,container,savedInstanceState);
+
+            chkIncremental = (CheckBox) result.findViewById(R.id.chkIncremental);
+            chkIncremental.setVisibility(View.VISIBLE);
+
+            final SharedPreferences preferences = PreferenceManager
+                    .getDefaultSharedPreferences(getActivity());
+            chkIncremental.setChecked(preferences.getBoolean("scan-incremental", false));
+
+            return result;
+        }
+
+        @Override
         protected void onDirectoryPick(IDirectory selection) {
             if ((mParent != null) && (selection != null)) {
-                mParent.onMediaScannerAnswer(mContext, selection.getAbsolute());
+                SharedPreferences.Editor prefs = PreferenceManager
+                        .getDefaultSharedPreferences(getActivity()).edit();
+                prefs.putBoolean("scan-incremental", chkIncremental.isChecked());
+                prefs.apply();
+
+                mParent.onMediaScannerAnswer(
+                        mContext,
+                        FileFacade.convert("onDirectoryPick", selection.getAbsolute()),
+                        chkIncremental.isChecked());
             }
             dismiss();
         }
@@ -450,11 +481,11 @@ public class AndroidFileCommands extends FileCommands {
     }
 
     /** answer from "which directory to start scanner from"? */
-    private void onMediaScannerAnswer(Activity activity, String scanRootDir) {
+    private void onMediaScannerAnswer(Activity activity, IFile scanRootDir, boolean incremental) {
         if  ((AndroidFileCommands.canProcessFile(activity, this.isInBackground)) || (RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner == null)){
 
             // remove ".nomedia" file from scan root
-            File nomedia = new File(scanRootDir, PhotoPropertiesMediaFilesScanner.MEDIA_IGNORE_FILENAME);
+            IFile nomedia = scanRootDir.create(PhotoPropertiesMediaFilesScanner.MEDIA_IGNORE_FILENAME);
             if (nomedia.exists()) {
                 if (Global.debugEnabled) {
                     Log.i(Global.LOG_CONTEXT, mDebugPrefix + "onMediaScannerAnswer deleting " + nomedia);
@@ -466,13 +497,14 @@ public class AndroidFileCommands extends FileCommands {
             }
 
             final String message = activity.getString(R.string.scanner_menu_title);
+
             final RecursivePhotoPropertiesMediaFilesScannerAsyncTask scanner = (RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner != null)
                     ? RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner :
-                    new RecursivePhotoPropertiesMediaFilesScannerAsyncTask(mScanner, activity, message);
+                    new RecursivePhotoPropertiesMediaFilesScannerAsyncTask(mScanner, activity, message, incremental);
             synchronized (this) {
                 if (RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner == null) {
                     RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner = scanner;
-                    scanner.execute(new String[]{scanRootDir});
+                    scanner.execute(new IFile[]{scanRootDir});
                 } // else scanner is already running
             }
 
@@ -570,13 +602,14 @@ public class AndroidFileCommands extends FileCommands {
      * called before copy/move/rename/delete. Android specific: check for ".nomedia"
      */
     @Override
-    protected void onPreProcess(String what, int opCode, SelectedFiles selectedFiles, String[] oldPathNames, String[] newPathNames) {
+    protected void onPreProcess(String what, int opCode, SelectedFiles selectedFiles, IFile[] oldPathNames, IFile[] newPathNames) {
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, mDebugPrefix + "onPreProcess('" + what + "')");
         }
 
         // a nomedia file is affected => must update gui
-        this.mHasNoMedia = PhotoPropertiesMediaFilesScanner.isNoMedia(22, oldPathNames) || PhotoPropertiesMediaFilesScanner.isNoMedia(22, newPathNames);
+        this.mHasNoMedia = PhotoPropertiesMediaFilesScanner.isNoMedia(22, oldPathNames)
+                || PhotoPropertiesMediaFilesScanner.isNoMedia(22, newPathNames);
         super.onPreProcess(what, opCode, selectedFiles, oldPathNames, newPathNames);
     }
 

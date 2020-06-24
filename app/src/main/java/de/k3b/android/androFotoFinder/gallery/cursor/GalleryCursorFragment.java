@@ -107,6 +107,7 @@ import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.collections.SelectedItems;
 import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 import de.k3b.tagDB.Tag;
 
 /**
@@ -1426,7 +1427,7 @@ showActivity(String debugContext, Activity context,
     protected class LocalFileCommands extends AndroidFileCommands {
 
         @Override
-        protected void onPostProcess(String what, int opCode, SelectedFiles selectedFiles, int modifyCount, int itemCount, String[] oldPathNames, String[] newPathNames) {
+        protected void onPostProcess(String what, int opCode, SelectedFiles selectedFiles, int modifyCount, int itemCount, IFile[] oldPathNames, IFile[] newPathNames) {
             if (Global.clearSelectionAfterCommand || (opCode == OP_DELETE) || (opCode == OP_MOVE)) {
                 mShowSelectedOnly = true;
                 multiSelectionCancel();

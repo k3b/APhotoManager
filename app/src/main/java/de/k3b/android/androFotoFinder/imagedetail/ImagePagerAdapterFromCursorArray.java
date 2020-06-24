@@ -44,7 +44,7 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
     /** not null data comes from array instead from base implementation */
     private AdapterArrayHelper mArrayImpl = null;
 
-    public ImagePagerAdapterFromCursorArray(final Activity context, String name, String fullPhotoPath) {
+    public ImagePagerAdapterFromCursorArray(final Activity context, String name, IFile fullPhotoPath) {
         super(context, name);
 
         if (PhotoPropertiesMediaFilesScanner.isNoMedia(fullPhotoPath, PhotoPropertiesMediaFilesScanner.DEFAULT_SCAN_DEPTH)) {
@@ -73,13 +73,13 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
     }
 
     @Override
-    public String getFullFilePath(int position) {
-        String result = getLocalFullFilePath(position);
+    public IFile getFullFilePath(int position) {
+        IFile result = getLocalFullFilePath(position);
         if (result == null) result = super.getFullFilePath(position);
         return result;
     }
 
-    private String getLocalFullFilePath(int position) {
+    private IFile getLocalFullFilePath(int position) {
         if (mArrayImpl != null) return mArrayImpl.getFullFilePathfromArray(position);
         return null;
     }
@@ -110,7 +110,7 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
     }
     /** internal helper. return -1 if position is not available */
     @Override
-    public int getPositionFromPath(String path) {
+    public int getPositionFromPath(IFile path) {
         if (mArrayImpl != null) {
             int result = mArrayImpl.getPositionFromPath(path);
 

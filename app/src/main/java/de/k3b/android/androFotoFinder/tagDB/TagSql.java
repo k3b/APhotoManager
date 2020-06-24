@@ -68,7 +68,7 @@ public class TagSql extends FotoSql {
     public static final int EXT_LAST_EXT_SCAN_NO_XMP_IN_CSV = 5;
     public static final int EXT_LAST_EXT_SCAN_NO_XMP = 10;
 
-    protected static final String FILTER_EXPR_PATH_LIKE_XMP_DATE = FILTER_EXPR_PATH_LIKE
+    protected static final String FILTER_EXPR_PATH_AND_XMP_DATE_LESS_THAN = FILTER_EXPR_PATH_LIKE
             + " and ("
             + SQL_COL_EXT_XMP_LAST_MODIFIED_DATE + " is null or "
             + SQL_COL_EXT_XMP_LAST_MODIFIED_DATE + " < ?) ";
@@ -371,7 +371,16 @@ public class TagSql extends FotoSql {
         if ((!Global.Media.enableXmpNone) || (xmpFileDate == EXT_LAST_EXT_SCAN_UNKNOWN)) {
             return getMediaDBApi().execUpdate(dbgContext, path, values, visibility);
         }
-        return getMediaDBApi().exexUpdateImpl(dbgContext, values, FILTER_EXPR_PATH_LIKE_XMP_DATE, new String[]{path, Long.toString(xmpFileDate)});
+        return getMediaDBApi().exexUpdateImpl(dbgContext, values, FILTER_EXPR_PATH_AND_XMP_DATE_LESS_THAN, new String[]{path, Long.toString(xmpFileDate)});
+    }
+
+    public static List<String> getPhotosNeverScanned(String path) {
+        final String debugContext = "getPhotosNeverScanned";
+
+        QueryParameter queryFilter = new QueryParameter()
+                .addWhere(FILTER_EXPR_PATH_AND_XMP_DATE_LESS_THAN, path, "" + (EXT_LAST_EXT_SCAN_UNKNOWN + 1));
+
+        return getPaths(debugContext, queryFilter);
     }
 
     /** return how many photos exist that have one or more tags from list */

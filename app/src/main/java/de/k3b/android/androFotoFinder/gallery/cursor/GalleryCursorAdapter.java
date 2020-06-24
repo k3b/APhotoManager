@@ -230,9 +230,10 @@ public class GalleryCursorAdapter extends CursorAdapter implements PhotoChangeNo
         return AffUtils.querySelectedFiles(context, items);
     }
 
-    public String getFullFilePath(int position) {
+    public IFile getFullFilePath(int position) {
         Cursor cursor = getCursorAt(position);
-        return DBUtils.getString(cursor,FotoSql.SQL_COL_DISPLAY_TEXT, null);
+        final String pathString = DBUtils.getString(cursor, FotoSql.SQL_COL_DISPLAY_TEXT, null);
+        return FileFacade.convert("getFullFilePath", pathString);
     }
 
     /** internal helper. return null if position is not available */

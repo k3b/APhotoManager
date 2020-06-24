@@ -59,8 +59,8 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
     public static final int OP_RENAME = 4;
     public static final int OP_UPDATE = 5;
 
-    protected ArrayList<String> mModifiedDestFiles;
-    protected ArrayList<String> mModifiedSrcFiles;
+    protected ArrayList<IFile> mModifiedDestFiles;
+    protected ArrayList<IFile> mModifiedSrcFiles;
 
     // may be set while looping over items to inform client over progress
     private IProgessListener progessListener;
@@ -82,7 +82,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                     startTimestamp = new Date().getTime();
                 }
 
-                String[] fileNames = fotos.getFileNames();
+                IFile[] selectedFotos = fotos.getIFiles();
                 long now = new Date().getTime();
 
                 int itemsPerProgress = LibGlobal.itemsPerProgress;
@@ -91,9 +91,9 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                 int maxCount = fotos.size();
 
                 openLogfile();
-                onPreProcess(dbgContext, OP_DELETE, fotos, fileNames, null);
+                onPreProcess(dbgContext, OP_DELETE, fotos, selectedFotos, null);
                 for (int i = 0; i < maxCount; i++) {
-                    IFile file = fotos.getIFile(i);
+                    IFile file = selectedFotos[i];
                     countdown--;
                     if (countdown <= 0) {
                         countdown = itemsPerProgress;
@@ -105,7 +105,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                         addTransactionLog(fotos.getId(i), file.getAbsolutePath(), now, MediaTransactionLogEntryType.DELETE, null);
                     }
                 }
-                onPostProcess(dbgContext, OP_DELETE, fotos, deleteCount, fileNames.length, fileNames, null);
+                onPostProcess(dbgContext, OP_DELETE, fotos, deleteCount, selectedFotos.length, selectedFotos, null);
                 if (LibGlobal.debugEnabledJpg || LibGlobal.debugEnabledJpgMetaIo) {
                     long dbgLoadEndTimestamp = new Date().getTime();
 
@@ -335,8 +335,8 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                 Long[] ids = fotos.getIds();
                 IFile[] sourceFiles = fotos.getIFiles();
 
-                mModifiedSrcFiles = (move) ? new ArrayList<String>() : null;
-                mModifiedDestFiles = new ArrayList<String>();
+                mModifiedSrcFiles = (move) ? new ArrayList<IFile>() : null;
+                mModifiedDestFiles = new ArrayList<>();
 
                 int itemsPerProgress = LibGlobal.itemsPerProgress;
                 int itemcount = 0;
@@ -424,9 +424,9 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                 } // foreach selected file
                 int modifyCount = mModifiedDestFiles.size();
 
-                String[] modifiedSourceFiles = ((mModifiedSrcFiles != null) && (mModifiedSrcFiles.size() > 0)) ? mModifiedSrcFiles.toArray(new String[modifyCount]) : null;
+                IFile[] modifiedSourceFiles = ((mModifiedSrcFiles != null) && (mModifiedSrcFiles.size() > 0)) ? mModifiedSrcFiles.toArray(new IFile[modifyCount]) : null;
 
-                String[] modifiedDestFiles = (modifyCount > 0) ? mModifiedDestFiles.toArray(new String[modifyCount]) : null;
+                IFile[] modifiedDestFiles = (modifyCount > 0) ? mModifiedDestFiles.toArray(new IFile[modifyCount]) : null;
                 onPostProcess(what, opCode, fotos, itemCount, sourceFiles.length, modifiedSourceFiles, modifiedDestFiles);
                 if (LibGlobal.debugEnabledJpgMetaIo) {
                     long dbgLoadEndTimestamp = new Date().getTime();
@@ -472,9 +472,9 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
     }
 
     private void addProcessedFiles(boolean move, IFile dest, IFile source) {
-        mModifiedDestFiles.add(dest.getAbsolutePath());
+        mModifiedDestFiles.add(dest);
         if (move) {
-            mModifiedSrcFiles.add(source.getAbsolutePath());
+            mModifiedSrcFiles.add(source);
         }
     }
 
@@ -550,12 +550,12 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
     }
 
     /** called before copy/move/rename/delete */
-    protected void onPreProcess(String what, int opCode, SelectedFiles selectedFiles, String[] oldPathNames, String[] newPathNames) {
+    protected void onPreProcess(String what, int opCode, SelectedFiles selectedFiles, IFile[] oldPathNames, IFile[] newPathNames) {
         /* can be overwritten */
     }
 
     /** called for each modified/deleted file */
-    protected void onPostProcess(String what, int opCode, SelectedFiles selectedFiles, int modifyCount, int itemCount, String[] oldPathNames, String[] newPathNames) {
+    protected void onPostProcess(String what, int opCode, SelectedFiles selectedFiles, int modifyCount, int itemCount, IFile[] oldPathNames, IFile[] newPathNames) {
         /* can be overwritten */
     }
 

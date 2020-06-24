@@ -139,7 +139,7 @@ public class SelectedFiles  {
         return toString(SORUNDER, mFileNames);
     }
 
-    public static <T> String toString(String SORUNDER, Date[] values) {
+    public static String toString(String SORUNDER, Date[] values) {
         if ((values != null) && (values.length > 0)) {
             Long[] lvalue = new Long[values.length];
             for (int i = 0; i < values.length; i++) {
@@ -190,6 +190,8 @@ public class SelectedFiles  {
         if ((mFileNames != null) && (i >= 0) && (i < mFileNames.length)) return mFileNames[i];
         return null;
     }
+
+    @Deprecated
     public File getFile(int i) {
         String name = getFileName(i);
         if (name != null) return new File(name);

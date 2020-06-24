@@ -51,7 +51,7 @@ public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
     /** not null data comes from array instead from base implementation */
     private AdapterArrayHelper mArrayImpl = null;
 
-    public GalleryCursorAdapterFromArray(final Activity context, SelectedItems selectedItems, String name, String fullPhotoPath) {
+    public GalleryCursorAdapterFromArray(final Activity context, SelectedItems selectedItems, String name, IFile fullPhotoPath) {
         super(context, selectedItems, name);
 
         if (PhotoPropertiesMediaFilesScanner.isNoMedia(fullPhotoPath, PhotoPropertiesMediaFilesScanner.DEFAULT_SCAN_DEPTH)) {
@@ -80,7 +80,7 @@ public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
     }
 
     @Override
-    public String getFullFilePath(int position) {
+    public IFile getFullFilePath(int position) {
         if (mArrayImpl != null) return mArrayImpl.getFullFilePathfromArray(position);
         return super.getFullFilePath(position);
     }
@@ -97,7 +97,7 @@ public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
      */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        final String fullPhotoPathFromArray = (mArrayImpl != null) ? mArrayImpl.getFullFilePathfromArray(position) : null;
+        final IFile fullPhotoPathFromArray = (mArrayImpl != null) ? mArrayImpl.getFullFilePathfromArray(position) : null;
 
         if (fullPhotoPathFromArray != null) {
             View v;
@@ -107,8 +107,8 @@ public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
                 v = convertView;
             }
             final GridCellViewHolder holder = (GridCellViewHolder) v.getTag();
-            holder.url =  fullPhotoPathFromArray;
-            IFile file = FileFacade.convert(mDebugPrefix, fullPhotoPathFromArray);
+            holder.url =  fullPhotoPathFromArray.getAsUriString();
+            IFile file = fullPhotoPathFromArray;
 
             int rotationAngle = ExifInterfaceEx.getOrientationId(fullPhotoPathFromArray);
             rotationAngle = PhotoPropertiesUtil.exifOrientationCode2RotationDegrees(rotationAngle, rotationAngle);
@@ -138,7 +138,7 @@ public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
 
     @Override
     public SelectedFiles createSelectedFiles(Context context, SelectedItems items) {
-        String[] paths = (mArrayImpl != null) ? mArrayImpl.getFileNames(items) : null;
+        IFile[] paths = (mArrayImpl != null) ? mArrayImpl.getFileNames(items) : null;
         if ((paths != null) && (paths.length > 0)) {
             return new SelectedFiles(paths, items.getIds(), null);
         }

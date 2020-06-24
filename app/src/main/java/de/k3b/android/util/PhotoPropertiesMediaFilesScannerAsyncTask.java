@@ -26,12 +26,13 @@ import android.widget.Toast;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.io.filefacade.IFile;
 
 /**
  * Created by k3b on 04.10.2016.
  */
 
-public class PhotoPropertiesMediaFilesScannerAsyncTask extends AsyncTask<String[],Object,Integer> {
+public class PhotoPropertiesMediaFilesScannerAsyncTask extends AsyncTask<IFile[],Object,Integer> {
     private static final String CONTEXT = "PhotoPropertiesMediaFilesScannerAsyncTask.";
 
     protected final PhotoPropertiesMediaFilesScanner mScanner;
@@ -45,7 +46,7 @@ public class PhotoPropertiesMediaFilesScannerAsyncTask extends AsyncTask<String[
     }
 
     @Override
-    protected Integer doInBackground(String[]... pathNames) {
+    protected Integer doInBackground(IFile[]... pathNames) {
         if (pathNames.length != 2) throw new IllegalArgumentException(CONTEXT + ".execute(oldFileNames, newFileNames)");
         return mScanner.updateMediaDatabase_Android42(mContext, pathNames[0], pathNames[1]);
     }
@@ -61,7 +62,9 @@ public class PhotoPropertiesMediaFilesScannerAsyncTask extends AsyncTask<String[
     }
 
     /** do not wait for result. */
-    public static void updateMediaDBInBackground(PhotoPropertiesMediaFilesScanner scanner, Context context, String why, String[] oldPathNames, String[] newPathNames) {
+    public static void updateMediaDBInBackground(
+            PhotoPropertiesMediaFilesScanner scanner, Context context, String why,
+            IFile[] oldPathNames, IFile[] newPathNames) {
         if (isGuiThread()) {
             // update_Android42 scanner in seperate background task
             PhotoPropertiesMediaFilesScannerAsyncTask scanTask = new PhotoPropertiesMediaFilesScannerAsyncTask(scanner, context.getApplicationContext(), why + " from completed new AsycTask");
