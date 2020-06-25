@@ -925,9 +925,19 @@ public class FotoSql extends FotoSqlBase {
      * @return returns a hashmap filename => mediaID
      */
     public static Map<String, Long> execGetPathIdMap(String... fileNames) {
+        return execGetPathIdMap(getWhereInFileNames(fileNames));
+    }
+
+    /**
+     * @return returns a hashmap filename => mediaID
+     */
+    public static Map<String, Long> execGetPathIdMap(IFile... fileNames) {
+        return execGetPathIdMap(getWhereInFileNames(fileNames));
+    }
+
+    private static Map<String, Long> execGetPathIdMap(String whereFileNames) {
         Map<String, Long> result = new HashMap<String, Long>();
 
-        String whereFileNames = getWhereInFileNames(fileNames);
         if (whereFileNames != null) {
             QueryParameter query = new QueryParameter()
                     .setID(QUERY_TYPE_UNDEFINED)

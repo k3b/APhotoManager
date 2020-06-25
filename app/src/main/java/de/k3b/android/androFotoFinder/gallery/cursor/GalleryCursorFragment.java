@@ -381,7 +381,8 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
         if (filter != null) {
             path = filter.getPath();
         }
-        mAdapter = new GalleryCursorAdapterFromArray(parent, mSelectedItems, mDebugPrefix, path);
+        mAdapter = new GalleryCursorAdapterFromArray(parent, mSelectedItems, mDebugPrefix,
+                FileFacade.convert(mDebugPrefix, path));
         mGalleryView.setAdapter(mAdapter);
 
         mGalleryView.setLongClickable(true);

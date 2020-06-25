@@ -34,7 +34,7 @@ import de.k3b.io.filefacade.IFile;
 public class SelectedFiles implements ISelectedFiles {
     private static final String DELIMITER = ",";
     private static final String SORUNDER = "'";
-    private final String[] mFileNames;
+    private String[] mFileNames = null;
     private final Long[] mIds;
     private final Date[] mDatesPhotoTaken;
     private IFile[] files = null;
@@ -69,13 +69,19 @@ public class SelectedFiles implements ISelectedFiles {
         mDatesPhotoTaken = datesPhotoTaken;
     }
 
+    public SelectedFiles(IFile[] fileNameList, Long[] ids, Date[] datesPhotoTaken) {
+        files = fileNameList;
+        mIds = ids;
+        mDatesPhotoTaken = datesPhotoTaken;
+    }
+
     private static Long[] parseIds(String listAsString) {
         Long[] result = null;
 
         if ((listAsString != null) && (listAsString.length() > 0)) {
             String itemsAsString[] = listAsString.split(DELIMITER);
             result = new Long[itemsAsString.length];
-            for (int i= 0; i < itemsAsString.length; i++) {
+            for (int i = 0; i < itemsAsString.length; i++) {
                 result[i] = Long.valueOf(itemsAsString[i]);
             }
         }
@@ -126,8 +132,9 @@ public class SelectedFiles implements ISelectedFiles {
     @Override
     public int getNonEmptyNameCount() {
         int result = 0;
-        if (mFileNames != null) {
-            for (String item : mFileNames) {
+        String[] fileNames = getFileNames();
+        if (fileNames != null) {
+            for (String item : fileNames) {
                 if (item != null) {
                     result++;
                 }
@@ -139,8 +146,8 @@ public class SelectedFiles implements ISelectedFiles {
     /** converts this into komma seperated list of names */
     @Override
     public String toPathListString() {
-        String[] mFileNames = this.mFileNames;
-        return toString(SORUNDER, mFileNames);
+        String[] fileNames = getFileNames();
+        return toString(SORUNDER, fileNames);
     }
 
     public static String toString(String SORUNDER, Date[] values) {
@@ -186,15 +193,25 @@ public class SelectedFiles implements ISelectedFiles {
 
     @Override
     public int size() {
-        return (mFileNames == null) ? 0 : mFileNames.length;
+        if (files != null) return files.length;
+        if (mFileNames != null) return mFileNames.length;
+        return 0;
     }
 
     public String[] getFileNames() {
+        if ((mFileNames == null) && (files != null)) {
+            mFileNames = new String[files.length];
+            for (int i = 0; i < files.length; i++) {
+                final IFile file = files[i];
+                mFileNames[i] = (file == null) ? null : file.getAbsolutePath();
+            }
+        }
         return mFileNames;
     }
 
     public String getFileName(int i) {
-        if ((mFileNames != null) && (i >= 0) && (i < mFileNames.length)) return mFileNames[i];
+        String[] fileNames = getFileNames();
+        if ((fileNames != null) && (i >= 0) && (i < fileNames.length)) return fileNames[i];
         return null;
     }
 

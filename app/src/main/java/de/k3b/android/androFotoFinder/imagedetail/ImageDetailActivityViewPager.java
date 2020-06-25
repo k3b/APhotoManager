@@ -78,7 +78,6 @@ import de.k3b.android.widget.FilePermissionActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.io.GeoUri;
-import de.k3b.io.FileUtils;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.IDirectory;
 import de.k3b.io.StringUtils;
@@ -507,7 +506,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
         if ((path == null) || (path.length() == 0)) return null;
 
         File selectedPhoto = new File(path);
-        this.mInitialFilePath = path;
+        this.mInitialFilePath = FileFacade.convert("ImageDetailActivityViewPager.getParameterFromPath", path);
         this.mInitialScrollPosition = NO_INITIAL_SCROLL_POSITION;
         GalleryFilterParameter filter = new GalleryFilterParameter().setFolderAndBelow(selectedPhoto.getParent());
         return filter;
@@ -649,9 +648,9 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
      * gets called if no file is found by a db-query or if jpgFullFilePath is not found in media db
      * return false; activity must me closed
      */
-    private boolean checkForIncompleteMediaDatabase(String jpgFullFilePath, String why) {
+    private boolean checkForIncompleteMediaDatabase(IFile jpgFullFilePath, String why) {
         if (!PhotoPropertiesMediaFilesScanner.isNoMedia(jpgFullFilePath, PhotoPropertiesMediaFilesScanner.DEFAULT_SCAN_DEPTH)) {
-            IFile fileToLoad = FileFacade.convert("ImageDetailActivityViewPager checkForIncompleteMediaDatabase " + why, jpgFullFilePath);
+            IFile fileToLoad = jpgFullFilePath;
 
             if ((!this.mWaitingForMediaScannerResult) && (fileToLoad != null) && (fileToLoad.exists()) && (fileToLoad.canRead())) {
                 // file exists => must update media database
@@ -798,8 +797,9 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
 
     private boolean onRenameFileQueston(final CharSequence title, final SelectedFiles currentFoto, final long fotoId, final String fotoPath, final String _newName) {
         if (AndroidFileCommands.canProcessFile(this, false)) {
-            final String newName = (_newName == null)
-                    ? new File(getCurrentFilePath()).getName()
+            final IFile currentFilePath = getCurrentIFile();
+            final String newName = (_newName == null && currentFilePath != null)
+                    ? currentFilePath.getName()
                     : _newName;
 
 
@@ -931,7 +931,8 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
 
                 case R.id.action_edit:
                     // #64: (not) open editor via chooser
-                    IntentUtil.cmdStartIntent("edit", this, getCurrentImageId(), getCurrentFilePath(), null, null,
+                    IntentUtil.cmdStartIntent("edit", this, getCurrentImageId(),
+                            getCurrentAbsolutPath(), null, null,
                             Intent.ACTION_EDIT,
                             (Global.showEditChooser) ? R.string.edit_chooser_title : 0,
                             R.string.edit_err_editor_not_found, ACTION_RESULT_MUST_MEDIA_SCAN);
@@ -939,7 +940,9 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
 
                 case R.id.menu_item_share:
                     reloadContext = false;
-                    IntentUtil.cmdStartIntent("share", this, getCurrentImageId(), null, null, getCurrentFilePath(), Intent.ACTION_SEND, R.string.share_menu_title, R.string.share_err_not_found, 0);
+                    IntentUtil.cmdStartIntent("share", this,
+                            getCurrentImageId(), null, null,
+                            getCurrentAbsolutPath(), Intent.ACTION_SEND, R.string.share_menu_title, R.string.share_err_not_found, 0);
                     break;
 
                 case R.id.cmd_copy:
@@ -950,18 +953,17 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
                     break;
                 case R.id.menu_item_rename:
                     PhotoChangeNotifyer.setPhotoChangedListener(this);
-                    result = onRenameFileQueston(menuItem.getTitle(), getCurrentFoto(), getCurrentImageId(), getCurrentFilePath(), null);
+                    result = onRenameFileQueston(menuItem.getTitle(), getCurrentFoto(), getCurrentImageId(),
+                            getCurrentAbsolutPath(), null);
                     break;
                 case R.id.menu_exif:
-                    result = onEditExif(menuItem, getCurrentFoto(), getCurrentImageId(), getCurrentFilePath());
+                    result = onEditExif(menuItem, getCurrentFoto(), getCurrentImageId(), getCurrentAbsolutPath());
                     break;
 
                 case R.id.cmd_gallery: {
                     reloadContext = false;
-                    String dirPath = getCurrentFilePath(); // PhotoPropertiesMediaFilesScanner.getDir().getAbsolutePath();
+                    String dirPath = getCurrentAbsolutPath(); // PhotoPropertiesMediaFilesScanner.getDir().getAbsolutePath();
                     if (dirPath != null) {
-                        dirPath = FileUtils.getDir(dirPath).getAbsolutePath();
-
                         QueryParameter query = FotoSql.addWhereFolderWithoutSubfolders(new QueryParameter(FotoSql.queryDetail), dirPath);
                         FotoGalleryActivity.showActivity(" menu " + menuItem.getTitle() + "[13]" + dirPath,
                                 this, query, 0);
@@ -978,7 +980,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
                     final long imageId = getCurrentImageId();
                     IGeoPoint _geo = FotoSql.execGetPosition(null,
                             null, imageId, mDebugPrefix, "on cmd_show_geo_as");
-                    final String currentFilePath = getCurrentFilePath();
+                    final String currentFilePath = getCurrentAbsolutPath();
                     GeoPointDto geo = new GeoPointDto(_geo.getLatitude(), _geo.getLongitude(), GeoPointDto.NO_ZOOM);
 
                     geo.setDescription(currentFilePath);
@@ -1100,7 +1102,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
     private boolean onRenameDirQueston(final CharSequence title, final SelectedFiles currentFoto, final long fotoId, final String fotoPath, final String _newName) {
         if (AndroidFileCommands.canProcessFile(this, false)) {
             final String newName = (_newName == null)
-                    ? new File(getCurrentFilePath()).getName()
+                    ? new File(getCurrentAbsolutPath()).getName()
                     : _newName;
 
 
@@ -1220,9 +1222,9 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
         long imageId = getCurrentImageId();
         Date imageDatePhotoTaken = getCurrentDatePhotoTaken();
         SelectedFiles result = new SelectedFiles(
-                new String[] {getCurrentFilePath()},
-                new Long[] {Long.valueOf(imageId)},
-                new Date[] {imageDatePhotoTaken});
+                new String[]{getCurrentAbsolutPath()},
+                new Long[]{Long.valueOf(imageId)},
+                new Date[]{imageDatePhotoTaken});
         return  result;
     }
 
@@ -1244,23 +1246,29 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
 
     protected String getCurrentDir() {
         try {
-            return new File(getCurrentFilePath()).getParent();
+            final IFile currentIFile = getCurrentIFile();
+            if (currentIFile != null) return currentIFile.getParentFile().getAbsolutePath();
         } catch (Exception ignore) {}
         return null;
     }
 
     protected IFile getCurrentFile() {
-        IFile file = FileFacade.convert("ImageDetailActivityViewPager.getCurrentFile()", getCurrentFilePath());
-        return file;
+        return getCurrentIFile();
     }
 
     //
-    protected String getCurrentFilePath() {
+    protected IFile getCurrentIFile() {
         if ((mViewPager != null) && (mAdapter != null)) {
             int itemPosition = mViewPager.getCurrentItem();
             return this.mAdapter.getFullFilePath(itemPosition);
         }
-        return "";
+        return null;
+    }
+
+    protected String getCurrentAbsolutPath() {
+        IFile file = getCurrentIFile();
+        if (file != null) return file.getAbsolutePath();
+        return null;
     }
 
     protected boolean hasCurrentGeo() {

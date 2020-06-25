@@ -220,7 +220,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
         return itemsLeft;
     }
 
-    private int insertIntoMediaDatabase(Context context, String[] newPathNames) {
+    private int insertIntoMediaDatabase(Context context, IFile[] newPathNames) {
         int modifyCount = 0;
 
         if ((newPathNames != null) && (newPathNames.length > 0)) {
@@ -230,15 +230,17 @@ abstract public class PhotoPropertiesMediaFilesScanner {
 
             Map<String, Long> inMediaDb = FotoSql.execGetPathIdMap(newPathNames);
 
-            for (String fileName : newPathNames) {
+            for (IFile fileName : newPathNames) {
                 if (fileName != null) {
-                    Long id = inMediaDb.get(fileName);
+                    Long id = inMediaDb.get(fileName.getAbsolutePath());
                     if (id != null) {
                         // already exists
                         modifyCount += update_Android42("PhotoPropertiesMediaFilesScanner.insertIntoMediaDatabase already existing "
-                                , context, id, new File(fileName));
+                                , context, id, fileName.getFile());
                     } else {
-                        modifyCount += insert_Android42("PhotoPropertiesMediaFilesScanner.insertIntoMediaDatabase new item ", context, new File(fileName));
+                        modifyCount += insert_Android42(
+                                "PhotoPropertiesMediaFilesScanner.insertIntoMediaDatabase new item ",
+                                context, fileName.getFile());
                     }
                 }
             }
@@ -262,8 +264,10 @@ abstract public class PhotoPropertiesMediaFilesScanner {
         return null;
     }
 
-    /** delete oldPathNames from media database */
-    private int deleteInMediaDatabase(Context context, String[] oldPathNames) {
+    /**
+     * delete oldPathNames from media database
+     */
+    private int deleteInMediaDatabase(Context context, IFile[] oldPathNames) {
         int modifyCount = 0;
 
         if ((oldPathNames != null) && (oldPathNames.length > 0)) {
@@ -281,19 +285,21 @@ abstract public class PhotoPropertiesMediaFilesScanner {
         return modifyCount;
     }
 
-    /** change path and path dependant fields in media database */
-    private int renameInMediaDatabase(Context context, String[] oldPathNames, String... newPathNames) {
+    /**
+     * change path and path dependant fields in media database
+     */
+    private int renameInMediaDatabase(Context context, IFile[] oldPathNames, IFile... newPathNames) {
         if ((oldPathNames != null) && (oldPathNames.length > 0)) {
             if (Global.debugEnabled) {
                 Log.i(Global.LOG_CONTEXT, CONTEXT + "renameInMediaDatabase to " + newPathNames.length + " files " + newPathNames[0] + "...");
             }
             Map<String, String> old2NewFileNames = new HashMap<>(oldPathNames.length);
-            ArrayList<String> deleteFileNames = new ArrayList<>();
-            ArrayList<String> insertFileNames = new ArrayList<>();
+            ArrayList<IFile> deleteFileNames = new ArrayList<>();
+            ArrayList<IFile> insertFileNames = new ArrayList<>();
 
             for (int i = 0; i < oldPathNames.length; i++) {
-                String oldPathName = oldPathNames[i];
-                String newPathName = newPathNames[i];
+                String oldPathName = oldPathNames[i].getAbsolutePath();
+                String newPathName = newPathNames[i].getAbsolutePath();
 
                 if ((oldPathName != null) && (newPathName != null)) {
                     //!!! ?seiteneffekt update other fields?
@@ -301,16 +307,16 @@ abstract public class PhotoPropertiesMediaFilesScanner {
                         old2NewFileNames.put(oldPathName, newPathName);
                     }
                 } else if (oldPathName != null) {
-                    deleteFileNames.add(oldPathName);
+                    deleteFileNames.add(oldPathNames[i]);
                 } else if (newPathName != null) {
-                    insertFileNames.add(newPathName);
+                    insertFileNames.add(newPathNames[i]);
                 }
             }
 
             int modifyCount =
-                    deleteInMediaDatabase(context, deleteFileNames.toArray(new String[deleteFileNames.size()]))
+                    deleteInMediaDatabase(context, deleteFileNames.toArray(new IFile[deleteFileNames.size()]))
                             + renameInMediaDatabase(context, old2NewFileNames)
-                            + insertIntoMediaDatabase(context, insertFileNames.toArray(new String[insertFileNames.size()]));
+                            + insertIntoMediaDatabase(context, insertFileNames.toArray(new IFile[insertFileNames.size()]));
             return modifyCount;
         }
         return 0;
