@@ -28,10 +28,10 @@ import de.k3b.io.filefacade.IFile;
 /**
  * The Multi-selection data for all photo commands.
  * Unmodifyable list of file names and optional their IDs and dates.
- *
+ * <p>
  * Created by k3b on 17.05.2016.
  */
-public class SelectedFiles implements ISelectedFiles {
+public class SelectedFiles {
     private static final String DELIMITER = ",";
     private static final String SORUNDER = "'";
     private String[] mFileNames = null;
@@ -115,7 +115,7 @@ public class SelectedFiles implements ISelectedFiles {
         return result;
     }
 
-    @Override
+
     public IFile[] getIFiles() {
         if (files == null) {
             files = FileFacade.get("SelectedFiles.getIFiles", getFiles());
@@ -123,13 +123,13 @@ public class SelectedFiles implements ISelectedFiles {
         return files;
     }
 
-    @Override
+
     @Deprecated
     public File[] getFiles() {
         return SelectedFiles.getFiles(getFileNames());
     }
 
-    @Override
+
     public int getNonEmptyNameCount() {
         int result = 0;
         String[] fileNames = getFileNames();
@@ -144,7 +144,7 @@ public class SelectedFiles implements ISelectedFiles {
     }
 
     /** converts this into komma seperated list of names */
-    @Override
+
     public String toPathListString() {
         String[] fileNames = getFileNames();
         return toString(SORUNDER, fileNames);
@@ -180,18 +180,18 @@ public class SelectedFiles implements ISelectedFiles {
     }
 
     /** converts this into komma seperated list of names */
-    @Override
+
     public String toIdString() {
         return toString("", this.mIds);
     }
 
     /** converts this into komma seperated list of names */
-    @Override
+
     public String toDateString() {
         return toString("", this.mDatesPhotoTaken);
     }
 
-    @Override
+
     public int size() {
         if (files != null) return files.length;
         if (mFileNames != null) return mFileNames.length;
@@ -216,32 +216,32 @@ public class SelectedFiles implements ISelectedFiles {
     }
 
     @Deprecated
-    @Override
+
     public File getFile(int i) {
         String name = getFileName(i);
         if (name != null) return new File(name);
         return null;
     }
 
-    @Override
+
     public IFile getIFile(int i) {
         return FileFacade.convert("SelectedFiles.getFile", getFile(i));
     }
 
-    @Override
+
     public Long getId(int i) {
         if ((i >= 0) && (i < mIds.length)) return mIds[i];
         return null;
     }
 
-    @Override
+
     public Long[] getIds() {
         return mIds;
     }
 
     /** needed for AutoRenaming which is based on DatesPhotoTaken.
      * return null if unknwon */
-    @Override
+
     public Date[] getDatesPhotoTaken() {
         return mDatesPhotoTaken;
     }
