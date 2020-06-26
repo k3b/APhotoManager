@@ -378,16 +378,20 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                     if ((sourcePath != null) && (destPath != null)) {
 
                         if (exifChanges == null) {
+                            // get info for potential xmp sidecare BEFORE jpg (sourceFile) is moved away
+                            String jpgName = sourceFile.getName();
+                            final IFile jpgParentFile = sourceFile.getParentFile();
+
                             // old style move/copy image with sidecarfile(s)
                             if (osFileMoveOrCopy(move, destRenamed, sourceFile)) itemCount++;
 
-                            IFile sourceSidecar = XmpFile.getSidecar(sourceFile, false);
+                            IFile sourceSidecar = XmpFile.getSidecar(jpgParentFile, jpgName, false);
                             if (osFileExists(sourceSidecar)) {
                                 IFile destSidecar = XmpFile.getSidecar(destRenamed, false);
                                 if (osFileMoveOrCopy(move, destSidecar, sourceSidecar)) itemCount++;
                             }
 
-                            sourceSidecar = XmpFile.getSidecar(sourceFile, true);
+                            sourceSidecar = XmpFile.getSidecar(jpgParentFile, jpgName, true);
                             if (osFileExists(sourceSidecar)) {
                                 IFile destSidecar = XmpFile.getSidecar(destRenamed, true);
                                 if (osFileMoveOrCopy(move, destSidecar, sourceSidecar)) itemCount++;
