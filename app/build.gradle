@@ -104,7 +104,6 @@ android {
 
         abortOnError false
     }
-    buildToolsVersion = '28.0.3'
 }
 
 // task from https://stackoverflow.com/questions/45848521/how-to-sync-android-project-by-gradle-task/45856729#45856729

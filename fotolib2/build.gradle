@@ -35,11 +35,3 @@ dependencies {
     implementation('com.github.k3b.ToGoZip:libK3bZip:L2.1.23')  { transitive = false }
     // implementation('com.github.k3b.ToGoZip:libK3bAndroidZip:v2.0.18.181224')  { transitive = false }
 }
-
-// workaround because android-studio does not make the test resources available
-// see https://code.google.com/p/android/issues/detail?id=64887#c13
-task copyTestResources(type: Copy) {
-    from sourceSets.test.resources
-    into sourceSets.test.output.classesDir
-}
-processTestResources.dependsOn copyTestResources
