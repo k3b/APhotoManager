@@ -31,7 +31,7 @@ before_install:
   # https://stackoverflow.com/questions/52274229/travis-ci-android-28-licenses-have-not-been-accepted
   # - yes | sdkmanager "platforms;android-28"
 
-  - yes | sdkmanager "platforms;android-23;android-28"
+  - yes | sdkmanager "platforms;android-23"
 
 
 script:
