@@ -140,12 +140,12 @@ public class FileCommandTests {
     }
 
     private SelectedFiles createTestSelectedFiles(IFile destDir, String... fileNames) {
-        String[] paths = new String[fileNames.length];
+        IFile[] paths = new IFile[fileNames.length];
         Long[] ids = new Long[fileNames.length];
         int pos = 0;
         for (String file : fileNames) {
-            ids[pos] = Long.valueOf(pos+1);
-            paths[pos++] = createTestFile(destDir, file).getAbsolutePath();
+            ids[pos] = Long.valueOf(pos + 1);
+            paths[pos++] = createTestFile(destDir, file);
         }
         return new SelectedFiles(paths, ids, null);
     }

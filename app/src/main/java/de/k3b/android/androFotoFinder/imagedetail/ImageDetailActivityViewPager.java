@@ -547,7 +547,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
             finish();
         } else if (requestCode == ACTION_RESULT_MUST_MEDIA_SCAN) {
             // #64 after edit the content might have been changed. update media DB.
-            IFile orgiginalFileToScan = getCurrentFile();
+            IFile orgiginalFileToScan = getCurrentIFile();
 
             if (orgiginalFileToScan != null) {
                 PhotoPropertiesMediaFilesScanner.getInstance(this).updateMediaDatabase_Android42(
@@ -912,7 +912,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
             // Handle presses on the action bar items
             switch (menuItem.getItemId()) {
                 case R.id.action_details:
-                    cmdShowDetails(menuItem.getTitle(), getCurrentFile(), getCurrentImageId());
+                    cmdShowDetails(menuItem.getTitle(), getCurrentIFile(), getCurrentImageId());
                     break;
 
                 case R.id.action_view_context_mode:
@@ -1222,7 +1222,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
         long imageId = getCurrentImageId();
         Date imageDatePhotoTaken = getCurrentDatePhotoTaken();
         SelectedFiles result = new SelectedFiles(
-                new String[]{getCurrentAbsolutPath()},
+                new IFile[]{getCurrentIFile()},
                 new Long[]{Long.valueOf(imageId)},
                 new Date[]{imageDatePhotoTaken});
         return  result;
@@ -1250,10 +1250,6 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
             if (currentIFile != null) return currentIFile.getParentFile().getAbsolutePath();
         } catch (Exception ignore) {}
         return null;
-    }
-
-    protected IFile getCurrentFile() {
-        return getCurrentIFile();
     }
 
     //

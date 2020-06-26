@@ -626,11 +626,11 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
 
             IFile[] files = rootDirFile.listFiles();
             if (files != null) {
-                String fileNames[] = new String[files.length];
+                IFile fileNames[] = new IFile[files.length];
                 int itemCount = 0;
                 for (int i = 0; i < files.length; i++) {
                     if (PhotoPropertiesUtil.isImage(files[i], PhotoPropertiesUtil.IMG_TYPE_ALL)) {
-                        fileNames[itemCount++] = files[i].getAbsolutePath();
+                        fileNames[itemCount++] = files[i];
                     }
                 }
 

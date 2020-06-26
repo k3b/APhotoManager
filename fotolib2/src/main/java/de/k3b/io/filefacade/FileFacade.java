@@ -90,7 +90,7 @@ public class FileFacade implements IFile {
     }
 
     public static IFile convert(String dbgContext, String filePath) {
-        if ((filePath == null) && (filePath.length() > 0)) return null;
+        if ((filePath == null) || (filePath.length() == 0)) return null;
         return convert(dbgContext, new File(filePath));
     }
 
