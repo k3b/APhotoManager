@@ -17,20 +17,23 @@ android:
     - tools
 
     # values in gradle.properties and .travis must be the same
-    - android-23
+    - android-28
 
     - add-on
     - extra
 
 before_install:
-# http://stackoverflow.com/questions/33820638/travis-yml-gradlew-permission-denied
-# must execute
-# git update-index --chmod=+x gradlew
-# instead of 
-# - chmod +x gradlew
-# https://stackoverflow.com/questions/52274229/travis-ci-android-28-licenses-have-not-been-accepted
-# - yes | sdkmanager "platforms;android-28"
- 
+  # http://stackoverflow.com/questions/33820638/travis-yml-gradlew-permission-denied
+  # must execute
+  # git update-index --chmod=+x gradlew
+  # instead of
+  # - chmod +x gradlew
+  # https://stackoverflow.com/questions/52274229/travis-ci-android-28-licenses-have-not-been-accepted
+  # - yes | sdkmanager "platforms;android-28"
+
+  - yes | sdkmanager "platforms;android-28"
+
+
 script:
   - jdk_switcher use oraclejdk8
   - ./gradlew assemble test
