@@ -92,10 +92,14 @@ abstract public class PhotoPropertiesMediaFilesScanner {
     public static final int DEFAULT_SCAN_DEPTH = 22;
     public static final String MEDIA_IGNORE_FILENAME = FileUtils.MEDIA_IGNORE_FILENAME; //  MediaStore.MEDIA_IGNORE_FILENAME;
 
-    /** singelton */
+    /**
+     * singelton
+     */
     private static PhotoPropertiesMediaFilesScanner sInstance = null;
 
     public final Context mContext;
+
+    private Map<String, Boolean> noMediaCache = new HashMap<>();
 
     public PhotoPropertiesMediaFilesScanner(Context context) {
         mContext = context.getApplicationContext();
@@ -122,15 +126,23 @@ abstract public class PhotoPropertiesMediaFilesScanner {
         return false;
     }
 
-    /** return true, if file is in a ".nomedia" dir */
     public static boolean isNoMedia(IFile path, int maxLevel) {
-        return FileUtils.isNoMedia(path,maxLevel);
+        return isNoMedia(path, maxLevel, null);
     }
 
-    /** return true, if file is in a ".nomedia" dir */
+    /**
+     * return true, if file is in a ".nomedia" dir
+     */
+    public static boolean isNoMedia(IFile path, int maxLevel, Map<String, Boolean> noMediaCache) {
+        return FileUtils.isNoMedia(path, maxLevel, noMediaCache);
+    }
+
+    /**
+     * return true, if file is in a ".nomedia" dir
+     */
     @Deprecated
     public static boolean isNoMedia(String path, int maxLevel) {
-        return FileUtils.isNoMedia(path,maxLevel);
+        return FileUtils.isNoMedia(path, maxLevel);
     }
 
     @Deprecated
@@ -208,7 +220,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
             for (int i = 0; i < fullPathNames.length; i++) {
                 IFile fullPathName = fullPathNames[i];
                 if (fullPathName != null) {
-                    if (!PhotoPropertiesUtil.isImage(fullPathName, PhotoPropertiesUtil.IMG_TYPE_ALL) || isNoMedia(fullPathName, 22)) {
+                    if (!PhotoPropertiesUtil.isImage(fullPathName, PhotoPropertiesUtil.IMG_TYPE_ALL) || isNoMedia(fullPathName, 5, this.noMediaCache)) {
                         fullPathNames[i] = null;
                     } else {
                         itemsLeft++;
@@ -368,8 +380,6 @@ abstract public class PhotoPropertiesMediaFilesScanner {
     /** updates values with current values of file. */
     protected PhotoPropertiesMediaDBContentValues getExifFromFile(ContentValues values, IFile jpgFile) {
         try {
-            String absoluteJpgPath = jpgFile.getCanonicalPath();
-
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true; // only need with/height but not content
             BitmapFactory.decodeStream(jpgFile.openInputStream(), null, options);
@@ -391,7 +401,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
 
             TagSql.setXmpFileModifyDate(values, xmpFilelastModified);
 
-            IPhotoProperties exif = loadNonMediaValues(values, absoluteJpgPath, xmpContent);
+            IPhotoProperties exif = loadNonMediaValues(values, jpgFile, xmpContent);
 
             IPhotoProperties src = null;
             if (exif == null) {
@@ -411,6 +421,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
                 updateTagRepository(src.getTags());
             }
 
+            String absoluteJpgPath = jpgFile.getCanonicalPath();
             setPathRelatedFieldsIfNeccessary(values, absoluteJpgPath, null);
 
             return dest;
@@ -456,7 +467,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
         return null;
     }
 
-    abstract protected IPhotoProperties loadNonMediaValues(ContentValues destinationValues, String absoluteJpgPath, IPhotoProperties xmpContent);
+    abstract protected IPhotoProperties loadNonMediaValues(ContentValues destinationValues, IFile jpgFile, IPhotoProperties xmpContent);
 
     /** @return number of copied properties */
     protected int getExifValues(PhotoPropertiesMediaDBContentValues dest, IPhotoProperties src) {

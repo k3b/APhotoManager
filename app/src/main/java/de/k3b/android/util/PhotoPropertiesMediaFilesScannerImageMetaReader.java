@@ -26,6 +26,7 @@ import java.io.IOException;
 
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.PhotoPropertiesImageReader;
 
@@ -40,10 +41,10 @@ public class PhotoPropertiesMediaFilesScannerImageMetaReader extends PhotoProper
     }
 
     @Override
-    protected IPhotoProperties loadNonMediaValues(ContentValues destinationValues, String absoluteJpgPath, IPhotoProperties xmpContent) {
+    protected IPhotoProperties loadNonMediaValues(ContentValues destinationValues, IFile jpgFile, IPhotoProperties xmpContent) {
         PhotoPropertiesImageReader exif = null;
         try {
-            exif = new PhotoPropertiesImageReader().load(FileFacade.convert("PhotoPropertiesMediaFilesScannerImageMetaReader loadNonMediaValues", absoluteJpgPath), null, xmpContent, "PhotoPropertiesMediaFilesScannerImageMetaReader load");
+            exif = new PhotoPropertiesImageReader().load(jpgFile, null, xmpContent, "PhotoPropertiesMediaFilesScannerImageMetaReader load");
         } catch (IOException ex) {
             // exif is null
         }

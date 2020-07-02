@@ -37,6 +37,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.Toast;
 
 import java.io.File;
@@ -383,73 +384,48 @@ public class AndroidFileCommands extends FileCommands {
         if ((nameCount == 0) || (nameCount == deleteCount)) {
             // no delete file error so also delete media-items
             QueryParameter where = new QueryParameter();
-            FotoSql.setWhereSelectionPks (where, fotos.toIdString());
+            FotoSql.setWhereSelectionPks(where, fotos.toIdString());
 
             FotoSql.getMediaDBApi().deleteMedia("AndroidFileCommands.deleteFiles", where.toAndroidWhere(), null, true);
         }
         return deleteCount;
     }
 
-    @SuppressLint("ValidFragment")
-    public static class MediaScannerDirectoryPickerFragment extends DirectoryPickerFragment {
-        private AndroidFileCommands mParent = null;
-        private CheckBox chkIncremental = null;
+    /**
+     * answer from "which directory to start scanner from"?
+     */
+    private void onMediaScannerAnswer(Activity activity, IFile scanRootDir,
+                                      boolean fullScan, boolean rescanNeverScannedByAPM, boolean scanForDeleted) {
+        if ((AndroidFileCommands.canProcessFile(activity, this.isInBackground)) || (RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner == null)) {
 
-        /** do not use activity callback */
-        @Override protected void setDirectoryListener(Activity activity) {}
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View result = super.onCreateView(inflater,container,savedInstanceState);
-
-            chkIncremental = (CheckBox) result.findViewById(R.id.chkIncremental);
-            chkIncremental.setVisibility(View.VISIBLE);
-
-            final SharedPreferences preferences = PreferenceManager
-                    .getDefaultSharedPreferences(getActivity());
-            chkIncremental.setChecked(preferences.getBoolean("scan-incremental", false));
-
-            return result;
-        }
-
-        @Override
-        protected void onDirectoryPick(IDirectory selection) {
-            if ((mParent != null) && (selection != null)) {
-                SharedPreferences.Editor prefs = PreferenceManager
-                        .getDefaultSharedPreferences(getActivity()).edit();
-                prefs.putBoolean("scan-incremental", chkIncremental.isChecked());
-                prefs.apply();
-
-                mParent.onMediaScannerAnswer(
-                        mContext,
-                        FileFacade.convert("onDirectoryPick", selection.getAbsolute()),
-                        chkIncremental.isChecked());
+            // remove ".nomedia" file from scan root
+            IFile nomedia = scanRootDir.create(PhotoPropertiesMediaFilesScanner.MEDIA_IGNORE_FILENAME);
+            if (nomedia.exists()) {
+                if (Global.debugEnabled) {
+                    Log.i(Global.LOG_CONTEXT, mDebugPrefix + "onMediaScannerAnswer deleting " + nomedia);
+                }
+                nomedia.delete();
             }
-            dismiss();
+            if (Global.debugEnabled) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "onMediaScannerAnswer start scanning " + scanRootDir);
+            }
+
+            final String message = activity.getString(R.string.scanner_menu_title);
+
+            final RecursivePhotoPropertiesMediaFilesScannerAsyncTask scanner = (RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner != null)
+                    ? RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner :
+                    new RecursivePhotoPropertiesMediaFilesScannerAsyncTask(
+                            mScanner, activity, message,
+                            fullScan, rescanNeverScannedByAPM, scanForDeleted);
+            synchronized (this) {
+                if (RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner == null) {
+                    RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner = scanner;
+                    scanner.execute(new IFile[]{scanRootDir});
+                } // else scanner is already running
+            }
+
+            showMediaScannerStatus(RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner, activity);
         }
-
-        @Override
-        public void onPause() {
-            super.onPause();
-
-            // else the java.lang.InstantiationException: can't instantiate
-            // class de.k3b.android.io.AndroidFileCommands$MediaScannerDirectoryPickerFragment;
-            // no empty constructor
-            // on orientation change
-            dismiss();
-        }
-
-        public void setParent(AndroidFileCommands parent) {
-            this.mParent = parent;
-        }
-
-        @Override
-        public void dismiss() {
-            setParent(null);
-            super.dismiss();
-        }
-
     }
 
     public boolean cmdMediaScannerWithQuestion(Activity activity) {
@@ -480,36 +456,99 @@ public class AndroidFileCommands extends FileCommands {
         return false;
     }
 
-    /** answer from "which directory to start scanner from"? */
-    private void onMediaScannerAnswer(Activity activity, IFile scanRootDir, boolean incremental) {
-        if  ((AndroidFileCommands.canProcessFile(activity, this.isInBackground)) || (RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner == null)){
+    @SuppressLint("ValidFragment")
+    public static class MediaScannerDirectoryPickerFragment extends DirectoryPickerFragment {
+        private AndroidFileCommands mParent = null;
+        private CheckBox chkFullScan = null;
+        private CheckBox chkRescanNeverScannedByAPM = null;
+        private CheckBox chkScanForDeleted = null;
 
-            // remove ".nomedia" file from scan root
-            IFile nomedia = scanRootDir.create(PhotoPropertiesMediaFilesScanner.MEDIA_IGNORE_FILENAME);
-            if (nomedia.exists()) {
-                if (Global.debugEnabled) {
-                    Log.i(Global.LOG_CONTEXT, mDebugPrefix + "onMediaScannerAnswer deleting " + nomedia);
-                }
-                nomedia.delete();
-            }
-            if (Global.debugEnabled) {
-                Log.i(Global.LOG_CONTEXT, mDebugPrefix + "onMediaScannerAnswer start scanning " + scanRootDir);
-            }
-
-            final String message = activity.getString(R.string.scanner_menu_title);
-
-            final RecursivePhotoPropertiesMediaFilesScannerAsyncTask scanner = (RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner != null)
-                    ? RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner :
-                    new RecursivePhotoPropertiesMediaFilesScannerAsyncTask(mScanner, activity, message, incremental);
-            synchronized (this) {
-                if (RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner == null) {
-                    RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner = scanner;
-                    scanner.execute(new IFile[]{scanRootDir});
-                } // else scanner is already running
-            }
-
-            showMediaScannerStatus(RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner, activity);
+        /**
+         * do not use activity callback
+         */
+        @Override
+        protected void setDirectoryListener(Activity activity) {
         }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            View result = super.onCreateView(inflater, container, savedInstanceState);
+
+            chkFullScan = (CheckBox) result.findViewById(R.id.chkFullScan);
+            chkFullScan.setVisibility(View.VISIBLE);
+
+            chkRescanNeverScannedByAPM = (CheckBox) result.findViewById(R.id.chkRescanNeverScannedByAPM);
+            chkRescanNeverScannedByAPM.setVisibility(View.VISIBLE);
+
+            chkScanForDeleted = (CheckBox) result.findViewById(R.id.chkScanForDeleted);
+            chkScanForDeleted.setVisibility(View.VISIBLE);
+
+            chkFullScan.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (chkFullScan.isChecked() && chkRescanNeverScannedByAPM.isChecked()) {
+                        chkRescanNeverScannedByAPM.setChecked(false);
+                    }
+                }
+            });
+            chkRescanNeverScannedByAPM.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (chkFullScan.isChecked() && chkRescanNeverScannedByAPM.isChecked()) {
+                        chkFullScan.setChecked(false);
+                    }
+                }
+            });
+            final SharedPreferences preferences = PreferenceManager
+                    .getDefaultSharedPreferences(getActivity());
+            chkFullScan.setChecked(preferences.getBoolean("chkFullScan", true));
+            chkRescanNeverScannedByAPM.setChecked(preferences.getBoolean("chkRescanNeverScannedByAPM", false));
+            chkScanForDeleted.setChecked(preferences.getBoolean("chkScanForDeleted", false));
+
+            return result;
+        }
+
+        @Override
+        protected void onDirectoryPick(IDirectory selection) {
+            if ((mParent != null) && (selection != null)) {
+                SharedPreferences.Editor prefs = PreferenceManager
+                        .getDefaultSharedPreferences(getActivity()).edit();
+                prefs.putBoolean("chkFullScan", chkFullScan.isChecked());
+                prefs.putBoolean("chkRescanNeverScannedByAPM", chkRescanNeverScannedByAPM.isChecked());
+                prefs.putBoolean("chkScanForDeleted", chkScanForDeleted.isChecked());
+                prefs.apply();
+
+                mParent.onMediaScannerAnswer(
+                        mContext,
+                        FileFacade.convert("onDirectoryPick", selection.getAbsolute()),
+                        chkFullScan.isChecked(),
+                        chkRescanNeverScannedByAPM.isChecked(), chkScanForDeleted.isChecked());
+            }
+            dismiss();
+        }
+
+        @Override
+        public void onPause() {
+            super.onPause();
+
+            // else the java.lang.InstantiationException: can't instantiate
+            // class de.k3b.android.io.AndroidFileCommands$MediaScannerDirectoryPickerFragment;
+            // no empty constructor
+            // on orientation change
+            dismiss();
+        }
+
+        public void setParent(AndroidFileCommands parent) {
+            this.mParent = parent;
+        }
+
+        @Override
+        public void dismiss() {
+            setParent(null);
+            super.dismiss();
+        }
+
     }
 
     private void showMediaScannerStatus(RecursivePhotoPropertiesMediaFilesScannerAsyncTask mediaScanner, Activity activity) {

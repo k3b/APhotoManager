@@ -26,6 +26,7 @@ import android.content.Context;
 import java.io.IOException;
 
 import de.k3b.geo.api.IGeoPointInfo;
+import de.k3b.io.filefacade.IFile;
 import de.k3b.media.ExifInterfaceEx;
 import de.k3b.media.IPhotoProperties;
 
@@ -41,10 +42,10 @@ public class PhotoPropertiesMediaFilesScannerExifInterface extends PhotoProperti
     }
 
     @Override
-    protected IPhotoProperties loadNonMediaValues(ContentValues destinationValues, String absoluteJpgPath, IPhotoProperties xmpContent) {
+    protected IPhotoProperties loadNonMediaValues(ContentValues destinationValues, IFile jpgFile, IPhotoProperties xmpContent) {
         ExifInterfaceEx exif = null;
         try {
-            exif = ExifInterfaceEx.create(absoluteJpgPath, null, xmpContent, "PhotoPropertiesMediaFilesScannerExifInterface.loadNonMediaValues");
+            exif = ExifInterfaceEx.create(jpgFile, null, xmpContent, "PhotoPropertiesMediaFilesScannerExifInterface.loadNonMediaValues");
             if (!exif.isValidJpgExifFormat()) exif = null;
         } catch (IOException ex) {
             // exif is null

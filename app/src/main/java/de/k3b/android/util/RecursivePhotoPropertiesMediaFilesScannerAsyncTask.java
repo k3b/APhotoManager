@@ -28,16 +28,12 @@ import android.os.Handler;
 import android.view.View;
 import android.widget.TextView;
 
-import java.io.File;
-import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
 
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
-import de.k3b.database.QueryParameter;
-import de.k3b.io.FileUtils;
 import de.k3b.io.filefacade.FileFacade;
 import de.k3b.io.filefacade.IFile;
 import de.k3b.media.PhotoPropertiesUtil;
@@ -51,11 +47,16 @@ import de.k3b.media.PhotoPropertiesUtil;
  * Created by k3b on 22.10.2015.
  */
 public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPropertiesMediaFilesScannerAsyncTask {
-    /** Either
+    /**
+     * Either
      * - current running scanner instance
-     * - or reumable instanc */
+     * - or reumable instanc
+     */
     public static RecursivePhotoPropertiesMediaFilesScannerAsyncTask sScanner = null;
-    private final boolean incremental;
+
+    private final boolean fullScan;
+    private final boolean rescanNeverScannedByAPM;
+    private final boolean scanForDeleted;
 
     // statistics displayed in the status dialog
     private String mCurrentFolder = "";
@@ -65,14 +66,22 @@ public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPro
     private Handler mTimerHandler = null;
     private Runnable mTimerRunner = null;
 
-    /** if not null scanner is either
+    /**
+     * if not null scanner is either
      * - in resume mode (can be started without parameters to resume interrupted scan)
-     * - or in pausing mode collecting all canceled scans here to be processed in resumeIfNecessary() */
+     * - or in pausing mode collecting all canceled scans here to be processed in resumeIfNecessary()
+     */
     private List<IFile> mPaused = null;
 
-    public RecursivePhotoPropertiesMediaFilesScannerAsyncTask(PhotoPropertiesMediaFilesScanner scanner, Context context, String why, boolean incremental) {
+    public RecursivePhotoPropertiesMediaFilesScannerAsyncTask(
+            PhotoPropertiesMediaFilesScanner scanner, Context context, String why,
+            boolean fullScan, boolean rescanNeverScannedByAPM, boolean scanForDeleted) {
         super(scanner, context, why);
-        this.incremental = incremental;
+
+        this.fullScan = fullScan;
+        this.rescanNeverScannedByAPM = rescanNeverScannedByAPM;
+        this.scanForDeleted = scanForDeleted;
+
     }
 
     @Override
@@ -92,10 +101,10 @@ public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPro
     private int scanRoot(IFile rootPath) {
         int resultCount = 0;
         if ((rootPath != null) && (rootPath.length() > 0)) {
-            if (this.incremental) {
+            if (this.rescanNeverScannedByAPM) {
                 List<String> pathsToUpdate = TagSql.getPhotosNeverScanned(rootPath.getAbsolutePath());
                 for (String pathToUpdate : pathsToUpdate) {
-                    resultCount += scanDirOrFile(FileFacade.convert("scanRoot incremental ", pathToUpdate));
+                    resultCount += scanDirOrFile(FileFacade.convert("scanRoot incremental paths never scanned ", pathToUpdate));
                 }
             }
 
@@ -122,25 +131,43 @@ public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPro
     }
 
     private int scanDir(IFile file, String fullFilePath) {
-        List<String> existing = null;
-        if (incremental) {
-            existing = FotoSql.getPathsOfFolderWithoutSubfolders(file.getAbsolutePath());
-        }
-
         int resultCount = 0;
-        IFile[] childFileNames = file.listFiles();
-
-        if (childFileNames != null) {
-            resultCount += runScanner(fullFilePath, childFileNames);
+        if (this.scanForDeleted) {
+            List<String> deletedPaths = null;
+            List<String> existing = FotoSql.getPathsOfFolderWithoutSubfolders(file.getAbsolutePath());
+            for (String candidatePath : existing) {
+                IFile camdidateFile = FileFacade.convert(
+                        "RecursivePhotoPropertiesMediaFilesScannerAsyncTask.scanDir find deleted", candidatePath);
+                // delete in db for existing but not found as file
+                if (!camdidateFile.exists()) {
+                    if (deletedPaths == null) deletedPaths = new ArrayList<>();
+                    deletedPaths.add(candidatePath);
+                }
+            }
+            if (deletedPaths != null) {
+                FotoSql.deleteMedia("del photos that did not exist any more ",
+                        deletedPaths, true);
+                resultCount += deletedPaths.size();
+            }
         }
 
-        IFile[] subDirs = file.listFiles();
+        if (this.fullScan) {
+            IFile[] childFileNames = file.listFiles();
 
-        if (subDirs != null) {
-            // #33
-            for (IFile subDir : subDirs) {
-                if ((subDir != null) && (subDir.isDirectory()) && (!subDir.getName().startsWith("."))) {
-                    resultCount += scanDirOrFile(subDir);
+            if (childFileNames != null) {
+                resultCount += runScanner(fullFilePath, childFileNames);
+            }
+        }
+
+        if (this.fullScan || this.scanForDeleted) {
+            IFile[] subDirs = file.listFiles();
+
+            if (subDirs != null) {
+                // #33
+                for (IFile subDir : subDirs) {
+                    if ((subDir != null) && (subDir.isDirectory()) && (!subDir.getName().startsWith("."))) {
+                        resultCount += scanDirOrFile(subDir);
+                    }
                 }
             }
         }
@@ -194,7 +221,8 @@ public class RecursivePhotoPropertiesMediaFilesScannerAsyncTask extends PhotoPro
         if (mustCreateResumeScanner) {
             RecursivePhotoPropertiesMediaFilesScannerAsyncTask newScanner
                     = new RecursivePhotoPropertiesMediaFilesScannerAsyncTask(
-                            mScanner, mScanner.mContext,"resumed " + mWhy, incremental);
+                    mScanner, mScanner.mContext, "resumed " + mWhy,
+                    fullScan, rescanNeverScannedByAPM, scanForDeleted);
             newScanner.mPaused = this.mPaused;
             RecursivePhotoPropertiesMediaFilesScannerAsyncTask.sScanner = newScanner;
         }

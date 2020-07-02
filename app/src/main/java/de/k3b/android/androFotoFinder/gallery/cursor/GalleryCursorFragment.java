@@ -561,7 +561,14 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
     }
 
     private void destroyLoaderIfFinishing(String context) {
-        if ((loaderID != -1) && (getActivity() != null) && (getActivity().isFinishing())) {
+        if ((getActivity() != null) && (getActivity().isFinishing())) {
+            destroyLoader(context);
+        }
+    }
+
+    //!!! TODO destroyLoader for performance reasons while scanner is active to remove
+    private void destroyLoader(String context) {
+        if (loaderID != -1) {
             getLoaderManager().destroyLoader(loaderID);
             if ((Global.debugEnabled) && (mCurorLoader != null)) {
                 Log.d(Global.LOG_CONTEXT, mDebugPrefix + context + " - releasing mCurorLoader" +

@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import de.k3b.LibGlobal;
@@ -243,18 +244,41 @@ public class FileUtils {
             }
         });
     }
-    /** return true, if file is in a ".nomedia" dir */
+
     public static boolean isNoMedia(IFile path, int maxLevel) {
+        return isNoMedia(path, maxLevel, null);
+    }
+
+    /**
+     * return true, if file is in a ".nomedia" dir
+     */
+    public static boolean isNoMedia(IFile path, int maxLevel, Map<String, Boolean> nomediaCache) {
         if (path != null) {
             if (isHiddenFolder(path))
                 return true;
             IFile file = path.getParentFile();
+            String firstDir = file.getAbsolutePath();
+            Boolean cacheFind;
             int level = maxLevel;
             while ((--level >= 0) && (file != null)) {
+                final String absolutePath = file.getAbsolutePath();
+                cacheFind = (nomediaCache == null) ? null : nomediaCache.get(absolutePath);
+                if (cacheFind != null) {
+                    nomediaCache.put(firstDir, cacheFind.booleanValue());
+                    return cacheFind.booleanValue();
+                }
+
                 if (file.create(MEDIA_IGNORE_FILENAME).exists()) {
+                    if (nomediaCache != null) {
+                        nomediaCache.put(absolutePath, true);
+                        nomediaCache.put(firstDir, true);
+                    }
                     return true;
                 }
                 file = file.getParentFile();
+            }
+            if (nomediaCache != null) {
+                nomediaCache.put(firstDir, false);
             }
         }
         return false;

@@ -52,13 +52,28 @@
 
         <!-- chkIncremental invisible except in MediaScannerDirectoryPickerFragment -->
         <CheckBox
-            android:id="@+id/chkIncremental"
-            android:text="@string/lbl_media_scanner_incremental"
+            android:id="@+id/chkFullScan"
+            android:text="@string/lbl_media_scanner_full"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            android:layout_below="@+id/lblName"
-            />
+            android:layout_below="@+id/lblName" />
+
+        <CheckBox
+            android:id="@+id/chkRescanNeverScannedByAPM"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/chkFullScan"
+            android:text="@string/lbl_media_scanner_non_apm_only"
+            android:visibility="gone" />
+
+        <CheckBox
+            android:id="@+id/chkScanForDeleted"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/chkRescanNeverScannedByAPM"
+            android:text="@string/lbl_media_scanner_deleted"
+            android:visibility="gone" />
 
         <HorizontalScrollView
             android:id="@+id/parent_scroller"
@@ -67,8 +82,7 @@
             android:scrollbars="horizontal"
             android:scrollbarSize="2dp"
             android:scrollbarStyle="insideInset"
-            android:layout_below="@+id/chkIncremental"
-            >
+            android:layout_below="@+id/chkScanForDeleted">
             <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:id="@+id/parent_owner"
                 android:orientation="horizontal"
