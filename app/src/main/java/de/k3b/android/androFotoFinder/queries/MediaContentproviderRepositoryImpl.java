@@ -64,6 +64,7 @@ public class MediaContentproviderRepositoryImpl {
             final String[] sqlWhereParameters, final String sqlSortOrder,
             CancellationSignal cancellationSignal, final String... sqlSelectColums) {
         ContentResolver resolver = context.getContentResolver();
+
         Cursor query = null;
 
         Exception excpetion = null;
@@ -176,9 +177,7 @@ public class MediaContentproviderRepositoryImpl {
         try {
             if (preventDeleteImageFile) {
                 // set SQL_COL_PATH empty so sql-delete cannot cascade delete the referenced image-file via delete trigger
-                ContentValues values = new ContentValues();
-                values.put(FotoSql.SQL_COL_PATH, FotoSql.DELETED_FILE_MARKER);
-                values.put(FotoSql.SQL_COL_EXT_MEDIA_TYPE, 0); // so it will not be shown as image any more
+                ContentValues values = getContentValuesDeleteStep1();
                 exexUpdateImpl(dbgContext + "-a: " +
                                 MODUL_NAME +
                                 ".deleteMedia: ",
@@ -219,6 +218,13 @@ public class MediaContentproviderRepositoryImpl {
 
         }
         return delCount;
+    }
+
+    public static ContentValues getContentValuesDeleteStep1() {
+        ContentValues values = new ContentValues();
+        values.put(FotoSql.SQL_COL_PATH, FotoSql.DELETED_FILE_MARKER);
+        values.put(FotoSql.SQL_COL_EXT_MEDIA_TYPE, 0); // so it will not be shown as image any more
+        return values;
     }
 
     /**

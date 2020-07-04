@@ -18,12 +18,20 @@
  */
 package de.k3b.android.androFotoFinder.queries;
 
+import android.content.ContentProviderOperation;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.net.Uri;
+import android.os.Build;
 import android.os.CancellationSignal;
+import android.util.Log;
 
+import java.util.ArrayList;
+
+import de.k3b.LibGlobal;
+import de.k3b.android.androFotoFinder.Global;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.VISIBILITY;
 
@@ -33,7 +41,12 @@ import de.k3b.io.VISIBILITY;
  * Implementation of Context.getContentResolver()-ContentProvider based media api
  */
 public class MediaContentproviderRepository implements IMediaRepositoryApi {
+    public static final String LOG_TAG = MediaContentproviderRepositoryImpl.LOG_TAG;
+    private static final String MODUL_NAME = MediaContentproviderRepository.class.getSimpleName() + "-Transaction ";
+
     private final Context context;
+
+    private ArrayList<ContentProviderOperation> transaction = null;
 
     public MediaContentproviderRepository(final Context context) {
         this.context = context;
@@ -68,7 +81,24 @@ public class MediaContentproviderRepository implements IMediaRepositoryApi {
 
     @Override
     public int exexUpdateImpl(String dbgContext, ContentValues values, String sqlWhere, String[] selectionArgs) {
-        return MediaContentproviderRepositoryImpl.exexUpdateImpl(dbgContext, context, values, sqlWhere, selectionArgs);
+        if (transaction != null) {
+            if (((dbgContext != null) && (Global.debugEnabledSql || LibGlobal.debugEnabledJpg))) {
+                Log.i(LOG_TAG, dbgContext + ":" +
+                        MODUL_NAME +
+                        ".update\n" +
+                        QueryParameter.toString(null, values.toString(), FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
+                                sqlWhere, selectionArgs, null, -1));
+            }
+
+            transaction.add(ContentProviderOperation
+                    .newUpdate(FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE)
+                    .withValues(values)
+                    .withSelection(sqlWhere, selectionArgs)
+                    .build());
+            return 1;
+        } else {
+            return MediaContentproviderRepositoryImpl.exexUpdateImpl(dbgContext, context, values, sqlWhere, selectionArgs);
+        }
     }
 
     /**
@@ -79,6 +109,14 @@ public class MediaContentproviderRepository implements IMediaRepositoryApi {
                                             String dbUpdateFilterJpgFullPathName,
                                             ContentValues values, VISIBILITY visibility,
                                             Long updateSuccessValue) {
+        if (transaction != null) {
+            String msg = dbgContext + ":" +
+                    MODUL_NAME +
+                    ".insertOrUpdateMediaDatabase not implemented\n" +
+                    QueryParameter.toString(null, values.toString(), FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
+                            dbUpdateFilterJpgFullPathName, null, null, -1);
+            throw new SQLException(msg);
+        }
         return MediaContentproviderRepositoryImpl.insertOrUpdateMediaDatabase(dbgContext, context,
                 dbUpdateFilterJpgFullPathName,
                 values, visibility,
@@ -90,15 +128,57 @@ public class MediaContentproviderRepository implements IMediaRepositoryApi {
      */
     @Override
     public Uri execInsert(String dbgContext, ContentValues values) {
-        return MediaContentproviderRepositoryImpl.execInsert(dbgContext, context, values);
+        if (transaction != null) {
+            if (((dbgContext != null) && (Global.debugEnabledSql || LibGlobal.debugEnabledJpg))) {
+                Log.i(LOG_TAG, dbgContext + ":" +
+                        MODUL_NAME +
+                        ".insert\n" +
+                        QueryParameter.toString(null, values.toString(), FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
+                                null, null, null, -1));
+            }
+
+            transaction.add(ContentProviderOperation
+                    .newInsert(FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE)
+                    .withValues(values)
+                    .build());
+            return Uri.EMPTY;
+        } else {
+            return MediaContentproviderRepositoryImpl.execInsert(dbgContext, context, values);
+        }
     }
 
     /**
      * Deletes media items specified by where with the option to prevent cascade delete of the image.
      */
     @Override
-    public int deleteMedia(String dbgContext, String where, String[] selectionArgs, boolean preventDeleteImageFile) {
-        return MediaContentproviderRepositoryImpl.deleteMedia(dbgContext, context, where, selectionArgs, preventDeleteImageFile);
+    public int deleteMedia(String dbgContext, String sqlWhere, String[] selectionArgs, boolean preventDeleteImageFile) {
+        if (transaction != null) {
+            if (((dbgContext != null) && (Global.debugEnabledSql || LibGlobal.debugEnabledJpg))) {
+                Log.i(LOG_TAG, dbgContext + ":" +
+                        MODUL_NAME +
+                        ".update\n" +
+                        QueryParameter.toString(null, null, FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME,
+                                sqlWhere, selectionArgs, null, -1));
+            }
+
+            if (preventDeleteImageFile) {
+                // set SQL_COL_PATH empty so sql-delete cannot cascade delete the referenced image-file via delete trigger
+                ContentValues values = MediaContentproviderRepositoryImpl.getContentValuesDeleteStep1();
+                exexUpdateImpl(dbgContext + "-a: " +
+                                MODUL_NAME +
+                                ".deleteMedia: ",
+                        values, sqlWhere, selectionArgs);
+                deleteMedia(dbgContext, FotoSql.SQL_COL_PATH + " is null", null, false);
+            } else {
+                transaction.add(ContentProviderOperation
+                        .newDelete(FotoSqlBase.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE)
+                        .withSelection(sqlWhere, selectionArgs)
+                        .build());
+            }
+            return 1;
+        } else {
+            return MediaContentproviderRepositoryImpl.deleteMedia(dbgContext, context, sqlWhere, selectionArgs, preventDeleteImageFile);
+        }
     }
 
     @Override
@@ -118,17 +198,60 @@ public class MediaContentproviderRepository implements IMediaRepositoryApi {
 
     @Override
     public void beginTransaction() {
-
+        if (transaction != null) {
+            String msg =
+                    MODUL_NAME +
+                            ".beginTransaction : already pending Transaction";
+            throw new SQLException(msg);
+        } else {
+            if ((Global.debugEnabledSql || LibGlobal.debugEnabledJpg)) {
+                Log.i(LOG_TAG,
+                        MODUL_NAME +
+                                ".beginTransaction");
+            }
+            this.transaction = new ArrayList<>();
+        }
     }
 
     @Override
     public void setTransactionSuccessful() {
-
+        if (transaction != null) {
+            if ((Global.debugEnabledSql || LibGlobal.debugEnabledJpg)) {
+                Log.i(LOG_TAG, MODUL_NAME + ".setTransactionSuccessful " + transaction.size());
+            }
+            try {
+                context.getContentResolver().applyBatch(
+                        FotoSqlBase.AUTHORITY, transaction);
+            } catch (Exception e) {
+                final String msg = MODUL_NAME + ".applyBatch " + e.getMessage();
+                Log.e(LOG_TAG, msg, e);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    throw new SQLException(msg, e);
+                }
+                throw new SQLException(msg);
+            }
+        } else {
+            String msg =
+                    MODUL_NAME +
+                            ".setTransactionSuccessful : no pending Transaction";
+            throw new SQLException(msg);
+        }
     }
 
     @Override
     public void endTransaction() {
+        if (transaction != null) {
+            if ((Global.debugEnabledSql || LibGlobal.debugEnabledJpg)) {
+                Log.i(LOG_TAG, MODUL_NAME + ".endTransaction");
+            }
+            transaction = null;
 
+        } else {
+            String msg =
+                    MODUL_NAME +
+                            ".endTransaction : no pending Transaction";
+            throw new SQLException(msg);
+        }
     }
 
 }

@@ -27,6 +27,7 @@ import android.provider.MediaStore;
 
 // pseudo constants (non final with unittest-defaults to be initialized with init()
 public class FotoSqlBase {
+    public static final String AUTHORITY = MediaStore.AUTHORITY;
     public static Uri SQL_TABLE_EXTERNAL_CONTENT_URI = null; // = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
     public static Uri SQL_TABLE_EXTERNAL_CONTENT_URI_FILE = null; // = MediaStore.Files.getContentUri("external");
     public static String SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME = "content:/unittest/file"; // = SQL_TABLE_EXTERNAL_CONTENT_URI_FILE.toString();
