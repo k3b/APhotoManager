@@ -160,14 +160,14 @@ dependencies {
     // this is osmdroid
     // https://github.com/osmdroid/osmdroid/  6.0.3 from 11/2018
     // https://github.com/osmdroid/osmdroid/  6.1.0 from 03/2019
-    implementation 'org.osmdroid:osmdroid-android:6.1.0'
-    implementation ('org.osmdroid:osmdroid-mapsforge:6.1.0')
+    implementation 'org.osmdroid:osmdroid-android:6.1.6'
+    implementation ('org.osmdroid:osmdroid-mapsforge:6.1.6')
 
 
     //Mapsforge rendering and database support, which is LGPL
-    implementation 'org.mapsforge:mapsforge-map-android:0.11.0'
-    implementation 'org.mapsforge:mapsforge-map:0.11.0'
-    implementation 'org.mapsforge:mapsforge-themes:0.11.0'
+    implementation 'org.mapsforge:mapsforge-map-android:0.13.0'
+    implementation 'org.mapsforge:mapsforge-map:0.13.0'
+    implementation 'org.mapsforge:mapsforge-themes:0.13.0'
 
     implementation 'org.slf4j:slf4j-api:1.7.7@jar'
     implementation 'eu.lp0.slf4j:slf4j-android:1.7.7-1@jar'

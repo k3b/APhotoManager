@@ -62,13 +62,28 @@
 
     <!-- after app crash the logcat is written to /mnt/sdcard/copy/log/androFotofinder.logcat*.txt
             on old android versions this allows to read logcat -->
-    <uses-permission android:name="android.permission.READ_LOGS"
+    <uses-permission
+        android:name="android.permission.READ_LOGS"
+        tools:ignore="ProtectedPermissions" />
+
+    <!-- Android-11 https://developer.android.com/preview/privacy/storage#all-files-access
+An app can request a special app access called All files access from the user by doing the following:
+
+    Declare the MANAGE_EXTERNAL_STORAGE permission in the manifest.
+    Use the ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION intent action to direct users to a system settings page where they can enable the following option for your app: Allow access to manage all files.
+
+To determine whether your app has been granted the MANAGE_EXTERNAL_STORAGE permission, call Environment.isExternalStorageManager()
+     -->
+    <uses-permission
+        android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
         tools:ignore="ProtectedPermissions" />
 
     <!--
          permissions inherited from a lib that the app does not need.
          tools:node="remove" means remove permission
          see http://stackoverflow.com/questions/37223379/google-play-game-service-adds-an-unwanted-permission-in-my-app-phone-status-and
+
+         <application android:requestLegacyExternalStorage = "true" .../> see android-11 https://developer.android.com/reference/android/R.attr#requestLegacyExternalStorage
     -->
 
     <application
