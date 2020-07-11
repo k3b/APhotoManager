@@ -246,6 +246,8 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        mDebugPrefix = "ImageDetailActivityViewPager#" + (id++) + " ";
+
         this.mWaitingForMediaScannerResult = false;
 
         // #17: let actionbar overlap image so there is no need to resize main view item

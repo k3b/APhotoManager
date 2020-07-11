@@ -260,10 +260,13 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements PhotoCh
         return null;
     }
 
-    /** internal helper. return -1 if position is not available */
-    public int getPositionFromPath(IFile path) {
+    /**
+     * internal helper. return -1 if position is not available
+     */
+    public int getPositionFromPath(IFile file) {
         int result = -1;
-        if ((this.mCursor != null) && (path != null)) {
+        if ((this.mCursor != null) && (file != null)) {
+            String path = file.getAbsolutePath();
             int index = mCursor.getColumnIndex(FotoSql.SQL_COL_DISPLAY_TEXT);
             if ((index >= 0) && (mCursor.moveToFirst())) {
                 do {
@@ -274,7 +277,8 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements PhotoCh
                 } while (mCursor.moveToNext());
             }
         }
-        if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, mDebugPrefix + "getPositionFromPath(" + path +") => " + result);
+        if (Global.debugEnabledViewItem)
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + "getPositionFromPath(" + file + ") => " + result);
         return result;
     }
 
