@@ -145,6 +145,7 @@ To determine whether your app has been granted the MANAGE_EXTERNAL_STORAGE permi
 
                 <!-- file must have mimeType to match -->
                 <data android:scheme="file" />
+                <data android:scheme="content" />
                 <data android:mimeType="*/*" />
                 <data android:host="*" />
                 <data android:pathPattern=".*\\.album" />
@@ -244,9 +245,7 @@ To determine whether your app has been granted the MANAGE_EXTERNAL_STORAGE permi
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <!-- file must have mimeType to match -->
-                <data
-                    android:mimeType="image/*"
-                    android:scheme="file" />
+                <data android:mimeType="image/jpeg" />
             </intent-filter>
         </activity>
 
@@ -261,6 +260,7 @@ To determine whether your app has been granted the MANAGE_EXTERNAL_STORAGE permi
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <!-- file must have mimeType to match -->
                 <data android:scheme="file"/>
+                <data android:scheme="content" />
                 <data android:mimeType="*/*"/>
                 <data android:host="*"/>
                 <data android:pathPattern=".*\\.apm"/>
@@ -283,6 +283,7 @@ To determine whether your app has been granted the MANAGE_EXTERNAL_STORAGE permi
 
                 <!-- file must have mimeType to match -->
                 <data android:scheme="file" />
+                <data android:scheme="content" />
                 <data android:mimeType="*/*" />
                 <data android:host="*" />
                 <data android:pathPattern=".*\\.zip\\.apm\\.config" />
@@ -415,6 +416,21 @@ To determine whether your app has been granted the MANAGE_EXTERNAL_STORAGE permi
                     android:mimeType="*/*"
                     android:pathPattern=".*\\.kml"
                     android:scheme="file" />
+                <data
+                    android:host="*"
+                    android:mimeType="*/*"
+                    android:pathPattern=".*\\.gpx"
+                    android:scheme="content" />
+                <data
+                    android:host="*"
+                    android:mimeType="*/*"
+                    android:pathPattern=".*\\.poi"
+                    android:scheme="content" />
+                <data
+                    android:host="*"
+                    android:mimeType="*/*"
+                    android:pathPattern=".*\\.kml"
+                    android:scheme="content" />
             </intent-filter>
 
             <!-- #61 map view all hosts; http(s), ftp; mime kml/gpx/poi -->
@@ -463,6 +479,7 @@ To determine whether your app has been granted the MANAGE_EXTERNAL_STORAGE permi
 
                 <!-- file must have mimeType to match -->
                 <data android:scheme="file" />
+                <data android:scheme="content" />
                 <data android:mimeType="*/*" />
                 <data android:host="*" />
                 <data android:pathPattern=".*\\.album" />
@@ -481,7 +498,9 @@ To determine whether your app has been granted the MANAGE_EXTERNAL_STORAGE permi
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="file" />
+                <data android:scheme="content" />
                 <data android:mimeType="text/comma-separated-values" />
+                <data android:host="*" />
                 <data android:pathPattern=".*\\.csv" />
             </intent-filter>
         </activity>

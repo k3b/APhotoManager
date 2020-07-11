@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -289,6 +290,11 @@ public class DocumentFileTranslator {
         }
     }
 
+    public static String pathFromUri(String uri) {
+        if (root == null) return null;
+        return root.pathFromUri(uri);
+    }
+
     private static class Root {
         private final Context context;
         private Map<String, String> dir2uri = new HashMap<>();
@@ -366,11 +372,21 @@ public class DocumentFileTranslator {
             }
         }
 
+        public String pathFromUri(String uri) {
+            for (Map.Entry<String, String> entry : dir2uri.entrySet()) {
+                if (uri.startsWith(entry.getValue())) {
+                    String[] relPath = URLDecoder.decode(uri.substring(entry.getValue().length())).split(":");
+                    return new File(entry.getKey(), relPath[relPath.length - 1]).getAbsolutePath();
+                }
+            }
+            return null;
+        }
+
         @Override
         public String toString() {
             final StringBuilder result = new StringBuilder().append("[");
-            for (Map.Entry<String, String> enty : dir2uri.entrySet()) {
-                result.append(enty.getKey()).append(" -> ").append(enty.getValue()).append(" ");
+            for (Map.Entry<String, String> entry : dir2uri.entrySet()) {
+                result.append(entry.getKey()).append(" -> ").append(entry.getValue()).append(" ");
             }
             return result.append("]").toString();
         }

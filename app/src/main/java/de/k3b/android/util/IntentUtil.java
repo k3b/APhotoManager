@@ -28,6 +28,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v4.provider.DocumentFile;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
@@ -37,6 +38,7 @@ import java.io.File;
 import de.k3b.android.androFotoFinder.Common;
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
+import de.k3b.android.io.DocumentFileTranslator;
 import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.io.StringUtils;
 
@@ -67,6 +69,8 @@ public class IntentUtil implements Common {
             String scheme = uri.getScheme();
             if ((scheme == null) || ("file".equals(scheme))) {
                 path = uri.getPath();
+            } else if (DocumentFile.isDocumentUri(context, uri)) {
+                path = DocumentFileTranslator.pathFromUri(uri.toString());
             } else if ("content".equals(scheme)) {
                 // try to translate via media db
                 path = FotoSql.execGetFotoPath(uri);
