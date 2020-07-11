@@ -23,10 +23,10 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.widget.Toast;
 
-import java.io.File;
-
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.io.StringUtils;
+import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 
 /**
  * Encapsulates Clipboard IO.
@@ -34,10 +34,6 @@ import de.k3b.io.StringUtils;
  */
 
 public class ClipboardUtil {
-    public static boolean addDirToClipboard(Context context, File dir) {
-        if (isValid(dir)) return addDirToClipboard(context, dir.getAbsolutePath());
-        return false;
-    }
     public static boolean addDirToClipboard(Context context, CharSequence dir) {
         if (!StringUtils.isNullOrEmpty(dir)) {
             ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
@@ -51,14 +47,15 @@ public class ClipboardUtil {
         return false;
     }
 
-    public static File getClipboardDir(Context context) {
+    public static IFile getClipboardDir(Context context) {
         ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         final ClipData data = (clipboard != null) ? clipboard.getPrimaryClip() : null;
         if (data != null) {
-            for (int i = data.getItemCount() -1; i >= 0; i--) {
+            for (int i = data.getItemCount() - 1; i >= 0; i--) {
                 CharSequence cipText = data.getItemAt(i).getText();
                 if (!StringUtils.isNullOrEmpty(cipText)) {
-                    File result = new File(cipText.toString());
+                    IFile result = FileFacade.convert(
+                            "getClipboardDir", cipText.toString());
                     if (isValid(result)) return result;
                 }
             }
@@ -66,7 +63,7 @@ public class ClipboardUtil {
         return null;
     }
 
-    protected static boolean isValid(File dir) {
+    protected static boolean isValid(IFile dir) {
         return ((dir != null) && dir.exists() && dir.isDirectory());
     }
 }

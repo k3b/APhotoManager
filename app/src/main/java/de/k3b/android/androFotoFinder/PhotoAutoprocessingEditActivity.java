@@ -43,7 +43,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -666,8 +665,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
         getMenuInflater().inflate(R.menu.menu_copy_paste, menu);
 
         MenuItem item = menu.findItem(android.R.id.paste);
-        final IFile clipboardDir = FileFacade.convert(mDebugPrefix + " getClipboardDir", ClipboardUtil.getClipboardDir(this));
-        final IFile apmFile = (clipboardDir == null) ? null : PhotoAutoprocessingDto.getApmFile(clipboardDir);
+        final IFile apmFile = getiApmFileFromClipboard();
         if ((item != null) && (apmFile != null) && apmFile.exists()) {
             item.setVisible(true);
         }
@@ -679,6 +677,11 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
         AboutDialogPreference.onPrepareOptionsMenu(this, menu);
 
         return true;
+    }
+
+    private IFile getiApmFileFromClipboard() {
+        final IFile clipboardDir = ClipboardUtil.getClipboardDir(this);
+        return (clipboardDir == null) ? null : PhotoAutoprocessingDto.getApmFile(clipboardDir);
     }
 
     @Override
@@ -707,7 +710,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
                 return true;
 
             case android.R.id.copy:
-                return ClipboardUtil.addDirToClipboard(this, mCurrentOutDir.getFile());
+                return ClipboardUtil.addDirToClipboard(this, mCurrentOutDir.getAbsolutePath());
             case android.R.id.paste:
                 return onPaste();
             default:
@@ -716,7 +719,7 @@ public class PhotoAutoprocessingEditActivity extends BaseActivity implements Com
     }
 
     private boolean onPaste() {
-        File dir = ClipboardUtil.getClipboardDir(this);
+        IFile dir = ClipboardUtil.getClipboardDir(this);
         if (dir != null) {
             try {
                 PhotoAutoprocessingDto srcApm = new PhotoAutoprocessingDto().load(dir);
