@@ -203,7 +203,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
 
         PhotoPropertiesMediaFilesScannerAsyncTask scanner = new PhotoPropertiesMediaFilesScannerAsyncTask(
                 PhotoPropertiesMediaFilesScanner.getInstance(context), context, why);
-        scanner.execute(null, missing.toArray(new IFile[missing.size()]));
+        scanner.execute(null, FileFacade.get("updateIncompleteMediaDatabase", missing));
         return missing.size();
     }
 

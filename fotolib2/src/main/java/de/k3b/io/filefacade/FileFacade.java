@@ -29,6 +29,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 
 import de.k3b.io.Converter;
 import de.k3b.io.FileUtils;
@@ -79,6 +80,15 @@ public class FileFacade implements IFile {
         IFile f[] = new FileFacade[files.length];
         for (int i = 0; i < files.length; i++) {
             f[i] = convert(dbgContext, files[i]);
+        }
+
+        return f;
+    }
+
+    public static IFile[] get(String dbgContext, List<String> files) {
+        IFile f[] = new FileFacade[files.size()];
+        for (int i = 0; i < files.size(); i++) {
+            f[i] = convert(dbgContext, files.get(i));
         }
 
         return f;
