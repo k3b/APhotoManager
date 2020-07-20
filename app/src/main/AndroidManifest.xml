@@ -172,31 +172,9 @@ To determine whether your app has been granted the MANAGE_EXTERNAL_STORAGE permi
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <!-- file must have mimeType to match -->
-                <data
-                    android:mimeType="image/*"
-                    android:scheme="file" />
-            </intent-filter>
-
-            <!-- ImageDetail mime image/* for SEND(_TO)/(RE)VIEW for null-schema -->
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <action android:name="android.intent.action.SENDTO" />
-                <action android:name="android.intent.action.VIEW" />
-                <!-- OpenCamera AlmalenceGUI.openExternalGallery() uses undocumented action="com.android.camera.action.REVIEW" which in my android-4.2.2 opens the gallery in swipe mode. -->
-                <action android:name="com.android.camera.action.REVIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <category android:name="android.intent.category.CATEGORY_OPENABLE" />
-
-                <!--
-                these do not work
-                <data android:scheme="content" android:host="*"  />
-                <data android:scheme="content" android:host="media" android:pathPattern="/external/images/media/.*" />
-                <data android:host="*" android:scheme="content" android:mimeType="image/*" />
-                -->
                 <data android:mimeType="image/*" />
-                <!-- example content://media/external/images/media/4711 -->
+                <data android:scheme="file" />
+                <data android:scheme="content" />
             </intent-filter>
 
             <!-- #100: private images get the extension ".jpg-p" which hides them from other gallery-apps and image pickers.  -->
@@ -209,6 +187,7 @@ To determine whether your app has been granted the MANAGE_EXTERNAL_STORAGE permi
                 <data android:mimeType="*/*" />
                 <data android:host="*" />
                 <data android:scheme="file" />
+                <data android:scheme="content" />
                 <!-- android does not allow to download *.ics-files via bluetooth but it works with other extensions.
                     according to http://en.wikipedia.org/wiki/ICalendar .ical and .icalendar are also used. -->
                 <data android:pathPattern=".*\\.jpg-p" />
@@ -401,36 +380,13 @@ To determine whether your app has been granted the MANAGE_EXTERNAL_STORAGE permi
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:host="*"
-                    android:mimeType="*/*"
-                    android:pathPattern=".*\\.gpx"
-                    android:scheme="file" />
-                <data
-                    android:host="*"
-                    android:mimeType="*/*"
-                    android:pathPattern=".*\\.poi"
-                    android:scheme="file" />
-                <data
-                    android:host="*"
-                    android:mimeType="*/*"
-                    android:pathPattern=".*\\.kml"
-                    android:scheme="file" />
-                <data
-                    android:host="*"
-                    android:mimeType="*/*"
-                    android:pathPattern=".*\\.gpx"
-                    android:scheme="content" />
-                <data
-                    android:host="*"
-                    android:mimeType="*/*"
-                    android:pathPattern=".*\\.poi"
-                    android:scheme="content" />
-                <data
-                    android:host="*"
-                    android:mimeType="*/*"
-                    android:pathPattern=".*\\.kml"
-                    android:scheme="content" />
+                <data android:host="*" />
+                <data android:mimeType="*/*" />
+                <data android:pathPattern=".*\\.gpx" />
+                <data android:pathPattern=".*\\.kml" />
+                <data android:pathPattern=".*\\.poi" />
+                <data android:scheme="file" />
+                <data android:scheme="content" />
             </intent-filter>
 
             <!-- #61 map view all hosts; http(s), ftp; mime kml/gpx/poi -->
@@ -445,6 +401,8 @@ To determine whether your app has been granted the MANAGE_EXTERNAL_STORAGE permi
                 <data android:scheme="http" />
                 <data android:scheme="https" />
                 <data android:scheme="ftp" />
+                <data android:scheme="file" />
+                <data android:scheme="content" />
                 <data android:mimeType="application/vnd.google-earth.kml+xml" />
                 <data android:mimeType="application/xml+kml" />
                 <data android:mimeType="application/xml+gpx" />

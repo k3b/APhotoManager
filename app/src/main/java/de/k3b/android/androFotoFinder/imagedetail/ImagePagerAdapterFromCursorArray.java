@@ -21,6 +21,7 @@ package de.k3b.android.androFotoFinder.imagedetail;
 
 import android.app.Activity;
 import android.database.Cursor;
+import android.net.Uri;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,11 +42,15 @@ import de.k3b.io.filefacade.IFile;
  */
 public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCursor {
 
-    /** not null data comes from array instead from base implementation */
+    private final Uri imageUri;
+    /**
+     * not null data comes from array instead from base implementation
+     */
     private AdapterArrayHelper mArrayImpl = null;
 
-    public ImagePagerAdapterFromCursorArray(final Activity context, String name, IFile fullPhotoPath) {
+    public ImagePagerAdapterFromCursorArray(final Activity context, String name, IFile fullPhotoPath, Uri imageUri) {
         super(context, name);
+        this.imageUri = imageUri;
 
         if (PhotoPropertiesMediaFilesScanner.isNoMedia(fullPhotoPath, PhotoPropertiesMediaFilesScanner.DEFAULT_SCAN_DEPTH)) {
             mArrayImpl = new AdapterArrayHelper(context, fullPhotoPath, "debugContext");
@@ -65,6 +70,7 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
 
     @Override
     public int getCount() {
+        if (imageUri != null) return 1;
         if (mArrayImpl != null) {
             return mArrayImpl.getCount();
         }
@@ -80,6 +86,7 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
     }
 
     private IFile getLocalFullFilePath(int position) {
+        if (imageUri != null) return null;
         if (mArrayImpl != null) return mArrayImpl.getFullFilePathfromArray(position);
         return null;
     }
@@ -87,12 +94,14 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
     /** translates offset in adapter to id of image */
     @Override
     public long getImageId(int position) {
+        if (imageUri != null) return -1;
         if (mArrayImpl != null) return mArrayImpl.getImageId(position);
         return super.getImageId(position);
     }
 
     @Override
     public Date getDatePhotoTaken(int position) {
+        if (imageUri != null) return null;
         if (mArrayImpl != null) return null;
         return super.getDatePhotoTaken(position);
     }

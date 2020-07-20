@@ -158,20 +158,21 @@ public class IntentUtil implements Common {
 
     /**
      * Helper to Execute parent.startActivity(ForResult)()
-     *  @param debugContext
-     * @param parentActivity    activity used to start and to receive actionResult
+     *
+     * @param debugContext
+     * @param parentActivity              activity used to start and to receive actionResult
      * @param imageId
-     * @param currentFilePath   for setData: null or file-path that also defines the content type.
-     * @param currentUri        for setData: null or uri to be procesed (i.e. content:...)
-     * @param extraPath         null or uri for EXTRA_STREAM
-     * @param action            edit, send, view, ....
-     * @param idChooserCaption  if != 0 string-resource-id for chooser caption. if 0 no chooser.
-     * @param idEditError       string-resource-id for error message if there is no hadler for action
-     * @param idActivityResultRequestCode  if != 0 execute startActivityForResult else startActivity
+     * @param currentFilePath             for setData: null or file-path that also defines the content type.
+     * @param currentDataUri              for setData: null or uri to be procesed (i.e. content:...)
+     * @param extraPathOrUri              null or uri for EXTRA_STREAM
+     * @param action                      edit, send, view, ....
+     * @param idChooserCaption            if != 0 string-resource-id for chooser caption. if 0 no chooser.
+     * @param idEditError                 string-resource-id for error message if there is no hadler for action
+     * @param idActivityResultRequestCode if != 0 execute startActivityForResult else startActivity
      */
     public static void cmdStartIntent(String debugContext, Activity parentActivity,
-                                      long imageId, String currentFilePath, String currentUri,
-                                      String extraPath, String action,
+                                      long imageId, String currentFilePath, String currentDataUri,
+                                      String extraPathOrUri, String action,
                                       int idChooserCaption, int idEditError,
                                       int idActivityResultRequestCode) {
 
@@ -205,14 +206,20 @@ public class IntentUtil implements Common {
                 }
             }
             outIntent.setDataAndType(uri, mime);
-        } else if (currentUri != null) {
-            outIntent.setData(Uri.parse(currentUri));
+        } else if (currentDataUri != null) {
+            outIntent.setData(Uri.parse(currentDataUri));
         }
 
-        if (extraPath != null) {
-            File file = new File(extraPath);
-            final Uri uri = Uri.fromFile(file);
-            outIntent.setType(IntentUtil.getMime(extraPath));
+        if (extraPathOrUri != null) {
+            Uri uri;
+
+            if (!extraPathOrUri.contains(":")) {
+                File file = new File(extraPathOrUri);
+                uri = Uri.fromFile(file);
+            } else {
+                uri = Uri.parse(extraPathOrUri);
+            }
+            outIntent.setType(IntentUtil.getMime(extraPathOrUri));
             outIntent.putExtra(EXTRA_STREAM, uri);
         }
         if (Global.debugEnabled) {

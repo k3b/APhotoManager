@@ -430,7 +430,8 @@ public class FileUtils {
 
     @Deprecated
     public static File getFirstExistingDir(File root) {
-        return getFirstExistingDir(FileFacade.convert("FileUtils getFirstExistingDir via File ", root)).getFile();
+        final IFile dir = getFirstExistingDir(FileFacade.convert("FileUtils getFirstExistingDir via File ", root));
+        return (dir == null) ? null : dir.getFile();
     }
 
     public static IFile getFirstExistingDir(IFile root) {

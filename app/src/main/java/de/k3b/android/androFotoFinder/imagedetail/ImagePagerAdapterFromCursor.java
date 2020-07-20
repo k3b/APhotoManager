@@ -283,10 +283,11 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements PhotoCh
     }
 
     @NonNull
-    protected View createViewWithContent(int position, ViewGroup container, IFile imageFile, String debugContext, int size) {
+    protected View createViewWithContent(
+            int position, ViewGroup container, IFile imageFile, String debugContext, int size) {
         final Context context = container.getContext();
 
-        final boolean useLayout=true;
+        final boolean useLayout = true;
 
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 

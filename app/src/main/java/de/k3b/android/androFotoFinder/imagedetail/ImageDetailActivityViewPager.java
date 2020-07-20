@@ -286,7 +286,8 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
             // extra parameter
             getParameter(intent);
 
-            mAdapter = new ImagePagerAdapterFromCursorArray(this, mDebugPrefix, mInitialFilePath);
+            mAdapter = new ImagePagerAdapterFromCursorArray(this, mDebugPrefix,
+                    mInitialFilePath, this.imageUri);
             if (savedInstanceState != null) {
                 String querySql = savedInstanceState.getString(EXTRA_QUERY);
                 if (querySql != null) {
@@ -934,7 +935,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
                 case R.id.action_edit:
                     // #64: (not) open editor via chooser
                     IntentUtil.cmdStartIntent("edit", this, getCurrentImageId(),
-                            getCurrentAbsolutPath(), null, null,
+                            null, getCurrentUriAsString(), null,
                             Intent.ACTION_EDIT,
                             (Global.showEditChooser) ? R.string.edit_chooser_title : 0,
                             R.string.edit_err_editor_not_found, ACTION_RESULT_MUST_MEDIA_SCAN);
@@ -943,8 +944,8 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
                 case R.id.menu_item_share:
                     reloadContext = false;
                     IntentUtil.cmdStartIntent("share", this,
-                            getCurrentImageId(), null, null,
-                            getCurrentAbsolutPath(), Intent.ACTION_SEND, R.string.share_menu_title, R.string.share_err_not_found, 0);
+                            getCurrentImageId(), null, null, getCurrentUriAsString(),
+                            Intent.ACTION_SEND, R.string.share_menu_title, R.string.share_err_not_found, 0);
                     break;
 
                 case R.id.cmd_copy:
@@ -991,7 +992,11 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
                     GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
                     String uri = PARSER.toUriString(geo);
 
-                    IntentUtil.cmdStartIntent("cmd_show_geo_as", this, -1, null, uri, null, Intent.ACTION_VIEW, R.string.geo_show_as_menu_title, R.string.geo_picker_err_not_found, 0);
+                    IntentUtil.cmdStartIntent(
+                            "cmd_show_geo_as", this, -1,
+                            null, uri, null, Intent.ACTION_VIEW,
+                            R.string.geo_show_as_menu_title,
+                            R.string.geo_picker_err_not_found, 0);
                     break;
                 }
 
@@ -1236,6 +1241,11 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
             return this.mAdapter.getImageId(itemPosition);
         }
         return -1;
+    }
+
+    private String getCurrentUriAsString() {
+        final IFile currentIFile = getCurrentIFile();
+        return (currentIFile == null) ? null : currentIFile.getAsUriString();
     }
 
     private Date getCurrentDatePhotoTaken() {
