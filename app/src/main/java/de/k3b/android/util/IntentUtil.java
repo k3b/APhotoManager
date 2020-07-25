@@ -41,12 +41,16 @@ import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.io.DocumentFileTranslator;
 import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.io.StringUtils;
+import de.k3b.io.filefacade.IFile;
 
 /**
  * Created by k3b on 09.09.2015.
  */
 public class IntentUtil implements Common {
-
+    public static final String DEFAULT_MIME = "image/*";
+    /**
+     * false means android does not allow file: uri- any more
+     */
     private final static boolean URI_AS_FILE = Build.VERSION.SDK_INT < Build.VERSION_CODES.M;
 
     public static Intent setDataAndTypeAndNormalize(Intent intent, Uri data, String type) {
@@ -56,7 +60,9 @@ public class IntentUtil implements Common {
         return intent.setDataAndType(data, type);
     }
 
-    /** either file: or content-uri. If content-uri translate to file uri */
+    /**
+     * either file: or content-uri. If content-uri translate to file uri
+     */
     public static String getFilePath(Context context, Uri uri) {
         File result = getExistingFileOrNull(context, uri);
         return (null == result) ? null : result.getAbsolutePath();
@@ -148,31 +154,36 @@ public class IntentUtil implements Common {
                 || (initalFileUrl.startsWith("file:"))));
     }
 
-    private static String getMime(String path) {
-        return "image/*";
-        /*
-        MimeTypeMap map = MimeTypeMap.getSingleton();
-        return map.getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(path));
-        */
+    private static String getMime(String path, String notFoundValue) {
+        final String fileExtensionFromUrl = MimeTypeMap.getFileExtensionFromUrl(path);
+        if (!StringUtils.isNullOrEmpty(fileExtensionFromUrl)) {
+            MimeTypeMap map = MimeTypeMap.getSingleton();
+            final String result = map.getMimeTypeFromExtension(fileExtensionFromUrl);
+            if (!StringUtils.isNullOrEmpty(fileExtensionFromUrl)) {
+                return result;
+            }
+        }
+        return notFoundValue;
     }
 
     /**
      * Helper to Execute parent.startActivity(ForResult)()
-     *
      * @param debugContext
      * @param parentActivity              activity used to start and to receive actionResult
-     * @param imageId
-     * @param currentFilePath             for setData: null or file-path that also defines the content type.
-     * @param currentDataUri              for setData: null or uri to be procesed (i.e. content:...)
-     * @param extraPathOrUri              null or uri for EXTRA_STREAM
      * @param action                      edit, send, view, ....
+     * @param asExtra                     false: uri via data
+     * @param uriString                   prio 1 if not null
+     * @param imageId                     prio 2 (3) if > 0
+     * @param file                        prio 3 (2) if not null
      * @param idChooserCaption            if != 0 string-resource-id for chooser caption. if 0 no chooser.
      * @param idEditError                 string-resource-id for error message if there is no hadler for action
      * @param idActivityResultRequestCode if != 0 execute startActivityForResult else startActivity
      */
     public static void cmdStartIntent(String debugContext, Activity parentActivity,
-                                      long imageId, String currentFilePath, String currentDataUri,
-                                      String extraPathOrUri, String action,
+                                      String action,
+                                      boolean asExtra, String uriString, long imageId, IFile file,
+
+
                                       int idChooserCaption, int idEditError,
                                       int idActivityResultRequestCode) {
 
@@ -187,62 +198,60 @@ public class IntentUtil implements Common {
             outIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                     .addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         }
-        if (currentFilePath != null) {
-            Uri uri;
-            String mime;
-            if (URI_AS_FILE) {
-                File file = new File(currentFilePath);
-                uri = Uri.fromFile(file);
-                mime = IntentUtil.getMime(currentFilePath);
-            } else {
-                MimeTypeMap map = MimeTypeMap.getSingleton();
-                mime = map.getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(currentFilePath));
 
-                if ((mime != null) && (mime.startsWith("image/"))) {
-                    final Uri baseUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-                    uri = Uri.parse(baseUri.toString() + "/" + imageId);
-                } else {
-                    uri = MediaStore.Files.getContentUri("external", imageId);
+        String mime = (file != null) ? IntentUtil.getMime(file.getName(), null) : null;
+        Uri uri = null;
+
+        if (uriString != null) {
+            uri = Uri.parse(uriString);
+            mime = IntentUtil.getMime(uriString, DEFAULT_MIME);
+        } else if (URI_AS_FILE && file != null) {
+            uri = Uri.fromFile(file.getFile());
+        } else if (imageId > 0) {
+            if ((mime != null) && (mime.startsWith("image/"))) {
+                final Uri baseUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                uri = Uri.parse(baseUri.toString() + "/" + imageId);
+            } else {
+                uri = MediaStore.Files.getContentUri("external", imageId);
+            }
+        } else if (file != null) {
+            uri = Uri.parse(file.getAsUriString());
+        }
+
+        if (uri != null) {
+            if (mime == null) {
+                mime = DEFAULT_MIME;
+            }
+
+            if (asExtra) {
+                outIntent.setType(mime);
+                outIntent.putExtra(EXTRA_STREAM, uri);
+            } else {
+                outIntent.setDataAndType(uri, mime);
+            }
+
+            try {
+                if (Global.debugEnabled) {
+                    Log.d(Global.LOG_CONTEXT,
+                            "cmdStartIntent(" + outIntent.toUri(Intent.URI_INTENT_SCHEME) + "')");
                 }
+
+                // #64: edit image (not) via chooser
+                final Intent execIntent = (idChooserCaption == 0)
+                        ? outIntent
+                        : Intent.createChooser(outIntent, parentActivity.getText(idChooserCaption));
+
+                ActivityWithCallContext.additionalCallContext = debugContext;
+                ActivityWithCallContext.addContext(debugContext, execIntent, parentActivity);
+
+                if (idActivityResultRequestCode == 0) {
+                    parentActivity.startActivity(execIntent);
+                } else {
+                    parentActivity.startActivityForResult(execIntent, idActivityResultRequestCode);
+                }
+            } catch (ActivityNotFoundException ex) {
+                Toast.makeText(parentActivity, idEditError, Toast.LENGTH_LONG).show();
             }
-            outIntent.setDataAndType(uri, mime);
-        } else if (currentDataUri != null) {
-            outIntent.setData(Uri.parse(currentDataUri));
-        }
-
-        if (extraPathOrUri != null) {
-            Uri uri;
-
-            if (!extraPathOrUri.contains(":")) {
-                File file = new File(extraPathOrUri);
-                uri = Uri.fromFile(file);
-            } else {
-                uri = Uri.parse(extraPathOrUri);
-            }
-            outIntent.setType(IntentUtil.getMime(extraPathOrUri));
-            outIntent.putExtra(EXTRA_STREAM, uri);
-        }
-        if (Global.debugEnabled) {
-            Log.d(Global.LOG_CONTEXT,
-                    "cmdStartIntent(" + outIntent.toUri(Intent.URI_INTENT_SCHEME) + "')");
-        }
-
-        try {
-            // #64: edit image (not) via chooser
-            final Intent execIntent = (idChooserCaption == 0)
-                    ? outIntent
-                    : Intent.createChooser(outIntent, parentActivity.getText(idChooserCaption));
-
-            ActivityWithCallContext.additionalCallContext = debugContext;
-            ActivityWithCallContext.addContext(debugContext, execIntent, parentActivity);
-
-            if (idActivityResultRequestCode == 0) {
-                parentActivity.startActivity(execIntent);
-            } else {
-                parentActivity.startActivityForResult(execIntent, idActivityResultRequestCode);
-            }
-        } catch (ActivityNotFoundException ex) {
-            Toast.makeText(parentActivity, idEditError,Toast.LENGTH_LONG).show();
         }
     }
 

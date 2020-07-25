@@ -89,6 +89,7 @@ import de.k3b.android.util.PhotoChangeNotifyer;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.android.util.ResourceUtils;
 import de.k3b.android.widget.AboutDialogPreference;
+import de.k3b.android.widget.ActivityWithCallContext;
 import de.k3b.android.widget.Dialogs;
 import de.k3b.android.widget.FilePermissionActivity;
 import de.k3b.android.widget.UpdateTask;
@@ -1312,6 +1313,10 @@ showActivity(String debugContext, Activity context,
             }
 
             try {
+                String debugContext = "send";
+                ActivityWithCallContext.additionalCallContext = debugContext;
+                ActivityWithCallContext.addContext(debugContext, sendIntent, getActivity());
+
                 mShareActionProvider.setShareIntent(sendIntent);
                 this.mNoShareError = true;
             } catch (Exception e) {

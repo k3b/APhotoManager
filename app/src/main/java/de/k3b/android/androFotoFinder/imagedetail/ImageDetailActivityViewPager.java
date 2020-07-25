@@ -934,9 +934,8 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
 
                 case R.id.action_edit:
                     // #64: (not) open editor via chooser
-                    IntentUtil.cmdStartIntent("edit", this, getCurrentImageId(),
-                            null, getCurrentUriAsString(), null,
-                            Intent.ACTION_EDIT,
+                    IntentUtil.cmdStartIntent("edit", this,
+                            Intent.ACTION_EDIT, false, null, getCurrentImageId(), getCurrentIFile(),
                             (Global.showEditChooser) ? R.string.edit_chooser_title : 0,
                             R.string.edit_err_editor_not_found, ACTION_RESULT_MUST_MEDIA_SCAN);
                     break;
@@ -944,8 +943,8 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
                 case R.id.menu_item_share:
                     reloadContext = false;
                     IntentUtil.cmdStartIntent("share", this,
-                            getCurrentImageId(), null, null, getCurrentUriAsString(),
-                            Intent.ACTION_SEND, R.string.share_menu_title, R.string.share_err_not_found, 0);
+                            Intent.ACTION_SEND, true, null, getCurrentImageId(), getCurrentIFile(),
+                            R.string.share_menu_title, R.string.share_err_not_found, 0);
                     break;
 
                 case R.id.cmd_copy:
@@ -980,23 +979,8 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
                     break;
 
                 case R.id.cmd_show_geo_as: {
-                    final long imageId = getCurrentImageId();
-                    IGeoPoint _geo = FotoSql.execGetPosition(null,
-                            null, imageId, mDebugPrefix, "on cmd_show_geo_as");
-                    final String currentFilePath = getCurrentAbsolutPath();
-                    GeoPointDto geo = new GeoPointDto(_geo.getLatitude(), _geo.getLongitude(), GeoPointDto.NO_ZOOM);
+                    onShowGeo();
 
-                    geo.setDescription(currentFilePath);
-                    geo.setId("" + imageId);
-                    geo.setName("#" + imageId);
-                    GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
-                    String uri = PARSER.toUriString(geo);
-
-                    IntentUtil.cmdStartIntent(
-                            "cmd_show_geo_as", this, -1,
-                            null, uri, null, Intent.ACTION_VIEW,
-                            R.string.geo_show_as_menu_title,
-                            R.string.geo_picker_err_not_found, 0);
                     break;
                 }
 
@@ -1041,6 +1025,26 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
 
         return result;
 
+    }
+
+    private void onShowGeo() {
+        final long imageId = getCurrentImageId();
+        IGeoPoint _geo = FotoSql.execGetPosition(null,
+                null, imageId, mDebugPrefix, "on cmd_show_geo_as");
+        final String currentFilePath = getCurrentAbsolutPath();
+        GeoPointDto geo = new GeoPointDto(_geo.getLatitude(), _geo.getLongitude(), GeoPointDto.NO_ZOOM);
+
+        geo.setDescription(currentFilePath);
+        geo.setId("" + imageId);
+        geo.setName("#" + imageId);
+        GeoUri PARSER = new GeoUri(GeoUri.OPT_PARSE_INFER_MISSING);
+        String uri = PARSER.toUriString(geo);
+
+        IntentUtil.cmdStartIntent(
+                "cmd_show_geo_as", this, Intent.ACTION_VIEW,
+                false, uri, -1, null,
+                R.string.geo_show_as_menu_title,
+                R.string.geo_picker_err_not_found, 0);
     }
 
     private boolean onEditExif(final MenuItem menuItem, final SelectedFiles currentFoto, final long fotoId, final String fotoPath) {

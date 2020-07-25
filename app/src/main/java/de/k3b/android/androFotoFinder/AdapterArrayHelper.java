@@ -22,7 +22,6 @@ package de.k3b.android.androFotoFinder;
 import android.app.Activity;
 import android.util.Log;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,10 +62,10 @@ public class AdapterArrayHelper {
         }
         if (iFiles.size() == 0) {
             mFullPhotoPaths = null;
-            Log.i(Global.LOG_CONTEXT, mDebugPrefix + why + "AdapterArrayHelper.refreshLocal(" + mRootDir +") " + 0);
-        } else if (mFullPhotoPaths != null) {
-            if (Global.debugEnabled) {
-                Log.i(Global.LOG_CONTEXT, mDebugPrefix + why + "AdapterArrayHelper.refreshLocal(" + mRootDir +") " + mFullPhotoPaths.length);
+            Log.i(Global.LOG_CONTEXT, mDebugPrefix + why + "AdapterArrayHelper.refreshLocal(" + mRootDir + ") " + 0);
+        } else {
+            if (mFullPhotoPaths != null && Global.debugEnabled) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + why + "AdapterArrayHelper.refreshLocal(" + mRootDir + ") " + mFullPhotoPaths.length);
             }
             mFullPhotoPaths = iFiles.toArray(new IFile[iFiles.size()]);
         }
