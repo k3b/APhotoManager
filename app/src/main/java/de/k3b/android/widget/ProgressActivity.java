@@ -29,7 +29,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.zip.LibZipGlobal;
 
-public abstract class ProgressActivity<RESULT> extends LocalizedActivity {
+public abstract class ProgressActivity<RESULT> extends FilePermissionActivity {
     private static String mDebugPrefix = "ProgressActivity: ";
 
     abstract protected ProgressableAsyncTask<RESULT> getAsyncTask();

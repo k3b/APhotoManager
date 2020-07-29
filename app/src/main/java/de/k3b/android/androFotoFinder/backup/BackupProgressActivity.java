@@ -36,7 +36,6 @@ import java.io.Serializable;
 import java.net.URLDecoder;
 import java.util.Date;
 
-import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.android.widget.ProgressActivity;
@@ -140,9 +139,7 @@ public class BackupProgressActivity extends ProgressActivity<IZipConfig> {
 */
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        Global.debugMemory(mDebugPrefix, "onCreate");
-        super.onCreate(savedInstanceState);
+    protected void onCreateEx(Bundle savedInstanceState) {
         setContentView(R.layout.activity_backup_progress);
 
         Intent intent = getIntent();

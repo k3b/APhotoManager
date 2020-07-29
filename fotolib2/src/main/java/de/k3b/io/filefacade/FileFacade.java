@@ -229,10 +229,10 @@ public class FileFacade implements IFile {
 
     @Override
     public boolean copy(IFile targetFullPath, boolean deleteSourceWhenSuccess) throws IOException {
-        return copyImpl((FileFacade) targetFullPath, deleteSourceWhenSuccess);
+        return copyImpl(targetFullPath, deleteSourceWhenSuccess);
     }
 
-    private boolean copyImpl(FileFacade targetFullPath, boolean deleteSourceWhenSuccess) throws IOException {
+    private boolean copyImpl(IFile targetFullPath, boolean deleteSourceWhenSuccess) throws IOException {
         FileUtils.copy(this.openInputStream(), targetFullPath.openOutputStream(), " FileFacade copyImpl ");
         if (deleteSourceWhenSuccess) {
             this.delete();
