@@ -72,7 +72,7 @@ public class AdapterArrayHelper {
     }
 
     public int getCount() {
-        return mFullPhotoPaths.length;
+        return mFullPhotoPaths == null ? 0 : mFullPhotoPaths.length;
     }
 
     /** return null if no file array or illegal index */
