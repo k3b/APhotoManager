@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!--
+/*
+ * Copyright (c) 2015-2020 by k3b.
+ *
+ * This file is part of AndroFotoFinder / #APhotoManager.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ * for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>
+ */
+ -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".imagedetail.ImageDetailActivityViewPager">
+    <!-- note: items with odd orderInCategory will not go to quick button  -->
+    <item
+        android:id="@+id/action_details"
+        android:orderInCategory="900"
+        android:showAsAction="never"
+        android:title="@string/details_menu_title" />
+
+    <item
+        android:id="@+id/cmd_settings"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:orderInCategory="1001"
+        android:showAsAction="never"
+        android:title="@string/settings_title"
+        android:visible="true" />
+
+    <item
+        android:id="@+id/cmd_app_pin"
+        android:orderInCategory="9999"
+        android:showAsAction="never"
+        android:title="@string/menu_title_app_pinnend"
+        android:visible="true" />
+
+    <item
+        android:id="@+id/cmd_about"
+        android:orderInCategory="10001"
+        android:showAsAction="never"
+        android:title="@string/about_summary"
+        android:visible="true" />
+</menu>

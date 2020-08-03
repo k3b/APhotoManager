@@ -2,6 +2,7 @@ Changes from 0.8.3 to ???
 
 * #169: Add sd-card-saf-write-permission support
 * #173: incremental media scanner
+* Show image with uri that cannot be translated to file (i.e. WhatsApp show photo in gallery)
 * version bumbs android-9 (sdk-28), gradle-6.1.1, osmdroid-6.1.6 mapsforge:0.13.0
 * new translation eu (Basque)
 * translation updates de, pt-BR

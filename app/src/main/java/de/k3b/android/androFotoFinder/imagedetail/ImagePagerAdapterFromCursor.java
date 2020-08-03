@@ -24,6 +24,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
 import android.util.Log;
@@ -51,6 +52,7 @@ import de.k3b.android.util.GarbageCollector;
 import de.k3b.android.util.MenuUtils;
 import de.k3b.android.util.PhotoChangeNotifyer;
 import de.k3b.android.util.ResourceUtils;
+import de.k3b.io.StringUtils;
 import de.k3b.io.filefacade.FileFacade;
 import de.k3b.io.filefacade.IFile;
 import de.k3b.media.PhotoPropertiesBulkUpdateService;
@@ -197,10 +199,24 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements PhotoCh
         return getiFile(position, fullFilePath, imageID);
     }
 
-    /** translates offset in adapter to id of image */
+    /**
+     * translates offset in adapter to id of image
+     */
     public long getImageId(int position) {
         Cursor cursor = getCursorAt(position);
-        return DBUtils.getLong(cursor, FotoSql.SQL_COL_PK,0);
+        return DBUtils.getLong(cursor, FotoSql.SQL_COL_PK, 0);
+    }
+
+    /**
+     * gets uri that belongongs to current image
+     */
+    public Uri getImageUri(int position) {
+        IFile file = getFullFilePath(position);
+        String path = (file != null) ? file.getAsUriString() : null;
+        if (!StringUtils.isNullOrEmpty(path)) {
+            return Uri.parse(path);
+        }
+        return null;
     }
 
     public Date getDatePhotoTaken(int position) {
@@ -211,7 +227,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements PhotoCh
 
     public boolean hasGeo(int position) {
         Cursor cursor = getCursorAt(position);
-        return !DBUtils.isNull(cursor,FotoSql.SQL_COL_GPS,true);
+        return !DBUtils.isNull(cursor, FotoSql.SQL_COL_GPS, true);
     }
 
     /**
@@ -244,7 +260,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements PhotoCh
 
             IFile file = getFile(position); // , fullPhotoPath);
             if (file != null) {
-                return createViewWithContent(position, container, file, "instantiateItemFromCursor(#", size);
+                return createViewWithContent(position, container, file, null, "instantiateItemFromCursor(#", size);
             }
 
         }
@@ -284,7 +300,7 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements PhotoCh
 
     @NonNull
     protected View createViewWithContent(
-            int position, ViewGroup container, IFile imageFile, String debugContext, int size) {
+            int position, ViewGroup container, IFile imageFile, Uri imageUri, String debugContext, int size) {
         final Context context = container.getContext();
 
         final boolean useLayout = true;
@@ -323,31 +339,40 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements PhotoCh
 
         String loadType;
 
-        // if image is big use memoryefficient, fast, low-quality thumbnail (old code)
-        if (size > Global.imageDetailThumbnailIfBiggerThan) {
-            loadType = "image too big using thumb ";
-            setImageFromThumbnail(photoView, imageFile);
-        } else {
-            try {
-                // #53 Optimisation: no need for thumbnail - saves cache memory but may throw OutOfMemoryError
-                loadType = "image small enough ";
-                Bitmap bitmap = HugeImageLoader.loadImage(imageFile, MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION);
-                // rotation is done by photoView
-                photoView.setImageBitmap(bitmap);
-                photoView.setImageReloadFile((IFile) null);
-                photoView.setDebugPrefix(imageFile.getName());
-            } catch (OutOfMemoryError err) {
-                loadType = "small image out of memory using thumb ";
+        if (imageFile != null) {
+            // if image is big use memoryefficient, fast, low-quality thumbnail (old code)
+            if (size > Global.imageDetailThumbnailIfBiggerThan) {
+                loadType = "image too big using thumb ";
                 setImageFromThumbnail(photoView, imageFile);
+            } else {
+                try {
+                    // #53 Optimisation: no need for thumbnail - saves cache memory but may throw OutOfMemoryError
+                    loadType = "image small enough ";
+                    Bitmap bitmap = HugeImageLoader.loadImage(imageFile, MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION);
+                    // rotation is done by photoView
+                    photoView.setImageBitmap(bitmap);
+                    photoView.setImageReloadFile((IFile) null);
+                    photoView.setDebugPrefix(imageFile.getName());
+                } catch (OutOfMemoryError err) {
+                    loadType = "small image out of memory using thumb ";
+                    setImageFromThumbnail(photoView, imageFile);
+                }
             }
+            final int rotationInDegrees = PhotoPropertiesBulkUpdateService.getRotationFromExifOrientation(imageFile, null);
+            if (Global.debugEnabledViewItem) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + debugContext + position + ", rotation=" +
+                        rotationInDegrees + ", "
+                        + loadType + ") => " + imageFile + " => " + photoView);
+            }
+            photoView.setRotationTo(rotationInDegrees);
+        } else if (imageUri != null) {
+            if (Global.debugEnabledViewItem) {
+                Log.i(Global.LOG_CONTEXT, mDebugPrefix + debugContext + ") => " + imageUri + " => " + photoView);
+            }
+            photoView.setImageURI(imageUri);
+        } else if (Global.debugEnabledViewItem) {
+            Log.w(Global.LOG_CONTEXT, mDebugPrefix + debugContext + ") no ifile and no imageUri " + photoView);
         }
-        final int rotationInDegrees = PhotoPropertiesBulkUpdateService.getRotationFromExifOrientation(imageFile, null);
-        if (Global.debugEnabledViewItem) {
-            Log.i(Global.LOG_CONTEXT, mDebugPrefix + debugContext + position +", rotation=" +
-                    rotationInDegrees + ", "
-                    + loadType + ") => " + imageFile + " => " + photoView);
-        }
-        photoView.setRotationTo(rotationInDegrees);
 
         container.addView(root, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         return root;

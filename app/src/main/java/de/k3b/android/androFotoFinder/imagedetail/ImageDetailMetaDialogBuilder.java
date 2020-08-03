@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ContentValues;
+import android.net.Uri;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
@@ -50,26 +51,29 @@ import de.k3b.media.XmpSegment;
 public class ImageDetailMetaDialogBuilder {
     private static final String NL = "\n";
 
-    public static Dialog createImageDetailDialog(Activity context, IFile file, long imageId,
+    public static Dialog createImageDetailDialog(Activity context, IFile file, Uri imageUri, long imageId,
                                                  QueryParameter query,
                                                  long offset, Object... moreBlocks) {
         StringBuilder result = new StringBuilder();
+
+        Object fileId = (file == null) ? imageUri : file;
+        if (fileId == null) fileId = "";
         result
                 .append(imageId)
-                .append(":").append(file)
+                .append(":").append(fileId)
                 .append("\n");
-        appendExifInfo(result, context, file, imageId);
+        appendExifInfo(context, result, file, imageUri, imageId);
         appendQueryInfo(result, query, offset);
 
         if ((moreBlocks != null) && (moreBlocks.length > 0)) {
             for (Object subBlock : moreBlocks) {
                 if (subBlock != null) {
-                    append(result,"\n");
-                    append(result, subBlock.toString());
+                    append(result, "\n");
+                    append(result, fileId.toString());
                 }
             }
         }
-        return createImageDetailDialog(context, file.toString(), result.toString());
+        return createImageDetailDialog(context, fileId.toString(), result.toString());
     }
 
     public static Dialog createImageDetailDialog(Activity context, String title, String block, Object... moreBlocks) {
@@ -125,15 +129,17 @@ public class ImageDetailMetaDialogBuilder {
             + TagSql.SQL_COL_LAST_MODIFIED
             + ",").toLowerCase();
 
-    private static void appendExifInfo(StringBuilder result, Activity context, IFile jpegFile, long currentImageId) {
+    private static void appendExifInfo(Activity context, StringBuilder result, IFile jpegFile, Uri imageUri, long currentImageId) {
         try {
-            getExifInfo_android(result, jpegFile);
+            getExifInfo_android(context, result, jpegFile, imageUri);
 
-            addExif(result, jpegFile);
+            addExif(context, result, jpegFile, imageUri);
 
-            // #84 show long and short xmp file
-            addXmp(result, XmpFile.getSidecar(jpegFile, true));
-            addXmp(result, XmpFile.getSidecar(jpegFile, false));
+            if (jpegFile != null) {
+                // #84 show long and short xmp file
+                addXmp(result, XmpFile.getSidecar(jpegFile, true));
+                addXmp(result, XmpFile.getSidecar(jpegFile, false));
+            }
 
             if (currentImageId != 0) {
 
@@ -142,7 +148,7 @@ public class ImageDetailMetaDialogBuilder {
                     result.append(NL).append(line).append(NL);
                     result.append(NL).append(TagSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE).append(NL).append(NL);
                     // sort by keys
-                    List<String> sortedKeys=new ArrayList(dbContent.keySet());
+                    List<String> sortedKeys = new ArrayList(dbContent.keySet());
                     Collections.sort(sortedKeys);
                     for (String key : sortedKeys) {
                         Object value = dbContent.get(key);
@@ -184,16 +190,28 @@ public class ImageDetailMetaDialogBuilder {
 
     private static String line = "------------------";
 
-    private static void addExif(StringBuilder builder, IFile file) throws IOException {
-        if (file.exists()) {
-            builder.append(NL).append(file).append(NL).append(NL);
-
-            PhotoPropertiesImageReader meta = new PhotoPropertiesImageReader().load(
+    private static void addExif(Activity context, StringBuilder builder, IFile file, Uri imageUri) throws IOException {
+        PhotoPropertiesImageReader meta = null;
+        Object fileId = file;
+        if (file != null && file.exists()) {
+            meta = new PhotoPropertiesImageReader().load(
                     file, file.openInputStream(), null, "ImageDetailMetaDialogBuilder");
-            if (meta != null) builder.append(meta.toString());
+        } else if (imageUri != null) {
+            fileId = imageUri;
+            meta = new PhotoPropertiesImageReader().load(
+                    (IFile) null,
+                    context.getContentResolver().openInputStream(imageUri),
+                    null, "ImageDetailMetaDialogBuilder(" +
+                            imageUri + ")");
+        }
+
+        if (meta != null) {
+            builder.append(NL).append(fileId).append(NL).append(NL);
+
+            builder.append(meta.toString());
             builder.append(NL).append(line).append(NL);
         } else {
-            builder.append(NL).append(file).append(" not found.").append(NL);
+            builder.append(NL).append(fileId).append(" not found.").append(NL);
         }
     }
 
@@ -209,13 +227,26 @@ public class ImageDetailMetaDialogBuilder {
         }
     }
 
-    private static void getExifInfo_android(StringBuilder builder, IFile filepath) throws IOException {
-        ExifInterfaceEx exif = ExifInterfaceEx.create(filepath, null, null, "ImageDetailMetaDialogBuilder.getExifInfo_android");
+    private static void getExifInfo_android(Activity context, StringBuilder builder, IFile filepath, Uri imageUri) throws IOException {
+        Object fileId = filepath;
+        ExifInterfaceEx exif = null;
+        if (filepath != null && filepath.exists()) {
+            exif = ExifInterfaceEx.create(filepath, null, null, "ImageDetailMetaDialogBuilder.getExifInfo_android");
+        } else if (imageUri != null) {
+            fileId = imageUri;
+            exif = ExifInterfaceEx.create(
+                    (IFile) null,
+                    context.getContentResolver().openInputStream(imageUri),
+                    null, "ImageDetailMetaDialogBuilder.getExifInfo_android(" +
+                            imageUri + ")");
+        }
 
-        builder.append(NL).append(line).append(NL);
-        builder.append(NL).append(filepath).append(NL).append(NL);
-        if (exif.isValidJpgExifFormat()) builder.append(exif.getDebugString(NL));
+        if (exif != null) {
+            builder.append(NL).append(line).append(NL);
+            builder.append(NL).append(fileId).append(NL).append(NL);
+            if (exif.isValidJpgExifFormat()) builder.append(exif.getDebugString(NL));
 
-        builder.append(NL).append(line).append(NL);
+            builder.append(NL).append(line).append(NL);
+        }
     }
 }
