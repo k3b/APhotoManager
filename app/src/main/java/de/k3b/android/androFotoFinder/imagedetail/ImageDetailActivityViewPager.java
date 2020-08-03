@@ -750,6 +750,8 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
             getMenuInflater().inflate(R.menu.menu_image_detail_locked, menu);
             LockScreen.removeDangerousCommandsFromMenu(menu);
 
+        } else if (null == getCurrentIFile()) {
+            getMenuInflater().inflate(R.menu.menu_image_detail_non_file, menu);
         } else {
             getMenuInflater().inflate(R.menu.menu_image_detail, menu);
             getMenuInflater().inflate(R.menu.menu_image_commands, menu);
@@ -873,24 +875,27 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
     }
 
     private void cmdShowDetails(final CharSequence title, final IFile file, final long currentImageId) {
-
-        File missingRoot = getMissingRootDirFileOrNull(
-                "ImageDetailActivityViewPager.osRenameTo", file.getFile());
-        if (missingRoot != null) {
-            // ask for needed permissions
-            requestRootUriDialog(missingRoot, title,
-                    new FilePermissionActivity.IOnDirectoryPermissionGrantedHandler() {
-                        @Override
-                        public void afterGrant(FilePermissionActivity activity) {
-                            ((ImageDetailActivityViewPager) activity).cmdShowDetails(title, file, currentImageId);
-                        }
-                    });
-            return;
+        if (file != null) {
+            File missingRoot = getMissingRootDirFileOrNull(
+                    "ImageDetailActivityViewPager.osRenameTo", file.getFile());
+            if (missingRoot != null) {
+                // ask for needed permissions
+                requestRootUriDialog(missingRoot, title,
+                        new FilePermissionActivity.IOnDirectoryPermissionGrantedHandler() {
+                            @Override
+                            public void afterGrant(FilePermissionActivity activity) {
+                                ((ImageDetailActivityViewPager) activity).cmdShowDetails(title, file, currentImageId);
+                            }
+                        });
+                return;
+            }
         }
         CharSequence countMsg = TagSql.getStatisticsMessage(this, R.string.show_photo,
                 mGalleryContentQuery);
 
-        ImageDetailMetaDialogBuilder.createImageDetailDialog(this, file, currentImageId,
+        Uri uri = (file == null) ? getImageUri() : null;
+
+        ImageDetailMetaDialogBuilder.createImageDetailDialog(this, file, uri, currentImageId,
                 mGalleryContentQuery,
                 mViewPager.getCurrentItem(),
                 countMsg).show();
@@ -1273,6 +1278,14 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
         if ((mViewPager != null) && (mAdapter != null)) {
             int itemPosition = mViewPager.getCurrentItem();
             return this.mAdapter.getFullFilePath(itemPosition);
+        }
+        return null;
+    }
+
+    protected Uri getImageUri() {
+        if ((mViewPager != null) && (mAdapter != null)) {
+            int itemPosition = mViewPager.getCurrentItem();
+            return this.mAdapter.getImageUri(itemPosition);
         }
         return null;
     }

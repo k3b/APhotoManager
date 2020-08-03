@@ -91,12 +91,28 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
         return null;
     }
 
-    /** translates offset in adapter to id of image */
+    /**
+     * translates offset in adapter to id of image
+     */
     @Override
     public long getImageId(int position) {
         if (imageUri != null) return -1;
         if (mArrayImpl != null) return mArrayImpl.getImageId(position);
         return super.getImageId(position);
+    }
+
+    /**
+     * gets uri that belongongs to current image
+     */
+    @Override
+    public Uri getImageUri(int position) {
+        Uri uri = super.getImageUri(position);
+
+        if ((uri == null) && (this.imageUri != null)) {
+            uri = this.imageUri;
+        }
+
+        return uri;
     }
 
     @Override
@@ -111,11 +127,16 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
         IFile file = getFile(position);
         if (file != null) {
             // special case image from ".nomedia" folder via absolute path not via content: uri
-            return createViewWithContent(position, container, file, "instantiateItemFromArray(#", 32767);
+            return createViewWithContent(position, container, file, null, "instantiateItemFromArray(#", 32767);
+        }
+
+        if (this.imageUri != null) {
+            // special case where uri exists and cannot be translated to file uri.
+            return createViewWithContent(position, container, null, this.imageUri, "instantiateItemFromArray(" + imageUri, 32767);
         }
 
         // no array avaliable. Use original cursor baed implementation
-        return  super.instantiateItem(container,position);
+        return super.instantiateItem(container, position);
     }
     /** internal helper. return -1 if position is not available */
     @Override
