@@ -54,7 +54,7 @@ import de.k3b.geo.io.GeoPickHistory;
 import de.k3b.geo.io.GeoUri;
 import de.k3b.io.DirectoryFormatter;
 import de.k3b.io.collections.SelectedFiles;
-import de.k3b.io.collections.SelectedItems;
+import de.k3b.io.collections.SelectedItemIds;
 
 /**
  * Defines a gui for global foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.
@@ -287,7 +287,7 @@ public class GeoEditActivity extends FilePermissionActivity implements Common {
         intent.setData(parseUri);
         intent.putExtra(EXTRA_TITLE, getString(R.string.geo_picker_title));
 
-        SelectedItems calculatedSelectedFotosIds = new SelectedItems();
+        SelectedItemIds calculatedSelectedFotosIds = new SelectedItemIds();
 
         GeoPickHistory history = getHistory();
         if (history != null) {

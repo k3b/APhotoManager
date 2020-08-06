@@ -27,7 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import de.k3b.LibGlobal;
-import de.k3b.io.collections.SelectedItems;
+import de.k3b.io.collections.SelectedItemIds;
 
 /**
  * parameter for foto filter: only fotos from certain filepath, date and/or lat/lon will be visible.
@@ -474,7 +474,7 @@ public class GalleryFilterParameter extends GeoRectangle implements IGalleryFilt
 
     public static String convertList(List<String> strings) {
         if (strings == null) return "";
-        return SelectedItems.toString(strings.iterator());
+        return SelectedItemIds.toString(strings.iterator());
     }
 
     public GalleryFilterParameter setRatingMin(int ratingMin) {

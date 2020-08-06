@@ -54,7 +54,7 @@ import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.io.XmpFile;
 import de.k3b.io.collections.SelectedFiles;
-import de.k3b.io.collections.SelectedItems;
+import de.k3b.io.collections.SelectedItemIds;
 import de.k3b.io.filefacade.IFile;
 
 /**
@@ -494,14 +494,16 @@ public class FotoSql extends FotoSqlBase {
         return 0;
     }
 
-    /** @return return all params for expression inside query. null if expression is not in query */
+    /**
+     * @return return all params for expression inside query. null if expression is not in query
+     */
     protected static String[] getParams(QueryParameter query, String expresion, boolean removeFromSourceQuery) {
         return query.getWhereParameter(expresion, removeFromSourceQuery);
     }
 
-    public static QueryParameter setWhereSelectionPks(QueryParameter query, SelectedItems selectedItems) {
-        if ((query != null) && (selectedItems != null) && (!selectedItems.isEmpty())) {
-            String pksAsListString = selectedItems.toString();
+    public static QueryParameter setWhereSelectionPks(QueryParameter query, SelectedItemIds selectedItemIds) {
+        if ((query != null) && (selectedItemIds != null) && (!selectedItemIds.isEmpty())) {
+            String pksAsListString = selectedItemIds.toString();
             setWhereSelectionPks(query, pksAsListString);
         }
         return query;
@@ -830,7 +832,7 @@ public class FotoSql extends FotoSqlBase {
     }
 
     public static IGeoRectangle execGetGeoRectangle(StringBuilder out_debugMessage, QueryParameter baseQuery,
-                                                    SelectedItems selectedItems, Object... dbgContext) {
+                                                    SelectedItemIds selectedItemIds, Object... dbgContext) {
         StringBuilder debugMessage = (out_debugMessage == null)
                 ? StringUtils.createDebugMessage(Global.debugEnabledSql, dbgContext)
                 : out_debugMessage;
@@ -843,15 +845,14 @@ public class FotoSql extends FotoSqlBase {
                         "max(" + SQL_COL_LON + ") AS LON_MAX",
                         "count(*)"
                 )
-                .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
-                ;
+                .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME);
 
         if (baseQuery != null) {
             query.getWhereFrom(baseQuery, true);
         }
 
-        if (selectedItems != null) {
-            setWhereSelectionPks(query, selectedItems);
+        if (selectedItemIds != null) {
+            setWhereSelectionPks(query, selectedItemIds);
         }
         FotoSql.addWhereLatLonNotNull(query);
 
@@ -1266,8 +1267,10 @@ public class FotoSql extends FotoSqlBase {
         return (value != null) ? new Date(value.longValue()) : null;
     }
 
-    /** converts internal ID-list to string array of filenNames via media database. */
-    public static List<String> getFileNames(SelectedItems items, List<Long> ids, List<String> paths, List<Date> datesPhotoTaken) {
+    /**
+     * converts internal ID-list to string array of filenNames via media database.
+     */
+    public static List<String> getFileNames(SelectedItemIds items, List<Long> ids, List<String> paths, List<Date> datesPhotoTaken) {
         if (!items.isEmpty()) {
             // query ordered by DatePhotoTaken so that lower rename-numbers correspond to older images.
             QueryParameter parameters = new QueryParameter(queryAutoRename);

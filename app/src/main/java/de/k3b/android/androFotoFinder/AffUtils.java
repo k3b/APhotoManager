@@ -29,7 +29,7 @@ import java.util.List;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.io.Properties;
 import de.k3b.io.collections.SelectedFiles;
-import de.k3b.io.collections.SelectedItems;
+import de.k3b.io.collections.SelectedItemIds;
 
 /**
  * App specific helper to query and (De)Serialize between Intent|Bundle and SelectedFiles|SelectedItems.
@@ -117,22 +117,24 @@ public class AffUtils {
         return false;
     }
 
-    /** converts internal ID-list to string array of filenNames via media database. */
-    public static SelectedFiles querySelectedFiles(Context context, SelectedItems items) {
-        if ((items != null) && (items.size() > 0)) {
+    /**
+     * converts internal ID-list to string array of filenNames via media database.
+     */
+    public static SelectedFiles querySelectedFiles(Context context, SelectedItemIds itemIds) {
+        if ((itemIds != null) && (itemIds.size() > 0)) {
             List<Long> ids = new ArrayList<Long>();
             List<String> paths = new ArrayList<String>();
             List<Date> datesPhotoTaken = new ArrayList<Date>();
 
-            if (FotoSql.getFileNames(items, ids, paths, datesPhotoTaken) != null) {
+            if (FotoSql.getFileNames(itemIds, ids, paths, datesPhotoTaken) != null) {
                 return new SelectedFiles(paths.toArray(new String[paths.size()]), ids.toArray(new Long[ids.size()]), datesPhotoTaken.toArray(new Date[datesPhotoTaken.size()]));
             }
         }
         return null;
     }
 
-    public static SelectedItems getSelectedItems(Intent intent) {
+    public static SelectedItemIds getSelectedItems(Intent intent) {
         String selectedIDsString = (intent == null) ? null : intent.getStringExtra(EXTRA_SELECTED_ITEM_IDS);
-        return (selectedIDsString != null) ? new SelectedItems().parse(selectedIDsString) : null;
+        return (selectedIDsString != null) ? new SelectedItemIds().parse(selectedIDsString) : null;
     }
 }

@@ -106,7 +106,7 @@ import de.k3b.io.PhotoAutoprocessingDto;
 import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
-import de.k3b.io.collections.SelectedItems;
+import de.k3b.io.collections.SelectedItemIds;
 import de.k3b.io.filefacade.FileFacade;
 import de.k3b.io.filefacade.IFile;
 import de.k3b.tagDB.Tag;
@@ -172,7 +172,7 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
     private TagUpdateTask mTagWorflow = null;
 
     // multi selection support
-    private final SelectedItems mSelectedItems = new SelectedItems();
+    private final SelectedItemIds mSelectedItemIds = new SelectedItemIds();
     private String mOldTitle = null;
     private boolean mShowSelectedOnly = false;
     private final AndroidFileCommands mFileCommands = new LocalFileCommands();
@@ -218,15 +218,17 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
         return fragment;
     }
 
-    public SelectedItems getSelectedItems() {
-        return mSelectedItems;
+    public SelectedItemIds getSelectedItemIds() {
+        return mSelectedItemIds;
     }
 
     public void onNotifyPhotoChanged() {
         requeryIfDataHasChanged();
     }
 
-    /** incremented every time a new curster/query is generated */
+    /**
+     * incremented every time a new curster/query is generated
+     */
     private int mRequeryInstanceCount = 0;
 
     protected LocalCursorLoader mCurorLoader = null;
@@ -317,9 +319,10 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
         if (savedInstanceState != null) {
             this.mLastVisiblePosition = savedInstanceState.getInt(INSTANCE_STATE_LAST_VISIBLE_POSITION, this.mLastVisiblePosition);
             this.loaderID = savedInstanceState.getInt(INSTANCE_STATE_LOADER_ID, this.loaderID);
-            String old = mSelectedItems.toString();
-            mSelectedItems.clear();
-            mSelectedItems.parse(savedInstanceState.getString(INSTANCE_STATE_SELECTED_ITEM_IDS, old));
+            //!!!
+            String old = mSelectedItemIds.toString();
+            mSelectedItemIds.clear();
+            mSelectedItemIds.parse(savedInstanceState.getString(INSTANCE_STATE_SELECTED_ITEM_IDS, old));
             this.mOldTitle = savedInstanceState.getString(INSTANCE_STATE_OLD_TITLE, this.mOldTitle);
             this.mShowSelectedOnly = savedInstanceState.getBoolean(INSTANCE_STATE_SEL_ONLY, this.mShowSelectedOnly);
             if (isMultiSelectionActive()) {
@@ -342,7 +345,7 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
         mLastVisiblePosition = mGalleryView.getLastVisiblePosition();
         outState.putInt(INSTANCE_STATE_LAST_VISIBLE_POSITION, mLastVisiblePosition);
         outState.putInt(INSTANCE_STATE_LOADER_ID, loaderID);
-        outState.putString(INSTANCE_STATE_SELECTED_ITEM_IDS, this.mSelectedItems.toString());
+        outState.putString(INSTANCE_STATE_SELECTED_ITEM_IDS, this.mSelectedItemIds.toString());
         outState.putString(INSTANCE_STATE_OLD_TITLE, this.mOldTitle);
         outState.putBoolean(INSTANCE_STATE_SEL_ONLY, this.mShowSelectedOnly);
     }
@@ -382,7 +385,7 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
         if (filter != null) {
             path = filter.getPath();
         }
-        mAdapter = new GalleryCursorAdapterFromArray(parent, mSelectedItems, mDebugPrefix,
+        mAdapter = new GalleryCursorAdapterFromArray(parent, mSelectedItemIds, mDebugPrefix,
                 FileFacade.convert(mDebugPrefix, path));
         mGalleryView.setAdapter(mAdapter);
 
@@ -608,7 +611,7 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
             }
 
             @Override
-            protected void onPostExecute(SelectedItems selectedItems) {
+            protected void onPostExecute(SelectedItemIds selectedItemIds) {
                 if (!isCancelled()) {
                     onMissingDisplayNamesComplete(mStatus);
                     onNotifyPhotoChanged();
@@ -627,7 +630,7 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
     private QueryParameter getCurrentQuery(QueryParameter rootQuery) {
         QueryParameter selFilter = new QueryParameter(rootQuery);
         if (mShowSelectedOnly) {
-            FotoSql.setWhereSelectionPks(selFilter, mSelectedItems);
+            FotoSql.setWhereSelectionPks(selFilter, mSelectedItemIds);
         }
         selFilter.replaceFrom(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE.toString());
         return selFilter;
@@ -774,7 +777,7 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
             if (!isMultiSelectionActive()) {
                 startMultiSelectionMode();
 
-                mSelectedItems.add(holder.imageID);
+                mSelectedItemIds.add(holder.imageID);
                 holder.icon.setVisibility(View.VISIBLE);
                 multiSelectionUpdateActionbar("Start multisel");
             } else {
@@ -889,7 +892,7 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
             multiSelectionCancel();
             this.getActivity().invalidateOptionsMenu();
             if (mShareOnlyToggle != null) mShareOnlyToggle.setVisible(false);
-            if (mMenuRemoveAllSelected != null)  mMenuRemoveAllSelected.setVisible(false);
+            if (mMenuRemoveAllSelected != null) mMenuRemoveAllSelected.setVisible(false);
 
             return true;
         }
@@ -897,18 +900,18 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
         // Handle menuItem selection
         AndroidFileCommands fileCommands = mFileCommands;
 
-        final SelectedFiles selectedFiles = this.mAdapter.createSelectedFiles(getActivity(), this.mSelectedItems);
-        if ((mSelectedItems != null)
+        final SelectedFiles selectedFiles = this.mAdapter.createSelectedFiles(getActivity(), this.mSelectedItemIds);
+        if ((mSelectedItemIds != null)
                 && (fileCommands.onOptionsItemSelected(
                 (FilePermissionActivity) getActivity(), menuItem, selectedFiles, this))) {
             return true;
         }
         switch (menuItem.getItemId()) {
             case R.id.cmd_cancel_multiselect:
-                    return multiSelectionCancel();
+                return multiSelectionCancel();
             case R.id.cmd_cancel_pick:
-                    getActivity().finish();
-                    return true;
+                getActivity().finish();
+                return true;
             case R.id.cmd_ok:
                 return onPickOk();
             case R.id.cmd_selected_only:
@@ -957,7 +960,7 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
     }
 
     private void cmdShowDetails() {
-        SelectedItems ids = getSelectedItems();
+        SelectedItemIds ids = getSelectedItemIds();
 
         final Activity activity = this.getActivity();
         CharSequence subQueryTypName = (activity instanceof FotoGalleryActivity)
@@ -982,7 +985,7 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
         SqlJobTaskBase task = new SqlJobTaskBase(this.getActivity(), "Searching for duplcates in media database:\n", null) {
             @Override
             protected void doInBackground(Long id, Cursor cursor) {
-                this.mSelectedItems.add(id);
+                this.mSelectedItemIds.add(id);
                 if (mStatus != null) {
                     mStatus
                             .append("\nduplicate found ")
@@ -995,10 +998,10 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
             }
 
             @Override
-            protected void onPostExecute(SelectedItems selectedItems) {
+            protected void onPostExecute(SelectedItemIds selectedItemIds) {
                 if (!isCancelled()) {
-                    if ((selectedItems != null) && (selectedItems.size() > 0)) {
-                        onDuplicatesFound(selectedItems, mStatus);
+                    if ((selectedItemIds != null) && (selectedItemIds.size() > 0)) {
+                        onDuplicatesFound(selectedItemIds, mStatus);
                     } else {
                         onDuplicatesFound(null, mStatus);
                     }
@@ -1184,13 +1187,13 @@ showActivity(String debugContext, Activity context,
 
     @Nullable
     private List<Uri> getSelectedUri(Activity parent, Object... dbgContext) {
-        StringBuilder debugMessage = StringUtils.createDebugMessage(Global.debugEnabledSql,mDebugPrefix,"getSelectedUri", dbgContext);
+        StringBuilder debugMessage = StringUtils.createDebugMessage(Global.debugEnabledSql, mDebugPrefix, "getSelectedUri", dbgContext);
 
         List<Uri> resultUri = null;
 
-        SelectedItems items = getSelectedItems();
-        if ((items != null) && (items.size() > 0)) {
-            long id = items.first();
+        SelectedItemIds selectedItemIds = getSelectedItemIds();
+        if ((selectedItemIds != null) && (selectedItemIds.size() > 0)) {
+            long id = selectedItemIds.first();
 
             if (resultUri == null) {
                 resultUri = new ArrayList<Uri>();
@@ -1243,7 +1246,7 @@ showActivity(String debugContext, Activity context,
     }
 
     private void clearSelections() {
-        mSelectedItems.clear();
+        mSelectedItemIds.clear();
 
         for (int i = mGalleryView.getChildCount() - 1; i >= 0; i--)
         {
@@ -1282,7 +1285,7 @@ showActivity(String debugContext, Activity context,
             }
         } else {
             // multi selection is active: update title and data for share menue
-            newTitle = getActivity().getString(R.string.selection_status_format, mSelectedItems.size());
+            newTitle = getActivity().getString(R.string.selection_status_format, mSelectedItemIds.size());
             multiSelectionUpdateShareIntent();
         }
 
@@ -1293,12 +1296,12 @@ showActivity(String debugContext, Activity context,
     }
 
     private void multiSelectionUpdateShareIntent() {
-        int selectionCount = mSelectedItems.size();
+        int selectionCount = mSelectedItemIds.size();
         if ((selectionCount > 0) && (mShareActionProvider != null)) {
             Intent sendIntent = new Intent();
             sendIntent.setType("image/*");
             if (selectionCount == 1) {
-                Long imageId = mSelectedItems.first();
+                Long imageId = mSelectedItemIds.first();
                 sendIntent.setAction(Intent.ACTION_SEND);
                 sendIntent.putExtra(EXTRA_STREAM, getUri(imageId));
             } else {
@@ -1306,8 +1309,8 @@ showActivity(String debugContext, Activity context,
 
                 ArrayList<Uri> uris = new ArrayList<Uri>();
 
-                for (Long mSelectedItem : mSelectedItems) {
-                    uris.add(getUri(mSelectedItem));
+                for (Long itemId : mSelectedItemIds) {
+                    uris.add(getUri(itemId));
                 }
                 sendIntent.putParcelableArrayListExtra(EXTRA_STREAM, uris);
             }
@@ -1329,14 +1332,14 @@ showActivity(String debugContext, Activity context,
 
     }
     private void removeAllFromSelection() {
-        SqlJobTaskBase task = new SqlJobTaskBase(this.getActivity(), "removeAllFromSelection", this.mSelectedItems) {
+        SqlJobTaskBase task = new SqlJobTaskBase(this.getActivity(), "removeAllFromSelection", this.mSelectedItemIds) {
             @Override
             protected void doInBackground(Long id, Cursor cursor) {
-                this.mSelectedItems.remove(id);
+                this.mSelectedItemIds.remove(id);
             }
 
             @Override
-            protected void onPostExecute(SelectedItems selectedItems) {
+            protected void onPostExecute(SelectedItemIds selectedItems) {
                 replaceSelectedItems(selectedItems, mStatus, mDebugPrefix);
             }
         };
@@ -1346,14 +1349,14 @@ showActivity(String debugContext, Activity context,
     }
 
     private void addAllToSelection() {
-        SqlJobTaskBase task = new SqlJobTaskBase(this.getActivity(), "addAllToSelection", this.mSelectedItems) {
+        SqlJobTaskBase task = new SqlJobTaskBase(this.getActivity(), "addAllToSelection", this.mSelectedItemIds) {
             @Override
             protected void doInBackground(Long id, Cursor cursor) {
-                this.mSelectedItems.add(id);
+                this.mSelectedItemIds.add(id);
             }
 
             @Override
-            protected void onPostExecute(SelectedItems selectedItems) {
+            protected void onPostExecute(SelectedItemIds selectedItems) {
                 replaceSelectedItems(selectedItems, mStatus, mDebugPrefix);
             }
         };
@@ -1362,11 +1365,11 @@ showActivity(String debugContext, Activity context,
         task.execute(query);
     }
 
-    private void replaceSelectedItems(SelectedItems selectedItems, StringBuffer debugMessage, String why) {
-        int oldSize = mSelectedItems.size();
-        this.mSelectedItems.clear();
-        this.mSelectedItems.addAll(selectedItems);
-        int newSize = mSelectedItems.size();
+    private void replaceSelectedItems(SelectedItemIds selectedItemIds, StringBuffer debugMessage, String why) {
+        int oldSize = mSelectedItemIds.size();
+        this.mSelectedItemIds.clear();
+        this.mSelectedItemIds.addAll(selectedItemIds);
+        int newSize = mSelectedItemIds.size();
 
         if (debugMessage != null) {
             debugMessage.append("\nSelections ").append(oldSize).append("=>").append(newSize);
@@ -1394,14 +1397,14 @@ showActivity(String debugContext, Activity context,
     /**
      * is called when removeDuplicates() found duplicates
      */
-    private void onDuplicatesFound(SelectedItems selectedItems, StringBuffer debugMessage) {
+    private void onDuplicatesFound(SelectedItemIds selectedItemIds, StringBuffer debugMessage) {
         if (debugMessage != null) {
             Log.w(Global.LOG_CONTEXT, mDebugPrefix + debugMessage);
         }
 
-        if (selectedItems != null) {
+        if (selectedItemIds != null) {
             QueryParameter query = new QueryParameter();
-            FotoSql.setWhereSelectionPks(query, selectedItems);
+            FotoSql.setWhereSelectionPks(query, selectedItemIds);
 
             final Activity activity = getActivity();
 
@@ -1565,7 +1568,7 @@ showActivity(String debugContext, Activity context,
 
     private boolean isMultiSelectionActive() {
         if (mMode != MODE_VIEW_PICKER_NONE) return true;
-        return !mSelectedItems.isEmpty();
+        return !mSelectedItemIds.isEmpty();
     }
 
     /** return true if multiselection is active */
@@ -1591,15 +1594,15 @@ showActivity(String debugContext, Activity context,
 
     /** return true if included; false if excluded */
     private boolean toggleSelection(long imageID) {
-        boolean contains = mSelectedItems.contains(imageID);
+        boolean contains = mSelectedItemIds.contains(imageID);
         if (mMode == MODE_VIEW_PICK_SINGLE) {
             clearSelections();
         }
         if (contains) {
-            mSelectedItems.remove(imageID);
+            mSelectedItemIds.remove(imageID);
             return false;
         } else {
-            mSelectedItems.add(imageID);
+            mSelectedItemIds.add(imageID);
             return true;
         }
     }

@@ -46,7 +46,7 @@ import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
-import de.k3b.io.collections.SelectedItems;
+import de.k3b.io.collections.SelectedItemIds;
 
 /**
  * LocationMapFragment working as Picker. Current result is the red marker.
@@ -132,16 +132,17 @@ public class PickerLocationMapFragment extends LocationMapFragment {
     /** get all important parameters for displaying the map */
     /**
      * (re)define map display
-     * @param rootQuery if not null contain database where to limit the photo data displayed
+     *
+     * @param rootQuery             if not null contain database where to limit the photo data displayed
      * @param depricated_rootFilter should be null. if not null contain database where to limit the data displayed
-     * @param zoomToRectangle if nut null the initial visible rectange
-     * @param zoomToZoomlevel the initial zoomToZoomlevel
-     * @param selectedItems if not null: items to be displayed as blue markers
-     * @param zoomToFit true mean recalculate zoomToZoomlevel from zoomToRectangle
+     * @param zoomToRectangle       if nut null the initial visible rectange
+     * @param zoomToZoomlevel       the initial zoomToZoomlevel
+     * @param selectedItemIds       if not null: items to be displayed as blue markers
+     * @param zoomToFit             true mean recalculate zoomToZoomlevel from zoomToRectangle
      */
     public void defineNavigation(QueryParameter rootQuery, GalleryFilterParameter depricated_rootFilter, IGeoPointInfo selectedItem,
                                  GeoRectangle zoomToRectangle, int zoomToZoomlevel,
-                                 SelectedItems selectedItems, Uri additionalPointsContentUri, boolean zoomToFit) {
+                                 SelectedItemIds selectedItemIds, Uri additionalPointsContentUri, boolean zoomToFit) {
         IGeoPointInfo currentSelection = selectedItem;
         if ((currentSelection == null) && (getCurrentSelectionPosition() == null)) {
             // first call with no geo: take last use from config
@@ -151,7 +152,7 @@ public class PickerLocationMapFragment extends LocationMapFragment {
             currentSelection = (lastValue == null) ? null : mGeoUriEngine.fromUri(lastValue);
         }
 
-        super.defineNavigation(rootQuery, depricated_rootFilter, zoomToRectangle, zoomToZoomlevel, selectedItems, additionalPointsContentUri, zoomToFit);
+        super.defineNavigation(rootQuery, depricated_rootFilter, zoomToRectangle, zoomToZoomlevel, selectedItemIds, additionalPointsContentUri, zoomToFit);
         if (currentSelection != null) {
             updateMarker(null, NO_MARKER_ID, new GeoPoint(currentSelection.getLatitude(), currentSelection.getLongitude()), null);
         }

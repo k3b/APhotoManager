@@ -26,24 +26,26 @@ import android.util.Log;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.database.QueryParameter;
-import de.k3b.io.collections.SelectedItems;
+import de.k3b.io.collections.SelectedItemIds;
 
 /**
  * process item-ids from sql-query in background task
  */
-public abstract class SqlJobTaskBase extends AsyncTask<QueryParameter, Integer, SelectedItems> {
+public abstract class SqlJobTaskBase extends AsyncTask<QueryParameter, Integer, SelectedItemIds> {
     // every 500 items the progress indicator is advanced
     private static final int PROGRESS_INCREMENT = 500;
 
     private final Activity mContext;
     protected final String mDebugPrefix;
-    protected SelectedItems mSelectedItems;
+    protected SelectedItemIds mSelectedItemIds;
 
-    /** collects debug infos */
+    /**
+     * collects debug infos
+     */
     protected StringBuffer mStatus = null;
     protected int mColumnIndexPK = -1;
 
-    public SqlJobTaskBase(Activity context, String debugPrefix, SelectedItems selectedItems) {
+    public SqlJobTaskBase(Activity context, String debugPrefix, SelectedItemIds selectedItemIds) {
         if (Global.debugEnabledSql || Global.debugEnabled) {
             mStatus = new StringBuffer().append(debugPrefix);
         }
@@ -51,14 +53,14 @@ public abstract class SqlJobTaskBase extends AsyncTask<QueryParameter, Integer, 
         Global.debugMemory(debugPrefix, "ctor");
         this.mContext = context;
         this.mDebugPrefix = debugPrefix;
-        this.mSelectedItems = new SelectedItems();
-        if (selectedItems != null) {
-            this.mSelectedItems.addAll(selectedItems);
+        this.mSelectedItemIds = new SelectedItemIds();
+        if (selectedItemIds != null) {
+            this.mSelectedItemIds.addAll(selectedItemIds);
         }
     }
 
     @Override
-    protected SelectedItems doInBackground(QueryParameter... querys) {
+    protected SelectedItemIds doInBackground(QueryParameter... querys) {
         if (querys.length != 1) throw new IllegalArgumentException();
 
         QueryParameter query = querys[0];
@@ -96,7 +98,7 @@ public abstract class SqlJobTaskBase extends AsyncTask<QueryParameter, Integer, 
                 }
             }
 
-            return this.mSelectedItems;
+            return this.mSelectedItemIds;
         } catch (Exception ex){
             Log.e(Global.LOG_CONTEXT, mDebugPrefix + query, ex);
             throw new RuntimeException(mDebugPrefix + query + "\n" + ex.getMessage(), ex);

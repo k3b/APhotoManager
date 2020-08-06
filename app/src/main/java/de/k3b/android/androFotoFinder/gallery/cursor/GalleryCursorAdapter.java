@@ -41,7 +41,7 @@ import de.k3b.android.androFotoFinder.queries.FotoSqlBase;
 import de.k3b.android.util.DBUtils;
 import de.k3b.android.util.PhotoChangeNotifyer;
 import de.k3b.io.collections.SelectedFiles;
-import de.k3b.io.collections.SelectedItems;
+import de.k3b.io.collections.SelectedItemIds;
 import de.k3b.io.filefacade.FileFacade;
 import de.k3b.io.filefacade.IFile;
 import de.k3b.media.PhotoPropertiesUtil;
@@ -67,7 +67,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements PhotoChangeNo
 
     // Identifies a particular Loader or a LoaderManager being used in this component
     protected final Activity mContext;
-    protected final SelectedItems mSelectedItems;
+    protected final SelectedItemIds mSelectedItemIds;
 
     // for debugging
     private static int id = 1;
@@ -76,10 +76,10 @@ public class GalleryCursorAdapter extends CursorAdapter implements PhotoChangeNo
     // for debugging: counts how many cell elements were created
     protected StringBuffer mStatus = null;
 
-    public GalleryCursorAdapter(final Activity context, SelectedItems selectedItems, String name) {
+    public GalleryCursorAdapter(final Activity context, SelectedItemIds selectedItemIds, String name) {
         super(context, null, false); // no cursor yet; no auto-requery
         mContext = context;
-        mSelectedItems = selectedItems;
+        mSelectedItemIds = selectedItemIds;
 
         mDebugPrefix = "GalleryCursorAdapter#" + (id++) + "@" + name + " ";
         Global.debugMemory(mDebugPrefix, "ctor");
@@ -141,7 +141,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements PhotoChangeNo
         if (count > 1) description += " (" + count + ")";
         if (gps) description += "#";
         holder.description.setText(description);
-        holder.icon.setVisibility(((mSelectedItems != null) && (mSelectedItems.contains(imageID))) ? View.VISIBLE : View.GONE);
+        holder.icon.setVisibility(((mSelectedItemIds != null) && (mSelectedItemIds.contains(imageID))) ? View.VISIBLE : View.GONE);
         holder.imageID = imageID;
 
         if (path != null) {
@@ -226,7 +226,7 @@ public class GalleryCursorAdapter extends CursorAdapter implements PhotoChangeNo
         }
     }
 
-    public SelectedFiles createSelectedFiles(Context context, SelectedItems items) {
+    public SelectedFiles createSelectedFiles(Context context, SelectedItemIds items) {
         return AffUtils.querySelectedFiles(context, items);
     }
 

@@ -28,7 +28,7 @@ import java.util.List;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.io.FileUtils;
 import de.k3b.io.VISIBILITY;
-import de.k3b.io.collections.SelectedItems;
+import de.k3b.io.collections.SelectedItemIds;
 import de.k3b.io.filefacade.IFile;
 import de.k3b.media.PhotoPropertiesUtil;
 
@@ -99,13 +99,15 @@ public class AdapterArrayHelper {
         return -1;
     }
 
-    /** helper for SelectedItems.Id2FileNameConverter: converts items.id-s to string array of filenNames. */
-    public IFile[] getFileNames(SelectedItems items) {
+    /**
+     * helper for SelectedItems.Id2FileNameConverter: converts items.id-s to string array of filenNames.
+     */
+    public IFile[] getFileNames(SelectedItemIds items) {
         if (items != null) {
             ArrayList<IFile> result = new ArrayList<>();
 
             int size = 0;
-            for(Long id : items) {
+            for (Long id : items) {
                 IFile path = (id != null) ? getFullFilePathfromArray(convertBetweenPositionAndId(id.intValue())) : null;
                 result.add(path);
                 if (path != null) size++;

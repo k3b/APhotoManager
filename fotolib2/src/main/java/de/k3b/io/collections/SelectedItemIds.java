@@ -25,10 +25,10 @@ import java.util.Set;
 /**
  * #1 Gallery-Multiselection
  * Container for selected items via ImageID.
- *
+ * <p>
  * Created by k3b on 01.08.2015.
  */
-public class SelectedItems extends java.util.TreeSet<Long> implements Set<Long> {
+public class SelectedItemIds extends java.util.TreeSet<Long> implements Set<Long> {
     private static final String DELIMITER = ",";
 
     /** converts this into komma seperated list of ID-s */
@@ -55,8 +55,10 @@ public class SelectedItems extends java.util.TreeSet<Long> implements Set<Long> 
         return result.toString();
     }
 
-    /** add ids from komma seperated list to this. */
-    public SelectedItems parse(String itemListAsString) {
+    /**
+     * add ids from komma seperated list to this.
+     */
+    public SelectedItemIds parse(String itemListAsString) {
 
         if ((itemListAsString != null) && (itemListAsString.length() > 0)) {
             String itemsAsString[] = itemListAsString.split(DELIMITER);

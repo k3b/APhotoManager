@@ -33,8 +33,7 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
 import de.k3b.io.collections.SelectedFiles;
-import de.k3b.io.collections.SelectedItems;
-import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.collections.SelectedItemIds;
 import de.k3b.io.filefacade.IFile;
 import de.k3b.media.ExifInterfaceEx;
 import de.k3b.media.PhotoPropertiesUtil;
@@ -48,18 +47,22 @@ import de.k3b.media.PhotoPropertiesUtil;
  */
 public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
 
-    /** not null data comes from array instead from base implementation */
+    /**
+     * not null data comes from array instead from base implementation
+     */
     private AdapterArrayHelper mArrayImpl = null;
 
-    public GalleryCursorAdapterFromArray(final Activity context, SelectedItems selectedItems, String name, IFile fullPhotoPath) {
-        super(context, selectedItems, name);
+    public GalleryCursorAdapterFromArray(final Activity context, SelectedItemIds selectedItemIds, String name, IFile fullPhotoPath) {
+        super(context, selectedItemIds, name);
 
         if (PhotoPropertiesMediaFilesScanner.isNoMedia(fullPhotoPath, PhotoPropertiesMediaFilesScanner.DEFAULT_SCAN_DEPTH)) {
             mArrayImpl = new AdapterArrayHelper(context, fullPhotoPath, "debugContext");
         }
     }
 
-    /** get informed that cursordata may be available so array can be disabled */
+    /**
+     * get informed that cursordata may be available so array can be disabled
+     */
     @Override
     public Cursor swapCursor(Cursor newCursor) {
         Cursor oldCursor = super.swapCursor(newCursor);
@@ -119,7 +122,7 @@ public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
 
             holder.image.setImageURI(Uri.parse(holder.url));
             holder.imageID = this.getImageId(position);
-            holder.icon.setVisibility(((mSelectedItems != null) && (mSelectedItems.contains(holder.imageID))) ? View.VISIBLE : View.GONE);
+            holder.icon.setVisibility(((mSelectedItemIds != null) && (mSelectedItemIds.contains(holder.imageID))) ? View.VISIBLE : View.GONE);
 
             if (Global.debugEnabledViewItem) Log.i(Global.LOG_CONTEXT, mDebugPrefix + "bindView for " + holder);
             return v;
@@ -137,7 +140,7 @@ public class GalleryCursorAdapterFromArray extends GalleryCursorAdapter {
     }
 
     @Override
-    public SelectedFiles createSelectedFiles(Context context, SelectedItems items) {
+    public SelectedFiles createSelectedFiles(Context context, SelectedItemIds items) {
         IFile[] paths = (mArrayImpl != null) ? mArrayImpl.getFileNames(items) : null;
         if ((paths != null) && (paths.length > 0)) {
             return new SelectedFiles(paths, items.getIds(), null);

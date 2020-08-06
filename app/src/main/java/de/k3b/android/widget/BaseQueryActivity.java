@@ -67,7 +67,7 @@ import de.k3b.io.IDirectory;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.ListUtils;
 import de.k3b.io.StringUtils;
-import de.k3b.io.collections.SelectedItems;
+import de.k3b.io.collections.SelectedItemIds;
 import de.k3b.tagDB.Tag;
 
 /**
@@ -616,14 +616,14 @@ public abstract class BaseQueryActivity extends BaseActivity implements Common, 
 
     abstract protected void defineDirectoryNavigation(IDirectory directoryRoot);
 
-    private void openLatLonPicker(SelectedItems selectedItems) {
+    private void openLatLonPicker(SelectedItemIds selectedItemIds) {
         this.mGalleryQueryParameter.mCurrentSubFilterMode = BaseQueryActivity.GalleryQueryParameter.SUB_FILTER_MODE_GEO;
 
         final FragmentManager manager = getFragmentManager();
         LocationMapFragment dialog = new LocationMapFragment();
         dialog.defineNavigation(this.mGalleryQueryParameter.mGalleryContentBaseQuery,
                 null,
-                this.mGalleryQueryParameter.getCurrentSubFilterSettings(), OsmdroidUtil.NO_ZOOM, selectedItems, null, false);
+                this.mGalleryQueryParameter.getCurrentSubFilterSettings(), OsmdroidUtil.NO_ZOOM, selectedItemIds, null, false);
 
         dialog.show(manager, DLG_NAVIGATOR_TAG);
         setAutoClose(dialog, null, null);
@@ -1028,7 +1028,7 @@ public abstract class BaseQueryActivity extends BaseActivity implements Common, 
         return result;
     }
 
-    protected boolean onOptionsItemSelected(MenuItem menuItem, SelectedItems selectedItems) {
+    protected boolean onOptionsItemSelected(MenuItem menuItem, SelectedItemIds selectedItemIds) {
         // Handle presses on the action bar items
         switch (menuItem.getItemId()) {
             case R.id.cmd_date:
@@ -1046,7 +1046,7 @@ public abstract class BaseQueryActivity extends BaseActivity implements Common, 
                 return true;
 
             case R.id.cmd_select_lat_lon:
-                openLatLonPicker(selectedItems);
+                openLatLonPicker(selectedItemIds);
                 return true;
             case R.id.cmd_select_tag:
                 openTagPicker();

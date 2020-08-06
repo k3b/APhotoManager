@@ -25,18 +25,18 @@ import org.junit.Test;
 /**
  * Created by k3b on 01.08.2015.
  */
-public class SelectedItemsTests {
+public class SelectedItemIdsTests {
     @Test
     public void shoudParse() {
-        SelectedItems sut = new SelectedItems().parse("1,2,3,1");
-        Assert.assertEquals("size",3, sut.size());
-        Assert.assertEquals("has 2",true, sut.contains(2L));
-        Assert.assertEquals("has not 5",false, sut.contains(5L));
+        SelectedItemIds sut = new SelectedItemIds().parse("1,2,3,1");
+        Assert.assertEquals("size", 3, sut.size());
+        Assert.assertEquals("has 2", true, sut.contains(2L));
+        Assert.assertEquals("has not 5", false, sut.contains(5L));
     }
 
     @Test
     public void shoudCreateString() {
-        SelectedItems sut = new SelectedItems();
+        SelectedItemIds sut = new SelectedItemIds();
         sut.add(1L);
         sut.add(2L);
         sut.add(3L);

@@ -62,7 +62,7 @@ import de.k3b.io.GeoRectangle;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IGeoRectangle;
 import de.k3b.io.collections.SelectedFiles;
-import de.k3b.io.collections.SelectedItems;
+import de.k3b.io.collections.SelectedItemIds;
 
 // BaseQueryActivity LocalizedActivity
 public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
@@ -159,7 +159,7 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
             }
         } // else (savedInstanceState != null) restore after rotation. fragment takes care of restoring map pos
 
-        final SelectedItems selectedItems = AffUtils.getSelectedItems(intent);
+        final SelectedItemIds selectedItemIds = AffUtils.getSelectedItems(intent);
 
         // TODO !!! #62 gpx/kml files: wie an LocatonMapFragment übergeben??
         String filter = null;
@@ -181,7 +181,7 @@ public class MapGeoPickerActivity extends BaseQueryActivity implements Common {
                     mMap.defineNavigation(mGalleryQueryParameter.calculateEffectiveGalleryContentQuery(),
                             null, geoPointFromIntent,
                             _zoomToRectangle, _zoomToZoomlevel,
-                            selectedItems, additionalPointsContentUri, _zoom2fit);
+                            selectedItemIds, additionalPointsContentUri, _zoom2fit);
                 }
             });
         }

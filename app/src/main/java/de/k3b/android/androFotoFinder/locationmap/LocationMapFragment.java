@@ -89,7 +89,7 @@ import de.k3b.io.GalleryFilterParameter;
 import de.k3b.io.GeoRectangle;
 import de.k3b.io.IGalleryFilter;
 import de.k3b.io.IGeoRectangle;
-import de.k3b.io.collections.SelectedItems;
+import de.k3b.io.collections.SelectedItemIds;
 
 /**
  * A fragment to display Foto locations in a geofrafic map.
@@ -470,18 +470,18 @@ public class LocationMapFragment extends DialogFragment {
     /**
      * (re)define map display. Data sohow from rootQuery + rectangle + zoomlevel.
      *
-     * @param rootQuery if not null contain database where to limit the photo data displayed
-     * @param depricated_rootFilter should be null. if not null contain database where to limit the data displayed
-     * @param rectangle if nut null the initial visible rectange
-     * @param zoomlevel the initial zoomlevel
-     * @param selectedItems if not null: items to be displayed as blue markers
+     * @param rootQuery                     if not null contain database where to limit the photo data displayed
+     * @param depricated_rootFilter         should be null. if not null contain database where to limit the data displayed
+     * @param rectangle                     if nut null the initial visible rectange
+     * @param zoomlevel                     the initial zoomlevel
+     * @param selectedItemIds               if not null: items to be displayed as blue markers
      * @param gpxAdditionalPointsContentUri if not null the file containing additional geo coords for blue marker
-     * @param zoomToFit true mean recalculate zoomlevel from rectangle
+     * @param zoomToFit                     true mean recalculate zoomlevel from rectangle
      */
     public void defineNavigation(QueryParameter rootQuery,
                                  IGalleryFilter depricated_rootFilter,
                                  GeoRectangle rectangle, int zoomlevel,
-                                 SelectedItems selectedItems,
+                                 SelectedItemIds selectedItemIds,
                                  Uri gpxAdditionalPointsContentUri, boolean zoomToFit) {
         String debugContext = mDebugPrefix + "defineNavigation: ";
         if (Global.debugEnabled || Global.debugEnabledMap) {
@@ -490,7 +490,7 @@ public class LocationMapFragment extends DialogFragment {
 
         this.mRootQuery = AndroidAlbumUtils.getAsMergedNewQuery(rootQuery, depricated_rootFilter);
 
-        mSelectedItemsHandler.define(selectedItems);
+        mSelectedItemsHandler.define(selectedItemIds);
         if (zoomToFit) {
             zoomToFit(null, "defineNavigation");
         } else {
@@ -882,17 +882,19 @@ public class LocationMapFragment extends DialogFragment {
 
     private SelectedItemsHandler mSelectedItemsHandler = new SelectedItemsHandler();
 
-    /** Support for non-clustered selected items */
+    /**
+     * Support for non-clustered selected items
+     */
     private class SelectedItemsHandler {
 
-        public void define(SelectedItems selectedItems) {
-            if ((selectedItems != null) && (this.mSelectedItems != selectedItems)) {
-                this.mSelectedItems = selectedItems;
+        private SelectedItemIds mSelectedItemIds = null;
+
+        public void define(SelectedItemIds selectedItemIds) {
+            if ((selectedItemIds != null) && (this.mSelectedItemIds != selectedItemIds)) {
+                this.mSelectedItemIds = selectedItemIds;
                 reloadSelectionMarker();
             }
         }
-
-        private SelectedItems mSelectedItems = null;
 
         /**
          * To allow canceling of loading task. There are 0 or one tasks running at a time
@@ -986,7 +988,7 @@ public class LocationMapFragment extends DialogFragment {
 
         private void reloadSelectionMarker() {
             if ((mFolderOverlayBlueSelectionMarker != null) &&
-                    (mSelectedItems != null) && (!mSelectedItems.isEmpty())) {
+                    (mSelectedItemIds != null) && (!mSelectedItemIds.isEmpty())) {
                 if (mCurrentSelectionMarkerLoader != null) {
                     mCurrentSelectionMarkerLoader.cancel(false);
                     mCurrentSelectionMarkerLoader = null;
@@ -995,7 +997,7 @@ public class LocationMapFragment extends DialogFragment {
                 List<Overlay> oldItems = mFolderOverlayBlueSelectionMarker.getItems();
 
                 QueryParameter query = new QueryParameter(FotoSql.queryGps);
-                FotoSql.setWhereSelectionPks(query, mSelectedItems);
+                FotoSql.setWhereSelectionPks(query, mSelectedItemIds);
                 FotoSql.addWhereLatLonNotNull(query);
 
                 mCurrentSelectionMarkerLoader = new SelectionMarkerLoaderTask(createHashMap(oldItems));

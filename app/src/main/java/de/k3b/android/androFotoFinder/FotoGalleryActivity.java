@@ -45,7 +45,7 @@ import de.k3b.android.widget.AboutDialogPreference;
 import de.k3b.android.widget.BaseQueryActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.IDirectory;
-import de.k3b.io.collections.SelectedItems;
+import de.k3b.io.collections.SelectedItemIds;
 
 /**
  * Gallery: Show zeoro or more images in a grid optionally filtered by a
@@ -67,7 +67,7 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
      */
 
     // multi selection support
-    private SelectedItems mSelectedItems = null;
+    private SelectedItemIds mSelectedItemIds = null;
 
     private Queryable mGalleryGui;
 
@@ -108,7 +108,7 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
         mGalleryGui = (Queryable) fragmentManager.findFragmentById(R.id.galleryCursor);
 
         if (mGalleryGui instanceof GalleryCursorFragment) {
-            this.mSelectedItems = ((GalleryCursorFragment) mGalleryGui).getSelectedItems();
+            this.mSelectedItemIds = ((GalleryCursorFragment) mGalleryGui).getSelectedItemIds();
         }
 
         // on tablet seperate dir navigator fragment
@@ -136,7 +136,7 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
     public void onResume() {
         super.onResume();
         if (mGalleryGui instanceof GalleryCursorFragment) {
-            this.mSelectedItems = ((GalleryCursorFragment) mGalleryGui).getSelectedItems();
+            this.mSelectedItemIds = ((GalleryCursorFragment) mGalleryGui).getSelectedItemIds();
         }
     }
 
@@ -217,7 +217,7 @@ public class FotoGalleryActivity extends BaseQueryActivity implements
                 }, 200);
                 return true;
             default:
-                return onOptionsItemSelected(item, this.mSelectedItems);
+                return onOptionsItemSelected(item, this.mSelectedItemIds);
         }
 
     }
