@@ -441,8 +441,12 @@ public class ImagePagerAdapterFromCursor extends PagerAdapter implements PhotoCh
         mImageButtonController.setContext(name);
     }
 
+    public boolean isInSingleImageMode() {
+        return false;
+    }
+
     private class ImageButtonControllerImpl {
-        private MenuItem mMenuItem = null ;
+        private MenuItem mMenuItem = null;
         private View.OnClickListener mClickListener;
         private final View.OnLongClickListener mLongClickListener;
 

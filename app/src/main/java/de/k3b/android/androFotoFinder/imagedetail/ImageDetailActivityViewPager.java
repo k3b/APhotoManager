@@ -750,7 +750,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
             getMenuInflater().inflate(R.menu.menu_image_detail_locked, menu);
             LockScreen.removeDangerousCommandsFromMenu(menu);
 
-        } else if (null == getCurrentIFile()) {
+        } else if (mAdapter != null && mAdapter.isInSingleImageMode()) {
             getMenuInflater().inflate(R.menu.menu_image_detail_non_file, menu);
         } else {
             getMenuInflater().inflate(R.menu.menu_image_detail, menu);

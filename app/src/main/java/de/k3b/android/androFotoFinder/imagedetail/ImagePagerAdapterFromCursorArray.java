@@ -70,7 +70,7 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
 
     @Override
     public int getCount() {
-        if (imageUri != null) return 1;
+        if (isInSingleImageMode()) return 1;
         if (mArrayImpl != null) {
             return mArrayImpl.getCount();
         }
@@ -86,9 +86,14 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
     }
 
     private IFile getLocalFullFilePath(int position) {
-        if (imageUri != null) return null;
+        if (isInSingleImageMode()) return null;
         if (mArrayImpl != null) return mArrayImpl.getFullFilePathfromArray(position);
         return null;
+    }
+
+    public boolean isInSingleImageMode() {
+        if (imageUri != null) return true;
+        return super.isInSingleImageMode();
     }
 
     /**
@@ -96,7 +101,7 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
      */
     @Override
     public long getImageId(int position) {
-        if (imageUri != null) return -1;
+        if (isInSingleImageMode()) return -1;
         if (mArrayImpl != null) return mArrayImpl.getImageId(position);
         return super.getImageId(position);
     }
@@ -108,7 +113,7 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
     public Uri getImageUri(int position) {
         Uri uri = super.getImageUri(position);
 
-        if ((uri == null) && (this.imageUri != null)) {
+        if ((uri == null) && (isInSingleImageMode())) {
             uri = this.imageUri;
         }
 
@@ -117,7 +122,7 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
 
     @Override
     public Date getDatePhotoTaken(int position) {
-        if (imageUri != null) return null;
+        if (isInSingleImageMode()) return null;
         if (mArrayImpl != null) return null;
         return super.getDatePhotoTaken(position);
     }
@@ -130,7 +135,7 @@ public class ImagePagerAdapterFromCursorArray extends ImagePagerAdapterFromCurso
             return createViewWithContent(position, container, file, null, "instantiateItemFromArray(#", 32767);
         }
 
-        if (this.imageUri != null) {
+        if (isInSingleImageMode()) {
             // special case where uri exists and cannot be translated to file uri.
             return createViewWithContent(position, container, null, this.imageUri, "instantiateItemFromArray(" + imageUri, 32767);
         }
