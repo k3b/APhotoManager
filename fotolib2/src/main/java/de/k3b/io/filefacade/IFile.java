@@ -29,8 +29,12 @@ import java.io.OutputStream;
  * Goal: to become an android independant replacement for java.io.File
  * that can be implemented by android independant de.k3b.io.File
  * and android specific de.k3b.android.io....
+ *
+ * This interface has the similar method names/sinatures as de.k3b.io.File
  */
 public interface IFile {
+    void set(IFile src);
+
     @Deprecated
     boolean renameTo(IFile newName);
 

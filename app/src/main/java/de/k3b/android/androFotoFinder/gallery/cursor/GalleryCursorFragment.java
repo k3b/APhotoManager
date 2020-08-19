@@ -173,8 +173,10 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
 
     // multi selection support
     private final SelectedItemIds mSelectedItemIds = new SelectedItemIds();
-    private String mOldTitle = null;
+
+    private String mOldAppTitleBeforeMultiselectionStarts = null;
     private boolean mShowSelectedOnly = false;
+    private boolean isMultiSelectionMenuVisible = false;
     private final AndroidFileCommands mFileCommands = new LocalFileCommands();
     private MenuItem mShareOnlyToggle;
     private MenuItem mMenuRemoveAllSelected = null;
@@ -319,11 +321,11 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
         if (savedInstanceState != null) {
             this.mLastVisiblePosition = savedInstanceState.getInt(INSTANCE_STATE_LAST_VISIBLE_POSITION, this.mLastVisiblePosition);
             this.loaderID = savedInstanceState.getInt(INSTANCE_STATE_LOADER_ID, this.loaderID);
-            //!!!
-            String old = mSelectedItemIds.toString();
+
+            String oldIds = mSelectedItemIds.toString();
             mSelectedItemIds.clear();
-            mSelectedItemIds.parse(savedInstanceState.getString(INSTANCE_STATE_SELECTED_ITEM_IDS, old));
-            this.mOldTitle = savedInstanceState.getString(INSTANCE_STATE_OLD_TITLE, this.mOldTitle);
+            mSelectedItemIds.parse(savedInstanceState.getString(INSTANCE_STATE_SELECTED_ITEM_IDS, oldIds));
+            this.mOldAppTitleBeforeMultiselectionStarts = savedInstanceState.getString(INSTANCE_STATE_OLD_TITLE, this.mOldAppTitleBeforeMultiselectionStarts);
             this.mShowSelectedOnly = savedInstanceState.getBoolean(INSTANCE_STATE_SEL_ONLY, this.mShowSelectedOnly);
             if (isMultiSelectionActive()) {
                 mMustReplaceMenue = true;
@@ -346,7 +348,7 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
         outState.putInt(INSTANCE_STATE_LAST_VISIBLE_POSITION, mLastVisiblePosition);
         outState.putInt(INSTANCE_STATE_LOADER_ID, loaderID);
         outState.putString(INSTANCE_STATE_SELECTED_ITEM_IDS, this.mSelectedItemIds.toString());
-        outState.putString(INSTANCE_STATE_OLD_TITLE, this.mOldTitle);
+        outState.putString(INSTANCE_STATE_OLD_TITLE, this.mOldAppTitleBeforeMultiselectionStarts);
         outState.putBoolean(INSTANCE_STATE_SEL_ONLY, this.mShowSelectedOnly);
     }
 
@@ -791,7 +793,9 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
 
     private void startMultiSelectionMode() {
         // multi selection not active yet: start multi selection
-        mOldTitle = getActivity().getTitle().toString();
+        if (mOldAppTitleBeforeMultiselectionStarts == null) {
+            mOldAppTitleBeforeMultiselectionStarts = getActivity().getTitle().toString();
+        }
         mMustReplaceMenue = true;
         mShowSelectedOnly = false;
         getActivity().invalidateOptionsMenu();
@@ -820,6 +824,7 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
      */
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
+        this.isMultiSelectionMenuVisible = false;
         super.onPrepareOptionsMenu(menu);
         final boolean locked = LockScreen.isLocked(this.getActivity());
         if (mMustReplaceMenue || (locked != this.locked)) {
@@ -840,6 +845,7 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
                     AboutDialogPreference.onPrepareOptionsMenu(getActivity(), menu);
                 } else if (this.isMultiSelectionActive()) { // view-multiselect
                     inflater.inflate(R.menu.menu_gallery_multiselect_mode_all, menu);
+                    this.isMultiSelectionMenuVisible = true;
                     if (Global.allowRenameMultible) {
                         inflater.inflate(R.menu.menu_gallery_multiselect_rename, menu);
                     }
@@ -1259,7 +1265,9 @@ showActivity(String debugContext, Activity context,
 
     private void multiSelectionReplaceTitleIfNecessary() {
         if (isMultiSelectionActive()) {
-            mOldTitle = getActivity().getTitle().toString();
+            if (mOldAppTitleBeforeMultiselectionStarts == null) {
+                mOldAppTitleBeforeMultiselectionStarts = getActivity().getTitle().toString();
+            }
             multiSelectionUpdateActionbar("selection my have changed");
         }
 
@@ -1269,7 +1277,6 @@ showActivity(String debugContext, Activity context,
     private void multiSelectionUpdateActionbar(String why) {
         String newTitle = null;
         if (!isMultiSelectionActive()) {
-
             // lost last selection. revert mShowSelectedOnly if neccessary
             if (mShowSelectedOnly) {
                 mShowSelectedOnly = false;
@@ -1277,13 +1284,16 @@ showActivity(String debugContext, Activity context,
             }
 
             // lost last selection. revert title if neccessary
-            if (mOldTitle != null) {
+            if (mOldAppTitleBeforeMultiselectionStarts != null) {
                 // last is deselected. Restore title and menu;
-                newTitle = mOldTitle;
-                mOldTitle = null;
+                newTitle = mOldAppTitleBeforeMultiselectionStarts;
+                mOldAppTitleBeforeMultiselectionStarts = null;
                 getActivity().invalidateOptionsMenu();
             }
         } else {
+            if (!this.isMultiSelectionMenuVisible) {
+                startMultiSelectionMode();
+            }
             // multi selection is active: update title and data for share menue
             newTitle = getActivity().getString(R.string.selection_status_format, mSelectedItemIds.size());
             multiSelectionUpdateShareIntent();

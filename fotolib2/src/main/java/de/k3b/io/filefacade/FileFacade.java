@@ -53,7 +53,18 @@ public class FileFacade implements IFile {
             return result;
         }
     };
+
     private File file;
+
+    @Override
+    public void set(IFile src) {
+        if (src != null) {
+            if (src instanceof FileWrapper) {
+                set(((FileWrapper) src).child);
+            }
+            setFile(src.getFile());
+        }
+    }
 
     @Override
     public boolean equals(Object o) {

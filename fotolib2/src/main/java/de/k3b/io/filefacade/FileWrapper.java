@@ -14,6 +14,11 @@ public class FileWrapper implements IFile {
     }
 
     @Override
+    public void set(IFile src) {
+        child.set(src);
+    }
+
+    @Override
     public boolean renameTo(IFile newName) {
         return child.renameTo(newName);
     }

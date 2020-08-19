@@ -39,7 +39,7 @@ import de.k3b.io.filefacade.FileFacade;
 import de.k3b.io.filefacade.IFile;
 
 /**
- * de.k3b.android.io.AndroidFileFacade havs the same methods as java.io.File
+ * de.k3b.android.io.AndroidFileFacade has the same methods as java.io.File
  * but is implemented through Android specific {@link DocumentFile}
  */
 public class AndroidFileFacade extends FileFacade {
@@ -90,6 +90,19 @@ public class AndroidFileFacade extends FileFacade {
 
     public AndroidFileFacade(@NonNull File file) {
         this(null, file);
+    }
+
+    @Override
+    public void set(IFile src) {
+        if (src != null) {
+            if (src instanceof AndroidFileFacade) {
+                AndroidFileFacade androidSrc = (AndroidFileFacade) src;
+                this.androidFile = androidSrc.androidFile;
+                this.androidFileMayExist = androidSrc.androidFileMayExist;
+                this.readUri = androidSrc.readUri;
+            }
+        }
+        super.set(src);
     }
 
     public static DocumentFile getDocumentFileOrDirOrNull(@NonNull File file) {

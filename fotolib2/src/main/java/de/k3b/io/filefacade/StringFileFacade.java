@@ -73,6 +73,11 @@ public class StringFileFacade implements IFile {
 
 
     @Override
+    public void set(IFile src) {
+
+    }
+
+    @Override
     public boolean renameTo(IFile newName) {
         return false;
     }
