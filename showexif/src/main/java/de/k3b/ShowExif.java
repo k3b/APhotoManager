@@ -58,8 +58,8 @@ public class ShowExif {
             final IFile file = FileFacade.convert(dbg_context, fileName);
             IPhotoProperties jpg = photoPropertyFileReader.load(file, null, dbg_context);
 
-            IPhotoProperties exif = new ExifInterfaceEx(null, null)
-                    .load(file, photoPropertyFileReader.getXmp(), dbg_context);
+            IPhotoProperties exif = ExifInterfaceEx.create(file, null, photoPropertyFileReader.getXmp(), dbg_context);
+
             // PhotoPropertiesImageReader jpg = new PhotoPropertiesImageReader().load(fileName, xmp, dbg_context);
             show(jpg, debug);
             show(exif, debug);

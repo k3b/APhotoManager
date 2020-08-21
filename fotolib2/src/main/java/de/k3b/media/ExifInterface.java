@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
+import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.File;
@@ -54,12 +55,21 @@ import de.k3b.io.filefacade.FileFacade;
 import de.k3b.io.filefacade.IFile;
 
 /**
- * This is a class for reading and writing Exif tags in a JPEG file.
- * It is based on ExifInterface of android-6 version.
- *
+ * This is a class for reading and writing Exif tags in a JPEG File through {@link java.io.File},
+ * {@link java.io.InputStream}, {@link java.io.OutputStream} or {@link IFile}.
+ * <p>
+ * The code is based on ExifInterface of android-6 version and can be used under j2se and under android.
+ * <p>
  * Improvements:
- *  * with dependencies to android removed
- *  * added microsoft exiftags: TAG_WIN_xxxxx
+ * * all dependencies to android removed so it can be used outside android, too.
+ * ** android.util.Log is replaced by org.slf4j.Logger
+ * * java native code nonly, no jini
+ * * added microsoft exiftags: TAG_WIN_xxxxx
+ * <p>
+ * Since using java.io.File is heavily restricted in Android it uses de.k3b.io.filefacade.IFile
+ * insted (both have same methods with same signatures).
+ * There are two implementatins of IFile: one based on java.io.File for j2se
+ * and one based om android.support.v4.provider.DocumentFile for android code.
  */
 public class ExifInterface {
     // public to allow error filtering
@@ -449,30 +459,6 @@ public class ExifInterface {
         }
     }
 
-    /**
-     * This function decides which parser to read the image data according to the given input stream
-     * type and the content of the input stream. In each case, it reads the first three bytes to
-     * determine whether the image data format is JPEG or not.
-     */
-    private void loadAttributes(InputStream in) {
-        try {
-            // Initialize mAttributes.
-            for (int i = 0; i < EXIF_TAGS.length; ++i) {
-                mAttributes[i] = new HashMap();
-            }
-            getJpegAttributes(in);
-        } catch (IOException e) {
-            // Ignore exceptions in order to keep the compatibility with the old versions of
-            // ExifInterface.
-            logWarn("Invalid image.", e);
-            validJpgExifFormat = false;
-        } finally {
-            FileUtils.close(in, "Exifinterface loadAttributes " + in);
-            if (DEBUG_INTERNAL) {
-                logDebug(this.toString());
-            }
-        }
-    }
     // A class for defining EXIF tag.
     private static class ExifTag {
         public final int id;
@@ -800,34 +786,45 @@ public class ExifInterface {
     // Pattern to check gps timestamp
     private static final Pattern sGpsTimestampPattern =
             Pattern.compile("^([0-9][0-9]):([0-9][0-9]):([0-9][0-9])$");
-    /**
-     * Reads Exif tags from the specified image file.
-     */
-    protected ExifInterface(InputStream in, IFile jpgFile, String filename) throws IOException {
-        mExifFile = (jpgFile != null)
-                ? jpgFile
-                : (filename != null)
-                ? FileFacade.convert("ExifInterface()", filename)
-                : null;
 
-        if (in != null) {
-            loadAttributes(in);
-        } else if (mExifFile != null) {
-            loadAttributes(mExifFile.openInputStream());
-        }
+    /**
+     * @deprecated use {@link #loadAttributes(InputStream, IFile, String)} instead
+     */
+    @Deprecated
+    private ExifInterface(InputStream in, IFile jpgFile, String filename) throws IOException {
+        loadAttributes(in, jpgFile, filename);
     }
 
-    protected ExifInterface() {}
+    public ExifInterface() {
+    }
 
-    /** false means this is no valid jpg format */
-    public boolean isValidJpgExifFormat() {return validJpgExifFormat;}
+    protected void reset() {
+        validJpgExifFormat = true;
+        mExifFile = null;
+        for (int i = 0; i < EXIF_TAGS.length; ++i) {
+            mAttributes[i] = null;
+        }
+
+        mExifByteOrder = ByteOrder.BIG_ENDIAN;
+        mHasThumbnail = false;
+        mThumbnailOffset = 0;
+        mThumbnailLength = 0;
+        mThumbnailBytes = null;
+    }
 
     /**
-         * Returns the EXIF attribute of the specified tagName or {@code null} if there is no such tagName in
-         * the image file.
-         *
-         * @param tagName the name of the tagName.
-         */
+     * false means this is no valid jpg format
+     */
+    public boolean isValidJpgExifFormat() {
+        return validJpgExifFormat;
+    }
+
+    /**
+     * Returns the EXIF attribute of the specified tagName or {@code null} if there is no such tagName in
+     * the image file.
+     *
+     * @param tagName the name of the tagName.
+     */
     private ExifAttribute getExifAttribute(String tagName) {
         if (mAttributes[0] != null) {
             // Retrieves all tagName groups. The value from primary image tagName group has a higher priority
@@ -1112,8 +1109,12 @@ public class ExifInterface {
             mThumbnailBytes = buffer;
             return buffer;
         } finally {
-            FileUtils.close(in, "ExifInterface getThumbnail" + in);
+            closeSilently(in, "ExifInterface getThumbnail " + in);
         }
+    }
+
+    private void closeSilently(Closeable in, String debugContext) {
+        FileUtils.close(in, debugContext);
     }
 
     @Override
@@ -1303,11 +1304,55 @@ public class ExifInterface {
         return null;
     }
 
+    /**
+     * Reads Exif tags from the specified image file.
+     */
+    protected ExifInterface loadAttributes(InputStream in, IFile jpgFile, String filename) throws IOException {
+        reset();
+        mExifFile = (jpgFile != null)
+                ? jpgFile
+                : (filename != null)
+                ? FileFacade.convert("ExifInterface()", filename)
+                : null;
+
+        if (in != null) {
+            loadAttributes(in);
+        } else if (mExifFile != null) {
+            loadAttributes(mExifFile.openInputStream());
+        }
+        return this;
+    }
+
+    /**
+     * This function decides which parser to read the image data according to the given input stream
+     * type and the content of the input stream. In each case, it reads the first three bytes to
+     * determine whether the image data format is JPEG or not.
+     */
+    private void loadAttributes(InputStream in) {
+        try {
+            // Initialize mAttributes.
+            for (int i = 0; i < EXIF_TAGS.length; ++i) {
+                mAttributes[i] = new HashMap();
+            }
+            getJpegAttributes(in);
+        } catch (IOException e) {
+            // Ignore exceptions in order to keep the compatibility with the old versions of
+            // ExifInterface.
+            logWarn("Invalid image.", e);
+            validJpgExifFormat = false;
+        } finally {
+            closeSilently(in, "Exifinterface loadAttributes " + in);
+            if (DEBUG_INTERNAL) {
+                logDebug(this.toString());
+            }
+        }
+    }
+
     // Loads EXIF attributes from a JPEG input stream.
     private void getJpegAttributes(InputStream inputStream) throws IOException {
         // See JPEG File Interchange Format Specification page 5.
         if (DEBUG_INTERNAL) {
-            logDebug( "getJpegAttributes starting with: " + inputStream);
+            logDebug("getJpegAttributes starting with: " + inputStream);
         }
         DataInputStream dataInputStream = null;
         try {
@@ -1430,7 +1475,7 @@ public class ExifInterface {
                 bytesRead += length;
             }
         } finally {
-            FileUtils.close(dataInputStream, "ExifInterface getJpegAttributes " + dataInputStream);
+            closeSilently(dataInputStream, "ExifInterface getJpegAttributes " + dataInputStream);
         }
     }
 
@@ -1674,8 +1719,8 @@ public class ExifInterface {
                 }
             }
         } finally {
-            FileUtils.close(dataOutputStream, "ExifInterface saveJpegAttributes out " + outputStream);
-            FileUtils.close(dataInputStream, "ExifInterface saveJpegAttributes in " + dataInputStream);
+            closeSilently(dataOutputStream, "ExifInterface saveJpegAttributes out " + outputStream);
+            closeSilently(dataInputStream, "ExifInterface saveJpegAttributes in " + dataInputStream);
         }
     }
 

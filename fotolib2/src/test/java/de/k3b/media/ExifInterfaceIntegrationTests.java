@@ -166,7 +166,7 @@ public class ExifInterfaceIntegrationTests {
         final IFile sutFile = OUTDIR.create(fileNameDest);
         OutputStream outputStream = sutFile.openOutputStream();
 
-        ExifInterface sutWrite = new ExifInterface(inputStream, null, sutFile.getAbsolutePath());
+        ExifInterface sutWrite = new ExifInterface().loadAttributes(inputStream, null, sutFile.getAbsolutePath());
         for(String key : testItems.keySet()) {
             sutWrite.setAttribute(key, testItems.get(key));
         }
@@ -180,7 +180,7 @@ public class ExifInterfaceIntegrationTests {
 
         FileUtils.close(outputStream, sutFile);
 
-        ExifInterface sutRead = new ExifInterface(null, sutFile, "junit");
+        ExifInterface sutRead = new ExifInterface().loadAttributes(null, sutFile, "junit");
 
         Assert.assertEquals(sutWriteText, sutRead.toString());
         return sutRead;

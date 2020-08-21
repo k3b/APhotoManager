@@ -41,13 +41,13 @@ import de.k3b.io.VISIBILITY;
 import de.k3b.io.filefacade.FileFacade;
 import de.k3b.io.filefacade.IFile;
 import de.k3b.media.MediaFormatter.FieldID;
+
 /**
- * Thin Wrapper around Android-s ExifInterface to read/write exif data from jpg file
- * and also implements IPhotoProperties
- *
+ * Thin Wrapper around Android-s ExifInterface to read/write exif data as {@link IPhotoProperties}
+ * from jpg {@link java.io.File} or {@link IFile}
+ * <p>
  * Created by k3b on 08.10.2016.
  */
-
 public class ExifInterfaceEx extends ExifInterface
         implements IPhotoProperties, IPhotoPropertyFileWriter, IPhotoPropertyFileReader {
     private static final Logger logger = LoggerFactory.getLogger(LOG_TAG);
@@ -61,46 +61,103 @@ public class ExifInterfaceEx extends ExifInterface
     }
 
 
-    /** when xmp sidecar file was last modified or 0 */
+    /**
+     * when xmp sidecar file was last modified or 0
+     */
     private long filelastModified = 0;
 
     // false for unittests because UserComment = null is not implemented for COM - Marker
     protected static boolean useUserComment = true;
 
-    private final String mDbg_context;
-	/** if not null content of xmp sidecar file */
-    private IPhotoProperties xmpExtern = null;
-
-    public ExifInterfaceEx(IFile jpgFile, String dbg_context) throws IOException {
-        this(null, jpgFile, null, null, dbg_context);
-    }
-    /**
-     * Reads Exif tags from the specified source.
-     * @param xmpExtern if not null content of xmp sidecar file
-     * @param dbg_context
-     */
-    private ExifInterfaceEx(InputStream in, IFile jpgFile, String absoluteJpgPath, IPhotoProperties xmpExtern, String dbg_context) throws IOException {
-        super(in, jpgFile, absoluteJpgPath);
-        setFilelastModified(mExifFile);
-
-        this.xmpExtern = xmpExtern;
-        this.mDbg_context = dbg_context + "->ExifInterfaceEx(" + absoluteJpgPath+ ") ";
-        if (LibGlobal.debugEnabledJpgMetaIo) {
-            logger.debug(this.mDbg_context +
-                    " load: " + PhotoPropertiesFormatter.format(this, false, null, FieldID.path, FieldID.clasz));
+    private static Factory factory = new Factory() {
+        @Override
+        public ExifInterfaceEx create() {
+            return new ExifInterfaceEx();
         }
-        // Log.d(LOG_TAG, msg);
+    };
+    /**
+     * if not null content of xmp sidecar file
+     */
+    private IPhotoProperties xmpExtern = null;
+    private String mDbg_context = null;
 
+    /**
+     * Prefer using one of the {@link #create()} methods instead
+     */
+    public ExifInterfaceEx() {
+        try {
+            loadAttributes(null, null, null, null, null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void setFactory(Factory factory) {
+        ExifInterfaceEx.factory = factory;
+    }
+
+    /**
+     * All instances of {@link ExifInterfaceEx} should be created through this factory method.
+     * <p>
+     * Use {@link #setFactory(Factory)} if you want to use a derived class
+     * of {@link ExifInterfaceEx} globally.
+     */
+    public static ExifInterfaceEx create() {
+        return factory.create();
     }
 
     public static ExifInterfaceEx create(IFile jpgFile, InputStream _in, IPhotoProperties xmpExtern, String dbg_context) throws IOException {
         InputStream in = (_in != null) ? _in : jpgFile.openInputStream();
         final String absolutePath = (jpgFile != null) ? jpgFile.getAbsolutePath() : null;
-        return new ExifInterfaceEx(in, jpgFile, absolutePath, xmpExtern, dbg_context);
+        return create().loadAttributes(in, jpgFile, absolutePath, xmpExtern, dbg_context);
     }
 
     public static ExifInterfaceEx create(String absoluteJpgPath, InputStream in, IPhotoProperties xmpExtern, String dbg_context) throws IOException {
-        return new ExifInterfaceEx(in, null, absoluteJpgPath, xmpExtern, dbg_context);
+        return create().loadAttributes(in, null, absoluteJpgPath, xmpExtern, dbg_context);
+    }
+
+    @Override
+    protected void reset() {
+        super.reset();
+        filelastModified = 0;
+        mDbg_context = null;
+        xmpExtern = null;
+        mLatitude = null;
+        mLongitude = null;
+    }
+
+    /**
+     * Reads Exif tags from the specified source.
+     *
+     * @param xmpExtern   if not null content of xmp sidecar file
+     * @param dbg_context
+     */
+    private ExifInterfaceEx loadAttributes(InputStream in, IFile jpgFile, String absoluteJpgPath, IPhotoProperties xmpExtern, String dbg_context) throws IOException {
+        super.loadAttributes(in, jpgFile, absoluteJpgPath);
+        setFilelastModified(mExifFile);
+
+        this.xmpExtern = xmpExtern;
+        this.mDbg_context = dbg_context + "->ExifInterfaceEx(" + absoluteJpgPath + ") ";
+        if (LibGlobal.debugEnabledJpgMetaIo) {
+            logger.debug(this.mDbg_context +
+                    " load: " + PhotoPropertiesFormatter.format(this, false, null, FieldID.path, FieldID.clasz));
+        }
+        // Log.d(LOG_TAG, msg);
+        return this;
+    }
+
+    @Override
+    public IPhotoProperties load(IFile jpgFile, IPhotoProperties childProperties, String dbg_context) {
+        try {
+            return create(jpgFile, null, childProperties, dbg_context);
+        } catch (IOException e) {
+            if (LibGlobal.debugEnabledJpgMetaIo) {
+                logger.info(StringUtils.appendMessage(
+                        null, dbg_context, getClass().getSimpleName(), "load failed",
+                        jpgFile, e.getMessage()).toString(), e);
+            }
+            return null;
+        }
     }
 
     public static int getOrientationId(IFile fullPath) {
@@ -110,8 +167,6 @@ public class ExifInterfaceEx extends ExifInterface
         }
         return 0;
     }
-
-    protected ExifInterfaceEx() {super();xmpExtern=null; mDbg_context = "";}
 
     @Override
     public void saveAttributes(IFile inFile, IFile outFile, boolean deleteInFileOnFinish) throws IOException {
@@ -403,7 +458,9 @@ public class ExifInterfaceEx extends ExifInterface
         return result;
     }
 
-    /** not implemented in {@link ExifInterface} */
+    /**
+     * not implemented in {@link ExifInterface}
+     */
     @Override
     public IPhotoProperties setRating(Integer value) {
         setAttribute(TAG_WIN_RATING, (value != null) ? value.toString() : null);
@@ -411,25 +468,13 @@ public class ExifInterfaceEx extends ExifInterface
         return this;
     }
 
-    @Override
-    public IPhotoProperties load(IFile jpgFile, IPhotoProperties childProperties, String dbg_context) {
-        try {
-            return new ExifInterfaceEx(null, jpgFile, null, childProperties, dbg_context);
-        } catch (IOException e) {
-            if (LibGlobal.debugEnabledJpgMetaIo) {
-                logger.info(StringUtils.appendMessage(
-                        null, dbg_context, getClass().getSimpleName(), "load failed",
-                        jpgFile, e.getMessage()).toString(), e);
-            }
-            return null;
-        }
+    public interface Factory {
+        public ExifInterfaceEx create();
     }
 
-    protected interface Factory {
-        ExifInterfaceEx create(String absoluteJpgPath, InputStream in, IPhotoProperties xmpExtern, String dbg_context) throws IOException;
-    }
-
-    /** return the image orinentation as id (one of the ORIENTATION_ROTATE_XXX constants) */
+    /**
+     * return the image orinentation as id (one of the ORIENTATION_ROTATE_XXX constants)
+     */
     public int getOrientationId() {
         return getAttributeInt(
                 ExifInterfaceEx.TAG_ORIENTATION, 0);
