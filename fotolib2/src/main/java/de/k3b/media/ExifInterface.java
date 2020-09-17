@@ -813,7 +813,7 @@ public class ExifInterface {
     }
 
     /**
-     * false means this is no valid jpg format
+     * @return false means this is no valid jpg format
      */
     public boolean isValidJpgExifFormat() {
         return validJpgExifFormat;
@@ -823,7 +823,7 @@ public class ExifInterface {
      * Returns the EXIF attribute of the specified tagName or {@code null} if there is no such tagName in
      * the image file.
      *
-     * @param tagName the name of the tagName.
+     * @param tagName the name of the tag exif tags to be returned.
      */
     private ExifAttribute getExifAttribute(String tagName) {
         if (mAttributes[0] != null) {

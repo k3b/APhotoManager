@@ -38,6 +38,7 @@ import java.util.Date;
 import de.k3b.LibGlobal;
 import de.k3b.android.GuiUtil;
 import de.k3b.android.androFotoFinder.imagedetail.HugeImageLoader;
+import de.k3b.android.androFotoFinder.media.AndroidExifInterfaceEx;
 import de.k3b.android.androFotoFinder.queries.DatabaseHelper;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.FotoSqlBase;
@@ -149,6 +150,7 @@ public class AndroFotoFinderApp extends Application {
     @Override public void onCreate() {
         // StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().detectAll().penaltyDialog().build());
         // StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().detectAll().penaltyDeath().build());
+        AndroidExifInterfaceEx.init();
         FotoSqlBase.init();
 
         super.onCreate();
