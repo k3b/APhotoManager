@@ -1127,9 +1127,9 @@ public class FotoSql extends FotoSqlBase {
         return SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME + "/" + imageID;
     }
 
-    public static SelectedFiles getSelectedfiles(String sqlWhere, VISIBILITY visibility) {
+    public static SelectedFiles getSelectedfiles(String sqlWhere, VISIBILITY visibility, String... parameters) {
         QueryParameter query = new QueryParameter(FotoSql.queryChangePath);
-        query.addWhere(sqlWhere);
+        query.addWhere(sqlWhere, parameters);
         query.addOrderBy(FotoSql.SQL_COL_PATH);
 
         return getSelectedfiles(query, FotoSql.SQL_COL_PATH, visibility);

@@ -24,6 +24,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.io.File;
+
 import de.k3b.android.androFotoFinder.transactionlog.TransactionLogSql;
 import de.k3b.android.util.DatabaseContext;
 
@@ -39,19 +41,32 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION_2_MEDIA_DB_COPY = 2;
 
     public static final int DATABASE_VERSION = DatabaseHelper.DATABASE_VERSION_2_MEDIA_DB_COPY;
+    public static final String DATABASE_NAME = "APhotoManager";
 
     private static DatabaseHelper instance = null;
+    private static DatabaseContext databaseContext = null;
 
     public DatabaseHelper(final Context context, final String databaseName) {
         super(context, databaseName, null, DatabaseHelper.DATABASE_VERSION);
     }
 
     public static SQLiteDatabase getWritableDatabase(Context context) {
-        if (instance == null) {
-            instance = new DatabaseHelper(new DatabaseContext(context), "APhotoManager");
-        }
-        return instance.getWritableDatabase();
+        return getInstance(context).getWritableDatabase();
     }
+
+    public static File getDatabasePath(Context context) {
+        getInstance(context);
+        return databaseContext.getDatabasePath(DATABASE_NAME);
+    }
+
+    private static DatabaseHelper getInstance(Context context) {
+        if (instance == null) {
+            databaseContext = new DatabaseContext(context);
+            instance = new DatabaseHelper(databaseContext, DATABASE_NAME);
+        }
+        return instance;
+    }
+
 
     public static void version2Upgrade_RecreateMediDbCopy(final SQLiteDatabase db) {
         for (String sql : MediaDBRepository.Impl.DDL) {

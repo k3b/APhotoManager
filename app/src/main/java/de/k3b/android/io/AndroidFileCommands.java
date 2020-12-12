@@ -61,7 +61,6 @@ import de.k3b.android.util.RecursivePhotoPropertiesMediaFilesScannerAsyncTask;
 import de.k3b.android.widget.FilePermissionActivity;
 import de.k3b.database.QueryParameter;
 import de.k3b.io.DirectoryFormatter;
-import de.k3b.io.FileCommands;
 import de.k3b.io.FileUtils;
 import de.k3b.io.IDirectory;
 import de.k3b.io.IProgessListener;
@@ -78,10 +77,10 @@ import de.k3b.transactionlog.TransactionLoggerBase;
 /**
  * Api to manipulate files/photos.
  * Same as FileCommands with update media database.
- *
+ * <p>
  * Created by k3b on 03.08.2015.
  */
-public class AndroidFileCommands extends FileCommands {
+public class AndroidFileCommands extends AndroidFileCommandsDbImpl {
     private static final String SETTINGS_KEY_LAST_COPY_TO_PATH = "last_copy_to_path";
     private static final String mDebugPrefix = "AndroidFileCommands.";
     private boolean isInBackground = false;

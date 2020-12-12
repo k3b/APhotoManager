@@ -127,11 +127,10 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
     }
 
     /**
-     *
      * @param sourceFullPath the path of the file that shall be copied including the file name with ending
-     * @param targetFullPath the path of the file  that shall be written to without filename
-     *
-     * Copies a file from the sourceFullPath path to the target path.
+     * @param targetFullPath the path of the file  that shall be written to with filename
+     *                       <p>
+     *                       Copies a file from the sourceFullPath path to the target path.
      */
     private static boolean _osFileCopy(IFile targetFullPath, IFile sourceFullPath, FileCommands owner) {
         boolean result = true;
@@ -454,22 +453,25 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
 
     /**
      * executes os specific move or copy operation and updates the list of modified files
+     *
+     * @param sourceFullPath the path of the file that shall be copied including the file name with ending
+     * @param targetFullPath the path of the file  that shall be written to with filename
      */
-    protected boolean osFileMoveOrCopy(boolean move, IFile dest, IFile source) {
+    protected boolean osFileMoveOrCopy(boolean move, IFile targetFullPath, IFile sourceFullPath) {
         boolean result = false;
-        long fileTime = source.lastModified();
+        long fileTime = sourceFullPath.lastModified();
 
         if (move) {
-            result = osFileMove(dest, source);
+            result = osFileMove(targetFullPath, sourceFullPath);
         } else {
-            result = osFileCopy(dest, source);
+            result = osFileCopy(targetFullPath, sourceFullPath);
         }
-        if (dest.lastModified() != fileTime) {
-            dest.setLastModified(fileTime);
+        if (targetFullPath.lastModified() != fileTime) {
+            targetFullPath.setLastModified(fileTime);
         }
 
         if (result) {
-            addProcessedFiles(move, dest, source);
+            addProcessedFiles(move, targetFullPath, sourceFullPath);
         }
 
         return result;
@@ -484,35 +486,38 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
 
     /**
      * can be replaced by mock/stub in unittests
+     *
+     * @param sourceFullPath the path of the file that shall be copied including the file name with ending
+     * @param targetFullPath the path of the file  that shall be written to with filename
      */
-    protected boolean osFileMove(IFile dest, IFile source) {
-        if (osRenameTo(dest, source)) {
+    protected boolean osFileMove(IFile targetFullPath, IFile sourceFullPath) {
+        if (osRenameTo(targetFullPath, sourceFullPath)) {
             // move within same mountpoint
             if (LibGlobal.debugEnabledJpg) {
-                logger.info("osFileMove(rename) '" + source
-                        + "' => '" + dest + "'");
+                logger.info("osFileMove(rename) '" + sourceFullPath
+                        + "' => '" + targetFullPath + "'");
             }
             return true;
         }
 
         // #61 cannot move between different mountpoints/devices/partitions. do Copy+Delete instead
-        if (osFileExists(source) && source.isFile() && source.canRead()
-                && source.canWrite() // to delete after success
-                && !osFileExists(dest)
-                && osFileCopy(dest, source)) {
-            if (osDeleteFile(source)) {
+        if (osFileExists(sourceFullPath) && sourceFullPath.isFile() && sourceFullPath.canRead()
+                && sourceFullPath.canWrite() // to delete after success
+                && !osFileExists(targetFullPath)
+                && osFileCopy(targetFullPath, sourceFullPath)) {
+            if (osDeleteFile(sourceFullPath)) {
                 if (LibGlobal.debugEnabledJpg) {
-                    logger.info("osFileMove(copy+delete) '" + source
-                            + "' => '" + dest + "'");
+                    logger.info("osFileMove(copy+delete) '" + sourceFullPath
+                            + "' => '" + targetFullPath + "'");
                 }
-                return true; // move: copy + delete(source) : success
+                return true; // move: copy + delete(sourceFullPath) : success
             } else {
                 // cannot delete souce: undo copy
                 if (LibGlobal.debugEnabledJpg) {
-                    logger.info("osFileMove failed for  '" + source
-                            + "' => '" + dest + "'");
+                    logger.info("osFileMove failed for  '" + sourceFullPath
+                            + "' => '" + targetFullPath + "'");
                 }
-                osDeleteFile(dest);
+                osDeleteFile(targetFullPath);
             }
         }
         return false;
@@ -530,11 +535,10 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
     }
 
     /**
+     * Copies a file from the sourceFullPath path to the target path.
      *
      * @param sourceFullPath the path of the file that shall be copied including the file name with ending
-     * @param targetFullPath the path of the file  that shall be written to without filename
-     *
-     * Copies a file from the sourceFullPath path to the target path.
+     * @param targetFullPath the path of the file  that shall be written to with filename
      */
     protected boolean osFileCopy(IFile targetFullPath, IFile sourceFullPath) {
         return _osFileCopy(targetFullPath, sourceFullPath, this);

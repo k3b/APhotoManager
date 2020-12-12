@@ -60,7 +60,7 @@ public class MediaContent2DBUpdateService {
     public void rebuild(Context context, IProgessListener progessListener) {
         long start = new Date().getTime();
         clearMediaCopy();
-        MediaDBRepository.Impl.updateMedaiCopy(context, writableDatabase, null, progessListener);
+        MediaDBRepository.Impl.updateMediaCopy(context, writableDatabase, null, progessListener);
         start = (new Date().getTime() - start) / 1000;
         final String text = "load db " + start + " secs";
         Toast.makeText(context, text, Toast.LENGTH_LONG).show();

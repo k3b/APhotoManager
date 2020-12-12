@@ -19,7 +19,7 @@ android {
 
         minSdkVersion 14		// Android 4.0 Ice Cream Sandwich (API 14); Android 4.4 KitKat (API 19);  Android 5.0 Lollipop (API 21); 
 								// Android 6.0 Marshmallow (API 23); Android 7.0 Nougat (API 24)
-        maxSdkVersion 28        // #155: android-10=api29
+        // maxSdkVersion 28        // #155: android-10=api29
 
         targetSdkVersion 28
 

@@ -85,14 +85,25 @@ public class ExifInterface {
     // false for unittests because UserComment = null is not implemented for COM - Marker
     protected static boolean fixDateOnSave = true;
 
+    // Used when overwriting original file
+    protected static final String TMP_FILE_SUFFIX = ".tmp";
+
     // The Exif tag names
-    /** Type is String. */
+    /**
+     * Type is String.
+     */
     public static final String TAG_ARTIST = "Artist";
-    /** Type is int. @hide */
+    /**
+     * Type is int. @hide
+     */
     public static final String TAG_BITS_PER_SAMPLE = "BitsPerSample";
-    /** Type is int. @hide */
+    /**
+     * Type is int. @hide
+     */
     public static final String TAG_COMPRESSION = "Compression";
-    /** Type is String.  */
+    /**
+     * Type is String.
+     */
     public static final String TAG_COPYRIGHT = "Copyright";
     /** Type is String. @hide */
     public static final String TAG_DATETIME = "DateTime";
@@ -1163,20 +1174,23 @@ public class ExifInterface {
      * and make a single call rather than multiple calls for each attribute.
      */
     public void saveAttributes() throws IOException {
-        saveAttributes(mExifFile, mExifFile, true);
+        saveAttributes(mExifFile, mExifFile, true, null);
     }
 
     /**
      * Old File based implementation.
      *
-     * @deprecated use {@link #saveAttributes(IFile, IFile, boolean)} instead
+     * @deprecated use {@link #saveAttributes(IFile, IFile, boolean, Boolean)} instead
      */
     @Deprecated
     public void saveAttributes(File inFile, File outFile, boolean deleteInFileOnFinish) throws IOException {
-        saveAttributes(FileFacade.convert("ExifInterface.saveAttributes in", inFile), FileFacade.convert("ExifInterface.saveAttributes out", outFile), deleteInFileOnFinish);
+        saveAttributes(FileFacade.convert("ExifInterface.saveAttributes in", inFile),
+                FileFacade.convert("ExifInterface.saveAttributes out", outFile),
+                deleteInFileOnFinish, null);
     }
 
-    public void saveAttributes(IFile inFile, IFile outFile, boolean deleteInFileOnFinish) throws IOException {
+    public void saveAttributes(IFile inFile, IFile outFile,
+                               boolean deleteInFileOnFinish, Boolean hasXmp) throws IOException {
         String debugContext = String.format("%s.saveAttributes(%s=>%s,deleteInFileOnFinish=%s)", this.getClass().getSimpleName(), inFile, outFile, deleteInFileOnFinish);
         IFile currentOutFile = outFile;
         fixAttributes();
@@ -1188,9 +1202,8 @@ public class ExifInterface {
 
         if (overwriteOriginal) {
             final String name = inFile.getName();
-            final String tempName = name + ".tmp";
-            renameOrThrow(inFile, tempName);
-            inFile = inFile.getParentFile().create(tempName);
+            final String tempName = name + TMP_FILE_SUFFIX;
+            inFile = renameSouraceFileBeforeReplaceOrThrow(inFile, tempName);
 
             currentOutFile = outFile.getParentFile().create(name);
         }
@@ -1207,13 +1220,14 @@ public class ExifInterface {
         mThumbnailBytes = null;
     }
 
-    private void renameOrThrow(IFile file, String newName) throws IOException {
-        logDebug(String.format("rename %s to %s", file, newName));
+    protected IFile renameSouraceFileBeforeReplaceOrThrow(IFile oldSourcefile, String newName) throws IOException {
+        logDebug(String.format("rename %s to %s", oldSourcefile, newName));
 
-        if (!file.renameTo(newName)) {
-            throw new IOException("Could'nt rename sourcefile from " + file +
+        if (!oldSourcefile.renameTo(newName)) {
+            throw new IOException("Could'nt rename sourcefile from " + oldSourcefile +
                     " to " + newName);
         }
+        return oldSourcefile.getParentFile().create(newName);
     }
 
     /** repairs wrong/missing attributes */
@@ -1273,7 +1287,7 @@ public class ExifInterface {
     }
 
     /**
-     * @deprecated use {@link #saveAttributes(IFile, IFile, boolean)} instead
+     * @deprecated use {@link #getThumbnail(IFile)} instead
      */
     @Deprecated
     public byte[] getThumbnail(File inFile) {
@@ -1719,9 +1733,13 @@ public class ExifInterface {
                 }
             }
         } finally {
-            closeSilently(dataOutputStream, "ExifInterface saveJpegAttributes out " + outputStream);
             closeSilently(dataInputStream, "ExifInterface saveJpegAttributes in " + dataInputStream);
+            beforeCloseSaveOutputStream();
+            closeSilently(dataOutputStream, "ExifInterface saveJpegAttributes out " + outputStream);
         }
+    }
+
+    protected void beforeCloseSaveOutputStream() {
     }
 
     // Reads the given EXIF byte area and save its tag data into attributes.

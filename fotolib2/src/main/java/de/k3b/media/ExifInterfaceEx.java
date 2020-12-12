@@ -169,9 +169,9 @@ public class ExifInterfaceEx extends ExifInterface
     }
 
     @Override
-    public void saveAttributes(IFile inFile, IFile outFile, boolean deleteInFileOnFinish) throws IOException {
+    public void saveAttributes(IFile inFile, IFile outFile, boolean deleteInFileOnFinish, Boolean hasXmp) throws IOException {
         fixDateTakenIfNeccessary(inFile);
-        super.saveAttributes(inFile, outFile, deleteInFileOnFinish);
+        super.saveAttributes(inFile, outFile, deleteInFileOnFinish, hasXmp);
         setFilelastModified(outFile);
     }
 

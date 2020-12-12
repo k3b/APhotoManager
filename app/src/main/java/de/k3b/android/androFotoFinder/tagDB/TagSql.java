@@ -318,6 +318,12 @@ public class TagSql extends FotoSql {
         }
     }
 
+    public static void setFileModifyDate(ContentValues values, Date fileModifyDate) {
+        if (fileModifyDate != null) {
+            setFileModifyDate(values, fileModifyDate.getTime() / 1000);
+        }
+    }
+
     public static void setFileModifyDate(ContentValues values, long fileModifyDateSecs) {
         if (fileModifyDateSecs != 0) {
             values.put(SQL_COL_LAST_MODIFIED, fileModifyDateSecs);

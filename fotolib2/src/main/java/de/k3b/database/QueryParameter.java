@@ -479,9 +479,11 @@ public class QueryParameter {
     /************************** local helpers *********************/
 
     private QueryParameter addToList(final List<String> list, boolean allowNull, final String[] parameters) {
-        for (String parameter : parameters) {
-            if ((allowNull) || (parameter != null)) {
-                list.add(parameter);
+        if (parameters != null) {
+            for (String parameter : parameters) {
+                if ((allowNull) || (parameter != null)) {
+                    list.add(parameter);
+                }
             }
         }
         return this;

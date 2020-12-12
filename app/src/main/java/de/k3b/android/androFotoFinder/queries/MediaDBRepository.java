@@ -72,7 +72,7 @@ public class MediaDBRepository implements IMediaRepositoryApi {
     // #155
     public static final boolean debugEnabledSqlRefresh = true;
 
-    private static final String MODUL_NAME = MediaContentproviderRepositoryImpl.class.getName();
+    private static final String MODUL_NAME = MediaDBRepository.class.getSimpleName();
     private static String currentUpdateReason = null;
     private static long currentUpdateId = 1;
     private static int transactionNumber = 0;
@@ -360,6 +360,41 @@ public class MediaDBRepository implements IMediaRepositoryApi {
         db.endTransaction();
     }
 
+    /**
+     * generic method to get values from current MediaDBApi-Implementation
+     *
+     * @param fullFilePathFilter
+     * @param destination
+     * @param dbgContext
+     * @return
+     */
+    public static ContentValues getContentValues(String fullFilePathFilter, ContentValues destination, String dbgContext) {
+        final String meldung = MODUL_NAME + ".getContentValues(" + dbgContext + "," + fullFilePathFilter + ")";
+        QueryParameter query = new QueryParameter().addColumn(MediaDBRepository.Impl.USED_MEDIA_COLUMNS);
+        query.removeFirstColumnThatContains(FotoSql.SQL_COL_PK);
+        FotoSql.setWhereFileNames(query, fullFilePathFilter);
+
+        Cursor c = null;
+
+        try {
+            c = FotoSql.getMediaDBApi().createCursorForQuery(null, meldung, query, null, null);
+            if (c.moveToNext()) {
+                if (destination == null) {
+                    destination = new ContentValues();
+                }
+                return Impl.getContentValues(c, destination);
+            }
+        } catch (Exception ex) {
+            Log.e(LOG_TAG, meldung +
+                    " error :", ex);
+        } finally {
+            if (c != null) c.close();
+        }
+
+        return null;
+    }
+
+
     public static class Impl {
         /**
          * SQL to create copy of contentprovider MediaStore.Images.
@@ -561,7 +596,7 @@ public class MediaDBRepository implements IMediaRepositoryApi {
         }
 
 
-        public static int updateMedaiCopy(Context context, SQLiteDatabase db, Date lastUpdate, IProgessListener progessListener) {
+        public static int updateMediaCopy(Context context, SQLiteDatabase db, Date lastUpdate, IProgessListener progessListener) {
             int progress = 0;
             java.util.Date startTime = new java.util.Date();
 

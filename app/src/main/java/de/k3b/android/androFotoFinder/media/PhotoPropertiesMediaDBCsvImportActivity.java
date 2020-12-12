@@ -204,7 +204,7 @@ public class PhotoPropertiesMediaDBCsvImportActivity extends Activity {
                     TagSql.setXmpFileModifyDate(dbValues, xmlLastFileModifyDate);
                 }
 
-                TagSql.setFileModifyDate(dbValues, new Date().getTime() / 1000);
+                TagSql.setFileModifyDate(dbValues, new Date());
 
                 mUpdateCount += TagSql.execUpdate(dbgContext, path, xmlLastFileModifyDate, dbValues, VISIBILITY.PRIVATE_PUBLIC);
                 mItemCount++;

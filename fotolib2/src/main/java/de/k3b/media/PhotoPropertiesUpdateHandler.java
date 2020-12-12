@@ -278,7 +278,8 @@ public class PhotoPropertiesUpdateHandler extends PhotoPropertiesWrapper
             exif.saveAttributes(
                     inJpgFullPath,
                     outJpgFullPath,
-                    this.deleteOriginalAfterFinish);
+                    this.deleteOriginalAfterFinish,
+                    this.xmp != null);
         } else if (!isSameFile) {
             // changes are NOT written to exif. Do File copy instead.
             FileUtils.copyReplace(inJpgFullPath, outJpgFullPath, this.deleteOriginalAfterFinish, dbg_context + "-transferExif");

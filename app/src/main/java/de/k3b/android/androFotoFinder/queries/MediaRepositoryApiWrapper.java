@@ -33,9 +33,9 @@ import de.k3b.media.IPhotoProperties;
  * Created by k3b on 30.11.2019.
  */
 public class MediaRepositoryApiWrapper implements IMediaRepositoryApi {
-    protected final IMediaRepositoryApi readChild;
-    protected final IMediaRepositoryApi writeChild;
-    protected final IMediaRepositoryApi transactionChild;
+    private final IMediaRepositoryApi readChild;
+    private final IMediaRepositoryApi writeChild;
+    private final IMediaRepositoryApi transactionChild;
 
     /**
      * count the non path write calls
@@ -54,27 +54,27 @@ public class MediaRepositoryApiWrapper implements IMediaRepositoryApi {
 
     @Override
     public Cursor createCursorForQuery(StringBuilder out_debugMessage, String dbgContext, QueryParameter parameters, VISIBILITY visibility, CancellationSignal cancellationSignal) {
-        return readChild.createCursorForQuery(out_debugMessage, dbgContext, parameters, visibility, cancellationSignal);
+        return getReadChild().createCursorForQuery(out_debugMessage, dbgContext, parameters, visibility, cancellationSignal);
     }
 
     @Override
     public Cursor createCursorForQuery(StringBuilder out_debugMessage, String dbgContext, String from, String sqlWhereStatement, String[] sqlWhereParameters, String sqlSortOrder, CancellationSignal cancellationSignal, String... sqlSelectColums) {
-        return readChild.createCursorForQuery(out_debugMessage, dbgContext, from, sqlWhereStatement, sqlWhereParameters, sqlSortOrder, cancellationSignal, sqlSelectColums);
+        return getReadChild().createCursorForQuery(out_debugMessage, dbgContext, from, sqlWhereStatement, sqlWhereParameters, sqlSortOrder, cancellationSignal, sqlSelectColums);
     }
 
     @Override
     public int execUpdate(String dbgContext, long id, ContentValues values) {
-        return writeChild.execUpdate(dbgContext, id, values);
+        return getWriteChild().execUpdate(dbgContext, id, values);
     }
 
     @Override
     public int execUpdate(String dbgContext, String path, ContentValues values, VISIBILITY visibility) {
-        return writeChild.execUpdate(dbgContext, path, values, visibility);
+        return getWriteChild().execUpdate(dbgContext, path, values, visibility);
     }
 
     @Override
     public int exexUpdateImpl(String dbgContext, ContentValues values, String sqlWhere, String[] selectionArgs) {
-        return writeChild.exexUpdateImpl(dbgContext, values, sqlWhere, selectionArgs);
+        return getWriteChild().exexUpdateImpl(dbgContext, values, sqlWhere, selectionArgs);
     }
 
     /**
@@ -88,7 +88,7 @@ public class MediaRepositoryApiWrapper implements IMediaRepositoryApi {
      */
     @Override
     public Long insertOrUpdateMediaDatabase(String dbgContext, String dbUpdateFilterJpgFullPathName, ContentValues values, VISIBILITY visibility, Long updateSuccessValue) {
-        return writeChild.insertOrUpdateMediaDatabase(dbgContext, dbUpdateFilterJpgFullPathName, values, visibility, updateSuccessValue);
+        return getWriteChild().insertOrUpdateMediaDatabase(dbgContext, dbUpdateFilterJpgFullPathName, values, visibility, updateSuccessValue);
     }
 
     /**
@@ -99,7 +99,7 @@ public class MediaRepositoryApiWrapper implements IMediaRepositoryApi {
      */
     @Override
     public Uri execInsert(String dbgContext, ContentValues values) {
-        return writeChild.execInsert(dbgContext, values);
+        return getWriteChild().execInsert(dbgContext, values);
     }
 
     /**
@@ -107,36 +107,48 @@ public class MediaRepositoryApiWrapper implements IMediaRepositoryApi {
      */
     @Override
     public int deleteMedia(String dbgContext, String where, String[] selectionArgs, boolean preventDeleteImageFile) {
-        return writeChild.deleteMedia(dbgContext, where, selectionArgs, preventDeleteImageFile);
+        return getWriteChild().deleteMedia(dbgContext, where, selectionArgs, preventDeleteImageFile);
     }
 
     @Override
     public ContentValues getDbContent(long id) {
-        return readChild.getDbContent(id);
+        return getReadChild().getDbContent(id);
     }
 
     @Override
     public long getCurrentUpdateId() {
-        return transactionChild.getCurrentUpdateId();
+        return getTransactionChild().getCurrentUpdateId();
     }
 
     @Override
     public boolean mustRequery(long updateId) {
-        return transactionChild.mustRequery(updateId);
+        return getTransactionChild().mustRequery(updateId);
     }
 
     @Override
     public void beginTransaction() {
-        transactionChild.beginTransaction();
+        getTransactionChild().beginTransaction();
     }
 
     @Override
     public void setTransactionSuccessful() {
-        transactionChild.setTransactionSuccessful();
+        getTransactionChild().setTransactionSuccessful();
     }
 
     @Override
     public void endTransaction() {
-        transactionChild.endTransaction();
+        getTransactionChild().endTransaction();
+    }
+
+    protected IMediaRepositoryApi getReadChild() {
+        return readChild;
+    }
+
+    protected IMediaRepositoryApi getWriteChild() {
+        return writeChild;
+    }
+
+    protected IMediaRepositoryApi getTransactionChild() {
+        return transactionChild;
     }
 }
