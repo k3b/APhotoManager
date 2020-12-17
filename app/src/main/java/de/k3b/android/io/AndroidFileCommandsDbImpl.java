@@ -22,8 +22,6 @@ package de.k3b.android.io;
 import android.content.ContentValues;
 import android.net.Uri;
 
-import java.io.File;
-
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.queries.MediaDBRepository;
 import de.k3b.io.FileCommands;
@@ -46,12 +44,11 @@ public class AndroidFileCommandsDbImpl extends FileCommands {
      */
     @Override
     protected boolean osFileCopy(IFile targetFullPath, IFile sourceFullPath) {
-        //!!! TODO muss noch getestet werden
         final String srcPath = sourceFullPath.getAbsolutePath();
         String toPath = null;
         boolean dbSuccess = false;
         if (PhotoPropertiesUtil.isImage(srcPath, PhotoPropertiesUtil.IMG_TYPE_ALL)) {
-            toPath = new File(targetFullPath.getFile(), targetFullPath.getName()).getAbsolutePath();
+            toPath = targetFullPath.getAbsolutePath();
             dbSuccess = (null != copyInDatabase("osFileCopy", srcPath, toPath));
         }
 
@@ -75,37 +72,13 @@ public class AndroidFileCommandsDbImpl extends FileCommands {
         boolean dbSuccess = false;
         // Database update must be done before super.osFileMove to avoid deleting/recreating old file entry
         if (PhotoPropertiesUtil.isImage(srcPath, PhotoPropertiesUtil.IMG_TYPE_ALL)) {
-            toPath = new File(targetFullPath.getFile(), targetFullPath.getName()).getAbsolutePath();
+            toPath = targetFullPath.getAbsolutePath();
             dbSuccess = renameInDatabase("osFileMove", srcPath, toPath);
         }
         final boolean osSuccess = super.osFileMove(targetFullPath, sourceFullPath);
         if (!osSuccess && dbSuccess) {
             // os falled. Rollback
             renameInDatabase("osFileMove-rollback", toPath, srcPath);
-        }
-        return osSuccess;
-    }
-
-    /**
-     * Renames a file from the sourceFullPath path to the target path.
-     * Android specific: also updates database.
-     *
-     * @param sourceFullPath the path of the file that shall be copied including the file name with ending
-     * @param targetFullPath the path of the file  that shall be written to with filename
-     */
-    @Override
-    protected boolean osRenameTo(IFile targetFullPath, IFile sourceFullPath) {
-        final String srcPath = sourceFullPath.getAbsolutePath();
-        String toPath = null;
-        boolean dbSuccess = false;
-        if (PhotoPropertiesUtil.isImage(srcPath, PhotoPropertiesUtil.IMG_TYPE_ALL)) {
-            toPath = targetFullPath.getAbsolutePath();
-            dbSuccess = renameInDatabase("osRenameTo", srcPath, toPath);
-        }
-        final boolean osSuccess = super.osRenameTo(targetFullPath, sourceFullPath);
-        if (!osSuccess && dbSuccess) {
-            // os falled. Rollback
-            renameInDatabase("osRenameTo-rollback", toPath, srcPath);
         }
         return osSuccess;
     }

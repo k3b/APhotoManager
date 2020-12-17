@@ -350,7 +350,7 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                 MediaTransactionLogEntryType moveOrCopyCommand = (move) ? MediaTransactionLogEntryType.MOVE : MediaTransactionLogEntryType.COPY;
                 TransactionLoggerBase logger = (exifChanges == null) ? null : createTransactionLogger(now);
                 boolean sameFile;
-
+                //!!! TODO ??begin transaction??
                 while (pos < fileCount) {
                     IFile sourceFile = sourceFiles[pos];
                     IFile destFile = destFiles[pos].getCanonicalFile();
@@ -424,7 +424,8 @@ public class FileCommands extends FileProcessor implements  Cloneable, IProgessL
                         }
                     }
                     pos++;
-                } // foreach selected file
+                } // foreach selected file.
+                // !!! TODO ??COMMIT TRANSACTION??
                 int modifyCount = mModifiedDestFiles.size();
 
                 IFile[] modifiedSourceFiles = ((mModifiedSrcFiles != null) && (mModifiedSrcFiles.size() > 0)) ? mModifiedSrcFiles.toArray(new IFile[modifyCount]) : null;

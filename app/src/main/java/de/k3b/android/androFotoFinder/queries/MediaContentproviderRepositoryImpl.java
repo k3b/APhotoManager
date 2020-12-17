@@ -47,7 +47,7 @@ public class MediaContentproviderRepositoryImpl {
     public static Cursor createCursorForQuery(
             StringBuilder out_debugMessage, String dbgContext, final Context context,
             QueryParameter parameters, VISIBILITY visibility, CancellationSignal cancellationSignal) {
-        if (visibility != null) FotoSql.setWhereVisibility(parameters, visibility);
+        FotoSql.setWhereVisibility(parameters, visibility);
         return createCursorForQuery(out_debugMessage, dbgContext, context, parameters.toFrom(),
                 parameters.toAndroidWhere(),
                 parameters.toAndroidParameters(), parameters.toOrderBy(),

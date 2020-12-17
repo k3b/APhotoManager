@@ -48,7 +48,6 @@ import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.LockScreen;
 import de.k3b.android.androFotoFinder.R;
 import de.k3b.android.androFotoFinder.directory.DirectoryPickerFragment;
-import de.k3b.android.androFotoFinder.media.AndroidPhotoPropertiesBulkUpdateService;
 import de.k3b.android.androFotoFinder.queries.DatabaseHelper;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
@@ -56,7 +55,6 @@ import de.k3b.android.androFotoFinder.transactionlog.TransactionLogSql;
 import de.k3b.android.util.OsUtils;
 import de.k3b.android.util.PhotoChangeNotifyer;
 import de.k3b.android.util.PhotoPropertiesMediaFilesScanner;
-import de.k3b.android.util.PhotoPropertiesMediaFilesScannerAsyncTask;
 import de.k3b.android.util.RecursivePhotoPropertiesMediaFilesScannerAsyncTask;
 import de.k3b.android.widget.FilePermissionActivity;
 import de.k3b.database.QueryParameter;
@@ -68,7 +66,6 @@ import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.filefacade.FileFacade;
 import de.k3b.io.filefacade.IFile;
 import de.k3b.media.MediaFormatter;
-import de.k3b.media.PhotoPropertiesBulkUpdateService;
 import de.k3b.media.PhotoPropertiesDiffCopy;
 import de.k3b.media.PhotoPropertiesUpdateHandler;
 import de.k3b.transactionlog.MediaTransactionLogEntryType;
@@ -146,16 +143,6 @@ public class AndroidFileCommands extends AndroidFileCommandsDbImpl {
 
         Context context = this.mContext;
         String message = getModifyMessage(context, opCode, modifyCount, itemCount);
-        if ((itemCount > 0) && (mScanner != null)) {
-            PhotoPropertiesMediaFilesScannerAsyncTask.updateMediaDBInBackground(mScanner, context, message, oldPathNames, newPathNames);
-        }
-
-        if (false && this.mHasNoMedia && (context != null)) {
-            // a nomedia file is affected => must update gui
-            context.getContentResolver().notifyChange(FotoSql.SQL_TABLE_EXTERNAL_CONTENT_URI_FILE, null, false);
-            this.mHasNoMedia = false;
-        }
-
         if (!isInBackground) {
             Toast.makeText(context, message, Toast.LENGTH_LONG).show();
         }
@@ -231,6 +218,7 @@ public class AndroidFileCommands extends AndroidFileCommandsDbImpl {
         return (result != 0);
     }
 
+    @Deprecated
     public int execRename(File srcDirFile, String newFolderName) {
         // this will allow to be newFolderName = "../someOtherDir/newName" or even "/absolute/path/to"
         File destDirFile = FileUtils.tryGetCanonicalFile(new File(srcDirFile.getParent(), newFolderName));
@@ -669,12 +657,6 @@ public class AndroidFileCommands extends AndroidFileCommandsDbImpl {
         }
         result.append(mDebugPrefix);
         return result.toString();
-    }
-
-    /** overwrite to create a android specific Workflow */
-    @Override
-    public PhotoPropertiesBulkUpdateService createWorkflow(TransactionLoggerBase logger, String dbgContext) {
-        return new AndroidPhotoPropertiesBulkUpdateService(mContext, logger, dbgContext);
     }
 
     @Override

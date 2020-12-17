@@ -126,8 +126,6 @@ public class PhotoPropertiesBulkUpdateService {
                         inFilePath.setLastModified(lastModified);
                     }
 
-                    id = updateMediaDB(id, inFilePath.getAbsolutePath(), outFile);
-
                     if (sb != null) {
                         PhotoPropertiesUpdateHandler exifVerify = PhotoPropertiesUpdateHandler.create(inFilePath,
                                 null, false, "dbg in PhotoPropertiesUpdateHandler", true, true, false);
@@ -219,11 +217,6 @@ public class PhotoPropertiesBulkUpdateService {
             }
         }
         return null;
-    }
-
-    /** todo overwrite in android class to implement update media db */
-    protected long updateMediaDB(long id, String oldJpgAbsolutePath, IFile newJpgFile) {
-        return id;
     }
 
     private StringBuilder createDebugStringBuilder(IFile filePath) {
