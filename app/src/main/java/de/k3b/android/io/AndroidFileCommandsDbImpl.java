@@ -73,12 +73,13 @@ public class AndroidFileCommandsDbImpl extends FileCommands {
         // Database update must be done before super.osFileMove to avoid deleting/recreating old file entry
         if (PhotoPropertiesUtil.isImage(srcPath, PhotoPropertiesUtil.IMG_TYPE_ALL)) {
             toPath = targetFullPath.getAbsolutePath();
-            dbSuccess = renameInDatabase("osFileMove", srcPath, toPath);
+            //!!! TODO PhotoPropertiesMediaFilesScanner.isNoMedia(targetFullPath))
+            dbSuccess = renameInDatabase("osFileMove", targetFullPath, sourceFullPath);
         }
         final boolean osSuccess = super.osFileMove(targetFullPath, sourceFullPath);
         if (!osSuccess && dbSuccess) {
             // os falled. Rollback
-            renameInDatabase("osFileMove-rollback", toPath, srcPath);
+            renameInDatabase("osFileMove-rollback", sourceFullPath, targetFullPath);
         }
         return osSuccess;
     }
@@ -88,11 +89,21 @@ public class AndroidFileCommandsDbImpl extends FileCommands {
         return super.osDeleteFile(file);
     }
 
-    private boolean renameInDatabase(String dbgContext, String fromPath, String toPath) {
-        ContentValues values = new ContentValues();
-        values.put(FotoSql.SQL_COL_PATH, toPath);
-        final int execResultCount = FotoSql.getMediaDBApi().
-                execUpdate(this.getClass().getSimpleName() + dbgContext, fromPath, values, null);
+    private boolean renameInDatabase(String dbgContext, IFile targetFullPath, IFile sourceFullPath) {
+        final String srcPath = sourceFullPath.getAbsolutePath();
+        String toPath = null;
+        boolean dbSuccess = false;
+
+        // TODO !!! check nomedia !!!
+        // Database update must be done before super.osFileMove to avoid deleting/recreating old file entry
+        if (PhotoPropertiesUtil.isImage(srcPath, PhotoPropertiesUtil.IMG_TYPE_ALL)) {
+            toPath = targetFullPath.getAbsolutePath();
+
+            ContentValues values = new ContentValues();
+            values.put(FotoSql.SQL_COL_PATH, toPath);
+            final int execResultCount = FotoSql.getMediaDBApi().
+                    execUpdate(this.getClass().getSimpleName() + dbgContext, fromPath, values, null);
+        }
 
         return 1 == execResultCount;
     }

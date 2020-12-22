@@ -116,7 +116,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
 
     public static boolean isNoMedia(int maxLevel, IFile[] pathNames) {
         if (pathNames != null) {
-            for(IFile path : pathNames) {
+            for (IFile path : pathNames) {
                 if (isNoMedia(path, maxLevel)) {
                     return true;
                 }
@@ -124,6 +124,10 @@ abstract public class PhotoPropertiesMediaFilesScanner {
 
         }
         return false;
+    }
+
+    public static boolean isNoMedia(IFile path) {
+        return isNoMedia(path, PhotoPropertiesMediaFilesScanner.DEFAULT_SCAN_DEPTH);
     }
 
     public static boolean isNoMedia(IFile path, int maxLevel) {
