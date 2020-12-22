@@ -102,10 +102,11 @@ public class AndroidFileCommandsDbImpl extends FileCommands {
             ContentValues values = new ContentValues();
             values.put(FotoSql.SQL_COL_PATH, toPath);
             final int execResultCount = FotoSql.getMediaDBApi().
-                    execUpdate(this.getClass().getSimpleName() + dbgContext, fromPath, values, null);
+                    execUpdate(this.getClass().getSimpleName() + dbgContext,
+                            sourceFullPath.getAbsolutePath(), values, null);
+            return 1 == execResultCount;
         }
-
-        return 1 == execResultCount;
+        return false;
     }
 
     private Uri copyInDatabase(String dbgContext, String fromPath, String toPath) {
