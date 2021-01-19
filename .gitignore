@@ -15,8 +15,6 @@ build
 .idea
 .metadata
 
-*.bak
-
 /local.properties
 .classpath
 
