@@ -112,6 +112,9 @@ public class TagSql extends FotoSql {
             if (getParams(query, FILTER_EXPR_PRIVATE, remove) != null) {
                 resultFilter.setVisibility(VISIBILITY.PRIVATE);
             }
+            if (getParams(query, FILTER_EXPR_HIDDEN, remove) != null) {
+                resultFilter.setVisibility(VISIBILITY.HIDDEN);
+            }
             if (getParams(query, FILTER_EXPR_PUBLIC, remove) != null) {
                 resultFilter.setVisibility(VISIBILITY.PUBLIC);
             }

@@ -84,7 +84,7 @@ public class TransactionLoggerBase implements Closeable {
 
         final VISIBILITY visibility = newData.getVisibility();
         if (changes.contains(FieldID.visibility) && VISIBILITY.isChangingValue(visibility)) {
-            addChanges(MediaTransactionLogEntryType.VISIBILITY, ((VISIBILITY.PRIVATE.equals(visibility)) ? "1": "0") + " " + visibility, false);
+            addChanges(MediaTransactionLogEntryType.VISIBILITY, ((!VISIBILITY.PUBLIC.equals(visibility)) ? "1" : "0") + " " + visibility, false);
         }
 
     }

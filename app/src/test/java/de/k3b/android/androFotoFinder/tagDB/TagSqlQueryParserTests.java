@@ -68,6 +68,11 @@ public class TagSqlQueryParserTests {
     }
 
     @Test
+    public void shouldParseHidden() {
+        assertFilterQueryFilter(VISIBILITY.HIDDEN);
+    }
+
+    @Test
     public void shouldFilterFind() {
         assertFilterFind("hello world", "shouldFilterFind");
     }

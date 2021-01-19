@@ -151,12 +151,16 @@ public class FotoSql extends FotoSqlBase {
     private static final int LAST_MODIFIED_FACTOR = 1000;
 
     public static final int MEDIA_TYPE_IMAGE_PRIVATE = 1000 + MEDIA_TYPE_IMAGE;                 // 1001 APhoto manager specific
-    public static final int MEDIA_TYPE_ALBUM_FILE    = 0;
+    public static final int MEDIA_TYPE_IMAGE_HIDDEN = 1100 + MEDIA_TYPE_IMAGE;                 // 1101 APhoto manager specific
+    public static final int MEDIA_TYPE_ALBUM_FILE = 0;
 
     protected static final String FILTER_EXPR_PRIVATE
             = "(" + SQL_COL_EXT_MEDIA_TYPE + " = " + MEDIA_TYPE_IMAGE_PRIVATE + ")";
+    protected static final String FILTER_EXPR_HIDDEN
+            = "(" + SQL_COL_EXT_MEDIA_TYPE + " = " + MEDIA_TYPE_IMAGE_HIDDEN + ")";
+
     public static final String FILTER_EXPR_PRIVATE_PUBLIC
-            = "(" + SQL_COL_EXT_MEDIA_TYPE + " in (" + MEDIA_TYPE_IMAGE_PRIVATE + "," + MEDIA_TYPE_IMAGE +"))";
+            = "(" + SQL_COL_EXT_MEDIA_TYPE + " in (" + MEDIA_TYPE_IMAGE_PRIVATE + "," + MEDIA_TYPE_IMAGE + "))";
     protected static final String FILTER_EXPR_PUBLIC
             = "(" + SQL_COL_EXT_MEDIA_TYPE + " = " + MEDIA_TYPE_IMAGE + ")";
 
@@ -1329,6 +1333,31 @@ public class FotoSql extends FotoSqlBase {
         return result;
     }
 
+    public static VISIBILITY mediaType2Visibility(final int mediaTypeId) {
+        switch (mediaTypeId) {
+            case FotoSql.MEDIA_TYPE_IMAGE_PRIVATE:
+                return VISIBILITY.PRIVATE;
+            case FotoSql.MEDIA_TYPE_IMAGE_HIDDEN:
+                return VISIBILITY.PRIVATE;
+            default:
+                return VISIBILITY.PUBLIC;
+        }
+
+
+    }
+
+    public static int mediaTypeFromVisibility(VISIBILITY value) {
+        switch (value) {
+            case HIDDEN:
+                return FotoSql.MEDIA_TYPE_IMAGE_HIDDEN;
+            case PRIVATE:
+                return FotoSql.MEDIA_TYPE_IMAGE_PRIVATE;
+            case PUBLIC:
+            default:
+                return FotoSql.MEDIA_TYPE_IMAGE;
+        }
+    }
+
     protected static String getFilterExpressionVisibility(VISIBILITY _visibility) {
         VISIBILITY visibility = _visibility;
         // add visibility column only if not included yet
@@ -1343,6 +1372,8 @@ public class FotoSql extends FotoSqlBase {
                 return FILTER_EXPR_PRIVATE;
             case PRIVATE_PUBLIC:
                 return FILTER_EXPR_PRIVATE_PUBLIC;
+            case HIDDEN:
+                return FILTER_EXPR_HIDDEN;
             case PUBLIC:
             default:
                 return FILTER_EXPR_PUBLIC;

@@ -28,14 +28,26 @@ import java.util.List;
 import de.k3b.LibGlobal;
 
 public enum VISIBILITY {
-    /** take from current settings */
+    /**
+     * take from current settings
+     */
     DEFAULT(0),
-    /** private only */
+    /**
+     * private only
+     */
     PRIVATE(1),
-    /** public only */
+    /**
+     * public only
+     */
     PUBLIC(2),
-    /** private and public images but not other files like album-files */
-    PRIVATE_PUBLIC(3);
+
+    /**
+     * Used as Filter: private and public images but not other files like album-files
+     */
+    PRIVATE_PUBLIC(3),
+
+    /* Hidden Photo (inside directoryname starting with "." or Directory miwth ".nomedia" file */
+    HIDDEN(4);
 
     // #100: if photo has this tag it has visibility PRIVATE
     public static final String TAG_PRIVATE = "PRIVATE";
@@ -44,7 +56,7 @@ public enum VISIBILITY {
     // causes "SLF4J: Class path contains multiple SLF4J bindings." in unittests :-(
     // private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
 
-    public static final VISIBILITY MAX = PRIVATE_PUBLIC;
+    public static final VISIBILITY MAX = HIDDEN;
     public final int value;
 
     private VISIBILITY(int value) {
@@ -71,6 +83,7 @@ public enum VISIBILITY {
                 if (lower.startsWith("private_p")) return PRIVATE_PUBLIC;
                 if (lower.startsWith("pr")) return PRIVATE;
                 if (lower.startsWith("pu")) return PUBLIC;
+                if (lower.startsWith("hi")) return HIDDEN;
                 switch (lower.charAt(0)) {
                     case 'd' :
                         return DEFAULT;
@@ -92,7 +105,7 @@ public enum VISIBILITY {
     }
 
     public static boolean isChangingValue(VISIBILITY value) {
-        return ((value == PRIVATE) || (value == PUBLIC));
+        return ((value == PRIVATE) || (value == PUBLIC) || (value == HIDDEN));
     }
 
     public static boolean hasPrivate(List<String> tags) {

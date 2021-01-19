@@ -161,10 +161,7 @@ public class PhotoPropertiesMediaDBContentValues implements IPhotoProperties {
     public VISIBILITY getVisibility() {
         Integer ty = mData.getAsInteger(TagSql.SQL_COL_EXT_MEDIA_TYPE);
         if (ty != null) {
-            if (ty.intValue() == FotoSql.MEDIA_TYPE_IMAGE_PRIVATE)
-                return VISIBILITY.PRIVATE;
-
-            return VISIBILITY.PUBLIC;
+            return FotoSql.mediaType2Visibility(ty.intValue());
         }
         return null;
     }
@@ -172,10 +169,7 @@ public class PhotoPropertiesMediaDBContentValues implements IPhotoProperties {
     @Override
     public IPhotoProperties setVisibility(VISIBILITY value) {
         if (VISIBILITY.isChangingValue(value)) {
-            int iValue = (value.equals(VISIBILITY.PRIVATE))
-                    ? FotoSql.MEDIA_TYPE_IMAGE_PRIVATE
-                    : FotoSql.MEDIA_TYPE_IMAGE;
-            mData.put(TagSql.SQL_COL_EXT_MEDIA_TYPE, iValue);
+            mData.put(TagSql.SQL_COL_EXT_MEDIA_TYPE, FotoSql.mediaTypeFromVisibility(value));
             setLastXmpFileModifyDate();
         }
         return this;

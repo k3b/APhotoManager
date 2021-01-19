@@ -119,10 +119,7 @@ public class PhotoPropertiesMediaDBCursor implements IPhotoProperties {
         if (colType == -1) return null;
         Integer ty = cursor.getInt(colType);
         if (ty != null) {
-            if (ty.intValue() == FotoSql.MEDIA_TYPE_IMAGE_PRIVATE)
-                return VISIBILITY.PRIVATE;
-
-            return VISIBILITY.PUBLIC;
+            return FotoSql.mediaType2Visibility(ty.intValue());
         }
         return null;
     }

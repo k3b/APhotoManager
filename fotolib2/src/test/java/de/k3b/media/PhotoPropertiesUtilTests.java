@@ -179,6 +179,10 @@ public class PhotoPropertiesUtilTests {
         check(null, "/path/to/file.jpg-p", VISIBILITY.PRIVATE);
         check(null, "/path/to/file.jpg", VISIBILITY.PRIVATE_PUBLIC);
         check(null, "/path/to/file.jpg", VISIBILITY.DEFAULT);
+        check(null, "/path/to/file.jpg", VISIBILITY.HIDDEN);
+        check(null, "/path/to/file.jpg-p", VISIBILITY.HIDDEN);
+        check(null, "/path/to/file.jpg", null);
+        check(null, "/path/to/file.jpg-p", null);
     }
 
 
