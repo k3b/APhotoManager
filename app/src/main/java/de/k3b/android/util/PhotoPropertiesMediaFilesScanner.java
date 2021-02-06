@@ -145,11 +145,6 @@ abstract public class PhotoPropertiesMediaFilesScanner {
      * return true, if file is in a ".nomedia" dir
      */
     @Deprecated
-    public static boolean isNoMedia(String path, int maxLevel) {
-        return FileUtils.isNoMedia(path, maxLevel);
-    }
-
-    @Deprecated
     public static boolean isNoMedia(String path) {
         return FileUtils.isNoMedia(path, PhotoPropertiesMediaFilesScanner.DEFAULT_SCAN_DEPTH);
     }
@@ -252,32 +247,16 @@ abstract public class PhotoPropertiesMediaFilesScanner {
                     if (id != null) {
                         // already exists
                         modifyCount += update_Android42("PhotoPropertiesMediaFilesScanner.insertIntoMediaDatabase already existing "
-                                , context, id, fileName.getFile());
+                                , context, id, fileName);
                     } else {
                         modifyCount += insert_Android42(
                                 "PhotoPropertiesMediaFilesScanner.insertIntoMediaDatabase new item ",
-                                context, fileName.getFile());
+                                context, fileName);
                     }
                 }
             }
         }
         return modifyCount;
-    }
-
-    /**  */
-    public Long insertOrUpdateMediaDatabase(String dbgContext, Context context,
-                                            String dbUpdateFilterJpgFullPathName, File currentJpgFile,
-                                            Long updateSuccessValue) {
-        if ((currentJpgFile != null) && currentJpgFile.exists() && currentJpgFile.canRead()) {
-            ContentValues values = createDefaultContentValues();
-            getExifFromFile(values, currentJpgFile);
-            Long result = FotoSql.getMediaDBApi().insertOrUpdateMediaDatabase(
-                    dbgContext, dbUpdateFilterJpgFullPathName,
-                    values, VISIBILITY.PRIVATE_PUBLIC, updateSuccessValue);
-
-            return result;
-        }
-        return null;
     }
 
     /**
@@ -367,18 +346,8 @@ abstract public class PhotoPropertiesMediaFilesScanner {
     }
 
     /** updates values with current values of file */
-    @Deprecated
-    public PhotoPropertiesMediaDBContentValues getExifFromFile(File jpgFile) {
-        return getExifFromFile(createDefaultContentValues(), jpgFile);
-    }
-
     public PhotoPropertiesMediaDBContentValues getExifFromFile(IFile jpgFile) {
         return getExifFromFile(createDefaultContentValues(), jpgFile);
-    }
-
-    @Deprecated
-    protected PhotoPropertiesMediaDBContentValues getExifFromFile(ContentValues values, File jpgFile) {
-        return getExifFromFile(values, FileFacade.convert("PhotoPropertiesMediaFilesScanner getExifFromFile from file", jpgFile));
     }
 
     /** updates values with current values of file. */
@@ -519,7 +488,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
         }
     }
 
-    private int update_Android42(String dbgContext, Context context, long id, File file) {
+    private int update_Android42(String dbgContext, Context context, long id, IFile file) {
         if ((file != null) && file.exists() && file.canRead()) {
             ContentValues values = createDefaultContentValues();
             getExifFromFile(values, file);
@@ -541,7 +510,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
         return contentValues;
     }
 
-    private int insert_Android42(String dbgContext, Context context, File file) {
+    private int insert_Android42(String dbgContext, Context context, IFile file) {
         if ((file != null) && file.exists() && file.canRead()) {
             ContentValues values = createDefaultContentValues();
             FotoSql.addDateAdded(values);

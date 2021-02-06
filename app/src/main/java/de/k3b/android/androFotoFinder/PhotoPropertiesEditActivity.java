@@ -73,6 +73,7 @@ import de.k3b.io.StringUtils;
 import de.k3b.io.VISIBILITY;
 import de.k3b.io.collections.SelectedFiles;
 import de.k3b.io.filefacade.FileFacade;
+import de.k3b.io.filefacade.IFile;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.PhotoPropertiesAsString;
 import de.k3b.media.PhotoPropertiesDiffCopy;
@@ -229,7 +230,7 @@ public class PhotoPropertiesEditActivity extends BaseActivity implements Common 
             if (null == currentData) {
                 // there is no ExifParam : infer exif from jpg file
                 SelectedFiles items = getSelectedFiles("onCreate ", this, intent, false);
-                File first = (items != null) ? items.getFile(0) : null;
+                IFile first = (items != null) ? items.getIFile (0) : null;
 
                 if ((first != null) && (first.exists())) {
                     currentData = PhotoPropertiesMediaFilesScanner.getInstance(this).getExifFromFile(first);

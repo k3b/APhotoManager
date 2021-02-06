@@ -355,7 +355,7 @@ public abstract class BaseQueryActivity extends BaseActivity implements Common, 
                                     BaseQueryActivity.this, null, uri, null);
                             if (albumQuery != null) {
                                 result.getWhereFrom(albumQuery, true);
-                            } else if (PhotoPropertiesMediaFilesScanner.isNoMedia(path, PhotoPropertiesMediaFilesScanner.DEFAULT_SCAN_DEPTH)) {
+                            } else if (PhotoPropertiesMediaFilesScanner.isNoMedia(path)) {
                                 // do not show (parent-)directories that contain ".nomedia"
                                 return null;
                             } else {
