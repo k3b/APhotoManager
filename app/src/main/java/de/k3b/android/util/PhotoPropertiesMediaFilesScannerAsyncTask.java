@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 by k3b.
+ * Copyright (c) 2016-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -48,7 +48,7 @@ public class PhotoPropertiesMediaFilesScannerAsyncTask extends AsyncTask<IFile[]
     @Override
     protected Integer doInBackground(IFile[]... pathNames) {
         if (pathNames.length != 2) throw new IllegalArgumentException(CONTEXT + ".execute(oldFileNames, newFileNames)");
-        return mScanner.updateMediaDatabase_Android42(mContext, pathNames[0], pathNames[1]);
+        return mScanner.updateMediaDatabaseAndroid42(mContext, pathNames[0], pathNames[1]);
     }
 
     private static void notifyIfThereAreChanges(Integer modifyCount, Context context, String why) {
@@ -71,7 +71,7 @@ public class PhotoPropertiesMediaFilesScannerAsyncTask extends AsyncTask<IFile[]
             scanTask.execute(oldPathNames, newPathNames);
         } else {
             // Continute in background task
-            int modifyCount = scanner.updateMediaDatabase_Android42(context.getApplicationContext(), oldPathNames, newPathNames);
+            int modifyCount = scanner.updateMediaDatabaseAndroid42(context.getApplicationContext(), oldPathNames, newPathNames);
             notifyIfThereAreChanges(modifyCount, context, why + " within current non-gui-task");
         }
     }

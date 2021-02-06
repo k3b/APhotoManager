@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 by k3b.
+ * Copyright (c) 2019-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -38,15 +38,16 @@ public interface IMediaRepositoryApi {
                                 final String[] sqlWhereParameters, final String sqlSortOrder,
                                 CancellationSignal cancellationSignal, final String... sqlSelectColums);
 
+    /** return numbner of modified items */
     int execUpdate(String dbgContext, long id, ContentValues values);
 
+    /** return numbner of modified items */
     int execUpdate(String dbgContext, String path, ContentValues values, VISIBILITY visibility);
 
+    /** return numbner of modified items */
     int exexUpdateImpl(String dbgContext, ContentValues values, String sqlWhere, String[] selectionArgs);
 
-    /**
-     * return id of inserted item
-     */
+    /** return id of inserted item or updateSuccessValue if update */
     Long insertOrUpdateMediaDatabase(String dbgContext,
                                      String dbUpdateFilterJpgFullPathName,
                                      ContentValues values, VISIBILITY visibility,

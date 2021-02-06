@@ -1,6 +1,6 @@
 /*******************************************************************************
  * Copyright 2011, 2012 Chris Banes.
- * Copyright (c) 2015-2020 by k3b.
+ * Copyright (c) 2015-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -553,7 +553,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
             IFile orgiginalFileToScan = getCurrentIFile();
 
             if (orgiginalFileToScan != null) {
-                PhotoPropertiesMediaFilesScanner.getInstance(this).updateMediaDatabase_Android42(
+                PhotoPropertiesMediaFilesScanner.getInstance(this).updateMediaDatabaseAndroid42(
                         this, null, orgiginalFileToScan);
             }
         }

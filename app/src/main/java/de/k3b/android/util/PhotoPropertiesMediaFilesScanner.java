@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020 by k3b.
+ * Copyright (c) 2015-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -53,7 +53,6 @@ import de.k3b.geo.api.GeoPointDto;
 import de.k3b.geo.api.IGeoPointInfo;
 import de.k3b.io.FileUtils;
 import de.k3b.io.VISIBILITY;
-import de.k3b.io.filefacade.FileFacade;
 import de.k3b.io.filefacade.IFile;
 import de.k3b.media.IPhotoProperties;
 import de.k3b.media.PhotoPropertiesChainReader;
@@ -70,7 +69,7 @@ import de.k3b.tagDB.TagRepository;
  *
  * Created by k3b on 14.09.2015.
  */
-abstract public class PhotoPropertiesMediaFilesScanner {
+public abstract class PhotoPropertiesMediaFilesScanner {
     protected static final String CONTEXT = "PhotoPropertiesMediaFilesScanner.";
 
     /* the DB_XXXX fields are updated by the scanner via ExifInterfaceEx
@@ -90,7 +89,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
     private static final String DB_SIZE = FotoSql.SQL_COL_SIZE;
 
     public static final int DEFAULT_SCAN_DEPTH = 22;
-    public static final String MEDIA_IGNORE_FILENAME = FileUtils.MEDIA_IGNORE_FILENAME; //  MediaStore.MEDIA_IGNORE_FILENAME;
+    public static final String MEDIA_IGNORE_FILENAME = FileUtils.MEDIA_IGNORE_FILENAME;
 
     /**
      * singelton
@@ -182,7 +181,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
         return result;
     }
 
-    public int updateMediaDatabase_Android42(Context context, IFile[] oldPathNames, IFile... newPathNames) {
+    public int updateMediaDatabaseAndroid42(Context context, IFile[] oldPathNames, IFile... newPathNames) {
         IMediaRepositoryApi api = FotoSql.getMediaDBApi();
         try {
             api.beginTransaction();
@@ -193,7 +192,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
             if (hasNew && hasOld) {
                 result = renameInMediaDatabase(context, oldPathNames, newPathNames);
             } else if (hasOld) {
-                result = deleteInMediaDatabase(context, oldPathNames);
+                result = deleteInMediaDatabase(oldPathNames);
             }
             if (hasNew) {
                 result = insertIntoMediaDatabase(context, newPathNames);
@@ -246,12 +245,12 @@ abstract public class PhotoPropertiesMediaFilesScanner {
                     Long id = inMediaDb.get(fileName.getAbsolutePath());
                     if (id != null) {
                         // already exists
-                        modifyCount += update_Android42("PhotoPropertiesMediaFilesScanner.insertIntoMediaDatabase already existing "
-                                , context, id, fileName);
+                        modifyCount += updateAndroid42("PhotoPropertiesMediaFilesScanner.insertIntoMediaDatabase already existing "
+                                , id, fileName);
                     } else {
-                        modifyCount += insert_Android42(
+                        modifyCount += insertAndroid42(
                                 "PhotoPropertiesMediaFilesScanner.insertIntoMediaDatabase new item ",
-                                context, fileName);
+                                fileName);
                     }
                 }
             }
@@ -262,7 +261,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
     /**
      * delete oldPathNames from media database
      */
-    private int deleteInMediaDatabase(Context context, IFile[] oldPathNames) {
+    private int deleteInMediaDatabase(IFile[] oldPathNames) {
         int modifyCount = 0;
 
         if ((oldPathNames != null) && (oldPathNames.length > 0)) {
@@ -309,7 +308,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
             }
 
             int modifyCount =
-                    deleteInMediaDatabase(context, deleteFileNames.toArray(new IFile[deleteFileNames.size()]))
+                    deleteInMediaDatabase(deleteFileNames.toArray(new IFile[deleteFileNames.size()]))
                             + renameInMediaDatabase(context, old2NewFileNames)
                             + insertIntoMediaDatabase(context, insertFileNames.toArray(new IFile[insertFileNames.size()]));
             return modifyCount;
@@ -440,14 +439,14 @@ abstract public class PhotoPropertiesMediaFilesScanner {
         return null;
     }
 
-    abstract protected IPhotoProperties loadNonMediaValues(ContentValues destinationValues, IFile jpgFile, IPhotoProperties xmpContent);
+    protected abstract IPhotoProperties loadNonMediaValues(ContentValues destinationValues, IFile jpgFile, IPhotoProperties xmpContent);
 
     /** @return number of copied properties */
     protected int getExifValues(PhotoPropertiesMediaDBContentValues dest, IPhotoProperties src) {
         return PhotoPropertiesUtil.copyNonEmpty(dest, src);
     }
 
-    abstract public IGeoPointInfo getPositionFromFile(String absolutePath, String id);
+    public abstract IGeoPointInfo getPositionFromFile(String absolutePath, String id);
     public int updatePathRelatedFields(Context context, Cursor cursor, String newAbsolutePath) {
         int columnIndexPk = cursor.getColumnIndex(FotoSql.SQL_COL_PK);
         int columnIndexPath = cursor.getColumnIndex(FotoSql.SQL_COL_PATH);
@@ -488,7 +487,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
         }
     }
 
-    private int update_Android42(String dbgContext, Context context, long id, IFile file) {
+    private int updateAndroid42(String dbgContext, long id, IFile file) {
         if ((file != null) && file.exists() && file.canRead()) {
             ContentValues values = createDefaultContentValues();
             getExifFromFile(values, file);
@@ -500,7 +499,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
     protected ContentValues createDefaultContentValues() {
         ContentValues contentValues = new ContentValues();
 
-        // to allow set null becyuse copy does not setNull if already has null (not found)
+        // to allow set null because copy does not setNull if already has null (not found)
         contentValues.putNull(DB_TITLE);
         contentValues.putNull(FotoSql.SQL_COL_LON);
         contentValues.putNull(FotoSql.SQL_COL_LAT);
@@ -510,7 +509,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
         return contentValues;
     }
 
-    private int insert_Android42(String dbgContext, Context context, IFile file) {
+    private int insertAndroid42(String dbgContext, IFile file) {
         if ((file != null) && file.exists() && file.canRead()) {
             ContentValues values = createDefaultContentValues();
             FotoSql.addDateAdded(values);
@@ -521,22 +520,20 @@ abstract public class PhotoPropertiesMediaFilesScanner {
 		return 0;
     }
 
-    @NonNull
     // generates a title based on file name
-    protected static String generateTitleFromFilePath(String _filePath) {
-        String filePath = generateDisplayNameFromFilePath(_filePath);
+    protected static String generateTitleFromFilePath(String filePath) {
+        String currentFilePath = generateDisplayNameFromFilePath(filePath);
 
-        if (filePath != null) {
+        if (currentFilePath != null) {
             // truncate the file extension (if any)
-            int lastDot = filePath.lastIndexOf('.');
+            int lastDot = currentFilePath.lastIndexOf('.');
             if (lastDot > 0) {
-                filePath = filePath.substring(0, lastDot);
+                currentFilePath = currentFilePath.substring(0, lastDot);
             }
         }
-        return filePath;
+        return currentFilePath;
     }
 
-    @NonNull
     // generates a title based on file name
     public static String generateDisplayNameFromFilePath(String filePath) {
         if (filePath != null) {
@@ -555,7 +552,7 @@ abstract public class PhotoPropertiesMediaFilesScanner {
     /** update media db via android-s native scanner.
      * Requires android-4.4 and up to support single files
      */
-    public static void updateMediaDB_Androd44(Context context, String[] pathNames) {
+    public static void updateMediaDBAndrod44(Context context, String[] pathNames) {
         if (Global.debugEnabled) {
             Log.i(Global.LOG_CONTEXT, CONTEXT + "updateMediaDB_Androd44(" + pathNames.length + " files " + pathNames[0] + "...");
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020 by k3b.
+ * Copyright (c) 2015-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -156,13 +156,7 @@ public class MediaDBRepository implements IMediaRepositoryApi {
     }
 
     /**
-     * return id of inserted item
-     *
-     * @param dbgContext
-     * @param dbUpdateFilterJpgFullPathName
-     * @param values
-     * @param visibility
-     * @param updateSuccessValue
+     * return id of inserted item or updateSuccessValue if update
      */
     @Override
     public Long insertOrUpdateMediaDatabase(String dbgContext, String dbUpdateFilterJpgFullPathName,

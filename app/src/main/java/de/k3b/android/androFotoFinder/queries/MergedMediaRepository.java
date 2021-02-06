@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019-2020 by k3b.
+ * Copyright (c) 2019-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -20,6 +20,7 @@ package de.k3b.android.androFotoFinder.queries;
 
 import android.content.ContentValues;
 import android.net.Uri;
+import android.util.Log;
 
 import de.k3b.io.VISIBILITY;
 
@@ -31,6 +32,8 @@ import de.k3b.io.VISIBILITY;
  * Therefore apm uses a copy of contentprovider MediaStore.Images with same column names and same pk.
  */
 public class MergedMediaRepository extends MediaRepositoryApiWrapper {
+    private static final String LOG_TAG = MediaDBRepository.LOG_TAG;
+
     private final IMediaRepositoryApi database;
     private final IMediaRepositoryApi contentProvider;
 
@@ -101,10 +104,27 @@ public class MergedMediaRepository extends MediaRepositoryApiWrapper {
      */
     @Override
     public Uri execInsert(String dbgContext, ContentValues values) {
+        // insert into android-contentprovider
         Uri result = super.execInsert(dbgContext, values);
+        if (result == null) {
+            dbgContext = dbgContext + "-insert into Contentprovider failed";
+            // not inserted because in android-contentprovider may already exist.
+            // get id from android-contentprovider
+            String path = values.getAsString(FotoSql.SQL_COL_PATH);
+            Long id = FotoSql.getId(dbgContext, getWriteChild(), path);
 
-        // insert with same pk as contentprovider does
-        values.put(FotoSql.SQL_COL_PK, FotoSql.getId(result));
+            if (id == null) {
+                Log.i(LOG_TAG, dbgContext + " Path '" + path + "' not found. Aborted.");
+                return null;
+            }
+            values.put(FotoSql.SQL_COL_PK, id);
+            super.execUpdate(dbgContext +
+                    "- Updating id=" + id +" instead ",id, values);
+            result = FotoSql.getUri(id);
+        } else {
+            // insert with same pk as contentprovider does
+            values.put(FotoSql.SQL_COL_PK, FotoSql.getId(result));
+        }
         database.execInsert(dbgContext, values);
         values.remove(FotoSql.SQL_COL_PK);
         return result;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020 by k3b.
+ * Copyright (c) 2015-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -1119,6 +1119,37 @@ public class FotoSql extends FotoSqlBase {
             }
         }
         return imageID;
+    }
+
+    /** get imageID from file-path */
+    public static Long getId(String dbgContext, String fullPath) {
+        return getId(dbgContext, mediaDBApi, fullPath);
+    }
+
+    /** get imageID from file-path */
+    public static Long getId(String _dbgContext, IMediaRepositoryApi mediaDBApi, String fullPath) {
+        String dbgContext = _dbgContext+" FotoSql.getId('" + fullPath + "')";
+        if (fullPath != null) {
+            QueryParameter query = new QueryParameter()
+                    .setID(QUERY_TYPE_UNDEFINED)
+                    .addColumn(SQL_COL_PK)
+                    .addFrom(SQL_TABLE_EXTERNAL_CONTENT_URI_FILE_NAME)
+                    .addWhere(SQL_COL_PATH + "= ?", fullPath);
+            Cursor c = null;
+
+            try {
+                c = mediaDBApi.createCursorForQuery(null, dbgContext, query, null, null);
+                if (c.moveToNext()) {
+                    return c.getLong(0);
+                }
+            } catch (Exception ex) {
+                Log.e(FotoSql.LOG_TAG, dbgContext + fullPath + "') error :", ex);
+            } finally {
+                if (c != null) c.close();
+            }
+        }
+        return null;
+
     }
 
     public static void addDateAdded(ContentValues values) {
