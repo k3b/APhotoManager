@@ -23,7 +23,7 @@
 <ul>
 <li>INTERNET: zum Download von Openstreetmap-Karten</li>
 <li>ACCESS_NETWORK_STATE und ACCESS_WIFI_STATE: zur Bestimmung der WLAN-/Internetverfügbarkeit für den Karten-Download</li>
-<li>WRITE_EXTERNAL_STORAGE: zum Zwichenspeichern von Landkarten und Durchführung von Fotodatei-Operationen</li>
+<li>WRITE_EXTERNAL_STORAGE: zum Zwischenspeichern von Landkarten und Durchführung von Fotodatei-Operationen</li>
 <li>READ_LOGS: zum Protokollieren von Absturzursachen in lokaler Textdatei
 .</li>
 </ul>

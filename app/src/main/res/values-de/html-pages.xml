@@ -20,7 +20,7 @@
  */
  -->
 <resources>
-  <string name="about_content_about"><![CDATA["
+	<string name="about_content_about"><![CDATA["
 <h1>A Photo Manager</h1>mit &#39;A Photo Map&#39; und &#39;AndroFotoFinder&#39;
   <br />
 <!-- this will also become translation 'short_description.txt' in fdroid -->

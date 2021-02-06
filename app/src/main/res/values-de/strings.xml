@@ -66,7 +66,7 @@
   <string name="image_err_file_exists_format">Die Datei \'%1$s\' ist bereits vorhanden. \n Soll sie wirklich überschrieben werden?</string>
   <string name="image_err_file_rename_format">Datei \'%1$s\' kann nicht umbenannt werden.</string>
   <string name="image_err_not_found_format">Keine Fotos gefunden für %1$s.</string>
-  <string name="image_err_not_in_db_format">Foto in Medien-Datenbank \"%1$s\" nicht gefunden. %2$d neue Dateien werden gescannt. Die fehlenden Fotos werden in Kürze abrufbar sein.</string>
+  <string name="image_err_not_in_db_format">Foto in Mediendatenbank \"%1$s\" nicht gefunden. %2$d neue Dateien werden gescannt. Die fehlenden Fotos werden in Kürze abrufbar sein.</string>
   <string name="image_loading_at_position_format">"(%1$d) wird geladen …"</string>
   <string name="image_success_update_format">%1$d Fotos aktualisiert.</string>
   <string name="lbl_date">Datum</string>
@@ -88,7 +88,7 @@
   <string name="scanner_dir_question">Ab wo scannen?</string>
   <string name="scanner_err_busy">Fotodateien können nicht bearbeitet werden, solange der Android Media Scanner aktiv ist. Versuchen Sie es später erneut.</string>
   <string name="scanner_menu_title">Media-Scanner</string>
-  <string name="scanner_update_result_format">%1$d Media-Datenbankelemente aktualisiert</string>
+  <string name="scanner_update_result_format">%1$d Elemente in Mediendatenbank aktualisiert</string>
   <string name="selection_status_format">%1$d ausgewählt</string>
   <string name="selection_none_hint">Wählen Sie den Ordner, aus dem Bilder geladen werden sollen, und drücken Sie OK</string>
   <string name="selected_only_menu_title">Nur ausgewählte</string>
