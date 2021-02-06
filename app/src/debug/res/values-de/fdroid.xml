@@ -60,7 +60,7 @@ Android-Berechtigungen: :
 
 * INTERNET: zum Download von Openstreetmap-Karten
 * ACCESS_NETWORK_STATE und ACCESS_WIFI_STATE: zur Bestimmung der WLAN-/Internetverfügbarkeit für den Karten-Download
-* WRITE_EXTERNAL_STORAGE: zum Zwichenspeichern von Landkarten und Durchführung von Fotodatei-Operationen
+* WRITE_EXTERNAL_STORAGE: zum Zwischenspeichern von Landkarten und Durchführung von Fotodatei-Operationen
 * READ_LOGS: zum Protokollieren von Absturzursachen in lokaler Textdatei
 .
 "]]></string>
