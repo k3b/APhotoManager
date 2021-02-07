@@ -374,7 +374,7 @@ public class TagSql extends FotoSql {
                 TagSql.setXmpFileModifyDate(dbValues, xmpFilelastModified);
                 TagSql.setFileModifyDate(dbValues, newFullJpgFilePath);
 
-                return TagSql.insertOrUpdateMediaDatabaseFromCsv(
+                return TagSql.execUpdate(
                         dbgContext, oldFullJpgFilePath,
                         TagSql.EXT_LAST_EXT_SCAN_UNKNOWN,
                         dbValues, VISIBILITY.PRIVATE_PUBLIC);
@@ -385,6 +385,12 @@ public class TagSql extends FotoSql {
         return 0L;
     }
 
+    public static long execUpdate(String dbgContext, String path, long xmpFileDate, ContentValues values, VISIBILITY visibility) {
+        if (!Global.Media.enableXmpNone || isPseudoXmpFileDateVauel(xmpFileDate)) {
+            return getMediaDBApi().execUpdate(dbgContext, path, values, visibility);
+        }
+        return getMediaDBApi().exexUpdateImpl(dbgContext, values, FILTER_EXPR_PATH_AND_XMP_DATE_LESS_THAN, new String[]{path, Long.toString(xmpFileDate)});
+    }
 
     public static Long insertOrUpdateMediaDatabaseFromCsv(
             String dbgContext, String path, long xmpFileDate,
