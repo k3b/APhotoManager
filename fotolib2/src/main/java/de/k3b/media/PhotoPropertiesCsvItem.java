@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 by k3b.
+ * Copyright (c) 2016-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -184,8 +184,10 @@ public class PhotoPropertiesCsvItem extends CsvItem implements IPhotoProperties 
     @Override
     public VISIBILITY getVisibility() {
         String sValue = getString("getVisibility", colVisibility);
-        if (sValue == null) return null;
-        return VISIBILITY.valueOf(sValue);
+        if (sValue != null) {
+            return VISIBILITY.valueOf(sValue);
+        }
+        return VISIBILITY.getVisibility(this);
     }
 
     @Override

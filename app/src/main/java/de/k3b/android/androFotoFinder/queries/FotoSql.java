@@ -1427,6 +1427,18 @@ public class FotoSql extends FotoSqlBase {
         return parameters;
     }
 
+    public static void setVisibility(ContentValues contentValues, VISIBILITY visibility) {
+        contentValues.put(SQL_COL_EXT_MEDIA_TYPE, getImageMediaType(visibility));
+    }
+
+    private static int getImageMediaType(VISIBILITY visibility) {
+        switch (visibility) {
+            case PRIVATE: return MEDIA_TYPE_IMAGE_PRIVATE;
+            case HIDDEN: return MEDIA_TYPE_IMAGE_HIDDEN;
+            default: return MEDIA_TYPE_IMAGE; // assume PUBLIC for the others
+        }
+    }
+
     public static List<String> getAlbumFiles(String path, int subDirLevels) {
         SelectedFiles databaseFiles = FotoSql.getSelectedfiles(
                 SQL_COL_PATH +" like '" + path +  "/%" + AlbumFile.SUFFIX_VALBUM + "' OR " +

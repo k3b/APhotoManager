@@ -391,6 +391,12 @@ public abstract class PhotoPropertiesMediaFilesScanner {
                 getExifValues(dest, src);
 
                 updateTagRepository(src.getTags());
+
+                VISIBILITY visibility = src.getVisibility();
+                if (visibility == null) {
+                    visibility = VISIBILITY.getVisibility(src);
+                }
+                FotoSql.setVisibility(values, visibility);
             }
 
             String absoluteJpgPath = jpgFile.getCanonicalPath();

@@ -61,21 +61,6 @@ public class PhotoPropertiesMediaFilesScannerAsyncTask extends AsyncTask<IFile[]
         }
     }
 
-    /** do not wait for result. */
-    public static void updateMediaDBInBackground(
-            PhotoPropertiesMediaFilesScanner scanner, Context context, String why,
-            IFile[] oldPathNames, IFile[] newPathNames) {
-        if (isGuiThread()) {
-            // update_Android42 scanner in seperate background task
-            PhotoPropertiesMediaFilesScannerAsyncTask scanTask = new PhotoPropertiesMediaFilesScannerAsyncTask(scanner, context.getApplicationContext(), why + " from completed new AsycTask");
-            scanTask.execute(oldPathNames, newPathNames);
-        } else {
-            // Continute in background task
-            int modifyCount = scanner.updateMediaDatabaseAndroid42(context.getApplicationContext(), oldPathNames, newPathNames);
-            notifyIfThereAreChanges(modifyCount, context, why + " within current non-gui-task");
-        }
-    }
-
     @Override
     protected void onPostExecute(Integer modifyCount) {
         super.onPostExecute(modifyCount);

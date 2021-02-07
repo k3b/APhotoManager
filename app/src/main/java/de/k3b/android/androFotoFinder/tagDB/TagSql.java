@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 by k3b.
+ * Copyright (c) 2016-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -64,9 +64,15 @@ public class TagSql extends FotoSql {
      *  <P>Type: INTEGER (long) as milliseconds since jan 1, 1970</P> */
     public static final String SQL_COL_EXT_XMP_LAST_MODIFIED_DATE = MediaStore.Video.Media.DURATION;
 
+    // pseudo date values for SQL_COL_EXT_XMP_LAST_MODIFIED_DATE
     public static final int EXT_LAST_EXT_SCAN_UNKNOWN = 0;
     public static final int EXT_LAST_EXT_SCAN_NO_XMP_IN_CSV = 5;
     public static final int EXT_LAST_EXT_SCAN_NO_XMP = 10;
+    public static final int EXT_LAST_EXT_SCAN_PSEUDO_LAST = 30;
+
+    public static boolean isPseudoXmpFileDateVauel(long xmpFileDate) {
+        return xmpFileDate >= EXT_LAST_EXT_SCAN_UNKNOWN && xmpFileDate <= EXT_LAST_EXT_SCAN_PSEUDO_LAST;
+    }
 
     protected static final String FILTER_EXPR_PATH_AND_XMP_DATE_LESS_THAN = FILTER_EXPR_PATH_LIKE
             + " and ("
@@ -377,7 +383,7 @@ public class TagSql extends FotoSql {
 
 
     public static int execUpdate(String dbgContext, String path, long xmpFileDate, ContentValues values, VISIBILITY visibility) {
-        if ((!Global.Media.enableXmpNone) || (xmpFileDate == EXT_LAST_EXT_SCAN_UNKNOWN)) {
+        if (!Global.Media.enableXmpNone || isPseudoXmpFileDateVauel(xmpFileDate)) {
             return getMediaDBApi().execUpdate(dbgContext, path, values, visibility);
         }
         return getMediaDBApi().exexUpdateImpl(dbgContext, values, FILTER_EXPR_PATH_AND_XMP_DATE_LESS_THAN, new String[]{path, Long.toString(xmpFileDate)});

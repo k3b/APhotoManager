@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020 by k3b.
+ * Copyright (c) 2016-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -317,8 +317,12 @@ public class PhotoPropertiesUtil {
         }
 
         return (IMG_TYPE_PRIVATE == (imageTypeFlags & IMG_TYPE_PRIVATE)) &&
-                (lcPath.endsWith(EXT_JPG_PRIVATE));
+                isPrivateImage(lcPath);
 
+    }
+
+    public static boolean isPrivateImage(String filePath) {
+        return filePath != null && filePath.endsWith(EXT_JPG_PRIVATE);
     }
 
     /** returns the full path that item should get or null if path is already ok */

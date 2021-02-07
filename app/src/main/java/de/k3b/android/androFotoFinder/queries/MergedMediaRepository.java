@@ -46,8 +46,22 @@ public class MergedMediaRepository extends MediaRepositoryApiWrapper {
     @Override
     public int execUpdate(String dbgContext, long id, ContentValues values) {
         int result = super.execUpdate(dbgContext, id, values);
-        database.execUpdate(dbgContext, id, values);
-        return result;
+        if (result == 0) {
+            dbgContext += " " + id + " not found or no change in contentprovider.";
+
+            String path = values.getAsString(FotoSql.SQL_COL_PATH);
+            Long changedId = FotoSql.getId(dbgContext, getWriteChild(), path);
+            if (changedId != null && id != changedId.longValue()) {
+                // pk in contentprovidser has changed
+                dbgContext += " unsing " + path + "(" + changedId + ") instead";
+                result = super.execUpdate(dbgContext, changedId, values);
+                if (result > 0) {
+                    // also correcting pk in local db
+                    values.put(FotoSql.SQL_COL_PK, changedId);
+                }
+            }
+        }
+        return database.execUpdate(dbgContext, id, values);
     }
 
     @Override

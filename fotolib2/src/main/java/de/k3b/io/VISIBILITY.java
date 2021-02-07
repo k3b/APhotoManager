@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2020 by k3b.
+ * Copyright (c) 2017-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.k3b.LibGlobal;
+import de.k3b.media.IPhotoProperties;
+import de.k3b.media.PhotoPropertiesUtil;
 
 public enum VISIBILITY {
     /**
@@ -113,8 +115,34 @@ public enum VISIBILITY {
         return (existing >= 0);
     }
 
+    /** infers visibility from tags */
     public static VISIBILITY getVisibility(List<String> tags) {
         return hasPrivate(tags) ? PRIVATE : PUBLIC;
+    }
+
+    /** infers visibility from path */
+    public static VISIBILITY getVisibility(String filePath) {
+        if (filePath == null) return null;
+        return PhotoPropertiesUtil.isPrivateImage(filePath) ? PRIVATE : PUBLIC;
+    }
+
+    /** infers visibility from tags and path */
+    public static VISIBILITY getVisibility(IPhotoProperties photoProperties) {
+        VISIBILITY result = null;
+        if (photoProperties != null) {
+            List<String> tags = photoProperties.getTags();
+            if (tags != null) {
+                result = VISIBILITY.getVisibility(tags);
+            }
+
+            if (result == null) {
+                String path = photoProperties.getPath();
+                if (path != null) {
+                    result = VISIBILITY.getVisibility(path);
+                }
+            }
+        }
+        return result;
     }
 
     public static List<String> setPrivate(List<String> tags, VISIBILITY visibility) {
