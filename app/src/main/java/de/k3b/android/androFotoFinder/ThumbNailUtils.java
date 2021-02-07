@@ -121,7 +121,7 @@ public class ThumbNailUtils {
     private static void displayImageImpl(String uriString, ImageView imageView, Object... debugParams) {
         if (ThumbNailUtils.DEBUG && Global.debugEnabledViewItem) {
             Log.i(ThumbNailUtils.LOG_TAG,
-                    StringUtils.appendMessage(null, "displayImageImpl"
+                    StringUtils.appendMessage("displayImageImpl"
                             , uriString, "because of", debugParams).toString());
         }
 

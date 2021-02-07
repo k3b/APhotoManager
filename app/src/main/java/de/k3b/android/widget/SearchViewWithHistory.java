@@ -123,7 +123,7 @@ public class SearchViewWithHistory extends FrameLayout implements Filter.FilterL
     // for debugging
     @Override
     public String toString() {
-        return StringUtils.appendMessage(null,
+        return StringUtils.appendMessage(
                 this.getClass().getSimpleName(),": open",
                 mIsSearchOpen, mUserQuery, mSavedState).toString();
     }
@@ -588,7 +588,7 @@ public class SearchViewWithHistory extends FrameLayout implements Filter.FilterL
         // for debugging
         @Override
         public String toString() {
-            return StringUtils.appendMessage(null,
+            return StringUtils.appendMessage(
                     this.getClass().getSimpleName(),": open",isSearchOpen, query).toString();
         }
 

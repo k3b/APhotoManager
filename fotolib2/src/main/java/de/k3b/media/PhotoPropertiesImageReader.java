@@ -108,7 +108,7 @@ public class PhotoPropertiesImageReader implements IPhotoProperties, IPhotoPrope
         } catch (IOException e) {
             if (LibGlobal.debugEnabledJpgMetaIo) {
                 logger.info(StringUtils.appendMessage(
-                        null, dbg_context, getClass().getSimpleName(), "load failed",
+                        dbg_context, getClass().getSimpleName(), "load failed",
                         jpgFile, e.getMessage()).toString(), e);
             }
         }

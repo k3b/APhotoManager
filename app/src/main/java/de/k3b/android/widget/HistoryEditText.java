@@ -73,7 +73,7 @@ public class HistoryEditText {
             mEditorHandlers[hisotryIndex].include(sharedPref, edit, values);
             edit.apply();
         } else {
-            Log.w(Global.LOG_CONTEXT, StringUtils.appendMessage(null,
+            Log.w(Global.LOG_CONTEXT, StringUtils.appendMessage(
                     "Cannot add",
                     getClass().getSimpleName(),
                     "addHistory(",

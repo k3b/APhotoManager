@@ -127,7 +127,7 @@ public class StringUtils {
     }
 
     public static StringBuilder createDebugMessage(boolean enabled, final Object... parameters) {
-        if (enabled) return appendMessage(null, parameters);
+        if (enabled) return appendMessage(parameters);
         return null;
     }
 
@@ -139,13 +139,16 @@ public class StringUtils {
      * @return either result or newly created StringBuilder if result was null
      */
     public static StringBuilder appendMessage(StringBuilder resultOrNull, final Object... parameters) {
-        StringBuilder result = (resultOrNull == null) ? new StringBuilder() : resultOrNull;
-
-        append(result, parameters);
-        return result;
+        return append(resultOrNull, parameters);
     }
 
-    private static void append(StringBuilder result, Object[] parameters) {
+    public static StringBuilder appendMessage(final Object... parameters) {
+        return append((StringBuilder) null, parameters);
+    }
+
+    private static StringBuilder append(StringBuilder resultOrNull, Object[] parameters) {
+        StringBuilder result = (resultOrNull == null) ? new StringBuilder() : resultOrNull;
+
         if ((result != null) && (parameters != null) && (parameters.length > 0)) {
             result.append("(");
             for (final Object param : parameters) {
@@ -164,6 +167,8 @@ public class StringUtils {
             }
             result.append(") ");
         }
+
+        return result;
     }
 
 }

@@ -1246,7 +1246,7 @@ public class FotoSql extends FotoSqlBase {
                         unit = "Mb";
                     }
                 }
-                return StringUtils.appendMessage(null,
+                return StringUtils.appendMessage(
                         text,
                         ": #",
                         count,
