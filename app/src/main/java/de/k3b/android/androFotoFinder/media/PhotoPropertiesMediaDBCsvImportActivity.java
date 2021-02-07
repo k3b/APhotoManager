@@ -36,12 +36,12 @@ import java.util.Date;
 
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.R;
+import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.android.androFotoFinder.tagDB.TagSql;
 import de.k3b.android.io.AndroidFileCommands;
 import de.k3b.android.util.IntentUtil;
 import de.k3b.csv2db.csv.CsvLoader;
 import de.k3b.io.FileUtils;
-import de.k3b.io.VISIBILITY;
 import de.k3b.io.filefacade.FileFacade;
 import de.k3b.io.filefacade.IFile;
 import de.k3b.media.PhotoPropertiesCsvItem;
@@ -206,7 +206,9 @@ public class PhotoPropertiesMediaDBCsvImportActivity extends Activity {
 
                 TagSql.setFileModifyDate(dbValues, new Date());
 
-                mUpdateCount += TagSql.execUpdate(dbgContext, path, xmlLastFileModifyDate, dbValues, VISIBILITY.PRIVATE_PUBLIC);
+                dbValues.put(FotoSql.SQL_COL_PATH, path);
+                mUpdateCount += TagSql.insertOrUpdateMediaDatabaseFromCsv(
+                        dbgContext, path, xmlLastFileModifyDate, dbValues, null);
                 mItemCount++;
             }
         }

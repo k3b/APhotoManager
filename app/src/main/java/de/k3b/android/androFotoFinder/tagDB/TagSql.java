@@ -346,8 +346,10 @@ public class TagSql extends FotoSql {
      * @param allowSetNulls     if one of these columns are null, the set null is copied, too
      * @return number of changed db items
      */
-    public static int updateDB(String dbgContext, String oldFullJpgFilePath,
-                               PhotoPropertiesUpdateHandler jpg, MediaFormatter.FieldID... allowSetNulls) {
+    public static Long updateDB(
+            String dbgContext, String oldFullJpgFilePath,
+            PhotoPropertiesUpdateHandler jpg,
+            MediaFormatter.FieldID... allowSetNulls) {
         if ((jpg != null) && (!PhotoPropertiesMediaFilesScanner.isNoMedia(oldFullJpgFilePath))) {
             ContentValues dbValues = new ContentValues();
             PhotoPropertiesMediaDBContentValues mediaValueAdapter = new PhotoPropertiesMediaDBContentValues();
@@ -372,21 +374,23 @@ public class TagSql extends FotoSql {
                 TagSql.setXmpFileModifyDate(dbValues, xmpFilelastModified);
                 TagSql.setFileModifyDate(dbValues, newFullJpgFilePath);
 
-                return TagSql.execUpdate(dbgContext, oldFullJpgFilePath,
-                        TagSql.EXT_LAST_EXT_SCAN_UNKNOWN, dbValues, VISIBILITY.PRIVATE_PUBLIC);
+                return TagSql.insertOrUpdateMediaDatabaseFromCsv(
+                        dbgContext, oldFullJpgFilePath,
+                        TagSql.EXT_LAST_EXT_SCAN_UNKNOWN,
+                        dbValues, VISIBILITY.PRIVATE_PUBLIC);
             }
 
 
         }
-        return 0;
+        return 0L;
     }
 
 
-    public static int execUpdate(String dbgContext, String path, long xmpFileDate, ContentValues values, VISIBILITY visibility) {
-        if (!Global.Media.enableXmpNone || isPseudoXmpFileDateVauel(xmpFileDate)) {
-            return getMediaDBApi().execUpdate(dbgContext, path, values, visibility);
-        }
-        return getMediaDBApi().exexUpdateImpl(dbgContext, values, FILTER_EXPR_PATH_AND_XMP_DATE_LESS_THAN, new String[]{path, Long.toString(xmpFileDate)});
+    public static Long insertOrUpdateMediaDatabaseFromCsv(
+            String dbgContext, String path, long xmpFileDate,
+            ContentValues values, VISIBILITY visibility) {
+        return getMediaDBApi().insertOrUpdateMediaDatabase(
+                dbgContext, path, values, visibility,1L);
     }
 
     public static List<String> getPhotosNeverScanned(String path) {

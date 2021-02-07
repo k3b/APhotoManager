@@ -50,7 +50,7 @@ public class MergedMediaRepository extends MediaRepositoryApiWrapper {
             dbgContext += " " + id + " not found or no change in contentprovider.";
 
             String path = values.getAsString(FotoSql.SQL_COL_PATH);
-            Long changedId = FotoSql.getId(dbgContext, getWriteChild(), path);
+            Long changedId = FotoSql.getId(dbgContext, contentProvider, path);
             if (changedId != null && id != changedId.longValue()) {
                 // pk in contentprovidser has changed
                 dbgContext += " unsing " + path + "(" + changedId + ") instead";
@@ -66,7 +66,8 @@ public class MergedMediaRepository extends MediaRepositoryApiWrapper {
 
     @Override
     public int execUpdate(String dbgContext, String path, ContentValues values, VISIBILITY visibility) {
-        int result = super.execUpdate(dbgContext, path, values, visibility);
+        int result = super.execUpdate(
+                dbgContext, path, values, visibility);
         database.execUpdate(dbgContext, path, values, visibility);
         return result;
     }
@@ -91,7 +92,7 @@ public class MergedMediaRepository extends MediaRepositoryApiWrapper {
     public Long insertOrUpdateMediaDatabase(String dbgContext, String dbUpdateFilterJpgFullPathName,
                                             ContentValues values, VISIBILITY visibility, Long updateSuccessValue) {
         Long result = updateSuccessValue;
-
+        Uri uriWithId = null;
         int modifyCount = contentProvider.execUpdate(dbgContext, dbUpdateFilterJpgFullPathName,
                 values, visibility);
 
@@ -100,13 +101,28 @@ public class MergedMediaRepository extends MediaRepositoryApiWrapper {
             FotoSql.addDateAdded(values);
 
             // insert into contentProvider and database
-            Uri uriWithId = execInsert(dbgContext, values);
-            result = FotoSql.getId(uriWithId);
-        } else {
-            // update into contentprovider successfull. also add to database
-            database.execUpdate(dbgContext, dbUpdateFilterJpgFullPathName,
-                    values, visibility);
+            uriWithId =  contentProvider.execInsert(dbgContext, values);
+
+            if (uriWithId != null) {
+                result = FotoSql.getId(uriWithId);
+                values.put(FotoSql.SQL_COL_PK, result);
+            }
         }
+
+        modifyCount = database.execUpdate(dbgContext, dbUpdateFilterJpgFullPathName,
+                values, visibility);
+
+        if (modifyCount == 0) {
+            // update failed (probably becauce oldFullPathName not found. try insert it.
+            FotoSql.addDateAdded(values);
+
+            // insert into contentProvider and database
+            uriWithId = database.execInsert(dbgContext, values);
+            if (uriWithId != null) {
+                result = FotoSql.getId(uriWithId);
+            }
+        }
+
         return result;
     }
 
@@ -125,7 +141,7 @@ public class MergedMediaRepository extends MediaRepositoryApiWrapper {
             // not inserted because in android-contentprovider may already exist.
             // get id from android-contentprovider
             String path = values.getAsString(FotoSql.SQL_COL_PATH);
-            Long id = FotoSql.getId(dbgContext, getWriteChild(), path);
+            Long id = FotoSql.getId(dbgContext, contentProvider, path);
 
             if (id == null) {
                 Log.i(LOG_TAG, dbgContext + " Path '" + path + "' not found. Aborted.");
