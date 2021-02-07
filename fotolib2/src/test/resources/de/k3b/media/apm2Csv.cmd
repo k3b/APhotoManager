@@ -5,5 +5,5 @@ rem batch to export comment title tags to csv
 if "%exifdir%"=="" set exifdir=C:\Progs.Portable\Multimedia\Picture\Image-ExifTool-6.93
 set exifexe="%exifdir%\exiftool.exe"   -quiet 
 
-%exifexe% -c "%%+.6f" -dateFormat "%%Y%%m%%dT%%H%%M%%S" -FileModifyDate -Subject -Description -Title -ImageUniqueID -ImageUniqueID -DocumentID -Rating -csv -r -ext .xmp -if "($Description or $Title or $Subject)" . > media.csv
+%exifexe% -c "%%+.6f" -dateFormat "%%Y%%m%%dT%%H%%M%%S" -FileModifyDate -Subject -Description -Title -ImageUniqueID -DocumentID -GPSLatitude -GPSLongitude -Rating -csv -r -ext .xmp -if "($Description or $Title or $Subject or $GPSLatitude)" . > media.csv
 
