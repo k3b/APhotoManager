@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015-2016 by Miguel Catalan Bañuls
- * Copyright (c) 2018-2020 by k3b.
+ * Copyright (c) 2018-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
