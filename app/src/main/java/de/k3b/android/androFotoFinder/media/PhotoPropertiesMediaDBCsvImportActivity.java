@@ -139,15 +139,15 @@ public class PhotoPropertiesMediaDBCsvImportActivity extends Activity {
         }
 
         protected String processUri(Uri uri) {
-            IFile csvRootDir = FileFacade.convert("PhotoPropertiesMediaDBCsvImportActivity processUri", IntentUtil.getFile(uri)).getCanonicalFile();
-            if (csvRootDir != null) {
+            IFile csvFile = FileFacade.convert("PhotoPropertiesMediaDBCsvImportActivity processUri", IntentUtil.getFile(uri)).getCanonicalFile();
+            if (csvFile != null) {
                 Reader reader = null;
                 try {
-                    if ((csvRootDir != null) && csvRootDir.getName().endsWith(".csv")) {
+                    if ((csvFile != null) && csvFile.getName().endsWith(".csv")) {
                         Log.i(Global.LOG_CONTEXT, DBG_CONTEXT + "start form " + uri.toString());
 
                         reader = new InputStreamReader(getContentResolver().openInputStream(uri));
-                        mLoader = new MediaCsvLoader(csvRootDir);
+                        mLoader = new MediaCsvLoader(csvFile.getParentFile());
 
                         mLoader.load(reader, new PhotoPropertiesCsvItem());
 
@@ -156,7 +156,7 @@ public class PhotoPropertiesMediaDBCsvImportActivity extends Activity {
                             mProgressCountDown = 10;
                             publishProgress(getString(R.string.scanner_menu_title) + " (" + mItemCount + ", +" + mUpdateCount + ") " + uri.toString());
 
-                            updateDB("set all xmp-file-dates to EXT_LAST_EXT_SCAN_NO_XMP_IN_CSV", csvRootDir.getAbsolutePath() + "/%", TagSql.EXT_LAST_EXT_SCAN_NO_XMP_IN_CSV, new ContentValues());
+                            updateDB("set all xmp-file-dates to EXT_LAST_EXT_SCAN_NO_XMP_IN_CSV", csvFile.getAbsolutePath() + "/%", TagSql.EXT_LAST_EXT_SCAN_NO_XMP_IN_CSV, new ContentValues());
                         }
                     }
                     mLoader = null;

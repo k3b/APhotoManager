@@ -22,24 +22,30 @@ import android.content.ContentValues;
 import android.net.Uri;
 import android.util.Log;
 
+import de.k3b.android.androFotoFinder.Global;
 import de.k3b.io.VISIBILITY;
 
 /**
- * #155: All reads are done through database while writes are
- * applied to database and contentProvider.
+ * #155: All reads are done through localDatabase while writes are
+ * applied to localDatabase and contentProvider.
  * <p>
- * Since Android-10 (api 29) using sqLite functions as content-provider-columns is not possible anymore.
+ * Since Android-10 (api 29) is not possible anymore:
+ * * using sqLite functions as content-provider-columns
+ * * read gps data (latitude,longitude.
+ *
  * Therefore apm uses a copy of contentprovider MediaStore.Images with same column names and same pk.
+ *
+ * The copy is called "localDatabase" the other "contentProvider".
  */
 public class MergedMediaRepository extends MediaRepositoryApiWrapper {
     private static final String LOG_TAG = MediaDBRepository.LOG_TAG;
 
-    private final IMediaRepositoryApi database;
+    private final IMediaRepositoryApi localDatabase;
     private final IMediaRepositoryApi contentProvider;
 
-    public MergedMediaRepository(IMediaRepositoryApi database, IMediaRepositoryApi contentProvider) {
-        super(database, contentProvider, database);
-        this.database = database;
+    public MergedMediaRepository(IMediaRepositoryApi localDatabase, IMediaRepositoryApi contentProvider) {
+        super(localDatabase, contentProvider, localDatabase);
+        this.localDatabase = localDatabase;
         this.contentProvider = contentProvider;
     }
 
@@ -61,21 +67,21 @@ public class MergedMediaRepository extends MediaRepositoryApiWrapper {
                 }
             }
         }
-        return database.execUpdate(dbgContext, id, values);
+        return localDatabase.execUpdate(dbgContext, id, values);
     }
 
     @Override
     public int execUpdate(String dbgContext, String path, ContentValues values, VISIBILITY visibility) {
         int result = super.execUpdate(
                 dbgContext, path, values, visibility);
-        database.execUpdate(dbgContext, path, values, visibility);
+        localDatabase.execUpdate(dbgContext, path, values, visibility);
         return result;
     }
 
     @Override
     public int exexUpdateImpl(String dbgContext, ContentValues values, String sqlWhere, String[] selectionArgs) {
         int result = super.exexUpdateImpl(dbgContext, values, sqlWhere, selectionArgs);
-        database.exexUpdateImpl(dbgContext, values, sqlWhere, selectionArgs);
+        localDatabase.exexUpdateImpl(dbgContext, values, sqlWhere, selectionArgs);
         return result;
     }
 
@@ -91,12 +97,18 @@ public class MergedMediaRepository extends MediaRepositoryApiWrapper {
     @Override
     public Long insertOrUpdateMediaDatabase(String dbgContext, String dbUpdateFilterJpgFullPathName,
                                             ContentValues values, VISIBILITY visibility, Long updateSuccessValue) {
-        Long result = updateSuccessValue;
         Uri uriWithId = null;
-        int modifyCount = contentProvider.execUpdate(dbgContext, dbUpdateFilterJpgFullPathName,
-                values, visibility);
+        Long idInContentprovider = FotoSql.getId(dbgContext, contentProvider, dbUpdateFilterJpgFullPathName);
 
-        if (modifyCount == 0) {
+        if (idInContentprovider != null) {
+            // already existing
+            int modifyCount = contentProvider.execUpdate(
+                    dbgContext, idInContentprovider,values);
+            if (modifyCount != 1 || Global.debugEnabledSql) {
+                Log.i(LOG_TAG, dbgContext + " merge-execUpdate(existContentProvider," + idInContentprovider +
+                        "[" + dbUpdateFilterJpgFullPathName + "]) = " + modifyCount +" items modified");
+            }
+        } else {
             // update failed (probably becauce oldFullPathName not found. try insert it.
             FotoSql.addDateAdded(values);
 
@@ -104,23 +116,41 @@ public class MergedMediaRepository extends MediaRepositoryApiWrapper {
             uriWithId =  contentProvider.execInsert(dbgContext, values);
 
             if (uriWithId != null) {
-                result = FotoSql.getId(uriWithId);
-                values.put(FotoSql.SQL_COL_PK, result);
+                idInContentprovider = FotoSql.getId(uriWithId);
             }
         }
 
-        modifyCount = database.execUpdate(dbgContext, dbUpdateFilterJpgFullPathName,
-                values, visibility);
+        Long idInDb = FotoSql.getId(dbgContext, localDatabase, dbUpdateFilterJpgFullPathName);
+        if (idInContentprovider != null && (idInDb == null || !idInContentprovider.equals(idInDb))) {
+            // must set or change id in local database
+            values.put(FotoSql.SQL_COL_PK, idInContentprovider);
+        }
 
-        if (modifyCount == 0) {
+        if (idInDb != null) {
+            int modifyCount = localDatabase.execUpdate(dbgContext, dbUpdateFilterJpgFullPathName,
+                    values, visibility);
+            if (modifyCount != 1 || Global.debugEnabledSql) {
+                Log.i(LOG_TAG, dbgContext + " merge-execUpdate(existLocalDb," + idInDb +
+                        "[" + dbUpdateFilterJpgFullPathName + "]) = " + modifyCount +" items modified");
+            }
+        } else {
             // update failed (probably becauce oldFullPathName not found. try insert it.
             FotoSql.addDateAdded(values);
 
             // insert into contentProvider and database
-            uriWithId = database.execInsert(dbgContext, values);
+            uriWithId = localDatabase.execInsert(dbgContext, values);
             if (uriWithId != null) {
-                result = FotoSql.getId(uriWithId);
+                idInDb = FotoSql.getId(uriWithId);
             }
+        }
+
+        Long result;
+        if (idInDb != null) {
+            result = idInDb;
+        } else if (idInContentprovider != null) {
+            result = idInContentprovider;
+        } else {
+            result = updateSuccessValue;
         }
 
         return result;
@@ -155,7 +185,7 @@ public class MergedMediaRepository extends MediaRepositoryApiWrapper {
             // insert with same pk as contentprovider does
             values.put(FotoSql.SQL_COL_PK, FotoSql.getId(result));
         }
-        database.execInsert(dbgContext, values);
+        localDatabase.execInsert(dbgContext, values);
         values.remove(FotoSql.SQL_COL_PK);
         return result;
     }
@@ -171,7 +201,7 @@ public class MergedMediaRepository extends MediaRepositoryApiWrapper {
     @Override
     public int deleteMedia(String dbgContext, String where, String[] selectionArgs, boolean preventDeleteImageFile) {
         int result = super.deleteMedia(dbgContext, where, selectionArgs, preventDeleteImageFile);
-        database.deleteMedia(dbgContext, where, selectionArgs, preventDeleteImageFile);
+        localDatabase.deleteMedia(dbgContext, where, selectionArgs, preventDeleteImageFile);
         return result;
     }
 }
