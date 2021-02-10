@@ -520,8 +520,8 @@ public abstract class PhotoPropertiesMediaFilesScanner {
             ContentValues values = createDefaultContentValues();
             FotoSql.addDateAdded(values);
 
-            getExifFromFile(values, file);
-            return (null != FotoSql.getMediaDBApi().execInsert(dbgContext, values)) ? 1 : 0;
+            IPhotoProperties exif = getExifFromFile(values, file);
+            return (null != FotoSql.getMediaDBApi().insertOrUpdateMediaDatabase(dbgContext, exif.getPath(), values, exif.getVisibility(), 1L)) ? 1 : 0;
         }
 		return 0;
     }

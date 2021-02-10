@@ -227,6 +227,7 @@ public class AndroFotoFinderApp extends Application {
                 MediaContentproviderRepositoryImpl.LOG_TAG,
                 DocumentFileTranslator.TAG, DocumentFileTranslator.TAG_DOCFILE,
                 FileFacade.LOG_TAG, AndroidFileFacade.LOG_TAG,
+                "SQLiteDatabase",
                 FilePermissionActivity.TAG) {
 
             @Override

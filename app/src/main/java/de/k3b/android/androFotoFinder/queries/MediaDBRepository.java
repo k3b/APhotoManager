@@ -232,12 +232,13 @@ public class MediaDBRepository implements IMediaRepositoryApi {
         Exception excpetion = null;
         try {
             // on my android-4.4 insert with media_type=1001 (private) does insert with media_type=1 (image)
-            result = db.insert(Impl.table, null, values);
-            if (result > 0) {
-                currentUpdateId++;
-                currentUpdateReason = dbgContext;
+            result = db.insertWithOnConflict(Impl.table, null, values, SQLiteDatabase.CONFLICT_REPLACE );
+            if (result == -1) {
+                return null;
             }
 
+            currentUpdateId++;
+            currentUpdateReason = dbgContext;
         } catch (Exception ex) {
             excpetion = ex;
         } finally {

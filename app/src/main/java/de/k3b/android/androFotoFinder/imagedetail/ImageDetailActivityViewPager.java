@@ -176,7 +176,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
         if (dirToScan == null) return 0;
 
         String dbPathSearch = null;
-        ArrayList<String> missing = new ArrayList<String>();
+        ArrayList<IFile> missing = new ArrayList<>();
         dbPathSearch = dirToScan.getAbsolutePath() + "/%";
         List<String> known = FotoSql.execGetFotoPaths(dbPathSearch);
         IFile[] existing = dirToScan.listFiles();
@@ -185,7 +185,7 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
             for (IFile file : existing) {
                 String found = file.getAbsolutePath();
                 if (PhotoPropertiesUtil.isImage(found, PhotoPropertiesUtil.IMG_TYPE_ALL) && !known.contains(found)) {
-                    missing.add(found);
+                    missing.add(file);
                 }
             }
         }
@@ -195,15 +195,15 @@ public class ImageDetailActivityViewPager extends BaseActivity implements Common
             message.append(debugPrefix).append("updateIncompleteMediaDatabase('")
                     .append(dbPathSearch).append("') : \n\t");
 
-            for (String s : missing) {
-                message.append(s).append("; ");
+            for (IFile s : missing) {
+                message.append(s.getName()).append("; ");
             }
             Log.d(Global.LOG_CONTEXT, message.toString());
         }
 
         PhotoPropertiesMediaFilesScannerAsyncTask scanner = new PhotoPropertiesMediaFilesScannerAsyncTask(
                 PhotoPropertiesMediaFilesScanner.getInstance(context), context, why);
-        scanner.execute(null, FileFacade.get("updateIncompleteMediaDatabase", missing));
+        scanner.execute(null, missing.toArray(new IFile[missing.size()]));
         return missing.size();
     }
 
