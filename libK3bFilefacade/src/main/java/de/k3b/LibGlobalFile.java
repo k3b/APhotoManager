@@ -1,8 +1,7 @@
 /*
- * Copyright (c) 2020 by k3b.
+ * Copyright (c) 2015-2021 by k3b.
  *
- * This file is part of #APhotoManager (https://github.com/k3b/APhotoManager/)
- *              and #toGoZip (https://github.com/k3b/ToGoZip/).
+ * This file is part of AndroFotoFinder.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by
@@ -17,14 +16,15 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
-package de.k3b.io;
+package de.k3b;
 
-/**
- * converts from type SOURCE to RESULT so that RESULT can be used as a facade for SOURCE
- *
- * @param <TO>
- * @param <FROM>
- */
-public interface Converter<FROM, TO> {
-    public TO convert(String dbgContext, FROM from);
+public class LibGlobalFile {
+    /** LOG_CONTEXT is used as logging source for filtering logging messages that belong to this */
+    public static final String LOG_TAG = "k3bFotoLib2";
+
+    /**
+     * Global.xxxxx. Non final values may be changed from outside (SettingsActivity or commandline parameter)
+     */
+    public static boolean debugEnabled = false;
+
 }

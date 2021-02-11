@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020 by k3b.
+ * Copyright (c) 2015-2021 by k3b.
  *
  * This file is part of #APhotoManager (https://github.com/k3b/APhotoManager/)
  *              and #toGoZip (https://github.com/k3b/ToGoZip/).
@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -40,11 +39,10 @@ import de.k3b.LibGlobal;
 import de.k3b.io.filefacade.FileFacade;
 import de.k3b.io.filefacade.IFile;
 
-
 /**
  * Created by k3b on 06.10.2015.
  */
-public class FileUtils {
+public class FileUtils extends FileUtilsBase {
     private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
     private static final String DBG_CONTEXT = "FileUtils:";
 
@@ -107,63 +105,6 @@ public class FileUtils {
         return sb.toString();
     }
 
-    public static void close(Closeable stream, Object source) {
-		if (stream != null) {
-            try {
-                if (LibGlobal.debugEnabled) {
-                    logger.warn(DBG_CONTEXT + "Closing " + source);
-                }
-
-				stream.close();
-            } catch (Exception e) {
-                // catch IOException and in android also NullPointerException
-                // java.lang.NullPointerException: Attempt to invoke virtual method
-                // 'void java.io.InputStream.close()' on a null object reference
-                // where stream is java.io.FilterInputStream whith child-filter "in" = null
-                if (source != null && LibGlobal.debugEnabled) {
-                    logger.warn(DBG_CONTEXT + "Error close " + source, e);
-                }
-			}
-		}
-	}
-		
-    /** tryGetCanonicalFile without exception */
-    public static File tryGetCanonicalFile(String path) {
-        if (path == null) return null;
-
-        final File file = new File(path);
-        return tryGetCanonicalFile(file, file);
-    }
-
-    /** tryGetCanonicalFile without exception */
-    public static File tryGetCanonicalFile(File file, File errorValue) {
-        if (file == null) return null;
-
-        try {
-            return file.getCanonicalFile();
-        } catch (IOException ex) {
-            logger.warn(DBG_CONTEXT + "Error tryGetCanonicalFile('" + file.getAbsolutePath() + "') => '" + errorValue + "' exception " + ex.getMessage(), ex);
-            return errorValue;
-        }
-    }
-
-    /** tryGetCanonicalFile without exception */
-    public static File tryGetCanonicalFile(File file) {
-        return tryGetCanonicalFile(file, file);
-    }
-
-    /** tryGetCanonicalFile without exception */
-    public static String tryGetCanonicalPath(File file, String errorValue) {
-        if (file == null) return null;
-
-        try {
-            return file.getCanonicalPath();
-        } catch (IOException ex) {
-            logger.warn(DBG_CONTEXT + "Error tryGetCanonicalPath('" + file.getAbsolutePath() + "') => '" + errorValue + "' exception " + ex.getMessage(), ex);
-            return errorValue;
-        }
-    }
-
     /** @return true if directory is an alias of an other (symlink-dir). */
 	public static  boolean isSymlinkDir(File directory, boolean errorValue) {
         if (LibGlobal.ignoreSymLinks || (directory == null)) {
@@ -171,7 +112,7 @@ public class FileUtils {
         }
 
         // from http://stackoverflow.com/questions/813710/java-1-6-determine-symbolic-links
-        String canonicalPath = tryGetCanonicalPath(directory, null);
+        String canonicalPath = FileUtilsBase.tryGetCanonicalPath(directory, null);
         if (canonicalPath != null) {
             boolean result = !directory.getAbsolutePath().equals(canonicalPath);
             if (result && LibGlobal.debugEnabled) {
@@ -388,32 +329,7 @@ public class FileUtils {
     public static void copyReplace(InputStream sourceStream, IFile destinationFile) throws IOException {
         if (destinationFile.exists()) destinationFile.delete();
         destinationFile.getParentFile().mkdirs();
-        FileUtils.copy(sourceStream, destinationFile.openOutputStream(), " copyReplace ");
-    }
-
-    public static void copy(InputStream in, OutputStream out) throws IOException {
-        copy(in, out, "");
-    }
-
-    /**
-     * copy all from is to os and closes the streams when done
-     */
-    public static void copy(InputStream in, OutputStream out, String dbgContext) throws IOException {
-        try {
-            if (LibGlobal.debugEnabled) {
-                logger.debug(DBG_CONTEXT + dbgContext + " copy " + in + "=>" + out);
-            }
-            byte[] buffer = new byte[10240]; // 10k buffer
-            int bytesRead = -1;
-
-            while ((bytesRead = in.read(buffer)) != -1) {
-                out.write(buffer, 0, bytesRead);
-            }
-            out.flush();
-        } finally {
-            FileUtils.close(in, dbgContext + " copy-close src " + in);
-            FileUtils.close(out, dbgContext + " copy-close dest " + out);
-        }
+        FileUtilsBase.copy(sourceStream, destinationFile.openOutputStream(), " copyReplace ");
     }
 
 

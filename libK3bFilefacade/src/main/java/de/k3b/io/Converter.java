@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 by k3b.
+ * Copyright (c) 2020-2021 by k3b.
  *
  * This file is part of #APhotoManager (https://github.com/k3b/APhotoManager/)
  *              and #toGoZip (https://github.com/k3b/ToGoZip/).
@@ -17,25 +17,14 @@
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>
  */
-package de.k3b.io.filefacade;
+package de.k3b.io;
 
-import org.junit.Assert;
-import org.junit.Test;
-
-import java.io.IOException;
-
-import de.k3b.io.FileUtils;
-
-public class StringFileFacadeTest {
-
-    @Test
-    public void copyInputStringToOutputString() throws IOException {
-        final String message = "hello world\n";
-        StringFileFacade in = new StringFileFacade().setInputString(message);
-        StringFileFacade out = new StringFileFacade();
-
-        FileUtils.copy(in.openInputStream(), out.openOutputStream(), "StringFileFacadeTest");
-
-        Assert.assertEquals(message, out.getOutputString());
-    }
+/**
+ * converts from type SOURCE to RESULT so that RESULT can be used as a facade for SOURCE
+ *
+ * @param <TO>
+ * @param <FROM>
+ */
+public interface Converter<FROM, TO> {
+    public TO convert(String dbgContext, FROM from);
 }

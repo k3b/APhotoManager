@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 by k3b.
+ * Copyright (c) 2020-2021 by k3b.
  *
  * This file is part of #APhotoManager (https://github.com/k3b/APhotoManager/)
  *              and #toGoZip (https://github.com/k3b/ToGoZip/).
@@ -32,7 +32,7 @@ import java.io.OutputStream;
 import java.util.List;
 
 import de.k3b.io.Converter;
-import de.k3b.io.FileUtils;
+import de.k3b.io.FileUtilsBase;
 
 /**
  * {@link FileFacade} has the same methods as {@link File} so it may become a
@@ -195,12 +195,12 @@ public class FileFacade implements IFile {
 
     @Override
     public IFile getCanonicalFile() {
-        return convert("FileFacade getCanonicalFile", FileUtils.tryGetCanonicalFile(file));
+        return convert("FileFacade getCanonicalFile", FileUtilsBase.tryGetCanonicalFile(file));
     }
 
     @Override
     public String getCanonicalPath() {
-        return FileUtils.tryGetCanonicalPath(file, null);
+        return FileUtilsBase.tryGetCanonicalPath(file, null);
     }
 
     @Override
@@ -244,7 +244,7 @@ public class FileFacade implements IFile {
     }
 
     private boolean copyImpl(IFile targetFullPath, boolean deleteSourceWhenSuccess) throws IOException {
-        FileUtils.copy(this.openInputStream(), targetFullPath.openOutputStream(), " FileFacade copyImpl ");
+        FileUtilsBase.copy(this.openInputStream(), targetFullPath.openOutputStream(), " FileFacade copyImpl ");
         if (deleteSourceWhenSuccess) {
             this.delete();
         }

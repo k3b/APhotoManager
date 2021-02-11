@@ -1,0 +1,18 @@
+plugins {
+    id 'java-library'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_7
+    targetCompatibility = JavaVersion.VERSION_1_7
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'org.slf4j:slf4j-api:1.7.7@jar'
+    testImplementation 'org.slf4j:slf4j-simple:1.7.7'
+
+    testImplementation 'junit:junit:4.11'
+    testImplementation "org.mockito:mockito-core:1.9.5"
+}
+
