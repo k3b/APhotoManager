@@ -26,6 +26,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An {@link IFile} to read from or write to as in memory String.
@@ -47,11 +49,16 @@ public class StringFileFacade implements IFile {
 
     private ByteArrayOutputStream byteArrayOutputStream = null;
     private String data = "";
+    private IFile parent = null;
+    private List<IFile> listFiles = new ArrayList<>();
+    private String absolutePath = "";
+    private boolean dir = false;
 
-    public StringFileFacade setInputString(String data) {
-        this.data = data;
-        return this;
-    }
+    public StringFileFacade parent(StringFileFacade parent) { this.parent = parent; parent.listFiles.add(this); return this;}
+    public StringFileFacade absolutePath(String absolutePath) { this.absolutePath = absolutePath; return this;}
+    public StringFileFacade dir() { this.dir = true; return this;}
+
+    public StringFileFacade setInputString(String data) {this.data = data;return this;}
 
     @Override
     public InputStream openInputStream() throws FileNotFoundException {
@@ -109,12 +116,12 @@ public class StringFileFacade implements IFile {
 
     @Override
     public boolean isFile() {
-        return true;
+        return !dir;
     }
 
     @Override
     public boolean isDirectory() {
-        return false;
+        return dir;
     }
 
     @Override
@@ -129,7 +136,7 @@ public class StringFileFacade implements IFile {
 
     @Override
     public String getAbsolutePath() {
-        return "";
+        return absolutePath;
     }
 
     @Override
@@ -153,7 +160,7 @@ public class StringFileFacade implements IFile {
 
     @Override
     public IFile getParentFile() {
-        return null;
+        return parent;
     }
 
     @Override
@@ -183,7 +190,7 @@ public class StringFileFacade implements IFile {
 
     @Override
     public IFile[] listFiles() {
-        return new IFile[0];
+        return listFiles.toArray(new IFile[listFiles.size()]);
     }
 
     @Override

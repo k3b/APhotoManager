@@ -46,8 +46,6 @@ public class FileUtils extends FileUtilsBase {
     private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
     private static final String DBG_CONTEXT = "FileUtils:";
 
-    public static final String MEDIA_IGNORE_FILENAME = ".nomedia"; // MediaStore.MEDIA_IGNORE_FILENAME;
-
     public static InputStream streamFromStringContent(String data) {
         ByteArrayInputStream s = new ByteArrayInputStream(data.getBytes());
         return s;

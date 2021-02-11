@@ -35,6 +35,8 @@ public class FileUtilsBase {
     private static final Logger logger = LoggerFactory.getLogger(LibGlobalFile.LOG_TAG);
     private static final String DBG_CONTEXT = "FileUtils:";
 
+    public static final String MEDIA_IGNORE_FILENAME = ".nomedia"; // MediaStore.MEDIA_IGNORE_FILENAME;
+
     /** tryGetCanonicalFile without exception */
     public static File tryGetCanonicalFile(String path) {
         if (path == null) return null;
