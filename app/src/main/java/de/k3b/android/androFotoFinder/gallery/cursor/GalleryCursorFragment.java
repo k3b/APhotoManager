@@ -699,6 +699,25 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
         // requeryGallery(); done by owning activity
     }
 
+    /**
+     * path/directory was clicked
+     */
+    private final View.OnClickListener onPathButtonClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            onPathButtonClick((IDirectory) v.getTag());
+        }
+    };
+
+    private Button createPathButton(IDirectory currentDir) {
+        Button result = new Button(getActivity());
+        result.setTag(currentDir);
+        result.setText(getDirectoryDisplayText(null, currentDir, (FotoViewerParameter.includeSubItems) ? Directory.OPT_SUB_ITEM : Directory.OPT_ITEM));
+
+        result.setOnClickListener(onPathButtonClickListener);
+        return result;
+    }
+
     private void reloadDirGuiIfAvailable(String why) {
         if ((mDirectoryRoot != null) && (mCurrentPath != null) && (mParentPathBar != null)) {
             if (Global.debugEnabled) {
@@ -725,7 +744,7 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
             // scroll to right where deepest child is
             if (first != null) mParentPathBarScroller.requestChildFocus(mParentPathBar, first);
 
-            List<IDirectory> children = selectedChild.getChildren();
+            IDirectory[] children = selectedChild.getChildren();
             if (children != null) {
                 for (IDirectory child : children) {
                     Button button = createPathButton(child);
@@ -734,23 +753,6 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
             }
         }
     }
-
-    private Button createPathButton(IDirectory currentDir) {
-        Button result = new Button(getActivity());
-        result.setTag(currentDir);
-        result.setText(getDirectoryDisplayText(null, currentDir, (FotoViewerParameter.includeSubItems) ? Directory.OPT_SUB_ITEM : Directory.OPT_ITEM));
-
-        result.setOnClickListener(onPathButtonClickListener);
-        return result;
-    }
-
-    /** path/directory was clicked */
-    private View.OnClickListener onPathButtonClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            onPathButtonClick((IDirectory) v.getTag());
-        }
-    };
 
     /** path/directory was clicked */
     private void onPathButtonClick(IDirectory newSelection) {

@@ -19,8 +19,6 @@
 
 package de.k3b.io;
 
-import java.util.List;
-
 import de.k3b.io.filefacade.IFile;
 
 /**
@@ -30,7 +28,7 @@ import de.k3b.io.filefacade.IFile;
  */
 
 public class OSDirOrVirtualAlbumFile extends OSDirectory {
-    public OSDirOrVirtualAlbumFile(IFile current, OSDirectory parent, List<IDirectory> childen) {
+    public OSDirOrVirtualAlbumFile(IFile current, OSDirectory parent, IDirectory[] childen) {
         super(current, parent, childen);
         if (isAlbum(current)) {
             setDirFlags(DIR_FLAG_VIRTUAL_DIR);
@@ -58,9 +56,11 @@ public class OSDirOrVirtualAlbumFile extends OSDirectory {
         return isAlbum(candidate);
     }
 
-    /** factory method to be overwrittern by derived classes, if tree should consist of derived classes. */
+    /**
+     * factory method to be overwrittern by derived classes, if tree should consist of derived classes.
+     */
     @Override
-    public OSDirectory createOsDirectory(IFile file, IDirectory parent, List<IDirectory> children) {
+    public OSDirectory createOsDirectory(IFile file, IDirectory parent, IDirectory[] children) {
         return new OSDirOrVirtualAlbumFile(file, (OSDirectory) parent, children);
     }
 }

@@ -79,8 +79,9 @@ public class FileFacade implements IFile {
     }
 
     public static IFile[] get(String dbgContext, File[] files) {
-        IFile f[] = new FileFacade[files.length];
-        for (int i = 0; i < files.length; i++) {
+        int length = (files == null) ? 0 : files.length;
+        IFile[] f = new FileFacade[length];
+        for (int i = 0; i < length; i++) {
             f[i] = convert(dbgContext, files[i]);
         }
 
@@ -88,8 +89,9 @@ public class FileFacade implements IFile {
     }
 
     public static IFile[] get(String dbgContext, String[] files) {
-        IFile f[] = new FileFacade[files.length];
-        for (int i = 0; i < files.length; i++) {
+        int length = (files == null) ? 0 : files.length;
+        IFile[] f = new FileFacade[length];
+        for (int i = 0; i < length; i++) {
             f[i] = convert(dbgContext, files[i]);
         }
 
@@ -97,8 +99,9 @@ public class FileFacade implements IFile {
     }
 
     public static IFile[] get(String dbgContext, List<String> files) {
-        IFile f[] = new FileFacade[files.size()];
-        for (int i = 0; i < files.size(); i++) {
+        int length = (files == null) ? 0 : files.size();
+        IFile[] f = new FileFacade[length];
+        for (int i = 0; i < length; i++) {
             f[i] = convert(dbgContext, files.get(i));
         }
 

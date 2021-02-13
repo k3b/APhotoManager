@@ -19,8 +19,6 @@
  
 package de.k3b.io;
 
-import java.util.List;
-
 /**
  * android independant navigation for andoid-s ExpandableListView(Adapter).
  *
@@ -74,7 +72,7 @@ public class DirectoryNavigator implements IExpandableListViewNavigation<IDirect
                             "): index must be 0 .. " +
                             (Directory.getChildCount(group) - 1));
         }
-        return group.getChildren().get(childIndex);
+        return group.getChildren()[childIndex];
     }
 
     @Override
@@ -86,7 +84,7 @@ public class DirectoryNavigator implements IExpandableListViewNavigation<IDirect
                     "): index must be 0 .. " +
                     (getGroupCount() - 1));
         }
-        return currentGrandFather.getChildren().get(groupIndex);
+        return currentGrandFather.getChildren()[groupIndex];
     }
 
     public void setCurrentGrandFather(IDirectory currentGrandFather) {
@@ -105,14 +103,14 @@ public class DirectoryNavigator implements IExpandableListViewNavigation<IDirect
             IDirectory parent = newSelection.getParent();
             if (parent != null) {
                 if (Directory.getChildCount(newSelection) > 0) {
-                    this.mLastNavigateToGroupPosition = parent.getChildren().indexOf(newSelection);
+                    this.mLastNavigateToGroupPosition = parent.childIndexOf(newSelection);
                     this.mLastNavigateToChildPosition = UNDEFINED;
                     return parent;
                 }
                 IDirectory grandparent = parent.getParent();
                 if (grandparent != null) {
-                    this.mLastNavigateToGroupPosition = grandparent.getChildren().indexOf(parent);
-                    this.mLastNavigateToChildPosition = parent.getChildren().indexOf(newSelection);
+                    this.mLastNavigateToGroupPosition = grandparent.childIndexOf(parent);
+                    this.mLastNavigateToChildPosition = parent.childIndexOf(newSelection);
                     return grandparent;
                 }
             }
@@ -128,12 +126,12 @@ public class DirectoryNavigator implements IExpandableListViewNavigation<IDirect
         IDirectory found = this.getRoot();
         if (indexes != null) {
             for (int index : indexes) {
-                List<IDirectory> children = (found != null) ? found.getChildren() : null;
-                int childCount = (children != null) ? children.size() : 0;
+                IDirectory[] children = (found != null) ? found.getChildren() : null;
+                int childCount = (children != null) ? children.length : 0;
                 if ((index < 0) || (index >= childCount)) {
                     return null;
                 }
-                found = children.get(index);
+                found = children[index];
             }
         }
 

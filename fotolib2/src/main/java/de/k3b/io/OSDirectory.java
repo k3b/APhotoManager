@@ -39,7 +39,7 @@ public class OSDirectory implements IDirectory {
     private static final Logger logger = LoggerFactory.getLogger(LibGlobal.LOG_TAG);
 
     private IFile mCurrent = null;
-    private List<IDirectory> mChilden = null;
+    private IDirectory[] mChilden = null;
 
     private OSDirectory mParent = null;
 
@@ -51,7 +51,7 @@ public class OSDirectory implements IDirectory {
     private String virtualName = null;
 
     // protected constructor to allow unittesting with fake children
-    public OSDirectory(IFile current, OSDirectory parent, List<IDirectory> childen) {
+    public OSDirectory(IFile current, OSDirectory parent, IDirectory[] childen) {
         setCurrent(current);
         mParent = parent;
         mChilden = childen;
@@ -82,27 +82,31 @@ public class OSDirectory implements IDirectory {
         if (parentDir == null) return null;
 
         String name = file.getName();
-        List<IDirectory> children = parentDir.getChildren();
-        OSDirectory result = (OSDirectory) findChildByRelPath(children, name);
+        OSDirectory result = (OSDirectory) findChildByRelPath(parentDir.getChildren(), name);
 
         if (result == null) {
             result = root.createOsDirectory(file, parentDir, null);
-            children.add(result);
+            parentDir.addChild(result);
         }
         return result;
     }
 
-    /** factory method to be overwrittern by derived classes, if tree should consist of derived classes. */
-    @Override
-    public OSDirectory createOsDirectory(IFile file, IDirectory parent, List<IDirectory> children) {
-        return new OSDirectory(file, (OSDirectory) parent, children);
+    public static IDirectory findChildByRelPath(IDirectory[] children, String name) {
+        for (IDirectory cur : children) {
+            if (name.equals(cur.getRelPath())) {
+                return cur;
+            }
+        }
+        return null;
     }
 
     protected IFile getCurrent() {
         return mCurrent;
     }
 
-    /** reloads entry where dirFlag is one of the DIR_FLAG_... values */
+    /**
+     * reloads entry where dirFlag is one of the DIR_FLAG_... values
+     */
     @Override
     public void refresh() {
         setDirFlags(getCalculateFlags(mCurrent));
@@ -166,8 +170,29 @@ public class OSDirectory implements IDirectory {
         this.mCurrent = mCurrent.getParentFile().create(newFolderName);
     }
 
+    public static void toTreeString(StringBuffer result, String indent, IDirectory dir) {
+        result.append(indent).append(dir.getRelPath()).append("\n");
+
+        // avoid load on demand
+        IDirectory[] mChilden = (dir instanceof OSDirectory) ? ((OSDirectory) dir).mChilden : dir.getChildren();
+        if (mChilden != null) {
+            String childIndent = indent + "-";
+            for (IDirectory child : mChilden) {
+                toTreeString(result, childIndent, child);
+            }
+        }
+    }
+
+    /**
+     * factory method to be overwrittern by derived classes, if tree should consist of derived classes.
+     */
     @Override
-    public List<IDirectory> getChildren() {
+    public OSDirectory createOsDirectory(IFile file, IDirectory parent, IDirectory[] children) {
+        return new OSDirectory(file, (OSDirectory) parent, children);
+    }
+
+    @Override
+    public IDirectory[] getChildren() {
         if ((mCurrent != null) && (mChilden == null)) {
             IFile[] files = mCurrent.listFiles();
             addChildDirs(files);
@@ -175,11 +200,29 @@ public class OSDirectory implements IDirectory {
         return mChilden;
     }
 
+    @Override
+    public void removeChild(IDirectory... child) {
+        this.mChilden = Directory.removeChild(this, this.mChilden, child);
+    }
+
+    @Override
+    public void addChild(IDirectory... child) {
+        this.mChilden = Directory.add(this.mChilden, child);
+    }
+
+    @Override
+    public int childIndexOf(IDirectory child) {
+        return Directory.childIndexOf(mChilden, child);
+    }
+
+    protected boolean isDirectory(IFile file) {
+        return file.isDirectory();
+    }
+
     public void addChildDirs(IFile... files) {
-        if (mChilden == null) {
-            mChilden = new ArrayList<IDirectory>();
-        }
-        if (files != null) {
+        if (files != null || files.length > 0) {
+            List<IDirectory> newDirs = new ArrayList<>();
+
             for (IFile file : files) {
                 if ((file != null)
                         && !file.isHidden()
@@ -188,37 +231,17 @@ public class OSDirectory implements IDirectory {
                     // && file.canWrite() // bugfix: must be visible because writeprotected parentdir may contain writeenabled subdirs
                 ) {
                     if (isDirectory(file)) {
-                        mChilden.add(createOsDirectory(file, this, null));
+                        newDirs.add(createOsDirectory(file, this, null));
                     }
                 }
             }
-        }
-    }
-
-    public void addChildDirs(IDirectory... dirs) {
-        if (mChilden == null) {
-            mChilden = new ArrayList<>();
-        }
-        if (dirs != null) {
-            for (IDirectory dir : dirs) {
-                if (!mChilden.contains(dir)) {
-                    mChilden.add(dir);
+            if (mChilden != null) {
+                for (IDirectory old : mChilden) {
+                    newDirs.add(old);
                 }
             }
+            mChilden = newDirs.toArray(new IDirectory[newDirs.size()]);
         }
-    }
-
-    protected boolean isDirectory(IFile file) {
-        return file.isDirectory();
-    }
-
-    public static IDirectory findChildByRelPath(List<IDirectory> children, String name) {
-        for (IDirectory cur : children) {
-            if (name.equals(cur.getRelPath())) {
-                return cur;
-            }
-        }
-        return null;
     }
 
     @Override
@@ -239,13 +262,8 @@ public class OSDirectory implements IDirectory {
         mParent = null;
     }
 
-    private void destroy(List<IDirectory> childen) {
-        if (childen != null) {
-            for (IDirectory child : childen) {
-                child.destroy();
-            }
-            childen.clear();
-        }
+    public void addChildDirs(IDirectory... dirs) {
+        this.mChilden = Directory.add(mChilden, dirs);
     }
 
     @Override
@@ -264,15 +282,10 @@ public class OSDirectory implements IDirectory {
         return result.toString();
     }
 
-    public static void toTreeString(StringBuffer result, String indent, IDirectory dir) {
-        result.append(indent).append(dir.getRelPath()).append("\n");
-
-        // avoid load on demand
-        List<IDirectory> mChilden = (dir instanceof OSDirectory) ? ((OSDirectory) dir).mChilden : dir.getChildren();
-        if (mChilden != null) {
-            String childIndent = indent + "-";
-            for(IDirectory child : mChilden) {
-                toTreeString(result, childIndent, child);
+    private void destroy(IDirectory[] childen) {
+        if (childen != null) {
+            for (IDirectory child : childen) {
+                child.destroy();
             }
         }
     }
@@ -299,7 +312,7 @@ public class OSDirectory implements IDirectory {
     /** return the deepest added childFolder */
     public OSDirectory addChildFolder(String newCildFolderName) {
         if ((newCildFolderName != null) && (!newCildFolderName.isEmpty())) {
-            String subfolderNames[] = newCildFolderName.split("/|\\\\");
+            String[] subfolderNames = newCildFolderName.split("/|\\\\");
             return addChildSubFolders(subfolderNames);
         }
         return null;
@@ -311,16 +324,16 @@ public class OSDirectory implements IDirectory {
         if ((newCildFolderNames != null) && (newCildFolderNames.length > 0)) {
             for (String newCildFolderName : newCildFolderNames) {
                 if ((newCildFolderName != null) && (!newCildFolderName.isEmpty())) {
-                   current = current.addChildFolder(newCildFolderName, new ArrayList<IDirectory>());
+                    current = current.addChildFolder(newCildFolderName, null);
                 }
             }
         }
         return current;
     }
 
-    private OSDirectory addChildFolder(String newCildFolderName, List<IDirectory> grandChilden) {
+    private OSDirectory addChildFolder(String newCildFolderName, IDirectory[] grandChilden) {
         OSDirectory result = null;
-        List<IDirectory> children = this.getChildren();
+        IDirectory[] children = this.getChildren();
         File newRelativeChild = new File(newCildFolderName);
         if (!newRelativeChild.isAbsolute()) {
             result = (OSDirectory) findChildByRelPath(children, newCildFolderName);
@@ -329,7 +342,7 @@ public class OSDirectory implements IDirectory {
                 IFile newChildFile = mCurrent.create(newCildFolderName).getCanonicalFile();
                 result = createOsDirectory(newChildFile, this, grandChilden);
                 if (result != null) {
-                    children.add(result);
+                    this.addChild(result);
                 }
             }
         }

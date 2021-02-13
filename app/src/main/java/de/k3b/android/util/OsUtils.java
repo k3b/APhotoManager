@@ -88,7 +88,7 @@ public class OsUtils {
         OSDirectory rootDir = createOsDirectory(
                 FileFacade.convert(context + 1, "/"), factory);
 
-        if (rootDir.getChildren().size() == 0) {
+        if (rootDir.getChildren() == null || rootDir.getChildren().length == 0) {
             // load on demand has failed on non rooted device
 
             // externalStorageFile

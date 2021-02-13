@@ -53,7 +53,6 @@ import android.widget.Toast;
 import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
-import java.util.List;
 
 import de.k3b.LibGlobal;
 import de.k3b.android.androFotoFinder.Global;
@@ -553,7 +552,7 @@ public class DirectoryPickerFragment extends DialogFragment
         // delete from dir tree
         IDirectory parent = (dir != null) ? dir.getParent() :null;
         if (parent != null) {
-            parent.getChildren().remove(dir);
+            parent.removeChild(dir);
             dir.destroy();
         }
 
@@ -644,7 +643,7 @@ public class DirectoryPickerFragment extends DialogFragment
                 onParentPathBarButtonClick(newChild);
             } else {
                 msgId = R.string.mk_err_failed_format;
-                parentDir.getChildren().remove(newChild);
+                parentDir.removeChild(newChild);
                 newChild.destroy();
             }
             Toast.makeText(getActivity(), getActivity().getString(msgId, newPathAbsolute),
@@ -854,12 +853,13 @@ public class DirectoryPickerFragment extends DialogFragment
 
         // naviationchange only if there are children below child
         IDirectory newGrandParent = ((selectedChild != null) && (Directory.getChildCount(selectedChild) > 0)) ? selectedChild.getParent() : null;
-        List<IDirectory> siblings = (newGrandParent != null) ? newGrandParent.getChildren() : null;
 
-        if (siblings != null) {
-            int childPosition = siblings.indexOf(selectedChild);
+        int childPosition = (newGrandParent != null) ? newGrandParent.childIndexOf(selectedChild) : -1;
+        if (childPosition >= 0) {
             navigateTo(childPosition, newGrandParent);
+
         }
+
         updateParentPathBar(selectedChild);
         notifySelectionChanged(selectedChild);
     }

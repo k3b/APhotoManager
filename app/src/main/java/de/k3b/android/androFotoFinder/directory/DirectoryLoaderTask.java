@@ -25,8 +25,6 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import java.util.List;
-
 import de.k3b.android.androFotoFinder.Global;
 import de.k3b.android.androFotoFinder.queries.FotoSql;
 import de.k3b.database.QueryParameter;
@@ -190,7 +188,7 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
     }
 
     private void compressLatLon(IDirectory result) {
-        List<IDirectory> children = (result != null) ? result.getChildren() : null;
+        IDirectory[] children = (result != null) ? result.getChildren() : null;
 
         if (children != null) {
             for (IDirectory _child: children) {

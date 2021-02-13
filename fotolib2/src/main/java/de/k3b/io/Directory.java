@@ -45,7 +45,7 @@ public class Directory implements IDirectory {
     private String relPath = null;
     private Boolean apmDir = null;
     private Directory parent = null;
-    private List<IDirectory> children = null;
+    private IDirectory[] children = null;
 
     private int nonDirItemCount = 0;
     private int nonDirSubItemCount = 0;
@@ -64,17 +64,15 @@ public class Directory implements IDirectory {
         setNonDirItemCount(nonDirItemCount);
     }
 
-    /** factory method to be overwrittern by derived classes, if tree should consist of derived classes. */
-    @Override
-    public IDirectory createOsDirectory(IFile file, IDirectory parent, List<IDirectory> children) {
-        final Directory result = new Directory(file.getName(), parent, 0);
-
-        if (children != null) {
-            for (IDirectory child : children) {
-                addChild(child);
+    public static IDirectory[] removeChild(IDirectory parent, IDirectory[] children, IDirectory... child) {
+        List<Integer> positions = new ArrayList<>();
+        for (int i = 0; i < child.length; i++) {
+            int index = parent.childIndexOf(child[i]);
+            if (index >= 0 && !positions.contains(index)) {
+                positions.add(index);
             }
         }
-        return result;
+        return removeChild(children, positions);
     }
 
     @Override
@@ -88,11 +86,68 @@ public class Directory implements IDirectory {
         parent = null;
     }
 
-    protected void addChild(IDirectory child) {
-        if (this.children == null)
-            this.children = new ArrayList<>();
-        this.children.add(child);
+    public static IDirectory[] removeChild(IDirectory[] children, List<Integer> removePositions) {
+        if (removePositions != null && removePositions.size() > 0) {
+            IDirectory[] newArray = new IDirectory[children.length - removePositions.size()];
+            int in = children.length;
+            int out = newArray.length;
+            while (--in >= 0) {
+                if (!removePositions.contains(in)) {
+                    newArray[--out] = children[in];
+                }
+            }
+            return newArray;
+        }
+        return children;
+    }
 
+    public static IDirectory[] add(IDirectory[] oldChildren, IDirectory... newChildren) {
+        if (newChildren == null || newChildren.length == 0) return oldChildren;
+        if (oldChildren == null || oldChildren.length == 0) return newChildren;
+
+        IDirectory[] result = new IDirectory[newChildren.length + oldChildren.length];
+        System.arraycopy(oldChildren, 0, result, 0, oldChildren.length);
+
+        System.arraycopy(newChildren, 0, result, oldChildren.length, newChildren.length);
+        return result;
+    }
+
+    public static <T> int childIndexOf(T[] children, T child) {
+        if (child != null && children != null) {
+            for (int i = children.length - 1; i >= 0; i--) {
+                if (child.equals(children[i])) return i;
+            }
+        }
+        return -1;
+    }
+
+    public static int getChildCount(IDirectory item) {
+        if ((item != null) && (item.getChildren() != null)) return item.getChildren().length;
+        return 0;
+    }
+
+    /**
+     * factory method to be overwrittern by derived classes, if tree should consist of derived classes.
+     */
+    @Override
+    public IDirectory createOsDirectory(IFile file, IDirectory parent, IDirectory[] children) {
+        final Directory result = new Directory(file.getName(), parent, 0);
+
+        if (children != null) {
+            for (IDirectory child : children) {
+                addChild(child);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void removeChild(IDirectory... child) {
+        children = Directory.removeChild(this, children, child);
+    }
+
+    public void addChild(IDirectory... child) {
+        this.children = add(this.children, child);
     }
 
     /*------------------- simple properties ------------------------*/
@@ -123,12 +178,13 @@ public class Directory implements IDirectory {
     }
 
     @Override
-    public List<IDirectory> getChildren() {
-        return children;
+    public int childIndexOf(IDirectory child) {
+        return childIndexOf(children, child);
     }
 
-    public void setChildren(List<IDirectory> children) {
-        this.children = children;
+    @Override
+    public IDirectory[] getChildren() {
+        return children;
     }
 
     /*------------------- formatting ------------------------*/
@@ -239,9 +295,8 @@ public class Directory implements IDirectory {
         if (iconID > this.iconID) this.iconID = iconID;
     }
 
-    public static int getChildCount(IDirectory item) {
-        if ((item != null) && (item.getChildren() != null)) return item.getChildren().size();
-        return 0;
+    public void setChildren(IDirectory[] children) {
+        this.children = children;
     }
 
     @Override

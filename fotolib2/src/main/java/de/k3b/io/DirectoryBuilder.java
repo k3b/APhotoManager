@@ -19,6 +19,7 @@
  
 package de.k3b.io;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -34,27 +35,31 @@ public class DirectoryBuilder {
         root = null;
     }
 
-    public IDirectory getRoot() {
-        if (root != null) {
-            List<IDirectory> children = root.getChildren();
-            compress(children);
-            createStatistics(children);
-        }
-        return root;
+    private static List<IDirectory> getChildren(Directory dir) {
+        return (dir != null && dir.getChildren() != null) ? Arrays.asList(dir.getChildren()) : null;
     }
 
     public static void createStatistics(List<IDirectory> children) {
         if (children != null) {
-            for (IDirectory _child: children) {
+            for (IDirectory _child : children) {
                 Directory child = (Directory) _child;
                 child.setNonDirSubItemCount(child.getNonDirItemCount()).setDirCount(0).setSubDirCount(0);
-                createStatistics(child.getChildren());
+                createStatistics(getChildren(child));
                 IDirectory parent = child.getParent();
                 if (parent != null) {
-                    ((Directory)parent).addChildStatistics(child.getSubDirCount(), child.getNonDirSubItemCount(), child.getSelectionIconID());
+                    ((Directory) parent).addChildStatistics(child.getSubDirCount(), child.getNonDirSubItemCount(), child.getSelectionIconID());
                 }
             }
         }
+    }
+
+    public IDirectory getRoot() {
+        if (root != null) {
+            List<IDirectory> children = getChildren(root);
+            compress(children);
+            createStatistics(children);
+        }
+        return root;
     }
 
     private void compress(Directory firstChild) {
@@ -64,7 +69,7 @@ public class DirectoryBuilder {
             item = mergeDirWithChildIfPossible(firstChild);
             mergeCound++;
         }
-        List<IDirectory> children = (firstChild != null) ? firstChild.getChildren() : null;
+        List<IDirectory> children = getChildren(firstChild);
 
         if ((mergeCound > 0) && (children != null)) {
             for (IDirectory _child: children) {
@@ -86,15 +91,14 @@ public class DirectoryBuilder {
     }
 
     private Directory mergeDirWithChildIfPossible(Directory firstChild) {
-        List<IDirectory> children = (firstChild != null) ? firstChild.getChildren() : null;
+        List<IDirectory> children = getChildren(firstChild);
 
         if ((children != null) && children.size() == 1) {
             Directory child = (Directory) children.get(0);
             firstChild.setRelPath(firstChild.getRelPath() + Directory.PATH_DELIMITER + child.getRelPath());
             firstChild.setNonDirItemCount(firstChild.getNonDirItemCount() + child.getNonDirItemCount());
 
-            children = child.getChildren();
-            firstChild.setChildren(children);
+            firstChild.setChildren(child.getChildren());
 
             child.setParent(null);
             child.setChildren(null);
@@ -130,7 +134,7 @@ public class DirectoryBuilder {
         if ((serach == null) || (serach.length() == 0))
             return addPath(elements, level + 1, root, iconID);
 
-        List<IDirectory> children = root.getChildren();
+        List<IDirectory> children = getChildren(root);
         if (children != null) {
             for (IDirectory _child: children) {
                 Directory child = (Directory) _child;

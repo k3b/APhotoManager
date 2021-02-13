@@ -19,8 +19,6 @@
 
 package de.k3b.io;
 
-import java.util.List;
-
 import de.k3b.io.filefacade.IFile;
 
 /**
@@ -34,17 +32,24 @@ public interface IDirectory {
     int DIR_FLAG_NOMEDIA_ROOT   = 2; // containing ".nomedia"
 
     int DIR_FLAG_APM_DIR        = 8; // containing ".apm"
-    int DIR_FLAG_VIRTUAL_DIR    = 9; // containing "*.album"
+    int DIR_FLAG_VIRTUAL_DIR = 9; // containing "*.album"
     String APM_DIR_PREFIX = "§ ";
 
     String getRelPath();
+
     String getAbsolute();
 
-    IDirectory createOsDirectory(IFile file, IDirectory parent, List<IDirectory> children);
+    IDirectory createOsDirectory(IFile file, IDirectory parent, IDirectory[] children);
 
     IDirectory getParent();
 
-    List<IDirectory> getChildren();
+    IDirectory[] getChildren();
+
+    void removeChild(IDirectory... child);
+
+    void addChild(IDirectory... child);
+
+    int childIndexOf(IDirectory child);
 
     IDirectory find(String path);
 
@@ -54,7 +59,9 @@ public interface IDirectory {
 
     int getDirFlags();
 
-    /** reloads entry flags */
+    /**
+     * reloads entry flags
+     */
     void refresh();
 
     /** #114: update internal data after a folder has been renamed in the gui */

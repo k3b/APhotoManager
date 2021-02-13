@@ -27,6 +27,40 @@ import org.junit.Test;
  */
 public class DirectoryTests {
     @Test
+    public void shoudChildIndexOf() {
+        IDirectory root = createDirsABC();
+
+        Assert.assertEquals(1, root.childIndexOf(root.getChildren()[1]));
+    }
+
+    @Test
+    public void shoudRemoveChild() {
+        IDirectory root = createDirsABC();
+
+        root.removeChild(root.getChildren()[1], null);
+        assertTree("x(3)|a|c|", root);
+    }
+
+    @Test
+    public void shoudAdd() {
+        IDirectory root = createDirsABC();
+
+        new Directory("d", root, 0);
+        // root.addChild();
+        assertTree("x(3)|a|b|c|d|", root);
+    }
+
+    private IDirectory createDirsABC() {
+        DirectoryBuilder directoryBuilder = new DirectoryBuilder();
+        directoryBuilder.add("/x/a", 0, 0);
+        directoryBuilder.add("/x/b", 0, 0);
+        directoryBuilder.add("/x/c", 0, 0);
+        IDirectory root = directoryBuilder.getRoot().getChildren()[0];
+        assertTree("x(3)|a|b|c|", root);
+        return root;
+    }
+
+    @Test
     public void shoudGetAbsolute() {
         Directory root = new Directory("a", null, 0);
         IDirectory leave = new Directory("b", root, 0);
@@ -37,7 +71,7 @@ public class DirectoryTests {
     public void shoudCompress() {
         DirectoryBuilder builder = new DirectoryBuilder();
         builder.add("/a/b/c/", 0, 0);
-        IDirectory result = builder.getRoot().getChildren().get(0);
+        IDirectory result = builder.getRoot().getChildren()[0];
         Assert.assertEquals("a/b/c", result.getRelPath());
     }
 
@@ -47,7 +81,7 @@ public class DirectoryTests {
         builder.add("/a/b", 1, 0);
         builder.add("/a/b/c",2, 0);
         builder.add("/a/b/c/d",4, 0);
-        IDirectory root = builder.getRoot().getChildren().get(0);
+        IDirectory root = builder.getRoot().getChildren()[0];
         assertTree("a/b(1+1):(1+6)|c(1):(2+4)|d:(4)|", root);
     }
 
@@ -61,7 +95,7 @@ public class DirectoryTests {
     public void shoudBuild1() {
         DirectoryBuilder builder = new DirectoryBuilder();
         builder.add("/a/b/c/", 0, 0);
-        IDirectory root = builder.getRoot().getChildren().get(0);
+        IDirectory root = builder.getRoot().getChildren()[0];
         Assert.assertEquals("/a/b/c", root.getAbsolute());
     }
 
@@ -71,7 +105,7 @@ public class DirectoryTests {
         builder.add("/a/b", 0, 0);
         builder.add("/a/b/c1", 0, 0);
         builder.add("/a/b/c2", 0, 0);
-        IDirectory root = builder.getRoot().getChildren().get(0);
+        IDirectory root = builder.getRoot().getChildren()[0];
         assertTree("a/b(2)|c1|c2|", root);
     }
 
@@ -80,7 +114,7 @@ public class DirectoryTests {
         DirectoryBuilder builder = new DirectoryBuilder();
         builder.add("/a/b/c1", 0, 0);
         builder.add("/a/b/c2", 0, 0);
-        IDirectory root = builder.getRoot().getChildren().get(0);
+        IDirectory root = builder.getRoot().getChildren()[0];
         assertTree("a/b(2)|c1|c2|", root);
     }
 
@@ -88,7 +122,7 @@ public class DirectoryTests {
     public void shoudSetNonDirItemCount() {
         DirectoryBuilder builder = new DirectoryBuilder();
         builder.add("/a/b/c", 4, 0);
-        Directory root = (Directory) builder.getRoot().getChildren().get(0);
+        Directory root = (Directory) builder.getRoot().getChildren()[0];
         Assert.assertEquals(4, root.getNonDirItemCount());
     }
 
@@ -97,7 +131,7 @@ public class DirectoryTests {
         DirectoryBuilder builder = new DirectoryBuilder();
         builder.add("/a/b/c", 4, 0);
         builder.add("/a/b/c", 3, 0);
-        Directory root = (Directory) builder.getRoot().getChildren().get(0);
+        Directory root = (Directory) builder.getRoot().getChildren()[0];
         Assert.assertEquals(7, root.getNonDirItemCount());
     }
 
