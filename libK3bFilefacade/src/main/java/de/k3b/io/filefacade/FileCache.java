@@ -26,64 +26,84 @@ import java.util.TreeMap;
 
 import de.k3b.io.FileUtilsBase;
 
-public class FileCache {
-    protected final Map<String, FileCacheItem> items = new TreeMap<>();
+/**
+ * Cache for {@link FileCacheItem}s that holds {@link IFile}.
+ * <p>
+ * Example use
+ * <p>
+ * public static class FileCacheImpl extends FileCache<FileCache.FileCacheItem> {
+ *
+ * @param <T>
+ * @Override protected FileCacheItem create(IFile file) {
+ * return new FileCacheItem(file);
+ * }
+ * @Override protected FileCacheItem[] toArray(List<FileCacheItem> resultList) {
+ * return resultList.toArray(new FileCacheItem[resultList.size()]);
+ * }
+ * }
+ */
+public abstract class FileCache<T extends FileCache.FileCacheItem> {
+    protected final Map<String, T> items = new TreeMap<>();
+
+    abstract protected T create(IFile file);
+
+    abstract protected T[] toArray(List<T> resultList);
 
     public int size() {
         return items.size();
     }
 
-    public FileCacheItem get(IFile fullPath) {
-        FileCacheItem result = null;
+    public T get(IFile fullPath) {
+        T result = null;
         if (fullPath != null) {
             result = get(fullPath.getCanonicalPath());
         }
         return result;
     }
 
-    public FileCacheItem get(String fullPath) {
-        FileCacheItem result = null;
+    public T get(String fullPath) {
+        T result = null;
         if (fullPath != null) {
             result = items.get(fullPath.toLowerCase());
         }
         return result;
     }
 
-    public FileCacheItem put(IFile file) {
+    public T put(IFile file) {
         String canonicalPath = (file != null) ? file.getCanonicalPath() : null;
-         FileCacheItem result = null;
+        T result = null;
 
         if (canonicalPath != null) {
             result = items.get(canonicalPath);
             if (result == null) {
-                result = new FileCacheItem(file);
+                result = create(file);
                 items.put(canonicalPath.toLowerCase(), result);
             }
         }
         return result;
     }
 
-    public FileCacheItem[] getChildDirs(FileCacheItem root) {
-        FileCacheItem[] result = null;
+    public T[] getChildDirs(T root) {
+        T[] result = null;
         if (root != null) {
-            result = root.childDirs;
+            result = (T[]) root.childDirs;
             if (result == null) {
                 boolean containsNomedia = false;
                 IFile[] iFiles = root.item.listFiles();
-                List<FileCacheItem> resultList = new ArrayList<>(iFiles.length);
+                List<T> resultList = new ArrayList<>(iFiles.length);
                 for (IFile i : iFiles) {
                     String path = i.getCanonicalPath();
                     if (path != null && path.toLowerCase().contains(FileUtilsBase.MEDIA_IGNORE_FILENAME)) {
                         containsNomedia = true;
                     }
                     if (i.isDirectory()) {
-                        FileCacheItem item = this.put(i);
+                        T item = this.put(i);
                         item.parent = root;
                         resultList.add(item);
                     }
                 }
                 root.isNomedia = containsNomedia;
-                result = resultList.toArray(new FileCacheItem[resultList.size()]);
+                result = toArray(resultList);
                 root.childDirs = result;
             }
 
@@ -95,10 +115,10 @@ public class FileCache {
         remove(get(file));
     }
 
-    public void remove(FileCacheItem item) {
+    public void remove(T item) {
         if (item != null) {
             if (item.childDirs != null) {
-                for (FileCacheItem i : item.childDirs) {
+                for (T i : (T[]) item.childDirs) {
                     remove(i);
                 }
                 item.childDirs = null;
@@ -112,10 +132,10 @@ public class FileCache {
         }
     }
 
-    protected static class FileCacheItem implements Comparable<FileCacheItem> {
+    protected static class FileCacheItem<T extends FileCache.FileCacheItem> implements Comparable<T> {
         final IFile item;
-        FileCacheItem[] childDirs;
-        FileCacheItem parent;
+        T[] childDirs;
+        T parent;
         Boolean isNomedia;
         Boolean isPrivate;
 
@@ -127,11 +147,11 @@ public class FileCache {
             return item;
         }
 
-        public FileCacheItem[] getChildDirs() {
+        public T[] getChildDirs() {
             return childDirs;
         }
 
-        public FileCacheItem getParent() {
+        public T getParent() {
             return parent;
         }
 
@@ -144,7 +164,7 @@ public class FileCache {
         }
 
         @Override
-        public int compareTo(FileCacheItem fileCache) {
+        public int compareTo(T fileCache) {
             String otherPath = (fileCache == null) ? null : fileCache.getItem().getCanonicalPath();
             String thisPath = getItem().getCanonicalPath();
             if (thisPath == null) {

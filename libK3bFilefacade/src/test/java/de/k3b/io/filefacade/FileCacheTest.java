@@ -22,16 +22,15 @@ package de.k3b.io.filefacade;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.List;
+
 import de.k3b.io.FileUtilsBase;
 
-import static org.junit.Assert.*;
-
 public class FileCacheTest {
-
     @Test
     public void get_putOneItem_found() {
         IFile file = new StringFileFacade().absolutePath("/Path/To/diR").dir();
-        FileCache sut = new FileCache();
+        FileCache sut = new FileCacheImpl();
 
         sut.put(file);
         IFile found = sut.get("/path/to/Dir").getItem();
@@ -43,7 +42,7 @@ public class FileCacheTest {
         StringFileFacade a = new StringFileFacade().absolutePath("/a").dir();
         StringFileFacade aa = new StringFileFacade().absolutePath("/a/a").parent(a).dir();
 
-        FileCache sut = new FileCache();
+        FileCache sut = new FileCacheImpl();
 
         FileCache.FileCacheItem root = sut.put(a);
         FileCache.FileCacheItem[] children = sut.getChildDirs(root);
@@ -61,7 +60,7 @@ public class FileCacheTest {
         StringFileFacade a = new StringFileFacade().absolutePath("/a").dir();
         StringFileFacade aa = new StringFileFacade().absolutePath("/a/" + FileUtilsBase.MEDIA_IGNORE_FILENAME).parent(a);
 
-        FileCache sut = new FileCache();
+        FileCache sut = new FileCacheImpl();
 
         FileCache.FileCacheItem root = sut.put(a);
         FileCache.FileCacheItem[] children = sut.getChildDirs(root);
@@ -77,17 +76,29 @@ public class FileCacheTest {
         StringFileFacade a = new StringFileFacade().absolutePath("/a").dir();
         StringFileFacade aa = new StringFileFacade().absolutePath("/a/a").parent(a).dir();
 
-        FileCache sut = new FileCache();
+        FileCache sut = new FileCacheImpl();
 
         FileCache.FileCacheItem root = sut.put(a);
         FileCache.FileCacheItem child = sut.getChildDirs(root)[0];
 
-        Assert.assertEquals("size dirs created",2, sut.size());
+        Assert.assertEquals("size dirs created", 2, sut.size());
 
         sut.remove(a);
-        Assert.assertEquals("size dirs removed",0, sut.size());
+        Assert.assertEquals("size dirs removed", 0, sut.size());
 
         Assert.assertNull(root.childDirs);
         Assert.assertNull(child.parent);
+    }
+
+    private static class FileCacheImpl extends FileCache<FileCache.FileCacheItem> {
+        @Override
+        protected FileCacheItem create(IFile file) {
+            return new FileCacheItem(file);
+        }
+
+        @Override
+        protected FileCacheItem[] toArray(List<FileCacheItem> resultList) {
+            return resultList.toArray(new FileCacheItem[resultList.size()]);
+        }
     }
 }
