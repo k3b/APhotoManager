@@ -97,7 +97,7 @@ public class QueryParameter {
     }
 
     public String[] toColumns() {
-        return Helper.toList(mColumns);
+        return Helper.toList((List<String>) mColumns);
     }
 
     public String removeFirstColumnThatContains(String namePart) {

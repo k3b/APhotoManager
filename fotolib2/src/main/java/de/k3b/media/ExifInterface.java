@@ -38,6 +38,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -382,7 +383,7 @@ public class ExifInterface {
     // Constants used for white balance
     public static final int WHITEBALANCE_AUTO = 0;
     public static final int WHITEBALANCE_MANUAL = 1;
-    private static SimpleDateFormat sFormatter;
+    private static final SimpleDateFormat sFormatter;
     // See Exchangeable image file format for digital still cameras: Exif version 2.2.
     // The following values are for parsing EXIF data area. There are tag groups in EXIF data area.
     // They are called "Image File Directory". They have multiple data formats to cover various
@@ -716,7 +717,7 @@ public class ExifInterface {
             new ExifTag(TAG_INTEROPERABILITY_IFD_POINTER, 40965, IFD_FORMAT_ULONG),
     };
     // List of indices of the indicated tag groups according to the IFD_POINTER_TAGS
-    private static final int[] IFD_POINTER_TAG_HINTS = new int[] {
+    private static final int[] IFD_POINTER_TAG_HINTS = new int[]{
             IFD_EXIF_HINT, IFD_GPS_HINT, IFD_INTEROPERABILITY_HINT
     };
     // Tags for indicating the thumbnail offset and length
@@ -724,24 +725,37 @@ public class ExifInterface {
             new ExifTag(TAG_JPEG_INTERCHANGE_FORMAT, 513, IFD_FORMAT_ULONG);
     private static final ExifTag JPEG_INTERCHANGE_FORMAT_LENGTH_TAG =
             new ExifTag(TAG_JPEG_INTERCHANGE_FORMAT_LENGTH, 514, IFD_FORMAT_ULONG);
-
-    // Mappings from tag number to tag name and each item represents one IFD tag group.
-    private static final HashMap<Integer,ExifTag>[] sNumner2ExifTag = new HashMap[EXIF_TAGS.length];
-    // Mappings from tag name to tag number and each item represents one IFD tag group.
-    private static final HashMap<String,ExifTag>[] sName2ExifTag = new HashMap[EXIF_TAGS.length];
+    private static final TagNumber2ExifTag[] sNumner2ExifTag = new TagNumber2ExifTag[EXIF_TAGS.length];
+    private static final TagName2ExifTag[] sName2ExifTag = new TagName2ExifTag[EXIF_TAGS.length];
+    // See JPEG File Interchange Format Version 1.02.
+    // The following values are defined for handling JPEG streams. In this implementation, we are
+    // not only getting information from EXIF but also from some JPEG special segments such as
+    // MARKER_COM for user comment and MARKER_SOFx for image width and height.
+    private static final Charset ASCII = StandardCharsets.UTF_8; //("US-ASCII");
+    private static final Charset UCS2 = StandardCharsets.UTF_16LE;
 
     // these have a special attribute string-formatting. must for all double attributes
     private static final HashSet<String> sTagSetForCompatibility = new HashSet<>(Arrays.asList(
             TAG_APERTURE, TAG_DIGITAL_ZOOM_RATIO, TAG_EXPOSURE_TIME, TAG_SUBJECT_DISTANCE,
             TAG_GPS_TIMESTAMP));
+    private static final Charset UTF16 = StandardCharsets.UTF_16;
 
-    // See JPEG File Interchange Format Version 1.02.
-    // The following values are defined for handling JPEG streams. In this implementation, we are
-    // not only getting information from EXIF but also from some JPEG special segments such as
-    // MARKER_COM for user comment and MARKER_SOFx for image width and height.
-    private static final Charset ASCII = Charset.forName ("UTF-8"); //("US-ASCII");
-    private static final Charset UCS2 = Charset.forName("UTF-16LE");
-    private static final Charset UTF16 = Charset.forName("UTF-16");
+    static {
+        sFormatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
+        sFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        // Build up the hash tables to look up Exif tags for reading Exif tags.
+        for (int hint = 0; hint < EXIF_TAGS.length; ++hint) {
+            sNumner2ExifTag[hint] = new TagNumber2ExifTag();
+            sName2ExifTag[hint] = new TagName2ExifTag();
+            for (ExifTag tag : EXIF_TAGS[hint]) {
+                sNumner2ExifTag[hint].put(tag.id, tag);
+                sName2ExifTag[hint].put(tag.name, tag);
+            }
+        }
+    }
+
+    //!!! tagname => tagvalue(with assoziated tagdefinition)
+    protected final TagName2ExifAttribute[] mAttributes = new TagName2ExifAttribute[EXIF_TAGS.length];
 
     // Identifier for EXIF APP1 segment in JPEG
     private static final byte[] IDENTIFIER_EXIF_APP1 = "Exif\0\0".getBytes(ASCII);
@@ -767,25 +781,91 @@ public class ExifInterface {
     private static final byte MARKER_APP1 = (byte) 0xe1;
     private static final byte MARKER_COM = (byte) 0xfe;
     private static final byte MARKER_EOI = (byte) 0xd9;
-    static {
-        sFormatter = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
-        sFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
-        // Build up the hash tables to look up Exif tags for reading Exif tags.
-        for (int hint = 0; hint < EXIF_TAGS.length; ++hint) {
-            sNumner2ExifTag[hint] = new HashMap<>();
-            sName2ExifTag[hint] = new HashMap<>();
-            for (ExifTag tag : EXIF_TAGS[hint]) {
-                sNumner2ExifTag[hint].put(tag.id, tag);
-                sName2ExifTag[hint].put(tag.name, tag);
+
+    // Prints out attributes for debugging.
+    public String getDebugString(String lineDelimiter, String... _keysToExclude) {
+        StringBuilder sb = new StringBuilder();
+        final List<String> keysToExclude = Arrays.asList(_keysToExclude);
+
+        for (int i = 0; i < mAttributes.length; ++i) {
+            TagName2ExifAttribute exifSegment = mAttributes[i];
+            String[] keys = exifSegment.keySet().toArray(new String[exifSegment.size()]);
+            Arrays.sort(keys);
+            // for display exif tags are sorted by tagName
+            for (String tagName : keys) {
+                if (!keysToExclude.contains(tagName)) {
+                    final ExifAttribute tagValue = exifSegment.get(tagName);
+                    sb.append("EXIF.").append(EXIF_TAG_NAMES[i]).append(".").append(tagName);
+                    if (DEBUG) {
+                        ExifTag tag = tagValue.exifTag;
+                        if (tag != null) {
+                            sb.append("(").append(tag.id).append("=0x")
+                                    .append(Integer.toHexString(tag.id)).append(")");
+                        }
+                    }
+                    sb.append("='").append(tagValue.getStringValue(mExifByteOrder)).append("'");
+                    if (DEBUG) {
+                        sb.append(" : ")
+                                .append(tagValue.getFormatName());
+                    }
+                    sb.append(lineDelimiter);
+                }
             }
+            sb.append(lineDelimiter);
         }
+        return sb.toString();
     }
 
     private boolean validJpgExifFormat = true;
     protected IFile mExifFile = null;
 
-    //!!! tagname => tagvalue(with assoziated tagdefinition)
-    protected final HashMap<String, ExifAttribute>[] mAttributes = new HashMap[EXIF_TAGS.length];
+    /**
+     * This function decides which parser to read the image data according to the given input stream
+     * type and the content of the input stream. In each case, it reads the first three bytes to
+     * determine whether the image data format is JPEG or not.
+     */
+    private void loadAttributes(InputStream in) {
+        try {
+            // Initialize mAttributes.
+            for (int i = 0; i < EXIF_TAGS.length; ++i) {
+                mAttributes[i] = new TagName2ExifAttribute();
+            }
+            getJpegAttributes(in);
+        } catch (IOException e) {
+            // Ignore exceptions in order to keep the compatibility with the old versions of
+            // ExifInterface.
+            logWarn("Invalid image.", e);
+            validJpgExifFormat = false;
+        } finally {
+            closeSilently(in, "Exifinterface loadAttributes " + in);
+            if (DEBUG_INTERNAL) {
+                logDebug(this.toString());
+            }
+        }
+    }
+
+    /**
+     * Stores the latitude and longitude value in a float array. The first element is
+     * the latitude, and the second element is the longitude. Returns false if the
+     * Exif tags are not available.
+     */
+    public boolean getLatLong(float[] output) {
+        String latValue = getAttribute(TAG_GPS_LATITUDE);
+        String latRef = getAttribute(TAG_GPS_LATITUDE_REF);
+        String lngValue = getAttribute(TAG_GPS_LONGITUDE);
+        String lngRef = getAttribute(TAG_GPS_LONGITUDE_REF);
+        if (latValue != null && latRef != null && lngValue != null && lngRef != null) {
+            try {
+                output[0] = convertRationalLatLonToFloat(latValue, latRef);
+                output[1] = convertRationalLatLonToFloat(lngValue, lngRef);
+                return true;
+            } catch (IllegalArgumentException e) {
+                // if values are not parseable
+            }
+        }
+        return false;
+    }
+
     private ByteOrder mExifByteOrder = ByteOrder.BIG_ENDIAN;
     private boolean mHasThumbnail;
     // The following values used for indicating a thumbnail position.
@@ -1133,38 +1213,171 @@ public class ExifInterface {
         return getDebugString("\n", TAG_DATETIME, TAG_GPS_VERSION_ID);
     }
 
-    // Prints out attributes for debugging.
-    public String getDebugString(String lineDelimiter, String... _keysToExclude) {
-        StringBuilder sb = new StringBuilder();
-        final List<String> keysToExclude = Arrays.asList(_keysToExclude);
-
-        for (int i = 0; i < mAttributes.length; ++i) {
-            HashMap<String, ExifAttribute> exifSegment = mAttributes[i];
-            String[] keys = exifSegment.keySet().toArray(new String[exifSegment.size()]);
-            Arrays.sort(keys);
-            // for display exif tags are sorted by tagName
-            for (String tagName : keys) {
-                if (!keysToExclude.contains(tagName)) {
-                    final ExifAttribute tagValue = exifSegment.get(tagName);
-                    sb.append("EXIF.").append(EXIF_TAG_NAMES[i]).append(".").append(tagName);
-                    if (DEBUG) {
-                        ExifTag tag = tagValue.exifTag;
-                        if (tag != null) {
-                            sb.append("(").append(tag.id).append("=0x")
-                                    .append(Integer.toHexString(tag.id)).append(")");
-                        }
-                    }
-                    sb.append("='").append(tagValue.getStringValue(mExifByteOrder)).append("'");
-                    if (DEBUG) {
-                        sb.append(" : ")
-                                .append(tagValue.getFormatName());
-                    }
-                    sb.append(lineDelimiter);
+    // Writes an Exif segment into the given output stream.
+    private int writeExifSegment(ByteOrderAwarenessDataOutputStream dataOutputStream,
+                                 int exifOffsetFromBeginning, byte[] thumbnail) throws IOException {
+        // The following variables are for calculating each IFD tag group size in bytes.
+        int[] ifdOffsets = new int[EXIF_TAGS.length];
+        int[] ifdDataSizes = new int[EXIF_TAGS.length];
+        // Remove IFD pointer tags (we'll re-add it later.)
+        for (ExifTag tag : IFD_POINTER_TAGS) {
+            removeAttribute(tag.name);
+        }
+        // Remove old thumbnail data
+        removeAttribute(JPEG_INTERCHANGE_FORMAT_TAG.name);
+        removeAttribute(JPEG_INTERCHANGE_FORMAT_LENGTH_TAG.name);
+        // Remove null value tags.
+        for (int hint = 0; hint < EXIF_TAGS.length; ++hint) {
+            for (Object obj : mAttributes[hint].entrySet().toArray()) {
+                final Map.Entry entry = (Map.Entry) obj;
+                if (entry.getValue() == null) {
+                    mAttributes[hint].remove(entry.getKey());
                 }
             }
-            sb.append(lineDelimiter);
         }
-        return sb.toString();
+        // Add IFD pointer tags. The next offset of primary image TIFF IFD will have thumbnail IFD
+        // offset when there is one or more tags in the thumbnail IFD.
+        if (!mAttributes[IFD_INTEROPERABILITY_HINT].isEmpty()) {
+            setAttribute(IFD_EXIF_HINT, IFD_POINTER_TAGS[2].name,
+                    ExifAttribute.createULong(IFD_POINTER_TAGS[2], 0, mExifByteOrder));
+        }
+        if (!mAttributes[IFD_EXIF_HINT].isEmpty()) {
+            setAttribute(IFD_TIFF_HINT, IFD_POINTER_TAGS[0].name,
+                    ExifAttribute.createULong(IFD_POINTER_TAGS[0], 0, mExifByteOrder));
+        }
+        if (!mAttributes[IFD_GPS_HINT].isEmpty()) {
+            setAttribute(IFD_TIFF_HINT, IFD_POINTER_TAGS[1].name,
+                    ExifAttribute.createULong(IFD_POINTER_TAGS[1], 0, mExifByteOrder));
+        }
+        if (mHasThumbnail) {
+            setAttribute(IFD_TIFF_HINT, JPEG_INTERCHANGE_FORMAT_TAG.name,
+                    ExifAttribute.createULong(JPEG_INTERCHANGE_FORMAT_TAG, 0, mExifByteOrder));
+            setAttribute(IFD_TIFF_HINT, JPEG_INTERCHANGE_FORMAT_LENGTH_TAG.name,
+                    ExifAttribute.createULong(JPEG_INTERCHANGE_FORMAT_LENGTH_TAG, mThumbnailLength, mExifByteOrder));
+        }
+        // Calculate IFD group data area sizes. IFD group data area is assigned to save the entry
+        // value which has a bigger size than 4 bytes.
+        for (int i = 0; i < EXIF_TAGS.length; ++i) {
+            int sum = 0;
+            for (Map.Entry entry : mAttributes[i].entrySet()) {
+                final ExifAttribute exifAttribute = (ExifAttribute) entry.getValue();
+                final int size = exifAttribute.size();
+                if (size > 4) {
+                    sum += size;
+                }
+            }
+            ifdDataSizes[i] += sum;
+        }
+        // Calculate IFD offsets.
+        int position = 8;
+        for (int hint = 0; hint < EXIF_TAGS.length; ++hint) {
+            if (!mAttributes[hint].isEmpty()) {
+                ifdOffsets[hint] = position;
+                position += 2 + mAttributes[hint].size() * 12 + 4 + ifdDataSizes[hint];
+            }
+        }
+        if (mHasThumbnail) {
+            int thumbnailOffset = position;
+            setAttribute(IFD_TIFF_HINT, JPEG_INTERCHANGE_FORMAT_TAG.name,
+                    ExifAttribute.createULong(JPEG_INTERCHANGE_FORMAT_TAG, thumbnailOffset, mExifByteOrder));
+            mThumbnailOffset = exifOffsetFromBeginning + thumbnailOffset;
+            position += mThumbnailLength;
+        }
+        // Calculate the total size
+        int totalSize = position + 8;  // eight bytes is for header part.
+        if (DEBUG_INTERNAL) {
+            logDebug("totalSize length: " + totalSize);
+            for (int i = 0; i < EXIF_TAGS.length; ++i) {
+                logDebug(String.format("index: %d, offsets: %d, tag count: %d, data sizes: %d",
+                        i, ifdOffsets[i], mAttributes[i].size(), ifdDataSizes[i]));
+            }
+        }
+        // Update IFD pointer tags with the calculated offsets.
+        if (!mAttributes[IFD_EXIF_HINT].isEmpty()) {
+            setAttribute(IFD_TIFF_HINT, IFD_POINTER_TAGS[0].name,
+                    ExifAttribute.createULong(IFD_POINTER_TAGS[0], ifdOffsets[IFD_EXIF_HINT], mExifByteOrder));
+        }
+        if (!mAttributes[IFD_GPS_HINT].isEmpty()) {
+            setAttribute(IFD_TIFF_HINT, IFD_POINTER_TAGS[1].name,
+                    ExifAttribute.createULong(IFD_POINTER_TAGS[1], ifdOffsets[IFD_GPS_HINT], mExifByteOrder));
+        }
+        if (!mAttributes[IFD_INTEROPERABILITY_HINT].isEmpty()) {
+            setAttribute(IFD_EXIF_HINT, IFD_POINTER_TAGS[2].name, ExifAttribute.createULong(
+                    IFD_POINTER_TAGS[2], ifdOffsets[IFD_INTEROPERABILITY_HINT], mExifByteOrder));
+        }
+        // Write TIFF Headers. See JEITA CP-3451C Table 1. page 10.
+        dataOutputStream.writeUnsignedShort(totalSize);
+        dataOutputStream.write(IDENTIFIER_EXIF_APP1);
+        dataOutputStream.writeShort(mExifByteOrder == ByteOrder.BIG_ENDIAN
+                ? BYTE_ALIGN_MM : BYTE_ALIGN_II);
+        dataOutputStream.setByteOrder(mExifByteOrder);
+        dataOutputStream.writeUnsignedShort(0x2a);
+        dataOutputStream.writeUnsignedInt(8);
+        // Write IFD groups. See JEITA CP-3451C Figure 7. page 12.
+        for (int hint = 0; hint < EXIF_TAGS.length; ++hint) {
+            TagName2ExifAttribute mAttributeSegment = mAttributes[hint];
+            int segmentSize = mAttributeSegment.size();
+            if (segmentSize > 0) {
+                // See JEITA CP-3451C 4.6.2 IFD structure. page 13.
+                // Write entry count
+                dataOutputStream.writeUnsignedShort(segmentSize);
+                // Write entry info
+                int dataOffset = ifdOffsets[hint] + 2 + segmentSize * 12 + 4;
+                ExifAttribute[] values = mAttributeSegment.values().toArray(new ExifAttribute[segmentSize]);
+
+                // in jpg file values must be sorted by exif id
+                Arrays.sort(values);
+                for (final ExifAttribute attribute : values) {
+                    final ExifTag tag = attribute.exifTag;
+                    final int tagNumber = tag.id;
+                    final int size = attribute.size();
+                    dataOutputStream.writeUnsignedShort(tagNumber);
+
+                    // k3b: IFD_FORMAT_UCS2LE_STRING not supported by exif. use byte instead
+                    int format = attribute.format;
+                    if ((format == IFD_FORMAT_UCS2LE_STRING) || (format == IFD_FORMAT_PREFIX_STRING)) {
+                        format = tag.secondaryFormat;
+                    }
+
+                    dataOutputStream.writeUnsignedShort(format);
+                    dataOutputStream.writeInt(attribute.numberOfComponents);
+                    if (size > 4) {
+                        dataOutputStream.writeUnsignedInt(dataOffset);
+                        dataOffset += size;
+                    } else {
+                        dataOutputStream.write(attribute.bytes);
+                        // Fill zero up to 4 bytes
+                        if (size < 4) {
+                            for (int i = size; i < 4; ++i) {
+                                dataOutputStream.writeByte(0);
+                            }
+                        }
+                    }
+                }
+                // Write the next offset. It writes the offset of thumbnail IFD if there is one or
+                // more tags in the thumbnail IFD when the current IFD is the primary image TIFF
+                // IFD; Otherwise 0.
+                if (hint == 0 && !mAttributes[IFD_THUMBNAIL_HINT].isEmpty()) {
+                    dataOutputStream.writeUnsignedInt(ifdOffsets[IFD_THUMBNAIL_HINT]);
+                } else {
+                    dataOutputStream.writeUnsignedInt(0);
+                }
+                // Write values of data field exceeding 4 bytes after the next offset.
+                for (final ExifAttribute attribute : values) {
+                    if (attribute.bytes.length > 4) {
+                        dataOutputStream.write(attribute.bytes, 0, attribute.bytes.length);
+                    }
+                }
+            }
+        }
+
+        if (thumbnail != null) {
+            dataOutputStream.write(thumbnail);
+        }
+
+        // Reset the byte order to big endian in order to write remaining parts of the JPEG file.
+        dataOutputStream.setByteOrder(ByteOrder.BIG_ENDIAN);
+        return totalSize;
     }
 
     /**
@@ -1337,29 +1550,8 @@ public class ExifInterface {
         return this;
     }
 
-    /**
-     * This function decides which parser to read the image data according to the given input stream
-     * type and the content of the input stream. In each case, it reads the first three bytes to
-     * determine whether the image data format is JPEG or not.
-     */
-    private void loadAttributes(InputStream in) {
-        try {
-            // Initialize mAttributes.
-            for (int i = 0; i < EXIF_TAGS.length; ++i) {
-                mAttributes[i] = new HashMap();
-            }
-            getJpegAttributes(in);
-        } catch (IOException e) {
-            // Ignore exceptions in order to keep the compatibility with the old versions of
-            // ExifInterface.
-            logWarn("Invalid image.", e);
-            validJpgExifFormat = false;
-        } finally {
-            closeSilently(in, "Exifinterface loadAttributes " + in);
-            if (DEBUG_INTERNAL) {
-                logDebug(this.toString());
-            }
-        }
+    // Mappings from tag number to tag name and each item represents one IFD tag group.
+    private static class TagNumber2ExifTag extends HashMap<Integer, ExifTag> {
     }
 
     // Loads EXIF attributes from a JPEG input stream.
@@ -1511,26 +1703,8 @@ public class ExifInterface {
         return range;
     }
 
-    /**
-     * Stores the latitude and longitude value in a float array. The first element is
-     * the latitude, and the second element is the longitude. Returns false if the
-     * Exif tags are not available.
-     */
-    public boolean getLatLong(float output[]) {
-        String latValue = getAttribute(TAG_GPS_LATITUDE);
-        String latRef = getAttribute(TAG_GPS_LATITUDE_REF);
-        String lngValue = getAttribute(TAG_GPS_LONGITUDE);
-        String lngRef = getAttribute(TAG_GPS_LONGITUDE_REF);
-        if (latValue != null && latRef != null && lngValue != null && lngRef != null) {
-            try {
-                output[0] = convertRationalLatLonToFloat(latValue, latRef);
-                output[1] = convertRationalLatLonToFloat(lngValue, lngRef);
-                return true;
-            } catch (IllegalArgumentException e) {
-                // if values are not parseable
-            }
-        }
-        return false;
+    // Mappings from tag name to tag number and each item represents one IFD tag group.
+    private static class TagName2ExifTag extends HashMap<String, ExifTag> {
     }
 
     /**
@@ -2330,171 +2504,8 @@ public class ExifInterface {
         }
         return -1;
     }
-    // Writes an Exif segment into the given output stream.
-    private int writeExifSegment(ByteOrderAwarenessDataOutputStream dataOutputStream,
-            int exifOffsetFromBeginning, byte[] thumbnail) throws IOException {
-        // The following variables are for calculating each IFD tag group size in bytes.
-        int[] ifdOffsets = new int[EXIF_TAGS.length];
-        int[] ifdDataSizes = new int[EXIF_TAGS.length];
-        // Remove IFD pointer tags (we'll re-add it later.)
-        for (ExifTag tag : IFD_POINTER_TAGS) {
-            removeAttribute(tag.name);
-        }
-        // Remove old thumbnail data
-        removeAttribute(JPEG_INTERCHANGE_FORMAT_TAG.name);
-        removeAttribute(JPEG_INTERCHANGE_FORMAT_LENGTH_TAG.name);
-        // Remove null value tags.
-        for (int hint = 0; hint < EXIF_TAGS.length; ++hint) {
-            for (Object obj : mAttributes[hint].entrySet().toArray()) {
-                final Map.Entry entry = (Map.Entry) obj;
-                if (entry.getValue() == null) {
-                    mAttributes[hint].remove(entry.getKey());
-                }
-            }
-        }
-        // Add IFD pointer tags. The next offset of primary image TIFF IFD will have thumbnail IFD
-        // offset when there is one or more tags in the thumbnail IFD.
-        if (!mAttributes[IFD_INTEROPERABILITY_HINT].isEmpty()) {
-            setAttribute(IFD_EXIF_HINT,IFD_POINTER_TAGS[2].name,
-                    ExifAttribute.createULong(IFD_POINTER_TAGS[2], 0, mExifByteOrder));
-        }
-        if (!mAttributes[IFD_EXIF_HINT].isEmpty()) {
-            setAttribute(IFD_TIFF_HINT,IFD_POINTER_TAGS[0].name,
-                    ExifAttribute.createULong(IFD_POINTER_TAGS[0], 0, mExifByteOrder));
-        }
-        if (!mAttributes[IFD_GPS_HINT].isEmpty()) {
-            setAttribute(IFD_TIFF_HINT,IFD_POINTER_TAGS[1].name,
-                    ExifAttribute.createULong(IFD_POINTER_TAGS[1], 0, mExifByteOrder));
-        }
-        if (mHasThumbnail) {
-            setAttribute(IFD_TIFF_HINT,JPEG_INTERCHANGE_FORMAT_TAG.name,
-                    ExifAttribute.createULong(JPEG_INTERCHANGE_FORMAT_TAG, 0, mExifByteOrder));
-            setAttribute(IFD_TIFF_HINT,JPEG_INTERCHANGE_FORMAT_LENGTH_TAG.name,
-                    ExifAttribute.createULong(JPEG_INTERCHANGE_FORMAT_LENGTH_TAG, mThumbnailLength, mExifByteOrder));
-        }
-        // Calculate IFD group data area sizes. IFD group data area is assigned to save the entry
-        // value which has a bigger size than 4 bytes.
-        for (int i = 0; i < EXIF_TAGS.length; ++i) {
-            int sum = 0;
-            for (Map.Entry entry : mAttributes[i].entrySet()) {
-                final ExifAttribute exifAttribute = (ExifAttribute) entry.getValue();
-                final int size = exifAttribute.size();
-                if (size > 4) {
-                    sum += size;
-                }
-            }
-            ifdDataSizes[i] += sum;
-        }
-        // Calculate IFD offsets.
-        int position = 8;
-        for (int hint = 0; hint < EXIF_TAGS.length; ++hint) {
-            if (!mAttributes[hint].isEmpty()) {
-                ifdOffsets[hint] = position;
-                position += 2 + mAttributes[hint].size() * 12 + 4 + ifdDataSizes[hint];
-            }
-        }
-        if (mHasThumbnail) {
-            int thumbnailOffset = position;
-            setAttribute(IFD_TIFF_HINT,JPEG_INTERCHANGE_FORMAT_TAG.name,
-                    ExifAttribute.createULong(JPEG_INTERCHANGE_FORMAT_TAG, thumbnailOffset, mExifByteOrder));
-            mThumbnailOffset = exifOffsetFromBeginning + thumbnailOffset;
-            position += mThumbnailLength;
-        }
-        // Calculate the total size
-        int totalSize = position + 8;  // eight bytes is for header part.
-        if (DEBUG_INTERNAL) {
-            logDebug( "totalSize length: " + totalSize);
-            for (int i = 0; i < EXIF_TAGS.length; ++i) {
-                logDebug( String.format("index: %d, offsets: %d, tag count: %d, data sizes: %d",
-                        i, ifdOffsets[i], mAttributes[i].size(), ifdDataSizes[i]));
-            }
-        }
-        // Update IFD pointer tags with the calculated offsets.
-        if (!mAttributes[IFD_EXIF_HINT].isEmpty()) {
-            setAttribute(IFD_TIFF_HINT,IFD_POINTER_TAGS[0].name,
-                    ExifAttribute.createULong(IFD_POINTER_TAGS[0], ifdOffsets[IFD_EXIF_HINT], mExifByteOrder));
-        }
-        if (!mAttributes[IFD_GPS_HINT].isEmpty()) {
-            setAttribute(IFD_TIFF_HINT,IFD_POINTER_TAGS[1].name,
-                    ExifAttribute.createULong(IFD_POINTER_TAGS[1], ifdOffsets[IFD_GPS_HINT], mExifByteOrder));
-        }
-        if (!mAttributes[IFD_INTEROPERABILITY_HINT].isEmpty()) {
-            setAttribute(IFD_EXIF_HINT,IFD_POINTER_TAGS[2].name, ExifAttribute.createULong(
-                    IFD_POINTER_TAGS[2], ifdOffsets[IFD_INTEROPERABILITY_HINT], mExifByteOrder));
-        }
-        // Write TIFF Headers. See JEITA CP-3451C Table 1. page 10.
-        dataOutputStream.writeUnsignedShort(totalSize);
-        dataOutputStream.write(IDENTIFIER_EXIF_APP1);
-        dataOutputStream.writeShort(mExifByteOrder == ByteOrder.BIG_ENDIAN
-                ? BYTE_ALIGN_MM : BYTE_ALIGN_II);
-        dataOutputStream.setByteOrder(mExifByteOrder);
-        dataOutputStream.writeUnsignedShort(0x2a);
-        dataOutputStream.writeUnsignedInt(8);
-        // Write IFD groups. See JEITA CP-3451C Figure 7. page 12.
-        for (int hint = 0; hint < EXIF_TAGS.length; ++hint) {
-            HashMap<String, ExifAttribute> mAttributeSegment = mAttributes[hint];
-            int segmentSize = mAttributeSegment.size();
-            if (segmentSize > 0) {
-                // See JEITA CP-3451C 4.6.2 IFD structure. page 13.
-                // Write entry count
-                dataOutputStream.writeUnsignedShort(segmentSize);
-                // Write entry info
-                int dataOffset = ifdOffsets[hint] + 2 + segmentSize * 12 + 4;
-                ExifAttribute[] values = mAttributeSegment.values().toArray(new ExifAttribute[segmentSize]);
 
-                // in jpg file values must be sorted by exif id
-                Arrays.sort(values);
-                for (final ExifAttribute attribute : values) {
-                    final ExifTag tag = attribute.exifTag;
-                    final int tagNumber = tag.id;
-                    final int size = attribute.size();
-                    dataOutputStream.writeUnsignedShort(tagNumber);
-
-                    // k3b: IFD_FORMAT_UCS2LE_STRING not supported by exif. use byte instead
-                    int format = attribute.format;
-                    if ((format == IFD_FORMAT_UCS2LE_STRING) || (format == IFD_FORMAT_PREFIX_STRING)) {
-                        format = tag.secondaryFormat;
-                    }
-
-                    dataOutputStream.writeUnsignedShort(format);
-                    dataOutputStream.writeInt(attribute.numberOfComponents);
-                    if (size > 4) {
-                        dataOutputStream.writeUnsignedInt(dataOffset);
-                        dataOffset += size;
-                    } else {
-                        dataOutputStream.write(attribute.bytes);
-                        // Fill zero up to 4 bytes
-                        if (size < 4) {
-                            for (int i = size; i < 4; ++i) {
-                                dataOutputStream.writeByte(0);
-                            }
-                        }
-                    }
-                }
-                // Write the next offset. It writes the offset of thumbnail IFD if there is one or
-                // more tags in the thumbnail IFD when the current IFD is the primary image TIFF
-                // IFD; Otherwise 0.
-                if (hint == 0 && !mAttributes[IFD_THUMBNAIL_HINT].isEmpty()) {
-                    dataOutputStream.writeUnsignedInt(ifdOffsets[IFD_THUMBNAIL_HINT]);
-                } else {
-                    dataOutputStream.writeUnsignedInt(0);
-                }
-                // Write values of data field exceeding 4 bytes after the next offset.
-                for (final ExifAttribute attribute : values) {
-                    if (attribute.bytes.length > 4) {
-                        dataOutputStream.write(attribute.bytes, 0, attribute.bytes.length);
-                    }
-                }
-            }
-        }
-
-        if (thumbnail != null) {
-            dataOutputStream.write(thumbnail);
-        }
-
-        // Reset the byte order to big endian in order to write remaining parts of the JPEG file.
-        dataOutputStream.setByteOrder(ByteOrder.BIG_ENDIAN);
-        return totalSize;
+    private static class TagName2ExifAttribute extends HashMap<String, ExifAttribute> {
     }
 
     /**

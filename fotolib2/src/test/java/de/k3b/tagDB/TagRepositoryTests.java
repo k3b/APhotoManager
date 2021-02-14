@@ -74,7 +74,7 @@ public class TagRepositoryTests {
 
         TagRepository result = new TagRepository(this.repositoryFile);
 
-        List items = result.load();
+        List<Tag> items = result.load();
         for (int i=1; i <= numberOfItems; i++) {
             items.add(createItem(i));
         }
@@ -374,7 +374,7 @@ public class TagRepositoryTests {
     @Test
     public void shouldInsertIfNotFound() {
         TagRepository sut = createUnsavedRepo("shouldInsertIfNotFound", "a/b/c");
-        int changes = sut.includeTagNamesIfNotFound(ListUtils.fromString("c,b,q"));
+        int changes = sut.includeTagNamesIfNotFound((List<String>) ListUtils.fromString("c,b,q"));
         sut.save();
         Assert.assertEquals(1, changes);
     }

@@ -54,7 +54,7 @@ public class GalleryFilterFormatter extends MediaFormatter {
     public Map<CharSequence, Object> asMap(IGalleryFilter item) {
         if (item == null) return null;
 
-        final HashMap<CharSequence, Object> result = new HashMap();
+        final HashMap<CharSequence, Object> result = new HashMap<>();
         new Binder() {
             void bind(FieldID id, Object value) {
                 result.put(_labeler.get(id), value);
@@ -84,7 +84,7 @@ public class GalleryFilterFormatter extends MediaFormatter {
             final String formatLatLon = DirectoryFormatter.formatLatLon(
                     item.getLatitudeMin(), item.getLogituedMin(), item.getLatitudeMax(), item.getLogituedMax()).toString();
             bindIf(FieldID.latitude_longitude, formatLatLon.substring(0, formatLatLon.length() - 1),
-                    0 == formatLatLon.toString().compareTo(",;,;"));
+                    0 == formatLatLon.compareTo(",;,;"));
 
             final int ratingMin = item.getRatingMin();
             bindIf(FieldID.rating, ratingMin, ratingMin < 1);

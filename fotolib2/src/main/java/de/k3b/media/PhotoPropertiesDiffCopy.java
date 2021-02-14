@@ -223,7 +223,7 @@ public class PhotoPropertiesDiffCopy {
         if ((this.addedTags != null) && (this.addedTags.size() > 0)) {
             TagRepository tagRepository = TagRepository.getInstance();
             if (tagRepository != null) {
-                tagRepository.includeTagNamesIfNotFound(this.addedTags);
+                tagRepository.includeTagNamesIfNotFound((List<String>) this.addedTags);
                 tagRepository.save();
             }
         }
@@ -293,7 +293,7 @@ public class PhotoPropertiesDiffCopy {
      * to y m d h m s.
      * (inacurate: all months assumed to have 30 days) */
     private String formatTimeDifference(long timeAdded) {
-        int divisors[] = {1000, 60, 60, 24, 30, 12 ,365};
+        int[] divisors = {1000, 60, 60, 24, 30, 12, 365};
         long remaining = timeAdded;
         StringBuilder result = new StringBuilder();
         for (int divisor : divisors) {
