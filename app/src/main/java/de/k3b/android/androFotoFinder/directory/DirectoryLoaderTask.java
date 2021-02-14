@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020 by k3b.
+ * Copyright (c) 2015-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -188,7 +188,7 @@ public class DirectoryLoaderTask extends AsyncTask<QueryParameter, Integer, IDir
     }
 
     private void compressLatLon(IDirectory result) {
-        IDirectory[] children = (result != null) ? result.getChildren() : null;
+        IDirectory[] children = (result != null) ? result.getChildDirs() : null;
 
         if (children != null) {
             for (IDirectory _child: children) {

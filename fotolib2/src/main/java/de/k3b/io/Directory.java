@@ -64,7 +64,7 @@ public class Directory implements IDirectory {
         setNonDirItemCount(nonDirItemCount);
     }
 
-    public static IDirectory[] removeChild(IDirectory parent, IDirectory[] children, IDirectory... child) {
+    public static <T extends IDirectory> T[] removeChild(IDirectory<T> parent, T[] children, T... child) {
         List<Integer> positions = new ArrayList<>();
         for (int i = 0; i < child.length; i++) {
             int index = parent.childIndexOf(child[i]);
@@ -72,23 +72,12 @@ public class Directory implements IDirectory {
                 positions.add(index);
             }
         }
-        return removeChild(children, positions);
+        return removeChild(parent, children, positions);
     }
 
-    @Override
-    public void destroy() {
-        if (children != null) {
-            for (IDirectory child : getChildren()) {
-                child.destroy();
-            }
-            children = null;
-        }
-        parent = null;
-    }
-
-    public static IDirectory[] removeChild(IDirectory[] children, List<Integer> removePositions) {
+    public static <T extends IDirectory> T[] removeChild(IDirectory<T> factory, T[] children, List<Integer> removePositions) {
         if (removePositions != null && removePositions.size() > 0) {
-            IDirectory[] newArray = new IDirectory[children.length - removePositions.size()];
+            T[] newArray = factory.createOsDirectoryArray(children.length - removePositions.size());
             int in = children.length;
             int out = newArray.length;
             while (--in >= 0) {
@@ -101,15 +90,20 @@ public class Directory implements IDirectory {
         return children;
     }
 
-    public static IDirectory[] add(IDirectory[] oldChildren, IDirectory... newChildren) {
+    public static <T extends IDirectory> T[] add(IDirectory<T> factory, T[] oldChildren, T... newChildren) {
         if (newChildren == null || newChildren.length == 0) return oldChildren;
         if (oldChildren == null || oldChildren.length == 0) return newChildren;
 
-        IDirectory[] result = new IDirectory[newChildren.length + oldChildren.length];
+        T[] result = factory.createOsDirectoryArray(newChildren.length + oldChildren.length);
         System.arraycopy(oldChildren, 0, result, 0, oldChildren.length);
 
         System.arraycopy(newChildren, 0, result, oldChildren.length, newChildren.length);
         return result;
+    }
+
+    public static int getChildCount(IDirectory item) {
+        if ((item != null) && (item.getChildDirs() != null)) return item.getChildDirs().length;
+        return 0;
     }
 
     public static <T> int childIndexOf(T[] children, T child) {
@@ -121,16 +115,68 @@ public class Directory implements IDirectory {
         return -1;
     }
 
-    public static int getChildCount(IDirectory item) {
-        if ((item != null) && (item.getChildren() != null)) return item.getChildren().length;
-        return 0;
+    protected static StringBuilder toTreeString(StringBuilder result, Directory item, String delimiter, int options) {
+        if (item != null) {
+            result.append(item.getRelPath());
+            appendCount(result, item, options);
+            result.append(delimiter);
+
+            if (item.getChildDirs() != null) {
+                for (IDirectory child : item.getChildDirs()) {
+                    toTreeString(result, (Directory) child, delimiter, options);
+                }
+            }
+        }
+        return result;
+    }
+
+    private static IDirectory find(IDirectory parent, StringBuilder path) {
+        while (path.indexOf(PATH_DELIMITER) == 0) {
+            path.delete(0, PATH_DELIMITER.length());
+        }
+
+        int pathLen = path.length();
+        if (pathLen == 0) return parent;
+
+        if (parent.getChildDirs() != null) {
+            for (IDirectory child : parent.getChildDirs()) {
+                if (path.indexOf(child.getRelPath()) == 0) {
+                    int childLen = child.getRelPath().length();
+                    if (childLen == pathLen) return child; // found last path element
+                    int end = path.indexOf(PATH_DELIMITER, childLen);
+
+                    if (end == childLen) {
+                        path.delete(0, childLen);
+                        return find(child, path);
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public void destroy() {
+        if (children != null) {
+            for (IDirectory child : getChildDirs()) {
+                child.destroy();
+            }
+            children = null;
+        }
+        parent = null;
+    }
+
+    @Override
+    public void removeChild(IDirectory... child) {
+        children = Directory.removeChild(this, children, child);
     }
 
     /**
      * factory method to be overwrittern by derived classes, if tree should consist of derived classes.
      */
     @Override
-    public IDirectory createOsDirectory(IFile file, IDirectory parent, IDirectory[] children) {
+    public Directory createOsDirectory(IFile file, IDirectory parent, IDirectory[] children) {
         final Directory result = new Directory(file.getName(), parent, 0);
 
         if (children != null) {
@@ -139,15 +185,6 @@ public class Directory implements IDirectory {
             }
         }
         return result;
-    }
-
-    @Override
-    public void removeChild(IDirectory... child) {
-        children = Directory.removeChild(this, children, child);
-    }
-
-    public void addChild(IDirectory... child) {
-        this.children = add(this.children, child);
     }
 
     /*------------------- simple properties ------------------------*/
@@ -182,9 +219,12 @@ public class Directory implements IDirectory {
         return childIndexOf(children, child);
     }
 
+    /**
+     * factory method to be overwrittern by derived classes.
+     */
     @Override
-    public IDirectory[] getChildren() {
-        return children;
+    public Directory[] createOsDirectoryArray(int size) {
+        return new Directory[size];
     }
 
     /*------------------- formatting ------------------------*/
@@ -205,19 +245,8 @@ public class Directory implements IDirectory {
         return result.toString();
     }
 
-    protected static StringBuilder toTreeString(StringBuilder result, Directory item, String delimiter, int options) {
-        if (item != null) {
-            result.append(item.getRelPath());
-            appendCount(result, item, options);
-            result.append(delimiter);
-
-            if (item.getChildren() != null) {
-                for (IDirectory child : item.getChildren()) {
-                    toTreeString(result, (Directory) child, delimiter, options);
-                }
-            }
-        }
-        return result;
+    public void addChild(IDirectory... child) {
+        this.children = add(this, this.children, child);
     }
 
     public static void appendCount(StringBuilder result, IDirectory _item, int options) {
@@ -307,30 +336,9 @@ public class Directory implements IDirectory {
         return null;
     }
 
-    private static IDirectory find(IDirectory parent, StringBuilder path) {
-        while (path.indexOf(PATH_DELIMITER) == 0) {
-            path.delete(0, PATH_DELIMITER.length());
-        }
-
-        int pathLen = path.length();
-        if (pathLen == 0) return parent;
-
-        if (parent.getChildren() != null) {
-            for(IDirectory child : parent.getChildren()) {
-                if (path.indexOf(child.getRelPath()) == 0) {
-                    int childLen = child.getRelPath().length();
-                    if (childLen == pathLen) return child; // found last path element
-                    int end = path.indexOf(PATH_DELIMITER, childLen);
-
-                    if (end == childLen) {
-                        path.delete(0,childLen);
-                        return find(child, path);
-                    }
-                }
-            }
-        }
-
-        return null;
+    @Override
+    public IDirectory[] getChildDirs() {
+        return children;
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020 by k3b.
+ * Copyright (c) 2015-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager
  *
@@ -72,7 +72,7 @@ public class DirectoryNavigator implements IExpandableListViewNavigation<IDirect
                             "): index must be 0 .. " +
                             (Directory.getChildCount(group) - 1));
         }
-        return group.getChildren()[childIndex];
+        return group.getChildDirs()[childIndex];
     }
 
     @Override
@@ -84,7 +84,7 @@ public class DirectoryNavigator implements IExpandableListViewNavigation<IDirect
                     "): index must be 0 .. " +
                     (getGroupCount() - 1));
         }
-        return currentGrandFather.getChildren()[groupIndex];
+        return currentGrandFather.getChildDirs()[groupIndex];
     }
 
     public void setCurrentGrandFather(IDirectory currentGrandFather) {
@@ -126,7 +126,7 @@ public class DirectoryNavigator implements IExpandableListViewNavigation<IDirect
         IDirectory found = this.getRoot();
         if (indexes != null) {
             for (int index : indexes) {
-                IDirectory[] children = (found != null) ? found.getChildren() : null;
+                IDirectory[] children = (found != null) ? found.getChildDirs() : null;
                 int childCount = (children != null) ? children.length : 0;
                 if ((index < 0) || (index >= childCount)) {
                     return null;

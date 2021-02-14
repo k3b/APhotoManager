@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020 by k3b.
+ * Copyright (c) 2015-2021 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -88,7 +88,7 @@ public class OsUtils {
         OSDirectory rootDir = createOsDirectory(
                 FileFacade.convert(context + 1, "/"), factory);
 
-        if (rootDir.getChildren() == null || rootDir.getChildren().length == 0) {
+        if (rootDir.getChildDirs(null) == null || rootDir.getChildDirs(null).length == 0) {
             // load on demand has failed on non rooted device
 
             // externalStorageFile

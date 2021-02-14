@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020 by k3b.
+ * Copyright (c) 2015-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -744,7 +744,7 @@ public class GalleryCursorFragment extends Fragment implements Queryable, Direct
             // scroll to right where deepest child is
             if (first != null) mParentPathBarScroller.requestChildFocus(mParentPathBar, first);
 
-            IDirectory[] children = selectedChild.getChildren();
+            IDirectory[] children = selectedChild.getChildDirs();
             if (children != null) {
                 for (IDirectory child : children) {
                     Button button = createPathButton(child);

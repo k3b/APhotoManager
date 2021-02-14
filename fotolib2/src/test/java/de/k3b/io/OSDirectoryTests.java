@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020 by k3b.
+ * Copyright (c) 2015-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager.
  *
@@ -47,8 +47,8 @@ public class OSDirectoryTests {
     public void shoudFindExisting() {
         IDirectory found = OSDirectory.find(mRoot, "a/b/c");
         assertNotNull(found);
-        assertEquals(1, found.getChildren().length);
-        assertEquals("d", found.getChildren()[0].getRelPath());
+        assertEquals(1, found.getChildDirs().length);
+        assertEquals("d", found.getChildDirs()[0].getRelPath());
     }
 
     @Test
@@ -68,8 +68,8 @@ public class OSDirectoryTests {
 
         out.println(mRoot.toTreeString());
         assertNotNull(found);
-        assertEquals(1, found.getChildren().length);
-        assertEquals("d", found.getChildren()[0].getRelPath());
+        assertEquals(1, found.getChildDirs().length);
+        assertEquals("d", found.getChildDirs()[0].getRelPath());
     }
 
     @Test
@@ -99,18 +99,18 @@ public class OSDirectoryTests {
     @Test
     public void shoudFindNewWithRoot() {
         mRoot = createTestData("/", "a/b/c/d");
-        int rootLen = (mRoot.getChildren() == null) ? 0 : mRoot.getChildren().length;
+        int rootLen = (mRoot.getChildDirs(null) == null) ? 0 : mRoot.getChildDirs(null).length;
         IDirectory found = OSDirectory.find(mRoot, "/q");
 
         out.println(mRoot.toTreeString());
         assertNotNull(found);
-        assertEquals(rootLen + 1, mRoot.getChildren().length);
+        assertEquals(rootLen + 1, mRoot.getChildDirs(null).length);
     }
 
     @Test
     public void shoudFindNew() {
         IDirectory found = OSDirectory.find(mRoot, "a/b/c/d2").getParent();
-        assertEquals(2, found.getChildren().length);
+        assertEquals(2, found.getChildDirs().length);
     }
 
     @Test
@@ -132,7 +132,7 @@ public class OSDirectoryTests {
 
     @Test
     public void shoudGetChildren() {
-        assertEquals(true, mRoot.getChildren().length > 0);
+        assertEquals(true, mRoot.getChildDirs(null).length > 0);
     }
 
     @Test
@@ -146,8 +146,8 @@ public class OSDirectoryTests {
         OSDirectory rootDir = new OSDirectory(rootFile, null, null);
         rootDir.includeRoot(new FileFacade(new File("/storage/emulated/0")), null);
         rootDir.includeRoot(new FileFacade(new File("/storage/1234-5678")), null);
-        assertEquals("#", 2, rootDir.getChildren().length);
-        assertEquals("path endsWith('1234-5678')", true, rootDir.getChildren()[1].getRelPath().endsWith("1234-5678"));
+        assertEquals("#", 2, rootDir.getChildDirs(null).length);
+        assertEquals("path endsWith('1234-5678')", true, rootDir.getChildDirs(null)[1].getRelPath().endsWith("1234-5678"));
     }
 
     @Ignore("https://stackoverflow.com/questions/48710003/how-to-make-this-junit-test-for-java-memory-leak-pass")
@@ -181,7 +181,8 @@ public class OSDirectoryTests {
 
     private OSDirectory createTestData(String rootName, String elements) {
         final IFile file = FileFacade.convert("OSDirectoryTests create test data", rootName);
-        OSDirectory root = new OSDirectory(file, null, null);
+        // new OSDirectory[0] prevents load on demand
+        OSDirectory root = new OSDirectory(file, null, new OSDirectory[0]);
         root.addChildFolder(elements);
         return root;
     }

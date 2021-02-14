@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020 by k3b.
+ * Copyright (c) 2018-2021 by k3b.
  *
  * This file is part of AndroFotoFinder / #APhotoManager
  *
@@ -28,7 +28,7 @@ import de.k3b.io.filefacade.IFile;
  */
 
 public class OSDirOrVirtualAlbumFile extends OSDirectory {
-    public OSDirOrVirtualAlbumFile(IFile current, OSDirectory parent, IDirectory[] childen) {
+    public OSDirOrVirtualAlbumFile(IFile current, OSDirectory parent, OSDirectory[] childen) {
         super(current, parent, childen);
         if (isAlbum(current)) {
             setDirFlags(DIR_FLAG_VIRTUAL_DIR);
@@ -51,16 +51,16 @@ public class OSDirOrVirtualAlbumFile extends OSDirectory {
     }
 
     @Override
-    protected boolean isDirectory(IFile candidate) {
-        if (super.isDirectory(candidate)) return true;
-        return isAlbum(candidate);
+    protected boolean isDirectory(IFile file) {
+        if (super.isDirectory(file)) return true;
+        return isAlbum(file);
     }
 
     /**
      * factory method to be overwrittern by derived classes, if tree should consist of derived classes.
      */
     @Override
-    public OSDirectory createOsDirectory(IFile file, IDirectory parent, IDirectory[] children) {
-        return new OSDirOrVirtualAlbumFile(file, (OSDirectory) parent, children);
+    public OSDirectory createOsDirectory(IFile file, OSDirectory parent, OSDirectory[] children) {
+        return new OSDirOrVirtualAlbumFile(file, parent, children);
     }
 }

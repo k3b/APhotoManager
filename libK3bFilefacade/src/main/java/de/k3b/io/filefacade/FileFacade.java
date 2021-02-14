@@ -270,10 +270,13 @@ public class FileFacade implements IFile {
 
     public IFile[] listDirs() {
         List<IFile> found = new ArrayList<>();
-        for (File file : file.listFiles()) {
-            if (file != null &&
-                    (file.isDirectory() || accept(file.getName().toLowerCase()))) {
-                found.add(convert(null, file));
+        File[] files = (file != null) ? file.listFiles() : null;
+        if (files != null) {
+            for (File file : files) {
+                if (file != null &&
+                        (file.isDirectory() || accept(file.getName().toLowerCase()))) {
+                    found.add(convert(null, file));
+                }
             }
         }
         return found.toArray(new IFile[found.size()]);

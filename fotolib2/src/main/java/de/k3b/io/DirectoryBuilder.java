@@ -36,7 +36,8 @@ public class DirectoryBuilder {
     }
 
     private static List<IDirectory> getChildren(Directory dir) {
-        return (dir != null && dir.getChildren() != null) ? Arrays.asList(dir.getChildren()) : null;
+        IDirectory[] childDirs = (dir != null) ? dir.getChildDirs() : null;
+        return (childDirs != null) ? Arrays.asList(childDirs) : null;
     }
 
     public static void createStatistics(List<IDirectory> children) {
@@ -98,7 +99,7 @@ public class DirectoryBuilder {
             firstChild.setRelPath(firstChild.getRelPath() + Directory.PATH_DELIMITER + child.getRelPath());
             firstChild.setNonDirItemCount(firstChild.getNonDirItemCount() + child.getNonDirItemCount());
 
-            firstChild.setChildren(child.getChildren());
+            firstChild.setChildren(child.getChildDirs());
 
             child.setParent(null);
             child.setChildren(null);

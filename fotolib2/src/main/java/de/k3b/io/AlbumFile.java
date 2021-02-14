@@ -22,6 +22,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.k3b.io.filefacade.FileFacade;
+
 /**
  * Created by k3b on 17.04.2018.
  */
@@ -29,6 +31,14 @@ import java.util.List;
 public class AlbumFile {
     public static final String SUFFIX_VALBUM = ".album";
     public static final String SUFFIX_QUERY = ".query";
+
+    static {
+        init();
+    }
+
+    public static void init() {
+        FileFacade.includeFileSuffixesForListDir(SUFFIX_QUERY, SUFFIX_VALBUM);
+    }
 
     public static boolean isQueryFile(String uri) {
         if (uri != null) {

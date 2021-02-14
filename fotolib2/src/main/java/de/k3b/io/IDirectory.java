@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2020 by k3b.
+ * Copyright (c) 2015-2021 by k3b.
  *
  * This file is part of AndroFotoFinder.
  *
@@ -23,15 +23,15 @@ import de.k3b.io.filefacade.IFile;
 
 /**
  * Abstraction of Directory
- *
+ * <p>
  * Created by k3b on 04.08.2015.
  */
-public interface IDirectory {
-    int DIR_FLAG_NONE           = 0;
-    int DIR_FLAG_NOMEDIA        = 1; // below linux hidden dir ".*" or below DIR_FLAG_NOMEDIA_ROOT
-    int DIR_FLAG_NOMEDIA_ROOT   = 2; // containing ".nomedia"
+public interface IDirectory<T extends IDirectory> {
+    int DIR_FLAG_NONE = 0;
+    int DIR_FLAG_NOMEDIA = 1; // below linux hidden dir ".*" or below DIR_FLAG_NOMEDIA_ROOT
+    int DIR_FLAG_NOMEDIA_ROOT = 2; // containing ".nomedia"
 
-    int DIR_FLAG_APM_DIR        = 8; // containing ".apm"
+    int DIR_FLAG_APM_DIR = 8; // containing ".apm"
     int DIR_FLAG_VIRTUAL_DIR = 9; // containing "*.album"
     String APM_DIR_PREFIX = "§ ";
 
@@ -39,19 +39,21 @@ public interface IDirectory {
 
     String getAbsolute();
 
-    IDirectory createOsDirectory(IFile file, IDirectory parent, IDirectory[] children);
+    T createOsDirectory(IFile file, T parent, T[] children);
 
-    IDirectory getParent();
+    T[] createOsDirectoryArray(int size);
 
-    IDirectory[] getChildren();
+    T getParent();
 
-    void removeChild(IDirectory... child);
+    T[] getChildDirs();
 
-    void addChild(IDirectory... child);
+    void removeChild(T... child);
+
+    void addChild(T... child);
 
     int childIndexOf(IDirectory child);
 
-    IDirectory find(String path);
+    T find(String path);
 
     void destroy();
 
