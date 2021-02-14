@@ -138,7 +138,7 @@ public class AndroidExifInterfaceEx extends ExifInterfaceEx {
                     " is not null");
             final SelectedFiles selectedfiles = FotoSql.getSelectedfiles(sqlWhere.toString(), VISIBILITY.PRIVATE_PUBLIC);
             Log.d(Global.LOG_CONTEXT, dbgContext + "\n\t["
-                    + StringUtils.appendMessage(paths)
+                    + StringUtils.appendMessage((String[]) paths)
                     + "] :\n\t\t"
                     + selectedfiles.toIdString() + " -> " + selectedfiles.toPathListString());
         }
